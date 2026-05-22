@@ -1,9 +1,17 @@
 # Dependabot — automatic dependency update PRs
 # Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
-# Uncomment and configure the ecosystem(s) this project uses.
 
 version: 2
 updates:
+
+  # GitHub Actions — enabled by default (applies to every project)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+
+  # Uncomment the block(s) that match this project's stack:
 
   # Python (pip / uv)
   # - package-ecosystem: "pip"
@@ -19,8 +27,16 @@ updates:
   #     interval: "weekly"
   #   open-pull-requests-limit: 5
 
-  # GitHub Actions
-  # - package-ecosystem: "github-actions"
+  # Rust
+  # - package-ecosystem: "cargo"
   #   directory: "/"
   #   schedule:
-  #     interval: "monthly"
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 5
+
+  # Go
+  # - package-ecosystem: "gomod"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 5

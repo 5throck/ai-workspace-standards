@@ -7,15 +7,74 @@ on:
     branches: [main, master]
 
 jobs:
+  # ── Documentation audit (always runs) ───────────────────────────────────────
   audit:
     name: Documentation Audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Run audit.sh
         run: bash scripts/audit.sh
 
+  # ── Secret scan (always runs) ────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Dependency vulnerability scan ────────────────────────────────────────────
+  # Uncomment the block that matches your project's stack.
+
+  # security-python:
+  #   name: Python Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
+  #     - run: pip install pip-audit
+  #     - run: pip-audit -r requirements.txt
+  #       # or for pyproject.toml: pip-audit .
+
+  # security-node:
+  #   name: Node.js Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #     - run: npm ci
+  #     - run: npm audit --audit-level=high
+
+  # security-rust:
+  #   name: Rust Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: cargo install cargo-audit
+  #     - run: cargo audit
+
+  # security-go:
+  #   name: Go Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-go@v5
+  #       with:
+  #         go-version: "stable"
+  #     - run: go install golang.org/x/vuln/cmd/govulncheck@latest
+  #     - run: govulncheck ./...
+
+  # ── Stack test jobs ───────────────────────────────────────────────────────────
   # Uncomment and configure the test job for your stack:
 
   # test-python:

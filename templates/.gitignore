@@ -1,5 +1,14 @@
 # Secrets — never commit
 .env
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
 
 # Python
 .venv/

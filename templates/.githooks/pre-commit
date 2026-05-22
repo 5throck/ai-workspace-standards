@@ -1,13 +1,61 @@
 #!/usr/bin/env bash
-# pre-commit: run audit only when key project files are staged.
-# memory/ session logs and other non-structural files are exempt.
+# pre-commit: documentation audit + secret scan on structural file changes.
+# memory/ session logs are exempt from all checks.
 
 STAGED=$(git diff --cached --name-only)
 [ -z "$STAGED" ] && exit 0
 
-# If every staged file is inside memory/ → skip audit (log-only commit)
+# Skip entirely for memory/-only commits
 if ! echo "$STAGED" | grep -qv "^memory/"; then
   exit 0
 fi
 
+# ── 1. Documentation audit ────────────────────────────────────────────────────
 bash scripts/audit.sh || exit 1
+
+# ── 2. Secret scan ────────────────────────────────────────────────────────────
+echo ""
+echo "=== Secret scan ==="
+
+if command -v gitleaks &>/dev/null; then
+  # Preferred: gitleaks (fast, comprehensive)
+  if gitleaks protect --staged --no-banner -q; then
+    echo -e "\033[32m[PASS]\033[0m gitleaks: no secrets detected"
+  else
+    echo -e "\033[31m[FAIL]\033[0m gitleaks detected potential secrets — commit blocked."
+    echo "       Review the output above and remove secrets before committing."
+    echo "       To suppress a false positive: add an inline '# gitleaks:allow' comment."
+    exit 1
+  fi
+else
+  # Fallback: regex scan of staged file content
+  STAGED_CONTENT=$(git diff --cached -U0 | grep "^+" | grep -v "^+++")
+  FOUND=0
+
+  _check() {
+    local label="$1"; local pattern="$2"
+    if echo "$STAGED_CONTENT" | grep -qP "$pattern" 2>/dev/null || \
+       echo "$STAGED_CONTENT" | grep -qE "$pattern" 2>/dev/null; then
+      echo -e "\033[31m[FAIL]\033[0m Possible secret — $label"
+      FOUND=1
+    fi
+  }
+
+  _check "Private key header"   "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY"
+  _check "AWS Access Key ID"     "AKIA[0-9A-Z]{16}"
+  _check "GitHub PAT (classic)"  "ghp_[0-9a-zA-Z]{36}"
+  _check "GitHub PAT (fine-grained)" "github_pat_[0-9a-zA-Z_]{82}"
+  _check "OpenAI API key"        "sk-[0-9a-zA-Z]{48}"
+  _check "Anthropic API key"     "sk-ant-[0-9a-zA-Z_-]{90,}"
+  _check "Generic secret assignment" "(password|passwd|secret|api_key|apikey|access_token|auth_token)[[:space:]]*=[[:space:]]*['\"][^'\"]{8,}['\"]"
+
+  if [ "$FOUND" -eq 0 ]; then
+    echo -e "\033[32m[PASS]\033[0m Regex secret scan: nothing detected"
+    echo "       Tip: install gitleaks for more thorough scanning — https://github.com/gitleaks/gitleaks"
+  else
+    echo ""
+    echo "       Remove secrets from staged files before committing."
+    echo "       Use environment variables or .env (gitignored) instead."
+    exit 1
+  fi
+fi
