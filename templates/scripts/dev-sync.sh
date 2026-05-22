@@ -35,9 +35,8 @@ else
   echo "ℹ️  Already on branch '$BRANCH' — committing here without creating a new branch."
 fi
 git add -A
-git commit -m "$MSG
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
+git commit -m "$MSG"
 git push -u origin "$BRANCH"
 # Use PR template if present; fall back to --fill
 if [ -f ".github/pull_request_template.md" ]; then
