@@ -9,8 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added — Multi-stack setup automation with mandatory Python venv and cross-platform support
-- `templates/scripts/setup.sh` + `setup.ps1`: multi-stack OS-aware setup — Node.js (`npm install`), Python (`requirements.txt`/`pyproject.toml` → mandatory `.venv` + pip, Python 3 guard), Ruby (`bundle install`), .NET (`dotnet restore`), Java Maven (`mvn dependency:resolve`), Java Gradle (`gradlew`/`gradle`), C/C++ CMake (`cmake -B build`), Makefile (info-only); all stacks guarded by toolchain presence check with install hint
-- `scripts/new-project.sh` + `new-project.ps1`: call `setup.sh`/`setup.ps1` as step 8; step 9 prints prominent directory-change banner with exact `cd <path>` command
+- `templates/scripts/setup.sh` + `setup.ps1`: multi-stack OS-aware setup with OSI license audit — Node.js (npm + `license-checker`), Python (mandatory `.venv` + pip + `pip-licenses`), Ruby (`bundle` + `licensee`), .NET (`dotnet restore` + `dotnet-project-licenses`), Java Maven/Gradle, C/C++ CMake/Makefile; all stacks toolchain-guarded; `--skip-license-check` flag to bypass audit
+- `CONSTITUTION.md` §8.5: Open-Source Package Policy — prefer OSI-approved licenses, document non-OSS exceptions
+- `templates/docs/context.md`: Coding Guidelines §5 Open-Source Package Policy added
+- `scripts/new-project.sh` + `new-project.ps1`: step 9 prints directory-change banner with exact `cd <path>` command
 
 
 ### Changed — Antigravity 2.0 / Gemini CLI session start config (workspace + templates + 4 sub-projects)

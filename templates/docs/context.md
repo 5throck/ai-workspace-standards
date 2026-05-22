@@ -155,6 +155,13 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
   - "Fix the bug" → "Write a reproducer test, then fix it"
 - For multi-step tasks, state a brief numbered plan with a verify step for each.
 
-### 5. Response Language
+### 5. Open-Source Package Policy
+- **Prefer** packages with OSI-approved licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, PSF-2.0.
+- **Avoid** GPL-3.0, AGPL-3.0, SSPL, BSL, or proprietary licenses unless explicitly justified.
+- Run `bash scripts/setup.sh --skip-commit` after adding dependencies to trigger the license audit.
+- Document any intentional non-OSS dependency in this file under a `## Non-OSS Dependencies` section.
+- Full policy: [CONSTITUTION.md §8.5](../../CONSTITUTION.md#5-open-source-package-policy)
+
+### 6. Response Language
 - All **conversational** replies to the user → **Korean (한국어)** by default.
 - All code, config, commit messages, PR titles, branch names → **English only**.
