@@ -139,10 +139,13 @@ Agent scaffold templates for all roles live in `CONSTITUTION.md §7`.
 
 ## Contributing
 
-1. Fork → branch (`pr/<YYYYMMDD-HHmmss>-<slug>`) → PR
+This is a **private repository**. Access is limited to invited collaborators.
+
+1. Branch off `main` using the naming convention: `pr/<YYYYMMDD-HHmmss>-<slug>`
 2. All PRs must pass `bash scripts/audit.sh`
 3. Add a `CHANGELOG.md` entry under `[Unreleased]` before merging
 4. Follow `CONSTITUTION.md §8 — Coding Behavior Guidelines`
+5. At least **1 approving review** is required before merging
 
 ---
 
