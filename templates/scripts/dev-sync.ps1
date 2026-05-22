@@ -40,8 +40,8 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     $Branch = $CurrentBranch
     Write-Host "ℹ️  Already on branch '$Branch' — committing here without creating a new branch." -ForegroundColor Cyan
 }
-git add -A
-git commit -m "$Msg`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
+git commit -m "$Msg"
 git push -u origin $Branch
 # Use PR template if present; fall back to --fill
 if (Test-Path ".github\pull_request_template.md") {
