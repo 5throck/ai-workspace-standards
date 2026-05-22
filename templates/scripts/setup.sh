@@ -12,8 +12,12 @@
 #   .NET       *.csproj / *.sln      → dotnet restore
 #   Java       pom.xml (Maven)       → mvn dependency:resolve
 #              build.gradle (Gradle) → ./gradlew dependencies
+#   Go         go.mod                → go mod download
+#   Rust       Cargo.toml            → cargo fetch
+#   Elixir     mix.exs               → mix deps.get
 #   C/C++      CMakeLists.txt        → cmake -B build (configure only)
 #              Makefile              → info only (not run automatically)
+#   Unknown    (none of the above)   → stack-setup agent invocation required
 #
 # Usage: bash scripts/setup.sh [--skip-install] [--skip-license-check] [--skip-commit]
 set -euo pipefail
@@ -308,6 +312,47 @@ if [ "$SKIP_INSTALL" = false ]; then
     fi
   fi
 
+  # ── Go ─────────────────────────────────────────────────────────────────────
+  if [ -f "go.mod" ]; then
+    if require go "install Go from https://go.dev/dl/"; then
+      info "Go project detected — running go mod download"
+      go mod download
+      pass "go mod download complete"
+      if [ "$SKIP_LICENSE" = false ]; then
+        info "  Optional license audit: go install github.com/google/go-licenses@latest"
+      fi
+    fi
+  fi
+
+  # ── Rust ───────────────────────────────────────────────────────────────────
+  if [ -f "Cargo.toml" ]; then
+    if require cargo "install Rust from https://rustup.rs  (run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"; then
+      info "Rust project detected — running cargo fetch"
+      cargo fetch
+      pass "cargo fetch complete"
+      if [ "$SKIP_LICENSE" = false ]; then
+        if command -v cargo-license &>/dev/null; then
+          info "Running Rust license audit (cargo-license)…"
+          cargo license 2>/dev/null || true
+        else
+          info "  Optional license audit: cargo install cargo-license && cargo license"
+        fi
+      fi
+    fi
+  fi
+
+  # ── Elixir / Mix ──────────────────────────────────────────────────────────
+  if [ -f "mix.exs" ]; then
+    if require mix "install Elixir from https://elixir-lang.org/install.html or: brew install elixir"; then
+      info "Elixir project detected — running mix deps.get"
+      mix deps.get
+      pass "mix deps.get complete"
+      if [ "$SKIP_LICENSE" = false ]; then
+        info "  Optional license audit: mix licenses (add {:licenses, github: 'unnawut/licensir'} to deps)"
+      fi
+    fi
+  fi
+
   # ── C/C++ (CMake) ─────────────────────────────────────────────────────────
   if [ -f "CMakeLists.txt" ]; then
     if require cmake "install CMake from https://cmake.org"; then
@@ -324,6 +369,44 @@ if [ "$SKIP_INSTALL" = false ]; then
       info "Makefile detected — 'make' available but NOT run automatically"
       info "  Run manually: make"
     fi
+  fi
+
+  # ── Unknown stack detection ───────────────────────────────────────────────
+  # If none of the known manifest files were found, flag for agent-assisted setup.
+  KNOWN_MANIFESTS=(
+    "package.json" "requirements.txt" "pyproject.toml" "Gemfile"
+    "go.mod" "Cargo.toml" "mix.exs"
+    "pom.xml" "build.gradle" "build.gradle.kts"
+    "CMakeLists.txt" "Makefile"
+  )
+  _found_stack=false
+  for _m in "${KNOWN_MANIFESTS[@]}"; do
+    [ -f "$_m" ] && _found_stack=true && break
+  done
+  # Also check for .NET projects (depth search already done above)
+  [ -n "$(find . -maxdepth 3 \( -name '*.csproj' -o -name '*.sln' \) -not -path './.git/*' 2>/dev/null | head -1)" ] && _found_stack=true
+
+  if [ "$_found_stack" = false ]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "\033[33m⚠  UNKNOWN STACK — manual setup required\033[0m"
+    echo ""
+    echo "  No recognized project manifest found in this directory."
+    echo "  Automatic dependency installation has been skipped."
+    echo ""
+    echo "  To set up this project, invoke the stack-setup agent:"
+    echo ""
+    echo -e "  \033[36m  Agent: agents/stack-setup.md\033[0m"
+    echo ""
+    echo "  The agent will:"
+    echo "    1. Search for the correct setup procedure for your stack"
+    echo "    2. Perform a security review of all proposed commands"
+    echo "    3. Present the plan with risk assessment for your approval"
+    echo "    4. Execute ONLY after explicit confirmation"
+    echo ""
+    echo -e "  \033[31m  ⛔ Do NOT run any install commands without agent security review.\033[0m"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
   fi
 
 else
