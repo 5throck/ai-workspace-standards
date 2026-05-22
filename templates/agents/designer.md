@@ -1,7 +1,7 @@
 ---
 name: designer
 model: inherit
-color: magenta
+color: purple
 description: >
   UI/UX design agent — produces wireframes, component specs, and design tokens.
   Use when: designing new screens or flows, defining visual language, specifying

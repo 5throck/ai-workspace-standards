@@ -28,26 +28,64 @@ else
   ((errors++)) || true
 fi
 
-# 3. If a docs/context.md exists in the current project, it must have ## Coding Guidelines
+# ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
+
 if [ -f "docs/context.md" ]; then
+
+  # 3. If a docs/context.md exists in the current project, it must have ## Coding Guidelines
   if grep -q "^## Coding Guidelines" "docs/context.md"; then
     green "docs/context.md has ## Coding Guidelines"
   else
     red  "docs/context.md is missing '## Coding Guidelines' section"
     ((errors++)) || true
   fi
-else
-  warn "docs/context.md not found — skipping Coding Guidelines check (workspace root)"
-fi
 
-# 4. CHANGELOG.md must have [Unreleased] section (if context.md exists — project-level check)
-if [ -f "docs/context.md" ] && [ -f "CHANGELOG.md" ]; then
-  if grep -q "\[Unreleased\]" "CHANGELOG.md"; then
-    green "CHANGELOG.md has [Unreleased] section"
+  # 4. CHANGELOG.md must have [Unreleased] section (project-level check)
+  if [ -f "CHANGELOG.md" ]; then
+    if grep -q "\[Unreleased\]" "CHANGELOG.md"; then
+      green "CHANGELOG.md has [Unreleased] section"
+    else
+      red  "CHANGELOG.md is missing '[Unreleased]' section"
+      ((errors++)) || true
+    fi
+  fi
+
+  # 5. AGENTS.md must exist
+  if [ -f "AGENTS.md" ]; then
+    green "AGENTS.md exists"
   else
-    red  "CHANGELOG.md is missing '[Unreleased]' section"
+    red  "AGENTS.md missing (required for agent-first projects)"
     ((errors++)) || true
   fi
+
+  # 6. At least one agent file must exist in agents/
+  if [ -d "agents" ] && [ -n "$(ls -A agents/*.md 2>/dev/null)" ]; then
+    green "agents/ has agent files"
+  else
+    red  "agents/ is empty or missing — create at least agents/pm.md"
+    ((errors++)) || true
+  fi
+
+  # 7. .env.sample must exist
+  if [ -f ".env.sample" ]; then
+    green ".env.sample exists"
+  else
+    warn ".env.sample not found — add one if this project uses environment variables"
+  fi
+
+  # 8. scripts/ .sh/.ps1 parity check
+  for sh_file in scripts/*.sh; do
+    [ -f "$sh_file" ] || continue
+    ps1_file="${sh_file%.sh}.ps1"
+    if [ -f "$ps1_file" ]; then
+      green "script parity: $(basename "$sh_file") / $(basename "$ps1_file")"
+    else
+      warn "script parity gap: $sh_file has no matching .ps1"
+    fi
+  done
+
+else
+  warn "docs/context.md not found — skipping project-level checks (workspace root)"
 fi
 
 echo ""

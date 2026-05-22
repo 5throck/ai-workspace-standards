@@ -17,7 +17,7 @@ bash scripts/sync-md.sh "$DATE" "$MSG"
 if [ -f "CHANGELOG.md" ]; then
   SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
   if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
-    perl -pi -e 's/## \[Unreleased\]/## [Unreleased]\n\n- '"$MSG"'/' CHANGELOG.md
+    perl -pi -e 'BEGIN{$m=shift} s/## \[Unreleased\]/## [Unreleased]\n\n- $m/' "$MSG" CHANGELOG.md
     echo "📝 Auto-added changelog entry: $MSG"
   fi
 fi
@@ -26,11 +26,24 @@ fi
 bash scripts/audit.sh
 
 # ── 5. Branch → commit → push → PR ────────────────────────────────────────────
-BRANCH="pr/$(date +%Y%m%d-%H%M%S)-$(echo "$MSG" | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)"
-git checkout -b "$BRANCH"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+  BRANCH="pr/$(date +%Y%m%d-%H%M%S)-$(echo "$MSG" | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)"
+  git checkout -b "$BRANCH"
+else
+  BRANCH="$CURRENT_BRANCH"
+  echo "ℹ️  Already on branch '$BRANCH' — committing here without creating a new branch."
+fi
+
 git add -A
 git commit -m "$MSG
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git push -u origin "$BRANCH"
-gh pr create --fill
+
+# Use PR template if present; fall back to --fill
+if [ -f ".github/pull_request_template.md" ]; then
+  gh pr create --title "$MSG" --body "$(cat .github/pull_request_template.md)"
+else
+  gh pr create --fill
+fi

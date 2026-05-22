@@ -22,3 +22,13 @@ cp .env.sample .env   # fill in values
 - **Agent index** → [`AGENTS.md`](AGENTS.md)
 - **Change history** → [`CHANGELOG.md`](CHANGELOG.md)
 - **Workspace standards** → [`../CONSTITUTION.md`](../CONSTITUTION.md)
+- **Claude Code config** → [`CLAUDE.md`](CLAUDE.md)
+- **Gemini CLI config** → [`GEMINI.md`](GEMINI.md)
+
+## Contributing
+
+[Describe how to contribute — or delete this section if the project is private/internal.]
+
+## License
+
+[License name] — see [LICENSE](LICENSE)

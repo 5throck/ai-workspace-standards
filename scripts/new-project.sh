@@ -56,14 +56,27 @@ cd "$PROJECT_DIR"
 git init
 git config core.hooksPath .githooks
 
+# Mark .ps1 scripts executable in git index (for WSL / Git Bash users)
+for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1; do
+  [ -f "$rel" ] && git update-index --chmod=+x "$rel" 2>/dev/null || true
+done
+
+# ── 7. Post-scaffold audit ─────────────────────────────────────────────────────
 echo ""
-echo "✅ Project '$PROJECT_NAME' scaffolded at: $PROJECT_DIR"
+echo "Running post-scaffold audit…"
+if bash scripts/audit.sh; then
+  echo ""
+  echo "✅ Project '$PROJECT_NAME' scaffolded and verified at: $PROJECT_DIR"
+else
+  echo ""
+  echo "⚠️  Project scaffolded but audit found issues — review above before continuing."
+fi
+
 echo ""
 echo "Next steps:"
 echo "  1. Fill in docs/context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
 echo "  2. Set your test command in agents/test-runner.md (replace [project test command])"
-echo "  3. bash scripts/audit.sh          (verify scaffold passes — must exit 0)"
-echo "  4. git config core.hooksPath .githooks  (already set, verify it stuck)"
+echo "  3. git remote add origin <url> && git add -A && git commit -m 'chore: initial scaffold'"
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/_examples/"

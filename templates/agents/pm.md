@@ -23,7 +23,7 @@ Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTI
 3. **Design** — Dispatch architect (implementation plan + ADR) and, if the task has UI/UX surface, designer (wireframes + component spec) in parallel; obtain explicit user approval before proceeding.
 4. **Implementation** — Dispatch code-writer (serial); test-runner verifies after each change.
 5. **QA** — Verify all acceptance criteria; run audit script + tests.
-6. **Finalization** — Run memlog → sync; open PR; hand off to user.
+6. **Finalization** — Run memlog → sync; open PR; hand off to user. All AI-generated commits must include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`.
 
 ## Agent Roster
 

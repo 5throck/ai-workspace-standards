@@ -130,6 +130,16 @@ Fix and re-review if issues found — maximum **3 iterations** before escalating
 
 ---
 
+### Custom Command Error Recovery
+
+If a slash command or background script returns a non-zero exit code:
+- **Never bypass hooks** with `--no-verify` unless under explicit written user instruction.
+- **Diagnose first**: read the failure log. Common causes:
+  - `CHANGELOG.md` not staged → run `/changelog` and stage the file, then retry.
+  - Direct push to `main` blocked by pre-push hook → use `/sync` to create a PR branch automatically.
+
+---
+
 ### Git
 
 Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md).

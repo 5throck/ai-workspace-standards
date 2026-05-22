@@ -11,6 +11,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - `scripts/sync-md.sh` and `scripts/sync-md.ps1` — missing files required by `dev-sync.sh` (workspace pipeline was broken without them)
 
+### Fixed + Added — Global best practices audit (13 items)
+
+**P1 — Bugs / Inconsistencies:**
+- `CONSTITUTION.md §5`: added `purple` to color palette (was missing after designer.md update)
+- `CONSTITUTION.md §5`: fixed JSON Input Contract — removed `//` comments (invalid JSON syntax)
+- `CONSTITUTION.md §1`: added `.github/` (workflows/, CODEOWNERS, pull_request_template.md) and `SECURITY.md` to standard folder structure
+- `CONSTITUTION.md §3`: added `perf:`, `ci:`, `style:`, `revert:` to Conventional Commits table (Conventional Commits v1.0 compliance)
+- `CONSTITUTION.md § Workspace`: unified Session Start checklist order (1→CONSTITUTION, 2→context.md, 3→AGENTS.md, 4→MEMORY.md, 5→skills) — was inconsistent with CLAUDE.md
+- `scripts/dev-sync.sh` + `dev-sync.ps1` (workspace): use `.github/pull_request_template.md` for PR body when present; fall back to `--fill`
+- `scripts/dev-sync.sh` (workspace): applied same perl escape fix and branch guard as templates
+
+**P2 — Feature gaps:**
+- `CONSTITUTION.md §2`: added memory archiving policy (50-row threshold, 30-day retention, `memory/archive/` for older logs, `docs/history.md` for ADR summaries)
+- `templates/docs/context.md`: added `## Git / PR Workflow` section (present in all real projects but was missing from the template)
+- `.editorconfig` + `templates/.editorconfig`: new — charset/indent/EOL/trailing-whitespace rules for all editors (VS Code, JetBrains, Vim, etc.)
+
+**P3 — Best practices:**
+- `templates/.github/CODEOWNERS`: new — automatic PR reviewer assignment template
+- `templates/.github/dependabot.yml`: new — dependency auto-update config template (pip/npm/github-actions stubs)
+- `templates/.github/workflows/ci.yml`: new — GitHub Actions CI stub (audit gate + Python/Node test job stubs)
+- `SECURITY.md` + `templates/SECURITY.md`: new — security vulnerability reporting policy (GitHub Advisory + response SLA)
+- `README.md`: updated Conventional Commits list to include new prefixes
+
+### Fixed — Template system (14-item improvement pass)
+
+**P1 — Bugs:**
+- `templates/scripts/dev-sync.sh`: perl changelog auto-insert now passes `$MSG` as a Perl variable (`BEGIN{$m=shift}`) — prevents breakage when commit message contains `/`, `&`, or `\`
+- `templates/scripts/dev-sync.ps1`: removed `-NoNewline` from `Set-Content` call — was silently stripping trailing newline from `CHANGELOG.md`
+- `templates/scripts/sync-md.sh` + `sync-md.ps1`: added deduplication guard — same-day entries no longer appended twice to `MEMORY.md`
+
+**P2 — Feature gaps:**
+- `templates/scripts/audit.sh` + `audit.ps1`: strengthened from 4 → 8 checks (added: AGENTS.md existence, agents/ non-empty, .env.sample existence, scripts .sh/.ps1 parity)
+- `scripts/new-project.sh` + `new-project.ps1`: post-scaffold audit runs automatically; added initial commit guidance; `.ps1` files now included in `git update-index --chmod=+x`
+- `templates/README.md`: added `## Contributing` and `## License` placeholder sections; added CLAUDE.md + GEMINI.md to Documentation links
+- `templates/docs/context.md`: converted Tech Stack from bullet list to table (better AI parseability; consistent with project examples)
+- `templates/GEMINI.md`: Session Start section now has actual `@`-syntax loading instructions (was comment-only)
+
+**P3 — Quality / best practices:**
+- `templates/.github/pull_request_template.md`: new file — PR body template for `gh pr create --fill`
+- `templates/scripts/dev-sync.sh` + `dev-sync.ps1`: added branch guard — if already on a PR branch, commits in place instead of creating a new branch
+- `templates/memory/MEMORY.md`: added explanatory header distinguishing index (MEMORY.md) from daily logs (YYYY-MM-DD.md)
+- `templates/agents/designer.md`: changed `color: magenta` → `color: purple` (was conflicting with analyst-example.md)
+- `scripts/audit.sh` (workspace): synced with template — now runs all 8 checks
+
+### Fixed — MD file comparison (workspace + templates)
+- `templates/agents/architect.md`: Unicode corruption on line 60 — `Context ?? Decision` → `Context → Decision` (arrow was mangled to replacement characters)
+- `templates/agents/pm.md`: Phase 6 Finalization — added Co-Authored-By commit signature requirement
+- `templates/agents/code-writer.md`: added rule 5 — update `CHANGELOG.md [Unreleased]` after every change
+- `templates/CLAUDE.md`: added `### Custom Command Error Recovery` section (error handling for `/sync` failures, hook bypass prohibition)
+- `templates/GEMINI.md`: added `/new-project` and `/post-write` rows to command emulation table
+- `templates/CHANGELOG.md`: added `---` separator and Semantic Versioning link (parity with workspace format)
+- `CLAUDE.md` (workspace): added `## Session Start` checklist and doc intent statement at top
+- `GEMINI.md` (workspace): added `### 3. Response Language` section (Korean/English split rule)
+
 ### Changed
 - Improve `templates/AGENTS.md` with AI disclaimer, dispatch protocol, phase workflow, role boundary matrix, skills table, and expanded maintenance rule
 

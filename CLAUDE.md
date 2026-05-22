@@ -1,10 +1,24 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working in this workspace.
+> **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:/git/`).
+> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.
+> For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.**
->
-> For tool-specific behaviors of Gemini/Antigravity, see [`GEMINI.md`](GEMINI.md).
+---
+
+## Session Start
+
+At the start of every Claude Code session in this workspace:
+
+```
+0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
+1. Read CONSTITUTION.md                  # workspace design standard
+2. Read CLAUDE.md                        # this file — Claude Code behaviors
+3. Read memory/MEMORY.md                 # recent session history (if exists)
+4. Load project-level docs/context.md   # when working inside a sub-project
+```
+
+---
 
 ---
 

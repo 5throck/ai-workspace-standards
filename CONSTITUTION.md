@@ -44,8 +44,9 @@ Navigate to the project directory before starting work. Each project has its own
    ```
 1. **Read this file** (CONSTITUTION.md) — you are reading it now. Complete the section checklist at the top before proceeding.
 2. Read the project's `docs/context.md` — single source of truth for purpose, tech stack, and architecture.
-3. Check the project's `memory/MEMORY.md` to understand recent changes.
-4. Load any skills listed under `## Session Start Skills` in the project's `docs/context.md`.
+3. Read `AGENTS.md` — canonical agent roster.
+4. Check `memory/MEMORY.md` — recent session history (skip if file does not exist).
+5. Load any skills listed under `## Session Start Skills` in `docs/context.md`.
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
 
@@ -79,8 +80,11 @@ Every project follows this layout. Omit folders that don't apply to the project 
 ├── skills/       # Reusable workflow skills
 │   └── <name>/
 │       └── SKILL.md
+├── .github/              # GitHub-specific files
+│   ├── workflows/        # GitHub Actions CI/CD pipelines
+│   ├── CODEOWNERS        # Automatic PR reviewer assignment
+│   └── pull_request_template.md  # Default PR body template
 ├── .gemini/              # Gemini CLI configuration
-│   ├── commands/
 │   ├── settings.json
 │   └── settings.local.json
 ├── .claude/              # Claude Code configuration
@@ -91,6 +95,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 ├── CHANGELOG.md          # User-visible change history (required by audit.sh)
 ├── CLAUDE.md             # Claude Code config
 ├── GEMINI.md             # Gemini CLI config
+├── SECURITY.md           # Security vulnerability reporting policy
 └── .env.sample           # Required env variable template (never commit .env)
 ```
 
@@ -137,6 +142,12 @@ Every session that produces a meaningful change must be logged.
 - Append to today's file — never overwrite.
 - Run `/memlog` (Claude Code) or manually append to `memory/YYYY-MM-DD.md` (Gemini CLI) before running `sync` to ensure the log is recorded prior to commit.
 
+**Archiving policy:**
+- When `memory/MEMORY.md` exceeds ~50 rows or `docs/context.md` becomes difficult to navigate, archive older content:
+  - Move completed ADR summaries and resolved decisions to `docs/history.md`
+  - Retain the last 30 days in `memory/MEMORY.md`; move older daily logs to `memory/archive/`
+  - Never delete logs — archive them
+
 ---
 
 ### 3. GitHub PR Workflow
@@ -174,6 +185,10 @@ Edit code
   | `refactor:` | Code change with no new feature or fix |
   | `chore:` | Tooling, build, configurations |
   | `test:` | Adding or modifying tests |
+  | `perf:` | Performance improvement (no feature/fix) |
+  | `ci:` | CI/CD pipeline changes |
+  | `style:` | Formatting only (no logic change) |
+  | `revert:` | Revert a previous commit |
 
 - **Branch Naming Standard**: Active development branches must follow the strict pattern: `pr/<YYYYMMDD-HHmmss>-<slug>` (automatically formatted and switched by `dev-sync` scripts).
 - **GitHub PR Requirements**: The GitHub CLI (`gh`) must be installed and authenticated (`gh auth login`) globally to automate PR creation.
@@ -234,7 +249,7 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 ---
 name: <agent-name>
 model: inherit
-color: yellow | blue | green | red | magenta | cyan  # Claude Code only
+color: yellow | blue | green | red | magenta | cyan | purple  # Claude Code only
 description: 'One-sentence role. Use when: "...", "...", "..."'
 examples:
   - user: "..."
@@ -258,14 +273,14 @@ The `description` field is how the AI tool selects the right agent — always wr
 
 - When no specific orchestrator is assigned, **always create `agents/pm.md`** — PM owns the entire workflow.
 - PM dispatches independent tasks as **parallel agents in a single message** (never sequential).
-- Agents communicate via **structured JSON Input Contracts** (template — `//` comments are for guidance, not valid JSON):
+- Agents communicate via **structured JSON Input Contracts**:
 
 ```json
 {
   "task": "<task description>",
-  "phase": "Triage | Analysis | Design | Implementation | QA | Finalization",  // choose one
+  "phase": "<one of: Triage | Analysis | Design | Implementation | QA | Finalization>",
   "context_file": "agents/<name>.md",
-  "input": { "...": "..." }
+  "input": {}
 }
 ```
 

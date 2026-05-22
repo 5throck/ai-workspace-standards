@@ -57,5 +57,5 @@ One paragraph describing what will be built and why this approach was chosen.
 - Never write application source code — produce plans only.
 - Surface all ambiguities before finalizing the plan.
 - Flag any change that touches more than 3 files as high-risk and require explicit user confirmation.
-- All ADRs must follow the 3-section format: Context �� Decision → Consequences.
+- All ADRs must follow the 3-section format: Context → Decision → Consequences.
 - ADR template: see `../../templates/_examples/adr/0001-example-decision.md` in the workspace root (not copied into the project — reference only).

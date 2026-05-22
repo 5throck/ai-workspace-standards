@@ -81,6 +81,8 @@ Instead, emulate them by reading the `.md` file and executing the described scri
 | `/memlog "summary"` | Manually append `## Session — summary` to `memory/YYYY-MM-DD.md` |
 | `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
 | `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
+| `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) · `.\scripts\new-project.ps1 "<name>"` (Windows) |
+| `/post-write` | `bash scripts/audit.sh` (macOS/Linux) · `.\scripts\audit.ps1` (Windows) |
 
 ---
 
@@ -97,8 +99,19 @@ This project uses `.claude/` for Claude Code configuration. Gemini follows these
 ---
 
 ### Session Start
-<!-- Skills are loaded from docs/context.md ## Session Start Skills.          -->
-<!-- Add entries here ONLY for Gemini-exclusive skills not in context.md.     -->
+
+At session start, load context using the `@` syntax (run these before any task):
+
+```
+@../CONSTITUTION.md      # workspace design standard
+@docs/context.md         # project knowledge (includes Session Start Skills)
+@AGENTS.md               # canonical agent roster
+@memory/MEMORY.md        # recent changes (skip if file does not exist)
+```
+
+<!-- Add project-specific files below as needed, e.g.:               -->
+<!-- @locales/en.json    — baseline locale for i18n work              -->
+<!-- @docs/BIZ_LOGIC.md  — domain formulas / business rules           -->
 
 ### Model Selection Override
 <!-- Uncomment to override workspace defaults for this project only.          -->
