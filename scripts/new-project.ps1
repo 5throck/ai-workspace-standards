@@ -4,65 +4,55 @@ param([Parameter(Mandatory)][string]$ProjectName)
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
+$TemplatesDir  = Join-Path $WorkspaceRoot "templates"
 
 if (Test-Path $ProjectDir) {
     Write-Host "❌ Directory already exists: $ProjectDir" -ForegroundColor Red
     exit 1
 }
 
+if (-not (Test-Path $TemplatesDir)) {
+    Write-Host "❌ Templates directory not found: $TemplatesDir" -ForegroundColor Red
+    exit 1
+}
+
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
-# Create directory structure
-$dirs = @("src","docs","scripts","memory","agents","skills",".claude\commands",".gemini\commands",".githooks")
-foreach ($d in $dirs) { New-Item -ItemType Directory -Path "$ProjectDir\$d" -Force | Out-Null }
+# ── 1. Copy templates (robocopy handles hidden files and subdirs) ──────────────
+New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
+robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
+# ── 2. Remove _examples (reference-only — not part of a real project) ──────────
+$examplesDir = Join-Path $ProjectDir "_examples"
+if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
+
+# ── 3. Remove .gitkeep placeholders ────────────────────────────────────────────
+Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
+
+# ── 4. Substitute [Project Name] placeholder in all text files ─────────────────
+$extensions = @('.md', '.json', '.sh', '.ps1', '.yaml', '.yml', '.sample')
+Get-ChildItem -Path $ProjectDir -Recurse -File |
+  Where-Object { $_.Extension -in $extensions -or $_.Name -like '*.sample' } |
+  ForEach-Object {
+    $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -and $content -match '\[Project Name\]') {
+        ($content -replace '\[Project Name\]', $ProjectName) |
+          Set-Content $_.FullName -Encoding UTF8 -NoNewline
+    }
+  }
+
+# ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir
 git init
 git config core.hooksPath .githooks
 
-# Copy audit scripts from workspace
-Copy-Item "$WorkspaceRoot\scripts\audit.sh"  "scripts\audit.sh"
-Copy-Item "$WorkspaceRoot\scripts\audit.ps1" "scripts\audit.ps1"
-
-# Scaffold files (same content as new-project.sh — abbreviated for PowerShell)
-@"
-# [Project Name]
-## Project Overview
-[One-sentence description.]
-## Coding Guidelines
-> See CONSTITUTION.md §8 for full guidelines.
-### 1. Think Before Coding
-### 2. Simplicity First
-### 3. Surgical Changes
-### 4. Goal-Driven Execution
-### 5. Response Language
-- Conversational replies → Korean (한국어)
-- Code / commits / PRs → English only
-"@ | Set-Content "docs\context.md"
-
-@"
-# Changelog
-All notable changes to this project will be documented in this file.
-## [Unreleased]
-"@ | Set-Content "CHANGELOG.md"
-
-@"
-# Memory Index
-| Date | Summary |
-|------|---------|
-"@ | Set-Content "memory\MEMORY.md"
-
-"# .env.sample — copy to .env and fill in values" | Set-Content ".env.sample"
-
-@"
-.env
-.venv/
-__pycache__/
-node_modules/
-.DS_Store
-Thumbs.db
-"@ | Set-Content ".gitignore"
-
 Write-Host ""
 Write-Host "✅ Project '$ProjectName' scaffolded at: $ProjectDir" -ForegroundColor Green
-Write-Host "Next: fill in docs\context.md placeholders and run .\scripts\audit.ps1"
+Write-Host ""
+Write-Host "Next steps:" -ForegroundColor Cyan
+Write-Host "  1. Fill in docs\context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
+Write-Host "  2. .\scripts\audit.ps1                    (verify scaffold passes — must exit 0)"
+Write-Host "  3. git config core.hooksPath .githooks    (already set, verify it stuck)"
+Write-Host ""
+Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
+Write-Host "  → $TemplatesDir\_examples\" -ForegroundColor DarkGray
