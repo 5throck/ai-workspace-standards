@@ -76,11 +76,24 @@ fi
 # ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
 echo ""
 echo "Running environment setup…"
-bash scripts/setup.sh || {
+bash "$PROJECT_DIR/scripts/setup.sh" || {
   echo ""
   echo "⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry."
 }
 
+# ── 9. Move into project directory ────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo -e "\033[36m📂 PROJECT DIRECTORY:\033[0m $PROJECT_DIR"
+echo ""
+echo -e "\033[33m⚠️  Your shell is still at the workspace root.\033[0m"
+echo "   Run the following command to move into your new project:"
+echo ""
+echo -e "   \033[32mcd \"$PROJECT_DIR\"\033[0m"
+echo ""
+echo "   All subsequent work (git, scripts, sessions) must be run"
+echo "   from inside this directory, not the workspace root."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/_examples/"

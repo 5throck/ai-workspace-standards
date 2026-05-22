@@ -74,11 +74,28 @@ if ($LASTEXITCODE -eq 0) {
 # ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
 Write-Host ""
 Write-Host "Running environment setup…" -ForegroundColor Cyan
-& ".\scripts\setup.ps1"
+& "$ProjectDir\scripts\setup.ps1"
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "⚠️  Setup encountered an error — run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
 }
+
+# ── 9. Move into project directory ────────────────────────────────────────────
+Write-Host ""
+Write-Host ("━" * 60) -ForegroundColor DarkGray
+Write-Host "📂 PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "⚠️  Your shell is still at the workspace root." -ForegroundColor Yellow
+Write-Host "   Run the following command to move into your new project:"
+Write-Host ""
+Write-Host "   cd `"$ProjectDir`"" -ForegroundColor Green
+Write-Host ""
+Write-Host "   All subsequent work (git, scripts, sessions) must be run"
+Write-Host "   from inside this directory, not the workspace root."
+Write-Host ("━" * 60) -ForegroundColor DarkGray
+
+# Also actually change to project directory (takes effect when dot-sourced)
+Set-Location $ProjectDir
 
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray

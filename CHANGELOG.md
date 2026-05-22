@@ -8,9 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added — New project setup automation
-- `templates/scripts/setup.sh` + `setup.ps1`: post-scaffold environment setup script with stack auto-detection (Node.js → `npm install`, Python → `.venv` + `pip install`, Ruby → `bundle install`), `.env.sample` → `.env` copy, and initial git commit
-- `scripts/new-project.sh` + `new-project.ps1`: automatically call `setup.sh`/`setup.ps1` after audit (step 8); removed manual "git add && git commit" from Next steps output
+### Added — New project setup automation with cross-platform support
+- `templates/scripts/setup.sh` + `setup.ps1`: OS-aware post-scaffold setup (macOS/Linux/Windows Git Bash/PowerShell); auto-detects stack (Node.js, Python, Ruby), installs deps with toolchain presence check, `.env.sample` → `.env` copy, initial commit
+- `scripts/new-project.sh` + `new-project.ps1`: call `setup.sh`/`setup.ps1` as step 8; add step 9 with prominent directory-change banner showing exact `cd <path>` command to prevent working in wrong directory
 
 
 ### Changed — Antigravity 2.0 / Gemini CLI session start config (workspace + templates + 4 sub-projects)
