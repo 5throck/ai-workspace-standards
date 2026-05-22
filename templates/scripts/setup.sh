@@ -6,8 +6,8 @@
 #
 # Supported stacks:
 #   Node.js    package.json          → npm install  → license-checker audit
-#   Python     requirements.txt /    → .venv (mandatory) + pip install → pip-licenses audit
-#              pyproject.toml
+#   Python     requirements.txt /    → uv venv + uv pip install (fallback: python -m venv + pip)
+#              pyproject.toml           → pip-licenses audit
 #   Ruby       Gemfile               → bundle install
 #   .NET       *.csproj / *.sln      → dotnet restore
 #   Java       pom.xml (Maven)       → mvn dependency:resolve
@@ -63,11 +63,17 @@ require() {
   return 0
 }
 
-# ── Python binary resolution ──────────────────────────────────────────────────
+# ── Python toolchain resolution (uv preferred, python -m venv fallback) ───────
+UV_BIN=""
+if command -v uv &>/dev/null; then
+  UV_BIN="uv"
+fi
+
 PY_BIN=""
 if command -v python3 &>/dev/null; then
   PY_BIN="python3"
 elif command -v python &>/dev/null; then
+  # Guard against 'python' aliased to Python 2
   if python --version 2>&1 | grep -q "^Python 3"; then
     PY_BIN="python"
   fi
@@ -87,28 +93,60 @@ activate_venv() {
 }
 
 venv_activate_hint() {
+  local mgr="${1:-pip}"
   if [ "$OS_TYPE" = "macos" ] || [ "$OS_TYPE" = "linux" ]; then
     info "  Activate venv: source .venv/bin/activate"
   else
     info "  Activate venv (Git Bash): source .venv/Scripts/activate"
     info "  Activate venv (PowerShell): .venv\\Scripts\\Activate.ps1"
   fi
+  if [ "$mgr" = "uv" ]; then
+    info "  Or skip activation entirely: uv run <command>"
+  fi
 }
 
+# ensure_venv: creates .venv via uv (preferred) or python -m venv (fallback).
+# Prints the manager used ("uv" or "pip") to stdout — capture with $(...).
 ensure_venv() {
-  if [ -z "$PY_BIN" ]; then
-    warn "Python 3 not found — skipping venv creation (install from https://python.org)"
+  if [ -n "$UV_BIN" ]; then
+    if [ ! -d ".venv" ]; then
+      info "Creating Python virtual environment with uv (.venv)…"
+      uv venv .venv
+      pass ".venv created (uv)"
+    else
+      info ".venv already exists — reusing (uv)"
+    fi
+    activate_venv
+    echo "uv"
+    return 0
+  elif [ -n "$PY_BIN" ]; then
+    if [ ! -d ".venv" ]; then
+      info "uv not found — creating .venv with $PY_BIN -m venv (fallback)"
+      info "  Install uv for faster installs: curl -LsSf https://astral.sh/uv/install.sh | sh"
+      "$PY_BIN" -m venv .venv
+      pass ".venv created (venv)"
+    else
+      info ".venv already exists — reusing"
+    fi
+    activate_venv
+    echo "pip"
+    return 0
+  else
+    warn "Neither uv nor Python 3 found — skipping venv"
+    warn "  Install uv (recommended): curl -LsSf https://astral.sh/uv/install.sh | sh"
+    warn "  Or install Python 3: https://python.org"
     return 1
   fi
-  if [ ! -d ".venv" ]; then
-    info "Creating Python virtual environment (.venv)…"
-    "$PY_BIN" -m venv .venv
-    pass ".venv created"
+}
+
+# py_install: run 'uv pip install' or 'pip install' depending on manager.
+py_install() {
+  local mgr="$1"; shift
+  if [ "$mgr" = "uv" ]; then
+    uv pip install "$@"
   else
-    info ".venv already exists — reusing"
+    pip install "$@"
   fi
-  activate_venv
-  return 0
 }
 
 # ── License audit helpers ─────────────────────────────────────────────────────
@@ -152,7 +190,9 @@ license_audit_python() {
     fi
   else
     info "pip-licenses not installed — installing for audit…"
-    if pip install pip-licenses --quiet 2>/dev/null; then
+    local install_cmd="pip"
+    [ -n "$UV_BIN" ] && install_cmd="uv pip"
+    if $install_cmd install pip-licenses --quiet 2>/dev/null; then
       license_audit_python  # re-run now that it's installed
     else
       warn "Could not install pip-licenses — skipping Python license audit"
@@ -187,23 +227,23 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Python (requirements.txt) ─────────────────────────────────────────────
   if [ -f "requirements.txt" ]; then
     info "Python project detected (requirements.txt)"
-    if ensure_venv; then
-      pip install -r requirements.txt
-      pass "pip install -r requirements.txt complete"
+    mgr=$(ensure_venv) && {
+      py_install "$mgr" -r requirements.txt
+      pass "Dependencies installed (requirements.txt) via $mgr"
       license_audit_python
-      venv_activate_hint
-    fi
+      venv_activate_hint "$mgr"
+    }
   fi
 
   # ── Python (pyproject.toml, no requirements.txt) ──────────────────────────
   if [ -f "pyproject.toml" ] && [ ! -f "requirements.txt" ]; then
     info "Python project detected (pyproject.toml)"
-    if ensure_venv; then
-      pip install -e .
-      pass "pip install -e . complete"
+    mgr=$(ensure_venv) && {
+      py_install "$mgr" -e .
+      pass "Dependencies installed (pyproject.toml) via $mgr"
       license_audit_python
-      venv_activate_hint
-    fi
+      venv_activate_hint "$mgr"
+    }
   fi
 
   # ── Ruby ──────────────────────────────────────────────────────────────────
