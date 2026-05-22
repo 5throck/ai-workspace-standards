@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- Improve `templates/AGENTS.md` with AI disclaimer, dispatch protocol, phase workflow, role boundary matrix, skills table, and expanded maintenance rule
+
 ### Fixed — Missing slash commands / Skill registrations
 - `.claude/commands/memlog.md` 추가 (workspace + templates) — `/memlog` Skill 등록
 - `.claude/commands/new-task.md` 추가 (workspace + templates) — `/new-task` Skill 등록
