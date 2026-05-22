@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added — Multi-stack setup automation with mandatory Python venv and cross-platform support
-- `templates/scripts/setup.sh` + `setup.ps1`: multi-stack OS-aware setup with OSI license audit — Node.js (npm + `license-checker`), Python (mandatory `.venv` + pip + `pip-licenses`), Ruby (`bundle` + `licensee`), .NET (`dotnet restore` + `dotnet-project-licenses`), Java Maven/Gradle, C/C++ CMake/Makefile; all stacks toolchain-guarded; `--skip-license-check` flag to bypass audit
+- `templates/scripts/setup.sh` + `setup.ps1`: Python venv now uses `uv venv` + `uv pip install` when uv is available, falling back to `python -m venv` + `pip`; `py_install`/`Py-Install` helper abstracts manager; multi-stack OS-aware setup with OSI license audit — Node.js (npm + `license-checker`), Python (uv/venv + `pip-licenses`), Ruby, .NET, Maven, Gradle, CMake/Makefile; `--skip-license-check` flag
 - `CONSTITUTION.md` §8.5: Open-Source Package Policy — prefer OSI-approved licenses, document non-OSS exceptions
 - `templates/docs/context.md`: Coding Guidelines §5 Open-Source Package Policy added
 - `scripts/new-project.sh` + `new-project.ps1`: step 9 prints directory-change banner with exact `cd <path>` command

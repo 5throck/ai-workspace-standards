@@ -45,7 +45,9 @@ function Require([string]$Cmd, [string]$Hint) {
     return $true
 }
 
-# ── Python binary resolution ──────────────────────────────────────────────────
+# ── Python toolchain resolution (uv preferred, python -m venv fallback) ───────
+$UvBin = if (Get-Command uv -ErrorAction SilentlyContinue) { "uv" } else { $null }
+
 $PyBin = $null
 foreach ($candidate in @("python3", "python")) {
     if (Get-Command $candidate -ErrorAction SilentlyContinue) {
@@ -63,24 +65,44 @@ function Activate-Venv {
     Warn "Could not find venv Activate.ps1 — continuing without activation"
 }
 
-function Show-VenvHint {
+function Show-VenvHint([string]$Mgr = "pip") {
     if ($IsWin) {
         Info "  Activate venv (PowerShell): .venv\Scripts\Activate.ps1"
         Info "  Activate venv (Git Bash):   source .venv/Scripts/activate"
     } else {
         Info "  Activate venv: source .venv/bin/activate"
     }
+    if ($Mgr -eq "uv") { Info "  Or skip activation: uv run <command>" }
 }
 
+# Ensure-Venv: creates .venv via uv (preferred) or python -m venv (fallback).
+# Returns the manager string: "uv" or "pip".
 function Ensure-Venv {
-    if (-not $PyBin) {
-        Warn "Python 3 not found — skipping venv (install from https://python.org)"; return $false
+    if ($UvBin) {
+        if (-not (Test-Path ".venv")) {
+            Info "Creating Python virtual environment with uv (.venv)…"
+            uv venv .venv; Pass ".venv created (uv)"
+        } else { Info ".venv already exists — reusing (uv)" }
+        Activate-Venv; return "uv"
+    } elseif ($PyBin) {
+        if (-not (Test-Path ".venv")) {
+            Info "uv not found — creating .venv with $PyBin -m venv (fallback)"
+            Info "  Install uv for faster installs: winget install astral-sh.uv  or  pip install uv"
+            & $PyBin -m venv .venv; Pass ".venv created (venv)"
+        } else { Info ".venv already exists — reusing" }
+        Activate-Venv; return "pip"
+    } else {
+        Warn "Neither uv nor Python 3 found — skipping venv"
+        Warn "  Install uv (recommended): winget install astral-sh.uv"
+        Warn "  Or install Python 3: https://python.org"
+        return $null
     }
-    if (-not (Test-Path ".venv")) {
-        Info "Creating Python virtual environment (.venv)…"
-        & $PyBin -m venv .venv; Pass ".venv created"
-    } else { Info ".venv already exists — reusing" }
-    Activate-Venv; return $true
+}
+
+# Py-Install: run 'uv pip install' or 'pip install' depending on manager.
+function Py-Install([string]$Mgr, [string[]]$Args) {
+    if ($Mgr -eq "uv") { uv pip install @Args }
+    else                { pip install @Args }
 }
 
 # ── License audit helpers ─────────────────────────────────────────────────────
@@ -104,7 +126,8 @@ function Audit-PythonLicenses {
     Info "Running Python license audit…"
     if (-not (Get-Command pip-licenses -ErrorAction SilentlyContinue)) {
         Info "pip-licenses not installed — installing for audit…"
-        pip install pip-licenses --quiet 2>$null
+        if ($UvBin) { uv pip install pip-licenses --quiet 2>$null }
+        else         { pip install pip-licenses --quiet 2>$null }
     }
     if (Get-Command pip-licenses -ErrorAction SilentlyContinue) {
         $report = pip-licenses --format=csv 2>$null
@@ -143,18 +166,20 @@ if (-not $SkipInstall) {
     # ── Python (requirements.txt) ─────────────────────────────────────────────
     if (Test-Path "requirements.txt") {
         Info "Python project detected (requirements.txt)"
-        if (Ensure-Venv) {
-            pip install -r requirements.txt
-            if ($LASTEXITCODE -eq 0) { Pass "pip install -r requirements.txt complete"; Audit-PythonLicenses; Show-VenvHint }
+        $mgr = Ensure-Venv
+        if ($mgr) {
+            Py-Install $mgr @("-r", "requirements.txt")
+            if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (requirements.txt) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
         }
     }
 
     # ── Python (pyproject.toml, no requirements.txt) ──────────────────────────
     if ((Test-Path "pyproject.toml") -and (-not (Test-Path "requirements.txt"))) {
         Info "Python project detected (pyproject.toml)"
-        if (Ensure-Venv) {
-            pip install -e .
-            if ($LASTEXITCODE -eq 0) { Pass "pip install -e . complete"; Audit-PythonLicenses; Show-VenvHint }
+        $mgr = Ensure-Venv
+        if ($mgr) {
+            Py-Install $mgr @("-e", ".")
+            if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (pyproject.toml) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
         }
     }
 
