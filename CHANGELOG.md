@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed — License
 - MIT → AGPL-3.0
 
+### Fixed — Scaffold guideline consistency (4th review — final)
+- `CONSTITUTION.md §5`: Phase 3 Governance Workflow에 Designer 병렬 dispatch 명시
+
 ### Fixed — Scaffold guideline consistency (3rd 5-round review)
 - `templates/agents/pm.md`: Governance Workflow Phase 3에 designer parallel dispatch 명시
 - `CONSTITUTION.md §Workspace`: Session Start 체크리스트 순서 정정 (3↔4 교환 — MEMORY.md 먼저, skills 후)

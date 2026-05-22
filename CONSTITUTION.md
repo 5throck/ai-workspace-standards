@@ -281,7 +281,8 @@ Phase 2 — Analysis
   Agents return findings → PM synthesizes into requirements + acceptance criteria
 
 Phase 3 — Design
-  Architect designs the implementation plan
+  Architect designs the implementation plan + ADR
+  Designer produces UI/UX specs (parallel with Architect, if task has UI/UX surface)
   PM obtains explicit user approval before proceeding
 
 Phase 4 — Implementation
