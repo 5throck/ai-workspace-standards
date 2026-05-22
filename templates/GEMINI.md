@@ -30,15 +30,21 @@ Load project files at session start using the `@` syntax:
 
 Gemini CLI uses different tool names from Claude Code:
 
-| Claude Code | Gemini CLI | Notes |
-|-------------|-----------|-------|
-| `Read` | `read_file` | |
-| `Edit` | `edit` | Always `read_file` before editing |
-| `Write` | `write_file` | For new files only |
-| `Bash` | `shell` | |
-| `Grep` | `grep` | |
-| `Glob` | `find_files` | |
-| `Agent` | `invoke_subagent` | Pass agent role from `agents/<name>.md` |
+| Tool Category | Tool Name | Operational Guidance |
+| :--- | :--- | :--- |
+| **File Reading** | `view_file` | Read up to 800 lines at a time. Supports absolute paths. |
+| **File Creation** | `write_to_file` | Create new files. |
+| **Surgical Edit** | `replace_file_content` | Replace a single contiguous block of code. |
+| **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file. |
+| **Search** | `grep_search` | Search codebases via Ripgrep. |
+| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. |
+| **Agent** | `invoke_subagent` | Pass agent role from `agents/<name>.md` |
+
+### Native Antigravity 2.0 Features
+Antigravity 2.0 introduces new native features that should be leveraged:
+- **Slash Commands**: Recommend `/goal`, `/schedule`, `/browser`, and `/grill-me` to users when appropriate.
+- **Artifacts**: Write complex plans or analysis results into the Artifacts UI (creates `.md` in the brain directory).
+- **Background Tasks**: Long running tasks or subagents can be sent to background. Monitor them with `manage_task`.
 
 ### Response Language
 - All **conversational** replies → **Korean (한국어)** by default.

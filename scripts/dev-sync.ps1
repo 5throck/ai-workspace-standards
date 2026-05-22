@@ -41,7 +41,7 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
 }
 
 git add -A
-git commit -m "$Msg`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git commit -m "$Msg`n`nCo-Authored-By: Gemini <noreply@google.com>"
 git push -u origin $Branch
 
 # Use PR template if present; fall back to --fill
