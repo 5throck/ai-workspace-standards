@@ -375,9 +375,9 @@ live there as **real, editable files** (not embedded strings).
 |----------------|---------|---------------|
 | `docs/context.md` | Single source of truth — 10 required sections | Fill in `[...]` placeholders |
 | `AGENTS.md` | Canonical agent index | Ready to use |
-| `agents/pm.md` + 3 others | Role definitions | `[Project Name]` already substituted |
+| `agents/pm.md` + 4 others | Role definitions (pm, architect, designer, code-writer, test-runner) | `[Project Name]` already substituted |
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
-| `.claude/settings.json` | PostToolUse audit hook | Ready to use |
+| `.claude/settings.json` | Hooks config (disabled by default — `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
 | `scripts/` | audit, dev-sync, sync-md (.sh + .ps1) | Ready to use |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |

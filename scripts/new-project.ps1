@@ -41,30 +41,20 @@ Get-ChildItem -Path $ProjectDir -Recurse -File |
     }
   }
 
-# ── 5. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
+# ── 5. Initialize git ──────────────────────────────────────────────────────────
+Set-Location $ProjectDir
+git init
+git config core.hooksPath .githooks
+
+# ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
+# Must run AFTER git init so the git index exists
 $executableFiles = @(
     ".githooks\pre-commit", ".githooks\pre-push",
     "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh"
 )
 foreach ($rel in $executableFiles) {
-    $fullPath = Join-Path $ProjectDir $rel
-    if (Test-Path $fullPath) {
-        $acl = Get-Acl $fullPath  # no-op on Windows — preserves git index bit via git
-        # Mark as executable in git index so WSL/Git Bash sees +x after clone
-        git -C $ProjectDir update-index --chmod=+x $rel 2>$null
-    }
-}
-
-# ── 6. Initialize git ──────────────────────────────────────────────────────────
-Set-Location $ProjectDir
-git init
-git config core.hooksPath .githooks
-
-# Re-apply executable bits after git init (index reset on init)
-foreach ($rel in $executableFiles) {
-    $fullPath = Join-Path $ProjectDir $rel
-    if (Test-Path $fullPath) {
-        git -C $ProjectDir update-index --chmod=+x $rel 2>$null
+    if (Test-Path (Join-Path $ProjectDir $rel)) {
+        git update-index --chmod=+x $rel 2>$null
     }
 }
 

@@ -89,8 +89,8 @@ bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1
 ## Coding Guidelines
 
 > These rules apply to every AI tool working in this project.
-> Full rationale: [CONSTITUTION.md §8](../CONSTITUTION.md#8-coding-behavior-guidelines)
-> *(This file lives in `docs/` — one level up is the project root, two levels up is the workspace root where `CONSTITUTION.md` lives.)*
+> Full rationale: [CONSTITUTION.md §8](../../CONSTITUTION.md#8-coding-behavior-guidelines)
+> *(This file lives in `docs/` — `../` = project root, `../../` = workspace root where `CONSTITUTION.md` lives.)*
 
 ### 1. Think Before Coding
 - State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.

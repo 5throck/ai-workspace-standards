@@ -11,6 +11,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed — License
 - MIT → AGPL-3.0
 
+### Fixed — Scaffold guideline consistency (2nd 5-round review)
+- `scripts/new-project.ps1`: git update-index를 git init 이후로 이동 (dead code 제거)
+- `templates/CLAUDE.md`: Hooks Override 주석 정정 (hook 비활성 상태 명확화), Step 0 표현 개선, `model: inherit` 상속 기본값 명시
+- `templates/GEMINI.md`: 이미 수정됨 (이전 라운드)
+- `templates/docs/context.md`: CONSTITUTION.md 링크 경로 수정 (`../` → `../../`)
+- `templates/AGENTS.md`: `_examples` 상대 경로 수정 (`../../templates/` → `../templates/`)
+- `CONSTITUTION.md §7`: "pm.md + 3 others" → "+ 4 others", `.claude/settings.json` 설명 정정
+- `GEMINI.md §3`: Context Loading에 `@AGENTS.md` 추가 (workspace 루트)
+
 ### Fixed — Scaffold guideline consistency (5-round review)
 - `templates/agents/pm.md`: Agent Roster에 `designer.md` 누락 추가
 - `templates/CLAUDE.md`: Session Start 섹션 구체화 (4단계 체크리스트)
