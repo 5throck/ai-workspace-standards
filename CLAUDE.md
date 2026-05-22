@@ -11,7 +11,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working in this
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-Claude Code automatically executes hooks defined in `.claude/settings.json`. The standard `PostToolUse` hook runs `scripts/audit.sh` after every Write or Edit operation to maintain document integrity.
+The workspace `.claude/settings.json` is currently `{}` — **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.sh` pipeline.
+
+To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add the following to `.claude/settings.json`:
 
 ```json
 {
@@ -31,15 +33,15 @@ Claude Code automatically executes hooks defined in `.claude/settings.json`. The
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
 
-| Environment | Hook fires? | Action if not |
-|-------------|:-----------:|---------------|
-| Claude Code CLI | ✅ | Automatic |
-| Claude Code Desktop App | ❌ | Run `bash scripts/audit.sh` manually |
+| Environment | Hook active by default? | Manual fallback |
+|-------------|:-----------------------:|-----------------|
+| Claude Code CLI | ❌ (disabled) | `bash scripts/audit.sh` |
+| Claude Code Desktop App | ❌ (always) | `bash scripts/audit.sh` |
 
 **Recommended workflow split:**
-- **CLI**: Automated workflows, hook-driven audits, multi-agent orchestration.
+- **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
 ### 2. Native Slash Commands
@@ -47,11 +49,14 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline — audit → commit → PR | Runs project-level `scripts/dev-sync.sh` |
-| `/memlog` | Append today's session summary to YYYY-MM-DD.md | Automatically updates the daily log |
-| `/changelog "..."` | Add entry to `CHANGELOG.md` | Pre-sync user-facing changelog entry |
-| `/new-task "..."` | Create a new task tracking file | Scaffolds a new active task file |
-| `/new-project` | Scaffold a new project | Runs the workspace-global initialization script |
+| `/sync "feat: ..."` | Full pipeline — memlog → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
+| `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
+| `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
+| `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
+| `/new-project "name"` | Scaffold a new project | `bash scripts/new-project.sh "$ARGUMENTS"` |
+
+> **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
+> registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
 ### 3. MCP Configurations & Absolute Resolving
 Config file: `.mcp.json` (project root) — auto-loaded by both the CLI and the Desktop App.

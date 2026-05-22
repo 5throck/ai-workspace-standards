@@ -66,6 +66,7 @@ Session Start Checklist steps are loaded into the conversation context using the
 ```
 @../CONSTITUTION.md          # Step 1 — workspace design standard
 @docs/context.md             # Step 2 — project knowledge
+@AGENTS.md                   # Step 3 — canonical agent roster
 @memory/MEMORY.md            # Step 4 — recent changes (skip if file does not exist)
 ```
 

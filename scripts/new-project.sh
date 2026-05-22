@@ -38,7 +38,7 @@ find "$PROJECT_DIR" -name ".gitkeep" -delete
 # ── 4. Substitute [Project Name] placeholder in all text files ─────────────────
 # Use perl for cross-platform compatibility (macOS sed -i requires '' suffix)
 while IFS= read -r -d '' file; do
-  perl -pi -e "s/\[Project Name\]/$PROJECT_NAME/g" "$file"
+  perl -pi -e "s/\[Project Name\]/\Q$PROJECT_NAME\E/g" "$file"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
      -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
@@ -61,8 +61,9 @@ echo "✅ Project '$PROJECT_NAME' scaffolded at: $PROJECT_DIR"
 echo ""
 echo "Next steps:"
 echo "  1. Fill in docs/context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
-echo "  2. bash scripts/audit.sh          (verify scaffold passes — must exit 0)"
-echo "  3. git config core.hooksPath .githooks  (already set, verify it stuck)"
+echo "  2. Set your test command in agents/test-runner.md (replace [project test command])"
+echo "  3. bash scripts/audit.sh          (verify scaffold passes — must exit 0)"
+echo "  4. git config core.hooksPath .githooks  (already set, verify it stuck)"
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/_examples/"

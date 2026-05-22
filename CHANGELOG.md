@@ -8,6 +8,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed — Missing slash commands / Skill registrations
+- `.claude/commands/memlog.md` 추가 (workspace + templates) — `/memlog` Skill 등록
+- `.claude/commands/new-task.md` 추가 (workspace + templates) — `/new-task` Skill 등록
+- `.claude/commands/new-project.md` 추가 (workspace only) — `/new-project` Skill 등록
+- `CLAUDE.md §2`: 커맨드 테이블 정확한 파일명 반영 및 Skill 등록 원리 설명 추가
+- `templates/CLAUDE.md`: Slash Commands 섹션 추가 (커맨드→Skill 자동 등록 원리 명시)
+- `templates/docs/context.md`: Development Workflow에 `/memlog` 추가, Slash Commands 테이블 추가
+
+### Changed — License
+- MIT → AGPL-3.0
+
+### Fixed — Scaffold guideline consistency (4th review — final)
+- `CONSTITUTION.md §5`: Phase 3 Governance Workflow에 Designer 병렬 dispatch 명시
+
+### Fixed — Scaffold guideline consistency (3rd 5-round review)
+- `templates/agents/pm.md`: Governance Workflow Phase 3에 designer parallel dispatch 명시
+- `CONSTITUTION.md §Workspace`: Session Start 체크리스트 순서 정정 (3↔4 교환 — MEMORY.md 먼저, skills 후)
+- `CONSTITUTION.md §3`: /sync 파이프라인 순서를 실제 dev-sync.sh와 일치시킴 (memlog→MEMORY.md→CHANGELOG→audit→branch→commit→push→PR)
+
+### Fixed — Scaffold guideline consistency (2nd 5-round review)
+- `scripts/new-project.ps1`: git update-index를 git init 이후로 이동 (dead code 제거)
+- `templates/CLAUDE.md`: Hooks Override 주석 정정 (hook 비활성 상태 명확화), Step 0 표현 개선, `model: inherit` 상속 기본값 명시
+- `templates/GEMINI.md`: 이미 수정됨 (이전 라운드)
+- `templates/docs/context.md`: CONSTITUTION.md 링크 경로 수정 (`../` → `../../`)
+- `templates/AGENTS.md`: `_examples` 상대 경로 수정 (`../../templates/` → `../templates/`)
+- `CONSTITUTION.md §7`: "pm.md + 3 others" → "+ 4 others", `.claude/settings.json` 설명 정정
+- `GEMINI.md §3`: Context Loading에 `@AGENTS.md` 추가 (workspace 루트)
+
+### Fixed — Scaffold guideline consistency (5-round review)
+- `templates/agents/pm.md`: Agent Roster에 `designer.md` 누락 추가
+- `templates/CLAUDE.md`: Session Start 섹션 구체화 (4단계 체크리스트)
+- `templates/GEMINI.md`: Context Loading에 `@AGENTS.md` 추가
+- `templates/agents/architect.md`: ADR 예시 경로 명확화 (workspace 상대경로)
+- `templates/AGENTS.md`: `_examples` 참조 경로 명확화 (workspace 상대경로)
+- `templates/docs/context.md`: Architecture placeholder 구체화, Key Files에 sync-md.sh 추가, Session Start Skills 작성 방법 안내, Development Workflow hook 상태 정정
+- `scripts/new-project.sh`: Perl 치환 특수문자 이스케이프(`\Q...\E`), Next steps에 test-runner 명령 안내 추가
+- `scripts/new-project.ps1`: `.sample` 중복 필터 제거, WSL용 `chmod +x` 패리티(git update-index) 추가, Next steps에 test-runner 명령 안내 추가
+
+### Fixed — Project consistency (README, CLAUDE.md, CONSTITUTION.md)
+- `CLAUDE.md §1`: PostToolUse hook이 비활성화 상태임을 명확히 표기 (`.claude/settings.json`은 `{}`)
+- `README.md`: 4-role → 5-role agent 모델 수정 (Designer 추가), Repository Structure에 `templates/` 추가, Two Philosophies 설명에 Designer 포함, Multi-Agent Workflow 설명 업데이트
+- `CONSTITUTION.md §7`: Post-scaffold checklist agent 수 4 → 5 수정, `.\scriptsudit.ps1` 오타 수정 (`.\scripts\audit.ps1`)
+- `scripts/dev-sync.ps1`: 워크스페이스 루트에 누락된 파일 추가 (Script Parity 규칙 준수)
+
 ### Changed — workspace `.githooks/pre-commit` + `.claude/settings.json` + `.claude/commands/`
 - Applied same changes as templates/ to the workspace root itself
 - `.githooks/pre-commit`: conditional audit (memory/ exempt)

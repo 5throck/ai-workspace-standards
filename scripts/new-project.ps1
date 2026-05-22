@@ -32,7 +32,7 @@ Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 # ── 4. Substitute [Project Name] placeholder in all text files ─────────────────
 $extensions = @('.md', '.json', '.sh', '.ps1', '.yaml', '.yml', '.sample')
 Get-ChildItem -Path $ProjectDir -Recurse -File |
-  Where-Object { $_.Extension -in $extensions -or $_.Name -like '*.sample' } |
+  Where-Object { $_.Extension -in $extensions } |
   ForEach-Object {
     $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
     if ($content -and $content -match '\[Project Name\]') {
@@ -46,13 +46,26 @@ Set-Location $ProjectDir
 git init
 git config core.hooksPath .githooks
 
+# ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
+# Must run AFTER git init so the git index exists
+$executableFiles = @(
+    ".githooks\pre-commit", ".githooks\pre-push",
+    "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh"
+)
+foreach ($rel in $executableFiles) {
+    if (Test-Path (Join-Path $ProjectDir $rel)) {
+        git update-index --chmod=+x $rel 2>$null
+    }
+}
+
 Write-Host ""
 Write-Host "✅ Project '$ProjectName' scaffolded at: $ProjectDir" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Fill in docs\context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
-Write-Host "  2. .\scripts\audit.ps1                    (verify scaffold passes — must exit 0)"
-Write-Host "  3. git config core.hooksPath .githooks    (already set, verify it stuck)"
+Write-Host "  2. Set your test command in agents\test-runner.md (replace [project test command])"
+Write-Host "  3. .\scripts\audit.ps1                    (verify scaffold passes — must exit 0)"
+Write-Host "  4. git config core.hooksPath .githooks    (already set, verify it stuck)"
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  → $TemplatesDir\_examples\" -ForegroundColor DarkGray

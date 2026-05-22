@@ -20,7 +20,7 @@ Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTI
 
 1. **Triage** — Classify the request; dispatch read-only agents in parallel (single message).
 2. **Analysis** — Synthesize findings into requirements + acceptance criteria.
-3. **Design** — Have the architect produce an implementation plan; obtain explicit user approval.
+3. **Design** — Dispatch architect (implementation plan + ADR) and, if the task has UI/UX surface, designer (wireframes + component spec) in parallel; obtain explicit user approval before proceeding.
 4. **Implementation** — Dispatch code-writer (serial); test-runner verifies after each change.
 5. **QA** — Verify all acceptance criteria; run audit script + tests.
 6. **Finalization** — Run memlog → sync; open PR; hand off to user.
@@ -33,6 +33,7 @@ Add rows as specialist agents are created. Start with PM only; expand when the p
 |-------|-------|------------|----------------|
 | Triage / Analysis | Analysis | *(add `agents/<name>-analyst.md`)* | Read-only investigation, findings report |
 | Design | Design | `agents/architect.md` | Implementation plan + ADR; awaits user approval |
+| Design | Design | `agents/designer.md` | UI/UX specs, wireframes, component definitions; awaits user approval |
 | Implementation | Execution | `agents/code-writer.md` | Write code per approved plan |
 | QA / Verification | Execution | `agents/test-runner.md` | Run tests, verify acceptance criteria |
 
