@@ -20,7 +20,7 @@ Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTI
 
 1. **Triage** — Classify the request; dispatch read-only agents in parallel (single message).
 2. **Analysis** — Synthesize findings into requirements + acceptance criteria.
-3. **Design** — Have the architect produce an implementation plan; obtain explicit user approval.
+3. **Design** — Dispatch architect (implementation plan + ADR) and, if the task has UI/UX surface, designer (wireframes + component spec) in parallel; obtain explicit user approval before proceeding.
 4. **Implementation** — Dispatch code-writer (serial); test-runner verifies after each change.
 5. **QA** — Verify all acceptance criteria; run audit script + tests.
 6. **Finalization** — Run memlog → sync; open PR; hand off to user.

@@ -44,8 +44,8 @@ Navigate to the project directory before starting work. Each project has its own
    ```
 1. **Read this file** (CONSTITUTION.md) — you are reading it now. Complete the section checklist at the top before proceeding.
 2. Read the project's `docs/context.md` — single source of truth for purpose, tech stack, and architecture.
-3. Load any skills listed under `## Session Start Skills` in the project's `docs/context.md`.
-4. Check the project's `memory/MEMORY.md` to understand recent changes.
+3. Check the project's `memory/MEMORY.md` to understand recent changes.
+4. Load any skills listed under `## Session Start Skills` in the project's `docs/context.md`.
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
 
@@ -152,12 +152,13 @@ Edit code
 
 /sync "feat: description" (or running dev-sync scripts directly)
   ↓
-  1. Audit script execution  — abort on failure (includes CHANGELOG.md existence check)
-  2. memory/YYYY-MM-DD.md     — auto-create if missing
-  3. MEMORY.md index         — update entry
-  4. git add -A && git commit
-  5. On main/master          ➔ create pr/<date>-<slug> branch, git reset --soft HEAD~1 on main
-  6. git push + gh pr create ➔ GitHub PR opened (Direct push blocked by local hooks)
+  1. memory/YYYY-MM-DD.md     — append session log entry
+  2. MEMORY.md index         — update entry
+  3. CHANGELOG.md            — auto-insert commit message if [Unreleased] is empty
+  4. Audit script execution  — abort on failure (includes CHANGELOG.md existence check)
+  5. git checkout -b pr/<date>-<slug>
+  6. git add -A && git commit
+  7. git push + gh pr create ➔ GitHub PR opened (Direct push blocked by local hooks)
 ```
 
 **Rules:**

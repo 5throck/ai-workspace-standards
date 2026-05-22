@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed — License
 - MIT → AGPL-3.0
 
+### Fixed — Scaffold guideline consistency (3rd 5-round review)
+- `templates/agents/pm.md`: Governance Workflow Phase 3에 designer parallel dispatch 명시
+- `CONSTITUTION.md §Workspace`: Session Start 체크리스트 순서 정정 (3↔4 교환 — MEMORY.md 먼저, skills 후)
+- `CONSTITUTION.md §3`: /sync 파이프라인 순서를 실제 dev-sync.sh와 일치시킴 (memlog→MEMORY.md→CHANGELOG→audit→branch→commit→push→PR)
+
 ### Fixed — Scaffold guideline consistency (2nd 5-round review)
 - `scripts/new-project.ps1`: git update-index를 git init 이후로 이동 (dead code 제거)
 - `templates/CLAUDE.md`: Hooks Override 주석 정정 (hook 비활성 상태 명확화), Step 0 표현 개선, `model: inherit` 상속 기본값 명시
