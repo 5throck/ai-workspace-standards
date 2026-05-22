@@ -17,10 +17,11 @@ At the start of every Claude Code session, run this checklist:
 
 ```
 0. git config core.hooksPath .githooks   # activate hooks (run once per clone; verify it stuck)
-1. Read docs/context.md                  # project knowledge — coding guidelines, agents, workflow
-2. Read AGENTS.md                        # agent roster (auto-loaded by Claude Code)
-3. Read memory/MEMORY.md                 # recent changes and session history
-4. Load skills listed in docs/context.md ## Session Start Skills
+1. Read ../CONSTITUTION.md               # workspace design standard
+2. Read docs/context.md                  # project knowledge — coding guidelines, agents, workflow
+3. Read AGENTS.md                        # agent roster (auto-loaded by Claude Code)
+4. Read memory/MEMORY.md                 # recent changes and session history
+5. Load skills listed in docs/context.md ## Session Start Skills
 ```
 
 ---
@@ -57,7 +58,7 @@ These commands are available as both `/slash-commands` and via the `Skill` tool:
 | Command | Purpose |
 |---------|---------|
 | `/changelog "description"` | Add entry to `CHANGELOG.md [Unreleased]` |
-| `/sync "feat: ..."` | Full pipeline — memlog → changelog → audit → commit → PR |
+| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only |
 | `/new-task "task name"` | Create task tracking block in today's memory log |
 
@@ -122,10 +123,10 @@ Enter plan mode (`EnterPlanMode`) when:
 - Never leave tasks `in_progress` at end of session
 
 #### Subagent Pattern
-Each implementation task follows a 3-role review cycle:
-1. **Implementation subagent** executes the task
-2. **Spec-compliance review subagent** checks against the approved plan
-3. **Code-quality review subagent** checks for bugs and style issues
+Each implementation task follows the Phase 4 execution loop:
+1. **code-writer** implements the changes
+2. **test-runner** verifies against acceptance criteria and runs tests
+3. **Quality gate (audit script)** validates compliance
 Fix and re-review if issues found — maximum **3 iterations** before escalating to the user.
 
 ---

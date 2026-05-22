@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- MD file consistency: unified Session Start Checklist across CLAUDE.md, GEMINI.md, and README.md (including templates/)
+- MD file consistency: updated subagent Phase 4 execution loop and `/sync` pipeline descriptions in `templates/` and root configurations
+
 ### Added
 - `scripts/sync-md.sh` and `scripts/sync-md.ps1` — missing files required by `dev-sync.sh` (workspace pipeline was broken without them)
 

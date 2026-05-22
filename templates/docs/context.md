@@ -73,7 +73,7 @@ bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
 # Claude Code:  /changelog "added|changed|fixed|removed <description>"
 # Gemini CLI:   append to CHANGELOG.md under [Unreleased]
 
-# Full sync: memlog → changelog → audit → commit → PR
+# Full sync: memlog → sync-md → changelog → audit → commit → PR
 bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1 "feat: ..."
 # Claude Code:  /sync "feat: description"
 ```
@@ -120,7 +120,7 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 | `agents/designer.md` | Design agent — UI/UX specs and component definitions |
 | `agents/code-writer.md` | Implementation agent — writes code from approved plans |
 | `agents/test-runner.md` | QA agent — runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (memlog → changelog → audit → commit → PR) |
+| `scripts/dev-sync.sh` | Full sync pipeline (memlog → sync-md → changelog → audit → commit → PR) |
 | `scripts/audit.sh` | Documentation audit script |
 | `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
 | `memory/MEMORY.md` | Session log index |

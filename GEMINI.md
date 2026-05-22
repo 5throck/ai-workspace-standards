@@ -69,12 +69,13 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ---
 
 ### 4. Context Loading
-Session Start Checklist steps are loaded into the conversation context using the platform `@` file reference syntax:
+Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
 ```
 @../CONSTITUTION.md          # Step 1 — workspace design standard
 @docs/context.md             # Step 2 — project knowledge
 @AGENTS.md                   # Step 3 — canonical agent roster
 @memory/MEMORY.md            # Step 4 — recent changes (skip if file does not exist)
+@skills/                     # Step 5 — load skills listed in docs/context.md
 ```
 
 For internationalization (i18n) work, also load the baseline translation reference:
@@ -91,9 +92,9 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "spec-compliance-reviewer",
-  "description": "Validates code updates against design requirements",
-  "system_prompt": "You are a quality compliance reviewer...",
+  "name": "test-runner",
+  "description": "Executes tests and verifies code changes against acceptance criteria",
+  "system_prompt": "You are a QA test runner...",
   "enable_write_tools": false,
   "enable_subagent_tools": false
 }
@@ -105,9 +106,9 @@ Spawn parallel instances to execute dedicated work concurrently.
 {
   "Subagents": [
     {
-      "TypeName": "spec-compliance-reviewer",
-      "Role": "Compliance Reviewer",
-      "Prompt": "Check the code diff in src/pricing.py against specs"
+      "TypeName": "test-runner",
+      "Role": "Test Runner",
+      "Prompt": "Verify the code changes in src/pricing.py against acceptance criteria and run tests"
     }
   ]
 }
@@ -117,10 +118,10 @@ Spawn parallel instances to execute dedicated work concurrently.
 Interact and exchange contracts with spawned agents via their unique `conversationID`.
 The platform supports **Reactive Wakeup**: you do not need to poll or query tasks in a loop. Simply yield execution, and the platform will wake you up automatically as soon as an agent replies or a background task completes.
 
-#### Standard 3-Role Review Cycle
-1.  **Implementation agent** writes the logic.
-2.  **Spec-compliance agent** checks implementation specs.
-3.  **Code-quality agent** audits code sanity.
+#### Phase 4 Execution Loop
+1.  **code-writer** implements the changes.
+2.  **test-runner** verifies against acceptance criteria and runs tests.
+3.  **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
 
