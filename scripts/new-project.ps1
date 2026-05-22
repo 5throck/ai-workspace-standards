@@ -50,8 +50,8 @@ git config core.hooksPath .githooks
 # Must run AFTER git init so the git index exists
 $executableFiles = @(
     ".githooks\pre-commit", ".githooks\pre-push",
-    "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh",
-    "scripts\dev-sync.ps1", "scripts\audit.ps1", "scripts\sync-md.ps1"
+    "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh", "scripts\setup.sh",
+    "scripts\dev-sync.ps1", "scripts\audit.ps1", "scripts\sync-md.ps1", "scripts\setup.ps1"
 )
 foreach ($rel in $executableFiles) {
     if (Test-Path (Join-Path $ProjectDir $rel)) {
@@ -71,12 +71,15 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "⚠️  Project scaffolded but audit found issues — review above before continuing." -ForegroundColor Yellow
 }
 
+# ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
 Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Fill in docs\context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
-Write-Host "  2. Set your test command in agents\test-runner.md (replace [project test command])"
-Write-Host "  3. git remote add origin <url>"
-Write-Host "     git add -A && git commit -m 'chore: initial scaffold'"
+Write-Host "Running environment setup…" -ForegroundColor Cyan
+& ".\scripts\setup.ps1"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ""
+    Write-Host "⚠️  Setup encountered an error — run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  → $TemplatesDir\_examples\" -ForegroundColor DarkGray

@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added — New project setup automation
+- `templates/scripts/setup.sh` + `setup.ps1`: post-scaffold environment setup script with stack auto-detection (Node.js → `npm install`, Python → `.venv` + `pip install`, Ruby → `bundle install`), `.env.sample` → `.env` copy, and initial git commit
+- `scripts/new-project.sh` + `new-project.ps1`: automatically call `setup.sh`/`setup.ps1` after audit (step 8); removed manual "git add && git commit" from Next steps output
+
+
 ### Changed — Antigravity 2.0 / Gemini CLI session start config (workspace + templates + 4 sub-projects)
 
 **`GEMINI.md` (workspace root)**

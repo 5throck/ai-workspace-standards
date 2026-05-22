@@ -49,7 +49,8 @@ chmod +x "$PROJECT_DIR/.githooks/pre-commit" \
          "$PROJECT_DIR/.githooks/pre-push" \
          "$PROJECT_DIR/scripts/audit.sh" \
          "$PROJECT_DIR/scripts/dev-sync.sh" \
-         "$PROJECT_DIR/scripts/sync-md.sh"
+         "$PROJECT_DIR/scripts/sync-md.sh" \
+         "$PROJECT_DIR/scripts/setup.sh"
 
 # ── 6. Initialize git ──────────────────────────────────────────────────────────
 cd "$PROJECT_DIR"
@@ -57,7 +58,7 @@ git init
 git config core.hooksPath .githooks
 
 # Mark .ps1 scripts executable in git index (for WSL / Git Bash users)
-for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1; do
+for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1 scripts/setup.ps1; do
   [ -f "$rel" ] && git update-index --chmod=+x "$rel" 2>/dev/null || true
 done
 
@@ -72,11 +73,14 @@ else
   echo "⚠️  Project scaffolded but audit found issues — review above before continuing."
 fi
 
+# ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
 echo ""
-echo "Next steps:"
-echo "  1. Fill in docs/context.md placeholders (## Tech Stack, ## Architecture, [KEY_NAME])"
-echo "  2. Set your test command in agents/test-runner.md (replace [project test command])"
-echo "  3. git remote add origin <url> && git add -A && git commit -m 'chore: initial scaffold'"
+echo "Running environment setup…"
+bash scripts/setup.sh || {
+  echo ""
+  echo "⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry."
+}
+
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/_examples/"
