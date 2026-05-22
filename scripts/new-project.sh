@@ -97,3 +97,18 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/_examples/"
+
+# ── 10. Security baseline scan notice ─────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo -e "\033[36m🔒 SECURITY BASELINE\033[0m"
+echo ""
+echo "  Run the security monitor agent to scan for known CVEs"
+echo "  affecting this project's tech stack:"
+echo ""
+echo -e "  \033[32m  /security-check\033[0m              (one-time scan)"
+echo -e "  \033[32m  /security-check --schedule\033[0m   (scan + enable daily monitoring)"
+echo ""
+echo "  Findings will be saved to: $PROJECT_DIR/security/"
+echo "  The agent will also run automatically before every PR on public repos."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

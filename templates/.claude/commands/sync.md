@@ -2,6 +2,26 @@ Run the full project sync pipeline.
 
 Arguments: $ARGUMENTS
 
+## Pipeline steps
+
+Execute the following steps **in order**:
+
+### Step 1 — Security advisory check (public repositories only)
+
+Before committing, check whether this repository is public:
+
+```bash
+gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null || echo "unknown"
+```
+
+- If the output is `false` (public repo): run `/security-check --pr`.
+  - If the check finds active CRITICAL or HIGH advisories → present them to the user and
+    ask whether to **proceed** or **stop to resolve first** (do not hard-block).
+  - If the check passes or the user chooses to proceed → continue to Step 2.
+- If the output is `true` or `unknown`: skip the check and continue.
+
+### Step 2 — Sync pipeline
+
 Execute the following bash command exactly as written:
 
 ```bash

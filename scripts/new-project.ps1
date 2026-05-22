@@ -100,3 +100,18 @@ Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  → $TemplatesDir\_examples\" -ForegroundColor DarkGray
+
+# ── 10. Security baseline scan notice ─────────────────────────────────────────
+Write-Host ""
+Write-Host ("━" * 60) -ForegroundColor DarkGray
+Write-Host "🔒 SECURITY BASELINE" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  Run the security monitor agent to scan for known CVEs"
+Write-Host "  affecting this project's tech stack:"
+Write-Host ""
+Write-Host "  /security-check              (one-time scan)" -ForegroundColor Green
+Write-Host "  /security-check --schedule   (scan + enable daily monitoring)" -ForegroundColor Green
+Write-Host ""
+Write-Host "  Findings will be saved to: $ProjectDir\security\"
+Write-Host "  The agent will also run automatically before every PR on public repos."
+Write-Host ("━" * 60) -ForegroundColor DarkGray

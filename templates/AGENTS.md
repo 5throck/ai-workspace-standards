@@ -32,6 +32,13 @@
 | Code Writer | [`agents/code-writer.md`](agents/code-writer.md) | Implements approved plans; surgical changes only |
 | Test Runner | [`agents/test-runner.md`](agents/test-runner.md) | Runs tests and verifies acceptance criteria |
 
+### 🔴 Security / Setup
+
+| Agent | File | Role |
+|-------|------|------|
+| Stack Setup | [`agents/stack-setup.md`](agents/stack-setup.md) | Identifies unknown stacks, web-searches setup procedures, mandatory security review, requires explicit user approval before executing any commands |
+| Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Daily CVE/advisory scanner for project stacks; saves findings to `security/`; mandatory pre-PR gate for public repos; cleans up resolved entries after 7 days |
+
 *(Add domain-specific agents as needed — see the extension guidance below.)*
 
 ---
@@ -73,6 +80,8 @@ Request received
 | Designer | `agents/designer.md` | ✅ Design phase | ❌ No |
 | Code Writer | `agents/code-writer.md` | ❌ Serial | ✅ Source files |
 | Test Runner | `agents/test-runner.md` | ❌ After writes | ✅ Test files only |
+| Stack Setup | `agents/stack-setup.md` | ✅ Research phase | ✅ setup.sh/ps1 only (after approval) |
+| Security Monitor | `agents/security-monitor.md` | ✅ Web search phase | ✅ security/ only |
 
 *(Extend this table as you add Analysis or specialized agents to the project.)*
 
