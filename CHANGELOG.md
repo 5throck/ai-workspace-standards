@@ -8,6 +8,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed — workspace `.githooks/pre-commit` + `.claude/settings.json` + `.claude/commands/`
+- Applied same changes as templates/ to the workspace root itself
+- `.githooks/pre-commit`: conditional audit (memory/ exempt)
+- `.claude/settings.json`: PostToolUse hook 제거
+- `.claude/commands/changelog.md` + `sync.md`: 신규 추가
+- `scripts/dev-sync.sh`: 신규 추가 (memlog → sync-md → changelog → audit → commit)
+
+### Changed — `templates/.githooks/pre-commit`
+- Smart conditional audit: skips `audit.sh` when only `memory/` files are staged (session logs, daily entries)
+- Runs audit only when structural files outside `memory/` are staged — prevents spurious failures on log-only commits
+
+### Changed — `templates/.claude/settings.json`
+- Removed PostToolUse hook — audit no longer fires on every Write/Edit
+- Audit is now enforced exclusively via pre-commit hook and `dev-sync.sh` pipeline
+
+### Changed — `templates/scripts/dev-sync.sh` + `dev-sync.ps1`
+- Reordered pipeline: `memlog → sync-md → changelog → audit → commit → PR`
+  (was: `audit → memlog → sync-md → commit`)
+- Added auto-changelog step: if `[Unreleased]` section has no entries, inserts the commit message automatically
+- Audit now runs after memory and changelog are updated — logically correct order
+
+### Added — `templates/.claude/commands/changelog.md`
+- `/changelog "description"` command: adds a typed entry (`### Added/Changed/Fixed/Removed`) to `CHANGELOG.md [Unreleased]`
+
+### Added — `templates/.claude/commands/sync.md`
+- `/sync "feat: ..."` command: wraps `bash scripts/dev-sync.sh` with pipeline description
+
 ### Added — `templates/agents/designer.md` (new)
 - UI/UX design agent for Phase 3 — Design group
 - Produces wireframes (text-based), component specs, design tokens, and accessibility checklists
