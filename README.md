@@ -138,7 +138,7 @@ Agent scaffold templates for all roles live in `templates/agents/`.
 - **`docs/context.md` is the single source of truth** for every project — all AI tools share it.
 - **`CLAUDE.md` / `GEMINI.md` (project-level) contain only platform-specific overrides.**
 - **PR-only workflow** — all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
-- **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:`
+- **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
 - **Cross-platform scripts** — every `.sh` has a `.ps1` pair with identical behavior.
 - **Coding Guidelines are audited** — `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 

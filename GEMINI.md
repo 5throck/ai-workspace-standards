@@ -61,7 +61,14 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ---
 
-### 3. Context Loading
+### 3. Response Language
+
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, branch names → **English only**.
+
+---
+
+### 4. Context Loading
 Session Start Checklist steps are loaded into the conversation context using the platform `@` file reference syntax:
 ```
 @../CONSTITUTION.md          # Step 1 — workspace design standard
@@ -77,7 +84,7 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ---
 
-### 4. Subagent Instantiation & Async Orchestration
+### 5. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
 #### Define Subagent (`define_subagent`)
@@ -123,7 +130,7 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 
 ---
 
-### 5. Slash Command Emulation Guide
+### 6. Slash Command Emulation Guide
 Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS:
 
 | Command | macOS / Linux (Bash) | Windows (PowerShell) |
@@ -137,7 +144,7 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 
 ---
 
-### 6. Coexistence, Precedence & Migration of .claude
+### 7. Coexistence, Precedence & Migration of .claude
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.

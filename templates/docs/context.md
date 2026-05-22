@@ -4,10 +4,15 @@
 [One-sentence description of what this project does and who it's for.]
 
 ## Tech Stack
-- **Language**: [e.g., Python 3.11+ / TypeScript 5+]
-- **Framework**: [e.g., FastAPI / Next.js / none]
-- **Key Libraries**: [e.g., pydantic, httpx, react-query]
-- **Package Manager**: [e.g., pip + uv / npm / pnpm]
+
+| Layer | Technology |
+|-------|-----------|
+| **Language** | [e.g., Python 3.11+ / TypeScript 5+] |
+| **Framework** | [e.g., FastAPI / Next.js / none] |
+| **Database** | [e.g., PostgreSQL + SQLAlchemy / SQLite / none] |
+| **Key Libraries** | [e.g., pydantic, httpx, react-query] |
+| **Package Manager** | [e.g., pip + uv / npm / pnpm] |
+| **Testing** | [e.g., pytest / Vitest / Jest] |
 
 ## Architecture
 ```
@@ -73,6 +78,10 @@ bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1
 # Claude Code:  /sync "feat: description"
 ```
 
+### Auto-Updating & Context Maintenance
+- **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/context.md` whenever a significant architectural decision or multi-file feature is completed.
+- **Archiving**: If `docs/context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.
+
 ### Claude Code Slash Commands
 Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude Code:
 | Command | Skill name | Purpose |
@@ -81,6 +90,25 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 | `/sync "..."` | `sync` | Full sync pipeline |
 | `/memlog "..."` | `memlog` | Log session entry only |
 | `/new-task "..."` | `new-task` | Create task block in memory log |
+
+## Git / PR Workflow
+
+```
+/sync "feat: description"
+  ↓
+  1. memory/YYYY-MM-DD.md append (memlog)
+  2. memory/MEMORY.md index update (sync-md)
+  3. CHANGELOG.md [Unreleased] auto-add
+  4. audit.sh                    ← must exit 0
+  5. git checkout -b pr/<date>-<slug>
+  6. git commit + push
+  7. gh pr create → GitHub PR
+```
+
+> Run `/changelog "description"` before `/sync` to pre-populate the changelog entry.
+> **Rule: All changes reach `main` via PR only — never direct push.**
+
+---
 
 ## Key Files
 | File | Purpose |

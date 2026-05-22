@@ -1,0 +1,26 @@
+# Dependabot — automatic dependency update PRs
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+# Uncomment and configure the ecosystem(s) this project uses.
+
+version: 2
+updates:
+
+  # Python (pip / uv)
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 5
+
+  # Node.js (npm / pnpm / yarn)
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 5
+
+  # GitHub Actions
+  # - package-ecosystem: "github-actions"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"

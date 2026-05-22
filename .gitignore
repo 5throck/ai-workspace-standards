@@ -49,3 +49,5 @@ __pycache__/
 !.claude/
 !scripts/
 !templates/
+!.editorconfig
+!SECURITY.md

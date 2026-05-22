@@ -3,6 +3,12 @@
 > **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
 > Workspace-level Claude Code behaviors → [`../CLAUDE.md`](../CLAUDE.md)
 
+> **Doc intent:** This file is Claude Code-specific behavioral configuration.
+> Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
+> Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
+
+---
+
 ## Project-Specific Claude Code Settings
 
 ### Session Start
@@ -17,7 +23,32 @@ At the start of every Claude Code session, run this checklist:
 4. Load skills listed in docs/context.md ## Session Start Skills
 ```
 
-<!-- Add entries below ONLY for Claude Code-exclusive session steps not covered above. -->
+---
+
+### CLI vs Desktop App
+
+Both the CLI and the Desktop App share the same `.claude/settings.json` and slash commands.
+
+| Environment | PostToolUse hook fires? | Action if not |
+|-------------|:-----------------------:|---------------|
+| Claude Code CLI | ✅ Automatic | — |
+| Claude Code Desktop App | ❌ Never | Run `bash scripts/audit.sh` manually before committing |
+
+> **Recommended split:**
+> - **CLI** — automated workflows, hook-driven audit, multi-agent orchestration.
+> - **Desktop App** — PR monitoring, visual diff review, parallel sessions.
+
+---
+
+### Claude Code Settings
+
+- `.claude/settings.json` — shared team config (committed to repo)
+- `.claude/settings.local.json` — personal write permissions + git/gh access (gitignored)
+- `.claude/commands/` — slash commands auto-registered as Skills
+
+Both files are loaded automatically by Claude Code.
+
+---
 
 ### Slash Commands (`.claude/commands/`)
 
@@ -33,16 +64,98 @@ These commands are available as both `/slash-commands` and via the `Skill` tool:
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill in Claude Code. Add new commands by creating files here.
 
+---
+
+### Hooks
+
+```json
+// .claude/settings.json — enable PostToolUse audit after every Write/Edit:
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": "bash scripts/audit.sh" }]
+      }
+    ]
+  }
+}
+```
+
+> **Note:** PostToolUse hooks are **disabled by default** (`.claude/settings.json = {}`).
+> Audit is enforced via the `.githooks/pre-commit` hook and `scripts/dev-sync.sh` pipeline.
+> Enable the above only if you want real-time audit on every Write/Edit in the CLI.
+
+---
+
+### Git Hooks
+
+Install project hooks once per clone (run from the project root):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| `.githooks/pre-commit` | Every commit | Blocks commit if `CHANGELOG.md` not staged (skips for `memory/`-only commits) |
+| `.githooks/pre-push` | Every push | Runs `audit.sh`; aborts on failure |
+
+---
+
+### Behavioral Rules
+
+#### Response Language
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, branch names → **English only**.
+
+#### Plan Mode
+Enter plan mode (`EnterPlanMode`) when:
+- User requests a new feature or significant refactor
+- The change touches more than 2 files
+- The correct approach is unclear or requires clarifying assumptions
+
+#### Task Tracking
+- Call `TaskCreate` before starting any multi-step work
+- Set status `in_progress` before beginning each atomic step
+- Set status `completed` immediately after verification
+- Never leave tasks `in_progress` at end of session
+
+#### Subagent Pattern
+Each implementation task follows a 3-role review cycle:
+1. **Implementation subagent** executes the task
+2. **Spec-compliance review subagent** checks against the approved plan
+3. **Code-quality review subagent** checks for bugs and style issues
+Fix and re-review if issues found — maximum **3 iterations** before escalating to the user.
+
+---
+
+### Custom Command Error Recovery
+
+If a slash command or background script returns a non-zero exit code:
+- **Never bypass hooks** with `--no-verify` unless under explicit written user instruction.
+- **Diagnose first**: read the failure log. Common causes:
+  - `CHANGELOG.md` not staged → run `/changelog` and stage the file, then retry.
+  - Direct push to `main` blocked by pre-push hook → use `/sync` to create a PR branch automatically.
+
+---
+
+### Git
+
+Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md).
+Always append to AI-generated commit messages:
+
+```
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+---
+
 ### MCP Servers
 <!-- Document project-specific .mcp.json entries here, if any.             -->
 <!-- General MCP guidance: workspace ../CLAUDE.md §3                        -->
 
-### Hooks Override
-<!-- Hooks are disabled by default (.claude/settings.json = {}).           -->
-<!-- Audit is enforced via pre-commit hook and scripts/dev-sync.sh only.   -->
-<!-- To enable PostToolUse audit on every Write/Edit, add to settings.json: -->
-<!--   { "hooks": { "PostToolUse": [{ "matcher": "Write|Edit",             -->
-<!--     "hooks": [{ "type": "command", "command": "bash scripts/audit.sh" }] }] } } -->
+---
 
 ### Model Selection Override
 <!-- agents/*.md use `model: inherit` — inheriting from workspace ../CLAUDE.md defaults: -->

@@ -13,8 +13,4 @@ if (-not (Test-Path $MemFile)) {
 |------|---------|
 "@ | Set-Content $MemFile -Encoding UTF8
 }
-# Only append if this date is not already in the index
-$existing = Get-Content $MemFile -Raw -ErrorAction SilentlyContinue
-if (-not $existing -or $existing -notmatch [regex]::Escape("[$Date]")) {
-    Add-Content $MemFile "| [$Date]($Date.md) | $Summary |"
-}
+Add-Content $MemFile "| [$Date]($Date.md) | $Summary |"

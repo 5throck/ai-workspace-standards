@@ -28,6 +28,7 @@ Apply all guidelines from `docs/context.md ## Coding Guidelines`:
 2. **No speculative code** — no "just in case" abstractions or future-proofing.
 3. **Secrets** — never hardcode credentials; always use env vars / `.env.sample`.
 4. **Clean up your own orphans** — remove imports/vars made unused by YOUR changes only.
+5. **Changelog** — add a `CHANGELOG.md [Unreleased]` entry for every change (run `/changelog` or edit manually).
 
 ## Output
 
