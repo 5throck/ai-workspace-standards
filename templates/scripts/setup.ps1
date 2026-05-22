@@ -2,6 +2,17 @@
 # Mirrors setup.sh exactly. Called automatically by new-project.ps1;
 # can also be re-run manually at any time.
 #
+# Supported stacks:
+#   Node.js    package.json          → npm install
+#   Python     requirements.txt /    → .venv (mandatory) + pip install
+#              pyproject.toml
+#   Ruby       Gemfile               → bundle install
+#   .NET       *.csproj / *.sln      → dotnet restore
+#   Java       pom.xml (Maven)       → mvn dependency:resolve
+#              build.gradle (Gradle) → gradlew dependencies
+#   C/C++      CMakeLists.txt        → cmake -B build (configure only)
+#              Makefile              → info only (not run automatically)
+#
 # Usage: .\scripts\setup.ps1 [-SkipInstall] [-SkipCommit]
 param(
     [switch]$SkipInstall,
@@ -15,22 +26,72 @@ function Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 Write-Host "=== setup.ps1 — environment setup ===" -ForegroundColor Cyan
 
 # ── OS detection ──────────────────────────────────────────────────────────────
-$IsWin   = $env:OS -eq "Windows_NT"
-$IsMac   = $IsMacOS  # Built-in PS 6+ variable; false in PS 5 on Windows
-$IsLin   = $IsLinux  # Built-in PS 6+ variable
-if ($PSVersionTable.PSVersion.Major -lt 6) {
-    # PowerShell 5 (Windows only) — $IsMacOS/$IsLinux don't exist
-    $IsMac = $false
-    $IsLin = $false
-    $IsWin = $true
+$IsWin = $true
+$IsMac = $false
+$IsLin = $false
+if ($PSVersionTable.PSVersion.Major -ge 6) {
+    $IsMac = $IsMacOS
+    $IsLin = $IsLinux
+    $IsWin = -not ($IsMac -or $IsLin)
 }
 $OsLabel = if ($IsMac) { "macOS" } elseif ($IsLin) { "Linux" } else { "Windows" }
 Info "Detected OS: $OsLabel (PowerShell $($PSVersionTable.PSVersion))"
 
-# ── Python binary ─────────────────────────────────────────────────────────────
+# ── Helper: require a command or warn ────────────────────────────────────────
+function Require {
+    param([string]$Cmd, [string]$Hint)
+    if (-not (Get-Command $Cmd -ErrorAction SilentlyContinue)) {
+        Warn "$Cmd not found — $Hint"
+        return $false
+    }
+    return $true
+}
+
+# ── Python binary resolution ──────────────────────────────────────────────────
 $PyBin = $null
-if (Get-Command python3 -ErrorAction SilentlyContinue) { $PyBin = "python3" }
-elseif (Get-Command python -ErrorAction SilentlyContinue) { $PyBin = "python" }
+foreach ($candidate in @("python3", "python")) {
+    if (Get-Command $candidate -ErrorAction SilentlyContinue) {
+        $ver = & $candidate --version 2>&1
+        if ($ver -match "^Python 3") {
+            $PyBin = $candidate
+            break
+        }
+    }
+}
+
+# ── Python venv helpers ───────────────────────────────────────────────────────
+function Activate-Venv {
+    $scripts = @(".venv\Scripts\Activate.ps1", ".venv/bin/Activate.ps1")
+    foreach ($s in $scripts) {
+        if (Test-Path $s) { & $s; return }
+    }
+    Warn "Could not find venv Activate.ps1 — continuing without activation"
+}
+
+function Show-VenvHint {
+    if ($IsWin) {
+        Info "  Activate venv (PowerShell): .venv\Scripts\Activate.ps1"
+        Info "  Activate venv (Git Bash):   source .venv/Scripts/activate"
+    } else {
+        Info "  Activate venv: source .venv/bin/activate"
+    }
+}
+
+function Ensure-Venv {
+    if (-not $PyBin) {
+        Warn "Python 3 not found — skipping venv creation (install from https://python.org)"
+        return $false
+    }
+    if (-not (Test-Path ".venv")) {
+        Info "Creating Python virtual environment (.venv)…"
+        & $PyBin -m venv .venv
+        Pass ".venv created"
+    } else {
+        Info ".venv already exists — reusing"
+    }
+    Activate-Venv
+    return $true
+}
 
 # ── 1. .env.sample → .env ─────────────────────────────────────────────────────
 if (Test-Path ".env.sample") {
@@ -45,65 +106,98 @@ if (Test-Path ".env.sample") {
 # ── 2. Dependency install (stack auto-detection) ──────────────────────────────
 if (-not $SkipInstall) {
 
-    # Node.js
+    # ── Node.js ────────────────────────────────────────────────────────────────
     if (Test-Path "package.json") {
-        if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
-            Warn "Node.js / npm not found — skipping npm install (install from https://nodejs.org)"
-        } else {
+        if (Require "npm" "install Node.js from https://nodejs.org") {
             Info "Node.js project detected — running npm install"
             npm install
             if ($LASTEXITCODE -eq 0) { Pass "npm install complete" }
         }
     }
 
-    # Python (requirements.txt)
+    # ── Python (requirements.txt) ─────────────────────────────────────────────
     if (Test-Path "requirements.txt") {
-        if (-not $PyBin) {
-            Warn "Python not found — skipping venv + pip install (install from https://python.org)"
-        } else {
-            Info "Python project detected — creating .venv and installing dependencies"
-            & $PyBin -m venv .venv
-
-            # Activate: Windows PowerShell uses Scripts\Activate.ps1
-            # macOS/Linux PowerShell uses bin/Activate.ps1
-            $activateScript = if (Test-Path ".venv\Scripts\Activate.ps1") {
-                ".venv\Scripts\Activate.ps1"
-            } elseif (Test-Path ".venv/bin/Activate.ps1") {
-                ".venv/bin/Activate.ps1"
-            } else { $null }
-
-            if ($activateScript) { & $activateScript }
-
+        Info "Python project detected (requirements.txt)"
+        if (Ensure-Venv) {
             pip install -r requirements.txt
-            if ($LASTEXITCODE -eq 0) { Pass "pip install complete (.venv created)" }
+            if ($LASTEXITCODE -eq 0) { Pass "pip install -r requirements.txt complete" }
+            Show-VenvHint
+        }
+    }
 
-            if ($IsWin) {
-                Info "Activate venv in PowerShell: .venv\Scripts\Activate.ps1"
-            } else {
-                Info "Activate venv in your shell: source .venv/bin/activate"
+    # ── Python (pyproject.toml, no requirements.txt) ──────────────────────────
+    if ((Test-Path "pyproject.toml") -and (-not (Test-Path "requirements.txt"))) {
+        Info "Python project detected (pyproject.toml)"
+        if (Ensure-Venv) {
+            pip install -e .
+            if ($LASTEXITCODE -eq 0) { Pass "pip install -e . complete" }
+            Show-VenvHint
+        }
+    }
+
+    # ── Ruby ──────────────────────────────────────────────────────────────────
+    if (Test-Path "Gemfile") {
+        if (Require "bundle" "run: gem install bundler") {
+            Info "Ruby project detected — running bundle install"
+            bundle install
+            if ($LASTEXITCODE -eq 0) { Pass "bundle install complete" }
+        }
+    }
+
+    # ── .NET ──────────────────────────────────────────────────────────────────
+    $dotnetProj = Get-ChildItem -Path . -Recurse -Depth 3 -Include "*.csproj","*.sln","*.fsproj" -ErrorAction SilentlyContinue |
+                  Where-Object { $_.FullName -notmatch "\\.git\\" } |
+                  Select-Object -First 1
+    if ($dotnetProj) {
+        if (Require "dotnet" "install .NET SDK from https://dotnet.microsoft.com/download") {
+            Info ".NET project detected ($($dotnetProj.Name)) — running dotnet restore"
+            dotnet restore
+            if ($LASTEXITCODE -eq 0) { Pass "dotnet restore complete" }
+        }
+    }
+
+    # ── Java / Maven ──────────────────────────────────────────────────────────
+    if (Test-Path "pom.xml") {
+        if (Require "mvn" "install Maven from https://maven.apache.org or use SDKMAN: sdk install maven") {
+            Info "Maven project detected — running mvn dependency:resolve -q"
+            mvn dependency:resolve -q
+            if ($LASTEXITCODE -eq 0) { Pass "mvn dependency:resolve complete" }
+        }
+    }
+
+    # ── Java / Gradle ─────────────────────────────────────────────────────────
+    $gradleBuild = @("build.gradle", "build.gradle.kts") | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($gradleBuild) {
+        $gradleCmd = if (Test-Path "gradlew.bat") { ".\gradlew.bat" } elseif (Test-Path "./gradlew") { "bash ./gradlew" } else { "gradle" }
+        $gradleExe = $gradleCmd.Split(" ")[0]
+        if (Require $gradleExe "install Gradle from https://gradle.org or use SDKMAN: sdk install gradle") {
+            Info "Gradle project detected — running $gradleCmd dependencies"
+            Invoke-Expression "$gradleCmd dependencies -q"
+            if ($LASTEXITCODE -eq 0) { Pass "Gradle dependencies resolved" }
+        }
+    }
+
+    # ── C/C++ (CMake) ─────────────────────────────────────────────────────────
+    if (Test-Path "CMakeLists.txt") {
+        if (Require "cmake" "install CMake from https://cmake.org") {
+            Info "CMake project detected — configuring build (cmake -B build)"
+            cmake -B build -S . 2>&1 | Select-Object -Last 5
+            if ($LASTEXITCODE -eq 0) {
+                Pass "CMake configure complete — build artifacts in build\"
+                Info "  To build: cmake --build build"
             }
         }
     }
 
-    # Python (pyproject.toml, no requirements.txt)
-    if ((Test-Path "pyproject.toml") -and (-not (Test-Path "requirements.txt"))) {
-        if (-not $PyBin) {
-            Warn "Python not found — skipping pip install -e . (install from https://python.org)"
+    # ── C/C++ (plain Makefile, no CMake) ─────────────────────────────────────
+    if ((Test-Path "Makefile") -and (-not (Test-Path "CMakeLists.txt"))) {
+        $makeAvail = (Get-Command make -ErrorAction SilentlyContinue) -or (Get-Command nmake -ErrorAction SilentlyContinue)
+        if ($makeAvail) {
+            Info "Makefile detected — 'make' is available but NOT run automatically"
+            Info "  Run manually: make"
         } else {
-            Info "pyproject.toml detected — running pip install -e ."
-            pip install -e .
-            if ($LASTEXITCODE -eq 0) { Pass "pip install -e . complete" }
-        }
-    }
-
-    # Ruby
-    if (Test-Path "Gemfile") {
-        if (-not (Get-Command bundle -ErrorAction SilentlyContinue)) {
-            Warn "Bundler not found — skipping bundle install (run: gem install bundler)"
-        } else {
-            Info "Ruby project detected — running bundle install"
-            bundle install
-            if ($LASTEXITCODE -eq 0) { Pass "bundle install complete" }
+            Warn "Makefile detected but make/nmake not found"
+            Warn "  Windows: install via 'winget install GnuWin32.Make' or Visual Studio Build Tools"
         }
     }
 
