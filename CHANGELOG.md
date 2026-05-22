@@ -8,8 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `scripts/sync-md.sh` and `scripts/sync-md.ps1` — missing files required by `dev-sync.sh` (workspace pipeline was broken without them)
+
 ### Changed
 - Improve `templates/AGENTS.md` with AI disclaimer, dispatch protocol, phase workflow, role boundary matrix, skills table, and expanded maintenance rule
+
+### Fixed
+- `CONSTITUTION.md §7` — Windows `.\scripts\new-project.ps1` command had a line-break bug rendering it as `.\scripts` + `ew-project.ps1`
+- `scripts/audit.sh` — remove unused `PASS=0` / `FAIL=1` dead code variables
+- `CONSTITUTION.md §1` — add workspace-root exception note to AGENTS.md rule
 - Improve `templates/CLAUDE.md` with doc intent, CLI vs Desktop table, behavioral rules section, git hooks install, Co-Authored-By, and settings.json clarification
 - Improve `templates/GEMINI.md` with doc intent, tool name mapping table, git commit policy, command emulation guide, and `.claude/` coexistence rules
 

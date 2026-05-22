@@ -4,8 +4,6 @@
 # Exit code 0 = pass, non-zero = fail.
 set -euo pipefail
 
-PASS=0
-FAIL=1
 errors=0
 
 red()   { echo -e "\033[31m[FAIL]\033[0m $*"; }

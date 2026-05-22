@@ -107,7 +107,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 - **Shared Memory**: `memory/` is strictly shared across all AI tools — not for general application data or temporary local logs.
 - **Locales**: `locales/` uses flat JSON files matching ISO language codes (`ko.json`, `en.json`, etc.).
 - **Orchestration**: `agents/pm.md` is always created — even for single-agent or simple projects.
-- **Agent Index**: `AGENTS.md` is always created at the project root — it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents`.
+- **Agent Index**: `AGENTS.md` is always created at the project root — it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents`. *(Exception: the workspace root itself — `C:/git/` — does not require an `AGENTS.md` because it contains no project code; each sub-project carries its own.)*
 - **Secrets**: `.env.sample` is always committed; `.env` is always in `.gitignore`.
 
 ---
@@ -360,8 +360,7 @@ One paragraph — what this skill enables and when to use it.
 
 - **Claude Code**: `/new-project` (slash command in `.claude/commands/`)
 - **macOS / Linux**: `bash scripts/new-project.sh "<project-name>"`
-- **Windows**: `.\scripts
-ew-project.ps1 "<project-name>"`
+- **Windows**: `.\scripts\new-project.ps1 "<project-name>"`
 
 The script copies [`templates/`](templates/) directly into the new project directory,
 substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
