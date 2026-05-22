@@ -8,6 +8,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added — Security agent + tooling integration improvements
+- `templates/agents/security-monitor.md`: Workflow 1 now runs local vuln scan first (`npm audit`, `pip-audit`, `cargo audit`, `govulncheck`) before web search — faster and more accurate for installed packages; Dependabot auto-resolve added to cleanup step (reads merged Dependabot PRs via `gh pr list`, marks matching `security/` entries as resolved); CI integration section added with manual sync instructions
+- `scripts/audit.sh` + `scripts/audit.ps1` + `templates/scripts/audit.sh` + `templates/scripts/audit.ps1`: check #9 added — warns on active CRITICAL entries in `security/` folder (WARN only, does not fail audit)
+- `templates/scripts/setup.sh` + `setup.ps1`: section 0 added — installs gitleaks automatically (macOS: brew, Linux: GitHub releases binary, Windows: winget → scoop fallback)
+- gitleaks v8.30.1 installed on workspace host (winget)
+
+### Added — Security hardening: secret scan, push audit gate, CI vuln scan, gitignore keys
+- `.githooks/pre-commit` (workspace + templates): secret scan step added — uses `gitleaks` if installed, falls back to regex (private keys, AWS/GitHub/OpenAI/Anthropic patterns, generic secret assignments)
+- `.githooks/pre-push` (workspace + templates): runs `audit.sh` as a gate before every push, not just main/master block
+- `templates/.github/workflows/ci.yml`: always-on `secret-scan` job (`gitleaks/gitleaks-action@v2`); stack vuln scan stubs added (`pip-audit`, `npm audit`, `cargo audit`, `govulncheck`)
+- `templates/.github/dependabot.yml`: `github-actions` ecosystem enabled by default (monthly); Rust/Go stubs added
+- `templates/.gitignore`: certificate/key extensions added (`*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.cer`, `*.crt`, `*.der`, `*.jks`, `*.keystore`)
+
+### Added — Daily security advisory monitoring + pre-PR advisory check
+- `templates/agents/security-monitor.md` (NEW): daily CVE/advisory scanner — detects stacks, web-searches for MEDIUM+ advisories, saves to `security/YYYY-MM-DD-{slug}.md`, auto-deletes resolved entries older than 7 days; pre-PR advisory check warns on CRITICAL/HIGH (advisory only, user decides whether to proceed)
+- `templates/security/README.md` (NEW): security folder structure and lifecycle docs
+- `templates/.claude/commands/security-check.md` (NEW): `/security-check` slash command (one-time scan or `--pr` pre-PR advisory mode)
+- `templates/.claude/commands/sync.md`: `/sync` now runs `/security-check --pr` before PR creation on public repos (advisory warning, not a hard block)
+- `scripts/new-project.sh` + `new-project.ps1`: step 10 prints security baseline notice with `/security-check` instructions after scaffold
+- `templates/AGENTS.md`: security-monitor added to roster and subagent dispatch table
+
+### Added — Go/Rust/Elixir stack support + unknown-stack security agent
+- `templates/scripts/setup.sh` + `setup.ps1`: Go (`go mod download` + `go-licenses`), Rust (`cargo fetch` + `cargo-license`), Elixir (`mix deps.get`) stacks added; unknown-stack detection block prints a security banner pointing users to `agents/stack-setup.md` and blocks accidental installs
+- `templates/agents/stack-setup.md` (NEW): 6-phase security-conscious agent for unrecognized stacks — Stack ID → Web Research → Mandatory Security Review (🟢/🟡/🔴 risk levels, HIGH requires `CONFIRM HIGH RISK`) → Present Plan → Execute via sub-agent → Persist to setup.sh/ps1
+- `templates/AGENTS.md`: `stack-setup` added to Agent Roster (🔴 Security/Setup group) and Subagent Roster dispatch table
+
 ### Added — Multi-stack setup automation with mandatory Python venv and cross-platform support
 - `templates/scripts/setup.sh` + `setup.ps1`: Python venv now uses `uv venv` + `uv pip install` when uv is available, falling back to `python -m venv` + `pip`; `py_install`/`Py-Install` helper abstracts manager; multi-stack OS-aware setup with OSI license audit — Node.js (npm + `license-checker`), Python (uv/venv + `pip-licenses`), Ruby, .NET, Maven, Gradle, CMake/Makefile; `--skip-license-check` flag
 - `CONSTITUTION.md` §8.5: Open-Source Package Policy — prefer OSI-approved licenses, document non-OSS exceptions

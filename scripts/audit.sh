@@ -88,6 +88,22 @@ else
   warn "docs/context.md not found — skipping project-level checks (workspace root)"
 fi
 
+# 9. Active CRITICAL advisories in security/ (warn only — does not fail the audit)
+if [ -d "security" ] && ls security/*.md 2>/dev/null | grep -q .; then
+  _critical=0
+  for _f in security/*.md; do
+    [ -f "$_f" ] || continue
+    if grep -q "^severity: CRITICAL" "$_f" && grep -q "^status: active" "$_f"; then
+      _critical=$((_critical + 1))
+    fi
+  done
+  if [ "$_critical" -gt 0 ]; then
+    warn "security/: $_critical active CRITICAL advisory/advisories — run /security-check to review"
+  else
+    green "security/: no active CRITICAL advisories"
+  fi
+fi
+
 echo ""
 if [ "$errors" -eq 0 ]; then
   echo -e "\033[32m✅ All checks passed.\033[0m"

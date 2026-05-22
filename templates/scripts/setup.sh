@@ -201,6 +201,45 @@ license_audit_python() {
   fi
 }
 
+# ── 0. Security tooling — gitleaks ───────────────────────────────────────────
+if command -v gitleaks &>/dev/null; then
+  pass "gitleaks already installed: $(gitleaks version)"
+else
+  info "Installing gitleaks (secret scanner for pre-commit hook)…"
+  _gl_installed=false
+  case "$OS_TYPE" in
+    macos)
+      if command -v brew &>/dev/null; then
+        brew install gitleaks && _gl_installed=true
+      fi
+      ;;
+    linux)
+      # Download binary from official GitHub releases
+      if command -v curl &>/dev/null && command -v tar &>/dev/null; then
+        _gl_ver=$(curl -sI "https://github.com/gitleaks/gitleaks/releases/latest" \
+          | grep -i "^location:" | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" || echo "v8.30.1")
+        _gl_url="https://github.com/gitleaks/gitleaks/releases/download/${_gl_ver}/gitleaks_${_gl_ver#v}_linux_x64.tar.gz"
+        curl -sSfL "$_gl_url" | tar -xz -C /usr/local/bin gitleaks 2>/dev/null && _gl_installed=true
+      fi
+      ;;
+    windows-bash)
+      if command -v winget &>/dev/null; then
+        winget install --id Gitleaks.Gitleaks -e --accept-source-agreements \
+          --accept-package-agreements --silent 2>/dev/null && _gl_installed=true
+      elif command -v scoop &>/dev/null; then
+        scoop install gitleaks 2>/dev/null && _gl_installed=true
+      fi
+      ;;
+  esac
+  if [ "$_gl_installed" = true ]; then
+    pass "gitleaks installed: $(gitleaks version 2>/dev/null || echo 'ok')"
+  else
+    warn "gitleaks could not be installed automatically"
+    warn "  Install manually: https://github.com/gitleaks/gitleaks/releases"
+    warn "  macOS: brew install gitleaks | Windows: winget install Gitleaks.Gitleaks"
+  fi
+fi
+
 # ── 1. .env.sample → .env ─────────────────────────────────────────────────────
 if [ -f ".env.sample" ]; then
   if [ ! -f ".env" ]; then

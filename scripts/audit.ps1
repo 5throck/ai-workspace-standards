@@ -57,6 +57,25 @@ if (Test-Path "docs\context.md") {
     Warn "docs/context.md not found — skipping project-level checks (workspace root)"
 }
 
+# 9. Active CRITICAL advisories in security/ (warn only — does not fail the audit)
+if (Test-Path "security") {
+    $secFiles = Get-ChildItem -Path "security" -Filter "*.md" -ErrorAction SilentlyContinue
+    if ($secFiles) {
+        $criticalCount = 0
+        foreach ($f in $secFiles) {
+            $content = Get-Content $f.FullName -Raw
+            if ($content -match "(?m)^severity: CRITICAL" -and $content -match "(?m)^status: active") {
+                $criticalCount++
+            }
+        }
+        if ($criticalCount -gt 0) {
+            Warn "security/: $criticalCount active CRITICAL advisory/advisories — run /security-check to review"
+        } else {
+            Pass "security/: no active CRITICAL advisories"
+        }
+    }
+}
+
 Write-Host ""
 if ($errors -eq 0) { Write-Host "✅ All checks passed." -ForegroundColor Green; exit 0 }
 else               { Write-Host "❌ $errors check(s) failed. Fix before committing." -ForegroundColor Red; exit 1 }

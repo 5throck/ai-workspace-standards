@@ -143,6 +143,48 @@ function Audit-PythonLicenses {
     } else { Warn "Could not install pip-licenses — skipping Python license audit" }
 }
 
+# ── 0. Security tooling — gitleaks ───────────────────────────────────────────
+if (Get-Command gitleaks -ErrorAction SilentlyContinue) {
+    Pass "gitleaks already installed: $(gitleaks version)"
+} else {
+    Info "Installing gitleaks (secret scanner for pre-commit hook)…"
+    $glInstalled = $false
+    if ($IsWin) {
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            winget install --id Gitleaks.Gitleaks -e --accept-source-agreements `
+              --accept-package-agreements --silent 2>$null
+            if ($LASTEXITCODE -eq 0) { $glInstalled = $true }
+        } elseif (Get-Command scoop -ErrorAction SilentlyContinue) {
+            scoop install gitleaks 2>$null
+            if ($LASTEXITCODE -eq 0) { $glInstalled = $true }
+        }
+    } elseif ($IsMac) {
+        if (Get-Command brew -ErrorAction SilentlyContinue) {
+            brew install gitleaks 2>$null
+            if ($LASTEXITCODE -eq 0) { $glInstalled = $true }
+        }
+    } elseif ($IsLin) {
+        if (Get-Command curl -ErrorAction SilentlyContinue) {
+            $glVer = "v8.30.1"
+            try {
+                $resp = Invoke-WebRequest -Uri "https://github.com/gitleaks/gitleaks/releases/latest" `
+                  -MaximumRedirection 0 -ErrorAction SilentlyContinue
+                if ($resp.Headers.Location -match "(v[0-9]+\.[0-9]+\.[0-9]+)") { $glVer = $Matches[1] }
+            } catch {}
+            $glUrl = "https://github.com/gitleaks/gitleaks/releases/download/$glVer/gitleaks_$($glVer.TrimStart('v'))_linux_x64.tar.gz"
+            curl -sSfL $glUrl | tar -xz -C /usr/local/bin gitleaks 2>$null
+            if ($LASTEXITCODE -eq 0) { $glInstalled = $true }
+        }
+    }
+    if ($glInstalled) {
+        Pass "gitleaks installed successfully"
+    } else {
+        Warn "gitleaks could not be installed automatically"
+        Warn "  Install manually: https://github.com/gitleaks/gitleaks/releases"
+        Warn "  Windows: winget install Gitleaks.Gitleaks  |  macOS: brew install gitleaks"
+    }
+}
+
 # ── 1. .env.sample → .env ─────────────────────────────────────────────────────
 if (Test-Path ".env.sample") {
     if (-not (Test-Path ".env")) {
