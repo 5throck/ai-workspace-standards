@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed — workspace `.githooks/pre-commit` + `.claude/settings.json` + `.claude/commands/`
+- Applied same changes as templates/ to the workspace root itself
+- `.githooks/pre-commit`: conditional audit (memory/ exempt)
+- `.claude/settings.json`: PostToolUse hook 제거
+- `.claude/commands/changelog.md` + `sync.md`: 신규 추가
+- `scripts/dev-sync.sh`: 신규 추가 (memlog → sync-md → changelog → audit → commit)
+
 ### Changed — `templates/.githooks/pre-commit`
 - Smart conditional audit: skips `audit.sh` when only `memory/` files are staged (session logs, daily entries)
 - Runs audit only when structural files outside `memory/` are staged — prevents spurious failures on log-only commits
