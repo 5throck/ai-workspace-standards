@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed — Antigravity 2.0 / Gemini CLI session start config (workspace + templates + 4 sub-projects)
+
+**`GEMINI.md` (workspace root)**
+- Tool mapping expanded with full operational guidance (`StartLine`, `EndLine`, `IsArtifact`, `MatchPerLine`, `NEVER use cd`)
+- ⚠️ Multi-replace offset safeguard added (bottom-to-top chunk ordering rule)
+- ⚠️ Grep 50-match cap safeguard added (partitioning remediation)
+- Planning Mode artifact specifications added (`implementation_plan.md`, `task.md`, `walkthrough.md` — brain/ paths + ArtifactType metadata)
+- Subagent orchestration added (`define_subagent`, `invoke_subagent` JSON examples, `send_message`, Reactive Wakeup)
+
+**`CLAUDE.md` (workspace root)**
+- Session Start steps 2, 3, 5에 workspace root에서는 skip함을 명시하는 노트 추가 (`docs/context.md`, `AGENTS.md` 부재 설명)
+
+**`templates/GEMINI.md`**
+- 동일한 Antigravity 2.0 설정 전면 적용 (safeguards, Planning Mode artifacts, Subagent 오케스트레이션)
+- 파일 하단의 중복 `### Session Start` 섹션 제거 (상단 `## Context Loading`과 동일 내용)
+
+### Changed — `scripts/audit.sh` (workspace root)
+- CHANGELOG.md `[Unreleased]` 섹션 존재 여부 검사를 `docs/context.md` 조건 블록 밖으로 이동
+- 워크스페이스 루트에서도 하위 프로젝트와 동일하게 CHANGELOG.md 업데이트 강제 적용
+
 ### Fixed
 - MD file consistency: unified Session Start Checklist across CLAUDE.md, GEMINI.md, and README.md (including templates/)
 - MD file consistency: updated subagent Phase 4 execution loop and `/sync` pipeline descriptions in `templates/` and root configurations
