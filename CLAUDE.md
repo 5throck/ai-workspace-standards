@@ -1,0 +1,118 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working in this workspace.
+
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.**
+>
+> For tool-specific behaviors of Gemini/Antigravity, see [`GEMINI.md`](GEMINI.md).
+
+---
+
+## Claude Code-Specific Behaviors
+
+### 1. Automated Hooks (`.claude/settings.json`)
+Claude Code automatically executes hooks defined in `.claude/settings.json`. The standard `PostToolUse` hook runs `scripts/audit.sh` after every Write or Edit operation to maintain document integrity.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/audit.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
+
+| Environment | Hook fires? | Action if not |
+|-------------|:-----------:|---------------|
+| Claude Code CLI | ✅ | Automatic |
+| Claude Code Desktop App | ❌ | Run `bash scripts/audit.sh` manually |
+
+**Recommended workflow split:**
+- **CLI**: Automated workflows, hook-driven audits, multi-agent orchestration.
+- **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
+
+### 2. Native Slash Commands
+Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
+
+| Command | Purpose | Underlying Trigger |
+|---------|---------|--------------------|
+| `/sync "feat: ..."` | Full pipeline — audit → commit → PR | Runs project-level `scripts/dev-sync.sh` |
+| `/memlog` | Append today's session summary to YYYY-MM-DD.md | Automatically updates the daily log |
+| `/changelog "..."` | Add entry to `CHANGELOG.md` | Pre-sync user-facing changelog entry |
+| `/new-task "..."` | Create a new task tracking file | Scaffolds a new active task file |
+| `/new-project` | Scaffold a new project | Runs the workspace-global initialization script |
+
+### 3. MCP Configurations & Absolute Resolving
+Config file: `.mcp.json` (project root) — auto-loaded by both the CLI and the Desktop App.
+* **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
+
+### 4. Native Sub-agents (`Agent` Tool)
+Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
+
+**Agent Dispatch** — use the `Agent` tool (not a bash CLI command):
+```
+Agent(
+  description   = "Implement pricing logic",
+  prompt        = "You are a code writer. [paste agents/code-writer.md content here]\n\nTask: Implement pricing logic matching spec in src/pricing.py.",
+  subagent_type = "claude"   // platform agent type; embed the agents/<name>.md role definition in the prompt
+)
+```
+
+Each implementation task follows a **3-role review cycle**:
+1. **Implementation sub-agent** executes the task.
+2. **Spec-compliance review sub-agent** checks the result against context design.
+3. **Code-quality review sub-agent** checks for bugs and styling.
+
+> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
+
+**Model Selection Overrides** (overridden per agent invocation when appropriate):
+- Complex analysis, architectural refactoring, or multi-file reasoning ➔ `claude-opus-4-7`
+- Standard implementation and surgical file writes (Default) ➔ `claude-sonnet-4-6`
+- Simple transformations, fast lookups, or file globbing ➔ `claude-haiku-4-5-20251001`
+
+### 5. Native Plan Mode (`EnterPlanMode`)
+Enter native plan mode using the `EnterPlanMode` tool when:
+- The user requests a new feature or significant refactor.
+- The change modifies more than 2 files.
+- The correct approach is unclear or requires clarifying assumptions.
+
+Once in plan mode:
+1. Draft the implementation plan and present it for user review.
+2. Obtain explicit user approval before modifying any code.
+3. Track progress using the native `TaskCreate` / `TaskUpdate` toolset.
+4. After completion, summarize outcomes in the active `memory/YYYY-MM-DD.md` daily log.
+
+### 6. Task Tracking (`TaskCreate` / `TaskUpdate`)
+When working in a plan-mode session:
+- Call `TaskCreate` before starting any multi-step execution.
+- Set status `in_progress` prior to beginning each atomic step.
+- Update status to `completed` immediately upon verification of the step.
+- Never leave tasks `in_progress` at the end of a session.
+
+### 7. Custom Command Error Recovery
+If a custom slash command or background script returns a non-zero exit code:
+* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
+* **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
+  * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
+  * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+
+---
+
+## Git & PR Additions (Claude Code)
+
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific addition:
+
+- **AI Commit Signatures**: Always append `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` to the end of all AI-generated git commit messages.
+
+*Last Updated: 2026-05-22*

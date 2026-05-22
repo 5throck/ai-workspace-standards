@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# pre-commit: run audit check before every commit
+bash scripts/audit.sh || exit 1

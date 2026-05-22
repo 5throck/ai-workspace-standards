@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# pre-push: block direct push to main/master
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+  echo "❌ Direct push to '$BRANCH' is blocked."
+  echo "   Create a PR branch with: /sync \"feat: ...\" or bash scripts/dev-sync.sh \"feat: ...\""
+  exit 1
+fi

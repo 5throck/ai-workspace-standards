@@ -1,0 +1,50 @@
+# ============================================================
+# AI Workspace Standards — .gitignore
+# This repo tracks ONLY workspace-level config files.
+# All project subdirectories are independent git repos.
+# ============================================================
+
+# --- Ignore all subdirectories (each is its own repo) ---
+/*/
+
+# --- Secrets and local certs ---
+.env
+*.pem
+*.key
+*.cmd
+
+# --- Node (workspace-level package.json artifacts) ---
+node_modules/
+package-lock.json
+
+# --- OS artifacts ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Python compiled ---
+__pycache__/
+*.pyc
+*.pyo
+
+# --- Claude local settings (personal, not shared) ---
+.claude/settings.local.json
+
+# --- Explicitly TRACK these workspace-level files ---
+# (gitignore negations — override the /*/  rule above)
+!CLAUDE.md
+!GEMINI.md
+!CONSTITUTION.md
+!CHANGELOG.md
+!README.md
+!LICENSE
+!.gitignore
+!.githooks/
+!.claude/
+!scripts/
