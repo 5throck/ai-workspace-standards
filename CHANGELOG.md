@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed — License
 - MIT → AGPL-3.0
 
+### Fixed — Project consistency (README, CLAUDE.md, CONSTITUTION.md)
+- `CLAUDE.md §1`: PostToolUse hook이 비활성화 상태임을 명확히 표기 (`.claude/settings.json`은 `{}`)
+- `README.md`: 4-role → 5-role agent 모델 수정 (Designer 추가), Repository Structure에 `templates/` 추가, Two Philosophies 설명에 Designer 포함, Multi-Agent Workflow 설명 업데이트
+- `CONSTITUTION.md §7`: Post-scaffold checklist agent 수 4 → 5 수정, `.\scriptsudit.ps1` 오타 수정 (`.\scripts\audit.ps1`)
+- `scripts/dev-sync.ps1`: 워크스페이스 루트에 누락된 파일 추가 (Script Parity 규칙 준수)
+
 ### Changed — workspace `.githooks/pre-commit` + `.claude/settings.json` + `.claude/commands/`
 - Applied same changes as templates/ to the workspace root itself
 - `.githooks/pre-commit`: conditional audit (memory/ exempt)

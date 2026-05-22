@@ -11,7 +11,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working in this
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-Claude Code automatically executes hooks defined in `.claude/settings.json`. The standard `PostToolUse` hook runs `scripts/audit.sh` after every Write or Edit operation to maintain document integrity.
+The workspace `.claude/settings.json` is currently `{}` — **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.sh` pipeline.
+
+To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add the following to `.claude/settings.json`:
 
 ```json
 {
@@ -31,15 +33,15 @@ Claude Code automatically executes hooks defined in `.claude/settings.json`. The
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
 
-| Environment | Hook fires? | Action if not |
-|-------------|:-----------:|---------------|
-| Claude Code CLI | ✅ | Automatic |
-| Claude Code Desktop App | ❌ | Run `bash scripts/audit.sh` manually |
+| Environment | Hook active by default? | Manual fallback |
+|-------------|:-----------------------:|-----------------|
+| Claude Code CLI | ❌ (disabled) | `bash scripts/audit.sh` |
+| Claude Code Desktop App | ❌ (always) | `bash scripts/audit.sh` |
 
 **Recommended workflow split:**
-- **CLI**: Automated workflows, hook-driven audits, multi-agent orchestration.
+- **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
 ### 2. Native Slash Commands

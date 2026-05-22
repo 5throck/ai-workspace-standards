@@ -19,7 +19,7 @@ Modern AI-assisted development requires more than prompts — it requires **cons
 
 ### Two Philosophies, One Standard
 
-**Vibe Coding** — AI takes the wheel. The developer describes intent; the AI agents (PM → Architect → Code Writer → Test Runner) execute the full workflow autonomously. These standards define the guardrails that keep autonomous execution safe and auditable.
+**Vibe Coding** — AI takes the wheel. The developer describes intent; the AI agents (PM → Architect → Designer → Code Writer → Test Runner) execute the full workflow autonomously. These standards define the guardrails that keep autonomous execution safe and auditable.
 
 **Harness Engineering** — Developer stays in the loop. AI tools are precision instruments: surgical edits, explicit plans, mandatory review gates. These standards define the harness that keeps AI output predictable and reviewable.
 
@@ -69,17 +69,24 @@ C:\git\ (workspace root — this repo)
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
+├── templates/               # Authoritative scaffold — new-project.sh copies this
+│   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md
+│   ├── docs/context.md      # Full 10-section project context template
+│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md
+│   ├── .githooks/           # pre-commit (smart conditional), pre-push
+│   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
 │   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .ps1   # Full pipeline: audit → memlog → commit → PR
+│   ├── dev-sync.sh / .ps1   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
 │   ├── sync-md.sh / .ps1    # MEMORY.md index updater
-│   └── new-project.sh / .ps1 # New project scaffolding
+│   └── new-project.sh / .ps1 # New project scaffolding (copies templates/)
 ├── .githooks/
-│   ├── pre-commit           # Enforces CHANGELOG entry on commit
+│   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main
 └── .claude/
-    ├── settings.json        # PostToolUse hook (audit.sh after Write/Edit)
-    └── commands/            # Custom slash commands (/sync, /memlog, etc.)
+    ├── settings.json        # {} (hooks disabled; enforced via pre-commit + dev-sync)
+    └── commands/            # Custom slash commands (/sync, /changelog, /memlog, etc.)
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -110,19 +117,19 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 
 ## Multi-Agent Workflow
 
-Projects use a 4-role agent model across 6 governance phases:
+Projects use a 5-role agent model across 6 governance phases:
 
 ```
 PM Orchestrator
   │
   ├─ Phase 1-2: Analysis agents (parallel)  →  findings + acceptance criteria
-  ├─ Phase 3:   Architect                   →  implementation plan (user approval required)
+  ├─ Phase 3:   Architect + Designer        →  implementation plan + design spec (user approval required)
   ├─ Phase 4:   Code Writer + Test Runner   →  implementation + verification
   ├─ Phase 5:   QA gate                     →  audit.sh + tests pass
   └─ Phase 6:   Finalization                →  memlog → sync → PR
 ```
 
-Agent scaffold templates for all roles live in `CONSTITUTION.md §7`.
+Agent scaffold templates for all roles live in `templates/agents/`.
 
 ---
 

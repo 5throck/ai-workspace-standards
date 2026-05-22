@@ -402,15 +402,15 @@ live there as **real, editable files** (not embedded strings).
         macOS/Linux : grep "^## " docs/context.md
         Windows     : Select-String -Path docs/context.md -Pattern "^## "
 
-□ agents/ — [Project Name] substituted in all 4 ## Role sections
-    □ agents/pm.md          □ agents/architect.md
+□ agents/ — [Project Name] substituted in all 5 ## Role sections
+    □ agents/pm.md          □ agents/architect.md   □ agents/designer.md
     □ agents/code-writer.md □ agents/test-runner.md
 
 □ README.md — project description filled in
 
 □ Final validation
     □ macOS/Linux : bash scripts/audit.sh    → must exit 0
-      Windows     : .\scriptsudit.ps1   → must exit 0
+      Windows     : .\scripts\audit.ps1   → must exit 0
     □ git config core.hooksPath .githooks    (already set by script — verify it stuck)
 ```
 ---
