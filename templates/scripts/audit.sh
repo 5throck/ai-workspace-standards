@@ -20,17 +20,17 @@ else red "CONSTITUTION.md not found (expected at ./ or ../)"; ((errors++)) || tr
 
 # ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
 
+# 3. CHANGELOG.md must have [Unreleased] section
+if [ -f "CHANGELOG.md" ]; then
+  if grep -q "\[Unreleased\]" "CHANGELOG.md"; then green "CHANGELOG.md has [Unreleased]"
+  else red "CHANGELOG.md missing '[Unreleased]'"; ((errors++)) || true; fi
+fi
+
 if [ -f "docs/context.md" ]; then
 
-  # 3. docs/context.md must have ## Coding Guidelines
+  # 4. docs/context.md must have ## Coding Guidelines
   if grep -q "^## Coding Guidelines" "docs/context.md"; then green "docs/context.md has ## Coding Guidelines"
   else red "docs/context.md missing '## Coding Guidelines'"; ((errors++)) || true; fi
-
-  # 4. CHANGELOG.md must have [Unreleased]
-  if [ -f "CHANGELOG.md" ]; then
-    if grep -q "\[Unreleased\]" "CHANGELOG.md"; then green "CHANGELOG.md has [Unreleased]"
-    else red "CHANGELOG.md missing '[Unreleased]'"; ((errors++)) || true; fi
-  fi
 
   # 5. AGENTS.md must exist
   if [ -f "AGENTS.md" ]; then green "AGENTS.md exists"
