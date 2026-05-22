@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed — License
+- MIT → AGPL-3.0
+
 ### Changed — workspace `.githooks/pre-commit` + `.claude/settings.json` + `.claude/commands/`
 - Applied same changes as templates/ to the workspace root itself
 - `.githooks/pre-commit`: conditional audit (memory/ exempt)

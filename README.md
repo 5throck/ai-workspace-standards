@@ -151,7 +151,7 @@ This is a **private repository**. Access is limited to invited collaborators.
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+AGPL-3.0 — see [LICENSE](LICENSE)
 
 ---
 
