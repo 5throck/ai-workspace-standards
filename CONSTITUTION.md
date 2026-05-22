@@ -496,7 +496,19 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-#### 5. Response Language
+#### 5. Open-Source Package Policy
+
+**Prefer OSI-approved open-source packages. Audit licenses after every install.**
+
+When adding or recommending dependencies:
+- **Prefer** packages with OSI-approved licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, LGPL-2.1+, PSF-2.0.
+- **Avoid** packages with proprietary, commercial-only, or copyleft licenses (GPL-3.0, AGPL-3.0, SSPL, BSL) unless the project's own license and legal context explicitly permit it.
+- **Always check** license compatibility when mixing packages (e.g., GPL in an MIT project requires careful review).
+- Run a license audit after `npm install` / `pip install` and review any flagged packages before committing.
+- If a proprietary alternative exists alongside a viable OSS equivalent, default to the OSS option.
+- Document any intentional non-OSS dependency with a comment in `docs/context.md` explaining the justification.
+
+#### 6. Response Language
 
 **Default to Korean unless explicitly instructed otherwise.**
 
