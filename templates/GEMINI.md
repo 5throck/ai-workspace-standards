@@ -15,6 +15,7 @@ Load project files at session start using the `@` syntax:
 @docs/context.md         # project knowledge (includes Session Start Skills)
 @AGENTS.md               # canonical agent roster
 @memory/MEMORY.md        # recent changes (skip if file does not exist)
+@skills/                 # load skills listed in docs/context.md
 ```
 
 <!-- Add project-specific files below as needed, e.g.:               -->
@@ -107,6 +108,7 @@ At session start, load context using the `@` syntax (run these before any task):
 @docs/context.md         # project knowledge (includes Session Start Skills)
 @AGENTS.md               # canonical agent roster
 @memory/MEMORY.md        # recent changes (skip if file does not exist)
+@skills/                 # load skills listed in docs/context.md
 ```
 
 <!-- Add project-specific files below as needed, e.g.:               -->

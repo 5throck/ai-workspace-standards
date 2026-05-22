@@ -57,10 +57,10 @@ Request received
 
 1. **Single message, multiple `Agent()` calls** — all parallel agents must be dispatched in one turn.
 2. **Merge before proceeding** — PM waits for ALL parallel agents to return before the next serial step.
-3. **3-role review cycle** — each implementation task goes through:
-   - Implementation agent executes the task
-   - Spec-compliance review agent checks against the approved plan
-   - Code-quality review agent checks for bugs and style issues
+3. **Phase 4 execution loop** — each implementation task goes through:
+   - **code-writer** implements the changes
+   - **test-runner** verifies against acceptance criteria and runs tests
+   - **Quality gate (audit script)** validates compliance
    - Loop and correct if issues found — maximum **3 iterations** before escalating to the user.
 4. **Error handling** — if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
 5. **Max fix iterations** — 3 per review cycle before escalating to the user.

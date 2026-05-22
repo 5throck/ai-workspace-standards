@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:/git/`).
+> **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:\git\`).
 > Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.
 > For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
@@ -13,9 +13,10 @@ At the start of every Claude Code session in this workspace:
 ```
 0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
 1. Read CONSTITUTION.md                  # workspace design standard
-2. Read CLAUDE.md                        # this file — Claude Code behaviors
-3. Read memory/MEMORY.md                 # recent session history (if exists)
-4. Load project-level docs/context.md   # when working inside a sub-project
+2. Read docs/context.md                  # single source of truth for project
+3. Read AGENTS.md                        # canonical agent roster
+4. Read memory/MEMORY.md                 # recent session history (if exists)
+5. Load Session Start Skills             # from docs/context.md
 ```
 
 ---
@@ -63,7 +64,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline — memlog → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
+| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
@@ -88,10 +89,10 @@ Agent(
 )
 ```
 
-Each implementation task follows a **3-role review cycle**:
-1. **Implementation sub-agent** executes the task.
-2. **Spec-compliance review sub-agent** checks the result against context design.
-3. **Code-quality review sub-agent** checks for bugs and styling.
+Each implementation task follows the **Phase 4 execution loop**:
+1. **code-writer** implements the changes.
+2. **test-runner** verifies against acceptance criteria and runs tests.
+3. **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
 

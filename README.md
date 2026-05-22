@@ -74,6 +74,7 @@ C:\git\ (workspace root — this repo)
 │   ├── docs/context.md      # Full 10-section project context template
 │   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md
+│   ├── .gemini/             # settings.json
 │   ├── .githooks/           # pre-commit (smart conditional), pre-push
 │   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
@@ -84,9 +85,11 @@ C:\git\ (workspace root — this repo)
 ├── .githooks/
 │   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main
-└── .claude/
-    ├── settings.json        # {} (hooks disabled; enforced via pre-commit + dev-sync)
-    └── commands/            # Custom slash commands (/sync, /changelog, /memlog, etc.)
+├── .claude/
+│   ├── settings.json        # {} (hooks disabled; enforced via pre-commit + dev-sync)
+│   └── commands/            # Custom slash commands (/sync, /changelog, /memlog, etc.)
+└── .gemini/
+    └── settings.json        # Gemini CLI project settings
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -110,8 +113,9 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 0. `git config core.hooksPath .githooks`
 1. Read `CONSTITUTION.md` (this workspace standard)
 2. Read the project's `docs/context.md`
-3. Load skills from `docs/context.md ## Session Start Skills`
+3. Read `AGENTS.md` (canonical agent roster)
 4. Check `memory/MEMORY.md` for recent changes
+5. Load skills from `docs/context.md ## Session Start Skills`
 
 ---
 
