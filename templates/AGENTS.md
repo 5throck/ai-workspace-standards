@@ -32,7 +32,7 @@
 | Code Writer | [`agents/code-writer.md`](agents/code-writer.md) | Implements approved plans; surgical changes only |
 | Test Runner | [`agents/test-runner.md`](agents/test-runner.md) | Runs tests and verifies acceptance criteria |
 
-*(Add Analysis agents as needed — see `../templates/_examples/agents/analyst-example.md` in the workspace root for the scaffold template.)*
+*(Add domain-specific agents as needed — see the extension guidance below.)*
 
 ---
 
@@ -140,6 +140,29 @@ All agents, regardless of their role, must adhere to the following:
 - **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
 - **Language**: All code, config, commit messages, and branch names → **English only**.
+
+---
+
+## Extending the Agent Roster
+
+Add domain-specific agents when the project requires specialized expertise beyond the base 5 roles. Common patterns:
+
+| Domain | Typical Additions |
+|--------|-------------------|
+| **Financial / BI** | `cpa-auditor`, `finance-strategy-lead`, `cost-asset-mgmt` |
+| **SAP / ERP** | `sd-analyst`, `mm-analyst`, `fi-analyst`, `co-analyst`, `pp-analyst` |
+| **i18n-heavy** | `l10n-auditor`, `i18n` |
+| **Security-critical** | `security-auditor`, `security` |
+| **Data / ML** | `data-engineer`, `ml-engineer` |
+
+**Steps to add a new agent:**
+1. Create `agents/<name>.md` with the agent's role, constraints, and write-access rules.
+2. Add a row to the Agent Roster table above.
+3. Add a row to the Subagent Roster dispatch table (Parallelizable / Write Allowed).
+4. Update `docs/context.md § Agents` to match.
+5. If the agent uses a skill, add it to the Skills table here and in `docs/context.md § Session Start Skills`.
+
+> Reference: [`abap_vibe_coding/AGENTS.md`](../abap_vibe_coding/AGENTS.md) (ERP domain example) and [`Pricing-Mgmt-Simulation/AGENTS.md`](../Pricing-Mgmt-Simulation/AGENTS.md) (financial BI example).
 
 ---
 
