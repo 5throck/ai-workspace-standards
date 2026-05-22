@@ -250,6 +250,7 @@ The `description` field is how the AI tool selects the right agent — always wr
 | Orchestration | Workflow management, parallel dispatch, quality gates | `pm.md` |
 | Analysis | Read-only investigation, codebase exploration, data gathering | `*-analyst.md` |
 | Design | Architecture decisions, implementation planning, technical spec | `architect.md` |
+| Design | UI/UX specifications, wireframes, component and interaction design | `designer.md` |
 | Execution | Code implementation and automated test verification | `code-writer.md`, `test-runner.md` |
 
 #### PM orchestrator rules
@@ -353,660 +354,65 @@ One paragraph — what this skill enables and when to use it.
 
 ### 7. New Project Initialization
 
-**Every new project starts with a project scaffolding command.** This scaffolds the full standard structure and generates all required files: `docs/context.md`, `AGENTS.md`, `agents/pm.md`, `CLAUDE.md`, `GEMINI.md`, `CHANGELOG.md`, `README.md`, `memory/MEMORY.md`, `.env.sample`, `.gitignore`, and the core scripts.
-
-- **Claude Code**: run `/new-project` slash command (defined in `.claude/commands/`)
-- **Gemini CLI**: run `.\scripts\new-project.ps1 "<project-name>"` (Windows) or `bash scripts/new-project.sh "<project-name>"` (macOS/Linux)
-
-#### What project scaffolding generates
-
-> **Invariant**: every generated `docs/context.md` **must** contain a `## Coding Guidelines` section populated from the mandatory template below. The `audit.sh` script checks for this heading and fails the build if it is missing.
-
-```
-<project-root>/
-├── docs/context.md              # Project knowledge — all AI tools (includes ## Coding Guidelines)
-├── src/
-├── scripts/
-│   ├── audit.sh + audit.ps1          # Documentation audit (checks CHANGELOG, ## Coding Guidelines, etc.)
-│   ├── dev-sync.sh + dev-sync.ps1   # Full sync pipeline (audit → memlog → commit → PR)
-│   └── sync-md.sh + sync-md.ps1    # MEMORY.md index updater (updates memory/MEMORY.md entry)
-├── locales/                     # UI projects only
-├── memory/MEMORY.md             # Log index
-├── agents/pm.md                 # PM orchestrator
-├── skills/                      # Add skills as needed
-├── .gemini/                     # Gemini CLI configuration
-│   ├── commands/
-│   ├── settings.json
-│   └── settings.local.json
-├── .claude/                     # Claude Code configuration
-│   ├── commands/
-│   ├── settings.json
-│   └── settings.local.json
-├── AGENTS.md                    # Agent index (shared by all AI tools)
-├── CHANGELOG.md                 # User-visible change history (required by audit.sh)
-├── CLAUDE.md                    # Claude Code config
-├── GEMINI.md                    # Gemini CLI config
-├── README.md                    # Project README (GitHub landing page)
-├── .env.sample                  # Required env variable template (never commit .env)
-└── .gitignore                   # Must include .env, .venv/, node_modules/, etc.
-```
-
-#### `docs/context.md` — required in every project
-
-This file is the **single source of truth** shared by all AI tools (Claude Code, Gemini, and other AI coding assistants).
-
-Required sections:
-```
-## Project Overview      — purpose in one sentence
-## Tech Stack            — language, framework, key libraries
-## Architecture          — folder map with role of each directory
-## Environment Setup     — prerequisites, .env keys, virtualenv/install steps
-## Agents                — agent list with one-line role descriptions
-## Skills                — on-demand skill list with trigger conditions
-## Session Start Skills  — skills auto-loaded at every session start
-## Development Workflow  — build, test, audit, sync pipeline
-## Key Files             — quick-reference path table
-## Coding Guidelines     — project-level AI behavior rules (always required)
-```
-
-> **Design principle**: `docs/context.md` is the single source of truth for ALL AI tools. Project-level `CLAUDE.md` and `GEMINI.md` must contain **only platform-specific overrides** — if a setting applies to both tools, it belongs in `docs/context.md`.
-
-#### `docs/context.md` — full scaffold template
-
-Copy this block verbatim when scaffolding a new project, then fill in the `[...]` placeholders.
-
-~~~~markdown
-# [Project Name]
-
-## Project Overview
-[One-sentence description of what this project does and who it's for.]
-
-## Tech Stack
-- **Language**: [e.g., Python 3.11+ / TypeScript 5+]
-- **Framework**: [e.g., FastAPI / Next.js / none]
-- **Key Libraries**: [e.g., pydantic, httpx, react-query]
-- **Package Manager**: [e.g., pip + uv / npm / pnpm]
-
-## Architecture
-```
-src/
-├── [folder]    # [description]
-└── [folder]    # [description]
-```
-
-## Environment Setup
-- Copy `.env.sample` → `.env` and fill in all required values.
-- **Python**:
-  - macOS/Linux: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
-  - Windows:     `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`
-- **Node.js**: `npm install`
-- Required env keys (see `.env.sample`):
-  - `[KEY_NAME]` — [description] *(replace with actual keys, or write "N/A — no env vars required")*
-
-## Agents
-<!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
-<!-- Duplicate the table here only as a quick-reference summary for non-CC tools.   -->
-| Group | Agent file | Role |
-|-------|------------|------|
-| Orchestration | `agents/pm.md` | PM orchestrator — owns the workflow, dispatches parallel tasks |
-| Design | `agents/architect.md` | Architect — produces implementation plans and ADRs |
-| Execution | `agents/code-writer.md` | Code writer — implements approved plans |
-| Execution | `agents/test-runner.md` | Test runner — verifies acceptance criteria and runs QA gate |
-
-## Skills
-| Skill path | Trigger condition |
-|------------|-------------------|
-| *(none yet — add entries as skills are created in `skills/`)* | |
-
-## Session Start Skills
-<!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
-<!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
-- *(none yet)*
-
-## Development Workflow
-```bash
-# Audit (runs automatically via PostToolUse hook in Claude Code CLI)
-bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
-
-# Add a changelog entry (optional, before sync)
-# Claude Code:  /changelog "added|changed|fixed|removed <description>"
-# Gemini CLI:   append to CHANGELOG.md under [Unreleased]
-
-# Full sync: audit → memlog → commit → PR
-bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1 "feat: ..."
-# Claude Code:  /sync "feat: description"
-```
-
-## Key Files
-| File | Purpose |
-|------|---------|
-| `docs/context.md` | This file — single source of truth for all AI tools |
-| `AGENTS.md` | Canonical agent index — auto-loaded by Claude Code |
-| `agents/pm.md` | PM orchestrator — workflow owner |
-| `agents/architect.md` | Design agent — implementation plans and ADRs |
-| `agents/code-writer.md` | Implementation agent — writes code from approved plans |
-| `agents/test-runner.md` | QA agent — runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (audit → commit → PR) |
-| `scripts/audit.sh` | Documentation audit script |
-| `memory/MEMORY.md` | Session log index |
-| `CHANGELOG.md` | User-visible change history |
-| `.env.sample` | Required environment variable template |
-
-## Coding Guidelines
-
-> These rules apply to every AI tool working in this project.
-> Full rationale: [CONSTITUTION.md §8](../../CONSTITUTION.md#8-coding-behavior-guidelines)
-> *(Path `../../CONSTITUTION.md` assumes project is at workspace root depth — e.g., `C:\git\<project>\`. Adjust if nested deeper.)*
-
-### 1. Think Before Coding
-- State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.
-- If multiple interpretations exist, present them; don't pick one silently.
-- If something is unclear, stop and name what's confusing.
-- **Secrets**: Never hardcode passwords, API tokens, or keys. Always use env vars / `.env.sample`.
-
-### 2. Simplicity First
-- Write the minimum code that solves the problem. Nothing speculative.
-- No abstractions for single-use code. No unrequested "flexibility."
-- If a 200-line solution could be 50 lines, rewrite it.
-
-### 3. Surgical Changes
-- Touch only what is necessary. Don't "improve" adjacent code.
-- Match existing style even if you'd do it differently.
-- Remove only the dead code that **your** changes created.
-
-### 4. Goal-Driven Execution
-- Convert every task into a verifiable goal before starting:
-  - "Add validation" → "Write tests for invalid inputs, then make them pass"
-  - "Fix the bug" → "Write a reproducer test, then fix it"
-- For multi-step tasks, state a brief numbered plan with a verify step for each.
-
-### 5. Response Language
-- All **conversational** replies to the user → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, branch names → **English only**.
-~~~~
-
-#### `AGENTS.md` — scaffold template
-
-This file is the **canonical agent index** for the project. Claude Code auto-loads it for agent discovery. All other AI tools (Gemini, etc.) reference it as the authoritative roster. The `## Agents` section in `docs/context.md` is a quick-reference copy — **`AGENTS.md` is always the source of truth for agent definitions.**
-
-```markdown
-# AGENTS.md
-
-> **Canonical agent index** — auto-loaded by Claude Code; referenced by all other AI tools.
-> Full agent definitions live in `agents/`. Full project context → `docs/context.md`.
-
-## Available Agents
-
-| Group | Agent | File | Role |
-|-------|-------|------|------|
-| Orchestration | PM Orchestrator | `agents/pm.md` | Owns the full workflow; dispatches parallel tasks |
-| Design | Architect | `agents/architect.md` | Produces implementation plans and ADRs; never writes code |
-| Execution | Code Writer | `agents/code-writer.md` | Implements approved plans; surgical changes only |
-| Execution | Test Runner | `agents/test-runner.md` | Runs tests and verifies acceptance criteria |
-
-*(Add Analysis agents as needed: `agents/<name>-analyst.md`)*
-
-## Agent Dispatch
-
-- **Claude Code**: use the `Agent` tool — embed the target `agents/<name>.md` content in the prompt field.
-- **Gemini CLI**: use `invoke_subagent` with the agent role definition from `agents/<name>.md`.
-
-## Maintenance Rule
-
-When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
-1. Add a row to the table above.
-2. Update the `## Agents` table in `docs/context.md` to match.
-```
-
-#### `agents/pm.md` — scaffold template
-
-The PM orchestrator is **always required**, even in single-agent or simple projects. It owns the workflow and is the entry point for all multi-step tasks. The file combines YAML frontmatter and markdown body in one file.
-
-> ⚠️ **After copying this template, replace `[Project Name]` in the `## Role` section with the actual project name.**
-
-````markdown
----
-name: pm
-model: inherit
-color: yellow
-description: >
-  PM orchestrator — owns the full workflow. Use when: starting any multi-step task,
-  coordinating parallel agents, reviewing a feature request, or running the QA gate.
-examples:
-  - user: "Add a new API endpoint for user registration"
-    assistant: "Running Phase 1 Triage to classify the request and dispatch read-only analysis agents."
----
-
-## Role
-
-You are the PM orchestrator for **[Project Name]**. You own the end-to-end workflow from triage to PR creation. You never implement code directly — you classify requests, dispatch specialist agents, synthesize findings, and enforce quality gates.
-
-## Governance Workflow
-
-Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTION.md#5-multi-agent-architecture):
-
-1. **Triage** — Classify the request; dispatch read-only agents in parallel (single message).
-2. **Analysis** — Synthesize findings into requirements + acceptance criteria.
-3. **Design** — Have the architect produce an implementation plan; obtain explicit user approval.
-4. **Implementation** — Dispatch code-writer (serial); test-runner verifies after each change.
-5. **QA** — Verify all acceptance criteria; run audit script + tests.
-6. **Finalization** — Run memlog → sync; open PR; hand off to user.
-
-## Agent Roster
-
-Add rows as specialist agents are created. Start with PM only; expand when the project requires dedicated roles.
-
-| Phase | Group | Agent file | Responsibility |
-|-------|-------|------------|----------------|
-| Triage / Analysis | Analysis | *(add `agents/<name>-analyst.md`)* | Read-only investigation, findings report |
-| Design | Design | `agents/architect.md` | Implementation plan + ADR; awaits user approval |
-| Implementation | Execution | `agents/code-writer.md` | Write code per approved plan |
-| QA / Verification | Execution | `agents/test-runner.md` | Run tests, verify acceptance criteria |
-
-## Constraints
-
-- Dispatch independent tasks **in parallel** (single message, multiple Agent calls).
-- Maximum **3 fix iterations** per review cycle before escalating to the user.
-- Never bypass audit hooks (`--no-verify` is forbidden).
-- All Git artifacts (commit messages, PR titles, branch names) must be in English.
-````
-
-#### `agents/architect.md` — scaffold template
-
-The architect owns **Phase 3 — Design**. It produces the implementation plan and waits for user approval before any code is written. It never writes code — it only designs.
-
-````markdown
----
-name: architect
-model: inherit
-color: blue
-description: >
-  Design agent — produces implementation plans and technical specs. Use when: planning a new
-  feature, evaluating architectural trade-offs, or generating an ADR before implementation starts.
-examples:
-  - user: "Design the data model for user authentication"
-    assistant: "Analyzing requirements and producing an implementation plan with schema, API surface, and trade-offs."
----
-
-## Role
-
-You are the architect for **[Project Name]**. You own Phase 3 — Design. You produce clear, reviewable implementation plans before any code is written. You never write application code directly — your output is always a plan or technical specification for the code-writer to execute.
-
-## Responsibilities
-
-- Analyze requirements and acceptance criteria from the Analysis phase.
-- Design the implementation: data models, API surface, module boundaries, file changes.
-- Identify and document trade-offs explicitly — never pick silently.
-- Produce an ADR (`docs/adr/NNNN-slug.md`) for significant architectural decisions.
-- Present the plan to the PM; do **not** proceed to implementation without explicit user approval.
-
-## Output Format
-
-Always produce a structured implementation plan:
-
-```
-## Implementation Plan
-
-### Summary
-One paragraph describing what will be built and why this approach was chosen.
-
-### Files to change
-| File | Action | Description |
-|------|--------|-------------|
-| src/... | create / modify / delete | what changes and why |
-
-### Data model / API surface
-[Schema, types, interfaces, or endpoint signatures as applicable]
-
-### Trade-offs considered
-| Option | Pro | Con | Decision |
-|--------|-----|-----|---------|
-
-### Acceptance criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-### Open questions (if any)
-- Question requiring user input before implementation can start
-```
-
-## Constraints
-
-- Never write application source code — produce plans only.
-- Surface all ambiguities before finalizing the plan.
-- Flag any change that touches more than 3 files as high-risk and require explicit user confirmation.
-- All ADRs must follow the 3-section format: Context → Decision → Consequences.
-````
-
-#### `agents/code-writer.md` — scaffold template
-
-The code-writer owns **Phase 4 — Implementation**. It receives an approved plan from the architect and executes it. It never designs — it only implements what is specified.
-
-````markdown
----
-name: code-writer
-model: inherit
-color: green
-description: >
-  Implementation agent — writes code from an approved plan. Use when: an architect plan has been
-  approved and it is time to write, modify, or delete source files.
-examples:
-  - user: "Implement the plan in docs/adr/0002-auth-model.md"
-    assistant: "Implementing the approved authentication data model — starting with the schema migration."
----
-
-## Role
-
-You are the code-writer for **[Project Name]**. You own Phase 4 — Implementation. You receive an approved implementation plan and execute it precisely. You do not redesign — if you discover a problem with the plan during implementation, you stop and report it to the PM rather than silently adapting.
-
-## Responsibilities
-
-- Implement exactly what the approved plan specifies — no scope creep.
-- Follow existing code style, naming conventions, and patterns.
-- After each file change, confirm the post-write audit hook passes.
-- Report blockers to the PM immediately rather than making unplanned design decisions.
-
-## Coding Rules
-
-Apply all guidelines from `docs/context.md ## Coding Guidelines`:
-1. **Surgical changes** — touch only what the plan requires.
-2. **No speculative code** — no "just in case" abstractions or future-proofing.
-3. **Secrets** — never hardcode credentials; always use env vars / `.env.sample`.
-4. **Clean up your own orphans** — remove imports/vars made unused by YOUR changes only.
-
-## Output
-
-For each file changed, report:
-```
-✅ src/models/user.py — created: User model with fields id, email, hashed_password
-✅ src/routes/auth.py — modified: added /register and /login endpoints
-⚠️  src/config.py    — requires new env var JWT_SECRET (added to .env.sample)
-```
-
-## Constraints
-
-- Do not modify files outside the scope of the approved plan without PM approval.
-- If a planned change turns out to be more complex than estimated, pause and report — do not expand scope silently.
-- Never bypass audit hooks (`--no-verify` is forbidden).
-````
-
-#### `agents/test-runner.md` — scaffold template
-
-The test-runner owns **Phase 4 verification and Phase 5 — QA**. It runs tests, interprets results, and reports pass/fail against the acceptance criteria.
-
-````markdown
----
-name: test-runner
-model: inherit
-color: cyan
-description: >
-  QA and verification agent — runs tests and validates acceptance criteria. Use when: code has
-  been written and needs to be verified, or when the QA gate needs to be run before a PR.
-examples:
-  - user: "Verify the authentication implementation against the acceptance criteria"
-    assistant: "Running the test suite and validating each acceptance criterion from the implementation plan."
----
-
-## Role
-
-You are the test-runner for **[Project Name]**. You own verification in Phase 4 and all of Phase 5 — QA. You run the test suite, check acceptance criteria, and produce a clear pass/fail report. You do not write application code — if a test fails, you report it to the PM with a precise diagnosis.
-
-## Responsibilities
-
-- Run the full test suite after each implementation step.
-- Verify every acceptance criterion from the implementation plan.
-- Run the audit script (`bash scripts/audit.sh`) as the quality gate.
-- Report failures with: which test failed, expected vs actual output, and suspected root cause.
-- Confirm "QA gate passed" only when all criteria are green and audit exits 0.
-
-## Verification Sequence
-
-```
-1. bash scripts/audit.sh           # documentation gate (exit 0 required)
-2. [project test command]          # e.g., pytest / npm test / go test ./...
-3. Check each acceptance criterion from the implementation plan
-4. Report
-```
-
-## Output Format
-
-```
-## QA Report
-
-### Audit gate
-[PASS ✅ | FAIL ❌] bash scripts/audit.sh
-
-### Test suite
-[PASS ✅ | FAIL ❌] X passed, Y failed
-
-### Acceptance criteria
-- [x] Criterion 1 — verified by test_auth.py::test_register
-- [x] Criterion 2 — verified by test_auth.py::test_login
-- [ ] Criterion 3 — FAILED: expected 401, got 500 (suspected: JWT_SECRET not set in test env)
-
-### Verdict
-[READY FOR PR ✅ | BLOCKED ❌ — reason]
-```
-
-## Constraints
-
-- Never modify application source code — diagnose and report only.
-- If a test is flaky (intermittent failure), flag it explicitly rather than re-running silently.
-- QA gate is considered passed only when audit script exits 0 **and** all acceptance criteria are met.
-````
-
-#### Project-level `CLAUDE.md` — scaffold template (minimal)
-
-This file holds **only Claude Code-specific overrides** for this project. Anything that applies to all AI tools goes in `docs/context.md` instead.
-
-> **Path note**: `../../CLAUDE.md` assumes the project lives directly under the workspace root (`C:\git\<project>\`). Adjust the relative path if the project is nested deeper.
-
-```markdown
-# CLAUDE.md
-
-> **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
-> Workspace-level Claude Code behaviors → [`../../CLAUDE.md`](../../CLAUDE.md)
-
-## Project-Specific Claude Code Settings
-
-### Session Start
-<!-- Skills are loaded from docs/context.md ## Session Start Skills.       -->
-<!-- Add entries here ONLY for Claude Code-exclusive skills not in context.md. -->
-
-### MCP Servers
-<!-- Document project-specific .mcp.json entries here, if any.             -->
-<!-- General MCP guidance: workspace CLAUDE.md §3                          -->
-
-### Hooks Override
-<!-- Override workspace hook behavior for this project only, if needed.    -->
-<!-- Default (from workspace CLAUDE.md §1) runs scripts/audit.sh on Write/Edit. -->
-
-### Model Selection Override
-<!-- Uncomment to override workspace defaults for this project only.       -->
-<!-- - Heavy reasoning  : claude-opus-4-7                                  -->
-<!-- - Default          : claude-sonnet-4-6                                -->
-<!-- - Fast lookups     : claude-haiku-4-5-20251001                        -->
-```
-
-#### `.claude/settings.json` — scaffold template
-
-This file activates the PostToolUse hook that runs `audit.sh` after every Write/Edit operation. **Required for automated audit enforcement in Claude Code CLI.**
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash scripts/audit.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-> ⚠️ PostToolUse hooks do **not** fire in the Claude Code Desktop App. After any Write/Edit in the Desktop App, run `bash scripts/audit.sh` manually.
-
-#### Project-level `GEMINI.md` — scaffold template (minimal)
-
-This file holds **only Gemini-specific overrides** for this project. Anything that applies to all AI tools goes in `docs/context.md` instead.
-
-> **Path note**: `../../GEMINI.md` and `@../../CONSTITUTION.md` assume the project lives directly under the workspace root (`C:\git\<project>\`). Adjust if nested deeper.
-
-~~~~markdown
-# GEMINI.md
-
-> **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
-> Workspace-level Gemini behaviors → [`../../GEMINI.md`](../../GEMINI.md)
-
-## Context Loading
-
-Load project files at session start using the `@` syntax:
-```
-@../../CONSTITUTION.md   # workspace design standard
-@docs/context.md         # project knowledge (includes Session Start Skills)
-@memory/MEMORY.md        # recent changes (skip if file does not exist)
-```
-
-## Project-Specific Gemini Settings
-
-### Session Start
-<!-- Skills are loaded from docs/context.md ## Session Start Skills.          -->
-<!-- Add entries here ONLY for Gemini-exclusive skills not in context.md.     -->
-
-### Model Selection Override
-<!-- Uncomment to override workspace defaults for this project only.          -->
-<!-- - Default      : gemini-2.5-pro                                          -->
-<!-- - Fast lookups : gemini-2.5-flash                                        -->
-~~~~
-
-#### `CHANGELOG.md` — initial scaffold
-
-Required by `audit.sh`. Must exist at project creation. Use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
-
-```markdown
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-## [Unreleased]
-```
-
-#### `.env.sample` — initial scaffold
-
-Documents required environment variables. **Never commit `.env`** — commit only `.env.sample`.
-
-```bash
-# .env.sample — copy to .env and fill in values
-# All variables listed here are required unless marked [optional]
-
-# [KEY_NAME]=[description]
-# Example:
-# API_KEY=your_api_key_here
-# DATABASE_URL=postgresql://user:password@localhost/dbname
-
-# If this project has no environment variables, leave this file with only this comment.
-```
-
-#### `memory/MEMORY.md` — initial scaffold
-
-Required index file for the memory system. Created empty at project init; updated automatically by `dev-sync` scripts.
-
-```markdown
-# Memory Index
-
-| Date | Summary |
-|------|---------|
-```
-
-#### `.gitignore` — initial scaffold
-
-Prevents secrets and local artifacts from being committed. **`.env` must always be listed here.**
-
-```gitignore
-# Secrets — never commit
-.env
-
-# Python
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-dist/
-*.egg-info/
-
-# Node.js
-node_modules/
-.next/
-dist/
-build/
-
-# OS artifacts
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-```
+**Every new project starts with a project scaffolding command:**
+
+- **Claude Code**: `/new-project` (slash command in `.claude/commands/`)
+- **macOS / Linux**: `bash scripts/new-project.sh "<project-name>"`
+- **Windows**: `.\scripts
+ew-project.ps1 "<project-name>"`
+
+The script copies [`templates/`](templates/) directly into the new project directory,
+substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
+and initializes git with hooks active.
+
+#### What gets generated
+
+The [`templates/`](templates/) folder mirrors the exact structure of a new project —
+browse it directly to see what every file should look like. All scaffold templates
+live there as **real, editable files** (not embedded strings).
+
+| Generated file | Purpose | Action needed |
+|----------------|---------|---------------|
+| `docs/context.md` | Single source of truth — 10 required sections | Fill in `[...]` placeholders |
+| `AGENTS.md` | Canonical agent index | Ready to use |
+| `agents/pm.md` + 3 others | Role definitions | `[Project Name]` already substituted |
+| `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
+| `.claude/settings.json` | PostToolUse audit hook | Ready to use |
+| `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
+| `scripts/` | audit, dev-sync, sync-md (.sh + .ps1) | Ready to use |
+| `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
+| `CHANGELOG.md` | User-visible change history | Ready to use |
+| `README.md` | GitHub landing page | Fill in project description |
+| `.env.sample` | Environment variable template | Add required env keys |
+| `.gitignore` | Standard ignore rules | Ready to use |
+| `memory/MEMORY.md` | Session log index | Ready to use |
+
+> **Extension templates** — ADR, analyst agent, skill, and daily log formats are **not**
+> generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
 
 #### Post-scaffold checklist
 
-After running the scaffolding command, verify every item before writing any code:
-
 ```
 □ docs/context.md
-    □ All 10 required sections present
+    □ [Project Name] on line 1 replaced with actual project name
+    □ ## Tech Stack filled in
+    □ ## Architecture src/ map filled in
+    □ [KEY_NAME] env vars filled in (or "N/A — no env vars required")
+    □ All 10 sections present:
         macOS/Linux : grep "^## " docs/context.md
         Windows     : Select-String -Path docs/context.md -Pattern "^## "
-    □ [Project Name] placeholder replaced with actual project name
-    □ [KEY_NAME] env vars filled in (or "N/A — no env vars required")
-    □ ## Coding Guidelines section present
 
-□ AGENTS.md
-    □ Table matches docs/context.md ## Agents
+□ agents/ — [Project Name] substituted in all 4 ## Role sections
+    □ agents/pm.md          □ agents/architect.md
+    □ agents/code-writer.md □ agents/test-runner.md
 
-□ agents/pm.md
-    □ [Project Name] placeholder in ## Role replaced
-
-□ CLAUDE.md
-    □ ../../CLAUDE.md path is correct for this project's depth
-
-□ GEMINI.md
-    □ @../../CONSTITUTION.md path is correct for this project's depth
-
-□ .claude/settings.json
-    □ PostToolUse hook points to scripts/audit.sh
-
-□ CHANGELOG.md
-    □ File exists with [Unreleased] section
-
-□ memory/MEMORY.md
-    □ File exists with header row
-
-□ .env.sample
-    □ File exists (even if empty — add "# No environment variables required")
-
-□ .gitignore
-    □ File exists and includes ".env" entry
-
-□ README.md
-    □ File exists (even a one-line placeholder is fine)
+□ README.md — project description filled in
 
 □ Final validation
-    □ macOS/Linux : bash scripts/audit.sh       → must exit 0
-      Windows     : .\scripts\audit.ps1         → must exit 0
-    □ Run: git config core.hooksPath .githooks
+    □ macOS/Linux : bash scripts/audit.sh    → must exit 0
+      Windows     : .\scriptsudit.ps1   → must exit 0
+    □ git config core.hooksPath .githooks    (already set by script — verify it stuck)
 ```
-
 ---
 
 ### 8. Coding Behavior Guidelines

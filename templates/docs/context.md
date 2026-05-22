@@ -1,0 +1,109 @@
+# [Project Name]
+
+## Project Overview
+[One-sentence description of what this project does and who it's for.]
+
+## Tech Stack
+- **Language**: [e.g., Python 3.11+ / TypeScript 5+]
+- **Framework**: [e.g., FastAPI / Next.js / none]
+- **Key Libraries**: [e.g., pydantic, httpx, react-query]
+- **Package Manager**: [e.g., pip + uv / npm / pnpm]
+
+## Architecture
+```
+src/
+├── [folder]    # [description]
+└── [folder]    # [description]
+```
+
+## Environment Setup
+- Copy `.env.sample` → `.env` and fill in all required values.
+- **Python**:
+  - macOS/Linux: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
+  - Windows:     `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`
+- **Node.js**: `npm install`
+- Required env keys (see `.env.sample`):
+  - `[KEY_NAME]` — [description] *(replace with actual keys, or write "N/A — no env vars required")*
+
+## Agents
+<!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
+<!-- Duplicate the table here only as a quick-reference summary for non-CC tools.   -->
+| Group | Agent file | Role |
+|-------|------------|------|
+| Orchestration | `agents/pm.md` | PM orchestrator — owns the workflow, dispatches parallel tasks |
+| Design | `agents/architect.md` | Architect — produces implementation plans and ADRs |
+| Design | `agents/designer.md` | Designer — produces UI/UX specs, wireframes, and component definitions |
+| Execution | `agents/code-writer.md` | Code writer — implements approved plans |
+| Execution | `agents/test-runner.md` | Test runner — verifies acceptance criteria and runs QA gate |
+
+## Skills
+| Skill path | Trigger condition |
+|------------|-------------------|
+| *(none yet — add entries as skills are created in `skills/`)* | |
+
+## Session Start Skills
+<!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
+<!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
+- *(none yet)*
+
+## Development Workflow
+```bash
+# Audit (runs automatically via PostToolUse hook in Claude Code CLI)
+bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
+
+# Add a changelog entry (optional, before sync)
+# Claude Code:  /changelog "added|changed|fixed|removed <description>"
+# Gemini CLI:   append to CHANGELOG.md under [Unreleased]
+
+# Full sync: audit → memlog → commit → PR
+bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1 "feat: ..."
+# Claude Code:  /sync "feat: description"
+```
+
+## Key Files
+| File | Purpose |
+|------|---------|
+| `docs/context.md` | This file — single source of truth for all AI tools |
+| `AGENTS.md` | Canonical agent index — auto-loaded by Claude Code |
+| `agents/pm.md` | PM orchestrator — workflow owner |
+| `agents/architect.md` | Design agent — implementation plans and ADRs |
+| `agents/designer.md` | Design agent — UI/UX specs and component definitions |
+| `agents/code-writer.md` | Implementation agent — writes code from approved plans |
+| `agents/test-runner.md` | QA agent — runs tests and verifies acceptance criteria |
+| `scripts/dev-sync.sh` | Full sync pipeline (audit → commit → PR) |
+| `scripts/audit.sh` | Documentation audit script |
+| `memory/MEMORY.md` | Session log index |
+| `CHANGELOG.md` | User-visible change history |
+| `.env.sample` | Required environment variable template |
+
+## Coding Guidelines
+
+> These rules apply to every AI tool working in this project.
+> Full rationale: [CONSTITUTION.md §8](../CONSTITUTION.md#8-coding-behavior-guidelines)
+> *(This file lives in `docs/` — one level up is the project root, two levels up is the workspace root where `CONSTITUTION.md` lives.)*
+
+### 1. Think Before Coding
+- State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.
+- If multiple interpretations exist, present them; don't pick one silently.
+- If something is unclear, stop and name what's confusing.
+- **Secrets**: Never hardcode passwords, API tokens, or keys. Always use env vars / `.env.sample`.
+
+### 2. Simplicity First
+- Write the minimum code that solves the problem. Nothing speculative.
+- No abstractions for single-use code. No unrequested "flexibility."
+- If a 200-line solution could be 50 lines, rewrite it.
+
+### 3. Surgical Changes
+- Touch only what is necessary. Don't "improve" adjacent code.
+- Match existing style even if you'd do it differently.
+- Remove only the dead code that **your** changes created.
+
+### 4. Goal-Driven Execution
+- Convert every task into a verifiable goal before starting:
+  - "Add validation" → "Write tests for invalid inputs, then make them pass"
+  - "Fix the bug" → "Write a reproducer test, then fix it"
+- For multi-step tasks, state a brief numbered plan with a verify step for each.
+
+### 5. Response Language
+- All **conversational** replies to the user → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, branch names → **English only**.

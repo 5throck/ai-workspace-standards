@@ -13,9 +13,9 @@ Write-Host "=== audit.ps1 — workspace standards check ===" -ForegroundColor Cy
 if (Test-Path "CHANGELOG.md") { Pass "CHANGELOG.md exists" }
 else                           { Fail "CHANGELOG.md missing" }
 
-# 2. CONSTITUTION.md must exist
-if (Test-Path "CONSTITUTION.md") { Pass "CONSTITUTION.md exists" }
-else                              { Fail "CONSTITUTION.md missing" }
+# 2. CONSTITUTION.md must be accessible (workspace root OR one level up for project dirs)
+if ((Test-Path "CONSTITUTION.md") -or (Test-Path "..\CONSTITUTION.md")) { Pass "CONSTITUTION.md accessible" }
+else { Fail "CONSTITUTION.md not found (expected at ./ or ../)" }
 
 # 3. docs/context.md must have ## Coding Guidelines
 if (Test-Path "docs/context.md") {

@@ -22,11 +22,11 @@ else
   ((errors++)) || true
 fi
 
-# 2. CONSTITUTION.md must exist
-if [ -f "CONSTITUTION.md" ]; then
-  green "CONSTITUTION.md exists"
+# 2. CONSTITUTION.md must be accessible (workspace root OR one level up for project dirs)
+if [ -f "CONSTITUTION.md" ] || [ -f "../CONSTITUTION.md" ]; then
+  green "CONSTITUTION.md accessible"
 else
-  red  "CONSTITUTION.md missing"
+  red  "CONSTITUTION.md not found (expected at ./ or ../)"
   ((errors++)) || true
 fi
 
