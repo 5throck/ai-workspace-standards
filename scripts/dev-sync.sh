@@ -38,7 +38,7 @@ fi
 git add -A
 git commit -m "$MSG
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+Co-Authored-By: Gemini <noreply@google.com>"
 git push -u origin "$BRANCH"
 
 # Use PR template if present; fall back to --fill
