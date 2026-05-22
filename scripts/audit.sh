@@ -30,24 +30,24 @@ fi
 
 # ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
 
+# 3. CHANGELOG.md must have [Unreleased] section (all projects + workspace root)
+if [ -f "CHANGELOG.md" ]; then
+  if grep -q "\[Unreleased\]" "CHANGELOG.md"; then
+    green "CHANGELOG.md has [Unreleased] section"
+  else
+    red  "CHANGELOG.md is missing '[Unreleased]' section"
+    ((errors++)) || true
+  fi
+fi
+
 if [ -f "docs/context.md" ]; then
 
-  # 3. If a docs/context.md exists in the current project, it must have ## Coding Guidelines
+  # 4. If a docs/context.md exists in the current project, it must have ## Coding Guidelines
   if grep -q "^## Coding Guidelines" "docs/context.md"; then
     green "docs/context.md has ## Coding Guidelines"
   else
     red  "docs/context.md is missing '## Coding Guidelines' section"
     ((errors++)) || true
-  fi
-
-  # 4. CHANGELOG.md must have [Unreleased] section (project-level check)
-  if [ -f "CHANGELOG.md" ]; then
-    if grep -q "\[Unreleased\]" "CHANGELOG.md"; then
-      green "CHANGELOG.md has [Unreleased] section"
-    else
-      red  "CHANGELOG.md is missing '[Unreleased]' section"
-      ((errors++)) || true
-    fi
   fi
 
   # 5. AGENTS.md must exist
