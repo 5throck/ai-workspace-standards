@@ -11,9 +11,15 @@
 
 ## Architecture
 ```
-src/
-├── [folder]    # [description]
-└── [folder]    # [description]
+[project root]/
+├── src/                  # [main source — e.g., app logic, API handlers]
+│   ├── [folder]          # [description]
+│   └── [folder]          # [description]
+├── docs/                 # project context, ADRs
+├── agents/               # AI agent definitions
+├── scripts/              # audit, dev-sync, sync-md
+├── memory/               # session logs
+└── [any other top-level dirs]
 ```
 
 ## Environment Setup
@@ -44,11 +50,14 @@ src/
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
 <!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
+<!-- Example: `skills/auth-flow/SKILL.md` — always load when auth-related tasks   -->
+<!-- Add a skill: create skills/<name>/SKILL.md, then add a line below.           -->
+<!-- See ../../templates/_examples/skills/example-skill/SKILL.md for the template.-->
 - *(none yet)*
 
 ## Development Workflow
 ```bash
-# Audit (runs automatically via PostToolUse hook in Claude Code CLI)
+# Audit (enforced via pre-commit hook and dev-sync pipeline; run manually any time)
 bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
 
 # Add a changelog entry (optional, before sync)
@@ -70,8 +79,9 @@ bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1
 | `agents/designer.md` | Design agent — UI/UX specs and component definitions |
 | `agents/code-writer.md` | Implementation agent — writes code from approved plans |
 | `agents/test-runner.md` | QA agent — runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (audit → commit → PR) |
+| `scripts/dev-sync.sh` | Full sync pipeline (memlog → changelog → audit → commit → PR) |
 | `scripts/audit.sh` | Documentation audit script |
+| `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
 | `memory/MEMORY.md` | Session log index |
 | `CHANGELOG.md` | User-visible change history |
 | `.env.sample` | Required environment variable template |

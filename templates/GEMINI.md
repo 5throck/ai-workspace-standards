@@ -9,6 +9,7 @@ Load project files at session start using the `@` syntax:
 ```
 @../CONSTITUTION.md      # workspace design standard
 @docs/context.md         # project knowledge (includes Session Start Skills)
+@AGENTS.md               # canonical agent roster
 @memory/MEMORY.md        # recent changes (skip if file does not exist)
 ```
 

@@ -11,6 +11,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed — License
 - MIT → AGPL-3.0
 
+### Fixed — Scaffold guideline consistency (5-round review)
+- `templates/agents/pm.md`: Agent Roster에 `designer.md` 누락 추가
+- `templates/CLAUDE.md`: Session Start 섹션 구체화 (4단계 체크리스트)
+- `templates/GEMINI.md`: Context Loading에 `@AGENTS.md` 추가
+- `templates/agents/architect.md`: ADR 예시 경로 명확화 (workspace 상대경로)
+- `templates/AGENTS.md`: `_examples` 참조 경로 명확화 (workspace 상대경로)
+- `templates/docs/context.md`: Architecture placeholder 구체화, Key Files에 sync-md.sh 추가, Session Start Skills 작성 방법 안내, Development Workflow hook 상태 정정
+- `scripts/new-project.sh`: Perl 치환 특수문자 이스케이프(`\Q...\E`), Next steps에 test-runner 명령 안내 추가
+- `scripts/new-project.ps1`: `.sample` 중복 필터 제거, WSL용 `chmod +x` 패리티(git update-index) 추가, Next steps에 test-runner 명령 안내 추가
+
 ### Fixed — Project consistency (README, CLAUDE.md, CONSTITUTION.md)
 - `CLAUDE.md §1`: PostToolUse hook이 비활성화 상태임을 명확히 표기 (`.claude/settings.json`은 `{}`)
 - `README.md`: 4-role → 5-role agent 모델 수정 (Designer 추가), Repository Structure에 `templates/` 추가, Two Philosophies 설명에 Designer 포함, Multi-Agent Workflow 설명 업데이트

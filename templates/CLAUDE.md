@@ -6,8 +6,18 @@
 ## Project-Specific Claude Code Settings
 
 ### Session Start
-<!-- Skills are loaded from docs/context.md ## Session Start Skills.       -->
-<!-- Add entries here ONLY for Claude Code-exclusive skills not in context.md. -->
+
+At the start of every Claude Code session, run this checklist:
+
+```
+0. git config core.hooksPath .githooks   # verify hooks are active
+1. Read docs/context.md                  # project knowledge — coding guidelines, agents, workflow
+2. Read AGENTS.md                        # agent roster (auto-loaded by Claude Code)
+3. Read memory/MEMORY.md                 # recent changes and session history
+4. Load skills listed in docs/context.md ## Session Start Skills
+```
+
+<!-- Add entries below ONLY for Claude Code-exclusive session steps not covered above. -->
 
 ### MCP Servers
 <!-- Document project-specific .mcp.json entries here, if any.             -->

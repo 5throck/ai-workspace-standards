@@ -13,7 +13,7 @@
 | Execution | Code Writer | `agents/code-writer.md` | Implements approved plans; surgical changes only |
 | Execution | Test Runner | `agents/test-runner.md` | Runs tests and verifies acceptance criteria |
 
-*(Add Analysis agents as needed — see `templates/_examples/agents/analyst-example.md` for the scaffold template.)*
+*(Add Analysis agents as needed — see `../../templates/_examples/agents/analyst-example.md` in the workspace root for the scaffold template.)*
 
 ## Agent Dispatch
 

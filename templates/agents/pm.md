@@ -33,6 +33,7 @@ Add rows as specialist agents are created. Start with PM only; expand when the p
 |-------|-------|------------|----------------|
 | Triage / Analysis | Analysis | *(add `agents/<name>-analyst.md`)* | Read-only investigation, findings report |
 | Design | Design | `agents/architect.md` | Implementation plan + ADR; awaits user approval |
+| Design | Design | `agents/designer.md` | UI/UX specs, wireframes, component definitions; awaits user approval |
 | Implementation | Execution | `agents/code-writer.md` | Write code per approved plan |
 | QA / Verification | Execution | `agents/test-runner.md` | Run tests, verify acceptance criteria |
 
