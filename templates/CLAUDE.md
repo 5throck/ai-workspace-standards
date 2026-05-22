@@ -3,7 +3,7 @@
 > **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
 > Workspace-level Claude Code behaviors → [`../CLAUDE.md`](../CLAUDE.md)
 
-> **Doc intent:** This file is Claude Code-specific behavioral configuration.
+> **Doc intent:** This file is Claude Code-specific behavioral configuration for **individual projects** (not the workspace root).
 > Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
 > Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
 
@@ -153,8 +153,25 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ---
 
 ### MCP Servers
-<!-- Document project-specific .mcp.json entries here, if any.             -->
-<!-- General MCP guidance: workspace ../CLAUDE.md §3                        -->
+
+Document project-specific `.mcp.json` entries here. General MCP guidance: workspace [`../CLAUDE.md §3`](../CLAUDE.md).
+
+```json
+// .mcp.json — example structure (add to project root; gitignored env vars go in .mcp.local.json)
+// {
+//   "mcpServers": {
+//     "<server-name>": {
+//       "command": "./path/to/binary",
+//       "args": ["--flag", "value"],
+//       "env": {
+//         "ENV_VAR": "value"
+//       }
+//     }
+//   }
+// }
+```
+
+> Use relative paths for `command` — Claude Code resolves them against the project root.
 
 ---
 

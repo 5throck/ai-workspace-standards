@@ -24,9 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - 동일한 Antigravity 2.0 설정 전면 적용 (safeguards, Planning Mode artifacts, Subagent 오케스트레이션)
 - 파일 하단의 중복 `### Session Start` 섹션 제거 (상단 `## Context Loading`과 동일 내용)
 
-### Changed — `scripts/audit.sh` (workspace root)
-- CHANGELOG.md `[Unreleased]` 섹션 존재 여부 검사를 `docs/context.md` 조건 블록 밖으로 이동
-- 워크스페이스 루트에서도 하위 프로젝트와 동일하게 CHANGELOG.md 업데이트 강제 적용
+### Changed — `scripts/audit.sh` + `scripts/audit.ps1` (workspace root) + `templates/scripts/audit.sh` + `templates/scripts/audit.ps1`
+- CHANGELOG.md `[Unreleased]` 섹션 존재 여부 검사를 `docs/context.md` 조건 블록 밖으로 이동 — 워크스페이스 루트 및 신규 프로젝트 모두 동일하게 강제
+- `scripts/audit.ps1` (workspace root): `.sh`와 체크 8개로 동기화 — AGENTS.md, agents/, .env.sample, scripts parity 체크 누락분 추가
 
 ### Fixed
 - MD file consistency: unified Session Start Checklist across CLAUDE.md, GEMINI.md, and README.md (including templates/)
