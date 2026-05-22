@@ -60,14 +60,27 @@
 # Audit (enforced via pre-commit hook and dev-sync pipeline; run manually any time)
 bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
 
+# Log a session entry (without syncing)
+# Claude Code:  /memlog "summary"
+# Bash:         echo "## Session — summary" >> memory/$(date +%Y-%m-%d).md
+
 # Add a changelog entry (optional, before sync)
 # Claude Code:  /changelog "added|changed|fixed|removed <description>"
 # Gemini CLI:   append to CHANGELOG.md under [Unreleased]
 
-# Full sync: audit → memlog → commit → PR
+# Full sync: memlog → changelog → audit → commit → PR
 bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1 "feat: ..."
 # Claude Code:  /sync "feat: description"
 ```
+
+### Claude Code Slash Commands
+Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude Code:
+| Command | Skill name | Purpose |
+|---------|-----------|---------|
+| `/changelog "..."` | `changelog` | Add CHANGELOG.md entry |
+| `/sync "..."` | `sync` | Full sync pipeline |
+| `/memlog "..."` | `memlog` | Log session entry only |
+| `/new-task "..."` | `new-task` | Create task block in memory log |
 
 ## Key Files
 | File | Purpose |

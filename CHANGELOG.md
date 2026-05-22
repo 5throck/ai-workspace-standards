@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed — Missing slash commands / Skill registrations
+- `.claude/commands/memlog.md` 추가 (workspace + templates) — `/memlog` Skill 등록
+- `.claude/commands/new-task.md` 추가 (workspace + templates) — `/new-task` Skill 등록
+- `.claude/commands/new-project.md` 추가 (workspace only) — `/new-project` Skill 등록
+- `CLAUDE.md §2`: 커맨드 테이블 정확한 파일명 반영 및 Skill 등록 원리 설명 추가
+- `templates/CLAUDE.md`: Slash Commands 섹션 추가 (커맨드→Skill 자동 등록 원리 명시)
+- `templates/docs/context.md`: Development Workflow에 `/memlog` 추가, Slash Commands 테이블 추가
+
 ### Changed — License
 - MIT → AGPL-3.0
 

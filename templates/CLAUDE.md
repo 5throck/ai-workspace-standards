@@ -19,6 +19,20 @@ At the start of every Claude Code session, run this checklist:
 
 <!-- Add entries below ONLY for Claude Code-exclusive session steps not covered above. -->
 
+### Slash Commands (`.claude/commands/`)
+
+These commands are available as both `/slash-commands` and via the `Skill` tool:
+
+| Command | Purpose |
+|---------|---------|
+| `/changelog "description"` | Add entry to `CHANGELOG.md [Unreleased]` |
+| `/sync "feat: ..."` | Full pipeline — memlog → changelog → audit → commit → PR |
+| `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only |
+| `/new-task "task name"` | Create task tracking block in today's memory log |
+
+> **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
+> registered as a `<name>` Skill in Claude Code. Add new commands by creating files here.
+
 ### MCP Servers
 <!-- Document project-specific .mcp.json entries here, if any.             -->
 <!-- General MCP guidance: workspace ../CLAUDE.md §3                        -->

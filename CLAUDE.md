@@ -49,11 +49,14 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline — audit → commit → PR | Runs project-level `scripts/dev-sync.sh` |
-| `/memlog` | Append today's session summary to YYYY-MM-DD.md | Automatically updates the daily log |
-| `/changelog "..."` | Add entry to `CHANGELOG.md` | Pre-sync user-facing changelog entry |
-| `/new-task "..."` | Create a new task tracking file | Scaffolds a new active task file |
-| `/new-project` | Scaffold a new project | Runs the workspace-global initialization script |
+| `/sync "feat: ..."` | Full pipeline — memlog → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
+| `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
+| `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
+| `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
+| `/new-project "name"` | Scaffold a new project | `bash scripts/new-project.sh "$ARGUMENTS"` |
+
+> **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
+> registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
 ### 3. MCP Configurations & Absolute Resolving
 Config file: `.mcp.json` (project root) — auto-loaded by both the CLI and the Desktop App.
