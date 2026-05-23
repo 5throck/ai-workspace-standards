@@ -47,6 +47,7 @@ done < <(find "$PROJECT_DIR" -type f \
 # ── 5. Make scripts and hooks executable ───────────────────────────────────────
 chmod +x "$PROJECT_DIR/.githooks/pre-commit" \
          "$PROJECT_DIR/.githooks/pre-push" \
+         "$PROJECT_DIR/.githooks/post-checkout" \
          "$PROJECT_DIR/scripts/audit.sh" \
          "$PROJECT_DIR/scripts/dev-sync.sh" \
          "$PROJECT_DIR/scripts/sync-md.sh" \

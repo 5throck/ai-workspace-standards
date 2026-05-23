@@ -43,6 +43,7 @@
 | Group | Agent file | Role |
 |-------|------------|------|
 | Orchestration | `agents/pm.md` | PM orchestrator — owns the workflow, dispatches parallel tasks |
+| Orchestration | `agents/security-monitor.md` | Security monitor — enforces policies, prevents secrets leaks |
 | Design | `agents/architect.md` | Architect — produces implementation plans and ADRs |
 | Design | `agents/designer.md` | Designer — produces UI/UX specs, wireframes, and component definitions |
 | Execution | `agents/code-writer.md` | Code writer — implements approved plans |
@@ -118,6 +119,7 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 | `docs/context.md` | This file — single source of truth for all AI tools |
 | `AGENTS.md` | Canonical agent index — auto-loaded by Claude Code |
 | `agents/pm.md` | PM orchestrator — workflow owner |
+| `agents/security-monitor.md` | Security agent — enforces policies and scans for secrets |
 | `agents/architect.md` | Design agent — implementation plans and ADRs |
 | `agents/designer.md` | Design agent — UI/UX specs and component definitions |
 | `agents/code-writer.md` | Implementation agent — writes code from approved plans |
