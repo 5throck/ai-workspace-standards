@@ -9,6 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-23]**: `.githooks/pre-commit` + `templates/.githooks/pre-commit`: New §1-B — auto-creates memory log entry and CHANGELOG entry on every direct `git commit`, not just when using `dev-sync.sh`. Reads commit message from `.git/COMMIT_EDITMSG`; skips duplicates already written by dev-sync; stages generated files into the same commit.
+- **[2026-05-23]**: `GEMINI.md`: Added §4 PR Language Rule (reference to CONSTITUTION.md §3); renumbered §4-7 → §5-8; Git & PR Additions: added PR Language bullet.
+- **[2026-05-23]**: `CLAUDE.md`, `GEMINI.md`, `templates/CLAUDE.md`, `templates/GEMINI.md`, `templates/docs/context.md`: PR Language Rule consolidated to CONSTITUTION.md §3 as single source of truth; removed inline duplicates; all files now reference §3 instead.
+- **[2026-05-23]**: `.github/pull_request_template.md`: Converted to English-only (removed Korean bilingual labels).
+- **[2026-05-23]**: `templates/docs/context.md`, `templates/CLAUDE.md`, `templates/GEMINI.md`: §7 PR Language Rule added to scaffold — new projects inherit the English-only PR rule from creation.
+- **[2026-05-23]**: `README_ko.md`: Step 3 updated from tool-based (Claude Code/Antigravity) to OS-based format; AI tool shortcut moved to tip note.
+- **[2026-05-23]**: `templates/README_ko.md`: Full UTF-8 Korean rewrite replacing EUC-KR-corrupted content; mirrors `templates/README.md` structure.
+
+### Added
 - **[2026-05-23]**: `.githooks/pre-commit`: Add Markdown date auto-bumper and CHANGELOG auto-dating logic. Automatically updates `Last Updated:` date in staged `.md` files upon commit, and injects date into undated `CHANGELOG.md` entries.
 
 ### Removed
