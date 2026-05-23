@@ -86,8 +86,8 @@ bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1
 - **Archiving**: If `docs/context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.
 
 ### Tracking Management: CHANGELOG vs. Memory
-- **`CHANGELOG.md`**: For end-users and release notes. Record *what* changed (features, fixes) using structured categories.
-- **`memory/` logs**: For developers and AI agents. Record *how* and *why* changes were made, including architectural decisions and debugging context.
+- **`CHANGELOG.md`**: For end-users and release notes. Record *what* changed (features, fixes) using structured categories. **(Must be written in English)**
+- **`memory/` logs**: For developers and AI agents. Record *how* and *why* changes were made, including architectural decisions and debugging context. **(Must be written in English)**
 
 ### Claude Code Slash Commands
 Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude Code:
@@ -172,4 +172,4 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 
 ### 6. Response Language
 - All **conversational** replies to the user → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, branch names → **English only**.
+- All code, config, commit messages, PR titles, branch names, **CHANGELOG.md**, and **memory/ logs** → **English only**.
