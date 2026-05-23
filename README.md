@@ -58,6 +58,12 @@ bash scripts/new-project.sh "my-project-name"
 
 Each new project is scaffolded with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files automatically.
 
+### 4. Multi-Agent Kickoff (Recommended)
+
+Before writing any code, start a PM-led kickoff meeting to plan the architecture and roles.
+Ask your AI assistant:
+> *"Let's start the PM agent kickoff meeting for this project."*
+
 ---
 
 ## Repository Structure
@@ -145,6 +151,7 @@ Agent scaffold templates for all roles live in `templates/agents/`.
 - **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
 - **Cross-platform scripts** — every `.sh` has a `.ps1` pair with identical behavior.
 - **Coding Guidelines are audited** — `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
+- **Security-First Scaffold** — Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
 ---
 
