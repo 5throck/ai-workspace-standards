@@ -63,6 +63,69 @@
 <!-- See https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/templates/_examples/skills/example-skill/SKILL.md for the template.-->
 - *(none yet)*
 
+## Multi-Agent Workflow
+
+This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator, which coordinates specialist agents to deliver high-quality, reviewed solutions.
+
+### Single Entry Point
+
+**The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests.**
+
+```
+┌──────────────┐
+│   Your Task  │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  PM Agent    │  ← Classify, dispatch, synthesize, execute
+│  (Orchestrator) │
+└──────┬───────┘
+       │
+       ├─► [Read-only tasks] → Parallel agents (analyst, researcher)
+       ├─► [Design tasks]    → Architect + Designer (parallel)
+       ├─► [Code tasks]      → Code-writer → Test-runner → QA gate
+       └─► [Unknown stack]   → Stack-setup agent
+```
+
+### Why PM-First?
+
+| Benefit | Description |
+|---------|-------------|
+| **Consistency** | All work follows the same 6-phase workflow |
+| **Quality** | No code without design review, no merge without QA |
+| **Traceability** | All decisions logged to `memory/` with rationale |
+| **Scalability** | Team expands by adding agents, not changing workflow |
+| **Safety** | Security monitor checks all changes before commit |
+
+### Starting Your First Task
+
+After project scaffolding completes:
+
+1. **Navigate to project:** `cd <project-name>`
+2. **Context is auto-loaded** by your AI tool:
+   - `docs/context.md` (this file)
+   - `AGENTS.md` (agent roster)
+   - `agents/pm.md` (PM role definition)
+3. **Submit your request to PM:**
+   - "PM, I need to [describe task]"
+   - PM will triage, dispatch agents, and coordinate the entire workflow
+
+### Workflow Phases
+
+| Phase | Name | What Happens |
+|-------|------|--------------|
+| 0 | Team Assembly | PM assesses project needs; creates specialized agents/skills if required |
+| 1 | Triage | PM classifies request; dispatches read-only agents in parallel |
+| 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
+| 3 | Design | Architect produces implementation plan; Designer produces UI/UX spec (parallel) |
+| 4 | Implementation | Code-writer implements; Test-runner verifies; Loop up to 3× on failures |
+| 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
+
+> **Full details:** See [`AGENTS.md`](AGENTS.md) for complete workflow, agent roster, and dispatch protocols.
+
+---
+
 ## Development Workflow
 ```bash
 # Audit (enforced via pre-commit hook and dev-sync pipeline; run manually any time)

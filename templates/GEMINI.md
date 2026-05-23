@@ -114,6 +114,18 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 Interact with spawned agents via their unique `conversationID`.
 **Reactive Wakeup**: Do not poll in a loop — simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
+### Multi-Agent Workflow
+
+This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator.
+
+**Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents via `invoke_subagent` is forbidden.
+
+> **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
+
+**Quick start:** Submit your request to PM: "PM, I need to [describe task]"
+
+---
+
 ### Response Language
 - All **conversational** replies → **Korean (한국어)** by default.
 - All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
