@@ -1,4 +1,4 @@
-# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
+﻿# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
 # Usage: .\scripts\dev-sync.ps1 "feat: description"
 param([string]$Msg = "chore: update")
 
@@ -75,3 +75,4 @@ if (Test-Path ".github\pull_request_template.md") {
 } else {
     gh pr create --fill
 }
+

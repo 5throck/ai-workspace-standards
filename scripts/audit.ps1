@@ -1,4 +1,4 @@
-# audit.ps1 — Documentation integrity check (Windows PowerShell)
+﻿# audit.ps1 — Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
 $errors = 0
@@ -60,3 +60,4 @@ if (Test-Path "docs\context.md") {
 Write-Host ""
 if ($errors -eq 0) { Write-Host "✅ All checks passed." -ForegroundColor Green; exit 0 }
 else               { Write-Host "❌ $errors check(s) failed. Fix before committing." -ForegroundColor Red; exit 1 }
+
