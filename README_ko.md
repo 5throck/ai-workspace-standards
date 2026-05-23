@@ -56,8 +56,8 @@ git config core.hooksPath .githooks
 # Otherwise, manually execute the script below.
 bash scripts/new-project.sh "my-project-name"
 
-# PowerShell
-.\scripts\new-project.ps1 "my-project-name"
+# Windows (명령 프롬프트 및 PowerShell 공통)
+.\scripts\new-project.cmd "my-project-name"
 ```
 
 각각의 새로운 프로젝트는 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일들과 함께 자동으로 스캐폴딩(scaffold)됩니다.
@@ -82,7 +82,7 @@ C:\git\ (워크스페이스 루트 — 현재 저장소)
 │   ├── docs/                  
 │   │   ├── context.md       # 전체 10개 섹션의 프로젝트 컨텍스트 템플릿
 │   │   └── security.md      # 내부 데이터 삭제(Sanitization) 가이드라인
-│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   ├── scripts/             # dev-sync.sh/.cmd, sync-md.sh/.cmd, audit.sh/.cmd
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, 등
 │   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, 등
 │   ├── .githooks/           # pre-commit (스마트 조건부 검사), pre-push
@@ -90,10 +90,10 @@ C:\git\ (워크스페이스 루트 — 현재 저장소)
 │   ├── SECURITY.md          # GitHub 보안 정책 템플릿
 │   └── _examples/           # 참고용 ADR, analyst 에이전트, 세션 로그, 스킬
 ├── scripts/
-│   ├── audit.sh / .ps1      # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
-│   ├── dev-sync.sh / .ps1   # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .ps1    # MEMORY.md 인덱스 업데이트
-│   └── new-project.sh / .ps1 # 새 프로젝트 스캐폴딩 (templates/ 복사)
+│   ├── audit.sh / .cmd      # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
+│   ├── dev-sync.sh / .cmd   # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .cmd    # MEMORY.md 인덱스 업데이트
+│   └── new-project.sh / .cmd # 새 프로젝트 스캐폴딩 (templates/ 복사)
 ├── .githooks/
 │   ├── pre-commit           # 스마트 조건부 감사 (memory/ 파일 예외 처리)
 │   └── pre-push             # main 브랜치로의 직접 push 차단
@@ -155,7 +155,7 @@ PM Orchestrator (PM 오케스트레이터)
 - **`CLAUDE.md` / `GEMINI.md` (프로젝트 레벨)는 플랫폼 특화 오버라이드만 포함합니다.**
 - **PR 전용 워크플로** — 모든 변경 사항은 Pull Request를 통해 `main` 브랜치에 도달합니다. 직접 push는 `.githooks/pre-push`에 의해 차단됩니다.
 - **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **크로스 플랫폼 스크립트** — 모든 `.sh` 파일은 동일한 동작을 하는 `.ps1` 파일과 짝을 이룹니다.
+- **크로스 플랫폼 스크립트** — 모든 `.sh` 파일은 동일한 동작을 하는 `.cmd`/`.ps1` 파일과 짝을 이룹니다.
 - **코딩 가이드라인 감사** — `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.sh`가 빌드를 실패 처리합니다.
 - **보안 중심 스캐폴드** — 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
 
