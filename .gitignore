@@ -47,6 +47,7 @@ __pycache__/
 !.gitignore
 !.githooks/
 !.claude/
+!.gemini/
 !scripts/
 !templates/
 !.editorconfig
