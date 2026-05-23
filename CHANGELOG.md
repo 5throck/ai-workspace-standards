@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added — Go/Rust/Elixir stack support + unknown-stack security agent
+- `templates/scripts/setup.sh` + `setup.ps1`: Go (`go mod download` + `go-licenses`), Rust (`cargo fetch` + `cargo-license`), Elixir (`mix deps.get`) stacks added; unknown-stack detection block prints a security banner pointing users to `agents/stack-setup.md` and blocks accidental installs
+- `templates/agents/stack-setup.md` (NEW): 6-phase security-conscious agent for unrecognized stacks — Stack ID → Web Research → Mandatory Security Review (🟢/🟡/🔴 risk levels, HIGH requires `CONFIRM HIGH RISK`) → Present Plan → Execute via sub-agent → Persist to setup.sh/ps1
+- `templates/AGENTS.md`: `stack-setup` added to Agent Roster (🔴 Security/Setup group) and Subagent Roster dispatch table
+
 ### Added — Multi-stack setup automation with mandatory Python venv and cross-platform support
 - `templates/scripts/setup.sh` + `setup.ps1`: Python venv now uses `uv venv` + `uv pip install` when uv is available, falling back to `python -m venv` + `pip`; `py_install`/`Py-Install` helper abstracts manager; multi-stack OS-aware setup with OSI license audit — Node.js (npm + `license-checker`), Python (uv/venv + `pip-licenses`), Ruby, .NET, Maven, Gradle, CMake/Makefile; `--skip-license-check` flag
 - `CONSTITUTION.md` §8.5: Open-Source Package Policy — prefer OSI-approved licenses, document non-OSS exceptions

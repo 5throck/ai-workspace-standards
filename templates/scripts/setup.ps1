@@ -249,6 +249,46 @@ if (-not $SkipInstall) {
         }
     }
 
+    # ── Go ─────────────────────────────────────────────────────────────────────
+    if (Test-Path "go.mod") {
+        if (Require "go" "install Go from https://go.dev/dl/") {
+            Info "Go project detected — running go mod download"
+            go mod download
+            if ($LASTEXITCODE -eq 0) {
+                Pass "go mod download complete"
+                if (-not $SkipLicenseCheck) { Info "  Optional license audit: go install github.com/google/go-licenses@latest" }
+            }
+        }
+    }
+
+    # ── Rust ──────────────────────────────────────────────────────────────────
+    if (Test-Path "Cargo.toml") {
+        if (Require "cargo" "install Rust from https://rustup.rs  (run: winget install Rustlang.Rustup)") {
+            Info "Rust project detected — running cargo fetch"
+            cargo fetch
+            if ($LASTEXITCODE -eq 0) {
+                Pass "cargo fetch complete"
+                if (-not $SkipLicenseCheck) {
+                    if (Get-Command cargo-license -ErrorAction SilentlyContinue) {
+                        Info "Running Rust license audit (cargo-license)…"; cargo license 2>$null
+                    } else { Info "  Optional license audit: cargo install cargo-license && cargo license" }
+                }
+            }
+        }
+    }
+
+    # ── Elixir / Mix ──────────────────────────────────────────────────────────
+    if (Test-Path "mix.exs") {
+        if (Require "mix" "install Elixir from https://elixir-lang.org/install.html  or  winget install ElixirLang.Elixir") {
+            Info "Elixir project detected — running mix deps.get"
+            mix deps.get
+            if ($LASTEXITCODE -eq 0) {
+                Pass "mix deps.get complete"
+                if (-not $SkipLicenseCheck) { Info "  Optional license audit: mix licenses (add licensir to deps)" }
+            }
+        }
+    }
+
     # ── C/C++ (CMake) ─────────────────────────────────────────────────────────
     if (Test-Path "CMakeLists.txt") {
         if (Require "cmake" "install CMake from https://cmake.org") {
@@ -271,6 +311,43 @@ if (-not $SkipInstall) {
             Warn "Makefile detected but make/nmake not found"
             Warn "  Install: winget install GnuWin32.Make  or  Visual Studio Build Tools"
         }
+    }
+
+    # ── Unknown stack detection ───────────────────────────────────────────────
+    $knownManifests = @(
+        "package.json","requirements.txt","pyproject.toml","Gemfile",
+        "go.mod","Cargo.toml","mix.exs",
+        "pom.xml","build.gradle","build.gradle.kts",
+        "CMakeLists.txt","Makefile"
+    )
+    $foundStack = ($knownManifests | Where-Object { Test-Path $_ }).Count -gt 0
+    if (-not $foundStack) {
+        $dotnetFound = Get-ChildItem -Path . -Recurse -Depth 3 -Include "*.csproj","*.sln","*.fsproj" `
+                       -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "\\.git\\" }
+        if ($dotnetFound) { $foundStack = $true }
+    }
+
+    if (-not $foundStack) {
+        Write-Host ""
+        Write-Host ("━" * 60) -ForegroundColor DarkGray
+        Write-Host "⚠  UNKNOWN STACK — manual setup required" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "  No recognized project manifest found in this directory."
+        Write-Host "  Automatic dependency installation has been skipped."
+        Write-Host ""
+        Write-Host "  To set up this project, invoke the stack-setup agent:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "    Agent: agents/stack-setup.md" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  The agent will:"
+        Write-Host "    1. Search for the correct setup procedure for your stack"
+        Write-Host "    2. Perform a security review of all proposed commands"
+        Write-Host "    3. Present the plan with risk assessment for your approval"
+        Write-Host "    4. Execute ONLY after explicit confirmation"
+        Write-Host ""
+        Write-Host "  ⛔ Do NOT run any install commands without agent security review." -ForegroundColor Red
+        Write-Host ("━" * 60) -ForegroundColor DarkGray
+        Write-Host ""
     }
 
 } else { Info "Skipping dependency install (-SkipInstall)" }
