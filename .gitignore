@@ -51,3 +51,5 @@ __pycache__/
 !templates/
 !.editorconfig
 !SECURITY.md
+!AGENTS.md
+!memory/
