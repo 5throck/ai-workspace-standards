@@ -7,6 +7,11 @@ $Date = Get-Date -Format "yyyy-MM-dd"
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 New-Item -ItemType Directory -Path "memory" -Force | Out-Null
 Add-Content "memory\$Date.md" "## Session — $Msg"
+$GitStatus = git status --short 2>$null
+if ($GitStatus) {
+    Add-Content "memory\$Date.md" "`n**Modified Files**:"
+    $GitStatus | ForEach-Object { Add-Content "memory\$Date.md" "- $_" }
+}
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
@@ -17,7 +22,12 @@ if (Test-Path "CHANGELOG.md") {
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
         if ($section -notmatch '(?m)^\s*[-*]' -and $section -notmatch '(?m)^### ') {
-            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n- **[$Date]**: $Msg"
+            $Category = "### Changed"
+            if ($Msg -match "^feat") { $Category = "### Added" }
+            elseif ($Msg -match "^fix") { $Category = "### Fixed" }
+            elseif ($Msg -match "^revert") { $Category = "### Removed" }
+            
+            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n$Category`n- **[$Date]**: $Msg"
             Set-Content "CHANGELOG.md" $cl -Encoding UTF8
             Write-Host "📝 Auto-added changelog entry: $Msg" -ForegroundColor Cyan
         }

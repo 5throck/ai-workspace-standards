@@ -9,6 +9,12 @@ DATE=$(date +%Y-%m-%d)
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 mkdir -p memory
 echo "## Session — $MSG" >> "memory/$DATE.md"
+GIT_STATUS=$(git status --short 2>/dev/null || true)
+if [ -n "$GIT_STATUS" ]; then
+  echo "" >> "memory/$DATE.md"
+  echo "**Modified Files**:" >> "memory/$DATE.md"
+  echo "$GIT_STATUS" | while read -r line; do echo "- $line" >> "memory/$DATE.md"; done
+fi
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"
