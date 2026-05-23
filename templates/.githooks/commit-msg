@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# commit-msg: auto-log memory + CHANGELOG on every direct git commit.
+# Receives the commit message file path as $1.
+# Runs AFTER pre-commit, so the message is guaranteed to be available.
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE" | sed 's/[[:space:]]*$//')
+
+# Skip empty, Merge, WIP, fixup!, squash! commits
+[ -z "$COMMIT_MSG" ] && exit 0
+echo "$COMMIT_MSG" | grep -qE "^Merge|^WIP|^fixup!|^squash!" && exit 0
+
+TODAY=$(date +%Y-%m-%d)
+mkdir -p memory
+
+STAGED=$(git diff --cached --name-only)
+
+# ── Auto-append memory log (skip if dev-sync already wrote this entry) ────────
+if ! grep -qF "## $COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
+  FILE_LIST=$(echo "$STAGED" | grep -v "^memory/" | paste -sd ", " - || true)
+  SEPARATOR=""
+  [ -f "memory/$TODAY.md" ] && SEPARATOR=$'\n---\n\n'
+  printf "%s## %s\n- **Files**: %s\n- **Purpose**: (auto-logged by commit-msg)\n- **Decisions**: \n- **Issues**: None\n" \
+    "$SEPARATOR" "$COMMIT_MSG" "$FILE_LIST" >> "memory/$TODAY.md"
+fi
+
+# ── Auto-update MEMORY.md index ───────────────────────────────────────────────
+if [ -f "scripts/sync-md.sh" ]; then
+  bash scripts/sync-md.sh "$TODAY" "$COMMIT_MSG" 2>/dev/null || true
+fi
+
+# ── Auto-add CHANGELOG entry if [Unreleased] section has no entries yet ───────
+if [ -f "CHANGELOG.md" ] && ! echo "$STAGED" | grep -q "CHANGELOG.md"; then
+  SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
+  if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
+    perl -i -pe 'BEGIN{$m=shift; $d=shift}
+      if (/^## \[Unreleased\]/) { $_ .= "\n### Added\n- **[$d]**: \Q$m\E\n" }
+    ' "$COMMIT_MSG" "$TODAY" CHANGELOG.md
+  fi
+fi
+
+exit 0
