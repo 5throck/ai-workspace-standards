@@ -8,13 +8,20 @@ DATE=$(date +%Y-%m-%d)
 
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 mkdir -p memory
-echo "## Session — $MSG" >> "memory/$DATE.md"
 GIT_STATUS=$(git status --short 2>/dev/null || true)
+FILE_LIST=""
 if [ -n "$GIT_STATUS" ]; then
-  echo "" >> "memory/$DATE.md"
-  echo "**Modified Files**:" >> "memory/$DATE.md"
-  echo "$GIT_STATUS" | while read -r line; do echo "- $line" >> "memory/$DATE.md"; done
+  # Extract just file names, join with commas
+  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | paste -sd ", " -)
 fi
+
+SEPARATOR=""
+if [ -f "memory/$DATE.md" ]; then
+  SEPARATOR="\n---\n\n"
+fi
+
+printf "${SEPARATOR}## $MSG\n- **Files**: $FILE_LIST\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n" >> "memory/$DATE.md"
+
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"

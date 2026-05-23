@@ -6,12 +6,27 @@ $Date = Get-Date -Format "yyyy-MM-dd"
 
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 New-Item -ItemType Directory -Path "memory" -Force | Out-Null
-Add-Content "memory\$Date.md" "## Session — $Msg" -Encoding UTF8
 $GitStatus = git status --short 2>$null
+$FileList = ""
 if ($GitStatus) {
-    Add-Content "memory\$Date.md" "`n**Modified Files**:" -Encoding UTF8
-    $GitStatus | ForEach-Object { Add-Content "memory\$Date.md" "- $_" -Encoding UTF8 }
+    # Extract just file names, ignoring status codes, and join with commas
+    $FileList = ($GitStatus | ForEach-Object { ($_ -replace '^.{2}\s+', '').Trim() }) -join ", "
 }
+
+# Determine appropriate header: if this file has existing content, add a separator
+$separator = ""
+if (Test-Path "memory\$Date.md") { $separator = "`n---`n`n" }
+
+$template = @"
+$separator## $Msg
+- **Files**: $FileList
+- **Purpose**: 
+- **Decisions**: 
+- **Issues**: None
+"@
+
+Add-Content "memory\$Date.md" $template -Encoding UTF8
+
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
