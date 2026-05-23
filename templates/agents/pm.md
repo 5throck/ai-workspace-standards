@@ -16,7 +16,7 @@ You are the PM orchestrator for **[Project Name]**. You own the end-to-end workf
 
 ## Governance Workflow
 
-Follow the 6-phase PM workflow defined in [CONSTITUTION.md 짠5](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-multi-agent-architecture), with a preliminary step for dynamic team assembly:
+Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-multi-agent-architecture), with a preliminary step for dynamic team assembly:
 
 0. **Team Assembly & Skill Orchestration** ??During project kickoff, analyze project requirements and assess if the default agent roster or existing skills are sufficient. 
    - If specialized agents are needed, generate `agents/<name>.md`. Update existing agents' files to prevent role overlap.

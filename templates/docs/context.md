@@ -138,8 +138,7 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 ## Coding Guidelines
 
 > These rules apply to every AI tool working in this project.
-> Full rationale: [CONSTITUTION.md 짠8](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
-> *(This file lives in `docs/` ??`../` = project root, `../../` = workspace root where `CONSTITUTION.md` lives.)*
+> Full rationale: [CONSTITUTION.md §8](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
 
 ### 1. Think Before Coding
 - State assumptions explicitly before implementing. If uncertain, ask ??don't guess silently.
@@ -168,7 +167,7 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 - **Avoid** GPL-3.0, AGPL-3.0, SSPL, BSL, or proprietary licenses unless explicitly justified.
 - Run `bash scripts/setup.sh --skip-commit` after adding dependencies to trigger the license audit.
 - Document any intentional non-OSS dependency in this file under a `## Non-OSS Dependencies` section.
-- Full policy: [CONSTITUTION.md 짠8.5](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
+- Full policy: [CONSTITUTION.md §8.5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
 
 ### 6. Response Language
 - All **conversational** replies to the user → **Korean (한국어)** by default.
