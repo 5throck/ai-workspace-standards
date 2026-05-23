@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# pre-commit: documentation audit + secret scan on structural file changes.
-# memory/ session logs are exempt from all checks.
+# pre-commit: auto-log memory + changelog, audit, secret scan.
+# memory/ session logs are exempt from audit/secret checks.
 
 STAGED=$(git diff --cached --name-only)
 [ -z "$STAGED" ] && exit 0
 
-# Skip entirely for memory/-only commits
+# Skip audit/secret checks for memory/-only commits (but still log)
+MEMORY_ONLY=false
 if ! echo "$STAGED" | grep -qv "^memory/"; then
-  exit 0
+  MEMORY_ONLY=true
 fi
 
 # ── 1. Auto-update Markdown "Last Updated" dates ──────────────────────────────
@@ -22,20 +23,60 @@ if [ -n "$MD_STAGED" ]; then
   done
 fi
 
-# ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries ───────────────────────
+# ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries ─────────────────────────
 if echo "$STAGED" | grep -q "CHANGELOG.md"; then
   TODAY=$(date +%Y-%m-%d)
   perl -i -pe '
     BEGIN { $today = shift; $in_unreleased = 0; }
     if (/^## \[Unreleased\]/) { $in_unreleased = 1; }
     elsif (/^## \[/ && !/^## \[Unreleased\]/) { $in_unreleased = 0; }
-    
     if ($in_unreleased && /^(\s*-\s+)(?!\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: )/) {
       s/^(\s*-\s+)/$1**[$today]**: /;
     }
   ' "$TODAY" CHANGELOG.md
   git add CHANGELOG.md
 fi
+
+# ── 1-B. Auto-create memory log + CHANGELOG entry (when bypassing dev-sync) ───
+# Reads commit message from .git/COMMIT_EDITMSG so direct `git commit -m`
+# calls still produce memory and changelog entries automatically.
+COMMIT_MSG=""
+[ -f ".git/COMMIT_EDITMSG" ] && COMMIT_MSG=$(head -1 .git/COMMIT_EDITMSG | sed 's/[[:space:]]*$//')
+
+if [ -n "$COMMIT_MSG" ] && ! echo "$COMMIT_MSG" | grep -qE "^Merge|^WIP|^fixup!|^squash!"; then
+  TODAY=$(date +%Y-%m-%d)
+  mkdir -p memory
+
+  # Auto-append memory log only if dev-sync hasn't already written this entry
+  if ! grep -qF "## $COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
+    FILE_LIST=$(echo "$STAGED" | grep -v "^memory/" | paste -sd ", " - || true)
+    SEPARATOR=""
+    [ -f "memory/$TODAY.md" ] && SEPARATOR=$'\n---\n\n'
+    printf "%s## %s\n- **Files**: %s\n- **Purpose**: (auto-logged by pre-commit)\n- **Decisions**: \n- **Issues**: None\n" \
+      "$SEPARATOR" "$COMMIT_MSG" "$FILE_LIST" >> "memory/$TODAY.md"
+    git add "memory/$TODAY.md"
+  fi
+
+  # Auto-update MEMORY.md index
+  if [ -f "scripts/sync-md.sh" ]; then
+    bash scripts/sync-md.sh "$TODAY" "$COMMIT_MSG" 2>/dev/null || true
+    [ -f "memory/MEMORY.md" ] && git add "memory/MEMORY.md"
+  fi
+
+  # Auto-add CHANGELOG entry if [Unreleased] section is empty
+  if [ -f "CHANGELOG.md" ] && ! echo "$STAGED" | grep -q "CHANGELOG.md"; then
+    SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
+    if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
+      TODAY=$(date +%Y-%m-%d)
+      perl -i -pe 'BEGIN{$m=shift; $d=shift}
+        if (/^## \[Unreleased\]/) { $_ .= "\n- **[$d]**: $m\n" }
+      ' "$COMMIT_MSG" "$TODAY" CHANGELOG.md
+      git add CHANGELOG.md
+    fi
+  fi
+fi
+
+[ "$MEMORY_ONLY" = true ] && exit 0
 
 # ── 2. Block staged .env files ────────────────────────────────────────────────
 if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then

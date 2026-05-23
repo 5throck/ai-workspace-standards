@@ -9,3 +9,4 @@
 | [2026-05-23](2026-05-23.md) | fix: initialize memory tracking on project creation |
 | [2026-05-23](2026-05-23.md) | docs: clarify tracking management guidelines (CHANGELOG vs. Memory) |
 | [2026-05-23](2026-05-23.md) | feat: dev-sync upgrades for memory and changelog tracking |
+| [2026-05-23](2026-05-23.md) | docs: README OS-based steps + PR language rule + pre-commit auto-log fix |
