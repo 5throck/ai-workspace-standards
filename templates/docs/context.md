@@ -1,4 +1,4 @@
-# [Project Name]
+﻿# [Project Name]
 
 ## Project Overview
 [One-sentence description of what this project does and who it's for.]
@@ -17,24 +17,24 @@
 ## Architecture
 ```
 [project root]/
-├── src/                  # [main source — e.g., app logic, API handlers]
-│   ├── [folder]          # [description]
-│   └── [folder]          # [description]
-├── docs/                 # project context, ADRs
-├── agents/               # AI agent definitions
-├── scripts/              # audit, dev-sync, sync-md
-├── memory/               # session logs
-└── [any other top-level dirs]
+?쒋?? src/                  # [main source ??e.g., app logic, API handlers]
+??  ?쒋?? [folder]          # [description]
+??  ?붴?? [folder]          # [description]
+?쒋?? docs/                 # project context, ADRs
+?쒋?? agents/               # AI agent definitions
+?쒋?? scripts/              # audit, dev-sync, sync-md
+?쒋?? memory/               # session logs
+?붴?? [any other top-level dirs]
 ```
 
 ## Environment Setup
-- Copy `.env.sample` → `.env` and fill in all required values.
+- Copy `.env.sample` ??`.env` and fill in all required values.
 - **Python**:
   - macOS/Linux: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
   - Windows:     `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`
 - **Node.js**: `npm install`
 - Required env keys (see `.env.sample`):
-  - `[KEY_NAME]` — [description] *(replace with actual keys, or write "N/A — no env vars required")*
+  - `[KEY_NAME]` ??[description] *(replace with actual keys, or write "N/A ??no env vars required")*
 
 ## Agents
 <!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
@@ -42,25 +42,25 @@
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 | Group | Agent file | Role |
 |-------|------------|------|
-| Orchestration | `agents/pm.md` | PM orchestrator — owns the workflow, dispatches parallel tasks |
-| Orchestration | `agents/security-monitor.md` | Security monitor — enforces policies, prevents secrets leaks |
-| Design | `agents/architect.md` | Architect — produces implementation plans and ADRs |
-| Design | `agents/designer.md` | Designer — produces UI/UX specs, wireframes, and component definitions |
-| Execution | `agents/code-writer.md` | Code writer — implements approved plans |
-| Execution | `agents/test-runner.md` | Test runner — verifies acceptance criteria and runs QA gate |
+| Orchestration | `agents/pm.md` | PM orchestrator ??owns the workflow, dispatches parallel tasks |
+| Orchestration | `agents/security-monitor.md` | Security monitor ??enforces policies, prevents secrets leaks |
+| Design | `agents/architect.md` | Architect ??produces implementation plans and ADRs |
+| Design | `agents/designer.md` | Designer ??produces UI/UX specs, wireframes, and component definitions |
+| Execution | `agents/code-writer.md` | Code writer ??implements approved plans |
+| Execution | `agents/test-runner.md` | Test runner ??verifies acceptance criteria and runs QA gate |
 
 ## Skills
 | Skill path | Trigger condition |
 |------------|-------------------|
-| *(none yet — add entries as skills are created in `skills/`)* | |
+| *(none yet ??add entries as skills are created in `skills/`)* | |
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
-<!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
-<!-- Example: `skills/auth-flow/SKILL.md` — always load when auth-related tasks   -->
+<!-- Format: `skills/<name>/SKILL.md` ??reason / trigger                          -->
+<!-- Example: `skills/auth-flow/SKILL.md` ??always load when auth-related tasks   -->
 <!-- Add a skill: create skills/<name>/SKILL.md, then add a line below.           -->
-<!-- See ../../templates/_examples/skills/example-skill/SKILL.md for the template.-->
+<!-- See https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/templates/_examples/skills/example-skill/SKILL.md for the template.-->
 - *(none yet)*
 
 ## Development Workflow
@@ -70,13 +70,13 @@ bash scripts/audit.sh            # Windows: .\scripts\audit.ps1
 
 # Log a session entry (without syncing)
 # Claude Code:  /memlog "summary"
-# Bash:         echo "## Session — summary" >> memory/$(date +%Y-%m-%d).md
+# Bash:         echo "## Session ??summary" >> memory/$(date +%Y-%m-%d).md
 
 # Add a changelog entry (optional, before sync)
 # Claude Code:  /changelog "added|changed|fixed|removed <description>"
 # Gemini CLI:   append to CHANGELOG.md under [Unreleased]
 
-# Full sync: memlog → sync-md → changelog → audit → commit → PR
+# Full sync: memlog ??sync-md ??changelog ??audit ??commit ??PR
 bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1 "feat: ..."
 # Claude Code:  /sync "feat: description"
 ```
@@ -102,33 +102,33 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 
 ```
 /sync "feat: description"
-  ↓
+  ??
   1. memory/YYYY-MM-DD.md append (memlog)
   2. memory/MEMORY.md index update (sync-md)
   3. CHANGELOG.md [Unreleased] auto-add
-  4. audit.sh                    ← must exit 0
+  4. audit.sh                    ??must exit 0
   5. git checkout -b pr/<date>-<slug>
   6. git commit + push
-  7. gh pr create → GitHub PR
+  7. gh pr create ??GitHub PR
 ```
 
 > Run `/changelog "description"` before `/sync` to pre-populate the changelog entry.
-> **Rule: All changes reach `main` via PR only — never direct push.**
+> **Rule: All changes reach `main` via PR only ??never direct push.**
 
 ---
 
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `docs/context.md` | This file — single source of truth for all AI tools |
-| `AGENTS.md` | Canonical agent index — auto-loaded by Claude Code |
-| `agents/pm.md` | PM orchestrator — workflow owner |
-| `agents/security-monitor.md` | Security agent — enforces policies and scans for secrets |
-| `agents/architect.md` | Design agent — implementation plans and ADRs |
-| `agents/designer.md` | Design agent — UI/UX specs and component definitions |
-| `agents/code-writer.md` | Implementation agent — writes code from approved plans |
-| `agents/test-runner.md` | QA agent — runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (memlog → sync-md → changelog → audit → commit → PR) |
+| `docs/context.md` | This file ??single source of truth for all AI tools |
+| `AGENTS.md` | Canonical agent index ??auto-loaded by Claude Code |
+| `agents/pm.md` | PM orchestrator ??workflow owner |
+| `agents/security-monitor.md` | Security agent ??enforces policies and scans for secrets |
+| `agents/architect.md` | Design agent ??implementation plans and ADRs |
+| `agents/designer.md` | Design agent ??UI/UX specs and component definitions |
+| `agents/code-writer.md` | Implementation agent ??writes code from approved plans |
+| `agents/test-runner.md` | QA agent ??runs tests and verifies acceptance criteria |
+| `scripts/dev-sync.sh` | Full sync pipeline (memlog ??sync-md ??changelog ??audit ??commit ??PR) |
 | `scripts/audit.sh` | Documentation audit script |
 | `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
 | `memory/MEMORY.md` | Session log index |
@@ -138,11 +138,11 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 ## Coding Guidelines
 
 > These rules apply to every AI tool working in this project.
-> Full rationale: [CONSTITUTION.md §8](../../CONSTITUTION.md#8-coding-behavior-guidelines)
-> *(This file lives in `docs/` — `../` = project root, `../../` = workspace root where `CONSTITUTION.md` lives.)*
+> Full rationale: [CONSTITUTION.md 짠8](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
+> *(This file lives in `docs/` ??`../` = project root, `../../` = workspace root where `CONSTITUTION.md` lives.)*
 
 ### 1. Think Before Coding
-- State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.
+- State assumptions explicitly before implementing. If uncertain, ask ??don't guess silently.
 - If multiple interpretations exist, present them; don't pick one silently.
 - If something is unclear, stop and name what's confusing.
 - **Secrets**: Never hardcode passwords, API tokens, or keys. Always use env vars / `.env.sample`.
@@ -159,8 +159,8 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 
 ### 4. Goal-Driven Execution
 - Convert every task into a verifiable goal before starting:
-  - "Add validation" → "Write tests for invalid inputs, then make them pass"
-  - "Fix the bug" → "Write a reproducer test, then fix it"
+  - "Add validation" ??"Write tests for invalid inputs, then make them pass"
+  - "Fix the bug" ??"Write a reproducer test, then fix it"
 - For multi-step tasks, state a brief numbered plan with a verify step for each.
 
 ### 5. Open-Source Package Policy
@@ -168,8 +168,9 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 - **Avoid** GPL-3.0, AGPL-3.0, SSPL, BSL, or proprietary licenses unless explicitly justified.
 - Run `bash scripts/setup.sh --skip-commit` after adding dependencies to trigger the license audit.
 - Document any intentional non-OSS dependency in this file under a `## Non-OSS Dependencies` section.
-- Full policy: [CONSTITUTION.md §8.5](../../CONSTITUTION.md#5-open-source-package-policy)
+- Full policy: [CONSTITUTION.md 짠8.5](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
 
 ### 6. Response Language
-- All **conversational** replies to the user → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, branch names, **CHANGELOG.md**, and **memory/ logs** → **English only**.
+- All **conversational** replies to the user ??**Korean (?쒓뎅??** by default.
+- All code, config, commit messages, PR titles, branch names, **CHANGELOG.md**, and **memory/ logs** ??**English only**.
+

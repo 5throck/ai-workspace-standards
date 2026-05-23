@@ -1,4 +1,4 @@
-# {{PROJECT_NAME}}
+﻿# {{PROJECT_NAME}}
 
 {{PROJECT_DESCRIPTION}}
 
@@ -29,17 +29,18 @@ cp .env.sample .env   # fill in values
 
 ## Documentation
 
-- **Project context & architecture** → [`docs/context.md`](docs/context.md)
-- **Agent index** → [`AGENTS.md`](AGENTS.md)
-- **Change history** → [`CHANGELOG.md`](CHANGELOG.md)
-- **Workspace standards** → [`../CONSTITUTION.md`](../CONSTITUTION.md)
-- **Claude Code config** → [`CLAUDE.md`](CLAUDE.md)
-- **Gemini CLI config** → [`GEMINI.md`](GEMINI.md)
+- **Project context & architecture** ??[`docs/context.md`](docs/context.md)
+- **Agent index** ??[`AGENTS.md`](AGENTS.md)
+- **Change history** ??[`CHANGELOG.md`](CHANGELOG.md)
+- **Workspace standards** ??[`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md)
+- **Claude Code config** ??[`CLAUDE.md`](CLAUDE.md)
+- **Gemini CLI config** ??[`GEMINI.md`](GEMINI.md)
 
 ## Contributing
 
-[Describe how to contribute — or delete this section if the project is private/internal.]
+[Describe how to contribute ??or delete this section if the project is private/internal.]
 
 ## License
 
-[License name] — see [LICENSE](LICENSE)
+[License name] ??see [LICENSE](LICENSE)
+

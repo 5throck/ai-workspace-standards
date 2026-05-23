@@ -1,8 +1,8 @@
-# GEMINI.md
+﻿# GEMINI.md
 
 This file provides guidance to Gemini (including the Antigravity agentic engine and Gemini CLI) when working in this workspace.
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) ??read it first.**
 >
 > For tool-specific behaviors of Claude Code, see [`CLAUDE.md`](CLAUDE.md).
 
@@ -22,12 +22,12 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
 | **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. |
 
-#### ⚠️ Surgical Multi-Replace Offset Safeguard
+#### ?좑툘 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 - This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
-#### ⚠️ Grep Search 50-Match Cap Safeguard
+#### ?좑툘 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
@@ -42,12 +42,12 @@ Enter Planning Mode when:
 
 When entering Planning Mode, Gemini **MUST** leverage the following three precise Markdown artifacts. When creating or updating them, set `IsArtifact: true` and specify accurate metadata:
 
-#### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows · `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
+#### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
 *   **Purpose**: Detailed technical design document presented to the user for feedback and approval.
 *   **Metadata**: `ArtifactType: "implementation_plan"`, `RequestFeedback: true`, and a clear multi-line `Summary`.
 *   **Governance**: Stop and wait for explicit user approval before modifying any application source code.
 
-#### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows · `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
+#### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
 *   **Purpose**: Running TODO list to track development progress dynamically.
 *   **Metadata**: `ArtifactType: "task"`.
 *   **Syntax**:
@@ -55,7 +55,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     *   `- [/]` for tasks currently in progress.
     *   `- [x]` for completed tasks.
 
-#### 3. `walkthrough.md` (Path: `<appDataDir>\brain\<session-id>\walkthrough.md` on Windows · `<appDataDir>/brain/<session-id>/walkthrough.md` on macOS/Linux)
+#### 3. `walkthrough.md` (Path: `<appDataDir>\brain\<session-id>\walkthrough.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/walkthrough.md` on macOS/Linux)
 *   **Purpose**: Post-implementation document summarizing changes, automated test logs, and manual validation details.
 *   **Metadata**: `ArtifactType: "walkthrough"`.
 
@@ -63,19 +63,19 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ### 3. Response Language
 
-- All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, branch names → **English only**.
+- All **conversational** replies ??**Korean (?쒓뎅??** by default.
+- All code, config, commit messages, PR titles, branch names ??**English only**.
 
 ---
 
 ### 4. Context Loading
 Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
 ```
-@../CONSTITUTION.md          # Step 1 — workspace design standard
-@docs/context.md             # Step 2 — project knowledge
-@AGENTS.md                   # Step 3 — canonical agent roster
-@memory/MEMORY.md            # Step 4 — recent changes (skip if file does not exist)
-@skills/                     # Step 5 — load skills listed in docs/context.md
+@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 ??workspace design standard
+@docs/context.md             # Step 2 ??project knowledge
+@AGENTS.md                   # Step 3 ??canonical agent roster
+@memory/MEMORY.md            # Step 4 ??recent changes (skip if file does not exist)
+@skills/                     # Step 5 ??load skills listed in docs/context.md
 ```
 
 For internationalization (i18n) work, also load the baseline translation reference:
@@ -123,11 +123,11 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 2.  **test-runner** verifies against acceptance criteria and runs tests.
 3.  **Quality gate (audit script)** validates compliance.
 
-> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
+> Loop and correct if review errors are flagged ??maximum **3 iterations** before escalating to the user.
 
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- All standard and complex tasks (Default) ➔ `gemini-2.5-pro`
-- Simple transformations, fast lookups, or file globbing ➔ `gemini-2.5-flash`
+- All standard and complex tasks (Default) ??`gemini-2.5-pro`
+- Simple transformations, fast lookups, or file globbing ??`gemini-2.5-flash`
 
 ---
 
@@ -149,15 +149,16 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
-*   **Migration**: Offer the user a migration of `.claude/` ➔ `.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
+*   **Migration**: Offer the user a migration of `.claude/` ??`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
 
 ---
 
 ## Git & PR Additions (Gemini)
 
-All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **AI Commit Signatures**: Always append `Co-Authored-By: Gemini <noreply@google.com>` to the end of all AI-generated git commit messages.
 
 *Last Updated: 2026-05-22*
+

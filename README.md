@@ -53,7 +53,7 @@ git config core.hooksPath .githooks
 # Antigravity will autonomously scaffold the project via a natural language prompt
 # (e.g., "my-project-name 프로젝트를 생성해 줘") ONLY IF the new-project skill is
 # registered in its global plugins (C:\Users\USER\.gemini\config\plugins\workspace-skills).
-# Otherwise, manually execute the script below, or use the /new-project skill folder.
+# Otherwise, manually execute the script below.
 bash scripts/new-project.sh "my-project-name"
 
 # PowerShell
@@ -73,15 +73,22 @@ C:\git\ (workspace root — this repo)
 ├── CONSTITUTION.md          # Master standard — read first in every session
 ├── CLAUDE.md                # Claude Code workspace behaviors
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
+├── SECURITY.md              # Standard GitHub vulnerability reporting policy
+├── AGENTS.md                # Workspace-level agent index
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
+├── memory/                  # Workspace-level memory logs
 ├── templates/               # Authoritative scaffold — new-project.sh copies this
 │   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   ├── docs/context.md      # Full 10-section project context template
+│   ├── docs/                  
+│   │   ├── context.md       # Full 10-section project context template
+│   │   └── security.md      # Internal data sanitization guidelines
 │   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
-│   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md
-│   ├── .gemini/             # settings.json
+│   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, etc.
+│   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .githooks/           # pre-commit (smart conditional), pre-push
+│   ├── .github/             # GitHub templates (CODEOWNERS, workflows, dependabot)
+│   ├── SECURITY.md          # GitHub vulnerability policy template
 │   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
 │   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
