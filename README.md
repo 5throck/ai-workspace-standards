@@ -56,8 +56,8 @@ git config core.hooksPath .githooks
 # Otherwise, manually execute the script below.
 bash scripts/new-project.sh "my-project-name"
 
-# PowerShell
-.\scripts\new-project.ps1 "my-project-name"
+# Windows (Command Prompt & PowerShell)
+.\scripts\new-project.cmd "my-project-name"
 ```
 
 Each new project is scaffolded with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files automatically.
@@ -84,7 +84,7 @@ C:\git\ (workspace root — this repo)
 │   ├── docs/                  
 │   │   ├── context.md       # Full 10-section project context template
 │   │   └── security.md      # Internal data sanitization guidelines
-│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   ├── scripts/             # dev-sync.sh/.cmd, sync-md.sh/.cmd, audit.sh/.cmd
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .githooks/           # pre-commit (smart conditional), pre-push
@@ -92,10 +92,10 @@ C:\git\ (workspace root — this repo)
 │   ├── SECURITY.md          # GitHub vulnerability policy template
 │   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
-│   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .ps1   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .ps1    # MEMORY.md index updater
-│   └── new-project.sh / .ps1 # New project scaffolding (copies templates/)
+│   ├── audit.sh / .cmd      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
+│   ├── dev-sync.sh / .cmd   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .cmd    # MEMORY.md index updater
+│   └── new-project.sh / .cmd # New project scaffolding (copies templates/)
 ├── .githooks/
 │   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main
@@ -157,7 +157,7 @@ Agent scaffold templates for all roles live in `templates/agents/`.
 - **`CLAUDE.md` / `GEMINI.md` (project-level) contain only platform-specific overrides.**
 - **PR-only workflow** — all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
 - **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **Cross-platform scripts** — every `.sh` has a `.ps1` pair with identical behavior.
+- **Cross-platform scripts** — every `.sh` has a `.cmd`/`.ps1` pair with identical behavior.
 - **Coding Guidelines are audited** — `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 - **Security-First Scaffold** — Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
