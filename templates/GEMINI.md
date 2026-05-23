@@ -1,7 +1,7 @@
-﻿# GEMINI.md
+# GEMINI.md
 
-> **All project context, coding guidelines, and dev workflow ??[`docs/context.md`](docs/context.md)**
-> Workspace-level Gemini behaviors ??[`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md)
+> **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
+> Workspace-level Gemini behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md)
 
 > **Doc intent:** This file contains Gemini CLI-specific overrides only.
 > Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
@@ -15,12 +15,12 @@ Load project files at session start using the `@` syntax:
 @docs/context.md         # project knowledge (includes Session Start Skills)
 @AGENTS.md               # canonical agent roster
 @memory/MEMORY.md        # recent changes (skip if file does not exist)
-@skills/                 # load skills listed in docs/context.md
+@skills/                 # load skills listed in docs/context.md (skip if skills/ does not exist)
 ```
 
 <!-- Add project-specific files below as needed, e.g.:               -->
-<!-- @locales/en.json    ??baseline locale for i18n work              -->
-<!-- @docs/BIZ_LOGIC.md  ??domain formulas / business rules           -->
+<!-- @locales/en.json    — baseline locale for i18n work              -->
+<!-- @docs/BIZ_LOGIC.md  — domain formulas / business rules           -->
 
 ---
 
@@ -40,11 +40,11 @@ Gemini CLI uses different tool names from Claude Code:
 | **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. |
 | **Agent** | `invoke_subagent` | Pass agent role from `agents/<name>.md` |
 
-#### ?좑툘 Surgical Multi-Replace Offset Safeguard
+#### ⚠️ Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: Sort and process `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 
-#### ?좑툘 Grep Search 50-Match Cap Safeguard
+#### ⚠️ Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search by targeting specific subdirectories or applying restrictive file glob filters via the `Includes` parameter.
@@ -75,7 +75,7 @@ When entering Planning Mode, leverage these three Markdown artifacts (set `IsArt
 *Path: `<appDataDir>\brain\<session-id>\task.md`*
 - **Purpose**: Running TODO list to track development progress dynamically.
 - **Metadata**: `ArtifactType: "task"`.
-- **Syntax**: `- [ ]` uncompleted 쨌 `- [/]` in progress 쨌 `- [x]` completed.
+- **Syntax**: `- [ ]` uncompleted · `- [/]` in progress · `- [x]` completed.
 
 #### 3. `walkthrough.md`
 *Path: `<appDataDir>\brain\<session-id>\walkthrough.md`*
@@ -112,11 +112,14 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 
 #### Communication (`send_message`)
 Interact with spawned agents via their unique `conversationID`.
-**Reactive Wakeup**: Do not poll in a loop ??simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
+**Reactive Wakeup**: Do not poll in a loop — simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
 ### Response Language
 - All **conversational** replies → **Korean (한국어)** by default.
 - All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
+
+### PR Language Rule
+All PR titles, bodies, and review comments must be written in English — governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
@@ -153,11 +156,29 @@ Instead, emulate them by reading the `.md` file and executing the described scri
 | Equivalent to | Run instead |
 |---------------|------------|
 | `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` |
-| `/memlog "summary"` | Manually append `## Session ??summary` to `memory/YYYY-MM-DD.md` |
+| `/memlog "summary"` | Manually append `## Session — summary` to `memory/YYYY-MM-DD.md` |
 | `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
 | `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
-| `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) 쨌 `.\scripts\new-project.ps1 "<name>"` (Windows) |
-| `/post-write` | `bash scripts/audit.sh` (macOS/Linux) 쨌 `.\scripts\audit.ps1` (Windows) |
+| `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) · `.\scripts\new-project.ps1 "<name>"` (Windows) |
+| `/post-write` | `bash scripts/audit.sh` (macOS/Linux) · `.\scripts\audit.ps1` (Windows) |
+| `/security-check` | Run Workflow 2 of `agents/security-monitor.md` (Pre-PR Advisory Check) |
+
+---
+
+### Pre-PR Security Gate (public repos only)
+
+Before pushing and creating a PR, check if the repo is public:
+
+```bash
+gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
+```
+
+If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` — read-only, no scan).
+
+- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
+- If no CRITICAL advisories: continue with the push and PR creation.
+
+For private repos: skip the security gate entirely.
 
 ---
 
@@ -167,7 +188,7 @@ This project uses `.claude/` for Claude Code configuration. Gemini follows these
 
 - **Absolute Precedence**: `.gemini/` always takes precedence over `.claude/` if both exist.
 - **Fallback**: If no `.gemini/` directory exists, Gemini may read `.claude/settings.json` and `.claude/commands/` as a fallback source of truth.
-- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated ??read the file to understand the underlying script and run it directly via `shell`.
+- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated — read the file to understand the underlying script and run it directly via `shell`.
 - **Agent Roles**: Gemini can instantiate roles defined in `agents/*.md` using `define_subagent` and `invoke_subagent`.
 - **Migration**: If the project transitions away from Claude Code, proactively offer to migrate `.claude/` configuration to `.gemini/` rather than leaving legacy files orphaned.
 
@@ -177,4 +198,3 @@ This project uses `.claude/` for Claude Code configuration. Gemini follows these
 <!-- Uncomment to override workspace defaults for this project only.          -->
 <!-- - Default      : gemini-2.5-pro                                          -->
 <!-- - Fast lookups : gemini-2.5-flash                                        -->
-
