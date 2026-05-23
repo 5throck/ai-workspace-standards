@@ -49,7 +49,11 @@ git config core.hooksPath .githooks
 # Claude Code
 /new-project
 
-# Gemini CLI / bash
+# Antigravity (Gemini CLI)
+# Antigravity will autonomously scaffold the project via a natural language prompt
+# (e.g., "my-project-name 프로젝트를 생성해 줘") ONLY IF the new-project skill is
+# registered in its global plugins (C:\Users\USER\.gemini\config\plugins\workspace-skills).
+# Otherwise, manually execute the script below, or use the /new-project skill folder.
 bash scripts/new-project.sh "my-project-name"
 
 # PowerShell
