@@ -116,13 +116,7 @@ Interact with spawned agents via their unique `conversationID`.
 
 ### Response Language
 - All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, **PR bodies**, branch names → **English only**.
-
-### PR Language Rule
-
-**All PR titles, bodies, and review comments must be written in English**, regardless of the active session language.
-
-This applies to every `gh pr create`, `gh pr edit`, and inline review call. Even when the user communicates in Korean throughout the session, all PR artifacts must be English.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).

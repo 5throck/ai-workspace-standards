@@ -150,11 +150,7 @@ Always append to AI-generated commit messages:
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
 
-#### PR Language Rule
-
-**All PR titles, bodies, and review comments must be written in English**, regardless of the active session language.
-
-This applies to every `gh pr create`, `gh pr edit`, and inline review call. Even when the user communicates in Korean throughout the session, all PR artifacts must be English.
+- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
 ---
 

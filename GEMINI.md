@@ -64,17 +64,11 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 3. Response Language
 
 - All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, **PR bodies**, branch names → **English only**.
-
-### 4. PR Language Rule
-
-**All PR titles, bodies, and review comments must be written in English**, regardless of the active session language.
-
-This applies to every `gh pr create`, `gh pr edit`, and inline review call. Even when the user communicates in Korean throughout the session, all PR artifacts must be English.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow)).
 
 ---
 
-### 5. Context Loading
+### 4. Context Loading
 Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
 ```
 @https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 ??workspace design standard
@@ -91,7 +85,7 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ---
 
-### 6. Subagent Instantiation & Async Orchestration
+### 5. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
 #### Define Subagent (`define_subagent`)
@@ -137,7 +131,7 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 
 ---
 
-### 7. Slash Command Emulation Guide
+### 6. Slash Command Emulation Guide
 Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS:
 
 | Command | macOS / Linux (Bash) | Windows (PowerShell) |
@@ -151,7 +145,7 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 
 ---
 
-### 8. Coexistence, Precedence & Migration of .claude
+### 7. Coexistence, Precedence & Migration of .claude
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
@@ -165,7 +159,7 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **AI Commit Signatures**: Always append `Co-Authored-By: Gemini <noreply@google.com>` to the end of all AI-generated git commit messages.
-- **PR Language**: All PR titles, bodies, and review comments **must be written in English**, regardless of the conversational language used in the session. This applies to every `gh pr create`, `gh pr edit`, and inline review call.
+- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
 *Last Updated: 2026-05-22*
 
