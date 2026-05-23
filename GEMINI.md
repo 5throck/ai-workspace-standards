@@ -63,8 +63,8 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ### 3. Response Language
 
-- All **conversational** replies ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names ??**English only**.
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow)).
 
 ---
 
@@ -159,6 +159,7 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **AI Commit Signatures**: Always append `Co-Authored-By: Gemini <noreply@google.com>` to the end of all AI-generated git commit messages.
+- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
 *Last Updated: 2026-05-22*
 

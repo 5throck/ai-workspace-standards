@@ -171,6 +171,9 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 - Full policy: [CONSTITUTION.md 짠8.5](../https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
 
 ### 6. Response Language
-- All **conversational** replies to the user ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names, **CHANGELOG.md**, and **memory/ logs** ??**English only**.
+- All **conversational** replies to the user → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/ logs** → **English only**.
+
+### 7. PR Language Rule
+All PR titles, bodies, and review comments must be written in English — governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
 

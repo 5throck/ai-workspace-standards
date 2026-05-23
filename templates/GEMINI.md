@@ -115,8 +115,8 @@ Interact with spawned agents via their unique `conversationID`.
 **Reactive Wakeup**: Do not poll in a loop ??simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
 ### Response Language
-- All **conversational** replies ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names ??**English only**.
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).

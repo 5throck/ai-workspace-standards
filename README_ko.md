@@ -46,19 +46,14 @@ git config core.hooksPath .githooks
 ### 3. 첫 번째 프로젝트 생성
 
 ```bash
-# Claude Code
-/new-project
-
-# Antigravity (Gemini CLI)
-# Antigravity will autonomously scaffold the project via a natural language prompt
-# (e.g., "my-project-name 프로젝트를 생성해 줘") ONLY IF the new-project skill is
-# registered in its global plugins (C:\Users\USER\.gemini\config\plugins\workspace-skills).
-# Otherwise, manually execute the script below.
+# macOS / Linux / Windows (Git Bash)
 bash scripts/new-project.sh "my-project-name"
 
-# Windows (명령 프롬프트 및 PowerShell 공통)
+# Windows — 명령 프롬프트 또는 PowerShell
 .\scripts\new-project.cmd "my-project-name"
 ```
+
+> **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"` 을 사용할 수 있습니다.
 
 각각의 새로운 프로젝트는 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일들과 함께 자동으로 스캐폴딩(scaffold)됩니다.
 

@@ -107,8 +107,8 @@ git config core.hooksPath .githooks
 ### Behavioral Rules
 
 #### Response Language
-- All **conversational** replies ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names ??**English only**.
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only**.
 
 #### Plan Mode
 Enter plan mode (`EnterPlanMode`) when:
@@ -143,12 +143,14 @@ If a slash command or background script returns a non-zero exit code:
 
 ### Git
 
-Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md).
+Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md).
 Always append to AI-generated commit messages:
 
 ```
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
+
+- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
 ---
 
