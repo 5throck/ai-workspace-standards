@@ -15,8 +15,15 @@
 - [ ] `[project test command]` passes
 - [ ] CHANGELOG.md updated under `[Unreleased]`
 
+## Security Checklist
+
+- [ ] No secrets, credentials, or API keys committed
+- [ ] No `.env` files staged (use `.env.sample` for templates)
+- [ ] No private key files (`*.pem`, `*.key`, `*.p12`, etc.)
+- [ ] Dependencies unchanged or reviewed for new CVEs
+- [ ] `security/` folder checked — no unresolved CRITICAL advisories
+
 ## Checklist
 
-- [ ] No secrets or credentials committed
 - [ ] Only files within the approved plan scope were modified
 - [ ] Co-Authored-By line included in commit message

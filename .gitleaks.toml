@@ -1,0 +1,29 @@
+# gitleaks configuration — workspace root
+# Docs: https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+
+title = "ai-workspace-standards gitleaks config"
+
+[extend]
+# Inherit all default rules from the upstream gitleaks config
+useDefault = true
+
+[allowlist]
+description = "Allowlist for known false positives in this workspace"
+# Regex patterns on the matched secret value
+regexes = [
+  # Placeholder values in .env.sample and docs
+  '''your[_-]?(api[_-]?)?key[_-]?here''',
+  '''your[_-]?secret[_-]?here''',
+  '''replace[_-]?with[_-]?actual''',
+  '''example[_\-.]com''',
+  # gitleaks:allow inline marker (single-line suppression)
+  '''gitleaks:allow''',
+]
+# Paths to skip entirely
+paths = [
+  '''\.env\.sample''',
+  '''CHANGELOG\.md''',
+  '''.*_test\.(js|ts|py|go|rs)$''',
+  '''.*\.test\.(js|ts)$''',
+  '''.*_spec\.rb$''',
+]

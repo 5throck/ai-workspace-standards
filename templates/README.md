@@ -39,6 +39,10 @@ cp .env.sample .env   # fill in values
 # 3. Install dependencies
 # Python:  python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 # Node.js: npm install
+
+# 4. Multi-Agent Kickoff (Recommended)
+# Before writing code, ask the AI to start a PM-led kickoff meeting:
+# "Let's start the PM agent kickoff meeting for this project."
 ```
 
 ## Documentation

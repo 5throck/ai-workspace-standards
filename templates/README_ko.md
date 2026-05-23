@@ -39,6 +39,10 @@ cp .env.sample .env   # 환경 변수 값 입력
 # 3. 의존성 설치
 # Python:  python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 # Node.js: npm install
+
+# 4. 멀티에이전트 킥오프 회의 (권장)
+# 코드를 작성하기 전에 AI에게 다음 명령을 내려 PM 에이전트 주관의 기획 회의를 시작하세요:
+# "이 프로젝트를 위한 PM 에이전트 킥오프 회의를 시작해 줘."
 ```
 
 ## 핵심 문서
