@@ -107,8 +107,8 @@ git config core.hooksPath .githooks
 ### Behavioral Rules
 
 #### Response Language
-- All **conversational** replies ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names ??**English only**.
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, PR bodies, branch names → **English only**.
 
 #### Plan Mode
 Enter plan mode (`EnterPlanMode`) when:

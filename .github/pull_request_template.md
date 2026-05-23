@@ -1,24 +1,25 @@
-﻿## Summary / 개요
+## Summary
 
-<!-- Describe the purpose of this PR / 이 PR의 목적을 설명해주세요. -->
+<!-- Describe the purpose of this PR. -->
 - 
 
-## Changes / 변경 사항
+## Changes
 
-<!-- List files modified and what changed / 수정된 파일과 변경 내용을 작성해주세요. -->
+<!-- List files modified and what changed. -->
 - 
 
-## Test Plan / 검증 계획
+## Test Plan
 
-- [ ] ash scripts/audit.sh passes (exit 0) / 성공
-- [ ] CHANGELOG.md updated under [Unreleased] / 업데이트됨
+- [ ] `bash scripts/audit.sh` passes (exit 0)
+- [ ] CHANGELOG.md updated under `[Unreleased]`
 
-## Security Checklist / 보안 체크리스트
+## Security Checklist
 
-- [ ] No secrets, credentials, or API keys committed / 민감한 정보 포함 안 됨
-- [ ] No .env files staged (use .env.sample for templates) / .env 파일 스테이징 안 됨
-- [ ] security/ folder checked — no unresolved CRITICAL advisories / 중대 보안 이슈 없음
+- [ ] No secrets, credentials, or API keys committed
+- [ ] No `.env` files staged (use `.env.sample` for templates)
+- [ ] `security/` folder checked — no unresolved CRITICAL advisories
 
-## Checklist / 체크리스트
+## Checklist
 
-- [ ] Only files within the approved plan scope were modified / 계획된 범위 내의 파일만 수정됨
+- [ ] Only files within the approved plan scope were modified
+- [ ] Co-Authored-By line included in commit message
