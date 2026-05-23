@@ -81,6 +81,11 @@ Request received
 ## Harness Engineering Workflow
 
 ```
+Phase 0 — Team Assembly & Skill Orchestration (Kickoff)
+  PM assesses project requirements
+  PM dynamically creates new agents/skills and resolves R&R overlap
+  PM updates AGENTS.md and docs/context.md
+
 Phase 1 — Triage & Analysis
   PM classifies the request
   Dispatch read-only agents in parallel (analysis, research)
