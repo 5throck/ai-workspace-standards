@@ -1,45 +1,46 @@
-# {{PROJECT_NAME}}
+﻿# {{PROJECT_NAME}}
 
 {{PROJECT_DESCRIPTION}}
 
-## 프로젝트 특징 (Characteristics)
+## ?꾨줈?앺듃 ?뱀쭠 (Characteristics)
 
 {{PROJECT_CHARACTERISTICS}}
 
-## 프로젝트 사용법
+## ?꾨줈?앺듃 ?ъ슜踰?
 
-1. **설정 검토**: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`를 열고 새 프로젝트의 구체적인 역할과 목표에 맞게 수정합니다.
-2. **스크립트 수정**: `scripts/` 디렉토리 내의 파일들(예: `dev-sync.ps1`, `audit.ps1`)을 검토하고, 프로젝트의 요구사항에 맞추어 주석이나 하드코딩된 예시 텍스트를 수정합니다.
-3. **메모리 초기화**: 새 프로젝트에 맞는 `memory/MEMORY.md` 인덱스를 시작합니다.
+1. **?ㅼ젙 寃??*: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`瑜??닿퀬 ???꾨줈?앺듃??援ъ껜?곸씤 ??븷怨?紐⑺몴??留욊쾶 ?섏젙?⑸땲??
+2. **?ㅽ겕由쏀듃 ?섏젙**: `scripts/` ?붾젆?좊━ ?댁쓽 ?뚯씪???? `dev-sync.ps1`, `audit.ps1`)??寃?좏븯怨? ?꾨줈?앺듃???붽뎄?ы빆??留욎텛??二쇱꽍?대굹 ?섎뱶肄붾뵫???덉떆 ?띿뒪?몃? ?섏젙?⑸땲??
+3. **硫붾え由?珥덇린??*: ???꾨줈?앺듃??留욌뒗 `memory/MEMORY.md` ?몃뜳?ㅻ? ?쒖옉?⑸땲??
 
-## 빠른 시작
+## 鍮좊Ⅸ ?쒖옉
 
 ```bash
-# 1. 훅(hooks) 활성화
+# 1. ??hooks) ?쒖꽦??
 git config core.hooksPath .githooks
 
-# 2. 환경 설정
-cp .env.sample .env   # 환경 변수 값 입력
+# 2. ?섍꼍 ?ㅼ젙
+cp .env.sample .env   # ?섍꼍 蹂??媛??낅젰
 
-# 3. 의존성 설치
+# 3. ?섏〈???ㅼ튂
 # Python:  python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 # Node.js: npm install
 
 ```
 
-## 핵심 문서
+## ?듭떖 臾몄꽌
 
-- **프로젝트 컨텍스트 & 아키텍처** → [`docs/context.md`](docs/context.md)
-- **에이전트 인덱스** → [`AGENTS.md`](AGENTS.md)
-- **변경 이력** → [`CHANGELOG.md`](CHANGELOG.md)
-- **워크스페이스 표준** → [`../CONSTITUTION.md`](../CONSTITUTION.md)
-- **Claude Code 설정** → [`CLAUDE.md`](CLAUDE.md)
-- **Gemini CLI 설정** → [`GEMINI.md`](GEMINI.md)
+- **?꾨줈?앺듃 而⑦뀓?ㅽ듃 & ?꾪궎?띿쿂** ??[`docs/context.md`](docs/context.md)
+- **?먯씠?꾪듃 ?몃뜳??* ??[`AGENTS.md`](AGENTS.md)
+- **蹂寃??대젰** ??[`CHANGELOG.md`](CHANGELOG.md)
+- **?뚰겕?ㅽ럹?댁뒪 ?쒖?** ??[`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md)
+- **Claude Code ?ㅼ젙** ??[`CLAUDE.md`](CLAUDE.md)
+- **Gemini CLI ?ㅼ젙** ??[`GEMINI.md`](GEMINI.md)
 
-## 기여하기
+## 湲곗뿬?섍린
 
-[기여 방법을 설명하세요 — 프라이빗/내부 프로젝트인 경우 이 섹션을 삭제하세요.]
+[湲곗뿬 諛⑸쾿???ㅻ챸?섏꽭?????꾨씪?대퉿/?대? ?꾨줈?앺듃??寃쎌슦 ???뱀뀡????젣?섏꽭??]
 
-## 라이선스
+## ?쇱씠?좎뒪
 
-[라이선스 이름] — [LICENSE](LICENSE) 파일 참조
+[?쇱씠?좎뒪 ?대쫫] ??[LICENSE](LICENSE) ?뚯씪 李몄“
+
