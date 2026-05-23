@@ -1,4 +1,4 @@
-# new-project.ps1 — Scaffold a new project under the workspace root (Windows)
+﻿# new-project.ps1 — Scaffold a new project under the workspace root (Windows)
 # Usage: .\scripts\new-project.ps1 "<project-name>"
 param([Parameter(Mandatory)][string]$ProjectName)
 
@@ -101,3 +101,4 @@ Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  → $TemplatesDir\_examples\" -ForegroundColor DarkGray
+
