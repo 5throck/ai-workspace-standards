@@ -46,10 +46,7 @@ git config core.hooksPath .githooks
 ### 3. Create your first project
 
 ```bash
-# macOS / Linux (bash)
-bash scripts/new-project.sh "my-project-name"
-
-# Windows — Git Bash
+# macOS / Linux / Windows (Git Bash)
 bash scripts/new-project.sh "my-project-name"
 
 # Windows — Command Prompt or PowerShell
