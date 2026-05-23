@@ -27,7 +27,7 @@ Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](https://raw.gith
 3. **Design** ??Dispatch architect (implementation plan + ADR) and, if the task has UI/UX surface, designer (wireframes + component spec) in parallel; obtain explicit user approval before proceeding.
 4. **Implementation** ??Dispatch code-writer (serial); test-runner verifies after each change.
 5. **QA** ??Verify all acceptance criteria; run audit script + tests.
-6. **Finalization** ??Run memlog ??sync; open PR; hand off to user. All AI-generated commits must include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`.
+6. **Finalization** — Run memlog → sync; open PR; hand off to user. All AI-generated commits must include the appropriate `Co-Authored-By` line for the active AI tool (see `CLAUDE.md` or `GEMINI.md`).
 
 ## Agent Roster
 
@@ -40,6 +40,7 @@ Add rows as specialist agents are created. Start with PM only; expand when the p
 | Design | Design | `agents/designer.md` | UI/UX specs, wireframes, component definitions; awaits user approval |
 | Implementation | Execution | `agents/code-writer.md` | Write code per approved plan |
 | QA / Verification | Execution | `agents/test-runner.md` | Run tests, verify acceptance criteria |
+| Setup (unknown stack) | Setup | `agents/stack-setup.md` | Identify stack, research, security review, scaffold setup scripts |
 
 ## Constraints
 

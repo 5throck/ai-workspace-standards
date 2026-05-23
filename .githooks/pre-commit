@@ -15,12 +15,13 @@ fi
 MD_STAGED=$(echo "$STAGED" | grep -i "\.md$" || true)
 if [ -n "$MD_STAGED" ]; then
   TODAY=$(date +%Y-%m-%d)
-  for file in $MD_STAGED; do
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
     if [ -f "$file" ] && grep -q "Last Updated:" "$file"; then
       sed -i "s/Last Updated: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Last Updated: $TODAY/g" "$file"
       git add "$file"
     fi
-  done
+  done <<< "$MD_STAGED"
 fi
 
 # ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries ─────────────────────────
