@@ -62,6 +62,24 @@ bash scripts/new-project.sh "my-project-name"
 
 Each new project is scaffolded with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files automatically.
 
+### 4. Move to the new project & Start Kick-off
+
+**CRITICAL**: You must exit your current AI session and start a new one inside the newly created project directory. If you remain at the workspace root, the AI will not load the project-specific configuration and will skip the kick-off meeting.
+
+```bash
+# 1. Exit the current AI session (if running)
+# 2. Move into the newly created project folder
+cd "my-project-name"
+
+# 3. Start a fresh AI session to load project context
+claude
+# or
+agy
+
+# 4. Ask the AI to start the PM kick-off
+> "Start the project kick-off meeting based on the pm agent requirements."
+```
+
 
 
 ---

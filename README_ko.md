@@ -62,6 +62,24 @@ bash scripts/new-project.sh "my-project-name"
 
 각각의 새로운 프로젝트는 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일들과 함께 자동으로 스캐폴딩(scaffold)됩니다.
 
+### 4. 새 프로젝트로 이동 및 킥오프 시작
+
+**중요 (CRITICAL)**: 프로젝트 생성이 완료되면 반드시 현재 AI 세션을 종료하고, 방금 생성한 프로젝트 폴더 내부로 이동하여 새로운 AI 세션을 시작해야 합니다. 루트 폴더(최상단)에 계속 머물러 있으면, AI가 프로젝트 전용 환경 설정 파일을 읽지 못해 PM 킥오프 미팅이 생략됩니다.
+
+```bash
+# 1. 실행 중인 AI 세션 종료
+# 2. 새로 생성된 프로젝트 폴더로 이동
+cd "my-project-name"
+
+# 3. 새로운 AI 세션을 시작하여 프로젝트 컨텍스트를 로드
+claude
+# 또는
+agy
+
+# 4. AI에게 PM 킥오프 미팅 시작을 요청
+> "PM 에이전트 지침에 맞춰 프로젝트 킥오프 미팅 진행해 줘."
+```
+
 ---
 
 ## 저장소 구조 (Repository Structure)
