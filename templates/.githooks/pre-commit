@@ -22,6 +22,21 @@ if [ -n "$MD_STAGED" ]; then
   done
 fi
 
+# ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries ───────────────────────
+if echo "$STAGED" | grep -q "CHANGELOG.md"; then
+  TODAY=$(date +%Y-%m-%d)
+  perl -i -pe '
+    BEGIN { $today = shift; $in_unreleased = 0; }
+    if (/^## \[Unreleased\]/) { $in_unreleased = 1; }
+    elsif (/^## \[/ && !/^## \[Unreleased\]/) { $in_unreleased = 0; }
+    
+    if ($in_unreleased && /^(\s*-\s+)(?!\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: )/) {
+      s/^(\s*-\s+)/$1**[$today]**: /;
+    }
+  ' "$TODAY" CHANGELOG.md
+  git add CHANGELOG.md
+fi
+
 # ── 2. Block staged .env files ────────────────────────────────────────────────
 if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then
   echo -e "\033[31m[FAIL]\033[0m Attempt to commit .env file detected."

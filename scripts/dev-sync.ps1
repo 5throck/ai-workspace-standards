@@ -17,7 +17,7 @@ if (Test-Path "CHANGELOG.md") {
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
         if ($section -notmatch '(?m)^\s*[-*]' -and $section -notmatch '(?m)^### ') {
-            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n- $Msg"
+            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n- **[$Date]**: $Msg"
             Set-Content "CHANGELOG.md" $cl -Encoding UTF8
             Write-Host "📝 Auto-added changelog entry: $Msg" -ForegroundColor Cyan
         }
