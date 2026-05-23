@@ -1,10 +1,10 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
 | Version | Supported |
 |---------|-----------|
-| Latest | ✅ |
+| Latest  | ??       |
 
 ## Reporting a Vulnerability
 
@@ -13,7 +13,7 @@ If you discover a security vulnerability in this project, **do not open a public
 Instead, please report it privately via one of the following channels:
 
 - **GitHub Security Advisory**: [Report a vulnerability](../../security/advisories/new) *(preferred)*
-- **Email**: [your-security-email@example.com] *(replace with actual contact)*
+- **Email**: Contact [@5throck](https://github.com/5throck) directly via GitHub
 
 ### What to include
 
