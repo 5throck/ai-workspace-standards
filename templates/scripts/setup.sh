@@ -430,7 +430,7 @@ fi
 # ── 4. Initial commit ─────────────────────────────────────────────────────────
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
-    git add -A
+    git add -A 2>/dev/null
     if git commit -m "chore: initial scaffold
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>" 2>/dev/null; then
