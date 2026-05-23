@@ -1,0 +1,23 @@
+﻿# Auto detect text files and perform LF normalization
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.h text
+*.js text
+*.ts text
+*.jsx text
+*.tsx text
+*.json text
+*.md text
+*.html text
+*.css text
+*.ps1 text
+
+# Declare files that will always have CRLF line endings on checkout.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
