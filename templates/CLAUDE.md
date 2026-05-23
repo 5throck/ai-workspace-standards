@@ -143,12 +143,18 @@ If a slash command or background script returns a non-zero exit code:
 
 ### Git
 
-Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md).
+Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md).
 Always append to AI-generated commit messages:
 
 ```
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
+
+#### PR Language Rule
+
+**All PR titles, bodies, and review comments must be written in English**, regardless of the active session language.
+
+This applies to every `gh pr create`, `gh pr edit`, and inline review call. Even when the user communicates in Korean throughout the session, all PR artifacts must be English.
 
 ---
 

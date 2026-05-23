@@ -115,8 +115,14 @@ Interact with spawned agents via their unique `conversationID`.
 **Reactive Wakeup**: Do not poll in a loop ??simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
 ### Response Language
-- All **conversational** replies ??**Korean (?쒓뎅??** by default.
-- All code, config, commit messages, PR titles, branch names ??**English only**.
+- All **conversational** replies → **Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, **PR bodies**, branch names → **English only**.
+
+### PR Language Rule
+
+**All PR titles, bodies, and review comments must be written in English**, regardless of the active session language.
+
+This applies to every `gh pr create`, `gh pr edit`, and inline review call. Even when the user communicates in Korean throughout the session, all PR artifacts must be English.
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
