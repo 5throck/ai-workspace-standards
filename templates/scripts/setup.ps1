@@ -352,7 +352,22 @@ if (-not $SkipInstall) {
 
 } else { Info "Skipping dependency install (-SkipInstall)" }
 
-# ── 3. Initial commit ─────────────────────────────────────────────────────────
+# ── 3. Initialize memory log ──────────────────────────────────────────────────
+$Date = Get-Date -Format "yyyy-MM-dd"
+if (-not (Test-Path "memory")) { New-Item -ItemType Directory -Path "memory" -Force | Out-Null }
+$LogPath = "memory\$Date.md"
+if (-not (Test-Path $LogPath)) {
+    Add-Content $LogPath "## Session — chore: initial scaffold`n`n- Project successfully scaffolded from workspace templates.`n"
+}
+$IndexPath = "memory\MEMORY.md"
+if (Test-Path $IndexPath) {
+    $IndexContent = Get-Content $IndexPath -Raw
+    if ($IndexContent -notmatch "\[$Date\]") {
+        Add-Content $IndexPath "| [$Date]($Date.md) | chore: initial scaffold |"
+    }
+}
+
+# ── 4. Initial commit ─────────────────────────────────────────────────────────
 if (-not $SkipCommit) {
     $gitDir = git rev-parse --git-dir 2>$null
     if ($LASTEXITCODE -eq 0) {

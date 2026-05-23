@@ -413,7 +413,21 @@ else
   info "Skipping dependency install (--skip-install)"
 fi
 
-# ── 3. Initial commit ─────────────────────────────────────────────────────────
+# ── 3. Initialize memory log ──────────────────────────────────────────────────
+DATE_STR=$(date +%Y-%m-%d)
+mkdir -p memory
+LOG_PATH="memory/${DATE_STR}.md"
+if [ ! -f "$LOG_PATH" ]; then
+  echo -e "## Session — chore: initial scaffold\n\n- Project successfully scaffolded from workspace templates.\n" > "$LOG_PATH"
+fi
+INDEX_PATH="memory/MEMORY.md"
+if [ -f "$INDEX_PATH" ]; then
+  if ! grep -q "\[${DATE_STR}\]" "$INDEX_PATH"; then
+    echo "| [${DATE_STR}](${DATE_STR}.md) | chore: initial scaffold |" >> "$INDEX_PATH"
+  fi
+fi
+
+# ── 4. Initial commit ─────────────────────────────────────────────────────────
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
     git add -A
