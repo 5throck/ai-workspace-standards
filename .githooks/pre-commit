@@ -10,17 +10,29 @@ if ! echo "$STAGED" | grep -qv "^memory/"; then
   exit 0
 fi
 
-# ── 1. Block staged .env files ────────────────────────────────────────────────
+# ── 1. Auto-update Markdown "Last Updated" dates ──────────────────────────────
+MD_STAGED=$(echo "$STAGED" | grep -i "\.md$" || true)
+if [ -n "$MD_STAGED" ]; then
+  TODAY=$(date +%Y-%m-%d)
+  for file in $MD_STAGED; do
+    if [ -f "$file" ] && grep -q "Last Updated:" "$file"; then
+      sed -i "s/Last Updated: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Last Updated: $TODAY/g" "$file"
+      git add "$file"
+    fi
+  done
+fi
+
+# ── 2. Block staged .env files ────────────────────────────────────────────────
 if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then
   echo -e "\033[31m[FAIL]\033[0m Attempt to commit .env file detected."
   echo "       .env files must never be committed. Add to .gitignore and use .env.sample instead."
   exit 1
 fi
 
-# ── 2. Documentation audit ────────────────────────────────────────────────────
+# ── 3. Documentation audit ────────────────────────────────────────────────────
 bash scripts/audit.sh || exit 1
 
-# ── 3. Secret scan ────────────────────────────────────────────────────────────
+# ── 4. Secret scan ────────────────────────────────────────────────────────────
 echo ""
 echo "=== Secret scan ==="
 
