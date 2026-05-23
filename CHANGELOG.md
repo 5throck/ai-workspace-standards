@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-23]**: `templates/docs/context.md`, `templates/agents/pm.md`, `templates/agents/*.md`: PM-first multi-agent workflow enforcement. Added "Multi-Agent Workflow" section to context.md as single source of truth; PM agent declared as SINGLE ENTRY POINT; all specialist agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) now refuse direct invocation and redirect to PM.
+- **[2026-05-23]**: `templates/CLAUDE.md`, `templates/GEMINI.md`: Added brief "Multi-Agent Workflow" reference pointing to docs/context.md; eliminated duplication.
 - **[2026-05-23]**: `.githooks/pre-commit` + `templates/.githooks/pre-commit`: New §1-B — auto-creates memory log entry and CHANGELOG entry on every direct `git commit`, not just when using `dev-sync.sh`. Reads commit message from `.git/COMMIT_EDITMSG`; skips duplicates already written by dev-sync; stages generated files into the same commit.
 - **[2026-05-23]**: `GEMINI.md`: Added §4 PR Language Rule (reference to CONSTITUTION.md §3); renumbered §4-7 → §5-8; Git & PR Additions: added PR Language bullet.
 - **[2026-05-23]**: `CLAUDE.md`, `GEMINI.md`, `templates/CLAUDE.md`, `templates/GEMINI.md`, `templates/docs/context.md`: PR Language Rule consolidated to CONSTITUTION.md §3 as single source of truth; removed inline duplicates; all files now reference §3 instead.

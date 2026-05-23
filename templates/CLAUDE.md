@@ -107,6 +107,16 @@ git config core.hooksPath .githooks
 
 ### Behavioral Rules
 
+#### Multi-Agent Workflow
+
+This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator.
+
+**Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents is forbidden.
+
+> **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
+
+**Quick start:** Submit your request to PM: "PM, I need to [describe task]"
+
 #### Response Language
 - All **conversational** replies → **Korean (한국어)** by default.
 - All code, config, commit messages, PR titles, PR bodies, branch names → **English only**.
