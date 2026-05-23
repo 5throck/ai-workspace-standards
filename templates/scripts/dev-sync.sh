@@ -11,17 +11,15 @@ mkdir -p memory
 GIT_STATUS=$(git status --short 2>/dev/null || true)
 FILE_LIST=""
 if [ -n "$GIT_STATUS" ]; then
-  # Extract just file names, join with commas
   FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | paste -sd ", " -)
 fi
 
 SEPARATOR=""
-if [ -f "memory/$DATE.md" ]; then
-  SEPARATOR="\n---\n\n"
-fi
+[ -f "memory/$DATE.md" ] && SEPARATOR=$'\n---\n\n'
 
-printf "${SEPARATOR}## $MSG\n- **Files**: $FILE_LIST\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n" >> "memory/$DATE.md"
-
+# Safe printf: keep format string static, pass values as arguments
+printf '%s## %s\n- **Files**: %s\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n' \
+  "$SEPARATOR" "$MSG" "$FILE_LIST" >> "memory/$DATE.md"
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"
@@ -30,7 +28,11 @@ bash scripts/sync-md.sh "$DATE" "$MSG"
 if [ -f "CHANGELOG.md" ]; then
   SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
   if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
-    perl -pi -e 'BEGIN{$m=shift} s/## \[Unreleased\]/## [Unreleased]\n\n- $m/' "$MSG" CHANGELOG.md
+    TODAY=$(date +%Y-%m-%d)
+    # \Q$m\E prevents Perl metachar expansion in the replacement string
+    perl -i -pe 'BEGIN{$m=shift; $d=shift}
+      if (/^## \[Unreleased\]/) { $_ .= "\n### Added\n- **[$d]**: \Q$m\E\n" }
+    ' "$MSG" "$TODAY" CHANGELOG.md
     echo "📝 Auto-added changelog entry: $MSG"
   fi
 fi
@@ -38,22 +40,38 @@ fi
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 bash scripts/audit.sh
 
-# ── 5. Branch → commit → push → PR ────────────────────────────────────────────
+# ── 5. Guard against committing sensitive files ────────────────────────────────
+# Check for unignored sensitive filenames before staging everything
+SENSITIVE=$(git ls-files --others --exclude-standard | \
+  grep -iE '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^s][^a]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' \
+  || true)
+if [ -n "$SENSITIVE" ]; then
+  echo "❌ Potentially sensitive untracked files detected — refusing git add -A:"
+  echo "$SENSITIVE" | sed 's/^/   /'
+  echo "   Stage files explicitly with 'git add <file>' or add them to .gitignore."
+  exit 1
+fi
+
+# ── 6. Branch → commit → push → PR ───────────────────────────────────────────
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
-  BRANCH="pr/$(date +%Y%m%d-%H%M%S)-$(echo "$MSG" | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)"
+  SLUG=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)
+  BRANCH="pr/$(date +%Y%m%d-%H%M%S)-${SLUG}"
   git checkout -b "$BRANCH"
 else
   BRANCH="$CURRENT_BRANCH"
   echo "ℹ️  Already on branch '$BRANCH' — committing here without creating a new branch."
 fi
+
 git add -A
-# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
-git commit -m "$MSG"
+git commit -m "$MSG
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git push -u origin "$BRANCH"
+
 # Use PR template if present; fall back to --fill
 if [ -f ".github/pull_request_template.md" ]; then
-  gh pr create --title "$MSG" --body "$(cat .github/pull_request_template.md)"
+  gh pr create --title "$MSG" --body-file .github/pull_request_template.md
 else
   gh pr create --fill
 fi

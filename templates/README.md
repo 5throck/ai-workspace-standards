@@ -44,3 +44,5 @@ bash scripts/setup.sh
 ## License
 
 [License name] — see [LICENSE](LICENSE)
+
+> **TODO**: Add a `LICENSE` file to this project. Choose a license at [choosealicense.com](https://choosealicense.com).

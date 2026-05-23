@@ -41,17 +41,12 @@ while IFS= read -r -d '' file; do
   perl -pi -e "s/\[Project Name\]/\Q$PROJECT_NAME\E/g" "$file"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
-     -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
+     -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
   -print0)
 
 # ── 5. Make scripts and hooks executable ───────────────────────────────────────
-chmod +x "$PROJECT_DIR/.githooks/pre-commit" \
-         "$PROJECT_DIR/.githooks/pre-push" \
-         "$PROJECT_DIR/.githooks/post-checkout" \
-         "$PROJECT_DIR/scripts/audit.sh" \
-         "$PROJECT_DIR/scripts/dev-sync.sh" \
-         "$PROJECT_DIR/scripts/sync-md.sh" \
-         "$PROJECT_DIR/scripts/setup.sh"
+find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;
+find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 
 # ── 6. Initialize git ──────────────────────────────────────────────────────────
 cd "$PROJECT_DIR"

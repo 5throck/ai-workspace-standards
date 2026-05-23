@@ -85,10 +85,10 @@ C:\git\ (워크스페이스 루트 — 현재 저장소)
 ├── CLAUDE.md                # Claude Code 워크스페이스 동작 설정
 ├── GEMINI.md                # Gemini CLI / Antigravity 워크스페이스 동작 설정
 ├── SECURITY.md              # 표준 GitHub 취약점 보고 정책
-├── AGENTS.md                # 워크스페이스 레벨 에이전트 인덱스
 ├── CHANGELOG.md             # 워크스페이스 레벨 변경 이력
 ├── README.md                # 영문 README
 ├── README_ko.md             # 본 파일 (국문)
+├── .gitleaks.toml           # 시크릿 스캔 설정 (상위 기본값 확장)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
 ├── templates/               # 공식 스캐폴드 — new-project.sh가 이 구조를 복사함
 │   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md

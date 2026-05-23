@@ -26,4 +26,6 @@ paths = [
   '''.*_spec\.rb$''',
   # memory/ logs never contain secrets (they're AI session notes)
   '''memory/.*''',
+  # _examples/ contains illustrative content with realistic-looking values
+  '''_examples/.*''',
 ]

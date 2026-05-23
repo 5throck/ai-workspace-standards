@@ -5,4 +5,7 @@ DATE="${1:-$(date +%Y-%m-%d)}"
 SUMMARY="${2:-update}"
 MEMORY_FILE="memory/MEMORY.md"
 [ ! -f "$MEMORY_FILE" ] && printf "# Memory Index\n\n| Date | Summary |\n|------|----------|\n" > "$MEMORY_FILE"
-echo "| [$DATE]($DATE.md) | $SUMMARY |" >> "$MEMORY_FILE"
+# Dedup: only append if this date+summary combination not already present
+if ! grep -qF "[$DATE]" "$MEMORY_FILE"; then
+  echo "| [$DATE]($DATE.md) | $SUMMARY |" >> "$MEMORY_FILE"
+fi

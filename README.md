@@ -87,10 +87,10 @@ C:\git\ (workspace root — this repo)
 ├── CLAUDE.md                # Claude Code workspace behaviors
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
 ├── SECURITY.md              # Standard GitHub vulnerability reporting policy
-├── AGENTS.md                # Workspace-level agent index
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
 ├── README_ko.md             # This file (Korean)
+├── .gitleaks.toml           # Secret scan config (extends upstream defaults)
 ├── memory/                  # Workspace-level memory logs
 ├── templates/               # Authoritative scaffold — new-project.sh copies this
 │   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
