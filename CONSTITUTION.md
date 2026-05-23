@@ -123,6 +123,7 @@ Every session that produces a meaningful change must be logged.
 
 #### Tracking Management Guidelines: CHANGELOG vs. Memory
 To avoid noise and preserve agent context, maintain a strict separation of concerns:
+- **Strictly English**: `CHANGELOG.md` and all `memory/` logs MUST be written in English. Do not write them in Korean even if the user converses in Korean.
 - **`CHANGELOG.md` (Product-Facing)**: Document *what* changed for the end-user (e.g., new features, bug fixes). Use structured format (Added, Changed, Fixed).
 - **`memory/` (Developer/AI-Facing)**: Document *how* and *why* it changed. Record the development process, architectural decisions, failed experiments, and agent task states to maintain AI context across sessions.
 
