@@ -6,11 +6,11 @@ $Date = Get-Date -Format "yyyy-MM-dd"
 
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 New-Item -ItemType Directory -Path "memory" -Force | Out-Null
-Add-Content "memory\$Date.md" "## Session — $Msg"
+Add-Content "memory\$Date.md" "## Session — $Msg" -Encoding UTF8
 $GitStatus = git status --short 2>$null
 if ($GitStatus) {
-    Add-Content "memory\$Date.md" "`n**Modified Files**:"
-    $GitStatus | ForEach-Object { Add-Content "memory\$Date.md" "- $_" }
+    Add-Content "memory\$Date.md" "`n**Modified Files**:" -Encoding UTF8
+    $GitStatus | ForEach-Object { Add-Content "memory\$Date.md" "- $_" -Encoding UTF8 }
 }
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
