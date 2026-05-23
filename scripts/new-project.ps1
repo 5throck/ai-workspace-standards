@@ -94,9 +94,6 @@ Write-Host "   All subsequent work (git, scripts, sessions) must be run"
 Write-Host "   from inside this directory, not the workspace root."
 Write-Host ("━" * 60) -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "🤖 MULTI-AGENT KICKOFF (Recommended):" -ForegroundColor Magenta
-Write-Host "   Before writing code, start a PM-led kickoff meeting to plan architecture and roles:"
-Write-Host "   Ask the AI: 'Let's start the PM agent kickoff meeting for this project.'" -ForegroundColor Yellow
 
 # Also actually change to project directory (takes effect when dot-sourced)
 Set-Location $ProjectDir
