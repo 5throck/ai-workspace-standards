@@ -39,6 +39,7 @@
 ## Agents
 <!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
 <!-- Duplicate the table here only as a quick-reference summary for non-CC tools.   -->
+<!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 | Group | Agent file | Role |
 |-------|------------|------|
 | Orchestration | `agents/pm.md` | PM orchestrator — owns the workflow, dispatches parallel tasks |
@@ -54,6 +55,7 @@
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
+<!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 <!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
 <!-- Example: `skills/auth-flow/SKILL.md` — always load when auth-related tasks   -->
 <!-- Add a skill: create skills/<name>/SKILL.md, then add a line below.           -->

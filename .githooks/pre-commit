@@ -29,7 +29,7 @@ _GITLEAKS_CONFIG=""
 
 if command -v gitleaks &>/dev/null; then
   # shellcheck disable=SC2086
-  if gitleaks protect --staged --no-banner -q $_GITLEAKS_CONFIG; then
+  if gitleaks protect --staged --no-banner --log-level error $_GITLEAKS_CONFIG; then
     echo -e "\033[32m[PASS]\033[0m gitleaks: no secrets detected"
   else
     echo -e "\033[31m[FAIL]\033[0m gitleaks detected potential secrets — commit blocked."
