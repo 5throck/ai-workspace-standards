@@ -1,27 +1,30 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
-This is a workspace configuration repository. Security concerns apply to the
-configuration files, scripts, and scaffold templates it provides.
+| Version | Supported |
+|---------|-----------|
+| Latest  | ??       |
 
 ## Reporting a Vulnerability
 
-If you discover a security issue in this workspace standard (e.g., a script that
-exposes credentials, a hook bypass, or an unsafe default), please report it privately:
+If you discover a security vulnerability in this project, **do not open a public GitHub issue**.
+
+Instead, please report it privately via one of the following channels:
 
 - **GitHub Security Advisory**: [Report a vulnerability](../../security/advisories/new) *(preferred)*
 - **Email**: Contact [@5throck](https://github.com/5throck) directly via GitHub
 
 ### What to include
 
-- Which file or script is affected
-- How the vulnerability could be exploited
-- Any suggested fix
+- A description of the vulnerability and its potential impact
+- Steps to reproduce the issue
+- Any suggested fixes or mitigations
 
 ### Response timeline
 
 - **Acknowledgement**: within 48 hours
-- **Fix release**: within 14 days for critical issues
+- **Initial assessment**: within 7 days
+- **Patch release**: within 30 days for critical issues
 
-We appreciate responsible disclosure.
+We appreciate responsible disclosure and will credit reporters (unless anonymity is requested).
