@@ -6,26 +6,11 @@
 
 {{PROJECT_CHARACTERISTICS}}
 
-## 이 템플릿 사용법
+## 프로젝트 사용법
 
-이 저장소(`templates`)는 견고한 하네스 엔지니어링(Harness Engineering) 및 AIG 거버넌스 구조를 갖춘 신규 프로젝트를 생성하기 위한 스캐폴딩(Scaffold) 템플릿입니다.
-제공된 스크립트를 사용하여 새 프로젝트 폴더를 자동으로 생성하고 프로젝트 세부 정보를 README 파일에 채울 수 있습니다.
-
-**자동 설정 (권장)**
-```bash
-# PowerShell 사용 시
-.\create-project.ps1 -TargetDir "C:\git\my_new_project"
-
-# Bash 사용 시
-bash create-project.sh "../my_new_project"
-```
-스크립트는 프로젝트 이름, 설명 및 특징을 묻는 프롬프트를 표시하고, 새로 생성된 `README.md`와 `README_ko.md`의 플레이스홀더를 자동으로 교체합니다.
-
-**수동 설정**
-1. **구조 복사하기**: `scripts/`, `memory/`, `.github/`, `.githooks/`, `.claude/` 디렉토리를 신규 프로젝트로 복사합니다.
-2. **설정 검토**: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`를 열고 새 프로젝트의 구체적인 역할과 목표에 맞게 수정합니다.
-3. **스크립트 수정**: `scripts/` 디렉토리 내의 파일들(예: `dev-sync.ps1`, `audit.ps1`)을 검토하고, 프로젝트의 요구사항에 맞추어 주석이나 하드코딩된 예시 텍스트를 수정합니다.
-4. **메모리 초기화**: 새 프로젝트에 맞는 `memory/MEMORY.md` 인덱스를 시작합니다.
+1. **설정 검토**: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`를 열고 새 프로젝트의 구체적인 역할과 목표에 맞게 수정합니다.
+2. **스크립트 수정**: `scripts/` 디렉토리 내의 파일들(예: `dev-sync.ps1`, `audit.ps1`)을 검토하고, 프로젝트의 요구사항에 맞추어 주석이나 하드코딩된 예시 텍스트를 수정합니다.
+3. **메모리 초기화**: 새 프로젝트에 맞는 `memory/MEMORY.md` 인덱스를 시작합니다.
 
 ## 빠른 시작
 

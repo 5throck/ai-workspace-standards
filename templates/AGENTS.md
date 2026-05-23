@@ -12,11 +12,12 @@
 
 ## Agent Roster
 
-### 🟡 Orchestration
+### 🟡 Orchestration / Audit
 
 | Agent | File | Role |
 |-------|------|------|
 | PM Orchestrator | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
+| Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Enforces security policies; prevents secrets leaks; monitors safe dependencies |
 
 ### 🔵 Design
 
@@ -69,6 +70,7 @@ Request received
 
 | Agent | File | Parallelizable | Write Allowed? |
 |-------|------|:--------------:|:--------------:|
+| Security Monitor | `agents/security-monitor.md`| ✅ Triage phase | ❌ No |
 | Architect | `agents/architect.md` | ✅ Design phase | ❌ No |
 | Designer | `agents/designer.md` | ✅ Design phase | ❌ No |
 | Code Writer | `agents/code-writer.md` | ❌ Serial | ✅ Source files |
@@ -119,6 +121,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 |----------|-----|------------|
 | Design the implementation approach and data model | `architect` | `code-writer` |
 | Design UI/UX components or screens | `designer` | `architect` |
+| Security assessment, credentials scanning | `security-monitor` | `architect` |
 | Write or modify source files | `code-writer` | `architect` |
 | Run tests and verify acceptance criteria | `test-runner` | `code-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |

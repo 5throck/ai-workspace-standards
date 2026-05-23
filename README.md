@@ -76,7 +76,7 @@ C:\git\ (workspace root — this repo)
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
 ├── templates/               # Authoritative scaffold — new-project.sh copies this
-│   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md
+│   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
 │   ├── docs/context.md      # Full 10-section project context template
 │   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md

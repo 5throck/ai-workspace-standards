@@ -49,7 +49,7 @@ git config core.hooksPath .githooks
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 # Must run AFTER git init so the git index exists
 $executableFiles = @(
-    ".githooks\pre-commit", ".githooks\pre-push",
+    ".githooks\pre-commit", ".githooks\pre-push", ".githooks\post-checkout",
     "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh", "scripts\setup.sh",
     "scripts\dev-sync.ps1", "scripts\audit.ps1", "scripts\sync-md.ps1", "scripts\setup.ps1"
 )
