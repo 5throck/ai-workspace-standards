@@ -1,48 +1,46 @@
-﻿# {{PROJECT_NAME}}
+# {{PROJECT_NAME}}
 
 {{PROJECT_DESCRIPTION}}
 
-## ?꾨줈?앺듃 ?뱀쭠 (Characteristics)
+## 프로젝트 특성 (Project Characteristics)
 
 {{PROJECT_CHARACTERISTICS}}
 
-## ?꾨줈?앺듃 ?ъ슜踰?
+## 이 프로젝트 사용 방법
 
-1. **?ㅼ젙 寃??*: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`瑜??닿퀬 ???꾨줈?앺듃??援ъ껜?곸씤 ??븷怨?紐⑺몴??留욊쾶 ?섏젙?⑸땲??
-2. **?ㅽ겕由쏀듃 ?섏젙**: `scripts/` ?붾젆?좊━ ?댁쓽 ?뚯씪???? `dev-sync.ps1`, `audit.ps1`)??寃?좏븯怨? ?꾨줈?앺듃???붽뎄?ы빆??留욎텛??二쇱꽍?대굹 ?섎뱶肄붾뵫???덉떆 ?띿뒪?몃? ?섏젙?⑸땲??
-3. **硫붾え由?珥덇린??*: ???꾨줈?앺듃??留욌뒗 `memory/MEMORY.md` ?몃뜳?ㅻ? ?쒖옉?⑸땲??
+1. **설정 검토**: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`를 참고하여 프로젝트의 역할과 목표에 맞게 업데이트합니다.
+2. **스크립트 업데이트**: `scripts/` 내의 스크립트(예: `dev-sync.sh`, `audit.sh`)를 검토하고, 플레이스홀더 로직을 프로젝트 전용 요구사항으로 교체합니다.
+3. **메모리 초기화**: `memory/MEMORY.md` 인덱스 파일을 생성하여 세션 이력 관리를 시작합니다.
 
-## 鍮좊Ⅸ ?쒖옉
+## 빠른 시작 (Quick Start)
 
 ```bash
-# 1. ??hooks) ?쒖꽦??
+# 1. Git Hooks 활성화
 git config core.hooksPath .githooks
 
-# 2. ?섍꼍 ?ㅼ젙
-cp .env.sample .env   # ?섍꼍 蹂??媛??낅젰
+# 2. 설정 실행 (.env 생성, 의존성 설치, 초기 커밋)
+#    macOS / Linux / Windows Git Bash
+bash scripts/setup.sh
 
-# 3. ?섏〈???ㅼ튂
-# Python:  python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-# Node.js: npm install
-
+#    Windows — PowerShell
+.\scripts\setup.ps1
 ```
 
-## ?듭떖 臾몄꽌
+> `setup.sh`는 스택(Node.js, Python, Ruby, .NET, Java, Go, Rust)을 자동 감지하여 의존성을 설치합니다. `--skip-install` 또는 `--skip-commit` 옵션으로 동작을 제어할 수 있습니다.
 
-- **?꾨줈?앺듃 而⑦뀓?ㅽ듃 & ?꾪궎?띿쿂** ??[`docs/context.md`](docs/context.md)
-- **?먯씠?꾪듃 ?몃뜳??* ??[`AGENTS.md`](AGENTS.md)
-- **蹂寃??대젰** ??[`CHANGELOG.md`](CHANGELOG.md)
-- **?뚰겕?ㅽ럹?댁뒪 ?쒖?** ??[`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md)
-- **Claude Code ?ㅼ젙** ??[`CLAUDE.md`](CLAUDE.md)
-- **Gemini CLI ?ㅼ젙** ??[`GEMINI.md`](GEMINI.md)
+## 문서 (Documentation)
 
-## 湲곗뿬?섍린
+- **프로젝트 컨텍스트 & 아키텍처** → [`docs/context.md`](docs/context.md)
+- **에이전트 인덱스** → [`AGENTS.md`](AGENTS.md)
+- **변경 이력** → [`CHANGELOG.md`](CHANGELOG.md)
+- **워크스페이스 표준** → [`CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md)
+- **Claude Code 설정** → [`CLAUDE.md`](CLAUDE.md)
+- **Gemini CLI 설정** → [`GEMINI.md`](GEMINI.md)
 
-[湲곗뿬 諛⑸쾿???ㅻ챸?섏꽭?????꾨씪?대퉿/?대? ?꾨줈?앺듃??寃쎌슦 ???뱀뀡????젣?섏꽭??]
+## 기여하기 (Contributing)
 
-## ?쇱씠?좎뒪
+[기여 방법을 설명하거나 — 프로젝트가 비공개/사내용인 경우 이 섹션을 삭제하세요.]
 
-[?쇱씠?좎뒪 ?대쫫] ??[LICENSE](LICENSE) ?뚯씪 李몄“
+## 라이선스 (License)
 
-
-
+[라이선스 이름] — [LICENSE](LICENSE) 파일 참조
