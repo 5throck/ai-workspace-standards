@@ -10,7 +10,7 @@ bash scripts/new-project.sh "$ARGUMENTS"
 
 The script will:
 1. Copy `templates/` into a new `<workspace>/$ARGUMENTS/` directory
-2. Remove `_examples/` (reference-only — not part of a real project)
+2. Remove `_examples/` (reference-only - not part of a real project)
 3. Remove `.gitkeep` placeholders
 4. Substitute `[Project Name]` placeholder with `$ARGUMENTS` in all text files
 5. Set executable permissions on hooks and scripts

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-md.sh — Update memory/MEMORY.md index
+# sync-md.sh - Update memory/MEMORY.md index
 # Usage: bash scripts/sync-md.sh "YYYY-MM-DD" "summary"
 DATE="${1:-$(date +%Y-%m-%d)}"
 SUMMARY="${2:-update}"

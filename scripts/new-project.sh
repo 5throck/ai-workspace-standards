@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# new-project.sh — Scaffold a new project under the workspace root
+# new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>"
 set -euo pipefail
 
@@ -29,7 +29,7 @@ echo "🚀 Scaffolding new project: $PROJECT_NAME"
 mkdir -p "$PROJECT_DIR"
 cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
-# ── 2. Remove _examples (reference-only — not part of a real project) ──────────
+# ── 2. Remove _examples (reference-only - not part of a real project) ──────────
 rm -rf "$PROJECT_DIR/_examples"
 
 # ── 3. Remove .gitkeep placeholders ────────────────────────────────────────────
@@ -66,7 +66,7 @@ if bash scripts/audit.sh; then
   echo "✅ Project '$PROJECT_NAME' scaffolded and verified at: $PROJECT_DIR"
 else
   echo ""
-  echo "⚠️  Project scaffolded but audit found issues — review above before continuing."
+  echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
 
 # ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
@@ -74,7 +74,7 @@ echo ""
 echo "Running environment setup…"
 bash "$PROJECT_DIR/scripts/setup.sh" || {
   echo ""
-  echo "⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry."
+  echo "⚠️  Setup encountered an error - run 'bash scripts/setup.sh' manually to retry."
 }
 
 # ── 9. Move into project directory ────────────────────────────────────────────

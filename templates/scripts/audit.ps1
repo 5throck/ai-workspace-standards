@@ -1,4 +1,4 @@
-﻿# audit.ps1 — Documentation integrity check (Windows PowerShell)
+﻿# audit.ps1 - Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
 $errors = 0
@@ -6,7 +6,7 @@ function Pass($msg) { Write-Host "[PASS] $msg" -ForegroundColor Green }
 function Fail($msg) { Write-Host "[FAIL] $msg" -ForegroundColor Red; $script:errors++ }
 function Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 
-Write-Host "=== audit.ps1 — workspace standards check ===" -ForegroundColor Cyan
+Write-Host "=== audit.ps1 - workspace standards check ===" -ForegroundColor Cyan
 
 # 1. CHANGELOG.md must exist
 if (Test-Path "CHANGELOG.md") { Pass "CHANGELOG.md exists" } else { Fail "CHANGELOG.md missing" }
@@ -38,11 +38,11 @@ if (Test-Path "docs\context.md") {
     # 6. At least one agent file must exist in agents/
     $agentFiles = Get-ChildItem -Path "agents" -Filter "*.md" -ErrorAction SilentlyContinue
     if ($agentFiles) { Pass "agents/ has agent files" }
-    else { Fail "agents/ is empty or missing — create at least agents/pm.md" }
+    else { Fail "agents/ is empty or missing - create at least agents/pm.md" }
 
     # 7. .env.sample must exist
     if (Test-Path ".env.sample") { Pass ".env.sample exists" }
-    else { Warn ".env.sample not found — add one if this project uses environment variables" }
+    else { Warn ".env.sample not found - add one if this project uses environment variables" }
 
     # 8. scripts/ .sh/.ps1 parity check
     Get-ChildItem -Path "scripts" -Filter "*.sh" -ErrorAction SilentlyContinue | ForEach-Object {
@@ -52,7 +52,7 @@ if (Test-Path "docs\context.md") {
     }
 
 } else {
-    Warn "docs/context.md not found — skipping project-level checks (workspace root)"
+    Warn "docs/context.md not found - skipping project-level checks (workspace root)"
 }
 
 Write-Host ""

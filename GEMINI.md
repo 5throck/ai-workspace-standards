@@ -2,7 +2,7 @@
 
 This file provides guidance to Gemini (including the Antigravity agentic engine and Gemini CLI) when working in this workspace.
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) —read it first.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) -read it first.**
 >
 > For tool-specific behaviors of Claude Code, see [`CLAUDE.md`](CLAUDE.md).
 
@@ -75,11 +75,11 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 4. Context Loading
 Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
 ```
-@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 — workspace design standard
-@docs/context.md             # Step 2 — project knowledge (skip at workspace root — no docs/context.md here)
-@AGENTS.md                   # Step 3 — canonical agent roster (skip at workspace root — no AGENTS.md here by design)
-@memory/MEMORY.md            # Step 4 — recent changes (skip if file does not exist)
-@skills/                     # Step 5 — load skills listed in docs/context.md (skip at workspace root)
+@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 - workspace design standard
+@docs/context.md             # Step 2 - project knowledge (skip at workspace root - no docs/context.md here)
+@AGENTS.md                   # Step 3 - canonical agent roster (skip at workspace root - no AGENTS.md here by design)
+@memory/MEMORY.md            # Step 4 - recent changes (skip if file does not exist)
+@skills/                     # Step 5 - load skills listed in docs/context.md (skip at workspace root)
 ```
 
 > **Workspace root note**: Steps 2, 3, and 5 apply to individual sub-projects only.
@@ -130,7 +130,7 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 2.  **test-runner** verifies against acceptance criteria and runs tests.
 3.  **Quality gate (audit script)** validates compliance.
 
-> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
+> Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
@@ -159,13 +159,13 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
-*   **Migration**: Offer the user a migration of `.claude/` —`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
+*   **Migration**: Offer the user a migration of `.claude/` -`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
 
 ---
 
 ## Git & PR Additions (Gemini)
 
-All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **AI Commit Signatures**: Always append both co-author lines to all AI-generated git commit messages:
@@ -173,7 +173,7 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
   Co-Authored-By: Gemini <noreply@google.com>
   ```
-- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-05-24*
 

@@ -22,7 +22,7 @@ git config core.hooksPath .githooks
 #    macOS / Linux / Windows Git Bash
 bash scripts/setup.sh
 
-#    Windows — PowerShell
+#    Windows - PowerShell
 .\scripts\setup.ps1
 ```
 
@@ -39,10 +39,10 @@ bash scripts/setup.sh
 
 ## Contributing
 
-[Describe how to contribute — or delete this section if the project is private/internal.]
+[Describe how to contribute - or delete this section if the project is private/internal.]
 
 ## License
 
-[License name] — see [LICENSE](LICENSE)
+[License name] - see [LICENSE](LICENSE)
 
 > **TODO**: Add a `LICENSE` file to this project. Choose a license at [choosealicense.com](https://choosealicense.com).

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# audit.sh — Documentation integrity check
+# audit.sh - Documentation integrity check
 # Checks that required files and sections exist before a commit.
 # Exit code 0 = pass, non-zero = fail.
 set -euo pipefail
@@ -10,7 +10,7 @@ red()   { echo -e "\033[31m[FAIL]\033[0m $*"; }
 green() { echo -e "\033[32m[PASS]\033[0m $*"; }
 warn()  { echo -e "\033[33m[WARN]\033[0m $*"; }
 
-echo "=== audit.sh — workspace standards check ==="
+echo "=== audit.sh - workspace standards check ==="
 
 # 1. CHANGELOG.md must exist
 if [ -f "CHANGELOG.md" ]; then
@@ -62,7 +62,7 @@ if [ -f "docs/context.md" ]; then
   if [ -d "agents" ] && [ -n "$(ls -A agents/*.md 2>/dev/null)" ]; then
     green "agents/ has agent files"
   else
-    red  "agents/ is empty or missing — create at least agents/pm.md"
+    red  "agents/ is empty or missing - create at least agents/pm.md"
     ((errors++)) || true
   fi
 
@@ -70,7 +70,7 @@ if [ -f "docs/context.md" ]; then
   if [ -f ".env.sample" ]; then
     green ".env.sample exists"
   else
-    warn ".env.sample not found — add one if this project uses environment variables"
+    warn ".env.sample not found - add one if this project uses environment variables"
   fi
 
   # 8. scripts/ .sh/.ps1 parity check
@@ -85,7 +85,7 @@ if [ -f "docs/context.md" ]; then
   done
 
 else
-  warn "docs/context.md not found — skipping project-level checks (workspace root)"
+  warn "docs/context.md not found - skipping project-level checks (workspace root)"
 fi
 
 echo ""

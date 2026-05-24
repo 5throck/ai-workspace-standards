@@ -1,4 +1,4 @@
-# gen-pr-body.ps1 — Generate a structured PR body from commit message + diff
+# gen-pr-body.ps1 - Generate a structured PR body from commit message + diff
 # Usage: .\scripts\gen-pr-body.ps1 "commit message"
 # Output: PR body markdown (stdout)
 #
@@ -24,7 +24,7 @@ $ClaudePath = Get-Command claude -ErrorAction SilentlyContinue
 if ($ClaudePath) {
     $Prompt = @"
 Generate a GitHub Pull Request body for the following change.
-Output ONLY the PR body in markdown — no explanation, no code fences around the whole output.
+Output ONLY the PR body in markdown - no explanation, no code fences around the whole output.
 
 Commit message : $CommitMsg
 Date           : $Today
@@ -41,7 +41,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 [1-3 sentences: what problem does this solve and why now?]
 
 ## What Changed
-[concise bullet list of actual changes — be specific, not generic]
+[concise bullet list of actual changes - be specific, not generic]
 
 ## Test Plan
 - [ ] ``bash scripts/audit.sh`` passes

@@ -1,15 +1,15 @@
 # Project Constitution
 
-These principles apply to every project under the workspace root (`C:\git` on Windows, or `~/git` on macOS/Linux). They define the **design standard** — implementation is handled per-project via each project's own scripts and settings.
+These principles apply to every project under the workspace root (`C:\git` on Windows, or `~/git` on macOS/Linux). They define the **design standard** - implementation is handled per-project via each project's own scripts and settings.
 
 > **📋 Every AI session MUST complete this checklist before touching any code:**
-> - [ ] Read §1 — Folder Structure (understand where files live)
-> - [ ] Read §3 — PR Workflow (understand commit/branch/PR rules)
-> - [ ] Read §8 — Coding Behavior Guidelines (understand behavioral constraints)
-> - [ ] Read §2 — Memory System (before ending any session that produced changes)
-> - [ ] Read §5 — Multi-Agent Architecture (if spawning agents)
-> - [ ] Read §4 — i18n (if the project has a user-facing UI)
-> - [ ] Read §7 — New Project Init (when creating a new project)
+> - [ ] Read §1 - Folder Structure (understand where files live)
+> - [ ] Read §3 - PR Workflow (understand commit/branch/PR rules)
+> - [ ] Read §8 - Coding Behavior Guidelines (understand behavioral constraints)
+> - [ ] Read §2 - Memory System (before ending any session that produced changes)
+> - [ ] Read §5 - Multi-Agent Architecture (if spawning agents)
+> - [ ] Read §4 - i18n (if the project has a user-facing UI)
+> - [ ] Read §7 - New Project Init (when creating a new project)
 
 **Sections:** Workspace · 1. Folder Structure · 2. Memory System · 3. PR Workflow · 4. i18n · 5. Agents · 6. Skills · 7. New Project Init · 8. Coding Behavior Guidelines
 
@@ -17,14 +17,14 @@ These principles apply to every project under the workspace root (`C:\git` on Wi
 
 ### Workspace Overview
 
-> **Environment-specific path** — this file is configured for the current machine. If you move to a different OS or clone to a new location, update the workspace root in the platform config files (`CLAUDE.md`, `GEMINI.md`).
+> **Environment-specific path** - this file is configured for the current machine. If you move to a different OS or clone to a new location, update the workspace root in the platform config files (`CLAUDE.md`, `GEMINI.md`).
 >
 > | OS | Workspace root |
 > |----|---------------|
 > | Windows (current) | `C:\git` |
 > | macOS / Linux | `~/git` or `/home/<user>/git` |
 
-This workspace contains multiple independent projects. Each subdirectory is a separate project/repository. Run `ls` (or `dir` on Windows) at the workspace root to see the current list — do not rely on a hardcoded list.
+This workspace contains multiple independent projects. Each subdirectory is a separate project/repository. Run `ls` (or `dir` on Windows) at the workspace root to see the current list - do not rely on a hardcoded list.
 
 Common project types:
 - MCP (Model Context Protocol) servers and tools
@@ -42,10 +42,10 @@ Navigate to the project directory before starting work. Each project has its own
    ```bash
    git config core.hooksPath .githooks
    ```
-1. **Read this file** (CONSTITUTION.md) — you are reading it now. Complete the section checklist at the top before proceeding.
-2. Read the project's `docs/context.md` — single source of truth for purpose, tech stack, and architecture.
-3. Read `AGENTS.md` — canonical agent roster.
-4. Check `memory/MEMORY.md` — recent session history (skip if file does not exist).
+1. **Read this file** (CONSTITUTION.md) - you are reading it now. Complete the section checklist at the top before proceeding.
+2. Read the project's `docs/context.md` - single source of truth for purpose, tech stack, and architecture.
+3. Read `AGENTS.md` - canonical agent roster.
+4. Check `memory/MEMORY.md` - recent session history (skip if file does not exist).
 5. Load any skills listed under `## Session Start Skills` in `docs/context.md`.
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
@@ -67,7 +67,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 <project-root>/
 ├── src/          # Source code
 ├── docs/         # Design docs, architecture, ADRs
-│   ├── context.md    # Project knowledge — shared by all AI tools (required)
+│   ├── context.md    # Project knowledge - shared by all AI tools (required)
 │   └── adr/          # Architecture Decision Records (ADRs)
 │       └── NNNN-slug.md  # e.g., 0001-use-mcp-server.md
 ├── scripts/      # Automation scripts (.sh + .ps1 pairs, cross-platform)
@@ -99,7 +99,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 └── .env.sample           # Required env variable template (never commit .env)
 ```
 
-> **Note**: `.gemini/` and `.claude/` both exist in every project — they coexist and each AI tool reads only its own directory.
+> **Note**: `.gemini/` and `.claude/` both exist in every project - they coexist and each AI tool reads only its own directory.
 
 **Rules:**
 - **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §7. The `audit.sh` / `audit.ps1` script must verify this heading exists and abort with a non-zero exit code if it is missing.
@@ -109,10 +109,10 @@ Every project follows this layout. Omit folders that don't apply to the project 
   2. **Decision**: What choice was made and why?
   3. **Consequences**: What are the trade-offs, side-effects, and future implications of this decision?
 - **Execution Paths**: Script references within code or documentation must use relative platform-agnostic formatting or supply examples for both terminal types.
-- **Shared Memory**: `memory/` is strictly shared across all AI tools — not for general application data or temporary local logs.
+- **Shared Memory**: `memory/` is strictly shared across all AI tools - not for general application data or temporary local logs.
 - **Locales**: `locales/` uses flat JSON files matching ISO language codes (`ko.json`, `en.json`, etc.).
-- **Orchestration**: `agents/pm.md` is always created — even for single-agent or simple projects.
-- **Agent Index**: `AGENTS.md` is always created at the project root — it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents`. *(Exception: the workspace root itself — `C:\git\` — does not require an `AGENTS.md` because it contains no project code; each sub-project carries its own.)*
+- **Orchestration**: `agents/pm.md` is always created - even for single-agent or simple projects.
+- **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents`. *(Exception: the workspace root itself - `C:\git\` - does not require an `AGENTS.md` because it contains no project code; each sub-project carries its own.)*
 - **Secrets**: `.env.sample` is always committed; `.env` is always in `.gitignore`.
 
 ---
@@ -127,14 +127,14 @@ To avoid noise and preserve agent context, maintain a strict separation of conce
 - **`CHANGELOG.md` (Product-Facing)**: Document *what* changed for the end-user (e.g., new features, bug fixes). Use structured format (Added, Changed, Fixed).
 - **`memory/` (Developer/AI-Facing)**: Document *how* and *why* it changed. Record the development process, architectural decisions, failed experiments, and agent task states to maintain AI context across sessions.
 
-**`memory/MEMORY.md`** — index file, updated by `dev-sync` scripts automatically:
+**`memory/MEMORY.md`** - index file, updated by `dev-sync` scripts automatically:
 ```markdown
 | Date | Summary |
 |------|---------|
 | [2026-05-21](2026-05-21.md) | feat: add pricing formula |
 ```
 
-**`memory/YYYY-MM-DD.md`** — daily log, written by the developer (via `/memlog` in Claude Code · manually in Gemini CLI):
+**`memory/YYYY-MM-DD.md`** - daily log, written by the developer (via `/memlog` in Claude Code · manually in Gemini CLI):
 ```markdown
 ## <Feature / Module Name>
 - **Files**: src/...
@@ -145,20 +145,20 @@ To avoid noise and preserve agent context, maintain a strict separation of conce
 
 **Rules:**
 - Log files are written in **English**.
-- Append to today's file — never overwrite.
+- Append to today's file - never overwrite.
 - Run `/memlog` (Claude Code) or manually append to `memory/YYYY-MM-DD.md` (Gemini CLI) before running `sync` to ensure the log is recorded prior to commit.
 
 **Archiving policy:**
 - When `memory/MEMORY.md` exceeds ~50 rows or `docs/context.md` becomes difficult to navigate, archive older content:
   - Move completed ADR summaries and resolved decisions to `docs/history.md`
   - Retain the last 30 days in `memory/MEMORY.md`; move older daily logs to `memory/archive/`
-  - Never delete logs — archive them
+  - Never delete logs - archive them
 
 ---
 
 ### 3. GitHub PR Workflow
 
-**All changes must reach `main` via a Pull Request — never by direct push.**
+**All changes must reach `main` via a Pull Request - never by direct push.**
 
 ```
 Edit code
@@ -169,10 +169,10 @@ Edit code
 
 /sync "feat: description" (or running dev-sync scripts directly)
   ↓
-  1. memory/YYYY-MM-DD.md     — append session log entry
-  2. MEMORY.md index         — update entry
-  3. CHANGELOG.md            — auto-insert commit message if [Unreleased] is empty
-  4. Audit script execution  — abort on failure (includes CHANGELOG.md existence check)
+  1. memory/YYYY-MM-DD.md     - append session log entry
+  2. MEMORY.md index         - update entry
+  3. CHANGELOG.md            - auto-insert commit message if [Unreleased] is empty
+  4. Audit script execution  - abort on failure (includes CHANGELOG.md existence check)
   5. git checkout -b pr/<date>-<slug>
   6. git add -A && git commit
   7. git push + gh pr create ➔ GitHub PR opened (Direct push blocked by local hooks)
@@ -204,8 +204,8 @@ Edit code
   ```
   This binds local automated hooks (like `pre-push` blocking direct `main` push, and `pre-commit` validating changelog compliance) forcibly.
 - Workflow scripts must avoid interactive prompts to prevent terminal hangs during automated agent runs.
-- `/changelog` is **optional** — run it before syncing when your change needs a user-visible entry in `CHANGELOG.md`. Skip it for internal refactors, formatting, or tooling changes.
-- Project-specific PR settings live in `.gemini/settings.json` or `.claude/settings.json` — kept version-controlled and shared with the team.
+- `/changelog` is **optional** - run it before syncing when your change needs a user-visible entry in `CHANGELOG.md`. Skip it for internal refactors, formatting, or tooling changes.
+- Project-specific PR settings live in `.gemini/settings.json` or `.claude/settings.json` - kept version-controlled and shared with the team.
 
 ---
 
@@ -235,7 +235,7 @@ Apply **only to projects with a user-facing UI** (web app, desktop app, CLI with
 - All keys must exist in `en.json` as the source of truth
 
 ```json
-// locales/en.json — example
+// locales/en.json - example
 {
   "app.title": "My App",
   "error.not_found": "Resource not found: {name}",
@@ -263,7 +263,7 @@ examples:
 ---
 ```
 
-The `description` field is how the AI tool selects the right agent — always write **when to use it** explicitly.
+The `description` field is how the AI tool selects the right agent - always write **when to use it** explicitly.
 
 #### Role groups
 
@@ -277,7 +277,7 @@ The `description` field is how the AI tool selects the right agent — always wr
 
 #### PM orchestrator rules
 
-- When no specific orchestrator is assigned, **always create `agents/pm.md`** — PM owns the entire workflow.
+- When no specific orchestrator is assigned, **always create `agents/pm.md`** - PM owns the entire workflow.
 - PM dispatches independent tasks as **parallel agents in a single message** (never sequential).
 - Agents communicate via **structured JSON Input Contracts**:
 
@@ -295,26 +295,26 @@ The `description` field is how the AI tool selects the right agent — always wr
 #### PM governance workflow (6 phases)
 
 ```
-Phase 1 — Triage
+Phase 1 - Triage
   PM classifies the request and dispatches read-only agents in parallel (single message)
 
-Phase 2 — Analysis
+Phase 2 - Analysis
   Agents return findings → PM synthesizes into requirements + acceptance criteria
 
-Phase 3 — Design
+Phase 3 - Design
   Architect designs the implementation plan + ADR
   Designer produces UI/UX specs (parallel with Architect, if task has UI/UX surface)
   PM obtains explicit user approval before proceeding
 
-Phase 4 — Implementation
+Phase 4 - Implementation
   code-writer implements (serial) → test-runner verifies
   Post-write quality gate runs after every change
 
-Phase 5 — QA
+Phase 5 - QA
   All acceptance criteria verified
   Quality gate: audit script + tests pass
 
-Phase 6 — Finalization
+Phase 6 - Finalization
   PM runs memlog → sync scripts
   PR created and handed to user for review
 ```
@@ -329,7 +329,7 @@ Reusable workflow knowledge is defined as skills in `skills/`.
 
 ```
 skills/
-└── <skill-name>/     # Directory per skill — NOT a flat file
+└── <skill-name>/     # Directory per skill - NOT a flat file
     └── SKILL.md      # Skill body
 ```
 
@@ -351,7 +351,7 @@ version: 1.0.0
 
 ```markdown
 ## Overview
-One paragraph — what this skill enables and when to use it.
+One paragraph - what this skill enables and when to use it.
 
 ## <workflow-name>
 
@@ -370,7 +370,7 @@ One paragraph — what this skill enables and when to use it.
 
 | Type | Description | Load timing |
 |------|-------------|-------------|
-| Session skill | Always-needed workflow for this project | Listed under `## Session Start Skills` in `docs/context.md` — loaded at session start by all AI tools |
+| Session skill | Always-needed workflow for this project | Listed under `## Session Start Skills` in `docs/context.md` - loaded at session start by all AI tools |
 | On-demand skill | Specialized knowledge for specific tasks | Auto-triggered by `description` matching |
 
 ---
@@ -389,17 +389,17 @@ and initializes git with hooks active.
 
 #### What gets generated
 
-The [`templates/`](templates/) folder mirrors the exact structure of a new project —
+The [`templates/`](templates/) folder mirrors the exact structure of a new project -
 browse it directly to see what every file should look like. All scaffold templates
 live there as **real, editable files** (not embedded strings).
 
 | Generated file | Purpose | Action needed |
 |----------------|---------|---------------|
-| `docs/context.md` | Single source of truth — 10 required sections | Fill in `[...]` placeholders |
+| `docs/context.md` | Single source of truth - 10 required sections | Fill in `[...]` placeholders |
 | `AGENTS.md` | Canonical agent index | Ready to use |
 | `agents/pm.md` + 4 others | Role definitions (pm, architect, designer, code-writer, test-runner) | `[Project Name]` already substituted |
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
-| `.claude/settings.json` | Hooks config (disabled by default — `{}`) | Enable PostToolUse if needed |
+| `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
 | `scripts/` | audit, dev-sync, sync-md (.sh + .ps1) | Ready to use |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
@@ -409,7 +409,7 @@ live there as **real, editable files** (not embedded strings).
 | `.gitignore` | Standard ignore rules | Ready to use |
 | `memory/MEMORY.md` | Session log index | Ready to use |
 
-> **Extension templates** — ADR, analyst agent, skill, and daily log formats are **not**
+> **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
 > generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
 
 #### Post-scaffold checklist
@@ -419,21 +419,21 @@ live there as **real, editable files** (not embedded strings).
     □ [Project Name] on line 1 replaced with actual project name
     □ ## Tech Stack filled in
     □ ## Architecture src/ map filled in
-    □ [KEY_NAME] env vars filled in (or "N/A — no env vars required")
+    □ [KEY_NAME] env vars filled in (or "N/A - no env vars required")
     □ All 10 sections present:
         macOS/Linux : grep "^## " docs/context.md
         Windows     : Select-String -Path docs/context.md -Pattern "^## "
 
-□ agents/ — [Project Name] substituted in all 5 ## Role sections
+□ agents/ - [Project Name] substituted in all 5 ## Role sections
     □ agents/pm.md          □ agents/architect.md   □ agents/designer.md
     □ agents/code-writer.md □ agents/test-runner.md
 
-□ README.md — project description filled in
+□ README.md - project description filled in
 
 □ Final validation
     □ macOS/Linux : bash scripts/audit.sh    → must exit 0
       Windows     : .\scripts\audit.ps1   → must exit 0
-    □ git config core.hooksPath .githooks    (already set by script — verify it stuck)
+    □ git config core.hooksPath .githooks    (already set by script - verify it stuck)
 ```
 ---
 

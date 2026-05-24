@@ -1,4 +1,4 @@
-﻿# new-project.ps1 — Scaffold a new project under the workspace root (Windows)
+﻿# new-project.ps1 - Scaffold a new project under the workspace root (Windows)
 # Usage: .\scripts\new-project.ps1 -ProjectName "<project-name>" -Description "<description>" -TechStack "<tech-stack>"
 param(
     [Parameter(Mandatory)][string]$ProjectName,
@@ -26,7 +26,7 @@ Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
-# ── 2. Remove _examples (reference-only — not part of a real project) ──────────
+# ── 2. Remove _examples (reference-only - not part of a real project) ──────────
 $examplesDir = Join-Path $ProjectDir "_examples"
 if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
 
@@ -101,7 +101,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Project '$ProjectName' scaffolded and verified at: $ProjectDir" -ForegroundColor Green
 } else {
     Write-Host ""
-    Write-Host "⚠️  Project scaffolded but audit found issues — review above before continuing." -ForegroundColor Yellow
+    Write-Host "⚠️  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
 }
 
 # ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
@@ -110,7 +110,7 @@ Write-Host "Running environment setup..." -ForegroundColor Cyan
 & "$ProjectDir\scripts\setup.ps1"
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
-    Write-Host "⚠️  Setup encountered an error — run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
+    Write-Host "⚠️  Setup encountered an error - run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
 }
 
 # ── 9. Move into project directory ────────────────────────────────────────────

@@ -13,6 +13,6 @@ Steps:
    - Unclear → add as a plain `- ` bullet directly under `## [Unreleased]`
 4. If the matching `### Type` subsection already exists under `[Unreleased]`, append the entry there.
    If it does not exist, create it above any existing subsections.
-5. Write only the minimum edit — do not touch any other part of the file.
+5. Write only the minimum edit - do not touch any other part of the file.
 
 Entry format: `- $ARGUMENTS` (one line, no trailing period)

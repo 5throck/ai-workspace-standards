@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup.sh — Post-scaffold environment setup
+# setup.sh - Post-scaffold environment setup
 # Detects OS and tech stack, installs dependencies, audits licenses, copies .env,
 # and makes initial commit.
 # Called automatically by new-project.sh; can also be re-run manually at any time.
@@ -41,7 +41,7 @@ warn() { echo -e "\033[33m[WARN]\033[0m $*"; }
 # Extend this list in docs/context.md if the project requires additional licenses.
 OSS_LICENSES="MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;Apache-1.1;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense;0BSD;PSF-2.0;Python-2.0;MPL-2.0;LGPL-2.0;LGPL-2.1;LGPL-3.0;Artistic-2.0;Zlib;BlueOak-1.0.0"
 
-echo "=== setup.sh — environment setup ==="
+echo "=== setup.sh - environment setup ==="
 
 # ── OS detection ──────────────────────────────────────────────────────────────
 OS_TYPE="unknown"
@@ -61,7 +61,7 @@ info "Detected OS: $OS_TYPE"
 require() {
   local cmd="$1" hint="$2"
   if ! command -v "$cmd" &>/dev/null; then
-    warn "$cmd not found — $hint"
+    warn "$cmd not found - $hint"
     return 1
   fi
   return 0
@@ -92,7 +92,7 @@ activate_venv() {
     # shellcheck disable=SC1091
     source .venv/Scripts/activate
   else
-    warn "Could not find venv activate script — continuing without activation"
+    warn "Could not find venv activate script - continuing without activation"
   fi
 }
 
@@ -110,7 +110,7 @@ venv_activate_hint() {
 }
 
 # ensure_venv: creates .venv via uv (preferred) or python -m venv (fallback).
-# Prints the manager used ("uv" or "pip") to stdout — capture with $(...).
+# Prints the manager used ("uv" or "pip") to stdout - capture with $(...).
 ensure_venv() {
   if [ -n "$UV_BIN" ]; then
     if [ ! -d ".venv" ]; then
@@ -118,25 +118,25 @@ ensure_venv() {
       uv venv .venv
       pass ".venv created (uv)"
     else
-      info ".venv already exists — reusing (uv)"
+      info ".venv already exists - reusing (uv)"
     fi
     activate_venv
     echo "uv"
     return 0
   elif [ -n "$PY_BIN" ]; then
     if [ ! -d ".venv" ]; then
-      info "uv not found — creating .venv with $PY_BIN -m venv (fallback)"
+      info "uv not found - creating .venv with $PY_BIN -m venv (fallback)"
       info "  Install uv for faster installs: curl -LsSf https://astral.sh/uv/install.sh | sh"
       "$PY_BIN" -m venv .venv
       pass ".venv created (venv)"
     else
-      info ".venv already exists — reusing"
+      info ".venv already exists - reusing"
     fi
     activate_venv
     echo "pip"
     return 0
   else
-    warn "Neither uv nor Python 3 found — skipping venv"
+    warn "Neither uv nor Python 3 found - skipping venv"
     warn "  Install uv (recommended): curl -LsSf https://astral.sh/uv/install.sh | sh"
     warn "  Or install Python 3: https://python.org"
     return 1
@@ -162,14 +162,14 @@ license_audit_node() {
   info "Running Node.js license audit…"
   if command -v npx &>/dev/null; then
     if npx --yes license-checker --summary --onlyAllow "$OSS_LICENSES" 2>/dev/null; then
-      pass "License audit passed — all packages use OSI-approved licenses"
+      pass "License audit passed - all packages use OSI-approved licenses"
     else
       warn "⚠  License audit flagged non-OSS packages. Review before committing."
       warn "   Run: npx license-checker --summary"
       warn "   Document any justified exceptions in docs/context.md § Non-OSS Dependencies"
     fi
   else
-    warn "npx not available — skipping Node.js license audit"
+    warn "npx not available - skipping Node.js license audit"
   fi
 }
 
@@ -182,24 +182,24 @@ license_audit_python() {
   if command -v pip-licenses &>/dev/null; then
     # Warn-only on non-OSS: list packages, grep for non-permissive licenses
     local report
-    report=$(pip-licenses --format=csv 2>/dev/null) || { warn "pip-licenses failed — skipping audit"; return; }
+    report=$(pip-licenses --format=csv 2>/dev/null) || { warn "pip-licenses failed - skipping audit"; return; }
     local flagged
     flagged=$(echo "$report" | grep -iE "GPL-3|AGPL|SSPL|BSL|Proprietary|Commercial" | grep -v "^Name" || true)
     if [ -z "$flagged" ]; then
-      pass "License audit passed — no restrictive licenses detected"
+      pass "License audit passed - no restrictive licenses detected"
     else
       warn "⚠  License audit flagged these packages:"
       echo "$flagged" | while IFS= read -r line; do warn "   $line"; done
       warn "   Document any justified exceptions in docs/context.md § Non-OSS Dependencies"
     fi
   else
-    info "pip-licenses not installed — installing for audit…"
+    info "pip-licenses not installed - installing for audit…"
     local install_cmd="pip"
     [ -n "$UV_BIN" ] && install_cmd="uv pip"
     if $install_cmd install pip-licenses --quiet 2>/dev/null; then
       license_audit_python  # re-run now that it's installed
     else
-      warn "Could not install pip-licenses — skipping Python license audit"
+      warn "Could not install pip-licenses - skipping Python license audit"
       warn "   Manual check: pip install pip-licenses && pip-licenses --format=csv"
     fi
   fi
@@ -209,9 +209,9 @@ license_audit_python() {
 if [ -f ".env.sample" ]; then
   if [ ! -f ".env" ]; then
     cp .env.sample .env
-    pass ".env created from .env.sample — fill in secrets before running the app"
+    pass ".env created from .env.sample - fill in secrets before running the app"
   else
-    info ".env already exists — skipping copy"
+    info ".env already exists - skipping copy"
   fi
 fi
 
@@ -221,7 +221,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Node.js ────────────────────────────────────────────────────────────────
   if [ -f "package.json" ]; then
     if require npm "install Node.js from https://nodejs.org"; then
-      info "Node.js project detected — running npm install"
+      info "Node.js project detected - running npm install"
       npm install
       pass "npm install complete"
       license_audit_node
@@ -253,7 +253,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Ruby ──────────────────────────────────────────────────────────────────
   if [ -f "Gemfile" ]; then
     if require bundle "run: gem install bundler"; then
-      info "Ruby project detected — running bundle install"
+      info "Ruby project detected - running bundle install"
       bundle install
       pass "bundle install complete"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -272,13 +272,13 @@ if [ "$SKIP_INSTALL" = false ]; then
     -not -path "./.git/*" 2>/dev/null | head -1)
   if [ -n "$DOTNET_PROJ" ]; then
     if require dotnet "install .NET SDK from https://dotnet.microsoft.com/download"; then
-      info ".NET project detected ($DOTNET_PROJ) — running dotnet restore"
+      info ".NET project detected ($DOTNET_PROJ) - running dotnet restore"
       dotnet restore
       pass "dotnet restore complete"
       if [ "$SKIP_LICENSE" = false ]; then
         if command -v dotnet-project-licenses &>/dev/null; then
           info "Running .NET license audit…"
-          dotnet-project-licenses --input . 2>/dev/null || warn "License audit failed — run manually: dotnet-project-licenses --input ."
+          dotnet-project-licenses --input . 2>/dev/null || warn "License audit failed - run manually: dotnet-project-licenses --input ."
         else
           info "  Optional license audit: dotnet tool install -g dotnet-project-licenses"
         fi
@@ -289,7 +289,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Java / Maven ──────────────────────────────────────────────────────────
   if [ -f "pom.xml" ]; then
     if require mvn "install Maven from https://maven.apache.org or: sdk install maven"; then
-      info "Maven project detected — running mvn dependency:resolve -q"
+      info "Maven project detected - running mvn dependency:resolve -q"
       mvn dependency:resolve -q
       pass "mvn dependency:resolve complete"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -303,7 +303,7 @@ if [ "$SKIP_INSTALL" = false ]; then
     GRADLE_CMD="./gradlew"
     [ ! -f "./gradlew" ] && GRADLE_CMD="gradle"
     if require "$GRADLE_CMD" "install Gradle from https://gradle.org or: sdk install gradle"; then
-      info "Gradle project detected — running $GRADLE_CMD dependencies (quiet)"
+      info "Gradle project detected - running $GRADLE_CMD dependencies (quiet)"
       "$GRADLE_CMD" dependencies -q 2>/dev/null || "$GRADLE_CMD" dependencies
       pass "Gradle dependencies resolved"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -315,7 +315,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Go ─────────────────────────────────────────────────────────────────────
   if [ -f "go.mod" ]; then
     if require go "install Go from https://go.dev/dl/"; then
-      info "Go project detected — running go mod download"
+      info "Go project detected - running go mod download"
       go mod download
       pass "go mod download complete"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -327,7 +327,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Rust ───────────────────────────────────────────────────────────────────
   if [ -f "Cargo.toml" ]; then
     if require cargo "install Rust from https://rustup.rs  (run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"; then
-      info "Rust project detected — running cargo fetch"
+      info "Rust project detected - running cargo fetch"
       cargo fetch
       pass "cargo fetch complete"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -344,7 +344,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── Elixir / Mix ──────────────────────────────────────────────────────────
   if [ -f "mix.exs" ]; then
     if require mix "install Elixir from https://elixir-lang.org/install.html or: brew install elixir"; then
-      info "Elixir project detected — running mix deps.get"
+      info "Elixir project detected - running mix deps.get"
       mix deps.get
       pass "mix deps.get complete"
       if [ "$SKIP_LICENSE" = false ]; then
@@ -356,9 +356,9 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── C/C++ (CMake) ─────────────────────────────────────────────────────────
   if [ -f "CMakeLists.txt" ]; then
     if require cmake "install CMake from https://cmake.org"; then
-      info "CMake project detected — configuring build (cmake -B build)"
+      info "CMake project detected - configuring build (cmake -B build)"
       cmake -B build -S . 2>&1 | tail -5
-      pass "CMake configure complete — build artifacts in build/"
+      pass "CMake configure complete - build artifacts in build/"
       info "  To build: cmake --build build"
     fi
   fi
@@ -366,7 +366,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   # ── C/C++ (plain Makefile, no CMake) ─────────────────────────────────────
   if [ -f "Makefile" ] && [ ! -f "CMakeLists.txt" ]; then
     if require make "Linux: apt install build-essential · macOS: xcode-select --install"; then
-      info "Makefile detected — 'make' available but NOT run automatically"
+      info "Makefile detected - 'make' available but NOT run automatically"
       info "  Run manually: make"
     fi
   fi
@@ -389,7 +389,7 @@ if [ "$SKIP_INSTALL" = false ]; then
   if [ "$_found_stack" = false ]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "\033[33m⚠  UNKNOWN STACK — manual setup required\033[0m"
+    echo -e "\033[33m⚠  UNKNOWN STACK - manual setup required\033[0m"
     echo ""
     echo "  No recognized project manifest found in this directory."
     echo "  Automatic dependency installation has been skipped."
@@ -416,7 +416,7 @@ fi
 # ── 3. Gemini Plugins Setup ───────────────────────────────────────────────────
 SUPERPOWERS_DIR="$HOME/.gemini/config/plugins/superpowers"
 if [ ! -d "$SUPERPOWERS_DIR" ]; then
-    info "Gemini superpowers plugin not found — installing globally…"
+    info "Gemini superpowers plugin not found - installing globally…"
     mkdir -p "$HOME/.gemini/config/plugins"
     if git clone https://github.com/obra/superpowers "$SUPERPOWERS_DIR" 2>/dev/null; then
         pass "superpowers plugin installed successfully"
@@ -436,7 +436,7 @@ if [ "$OS_TYPE" = "macos" ] || [ "$OS_TYPE" = "linux" ]; then
             cargo install --git https://github.com/rtk-ai/rtk
             pass "rtk installed via Cargo"
         else
-            warn "Neither Homebrew nor Cargo found — skipping rtk installation."
+            warn "Neither Homebrew nor Cargo found - skipping rtk installation."
         fi
     else
         info "rtk is already installed."
@@ -457,7 +457,7 @@ if command -v npx >/dev/null 2>&1; then
         warn "Failed to initialize CodeGraph"
     fi
 else
-    warn "npx not found — skipping CodeGraph initialization"
+    warn "npx not found - skipping CodeGraph initialization"
 fi
 
 # ── 6. Initialize memory log ──────────────────────────────────────────────────
@@ -465,7 +465,7 @@ DATE_STR=$(date +%Y-%m-%d)
 mkdir -p memory
 LOG_PATH="memory/${DATE_STR}.md"
 if [ ! -f "$LOG_PATH" ]; then
-  echo -e "## Session — chore: initial scaffold\n\n- Project successfully scaffolded from workspace templates.\n" > "$LOG_PATH"
+  echo -e "## Session - chore: initial scaffold\n\n- Project successfully scaffolded from workspace templates.\n" > "$LOG_PATH"
 fi
 INDEX_PATH="memory/MEMORY.md"
 if [ -f "$INDEX_PATH" ]; then
@@ -486,7 +486,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>" 2>/dev/null; then
       warn "Nothing to commit (already committed?)"
     fi
   else
-    warn "Not inside a git repository — skipping initial commit"
+    warn "Not inside a git repository - skipping initial commit"
   fi
 else
   info "Skipping initial commit (--skip-commit)"

@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 > **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:\git\`).
-> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) — read it first.
+> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first.
 > For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
 ---
@@ -13,8 +13,8 @@ At the start of every Claude Code session in this workspace:
 ```
 0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
 1. Read CONSTITUTION.md                  # workspace design standard
-2. Read docs/context.md                  # project SSOT (skip if working at workspace root — no project context here)
-3. Read AGENTS.md                        # canonical agent roster (skip at workspace root — no AGENTS.md here by design)
+2. Read docs/context.md                  # project SSOT (skip if working at workspace root - no project context here)
+3. Read AGENTS.md                        # canonical agent roster (skip at workspace root - no AGENTS.md here by design)
 4. Read memory/MEMORY.md                 # recent session history (if exists)
 5. Load Session Start Skills             # from docs/context.md ## Session Start Skills (skip at workspace root)
 ```
@@ -29,7 +29,7 @@ At the start of every Claude Code session in this workspace:
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` is currently `{}` — **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.sh` pipeline.
+The workspace `.claude/settings.json` is currently `{}` - **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.sh` pipeline.
 
 To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add the following to `.claude/settings.json`:
 
@@ -67,7 +67,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
+| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
@@ -77,13 +77,13 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
 ### 3. MCP Configurations & Absolute Resolving
-Config file: `.mcp.json` (project root) — auto-loaded by both the CLI and the Desktop App.
+Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
 
 ### 4. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
-**Agent Dispatch** — use the `Agent` tool (not a bash CLI command):
+**Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
 Agent(
   description   = "Implement pricing logic",
@@ -97,7 +97,7 @@ Each implementation task follows the **Phase 4 execution loop**:
 2. **test-runner** verifies against acceptance criteria and runs tests.
 3. **Quality gate (audit script)** validates compliance.
 
-> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
+> Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
@@ -144,6 +144,6 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
   Co-Authored-By: Gemini <noreply@google.com>
   ```
-- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-05-24*

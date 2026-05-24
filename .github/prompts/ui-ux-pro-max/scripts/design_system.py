@@ -772,12 +772,12 @@ def format_master_md(design_system: dict) -> str:
     lines.append("")
     lines.append("### Additional Forbidden Patterns")
     lines.append("")
-    lines.append("- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)")
-    lines.append("- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer")
-    lines.append("- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout")
-    lines.append("- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio")
-    lines.append("- ❌ **Instant state changes** — Always use transitions (150-300ms)")
-    lines.append("- ❌ **Invisible focus states** — Focus states must be visible for a11y")
+    lines.append("- ❌ **Emojis as icons** - Use SVG icons (Heroicons, Lucide, Simple Icons)")
+    lines.append("- ❌ **Missing cursor:pointer** - All clickable elements must have cursor:pointer")
+    lines.append("- ❌ **Layout-shifting hovers** - Avoid scale transforms that shift layout")
+    lines.append("- ❌ **Low contrast text** - Maintain 4.5:1 minimum contrast ratio")
+    lines.append("- ❌ **Instant state changes** - Always use transitions (150-300ms)")
+    lines.append("- ❌ **Invisible focus states** - Focus states must be visible for a11y")
     lines.append("")
     
     # Pre-Delivery Checklist
@@ -837,7 +837,7 @@ def format_page_override_md(design_system: dict, page_name: str, page_query: str
         for key, value in layout.items():
             lines.append(f"- **{key}:** {value}")
     else:
-        lines.append("- No overrides — use Master layout")
+        lines.append("- No overrides - use Master layout")
     lines.append("")
     
     # Spacing Overrides
@@ -848,7 +848,7 @@ def format_page_override_md(design_system: dict, page_name: str, page_query: str
         for key, value in spacing.items():
             lines.append(f"- **{key}:** {value}")
     else:
-        lines.append("- No overrides — use Master spacing")
+        lines.append("- No overrides - use Master spacing")
     lines.append("")
     
     # Typography Overrides
@@ -859,7 +859,7 @@ def format_page_override_md(design_system: dict, page_name: str, page_query: str
         for key, value in typography.items():
             lines.append(f"- **{key}:** {value}")
     else:
-        lines.append("- No overrides — use Master typography")
+        lines.append("- No overrides - use Master typography")
     lines.append("")
     
     # Color Overrides
@@ -870,7 +870,7 @@ def format_page_override_md(design_system: dict, page_name: str, page_query: str
         for key, value in colors.items():
             lines.append(f"- **{key}:** {value}")
     else:
-        lines.append("- No overrides — use Master colors")
+        lines.append("- No overrides - use Master colors")
     lines.append("")
     
     # Component Overrides
@@ -881,7 +881,7 @@ def format_page_override_md(design_system: dict, page_name: str, page_query: str
         for comp in components:
             lines.append(f"- {comp}")
     else:
-        lines.append("- No overrides — use Master component specs")
+        lines.append("- No overrides - use Master component specs")
     lines.append("")
     
     # Page-Specific Components
@@ -958,11 +958,11 @@ def _generate_intelligent_overrides(page_name: str, page_query: str, design_syst
         if any(kw in keywords.lower() for kw in ["data", "dense", "dashboard", "grid"]):
             layout["Max Width"] = "1400px or full-width"
             layout["Grid"] = "12-column grid for data flexibility"
-            spacing["Content Density"] = "High — optimize for information display"
+            spacing["Content Density"] = "High - optimize for information display"
         elif any(kw in keywords.lower() for kw in ["minimal", "simple", "clean", "single"]):
             layout["Max Width"] = "800px (narrow, focused)"
             layout["Layout"] = "Single column, centered"
-            spacing["Content Density"] = "Low — focus on clarity"
+            spacing["Content Density"] = "Low - focus on clarity"
         else:
             layout["Max Width"] = "1200px (standard)"
             layout["Layout"] = "Full-width sections, centered content"

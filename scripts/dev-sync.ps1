@@ -1,4 +1,4 @@
-﻿# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
+﻿# dev-sync.ps1 - Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
 # Usage: .\scripts\dev-sync.ps1 "feat: description"
 param([string]$Msg = "chore: update")
 
@@ -62,14 +62,14 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     git checkout -b $Branch
 } else {
     $Branch = $CurrentBranch
-    Write-Host "ℹ️  Already on branch '$Branch' — committing here without creating a new branch." -ForegroundColor Cyan
+    Write-Host "ℹ️  Already on branch '$Branch' - committing here without creating a new branch." -ForegroundColor Cyan
 }
 
 # ── 6. Guard against committing sensitive files ───────────────────────────────
 $Sensitive = git ls-files --others --exclude-standard 2>$null |
     Where-Object { $_ -match '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' }
 if ($Sensitive) {
-    Write-Host "❌ Potentially sensitive untracked files detected — refusing git add -A:" -ForegroundColor Red
+    Write-Host "❌ Potentially sensitive untracked files detected - refusing git add -A:" -ForegroundColor Red
     $Sensitive | ForEach-Object { Write-Host "   $_" }
     Write-Host "   Stage files explicitly with 'git add <file>' or add them to .gitignore." -ForegroundColor Yellow
     exit 1

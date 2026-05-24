@@ -116,7 +116,7 @@ function Audit-NodeLicenses {
         } else {
             Warn "?? License audit flagged non-OSS packages. Review before committing."
             Warn "   Run: npx license-checker --summary"
-            Warn "   Document justified exceptions in docs/context.md 짠 Non-OSS Dependencies"
+            Warn "   Document justified exceptions in docs/context.md § Non-OSS Dependencies"
         }
     } else { Warn "npx not available ??skipping Node.js license audit" }
 }
@@ -138,7 +138,7 @@ function Audit-PythonLicenses {
         } else {
             Warn "?? License audit flagged these packages:"
             $flagged | ForEach-Object { Warn "   $_" }
-            Warn "   Document justified exceptions in docs/context.md 짠 Non-OSS Dependencies"
+            Warn "   Document justified exceptions in docs/context.md § Non-OSS Dependencies"
         }
     } else { Warn "Could not install pip-licenses ??skipping Python license audit" }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dev-sync.sh — Full pipeline: memlog → sync-md → changelog → audit → commit → PR
+# dev-sync.sh - Full pipeline: memlog → sync-md → changelog → audit → commit → PR
 # Usage: bash scripts/dev-sync.sh "feat: description"
 set -euo pipefail
 
@@ -44,7 +44,7 @@ SENSITIVE=$(git ls-files --others --exclude-standard | \
   grep -iE '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^s][^a]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' \
   || true)
 if [ -n "$SENSITIVE" ]; then
-  echo "❌ Potentially sensitive untracked files detected — refusing git add -A:"
+  echo "❌ Potentially sensitive untracked files detected - refusing git add -A:"
   echo "$SENSITIVE" | sed 's/^/   /'
   echo "   Stage files explicitly with 'git add <file>' or add them to .gitignore."
   exit 1
@@ -58,7 +58,7 @@ if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
   git checkout -b "$BRANCH"
 else
   BRANCH="$CURRENT_BRANCH"
-  echo "ℹ️  Already on branch '$BRANCH' — committing here without creating a new branch."
+  echo "ℹ️  Already on branch '$BRANCH' - committing here without creating a new branch."
 fi
 
 git add -A
