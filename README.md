@@ -50,7 +50,7 @@ git config core.hooksPath .githooks
 bash scripts/new-project.sh "my-project-name"
 
 # Windows - Command Prompt or PowerShell
-.\scripts\new-project.cmd "my-project-name"
+.\scripts\new-project.ps1 "my-project-name"
 ```
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
@@ -97,7 +97,7 @@ C:\git\ (workspace root - this repo)
 │   ├── docs/                  
 │   │   ├── context.md       # Full 10-section project context template
 │   │   └── security.md      # Internal data sanitization guidelines
-│   ├── scripts/             # dev-sync.sh/.cmd, sync-md.sh/.cmd, audit.sh/.cmd
+│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .githooks/           # pre-commit (smart conditional), pre-push
@@ -105,10 +105,10 @@ C:\git\ (workspace root - this repo)
 │   ├── SECURITY.md          # GitHub vulnerability policy template
 │   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
-│   ├── audit.sh / .cmd      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .cmd   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .cmd    # MEMORY.md index updater
-│   └── new-project.sh / .cmd # New project scaffolding (copies templates/)
+│   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
+│   ├── dev-sync.sh / .ps1   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .ps1    # MEMORY.md index updater
+│   └── new-project.sh / .ps1 # New project scaffolding (copies templates/)
 ├── .githooks/
 │   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main

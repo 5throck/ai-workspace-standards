@@ -4,14 +4,15 @@ These principles apply to every project under the workspace root (`C:\git` on Wi
 
 > **📋 Every AI session MUST complete this checklist before touching any code:**
 > - [ ] Read §1 - Folder Structure (understand where files live)
-> - [ ] Read §3 - PR Workflow (understand commit/branch/PR rules)
-> - [ ] Read §8 - Coding Behavior Guidelines (understand behavioral constraints)
 > - [ ] Read §2 - Memory System (before ending any session that produced changes)
-> - [ ] Read §5 - Multi-Agent Architecture (if spawning agents)
+> - [ ] Read §3 - PR Workflow (understand commit/branch/PR rules)
 > - [ ] Read §4 - i18n (if the project has a user-facing UI)
+> - [ ] Read §5 - Multi-Agent Architecture (if spawning agents)
+> - [ ] Read §6 - Skills (if using or creating skills)
 > - [ ] Read §7 - New Project Init (when creating a new project)
+> - [ ] Read §8 - Coding Behavior Guidelines (understand behavioral constraints)
 
-**Sections:** Workspace · 1. Folder Structure · 2. Memory System · 3. PR Workflow · 4. i18n · 5. Agents · 6. Skills · 7. New Project Init · 8. Coding Behavior Guidelines
+**Sections:** Workspace · 1. Folder Structure · 2. Memory System · 3. PR Workflow · 4. i18n · 5. Multi-Agent Architecture · 6. Skills · 7. New Project Init · 8. Coding Behavior Guidelines
 
 ---
 
@@ -68,6 +69,8 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ### 1. Standard Folder Structure
 
+#### 1.1 Project Layout
+
 Every project follows this layout. Omit folders that don't apply to the project type.
 
 ```
@@ -109,8 +112,8 @@ Every project follows this layout. Omit folders that don't apply to the project 
 
 > **Note**: `.gemini/` and `.claude/` both exist in every project - they coexist and each AI tool reads only its own directory.
 
-**Rules:**
-- **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §7. The `audit.sh` / `audit.ps1` script must verify this heading exists and abort with a non-zero exit code if it is missing.
+#### 1.2 Rules
+- **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §8. The `audit.sh` / `audit.ps1` script must verify this heading exists and abort with a non-zero exit code if it is missing.
 - **Cross-Platform Script Parity**: `scripts/` must always provide both `.sh` (bash) and `.ps1` (PowerShell) pairs. Both files must accept the exact same positional parameters/flags, perform identical side-effects, and return unified exit codes (`0` for success, non-zero `>0` for error).
 - **ADR Format Standard**: ADRs in `docs/adr/` must follow sequential 4-digit prefix naming (`0001-slug.md`). Every ADR must consist of three mandatory sections:
   1. **Context**: What is the problem or architectural background context?
@@ -129,7 +132,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 
 Every session that produces a meaningful change must be logged.
 
-#### Tracking Management Guidelines: CHANGELOG vs. Memory
+#### 2.1 Tracking Management Guidelines: CHANGELOG vs. Memory
 To avoid noise and preserve agent context, maintain a strict separation of concerns:
 - **Strictly English**: `CHANGELOG.md` and all `memory/` logs MUST be written in English. Do not write them in Korean even if the user converses in Korean.
 - **`CHANGELOG.md` (Product-Facing)**: Document *what* changed for the end-user (e.g., new features, bug fixes). Use structured format (Added, Changed, Fixed).
@@ -151,12 +154,12 @@ To avoid noise and preserve agent context, maintain a strict separation of conce
 - **Issues**: symptom → root cause → resolution
 ```
 
-**Rules:**
+#### 2.2 Rules
 - Log files are written in **English**.
 - Append to today's file - never overwrite.
 - Run `/memlog` (Claude Code) or manually append to `memory/YYYY-MM-DD.md` (Gemini CLI) before running `sync` to ensure the log is recorded prior to commit.
 
-**Archiving policy:**
+#### 2.3 Archiving Policy
 - When `memory/MEMORY.md` exceeds ~50 rows or `docs/context.md` becomes difficult to navigate, archive older content:
   - Move completed ADR summaries and resolved decisions to `docs/history.md`
   - Retain the last 30 days in `memory/MEMORY.md`; move older daily logs to `memory/archive/`
@@ -165,6 +168,8 @@ To avoid noise and preserve agent context, maintain a strict separation of conce
 ---
 
 ### 3. GitHub PR Workflow
+
+#### 3.1 Core Rule
 
 **All changes must reach `main` via a Pull Request - never by direct push.**
 
@@ -186,7 +191,7 @@ Edit code
   7. git push + gh pr create ➔ GitHub PR opened (Direct push blocked by local hooks)
 ```
 
-**Rules:**
+#### 3.2 Rules
 - Each project must have `scripts/dev-sync.sh` and `scripts/dev-sync.ps1` adhering to the script parity rule.
 - **Mandatory English Git & PR Artifacts**: All Git and GitHub-related artifacts (including commit messages, pull request titles, pull request descriptions/bodies, branch names, and code review comments) **MUST** be written entirely in **English**, regardless of the developer's native or session conversation language. Always double-check before pushing.
 - **Conventional Commits Standard**: All commits in this workspace must adhere to the Conventional Commits specification:
@@ -221,6 +226,8 @@ Edit code
 
 Apply **only to projects with a user-facing UI** (web app, desktop app, CLI with user messages). Pure API servers and libraries are exempt.
 
+#### 4.1 Supported Languages
+
 **Standard: 16 languages** (expand as needed):
 
 | Code | Language | Code | Language |
@@ -236,7 +243,7 @@ Apply **only to projects with a user-facing UI** (web app, desktop app, CLI with
 
 > **Arabic (ar) RTL note:** Arabic is right-to-left. If rendering in a browser, set `dir="rtl"` on the root element or apply `direction: rtl` in CSS when `ar` is the active locale.
 
-**Implementation pattern:**
+#### 4.2 Implementation Pattern
 - Translation files: `locales/<lang-code>.json` (flat key-value)
 - Language detection priority: `APP_LOCALE` env var → OS locale (`LANG`/`LC_ALL`) → `en` fallback
 - i18n module: `i18n.py` (Python) or `i18n.ts` (TypeScript)
@@ -257,7 +264,11 @@ Apply **only to projects with a user-facing UI** (web app, desktop app, CLI with
 
 Every project uses a role-based agent structure. Agents are defined as markdown files in `agents/`.
 
-#### Agent file format (standard frontmatter)
+> **Workspace Root vs. Individual Projects**:
+> - **Workspace Root** (`ai-workspace-standards`): Specialized agents for template maintenance (pm, architect, automation-engineer, security-expert, docs-writer, auditor, scaffolding-expert). See [AGENTS.md](AGENTS.md) for the complete roster.
+> - **Individual Projects**: Generic agents for development workflows (pm, architect, designer, code-writer, test-runner). These are generated from `templates/agents/` at project init.
+
+#### 5.1 Agent File Format (Standard Frontmatter)
 
 ```yaml
 ---
@@ -273,7 +284,7 @@ examples:
 
 The `description` field is how the AI tool selects the right agent - always write **when to use it** explicitly.
 
-#### Role groups
+#### 5.2 Role Groups
 
 | Group | Responsibility | Core agents |
 |-------|---------------|-------------|
@@ -283,7 +294,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 | Design | UI/UX specifications, wireframes, component and interaction design | `designer.md` |
 | Execution | Code implementation and automated test verification | `code-writer.md`, `test-runner.md` |
 
-#### PM orchestrator rules
+#### 5.3 PM Orchestrator Rules
 
 - When no specific orchestrator is assigned, **always create `agents/pm.md`** - PM owns the entire workflow.
 - PM dispatches independent tasks as **parallel agents in a single message** (never sequential).
@@ -300,7 +311,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 
 - **Tool Abstraction**: The PM spawns child agent processes using the host tool's native subagent dispatching mechanism. The underlying tool handles process lifecycle and workspace sandboxing.
 
-#### PM governance workflow (6 phases)
+#### 5.4 PM Governance Workflow (6 Phases)
 
 ```
 Phase 1 - Triage
@@ -329,21 +340,38 @@ Phase 6 - Finalization
 
 ---
 
-### 6. Reusable Skills
+### 6. Skills
 
-Reusable workflow knowledge is defined as skills in `skills/`.
+Reusable workflow knowledge is defined as skills.
 
-#### Folder structure
+> **Workspace Root vs. Individual Projects**:
+> - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `ui-ux-pro-max`, `simulate-project-creation`, `security-scan`, `audit-workspace`).
+> - **Individual Projects**: Skills are project-specific workflows defined by the development team.
+
+#### 6.1 Folder Structure
+
+Skills can exist in two locations:
 
 ```
+# Project-specific skills (both AI tools)
 skills/
-└── <skill-name>/     # Directory per skill - NOT a flat file
-    └── SKILL.md      # Skill body
+└── <skill-name>/
+    └── SKILL.md
+
+# Claude Code-only skills (auto-registered)
+.claude/skills/
+└── <skill-name>/
+    └── SKILL.md
 ```
 
-> **Important:** `skills/my-skill.md` (flat file) is NOT recognized as a skill by any AI tool. Always use `skills/my-skill/SKILL.md` (directory + file).
+> **Important:** Flat files like `skills/my-skill.md` are NOT recognized. Always use the directory format: `skills/my-skill/SKILL.md`.
 
-#### Skill file format (standard frontmatter)
+| Location | Scope | AI Tools |
+|----------|-------|----------|
+| `skills/<name>/` | Project-specific, shared | Claude Code, Gemini |
+| `.claude/skills/<name>/` | Claude Code-only | Claude Code only |
+
+#### 6.2 Skill File Format (Standard Frontmatter)
 
 ```yaml
 ---
@@ -355,7 +383,7 @@ version: 1.0.0
 ---
 ```
 
-#### Skill body structure
+#### 6.3 Skill Body Structure
 
 ```markdown
 ## Overview
@@ -374,7 +402,7 @@ One paragraph - what this skill enables and when to use it.
 **Output**: What the agent produces at the end.
 ```
 
-#### Skill types
+#### 6.4 Skill Types
 
 | Type | Description | Load timing |
 |------|-------------|-------------|
@@ -384,6 +412,8 @@ One paragraph - what this skill enables and when to use it.
 ---
 
 ### 7. New Project Initialization
+
+#### 7.1 Project Scaffolding Commands
 
 **Every new project starts with a project scaffolding command:**
 
@@ -395,7 +425,7 @@ The script copies [`templates/`](templates/) directly into the new project direc
 substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
 and initializes git with hooks active.
 
-#### What gets generated
+#### 7.2 What Gets Generated
 
 The [`templates/`](templates/) folder mirrors the exact structure of a new project -
 browse it directly to see what every file should look like. All scaffold templates
@@ -420,7 +450,7 @@ live there as **real, editable files** (not embedded strings).
 > **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
 > generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
 
-#### Post-scaffold checklist
+#### 7.3 Post-Scaffold Checklist
 
 ```
 □ docs/context.md
@@ -451,7 +481,7 @@ Behavioral guidelines to reduce common LLM coding mistakes.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-#### 1. Think Before Coding
+#### 8.1 Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
@@ -462,7 +492,7 @@ Before implementing:
 - If something is unclear, stop. Name what's confusing. Ask.
 - **Secrets Management Rule**: Plaintext secrets (passwords, API tokens, security keys) **MUST NEVER** be hardcoded into application source files or configurations. All credentials must be loaded dynamically from local environment variables, system keychains, or secure config files. Establish a `.env.sample` template for every repository.
 
-#### 2. Simplicity First
+#### 8.2 Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -474,7 +504,7 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-#### 3. Surgical Changes
+#### 8.3 Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -490,7 +520,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-#### 4. Goal-Driven Execution
+#### 8.4 Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -510,7 +540,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-#### 5. Open-Source Package Policy
+#### 8.5 Open-Source Package Policy
 
 **Prefer OSI-approved open-source packages. Audit licenses after every install.**
 
@@ -522,14 +552,14 @@ When adding or recommending dependencies:
 - If a proprietary alternative exists alongside a viable OSS equivalent, default to the OSS option.
 - Document any intentional non-OSS dependency with a comment in `docs/context.md` explaining the justification.
 
-#### 6. Response Language
+#### 8.6 Response Language
 
 **Default to Korean unless explicitly instructed otherwise.**
 
 - All conversational interactions with the user **MUST** be written in **Korean** (한국어), unless the user initiates or explicitly requests the conversation in English.
 - This rule applies only to conversational text; actual codebase modifications, configuration scripts, Git messages, and PR documents must follow their respective English-only conventions.
 
-### 7. File Encoding Rule (Markdown & Scripts)
+#### 8.7 File Encoding Rule (Markdown & Scripts)
 - All text files, including Markdown (`.md`) and scripts (`.ps1`, `.sh`, `.py`, `.js`, etc.), must be saved as **UTF-8 (without BOM)**.
 - When generating files programmatically (e.g. PowerShell scripts), explicitly use `-Encoding UTF8` (or `[System.Text.UTF8Encoding]::new($false)`) to prevent fallback to localized ANSI (CP949) encodings.
 - Git configuration (`core.quotepath false` and `i18n.commitencoding utf-8`) helps, but the source files themselves must be strictly UTF-8 encoded to prevent character corruption.

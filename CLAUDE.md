@@ -63,24 +63,27 @@ Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the De
 ### 4. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
+
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
 Agent(
-  description   = "Implement pricing logic",
-  prompt        = "You are a code writer. [paste agents/code-writer.md content here]\n\nTask: Implement pricing logic matching spec in src/pricing.py.",
+  description   = "Implement automation script",
+  prompt        = "You are an automation engineer. [paste agents/automation-engineer.md content here]\n\nTask: Implement the script per the approved plan.",
   subagent_type = "claude"   // platform agent type; embed the agents/<name>.md role definition in the prompt
 )
 ```
 
-Each implementation task follows the **Phase 4 execution loop**:
-1. **code-writer** implements the changes.
-2. **test-runner** verifies against acceptance criteria and runs tests.
+Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
+1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
+2. **auditor** verifies against acceptance criteria and consistency.
 3. **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
-The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
 - **High-tier (Design/Planning)** ➔ `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
 - **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.

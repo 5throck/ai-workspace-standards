@@ -68,13 +68,16 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
+
 #### Define Subagent (`define_subagent`)
 Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "test-runner",
-  "description": "Executes tests and verifies code changes against acceptance criteria",
-  "system_prompt": "You are a QA test runner...",
+  "name": "auditor",
+  "description": "Cross-validates documentation and ensures rules are not contradicted",
+  "system_prompt": "You are a consistency auditor...",
   "enable_write_tools": false,
   "enable_subagent_tools": false
 }
@@ -86,9 +89,9 @@ Spawn parallel instances to execute dedicated work concurrently.
 {
   "Subagents": [
     {
-      "TypeName": "test-runner",
-      "Role": "Test Runner",
-      "Prompt": "Verify the code changes in src/pricing.py against acceptance criteria and run tests"
+      "TypeName": "auditor",
+      "Role": "Consistency Auditor",
+      "Prompt": "Cross-validate the documentation changes and check for contradictions"
     }
   ]
 }
@@ -99,14 +102,15 @@ Interact and exchange contracts with spawned agents via their unique `conversati
 The platform supports **Reactive Wakeup**: you do not need to poll or query tasks in a loop. Simply yield execution, and the platform will wake you up automatically as soon as an agent replies or a background task completes.
 
 #### Phase 4 Execution Loop
-1.  **code-writer** implements the changes.
-2.  **test-runner** verifies against acceptance criteria and runs tests.
+See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete agent list:
+1.  **automation-engineer** implements the changes.
+2.  **auditor** verifies against acceptance criteria and consistency.
 3.  **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
-The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
 - **High-tier (Design/Planning)** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
 - **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
