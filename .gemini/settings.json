@@ -1,12 +1,1 @@
-{
-  "mcpServers": {
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@colbymchenry/codegraph",
-        "serve"
-      ]
-    }
-  }
-}
+{}
