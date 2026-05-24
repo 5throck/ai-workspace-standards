@@ -173,6 +173,7 @@ bash scripts/dev-sync.sh "feat: description"
 
 Always append to AI-generated commit messages:
 ```
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 Co-Authored-By: Gemini <noreply@google.com>
 ```
 
