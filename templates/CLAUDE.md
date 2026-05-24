@@ -116,7 +116,7 @@ This project uses a **PM-first multi-agent architecture**. All development work 
 **Superpowers & Cost Optimization (3-Tier Strategy):**
 The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
 - **High-tier (PM / Architect)**: Runs on `claude-opus-4-7` to handle complex planning, reasoning, and prompt engineering.
-- **Medium-tier (Reviewer / QA)**: Runs on `claude-sonnet-5` to rigorously verify and review the code produced by the low-tier.
+- **Medium-tier (Reviewer / QA)**: Runs on `claude-sonnet-4.6` to rigorously verify and review the code produced by the low-tier.
 - **Low-tier (Code Writer)**: Dispatched on `claude-haiku-4-5` for scoped, simple, or boilerplate coding tasks.
 
 > **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)

@@ -12,3 +12,4 @@
 | [2026-05-23](2026-05-23.md) | docs: README OS-based steps + PR language rule + pre-commit auto-log fix |
 | [2026-05-24](2026-05-24.md) | feat: auto-install superpowers plugin during project scaffold |
 | [2026-05-24](2026-05-24.md) | feat: Refactor PM to 3-tier agent strategy and repair Windows terminal CP949 encoding corruptions |
+| [2026-05-24](2026-05-24.md) | feat: Optimize 3-tier model selection for PM cost efficiency |
