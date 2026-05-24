@@ -1,6 +1,9 @@
-﻿# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
-# Usage: .\scripts\dev-sync.ps1 "feat: description"
-param([string]$Msg = "chore: update")
+﻿param([string]$Msg = "chore: update")
+
+# UTF-8 encoding enforcement
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$ErrorActionPreference = 'Stop'
+
 
 $Date = Get-Date -Format "yyyy-MM-dd"
 
@@ -31,13 +34,14 @@ Add-Content "memory\$Date.md" $template -Encoding UTF8
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
 
-# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
+# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the entry is missing ────
 if (Test-Path "CHANGELOG.md") {
-    $cl = Get-Content "CHANGELOG.md" -Raw
+    $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
     # Extract [Unreleased] section content
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
-        if ($section -notmatch '(?m)^\s*[-*]' -and $section -notmatch '(?m)^### ') {
+        $EscapedMsg = [regex]::Escape($Msg)
+        if ($section -notmatch $EscapedMsg) {
             $Category = "### Changed"
             if ($Msg -match "^feat") { $Category = "### Added" }
             elseif ($Msg -match "^fix") { $Category = "### Fixed" }
@@ -63,13 +67,13 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     git checkout -b $Branch
 } else {
     $Branch = $CurrentBranch
-    Write-Host "ℹ️  Already on branch '$Branch' — committing here without creating a new branch." -ForegroundColor Cyan
+    Write-Host "ℹ️  Already on branch '$Branch' - committing here without creating a new branch." -ForegroundColor Cyan
 }
 # ── 6. Guard against committing sensitive files ───────────────────────────────
 $Sensitive = git ls-files --others --exclude-standard 2>$null |
     Where-Object { $_ -match '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' }
 if ($Sensitive) {
-    Write-Host "❌ Potentially sensitive untracked files detected — refusing git add -A:" -ForegroundColor Red
+    Write-Host "❌ Potentially sensitive untracked files detected - refusing git add -A:" -ForegroundColor Red
     $Sensitive | ForEach-Object { Write-Host "   $_" }
     Write-Host "   Stage files explicitly with 'git add <file>' or add them to .gitignore." -ForegroundColor Yellow
     exit 1
@@ -88,9 +92,10 @@ if (Test-Path "scripts\gen-pr-body.ps1") {
 if ($PrBody) {
     gh pr create --title $Msg --body $PrBody
 } elseif (Test-Path ".github\pull_request_template.md") {
-    $prBody = Get-Content ".github\pull_request_template.md" -Raw
+    $prBody = Get-Content ".github\pull_request_template.md" -Raw -Encoding UTF8
     gh pr create --title $Msg --body $prBody
 } else {
     gh pr create --fill
 }
+
 

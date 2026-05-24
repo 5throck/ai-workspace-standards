@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# gen-pr-body.sh — Generate a structured PR body from commit message + diff
+# gen-pr-body.sh - Generate a structured PR body from commit message + diff
 # Usage: bash scripts/gen-pr-body.sh "commit message"
 # Output: PR body markdown (stdout)
 #
@@ -30,7 +30,7 @@ DIFF_STAT=$(git diff --stat HEAD~1 HEAD 2>/dev/null || git diff --cached --stat 
 # ── AI mode: generate body via Claude CLI ─────────────────────────────────────
 if command -v claude &>/dev/null; then
   PROMPT="Generate a GitHub Pull Request body for the following change.
-Output ONLY the PR body in markdown — no explanation, no code fences around the whole output.
+Output ONLY the PR body in markdown - no explanation, no code fences around the whole output.
 
 Commit message : $COMMIT_MSG
 Date           : $TODAY
@@ -47,7 +47,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 [1-3 sentences: what problem does this solve and why now?]
 
 ## What Changed
-[concise bullet list of actual changes — be specific, not generic]
+[concise bullet list of actual changes - be specific, not generic]
 
 ## Test Plan
 - [ ] \`bash scripts/audit.sh\` passes

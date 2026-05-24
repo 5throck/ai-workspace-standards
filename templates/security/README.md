@@ -21,7 +21,7 @@ source: local-scan | web-advisory
 
 | Status | Meaning | Retention |
 |--------|---------|-----------|
-| `active` | Unfixed — upgrade required | Kept indefinitely |
+| `active` | Unfixed - upgrade required | Kept indefinitely |
 | `resolved` | Fixed (upgraded or Dependabot merged) | Deleted after 7 days |
 
 ## Usage

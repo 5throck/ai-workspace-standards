@@ -2,7 +2,7 @@
 
 This file provides guidance to Gemini (including the Antigravity agentic engine and Gemini CLI) when working in this workspace.
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) —read it first.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) -read it first.**
 >
 > For tool-specific behaviors of Claude Code, see [`CLAUDE.md`](CLAUDE.md).
 
@@ -65,43 +65,19 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ---
 
-### 3. Response Language
-
-- All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow)).
-
----
-
-### 4. Context Loading
-Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
-```
-@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 — workspace design standard
-@docs/context.md             # Step 2 — project knowledge (skip at workspace root — no docs/context.md here)
-@AGENTS.md                   # Step 3 — canonical agent roster (skip at workspace root — no AGENTS.md here by design)
-@memory/MEMORY.md            # Step 4 — recent changes (skip if file does not exist)
-@skills/                     # Step 5 — load skills listed in docs/context.md (skip at workspace root)
-```
-
-> **Workspace root note**: Steps 2, 3, and 5 apply to individual sub-projects only.
-> At workspace root (`C:\git`), only steps 0, 1, and 4 apply. Navigate into a project directory to get full context.
-
-For internationalization (i18n) work, also load the baseline translation reference:
-```
-@locales/en.json
-```
-
----
-
-### 5. Subagent Instantiation & Async Orchestration
+### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
+
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 
 #### Define Subagent (`define_subagent`)
 Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "test-runner",
-  "description": "Executes tests and verifies code changes against acceptance criteria",
-  "system_prompt": "You are a QA test runner...",
+  "name": "auditor",
+  "description": "Cross-validates documentation and ensures rules are not contradicted",
+  "system_prompt": "You are a consistency auditor...",
   "enable_write_tools": false,
   "enable_subagent_tools": false
 }
@@ -113,9 +89,9 @@ Spawn parallel instances to execute dedicated work concurrently.
 {
   "Subagents": [
     {
-      "TypeName": "test-runner",
-      "Role": "Test Runner",
-      "Prompt": "Verify the code changes in src/pricing.py against acceptance criteria and run tests"
+      "TypeName": "auditor",
+      "Role": "Consistency Auditor",
+      "Prompt": "Cross-validate the documentation changes and check for contradictions"
     }
   ]
 }
@@ -126,14 +102,15 @@ Interact and exchange contracts with spawned agents via their unique `conversati
 The platform supports **Reactive Wakeup**: you do not need to poll or query tasks in a loop. Simply yield execution, and the platform will wake you up automatically as soon as an agent replies or a background task completes.
 
 #### Phase 4 Execution Loop
-1.  **code-writer** implements the changes.
-2.  **test-runner** verifies against acceptance criteria and runs tests.
+See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete agent list:
+1.  **automation-engineer** implements the changes.
+2.  **auditor** verifies against acceptance criteria and consistency.
 3.  **Quality gate (audit script)** validates compliance.
 
-> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
+> Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
-The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
 - **High-tier (Design/Planning)** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
 - **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
@@ -159,13 +136,13 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
-*   **Migration**: Offer the user a migration of `.claude/` —`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
+*   **Migration**: Offer the user a migration of `.claude/` -`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
 
 ---
 
 ## Git & PR Additions (Gemini)
 
-All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **AI Commit Signatures**: Always append both co-author lines to all AI-generated git commit messages:
@@ -173,7 +150,7 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
   Co-Authored-By: Gemini <noreply@google.com>
   ```
-- **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-05-24*
 

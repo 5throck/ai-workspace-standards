@@ -11,8 +11,8 @@ Arguments: $ARGUMENTS
 
 Run the security monitor agent.
 
-- **No arguments** (or `--scan`): Run a full daily scan — local vulnerability scan, web advisory lookup, deduplication, save findings to `security/`, Dependabot auto-resolve, age cleanup.
-- **`--pr`**: Pre-PR advisory check — read-only. Report existing active advisories from `security/`. No new scan. Used automatically by `/sync` for public repos.
+- **No arguments** (or `--scan`): Run a full daily scan - local vulnerability scan, web advisory lookup, deduplication, save findings to `security/`, Dependabot auto-resolve, age cleanup.
+- **`--pr`**: Pre-PR advisory check - read-only. Report existing active advisories from `security/`. No new scan. Used automatically by `/sync` for public repos.
 
 Load and follow `agents/security-monitor.md` exactly.
 

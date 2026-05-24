@@ -8,7 +8,7 @@ This repository defines the shared workspace standards used by every project und
 
 ## What Is This?
 
-Modern AI-assisted development requires more than prompts — it requires **consistent, enforced behavioral contracts** that every AI tool follows across every project. This repo provides:
+Modern AI-assisted development requires more than prompts - it requires **consistent, enforced behavioral contracts** that every AI tool follows across every project. This repo provides:
 
 | Concern | File | Audience |
 |---------|------|----------|
@@ -19,9 +19,9 @@ Modern AI-assisted development requires more than prompts — it requires **cons
 
 ### Two Philosophies, One Standard
 
-**Vibe Coding** — AI takes the wheel. The developer describes intent; the AI agents (PM → Architect → Designer → Code Writer → Test Runner) execute the full workflow autonomously. These standards define the guardrails that keep autonomous execution safe and auditable.
+**Vibe Coding** - AI takes the wheel. The developer describes intent; the AI agents (PM → Architect → Designer → Code Writer → Test Runner) execute the full workflow autonomously. These standards define the guardrails that keep autonomous execution safe and auditable.
 
-**Harness Engineering** — Developer stays in the loop. AI tools are precision instruments: surgical edits, explicit plans, mandatory review gates. These standards define the harness that keeps AI output predictable and reviewable.
+**Harness Engineering** - Developer stays in the loop. AI tools are precision instruments: surgical edits, explicit plans, mandatory review gates. These standards define the harness that keeps AI output predictable and reviewable.
 
 ---
 
@@ -49,8 +49,8 @@ git config core.hooksPath .githooks
 # macOS / Linux / Windows (Git Bash)
 bash scripts/new-project.sh "my-project-name"
 
-# Windows — Command Prompt or PowerShell
-.\scripts\new-project.cmd "my-project-name"
+# Windows - Command Prompt or PowerShell
+.\scripts\new-project.ps1 "my-project-name"
 ```
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
@@ -82,8 +82,8 @@ agy
 ## Repository Structure
 
 ```
-C:\git\ (workspace root — this repo)
-├── CONSTITUTION.md          # Master standard — read first in every session
+C:\git\ (workspace root - this repo)
+├── CONSTITUTION.md          # Master standard - read first in every session
 ├── CLAUDE.md                # Claude Code workspace behaviors
 ├── GEMINI.md                # Gemini CLI / Antigravity workspace behaviors
 ├── SECURITY.md              # Standard GitHub vulnerability reporting policy
@@ -92,12 +92,12 @@ C:\git\ (workspace root — this repo)
 ├── README_ko.md             # This file (Korean)
 ├── .gitleaks.toml           # Secret scan config (extends upstream defaults)
 ├── memory/                  # Workspace-level memory logs
-├── templates/               # Authoritative scaffold — new-project.sh copies this
+├── templates/               # Authoritative scaffold - new-project.sh copies this
 │   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
 │   ├── docs/                  
 │   │   ├── context.md       # Full 10-section project context template
 │   │   └── security.md      # Internal data sanitization guidelines
-│   ├── scripts/             # dev-sync.sh/.cmd, sync-md.sh/.cmd, audit.sh/.cmd
+│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, etc.
 │   ├── .githooks/           # pre-commit (smart conditional), pre-push
@@ -105,10 +105,10 @@ C:\git\ (workspace root — this repo)
 │   ├── SECURITY.md          # GitHub vulnerability policy template
 │   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
 ├── scripts/
-│   ├── audit.sh / .cmd      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .cmd   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .cmd    # MEMORY.md index updater
-│   └── new-project.sh / .cmd # New project scaffolding (copies templates/)
+│   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
+│   ├── dev-sync.sh / .ps1   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .ps1    # MEMORY.md index updater
+│   └── new-project.sh / .ps1 # New project scaffolding (copies templates/)
 ├── .githooks/
 │   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main
@@ -166,13 +166,13 @@ Agent scaffold templates for all roles live in `templates/agents/`.
 
 ## Design Principles
 
-- **`docs/context.md` is the single source of truth** for every project — all AI tools share it.
+- **`docs/context.md` is the single source of truth** for every project - all AI tools share it.
 - **`CLAUDE.md` / `GEMINI.md` (project-level) contain only platform-specific overrides.**
-- **PR-only workflow** — all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
-- **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **Cross-platform scripts** — every `.sh` has a `.cmd`/`.ps1` pair with identical behavior.
-- **Coding Guidelines are audited** — `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
-- **Security-First Scaffold** — Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
+- **PR-only workflow** - all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
+- **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
+- **Cross-platform scripts** - every `.sh` has a `.cmd`/`.ps1` pair with identical behavior.
+- **Coding Guidelines are audited** - `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
+- **Security-First Scaffold** - Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
 ---
 
@@ -183,15 +183,15 @@ This is a **public repository**. Contributions are welcome via pull requests.
 1. Branch off `main` using the naming convention: `pr/<YYYYMMDD-HHmmss>-<slug>`
 2. All PRs must pass `bash scripts/audit.sh`
 3. Add a `CHANGELOG.md` entry under `[Unreleased]` before merging
-4. Follow `CONSTITUTION.md §8 — Coding Behavior Guidelines`
+4. Follow `CONSTITUTION.md §8 - Coding Behavior Guidelines`
 5. At least **1 approving review** is required before merging
 
 ---
 
 ## License
 
-AGPL-3.0 — see [LICENSE](LICENSE)
+AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-22*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-24*

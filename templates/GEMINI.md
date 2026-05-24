@@ -7,23 +7,6 @@
 > Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
 > Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
 
-## Context Loading
-
-Load project files at session start using the `@` syntax:
-```
-@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md      # workspace design standard
-@docs/context.md         # project knowledge (includes Session Start Skills)
-@AGENTS.md               # canonical agent roster
-@memory/MEMORY.md        # recent changes (skip if file does not exist)
-@skills/                 # load skills listed in docs/context.md (skip if skills/ does not exist)
-```
-
-<!-- Add project-specific files below as needed, e.g.:               -->
-<!-- @locales/en.json    — baseline locale for i18n work              -->
-<!-- @docs/BIZ_LOGIC.md  — domain formulas / business rules           -->
-
----
-
 ## Project-Specific Gemini Settings
 
 ### Tool Name Mapping & Safeguards
@@ -116,24 +99,11 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 
 #### Communication (`send_message`)
 Interact with spawned agents via their unique `conversationID`.
-**Reactive Wakeup**: Do not poll in a loop — simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
+**Reactive Wakeup**: Do not poll in a loop - simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
-### Multi-Agent Workflow
+### Behavioral Rules & Multi-Agent Workflow
 
-This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator.
-
-**Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents via `invoke_subagent` is forbidden.
-
-**Superpowers & Cost Optimization (3-Tier Strategy):**
-The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
-- **High-tier (PM / Architect)**: Runs on `gemini-3.5-pro` for complex planning, reasoning, and prompt engineering.
-- **Medium-tier (Reviewer / QA)**: Runs on `gemini-3.1-pro` to rigorously verify and review the code produced by the low-tier.
-- **Low-tier (Code Writer)**: Dispatched on `gemini-3.5-flash` for scoped, simple, or boilerplate coding tasks.
-
-> **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
-
-**Quick start:** Submit your request to PM: "PM, I need to [describe task]"
-
+All behavioral rules (Multi-Agent Workflow, Response Language, Plan Mode, Task Tracking, Subagent Pattern) have been consolidated into the project-level context file to avoid duplication.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
@@ -142,14 +112,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 - **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** → `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
----
-
-### Response Language
-- All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
-
-### PR Language Rule
-All PR titles, bodies, and review comments must be written in English — governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
+> **Full guidelines:** See [docs/context.md § Coding Guidelines](docs/context.md#coding-guidelines) and [docs/context.md § Multi-Agent Workflow](docs/context.md#multi-agent-workflow)
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
@@ -187,7 +150,7 @@ Instead, emulate them by reading the `.md` file and executing the described scri
 | Equivalent to | Run instead |
 |---------------|------------|
 | `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` |
-| `/memlog "summary"` | Manually append `## Session — summary` to `memory/YYYY-MM-DD.md` |
+| `/memlog "summary"` | Manually append `## Session - summary` to `memory/YYYY-MM-DD.md` |
 | `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
 | `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
 | `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) · `.\scripts\new-project.ps1 "<name>"` (Windows) |
@@ -204,9 +167,9 @@ Before pushing and creating a PR, check if the repo is public:
 gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
 ```
 
-If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` — read-only, no scan).
+If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` - read-only, no scan).
 
-- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
+- If CRITICAL advisories are found: show the warning and **pause** - let the user decide whether to proceed or stop.
 - If no CRITICAL advisories: continue with the push and PR creation.
 
 For private repos: skip the security gate entirely.
@@ -219,7 +182,7 @@ This project uses `.claude/` for Claude Code configuration. Gemini follows these
 
 - **Absolute Precedence**: `.gemini/` always takes precedence over `.claude/` if both exist.
 - **Fallback**: If no `.gemini/` directory exists, Gemini may read `.claude/settings.json` and `.claude/commands/` as a fallback source of truth.
-- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated — read the file to understand the underlying script and run it directly via `shell`.
+- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated - read the file to understand the underlying script and run it directly via `shell`.
 - **Agent Roles**: Gemini can instantiate roles defined in `agents/*.md` using `define_subagent` and `invoke_subagent`.
 - **Migration**: If the project transitions away from Claude Code, proactively offer to migrate `.claude/` configuration to `.gemini/` rather than leaving legacy files orphaned.
 

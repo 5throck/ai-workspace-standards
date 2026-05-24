@@ -15,7 +15,7 @@
 - [ ] No `.env` files staged (use `.env.sample` for templates)
 - [ ] No private key files (`*.pem`, `*.key`, `*.p12`, etc.)
 - [ ] Dependencies unchanged or reviewed for new CVEs
-- [ ] `security/` folder checked — no unresolved CRITICAL advisories
+- [ ] `security/` folder checked - no unresolved CRITICAL advisories
 
 ## Notes
 <!-- Breaking changes, deployment steps, or reviewer guidance. Delete section if not applicable. -->

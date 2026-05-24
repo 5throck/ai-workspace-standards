@@ -69,8 +69,8 @@ python3 prompts/ui-ux-pro-max/scripts/search.py "<query>" --design-system --pers
 ```
 
 This creates:
-- `design-system/MASTER.md` — Global Source of Truth with all design rules
-- `design-system/pages/` — Folder for page-specific overrides
+- `design-system/MASTER.md` - Global Source of Truth with all design rules
+- `design-system/pages/` - Folder for page-specific overrides
 
 **With page-specific override:**
 ```bash
@@ -78,7 +78,7 @@ python3 prompts/ui-ux-pro-max/scripts/search.py "<query>" --design-system --pers
 ```
 
 This also creates:
-- `design-system/pages/dashboard.md` — Page-specific deviations from Master
+- `design-system/pages/dashboard.md` - Page-specific deviations from Master
 
 **How hierarchical retrieval works:**
 1. When building a specific page (e.g., "Checkout"), first check `design-system/pages/checkout.md`

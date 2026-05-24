@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# audit.sh — Documentation integrity check
+# audit.sh - Documentation integrity check
 # Checks that required files and sections exist before a commit.
 # Exit code 0 = pass, non-zero = fail.
 set -euo pipefail
@@ -10,7 +10,7 @@ red()   { echo -e "\033[31m[FAIL]\033[0m $*"; }
 green() { echo -e "\033[32m[PASS]\033[0m $*"; }
 warn()  { echo -e "\033[33m[WARN]\033[0m $*"; }
 
-echo "=== audit.sh — workspace standards check ==="
+echo "=== audit.sh - workspace standards check ==="
 
 # 1. CHANGELOG.md must exist
 if [ -f "CHANGELOG.md" ]; then
@@ -40,37 +40,40 @@ if [ -f "CHANGELOG.md" ]; then
   fi
 fi
 
-if [ -f "docs/context.md" ]; then
+# --- Agent checks (applicable to all projects AND workspace root) ---
 
-  # 4. If a docs/context.md exists in the current project, it must have ## Coding Guidelines
-  if grep -q "^## Coding Guidelines" "docs/context.md"; then
-    green "docs/context.md has ## Coding Guidelines"
-  else
-    red  "docs/context.md is missing '## Coding Guidelines' section"
-    ((errors++)) || true
-  fi
-
-  # 5. AGENTS.md must exist
-  if [ -f "AGENTS.md" ]; then
+# 4. AGENTS.md must exist
+if [ -f "AGENTS.md" ]; then
     green "AGENTS.md exists"
-  else
-    red  "AGENTS.md missing (required for agent-first projects)"
+else
+    red "AGENTS.md missing (required for agent-first projects)"
     ((errors++)) || true
-  fi
+fi
 
-  # 6. At least one agent file must exist in agents/
-  if [ -d "agents" ] && [ -n "$(ls -A agents/*.md 2>/dev/null)" ]; then
+# 5. At least one agent file must exist in agents/
+if [ -n "$(ls -A agents/*.md 2>/dev/null)" ]; then
     green "agents/ has agent files"
-  else
-    red  "agents/ is empty or missing — create at least agents/pm.md"
+else
+    red "agents/ is empty or missing - create at least agents/pm.md"
     ((errors++)) || true
-  fi
+fi
+
+# --- Project-level checks (skip at workspace root where docs/context.md is absent) ---
+
+if [ -f "docs/context.md" ]; then
+    # 6. docs/context.md must have ## Coding Guidelines
+    if grep -q "^## Coding Guidelines" "docs/context.md"; then
+        green "docs/context.md has ## Coding Guidelines"
+    else
+        red "docs/context.md is missing '## Coding Guidelines' section"
+        ((errors++)) || true
+    fi
 
   # 7. .env.sample must exist
   if [ -f ".env.sample" ]; then
     green ".env.sample exists"
   else
-    warn ".env.sample not found — add one if this project uses environment variables"
+    warn ".env.sample not found - add one if this project uses environment variables"
   fi
 
   # 8. scripts/ .sh/.ps1 parity check
@@ -85,7 +88,7 @@ if [ -f "docs/context.md" ]; then
   done
 
 else
-  warn "docs/context.md not found — skipping project-level checks (workspace root)"
+  warn "docs/context.md not found - skipping project-level checks (workspace root)"
 fi
 
 echo ""

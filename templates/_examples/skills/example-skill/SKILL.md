@@ -21,7 +21,7 @@ back cleanly if needed.
 **Steps**:
 1. Verify the virtual environment is active: `which python` should point to `.venv/`
 2. Run autogenerate: `alembic revision --autogenerate -m "describe the change"`
-3. **Review the generated file** in `alembic/versions/` — autogenerate is not always correct
+3. **Review the generated file** in `alembic/versions/` - autogenerate is not always correct
 4. Check for: missing `op.create_index`, incorrect column types, missing `nullable` changes
 5. Report the generated file path and a summary of what it will do
 

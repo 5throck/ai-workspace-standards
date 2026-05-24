@@ -12,7 +12,7 @@ The pipeline will:
 1. Append a session entry to `memory/YYYY-MM-DD.md`
 2. Update `memory/MEMORY.md` index via `sync-md.sh`
 3. Auto-add `$ARGUMENTS` to `CHANGELOG.md [Unreleased]` if the section has no entries yet
-4. Run `audit.sh` — must exit 0 before proceeding
+4. Run `audit.sh` - must exit 0 before proceeding
 5. Create a new PR branch, commit all staged changes, push, and open a GitHub PR
 
 If audit fails, fix the reported issue before re-running `/sync`.
@@ -25,9 +25,9 @@ Before step 5 (push + PR), check if the repo is public:
 gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
 ```
 
-If the result is `false` (public repo): run `/security-check --pr` (Workflow 2 of `agents/security-monitor.md` — read-only, no scan).
+If the result is `false` (public repo): run `/security-check --pr` (Workflow 2 of `agents/security-monitor.md` - read-only, no scan).
 
-- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
+- If CRITICAL advisories are found: show the warning and **pause** - let the user decide whether to proceed or stop.
 - If no CRITICAL advisories: continue with the push and PR creation.
 
 For private repos: skip the security gate entirely.

@@ -19,9 +19,9 @@
 
 ### 두 가지 철학, 하나의 표준
 
-**Vibe Coding (바이브 코딩)** — AI가 주도합니다. 개발자가 의도를 설명하면 AI 에이전트(PM → Architect → Designer → Code Writer → Test Runner)가 자율적으로 전체 워크플로를 실행합니다. 이 표준은 자율적인 실행을 안전하고 감사(audit) 가능하게 유지하는 가드레일을 정의합니다.
+**Vibe Coding (바이브 코딩)** - AI가 주도합니다. 개발자가 의도를 설명하면 AI 에이전트(PM → Architect → Designer → Code Writer → Test Runner)가 자율적으로 전체 워크플로를 실행합니다. 이 표준은 자율적인 실행을 안전하고 감사(audit) 가능하게 유지하는 가드레일을 정의합니다.
 
-**Harness Engineering (하네스 엔지니어링)** — 개발자가 프로세스에 참여합니다. AI 도구는 정밀 도구로서 작동합니다: 외과적 편집, 명시적 계획, 필수 리뷰 게이트. 이 표준은 AI의 결과물을 예측 가능하고 리뷰할 수 있도록 유지하는 하네스를 정의합니다.
+**Harness Engineering (하네스 엔지니어링)** - 개발자가 프로세스에 참여합니다. AI 도구는 정밀 도구로서 작동합니다: 외과적 편집, 명시적 계획, 필수 리뷰 게이트. 이 표준은 AI의 결과물을 예측 가능하고 리뷰할 수 있도록 유지하는 하네스를 정의합니다.
 
 ---
 
@@ -49,7 +49,7 @@ git config core.hooksPath .githooks
 # macOS / Linux / Windows (Git Bash)
 bash scripts/new-project.sh "my-project-name"
 
-# Windows — 명령 프롬프트 또는 PowerShell
+# Windows - 명령 프롬프트 또는 PowerShell
 .\scripts\new-project.cmd "my-project-name"
 ```
 
@@ -80,8 +80,8 @@ agy
 ## 저장소 구조 (Repository Structure)
 
 ```
-C:\git\ (워크스페이스 루트 — 현재 저장소)
-├── CONSTITUTION.md          # 마스터 표준 — 모든 세션에서 가장 먼저 읽어야 함
+C:\git\ (워크스페이스 루트 - 현재 저장소)
+├── CONSTITUTION.md          # 마스터 표준 - 모든 세션에서 가장 먼저 읽어야 함
 ├── CLAUDE.md                # Claude Code 워크스페이스 동작 설정
 ├── GEMINI.md                # Gemini CLI / Antigravity 워크스페이스 동작 설정
 ├── SECURITY.md              # 표준 GitHub 취약점 보고 정책
@@ -90,7 +90,7 @@ C:\git\ (워크스페이스 루트 — 현재 저장소)
 ├── README_ko.md             # 본 파일 (국문)
 ├── .gitleaks.toml           # 시크릿 스캔 설정 (상위 기본값 확장)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
-├── templates/               # 공식 스캐폴드 — new-project.sh가 이 구조를 복사함
+├── templates/               # 공식 스캐폴드 - new-project.sh가 이 구조를 복사함
 │   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
 │   ├── docs/                  
 │   │   ├── context.md       # 전체 10개 섹션의 프로젝트 컨텍스트 템플릿
@@ -164,13 +164,13 @@ PM Orchestrator (PM 오케스트레이터)
 
 ## 설계 원칙 (Design Principles)
 
-- **`docs/context.md`는 모든 프로젝트의 단일 진실 공급원(SSOT)**입니다 — 모든 AI 도구가 이를 공유합니다.
+- **`docs/context.md`는 모든 프로젝트의 단일 진실 공급원(SSOT)**입니다 - 모든 AI 도구가 이를 공유합니다.
 - **`CLAUDE.md` / `GEMINI.md` (프로젝트 레벨)는 플랫폼 특화 오버라이드만 포함합니다.**
-- **PR 전용 워크플로** — 모든 변경 사항은 Pull Request를 통해 `main` 브랜치에 도달합니다. 직접 push는 `.githooks/pre-push`에 의해 차단됩니다.
-- **Conventional Commits** — `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **크로스 플랫폼 스크립트** — 모든 `.sh` 파일은 동일한 동작을 하는 `.cmd`/`.ps1` 파일과 짝을 이룹니다.
-- **코딩 가이드라인 감사** — `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.sh`가 빌드를 실패 처리합니다.
-- **보안 중심 스캐폴드** — 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
+- **PR 전용 워크플로** - 모든 변경 사항은 Pull Request를 통해 `main` 브랜치에 도달합니다. 직접 push는 `.githooks/pre-push`에 의해 차단됩니다.
+- **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
+- **크로스 플랫폼 스크립트** - 모든 `.sh` 파일은 동일한 동작을 하는 `.cmd`/`.ps1` 파일과 짝을 이룹니다.
+- **코딩 가이드라인 감사** - `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.sh`가 빌드를 실패 처리합니다.
+- **보안 중심 스캐폴드** - 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
 
 ---
 
@@ -181,14 +181,14 @@ PM Orchestrator (PM 오케스트레이터)
 1. `pr/<YYYYMMDD-HHmmss>-<slug>` 네이밍 규칙을 사용하여 `main`에서 브랜치를 땁니다.
 2. 모든 PR은 `bash scripts/audit.sh`를 통과해야 합니다.
 3. 병합(merge)하기 전에 `[Unreleased]` 아래에 `CHANGELOG.md` 항목을 추가합니다.
-4. `CONSTITUTION.md §8 — Coding Behavior Guidelines`를 준수합니다.
+4. `CONSTITUTION.md §8 - Coding Behavior Guidelines`를 준수합니다.
 5. 병합하기 전에 최소 **1명의 승인 리뷰(approving review)**가 필요합니다.
 
 ---
 
 ## 라이선스 (License)
 
-AGPL-3.0 — [LICENSE](LICENSE) 파일 참조
+AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 

@@ -22,7 +22,7 @@ git config core.hooksPath .githooks
 #    macOS / Linux / Windows Git Bash
 bash scripts/setup.sh
 
-#    Windows — PowerShell
+#    Windows - PowerShell
 .\scripts\setup.ps1
 ```
 
@@ -39,8 +39,8 @@ bash scripts/setup.sh
 
 ## 기여하기 (Contributing)
 
-[기여 방법을 설명하거나 — 프로젝트가 비공개/사내용인 경우 이 섹션을 삭제하세요.]
+[기여 방법을 설명하거나 - 프로젝트가 비공개/사내용인 경우 이 섹션을 삭제하세요.]
 
 ## 라이선스 (License)
 
-[라이선스 이름] — [LICENSE](LICENSE) 파일 참조
+[라이선스 이름] - [LICENSE](LICENSE) 파일 참조

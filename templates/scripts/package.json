@@ -1,0 +1,15 @@
+{
+  "name": "vsp-scripts",
+  "version": "1.0.0",
+  "description": "VSP Harness Engineering Scripts - Hybrid Orchestration",
+  "scripts": {
+    "verify-skills": "bun scripts/verify-skills.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

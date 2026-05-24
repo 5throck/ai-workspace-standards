@@ -7,9 +7,9 @@ Steps:
 2. Ensure `memory/` directory exists.
 3. Append the following to `memory/YYYY-MM-DD.md` (create if missing):
    ```
-   ## Session — $ARGUMENTS
+   ## Session - $ARGUMENTS
    ```
-   If $ARGUMENTS is empty, use `## Session — update` as the heading.
+   If $ARGUMENTS is empty, use `## Session - update` as the heading.
 4. Update `memory/MEMORY.md` index by appending a row:
    `| [YYYY-MM-DD](YYYY-MM-DD.md) | $ARGUMENTS |`
    (Create MEMORY.md with header row if it does not exist.)
