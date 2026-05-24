@@ -118,38 +118,11 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 Interact with spawned agents via their unique `conversationID`.
 **Reactive Wakeup**: Do not poll in a loop — simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
-### Multi-Agent Workflow
+### Behavioral Rules & Multi-Agent Workflow
 
-This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator.
+All behavioral rules (Multi-Agent Workflow, Response Language, Plan Mode, Task Tracking, Subagent Pattern) have been consolidated into the project-level context file to avoid duplication.
 
-**Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents via `invoke_subagent` is forbidden.
-
-**Superpowers & Cost Optimization (3-Tier Strategy):**
-The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
-- **High-tier (PM / Architect)**: Runs on `gemini-3.5-pro` for complex planning, reasoning, and prompt engineering.
-- **Medium-tier (Reviewer / QA)**: Runs on `gemini-3.1-pro` to rigorously verify and review the code produced by the low-tier.
-- **Low-tier (Code Writer)**: Dispatched on `gemini-3.5-flash` for scoped, simple, or boilerplate coding tasks.
-
-> **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
-
-**Quick start:** Submit your request to PM: "PM, I need to [describe task]"
-
-
-#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
-The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
-**Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- **High-tier (Design/Planning)** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** → `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
-
----
-
-### Response Language
-- All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow)).
-
-### PR Language Rule
-All PR titles, bodies, and review comments must be written in English — governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
+> **Full guidelines:** See [docs/context.md § Coding Guidelines](docs/context.md#coding-guidelines) and [docs/context.md § Multi-Agent Workflow](docs/context.md#multi-agent-workflow)
 
 ### Optimal Interaction Guidelines
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).

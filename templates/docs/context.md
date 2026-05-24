@@ -17,14 +17,14 @@
 ## Architecture
 ```
 [project root]/
-????? src/                  # [main source ??e.g., app logic, API handlers]
-??  ????? [folder]          # [description]
-??  ?遺??? [folder]          # [description]
-????? docs/                 # project context, ADRs
-????? agents/               # AI agent definitions
-????? scripts/              # audit, dev-sync, sync-md
-????? memory/               # session logs
-?遺??? [any other top-level dirs]
+├── src/                  # [main source — e.g., app logic, API handlers]
+│   ├── [folder]          # [description]
+│   └── [folder]          # [description]
+├── docs/                 # project context, ADRs
+├── agents/               # AI agent definitions
+├── scripts/              # audit, dev-sync, sync-md
+├── memory/               # session logs
+└── [any other top-level dirs]
 ```
 
 ## Environment Setup
@@ -72,20 +72,20 @@ This project uses a **PM-first multi-agent architecture**. All development work 
 **The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests.**
 
 ```
-?뚢????????????????
-??  Your Task  ??
-?붴???????р?????????
-       ??
-       ??
-?뚢????????????????
-?? PM Agent    ?? ??Classify, dispatch, synthesize, execute
-?? (Orchestrator) ??
-?붴???????р?????????
-       ??
-       ?쒋???[Read-only tasks] ??Parallel agents (analyst, researcher)
-       ?쒋???[Design tasks]    ??Architect + Designer (parallel)
-       ?쒋???[Code tasks]      ??Code-writer ??Test-runner ??QA gate
-       ?붴???[Unknown stack]   ??Stack-setup agent
+┌──────────────┐
+│  Your Task   │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ PM Agent     │ → Classify, dispatch, synthesize, execute
+│ (Orchestrator)│
+└──────┬───────┘
+       │
+       ├─▶[Read-only tasks] → Parallel agents (analyst, researcher)
+       ├─▶[Design tasks]    → Architect + Designer (parallel)
+       ├─▶[Code tasks]      → Code-writer → Test-runner → QA gate
+       └─▶[Unknown stack]   → Stack-setup agent
 ```
 
 ### Why PM-First?
@@ -243,3 +243,17 @@ All PR titles, bodies, and review comments must be written in English —governe
 ### 8. File Encoding Rule (Markdown & Scripts)
 - All text files, including Markdown (.md) and scripts (.ps1, .sh, .py, .js, etc.), must be saved as **UTF-8 (without BOM)**.
 - Script outputs (Add-Content, Set-Content) must explicitly specify -Encoding UTF8.
+### 9. Plan Mode
+- Enter plan mode when the user requests a new feature or significant refactor, or if the change touches more than 2 files.
+- If the correct approach is unclear, stop and present a plan before modifying code.
+
+### 10. Task Tracking
+- Call task creation tools before starting any multi-step work.
+- Keep statuses updated (in_progress, completed) and never leave tasks in_progress at the end of a session.
+
+### 11. Subagent Pattern
+- Each implementation task follows the Phase 4 execution loop:
+  1. **code-writer** implements the changes
+  2. **test-runner** verifies against acceptance criteria and runs tests
+  3. **Quality gate (audit script)** validates compliance
+- Fix and re-review if issues found — maximum **3 iterations** before escalating to the user.

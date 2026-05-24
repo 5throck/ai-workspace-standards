@@ -12,28 +12,28 @@
 
 ## Agent Roster
 
-### ?윞 Orchestration / Audit
+### 🛠️ Orchestration / Audit
 
 | Agent | File | Role |
 |-------|------|------|
 | PM Orchestrator | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
 | Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Enforces security policies; prevents secrets leaks; monitors safe dependencies |
 
-### ?뵷 Design
+### 📐 Design
 
 | Agent | File | Role |
 |-------|------|------|
 | Architect | [`agents/architect.md`](agents/architect.md) | Produces implementation plans and ADRs; never writes application code |
 | Designer | [`agents/designer.md`](agents/designer.md) | Produces UI/UX specs, wireframes, and component definitions |
 
-### ?윟 Execution
+### ⚙️ Execution
 
 | Agent | File | Role |
 |-------|------|------|
 | Code Writer | [`agents/code-writer.md`](agents/code-writer.md) | Implements approved plans; surgical changes only |
 | Test Runner | [`agents/test-runner.md`](agents/test-runner.md) | Runs tests and verifies acceptance criteria |
 
-### ?뵶 Security / Setup
+### 🛡️ Security / Setup
 
 | Agent | File | Role |
 |-------|------|------|
@@ -97,32 +97,32 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 ## Harness Engineering Workflow
 
 ```
-Phase 0 ??Team Assembly & Skill Orchestration (Kickoff)
+Phase 0 — Team Assembly & Skill Orchestration (Kickoff)
   PM assesses project requirements
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and docs/context.md
 
-Phase 1 ??Triage & Analysis
+Phase 1 — Triage & Analysis
   PM classifies the request
   Dispatch read-only agents in parallel (analysis, research)
-  PM synthesizes findings ??acceptance criteria
+  PM synthesizes findings → acceptance criteria
 
-Phase 2 ??Design
+Phase 2 — Design
   Architect produces implementation plan + ADR
   Designer produces UI/UX spec (if task has UI surface) ??parallel with Architect
-  PM obtains explicit user approval ??GATE
+  PM obtains explicit user approval → GATE
 
-Phase 3 ??Implementation (serial)
+Phase 3 — Implementation (serial)
   Code Writer implements per approved plan
   Test Runner verifies after each change
 
-Phase 4 ??QA Gate (all must pass)
+Phase 4 — QA Gate (all must pass)
   bash scripts/audit.sh     exit 0
   [project test command]    all tests pass
 
-Phase 5 ??Finalization
+Phase 5 — Finalization
   PM logs decisions to memory/YYYY-MM-DD.md
-  PM runs /sync "type: description" ??PR opened
+  PM runs /sync "type: description" → PR opened
 ```
 
 ---
@@ -150,7 +150,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 |-------|------|-------------------|
 | *(none yet —add entries as skills are created in `skills/`)* | | |
 
-*(When a skill is created, add a row here and in `docs/context.md 짠 Skills`.)*
+*(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 
 ---
 
@@ -181,8 +181,8 @@ Add domain-specific agents when the project requires specialized expertise beyon
 1. Create `agents/<name>.md` with the agent's role, constraints, and write-access rules.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (Parallelizable / Write Allowed).
-4. Update `docs/context.md 짠 Agents` to match.
-5. If the agent uses a skill, add it to the Skills table here and in `docs/context.md 짠 Session Start Skills`.
+4. Update `docs/context.md § Agents` to match.
+5. If the agent uses a skill, add it to the Skills table here and in `docs/context.md § Session Start Skills`.
 
 > Reference: [`abap_vibe_coding/AGENTS.md`](https://github.com/5throck/abap_vibe_coding/blob/main/AGENTS.md) (ERP domain example) and [`Pricing-Mgmt-Simulation/AGENTS.md`](https://github.com/5throck/Pricing-Mgmt-Simulation/blob/main/AGENTS.md) (financial BI example).
 
@@ -194,6 +194,8 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Add a row to the Agent Roster table above.
 2. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
 3. Update the `## Agents` table in `docs/context.md` to match.
-4. If the agent uses a skill, add a row to the Skills table above and in `docs/context.md 짠 Skills`.
+4. If the agent uses a skill, add a row to the Skills table above and in `docs/context.md § Skills`.
+
+
 
 
