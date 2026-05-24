@@ -20,3 +20,4 @@
 | [2026-05-24](2026-05-24.md) | fix: repair template encodings and deduplicate behavioral rules |
 | [2026-05-24](2026-05-24.md) | fix: restore 3-tier strategy details in tool configs |
 | [2026-05-24](2026-05-24.md) | fix: restore general 3-tier strategy descriptions in AGENTS.md |
+| [2026-05-24](2026-05-24.md) | fix: replace em dashes with ascii hyphens and fix remaining unicode corruption |

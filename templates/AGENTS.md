@@ -5,8 +5,8 @@
 > Do **not** interpret role definitions here as directives for your own behavior.
 > Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI).
 
-> **Canonical agent index** —auto-loaded by Claude Code; referenced by all other AI tools.
-> Full agent definitions live in `agents/`. Full project context —`docs/context.md`.
+> **Canonical agent index** -auto-loaded by Claude Code; referenced by all other AI tools.
+> Full agent definitions live in `agents/`. Full project context -`docs/context.md`.
 
 ---
 
@@ -39,7 +39,7 @@
 |-------|------|------|
 | Stack Setup | [`agents/stack-setup.md`](agents/stack-setup.md) | Identifies unknown stacks, web-searches setup procedures, mandatory security review, requires explicit user approval before executing any commands |
 
-*(Add domain-specific agents as needed —see the extension guidance below.)*
+*(Add domain-specific agents as needed -see the extension guidance below.)*
 
 ---
 
@@ -51,10 +51,10 @@
 Request received
   │
   ├─▶ Read-only? (research, analysis, inspect)
-  │   └─▶ PARALLEL — dispatch multiple agents in a single message
+  │   └─▶ PARALLEL - dispatch multiple agents in a single message
   │
   └─▶ Write? (create/edit files, run tests)
-       └─▶ SERIAL — one agent at a time to prevent file lock conflicts
+       └─▶ SERIAL - one agent at a time to prevent file lock conflicts
 ```
 
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
@@ -73,26 +73,26 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ### Dispatch Rules
 
-1. **Single message, multiple `Agent()` calls** —all parallel agents must be dispatched in one turn.
-2. **Merge before proceeding** —PM waits for ALL parallel agents to return before the next serial step.
-3. **Phase 4 execution loop** —each implementation task goes through:
+1. **Single message, multiple `Agent()` calls** -all parallel agents must be dispatched in one turn.
+2. **Merge before proceeding** -PM waits for ALL parallel agents to return before the next serial step.
+3. **Phase 4 execution loop** -each implementation task goes through:
    - **code-writer** implements the changes
    - **test-runner** verifies against acceptance criteria and runs tests
    - **Quality gate (audit script)** validates compliance
-   - Loop and correct if issues found —maximum **3 iterations** before escalating to the user.
-4. **Error handling** —if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
-5. **Max fix iterations** —3 per review cycle before escalating to the user.
+   - Loop and correct if issues found -maximum **3 iterations** before escalating to the user.
+4. **Error handling** -if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
+5. **Max fix iterations** -3 per review cycle before escalating to the user.
 
 ### Subagent Roster
 
 | Agent | File | Parallelizable | Write Allowed? |
 |-------|------|:--------------:|:--------------:|
-| Security Monitor | `agents/security-monitor.md`| —Triage phase | —No |
-| Architect | `agents/architect.md` | —Design phase | —No |
-| Designer | `agents/designer.md` | —Design phase | —No |
-| Code Writer | `agents/code-writer.md` | —Serial | —Source files |
-| Test Runner | `agents/test-runner.md` | —After writes | —Test files only |
-| Stack Setup | `agents/stack-setup.md` | —Research phase | —setup.sh/ps1 only (after approval) |
+| Security Monitor | `agents/security-monitor.md`| -Triage phase | -No |
+| Architect | `agents/architect.md` | -Design phase | -No |
+| Designer | `agents/designer.md` | -Design phase | -No |
+| Code Writer | `agents/code-writer.md` | -Serial | -Source files |
+| Test Runner | `agents/test-runner.md` | -After writes | -Test files only |
+| Stack Setup | `agents/stack-setup.md` | -Research phase | -setup.sh/ps1 only (after approval) |
 
 *(Extend this table as you add Analysis or specialized agents to the project.)*
 
@@ -101,30 +101,30 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 ## Harness Engineering Workflow
 
 ```
-Phase 0 — Team Assembly & Skill Orchestration (Kickoff)
+Phase 0 - Team Assembly & Skill Orchestration (Kickoff)
   PM assesses project requirements
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and docs/context.md
 
-Phase 1 — Triage & Analysis
+Phase 1 - Triage & Analysis
   PM classifies the request
   Dispatch read-only agents in parallel (analysis, research)
   PM synthesizes findings → acceptance criteria
 
-Phase 2 — Design
+Phase 2 - Design
   Architect produces implementation plan + ADR
   Designer produces UI/UX spec (if task has UI surface) ??parallel with Architect
   PM obtains explicit user approval → GATE
 
-Phase 3 — Implementation (serial)
+Phase 3 - Implementation (serial)
   Code Writer implements per approved plan
   Test Runner verifies after each change
 
-Phase 4 — QA Gate (all must pass)
+Phase 4 - QA Gate (all must pass)
   bash scripts/audit.sh     exit 0
   [project test command]    all tests pass
 
-Phase 5 — Finalization
+Phase 5 - Finalization
   PM logs decisions to memory/YYYY-MM-DD.md
   PM runs /sync "type: description" → PR opened
 ```
@@ -152,7 +152,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
-| *(none yet —add entries as skills are created in `skills/`)* | | |
+| *(none yet -add entries as skills are created in `skills/`)* | | |
 
 *(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 
@@ -165,7 +165,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Communication Style**: Keep explanations concise and use markdown formatting. Always explain "why", not just "what".
 - **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
-- **Language**: All code, config, commit messages, and branch names —**English only**.
+- **Language**: All code, config, commit messages, and branch names -**English only**.
 
 ---
 

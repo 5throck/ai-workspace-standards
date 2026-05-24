@@ -19,8 +19,8 @@ Load project files at session start using the `@` syntax:
 ```
 
 <!-- Add project-specific files below as needed, e.g.:               -->
-<!-- @locales/en.json    — baseline locale for i18n work              -->
-<!-- @docs/BIZ_LOGIC.md  — domain formulas / business rules           -->
+<!-- @locales/en.json    - baseline locale for i18n work              -->
+<!-- @docs/BIZ_LOGIC.md  - domain formulas / business rules           -->
 
 ---
 
@@ -116,7 +116,7 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 
 #### Communication (`send_message`)
 Interact with spawned agents via their unique `conversationID`.
-**Reactive Wakeup**: Do not poll in a loop — simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
+**Reactive Wakeup**: Do not poll in a loop - simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
 ### Behavioral Rules & Multi-Agent Workflow
 
@@ -167,7 +167,7 @@ Instead, emulate them by reading the `.md` file and executing the described scri
 | Equivalent to | Run instead |
 |---------------|------------|
 | `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` |
-| `/memlog "summary"` | Manually append `## Session — summary` to `memory/YYYY-MM-DD.md` |
+| `/memlog "summary"` | Manually append `## Session - summary` to `memory/YYYY-MM-DD.md` |
 | `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
 | `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
 | `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) · `.\scripts\new-project.ps1 "<name>"` (Windows) |
@@ -184,9 +184,9 @@ Before pushing and creating a PR, check if the repo is public:
 gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
 ```
 
-If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` — read-only, no scan).
+If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` - read-only, no scan).
 
-- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
+- If CRITICAL advisories are found: show the warning and **pause** - let the user decide whether to proceed or stop.
 - If no CRITICAL advisories: continue with the push and PR creation.
 
 For private repos: skip the security gate entirely.
@@ -199,7 +199,7 @@ This project uses `.claude/` for Claude Code configuration. Gemini follows these
 
 - **Absolute Precedence**: `.gemini/` always takes precedence over `.claude/` if both exist.
 - **Fallback**: If no `.gemini/` directory exists, Gemini may read `.claude/settings.json` and `.claude/commands/` as a fallback source of truth.
-- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated — read the file to understand the underlying script and run it directly via `shell`.
+- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated - read the file to understand the underlying script and run it directly via `shell`.
 - **Agent Roles**: Gemini can instantiate roles defined in `agents/*.md` using `define_subagent` and `invoke_subagent`.
 - **Migration**: If the project transitions away from Claude Code, proactively offer to migrate `.claude/` configuration to `.gemini/` rather than leaving legacy files orphaned.
 

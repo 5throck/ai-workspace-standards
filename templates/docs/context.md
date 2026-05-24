@@ -17,7 +17,7 @@
 ## Architecture
 ```
 [project root]/
-├── src/                  # [main source — e.g., app logic, API handlers]
+├── src/                  # [main source - e.g., app logic, API handlers]
 │   ├── [folder]          # [description]
 │   └── [folder]          # [description]
 ├── docs/                 # project context, ADRs
@@ -28,13 +28,13 @@
 ```
 
 ## Environment Setup
-- Copy `.env.sample` —`.env` and fill in all required values.
+- Copy `.env.sample` -`.env` and fill in all required values.
 - **Python**:
   - macOS/Linux: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
   - Windows:     `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`
 - **Node.js**: `npm install`
 - Required env keys (see `.env.sample`):
-  - `[KEY_NAME]` —[description] *(replace with actual keys, or write "N/A —no env vars required")*
+  - `[KEY_NAME]` -[description] *(replace with actual keys, or write "N/A -no env vars required")*
 
 ## Agents
 <!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
@@ -42,23 +42,23 @@
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 | Group | Agent file | Role |
 |-------|------------|------|
-| Orchestration | `agents/pm.md` | PM orchestrator —owns the workflow, dispatches parallel tasks |
-| Orchestration | `agents/security-monitor.md` | Security monitor —enforces policies, prevents secrets leaks |
-| Design | `agents/architect.md` | Architect —produces implementation plans and ADRs |
-| Design | `agents/designer.md` | Designer —produces UI/UX specs, wireframes, and component definitions |
-| Execution | `agents/code-writer.md` | Code writer —implements approved plans |
-| Execution | `agents/test-runner.md` | Test runner —verifies acceptance criteria and runs QA gate |
+| Orchestration | `agents/pm.md` | PM orchestrator -owns the workflow, dispatches parallel tasks |
+| Orchestration | `agents/security-monitor.md` | Security monitor -enforces policies, prevents secrets leaks |
+| Design | `agents/architect.md` | Architect -produces implementation plans and ADRs |
+| Design | `agents/designer.md` | Designer -produces UI/UX specs, wireframes, and component definitions |
+| Execution | `agents/code-writer.md` | Code writer -implements approved plans |
+| Execution | `agents/test-runner.md` | Test runner -verifies acceptance criteria and runs QA gate |
 
 ## Skills
 | Skill path | Trigger condition |
 |------------|-------------------|
-| *(none yet —add entries as skills are created in `skills/`)* | |
+| *(none yet -add entries as skills are created in `skills/`)* | |
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
-<!-- Format: `skills/<name>/SKILL.md` —reason / trigger                          -->
-<!-- Example: `skills/auth-flow/SKILL.md` —always load when auth-related tasks   -->
+<!-- Format: `skills/<name>/SKILL.md` -reason / trigger                          -->
+<!-- Example: `skills/auth-flow/SKILL.md` -always load when auth-related tasks   -->
 <!-- Add a skill: create skills/<name>/SKILL.md, then add a line below.           -->
 <!-- See https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/templates/_examples/skills/example-skill/SKILL.md for the template.-->
 - *(none yet)*
@@ -176,22 +176,22 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 ```
 
 > Run `/changelog "description"` before `/sync` to pre-populate the changelog entry.
-> **Rule: All changes reach `main` via PR only —never direct push.**
+> **Rule: All changes reach `main` via PR only -never direct push.**
 
 ---
 
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `docs/context.md` | This file —single source of truth for all AI tools |
-| `AGENTS.md` | Canonical agent index —auto-loaded by Claude Code |
-| `agents/pm.md` | PM orchestrator —workflow owner |
-| `agents/security-monitor.md` | Security agent —enforces policies and scans for secrets |
-| `agents/architect.md` | Design agent —implementation plans and ADRs |
-| `agents/designer.md` | Design agent —UI/UX specs and component definitions |
-| `agents/code-writer.md` | Implementation agent —writes code from approved plans |
-| `agents/test-runner.md` | QA agent —runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (memlog —sync-md —changelog —audit —commit —PR) |
+| `docs/context.md` | This file -single source of truth for all AI tools |
+| `AGENTS.md` | Canonical agent index -auto-loaded by Claude Code |
+| `agents/pm.md` | PM orchestrator -workflow owner |
+| `agents/security-monitor.md` | Security agent -enforces policies and scans for secrets |
+| `agents/architect.md` | Design agent -implementation plans and ADRs |
+| `agents/designer.md` | Design agent -UI/UX specs and component definitions |
+| `agents/code-writer.md` | Implementation agent -writes code from approved plans |
+| `agents/test-runner.md` | QA agent -runs tests and verifies acceptance criteria |
+| `scripts/dev-sync.sh` | Full sync pipeline (memlog -sync-md -changelog -audit -commit -PR) |
 | `scripts/audit.sh` | Documentation audit script |
 | `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
 | `memory/MEMORY.md` | Session log index |
@@ -204,7 +204,7 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 > Full rationale: [CONSTITUTION.md 짠8](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
 
 ### 1. Think Before Coding
-- State assumptions explicitly before implementing. If uncertain, ask —don't guess silently.
+- State assumptions explicitly before implementing. If uncertain, ask -don't guess silently.
 - If multiple interpretations exist, present them; don't pick one silently.
 - If something is unclear, stop and name what's confusing.
 - **Secrets**: Never hardcode passwords, API tokens, or keys. Always use env vars / `.env.sample`.
@@ -221,8 +221,8 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 
 ### 4. Goal-Driven Execution
 - Convert every task into a verifiable goal before starting:
-  - "Add validation" —"Write tests for invalid inputs, then make them pass"
-  - "Fix the bug" —"Write a reproducer test, then fix it"
+  - "Add validation" -"Write tests for invalid inputs, then make them pass"
+  - "Fix the bug" -"Write a reproducer test, then fix it"
 - For multi-step tasks, state a brief numbered plan with a verify step for each.
 
 ### 5. Open-Source Package Policy
@@ -233,11 +233,11 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 - Full policy: [CONSTITUTION.md 짠8.5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
 
 ### 6. Response Language
-- All **conversational** replies to the user —**Korean (?쒓뎅—** by default.
-- All code, config, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/ logs** —**English only**.
+- All **conversational** replies to the user -**Korean (한국어)** by default.
+- All code, config, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/ logs** -**English only**.
 
 ### 7. PR Language Rule
-All PR titles, bodies, and review comments must be written in English —governed by [CONSTITUTION.md 짠3 —Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
+All PR titles, bodies, and review comments must be written in English -governed by [CONSTITUTION.md §3 -Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
 
 
 ### 8. File Encoding Rule (Markdown & Scripts)
@@ -256,4 +256,4 @@ All PR titles, bodies, and review comments must be written in English —governe
   1. **code-writer** implements the changes
   2. **test-runner** verifies against acceptance criteria and runs tests
   3. **Quality gate (audit script)** validates compliance
-- Fix and re-review if issues found — maximum **3 iterations** before escalating to the user.
+- Fix and re-review if issues found - maximum **3 iterations** before escalating to the user.
