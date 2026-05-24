@@ -69,8 +69,14 @@ git commit -m "$MSG
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git push -u origin "$BRANCH"
 
-# Use PR template if present; fall back to --fill
-if [ -f ".github/pull_request_template.md" ]; then
+# ── 7. Generate PR body ───────────────────────────────────────────────────────
+if [ -f "scripts/gen-pr-body.sh" ]; then
+  PR_BODY=$(bash scripts/gen-pr-body.sh "$MSG" 2>/dev/null || true)
+fi
+
+if [ -n "${PR_BODY:-}" ]; then
+  gh pr create --title "$MSG" --body "$PR_BODY"
+elif [ -f ".github/pull_request_template.md" ]; then
   gh pr create --title "$MSG" --body-file .github/pull_request_template.md
 else
   gh pr create --fill

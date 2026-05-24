@@ -1,25 +1,21 @@
-## Summary
+## Why
+<!-- What problem does this PR solve? Why is this change needed now? -->
 
-<!-- Describe the purpose of this PR. -->
-- 
-
-## Changes
-
-<!-- List files modified and what changed. -->
-- 
+## What Changed
+<!-- Concise bullet list of concrete changes. -->
+-
 
 ## Test Plan
-
-- [ ] `bash scripts/audit.sh` passes (exit 0)
+- [ ] `bash scripts/audit.sh` passes
 - [ ] CHANGELOG.md updated under `[Unreleased]`
+- [ ] <!-- add project-specific test steps -->
 
 ## Security Checklist
-
 - [ ] No secrets, credentials, or API keys committed
 - [ ] No `.env` files staged (use `.env.sample` for templates)
+- [ ] No private key files (`*.pem`, `*.key`, `*.p12`, etc.)
+- [ ] Dependencies unchanged or reviewed for new CVEs
 - [ ] `security/` folder checked — no unresolved CRITICAL advisories
 
-## Checklist
-
-- [ ] Only files within the approved plan scope were modified
-- [ ] Co-Authored-By line included in commit message
+## Notes
+<!-- Breaking changes, deployment steps, or reviewer guidance. Delete section if not applicable. -->
