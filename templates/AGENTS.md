@@ -1,4 +1,4 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
@@ -62,9 +62,13 @@ Request received
 
 ### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
-- **High-tier (Design/Plan - e.g., Opus 4.7 / Gemini 3.5 Pro)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
-- **Medium-tier (Review/QA - e.g., Sonnet 5 / Gemini 3.1 Pro)**: Used by Test Runner or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
-- **Low-tier (Coding/Execute - e.g., Haiku 4.5 / Gemini 3.5 Flash)**: Used by Code Writer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+- **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
+- **Medium-tier (Review/QA)**: Used by Test Runner or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
+- **Low-tier (Coding/Execute)**: Used by Code Writer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+
+> **Note on 3-Tier Strategy Models:**
+> The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
+
 The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
 
 ### Dispatch Rules
