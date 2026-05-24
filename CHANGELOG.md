@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-24]**: chore: remove leftover temporary automation scripts from workspace root
+
+### Changed
 - **[2026-05-24]**: refactor: consolidate Session Start/Context Loading into CONSTITUTION.md and remove duplicates from CLAUDE and GEMINI templates
 
 ### Changed
@@ -333,6 +336,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
 

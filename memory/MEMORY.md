@@ -28,3 +28,4 @@
 | [2026-05-24](2026-05-24.md) | docs: backfill today's changelog entries that were missed due to the previous bug |
 | [2026-05-24](2026-05-24.md) | refactor: remove duplicated Response Language block from GEMINI.md |
 | [2026-05-24](2026-05-24.md) | refactor: consolidate Session Start/Context Loading into CONSTITUTION.md and remove duplicates from CLAUDE and GEMINI templates |
+| [2026-05-24](2026-05-24.md) | chore: remove leftover temporary automation scripts from workspace root |
