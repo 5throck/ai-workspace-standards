@@ -114,7 +114,9 @@ Every project follows this layout. Omit folders that don't apply to the project 
 
 #### 1.2 Rules
 - **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §8. The `audit.sh` / `audit.ps1` script must verify this heading exists and abort with a non-zero exit code if it is missing.
-- **Cross-Platform Script Parity**: `scripts/` must always provide both `.sh` (bash) and `.ps1` (PowerShell) pairs. Both files must accept the exact same positional parameters/flags, perform identical side-effects, and return unified exit codes (`0` for success, non-zero `>0` for error).
+- **Hybrid Scripting & Cross-Platform Parity**: The workspace follows a hybrid scripting model:
+  1. **Utility Scripts** (e.g., `dev-sync`, `audit`) are implemented in pure PowerShell (`.ps1`) and Bash (`.sh`). `scripts/` must always provide both `.sh` and `.ps1` pairs. Both files must accept the exact same parameters and perform identical side-effects.
+  2. **Agent Orchestration** (e.g., `dispatch`, `verify-skills`) and complex workflows are implemented in TypeScript (`.ts`) executed via Bun. These `.ts` files do not require PS1/SH pairs.
 - **ADR Format Standard**: ADRs in `docs/adr/` must follow sequential 4-digit prefix naming (`0001-slug.md`). Every ADR must consist of three mandatory sections:
   1. **Context**: What is the problem or architectural background context?
   2. **Decision**: What choice was made and why?
@@ -564,6 +566,10 @@ When adding or recommending dependencies:
 - When generating files programmatically (e.g. PowerShell scripts), explicitly use `-Encoding UTF8` (or `[System.Text.UTF8Encoding]::new($false)`) to prevent fallback to localized ANSI (CP949) encodings.
 - Git configuration (`core.quotepath false` and `i18n.commitencoding utf-8`) helps, but the source files themselves must be strictly UTF-8 encoded to prevent character corruption.
 
+#### 8.8 Hybrid Scripting & Cross-Platform Rule
+- **Hybrid Approach**: The project uses a hybrid scripting model. Complex multi-agent orchestration (e.g., `dispatch.ts`, `retry-handler.ts`, `verify-skills.ts`) is implemented in **Bun (.ts)**. Everyday development utilities (e.g., `dev-sync`, `audit`) use native shell scripts.
+- **Utility Script Pairing**: All utility shell scripts must be cross-platform compatible. Any creation, modification, or deletion of a PowerShell utility script (`.ps1`) MUST be accompanied by the exact same operation on its corresponding Bash script counterpart (`.sh`), and vice versa. They must always be kept in sync as a pair (e.g., `dev-sync.ps1` and `dev-sync.sh`).
+
 ---
 
-*Last Updated: 2026-05-24*
+*Last Updated: 2026-05-25*

@@ -258,3 +258,7 @@ All PR titles, bodies, and review comments must be written in English -governed 
   2. **test-runner** verifies against acceptance criteria and runs tests
   3. **Quality gate (audit script)** validates compliance
 - Fix and re-review if issues found - maximum **3 iterations** before escalating to the user.
+
+### 12. Hybrid Scripting & Cross-Platform Rule
+- **Hybrid Approach**: The project uses a hybrid scripting model. Complex multi-agent orchestration (e.g., `dispatch.ts`, `verify-skills.ts`) is implemented in **Bun (.ts)**. Everyday development utilities (e.g., `dev-sync`, `audit`) use native shell scripts.
+- **Utility Script Pairing**: All utility shell scripts must be cross-platform compatible. Any creation, modification, or deletion of a PowerShell utility script (`.ps1`) MUST be accompanied by the exact same operation on its corresponding Bash script counterpart (`.sh`), and vice versa. They must always be kept in sync as a pair (e.g., `dev-sync.ps1` and `dev-sync.sh`).

@@ -218,6 +218,15 @@ fi
 # ── 2. Dependency install + license audit (stack auto-detection) ──────────────
 if [ "$SKIP_INSTALL" = false ]; then
 
+  # ── Bun Agent Orchestration ────────────────────────────────────────────────
+  if [ -f "scripts/package.json" ]; then
+    if require bun "install Bun using bash scripts/install-bun.sh"; then
+      info "Agent orchestration (Bun) detected - running bun install in scripts/"
+      (cd scripts && bun install)
+      pass "bun install complete"
+    fi
+  fi
+
   # ── Node.js ────────────────────────────────────────────────────────────────
   if [ -f "package.json" ]; then
     if require npm "install Node.js from https://nodejs.org"; then

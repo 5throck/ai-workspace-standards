@@ -1,4 +1,4 @@
-﻿# setup.ps1 ??Post-scaffold environment setup (Windows PowerShell)
+# setup.ps1 ??Post-scaffold environment setup (Windows PowerShell)
 # Mirrors setup.sh exactly. Called automatically by new-project.ps1;
 # can also be re-run manually at any time.
 #
@@ -151,10 +151,21 @@ if (Test-Path ".env.sample") {
     } else { Info ".env already exists ??skipping copy" }
 }
 
-# ?? 2. Dependency install + license audit (stack auto-detection) ??????????????
+# ── 2. Dependency install + license audit (stack auto-detection) ──────────────
 if (-not $SkipInstall) {
 
-    # ?? Node.js ????????????????????????????????????????????????????????????????
+    # ── Bun Agent Orchestration ───────────────────────────────────────────────
+    if (Test-Path "scripts\package.json") {
+        if (Require "bun" "install Bun using .\scripts\install-bun.ps1") {
+            Info "Agent orchestration (Bun) detected ── running bun install in scripts/"
+            Push-Location scripts
+            bun install
+            if ($LASTEXITCODE -eq 0) { Pass "bun install complete" }
+            Pop-Location
+        }
+    }
+
+    # ?€?€ Node.js ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
     if (Test-Path "package.json") {
         if (Require "npm" "install Node.js from https://nodejs.org") {
             Info "Node.js project detected ??running npm install"
