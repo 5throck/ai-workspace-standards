@@ -37,18 +37,25 @@ Each project directory contains its own `docs/context.md` as the authoritative d
 
 Navigate to the project directory before starting work. Each project has its own build system (`package.json`, `pyproject.toml`, etc.), dependencies, testing framework, and development workflow (`scripts/dev-sync.sh`).
 
-**Session start checklist** (run in order at the beginning of every session):
+**Session start checklist / Context Loading** (run in order at the beginning of every session):
+
+> **Tool-Specific Instructions:**
+> - **Claude Code / CLI tools**: Read the files using your native file reading capabilities.
+> - **Gemini / Web UI tools**: Use the `@` file reference syntax to load these into context.
+
 0. **Forced Hook Activation**: Ensure automated PR-enforcement hooks are bound. Execute:
    ```bash
    git config core.hooksPath .githooks
    ```
-1. **Read this file** (CONSTITUTION.md) - you are reading it now. Complete the section checklist at the top before proceeding.
-2. Read the project's `docs/context.md` - single source of truth for purpose, tech stack, and architecture.
-3. Read `AGENTS.md` - canonical agent roster.
-4. Check `memory/MEMORY.md` - recent session history (skip if file does not exist).
-5. Load any skills listed under `## Session Start Skills` in `docs/context.md`.
+1. **Workspace Standard**: Read this file (`CONSTITUTION.md`) or load `@CONSTITUTION.md`.
+2. **Project Context**: Read `docs/context.md` or load `@docs/context.md` (skip at workspace root).
+3. **Agent Roster**: Read `AGENTS.md` or load `@AGENTS.md` (skip at workspace root).
+4. **Session History**: Read `memory/MEMORY.md` or load `@memory/MEMORY.md` (skip if file does not exist).
+5. **Session Skills**: Load any skills listed under `## Session Start Skills` in `docs/context.md`. (For Gemini, load `@skills/`).
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
+
+For internationalization (i18n) work, also load the baseline translation reference (e.g. `@locales/en.json`).
 
 #### General Development Notes
 

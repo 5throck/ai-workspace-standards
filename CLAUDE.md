@@ -6,26 +6,6 @@
 
 ---
 
-## Session Start
-
-At the start of every Claude Code session in this workspace:
-
-```
-0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
-1. Read CONSTITUTION.md                  # workspace design standard
-2. Read docs/context.md                  # project SSOT (skip if working at workspace root - no project context here)
-3. Read AGENTS.md                        # canonical agent roster (skip at workspace root - no AGENTS.md here by design)
-4. Read memory/MEMORY.md                 # recent session history (if exists)
-5. Load Session Start Skills             # from docs/context.md ## Session Start Skills (skip at workspace root)
-```
-
-> **Workspace root note**: Steps 2, 3, and 5 apply to individual sub-projects, not the workspace root itself.
-> At workspace root (`C:\git`), only steps 0, 1, and 4 apply. Navigate into a project directory to get full context.
-
----
-
----
-
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)

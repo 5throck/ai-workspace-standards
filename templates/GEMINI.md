@@ -7,23 +7,6 @@
 > Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
 > Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
 
-## Context Loading
-
-Load project files at session start using the `@` syntax:
-```
-@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md      # workspace design standard
-@docs/context.md         # project knowledge (includes Session Start Skills)
-@AGENTS.md               # canonical agent roster
-@memory/MEMORY.md        # recent changes (skip if file does not exist)
-@skills/                 # load skills listed in docs/context.md (skip if skills/ does not exist)
-```
-
-<!-- Add project-specific files below as needed, e.g.:               -->
-<!-- @locales/en.json    - baseline locale for i18n work              -->
-<!-- @docs/BIZ_LOGIC.md  - domain formulas / business rules           -->
-
----
-
 ## Project-Specific Gemini Settings
 
 ### Tool Name Mapping & Safeguards

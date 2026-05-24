@@ -11,21 +11,6 @@
 
 ## Project-Specific Claude Code Settings
 
-### Session Start
-
-At the start of every Claude Code session, run this checklist:
-
-```
-0. git config core.hooksPath .githooks   # activate hooks (run once per clone; verify it stuck)
-1. Read https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md               # workspace design standard
-2. Read docs/context.md                  # project knowledge - coding guidelines, agents, workflow
-3. Read AGENTS.md                        # agent roster (auto-loaded by Claude Code)
-4. Read memory/MEMORY.md                 # recent changes and session history
-5. Load skills listed in docs/context.md ## Session Start Skills
-```
-
----
-
 ### CLI vs Desktop App
 
 Both the CLI and the Desktop App share the same `.claude/settings.json` and slash commands.

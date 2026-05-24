@@ -65,27 +65,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ---
 
-### 3. Context Loading
-Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
-```
-@https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 - workspace design standard
-@docs/context.md             # Step 2 - project knowledge (skip at workspace root - no docs/context.md here)
-@AGENTS.md                   # Step 3 - canonical agent roster (skip at workspace root - no AGENTS.md here by design)
-@memory/MEMORY.md            # Step 4 - recent changes (skip if file does not exist)
-@skills/                     # Step 5 - load skills listed in docs/context.md (skip at workspace root)
-```
-
-> **Workspace root note**: Steps 2, 3, and 5 apply to individual sub-projects only.
-> At workspace root (`C:\git`), only steps 0, 1, and 4 apply. Navigate into a project directory to get full context.
-
-For internationalization (i18n) work, also load the baseline translation reference:
-```
-@locales/en.json
-```
-
----
-
-### 4. Subagent Instantiation & Async Orchestration
+### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
 #### Define Subagent (`define_subagent`)
