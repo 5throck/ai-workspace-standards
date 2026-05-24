@@ -109,6 +109,12 @@ git config core.hooksPath .githooks
 
 All behavioral rules (Multi-Agent Workflow, Response Language, Plan Mode, Task Tracking, Subagent Pattern) have been consolidated into the project-level context file to avoid duplication.
 
+#### Superpowers & Cost Optimization (3-Tier Strategy)
+The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
+- **High-tier (PM / Architect)**: Runs on `claude-opus-4-7` to handle complex planning, reasoning, and prompt engineering.
+- **Medium-tier (Reviewer / QA)**: Runs on `claude-sonnet-4.6` to rigorously verify and review the code produced by the low-tier.
+- **Low-tier (Code Writer)**: Dispatched on `claude-haiku-4-5` for scoped, simple, or boilerplate coding tasks.
+
 > **Full guidelines:** See [docs/context.md § Coding Guidelines](docs/context.md#coding-guidelines) and [docs/context.md § Multi-Agent Workflow](docs/context.md#multi-agent-workflow)
 
 ---

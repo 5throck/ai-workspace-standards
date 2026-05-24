@@ -18,3 +18,4 @@
 | [2026-05-24](2026-05-24.md) | feat: Refactor project creation workflow and ensure template consistency |
 | [2026-05-24](2026-05-24.md) | chore: update |
 | [2026-05-24](2026-05-24.md) | fix: repair template encodings and deduplicate behavioral rules |
+| [2026-05-24](2026-05-24.md) | fix: restore 3-tier strategy details in tool configs |
