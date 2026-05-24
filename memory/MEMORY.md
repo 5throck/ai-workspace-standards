@@ -22,3 +22,4 @@
 | [2026-05-24](2026-05-24.md) | fix: restore general 3-tier strategy descriptions in AGENTS.md |
 | [2026-05-24](2026-05-24.md) | fix: replace em dashes with ascii hyphens and fix remaining unicode corruption |
 | [2026-05-24](2026-05-24.md) | fix: replace em dashes and unicode bugs across entire ai-workspace-standards project |
+| [2026-05-24](2026-05-24.md) | fix: add -Encoding UTF8 to all Get-Content calls in powershell scripts to prevent CP949 corruption |

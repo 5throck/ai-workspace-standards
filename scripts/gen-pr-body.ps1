@@ -63,7 +63,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
     $Prompt | Set-Content $TmpFile -Encoding UTF8
 
     try {
-        $Body = claude -p (Get-Content $TmpFile -Raw) 2>$null
+        $Body = claude -p (Get-Content $TmpFile -Raw -Encoding UTF8) 2>$null
         if ($Body) {
             Write-Output $Body
             exit 0

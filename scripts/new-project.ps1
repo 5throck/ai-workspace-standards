@@ -63,7 +63,7 @@ $extensions = @('.md', '.json', '.sh', '.ps1', '.yaml', '.yml', '.sample')
 Get-ChildItem -Path $ProjectDir -Recurse -File |
   Where-Object { $_.Extension -in $extensions } |
   ForEach-Object {
-    $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+    $content = Get-Content $_.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
     if ($content) {
         $modified = $false
         if ($content -match '\[Project Name\]') { $content = $content -replace '\[Project Name\]', $ProjectName; $modified = $true }

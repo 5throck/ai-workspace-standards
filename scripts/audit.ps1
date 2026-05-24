@@ -19,7 +19,7 @@ else { Fail "CONSTITUTION.md not found (expected at ./ or ../)" }
 
 # 3. CHANGELOG.md must have [Unreleased] section
 if (Test-Path "CHANGELOG.md") {
-    $cl = Get-Content "CHANGELOG.md" -Raw
+    $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
     if ($cl -match "\[Unreleased\]") { Pass "CHANGELOG.md has [Unreleased] section" }
     else                              { Fail "CHANGELOG.md is missing '[Unreleased]' section" }
 }
@@ -27,7 +27,7 @@ if (Test-Path "CHANGELOG.md") {
 # ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
 
 if (Test-Path "docs\context.md") {
-    $ctx = Get-Content "docs\context.md" -Raw
+    $ctx = Get-Content "docs\context.md" -Raw -Encoding UTF8
 
     # 4. docs/context.md must have ## Coding Guidelines
     if ($ctx -match "(?m)^## Coding Guidelines") { Pass "docs/context.md has ## Coding Guidelines" }

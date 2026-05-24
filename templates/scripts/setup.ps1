@@ -423,7 +423,7 @@ if (-not (Test-Path $LogPath)) {
 }
 $IndexPath = "memory\MEMORY.md"
 if (Test-Path $IndexPath) {
-    $IndexContent = Get-Content $IndexPath -Raw
+    $IndexContent = Get-Content $IndexPath -Raw -Encoding UTF8
     if ($IndexContent -notmatch "\[$Date\]") {
         Add-Content $IndexPath "| [$Date]($Date.md) | chore: initial scaffold |" -Encoding UTF8
     }

@@ -33,7 +33,7 @@ Add-Content "memory\$Date.md" $template -Encoding UTF8
 
 # ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
 if (Test-Path "CHANGELOG.md") {
-    $cl = Get-Content "CHANGELOG.md" -Raw
+    $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
     # Extract [Unreleased] section content
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
@@ -88,7 +88,7 @@ if (Test-Path "scripts\gen-pr-body.ps1") {
 if ($PrBody) {
     gh pr create --title $Msg --body $PrBody
 } elseif (Test-Path ".github\pull_request_template.md") {
-    $prBody = Get-Content ".github\pull_request_template.md" -Raw
+    $prBody = Get-Content ".github\pull_request_template.md" -Raw -Encoding UTF8
     gh pr create --title $Msg --body $prBody
 } else {
     gh pr create --fill
