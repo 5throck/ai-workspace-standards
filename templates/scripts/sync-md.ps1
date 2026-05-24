@@ -1,5 +1,10 @@
 ﻿# sync-md.ps1 - Update memory/MEMORY.md index (Windows)
 # Usage: .\scripts\sync-md.ps1 "YYYY-MM-DD" "summary"
+
+# UTF-8 encoding enforcement
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$ErrorActionPreference = 'Stop'
+
 param(
     [string]$Date    = (Get-Date -Format "yyyy-MM-dd"),
     [string]$Summary = "update"
@@ -13,9 +18,9 @@ if (-not (Test-Path $MemFile)) {
 |------|---------|
 "@ | Set-Content $MemFile -Encoding UTF8
 }
-# Only append if this date is not already in the index
-$existing = Get-Content $MemFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-if (-not $existing -or $existing -notmatch [regex]::Escape("[$Date]")) {
+# Dedup: only append if this date is not already present
+$IndexContent = Get-Content $MemFile -Raw -Encoding UTF8
+if ($IndexContent -notmatch [regex]::Escape("[$Date]")) {
     Add-Content $MemFile "| [$Date]($Date.md) | $Summary |" -Encoding UTF8
 }
 

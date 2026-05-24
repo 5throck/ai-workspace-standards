@@ -1,6 +1,10 @@
 # audit.ps1 - Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
+# UTF-8 encoding enforcement
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$ErrorActionPreference = 'Stop'
+
 $errors = 0
 
 function Pass($msg)  { Write-Host "[PASS] $msg" -ForegroundColor Green }

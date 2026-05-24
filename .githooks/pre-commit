@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # pre-commit: auto-log memory + changelog, audit, secret scan.
-# memory/ session logs are exempt from audit/secret checks.
+# memory/-only commits skip documentation audit but still run secret scan.
 
 STAGED=$(git diff --cached --name-only)
 [ -z "$STAGED" ] && exit 0
 
-# Skip audit/secret checks for memory/-only commits (but still log)
+# Check if this is a memory-only commit (for selective skipping)
 MEMORY_ONLY=false
 if ! echo "$STAGED" | grep -qv "^memory/"; then
   MEMORY_ONLY=true
@@ -39,8 +39,6 @@ if echo "$STAGED" | grep -q "CHANGELOG.md"; then
 fi
 
 
-[ "$MEMORY_ONLY" = true ] && exit 0
-
 # ── 2. Block staged .env files ────────────────────────────────────────────────
 if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then
   echo -e "\033[31m[FAIL]\033[0m Attempt to commit .env file detected."
@@ -49,7 +47,10 @@ if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then
 fi
 
 # ── 3. Documentation audit ────────────────────────────────────────────────────
-bash scripts/audit.sh || exit 1
+# Skip documentation audit for memory-only commits (workflow optimization)
+if [ "$MEMORY_ONLY" = false ]; then
+  bash scripts/audit.sh || exit 1
+fi
 
 # ── 4. Secret scan ────────────────────────────────────────────────────────────
 echo ""

@@ -6,6 +6,10 @@
 #   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
 #   2. Otherwise → build a structured template from commit message + file list (fallback)
 
+# UTF-8 encoding enforcement
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$ErrorActionPreference = 'Stop'
+
 param([Parameter(Mandatory)][string]$CommitMsg)
 
 $Today = Get-Date -Format "yyyy-MM-dd"

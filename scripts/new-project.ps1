@@ -1,5 +1,10 @@
 ﻿# new-project.ps1 - Scaffold a new project under the workspace root (Windows)
 # Usage: .\scripts\new-project.ps1 -ProjectName "<project-name>" -Description "<description>" -TechStack "<tech-stack>"
+
+# UTF-8 encoding enforcement
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$ErrorActionPreference = 'Stop'
+
 param(
     [Parameter(Mandatory)][string]$ProjectName,
     [Parameter(Mandatory=$false)][string]$Description = "A new project",
@@ -80,7 +85,7 @@ Get-ChildItem -Path $ProjectDir -Recurse -File |
 # ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir
 git init
-git config core.hooksPath ../.githooks
+git config core.hooksPath .githooks
 
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
