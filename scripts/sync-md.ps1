@@ -13,5 +13,5 @@ if (-not (Test-Path $MemFile)) {
 |------|---------|
 "@ | Set-Content $MemFile -Encoding UTF8
 }
-Add-Content $MemFile "| [$Date]($Date.md) | $Summary |"
+Add-Content $MemFile "| [$Date]($Date.md) | $Summary |" -Encoding UTF8
 

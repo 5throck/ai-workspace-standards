@@ -1,12 +1,12 @@
 ﻿# AGENTS.md
 
-> **?좑툘 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
+> **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
 > Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI).
 
-> **Canonical agent index** ??auto-loaded by Claude Code; referenced by all other AI tools.
-> Full agent definitions live in `agents/`. Full project context ??`docs/context.md`.
+> **Canonical agent index** —auto-loaded by Claude Code; referenced by all other AI tools.
+> Full agent definitions live in `agents/`. Full project context —`docs/context.md`.
 
 ---
 
@@ -39,7 +39,7 @@
 |-------|------|------|
 | Stack Setup | [`agents/stack-setup.md`](agents/stack-setup.md) | Identifies unknown stacks, web-searches setup procedures, mandatory security review, requires explicit user approval before executing any commands |
 
-*(Add domain-specific agents as needed ??see the extension guidance below.)*
+*(Add domain-specific agents as needed —see the extension guidance below.)*
 
 ---
 
@@ -49,39 +49,46 @@
 
 ```
 Request received
-  ??
-  ?쒋? Read-only? (research, analysis, inspect)
-  ??   ?붴???PARALLEL ??dispatch multiple agents in a single message
-  ??
-  ?붴? Write? (create/edit files, run tests)
-       ?붴???SERIAL ??one agent at a time to prevent file lock conflicts
+  │
+  ├─▶ Read-only? (research, analysis, inspect)
+  │   └─▶ PARALLEL — dispatch multiple agents in a single message
+  │
+  └─▶ Write? (create/edit files, run tests)
+       └─▶ SERIAL — one agent at a time to prevent file lock conflicts
 ```
 
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
 > Always wait for a write agent to complete before dispatching the next.
 
+### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
+- **High-tier (Design/Plan - e.g., Opus 4.7 / Gemini 3.5 Pro)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
+- **Medium-tier (Review/QA - e.g., Sonnet 5 / Gemini 3.1 Pro)**: Used by Test Runner or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
+- **Low-tier (Coding/Execute - e.g., Haiku 4.5 / Gemini 3.5 Flash)**: Used by Code Writer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
+
 ### Dispatch Rules
 
-1. **Single message, multiple `Agent()` calls** ??all parallel agents must be dispatched in one turn.
-2. **Merge before proceeding** ??PM waits for ALL parallel agents to return before the next serial step.
-3. **Phase 4 execution loop** ??each implementation task goes through:
+1. **Single message, multiple `Agent()` calls** —all parallel agents must be dispatched in one turn.
+2. **Merge before proceeding** —PM waits for ALL parallel agents to return before the next serial step.
+3. **Phase 4 execution loop** —each implementation task goes through:
    - **code-writer** implements the changes
    - **test-runner** verifies against acceptance criteria and runs tests
    - **Quality gate (audit script)** validates compliance
-   - Loop and correct if issues found ??maximum **3 iterations** before escalating to the user.
-4. **Error handling** ??if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
-5. **Max fix iterations** ??3 per review cycle before escalating to the user.
+   - Loop and correct if issues found —maximum **3 iterations** before escalating to the user.
+4. **Error handling** —if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
+5. **Max fix iterations** —3 per review cycle before escalating to the user.
 
 ### Subagent Roster
 
 | Agent | File | Parallelizable | Write Allowed? |
 |-------|------|:--------------:|:--------------:|
-| Security Monitor | `agents/security-monitor.md`| ??Triage phase | ??No |
-| Architect | `agents/architect.md` | ??Design phase | ??No |
-| Designer | `agents/designer.md` | ??Design phase | ??No |
-| Code Writer | `agents/code-writer.md` | ??Serial | ??Source files |
-| Test Runner | `agents/test-runner.md` | ??After writes | ??Test files only |
-| Stack Setup | `agents/stack-setup.md` | ??Research phase | ??setup.sh/ps1 only (after approval) |
+| Security Monitor | `agents/security-monitor.md`| —Triage phase | —No |
+| Architect | `agents/architect.md` | —Design phase | —No |
+| Designer | `agents/designer.md` | —Design phase | —No |
+| Code Writer | `agents/code-writer.md` | —Serial | —Source files |
+| Test Runner | `agents/test-runner.md` | —After writes | —Test files only |
+| Stack Setup | `agents/stack-setup.md` | —Research phase | —setup.sh/ps1 only (after approval) |
 
 *(Extend this table as you add Analysis or specialized agents to the project.)*
 
@@ -141,7 +148,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
-| *(none yet ??add entries as skills are created in `skills/`)* | | |
+| *(none yet —add entries as skills are created in `skills/`)* | | |
 
 *(When a skill is created, add a row here and in `docs/context.md 짠 Skills`.)*
 
@@ -154,7 +161,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Communication Style**: Keep explanations concise and use markdown formatting. Always explain "why", not just "what".
 - **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
-- **Language**: All code, config, commit messages, and branch names ??**English only**.
+- **Language**: All code, config, commit messages, and branch names —**English only**.
 
 ---
 
@@ -188,4 +195,5 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 2. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
 3. Update the `## Agents` table in `docs/context.md` to match.
 4. If the agent uses a skill, add a row to the Skills table above and in `docs/context.md 짠 Skills`.
+
 

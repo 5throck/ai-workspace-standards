@@ -2,7 +2,7 @@
 
 This file provides guidance to Gemini (including the Antigravity agentic engine and Gemini CLI) when working in this workspace.
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) ??read it first.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) —read it first.**
 >
 > For tool-specific behaviors of Claude Code, see [`CLAUDE.md`](CLAUDE.md).
 
@@ -22,12 +22,16 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
 | **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. |
 
-#### ?좑툘 Surgical Multi-Replace Offset Safeguard
+#### 🚨 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 - This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
-#### ?좑툘 Grep Search 50-Match Cap Safeguard
+#### 🚨 Windows Terminal & Code Page Safeguard
+When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
+- **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
+
+#### 🚨 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
@@ -126,11 +130,14 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 2.  **test-runner** verifies against acceptance criteria and runs tests.
 3.  **Quality gate (audit script)** validates compliance.
 
-> Loop and correct if review errors are flagged ??maximum **3 iterations** before escalating to the user.
+> Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
 
+#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- All standard and complex tasks (Default) ??`gemini-2.5-pro`
-- Simple transformations, fast lookups, or file globbing ??`gemini-2.5-flash`
+- **High-tier (Design/Planning)** → `gemini-3.5-pro`: Complex reasoning, architectural design, planning, and PM orchestration.
+- **Medium-tier (Review/QA)** → `gemini-3.1-pro`: Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** → `gemini-3.5-flash`: Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ---
 
@@ -152,7 +159,7 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
-*   **Migration**: Offer the user a migration of `.claude/` ??`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
+*   **Migration**: Offer the user a migration of `.claude/` —`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
 
 ---
 
@@ -164,5 +171,6 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 - **AI Commit Signatures**: Always append `Co-Authored-By: Gemini <noreply@google.com>` to the end of all AI-generated git commit messages.
 - **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
-*Last Updated: 2026-05-22*
+*Last Updated: 2026-05-24*
+
 
