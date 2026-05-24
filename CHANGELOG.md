@@ -8,8 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **[2026-05-24]**: docs: backfill today's changelog entries that were missed due to the previous bug
+
 ### Fixed
-- **[2026-05-24]**: fix: ensure changelog auto-logs every new PR instead of just the first one
+- **[2026-05-24]**: scripts/dev-sync.*, 	emplates/scripts/dev-sync.*: Fixed bug where Changelog auto-add would skip logging after the first commit in a release cycle.
+- **[2026-05-24]**: 	emplates/GEMINI.md, 	emplates/docs/context.md: Moved 'Pre-PR Security Gate' rule from GEMINI-specific instructions to common context.md Git/PR Workflow as it applies to all agents.
+- **[2026-05-24]**: scripts/*.ps1, 	emplates/scripts/*.ps1: Fixed critical Windows CP949 encoding corruption bug by enforcing -Encoding UTF8 on all Get-Content calls.
+- **[2026-05-24]**: 	emplates/AGENTS.md, 	emplates/CLAUDE.md, 	emplates/GEMINI.md, 	emplates/docs/context.md: Deduplicated behavioral rules into context.md and restored 3-tier strategy references. Removed Em Dashes to prevent encoding errors.
+
 
 ### Added
 - **[2026-05-23]**: `templates/docs/context.md`, `templates/agents/pm.md`, `templates/agents/*.md`: PM-first multi-agent workflow enforcement. Added "Multi-Agent Workflow" section to context.md as single source of truth; PM agent declared as SINGLE ENTRY POINT; all specialist agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) now refuse direct invocation and redirect to PM.
@@ -320,6 +327,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
 
