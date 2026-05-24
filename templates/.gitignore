@@ -48,3 +48,6 @@ Thumbs.db
 # Databases
 *.sqlite
 *.db
+
+# CodeGraph Index
+.codegraph/
