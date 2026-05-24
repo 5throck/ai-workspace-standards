@@ -27,7 +27,7 @@ bash scripts/sync-md.sh "$DATE" "$MSG"
 # ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
 if [ -f "CHANGELOG.md" ]; then
   SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
-  if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
+  if ! echo "$SECTION" | grep -Fq "$MSG"; then
     TODAY=$(date +%Y-%m-%d)
     perl -i -pe 'BEGIN{$m=shift; $d=shift}
       if (/^## \[Unreleased\]/) { $_ .= "\n### Added\n- **[$d]**: \Q$m\E\n" }

@@ -31,12 +31,13 @@ Add-Content "memory\$Date.md" $template -Encoding UTF8
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
 
-# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
+# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the entry is missing ────
 if (Test-Path "CHANGELOG.md") {
     $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
-        if ($section -notmatch '(?m)^\s*[-*]' -and $section -notmatch '(?m)^### ') {
+        $EscapedMsg = [regex]::Escape($Msg)
+        if ($section -notmatch $EscapedMsg) {
             $Category = "### Changed"
             if ($Msg -match "^feat") { $Category = "### Added" }
             elseif ($Msg -match "^fix") { $Category = "### Fixed" }

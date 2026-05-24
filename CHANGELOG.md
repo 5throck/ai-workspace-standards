@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-05-24]**: fix: ensure changelog auto-logs every new PR instead of just the first one
+
 ### Added
 - **[2026-05-23]**: `templates/docs/context.md`, `templates/agents/pm.md`, `templates/agents/*.md`: PM-first multi-agent workflow enforcement. Added "Multi-Agent Workflow" section to context.md as single source of truth; PM agent declared as SINGLE ENTRY POINT; all specialist agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) now refuse direct invocation and redirect to PM.
 - **[2026-05-23]**: `templates/CLAUDE.md`, `templates/GEMINI.md`: Added brief "Multi-Agent Workflow" reference pointing to docs/context.md; eliminated duplication.
@@ -317,5 +320,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
