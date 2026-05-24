@@ -15,3 +15,4 @@
 | [2026-05-24](2026-05-24.md) | feat: Optimize 3-tier model selection for PM cost efficiency |
 | [2026-05-24](2026-05-24.md) | feat: Revert Low-tier to gemini-3.5-flash for reliability |
 | [2026-05-24](2026-05-24.md) | feat: Explicitly specify Gemini thinking_level for 3-tier strategy |
+| [2026-05-24](2026-05-24.md) | feat: Refactor project creation workflow and ensure template consistency |
