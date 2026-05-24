@@ -1,15 +1,13 @@
-﻿# new-project.ps1 - Scaffold a new project under the workspace root (Windows)
-# Usage: .\scripts\new-project.ps1 -ProjectName "<project-name>" -Description "<description>" -TechStack "<tech-stack>"
+﻿param(
+    [Parameter(Mandatory)][string]$ProjectName,
+    [Parameter(Mandatory=$false)][string]$Description = "A new project",
+    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc"
+)
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
-param(
-    [Parameter(Mandatory)][string]$ProjectName,
-    [Parameter(Mandatory=$false)][string]$Description = "A new project",
-    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc"
-)
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
@@ -136,6 +134,7 @@ Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  -> $TemplatesDir\_examples" -ForegroundColor DarkGray
+
 
 
 

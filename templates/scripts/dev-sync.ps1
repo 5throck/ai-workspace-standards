@@ -1,11 +1,9 @@
-﻿# dev-sync.ps1 - Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
-# Usage: .\scripts\dev-sync.ps1 "feat: description"
+﻿param([string]$Msg = "chore: update")
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
-param([string]$Msg = "chore: update")
 
 $Date = Get-Date -Format "yyyy-MM-dd"
 
@@ -99,4 +97,5 @@ if ($PrBody) {
 } else {
     gh pr create --fill
 }
+
 

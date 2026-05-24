@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-05-25]**: fix: resolve param syntax bug in powershell scripts
+
 ### Added
 - **[2026-05-24]**: docs: multi-agent meeting summary - 96 improvement opportunities identified across 7 agents
 - **[2026-05-24]**: feat: establish multi-agent harness for workspace root
@@ -342,7 +345,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-24*
+*Last Updated: 2026-05-25*
+
 
 
 

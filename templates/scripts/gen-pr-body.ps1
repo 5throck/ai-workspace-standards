@@ -1,20 +1,13 @@
-# gen-pr-body.ps1 - Generate a structured PR body from commit message + diff
-# Usage: .\scripts\gen-pr-body.ps1 "commit message"
-# Output: PR body markdown (stdout)
-#
-# Behaviour:
-#   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
-#   2. Otherwise → build a structured template from commit message + file list (fallback)
+﻿param([Parameter(Mandatory)][string]$CommitMsg)
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
-param([Parameter(Mandatory)][string]$CommitMsg)
 
 $Today = Get-Date -Format "yyyy-MM-dd"
 
-# ── Collect changed files ──────────────────────────────────────────────────────
+# ?? Collect changed files ??????????????????????????????????????????????????????
 $Files = (git diff --name-only HEAD~1 HEAD 2>$null)
 if (-not $Files) { $Files = (git diff --cached --name-only 2>$null) }
 if (-not $Files) { $Files = (git show --name-only --format="" HEAD 2>$null) }
@@ -23,7 +16,7 @@ $FileList = ($Files | Select-Object -First 30 | ForEach-Object { "- $_" }) -join
 $DiffStat = (git diff --stat HEAD~1 HEAD 2>$null) -join "`n"
 if (-not $DiffStat) { $DiffStat = (git diff --cached --stat 2>$null) -join "`n" }
 
-# ── AI mode: generate body via Claude CLI ─────────────────────────────────────
+# ?? AI mode: generate body via Claude CLI ?????????????????????????????????????
 $ClaudePath = Get-Command claude -ErrorAction SilentlyContinue
 if ($ClaudePath) {
     $Prompt = @"
@@ -79,7 +72,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
     }
 }
 
-# ── Fallback mode: structured template with auto-filled fields ─────────────────
+# ?? Fallback mode: structured template with auto-filled fields ?????????????????
 @"
 ## Why
 $CommitMsg
@@ -102,3 +95,4 @@ None
 ---
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 "@
+
