@@ -413,7 +413,19 @@ else
   info "Skipping dependency install (--skip-install)"
 fi
 
-# ── 3. Initialize memory log ──────────────────────────────────────────────────
+# ── 3. Gemini Plugins Setup ───────────────────────────────────────────────────
+SUPERPOWERS_DIR="$HOME/.gemini/config/plugins/superpowers"
+if [ ! -d "$SUPERPOWERS_DIR" ]; then
+    info "Gemini superpowers plugin not found — installing globally…"
+    mkdir -p "$HOME/.gemini/config/plugins"
+    if git clone https://github.com/obra/superpowers "$SUPERPOWERS_DIR" 2>/dev/null; then
+        pass "superpowers plugin installed successfully"
+    else
+        warn "Failed to install superpowers plugin"
+    fi
+fi
+
+# ── 4. Initialize memory log ──────────────────────────────────────────────────
 DATE_STR=$(date +%Y-%m-%d)
 mkdir -p memory
 LOG_PATH="memory/${DATE_STR}.md"
@@ -427,7 +439,7 @@ if [ -f "$INDEX_PATH" ]; then
   fi
 fi
 
-# ── 4. Initial commit ─────────────────────────────────────────────────────────
+# ── 5. Initial commit ─────────────────────────────────────────────────────────
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
     git add -A 2>/dev/null
