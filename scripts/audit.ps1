@@ -1,4 +1,4 @@
-﻿# audit.ps1 - Documentation integrity check (Windows PowerShell)
+# audit.ps1 - Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
 $errors = 0
@@ -24,23 +24,25 @@ if (Test-Path "CHANGELOG.md") {
     else                              { Fail "CHANGELOG.md is missing '[Unreleased]' section" }
 }
 
-# ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
+# --- Agent checks (applicable to all projects AND workspace root) ---
+
+    # 4. AGENTS.md must exist
+    if (Test-Path "AGENTS.md") { Pass "AGENTS.md exists" }
+    else                        { Fail "AGENTS.md missing (required for agent-first projects)" }
+
+    # 5. At least one agent file must exist in agents/
+    $agentFiles = Get-ChildItem -Path "agents" -Filter "*.md" -ErrorAction SilentlyContinue
+    if ($agentFiles) { Pass "agents/ has agent files" }
+    else              { Fail "agents/ is empty or missing - create at least agents/pm.md" }
+
+# --- Project-level checks (skip at workspace root where docs/context.md is absent) ---
 
 if (Test-Path "docs\context.md") {
     $ctx = Get-Content "docs\context.md" -Raw -Encoding UTF8
 
-    # 4. docs/context.md must have ## Coding Guidelines
+    # 6. docs/context.md must have ## Coding Guidelines
     if ($ctx -match "(?m)^## Coding Guidelines") { Pass "docs/context.md has ## Coding Guidelines" }
     else                                           { Fail "docs/context.md is missing '## Coding Guidelines' section" }
-
-    # 5. AGENTS.md must exist
-    if (Test-Path "AGENTS.md") { Pass "AGENTS.md exists" }
-    else                        { Fail "AGENTS.md missing (required for agent-first projects)" }
-
-    # 6. At least one agent file must exist in agents/
-    $agentFiles = Get-ChildItem -Path "agents" -Filter "*.md" -ErrorAction SilentlyContinue
-    if ($agentFiles) { Pass "agents/ has agent files" }
-    else              { Fail "agents/ is empty or missing - create at least agents/pm.md" }
 
     # 7. .env.sample must exist
     if (Test-Path ".env.sample") { Pass ".env.sample exists" }

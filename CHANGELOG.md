@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-24]**: feat: establish multi-agent harness for workspace root
+
+### Added
 - **[2026-05-24]**: feat: add scripts/temp directory for scratch scripts with gitignore rules
 
 ### Changed
@@ -339,6 +342,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
 

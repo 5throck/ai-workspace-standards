@@ -47,11 +47,11 @@ Navigate to the project directory before starting work. Each project has its own
    ```bash
    git config core.hooksPath .githooks
    ```
-1. **Workspace Standard**: Read this file (`CONSTITUTION.md`) or load `@CONSTITUTION.md`.
-2. **Project Context**: Read `docs/context.md` or load `@docs/context.md` (skip at workspace root).
-3. **Agent Roster**: Read `AGENTS.md` or load `@AGENTS.md` (skip at workspace root).
+1. **Workspace Standard**: Read this file (`CONSTITUTION.md`) or load `@CONSTITUTION.md`. (For the root workspace itself, this file ALSO serves as the `docs/context.md` SSOT).
+2. **Project Context**: Read `docs/context.md` or load `@docs/context.md`. (Skip at workspace root, as `CONSTITUTION.md` covers it).
+3. **Agent Roster**: Read `AGENTS.md` or load `@AGENTS.md`.
 4. **Session History**: Read `memory/MEMORY.md` or load `@memory/MEMORY.md` (skip if file does not exist).
-5. **Session Skills**: Load any skills listed under `## Session Start Skills` in `docs/context.md`. (For Gemini, load `@skills/`).
+5. **Session Skills**: Load any skills listed under `## Session Start Skills` in `docs/context.md` (or `CONSTITUTION.md` for the root workspace). (For Gemini, load `@skills/`).
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
 
@@ -120,7 +120,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 - **Shared Memory**: `memory/` is strictly shared across all AI tools - not for general application data or temporary local logs.
 - **Locales**: `locales/` uses flat JSON files matching ISO language codes (`ko.json`, `en.json`, etc.).
 - **Orchestration**: `agents/pm.md` is always created - even for single-agent or simple projects.
-- **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents`. *(Exception: the workspace root itself - `C:\git\` - does not require an `AGENTS.md` because it contains no project code; each sub-project carries its own.)*
+- **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents` (or `CONSTITUTION.md` for the root workspace).
 - **Secrets**: `.env.sample` is always committed; `.env` is always in `.gitignore`.
 
 ---
