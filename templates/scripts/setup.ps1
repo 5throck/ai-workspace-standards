@@ -1,4 +1,4 @@
-﻿# setup.ps1 — Post-scaffold environment setup (Windows PowerShell)
+# setup.ps1 — Post-scaffold environment setup (Windows PowerShell)
 # Mirrors setup.sh exactly. Called automatically by new-project.ps1;
 # can also be re-run manually at any time.
 #
@@ -352,7 +352,18 @@ if (-not $SkipInstall) {
 
 } else { Info "Skipping dependency install (-SkipInstall)" }
 
-# ── 3. Initialize memory log ──────────────────────────────────────────────────
+# ── 3. Gemini Plugins Setup ───────────────────────────────────────────────────
+$SuperpowersDir = Join-Path $HOME ".gemini\config\plugins\superpowers"
+if (-not (Test-Path $SuperpowersDir)) {
+    Info "Gemini superpowers plugin not found — installing globally…"
+    $PluginsDir = Join-Path $HOME ".gemini\config\plugins"
+    if (-not (Test-Path $PluginsDir)) { New-Item -ItemType Directory -Path $PluginsDir -Force | Out-Null }
+    git clone https://github.com/obra/superpowers $SuperpowersDir 2>$null
+    if ($LASTEXITCODE -eq 0) { Pass "superpowers plugin installed successfully" }
+    else { Warn "Failed to install superpowers plugin" }
+}
+
+# ── 4. Initialize memory log ──────────────────────────────────────────────────
 $Date = Get-Date -Format "yyyy-MM-dd"
 if (-not (Test-Path "memory")) { New-Item -ItemType Directory -Path "memory" -Force | Out-Null }
 $LogPath = "memory\$Date.md"
@@ -367,7 +378,7 @@ if (Test-Path $IndexPath) {
     }
 }
 
-# ── 4. Initial commit ─────────────────────────────────────────────────────────
+# ── 5. Initial commit ─────────────────────────────────────────────────────────
 if (-not $SkipCommit) {
     $gitDir = git rev-parse --git-dir 2>$null
     if ($LASTEXITCODE -eq 0) {
