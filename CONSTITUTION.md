@@ -78,6 +78,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 │   └── adr/          # Architecture Decision Records (ADRs)
 │       └── NNNN-slug.md  # e.g., 0001-use-mcp-server.md
 ├── scripts/      # Automation scripts (.sh + .ps1 pairs, cross-platform)
+│   └── temp/     # Temporary scratch scripts (git-ignored)
 ├── locales/      # i18n translation files (UI projects only)
 ├── memory/       # session logs (shared by all AI tools)
 │   ├── MEMORY.md     # Index of all log entries

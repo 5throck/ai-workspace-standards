@@ -1,4 +1,4 @@
-﻿# [Project Name]
+# [Project Name]
 
 ## Project Overview
 [One-sentence description of what this project does and who it's for.]
@@ -23,6 +23,7 @@
 ├── docs/                 # project context, ADRs
 ├── agents/               # AI agent definitions
 ├── scripts/              # audit, dev-sync, sync-md
+│   └── temp/             # scratch scripts (git-ignored)
 ├── memory/               # session logs
 └── [any other top-level dirs]
 ```

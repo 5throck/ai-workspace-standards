@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-05-24]**: feat: add scripts/temp directory for scratch scripts with gitignore rules
+
 ### Changed
 - **[2026-05-24]**: chore: remove leftover temporary automation scripts from workspace root
 
@@ -336,6 +339,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
 
