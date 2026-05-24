@@ -44,7 +44,11 @@ Gemini CLI uses different tool names from Claude Code:
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: Sort and process `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 
-#### ⚠️ Grep Search 50-Match Cap Safeguard
+#### 🚨 Windows Terminal & Code Page Safeguard
+When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
+- **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
+
+#### 🚨 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search by targeting specific subdirectories or applying restrictive file glob filters via the `Includes` parameter.
@@ -119,6 +123,12 @@ Interact with spawned agents via their unique `conversationID`.
 This project uses a **PM-first multi-agent architecture**. All development work flows through the PM orchestrator.
 
 **Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents via `invoke_subagent` is forbidden.
+
+**Superpowers & Cost Optimization (3-Tier Strategy):**
+The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
+- **High-tier (PM / Architect)**: Runs on `gemini-3.5-pro` for complex planning, reasoning, and prompt engineering.
+- **Medium-tier (Reviewer / QA)**: Runs on `gemini-3.1-pro` to rigorously verify and review the code produced by the low-tier.
+- **Low-tier (Code Writer)**: Dispatched on `gemini-3.5-flash` for scoped, simple, or boilerplate coding tasks.
 
 > **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
 

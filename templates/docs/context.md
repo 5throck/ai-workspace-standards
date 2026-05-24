@@ -17,24 +17,24 @@
 ## Architecture
 ```
 [project root]/
-?쒋?? src/                  # [main source ??e.g., app logic, API handlers]
-??  ?쒋?? [folder]          # [description]
-??  ?붴?? [folder]          # [description]
-?쒋?? docs/                 # project context, ADRs
-?쒋?? agents/               # AI agent definitions
-?쒋?? scripts/              # audit, dev-sync, sync-md
-?쒋?? memory/               # session logs
-?붴?? [any other top-level dirs]
+????? src/                  # [main source ??e.g., app logic, API handlers]
+??  ????? [folder]          # [description]
+??  ?遺??? [folder]          # [description]
+????? docs/                 # project context, ADRs
+????? agents/               # AI agent definitions
+????? scripts/              # audit, dev-sync, sync-md
+????? memory/               # session logs
+?遺??? [any other top-level dirs]
 ```
 
 ## Environment Setup
-- Copy `.env.sample` ??`.env` and fill in all required values.
+- Copy `.env.sample` —`.env` and fill in all required values.
 - **Python**:
   - macOS/Linux: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
   - Windows:     `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`
 - **Node.js**: `npm install`
 - Required env keys (see `.env.sample`):
-  - `[KEY_NAME]` ??[description] *(replace with actual keys, or write "N/A ??no env vars required")*
+  - `[KEY_NAME]` —[description] *(replace with actual keys, or write "N/A —no env vars required")*
 
 ## Agents
 <!-- See AGENTS.md at the project root for the full agent index (canonical source). -->
@@ -42,23 +42,23 @@
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 | Group | Agent file | Role |
 |-------|------------|------|
-| Orchestration | `agents/pm.md` | PM orchestrator ??owns the workflow, dispatches parallel tasks |
-| Orchestration | `agents/security-monitor.md` | Security monitor ??enforces policies, prevents secrets leaks |
-| Design | `agents/architect.md` | Architect ??produces implementation plans and ADRs |
-| Design | `agents/designer.md` | Designer ??produces UI/UX specs, wireframes, and component definitions |
-| Execution | `agents/code-writer.md` | Code writer ??implements approved plans |
-| Execution | `agents/test-runner.md` | Test runner ??verifies acceptance criteria and runs QA gate |
+| Orchestration | `agents/pm.md` | PM orchestrator —owns the workflow, dispatches parallel tasks |
+| Orchestration | `agents/security-monitor.md` | Security monitor —enforces policies, prevents secrets leaks |
+| Design | `agents/architect.md` | Architect —produces implementation plans and ADRs |
+| Design | `agents/designer.md` | Designer —produces UI/UX specs, wireframes, and component definitions |
+| Execution | `agents/code-writer.md` | Code writer —implements approved plans |
+| Execution | `agents/test-runner.md` | Test runner —verifies acceptance criteria and runs QA gate |
 
 ## Skills
 | Skill path | Trigger condition |
 |------------|-------------------|
-| *(none yet ??add entries as skills are created in `skills/`)* | |
+| *(none yet —add entries as skills are created in `skills/`)* | |
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
 <!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
-<!-- Format: `skills/<name>/SKILL.md` ??reason / trigger                          -->
-<!-- Example: `skills/auth-flow/SKILL.md` ??always load when auth-related tasks   -->
+<!-- Format: `skills/<name>/SKILL.md` —reason / trigger                          -->
+<!-- Example: `skills/auth-flow/SKILL.md` —always load when auth-related tasks   -->
 <!-- Add a skill: create skills/<name>/SKILL.md, then add a line below.           -->
 <!-- See https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/templates/_examples/skills/example-skill/SKILL.md for the template.-->
 - *(none yet)*
@@ -72,20 +72,20 @@ This project uses a **PM-first multi-agent architecture**. All development work 
 **The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests.**
 
 ```
-┌──────────────┐
-│   Your Task  │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│  PM Agent    │  ← Classify, dispatch, synthesize, execute
-│  (Orchestrator) │
-└──────┬───────┘
-       │
-       ├─► [Read-only tasks] → Parallel agents (analyst, researcher)
-       ├─► [Design tasks]    → Architect + Designer (parallel)
-       ├─► [Code tasks]      → Code-writer → Test-runner → QA gate
-       └─► [Unknown stack]   → Stack-setup agent
+?뚢????????????????
+??  Your Task  ??
+?붴???????р?????????
+       ??
+       ??
+?뚢????????????????
+?? PM Agent    ?? ??Classify, dispatch, synthesize, execute
+?? (Orchestrator) ??
+?붴???????р?????????
+       ??
+       ?쒋???[Read-only tasks] ??Parallel agents (analyst, researcher)
+       ?쒋???[Design tasks]    ??Architect + Designer (parallel)
+       ?쒋???[Code tasks]      ??Code-writer ??Test-runner ??QA gate
+       ?붴???[Unknown stack]   ??Stack-setup agent
 ```
 
 ### Why PM-First?
@@ -119,7 +119,7 @@ After project scaffolding completes:
 | 1 | Triage | PM classifies request; dispatches read-only agents in parallel |
 | 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
 | 3 | Design | Architect produces implementation plan; Designer produces UI/UX spec (parallel) |
-| 4 | Implementation | Code-writer implements; Test-runner verifies; Loop up to 3× on failures |
+| 4 | Implementation | Code-writer implements; Test-runner verifies; Loop up to 3횞 on failures |
 | 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
 
 > **Full details:** See [`AGENTS.md`](AGENTS.md) for complete workflow, agent roster, and dispatch protocols.
@@ -176,22 +176,22 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 ```
 
 > Run `/changelog "description"` before `/sync` to pre-populate the changelog entry.
-> **Rule: All changes reach `main` via PR only ??never direct push.**
+> **Rule: All changes reach `main` via PR only —never direct push.**
 
 ---
 
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `docs/context.md` | This file ??single source of truth for all AI tools |
-| `AGENTS.md` | Canonical agent index ??auto-loaded by Claude Code |
-| `agents/pm.md` | PM orchestrator ??workflow owner |
-| `agents/security-monitor.md` | Security agent ??enforces policies and scans for secrets |
-| `agents/architect.md` | Design agent ??implementation plans and ADRs |
-| `agents/designer.md` | Design agent ??UI/UX specs and component definitions |
-| `agents/code-writer.md` | Implementation agent ??writes code from approved plans |
-| `agents/test-runner.md` | QA agent ??runs tests and verifies acceptance criteria |
-| `scripts/dev-sync.sh` | Full sync pipeline (memlog ??sync-md ??changelog ??audit ??commit ??PR) |
+| `docs/context.md` | This file —single source of truth for all AI tools |
+| `AGENTS.md` | Canonical agent index —auto-loaded by Claude Code |
+| `agents/pm.md` | PM orchestrator —workflow owner |
+| `agents/security-monitor.md` | Security agent —enforces policies and scans for secrets |
+| `agents/architect.md` | Design agent —implementation plans and ADRs |
+| `agents/designer.md` | Design agent —UI/UX specs and component definitions |
+| `agents/code-writer.md` | Implementation agent —writes code from approved plans |
+| `agents/test-runner.md` | QA agent —runs tests and verifies acceptance criteria |
+| `scripts/dev-sync.sh` | Full sync pipeline (memlog —sync-md —changelog —audit —commit —PR) |
 | `scripts/audit.sh` | Documentation audit script |
 | `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
 | `memory/MEMORY.md` | Session log index |
@@ -201,10 +201,10 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 ## Coding Guidelines
 
 > These rules apply to every AI tool working in this project.
-> Full rationale: [CONSTITUTION.md §8](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
+> Full rationale: [CONSTITUTION.md 짠8](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#8-coding-behavior-guidelines)
 
 ### 1. Think Before Coding
-- State assumptions explicitly before implementing. If uncertain, ask ??don't guess silently.
+- State assumptions explicitly before implementing. If uncertain, ask —don't guess silently.
 - If multiple interpretations exist, present them; don't pick one silently.
 - If something is unclear, stop and name what's confusing.
 - **Secrets**: Never hardcode passwords, API tokens, or keys. Always use env vars / `.env.sample`.
@@ -221,8 +221,8 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 
 ### 4. Goal-Driven Execution
 - Convert every task into a verifiable goal before starting:
-  - "Add validation" ??"Write tests for invalid inputs, then make them pass"
-  - "Fix the bug" ??"Write a reproducer test, then fix it"
+  - "Add validation" —"Write tests for invalid inputs, then make them pass"
+  - "Fix the bug" —"Write a reproducer test, then fix it"
 - For multi-step tasks, state a brief numbered plan with a verify step for each.
 
 ### 5. Open-Source Package Policy
@@ -230,12 +230,16 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 - **Avoid** GPL-3.0, AGPL-3.0, SSPL, BSL, or proprietary licenses unless explicitly justified.
 - Run `bash scripts/setup.sh --skip-commit` after adding dependencies to trigger the license audit.
 - Document any intentional non-OSS dependency in this file under a `## Non-OSS Dependencies` section.
-- Full policy: [CONSTITUTION.md §8.5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
+- Full policy: [CONSTITUTION.md 짠8.5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-open-source-package-policy)
 
 ### 6. Response Language
-- All **conversational** replies to the user → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/ logs** → **English only**.
+- All **conversational** replies to the user —**Korean (?쒓뎅—** by default.
+- All code, config, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/ logs** —**English only**.
 
 ### 7. PR Language Rule
-All PR titles, bodies, and review comments must be written in English — governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
+All PR titles, bodies, and review comments must be written in English —governed by [CONSTITUTION.md 짠3 —Mandatory English Git & PR Artifacts](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#3-github-pr-workflow).
 
+
+### 8. File Encoding Rule (Markdown & Scripts)
+- All text files, including Markdown (.md) and scripts (.ps1, .sh, .py, .js, etc.), must be saved as **UTF-8 (without BOM)**.
+- Script outputs (Add-Content, Set-Content) must explicitly specify -Encoding UTF8.

@@ -166,20 +166,34 @@ if (-not $SkipInstall) {
     # ── Python (requirements.txt) ─────────────────────────────────────────────
     if (Test-Path "requirements.txt") {
         Info "Python project detected (requirements.txt)"
-        $mgr = Ensure-Venv
-        if ($mgr) {
-            Py-Install $mgr @("-r", "requirements.txt")
-            if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (requirements.txt) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
+        $envInfo = Ensure-Venv
+        if ($envInfo) {
+            $mgr = $envInfo.Mgr
+            if ($envInfo.Created) {
+                Info "Running dependency install ($mgr) for requirements.txt"
+                Py-Install $mgr @("-r", "requirements.txt")
+                if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (requirements.txt) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
+            } else {
+                Info "Virtual environment already existed -- skipping pip install. To reinstall, delete .venv"
+                Show-VenvHint $mgr
+            }
         }
     }
 
     # ── Python (pyproject.toml, no requirements.txt) ──────────────────────────
     if ((Test-Path "pyproject.toml") -and (-not (Test-Path "requirements.txt"))) {
         Info "Python project detected (pyproject.toml)"
-        $mgr = Ensure-Venv
-        if ($mgr) {
-            Py-Install $mgr @("-e", ".")
-            if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (pyproject.toml) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
+        $envInfo = Ensure-Venv
+        if ($envInfo) {
+            $mgr = $envInfo.Mgr
+            if ($envInfo.Created) {
+                Info "Running dependency install ($mgr) for pyproject.toml"
+                Py-Install $mgr @("-e", ".")
+                if ($LASTEXITCODE -eq 0) { Pass "Dependencies installed (pyproject.toml) via $mgr"; Audit-PythonLicenses; Show-VenvHint $mgr }
+            } else {
+                Info "Virtual environment already existed -- skipping pip install. To reinstall, delete .venv"
+                Show-VenvHint $mgr
+            }
         }
     }
 
@@ -361,9 +375,35 @@ if (-not (Test-Path $SuperpowersDir)) {
     git clone https://github.com/obra/superpowers $SuperpowersDir 2>$null
     if ($LASTEXITCODE -eq 0) { Pass "superpowers plugin installed successfully" }
     else { Warn "Failed to install superpowers plugin" }
+} else {
+    Info "Gemini superpowers plugin already installed -- updating"
+    Push-Location $SuperpowersDir
+    git pull origin main 2>$null
+    Pop-Location
 }
 
-# ── 4. Initialize CodeGraph MCP ───────────────────────────────────────────────
+# ── 4. Install RTK (Rust Token Killer) ────────────────────────────────────────
+if ($IsMac -or $IsLin) {
+    if (-not (Get-Command rtk -ErrorAction SilentlyContinue)) {
+        Info "Installing rtk (Rust Token Killer) for AI token optimization…"
+        if (Get-Command brew -ErrorAction SilentlyContinue) {
+            brew install rtk
+            if ($LASTEXITCODE -eq 0) { Pass "rtk installed via Homebrew" }
+        } elseif (Get-Command cargo -ErrorAction SilentlyContinue) {
+            cargo install --git https://github.com/rtk-ai/rtk
+            if ($LASTEXITCODE -eq 0) { Pass "rtk installed via Cargo" }
+        } else {
+            Warn "Neither Homebrew nor Cargo found — skipping rtk installation."
+        }
+    } else {
+        Info "rtk is already installed."
+    }
+} else {
+    Info "Skipping rtk installation (Windows native is not fully supported)."
+    Info "  Note: If you run setup.sh or setup.ps1 inside WSL, it will install rtk normally."
+}
+
+# ── 5. Initialize CodeGraph MCP ───────────────────────────────────────────────
 if (Get-Command npx -ErrorAction SilentlyContinue) {
     Info "Initializing and indexing CodeGraph for AI context…"
     npx -y @colbymchenry/codegraph init 2>$null
@@ -374,22 +414,22 @@ if (Get-Command npx -ErrorAction SilentlyContinue) {
     Warn "npx not found — skipping CodeGraph initialization"
 }
 
-# ── 5. Initialize memory log ──────────────────────────────────────────────────
+# ── 6. Initialize memory log ──────────────────────────────────────────────────
 $Date = Get-Date -Format "yyyy-MM-dd"
 if (-not (Test-Path "memory")) { New-Item -ItemType Directory -Path "memory" -Force | Out-Null }
 $LogPath = "memory\$Date.md"
 if (-not (Test-Path $LogPath)) {
-    Add-Content $LogPath "## Session — chore: initial scaffold`n`n- Project successfully scaffolded from workspace templates.`n"
+    Add-Content $LogPath " -Encoding UTF8 ## Session — chore: initial scaffold`n`n- Project successfully scaffolded from workspace templates.`n"
 }
 $IndexPath = "memory\MEMORY.md"
 if (Test-Path $IndexPath) {
     $IndexContent = Get-Content $IndexPath -Raw
     if ($IndexContent -notmatch "\[$Date\]") {
-        Add-Content $IndexPath "| [$Date]($Date.md) | chore: initial scaffold |"
+        Add-Content $IndexPath "| [$Date]($Date.md) | chore: initial scaffold |" -Encoding UTF8
     }
 }
 
-# ── 6. Initial commit ─────────────────────────────────────────────────────────
+# ── 7. Initial commit ─────────────────────────────────────────────────────────
 if (-not $SkipCommit) {
     $gitDir = git rev-parse --git-dir 2>$null
     if ($LASTEXITCODE -eq 0) {

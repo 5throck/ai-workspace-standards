@@ -99,10 +99,12 @@ Each implementation task follows the **Phase 4 execution loop**:
 
 > Loop and correct if review errors are flagged — maximum **3 iterations** before escalating to the user.
 
+#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
-- Complex analysis, architectural refactoring, or multi-file reasoning ➔ `claude-opus-4-7`
-- Standard implementation and surgical file writes (Default) ➔ `claude-sonnet-4-6`
-- Simple transformations, fast lookups, or file globbing ➔ `claude-haiku-4-5-20251001`
+- **High-tier (Design/Planning)** ➔ `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
+- **Medium-tier (Review/QA)** ➔ `claude-sonnet-5`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5-20251001`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ### 5. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
@@ -126,6 +128,7 @@ When working in a plan-mode session:
 ### 7. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
+* **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
 * **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
@@ -139,4 +142,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 - **AI Commit Signatures**: Always append `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` to the end of all AI-generated git commit messages.
 - **PR Language**: Governed by [CONSTITUTION.md §3 — Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English — no exceptions.
 
-*Last Updated: 2026-05-22*
+*Last Updated: 2026-05-24*

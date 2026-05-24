@@ -113,6 +113,12 @@ This project uses a **PM-first multi-agent architecture**. All development work 
 
 **Single Entry Point:** The PM agent (`agents/pm.md`) is the ONLY interface for ALL requests. Direct invocation of specialist agents is forbidden.
 
+**Superpowers & Cost Optimization (3-Tier Strategy):**
+The PM agent MUST utilize the `superpowers` plugin to perform harness engineering using a 3-tier model architecture:
+- **High-tier (PM / Architect)**: Runs on `claude-opus-4-7` to handle complex planning, reasoning, and prompt engineering.
+- **Medium-tier (Reviewer / QA)**: Runs on `claude-sonnet-5` to rigorously verify and review the code produced by the low-tier.
+- **Low-tier (Code Writer)**: Dispatched on `claude-haiku-4-5` for scoped, simple, or boilerplate coding tasks.
+
 > **Full guide:** See [`docs/context.md § Multi-Agent Workflow`](docs/context.md#multi-agent-workflow)
 
 **Quick start:** Submit your request to PM: "PM, I need to [describe task]"
@@ -147,6 +153,7 @@ Fix and re-review if issues found — maximum **3 iterations** before escalating
 
 If a slash command or background script returns a non-zero exit code:
 - **Never bypass hooks** with `--no-verify` unless under explicit written user instruction.
+- **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
 - **Diagnose first**: read the failure log. Common causes:
   - `CHANGELOG.md` not staged — run `/changelog` and stage the file, then retry.
   - Direct push to `main` blocked by pre-push hook — use `/sync` to create a PR branch automatically.

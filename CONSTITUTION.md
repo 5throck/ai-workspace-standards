@@ -521,6 +521,11 @@ When adding or recommending dependencies:
 - All conversational interactions with the user **MUST** be written in **Korean** (한국어), unless the user initiates or explicitly requests the conversation in English.
 - This rule applies only to conversational text; actual codebase modifications, configuration scripts, Git messages, and PR documents must follow their respective English-only conventions.
 
+### 7. File Encoding Rule (Markdown & Scripts)
+- All text files, including Markdown (`.md`) and scripts (`.ps1`, `.sh`, `.py`, `.js`, etc.), must be saved as **UTF-8 (without BOM)**.
+- When generating files programmatically (e.g. PowerShell scripts), explicitly use `-Encoding UTF8` (or `[System.Text.UTF8Encoding]::new($false)`) to prevent fallback to localized ANSI (CP949) encodings.
+- Git configuration (`core.quotepath false` and `i18n.commitencoding utf-8`) helps, but the source files themselves must be strictly UTF-8 encoded to prevent character corruption.
+
 ---
 
-*Last Updated: 2026-05-22*
+*Last Updated: 2026-05-24*

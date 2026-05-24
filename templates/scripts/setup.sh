@@ -425,7 +425,28 @@ if [ ! -d "$SUPERPOWERS_DIR" ]; then
     fi
 fi
 
-# ── 4. Initialize CodeGraph MCP ───────────────────────────────────────────────
+# ── 4. Install RTK (Rust Token Killer) ────────────────────────────────────────
+if [ "$OS_TYPE" = "macos" ] || [ "$OS_TYPE" = "linux" ]; then
+    if ! command -v rtk >/dev/null 2>&1; then
+        info "Installing rtk (Rust Token Killer) for AI token optimization…"
+        if command -v brew >/dev/null 2>&1; then
+            brew install rtk
+            pass "rtk installed via Homebrew"
+        elif command -v cargo >/dev/null 2>&1; then
+            cargo install --git https://github.com/rtk-ai/rtk
+            pass "rtk installed via Cargo"
+        else
+            warn "Neither Homebrew nor Cargo found — skipping rtk installation."
+        fi
+    else
+        info "rtk is already installed."
+    fi
+else
+    info "Skipping rtk installation (Windows native is not fully supported)."
+    info "  Note: If you run this script inside WSL, it will be detected as Linux and install rtk normally."
+fi
+
+# ── 5. Initialize CodeGraph MCP ───────────────────────────────────────────────
 if command -v npx >/dev/null 2>&1; then
     info "Initializing and indexing CodeGraph for AI context…"
     npx -y @colbymchenry/codegraph init 2>/dev/null || true
@@ -439,7 +460,7 @@ else
     warn "npx not found — skipping CodeGraph initialization"
 fi
 
-# ── 5. Initialize memory log ──────────────────────────────────────────────────
+# ── 6. Initialize memory log ──────────────────────────────────────────────────
 DATE_STR=$(date +%Y-%m-%d)
 mkdir -p memory
 LOG_PATH="memory/${DATE_STR}.md"
@@ -453,7 +474,7 @@ if [ -f "$INDEX_PATH" ]; then
   fi
 fi
 
-# ── 6. Initial commit ─────────────────────────────────────────────────────────
+# ── 7. Initial commit ─────────────────────────────────────────────────────────
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
     git add -A 2>/dev/null
