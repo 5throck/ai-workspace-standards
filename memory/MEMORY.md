@@ -26,3 +26,4 @@
 | [2026-05-24](2026-05-24.md) | refactor: move Pre-PR Security Gate from GEMINI.md to common context.md |
 | [2026-05-24](2026-05-24.md) | fix: ensure changelog auto-logs every new PR instead of just the first one |
 | [2026-05-24](2026-05-24.md) | docs: backfill today's changelog entries that were missed due to the previous bug |
+| [2026-05-24](2026-05-24.md) | refactor: remove duplicated Response Language block from GEMINI.md |

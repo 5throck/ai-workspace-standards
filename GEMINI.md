@@ -65,14 +65,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 
 ---
 
-### 3. Response Language
-
-- All **conversational** replies → **Korean (한국어)** by default.
-- All code, config, commit messages, PR titles, PR bodies, branch names → **English only** (see [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow)).
-
----
-
-### 4. Context Loading
+### 3. Context Loading
 Session Start Checklist steps (as defined in CONSTITUTION.md) are loaded into the conversation context using the platform `@` file reference syntax. (Note: Step 0 is a git command, not a file load).
 ```
 @https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md          # Step 1 - workspace design standard
@@ -92,7 +85,7 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ---
 
-### 5. Subagent Instantiation & Async Orchestration
+### 4. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
 #### Define Subagent (`define_subagent`)

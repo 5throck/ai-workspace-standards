@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-24]**: refactor: remove duplicated Response Language block from GEMINI.md
+
+### Changed
 - **[2026-05-24]**: docs: backfill today's changelog entries that were missed due to the previous bug
 
 ### Fixed
@@ -327,6 +330,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-24*
+
 
 
 
