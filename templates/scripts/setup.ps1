@@ -363,7 +363,18 @@ if (-not (Test-Path $SuperpowersDir)) {
     else { Warn "Failed to install superpowers plugin" }
 }
 
-# ── 4. Initialize memory log ──────────────────────────────────────────────────
+# ── 4. Initialize CodeGraph MCP ───────────────────────────────────────────────
+if (Get-Command npx -ErrorAction SilentlyContinue) {
+    Info "Initializing and indexing CodeGraph for AI context…"
+    npx -y @colbymchenry/codegraph init 2>$null
+    npx -y @colbymchenry/codegraph index 2>$null
+    if ($LASTEXITCODE -eq 0) { Pass "CodeGraph initialized successfully" }
+    else { Warn "Failed to initialize CodeGraph" }
+} else {
+    Warn "npx not found — skipping CodeGraph initialization"
+}
+
+# ── 5. Initialize memory log ──────────────────────────────────────────────────
 $Date = Get-Date -Format "yyyy-MM-dd"
 if (-not (Test-Path "memory")) { New-Item -ItemType Directory -Path "memory" -Force | Out-Null }
 $LogPath = "memory\$Date.md"
@@ -378,7 +389,7 @@ if (Test-Path $IndexPath) {
     }
 }
 
-# ── 5. Initial commit ─────────────────────────────────────────────────────────
+# ── 6. Initial commit ─────────────────────────────────────────────────────────
 if (-not $SkipCommit) {
     $gitDir = git rev-parse --git-dir 2>$null
     if ($LASTEXITCODE -eq 0) {
