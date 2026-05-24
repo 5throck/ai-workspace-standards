@@ -48,15 +48,15 @@ git config core.hooksPath .githooks
 
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 # Must run AFTER git init so the git index exists
-$executableFiles = @(
-    ".githooks\pre-commit", ".githooks\pre-push", ".githooks\post-checkout", ".githooks\commit-msg",
-    "scripts\audit.sh", "scripts\dev-sync.sh", "scripts\sync-md.sh", "scripts\setup.sh",
-    "scripts\dev-sync.ps1", "scripts\audit.ps1", "scripts\sync-md.ps1", "scripts\setup.ps1"
-)
-foreach ($rel in $executableFiles) {
-    if (Test-Path (Join-Path $ProjectDir $rel)) {
-        git update-index --chmod=+x $rel 2>$null
-    }
+# Hooks: all files in .githooks/
+Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
+    $rel = ".githooks\" + $_.Name
+    git update-index --chmod=+x $rel 2>$null
+}
+# Scripts: all .sh and .ps1 files in scripts/
+Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
+    $rel = "scripts\" + $_.Name
+    git update-index --chmod=+x $rel 2>$null
 }
 
 # ── 7. Post-scaffold audit ─────────────────────────────────────────────────────

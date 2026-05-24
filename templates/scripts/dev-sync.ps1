@@ -65,11 +65,29 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     $Branch = $CurrentBranch
     Write-Host "ℹ️  Already on branch '$Branch' — committing here without creating a new branch." -ForegroundColor Cyan
 }
-# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
-git commit -m "$Msg"
+# ── 6. Guard against committing sensitive files ───────────────────────────────
+$Sensitive = git ls-files --others --exclude-standard 2>$null |
+    Where-Object { $_ -match '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' }
+if ($Sensitive) {
+    Write-Host "❌ Potentially sensitive untracked files detected — refusing git add -A:" -ForegroundColor Red
+    $Sensitive | ForEach-Object { Write-Host "   $_" }
+    Write-Host "   Stage files explicitly with 'git add <file>' or add them to .gitignore." -ForegroundColor Yellow
+    exit 1
+}
+
+git add -A
+git commit -m "$Msg`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git push -u origin $Branch
-# Use PR template if present; fall back to --fill
-if (Test-Path ".github\pull_request_template.md") {
+
+# ── 7. Generate PR body and open PR ───────────────────────────────────────────
+$PrBody = ""
+if (Test-Path "scripts\gen-pr-body.ps1") {
+    try { $PrBody = & .\scripts\gen-pr-body.ps1 $Msg 2>$null } catch {}
+}
+
+if ($PrBody) {
+    gh pr create --title $Msg --body $PrBody
+} elseif (Test-Path ".github\pull_request_template.md") {
     $prBody = Get-Content ".github\pull_request_template.md" -Raw
     gh pr create --title $Msg --body $prBody
 } else {
