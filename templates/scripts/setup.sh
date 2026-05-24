@@ -425,7 +425,21 @@ if [ ! -d "$SUPERPOWERS_DIR" ]; then
     fi
 fi
 
-# ── 4. Initialize memory log ──────────────────────────────────────────────────
+# ── 4. Initialize CodeGraph MCP ───────────────────────────────────────────────
+if command -v npx >/dev/null 2>&1; then
+    info "Initializing and indexing CodeGraph for AI context…"
+    npx -y @colbymchenry/codegraph init 2>/dev/null || true
+    npx -y @colbymchenry/codegraph index 2>/dev/null || true
+    if [ $? -eq 0 ]; then
+        pass "CodeGraph initialized successfully"
+    else
+        warn "Failed to initialize CodeGraph"
+    fi
+else
+    warn "npx not found — skipping CodeGraph initialization"
+fi
+
+# ── 5. Initialize memory log ──────────────────────────────────────────────────
 DATE_STR=$(date +%Y-%m-%d)
 mkdir -p memory
 LOG_PATH="memory/${DATE_STR}.md"
@@ -439,7 +453,7 @@ if [ -f "$INDEX_PATH" ]; then
   fi
 fi
 
-# ── 5. Initial commit ─────────────────────────────────────────────────────────
+# ── 6. Initial commit ─────────────────────────────────────────────────────────
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
     git add -A 2>/dev/null
