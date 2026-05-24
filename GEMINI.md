@@ -135,9 +135,9 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- **High-tier (Design/Planning)** → `gemini-3.5-pro`: Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** → `gemini-3.1-pro`: Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** → `gemini-3.5-flash`: Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
+- **High-tier (Design/Planning)** → `gemini-3.1-pro`: Complex reasoning, architectural design, planning, and PM orchestration.
+- **Medium-tier (Review/QA)** → `gemini-3.5-flash`: Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** → `gemini-3.5-flash-8b`: Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ---
 

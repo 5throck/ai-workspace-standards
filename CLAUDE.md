@@ -103,7 +103,7 @@ Each implementation task follows the **Phase 4 execution loop**:
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
 - **High-tier (Design/Planning)** ➔ `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
-- **Medium-tier (Review/QA)** ➔ `claude-sonnet-5`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
+- **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5-20251001`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ### 5. Native Plan Mode (`EnterPlanMode`)
