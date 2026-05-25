@@ -1,5 +1,9 @@
 ---
 name: security-monitor
+tier:
+  claude: medium      # claude-sonnet-4.6
+  antigravity: medium # gemini-3.5-flash
+  gemini-cli: medium  # gemini-3.5-flash
 model: inherit
 color: red
 description: >
@@ -158,3 +162,11 @@ Do not run any scanners. Do not modify files.
 ## Workflow 3 - Post-Scaffold Scan
 
 Run Workflow 1 (Daily Scan) immediately after new project creation to establish a security baseline. This gives the project its first `security/` entries and catches any newly-introduced vulnerabilities from scaffolded dependencies.
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [4]  # Security-monitor leads security review in QA gate
+**Can Support In**: []
+**Auto-Dispatch To**: N/A
+**Tier**: medium
+**Communication Style**: async  # Security scans can run asynchronously
