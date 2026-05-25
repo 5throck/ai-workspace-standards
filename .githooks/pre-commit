@@ -101,7 +101,26 @@ if [ -n "$SKILL_FILES" ]; then
   fi
 fi
 
-# ── 4. Secret scan ────────────────────────────────────────────────────────────
+# ── 4. Script Parity Check ─────────────────────────────────────────────────────
+# Ensure every .sh has a corresponding .ps1 and vice versa
+if [ -d "scripts" ]; then
+  SH_NAMES=$(ls scripts/*.sh 2>/dev/null | sed 's|.*/||; s/\.sh$//' | sort)
+  PS1_NAMES=$(ls scripts/*.ps1 2>/dev/null | sed 's|.*/||; s/\.ps1$//' | sort)
+
+  if [ "$SH_NAMES" != "$PS1_NAMES" ]; then
+    echo -e "\033[31m[FAIL]\033[0m Script parity violation: .sh and .ps1 files don't match"
+    echo "   Every script must have both .sh and .ps1 versions"
+    echo ""
+    echo "   .sh files:"
+    echo "$SH_NAMES" | sed 's/^/     - /'
+    echo ""
+    echo "   .ps1 files:"
+    echo "$PS1_NAMES" | sed 's/^/     - /'
+    exit 1
+  fi
+fi
+
+# ── 5. Secret scan ────────────────────────────────────────────────────────────
 echo ""
 echo "=== Secret scan ==="
 
