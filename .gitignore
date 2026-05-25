@@ -102,6 +102,7 @@ __pycache__/
 !.editorconfig
 !SECURITY.md
 !AGENTS.md
+!agents/
 !memory/
 !.github/
 
