@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # sync-md.sh - Update memory/MEMORY.md index
 # Usage: bash scripts/sync-md.sh "YYYY-MM-DD" "summary"
+
+# Force English locale for consistent error messages
+export LC_ALL=C
+export LANG=C
+
 DATE="${1:-$(date +%Y-%m-%d)}"
 SUMMARY="${2:-update}"
 MEMORY_FILE="memory/MEMORY.md"

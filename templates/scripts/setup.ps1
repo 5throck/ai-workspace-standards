@@ -14,6 +14,10 @@
 #              Makefile              ??info only (not run automatically)
 #
 # Usage: .\scripts\setup.ps1 [-SkipInstall] [-SkipLicenseCheck] [-SkipCommit]
+
+# Force English culture for consistent error messages
+[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
+
 param(
     [switch]$SkipInstall,
     [switch]$SkipLicenseCheck,

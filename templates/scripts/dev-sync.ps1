@@ -1,5 +1,8 @@
 ﻿param([string]$Msg = "chore: update")
 
+# Force English culture for consistent error messages
+[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
+
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
