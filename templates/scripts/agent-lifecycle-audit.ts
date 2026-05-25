@@ -99,12 +99,28 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
     const frontmatter: Record<string, unknown> = {};
     const lines = frontmatterMatch[1].split('\n');
 
+    let inTierBlock = false;
+    let currentIndentation = 0;
+
     for (const line of lines) {
+      const trimmedLine = line.trim();
       const colonIndex = line.indexOf(':');
       if (colonIndex === -1) continue;
 
       const key = line.slice(0, colonIndex).trim();
       const value = line.slice(colonIndex + 1).trim();
+
+      // Track if we're entering or leaving a tier block
+      if (key === 'tier' && value === '') {
+        inTierBlock = true;
+        currentIndentation = line.search(/\S/); // Get indentation level
+        continue;
+      }
+
+      // Check if we've left the tier block (decreased indentation or new top-level key)
+      if (inTierBlock && line.search(/\S/) <= currentIndentation && key !== 'claude' && key !== 'antigravity' && key !== 'gemini-cli') {
+        inTierBlock = false;
+      }
 
       if (value.startsWith('[') && value.endsWith(']')) {
         frontmatter[key] = value
@@ -112,20 +128,14 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
           .split(',')
           .map((v) => v.trim().replace(/^['"]|['"]$/g, ''))
           .filter(Boolean);
-      } else if (key === 'tier' || key.includes('tier')) {
-        // Handle tier field
+      } else if (inTierBlock && (key === 'claude' || key === 'antigravity' || key === 'gemini-cli')) {
+        // Handle nested tier fields
         if (!frontmatter['tier']) {
           frontmatter['tier'] = {};
         }
-        if (key === 'tier') {
-          // Skip the parent tier key, we'll process children
-          continue;
-        } else if (key.startsWith('tier.')) {
-          const platform = key.slice(5); // Remove 'tier.' prefix
-          if (platform === 'claude' || platform === 'antigravity' || platform === 'gemini-cli') {
-            frontmatter['tier'][platform] = value.replace(/^['"]|['"]$/g, '');
-          }
-        }
+        // Strip comments and clean the value
+        const cleanValue = value.split('#')[0].trim().replace(/^['"]|['"]$/g, '');
+        frontmatter['tier'][key] = cleanValue;
       } else {
         frontmatter[key] = value.replace(/^['"]|['"]$/g, '');
       }
