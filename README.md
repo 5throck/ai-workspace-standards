@@ -57,9 +57,16 @@ bash scripts/new-project.sh "my-project-name"
 
 Each new project is scaffolded with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files automatically.
 
-### 4. Move to the new project & Start Kick-off
+### 4. Move to the new project & Start PM Kick-off
 
 **CRITICAL**: You must exit your current AI session and start a new one inside the newly created project directory. If you remain at the workspace root, the AI will not load the project-specific configuration and will skip the kick-off meeting.
+
+**Provide Context for Better Results**
+
+The PM agent works best when you provide clear context:
+1. **Project goal** - What you're building
+2. **Agent team hint** (optional) - Suggested specialized agents
+3. **Expected output** - Implementation plan, design, code
 
 ```bash
 # 1. Exit the current AI session (if running)
@@ -70,10 +77,22 @@ cd "my-project-name"
 claude
 # or
 agy
-
-# 4. Ask the AI to start the PM kick-off
-> "Start the project kick-off meeting based on the pm agent requirements."
 ```
+
+**Example: Building a Tetris Game**
+
+```
+> "Build a Tetris game in TypeScript. Configure a specialized agent team
+> (game-design for mechanics, game-logic for collision detection, graphics
+> for rendering, qa for testing) and start the kick-off meeting to create
+> an implementation plan."
+```
+
+This gives the PM agent clear context to:
+- Understand your specific requirements
+- Configure the right agent team (default or custom)
+- Generate a focused kick-off agenda
+- Present a concrete plan for your approval
 
 
 
@@ -194,4 +213,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-24*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-25*

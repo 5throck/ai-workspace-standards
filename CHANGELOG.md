@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **[2026-05-25]**: docs: improve README Step 4 - add concrete example (Tetris game) with context guidance and custom agent team explanation to help users understand PM kick-off process
+- **[2026-05-25]**: docs: apply same README improvements to README_ko.md for bilingual consistency
+
 ### Fixed
 - **[2026-05-25]**: feat: enhance memory log format - commit-msg hook now captures rich context (summary, file count, decisions, issues) from commit body instead of generic placeholders
 - **[2026-05-25]**: fix: resolve param syntax bug in powershell scripts
