@@ -2,7 +2,7 @@
 name: Scaffolding Expert
 tier:
   claude: low         # claude-haiku-4-5
-  antigravity: low    # gemini-3.3-flash (thinking_level="low")
+  antigravity: low    # gemini-3.5-flash (thinking_level="low")
   gemini-cli: low     # gemini-3.5-flash
 model: inherit
 color: orange
