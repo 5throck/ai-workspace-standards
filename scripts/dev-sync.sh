@@ -62,9 +62,7 @@ else
 fi
 
 git add -A
-git commit -m "$MSG
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git commit -m "$MSG"
 git push -u origin "$BRANCH"
 
 # ── 7. Generate PR body ───────────────────────────────────────────────────────

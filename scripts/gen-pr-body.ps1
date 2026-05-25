@@ -53,7 +53,6 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 [Breaking changes, deployment steps, or reviewer guidance. Write 'None' if not applicable.]
 
 ---
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 "@
 
     $TmpFile = [System.IO.Path]::GetTempFileName()
@@ -93,6 +92,5 @@ $FileList
 None
 
 ---
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 "@
 

@@ -342,6 +342,76 @@ Phase 6 - Finalization
 
 ---
 
+### 5.5 Agent Lifecycle Management
+
+This workspace uses a **file-based agent system** where agents are defined as markdown files in `agents/`. The PM orchestrator is responsible for managing the agent lifecycle.
+
+> **Workspace Root vs. Individual Projects**:
+> - **Workspace Root** agents focus on template maintenance, scaffolding validation, and meta-workflows.
+> - **Individual Project** agents focus on project-specific implementation workflows.
+
+#### Agent Lifecycle Phases
+
+| Phase | Action | Command | Documentation Update |
+|-------|--------|---------|---------------------|
+| **Create** | Add new agent | `bun run agent:create <name> --role "Display" --group <group>` | Update `AGENTS.md` + `CONSTITUTION.md §5` |
+| **List** | View all agents | `bun run agent:list [--group <group>] [--verbose]` | N/A (read-only) |
+| **Update** | Modify agent | Edit `agents/<name>.md` directly | Update `AGENTS.md` if role/triggers change |
+| **Delete** | Remove agent | `bun run agent:delete <name> --force` | Update `AGENTS.md` + `CONSTITUTION.md §5` |
+| **Verify** | Check sync | `bun run agent:verify` | N/A (reports inconsistencies) |
+
+#### Agent Management Commands
+
+```bash
+# Create a new agent
+bun run agent:create <name> --role "Display Name" --group <group> --description "Purpose"
+
+# List all agents
+bun run agent:list
+bun run agent:list --group Orchestration
+bun run agent:list --verbose
+
+# Delete an agent
+bun run agent:delete <name>
+bun run agent:delete <name> --force
+
+# Verify documentation synchronization
+bun run agent:verify
+```
+
+#### Documentation Synchronization Rule
+
+**CRITICAL**: After any agent creation, modification, or deletion, the PM MUST update:
+
+1. **AGENTS.md** - Canonical agent index:
+   - Add/remove row from Agent Roster table
+   - Add/remove row from Subagent Roster table (with Parallelizable/Write columns)
+   - Update Skills table if agent uses skills
+
+2. **CONSTITUTION.md §5** - Multi-Agent Architecture:
+   - Add/remove reference to agent in relevant subsections
+   - Update role group definitions if applicable
+   - Keep in sync with AGENTS.md
+
+#### Verification
+
+Run `bun run agent:verify` to check:
+- All agents in `agents/` have corresponding entries in `AGENTS.md`
+- All agents in `AGENTS.md` have corresponding files in `agents/`
+- Agent metadata (role, group, triggers) is consistent
+
+#### PM Responsibility
+
+During **Phase 0 (Team Assembly)**, the PM:
+1. Assesses workspace or project requirements
+2. Creates specialized agents if needed using `agent:create.ts`
+3. Updates `AGENTS.md` and `CONSTITUTION.md` with new agent entries
+4. Documents agent handoff rules and dispatch triggers
+
+> **Reference**: See `AGENTS.md` for complete agent roster, dispatch protocols, and maintenance rules.
+
+---
+
 ### 6. Skills
 
 Reusable workflow knowledge is defined as skills.
@@ -410,6 +480,98 @@ One paragraph - what this skill enables and when to use it.
 |------|-------------|-------------|
 | Session skill | Always-needed workflow for this project | Listed under `## Session Start Skills` in `docs/context.md` - loaded at session start by all AI tools |
 | On-demand skill | Specialized knowledge for specific tasks | Auto-triggered by `description` matching |
+
+#### 6.5 Skill Lifecycle Management
+
+Skills have a lifecycle managed by the PM agent. When agent configurations change, skills may need to be created, updated, deprecated, or archived.
+
+##### Skill Lifecycle States
+
+| State | Description | Action Required |
+|-------|-------------|-----------------|
+| **draft** | Skill under development | Move to active after review |
+| **active** | Skill in production use | Regular health checks |
+| **deprecated** | Superseded, pending removal | Add frontmatter warning, archive after 30 days |
+| **archived** | No longer used, kept for reference | Move to `skills/_archive/`, can delete after 90 days |
+
+##### Skill Frontmatter Template
+
+All skills should include lifecycle metadata:
+
+```yaml
+---
+name: skill-name
+description: This skill should be used when...
+version: 1.2.3
+
+# Lifecycle metadata
+status: active           # draft | active | deprecated | archived
+owner: agent-name        # Primary owning agent
+requires: []             # Skills this depends on
+supersedes: old-skill    # This replaces old skill
+superseded_by: []        # If another skill replaces this
+
+# Last updated
+last_reviewed: 2026-05-25
+last_reviewed_by: pm-agent
+---
+```
+
+##### Running Skill Health Audit
+
+Execute the audit script to check skill health:
+
+**Bun:**
+```bash
+bun scripts/skill-lifecycle-audit.ts
+```
+
+The audit checks for:
+- ✅ Skills without owners
+- ✅ Orphaned skills (owner agent doesn't exist)
+- ✅ Deprecated skills still being modified
+- ✅ Missing dependencies (requires field)
+- ✅ Circular dependencies
+
+##### Agent Configuration Change Workflow
+
+When PM agent modifies the agent team:
+
+**New Agent Added:**
+1. Does agent need a skill? → Create using `skill-creator:skill-creator`
+2. Can existing skill be shared? → Update `owner: [agent1, agent2]`
+
+**Agent Role Changed:**
+1. Find all skills with `owner: changed-agent`
+2. Update skill descriptions to reflect new scope
+3. Bump version if capabilities changed
+
+**Agent Removed:**
+1. Find all skills with `owner: removed-agent`
+2. Is skill shared? → Remove agent from owner list
+3. Is skill needed by another agent? → Reassign owner
+4. Is skill orphaned? → Change status to deprecated
+
+**Agent Consolidation:**
+1. List all skills from merged agents
+2. Identify duplicates → Use `supersedes` field to mark old
+3. Keep most complete version
+4. Update `owner: new-consolidated-agent`
+
+##### Pre-commit Integration
+
+Skills are automatically validated on commit:
+
+```bash
+git add .claude/skills/new-skill/SKILL.md
+git commit -m "feat: add new skill"
+# → Skill Lifecycle Audit runs automatically
+```
+
+If audit fails:
+- Add missing `owner: agent-name` to frontmatter
+- Reassign orphaned skills to valid agents
+- Archive deprecated skills to `skills/_archive/`
 
 ---
 
@@ -569,6 +731,17 @@ When adding or recommending dependencies:
 #### 8.8 Hybrid Scripting & Cross-Platform Rule
 - **Hybrid Approach**: The project uses a hybrid scripting model. Complex multi-agent orchestration (e.g., `dispatch.ts`, `retry-handler.ts`, `verify-skills.ts`) is implemented in **Bun (.ts)**. Everyday development utilities (e.g., `dev-sync`, `audit`) use native shell scripts.
 - **Utility Script Pairing**: All utility shell scripts must be cross-platform compatible. Any creation, modification, or deletion of a PowerShell utility script (`.ps1`) MUST be accompanied by the exact same operation on its corresponding Bash script counterpart (`.sh`), and vice versa. They must always be kept in sync as a pair (e.g., `dev-sync.ps1` and `dev-sync.sh`).
+
+#### 8.9 Bilingual Documentation Rule
+- **README Pairing Requirement**: For any `README.md` file created in the `templates/` directory, a corresponding Korean version `README_ko.md` MUST also be created and maintained.
+- **Synchronization**: When a `README.md` is modified, the corresponding `README_ko.md` MUST be updated to reflect the same changes. The Korean version should be a faithful translation, maintaining the same structure and content coverage.
+- **Directory Structure**: Both files MUST reside in the same directory:
+  ```
+  templates/<directory>/
+  ├── README.md      # English version
+  └── README_ko.md   # Korean version (translation of README.md)
+  ```
+- **Verification**: The `audit.sh` / `audit.ps1` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
 
 ---
 

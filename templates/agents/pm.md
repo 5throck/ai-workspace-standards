@@ -1,5 +1,6 @@
 ﻿---
 name: pm
+formal_name: Project Manager (PM) Agent
 model: inherit
 color: yellow
 description: >
@@ -43,7 +44,7 @@ Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](https://raw.gith
 3. **Design** -Dispatch architect (implementation plan + ADR) and, if the task has UI/UX surface, designer (wireframes + component spec) in parallel; obtain explicit user approval before proceeding.
 4. **Implementation** -Dispatch code-writer (serial); test-runner verifies after each change.
 5. **QA** -Verify all acceptance criteria; run audit script + tests.
-6. **Finalization** - Run memlog → sync; open PR; hand off to user. All AI-generated commits must include the appropriate `Co-Authored-By` line for the active AI tool (see `CLAUDE.md` or `GEMINI.md`).
+6. **Finalization** - Run memlog → sync; open PR; hand off to user.
 
 ## Agent Roster
 

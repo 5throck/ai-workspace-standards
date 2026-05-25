@@ -52,7 +52,75 @@ if [ "$MEMORY_ONLY" = false ]; then
   bash scripts/audit.sh || exit 1
 fi
 
-# ── 4. Secret scan ────────────────────────────────────────────────────────────
+# ── 3.5. Agent Lifecycle Audit ─────────────────────────────────────────────────
+# Run when workspace root agent files are modified (skip sub-projects)
+AGENT_FILES=$(echo "$STAGED" | grep -iE "^agents/.*\.md|^AGENTS\.md" || true)
+if [ -n "$AGENT_FILES" ]; then
+  echo ""
+  echo "=== Agent Lifecycle Audit ==="
+
+  if command -v bun &>/dev/null && [ -f "scripts/agent-lifecycle-audit.ts" ]; then
+    # Check only workspace root agents (exclude sub-projects)
+    if bun scripts/agent-lifecycle-audit.ts --json 2>/dev/null | grep -q '"errors": \[\]'; then
+      echo -e "\033[32m[PASS]\033[0m Agent audit: all agents healthy"
+    else
+      echo -e "\033[31m[FAIL]\033[0m Agent audit detected issues — commit blocked."
+      echo "       Run 'bun scripts/agent-lifecycle-audit.ts' to see details."
+      echo "       Common fixes:"
+      echo "       - Add frontmatter (name, role, status) to agent file"
+      echo "       - Register agent in AGENTS.md"
+      echo "       - Reassign skills from deprecated agents"
+      exit 1
+    fi
+  else
+    echo -e "\033[33m[SKIP]\033[0m Agent audit requires bun. Install for automated checks."
+  fi
+fi
+
+# ── 3.6. Skill Lifecycle Audit ─────────────────────────────────────────────────
+# Run when skill files are modified
+SKILL_FILES=$(echo "$STAGED" | grep -iE "SKILL\.md|\.claude/skills/" || true)
+if [ -n "$SKILL_FILES" ]; then
+  echo ""
+  echo "=== Skill Lifecycle Audit ==="
+
+  if command -v bun &>/dev/null && [ -f "scripts/skill-lifecycle-audit.ts" ]; then
+    if bun scripts/skill-lifecycle-audit.ts --json 2>/dev/null | grep -q '"errors": \[\]'; then
+      echo -e "\033[32m[PASS]\033[0m Skill audit: all skills healthy"
+    else
+      echo -e "\033[31m[FAIL]\033[0m Skill audit detected issues — commit blocked."
+      echo "       Run 'bun scripts/skill-lifecycle-audit.ts' to see details."
+      echo "       Common fixes:"
+      echo "       - Add 'owner: agent-name' to skill frontmatter"
+      echo "       - Reassign orphaned skills to valid agents"
+      echo "       - Archive deprecated skills to skills/_archive/"
+      exit 1
+    fi
+  else
+    echo -e "\033[33m[SKIP]\033[0m Skill audit requires bun. Install for automated checks."
+  fi
+fi
+
+# ── 4. Script Parity Check ─────────────────────────────────────────────────────
+# Ensure every .sh has a corresponding .ps1 and vice versa
+if [ -d "scripts" ]; then
+  SH_NAMES=$(ls scripts/*.sh 2>/dev/null | sed 's|.*/||; s/\.sh$//' | sort)
+  PS1_NAMES=$(ls scripts/*.ps1 2>/dev/null | sed 's|.*/||; s/\.ps1$//' | sort)
+
+  if [ "$SH_NAMES" != "$PS1_NAMES" ]; then
+    echo -e "\033[31m[FAIL]\033[0m Script parity violation: .sh and .ps1 files don't match"
+    echo "   Every script must have both .sh and .ps1 versions"
+    echo ""
+    echo "   .sh files:"
+    echo "$SH_NAMES" | sed 's/^/     - /'
+    echo ""
+    echo "   .ps1 files:"
+    echo "$PS1_NAMES" | sed 's/^/     - /'
+    exit 1
+  fi
+fi
+
+# ── 5. Secret scan ────────────────────────────────────────────────────────────
 echo ""
 echo "=== Secret scan ==="
 

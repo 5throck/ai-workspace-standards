@@ -489,7 +489,6 @@ if [ "$SKIP_COMMIT" = false ]; then
     git add -A 2>/dev/null
     if git commit -m "chore: initial scaffold
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>" 2>/dev/null; then
       pass "Initial commit created"
     else
       warn "Nothing to commit (already committed?)"

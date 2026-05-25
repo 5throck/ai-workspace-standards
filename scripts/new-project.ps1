@@ -29,8 +29,8 @@ Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
-# ── 2. Remove _examples (reference-only - not part of a real project) ──────────
-$examplesDir = Join-Path $ProjectDir "_examples"
+# ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
+$examplesDir = Join-Path $ProjectDir "docs\_examples"
 if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
 
 # ── 2.5. Remove any accidentally copied .cmd files and Enforce .ps1 / .sh Pairs ──
@@ -133,7 +133,7 @@ Write-Host ""
 Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
-Write-Host "  -> $TemplatesDir\_examples" -ForegroundColor DarkGray
+Write-Host "  -> $TemplatesDir\docs\_examples" -ForegroundColor DarkGray
 
 
 

@@ -89,6 +89,66 @@ This project uses a **PM-first multi-agent architecture**. All development work 
        └─▶[Unknown stack]   → Stack-setup agent
 ```
 
+### Agent & Skill Lifecycle Management
+
+The PM agent also manages the lifecycle of both agents and skills in the project:
+
+| Lifecycle State | Agents | Skills |
+|-----------------|--------|--------|
+| **Creation** | PM creates new agent files via `/new-agent` | PM or skill-creator creates new skills |
+| **Active** | Agent in production use | Skill in production use |
+| **Deprecated** | Marked with `status: deprecated` in frontmatter | Marked with `status: deprecated` in frontmatter |
+| **Archived** | Moved to `agents/_archive/` after 30 days | Moved to `skills/_archive/` after 30 days |
+
+When agent configurations change:
+1. **New agent added** → PM creates or reassigns skills
+2. **Agent role changed** → PM updates associated skill descriptions
+3. **Agent removed** → PM reassigns or deprecates owned skills
+4. **Agents consolidated** → PM merges skill inventories
+
+#### Skill Frontmatter Template
+
+All skills should include lifecycle metadata:
+
+```yaml
+---
+name: skill-name
+description: This skill should be used when...
+version: 1.0.0
+
+# Lifecycle metadata
+status: active           # draft | active | deprecated | archived
+owner: agent-name        # Primary owning agent (must exist in agents/)
+requires: []             # Skills this depends on
+supersedes: old-skill    # This replaces old-skill (optional)
+superseded_by: []        # If another skill replaces this (optional)
+---
+```
+
+#### Running Lifecycle Audit
+
+**Skill Audit:**
+```bash
+bun scripts/skill-lifecycle-audit.ts
+```
+
+**Agent Audit:**
+```bash
+bun scripts/agent-lifecycle-audit.ts
+```
+
+The audit checks for:
+- ✅ Skills without owners
+- ✅ Orphaned skills (owner agent doesn't exist)
+- ✅ Deprecated skills still being modified
+- ✅ Missing dependencies (requires field)
+- ✅ Circular dependencies
+- ✅ Agents missing frontmatter (name, role, status)
+- ✅ Agents not registered in AGENTS.md
+
+> **Note**: Lifecycle audits run automatically via pre-commit hook when agent or skill files are staged for commit.
+```
+
 ### Why PM-First?
 
 | Benefit | Description |
@@ -194,7 +254,12 @@ Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude C
 | `agents/test-runner.md` | QA agent -runs tests and verifies acceptance criteria |
 | `scripts/dev-sync.sh` | Full sync pipeline (memlog -sync-md -changelog -audit -commit -PR) |
 | `scripts/audit.sh` | Documentation audit script |
+| `scripts/agent-verify.ts` | Verifies agent/documentation synchronization |
 | `scripts/sync-md.sh` | Updates `memory/MEMORY.md` index with today's session entry |
+| `scripts/skill-lifecycle-audit.ts` | Agent & Skill lifecycle audit (Bun) - validates owners, dependencies, deprecated skills |
+
+> **Platform Note:** Lifecycle management scripts use Bun (`.ts`) for cross-platform compatibility.
+> Run with: `bun scripts/skill-lifecycle-audit.ts`
 | `memory/MEMORY.md` | Session log index |
 | `CHANGELOG.md` | User-visible change history |
 | `.env.sample` | Required environment variable template |
@@ -262,3 +327,80 @@ All PR titles, bodies, and review comments must be written in English -governed 
 ### 12. Hybrid Scripting & Cross-Platform Rule
 - **Hybrid Approach**: The project uses a hybrid scripting model. Complex multi-agent orchestration (e.g., `dispatch.ts`, `verify-skills.ts`) is implemented in **Bun (.ts)**. Everyday development utilities (e.g., `dev-sync`, `audit`) use native shell scripts.
 - **Utility Script Pairing**: All utility shell scripts must be cross-platform compatible. Any creation, modification, or deletion of a PowerShell utility script (`.ps1`) MUST be accompanied by the exact same operation on its corresponding Bash script counterpart (`.sh`), and vice versa. They must always be kept in sync as a pair (e.g., `dev-sync.ps1` and `dev-sync.sh`).
+
+### 13. Bilingual Documentation Rule (Template Maintenance)
+- **README Pairing Requirement**: For any `README.md` file created in the `templates/` directory, a corresponding Korean version `README_ko.md` MUST also be created and maintained.
+- **Synchronization**: When a `README.md` is modified, the corresponding `README_ko.md` MUST be updated to reflect the same changes. The Korean version should be a faithful translation, maintaining the same structure and content coverage.
+- **Directory Structure**: Both files MUST reside in the same directory:
+  ```
+  templates/<directory>/
+  ├── README.md      # English version
+  └── README_ko.md   # Korean version (translation of README.md)
+  ```
+- **Verification**: The `audit.sh` / `audit.ps1` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
+
+---
+
+## Agent Lifecycle Management
+
+This project uses a **file-based agent system** where agents are defined as markdown files in `agents/`. The PM orchestrator is responsible for managing the agent lifecycle.
+
+### Agent Lifecycle Phases
+
+| Phase | Action | Command | Documentation Update |
+|-------|--------|---------|---------------------|
+| **Create** | Add new agent | `bun run agent:create <name> --role "Display" --group <group>` | Update `AGENTS.md` + `docs/context.md § Agents` |
+| **List** | View all agents | `bun run agent:list [--group <group>] [--verbose]` | N/A (read-only) |
+| **Update** | Modify agent | Edit `agents/<name>.md` directly | Update `AGENTS.md` if role/triggers change |
+| **Delete** | Remove agent | `bun run agent:delete <name> --force` | Update `AGENTS.md` + `docs/context.md § Agents` |
+
+### Agent Management Commands
+
+```bash
+# Create a new agent
+bun run agent:create <name> --role "Display Name" --group <group> --description "Purpose"
+
+# List all agents
+bun run agent:list
+bun run agent:list --group Technical
+bun run agent:list --verbose
+
+# Delete an agent
+bun run agent:delete <name>
+bun run agent:delete <name> --force
+```
+
+### Documentation Synchronization Rule
+
+**CRITICAL**: After any agent creation, modification, or deletion, the PM MUST update:
+
+1. **AGENTS.md** - Canonical agent index:
+   - Add/remove row from Agent Roster table
+   - Add/remove row from Subagent Roster table (with Parallelizable/Write columns)
+   - Update Skills table if agent uses skills
+
+2. **docs/context.md § Agents** - Quick reference summary:
+   - Add/remove row from the Agents table
+   - Keep in sync with AGENTS.md
+
+3. **docs/context.md § Session Start Skills** - If applicable:
+   - Add skill auto-load entry if agent requires specific skills
+
+### Verification
+
+Run `bun run agent:list --verbose` to verify:
+- All agents in `agents/` have corresponding entries in `AGENTS.md`
+- All agents in `AGENTS.md` have corresponding files in `agents/`
+- Agent metadata (role, group, triggers) is consistent
+
+### PM Responsibility
+
+During **Phase 0 (Team Assembly)**, the PM:
+1. Assesses project requirements
+2. Creates specialized agents if needed using `agent:create.ts`
+3. Updates `AGENTS.md` and `docs/context.md` with new agent entries
+4. Documents agent handoff rules and dispatch triggers
+
+> **Reference**: See `AGENTS.md` for complete agent roster, dispatch protocols, and maintenance rules.
+
+---
