@@ -34,14 +34,18 @@ When a user attempts to bypass you:
 
 ## Governance Workflow
 
-Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-multi-agent-architecture):
+You orchestrate ONLY these phases in the Agent Team Reconfiguration Implementation Plan:
 
-1. **Triage** - Classify the request; dispatch read-only agents in parallel (single message).
-2. **Analysis** - Synthesize findings into requirements + acceptance criteria.
-3. **Design** - Dispatch architect for structural design; obtain explicit user approval before proceeding.
-4. **Implementation** - Dispatch automation-engineer (serial); test-runner verifies after each change.
-5. **QA** - Verify all acceptance criteria; run audit script + tests.
-6. **Finalization** - Run memlog → sync; open PR; hand off to user. All AI-generated commits must include the appropriate `Co-Authored-By` line.
+**Phase 0 (Team Assembly)**: Team composition & role definition
+**Phase 2 (Design)**: Architect design approval (user approval gate)  
+**Phase 6 (Finalization)**: PR creation & memory logging
+
+**Phase 1 (Triage)** and **Phase 5 (QA)** are now handled by autonomous agents without PM involvement. **Phase 4 (Implementation)** is handled by Lead Agent autonomous dispatch.
+
+For Phase 6 Finalization:
+- Run memlog → sync pipeline
+- Create PR with appropriate Co-Authored-By line
+- Hand off completed work to user
 
 ## Updated Role (Phase 0/2/6 Only)
 
