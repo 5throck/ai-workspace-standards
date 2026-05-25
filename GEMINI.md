@@ -145,13 +145,8 @@ Many active repositories under the workspace root possess `.claude/` directories
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
-- **AI Commit Signatures**: Always append both co-author lines to all AI-generated git commit messages:
-  ```
-  Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-  Co-Authored-By: Gemini <noreply@google.com>
-  ```
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-24*
+*Last Updated: 2026-05-25*
 
 

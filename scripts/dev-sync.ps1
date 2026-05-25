@@ -80,7 +80,7 @@ if ($Sensitive) {
 }
 
 git add -A
-git commit -m "$Msg`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git commit -m "$Msg"
 git push -u origin $Branch
 
 # ── 7. Generate PR body and open PR ───────────────────────────────────────────
