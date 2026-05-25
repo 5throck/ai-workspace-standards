@@ -237,6 +237,7 @@ function auditSkills(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Skill Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
     console.log(`${colors.dim}Skills found: ${skillFiles.length}${colors.reset}`);
     console.log('');
   }
