@@ -15,30 +15,30 @@
 
 ### 🛠️ Orchestration / Audit
 
-| Agent | File | Role |
-|-------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates; evaluates requirements and enforces CONSTITUTION.md standards |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Cross-validates documentation; ensures rules defined in one place are not contradicted elsewhere |
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 6); reduced bottleneck role |
+| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency
 
 ### 📐 Design
 
-| Agent | File | Role |
-|-------|------|------|
-| Template Architect | [`agents/architect.md`](agents/architect.md) | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
 
 ### ⚙️ Execution
 
-| Agent | File | Role |
-|-------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Scripting and tools expert; maintains .ps1 and .sh cross-platform scripts; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | Standardizes Markdown documentation (README.md, CONSTITUTION.md, CHANGELOG.md) and manages locales/ translations |
-| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains .ps1 and .sh cross-platform scripts; ensures idempotency and robustness |
+| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | Low | Standardizes Markdown documentation (README.md, CONSTITUTION.md, CHANGELOG.md) and manages locales/ translations |
+| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
 ### 🛡️ Security
 
-| Agent | File | Role |
-|-------|------|------|
-| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
 
 ---
 
@@ -74,27 +74,24 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ### Dispatch Rules
 
-1. **Single message, multiple `Agent()` calls** - all parallel agents must be dispatched in one turn.
-2. **Merge before proceeding** - PM waits for ALL parallel agents to return before the next serial step.
-3. **Phase 4 execution loop** - each implementation task goes through:
-   - **automation-engineer** implements the changes
-   - **auditor** verifies against acceptance criteria and consistency
-   - **Quality gate (audit script)** validates compliance
-   - Loop and correct if issues found - maximum **3 iterations** before escalating to the user.
-4. **Error handling** - if any parallel agent fails, PM resolves the failure before proceeding. Do not skip.
-5. **Max fix iterations** - 3 per review cycle before escalating to the user.
+1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
+2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 6 (Finalization)
+3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using qa-gate.sh/.ps1 scripts
+4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
+5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
+6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
 
 ### Subagent Roster
 
-| Agent | File | Parallelizable | Write Allowed? |
-|-------|------|:--------------:|:--------------:|
-| PM Orchestrator | `agents/pm.md` | - | orchestrates only |
-| Consistency Auditor | `agents/auditor.md` | Triage phase | No |
-| Template Architect | `agents/architect.md` | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Serial | Script files only |
-| Documentation Writer | `agents/docs-writer.md` | After design | .md files only |
-| Scaffolding Expert | `agents/scaffolding-expert.md` | Research phase | setup scripts only (after approval) |
-| Security & Git Expert | `agents/security-expert.md` | Review phase | Hook configs only |
+| Agent | File | Tier | Parallelizable | Write Allowed? |
+|-------|------|------|:--------------:|:--------------:|
+| PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
+| Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
+| Template Architect | `agents/architect.md` | High | Design phase | No |
+| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Script files only |
+| Documentation Writer | `agents/docs-writer.md` | Low | After design | .md files only |
+| Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
+| Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
 
@@ -110,23 +107,24 @@ Phase 0 - Team Assembly & Skill Orchestration (Kickoff)
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and maintains skill registry
 
-Phase 1 - Triage & Analysis
+Phase 1 - Analysis & Triage
   PM classifies the request
   Dispatch read-only agents in parallel (analysis, research)
   PM synthesizes findings → acceptance criteria
 
 Phase 2 - Design
   Architect produces implementation plan + ADR
-  PM obtains explicit user approval → GATE
+  PM validates design approach and obtains explicit user approval → GATE
 
 Phase 3 - Implementation (serial)
   Automation Engineer implements per approved plan
   Documentation Writer updates docs as needed
-  Auditor verifies after each change
+  Agents can dispatch each other directly for routine handoffs
 
-Phase 4 - QA Gate (all must pass)
-  bash scripts/audit.sh     exit 0
-  [project test command]    all tests pass
+Phase 4 - QA Gate (Independent Auditor)
+  Auditor executes qa-gate.sh/.ps1 autonomously
+  Validates: workspace audit, project tests, documentation consistency
+  Maximum 2 iterations before PM escalation → GATE
 
 Phase 5 - Finalization
   PM logs decisions to memory/YYYY-MM-DD.md

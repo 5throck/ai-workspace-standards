@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @license MIT
  */
 
@@ -24,6 +24,11 @@ interface AgentFrontmatter {
   color?: string;
   description?: string;
   responsibilities?: string[];
+  tier?: {
+    claude?: 'high' | 'medium' | 'low';
+    antigravity?: 'high' | 'medium' | 'low';
+    'gemini-cli'?: 'high' | 'medium' | 'low';
+  };
 }
 
 interface AgentIssue {
@@ -111,6 +116,20 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
           .split(',')
           .map((v) => v.trim().replace(/^['"]|['"]$/g, ''))
           .filter(Boolean);
+      } else if (key === 'tier' || key.includes('tier')) {
+        // Handle tier field
+        if (!frontmatter['tier']) {
+          frontmatter['tier'] = {};
+        }
+        if (key === 'tier') {
+          // Skip the parent tier key, we'll process children
+          continue;
+        } else if (key.startsWith('tier.')) {
+          const platform = key.slice(5); // Remove 'tier.' prefix
+          if (platform === 'claude' || platform === 'antigravity' || platform === 'gemini-cli') {
+            frontmatter['tier'][platform] = value.replace(/^['"]|['"]$/g, '');
+          }
+        }
       } else {
         frontmatter[key] = value.replace(/^['"]|['"]$/g, '');
       }
@@ -323,6 +342,40 @@ function auditAgents(jsonMode = false): AuditResult {
         fix: "Set 'status: archived' in frontmatter",
       });
     }
+
+    // Check 8: Tier validation - missing tier field
+    if (!frontmatter.tier) {
+      errors.push({
+        level: 'error',
+        file: relPath,
+        message: 'Missing tier field in frontmatter',
+        fix: "Add tier field with claude, antigravity, and gemini-cli specifications",
+      });
+    } else {
+      // Check 9: Tier validation - missing platforms
+      const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'];
+      for (const platform of requiredPlatforms) {
+        if (!frontmatter.tier[platform]) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Missing tier.${platform} specification`,
+            fix: `Add tier.${platform}: high|medium|low to frontmatter`,
+          });
+        } else {
+          // Check 10: Tier validation - invalid tier values
+          const validTiers = ['high', 'medium', 'low'];
+          if (!validTiers.includes(frontmatter.tier[platform])) {
+            errors.push({
+              level: 'error',
+              file: relPath,
+              message: `Invalid tier.${platform} value: "${frontmatter.tier[platform]}"`,
+              fix: `Use one of: ${validTiers.join(', ')}`,
+            });
+          }
+        }
+      }
+    }
   }
 
   // Check 8: Agents registered in AGENTS.md but files don't exist
@@ -417,6 +470,7 @@ Checks:
   ✓ Registered agents with missing files
   ✓ Deprecated agents with active skill references
   ✓ Archive location vs status consistency
+  ✓ Tier field validation (all platforms present, valid values)
 
 Platform: ${PLATFORM}
   `);
