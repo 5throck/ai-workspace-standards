@@ -16,7 +16,7 @@
 
 | Agent | File | Role |
 |-------|------|------|
-| PM Orchestrator | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
 | Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Enforces security policies; prevents secrets leaks; monitors safe dependencies |
 
 ### 📐 Design
@@ -152,7 +152,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
-| *(none yet -add entries as skills are created in `skills/`)* | | |
+| **Skill Lifecycle Manager** | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
 
 *(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 

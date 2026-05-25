@@ -8,7 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-05-25]**: feat: add agent and skill lifecycle management system with Bun/TypeScript audit scripts
+  - **[2026-05-25]**: `scripts/agent-lifecycle-audit.ts` - validates agent frontmatter, AGENTS.md consistency, deprecated agent references
+  - **[2026-05-25]**: `scripts/skill-lifecycle-audit.ts` - validates skill frontmatter, owner references, deprecated skills, dependencies
+  - **[2026-05-25]**: Pre-commit hooks automatically run audits when agent/skill files are staged
+  - **[2026-05-25]**: `.claude/skills/skill-lifecycle-manager/SKILL.md` - PM agent skill for managing skill lifecycle
+- **[2026-05-25]**: docs: add lifecycle management sections to CONSTITUTION.md (§5.5 Agent Lifecycle, §6.5 Skill Lifecycle)
+- **[2026-05-25]**: docs: add lifecycle management documentation to templates/docs/context.md with frontmatter templates and audit commands
+
 ### Changed
+- **[2026-05-25]**: feat: add `role` and `status: active` fields to all workspace root agent files (architect, auditor, automation-engineer, docs-writer, pm, scaffolding-expert, security-expert)
+- **[2026-05-25]**: docs: update AGENTS.md and templates/AGENTS.md with skill-lifecycle-manager entry
+- **[2026-05-25]**: docs: update platform notes to specify Bun-only for lifecycle audit scripts (removed Bash/PS1 references)
+- **[2026-05-25]**: docs: improve README Step 4 - add concrete example (Tetris game) with context guidance and custom agent team explanation to help users understand PM kick-off process
 - **[2026-05-25]**: docs: improve README Step 4 - add concrete example (Tetris game) with context guidance and custom agent team explanation to help users understand PM kick-off process
 - **[2026-05-25]**: docs: apply same README improvements to README_ko.md for bilingual consistency
 

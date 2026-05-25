@@ -17,7 +17,7 @@
 
 | Agent | File | Role |
 |-------|------|------|
-| PM Orchestrator | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates; evaluates requirements and enforces CONSTITUTION.md standards |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates; evaluates requirements and enforces CONSTITUTION.md standards |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Cross-validates documentation; ensures rules defined in one place are not contradicted elsewhere |
 
 ### 📐 Design
@@ -158,6 +158,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
 | UI/UX Design Intelligence | `.claude/skills/ui-ux-pro-max/SKILL.md` | Building web components, pages, or applications; UI/UX design tasks |
+| Skill Lifecycle Manager | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
 | Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
 | Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
@@ -165,6 +166,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.
+>
+> **Platform Support:** Skills are compatible with both Claude Code and Antigravity (Gemini CLI).
+> Lifecycle audit scripts use Bun (`.ts`) for cross-platform support.
 
 ---
 

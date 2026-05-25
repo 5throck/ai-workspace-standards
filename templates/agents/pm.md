@@ -1,5 +1,6 @@
 ﻿---
 name: pm
+formal_name: Project Manager (PM) Agent
 model: inherit
 color: yellow
 description: >

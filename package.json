@@ -1,7 +1,7 @@
 {
-  "name": "project-scripts",
+  "name": "ai-workspace-scripts",
   "version": "1.0.0",
-  "description": "Project utility scripts - TypeScript orchestration",
+  "description": "AI Workspace - Utility scripts for template maintenance and agent management",
   "scripts": {
     "verify-skills": "bun scripts/verify-skills.ts",
     "agent:create": "bun scripts/agent-create.ts",

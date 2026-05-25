@@ -29,8 +29,8 @@ echo "🚀 Scaffolding new project: $PROJECT_NAME"
 mkdir -p "$PROJECT_DIR"
 cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
-# ── 2. Remove _examples (reference-only - not part of a real project) ──────────
-rm -rf "$PROJECT_DIR/_examples"
+# ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
+rm -rf "$PROJECT_DIR/docs/_examples"
 
 # ── 3. Remove .gitkeep placeholders ────────────────────────────────────────────
 find "$PROJECT_DIR" -name ".gitkeep" -delete
@@ -92,4 +92,4 @@ echo "   from inside this directory, not the workspace root."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
-echo "  → $TEMPLATES_DIR/_examples/"
+echo "  → $TEMPLATES_DIR/docs/_examples/"
