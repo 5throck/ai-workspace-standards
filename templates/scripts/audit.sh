@@ -2,6 +2,11 @@
 # audit.sh - Documentation integrity check
 # Checks that required files and sections exist before a commit.
 # Exit code 0 = pass, non-zero = fail.
+
+# Force English locale for consistent error messages
+export LC_ALL=C
+export LANG=C
+
 set -euo pipefail
 
 errors=0

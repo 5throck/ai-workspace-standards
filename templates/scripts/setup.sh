@@ -20,6 +20,11 @@
 #   Unknown    (none of the above)   → stack-setup agent invocation required
 #
 # Usage: bash scripts/setup.sh [--skip-install] [--skip-license-check] [--skip-commit]
+
+# Force English locale for consistent error messages
+export LC_ALL=C
+export LANG=C
+
 set -euo pipefail
 
 SKIP_INSTALL=false
@@ -487,8 +492,7 @@ fi
 if [ "$SKIP_COMMIT" = false ]; then
   if git rev-parse --git-dir > /dev/null 2>&1; then
     git add -A 2>/dev/null
-    if git commit -m "chore: initial scaffold
-
+    if git commit -m "chore: initial scaffold"; then
       pass "Initial commit created"
     else
       warn "Nothing to commit (already committed?)"

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>"
+
+# Force English locale for consistent error messages
+export LC_ALL=C
+export LANG=C
+
 set -euo pipefail
 
 PROJECT_NAME="${1:-}"

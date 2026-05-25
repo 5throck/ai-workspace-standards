@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # dev-sync.sh - Full pipeline: memlog → sync-md → changelog → audit → commit → PR
 # Usage: bash scripts/dev-sync.sh "feat: description"
+
+# Force English locale for consistent error messages
+export LC_ALL=C
+export LANG=C
+
 set -euo pipefail
 
 MSG="${1:-chore: update}"
