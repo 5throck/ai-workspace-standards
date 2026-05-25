@@ -445,7 +445,6 @@ if (-not $SkipCommit) {
     $gitDir = git rev-parse --git-dir 2>$null
     if ($LASTEXITCODE -eq 0) {
         git add -A 2>$null
-        $msg = "chore: initial scaffold`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
         git commit -m $msg 2>$null
         if ($LASTEXITCODE -eq 0) { Pass "Initial commit created" } else { Warn "Nothing to commit (already committed?)" }
     } else { Warn "Not inside a git repository ??skipping initial commit" }

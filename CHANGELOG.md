@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-25]**: feat\(lifecycle\)\:\ add\ execution\ location\ output\,\ simplify\ templates
+
+### Added
 - **[2026-05-25]**: feat: add agent and skill lifecycle management system with Bun/TypeScript audit scripts
   - **[2026-05-25]**: `scripts/agent-lifecycle-audit.ts` - validates agent frontmatter, AGENTS.md consistency, deprecated agent references
   - **[2026-05-25]**: `scripts/skill-lifecycle-audit.ts` - validates skill frontmatter, owner references, deprecated skills, dependencies

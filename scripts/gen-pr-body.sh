@@ -60,9 +60,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 
 ## Notes
 [Breaking changes, deployment steps, or reviewer guidance. Write 'None' if not applicable.]
-
----
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+---"
 
   # Write prompt to temp file to avoid shell quoting issues
   TMPFILE=$(mktemp)
@@ -97,5 +95,4 @@ $FILE_LIST
 None
 
 ---
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF

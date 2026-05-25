@@ -237,6 +237,7 @@ function auditAgents(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Agent Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
     console.log(`${colors.dim}Agents found: ${agentFiles.length}${colors.reset}`);
     console.log('');
   }
