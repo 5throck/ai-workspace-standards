@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **[2026-05-25]**: feat: enhance memory log format - commit-msg hook now captures rich context (summary, file count, decisions, issues) from commit body instead of generic placeholders
 - **[2026-05-25]**: fix: resolve param syntax bug in powershell scripts
 
 ### Added

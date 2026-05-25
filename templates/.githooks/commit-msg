@@ -5,6 +5,7 @@
 
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE" | sed 's/[[:space:]]*$//')
+COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '1,/^$/d' -e '/^#/d' | sed 's/^[[:space:]]*//' | head -5)
 
 # Skip empty, Merge, WIP, fixup!, squash! commits
 [ -z "$COMMIT_MSG" ] && exit 0
@@ -14,14 +15,67 @@ TODAY=$(date +%Y-%m-%d)
 mkdir -p memory
 
 STAGED=$(git diff --cached --name-only)
+STAGED_COUNT=$(echo "$STAGED" | grep -v "^memory/" | wc -l)
+
+# ── Extract decisions from commit body (look for "Decided:", "Choice:", etc.) ─
+DECISIONS=""
+if echo "$COMMIT_BODY" | grep -qiE "decided:|choice:|selected:|chose:|why:|because"; then
+  DECISIONS=$(echo "$COMMIT_BODY" | grep -iE "decided:|choice:|selected:|chose:|why:|because" | head -2 | sed 's/^[^:]*: //')
+fi
+
+# ── Extract issues/blockers from commit body ────────────────────────────────
+ISSUES=""
+if echo "$COMMIT_BODY" | grep -qiE "issue:|bug:|fix:|problem:|blocker:|error:|fail"; then
+  ISSUES=$(echo "$COMMIT_BODY" | grep -iE "issue:|bug:|fix:|problem:|blocker:|error:|fail" | head -2 | sed 's/^[^:]*: //')
+fi
+[ -z "$ISSUES" ] && ISSUES="None"
+
+# ── Build purpose from commit body (first non-empty line) ───────────────────
+if [ -n "$COMMIT_BODY" ]; then
+  # First meaningful line from body
+  PURPOSE=$(echo "$COMMIT_BODY" | head -1)
+else
+  # Fallback: derive from commit title
+  case "$COMMIT_MSG" in
+    feat:*)  PURPOSE="Feature implementation: ${COMMIT_MSG#feat: }" ;;
+    fix:*)   PURPOSE="Bug fix: ${COMMIT_MSG#fix: }" ;;
+    refactor:*) PURPOSE="Refactoring: ${COMMIT_MSG#refactor: }" ;;
+    docs:*)  PURPOSE="Documentation update: ${COMMIT_MSG#docs: }" ;;
+    test:*)  PURPOSE="Test improvement: ${COMMIT_MSG#test: }" ;;
+    chore:*) PURPOSE="Maintenance task: ${COMMIT_MSG#chore: }" ;;
+    *)       PURPOSE="${COMMIT_MSG}" ;;
+  esac
+fi
+
+# ── Build detailed file list with categories ───────────────────────────────
+FILE_LIST=$(echo "$STAGED" | grep -v "^memory/" | paste -sd ", " - || echo "No files")
 
 # ── Auto-append memory log (skip if dev-sync already wrote this entry) ────────
 if ! grep -qF "## $COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
-  FILE_LIST=$(echo "$STAGED" | grep -v "^memory/" | paste -sd ", " - || true)
   SEPARATOR=""
   [ -f "memory/$TODAY.md" ] && SEPARATOR=$'\n---\n\n'
-  printf "%s## %s\n- **Files**: %s\n- **Purpose**: (auto-logged by commit-msg)\n- **Decisions**: \n- **Issues**: None\n" \
-    "$SEPARATOR" "$COMMIT_MSG" "$FILE_LIST" >> "memory/$TODAY.md"
+
+  cat >> "memory/$TODAY.md" << EOF
+${SEPARATOR}## ${COMMIT_MSG}
+
+**Summary**: ${PURPOSE}
+
+**Files Changed** (${STAGED_COUNT} files): ${FILE_LIST}
+EOF
+
+  # Add Decisions section if we have content
+  if [ -n "$DECISIONS" ]; then
+    echo "" >> "memory/$TODAY.md"
+    echo "**Decisions**:" >> "memory/$TODAY.md"
+    echo "$DECISIONS" | while read -r line; do
+      [ -n "$line" ] && echo "- $line" >> "memory/$TODAY.md"
+    done
+  fi
+
+  # Add Issues section
+  echo "" >> "memory/$TODAY.md"
+  echo "**Issues**: ${ISSUES}" >> "memory/$TODAY.md"
+  echo "" >> "memory/$TODAY.md"
 fi
 
 # ── Auto-update MEMORY.md index ───────────────────────────────────────────────
