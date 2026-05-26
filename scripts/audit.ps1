@@ -38,6 +38,50 @@ if ((Test-Path "CONSTITUTION.md") -and (Test-Path "docs\constitution")) {
     }
 }
 
+# 2.6. Web URL link validation (workspace root only)
+if ((Test-Path "AGENTS.md") -or (Test-Path "templates\common\docs\context.md")) {
+    $linkErrors = 0
+
+    # Check if Invoke-WebRequest is available
+    if (Get-Command Invoke-WebRequest -ErrorAction SilentlyContinue) {
+        # Check AGENTS.md web URLs
+        if (Test-Path "AGENTS.md") {
+            $webUrls = Select-String -Path "AGENTS.md" -Pattern "https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#[\w-]+" -AllMatches
+            foreach ($match in $webUrls.Matches) {
+                $url = $match.Value
+                try {
+                    $null = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -TimeoutSec 5
+                } catch {
+                    Fail "Dead link detected in AGENTS.md: $url"
+                    $linkErrors++
+                }
+            }
+        }
+
+        # Check templates/common/docs/context.md web URLs
+        if (Test-Path "templates\common\docs\context.md") {
+            $webUrls = Select-String -Path "templates\common\docs\context.md" -Pattern "https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#[\w-]+" -AllMatches
+            foreach ($match in $webUrls.Matches) {
+                $url = $match.Value
+                try {
+                    $null = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -TimeoutSec 5
+                } catch {
+                    Fail "Dead link detected in templates\common\docs\context.md: $url"
+                    $linkErrors++
+                }
+            }
+        }
+
+        if ($linkErrors -eq 0) {
+            Pass "Web URL validation: all external links resolve"
+        } else {
+            $errors += $linkErrors
+        }
+    } else {
+        Warn "Invoke-WebRequest not available - skipping web URL validation"
+    }
+}
+
 # 3. CHANGELOG.md must have [Unreleased] section
 if (Test-Path "CHANGELOG.md") {
     $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
@@ -106,6 +150,41 @@ if (Get-Command bun -ErrorAction SilentlyContinue) {
     }
 } else {
     Warn "Bun not installed - skipping lifecycle audits"
+}
+
+# --- Agent/Skill State Synchronization Check ---
+if (Test-Path "AGENTS.md" -and (Test-Path "agents")) {
+    $syncErrors = 0
+    Get-ChildItem "agents\*.md" -ErrorAction SilentlyContinue | ForEach-Object {
+        $agentFile = $_
+        $agentName = $_.BaseName
+
+        # Extract status from agent file
+        $fileStatus = Select-String -Path $agentFile -Pattern "^status:" | ForEach-Object {
+            $_.Line.Split(":")[1].Trim()
+        }
+
+        if ($fileStatus) {
+            # Check AGENTS.md for matching status
+            $agentsMdLine = Select-String -Path "AGENTS.md" -Pattern "\`${agentName}\.md\`" -Context 0,2
+            if ($agentsMdLine) {
+                $agentsMdStatus = $agentsMdLine.Context.PostContext | Select-String -Pattern "status: \w+" | ForEach-Object {
+                    $_.Matches[0].Value.Split(":")[1].Trim()
+                }
+
+                if ($agentsMdStatus -and $fileStatus -ne $agentsMdStatus) {
+                    Fail "Agent state mismatch: $agentName (file=$fileStatus, AGENTS.md=$agentsMdStatus)"
+                    $syncErrors++
+                }
+            }
+        }
+    }
+
+    if ($syncErrors -eq 0) {
+        Pass "Agent state synchronization: all agents in sync"
+    } else {
+        $errors += $syncErrors
+    }
 }
 
 Write-Host ""
