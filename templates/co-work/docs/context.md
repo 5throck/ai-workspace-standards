@@ -31,6 +31,7 @@
 
 ## Skills
 
+<!-- DYNAMIC_SKILLS_START -->
 | Skill path | Trigger condition |
 |------------|-------------------|
 | `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research, evidence gathering |
@@ -39,6 +40,7 @@
 | `skills/agent-lifecycle-manager/SKILL.md` | PM managing agent lifecycle and validation |
 | `skills/skill-lifecycle-manager/SKILL.md` | PM managing skill lifecycle and validation |
 | `.claude/skills/api-documentation/SKILL.md` | Documenting REST APIs, GraphQL interfaces, SDKs, and developer-facing technical specifications |
+<!-- DYNAMIC_SKILLS_END -->
 
 ## Multi-Agent Collaboration Workflow
 

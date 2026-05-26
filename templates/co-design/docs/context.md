@@ -32,6 +32,7 @@
 
 ## Skills
 
+<!-- DYNAMIC_SKILLS_START -->
 | Skill path | Trigger condition |
 |------------|-------------------|
 | `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, creating visual designs, UI components, or design specifications |
@@ -39,6 +40,7 @@
 | `skills/skill-lifecycle-manager/SKILL.md` | Design PM managing skill lifecycle after agent configuration changes |
 | `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
 | `.claude/skills/service-design/SKILL.md` | Designing end-to-end service experiences, customer journeys, and operational processes |
+<!-- DYNAMIC_SKILLS_END -->
 
 ## Multi-Agent Design Workflow
 

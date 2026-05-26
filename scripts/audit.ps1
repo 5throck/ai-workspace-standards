@@ -63,6 +63,22 @@ if (Test-Path "docs\context.md") {
     Warn "docs/context.md not found - skipping project-level checks (workspace root)"
 }
 
+# --- Lifecycle Audits ---
+if (Get-Command bun -ErrorAction SilentlyContinue) {
+    if (Test-Path "scripts\agent-lifecycle-audit.ts") {
+        $agentOutput = bun scripts\agent-lifecycle-audit.ts --json 2>$null
+        if ($agentOutput -match '"errors":\s*\[\]') { Pass "Agent audit: all agents healthy" }
+        else { Fail "Agent audit detected issues (run 'bun scripts\agent-lifecycle-audit.ts' to see details)" }
+    }
+    if (Test-Path "scripts\skill-lifecycle-audit.ts") {
+        $skillOutput = bun scripts\skill-lifecycle-audit.ts --json 2>$null
+        if ($skillOutput -match '"errors":\s*\[\]') { Pass "Skill audit: all skills healthy" }
+        else { Fail "Skill audit detected issues (run 'bun scripts\skill-lifecycle-audit.ts' to see details)" }
+    }
+} else {
+    Warn "Bun not installed - skipping lifecycle audits"
+}
+
 Write-Host ""
 if ($errors -eq 0) { Write-Host "✅ All checks passed." -ForegroundColor Green; exit 0 }
 else               { Write-Host "❌ $errors check(s) failed. Fix before committing." -ForegroundColor Red; exit 1 }

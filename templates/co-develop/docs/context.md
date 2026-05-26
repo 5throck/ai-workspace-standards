@@ -51,6 +51,7 @@
 | Execution | `agents/test-runner.md` | Test runner -verifies acceptance criteria and runs QA gate |
 
 ## Skills
+<!-- DYNAMIC_SKILLS_START -->
 | Skill path | Trigger condition |
 |------------|-------------------|
 | `skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
@@ -59,6 +60,7 @@
 | `.claude/skills/code-review/SKILL.md` | Conducting thorough code reviews focusing on correctness, maintainability, security, and best practices |
 | `.claude/skills/test-driven-development/SKILL.md` | Implementing software using TDD methodology with red-green-refactor cycle |
 | `.claude/skills/refactoring/SKILL.md` | Improving code structure and design while preserving behavior using systematic refactoring techniques |
+<!-- DYNAMIC_SKILLS_END -->
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
