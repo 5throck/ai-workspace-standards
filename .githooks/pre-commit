@@ -46,6 +46,36 @@ if echo "$STAGED" | grep -qE "^\.env$|^\.env\.[^s]|/\.env$|/\.env\.[^s]"; then
   exit 1
 fi
 
+# ── 2-A. Enforce UTF-8 on all staged Markdown files ───────────────────────────
+if [ -n "$MD_STAGED" ]; then
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      ENCODING=$(file --mime-encoding "$file" | cut -d: -f2 | tr -d ' ')
+      if [[ "$ENCODING" != "utf-8" && "$ENCODING" != "us-ascii" ]]; then
+        echo -e "\033[31m[FAIL]\033[0m Invalid encoding '$ENCODING' in $file"
+        echo "       CONSTITUTION.md mandates all text files must be UTF-8 encoded."
+        exit 1
+      fi
+    fi
+  done <<< "$MD_STAGED"
+fi
+
+# ── 2-B. Enforce English Only in PR Artifacts (CHANGELOG, memory) ─────────────
+DOCS_TO_CHECK=$(echo "$STAGED" | grep -E "^memory/.*\.md$|^CHANGELOG.md$" || true)
+if [ -n "$DOCS_TO_CHECK" ]; then
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      if ! perl -CSD -ne 'exit 1 if /\p{Hangul}/' "$file"; then
+        echo -e "\033[31m[FAIL]\033[0m Non-English characters (Korean) detected in $file"
+        echo "       CONSTITUTION.md mandates all PR artifacts must be strictly English."
+        exit 1
+      fi
+    fi
+  done <<< "$DOCS_TO_CHECK"
+fi
+
 # ── 3. Documentation audit ────────────────────────────────────────────────────
 # Skip documentation audit for memory-only commits (workflow optimization)
 if [ "$MEMORY_ONLY" = false ]; then

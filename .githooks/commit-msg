@@ -11,6 +11,13 @@ COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '1,/^$/d' -e '/^#/d' | sed 
 [ -z "$COMMIT_MSG" ] && exit 0
 echo "$COMMIT_MSG" | grep -qE "^Merge|^WIP|^fixup!|^squash!" && exit 0
 
+# ── Enforce English Only ──────────────────────────────────────────────────────
+if ! perl -CSD -ne 'exit 1 if /\p{Hangul}/' "$COMMIT_MSG_FILE"; then
+  echo -e "\033[31m[FAIL]\033[0m Non-English characters (Korean) detected in commit message."
+  echo "       CONSTITUTION.md mandates all commit messages must be in English."
+  exit 1
+fi
+
 TODAY=$(date +%Y-%m-%d)
 mkdir -p memory
 
