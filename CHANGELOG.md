@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-27]**: chore\:\ update
 
 ### Added
+- **[2026-05-27]**: chore\:\ update
+
+### Added
 - **[2026-05-27]**: `templates/common/docs/context.md` — new immutable common context file (project identity, architecture, key files, documentation standards) (#95)
 - **[2026-05-27]**: `templates/co-develop/docs/co-develop.context.md` — new variant config file (tech stack, agents, skills, scripts, workflow) with lifecycle status columns (#95)
 - **[2026-05-27]**: `templates/co-design/docs/co-design.context.md` — new variant config file for design projects (#95)
