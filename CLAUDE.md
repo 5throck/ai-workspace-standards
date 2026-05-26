@@ -87,7 +87,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
 - **High-tier (Design/Planning)** ➔ `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
 - **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5-20251001`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
+- **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ### 5. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
