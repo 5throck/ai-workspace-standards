@@ -153,6 +153,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
 | **Skill Lifecycle Manager** | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
+| **Multi-Agent Meeting** | `.claude/commands/meeting.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue; use `/meeting "topic" --agents X,Y,Z` |
 
 *(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 

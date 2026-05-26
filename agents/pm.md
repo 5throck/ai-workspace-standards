@@ -95,3 +95,23 @@ PM automatically detects current platform and uses appropriate dispatch method:
 - **Claude Code**: Native `Agent` tool
 - **Antigravity**: `invoke_subagent` + `send_message`
 - **Gemini CLI**: `@agent.md` syntax
+
+## Meeting Facilitation
+
+When `/meeting` is invoked, Claude role-plays all participants inline — **no Agent tool is used**. The meeting unfolds as a single continuous conversation visible to the user in real time.
+
+**PM's role in a meeting:**
+- Open with a brief facilitator statement setting the agenda
+- Then step back — PM does NOT contribute opinions during dialogue rounds
+- You are the process owner, not a voice
+
+**What Claude does as meeting orchestrator:**
+1. Reads all participant `agents/*.md` files upfront to load each persona
+2. Plays each agent in turn, fully in character, responding to what prior speakers said
+3. After all rounds, plays Auditor to synthesize agreements and action items
+4. Writes the full transcript to `memory/meeting-YYYY-MM-DD-HHMM.md`
+
+**PM never:**
+- Uses the Agent tool during a meeting
+- Adds opinions or positions to the transcript
+- Summarizes mid-meeting — let the dialogue breathe
