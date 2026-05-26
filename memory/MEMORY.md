@@ -34,3 +34,4 @@
 | [2026-05-24](2026-05-24-multi-agent-meeting-summary.md) | meeting: 3-round multi-agent analysis identifies 96 improvement opportunities |
 | [2026-05-25](2026-05-25.md) | feat: align template with hybrid scripting standards |
 | [2026-05-26](2026-05-26.md) | feat: implement agent lifecycle management and sync template agent references |
+| [2026-05-27](2026-05-27.md) | docs: update new-project command to support PowerShell and Bash environments |
