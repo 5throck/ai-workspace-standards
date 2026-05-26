@@ -11,15 +11,15 @@ mkdir -p memory
 GIT_STATUS=$(git status --short 2>/dev/null || true)
 FILE_LIST=""
 if [ -n "$GIT_STATUS" ]; then
-  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | paste -sd ", " -)
+  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | sed 's/^/- `/' | sed 's/$/' — modified"/' )
 fi
 
 SEPARATOR=""
 [ -f "memory/$DATE.md" ] && SEPARATOR=$'\n---\n\n'
 
-# Safe printf: keep format string static, pass values as arguments
-printf '%s## %s\n- **Files**: %s\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n' \
-  "$SEPARATOR" "$MSG" "$FILE_LIST" >> "memory/$DATE.md"
+# Mandatory 4-section format (CONSTITUTION.md §2 / docs/context.md § Documentation Standards)
+printf '%s## Session Summary\n%s\n\n## Changes\n%s\n\n## Decisions\n- None\n\n## Open Issues\n- None\n' \
+  "$SEPARATOR" "$MSG" "${FILE_LIST:-"- N/A"}" >> "memory/$DATE.md"
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"
@@ -33,6 +33,18 @@ if [ -f "CHANGELOG.md" ]; then
       if (/^## \[Unreleased\]/) { $_ .= "\n### Added\n- **[$d]**: \Q$m\E\n" }
     ' "$MSG" "$TODAY" CHANGELOG.md
     echo "📝 Auto-added changelog entry: $MSG"
+  fi
+fi
+
+# ── 3.5. Warn if [Unreleased] section has no bullet items ────────────────────
+if [ -f "CHANGELOG.md" ]; then
+  UNRELEASED_CONTENT=$(awk '/^## \[Unreleased\]/{f=1;next} f && /^## \[/{exit} f{print}' CHANGELOG.md)
+  if ! echo "$UNRELEASED_CONTENT" | grep -qE '^\s*-\s+'; then
+    echo ""
+    echo "⚠️  CHANGELOG.md [Unreleased] section has no entries."
+    echo "   Consider running: /changelog \"type: description\" before syncing."
+    echo "   (continuing anyway — use this warning to keep your changelog current)"
+    echo ""
   fi
 fi
 

@@ -220,6 +220,40 @@ bash scripts/dev-sync.sh "feat: description"   # Windows: .\scripts\dev-sync.ps1
 - **`CHANGELOG.md`**: For end-users and release notes. Record *what* changed (features, fixes) using structured categories. **(Must be written in English)**
 - **`memory/` logs**: For developers and AI agents. Record *how* and *why* changes were made, including architectural decisions and debugging context. **(Must be written in English)**
 
+### Documentation Standards
+
+#### Session Log Format (`memory/YYYY-MM-DD.md`)
+Every session log entry MUST include the following four sections:
+
+```markdown
+## Session Summary
+<!-- One paragraph: what was accomplished this session -->
+
+## Changes
+<!-- File-level list of what was created, modified, or deleted -->
+- `path/to/file` — created: reason
+- `path/to/file` — modified: what changed and why
+- `path/to/file` — deleted: reason
+
+## Decisions
+<!-- Architectural or design choices made, with rationale -->
+- Decision: why this approach was chosen over alternatives
+
+## Open Issues
+<!-- Unresolved problems, blockers, or follow-up items -->
+- Issue: symptom → root cause → resolution (or "pending")
+```
+
+> All AI tools (Claude Code, Claude App, Antigravity, Antigravity CLI) MUST produce session logs with these exact four section headings for cross-tool consistency.
+
+#### CHANGELOG Entry Format (`CHANGELOG.md`)
+Every entry under `[Unreleased]` MUST include a PR reference:
+```markdown
+## [Unreleased]
+### Added
+- Short description of change (#PR-number)
+```
+
 ### Claude Code Slash Commands
 Each `.claude/commands/<name>.md` file is auto-registered as a Skill in Claude Code:
 | Command | Skill name | Purpose |

@@ -125,3 +125,39 @@ This project uses a **Design PM-first multi-agent architecture**. All design wor
 
 - All **conversational** replies to the user → **Korean** by default.
 - All design documentation, file names, commit messages, PR titles, **PR bodies**, branch names, **CHANGELOG.md**, and **memory/` logs → **English only**.
+
+---
+
+## Documentation Standards
+
+### Session Log Format (`memory/YYYY-MM-DD.md`)
+Every session log entry MUST include the following four sections:
+
+```markdown
+## Session Summary
+<!-- One paragraph: what was accomplished this session -->
+
+## Changes
+<!-- File-level list of what was created, modified, or deleted -->
+- `path/to/file` — created: reason
+- `path/to/file` — modified: what changed and why
+- `path/to/file` — deleted: reason
+
+## Decisions
+<!-- Architectural or design choices made, with rationale -->
+- Decision: why this approach was chosen over alternatives
+
+## Open Issues
+<!-- Unresolved problems, blockers, or follow-up items -->
+- Issue: symptom → root cause → resolution (or "pending")
+```
+
+> All AI tools (Claude Code, Claude App, Antigravity, Antigravity CLI) MUST produce session logs with these exact four section headings for cross-tool consistency.
+
+### CHANGELOG Entry Format (`CHANGELOG.md`)
+Every entry under `[Unreleased]` MUST include a PR reference:
+```markdown
+## [Unreleased]
+### Added
+- Short description of change (#PR-number)
+```
