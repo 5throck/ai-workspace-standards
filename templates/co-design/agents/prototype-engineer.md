@@ -2,9 +2,9 @@
 name: prototype-engineer
 formal_name: Interactive Prototyping Specialist
 tier:
-  claude: medium
-  antigravity: medium
-  gemini-cli: medium
+  claude: medium    # claude-sonnet-4.6
+  antigravity: medium # gemini-3.5-flash
+  gemini-cli: medium  # gemini-3.5-flash
 model: inherit
 color: orange
 description: >

@@ -2,9 +2,9 @@
 name: typography-expert
 formal_name: Typography Expert & Type System Designer
 tier:
-  claude: medium
-  antigravity: medium
-  gemini-cli: medium
+  claude: medium    # claude-sonnet-4.6
+  antigravity: medium # gemini-3.5-flash
+  gemini-cli: medium  # gemini-3.5-flash
 model: inherit
 color: violet
 description: >

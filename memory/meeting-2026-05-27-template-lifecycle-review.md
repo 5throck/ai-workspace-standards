@@ -1,9 +1,9 @@
 # Meeting Transcript
 **Date**: 2026-05-27
-**Topic**: (1) Template 폴더 변경사항 점검 및 신규 프로젝트 생성 체계 검토 / (2) 에이전트·스킬 생애주기 관리 체계 점검
+**Topic**: (1) Template directory change review and new project scaffolding system audit / (2) Agent and skill lifecycle management system review
 **Participants**: pm, architect, scaffolding-expert, automation-engineer, security-expert, docs-writer, auditor
 **Rounds**: 2
-**Language**: Korean
+**Language**: Korean (transcript translated to English per documentation standards)
 **Status**: Complete
 
 ---
@@ -12,29 +12,29 @@
 
 ### Round 1
 
-**[Architect]**: 두 개의 skills 레이어 불일치 지적. `templates/common/skills/`에 lifecycle manager 스킬 존재하나 `C:/git/skills/`에 없음. `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts` 워크스페이스 루트 누락. variant 파라미터가 command를 통해 제대로 전달되는지 확인 요청.
+**Architect**: Identified a skills layer mismatch as the core structural problem. `templates/common/skills/` contains the lifecycle manager skill, but `C:/git/skills/` does not. `agent-lifecycle-audit.ts` and `skill-lifecycle-audit.ts` are missing from the workspace root. Requested verification that the variant parameter is correctly passed through commands.
 
-**[Scaffolding-Expert]**: `$ARGUMENTS` 전체가 PROJECT_NAME으로 파싱되는 버그 확인. `--variant` 플래그 command 경유 불가. AGENTS.md를 common으로 올릴 경우 audit false positive 위험 지적.
+**Scaffolding-Expert**: Confirmed a bug where `$ARGUMENTS` is parsed as a single element into PROJECT_NAME. The `--variant` flag cannot be passed through commands. Flagged the risk of audit false positives if AGENTS.md is elevated to common.
 
-**[Automation-Engineer]**: `"$@"` 배열에 단일 원소로 파싱되는 쉘 동작 확인. 해결책 A(quote 제거)와 B(command에서 분리 파싱) 제시. `bun` 런타임 의존성 문제 지적.
+**Automation-Engineer**: Confirmed shell behavior where `"$@"` is parsed as a single array element. Proposed two solutions — Solution A (remove quotes) and Solution B (separate parsing in command). Flagged bun runtime dependency as a concern.
 
-**[Security-Expert]**: lifecycle audit 스크립트가 어떤 hook에도 연결되지 않음 확인. path traversal 위험 지적. `co-develop/.claude/skills/`의 중복 파일이 보안 정책 override 벡터 가능성 지적.
+**Security-Expert**: Confirmed that lifecycle audit scripts are not connected to any hook. Flagged a path traversal risk. Noted that duplicate files in `co-develop/.claude/skills/` could serve as a security policy override vector.
 
-**[Docs-Writer]**: `co-develop/.claude/skills/skill-lifecycle-manager`와 `common/skills/` 중복으로 common 레이어 설계 원칙 위반. system-reminder에 표시되지만 실제 없는 스킬로 인한 운영 장애 가능성 지적.
+**Docs-Writer**: The duplication between `co-develop/.claude/skills/skill-lifecycle-manager` and `common/skills/` violates the common layer design principle. Flagged the operational risk of skills appearing in system-reminder but not existing on disk.
 
-**[Auditor]**: audit.sh 커버리지 갭 정리 — skills registry cross-check, template 동기화, 중복 파일, hook 연결 상태 모두 현재 검출 불가. Architect에게 lifecycle manager 누락이 의도적 설계인지 질문.
+**Auditor**: Summarized audit.sh coverage gaps — skills registry cross-check, template sync, duplicate files, and hook connectivity are all currently undetectable. Asked Architect whether the lifecycle manager omission was an intentional design decision.
 
 ### Round 2
 
-**[Architect]**: 누락이 버그임 확인. Skills single source of truth = `templates/common/skills/` 제안. audit.sh 확장 제안. command 인자 파싱 개선 제안.
+**Architect**: Confirmed the omission is a bug. Proposed `templates/common/skills/` as the single source of truth for skills. Proposed extending audit.sh. Proposed improving command argument parsing.
 
-**[Scaffolding-Expert]**: 신규 프로젝트 생성 시 `common/skills/` → `.claude/skills/` 복사 경로 확인. 워크스페이스 루트용 `sync-workspace-skills.sh` 스크립트 필요성 제안.
+**Scaffolding-Expert**: Confirmed the copy path `common/skills/` → `.claude/skills/` during new project creation. Proposed a `sync-workspace-skills.sh` script for workspace root synchronization.
 
-**[Automation-Engineer]**: audit.sh 체크 bash 구현 제시. skills registry 독립 파일(REGISTRY.json) 도입 제안. PROJECT_NAME validation regex 제시.
+**Automation-Engineer**: Presented bash implementation for audit.sh checks. Proposed introducing an independent skills registry file (REGISTRY.json). Presented a PROJECT_NAME validation regex.
 
-**[Security-Expert]**: validation 패턴 승인 + 길이 제한 추가. co-develop 중복 파일 제거 권장. bun 환경 보장 선행 조건 강조.
+**Security-Expert**: Approved the validation pattern and added a length limit. Recommended removing duplicate files from co-develop. Emphasized bun environment availability as a prerequisite.
 
-**[Docs-Writer]**: lifecycle management 사용 안내 문서 부재 지적. AGENTS.md에 "Lifecycle Management" 섹션 추가 제안.
+**Docs-Writer**: Flagged the absence of lifecycle management usage documentation. Proposed adding a "Lifecycle Management" section to AGENTS.md.
 
 ---
 
@@ -42,18 +42,18 @@
 
 | # | Owner | Deliverable | Phase |
 |---|-------|-------------|-------|
-| A-01 | Automation-Engineer | `C:/git/skills/`에 lifecycle manager 스킬 복사 + co-develop 중복 제거 | 즉시 |
-| A-02 | Automation-Engineer | new-project.sh/.ps1 PROJECT_NAME validation 추가 | 즉시 |
-| A-03 | Automation-Engineer | audit.sh/.ps1 skills registry cross-check 추가 | A-01 완료 후 |
-| A-04 | Docs-Writer | AGENTS.md "Lifecycle Management" 섹션 추가 | A-01과 병행 |
-| A-05 | Architect + PM | Skills registry 관리 방법 결정 후 설계 지시 | A-03 착수 전 |
+| A-01 | Automation-Engineer | Copy lifecycle manager skill to `C:/git/skills/` and remove co-develop duplicate | Immediate |
+| A-02 | Automation-Engineer | Add PROJECT_NAME validation to new-project.sh/.ps1 | Immediate |
+| A-03 | Automation-Engineer | Add skills registry cross-check to audit.sh/.ps1 | After A-01 |
+| A-04 | Docs-Writer | Add "Lifecycle Management" section to AGENTS.md | Parallel with A-01 |
+| A-05 | Architect + PM | Decide skills registry management approach before A-03 design | Before A-03 |
 
 ## Acceptance Criteria
 
 | # | Criterion | Verification |
 |---|-----------|--------------|
-| C-01 | `C:/git/skills/agent-lifecycle-manager` 및 `skill-lifecycle-manager` 존재 | `ls C:/git/skills/` |
-| C-02 | `co-develop/.claude/skills/skill-lifecycle-manager` 제거됨 | 파일 부재 확인 |
-| C-03 | PROJECT_NAME에 특수문자 입력 시 new-project.sh가 exit 1 반환 | `bash scripts/new-project.sh "test;rm -rf"` |
-| C-04 | audit.sh가 AGENTS.md 등록 스킬 부재 시 FAIL 출력 | 임의 스킬 삭제 후 audit 실행 |
-| C-05 | AGENTS.md에 Lifecycle Management 섹션 존재 | grep으로 확인 |
+| C-01 | `C:/git/skills/agent-lifecycle-manager` and `skill-lifecycle-manager` exist | `ls C:/git/skills/` |
+| C-02 | `co-develop/.claude/skills/skill-lifecycle-manager` removed | Confirm file absence |
+| C-03 | new-project.sh exits 1 on special characters in PROJECT_NAME | `bash scripts/new-project.sh "test;rm -rf"` |
+| C-04 | audit.sh outputs FAIL when a skill registered in AGENTS.md is missing on disk | Delete a skill, run audit |
+| C-05 | "Lifecycle Management" section exists in AGENTS.md | grep check |

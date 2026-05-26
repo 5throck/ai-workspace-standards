@@ -175,22 +175,24 @@ Print the closing header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is a 2-3 word kebab-case summary of the topic:
+Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is a 2-3 word kebab-case summary of the topic.
+
+> **Language rule**: The saved transcript file MUST always be written in **English**, regardless of the dialogue language used during the meeting. If the meeting was conducted in Korean, translate all dialogue, action items, and acceptance criteria to English before saving. This follows the workspace documentation standard (CONSTITUTION.md §2).
 
 ```markdown
 # Meeting Transcript
 **Date**: YYYY-MM-DD
-**Topic**: [TOPIC]
+**Topic**: [TOPIC in English]
 **Participants**: [list]
 **Rounds**: [N]
-**Language**: [Korean | English]
+**Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
 ---
 
 ## Transcript
 
-[Full dialogue — each turn in order]
+[Full dialogue in English — each turn in order]
 
 ---
 
@@ -229,12 +231,16 @@ If `--tasks` was not passed, instead print:
 액션 아이템을 태스크로 변환하려면 /meeting ... --tasks 옵션을 사용하세요.
 ```
 
-After saving the transcript (regardless of `--tasks`), register the meeting in MEMORY.md by running:
-```bash
-bash scripts/sync-md.sh "YYYY-MM-DD" "[TOPIC]" --meeting
-# PowerShell:
-# .\scripts\sync-md.ps1 -Date "YYYY-MM-DD" -Summary "[TOPIC]" -Meeting
-```
+After saving the transcript (regardless of `--tasks`), register the meeting in MEMORY.md — detect OS and run the appropriate script:
+
+- **Bash (Git Bash / WSL / macOS / Linux):**
+  ```bash
+  bash scripts/sync-md.sh "YYYY-MM-DD" "[TOPIC]" --meeting
+  ```
+- **Windows (PowerShell native):**
+  ```powershell
+  .\scripts\sync-md.ps1 -Date "YYYY-MM-DD" -Summary "[TOPIC]" -Meeting
+  ```
 
 ---
 

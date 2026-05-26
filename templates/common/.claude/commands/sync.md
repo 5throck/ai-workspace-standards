@@ -2,17 +2,25 @@ Run the full project sync pipeline.
 
 Arguments: $ARGUMENTS
 
-Execute the following bash command exactly as written:
+Detect the OS and run the appropriate script:
 
+**Windows (PowerShell native) — no bash available:**
+```powershell
+.\scripts\dev-sync.ps1 "$ARGUMENTS"
+```
+
+**Bash (Git Bash / WSL / macOS / Linux):**
 ```bash
 bash scripts/dev-sync.sh "$ARGUMENTS"
 ```
 
+To detect: check if `bash` is available by running `bash --version`. If the command fails or the environment is PowerShell-only, use the `.ps1` variant; otherwise use the `.sh` variant.
+
 The pipeline will:
 1. Append a session entry to `memory/YYYY-MM-DD.md`
-2. Update `memory/MEMORY.md` index via `sync-md.sh`
+2. Update `memory/MEMORY.md` index via `sync-md.sh` / `sync-md.ps1`
 3. Auto-add `$ARGUMENTS` to `CHANGELOG.md [Unreleased]` if the section has no entries yet
-4. Run `audit.sh` - must exit 0 before proceeding
+4. Run `audit.sh` / `audit.ps1` - must exit 0 before proceeding
 5. Create a new PR branch, commit all staged changes, push, and open a GitHub PR
 
 If audit fails, fix the reported issue before re-running `/sync`.

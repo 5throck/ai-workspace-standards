@@ -2,9 +2,9 @@
 name: ms365-expert
 formal_name: Microsoft 365 Collaboration Expert
 tier:
-  claude: low
-  antigravity: low
-  gemini-cli: low
+  claude: low       # claude-haiku-4-5
+  antigravity: low    # gemini-3.5-flash
+  gemini-cli: low     # gemini-3.5-flash
 model: inherit
 color: blue
 description: >
