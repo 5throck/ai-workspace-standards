@@ -28,6 +28,61 @@ else
   ((errors++)) || true
 fi
 
+# 2.5. Constitution section files must exist and be non-empty (workspace root only)
+if [ -f "CONSTITUTION.md" ] && [ -d "docs/constitution" ]; then
+  for ref in $(grep -oP '(?<=docs/constitution/)[\w.-]+\.md' CONSTITUTION.md 2>/dev/null || true); do
+    if [ -s "docs/constitution/$ref" ]; then
+      green "constitution section: $ref"
+    else
+      red "constitution section missing or empty: docs/constitution/$ref"
+      ((errors++)) || true
+    fi
+  done
+fi
+
+# 2.6. Web URL link validation (workspace root only)
+if [ -f "AGENTS.md" ] || [ -f "templates/common/docs/context.md" ]; then
+  link_errors=0
+  base_url="https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md"
+
+  # Check if curl is available
+  if command -v curl &>/dev/null; then
+    # Check AGENTS.md web URLs
+    if [ -f "AGENTS.md" ]; then
+      web_urls=$(grep -oP 'https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#[\w-]+' AGENTS.md 2>/dev/null || true)
+      for url in $web_urls; do
+        if curl -fsI "$url" &>/dev/null; then
+          : # Link is valid
+        else
+          red "Dead link detected in AGENTS.md: $url"
+          ((link_errors++)) || true
+        fi
+      done
+    fi
+
+    # Check templates/common/docs/context.md web URLs
+    if [ -f "templates/common/docs/context.md" ]; then
+      web_urls=$(grep -oP 'https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#[\w-]+' templates/common/docs/context.md 2>/dev/null || true)
+      for url in $web_urls; do
+        if curl -fsI "$url" &>/dev/null; then
+          : # Link is valid
+        else
+          red "Dead link detected in templates/common/docs/context.md: $url"
+          ((link_errors++)) || true
+        fi
+      done
+    fi
+
+    if [ "$link_errors" -eq 0 ]; then
+      green "Web URL validation: all external links resolve"
+    else
+      ((errors += link_errors)) || true
+    fi
+  else
+    warn "curl not available - skipping web URL validation"
+  fi
+fi
+
 # ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
 
 # 3. CHANGELOG.md must have [Unreleased] section (all projects + workspace root)
@@ -135,6 +190,34 @@ if command -v bun &>/dev/null; then
     fi
 else
     warn "Bun not installed - skipping lifecycle audits"
+fi
+
+# --- Agent/Skill State Synchronization Check ---
+if [ -f "AGENTS.md" ] && [ -d "agents" ]; then
+  sync_errors=0
+  for agent_file in agents/*.md; do
+    [ -f "$agent_file" ] || continue
+    agent_name=$(basename "$agent_file" .md)
+
+    # Extract status from agent file
+    file_status=$(grep "^status:" "$agent_file" 2>/dev/null | cut -d: -f2 | xargs || echo "")
+
+    if [ -n "$file_status" ]; then
+      # Check AGENTS.md for matching status
+      agents_md_status=$(grep -A2 "^|.*\`${agent_name}\.md\`" AGENTS.md 2>/dev/null | grep -oP 'status: \K\w+' || echo "")
+
+      if [ -n "$agents_md_status" ] && [ "$file_status" != "$agents_md_status" ]; then
+        red "Agent state mismatch: $agent_name (file=$file_status, AGENTS.md=$agents_md_status)"
+        ((sync_errors++)) || true
+      fi
+    fi
+  done
+
+  if [ "$sync_errors" -eq 0 ]; then
+    green "Agent state synchronization: all agents in sync"
+  else
+    ((errors += sync_errors)) || true
+  fi
 fi
 
 echo ""

@@ -48,6 +48,20 @@ if [ -f "CHANGELOG.md" ]; then
   fi
 fi
 
+# ── 3.6. Warn about deprecated scripts (if SCRIPTS.md exists) ─────────────────
+if [ -f "SCRIPTS.md" ]; then
+  DEPRECATED_SCRIPTS=$(grep -E '^\|.*\|.*deprecated' SCRIPTS.md 2>/dev/null || true)
+  if [ -n "$DEPRECATED_SCRIPTS" ]; then
+    echo "⚠️  Deprecated scripts detected in SCRIPTS.md:"
+    echo "$DEPRECATED_SCRIPTS" | while IFS='|' read -r _ name _ _ _; do
+      script_name=$(echo "$name" | xargs)
+      echo "   - $script_name"
+    done
+    echo "   Consider removing or updating these scripts."
+    echo ""
+  fi
+fi
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 bash scripts/audit.sh
 

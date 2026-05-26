@@ -57,6 +57,8 @@
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
 
+> **Lifecycle procedures**: See `templates/common/docs/context.md § Lifecycle Management`
+
 ---
 
 ## Scripts

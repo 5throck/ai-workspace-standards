@@ -7,7 +7,7 @@
 
 At the start of every session, read these files **in order**:
 
-1. **[`docs/context.md`](docs/context.md)** — Immutable project identity (architecture, key files, documentation standards). Do NOT modify.
+1. **[`docs/context.md`](templates/common/docs/context.md)** — Immutable project identity (architecture, key files, documentation standards). Do NOT modify.
 2. **[`docs/co-develop.context.md`](docs/co-develop.context.md)** — Tech stack, agents, skills, scripts, workflow. All project-specific changes go here.
 3. **[`AGENTS.md`](AGENTS.md)** — Canonical agent index and dispatch protocols.
 

@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 > **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:\git\`).
-> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first.
+> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.
 > For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
 ---
@@ -124,4 +124,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-25*
+*Last Updated: 2026-05-27*
