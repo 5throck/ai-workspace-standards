@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-26]**: feat: implement agent lifecycle management and sync template agent references
+
+### Added
 - **[2026-05-25]**: feat\(lifecycle\)\:\ add\ execution\ location\ output\,\ simplify\ templates
 
 ### Added
@@ -369,6 +372,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-25*
+
 
 
 
