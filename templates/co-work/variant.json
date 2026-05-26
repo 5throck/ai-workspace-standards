@@ -1,6 +1,6 @@
 {
   "name": "co-work",
-  "description": "General collaboration workflow — flexible agent team for knowledge work, documentation, and cross-functional collaboration",
-  "status": "planned",
-  "version": "0.1.0"
+  "description": "Collaboration-focused variant for research, documentation, and project coordination. Includes 4 specialized collaboration agents.",
+  "status": "stable",
+  "version": "0.5.0"
 }
