@@ -116,48 +116,15 @@ C:\git\ (workspace root - this repo)
 ├── CHANGELOG.md             # Workspace-level change history
 ├── README.md                # This file
 ├── README_ko.md             # This file (Korean)
-├── .gitleaks.toml           # Secret scan config (extends upstream defaults)
 ├── memory/                  # Workspace-level memory logs
-├── templates/               # Versioned template variants (tagged as template-vX.Y.Z)
-│   ├── VERSION              # Current template semver (0.5.0)
-│   ├── CHANGELOG.md         # Template-level change history
-│   ├── common/              # Shared base files across all variants
-│   │   ├── .githooks/       # Standard git hooks
-│   │   ├── .github/         # CODEOWNERS, workflows, pull_request_template.md
-│   │   ├── scripts/         # Setup, sync, and audit scripts (bash + PowerShell)
-│   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
-│   ├── co-develop/          # ✅ Stable — full software development agent team
-│   │   ├── variant.json     # Variant metadata (name, status, version)
-│   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   │   ├── docs/            # context.md (10-section template)
-│   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog, etc.)
-│   │   │   └── skills/      # code-review, test-driven-development, refactoring
-│   │   └── .gemini/         # settings.json, commands/
-│   ├── co-design/           # ✅ Stable — UI/UX design workflow
-│   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
-│   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design
-│   └── co-work/             # ✅ Stable — general collaboration workflow
-│       ├── agents/          # pm.md, analyst.md, technical-writer.md, content-writer.md, project-coordinator.md, storyteller.md, ms365-expert.md
-│       └── .claude/skills/  # research-analysis, documentation-writing, api-documentation
-├── scripts/
-│   ├── audit.sh / .ps1                         # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .ps1                      # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── new-project.sh / .ps1                   # New project scaffolding (--variant, --version flags)
-│   ├── qa-gate.sh / .ps1                       # Independent QA gate execution script
-│   ├── sync-md.sh / .ps1                       # MEMORY.md index updater
-│   ├── validate-templates.ts                   # Template variant structural integrity validator
-│   └── *-lifecycle-audit.ts                    # Agent/Skill/README structural integrity checks
-├── .githooks/
-│   ├── commit-msg           # English-only PR artifact enforcement
-│   ├── post-checkout        # Background workspace config initialization
-│   ├── pre-commit           # Smart conditional audit & UTF-8 checks
-│   ├── pre-push             # Blocks direct push to main
-│   └── pre-rebase           # Gitleaks secret scanning before rebasing
-├── .claude/
-│   ├── settings.json        # {} (hooks disabled; enforced via pre-commit + dev-sync)
-│   └── commands/            # Custom slash commands (/sync, /changelog, /memlog, etc.)
-└── .gemini/
-    └── settings.json        # Gemini CLI project settings
+├── scripts/                 # Core automation and audit scripts
+├── .githooks/               # Git hooks for enforcing PR policies and rules
+├── .claude/ & .gemini/      # AI tools global settings and custom slash commands
+└── templates/               # Versioned AI project templates (co-develop, co-design, etc.)
+    ├── common/              # Shared scripts, hooks, and skills across all variants
+    ├── co-develop/          # ✅ Stable — full software development agent team
+    ├── co-design/           # ✅ Stable — UI/UX design workflow
+    └── co-work/             # ✅ Stable — general collaboration workflow
 ```
 
 Each sub-project lives in its own directory and git repository:

@@ -114,48 +114,15 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── CHANGELOG.md             # 워크스페이스 레벨 변경 이력
 ├── README.md                # 영문 README
 ├── README_ko.md             # 본 파일 (국문)
-├── .gitleaks.toml           # 시크릿 스캔 설정 (상위 기본값 확장)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
-├── templates/               # 버전 관리되는 template variant (template-vX.Y.Z 태그로 관리)
-│   ├── VERSION              # 현재 template semver (0.5.0)
-│   ├── CHANGELOG.md         # Template 레벨 변경 이력
-│   ├── common/              # 모든 variant에서 공유하는 공통 파일
-│   │   ├── .githooks/       # 표준 Git 훅
-│   │   ├── .github/         # CODEOWNERS, workflows, pull_request_template.md
-│   │   ├── scripts/         # 설정, 동기화 및 문서 감사 스크립트 (bash + PowerShell)
-│   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
-│   ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 에이전트 팀
-│   │   ├── variant.json     # Variant 메타데이터 (name, status, version)
-│   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   │   ├── docs/            # context.md (10섹션 템플릿)
-│   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog 등)
-│   │   │   └── skills/      # code-review, test-driven-development, refactoring
-│   │   └── .gemini/         # settings.json, commands/
-│   ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로
-│   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
-│   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design
-│   └── co-work/             # ✅ Stable — 범용 협업 워크플로
-│       ├── agents/          # pm.md, analyst.md, technical-writer.md, content-writer.md, project-coordinator.md, storyteller.md, ms365-expert.md
-│       └── .claude/skills/  # research-analysis, documentation-writing, api-documentation
-├── scripts/
-│   ├── audit.sh / .ps1                       # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
-│   ├── dev-sync.sh / .ps1                    # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
-│   ├── new-project.sh / .ps1                 # 새 프로젝트 스캐폴딩 (--variant, --version 지원)
-│   ├── qa-gate.sh / .ps1                     # 독립적인 품질 보증(QA) 게이트 실행 스크립트
-│   ├── sync-md.sh / .ps1                     # MEMORY.md 인덱스 업데이트
-│   ├── validate-templates.ts                 # Template variant 구조 무결성 검증
-│   └── *-lifecycle-audit.ts                  # Agent/Skill/README 구조 무결성 검사
-├── .githooks/
-│   ├── commit-msg           # 영어로만 작성된 PR 산출물 강제 검증
-│   ├── post-checkout        # 백그라운드 워크스페이스 설정 초기화
-│   ├── pre-commit           # 스마트 조건부 감사 및 UTF-8 인코딩 검사
-│   ├── pre-push             # main 브랜치로의 직접 push 차단
-│   └── pre-rebase           # Rebase 전 Gitleaks 시크릿 검사
-├── .claude/
-│   ├── settings.json        # {} (훅 비활성화됨; pre-commit + dev-sync를 통해 강제 적용)
-│   └── commands/            # 커스텀 슬래시 명령어 (/sync, /changelog, /memlog 등)
-└── .gemini/
-    └── settings.json        # Gemini CLI 프로젝트 설정
+├── scripts/                 # 공통 자동화, 템플릿 검증 및 문서 감사 스크립트
+├── .githooks/               # PR 산출물 강제 및 시크릿 검사를 위한 Git 훅
+├── .claude/ & .gemini/      # AI 툴 전역 설정 및 커스텀 슬래시 명령어
+└── templates/               # 새 프로젝트 스캐폴딩을 위한 버전 관리 템플릿들
+    ├── common/              # 모든 템플릿이 공통으로 사용하는 스크립트/스킬/깃훅
+    ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 워크플로 템플릿
+    ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로 템플릿
+    └── co-work/             # ✅ Stable — 기획 및 범용 협업 워크플로 템플릿
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
