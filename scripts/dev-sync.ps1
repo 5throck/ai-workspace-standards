@@ -53,6 +53,21 @@ if (Test-Path "CHANGELOG.md") {
     }
 }
 
+# ── 3.5. Warn if [Unreleased] section has no bullet items ────────────────────
+if (Test-Path "CHANGELOG.md") {
+    $clCheck = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
+    if ($clCheck -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
+        $unreleasedSection = $Matches[1]
+        if ($unreleasedSection -notmatch '(?m)^\s*-\s+') {
+            Write-Host ""
+            Write-Host "⚠️  CHANGELOG.md [Unreleased] section has no entries." -ForegroundColor Yellow
+            Write-Host "   Consider running: /changelog 'type: description' before syncing." -ForegroundColor Yellow
+            Write-Host "   (continuing anyway - use this warning to keep your changelog current)" -ForegroundColor DarkGray
+            Write-Host ""
+        }
+    }
+}
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 .\scripts\audit.ps1
 if ($LASTEXITCODE -ne 0) { exit 1 }

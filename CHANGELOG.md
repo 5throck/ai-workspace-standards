@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-05-27]**: `.github/pull_request_template.md` redesigned with Summary/Changes table/Test Plan/Security Checklist sections — applied to workspace and all template variants (#TBD)
+- **[2026-05-27]**: `CONSTITUTION.md §2`: Memory session log mandatory four-section format (Session Summary, Changes, Decisions, Open Issues) with cross-tool consistency note (#TBD)
+- **[2026-05-27]**: `CONSTITUTION.md §2.1`: CHANGELOG entry `(#PR-number)` reference requirement (#TBD)
+- **[2026-05-27]**: `Documentation Standards` section added to all variant `docs/context.md` files (co-develop, co-design, co-work) (#TBD)
+- **[2026-05-27]**: `scripts/dev-sync.sh` + `.ps1`: `[Unreleased]` content check — warns if section is empty before commit (#TBD)
+- **[2026-05-27]**: `templates/common/.githooks/pre-commit`: §2-A UTF-8 Markdown encoding check + §2-B English-only enforcement added; section order corrected (#TBD)
+- **[2026-05-27]**: `scripts/`: reverse-sync from `templates/common/scripts/` — added `verify-skills.ts`, `install-bun.sh/.ps1`, `dispatch-parallel.ts`, `dispatch-serial.ts`, `dispatch.ts`, `retry-handler.ts` (#TBD)
+
+### Changed
+- **[2026-05-27]**: `templates/CHANGELOG.md`: added `[0.5.0]` release entry with `(#PR)` reference format — establishes PR reference convention (#TBD)
+- **[2026-05-27]**: `.githooks/pre-commit`: section header emoji replaced with `──` separator style for consistency with template (#TBD)
+
 ### Changed
 - **[2026-05-26]**: docs: simplify co-develop variant summary for consistency
 
@@ -407,7 +420,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-26*
+*Last Updated: 2026-05-27*
 
 
 

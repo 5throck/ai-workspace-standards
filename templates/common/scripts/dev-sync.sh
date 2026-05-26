@@ -42,6 +42,18 @@ if [ -f "CHANGELOG.md" ]; then
   fi
 fi
 
+# ── 3.5. Warn if [Unreleased] section has no bullet items ────────────────────
+if [ -f "CHANGELOG.md" ]; then
+  UNRELEASED_CONTENT=$(awk '/^## \[Unreleased\]/{f=1;next} f && /^## \[/{exit} f{print}' CHANGELOG.md)
+  if ! echo "$UNRELEASED_CONTENT" | grep -qE '^\s*-\s+'; then
+    echo ""
+    echo "⚠️  CHANGELOG.md [Unreleased] section has no entries."
+    echo "   Consider running: /changelog \"type: description\" before syncing."
+    echo "   (continuing anyway — use this warning to keep your changelog current)"
+    echo ""
+  fi
+fi
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 bash scripts/audit.sh
 
