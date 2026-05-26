@@ -92,7 +92,19 @@ if [ -n "$DOCS_TO_CHECK" ]; then
   done <<< "$DOCS_TO_CHECK"
 fi
 
-# ── 3. Documentation audit 
+# ── 3. Memory format validation ────────────────────────────────────────────
+# Run when memory/ files are staged
+MEMORY_STAGED=$(echo "$STAGED" | grep -E "^memory/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$" || true)
+if [ -n "$MEMORY_STAGED" ] && command -v bun &>/dev/null && [ -f "scripts/verify-memory.ts" ]; then
+  echo ""
+  echo "=== Memory Format Validation ==="
+  # Non-blocking: report format violations as warnings only
+  # shellcheck disable=SC2086
+  bun scripts/verify-memory.ts --verify $MEMORY_STAGED 2>/dev/null || \
+    echo -e "\033[33m[WARN]\033[0m Memory format: some entries use legacy format — run 'bun scripts/verify-memory.ts --report' for details"
+fi
+
+# ── 3. Documentation audit
 # Skip documentation audit for memory-only commits (workflow optimization)
 if [ "$MEMORY_ONLY" = false ]; then
   bash scripts/audit.sh || exit 1

@@ -126,6 +126,13 @@ if command -v bun &>/dev/null; then
             ((errors++)) || true
         fi
     fi
+    if [ -f "scripts/verify-memory.ts" ] && [ -d "memory" ]; then
+        if bun scripts/verify-memory.ts --verify 2>/dev/null; then
+            green "Memory audit: all session logs valid"
+        else
+            warn "Memory audit: some entries use legacy format (run 'bun scripts/verify-memory.ts --report')"
+        fi
+    fi
 else
     warn "Bun not installed - skipping lifecycle audits"
 fi
