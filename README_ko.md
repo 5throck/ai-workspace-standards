@@ -119,18 +119,18 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── templates/               # 버전 관리되는 template variant (template-vX.Y.Z 태그로 관리)
 │   ├── VERSION              # 현재 template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template 레벨 변경 이력
-│   ├── common/              # 모든 variant에서 공유하는 스킬
+│   ├── common/              # 모든 variant에서 공유하는 공통 파일
+│   │   ├── .githooks/       # 표준 Git 훅
+│   │   ├── .github/         # CODEOWNERS, workflows, pull_request_template.md
+│   │   ├── scripts/         # 설정, 동기화 및 문서 감사 스크립트 (bash + PowerShell)
 │   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 에이전트 팀
 │   │   ├── variant.json     # Variant 메타데이터 (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   │   ├── docs/            # context.md (10섹션 템플릿), security.md
-│   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   │   ├── docs/            # context.md (10섹션 템플릿)
 │   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog 등)
 │   │   │   └── skills/      # code-review, test-driven-development, refactoring
-│   │   ├── .gemini/         # settings.json, commands/
-│   │   ├── .githooks/       # pre-commit, pre-push
-│   │   └── .github/         # CODEOWNERS, workflows, dependabot
+│   │   └── .gemini/         # settings.json, commands/
 │   ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로
 │   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
 │   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design

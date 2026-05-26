@@ -121,18 +121,18 @@ C:\git\ (workspace root - this repo)
 ├── templates/               # Versioned template variants (tagged as template-vX.Y.Z)
 │   ├── VERSION              # Current template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template-level change history
-│   ├── common/              # Shared skills across all variants
+│   ├── common/              # Shared base files across all variants
+│   │   ├── .githooks/       # Standard git hooks
+│   │   ├── .github/         # CODEOWNERS, workflows, pull_request_template.md
+│   │   ├── scripts/         # Setup, sync, and audit scripts (bash + PowerShell)
 │   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — full software development agent team
 │   │   ├── variant.json     # Variant metadata (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   │   ├── docs/            # context.md (10-section template), security.md
-│   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   │   ├── docs/            # context.md (10-section template)
 │   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog, etc.)
 │   │   │   └── skills/      # code-review, test-driven-development, refactoring
-│   │   ├── .gemini/         # settings.json, commands/
-│   │   ├── .githooks/       # pre-commit, pre-push
-│   │   └── .github/         # CODEOWNERS, workflows, dependabot
+│   │   └── .gemini/         # settings.json, commands/
 │   ├── co-design/           # ✅ Stable — UI/UX design workflow
 │   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
 │   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design
