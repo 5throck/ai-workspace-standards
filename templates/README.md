@@ -1,17 +1,33 @@
 # AI Workspace Templates
 
-![Template Version](https://img.shields.io/badge/version-0.4.0-blue)
+![Template Version](https://img.shields.io/badge/version-0.5.0-blue)
 
 This directory contains template variants for scaffolding new AI-assisted projects.
 Select a variant when running `bash scripts/new-project.sh <name> --variant <variant>`.
+
+## Template Structure
+
+```
+templates/
+├── common/              # Shared infrastructure (all variants)
+│   ├── .githooks/       # Git hooks
+│   ├── .github/         # GitHub integration (CI/CD, dependabot)
+│   ├── scripts/         # Automation scripts
+│   └── docs/_examples/  # Reference documentation
+├── co-develop/          # Software development variant
+├── co-design/           # Design workflow variant
+└── co-work/             # Collaboration variant
+```
+
+**How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
 
 ## Available Variants
 
 | Variant | Status | Description |
 |---------|--------|-------------|
-| [`co-develop`](co-develop/) | ✅ Stable | Software development workflow with full agent team |
-| [`co-design`](co-design/) | 🔵 Planned | UI/UX design workflow |
-| [`co-work`](co-work/) | 🔵 Planned | General collaboration workflow |
+| [`co-develop`](co-develop/) | ✅ Stable | Software development workflow with 7 agents (pm, architect, code-writer, etc.) |
+| [`co-design`](co-design/) | ✅ Stable | UI/UX design workflow with 5 agents (design pm, design-lead, ux-researcher, visual-designer, prototype-engineer) |
+| [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 4 agents (collaboration pm, analyst, content-writer, project-coordinator) |
 
 ## Usage
 
