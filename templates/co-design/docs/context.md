@@ -30,6 +30,16 @@
 | Visual & Interface | `agents/visual-designer.md` | Visual Designer - visual designs and specifications |
 | Prototyping & Handoff | `agents/prototype-engineer.md` | Prototype Engineer - interactive prototypes |
 
+## Skills
+
+| Skill path | Trigger condition |
+|------------|-------------------|
+| `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, creating visual designs, UI components, or design specifications |
+| `skills/agent-lifecycle-manager/SKILL.md` | Design PM managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
+| `skills/skill-lifecycle-manager/SKILL.md` | Design PM managing skill lifecycle after agent configuration changes |
+| `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
+| `.claude/skills/service-design/SKILL.md` | Designing end-to-end service experiences, customer journeys, and operational processes |
+
 ## Multi-Agent Design Workflow
 
 This project uses a **Design PM-first multi-agent architecture**. All design work flows through the Design PM orchestrator.

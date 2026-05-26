@@ -29,6 +29,17 @@
 | Documentation | `agents/content-writer.md` | Content Writer - documentation and communication |
 | Coordination | `agents/project-coordinator.md` | Project Coordinator - schedule and stakeholder management |
 
+## Skills
+
+| Skill path | Trigger condition |
+|------------|-------------------|
+| `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research, evidence gathering |
+| `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications, synthesizing complex information |
+| `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
+| `skills/agent-lifecycle-manager/SKILL.md` | PM managing agent lifecycle and validation |
+| `skills/skill-lifecycle-manager/SKILL.md` | PM managing skill lifecycle and validation |
+| `.claude/skills/api-documentation/SKILL.md` | Documenting REST APIs, GraphQL interfaces, SDKs, and developer-facing technical specifications |
+
 ## Multi-Agent Collaboration Workflow
 
 This project uses a **Collaboration PM-first multi-agent architecture**. All collaboration work flows through the Collaboration PM orchestrator.

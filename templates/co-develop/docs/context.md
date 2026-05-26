@@ -53,7 +53,12 @@
 ## Skills
 | Skill path | Trigger condition |
 |------------|-------------------|
-| *(none yet -add entries as skills are created in `skills/`)* | |
+| `skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
+| `skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
+| `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making and problem resolution |
+| `.claude/skills/code-review/SKILL.md` | Conducting thorough code reviews focusing on correctness, maintainability, security, and best practices |
+| `.claude/skills/test-driven-development/SKILL.md` | Implementing software using TDD methodology with red-green-refactor cycle |
+| `.claude/skills/refactoring/SKILL.md` | Improving code structure and design while preserving behavior using systematic refactoring techniques |
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->

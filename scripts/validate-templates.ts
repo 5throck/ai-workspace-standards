@@ -294,7 +294,7 @@ function checkCommands(variant: string): void {
       return;
     }
 
-    const universalCommands = ['changelog.md', 'memlog.md', 'new-task.md', 'security-check.md', 'sync.md'];
+    const universalCommands = ['changelog.md', 'memlog.md', 'new-task.md', 'sync.md'];
     for (const cmd of universalCommands) {
       const cmdPath = join(commandsDir, cmd);
       if (!existsSync(cmdPath)) {
@@ -372,6 +372,51 @@ function checkSharedFileSync(): void {
   }
 }
 
+// Check 9: docs/context.md sync and broken paths
+function checkContextSync(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
+  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+  const contextMdPath = join(TEMPLATES_DIR, variant, 'docs', 'context.md');
+
+  if (!existsSync(agentsMdPath) || !existsSync(contextMdPath)) {
+    return; // Skip if either doesn't exist
+  }
+
+  const agentsMd = readFileSync(agentsMdPath, 'utf-8');
+  const contextMd = readFileSync(contextMdPath, 'utf-8');
+
+  // Check for broken paths in AGENTS.md
+  if (agentsMd.includes('../common/skills/')) {
+    fail(variant, 'broken-paths', `AGENTS.md contains broken '../common/skills/' paths`, `Change to 'skills/'`);
+  }
+
+  // Check for Agent Lifecycle Manager existence
+  if (!agentsMd.includes('agent-lifecycle-manager/SKILL.md')) {
+    fail(variant, 'missing-lifecycle-manager', `AGENTS.md is missing 'agent-lifecycle-manager' skill`);
+  }
+
+  // Find all skills in AGENTS.md
+  const skillRegex = /`([a-zA-Z0-9-./_]+\/SKILL\.md)`/g;
+  const expectedSkills = new Set<string>();
+  for (const match of agentsMd.matchAll(skillRegex)) {
+    expectedSkills.add(match[1]);
+  }
+
+  // Check if they are all in contextMd
+  const missingSkills: string[] = [];
+  for (const skill of expectedSkills) {
+    if (!contextMd.includes(skill)) {
+      missingSkills.push(skill);
+    }
+  }
+
+  if (missingSkills.length > 0) {
+    fail(variant, 'context-sync', `docs/context.md is missing skills defined in AGENTS.md: ${missingSkills.join(', ')}`, 'Sync the ## Skills table in docs/context.md with AGENTS.md');
+  } else {
+    pass(`${variant}/docs/context.md has all ${expectedSkills.size} skills from AGENTS.md`);
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -396,6 +441,7 @@ function main() {
       checkAgentsRoster(variant);
       checkCommands(variant);
       checkScriptParity(variant);
+      checkContextSync(variant);
       variantsChecked++;
     }
   }
