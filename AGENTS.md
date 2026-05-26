@@ -186,17 +186,63 @@ All agents, regardless of their role, must adhere to the following:
 
 ---
 
+## Lifecycle Management
+
+Use the dedicated lifecycle manager skills whenever creating, modifying, or retiring agents and skills. These skills are located in `.claude/skills/` and are loaded automatically by Claude Code.
+
+### Agent Lifecycle
+
+| Event | Skill to Use | Action |
+|-------|-------------|--------|
+| Create new agent | `agent-lifecycle-manager` | Draft frontmatter → write content → register in AGENTS.md → validate |
+| Update agent role/tier | `agent-lifecycle-manager` | Update frontmatter → bump version → re-validate |
+| Deprecate agent | `agent-lifecycle-manager` | Set `status: deprecated` → reassign owned skills → update AGENTS.md |
+
+**Trigger**: Invoke the `agent-lifecycle-manager` skill from Claude Code when any of the above events occur.
+
+```
+Skill("agent-lifecycle-manager")
+```
+
+### Skill Lifecycle
+
+| Event | Skill to Use | Action |
+|-------|-------------|--------|
+| Create new skill | `skill-lifecycle-manager` | Create `skills/<name>/SKILL.md` → write frontmatter → update AGENTS.md Skills table |
+| Update skill metadata | `skill-lifecycle-manager` | Update frontmatter → bump version → re-validate |
+| Deprecate skill | `skill-lifecycle-manager` | Set `status: deprecated` → archive after 30 days → update AGENTS.md |
+
+**Trigger**: Invoke the `skill-lifecycle-manager` skill from Claude Code when any of the above events occur.
+
+```
+Skill("skill-lifecycle-manager")
+```
+
+### Skills Location Reference
+
+| Location | Purpose |
+|----------|---------|
+| `.claude/skills/` | Workspace-level skills (available in all sessions) |
+| `skills/` | Workspace utility skills (validate, scan, simulate) |
+| `templates/common/skills/` | Single source of truth — changes here must sync to `.claude/skills/` |
+
+> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bash scripts/audit.sh` to verify.
+
+---
+
 ## Maintenance Rule
 
 When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
-1. Add a row to the Agent Roster table above.
-2. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-3. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
-4. If the agent uses a skill, add a row to the Skills table above.
+1. Use the `agent-lifecycle-manager` skill to guide the process.
+2. Add a row to the Agent Roster table above.
+3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
+4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
-1. Add a row to the Skills table above.
-2. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
+1. Use the `skill-lifecycle-manager` skill to guide the process.
+2. Add a row to the Skills table above.
+3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
 > **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).

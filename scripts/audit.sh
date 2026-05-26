@@ -91,6 +91,23 @@ else
   warn "docs/context.md not found - skipping project-level checks (workspace root)"
 fi
 
+# --- Skills registry cross-check ---
+# Verify every directory in skills/ and .claude/skills/ has a SKILL.md file
+for skills_dir in "skills" ".claude/skills"; do
+  if [ -d "$skills_dir" ]; then
+    for skill_dir in "$skills_dir"/*/; do
+      [ -d "$skill_dir" ] || continue
+      skill_name=$(basename "$skill_dir")
+      if [ -f "${skill_dir}SKILL.md" ]; then
+        green "skill exists: $skills_dir/$skill_name/SKILL.md"
+      else
+        red "skill directory missing SKILL.md: $skill_dir"
+        ((errors++)) || true
+      fi
+    done
+  fi
+done
+
 # --- Lifecycle Audits ---
 if command -v bun &>/dev/null; then
     if [ -f "scripts/agent-lifecycle-audit.ts" ]; then

@@ -63,6 +63,18 @@ if (Test-Path "docs\context.md") {
     Warn "docs/context.md not found - skipping project-level checks (workspace root)"
 }
 
+# --- Skills registry cross-check ---
+# Verify every directory in skills/ and .claude/skills/ has a SKILL.md file
+foreach ($skillsDir in @("skills", ".claude\skills")) {
+    if (Test-Path $skillsDir) {
+        Get-ChildItem -Path $skillsDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $skillMd = Join-Path $_.FullName "SKILL.md"
+            if (Test-Path $skillMd) { Pass "skill exists: $skillsDir\$($_.Name)\SKILL.md" }
+            else                     { Fail "skill directory missing SKILL.md: $skillsDir\$($_.Name)\" }
+        }
+    }
+}
+
 # --- Lifecycle Audits ---
 if (Get-Command bun -ErrorAction SilentlyContinue) {
     if (Test-Path "scripts\agent-lifecycle-audit.ts") {
