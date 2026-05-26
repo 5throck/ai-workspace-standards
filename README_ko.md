@@ -57,7 +57,7 @@ bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
 .\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.5.0
+.\scripts\new-project.ps1 "my-project-name" -variant co-develop -version 0.5.0
 ```
 
 > **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"`을 사용할 수 있습니다.
