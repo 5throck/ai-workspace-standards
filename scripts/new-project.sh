@@ -145,15 +145,25 @@ done < <(find "$PROJECT_DIR" -type f \
      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
   -print0)
 
-# ── 4.5. Record template provenance in docs/context.md ────────────────────────
+# ── 4.5. Record template provenance in variant context file ───────────────────
 TEMPLATE_VERSION="${TEMPLATE_VER:-$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]' || echo 'unknown')}"
-CONTEXT_MD="$PROJECT_DIR/docs/context.md"
-if [ -f "$CONTEXT_MD" ]; then
+VARIANT_CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
+if [ -f "$VARIANT_CONTEXT_MD" ]; then
   # Add template provenance if not already present
-  if ! grep -q "Template-Version:" "$CONTEXT_MD"; then
+  if ! grep -q "Template-Version:" "$VARIANT_CONTEXT_MD"; then
     printf '\n## Template Provenance\n\n- **Template-Version**: %s\n- **Template-Variant**: %s\n' \
-      "$TEMPLATE_VERSION" "$VARIANT" >> "$CONTEXT_MD"
+      "$TEMPLATE_VERSION" "$VARIANT" >> "$VARIANT_CONTEXT_MD"
   fi
+fi
+
+# ── 4.6. Protect context.md from accidental overwrites (merge=ours) ───────────
+GITATTRIBUTES="$PROJECT_DIR/.gitattributes"
+if [ -f "$GITATTRIBUTES" ]; then
+  if ! grep -q "docs/context.md" "$GITATTRIBUTES"; then
+    echo "docs/context.md merge=ours" >> "$GITATTRIBUTES"
+  fi
+else
+  echo "docs/context.md merge=ours" > "$GITATTRIBUTES"
 fi
 
 # ── 5. Make scripts and hooks executable ───────────────────────────────────────
