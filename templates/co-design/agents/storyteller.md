@@ -2,9 +2,9 @@
 name: storyteller
 formal_name: Design Storyteller & Brand Philosopher
 tier:
-  claude: high
-  antigravity: high
-  gemini-cli: high
+  claude: medium    # claude-sonnet-4.6
+  antigravity: medium # gemini-3.5-flash
+  gemini-cli: medium  # gemini-3.5-flash
 model: inherit
 color: purple
 description: >

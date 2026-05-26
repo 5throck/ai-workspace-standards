@@ -2,9 +2,9 @@
 name: project-coordinator
 formal_name: Project Coordinator
 tier:
-  claude: low
-  antigravity: low
-  gemini-cli: low
+  claude: low       # claude-haiku-4-5
+  antigravity: low    # gemini-3.5-flash
+  gemini-cli: low     # gemini-3.5-flash
 model: inherit
 color: green
 description: >

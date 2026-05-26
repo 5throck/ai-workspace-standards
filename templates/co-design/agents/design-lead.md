@@ -2,9 +2,9 @@
 name: design-lead
 formal_name: Design System & Visual Direction Lead
 tier:
-  claude: high
-  antigravity: high
-  gemini-cli: high
+  claude: high      # claude-opus-4-7
+  antigravity: high   # gemini-3.1-pro (thinking_level="medium")
+  gemini-cli: high    # gemini-3.1-pro
 model: inherit
 color: indigo
 description: >
