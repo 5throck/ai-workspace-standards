@@ -120,7 +120,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 │   ├── VERSION              # 현재 template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template 레벨 변경 이력
 │   ├── common/              # 모든 variant에서 공유하는 스킬
-│   │   └── skills/          # skill-lifecycle-manager, meeting-facilitation
+│   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 에이전트 팀
 │   │   ├── variant.json     # Variant 메타데이터 (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
@@ -140,13 +140,17 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── scripts/
 │   ├── audit.sh / .ps1                       # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
 │   ├── dev-sync.sh / .ps1                    # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .ps1                     # MEMORY.md 인덱스 업데이트
 │   ├── new-project.sh / .ps1                 # 새 프로젝트 스캐폴딩 (--variant, --version 지원)
-│   ├── list-template-versions.sh / .ps1      # 사용 가능한 template 버전 목록 (git 태그 기반)
-│   └── validate-templates.sh / .ps1          # Template variant 구조 무결성 검증
+│   ├── qa-gate.sh / .ps1                     # 독립적인 품질 보증(QA) 게이트 실행 스크립트
+│   ├── sync-md.sh / .ps1                     # MEMORY.md 인덱스 업데이트
+│   ├── validate-templates.ts                 # Template variant 구조 무결성 검증
+│   └── *-lifecycle-audit.ts                  # Agent/Skill/README 구조 무결성 검사
 ├── .githooks/
-│   ├── pre-commit           # 스마트 조건부 감사 (memory/ 파일 예외 처리)
-│   └── pre-push             # main 브랜치로의 직접 push 차단
+│   ├── commit-msg           # 영어로만 작성된 PR 산출물 강제 검증
+│   ├── post-checkout        # 백그라운드 워크스페이스 설정 초기화
+│   ├── pre-commit           # 스마트 조건부 감사 및 UTF-8 인코딩 검사
+│   ├── pre-push             # main 브랜치로의 직접 push 차단
+│   └── pre-rebase           # Rebase 전 Gitleaks 시크릿 검사
 ├── .claude/
 │   ├── settings.json        # {} (훅 비활성화됨; pre-commit + dev-sync를 통해 강제 적용)
 │   └── commands/            # 커스텀 슬래시 명령어 (/sync, /changelog, /memlog 등)
@@ -183,7 +187,7 @@ C:\git\
 
 ## 멀티 에이전트 워크플로 (Multi-Agent Workflow)
 
-프로젝트는 6단계 거버넌스 단계에 걸쳐 5역할 에이전트 모델을 사용합니다:
+기본 `co-develop` 템플릿은 6단계 거버넌스 단계에 걸쳐 5역할 에이전트 모델을 사용합니다:
 
 ```
 PM Orchestrator (PM 오케스트레이터)

@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-26]**: docs: sync readme structure with current repository state
+
+### Changed
 - **[2026-05-26]**: docs: standardize powershell argument casing in readme
 
 ### Changed
@@ -387,6 +390,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-26*
+
 
 
 

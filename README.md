@@ -122,7 +122,7 @@ C:\git\ (workspace root - this repo)
 │   ├── VERSION              # Current template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template-level change history
 │   ├── common/              # Shared skills across all variants
-│   │   └── skills/          # skill-lifecycle-manager, meeting-facilitation
+│   │   └── skills/          # agent-lifecycle-manager, skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — full software development agent team
 │   │   ├── variant.json     # Variant metadata (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
@@ -142,13 +142,17 @@ C:\git\ (workspace root - this repo)
 ├── scripts/
 │   ├── audit.sh / .ps1                         # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
 │   ├── dev-sync.sh / .ps1                      # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .ps1                       # MEMORY.md index updater
 │   ├── new-project.sh / .ps1                   # New project scaffolding (--variant, --version flags)
-│   ├── list-template-versions.sh / .ps1        # List available template versions (git tags)
-│   └── validate-templates.sh / .ps1            # Validate template variant structural integrity
+│   ├── qa-gate.sh / .ps1                       # Independent QA gate execution script
+│   ├── sync-md.sh / .ps1                       # MEMORY.md index updater
+│   ├── validate-templates.ts                   # Template variant structural integrity validator
+│   └── *-lifecycle-audit.ts                    # Agent/Skill/README structural integrity checks
 ├── .githooks/
-│   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
-│   └── pre-push             # Blocks direct push to main
+│   ├── commit-msg           # English-only PR artifact enforcement
+│   ├── post-checkout        # Background workspace config initialization
+│   ├── pre-commit           # Smart conditional audit & UTF-8 checks
+│   ├── pre-push             # Blocks direct push to main
+│   └── pre-rebase           # Gitleaks secret scanning before rebasing
 ├── .claude/
 │   ├── settings.json        # {} (hooks disabled; enforced via pre-commit + dev-sync)
 │   └── commands/            # Custom slash commands (/sync, /changelog, /memlog, etc.)
@@ -185,7 +189,7 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 
 ## Multi-Agent Workflow
 
-Projects use a 5-role agent model across 6 governance phases:
+The default `co-develop` template uses a 5-role agent model across 6 governance phases:
 
 ```
 PM Orchestrator
