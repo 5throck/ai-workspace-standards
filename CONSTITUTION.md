@@ -9,6 +9,7 @@ These principles apply to every project under the workspace root (`C:\git` on Wi
 > **AI tools MUST load these files at session start** in addition to this document:
 > - `docs/constitution/05-multi-agent-architecture.md`
 > - `docs/constitution/08-coding-guidelines.md`
+> - `docs/constitution/09-operations-workflow.md` (for PM and maintenance tasks)
 
 ---
 
@@ -120,6 +121,12 @@ Every new project starts with `/new-project` (Claude Code), `bash scripts/new-pr
 ### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
 
 Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: complex orchestration in Bun (.ts), utilities in cross-platform .sh/.ps1 pairs. **Bilingual README**: `templates/` requires both `README.md` and `README_ko.md`.
+
+---
+
+### 9. Operations Workflow → [Full details](docs/constitution/09-operations-workflow.md)
+
+Operational procedures for maintaining workspace health and lifecycle hygiene. **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect + Auditor, first Friday): Review deprecated items ≥30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `sync-agent-status.sh` and `sync-skill-status.sh` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
 
 ---
 
