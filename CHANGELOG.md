@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-26]**: docs: simplify co-develop variant summary for consistency
+
+### Changed
 - **[2026-05-26]**: docs: update variant summaries in root READMEs to reflect domain-native workflows
 
 ### Changed
@@ -405,6 +408,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-26*
+
 
 
 
