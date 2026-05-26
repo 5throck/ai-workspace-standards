@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-26]**: docs: update co-design and co-work context.md with domain-native workflows
+
+### Changed
 - **[2026-05-26]**: docs: encapsulate multi-agent workflow details by variant
 
 ### Changed
@@ -399,6 +402,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-26*
+
 
 
 
