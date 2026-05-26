@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **[2026-05-26]**: chore: remove stale meeting summary files
+
 ### Added
 - **[2026-05-26]**: feat: enforce english only and utf-8 encoding in git hooks
 
@@ -381,6 +384,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-26*
+
 
 
 
