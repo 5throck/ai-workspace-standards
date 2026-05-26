@@ -38,6 +38,7 @@
 | `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — |
 | `dispatch.ts` | L0 | 1.0.0 | active | — | — |
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — |
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — |
@@ -163,6 +164,13 @@ skills still being modified, dependency graph, circular dependencies.
 **Purpose**: Cross-validates skills referenced in `docs/context.md` against actual
 skill files on disk. Detects missing or orphaned skill references.
 **Usage**: `bun scripts/verify-skills.ts`
+
+#### `verify-memory.ts`
+**Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
+(`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects
+orphaned files not registered in `MEMORY.md` index.
+**Usage**: `bun scripts/verify-memory.ts [--verify | --report]`
+**Runs automatically**: pre-commit hook when `memory/*.md` files are staged.
 
 ---
 

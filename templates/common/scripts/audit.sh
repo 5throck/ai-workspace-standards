@@ -96,6 +96,15 @@ else
   warn "docs/context.md not found - skipping project-level checks (workspace root)"
 fi
 
+# --- Memory Format Audit ---
+if command -v bun &>/dev/null && [ -f "scripts/verify-memory.ts" ] && [ -d "memory" ]; then
+    if bun scripts/verify-memory.ts --verify 2>/dev/null; then
+        green "Memory audit: all session logs valid"
+    else
+        warn "Memory audit: some entries use legacy format (run 'bun scripts/verify-memory.ts --report')"
+    fi
+fi
+
 echo ""
 if [ "$errors" -eq 0 ]; then
   echo -e "\033[32m✅ All checks passed.\033[0m"

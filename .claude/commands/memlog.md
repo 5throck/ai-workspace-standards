@@ -5,32 +5,40 @@ Arguments: $ARGUMENTS
 Steps:
 1. Determine today's date in YYYY-MM-DD format.
 2. Ensure `memory/` directory exists.
-3. Append to `memory/YYYY-MM-DD.md` (create if missing) using the mandatory 4-section format:
+3. Collect context automatically:
+   - Run `git diff --name-only HEAD` to get the list of files changed in this session.
+   - Run `git log --oneline -5` to see recent commit messages for context.
+4. Append to `memory/YYYY-MM-DD.md` (create if missing) using the mandatory 4-section format:
    ```
    ## Session Summary
-   <!-- One paragraph: what was accomplished this session -->
    $ARGUMENTS
 
    ## Changes
-   <!-- File-level list of what was created, modified, or deleted -->
-   - `path/to/file` — created/modified/deleted: reason
+   <!-- Auto-populated from git diff --name-only HEAD -->
+   - `path/to/file` — brief description of what changed
 
    ## Decisions
-   <!-- Architectural or design choices made, with rationale -->
+   <!-- Fill in architectural or design choices made this session, with rationale -->
    - None
 
    ## Open Issues
-   <!-- Unresolved problems, blockers, or follow-up items -->
+   <!-- Fill in unresolved problems, blockers, or follow-up items -->
    - None
    ```
    If `memory/YYYY-MM-DD.md` already has content, prepend a `---` separator before the new entry.
-4. Update `memory/MEMORY.md` index by appending a row:
-   `| [YYYY-MM-DD](YYYY-MM-DD.md) | $ARGUMENTS |`
-   (Create MEMORY.md with header row if it does not exist.)
-5. Fill in `## Changes` by listing any files that were written or edited in this session.
-6. Fill in `## Decisions` and `## Open Issues` based on what was discussed or left pending.
+5. After writing the entry:
+   - Fill in `## Changes` from the git diff output collected in step 3.
+   - Fill in `## Decisions` based on key architectural/design choices discussed this session.
+   - Fill in `## Open Issues` based on any unresolved problems or follow-up items.
+6. Update `memory/MEMORY.md` Sessions section:
+   Run `bash scripts/sync-md.sh "YYYY-MM-DD" "$ARGUMENTS"` (or PowerShell equivalent).
 7. Confirm: "📝 Session logged to memory/YYYY-MM-DD.md"
 
-> **Format note**: The four section headings (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) are mandatory. All AI tools must produce logs with these exact headings for cross-tool consistency. See CONSTITUTION.md §2 or docs/context.md § Documentation Standards.
+> **Format note**: The four section headings (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) are mandatory. All AI tools must produce logs with these exact headings for cross-tool consistency. See CONSTITUTION.md §2.
+
+> **MEMORY.md structure**: MEMORY.md has three sections — Sessions, Meetings, ADRs.
+> - Sessions: auto-updated by this command and the commit-msg hook.
+> - Meetings: register via `bash scripts/sync-md.sh "DATE" "TOPIC" --meeting` after `/meeting`.
+> - ADRs: register via `bash scripts/sync-md.sh "DATE" "TITLE" --adr ADR-NNNN` when creating an ADR file.
 
 Note: `/sync` already runs memlog automatically. Use `/memlog` only when you want to log a session entry without triggering a full sync.

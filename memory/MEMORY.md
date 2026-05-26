@@ -1,37 +1,26 @@
-﻿# Memory Index
+# Memory Index
+
+## Sessions
 
 | Date | Summary |
 |------|---------|
-| [2026-05-23](2026-05-23.md) | fix: align markdown files with CONSTITUTION.md standards |
-| [2026-05-23](2026-05-23.md) | chore: update Gemini CLI tool mappings in template |
-| [2026-05-23](2026-05-23.md) | docs: add multi-agent kickoff and security-first scaffold |
-| [2026-05-23](2026-05-23.md) | feat: backport security governance and auto-dating hooks |
-| [2026-05-23](2026-05-23.md) | fix: initialize memory tracking on project creation |
-| [2026-05-23](2026-05-23.md) | docs: clarify tracking management guidelines (CHANGELOG vs. Memory) |
-| [2026-05-23](2026-05-23.md) | feat: dev-sync upgrades for memory and changelog tracking |
-| [2026-05-23](2026-05-23.md) | docs: README OS-based steps + PR language rule + pre-commit auto-log fix |
-| [2026-05-24](2026-05-24.md) | feat: auto-install superpowers plugin during project scaffold |
+| [2026-05-23](2026-05-23.md) | feat: align markdown files with CONSTITUTION.md standards |
 | [2026-05-24](2026-05-24.md) | feat: Refactor PM to 3-tier agent strategy and repair Windows terminal CP949 encoding corruptions |
-| [2026-05-24](2026-05-24.md) | feat: Optimize 3-tier model selection for PM cost efficiency |
-| [2026-05-24](2026-05-24.md) | feat: Revert Low-tier to gemini-3.5-flash for reliability |
-| [2026-05-24](2026-05-24.md) | feat: Explicitly specify Gemini thinking_level for 3-tier strategy |
-| [2026-05-24](2026-05-24.md) | feat: Refactor project creation workflow and ensure template consistency |
-| [2026-05-24](2026-05-24.md) | chore: update |
-| [2026-05-24](2026-05-24.md) | fix: repair template encodings and deduplicate behavioral rules |
-| [2026-05-24](2026-05-24.md) | fix: restore 3-tier strategy details in tool configs |
-| [2026-05-24](2026-05-24.md) | fix: restore general 3-tier strategy descriptions in AGENTS.md |
-| [2026-05-24](2026-05-24.md) | fix: replace em dashes with ascii hyphens and fix remaining unicode corruption |
-| [2026-05-24](2026-05-24.md) | fix: replace em dashes and unicode bugs across entire ai-workspace-standards project |
-| [2026-05-24](2026-05-24.md) | fix: add -Encoding UTF8 to all Get-Content calls in powershell scripts to prevent CP949 corruption |
-| [2026-05-24](2026-05-24.md) | refactor: move Pre-PR Security Gate from GEMINI.md to common context.md |
-| [2026-05-24](2026-05-24.md) | fix: ensure changelog auto-logs every new PR instead of just the first one |
-| [2026-05-24](2026-05-24.md) | docs: backfill today's changelog entries that were missed due to the previous bug |
-| [2026-05-24](2026-05-24.md) | refactor: remove duplicated Response Language block from GEMINI.md |
-| [2026-05-24](2026-05-24.md) | refactor: consolidate Session Start/Context Loading into CONSTITUTION.md and remove duplicates from CLAUDE and GEMINI templates |
-| [2026-05-24](2026-05-24.md) | chore: remove leftover temporary automation scripts from workspace root |
-| [2026-05-24](2026-05-24.md) | feat: add scripts/temp directory for scratch scripts with gitignore rules |
-| [2026-05-24](2026-05-24.md) | feat: establish multi-agent harness for workspace root |
-| [2026-05-24](2026-05-24-multi-agent-meeting-summary.md) | meeting: 3-round multi-agent analysis identifies 96 improvement opportunities |
 | [2026-05-25](2026-05-25.md) | feat: align template with hybrid scripting standards |
 | [2026-05-26](2026-05-26.md) | feat: implement agent lifecycle management and sync template agent references |
-| [2026-05-27](2026-05-27.md) | docs: update new-project command to support PowerShell and Bash environments |
+| [2026-05-27](2026-05-27.md) | feat: script lifecycle management + context.md two-layer structure |
+
+## Meetings
+
+| Date | Topic | File |
+|------|-------|------|
+| 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | [2026-05-24-multi-agent-meeting-summary.md](2026-05-24-multi-agent-meeting-summary.md) |
+| 2026-05-27 | Doc format best practices | [meeting-2026-05-27-doc-format-best-practices.md](meeting-2026-05-27-doc-format-best-practices.md) |
+| 2026-05-27 | Template lifecycle review | [meeting-2026-05-27-template-lifecycle-review.md](meeting-2026-05-27-template-lifecycle-review.md) |
+| 2026-05-27 | Script lifecycle + context.md structure | [meeting-2026-05-27-script-lifecycle-context-structure.md](meeting-2026-05-27-script-lifecycle-context-structure.md) |
+
+## ADRs
+
+| ID | Title | Status | File |
+|----|-------|--------|------|
+| ADR-0001 | Document Format Single Source of Truth | Accepted | [adr-0001-document-format-single-source-of-truth.md](adr-0001-document-format-single-source-of-truth.md) |
