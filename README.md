@@ -158,9 +158,9 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 
 Each template variant in this workspace provides a highly optimized, specialized **multi-agent workflow and agent team** tailored for its specific purpose.
 
-- **co-develop**: A 5-role/6-phase governance pipeline for software development and verification
-- **co-design**: A design-centric pipeline for UI/UX research and prototyping
-- **co-work**: A general collaboration pipeline for documentation, planning, and research
+- **co-develop**: A 5-role/6-phase linear governance pipeline for software development and verification
+- **co-design**: A 5-phase iterative design-native workflow focused on rapid prototyping and continuous user validation
+- **co-work**: A 6-phase asynchronous collaboration workflow focused on parallel drafting and continuous stakeholder review
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
