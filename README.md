@@ -57,7 +57,7 @@ bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
 .\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.5.0
+.\scripts\new-project.ps1 "my-project-name" -variant co-develop -version 0.5.0
 ```
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
