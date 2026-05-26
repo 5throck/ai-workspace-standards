@@ -618,6 +618,58 @@ If audit fails:
 
 ---
 
+### 6.5 Script Lifecycle Management
+
+Scripts are managed across three ownership layers. All changes originate at L0 and propagate downward.
+
+#### Ownership Layers
+
+| Layer | Location | Owner | Update Policy |
+|-------|----------|-------|---------------|
+| **L0 — Template SSOT** | `templates/common/scripts/` | templates team | Versioned via `SCRIPTS.md` Registry |
+| **L1 — Workspace** | `scripts/` (workspace root) | workspace maintainer | Sync from L0 on release |
+| **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation |
+
+**Propagation rule**: Changes flow L0 → L1 → L2 (at project creation time only).
+No automatic back-propagation. Reverse sync (project → workspace → template) requires an explicit PR.
+
+#### Script States
+
+| Status | Meaning | Enforcement |
+|--------|---------|-------------|
+| `active` | In production use | Version bump required on change |
+| `deprecated` | Scheduled for removal | `removal-date` required (90-day minimum notice); `dev-sync` warns L1/L2 |
+| `experimental` | Unstable / not propagated | Not synced to L1/L2 automatically |
+
+#### Deprecation Protocol
+
+1. Set `status: deprecated` and `removal-date: YYYY-MM-DD` in `SCRIPTS.md` Registry (≥ 90 days notice)
+2. `dev-sync.sh` warns all L1/L2 consumers on every run until removed
+3. On `removal-date`, `verify-scripts.ts --verify` **hard blocks** pre-commit
+
+#### Security Advisory Protocol
+
+When a security vulnerability is found in a script:
+1. Set `security-advisory: CVE-XXXX` in `SCRIPTS.md` Registry
+2. `dev-sync.sh` **hard blocks immediately** in L1/L2 (no grace period)
+3. Advisory is cleared only after the script is patched or removed
+
+#### SCRIPTS.md — Registry Format
+
+`templates/common/scripts/SCRIPTS.md` is the L0 manifest. It has two sections:
+
+- **`## Registry`** — machine-readable table parsed by `verify-scripts.ts`
+- **`## Guide`** — human-readable documentation (purpose, usage, deprecation notes)
+
+```markdown
+| script | source | version | status | removal-date | security-advisory |
+|--------|--------|---------|--------|--------------|-------------------|
+| `audit.sh` | L0 | 1.2.0 | active | — | — |
+| `old-tool.sh` | L0 | 2.1.0 | deprecated | 2026-08-01 | — |
+```
+
+---
+
 ### 7. New Project Initialization
 
 #### 7.1 Project Scaffolding Commands
