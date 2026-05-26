@@ -44,7 +44,7 @@ This matches exactly how a real meeting works — each person heard everything b
 
 Extract from `$ARGUMENTS`:
 - **Topic**: The meeting agenda (required)
-- **Participants**: e.g. `--agents architect,security-expert,auditor` (optional — defaults to all available agents for this project)
+- **Participants**: e.g. `--agents architect,security-expert,auditor` (optional — if omitted, defaults to context-aware roles based on execution directory. Root defaults to `pm, architect, auditor`; sub-projects default to `pm, automation-engineer, docs-writer` or available variant agents)
 - **Rounds**: e.g. `--rounds 2` (optional — default 2, max 3)
 - **Language**: e.g. `--language en` (optional — defaults to Korean; `en` switches all dialogue to English)
 - **Tasks**: e.g. `--tasks` flag (optional — if set, after the meeting automatically convert action items into a task plan)
@@ -63,11 +63,20 @@ Default is silent because most callers need the outcome, not the transcript. Pas
 
 ## Step 2 — Detect Project Context
 
-Check which agent files exist:
-- If `agents/` contains workspace agents (architect, auditor, security-expert, automation-engineer, docs-writer, scaffolding-expert) → workspace meeting
-- If `agents/` contains template agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) → project meeting
+**Automatically detect available agents:**
+1. Check if `agents/` directory exists in current working directory
+2. List all `*.md` files in `agents/` (excluding README.md)
+3. Extract agent names from filenames (e.g., `architect.md` → `architect`)
 
-Load only the agent files that (a) exist and (b) are in the `--agents` list if specified. Read each file now to hold all personas in context before the meeting starts.
+**Context-Aware Defaulting (if `--agents` is NOT specified):**
+- **Workspace Root Execution**: Default to `pm, architect, auditor`. This focuses the meeting on high-level architecture, standards, and cross-project consistency.
+- **Variant/Sub-project Execution**: Default to `pm, automation-engineer, docs-writer, security-expert` (or the specific agents present in that variant's local `agents/` folder). This focuses the meeting on execution, implementation, and variant-specific details.
+- *Note: Only load agents that actually exist in the detected `agents/` directories.*
+
+**If `--agents` IS specified:**
+- Filter the available agents to exactly match those provided in the list.
+
+If no agents are found in the final list or `agents/` doesn't exist, error with a clear message. Read each target agent file now to hold all personas in context before the meeting starts.
 
 ---
 

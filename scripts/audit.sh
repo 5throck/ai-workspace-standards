@@ -91,6 +91,28 @@ else
   warn "docs/context.md not found - skipping project-level checks (workspace root)"
 fi
 
+# --- Lifecycle Audits ---
+if command -v bun &>/dev/null; then
+    if [ -f "scripts/agent-lifecycle-audit.ts" ]; then
+        if bun scripts/agent-lifecycle-audit.ts --json 2>/dev/null | grep -q '"errors": \[\]'; then
+            green "Agent audit: all agents healthy"
+        else
+            red "Agent audit detected issues (run 'bun scripts/agent-lifecycle-audit.ts' to see details)"
+            ((errors++)) || true
+        fi
+    fi
+    if [ -f "scripts/skill-lifecycle-audit.ts" ]; then
+        if bun scripts/skill-lifecycle-audit.ts --json 2>/dev/null | grep -q '"errors": \[\]'; then
+            green "Skill audit: all skills healthy"
+        else
+            red "Skill audit detected issues (run 'bun scripts/skill-lifecycle-audit.ts' to see details)"
+            ((errors++)) || true
+        fi
+    fi
+else
+    warn "Bun not installed - skipping lifecycle audits"
+fi
+
 echo ""
 if [ "$errors" -eq 0 ]; then
   echo -e "\033[32m✅ All checks passed.\033[0m"

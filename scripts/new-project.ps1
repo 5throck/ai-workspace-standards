@@ -1,9 +1,11 @@
-﻿param(
-    [Parameter(Mandatory)][string]$ProjectName,
-    [Parameter(Mandatory=$false)][string]$Description = "A new project",
-    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc",
-    [Parameter(Mandatory=$false)][string]$Variant = "co-develop",
-    [Parameter(Mandatory=$false)][string]$Version = ""
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$ProjectName,
+    [string]$Description = "A new project",
+    [string]$TechStack = "Node.js / Python / etc",
+    [string]$Variant = "co-develop",
+    [string]$Version = ""
 )
 
 # UTF-8 encoding enforcement
@@ -13,9 +15,9 @@ $ErrorActionPreference = 'Stop'
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
-$TemplatesDir  = Join-Path $WorkspaceRoot "templates" $Variant
-$CommonDir     = Join-Path $WorkspaceRoot "templates" "common"
-$VersionFile   = Join-Path $WorkspaceRoot "templates" "VERSION"
+$TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
+$CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"
+$VersionFile   = Join-Path (Join-Path $WorkspaceRoot "templates") "VERSION"
 
 # ── Version resolution ─────────────────────────────────────────────────────────
 $TempDir = $null
@@ -36,8 +38,8 @@ if ($Version -ne "") {
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    $CommonDir = Join-Path $TempDir "templates" "common"
-    $TemplatesDir = Join-Path $TempDir "templates" $Variant
+    $CommonDir = Join-Path (Join-Path $TempDir "templates") "common"
+    $TemplatesDir = Join-Path (Join-Path $TempDir "templates") $Variant
     if (-not (Test-Path $TemplatesDir)) {
         Write-Host "❌ Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -156,6 +158,28 @@ if (Test-Path $ContextMd) {
     }
 }
 
+# ── 4.6. Inject AGENTS.md Skills into docs/context.md ────────────────────────
+$AgentsMdPath = Join-Path $ProjectDir "AGENTS.md"
+$ContextMdPath = Join-Path $ProjectDir "docs\context.md"
+
+if ((Test-Path $AgentsMdPath) -and (Test-Path $ContextMdPath)) {
+    $agentsContent = Get-Content $AgentsMdPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+    $contextContent = Get-Content $ContextMdPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+
+    if ($agentsContent -and $contextContent) {
+        if ($agentsContent -match '(?ms)^## Skills\s*(?<tableData>\| Skill .*?)(?=\n---|\Z)') {
+            $skillsTable = $Matches['tableData'].Trim()
+            $replacement = "`$1`n" + $skillsTable.Replace('$', '$$') + "`n`$2"
+            $newContextContent = $contextContent -replace '(?s)(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)', $replacement
+            
+            if ($newContextContent -ne $contextContent) {
+                Set-Content $ContextMdPath $newContextContent -Encoding UTF8 -NoNewline
+                Write-Host "🔄 Injected dynamic skills from AGENTS.md into docs/context.md" -ForegroundColor Cyan
+            }
+        }
+    }
+}
+
 # ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir
 git init
@@ -163,11 +187,11 @@ git config core.hooksPath .githooks
 
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
-    $rel = ".githooks" + $_.Name
+    $rel = ".githooks/" + $_.Name
     git update-index --chmod=+x $rel 2>$null
 }
 Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
-    $rel = "scripts" + $_.Name
+    $rel = "scripts/" + $_.Name
     git update-index --chmod=+x $rel 2>$null
 }
 
