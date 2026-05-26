@@ -154,19 +154,16 @@ C:\git\
 
 ## 멀티 에이전트 워크플로 (Multi-Agent Workflow)
 
-기본 `co-develop` 템플릿은 6단계 거버넌스 단계에 걸쳐 5역할 에이전트 모델을 사용합니다:
+이 워크스페이스의 각 템플릿 변형(Variant)은 목적에 맞게 고도로 최적화된 고유의 **다중 에이전트 워크플로와 에이전트 팀**을 제공합니다. 
 
-```
-PM Orchestrator (PM 오케스트레이터)
-  │
-  ├── Phase 1-2: Analysis agents (병렬 분석)  → 분석 결과 + 수용 조건 (Acceptance criteria)
-  ├── Phase 3:   Architect + Designer       → 구현 계획 + 디자인 스펙 (사용자 승인 필수)
-  ├── Phase 4:   Code Writer + Test Runner  → 구현 + 검증
-  ├── Phase 5:   QA gate                    → audit.sh 실행 및 테스트 통과 확인
-  └── Phase 6:   Finalization (마무리)       → memlog → sync → PR 생성
-```
+- **co-develop**: 소프트웨어 개발 및 검증을 위한 5역할/6단계 거버넌스 파이프라인
+- **co-design**: UI/UX 리서치 및 프로토타이핑을 위한 디자인 중심 파이프라인
+- **co-work**: 문서화, 기획, 리서치를 위한 범용 협업 파이프라인
 
-모든 역할에 대한 에이전트 스캐폴드 템플릿은 `templates/co-develop/agents/`에 존재합니다.
+**💡 Workflow 상세 정보 확인 방법**
+구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
+1. `AGENTS.md`: 해당 프로젝트에 투입된 전체 에이전트 역할 및 권한 명세
+2. `docs/context.md`: 프로젝트의 목표 및 초기 세션 시작을 위한 워크플로 컨텍스트
 
 ---
 
