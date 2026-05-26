@@ -1,7 +1,9 @@
 ﻿param(
     [Parameter(Mandatory)][string]$ProjectName,
     [Parameter(Mandatory=$false)][string]$Description = "A new project",
-    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc"
+    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc",
+    [Parameter(Mandatory=$false)][string]$Variant = "co-develop",
+    [Parameter(Mandatory=$false)][string]$Version = ""
 )
 
 # UTF-8 encoding enforcement
@@ -11,7 +13,43 @@ $ErrorActionPreference = 'Stop'
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
-$TemplatesDir  = Join-Path $WorkspaceRoot "templates"
+$TemplatesDir  = Join-Path $WorkspaceRoot "templates" $Variant
+$CommonDir     = Join-Path $WorkspaceRoot "templates" "common"
+$VersionFile   = Join-Path $WorkspaceRoot "templates" "VERSION"
+
+# ── Version resolution ─────────────────────────────────────────────────────────
+$TempDir = $null
+if ($Version -ne "") {
+    $Tag = "template-v$Version"
+    $tagExists = git -C $WorkspaceRoot tag -l $Tag 2>$null
+    if (-not $tagExists) {
+        Write-Host "❌ Template version not found: $Tag" -ForegroundColor Red
+        Write-Host "   Run: .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
+        exit 1
+    }
+    $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
+    New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
+    # Extract BOTH common and variant from tag
+    git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" | tar -x -C $TempDir 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
+        Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    $CommonDir = Join-Path $TempDir "templates" "common"
+    $TemplatesDir = Join-Path $TempDir "templates" $Variant
+    if (-not (Test-Path $TemplatesDir)) {
+        Write-Host "❌ Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
+        Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    if (-not (Test-Path $CommonDir)) {
+        Write-Host "❌ templates/common/ not found in template version $Tag" -ForegroundColor Red
+        Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    Write-Host "📦 Using template version: $Tag" -ForegroundColor Cyan
+}
 
 if (Test-Path $ProjectDir) {
     Write-Host "❌ Directory already exists: $ProjectDir" -ForegroundColor Red
@@ -19,15 +57,42 @@ if (Test-Path $ProjectDir) {
 }
 
 if (-not (Test-Path $TemplatesDir)) {
-    Write-Host "❌ Templates directory not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable)" -ForegroundColor Yellow
     exit 1
+}
+
+# Check variant status
+$VariantJson = Join-Path $TemplatesDir "variant.json"
+if (Test-Path $VariantJson) {
+    $variantData = Get-Content $VariantJson -Raw | ConvertFrom-Json
+    if ($variantData.status -ne "stable") {
+        Write-Host "⚠️  Variant '$Variant' has status: $($variantData.status)" -ForegroundColor Yellow
+        Write-Host "   This variant may not be fully implemented." -ForegroundColor Yellow
+        $confirm = Read-Host "   Continue anyway? [y/N]"
+        if ($confirm -ne "y" -and $confirm -ne "Y") {
+            Write-Host "Aborted." -ForegroundColor Red
+            exit 1
+        }
+    }
 }
 
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
-# ── 1. Copy templates (robocopy handles hidden files and subdirs) ──────────
+# ── 1. Copy common/ first (shared infrastructure) ────────────────────────────
+if (-not (Test-Path $CommonDir)) {
+    Write-Host "❌ Common templates directory not found: $CommonDir" -ForegroundColor Red
+    exit 1
+}
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
-robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
+robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
+
+# ── 2. Overlay variant/ on top (variant-specific files override common) ──────
+if (-not (Test-Path $TemplatesDir)) {
+    Write-Host "❌ Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
+    exit 1
+}
+robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS /IS | Out-Null
 
 # ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
 $examplesDir = Join-Path $ProjectDir "docs\_examples"
@@ -73,12 +138,23 @@ Get-ChildItem -Path $ProjectDir -Recurse -File |
         if ($content -match '\{\{PROJECT_NAME\}\}') { $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName; $modified = $true }
         if ($content -match '\{\{PROJECT_DESCRIPTION\}\}') { $content = $content -replace '\{\{PROJECT_DESCRIPTION\}\}', $Description; $modified = $true }
         if ($content -match '\{\{PROJECT_CHARACTERISTICS\}\}') { $content = $content -replace '\{\{PROJECT_CHARACTERISTICS\}\}', $TechStack; $modified = $true }
-        
+
         if ($modified) {
             Set-Content $_.FullName $content -Encoding UTF8 -NoNewline
         }
     }
   }
+
+# ── 4.5. Record template provenance in docs/context.md ────────────────────────
+$TemplateVersion = if ($Version -ne "") { $Version } elseif (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "unknown" }
+$ContextMd = Join-Path $ProjectDir "docs\context.md"
+if (Test-Path $ContextMd) {
+    $contextContent = Get-Content $ContextMd -Raw -Encoding UTF8
+    if ($contextContent -notmatch "Template-Version:") {
+        $provenance = "`n## Template Provenance`n`n- **Template-Version**: $TemplateVersion`n- **Template-Variant**: $Variant`n"
+        Add-Content $ContextMd $provenance -Encoding UTF8
+    }
+}
 
 # ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir
@@ -134,6 +210,11 @@ Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  -> $TemplatesDir\docs\_examples" -ForegroundColor DarkGray
+
+# ── Cleanup temp dir ───────────────────────────────────────────────────────────
+if ($TempDir -and (Test-Path $TempDir)) {
+    Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 
 

@@ -46,16 +46,23 @@ git config core.hooksPath .githooks
 ### 3. 첫 번째 프로젝트 생성
 
 ```bash
-# macOS / Linux / Windows (Git Bash)
+# 기본값 (최신 템플릿, co-develop variant)
 bash scripts/new-project.sh "my-project-name"
 
-# Windows - 명령 프롬프트 또는 PowerShell
-.\scripts\new-project.cmd "my-project-name"
+# variant 지정
+bash scripts/new-project.sh "my-project-name" --variant co-develop
+
+# 특정 템플릿 버전 사용 (목록 확인: bash scripts/list-template-versions.sh)
+bash scripts/new-project.sh "my-project-name" --version 0.4.0
+
+# Windows PowerShell
+.\scripts\new-project.ps1 "my-project-name"
+.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.4.0
 ```
 
-> **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"` 을 사용할 수 있습니다.
+> **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"`을 사용할 수 있습니다.
 
-각각의 새로운 프로젝트는 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일들과 함께 자동으로 스캐폴딩(scaffold)됩니다.
+각 새 프로젝트는 선택한 template variant를 기반으로 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일과 함께 생성됩니다. 사용된 템플릿 버전과 variant는 추적 가능성을 위해 `docs/context.md`에 기록됩니다.
 
 ### 4. 새 프로젝트로 이동 및 PM 킥오프 시작
 
@@ -109,23 +116,27 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── README_ko.md             # 본 파일 (국문)
 ├── .gitleaks.toml           # 시크릿 스캔 설정 (상위 기본값 확장)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
-├── templates/               # 공식 스캐폴드 - new-project.sh가 이 구조를 복사함
-│   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   ├── docs/                  
-│   │   ├── context.md       # 전체 10개 섹션의 프로젝트 컨텍스트 템플릿
-│   │   └── security.md      # 내부 데이터 삭제(Sanitization) 가이드라인
-│   ├── scripts/             # dev-sync.sh/.cmd, sync-md.sh/.cmd, audit.sh/.cmd
-│   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, 등
-│   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, 등
-│   ├── .githooks/           # pre-commit (스마트 조건부 검사), pre-push
-│   ├── .github/             # GitHub 템플릿 (CODEOWNERS, workflows, dependabot)
-│   ├── SECURITY.md          # GitHub 보안 정책 템플릿
-│   └── _examples/           # 참고용 ADR, analyst 에이전트, 세션 로그, 스킬
+├── templates/               # 버전 관리되는 template variant (template-vX.Y.Z 태그로 관리)
+│   ├── VERSION              # 현재 template semver (0.4.0)
+│   ├── CHANGELOG.md         # Template 레벨 변경 이력
+│   ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 에이전트 팀
+│   │   ├── variant.json     # Variant 메타데이터 (name, status, version)
+│   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
+│   │   ├── docs/            # context.md (10섹션 템플릿), security.md
+│   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog 등)
+│   │   ├── .gemini/         # settings.json, commands/
+│   │   ├── .githooks/       # pre-commit, pre-push
+│   │   └── .github/         # CODEOWNERS, workflows, dependabot
+│   ├── co-design/           # 🔵 Planned — UI/UX 디자인 워크플로
+│   └── co-work/             # 🔵 Planned — 범용 협업 워크플로
 ├── scripts/
-│   ├── audit.sh / .cmd      # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
-│   ├── dev-sync.sh / .cmd   # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .cmd    # MEMORY.md 인덱스 업데이트
-│   └── new-project.sh / .cmd # 새 프로젝트 스캐폴딩 (templates/ 복사)
+│   ├── audit.sh / .ps1                       # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
+│   ├── dev-sync.sh / .ps1                    # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .ps1                     # MEMORY.md 인덱스 업데이트
+│   ├── new-project.sh / .ps1                 # 새 프로젝트 스캐폴딩 (--variant, --version 지원)
+│   ├── list-template-versions.sh / .ps1      # 사용 가능한 template 버전 목록 (git 태그 기반)
+│   └── validate-templates.sh / .ps1          # Template variant 구조 무결성 검증
 ├── .githooks/
 │   ├── pre-commit           # 스마트 조건부 감사 (memory/ 파일 예외 처리)
 │   └── pre-push             # main 브랜치로의 직접 push 차단
@@ -177,7 +188,45 @@ PM Orchestrator (PM 오케스트레이터)
   └── Phase 6:   Finalization (마무리)       → memlog → sync → PR 생성
 ```
 
-모든 역할에 대한 에이전트 스캐폴드 템플릿은 `templates/agents/`에 존재합니다.
+모든 역할에 대한 에이전트 스캐폴드 템플릿은 `templates/co-develop/agents/`에 존재합니다.
+
+---
+
+## Template Variants (템플릿 Variant)
+
+새 프로젝트는 버전 관리된 template variant에서 생성됩니다. 템플릿은 Git에서 `template-vX.Y.Z` 태그로 관리됩니다.
+
+| Variant | 상태 | 설명 |
+|---------|------|------|
+| `co-develop` | ✅ Stable | 소프트웨어 개발 전용 워크플로 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
+| `co-design` | 🔵 Planned | UI/UX 디자인 워크플로 |
+| `co-work` | 🔵 Planned | 범용 협업 워크플로 |
+
+### 버전 및 Variant 선택
+
+```bash
+# 사용 가능한 template 버전 목록 확인
+bash scripts/list-template-versions.sh
+
+# 최신 template 사용 (기본값)
+bash scripts/new-project.sh my-project
+
+# 특정 버전 지정
+bash scripts/new-project.sh my-project --version 0.4.0
+
+# 특정 variant 지정
+bash scripts/new-project.sh my-project --variant co-develop
+```
+
+### Template 검증
+
+Template 파일을 수정할 때는 라이프사이클 검증기를 실행하여 구조적 문제를 조기에 발견하세요:
+
+```bash
+bash scripts/validate-templates.sh
+```
+
+검증 항목: 에이전트 frontmatter 완결성, 필수 섹션(`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md 명단 일치, 스크립트 `.sh`/`.ps1` 패리티, 공유 파일 동기화 경고. `templates/` 파일이 스테이징될 때 pre-commit을 통해 자동으로 실행됩니다.
 
 ---
 
@@ -211,4 +260,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck)*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-26*

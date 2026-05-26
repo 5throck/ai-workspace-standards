@@ -1,3 +1,7 @@
+---
+description: Add a changelog entry to CHANGELOG.md under the [Unreleased] section
+---
+
 Add a changelog entry to CHANGELOG.md under the `## [Unreleased]` section.
 
 Arguments: $ARGUMENTS

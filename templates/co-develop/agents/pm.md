@@ -89,3 +89,11 @@ When `/meeting` is invoked, Claude role-plays all participants inline — **no A
 - Adds opinions or positions to the transcript
 - Summarizes mid-meeting — let the dialogue breathe
 
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 1, 2, 5]  # PM owns team assembly, triage, design validation, finalization
+**Can Support In**: []
+**Auto-Dispatch To**: architect, designer, code-writer, test-runner, stack-setup
+**Tier**: high
+**Communication Style**: sync  # PM gates require user confirmation
+
