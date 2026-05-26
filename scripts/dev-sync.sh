@@ -11,7 +11,7 @@ mkdir -p memory
 GIT_STATUS=$(git status --short 2>/dev/null || true)
 FILE_LIST=""
 if [ -n "$GIT_STATUS" ]; then
-  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | sed 's/^/- `/' | sed 's/$/' — modified"/' )
+  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | sed 's/^/- `/' | sed 's/$/ -- modified`/')
 fi
 
 SEPARATOR=""
@@ -43,7 +43,7 @@ if [ -f "CHANGELOG.md" ]; then
     echo ""
     echo "⚠️  CHANGELOG.md [Unreleased] section has no entries."
     echo "   Consider running: /changelog \"type: description\" before syncing."
-    echo "   (continuing anyway — use this warning to keep your changelog current)"
+    echo "   (continuing anyway - use this warning to keep your changelog current)"
     echo ""
   fi
 fi
