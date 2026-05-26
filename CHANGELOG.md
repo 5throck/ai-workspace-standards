@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-27]**: `templates/common/docs/context.md` — new immutable common context file (project identity, architecture, key files, documentation standards) (#TBD)
+- **[2026-05-27]**: `templates/co-develop/docs/co-develop.context.md` — new variant config file (tech stack, agents, skills, scripts, workflow) with lifecycle status columns (#TBD)
+- **[2026-05-27]**: `templates/co-design/docs/co-design.context.md` — new variant config file for design projects (#TBD)
+- **[2026-05-27]**: `templates/co-work/docs/co-work.context.md` — new variant config file for collaboration projects (#TBD)
+- **[2026-05-27]**: All variant CLAUDE.md and GEMINI.md — `## Session Start — Context Loading Order` section added (context.md → variant.context.md → AGENTS.md read order) (#TBD)
+- **[2026-05-27]**: `scripts/new-project.sh` / `.ps1` — template provenance written to variant.context.md; `docs/context.md merge=ours` added to `.gitattributes` on project creation (#TBD)
+
+### Changed
 - **[2026-05-27]**: `.github/pull_request_template.md` redesigned with Summary/Changes table/Test Plan/Security Checklist sections — applied to workspace and all template variants (#93)
 - **[2026-05-27]**: `CONSTITUTION.md §2`: Memory session log mandatory four-section format (Session Summary, Changes, Decisions, Open Issues) with cross-tool consistency note (#93)
 - **[2026-05-27]**: `CONSTITUTION.md §2.1`: CHANGELOG entry `(#PR-number)` reference requirement (#93)

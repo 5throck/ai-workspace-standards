@@ -157,15 +157,27 @@ Get-ChildItem -Path $ProjectDir -Recurse -File |
     }
   }
 
-# ── 4.5. Record template provenance in docs/context.md ────────────────────────
+# ── 4.5. Record template provenance in variant context file ───────────────────
 $TemplateVersion = if ($Version -ne "") { $Version } elseif (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "unknown" }
-$ContextMd = Join-Path $ProjectDir "docs\context.md"
-if (Test-Path $ContextMd) {
-    $contextContent = Get-Content $ContextMd -Raw -Encoding UTF8
-    if ($contextContent -notmatch "Template-Version:") {
+$VariantContextMd = Join-Path $ProjectDir "docs\$Variant.context.md"
+if (Test-Path $VariantContextMd) {
+    $variantContextContent = Get-Content $VariantContextMd -Raw -Encoding UTF8
+    if ($variantContextContent -notmatch "Template-Version:") {
         $provenance = "`n## Template Provenance`n`n- **Template-Version**: $TemplateVersion`n- **Template-Variant**: $Variant`n"
-        Add-Content $ContextMd $provenance -Encoding UTF8
+        Add-Content $VariantContextMd $provenance -Encoding UTF8
     }
+}
+
+# ── 4.6. Protect context.md from accidental overwrites (merge=ours) ───────────
+$GitAttributesPath = Join-Path $ProjectDir ".gitattributes"
+$mergeOursLine = "docs/context.md merge=ours"
+if (Test-Path $GitAttributesPath) {
+    $gitAttrContent = Get-Content $GitAttributesPath -Raw -Encoding UTF8
+    if ($gitAttrContent -notmatch "docs/context\.md") {
+        Add-Content $GitAttributesPath "`n$mergeOursLine" -Encoding UTF8
+    }
+} else {
+    Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
 # ── 4.6. Inject AGENTS.md Skills into docs/context.md ────────────────────────

@@ -1,11 +1,18 @@
 # CLAUDE.md
 
-> **All project context, coding guidelines, and dev workflow → [`docs/context.md`](docs/context.md)**
+> **Doc intent:** This file is Claude Code-specific behavioral configuration for **individual projects** (not the workspace root).
 > Workspace-level Claude Code behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md)
 
-> **Doc intent:** This file is Claude Code-specific behavioral configuration for **individual projects** (not the workspace root).
-> Shared project context (architecture, tech stack, coding guidelines) lives in [`docs/context.md`](docs/context.md).
-> Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
+## Session Start — Context Loading Order
+
+At the start of every session, read these files **in order**:
+
+1. **[`docs/context.md`](docs/context.md)** — Immutable project identity (architecture, key files, documentation standards). Do NOT modify.
+2. **[`docs/co-develop.context.md`](docs/co-develop.context.md)** — Tech stack, agents, skills, scripts, workflow. All project-specific changes go here.
+3. **[`AGENTS.md`](AGENTS.md)** — Canonical agent index and dispatch protocols.
+
+> The two-file split is intentional: `context.md` never changes after project creation;
+> `co-develop.context.md` evolves with the project (agents, skills, tech stack, workflow).
 
 ---
 
