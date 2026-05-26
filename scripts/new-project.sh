@@ -31,6 +31,17 @@ if [ -z "$PROJECT_NAME" ]; then
   exit 1
 fi
 
+# Validate PROJECT_NAME: alphanumeric, hyphens, underscores only; max 64 chars
+if [[ ! "$PROJECT_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+  echo "❌ Invalid project name: '$PROJECT_NAME'"
+  echo "   Only letters, numbers, hyphens (-), and underscores (_) are allowed."
+  exit 1
+fi
+if [ "${#PROJECT_NAME}" -gt 64 ]; then
+  echo "❌ Project name too long (${#PROJECT_NAME} chars). Maximum is 64 characters."
+  exit 1
+fi
+
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ "$VARIANT" = "co-develop" ]; then
   echo "❌ --variant requires a value. Available: co-develop, co-design, co-work"

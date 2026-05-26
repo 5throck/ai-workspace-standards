@@ -1,307 +1,260 @@
 ---
 name: skill-lifecycle-manager
-description: This skill should be used when the user asks to "manage skill lifecycle", "audit skills", "deprecated skills", "orphaned skills", "check skill health", or when PM agent needs to handle skill changes after agent configuration changes. Provides comprehensive skill lifecycle management workflows. Compatible with Claude Code and Antigravity (Gemini CLI).
+description: >
+  Manages the creation, validation, and maintenance of skill files across the project.
+  Use when: creating new skills, updating skill metadata, validating skill structure,
+  or managing skill-agent mappings.
 version: 1.0.0
-status: active
-owner: pm
-platforms: [claude-code, antigravity]
-requires: []
+metadata:
+  type: process
+  triggers:
+    - create skill
+    - new skill
+    - validate skills
+    - skill lifecycle
+    - manage skills
 ---
 
-# Skill Lifecycle Manager
+## Overview
 
-Manages the complete lifecycle of skills in the workspace: creation, evolution, deprecation, and archival. Used primarily by the PM agent when agent configurations change.
+This skill provides a systematic approach to creating, validating, and maintaining skill files. It ensures all skills follow proper structure, have correct frontmatter, and are properly documented in AGENTS.md and docs/context.md.
 
 ## When to Use This Skill
 
-Use this skill when:
-- PM agent adds/removes/reconfigures agents in the team
-- User requests skill health audit or cleanup
-- Agent roles change and associated skills need updating
-- Merging or consolidating agents and their skills
-- Identifying orphaned or deprecated skills
+**Create New Skill:**
+- Trigger: "Create a skill for X capability" or "Add skill to do Y"
+- Use Case: New workflow capability needed that doesn't fit in agent role definition
 
-## Skill Lifecycle States
+**Validate Existing Skills:**
+- Trigger: "Check if skills are valid" or "Validate skill structure"
+- Use Case: After modifying skills, before committing changes
 
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  DRAFT   │───▶│  ACTIVE  │───▶│DEPRECATED│───▶│ ARCHIVED │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-```
+**Update Skill Metadata:**
+- Trigger: "Update skill triggers" or "Modify skill frontmatter"
+- Use Case: Improving skill discoverability or updating descriptions
 
-| State | Description | Action Required |
-|-------|-------------|-----------------|
-| **draft** | Skill under development | Move to active after review |
-| **active** | Skill in production use | Regular health checks |
-| **deprecated** | Superseded, pending removal | Archive after 30 days |
-| **archived** | No longer used, kept for reference | Can delete after 90 days |
+---
 
-## Skill Frontmatter Template
+## Step 1: Create New Skill Structure
 
-All skills should include lifecycle metadata:
+**Purpose**: Create proper directory structure for a new skill.
+
+**Steps**:
+1. Navigate to `skills/` directory (workspace root) or `templates/common/skills/`
+2. Create skill directory: `mkdir -p skills/<skill-name>/`
+3. Create SKILL.md file: `touch skills/<skill-name>/SKILL.md`
+
+**Validation**:
+- Directory name should use kebab-case (lowercase with hyphens)
+- SKILL.md must be exactly that name (uppercase)
+- No nested subdirectories within skill directory
+
+---
+
+## Step 2: Write Skill Frontmatter
+
+**Purpose**: Define skill metadata with proper YAML frontmatter.
+
+**Required Frontmatter Structure**:
 
 ```yaml
 ---
 name: skill-name
-description: This skill should be used when...
-version: 1.2.3
-
-# Lifecycle metadata
-status: active           # draft | active | deprecated | archived
-owner: agent-name        # Primary owning agent
-requires: []             # Skills this depends on
-supersedes: old-skill    # This replaces old skill
-superseded_by: []        # If another skill replaces this
-
-# Maintenance
-last_reviewed: 2026-05-25
-last_reviewed_by: pm-agent
+description: >
+  Brief description of what this skill does and when to use it.
+  Use when: [specific trigger scenarios]
+version: 1.0.0
+metadata:
+  type: process | implementation | domain
+  triggers:
+    - keyword1
+    - keyword2
+    - keyword3
 ---
 ```
 
-## Agent Configuration Change Workflow
+**Field Definitions**:
+- `name`: kebab-case skill identifier (must match directory name)
+- `description`: Clear explanation of skill purpose + trigger conditions
+- `version`: Semantic version (start at 1.0.0)
+- `metadata.type`: One of:
+  - `process`: Workflow and methodology skills
+  - `implementation`: Technical implementation skills
+  - `domain`: Domain-specific knowledge skills
+- `metadata.triggers`: List of keywords that should activate this skill
 
-When PM agent modifies the agent team:
+**Validation**:
+- All required fields must be present
+- `name` must match directory name
+- `type` must be one of the three valid values
+- `triggers` must be a list with at least one item
 
-### 1. New Agent Added
+---
 
-```
-┌─────────────────────────────────────────────┐
-│ Does the new agent need a skill?            │
-├─────────────────────────────────────────────┤
-│ YES → Create new skill (status: draft)      │
-│       - Use skill-creator to draft          │
-│       - Set owner: new-agent                │
-│       - Test and validate                   │
-│       - Change status to active             │
-│                                              │
-│ NO  → Check if existing skills can be       │
-│       shared → Add to owner: [agent1, ...]  │
-└─────────────────────────────────────────────┘
-```
+## Step 3: Write Skill Content
 
-### 2. Agent Role Changed
+**Purpose**: Document the skill's workflow, steps, and expected outputs.
 
-```
-┌─────────────────────────────────────────────┐
-│ Find all skills with owner: changed-agent   │
-├─────────────────────────────────────────────┤
-│ Update skill descriptions to reflect        │
-│ new scope and responsibilities              │
-│                                              │
-│ If capabilities added:                       │
-│   - Add/extend skills                       │
-│   - Bump version (minor)                    │
-│                                              │
-│ If capabilities removed:                     │
-│   - Deprecate affected skills               │
-│   - Or document reduced scope               │
-└─────────────────────────────────────────────┘
-```
+**Required Sections**:
 
-### 3. Agent Removed
+1. **Overview**: High-level explanation of skill purpose
+2. **When to Use This Skill**: Trigger conditions and use cases
+3. **Steps**: Numbered workflow steps (grouped by logical phases)
+4. **Expected Outputs**: What the skill produces
+5. **Examples** (optional): Concrete usage examples
 
-```
-┌─────────────────────────────────────────────┐
-│ Find all skills with owner: removed-agent   │
-├─────────────────────────────────────────────┤
-│ For each skill:                             │
-│   1. Is skill shared? (multiple owners)     │
-│      → Remove removed-agent from owner list │
-│                                              │
-│   2. Is skill needed by another agent?      │
-│      → Reassign owner field                 │
-│                                              │
-│   3. Is skill orphaned?                     │
-│      → Change status: deprecated            │
-│      → Document in AGENTS.md                │
-│      → Schedule for archival (30 days)      │
-└─────────────────────────────────────────────┘
-```
+**Content Guidelines**:
+- Use imperative mood ("Create X", not "Creates X")
+- Include validation checks at each step
+- Specify expected outputs clearly
+- Add examples for complex skills
 
-### 4. Agent Consolidation
+---
 
-```
-┌─────────────────────────────────────────────┐
-│ Agents merged → Merge skill inventories     │
-├─────────────────────────────────────────────┤
-│ 1. List all skills from merged agents       │
-│ 2. Identify duplicates:                     │
-│    - Use supersedes field to mark old       │
-│    - Keep most complete version             │
-│ 3. Update owner: new-consolidated-agent     │
-│ 4. Run lifecycle audit to verify            │
-└─────────────────────────────────────────────┘
-```
+## Step 4: Update Documentation
 
-## Platform Support
+**Purpose**: Register skill in project documentation.
 
-This skill and its audit scripts support both **Claude Code** and **Antigravity (Gemini CLI)**:
+**Files to Update**:
 
-| Platform | Detection Marker | Skill Location | Config |
-|----------|-----------------|----------------|--------|
-| Claude Code | `CLAUDE.md` or `.claude/` | `.claude/skills/` | `.claude/settings.json` |
-| Antigravity | `GEMINI.md` | `.gemini/skills/` or `.claude/skills/` | `GEMINI.md` |
+1. **AGENTS.md** (if applicable):
+   - Add to Skills table
+   - Include file path and trigger condition
 
-The audit script automatically detects the platform and adjusts paths accordingly.
+2. **docs/context.md**:
+   - Add to Skills section
+   - Include skill name, type, and brief description
 
-## Running Skill Health Audit
+3. **skills/README.md**:
+   - Update available skills list
+   - Ensure skill is discoverable
 
-Execute the audit script to check skill health:
+**Validation**:
+- Skill appears in all relevant documentation
+- File paths are correct
+- Trigger conditions match frontmatter
 
-**Bash:**
+---
+
+## Step 5: Validate Skill
+
+**Purpose**: Ensure skill follows all conventions and is properly structured.
+
+**Validation Checklist**:
+- [ ] Directory exists with correct name (kebab-case)
+- [ ] SKILL.md file exists (exact name)
+- [ ] Frontmatter has all required fields
+- [ ] `name` matches directory name
+- [ ] `type` is one of: process, implementation, domain
+- [ ] `triggers` list has at least one item
+- [ ] Content has Overview and When to Use sections
+- [ ] Documentation updated (AGENTS.md, docs/context.md)
+- [ ] No duplicate skill names exist
+
+**Run Validation Script** (if available):
 ```bash
-bash scripts/skill-lifecycle-audit.sh
+bun run verify-skills
 ```
 
-**PowerShell:**
-```powershell
-.\scripts\skill-lifecycle-audit.ps1
+---
+
+## Step 6: Test Skill Activation
+
+**Purpose**: Verify skill can be activated and functions correctly.
+
+**Test Steps**:
+1. Try activating skill via Claude Code: `Skill tool with skill name`
+2. Verify frontmatter loads correctly
+3. Check that content is readable and actionable
+4. Test with sample trigger scenario
+
+**Success Criteria**:
+- Skill loads without errors
+- Content is complete and actionable
+- Triggers match expected use cases
+
+---
+
+## Expected Outputs
+
+**For New Skill Creation**:
+- Properly structured skill directory
+- Complete SKILL.md with valid frontmatter
+- Updated documentation (AGENTS.md, docs/context.md)
+- Validation confirmation
+
+**For Skill Validation**:
+- Pass/fail status for each validation check
+- List of any issues found
+- Suggestions for fixing problems
+
+---
+
+## Common Mistakes to Avoid
+
+❌ **Don't**:
+- Create skills that duplicate agent roles
+- Use vague or generic trigger keywords
+- Skip updating documentation
+- Mix skill types incorrectly
+- Create deeply nested skill directories
+
+✅ **Do**:
+- Focus skills on specific capabilities
+- Use clear, specific trigger keywords
+- Always update documentation after creating skills
+- Choose appropriate skill type
+- Keep skill structure flat (one level deep)
+
+---
+
+## Examples
+
+**Example 1: Process Skill**
+```yaml
+---
+name: debugging-workflow
+description: Use when troubleshooting code issues, investigating bugs, or diagnosing errors
+metadata:
+  type: process
+  triggers:
+    - debug
+    - troubleshoot
+    - investigate error
+---
 ```
 
-The audit checks for:
-- ✅ Skills without owners
-- ✅ Orphaned skills (owner agent doesn't exist)
-- ✅ Deprecated skills still being modified
-- ✅ Missing dependencies (requires field)
-
-## Handling Audit Results
-
-### Orphaned Skills (ERROR)
-
-```
-✖ ERROR: Orphaned skill
-   File: skills/old-feature.md
-   Owner: deprecated-agent (agent not found)
-
-Actions:
-1. If skill still useful → Reassign owner to active agent
-2. If skill obsolete → Mark status: deprecated
-3. Document decision in AGENTS.md Skills table
+**Example 2: Implementation Skill**
+```yaml
+---
+name: frontend-design
+description: Use when implementing user interfaces, creating visual designs, or building UI components
+metadata:
+  type: implementation
+  triggers:
+    - design ui
+    - create interface
+    - build component
+---
 ```
 
-### Deprecated Skills (WARNING)
-
-```
-⚠️  WARNING: Deprecated skill still active
-   File: skills/legacy-format.md
-   Status: deprecated (v1.0.0)
-
-Actions:
-1. Move to skills/_archive/ directory
-2. Update AGENTS.md to note archival
-3. Or delete if no longer needed
-```
-
-### Missing Dependencies (WARNING)
-
-```
-⚠️  WARNING: Missing dependency
-   File: skills/advanced-feature.md
-   Requires: base-skill (not found)
-
-Actions:
-1. Create missing base skill
-2. Or remove from requires: []
+**Example 3: Domain Skill**
+```yaml
+---
+name: api-integration
+description: Use when integrating with external APIs, handling authentication, or managing API clients
+metadata:
+  type: domain
+  triggers:
+    - api integration
+    - external service
+    - authentication
+---
 ```
 
-## Updating AGENTS.md Skills Table
+---
 
-After any skill lifecycle change, update the Skills table in AGENTS.md:
+## Related Skills
 
-```markdown
-## Skills Registry
-
-| Skill | Owner | Status | Version | Purpose |
-|-------|-------|--------|---------|---------|
-| ui-ux-pro-max | workspace | active | 2.1.0 | UI/UX design |
-| audit-workspace | pm-agent | active | 1.5.3 | Compliance checks |
-| old-skill | - | deprecated | 0.9.0 | Legacy feature |
-
-*Last updated: 2026-05-25*
-```
-
-## Skill Versioning
-
-| Change Type | Version Bump | Example |
-|-------------|--------------|---------|
-| Documentation fix | Same | 1.2.3 → 1.2.3 |
-| Bug fix in skill logic | Patch | 1.2.3 → 1.2.4 |
-| New capability added | Minor | 1.2.3 → 1.3.0 |
-| Breaking change (behavior) | Major | 1.2.3 → 2.0.0 |
-| Agent owner change | Same | 1.2.3 → 1.2.3 |
-
-## Skill Archival Process
-
-When archiving a deprecated skill:
-
-```bash
-# Create archive directory if needed
-mkdir -p skills/_archive
-
-# Move skill with timestamp
-mv skills/old-skill skills/_archive/old-skill-2026-05-25/
-
-# Update AGENTS.md to note archival location
-```
-
-Archived skills can be deleted after 90 days if no references remain.
-
-## Workflow Checklist
-
-When managing skill lifecycle:
-
-- [ ] Run audit script to identify issues
-- [ ] For each error/warning, determine appropriate action
-- [ ] Update skill frontmatter (status, owner, version)
-- [ ] Reassign owners or deprecate as needed
-- [ ] Update AGENTS.md Skills table
-- [ ] Archive deprecated skills
-- [ ] Re-run audit to verify fixes
-- [ ] Document decisions in memory/YYYY-MM-DD.md
-
-## Example Session
-
-```
-User: "Remove the old-audit agent, its duties go to pm-agent"
-
-1. Find skills with owner: old-audit
-   → skills/security-scan.md
-   → skills/compliance-check.md
-
-2. For each skill:
-   → Update owner: pm-agent
-   → Update last_reviewed: today
-   → Bump version patch
-
-3. Update AGENTS.md:
-   → Remove old-audit from agent table
-   → Update skill owner assignments
-
-4. Run audit to verify:
-   bash scripts/skill-lifecycle-audit.sh
-
-5. Document in memory log:
-   /memlog "Migrated old-audit skills to pm-agent"
-```
-
-## Additional Resources
-
-### Scripts
-
-| Script | Platform | Usage |
-|--------|----------|-------|
-| **`scripts/skill-lifecycle-audit.ts`** | Bun (Recommended) | `bun scripts/skill-lifecycle-audit.ts` |
-| **`scripts/skill-lifecycle-audit.sh`** | Bash/Unix | `bash scripts/skill-lifecycle-audit.sh` |
-| **`scripts/skill-lifecycle-audit.ps1`** | PowerShell | `.\scripts\skill-lifecycle-audit.ps1` |
-
-> **Why Bun?** Single cross-platform binary, type-safe TypeScript, fastest execution, no shell injection risks.
-
-### References
-- **AGENTS.md** - Agent and skill registry
-- **CONSTITUTION.md §6** - Skill file format standards
-- **GEMINI.md** - Antigravity-specific behaviors
-
-### Related Skills
-- **skill-creator:skill-creator** - Creating new skills
-- **plugin-dev:skill-development** - Skill structure and best practices
+- **validate-templates**: Validates template structure (related validation skill)
+- **agent-lifecycle-manager**: Manages agent creation and validation (parallel workflow)

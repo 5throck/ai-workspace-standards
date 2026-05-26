@@ -12,6 +12,16 @@ param(
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
+# Validate ProjectName: alphanumeric, hyphens, underscores only; max 64 chars
+if ($ProjectName -notmatch '^[a-zA-Z0-9_-]+$') {
+    Write-Host "❌ Invalid project name: '$ProjectName'" -ForegroundColor Red
+    Write-Host "   Only letters, numbers, hyphens (-), and underscores (_) are allowed." -ForegroundColor Yellow
+    exit 1
+}
+if ($ProjectName.Length -gt 64) {
+    Write-Host "❌ Project name too long ($($ProjectName.Length) chars). Maximum is 64 characters." -ForegroundColor Red
+    exit 1
+}
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
