@@ -24,6 +24,7 @@
 |-------|------|------|------|
 | **UX Researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | Conducts user research, analyzes needs, produces insights and personas |
 | **Design Lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Owns design direction, design system architecture, and creative strategy |
+| **Design Storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | High | Provides philosophical foundation, meaning, and narrative coherence to design systems |
 
 ### 🎭 Visual & Interface Design
 

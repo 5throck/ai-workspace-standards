@@ -13,6 +13,7 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Research Analyst** | [`agents/analyst.md`](agents/analyst.md) | Medium | Conducts systematic investigation, data synthesis, evidence gathering |
+| **Storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | High | Shapes organizational culture, manages change narratives, provides historical context |
 
 ### ✍️ Documentation & Communication
 | Agent | File | Tier | Role |

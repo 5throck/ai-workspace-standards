@@ -4,7 +4,7 @@ Run an interactive meeting where design agents discuss design decisions and coll
 
 **Usage:**
 ```bash
-/meeting "design topic to discuss" --agents pm,design-lead,ux-researcher,visual-designer,prototype-engineer
+/meeting "design topic to discuss" --agents pm,design-lead,storyteller,ux-researcher,visual-designer,prototype-engineer
 ```
 
 **Example:**
@@ -15,6 +15,7 @@ Run an interactive meeting where design agents discuss design decisions and coll
 **Available Design Agents:**
 - **pm**: Design Project Manager (meeting facilitator)
 - **design-lead**: Design System & Visual Direction Lead
+- **storyteller**: Design Storyteller & Brand Philosopher
 - **ux-researcher**: User Research & Usability Testing Specialist
 - **visual-designer**: UI Execution & Visual Design Specialist
 - **prototype-engineer**: Interactive Prototyping Specialist

@@ -4,11 +4,12 @@ Run an interactive meeting where collaboration agents discuss research, document
 
 **Usage:**
 ```bash
-/meeting "collaboration topic to discuss" --agents pm,analyst,content-writer,project-coordinator
+/meeting "collaboration topic to discuss" --agents pm,storyteller,analyst,content-writer,project-coordinator
 ```
 
 **Available Collaboration Agents:**
 - **pm**: Collaboration Project Manager (meeting facilitator)
+- **storyteller**: Organizational Storyteller & Culture Steward
 - **analyst**: Research & Data Analyst
 - **content-writer**: Content Writer & Documentation Specialist
 - **project-coordinator**: Project Coordinator
