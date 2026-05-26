@@ -78,7 +78,7 @@ if [ -n "$SCRIPT_STAGED" ]; then
   done <<< "$SCRIPT_STAGED"
 fi
 
-DOCS_TO_CHECK=$(echo "$STAGED" | grep -E "^memory/.*\.md$|^CHANGELOG.md$" || true)
+DOCS_TO_CHECK=$(echo "$STAGED" | grep -E "^memory/.*\.md$|^CHANGELOG.md$" | grep -v "^memory/meeting-" || true)
 if [ -n "$DOCS_TO_CHECK" ]; then
   while IFS= read -r file; do
     [ -z "$file" ] && continue
