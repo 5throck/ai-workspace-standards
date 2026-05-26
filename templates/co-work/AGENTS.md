@@ -55,6 +55,7 @@
 | **Documentation Writing** | `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications, synthesizing complex information |
 | **Meeting Facilitation** | `../common/skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
 | **Skill Lifecycle Manager** | `../common/skills/skill-lifecycle-manager/SKILL.md` | PM managing skill lifecycle and validation |
+| **API Documentation** | `.claude/skills/api-documentation/SKILL.md` | Documenting REST APIs, GraphQL interfaces, SDKs, and developer-facing technical specifications |
 
 ---
 

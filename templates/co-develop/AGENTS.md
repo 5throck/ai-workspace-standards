@@ -155,6 +155,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | **Skill Lifecycle Manager** | `../common/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
 | **Meeting Facilitation** | `../common/skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making and problem resolution |
 | **Code Review** | `.claude/skills/code-review/SKILL.md` | Conducting thorough code reviews focusing on correctness, maintainability, security, and best practices |
+| **Test-Driven Development** | `.claude/skills/test-driven-development/SKILL.md` | Implementing software using TDD methodology with red-green-refactor cycle |
+| **Refactoring** | `.claude/skills/refactoring/SKILL.md` | Improving code structure and design while preserving behavior using systematic refactoring techniques |
 
 *(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 

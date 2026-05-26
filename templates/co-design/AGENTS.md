@@ -152,6 +152,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | **UI/UX Design Intelligence** | `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, creating visual designs, UI components, or design specifications |
 | **Skill Lifecycle Manager** | `../common/skills/skill-lifecycle-manager/SKILL.md` | Design PM managing skill lifecycle after agent configuration changes |
 | **Meeting Facilitation** | `../common/skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
+| **Service Design** | `.claude/skills/service-design/SKILL.md` | Designing end-to-end service experiences, customer journeys, and operational processes |
 
 ---
 
