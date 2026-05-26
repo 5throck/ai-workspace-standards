@@ -105,6 +105,7 @@ __pycache__/
 !agents/
 !memory/
 !.github/
+!docs/constitution/
 
 # --- CodeGraph Index ---
 .codegraph/
