@@ -52,6 +52,23 @@ if [ "$MEMORY_ONLY" = false ]; then
   bash scripts/audit.sh || exit 1
 fi
 
+# ── 2-B. Enforce UTF-8 on all staged Script files ────────────────────────────
+SCRIPT_STAGED=$(echo "$STAGED" | grep -iE "\.(sh|ps1|ts)$" || true)
+if [ -n "$SCRIPT_STAGED" ]; then
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      ENCODING=$(file --mime-encoding "$file" | cut -d: -f2 | tr -d ' ')
+      if [[ "$ENCODING" != "utf-8" && "$ENCODING" != "us-ascii" ]]; then
+        echo -e "\033[31m[FAIL]\033[0m Invalid encoding '$ENCODING' in $file"
+        echo "       All script files (.sh, .ps1, .ts) must be UTF-8 encoded."
+        echo "       Convert to UTF-8: iconv -f ORIGINAL_ENCODING -t UTF-8 -o output.txt input.txt"
+        exit 1
+      fi
+    fi
+  done <<< "$SCRIPT_STAGED"
+fi
+
 # ── 3.5. Agent Lifecycle Audit ─────────────────────────────────────────────────
 # Run when workspace root agent files are modified (skip sub-projects)
 AGENT_FILES=$(echo "$STAGED" | grep -iE "^agents/.*\.md|^AGENTS\.md" || true)
