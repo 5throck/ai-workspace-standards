@@ -25,12 +25,14 @@
 | **UX Researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | Conducts user research, analyzes needs, produces insights and personas |
 | **Design Lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Owns design direction, design system architecture, and creative strategy |
 | **Design Storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | High | Provides philosophical foundation, meaning, and narrative coherence to design systems |
+| **Service Designer** | [`agents/service-designer.md`](agents/service-designer.md) | Medium | Designs end-to-end service experiences, customer journeys, and operational processes |
 
 ### 🎭 Visual & Interface Design
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Visual Designer** | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Produces visual designs, design tokens, and component specifications |
+| **Typography Expert** | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Specializes in font selection, type systems, and visual hierarchy through typography |
 
 ### 🔨 Prototyping & Handoff
 
