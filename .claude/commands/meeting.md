@@ -175,22 +175,24 @@ Print the closing header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is a 2-3 word kebab-case summary of the topic:
+Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is a 2-3 word kebab-case summary of the topic.
+
+> **Language rule**: The saved transcript file MUST always be written in **English**, regardless of the dialogue language used during the meeting. If the meeting was conducted in Korean, translate all dialogue, action items, and acceptance criteria to English before saving. This follows the workspace documentation standard (CONSTITUTION.md §2).
 
 ```markdown
 # Meeting Transcript
 **Date**: YYYY-MM-DD
-**Topic**: [TOPIC]
+**Topic**: [TOPIC in English]
 **Participants**: [list]
 **Rounds**: [N]
-**Language**: [Korean | English]
+**Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
 ---
 
 ## Transcript
 
-[Full dialogue — each turn in order]
+[Full dialogue in English — each turn in order]
 
 ---
 

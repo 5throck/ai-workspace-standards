@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-27]**: `templates/common/scripts/SCRIPTS.md` — script lifecycle registry (Registry + Guide dual-section) (#96)
 - **[2026-05-27]**: `scripts/verify-scripts.ts` — script registry verifier with --verify / --generate / --report modes (#96)
 - **[2026-05-27]**: `CONSTITUTION.md §6.5` — Script Lifecycle Management section (ownership layers, states, deprecation/security protocols) (#96)
+- **[2026-05-27]**: Meeting transcripts English mandate — `/meeting` skill updated to always save transcripts in English regardless of dialogue language; all variant `meeting.md` commands updated
+- **[2026-05-27]**: Existing Korean meeting transcripts translated to English (`meeting-2026-05-27-template-lifecycle-review.md`, `meeting-2026-05-27-script-lifecycle-context-structure.md`)
+- **[2026-05-27]**: `.githooks/pre-commit` — removed meeting-transcript Korean exemption; all `memory/*.md` files now subject to English-only enforcement
 - **[2026-05-27]**: `scripts/verify-memory.ts` — memory log format verifier with --verify / --report modes (#99)
 - **[2026-05-27]**: `scripts/sync-md.sh/ps1` — MEMORY.md 3-section structure (Sessions/Meetings/ADRs) with --meeting and --adr flags (#99)
 
