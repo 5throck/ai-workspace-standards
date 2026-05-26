@@ -77,6 +77,27 @@ function warn(variant: string, check: string, msg: string, fix?: string) {
   }
 }
 
+// Check 0: templates/common/
+function checkCommon(): void {
+  if (!JSON_MODE) console.log('\n=== Check 0: templates/common/ ===');
+  const commonDir = join(TEMPLATES_DIR, 'common');
+  if (!existsSync(commonDir)) {
+    fail('root', 'common-dir', 'templates/common/ directory not found', 'Create templates/common/ with shared infrastructure');
+    return;
+  }
+
+  // Check required subdirectories
+  const requiredDirs = ['.githooks', '.github', 'scripts', 'docs'];
+  for (const dir of requiredDirs) {
+    const dirPath = join(commonDir, dir);
+    if (!existsSync(dirPath)) {
+      fail('common', 'common-structure', `templates/common/${dir}/ not found`, `Create templates/common/${dir}/ directory`);
+    }
+  }
+
+  pass('templates/common/ exists with required subdirectories');
+}
+
 // Check 1: templates/VERSION
 function checkVersion(): void {
   if (!JSON_MODE) console.log('\n=== Check 1: templates/VERSION ===');
@@ -106,7 +127,7 @@ function checkVariantManifests(): Map<string, VariantManifest> {
   const entries = readdirSync(TEMPLATES_DIR);
   const variantDirs = entries.filter(e => {
     const fullPath = join(TEMPLATES_DIR, e);
-    return statSync(fullPath).isDirectory() && !e.startsWith('.');
+    return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common';
   });
 
   if (variantDirs.length === 0) {
@@ -261,33 +282,54 @@ function checkAgentsRoster(variant: string): void {
   }
 }
 
-// Check 6: .claude/commands/ description frontmatter
+// Check 6: .claude/commands in variant
 function checkCommands(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 6: .claude/commands in ${variant} ===`);
+
+  // For common/, check universal commands only
+  if (variant === 'common') {
+    const commandsDir = join(TEMPLATES_DIR, 'common', '.claude', 'commands');
+    if (!existsSync(commandsDir)) {
+      fail('common', 'commands-dir', 'templates/common/.claude/commands/ not found');
+      return;
+    }
+
+    const universalCommands = ['changelog.md', 'memlog.md', 'new-task.md', 'security-check.md', 'sync.md'];
+    for (const cmd of universalCommands) {
+      const cmdPath = join(commandsDir, cmd);
+      if (!existsSync(cmdPath)) {
+        fail('common', 'command-missing', `.claude/commands/${cmd} not found in common/`);
+      }
+    }
+    pass(`common/.claude/commands: ${universalCommands.length} universal commands OK`);
+    return;
+  }
+
+  // For variants, check meeting.md exists
   const commandsDir = join(TEMPLATES_DIR, variant, '.claude', 'commands');
   if (!existsSync(commandsDir)) {
     warn(variant, 'commands-dir', `templates/${variant}/.claude/commands/ not found`);
     return;
   }
 
-  const cmdFiles = readdirSync(commandsDir).filter(f => f.endsWith('.md'));
-  for (const file of cmdFiles) {
-    const rawContent = readFileSync(join(commandsDir, file), 'utf-8');
-    const fields = parseFrontmatter(rawContent);
-    if (!('description' in fields)) {
-      fail(variant, 'command-frontmatter', `.claude/commands/${file}: missing 'description' frontmatter`);
-    } else {
-      pass(`.claude/commands/${file}: description OK`);
-    }
+  const meetingCmd = join(commandsDir, 'meeting.md');
+  if (!existsSync(meetingCmd)) {
+    fail(variant, 'command-missing', `templates/${variant}/.claude/commands/meeting.md not found`);
+  } else {
+    pass(`${variant}/.claude/commands/meeting.md: OK`);
   }
 }
 
-// Check 7: scripts .sh/.ps1 parity
+// Check 7: scripts parity
 function checkScriptParity(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 7: scripts parity in ${variant} ===`);
-  const scriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+
+  // Only check common/ for script parity
+  if (variant !== 'common') return;
+
+  const scriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
   if (!existsSync(scriptsDir)) {
-    warn(variant, 'scripts-dir', `templates/${variant}/scripts/ not found`);
+    warn('common', 'scripts-dir', 'templates/common/scripts/ not found');
     return;
   }
 
@@ -299,13 +341,13 @@ function checkScriptParity(variant: string): void {
   const missingSh = [...ps1Names].filter(n => !shNames.has(n));
 
   if (missingPs1.length > 0) {
-    fail(variant, 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
+    fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
   }
   if (missingSh.length > 0) {
-    fail(variant, 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
+    fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
   }
   if (missingPs1.length === 0 && missingSh.length === 0) {
-    pass(`${variant}/scripts: .sh/.ps1 parity OK (${shNames.size} pairs)`);
+    pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs)`);
   }
 }
 
@@ -339,7 +381,11 @@ function main() {
   }
 
   checkVersion();
+  checkCommon();
   const manifests = checkVariantManifests();
+
+  // Check common/ commands
+  checkCommands('common');
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {

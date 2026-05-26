@@ -14,6 +14,7 @@ $ErrorActionPreference = 'Stop'
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path $WorkspaceRoot "templates" $Variant
+$CommonDir     = Join-Path $WorkspaceRoot "templates" "common"
 $VersionFile   = Join-Path $WorkspaceRoot "templates" "VERSION"
 
 # ── Version resolution ─────────────────────────────────────────────────────────
@@ -28,16 +29,22 @@ if ($Version -ne "") {
     }
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
     New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
-    # Extract tagged template files
-    git -C $WorkspaceRoot archive $Tag "templates/$Variant/" | tar -x -C $TempDir 2>$null
+    # Extract BOTH common and variant from tag
+    git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" | tar -x -C $TempDir 2>$null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
+    $CommonDir = Join-Path $TempDir "templates" "common"
     $TemplatesDir = Join-Path $TempDir "templates" $Variant
     if (-not (Test-Path $TemplatesDir)) {
         Write-Host "❌ Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
+        Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    if (-not (Test-Path $CommonDir)) {
+        Write-Host "❌ templates/common/ not found in template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
@@ -51,7 +58,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (planned), co-work (planned)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable)" -ForegroundColor Yellow
     exit 1
 }
 
@@ -72,9 +79,20 @@ if (Test-Path $VariantJson) {
 
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
-# ── 1. Copy templates (robocopy handles hidden files and subdirs) ──────────
+# ── 1. Copy common/ first (shared infrastructure) ────────────────────────────
+if (-not (Test-Path $CommonDir)) {
+    Write-Host "❌ Common templates directory not found: $CommonDir" -ForegroundColor Red
+    exit 1
+}
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
-robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
+robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
+
+# ── 2. Overlay variant/ on top (variant-specific files override common) ──────
+if (-not (Test-Path $TemplatesDir)) {
+    Write-Host "❌ Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
+    exit 1
+}
+robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS /IS | Out-Null
 
 # ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
 $examplesDir = Join-Path $ProjectDir "docs\_examples"

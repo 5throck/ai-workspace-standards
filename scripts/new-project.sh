@@ -40,6 +40,7 @@ fi
 WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_DIR="$WORKSPACE_ROOT/$PROJECT_NAME"
 TEMPLATES_DIR="$WORKSPACE_ROOT/templates/$VARIANT"
+COMMON_DIR="$WORKSPACE_ROOT/templates/common"
 VERSION_FILE="$WORKSPACE_ROOT/templates/VERSION"
 
 # ── Version resolution ─────────────────────────────────────────────────────────
@@ -52,15 +53,21 @@ if [ -n "$TEMPLATE_VER" ]; then
     exit 1
   fi
   TEMP_DIR=$(mktemp -d)
-  # Extract tagged template files to temp dir
-  git -C "$WORKSPACE_ROOT" archive "$TAG" "templates/${VARIANT}/" | tar -x -C "$TEMP_DIR" 2>/dev/null || {
+  # Extract BOTH common and variant from tag
+  git -C "$WORKSPACE_ROOT" archive "$TAG" "templates/common/" "templates/${VARIANT}/" | tar -x -C "$TEMP_DIR" 2>/dev/null || {
     echo "❌ Failed to extract template version $TAG"
     rm -rf "$TEMP_DIR"
     exit 1
   }
+  COMMON_DIR="$TEMP_DIR/templates/common"
   TEMPLATES_DIR="$TEMP_DIR/templates/${VARIANT}"
   if [ ! -d "$TEMPLATES_DIR" ]; then
     echo "❌ Variant '$VARIANT' not found in template version $TAG"
+    rm -rf "$TEMP_DIR"
+    exit 1
+  fi
+  if [ ! -d "$COMMON_DIR" ]; then
+    echo "❌ templates/common/ not found in template version $TAG"
     rm -rf "$TEMP_DIR"
     exit 1
   fi
@@ -76,7 +83,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (planned), co-work (planned)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable)"
   exit 1
 fi
 
@@ -97,8 +104,19 @@ fi
 
 echo "🚀 Scaffolding new project: $PROJECT_NAME"
 
-# ── 1. Copy templates (including hidden files) ─────────────────────────────────
+# ── 1. Copy common/ first (shared infrastructure) ────────────────────────────
+if [ ! -d "$COMMON_DIR" ]; then
+  echo "❌ Common templates directory not found: $COMMON_DIR"
+  exit 1
+fi
 mkdir -p "$PROJECT_DIR"
+cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
+
+# ── 2. Overlay variant/ on top (variant-specific files override common) ──────
+if [ ! -d "$TEMPLATES_DIR" ]; then
+  echo "❌ Variant templates directory not found: $TEMPLATES_DIR"
+  exit 1
+fi
 cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
 # ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
