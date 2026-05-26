@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-26]**: feat: enforce english only and utf-8 encoding in git hooks
+
+### Added
 - **[2026-05-26]**: feat: implement dynamic template generation and audit hooks
 
 ### Added
@@ -30,8 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-25]**: docs: add lifecycle management documentation to templates/docs/context.md with frontmatter templates and audit commands
 
 ### Changed
-- Update `README.md` and `README_ko.md` to reflect current state: co-design and co-work variants marked ✅ Stable, agent rosters listed, `common/skills/` added to structure, template version bumped to 0.5.0, branch naming convention updated to `feat/fix/docs` prefix
-- Bump `templates/VERSION` from `0.4.0` to `0.5.0`
+- **[2026-05-26]**: Update `README.md` and `README_ko.md` to reflect current state: co-design and co-work variants marked ✅ Stable, agent rosters listed, `common/skills/` added to structure, template version bumped to 0.5.0, branch naming convention updated to `feat/fix/docs` prefix
+- **[2026-05-26]**: Bump `templates/VERSION` from `0.4.0` to `0.5.0`
 - **[2026-05-25]**: feat: add `role` and `status: active` fields to all workspace root agent files (architect, auditor, automation-engineer, docs-writer, pm, scaffolding-expert, security-expert)
 - **[2026-05-25]**: docs: update AGENTS.md and templates/AGENTS.md with skill-lifecycle-manager entry
 - **[2026-05-25]**: docs: update platform notes to specify Bun-only for lifecycle audit scripts (removed Bash/PS1 references)
@@ -89,8 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added -Go/Rust/Elixir stack support + unknown-stack security agent
 - **[2026-05-23]**: `templates/scripts/setup.sh` + `setup.ps1`: Go (`go mod download` + `go-licenses`), Rust (`cargo fetch` + `cargo-license`), Elixir (`mix deps.get`) stacks added; unknown-stack detection block prints a security banner pointing users to `agents/stack-setup.md` and blocks accidental installs
-- **[2026-05-23]**: `templates/agents/stack-setup.md` (NEW): 6-phase security-conscious agent for unrecognized stacks -Stack ID -Web Research -Mandatory Security Review (?윟/?윞/?뵶 risk levels, HIGH requires `CONFIRM HIGH RISK`) -Present Plan -Execute via sub-agent -Persist to setup.sh/ps1
-- **[2026-05-23]**: `templates/AGENTS.md`: `stack-setup` added to Agent Roster (?뵶 Security/Setup group) and Subagent Roster dispatch table
+- **[2026-05-23]**: `templates/agents/stack-setup.md` (NEW): 6-phase security-conscious agent for unrecognized stacks -Stack ID -Web Research -Mandatory Security Review (?/?/? risk levels, HIGH requires `CONFIRM HIGH RISK`) -Present Plan -Execute via sub-agent -Persist to setup.sh/ps1
+- **[2026-05-23]**: `templates/AGENTS.md`: `stack-setup` added to Agent Roster (? Security/Setup group) and Subagent Roster dispatch table
 
 ### Added -Multi-stack setup automation with mandatory Python venv and cross-platform support
 - **[2026-05-23]**: `templates/scripts/setup.sh` + `setup.ps1`: Python venv now uses `uv venv` + `uv pip install` when uv is available, falling back to `python -m venv` + `pip`; `py_install`/`Py-Install` helper abstracts manager; multi-stack OS-aware setup with OSI license audit -Node.js (npm + `license-checker`), Python (uv/venv + `pip-licenses`), Ruby, .NET, Maven, Gradle, CMake/Makefile; `--skip-license-check` flag
@@ -133,7 +136,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: `CONSTITUTION.md §5`: fixed JSON Input Contract -removed `//` comments (invalid JSON syntax)
 - **[2026-05-23]**: `CONSTITUTION.md §1`: added `.github/` (workflows/, CODEOWNERS, pull_request_template.md) and `SECURITY.md` to standard folder structure
 - **[2026-05-23]**: `CONSTITUTION.md §3`: added `perf:`, `ci:`, `style:`, `revert:` to Conventional Commits table (Conventional Commits v1.0 compliance)
-- **[2026-05-23]**: `CONSTITUTION.md § Workspace`: unified Session Start checklist order (1?묬ONSTITUTION, 2?뭖ontext.md, 3?묨GENTS.md, 4?묺EMORY.md, 5?뭩kills) -was inconsistent with CLAUDE.md
+- **[2026-05-23]**: `CONSTITUTION.md § Workspace`: unified Session Start checklist order (1?ONSTITUTION, 2?ontext.md, 3?GENTS.md, 4?EMORY.md, 5?kills) -was inconsistent with CLAUDE.md
 - **[2026-05-23]**: `scripts/dev-sync.sh` + `dev-sync.ps1` (workspace): use `.github/pull_request_template.md` for PR body when present; fall back to `--fill`
 - **[2026-05-23]**: `scripts/dev-sync.sh` (workspace): applied same perl escape fix and branch guard as templates
 
@@ -377,7 +380,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-25*
+*Last Updated: 2026-05-26*
+
 
 
 
