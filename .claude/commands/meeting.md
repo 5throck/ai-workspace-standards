@@ -63,9 +63,16 @@ Default is silent because most callers need the outcome, not the transcript. Pas
 
 ## Step 2 — Detect Project Context
 
-Check which agent files exist:
-- If `agents/` contains workspace agents (architect, auditor, security-expert, automation-engineer, docs-writer, scaffolding-expert) → workspace meeting
-- If `agents/` contains template agents (architect, designer, code-writer, test-runner, security-monitor, stack-setup) → project meeting
+**Automatically detect available agents:**
+1. Check if `agents/` directory exists in current working directory
+2. List all `*.md` files in `agents/` (excluding README.md)
+3. Extract agent names from filenames (e.g., `architect.md` → `architect`)
+4. If `--agents` list is specified, filter available agents to only those in the list
+5. If no agents found or `agents/` doesn't exist, error with clear message
+
+**Agent Detection Priority:**
+- Current directory `agents/` takes precedence (allows variant-specific meetings)
+- No hard-coded agent lists — fully dynamic based on actual files
 
 Load only the agent files that (a) exist and (b) are in the `--agents` list if specified. Read each file now to hold all personas in context before the meeting starts.
 
