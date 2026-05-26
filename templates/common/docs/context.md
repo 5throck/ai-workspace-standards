@@ -106,4 +106,27 @@ All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 
 ---
 
+## Lifecycle Management
+
+This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
+
+### Common Principles
+
+- **Agent / Skill / Script** each have explicit lifecycle states (active, deprecated, retired/archived)
+- Full lifecycle rules are defined in the workspace `CONSTITUTION.md` section files
+- Audit commands exist for each domain: `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`, `verify-scripts.ts`
+
+### Workspace Constitution Reference
+
+All projects must read [`CONSTITUTION.md`](../CONSTITUTION.md) at session start, including the files listed in its `## Required Reading` block:
+- `docs/constitution/05-multi-agent-architecture.md` — Agent architecture, 3-tier model, PM governance workflow
+- `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
+
+For full lifecycle procedures:
+- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](../CONSTITUTION.md#56-agent-lifecycle-management)
+- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](../CONSTITUTION.md#6-skill-lifecycle-management)
+- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](../CONSTITUTION.md#65-script-lifecycle-management)
+
+---
+
 *context.md version: 2.0 — created by /new-project*

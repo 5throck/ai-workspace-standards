@@ -77,6 +77,19 @@ This project uses a **Collaboration PM-first multi-agent architecture**. All col
 
 ---
 
+## Workspace Constitution Reference
+
+All projects must read [`CONSTITUTION.md`](../../../CONSTITUTION.md) at session start, including the files listed in its `## Required Reading` block:
+- `docs/constitution/05-multi-agent-architecture.md` — Agent architecture, 3-tier model, PM governance workflow
+- `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
+
+For full lifecycle procedures:
+- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](../../../CONSTITUTION.md#56-agent-lifecycle-management)
+- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](../../../CONSTITUTION.md#6-skill-lifecycle-management)
+- **Lifecycle procedures**: See `co-work.context.md § Agent & Skill Lifecycle Management`
+
+---
+
 ## Key Files
 
 | File | Purpose |

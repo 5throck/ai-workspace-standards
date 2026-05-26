@@ -14,6 +14,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-27 | CONSTITUTION.md hub-and-spoke restructure proposal | [meeting-2026-05-27-constitution-md-hub-and-spoke-restructur.md](meeting-2026-05-27-constitution-md-hub-and-spoke-restructur.md) |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | [2026-05-24-multi-agent-meeting-summary.md](2026-05-24-multi-agent-meeting-summary.md) |
 | 2026-05-27 | Doc format best practices | [meeting-2026-05-27-doc-format-best-practices.md](meeting-2026-05-27-doc-format-best-practices.md) |
 | 2026-05-27 | Template lifecycle review | [meeting-2026-05-27-template-lifecycle-review.md](meeting-2026-05-27-template-lifecycle-review.md) |

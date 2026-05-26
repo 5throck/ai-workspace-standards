@@ -33,6 +33,18 @@ else
   ((errors++)) || true
 fi
 
+# 2.5. Constitution section files must exist and be non-empty (workspace root only)
+if [ -f "CONSTITUTION.md" ] && [ -d "docs/constitution" ]; then
+  for ref in $(grep -oP '(?<=docs/constitution/)[\w.-]+\.md' CONSTITUTION.md 2>/dev/null || true); do
+    if [ -s "docs/constitution/$ref" ]; then
+      green "constitution section: $ref"
+    else
+      red "constitution section missing or empty: docs/constitution/$ref"
+      ((errors++)) || true
+    fi
+  done
+fi
+
 # ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
 
 # 3. CHANGELOG.md must have [Unreleased] section (all projects + workspace root)

@@ -59,6 +59,69 @@
 
 ---
 
+## Agent & Skill Lifecycle Management
+
+This project follows explicit lifecycle management practices for Agents and Skills.
+
+### Agent Lifecycle States
+
+| State | Description | Action Required |
+|-------|-------------|-----------------|
+| **active** | In production use | Regular health checks via `agent:verify` |
+| **deprecated** | Being phased out | Add frontmatter `status: deprecated` warning; reassign skills within 30 days |
+| **retired** | No longer used | Move to `agents/_archive/`; delete after 90 days |
+
+### Agent Lifecycle Commands
+
+| Phase | Command | Documentation Update |
+|-------|---------|---------------------|
+| **Create** | `bun run agent:create <name> --role "Display" --group <group>` | Update `AGENTS.md` + this table |
+| **List** | `bun run agent:list [--group <group>] [--verbose]` | N/A (read-only) |
+| **Update** | Edit `agents/<name>.md` directly | Update `AGENTS.md` if role/triggers change |
+| **Delete** | `bun run agent:delete <name> --force` | Update `AGENTS.md` + this table |
+| **Verify** | `bun run agent:verify` | N/A (reports inconsistencies) |
+
+### Skill Lifecycle States
+
+| State | Description | Action Required |
+|-------|-------------|-----------------|
+| **draft** | Skill under development | Move to active after review |
+| **active** | Skill in production use | Regular health checks |
+| **deprecated** | Superseded, pending removal | Add frontmatter warning, archive after 30 days |
+| **archived** | No longer used, kept for reference | Move to `skills/_archive/`, can delete after 90 days |
+
+### Skill Lifecycle Commands
+
+When PM agent modifies the agent team:
+
+**New Agent Added:**
+1. Does agent need a skill? → Create using `skill-creator:skill-creator`
+2. Can existing skill be shared? → Update `owner: [agent1, agent2]`
+
+**Agent Role Changed:**
+1. Find all skills with `owner: changed-agent`
+2. Update skill descriptions to reflect new scope
+3. Bump version if capabilities changed (**patch** 1.0.x for wording, **minor** 1.x.0 for new steps, **major** x.0.0 for rewrites)
+
+**Agent Removed:**
+1. Find all skills with `owner: removed-agent`
+2. Is skill shared? → Remove agent from owner list
+3. Is skill needed by another agent? → Reassign owner
+4. Is skill orphaned? → Change status to deprecated
+
+### Audit Commands
+
+- **Agent health**: `bun scripts/agent-lifecycle-audit.ts`
+- **Skill health**: `bun scripts/skill-lifecycle-audit.ts`
+
+Both audits check for:
+- ✅ Missing owners
+- ✅ Orphaned skills/agents (owner doesn't exist)
+- ✅ Deprecated items still being modified
+- ✅ Missing dependencies
+
+---
+
 ## Scripts
 
 <!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->

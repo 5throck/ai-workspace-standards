@@ -24,6 +24,23 @@ else                           { Fail "CHANGELOG.md missing" }
 if ((Test-Path "CONSTITUTION.md") -or (Test-Path "..\CONSTITUTION.md")) { Pass "CONSTITUTION.md accessible" }
 else { Fail "CONSTITUTION.md not found (expected at ./ or ../)" }
 
+# 2.5. Constitution section files must exist and be non-empty (workspace root only)
+if ((Test-Path "CONSTITUTION.md") -and (Test-Path "docs\constitution")) {
+    $content = Get-Content "CONSTITUTION.md" -Raw -Encoding UTF8
+    if ($content -match 'docs/constitution/([\w.-]+\.md)') {
+        $matches = [regex]::Matches($content, 'docs/constitution/([\w.-]+\.md)')
+        foreach ($match in $matches) {
+            $ref = $match.Groups[1].Value
+            $path = "docs\constitution\$ref"
+            if ((Test-Path $path) -and ((Get-Item $path).Length -gt 0)) {
+                Pass "constitution section: $ref"
+            } else {
+                Fail "constitution section missing or empty: docs\constitution\$ref"
+            }
+        }
+    }
+}
+
 # 3. CHANGELOG.md must have [Unreleased] section
 if (Test-Path "CHANGELOG.md") {
     $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
