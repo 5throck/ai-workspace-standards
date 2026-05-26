@@ -156,19 +156,16 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 
 ## Multi-Agent Workflow
 
-The default `co-develop` template uses a 5-role agent model across 6 governance phases:
+Each template variant in this workspace provides a highly optimized, specialized **multi-agent workflow and agent team** tailored for its specific purpose.
 
-```
-PM Orchestrator
-  │
-  ├─ Phase 1-2: Analysis agents (parallel)  →  findings + acceptance criteria
-  ├─ Phase 3:   Architect + Designer        →  implementation plan + design spec (user approval required)
-  ├─ Phase 4:   Code Writer + Test Runner   →  implementation + verification
-  ├─ Phase 5:   QA gate                     →  audit.sh + tests pass
-  └─ Phase 6:   Finalization                →  memlog → sync → PR
-```
+- **co-develop**: A 5-role/6-phase governance pipeline for software development and verification
+- **co-design**: A design-centric pipeline for UI/UX research and prototyping
+- **co-work**: A general collaboration pipeline for documentation, planning, and research
 
-Agent scaffold templates for all roles live in `templates/co-develop/agents/`.
+**💡 How to Check Workflow Details**
+Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
+1. `AGENTS.md`: The full specification of agent roles and permissions deployed in the project
+2. `docs/context.md`: The project goal and workflow context for initial session kickoff
 
 ---
 
