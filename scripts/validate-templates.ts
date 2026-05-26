@@ -87,7 +87,7 @@ function checkCommon(): void {
   }
 
   // Check required subdirectories
-  const requiredDirs = ['.githooks', '.github', 'scripts', 'docs'];
+  const requiredDirs = ['.githooks', '.github', 'scripts', 'docs', 'memory', 'skills'];
   for (const dir of requiredDirs) {
     const dirPath = join(commonDir, dir);
     if (!existsSync(dirPath)) {
@@ -376,7 +376,7 @@ function checkSharedFileSync(): void {
 function checkContextSync(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
   const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
-  const contextMdPath = join(TEMPLATES_DIR, variant, 'docs', 'context.md');
+  const contextMdPath = join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
 
   if (!existsSync(agentsMdPath) || !existsSync(contextMdPath)) {
     return; // Skip if either doesn't exist
@@ -417,6 +417,39 @@ function checkContextSync(variant: string): void {
   }
 }
 
+// Check 10: Root vs Template Alignment (L0 vs L1 Sync)
+function checkL0L1ScriptParity() {
+  const L1_SCRIPTS = join(ROOT, 'scripts');
+  const L0_SCRIPTS = join(ROOT, 'templates', 'common', 'scripts');
+  
+  if (!existsSync(L1_SCRIPTS) || !existsSync(L0_SCRIPTS)) return;
+  
+  const whitelist = [
+    'agent-create.ts', 
+    'dev-sync.ps1', 
+    'dev-sync.sh', 
+    'generate-scripts-readme.ts', 
+    'sync-agent-status.ts', 
+    'sync-skill-status.ts'
+  ];
+  
+  for (const script of whitelist) {
+    const l1Path = join(L1_SCRIPTS, script);
+    const l0Path = join(L0_SCRIPTS, script);
+    
+    if (existsSync(l1Path) && existsSync(l0Path)) {
+      const l1Content = readFileSync(l1Path, 'utf-8');
+      const l0Content = readFileSync(l0Path, 'utf-8');
+      
+      if (l1Content !== l0Content) {
+        fail('common', 'l0-l1-script-parity', `Script ${script} differs between L1 (root) and L0 (templates/common).`, `Backport L1 changes to L0 or update L1 to match L0.`);
+      } else {
+        pass(`Script ${script} is in sync between L0 and L1`);
+      }
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -447,6 +480,7 @@ function main() {
   }
 
   checkSharedFileSync();
+  checkL0L1ScriptParity();
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');

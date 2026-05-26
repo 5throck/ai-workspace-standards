@@ -1,4 +1,4 @@
-﻿---
+---
 name: architect
 tier:
   claude: high        # claude-opus-4-7

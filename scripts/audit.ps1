@@ -1,3 +1,4 @@
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # audit.ps1 - Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
@@ -89,6 +90,38 @@ if (Test-Path "CHANGELOG.md") {
     else                              { Fail "CHANGELOG.md is missing '[Unreleased]' section" }
 }
 
+# 3.5. UTF-8 BOM check for Markdown files
+$bomErrors = 0
+$searchDirs = @(".")
+if ((Test-Path "docs\context.md") -eq $false -and (Test-Path "templates")) {
+    # We are at workspace root, only check standard directories
+    $searchDirs = @("agents", "docs", "memory", "scripts", "skills", "templates", ".claude")
+    # Also check root md files
+    Get-ChildItem -Path "." -Filter "*.md" -Depth 0 -ErrorAction SilentlyContinue | ForEach-Object {
+        $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
+        if ($bytes.Length -ge 3 -and $bytes[0] -eq 239 -and $bytes[1] -eq 187 -and $bytes[2] -eq 191) {
+            Fail ("UTF-8 BOM found in " + $_.FullName + " - files must be UTF-8 without BOM")
+            $bomErrors++
+        }
+    }
+}
+
+foreach ($dir in $searchDirs) {
+    if (Test-Path $dir) {
+        Get-ChildItem -Path $dir -Filter "*.md" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.FullName -notmatch '\\node_modules\\|\\\.git\\') {
+                $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
+                if ($bytes.Length -ge 3 -and $bytes[0] -eq 239 -and $bytes[1] -eq 187 -and $bytes[2] -eq 191) {
+                    Fail ("UTF-8 BOM found in " + $_.FullName + " - files must be UTF-8 without BOM")
+                    $bomErrors++
+                }
+            }
+        }
+    }
+}
+if ($bomErrors -eq 0) { Pass "UTF-8 BOM check: all markdown files are clean" }
+else { $script:errors += $bomErrors }
+
 # --- Agent checks (applicable to all projects AND workspace root) ---
 
     # 4. AGENTS.md must exist
@@ -153,7 +186,7 @@ if (Get-Command bun -ErrorAction SilentlyContinue) {
 }
 
 # --- Agent/Skill State Synchronization Check ---
-if (Test-Path "AGENTS.md" -and (Test-Path "agents")) {
+if ((Test-Path "AGENTS.md") -and (Test-Path "agents")) {
     $syncErrors = 0
     Get-ChildItem "agents\*.md" -ErrorAction SilentlyContinue | ForEach-Object {
         $agentFile = $_
@@ -166,7 +199,7 @@ if (Test-Path "AGENTS.md" -and (Test-Path "agents")) {
 
         if ($fileStatus) {
             # Check AGENTS.md for matching status
-            $agentsMdLine = Select-String -Path "AGENTS.md" -Pattern "\`${agentName}\.md\`" -Context 0,2
+            $agentsMdLine = Select-String -Path "AGENTS.md" -Pattern "``${agentName}\.md``" -Context 0,2
             if ($agentsMdLine) {
                 $agentsMdStatus = $agentsMdLine.Context.PostContext | Select-String -Pattern "status: \w+" | ForEach-Object {
                     $_.Matches[0].Value.Split(":")[1].Trim()

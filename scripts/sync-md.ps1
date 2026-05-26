@@ -6,6 +6,7 @@ param(
     [string]$AdrId   = ""
 )
 
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'

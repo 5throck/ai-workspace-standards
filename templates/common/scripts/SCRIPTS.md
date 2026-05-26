@@ -43,6 +43,9 @@
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — |
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — |
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — |
 
 ---
 
@@ -111,6 +114,11 @@ git hooks installation, initial commit.
 **Purpose**: Generates PR body from commit log and memory log. Called by `dev-sync.sh`.
 **Usage**: Invoked automatically. Can be called standalone: `bash scripts/gen-pr-body.sh "msg"`
 
+#### `generate-scripts-readme.ts`
+**Purpose**: Auto-generates scripts/README.md from SCRIPTS.md registry.
+**Usage**: `bun scripts/generate-scripts-readme.ts`
+**Runs automatically**: `dev-sync.sh`
+
 ---
 
 ### Installation Scripts
@@ -146,6 +154,10 @@ deprecated agent references, missing fields.
 **Usage**: `bun scripts/agent-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `agents/*.md` files are staged.
 
+#### `sync-agent-status.ts`
+**Purpose**: Synchronizes agent status between agent files and AGENTS.md.
+**Usage**: `bun scripts/sync-agent-status.ts`
+
 ---
 
 ### Skill Lifecycle Scripts (Bun / TypeScript)
@@ -164,6 +176,10 @@ skills still being modified, dependency graph, circular dependencies.
 **Purpose**: Cross-validates skills referenced in `docs/context.md` against actual
 skill files on disk. Detects missing or orphaned skill references.
 **Usage**: `bun scripts/verify-skills.ts`
+
+#### `sync-skill-status.ts`
+**Purpose**: Synchronizes skill status between SKILL.md and registry tables.
+**Usage**: `bun scripts/sync-skill-status.ts`
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance

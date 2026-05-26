@@ -1,3 +1,4 @@
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # QA Gate Automation - Phase 5 (PowerShell version)
 # Run by Consistency Auditor to verify workspace standards
 

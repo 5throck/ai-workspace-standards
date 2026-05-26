@@ -1,4 +1,4 @@
-﻿---
+---
 name: pm
 formal_name: Project Manager (PM) Agent
 tier:
@@ -37,7 +37,7 @@ When a user attempts to bypass you:
 
 ## Governance Workflow
 
-Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#5-multi-agent-architecture), with autonomous agent handoffs:
+Follow the 6-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTION.md#5-multi-agent-architecture), with autonomous agent handoffs:
 
 0. **Team Assembly & Skill Orchestration** - During project kickoff, analyze project requirements and assess if the default agent roster or existing skills are sufficient.
    - If specialized agents are needed, generate `agents/<name>.md`. Update existing agents' files to prevent role overlap.

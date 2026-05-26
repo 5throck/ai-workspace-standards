@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Agent Creator CLI
+ * Agent Creator CLI for Workspace Root
  * Creates new agent definition files in the agents/ directory
  *
  * Usage:
@@ -24,7 +24,7 @@ interface AgentOptions {
 }
 
 /**
- * Agent template
+ * Agent template for workspace root
  */
 function getAgentTemplate(options: AgentOptions): string {
   const { name, role, group, description } = options;
@@ -98,34 +98,6 @@ The agent produces:
 \`\`\`
 
 ---
-
-## Handoff Rules
-
-### Receives From
-
-- <!-- Agent or role that hands off to this agent -->
-
-### Hands Off To
-
-- <!-- Agent or role that this agent hands off to -->
-
----
-
-## Constraints & Boundaries
-
-- <!-- Constraint 1 -->
-- <!-- Constraint 2 -->
-
----
-
-## Examples
-
-### Example 1
-
-**Input**: <!-- example input -->
-**Output**: <!-- example output -->
-
----
 `;
 }
 
@@ -151,8 +123,9 @@ async function createAgent(options: AgentOptions): Promise<void> {
   console.log(`✅ Agent created: ${agentPath}`);
   console.log(`\nNext steps:`);
   console.log(`  1. Edit the agent file to add role-specific content`);
-  console.log(`  2. Add the agent to AGENTS.md if needed`);
-  console.log(`  3. Add dispatch triggers to PM or other agents`);
+  console.log(`  2. Add the agent to AGENTS.md (Agent Roster table)`);
+  console.log(`  3. Add the agent to Subagent Roster table in AGENTS.md`);
+  console.log(`  4. Update CONSTITUTION.md §5.2 Role Groups if needed`);
 }
 
 /**
@@ -170,13 +143,13 @@ Arguments:
 
 Options:
   --role <role>         Display name for the role (default: capitalized name)
-  --group <group>       Agent group: Orchestration, Business, Technical, Execution
+  --group <group>       Agent group: Orchestration, Design, Execution, Security
   --description <desc>  Brief description of the agent's purpose
 
 Examples:
-  bun scripts/agent-create.ts security-auditor
-  bun scripts/agent-create.ts security-auditor --role "Security Auditor" --group Technical
-  bun scripts/agent-create.ts data-analyst --group Business --description "Analyzes data patterns"
+  bun scripts/agent-create.ts code-reviewer
+  bun scripts/agent-create.ts code-reviewer --role "Code Reviewer" --group Execution
+  bun scripts/agent-create.ts i18n-specialist --group Design --description "Handles internationalization"
 `);
     process.exit(1);
   }

@@ -1,4 +1,5 @@
-﻿param([Parameter(Mandatory)][string]$CommitMsg)
+param([Parameter(Mandatory)][string]$CommitMsg)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'

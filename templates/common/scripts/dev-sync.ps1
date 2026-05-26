@@ -1,7 +1,5 @@
-﻿param([string]$Msg = "chore: update")
-
-# Force English culture for consistent error messages
-[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
+param([string]$Msg = "chore: update")
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
@@ -25,7 +23,7 @@ if ($GitStatus) {
 $separator = ""
 if (Test-Path "memory\$Date.md") { $separator = "`n---`n`n" }
 
-# Mandatory 4-section format (docs/context.md § Documentation Standards)
+# Mandatory 4-section format (CONSTITUTION.md §2 / docs/context.md § Documentation Standards)
 $template = @"
 $separator## Session Summary
 $Msg
@@ -46,10 +44,14 @@ Add-Content "memory\$Date.md" $template -Encoding UTF8
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
 
+# ── 2.5. Generate scripts/README.md ───────────────────────────────────────────
+if (Test-Path "scripts\generate-scripts-readme.ts") {
+    bun scripts\generate-scripts-readme.ts
+}
+
 # ── 3. Auto-add to CHANGELOG.md [Unreleased] if the entry is missing ────
 if (Test-Path "CHANGELOG.md") {
     $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
-    # Extract [Unreleased] section content
     if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $section = $Matches[1]
         $EscapedMsg = [regex]::Escape($Msg)
@@ -81,6 +83,23 @@ if (Test-Path "CHANGELOG.md") {
     }
 }
 
+# ── 3.6. Warn about deprecated scripts (if SCRIPTS.md exists) ─────────────────
+if (Test-Path "SCRIPTS.md") {
+    $deprecatedScripts = Select-String -Path "SCRIPTS.md" -Pattern "^\|.*\|.*deprecated" -ErrorAction SilentlyContinue
+    if ($deprecatedScripts) {
+        Write-Host "⚠️  Deprecated scripts detected in SCRIPTS.md:" -ForegroundColor Yellow
+        foreach ($match in $deprecatedScripts) {
+            $parts = $match.Line -split '\|'
+            if ($parts.Length -ge 3) {
+                $scriptName = $parts[1].Trim()
+                Write-Host "   - $scriptName"
+            }
+        }
+        Write-Host "   Consider removing or updating these scripts."
+        Write-Host ""
+    }
+}
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 .\scripts\audit.ps1
 if ($LASTEXITCODE -ne 0) { exit 1 }
@@ -96,6 +115,7 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     $Branch = $CurrentBranch
     Write-Host "ℹ️  Already on branch '$Branch' - committing here without creating a new branch." -ForegroundColor Cyan
 }
+
 # ── 6. Guard against committing sensitive files ───────────────────────────────
 $Sensitive = git ls-files --others --exclude-standard 2>$null |
     Where-Object { $_ -match '\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml' }

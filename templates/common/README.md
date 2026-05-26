@@ -1,3 +1,7 @@
+---
+sync_version: 1
+---
+
 # {{PROJECT_NAME}}
 
 {{PROJECT_DESCRIPTION}}
@@ -33,7 +37,7 @@ bash scripts/setup.sh
 - **Project context & architecture** → [`docs/context.md`](docs/context.md)
 - **Agent index** → [`AGENTS.md`](AGENTS.md)
 - **Change history** → [`CHANGELOG.md`](CHANGELOG.md)
-- **Workspace standards** → [`CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md)
+- **Workspace standards** → [`CONSTITUTION.md`](../CONSTITUTION.md)
 - **Claude Code config** → [`CLAUDE.md`](CLAUDE.md)
 - **Gemini CLI config** → [`GEMINI.md`](GEMINI.md)
 

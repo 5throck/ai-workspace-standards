@@ -49,11 +49,12 @@
 
 | Skill | Directory | Trigger | Status |
 |-------|-----------|---------|--------|
-| UI/UX Design Intelligence | `.claude/skills/ui-ux-design-intelligence/` | Building design systems, visual designs, UI components | active |
-| Service Design | `.claude/skills/service-design/` | Designing end-to-end service experiences | active |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/` | Managing agent lifecycle | active |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/` | Managing skill lifecycle | active |
-| Meeting Facilitation | `skills/meeting-facilitation/` | Multi-agent meetings | active |
+| UI/UX Design Intelligence | `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, visual designs, UI components | active |
+| Service Design | `.claude/skills/service-design/SKILL.md` | Designing end-to-end service experiences | active |
+| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
+| Script Lifecycle Manager | .claude/skills/script-lifecycle-manager/SKILL.md | PM agent managing script lifecycle... | active |
+| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
+| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
 

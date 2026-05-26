@@ -171,11 +171,31 @@ if [ -n "$TEMPLATE_FILES" ]; then
       echo -e "\033[32m[PASS]\033[0m Template validation: all checks passed"
     else
       echo -e "\033[31m[FAIL]\033[0m Template validation failed ??commit blocked."
-      echo "       Run 'bash scripts/validate-templates.sh' to see details."
+      echo "       Run 'bun scripts/skill-lifecycle-audit.ts' to see details."
       exit 1
     fi
   else
-    echo -e "\033[33m[SKIP]\033[0m Template validation requires bun. Install for automated checks."
+    echo -e "\033[33m[SKIP]\033[0m Skill audit requires bun. Install for automated checks."
+  fi
+fi
+
+# ── 3.7. README Synchronization Audit
+# Run when README files are modified
+README_FILES=$(echo "$STAGED" | grep -iE "README.*\.md" || true)
+if [ -n "$README_FILES" ]; then
+  echo ""
+  echo "=== README Synchronization Audit ==="
+
+  if command -v bun &>/dev/null && [ -f "scripts/verify-readme-sync.ts" ]; then
+    if bun scripts/verify-readme-sync.ts --pre-commit; then
+      echo -e "\033[32m[PASS]\033[0m README audit: files are synchronized"
+    else
+      echo -e "\033[31m[FAIL]\033[0m README audit detected issues ??commit blocked."
+      echo "       If you edited README.md, you must also edit README_ko.md (and update sync_version in both)."
+      exit 1
+    fi
+  else
+    echo -e "\033[33m[SKIP]\033[0m README audit requires bun. Install for automated checks."
   fi
 fi
 
