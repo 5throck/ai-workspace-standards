@@ -15,9 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-27]**: `templates/co-work/docs/co-work.context.md` — new variant config file for collaboration projects (#95)
 - **[2026-05-27]**: All variant CLAUDE.md and GEMINI.md — Session Start context loading order added (#95)
 - **[2026-05-27]**: `scripts/new-project.sh` / `.ps1` — provenance to variant.context.md; docs/context.md merge=ours in .gitattributes (#95)
-- **[2026-05-27]**: `templates/common/scripts/SCRIPTS.md` — script lifecycle registry (Registry + Guide dual-section) (#TBD)
-- **[2026-05-27]**: `scripts/verify-scripts.ts` — script registry verifier with --verify / --generate / --report modes (#TBD)
-- **[2026-05-27]**: `CONSTITUTION.md §6.5` — Script Lifecycle Management section (ownership layers, states, deprecation/security protocols) (#TBD)
+- **[2026-05-27]**: `templates/common/scripts/SCRIPTS.md` — script lifecycle registry (Registry + Guide dual-section) (#96)
+- **[2026-05-27]**: `scripts/verify-scripts.ts` — script registry verifier with --verify / --generate / --report modes (#96)
+- **[2026-05-27]**: `CONSTITUTION.md §6.5` — Script Lifecycle Management section (ownership layers, states, deprecation/security protocols) (#96)
 
 ### Changed
 - **[2026-05-27]**: `.github/pull_request_template.md` redesigned with Summary/Changes table/Test Plan/Security Checklist sections — applied to workspace and all template variants (#93)
