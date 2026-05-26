@@ -161,6 +161,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
+| Multi-Agent Meeting | `.claude/commands/meeting.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue; use `/meeting "topic" --agents X,Y,Z` |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.
