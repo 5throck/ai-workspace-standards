@@ -18,6 +18,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-27]**: `templates/common/scripts/SCRIPTS.md` — script lifecycle registry (Registry + Guide dual-section) (#96)
 - **[2026-05-27]**: `scripts/verify-scripts.ts` — script registry verifier with --verify / --generate / --report modes (#96)
 - **[2026-05-27]**: `CONSTITUTION.md §6.5` — Script Lifecycle Management section (ownership layers, states, deprecation/security protocols) (#96)
+- **[2026-05-27]**: `scripts/verify-memory.ts` — memory log format verifier with --verify / --report modes (#99)
+- **[2026-05-27]**: `scripts/sync-md.sh/ps1` — MEMORY.md 3-section structure (Sessions/Meetings/ADRs) with --meeting and --adr flags (#99)
+
+### Changed
+- **[2026-05-27]**: `.githooks/commit-msg` — auto-log now generates mandatory 4-section format (## Session Summary / ## Changes / ## Decisions / ## Open Issues) (#99)
+- **[2026-05-27]**: `memory/MEMORY.md` — restructured into Sessions / Meetings / ADRs sections (#99)
+- **[2026-05-27]**: `.claude/commands/memlog.md` — auto-scaffolds 4-section format with git diff pre-populated (#99)
+- **[2026-05-27]**: `/meeting` skill — now registers transcript to MEMORY.md Meetings section after saving (#99)
+- **[2026-05-27]**: `scripts/audit.sh` — memory format audit integrated as non-blocking warning (#99)
 
 ### Changed
 - **[2026-05-27]**: `.github/pull_request_template.md` redesigned with Summary/Changes table/Test Plan/Security Checklist sections — applied to workspace and all template variants (#93)
