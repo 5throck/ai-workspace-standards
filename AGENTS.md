@@ -162,6 +162,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
 | Multi-Agent Meeting | `.claude/commands/meeting.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue; use `/meeting "topic" --agents X,Y,Z` |
+| Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.

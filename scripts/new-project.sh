@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>"
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work]
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -8,15 +8,36 @@ export LANG=C
 
 set -euo pipefail
 
-PROJECT_NAME="${1:-}"
+VARIANT="co-develop"
+PROJECT_NAME=""
+
+# Parse arguments: project name (first non-flag arg) + --variant flag
+prev_arg=""
+for arg in "$@"; do
+  if [ "$prev_arg" = "--variant" ]; then
+    VARIANT="$arg"
+  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ -z "$PROJECT_NAME" ]; then
+    PROJECT_NAME="$arg"
+  fi
+  prev_arg="$arg"
+done
+
+# Validate required arguments
 if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: bash scripts/new-project.sh \"<project-name>\""
+  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work]"
+  exit 1
+fi
+
+# Validate --variant was not left without a value (last arg was --variant)
+if [ "$prev_arg" = "--variant" ] && [ "$VARIANT" = "co-develop" ]; then
+  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work"
   exit 1
 fi
 
 WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_DIR="$WORKSPACE_ROOT/$PROJECT_NAME"
-TEMPLATES_DIR="$WORKSPACE_ROOT/templates"
+TEMPLATES_DIR="$WORKSPACE_ROOT/templates/$VARIANT"
+VERSION_FILE="$WORKSPACE_ROOT/templates/VERSION"
 
 if [ -d "$PROJECT_DIR" ]; then
   echo "❌ Directory already exists: $PROJECT_DIR"
@@ -24,8 +45,24 @@ if [ -d "$PROJECT_DIR" ]; then
 fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
-  echo "❌ Templates directory not found: $TEMPLATES_DIR"
+  echo "❌ Template variant not found: $TEMPLATES_DIR"
+  echo "   Available variants: co-develop (stable), co-design (planned), co-work (planned)"
   exit 1
+fi
+
+# Check variant status
+VARIANT_JSON="$TEMPLATES_DIR/variant.json"
+if [ -f "$VARIANT_JSON" ]; then
+  VARIANT_STATUS=$(grep '"status"' "$VARIANT_JSON" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+  if [ "$VARIANT_STATUS" != "stable" ]; then
+    echo "⚠️  Variant '$VARIANT' has status: $VARIANT_STATUS"
+    echo "   This variant may not be fully implemented."
+    read -r -p "   Continue anyway? [y/N] " confirm
+    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+      echo "Aborted."
+      exit 1
+    fi
+  fi
 fi
 
 echo "🚀 Scaffolding new project: $PROJECT_NAME"
@@ -48,6 +85,20 @@ done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
   -print0)
+
+# ── 4.5. Record template provenance in docs/context.md ────────────────────────
+TEMPLATE_VERSION="unknown"
+if [ -f "$VERSION_FILE" ]; then
+  TEMPLATE_VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+fi
+CONTEXT_MD="$PROJECT_DIR/docs/context.md"
+if [ -f "$CONTEXT_MD" ]; then
+  # Add template provenance if not already present
+  if ! grep -q "Template-Version:" "$CONTEXT_MD"; then
+    printf '\n## Template Provenance\n\n- **Template-Version**: %s\n- **Template-Variant**: %s\n' \
+      "$TEMPLATE_VERSION" "$VARIANT" >> "$CONTEXT_MD"
+  fi
+fi
 
 # ── 5. Make scripts and hooks executable ───────────────────────────────────────
 find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;

@@ -1,3 +1,7 @@
+---
+description: Create a new task tracking entry in memory for the current session
+---
+
 Create a new task tracking entry in memory for the current session.
 
 Arguments: $ARGUMENTS

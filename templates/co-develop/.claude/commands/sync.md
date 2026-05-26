@@ -1,3 +1,7 @@
+---
+description: Run the full project sync pipeline — memlog, changelog, audit, commit, and PR
+---
+
 Run the full project sync pipeline.
 
 Arguments: $ARGUMENTS

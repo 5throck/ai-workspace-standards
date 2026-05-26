@@ -1,3 +1,7 @@
+---
+description: Append a session summary entry to today's memory log file
+---
+
 Append a session summary entry to today's memory log file.
 
 Arguments: $ARGUMENTS

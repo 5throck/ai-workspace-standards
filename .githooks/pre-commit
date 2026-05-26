@@ -101,6 +101,26 @@ if [ -n "$SKILL_FILES" ]; then
   fi
 fi
 
+# ── 3.7. Template Lifecycle Validation ────────────────────────────────────────
+# Run when templates/ files are modified
+TEMPLATE_FILES=$(echo "$STAGED" | grep '^templates/' || true)
+if [ -n "$TEMPLATE_FILES" ]; then
+  echo ""
+  echo "=== Template Lifecycle Validation ==="
+
+  if command -v bun &>/dev/null && [ -f "scripts/validate-templates.ts" ]; then
+    if bash scripts/validate-templates.sh; then
+      echo -e "\033[32m[PASS]\033[0m Template validation: all checks passed"
+    else
+      echo -e "\033[31m[FAIL]\033[0m Template validation failed — commit blocked."
+      echo "       Run 'bash scripts/validate-templates.sh' to see details."
+      exit 1
+    fi
+  else
+    echo -e "\033[33m[SKIP]\033[0m Template validation requires bun. Install for automated checks."
+  fi
+fi
+
 # ── 4. Script Parity Check ─────────────────────────────────────────────────────
 # Ensure every .sh has a corresponding .ps1 and vice versa
 if [ -d "scripts" ]; then

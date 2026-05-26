@@ -1,7 +1,8 @@
 ﻿param(
     [Parameter(Mandatory)][string]$ProjectName,
     [Parameter(Mandatory=$false)][string]$Description = "A new project",
-    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc"
+    [Parameter(Mandatory=$false)][string]$TechStack = "Node.js / Python / etc",
+    [Parameter(Mandatory=$false)][string]$Variant = "co-develop"
 )
 
 # UTF-8 encoding enforcement
@@ -11,7 +12,8 @@ $ErrorActionPreference = 'Stop'
 
 $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
-$TemplatesDir  = Join-Path $WorkspaceRoot "templates"
+$TemplatesDir  = Join-Path $WorkspaceRoot "templates" $Variant
+$VersionFile   = Join-Path $WorkspaceRoot "templates" "VERSION"
 
 if (Test-Path $ProjectDir) {
     Write-Host "❌ Directory already exists: $ProjectDir" -ForegroundColor Red
@@ -19,8 +21,24 @@ if (Test-Path $ProjectDir) {
 }
 
 if (-not (Test-Path $TemplatesDir)) {
-    Write-Host "❌ Templates directory not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "   Available variants: co-develop (stable), co-design (planned), co-work (planned)" -ForegroundColor Yellow
     exit 1
+}
+
+# Check variant status
+$VariantJson = Join-Path $TemplatesDir "variant.json"
+if (Test-Path $VariantJson) {
+    $variantData = Get-Content $VariantJson -Raw | ConvertFrom-Json
+    if ($variantData.status -ne "stable") {
+        Write-Host "⚠️  Variant '$Variant' has status: $($variantData.status)" -ForegroundColor Yellow
+        Write-Host "   This variant may not be fully implemented." -ForegroundColor Yellow
+        $confirm = Read-Host "   Continue anyway? [y/N]"
+        if ($confirm -ne "y" -and $confirm -ne "Y") {
+            Write-Host "Aborted." -ForegroundColor Red
+            exit 1
+        }
+    }
 }
 
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
@@ -73,12 +91,26 @@ Get-ChildItem -Path $ProjectDir -Recurse -File |
         if ($content -match '\{\{PROJECT_NAME\}\}') { $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName; $modified = $true }
         if ($content -match '\{\{PROJECT_DESCRIPTION\}\}') { $content = $content -replace '\{\{PROJECT_DESCRIPTION\}\}', $Description; $modified = $true }
         if ($content -match '\{\{PROJECT_CHARACTERISTICS\}\}') { $content = $content -replace '\{\{PROJECT_CHARACTERISTICS\}\}', $TechStack; $modified = $true }
-        
+
         if ($modified) {
             Set-Content $_.FullName $content -Encoding UTF8 -NoNewline
         }
     }
   }
+
+# ── 4.5. Record template provenance in docs/context.md ────────────────────────
+$TemplateVersion = "unknown"
+if (Test-Path $VersionFile) {
+    $TemplateVersion = (Get-Content $VersionFile -Raw).Trim()
+}
+$ContextMd = Join-Path $ProjectDir "docs\context.md"
+if (Test-Path $ContextMd) {
+    $contextContent = Get-Content $ContextMd -Raw -Encoding UTF8
+    if ($contextContent -notmatch "Template-Version:") {
+        $provenance = "`n## Template Provenance`n`n- **Template-Version**: $TemplateVersion`n- **Template-Variant**: $Variant`n"
+        Add-Content $ContextMd $provenance -Encoding UTF8
+    }
+}
 
 # ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir

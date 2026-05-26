@@ -98,3 +98,11 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 - Write implementation code (that is code-writer's domain)
 - Give vague structural opinions — always name the specific file or component affected
 
+## Dispatch Protocol
+
+**Can Lead Phases**: [1, 2]  # Architect leads analysis and design
+**Can Support In**: []
+**Auto-Dispatch To**: N/A
+**Tier**: high
+**Communication Style**: async  # Design documents reviewed async
+
