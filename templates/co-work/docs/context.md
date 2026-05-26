@@ -63,17 +63,17 @@ This project uses a **Collaboration PM-first multi-agent architecture**. All col
        └─▶[Coord]      → Project Coordinator
 ```
 
-### Collaboration Workflow Phases
+### Asynchronous Collaboration Workflow Phases
 
-| Phase | Name | Lead Agent |
-|-------|------|------------|
-| 0 | Team Assembly | PM |
-| 1 | Research & Analysis | Analyst |
-| 2 | Strategy Validation | PM |
-| 3 | Content Creation | Content Writer |
-| 4 | Coordination | Project Coordinator |
-| 5 | Final Review | All |
-| 6 | Publication | PM |
+| Phase | Name | What Happens | Primary Owner |
+|-------|------|--------------|---------------|
+| 0 | Team Assembly | PM forms collaboration team and establishes objectives | PM |
+| 1 | Asynchronous Research & Discovery | Independent data gathering and fact-checking to build knowledge base | Analyst |
+| 2 | Narrative Framework & Alignment | Draft core storyline and outline; obtain stakeholder alignment early | Storyteller |
+| 3 | Collaborative Drafting | Parallel creation of engaging prose and technical docs via live co-authoring | Content Writer, Technical Writer |
+| 4 | Iterative Stakeholder Review | Continuous, non-blocking feedback loops by SMEs directly in living docs | Project Coordinator, Tech Writer |
+| 5 | Stylistic Polish & Finalization | Final formatting, brand voice refinement, and multimedia integration | Content Writer, Storyteller |
+| 6 | Automated Publication | Push final artifacts to channels, archive source materials, notify stakeholders | MS365 Expert |
 
 ---
 

@@ -64,16 +64,18 @@ This project uses a **Design PM-first multi-agent architecture**. All design wor
        └─▶[System tasks]     → Design Lead → Visual Designer
 ```
 
-### Design Workflow Phases
+### Iterative Design-Native Workflow Phases
 
-| Phase | Name | What Happens |
-|-------|------|--------------|
-| 0 | Team Assembly | Design PM assesses project needs; creates specialized design agents/skills |
-| 1 | Research & Discovery | UX Researcher conducts research; Design Lead analyzes constraints (parallel) |
-| 2 | Design Direction | Design Lead establishes creative direction and design system approach |
-| 3 | Design Execution | Visual Designer creates designs; Prototype Engineer builds prototype |
-| 4 | Design Review | Validate system consistency, accessibility, and UX coherence |
-| 5 | Handoff | Create handoff package; log decisions; run `/sync` |
+| Phase | Name | What Happens | Lead Agent(s) |
+|-------|------|--------------|---------------|
+| 0 | Team Assembly | PM analyzes project needs; creates specialized design agents/skills | Design PM |
+| 1 | Narrative & Ecosystem Mapping | Establish core user story, map service touchpoints, define problem space | Storyteller, UX Researcher |
+| 2 | Foundational Exploration | Establish typographic hierarchy, visual mood boards, and layout frameworks | Typography Expert, Visual Designer |
+| 3 | Rapid Prototyping Loops | Continuous build/test of low-fi to high-fi interactive models | Prototype Engineer, Design Lead |
+| 4 | Continuous Validation | Parallel user testing and a11y validation integrated with prototyping loops | UX Researcher, Design Lead |
+| 5 | System Refinement & Handoff | Polish visuals, finalize design system, prepare dev handoff, log decisions | Visual Designer, Prototype Eng |
+
+> **Note:** Phases 3 and 4 operate as a continuous "figure-eight" loop rather than sequential steps.
 
 > **Full details:** See [`AGENTS.md`](../AGENTS.md) for complete workflow, agent roster, and dispatch protocols.
 
