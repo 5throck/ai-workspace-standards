@@ -4,7 +4,7 @@ Run an interactive meeting where collaboration agents discuss research, document
 
 **Usage:**
 ```bash
-/meeting "collaboration topic to discuss" --agents pm,storyteller,analyst,content-writer,project-coordinator
+/meeting "collaboration topic to discuss" --agents pm,storyteller,analyst,content-writer,technical-writer,project-coordinator,ms365-expert
 ```
 
 **Available Collaboration Agents:**
@@ -12,6 +12,8 @@ Run an interactive meeting where collaboration agents discuss research, document
 - **storyteller**: Organizational Storyteller & Culture Steward
 - **analyst**: Research & Data Analyst
 - **content-writer**: Content Writer & Documentation Specialist
+- **technical-writer**: Technical Writer & Developer Documentation Specialist
 - **project-coordinator**: Project Coordinator
+- **ms365-expert**: Microsoft 365 Collaboration Expert
 
 See [AGENTS.md](../AGENTS.md) for complete agent roster.

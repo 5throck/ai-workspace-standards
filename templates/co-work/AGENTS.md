@@ -19,11 +19,17 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Content Writer** | [`agents/content-writer.md`](agents/content-writer.md) | Medium | Transforms research into clear documentation and communications |
+| **Technical Writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | Creates API documentation, technical guides, and developer resources |
 
 ### 📅 Coordination & Logistics
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Coordinator** | [`agents/project-coordinator.md`](agents/project-coordinator.md) | Low | Manages schedules, stakeholder communication, delivery logistics |
+
+### 🛠️ Tools & Platforms
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| **MS 365 Expert** | [`agents/ms365-expert.md`](agents/ms365-expert.md) | Low | Provides Microsoft 365 expertise for Outlook, Word, Excel, PowerPoint, SharePoint, and Teams |
 
 ---
 
