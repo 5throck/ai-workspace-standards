@@ -77,6 +77,23 @@ if (Test-Path "CHANGELOG.md") {
     }
 }
 
+# ── 3.6. Warn about deprecated scripts (if SCRIPTS.md exists) ─────────────────
+if (Test-Path "SCRIPTS.md") {
+    $deprecatedScripts = Select-String -Path "SCRIPTS.md" -Pattern "^\|.*\|.*deprecated" -ErrorAction SilentlyContinue
+    if ($deprecatedScripts) {
+        Write-Host "⚠️  Deprecated scripts detected in SCRIPTS.md:" -ForegroundColor Yellow
+        foreach ($match in $deprecatedScripts) {
+            $parts = $match.Line -split '\|'
+            if ($parts.Length -ge 3) {
+                $scriptName = $parts[1].Trim()
+                Write-Host "   - $scriptName"
+            }
+        }
+        Write-Host "   Consider removing or updating these scripts."
+        Write-Host ""
+    }
+}
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 .\scripts\audit.ps1
 if ($LASTEXITCODE -ne 0) { exit 1 }
