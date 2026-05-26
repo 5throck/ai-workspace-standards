@@ -19,6 +19,7 @@
 | 2026-05-27 | Doc format best practices | [meeting-2026-05-27-doc-format-best-practices.md](meeting-2026-05-27-doc-format-best-practices.md) |
 | 2026-05-27 | Template lifecycle review | [meeting-2026-05-27-template-lifecycle-review.md](meeting-2026-05-27-template-lifecycle-review.md) |
 | 2026-05-27 | Script lifecycle + context.md structure | [meeting-2026-05-27-script-lifecycle-context-structure.md](meeting-2026-05-27-script-lifecycle-context-structure.md) |
+| 2026-05-27 | Workspace root and template lifecycle management review | [meeting-2026-05-27-lifecycle-management-review.md](meeting-2026-05-27-lifecycle-management-review.md) |
 
 ## ADRs
 

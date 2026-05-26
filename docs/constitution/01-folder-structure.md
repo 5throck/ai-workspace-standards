@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §1 Standard Folder Structure
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 1. Standard Folder Structure
+### 1. Standard Folder Structure {#standard-folder-structure}
 
 #### 1.1 Project Layout
 

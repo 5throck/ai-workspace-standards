@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §3 GitHub PR Workflow
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 3. GitHub PR Workflow
+### 3. GitHub PR Workflow {#github-pr-workflow}
 
 #### 3.1 Core Rule
 

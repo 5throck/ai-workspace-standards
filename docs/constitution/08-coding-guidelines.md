@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §8 Coding Behavior Guidelines
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 8. Coding Behavior Guidelines
+### 8. Coding Behavior Guidelines {#coding-behavior-guidelines}
 
 Behavioral guidelines to reduce common LLM coding mistakes.
 

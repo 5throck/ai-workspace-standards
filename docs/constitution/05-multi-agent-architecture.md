@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §5 Multi-Agent Architecture
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 5. Multi-Agent Architecture
+### 5. Multi-Agent Architecture {#multi-agent-architecture}
 
 Every project uses a role-based agent structure. Agents are defined as markdown files in `agents/`.
 

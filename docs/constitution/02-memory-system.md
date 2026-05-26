@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §2 Memory System
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 2. Memory System
+### 2. Memory System {#memory-system}
 
 Every session that produces a meaningful change must be logged.
 

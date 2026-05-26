@@ -123,9 +123,9 @@ All projects must read [`CONSTITUTION.md`](https://raw.githubusercontent.com/5th
 - `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
 
 For full lifecycle procedures:
-- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#56-agent-lifecycle-management)
-- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#6-skill-lifecycle-management)
-- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#65-script-lifecycle-management)
+- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#agent-lifecycle-management)
+- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#skills)
+- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#script-lifecycle-management)
 
 ---
 

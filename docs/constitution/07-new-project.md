@@ -1,7 +1,7 @@
 > Part of [CONSTITUTION.md](../../CONSTITUTION.md) — §7 New Project Initialization
 > **Do not edit in isolation** — changes must be reflected in the hub index.
 
-### 7. New Project Initialization
+### 7. New Project Initialization {#new-project-initialization}
 
 #### 7.1 Project Scaffolding Commands
 
