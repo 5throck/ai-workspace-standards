@@ -10,22 +10,31 @@ $Date = Get-Date -Format "yyyy-MM-dd"
 # ── 1. Write daily session log ─────────────────────────────────────────────────
 New-Item -ItemType Directory -Path "memory" -Force | Out-Null
 $GitStatus = git status --short 2>$null
-$FileList = ""
+$FileLines = "- N/A"
 if ($GitStatus) {
-    # Extract just file names, ignoring status codes, and join with commas
-    $FileList = ($GitStatus | ForEach-Object { ($_ -replace '^.{2}\s+', '').Trim() }) -join ", "
+    $FileLines = ($GitStatus | ForEach-Object {
+        $f = ($_ -replace '^.{2}\s+', '').Trim()
+        "- ``$f`` — modified"
+    }) -join "`n"
 }
 
-# Determine appropriate header: if this file has existing content, add a separator
+# Determine appropriate separator
 $separator = ""
 if (Test-Path "memory\$Date.md") { $separator = "`n---`n`n" }
 
+# Mandatory 4-section format (CONSTITUTION.md §2 / docs/context.md § Documentation Standards)
 $template = @"
-$separator## $Msg
-- **Files**: $FileList
-- **Purpose**: 
-- **Decisions**: 
-- **Issues**: None
+$separator## Session Summary
+$Msg
+
+## Changes
+$FileLines
+
+## Decisions
+- None
+
+## Open Issues
+- None
 "@
 
 Add-Content "memory\$Date.md" $template -Encoding UTF8

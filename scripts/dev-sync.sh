@@ -11,15 +11,15 @@ mkdir -p memory
 GIT_STATUS=$(git status --short 2>/dev/null || true)
 FILE_LIST=""
 if [ -n "$GIT_STATUS" ]; then
-  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | paste -sd ", " -)
+  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | sed 's/^/- `/' | sed 's/$/' — modified"/' )
 fi
 
 SEPARATOR=""
 [ -f "memory/$DATE.md" ] && SEPARATOR=$'\n---\n\n'
 
-# Safe printf: keep format string static, pass values as arguments
-printf '%s## %s\n- **Files**: %s\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n' \
-  "$SEPARATOR" "$MSG" "$FILE_LIST" >> "memory/$DATE.md"
+# Mandatory 4-section format (CONSTITUTION.md §2 / docs/context.md § Documentation Standards)
+printf '%s## Session Summary\n%s\n\n## Changes\n%s\n\n## Decisions\n- None\n\n## Open Issues\n- None\n' \
+  "$SEPARATOR" "$MSG" "${FILE_LIST:-"- N/A"}" >> "memory/$DATE.md"
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"
