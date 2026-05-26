@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-25]**: docs: add lifecycle management documentation to templates/docs/context.md with frontmatter templates and audit commands
 
 ### Changed
+- Update `README.md` and `README_ko.md` to reflect current state: co-design and co-work variants marked ✅ Stable, agent rosters listed, `common/skills/` added to structure, template version bumped to 0.5.0, branch naming convention updated to `feat/fix/docs` prefix
+- Bump `templates/VERSION` from `0.4.0` to `0.5.0`
 - **[2026-05-25]**: feat: add `role` and `status: active` fields to all workspace root agent files (architect, auditor, automation-engineer, docs-writer, pm, scaffolding-expert, security-expert)
 - **[2026-05-25]**: docs: update AGENTS.md and templates/AGENTS.md with skill-lifecycle-manager entry
 - **[2026-05-25]**: docs: update platform notes to specify Bun-only for lifecycle audit scripts (removed Bash/PS1 references)

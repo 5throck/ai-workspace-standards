@@ -53,11 +53,11 @@ bash scripts/new-project.sh "my-project-name"
 bash scripts/new-project.sh "my-project-name" --variant co-develop
 
 # Use a specific template version (see available: bash scripts/list-template-versions.sh)
-bash scripts/new-project.sh "my-project-name" --version 0.4.0
+bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
 .\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.4.0
+.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.5.0
 ```
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
@@ -119,19 +119,26 @@ C:\git\ (workspace root - this repo)
 ├── .gitleaks.toml           # Secret scan config (extends upstream defaults)
 ├── memory/                  # Workspace-level memory logs
 ├── templates/               # Versioned template variants (tagged as template-vX.Y.Z)
-│   ├── VERSION              # Current template semver (0.4.0)
+│   ├── VERSION              # Current template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template-level change history
+│   ├── common/              # Shared skills across all variants
+│   │   └── skills/          # skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — full software development agent team
 │   │   ├── variant.json     # Variant metadata (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
 │   │   ├── docs/            # context.md (10-section template), security.md
 │   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog, etc.)
+│   │   │   └── skills/      # code-review, test-driven-development, refactoring
 │   │   ├── .gemini/         # settings.json, commands/
 │   │   ├── .githooks/       # pre-commit, pre-push
 │   │   └── .github/         # CODEOWNERS, workflows, dependabot
-│   ├── co-design/           # 🔵 Planned — UI/UX design workflow
-│   └── co-work/             # 🔵 Planned — general collaboration workflow
+│   ├── co-design/           # ✅ Stable — UI/UX design workflow
+│   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
+│   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design
+│   └── co-work/             # ✅ Stable — general collaboration workflow
+│       ├── agents/          # pm.md, analyst.md, technical-writer.md, content-writer.md, project-coordinator.md, storyteller.md, ms365-expert.md
+│       └── .claude/skills/  # research-analysis, documentation-writing, api-documentation
 ├── scripts/
 │   ├── audit.sh / .ps1                         # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
 │   ├── dev-sync.sh / .ps1                      # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
@@ -201,8 +208,8 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | Variant | Status | Description |
 |---------|--------|-------------|
 | `co-develop` | ✅ Stable | Full software development workflow — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
-| `co-design` | 🔵 Planned | UI/UX design workflow |
-| `co-work` | 🔵 Planned | General collaboration workflow |
+| `co-design` | ✅ Stable | UI/UX design workflow — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
+| `co-work` | ✅ Stable | General collaboration workflow — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 
 ### Selecting a version and variant
 
@@ -214,7 +221,7 @@ bash scripts/list-template-versions.sh
 bash scripts/new-project.sh my-project
 
 # Use a specific version
-bash scripts/new-project.sh my-project --version 0.4.0
+bash scripts/new-project.sh my-project --version 0.5.0
 
 # Use a specific variant
 bash scripts/new-project.sh my-project --variant co-develop
@@ -248,7 +255,7 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 
 This is a **public repository**. Contributions are welcome via pull requests.
 
-1. Branch off `main` using the naming convention: `pr/<YYYYMMDD-HHmmss>-<slug>`
+1. Branch off `main` using the naming convention: `feat/<slug>`, `fix/<slug>`, or `docs/<slug>`
 2. All PRs must pass `bash scripts/audit.sh`
 3. Add a `CHANGELOG.md` entry under `[Unreleased]` before merging
 4. Follow `CONSTITUTION.md §8 - Coding Behavior Guidelines`
