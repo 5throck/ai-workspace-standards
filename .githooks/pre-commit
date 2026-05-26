@@ -62,6 +62,22 @@ if [ -n "$MD_STAGED" ]; then
 fi
 
 # ?? 2-B. Enforce English Only in PR Artifacts (CHANGELOG, memory) ?????????????
+SCRIPT_STAGED=$(echo "$STAGED" | grep -iE "\.(sh|ps1|ts)$" || true)
+if [ -n "$SCRIPT_STAGED" ]; then
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      ENCODING=$(file --mime-encoding "$file" | cut -d: -f2 | tr -d ' ')
+      if [[ "$ENCODING" != "utf-8" && "$ENCODING" != "us-ascii" ]]; then
+        echo -e "\033[31m[FAIL]\033[0m Invalid encoding '$ENCODING' in $file"
+        echo "       All script files (.sh, .ps1, .ts) must be UTF-8 encoded."
+        echo "       Convert to UTF-8: iconv -f ORIGINAL_ENCODING -t UTF-8 -o output.txt input.txt"
+        exit 1
+      fi
+    fi
+  done <<< "$SCRIPT_STAGED"
+fi
+
 DOCS_TO_CHECK=$(echo "$STAGED" | grep -E "^memory/.*\.md$|^CHANGELOG.md$" || true)
 if [ -n "$DOCS_TO_CHECK" ]; then
   while IFS= read -r file; do
