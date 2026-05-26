@@ -48,6 +48,16 @@ Extract from `$ARGUMENTS`:
 - **Rounds**: e.g. `--rounds 2` (optional — default 2, max 3)
 - **Language**: e.g. `--language en` (optional — defaults to Korean; `en` switches all dialogue to English)
 - **Tasks**: e.g. `--tasks` flag (optional — if set, after the meeting automatically convert action items into a task plan)
+- **Dialogue**: e.g. `--dialogue` flag (optional — prints every agent turn in real time so the user can watch the conversation unfold. High token cost; use when the reasoning process itself is valuable to observe.)
+
+### Mode comparison
+
+| Mode | Command | What you see | Token cost |
+|------|---------|--------------|------------|
+| **Silent** (default) | `/meeting "topic"` | Opening header → `[meeting in progress…]` → synthesis only | ~1,000 tokens |
+| **Dialogue** | `/meeting "topic" --dialogue` | Full real-time conversation, every turn | ~5,000+ tokens |
+
+Default is silent because most callers need the outcome, not the transcript. Pass `--dialogue` only when watching the agents reason together adds value.
 
 ---
 
@@ -64,8 +74,9 @@ Load only the agent files that (a) exist and (b) are in the `--agents` list if s
 ## Step 3 — Open the Meeting
 
 Determine dialogue language from `--language` flag (default: Korean).
+Determine output mode: **silent by default**; `--dialogue` flag switches to full output.
 
-Print the meeting header:
+Print the meeting header regardless of mode:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -73,9 +84,15 @@ Print the meeting header:
 Topic   : [TOPIC]
 Present : [comma-separated agent names]
 Rounds  : [N]
-Language: [Korean | English]
+Mode    : [Silent | Dialogue]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
+**If silent (default)**: print `[회의 진행 중… 완료 시 결과를 출력합니다]` (or English equivalent) and proceed internally without any further per-turn output until Step 5.
+
+**If `--dialogue`**: print the facilitator opening statement and continue to Step 4.
+
+```
 [Facilitator]: [Opening statement in the chosen language, setting the agenda and asking participants to respond directly to each other by name.]
 
 ---
@@ -87,39 +104,44 @@ Language: [Korean | English]
 
 For each round (1 to N), iterate through each participant in order.
 
-For each participant's turn:
+For each participant's turn, Claude fully inhabits the agent's persona and generates their contribution internally (this always happens regardless of mode — the thinking is never skipped):
 
 1. **Fully inhabit that agent's persona** — you are now that character, not Claude
 2. **Everything said so far is already in your context** — every prior turn is visible above; use it naturally, as a person in the room would
-3. **Output their contribution** in this format:
+3. **Generate their contribution** covering:
+   - Name at least one prior speaker and reference their specific point
+   - Add domain perspective only this agent holds
+   - Agree, build on, or respectfully challenge — like a real conversation
+   - End with a concrete proposal or a direct question to a named colleague
+
+**If `--dialogue`**: print each turn as it is generated:
 
 ```
 **[AgentName]**: (Round N)
 
-[2–4 paragraphs of natural dialogue. MUST:
-- Name at least one prior speaker and reference their specific point
-- Add domain perspective only this agent holds
-- Agree, build on, or respectfully challenge — like a real conversation
-- End with a concrete proposal or a direct question to a named colleague]
+[2–4 paragraphs]
 
 ---
 ```
 
+**If silent (default)**: do NOT print the turn. Hold it in context only — it still influences subsequent agents' reasoning.
+
 All dialogue text follows the `--language` setting. Speaker labels (`**Architect**:`) are always in English regardless of language.
 
-**Critical rules for each turn:**
+**Critical rules (both modes):**
 - Stay fully in character — the agent's constraints, tone, and knowledge domain apply
 - Reference specific things previous speakers said (quote or paraphrase with their name)
 - Never break character to explain what you're doing
 - No meta-commentary like "As the architect agent, I will now..."
-- Short speaker label: `**Architect**:` not `**[Architect Agent]**:`
 - Maximum 3 rounds — stop and synthesize if the discussion converges earlier
 
 ---
 
 ## Step 5 — Synthesis (Final Turn)
 
-After all rounds, the most cross-domain agent (Auditor, Test-Runner, or the closest equivalent) speaks last as synthesizer:
+After all rounds, the most cross-domain agent (Auditor, Test-Runner, or the closest equivalent) speaks last as synthesizer.
+
+**Always print the synthesis regardless of mode** — this is the primary output of a silent meeting:
 
 ```
 **[Synthesizer]**: (Synthesis)
