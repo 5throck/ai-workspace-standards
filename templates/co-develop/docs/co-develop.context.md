@@ -49,6 +49,7 @@
 | Skill | Directory | Trigger | Status |
 |-------|-----------|---------|--------|
 | Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
+| Script Lifecycle Manager | .claude/skills/script-lifecycle-manager/SKILL.md | PM agent managing script lifecycle... | active |
 | Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
 | Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
 | Code Review | `.claude/skills/code-review/SKILL.md` | Before PR creation | active |

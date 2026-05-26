@@ -157,12 +157,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 |-------|------|-------------------|
 | UI/UX Design Intelligence | `.claude/skills/ui-ux-pro-max/SKILL.md` | Building web components, pages, or applications; UI/UX design tasks |
 | Skill Lifecycle Manager | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
+| Script Lifecycle Manager | `.claude/skills/script-lifecycle-manager/SKILL.md` | PM agent managing script lifecycle; creating scripts, managing versions and dependencies in SCRIPTS.md |
 | Agent Lifecycle Manager | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
 | Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
 | Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
-| Multi-Agent Meeting | `.claude/commands/meeting.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue; use `/meeting "topic" --agents X,Y,Z` |
+| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
@@ -216,6 +217,20 @@ Skill("agent-lifecycle-manager")
 
 ```
 Skill("skill-lifecycle-manager")
+```
+
+### Script Lifecycle
+
+| Event | Skill to Use | Action |
+|-------|-------------|--------|
+| Create new script | `script-lifecycle-manager` | Create script → update SCRIPTS.md → write documentation |
+| Update script | `script-lifecycle-manager` | Modify script → bump version in SCRIPTS.md → validate |
+| Deprecate script | `script-lifecycle-manager` | Set `status: deprecated` and `removal-date` → update SCRIPTS.md |
+
+**Trigger**: Invoke the `script-lifecycle-manager` skill from Claude Code/Antigravity when any of the above events occur.
+
+```
+Skill("script-lifecycle-manager")
 ```
 
 ### Skills Location Reference

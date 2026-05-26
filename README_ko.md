@@ -1,3 +1,7 @@
+---
+sync_version: 1
+---
+
 # AI 워크스페이스 표준 (AI Workspace Standards)
 
 > **모든 AI 코딩 도구를 아우르는 Vibe Coding 및 Harness Engineering 마스터 구성입니다.**
@@ -235,4 +239,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-26*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-27*

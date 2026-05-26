@@ -1,3 +1,7 @@
+---
+sync_version: 1
+---
+
 # AI Workspace Standards
 
 > **Master configuration for Vibe Coding and Harness Engineering across all AI coding tools.**
@@ -237,4 +241,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-26*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-27*

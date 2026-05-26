@@ -1,5 +1,6 @@
 param(
     [string]$Date    = (Get-Date -Format "yyyy-MM-dd"),
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
     [string]$Summary = "update",
     [switch]$Meeting,
     [switch]$Adr,

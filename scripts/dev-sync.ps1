@@ -1,4 +1,5 @@
 param([string]$Msg = "chore: update")
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'

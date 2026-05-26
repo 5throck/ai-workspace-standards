@@ -1,3 +1,4 @@
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # Bun installer for Windows
 
 Write-Host "📦 Installing Bun..." -ForegroundColor Cyan

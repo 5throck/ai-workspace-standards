@@ -1,3 +1,7 @@
+---
+sync_version: 1
+---
+
 # {{PROJECT_NAME}}
 
 {{PROJECT_DESCRIPTION}}
