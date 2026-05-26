@@ -149,9 +149,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
-| **UI/UX Design Intelligence** | `.claude/skills/ui-ux-pro-max/SKILL.md` | Building design systems, creating visual designs, UI components, or design specifications |
-| **Skill Lifecycle Manager** | `.claude/skills/skill-lifecycle-manager/SKILL.md` | Design PM managing skill lifecycle after agent configuration changes |
-| **Multi-Agent Meeting** | `.claude/commands/meeting.md` | Running an interactive design meeting where agents discuss design decisions |
+| **UI/UX Design Intelligence** | `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, creating visual designs, UI components, or design specifications |
+| **Skill Lifecycle Manager** | `../common/skills/skill-lifecycle-manager/SKILL.md` | Design PM managing skill lifecycle after agent configuration changes |
+| **Meeting Facilitation** | `../common/skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
 
 ---
 

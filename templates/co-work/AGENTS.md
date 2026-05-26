@@ -49,11 +49,12 @@
 
 ## Skills
 
-| Skill | Trigger |
-|-------|----------|
-| **Research Analysis** | Analyzing topics, synthesizing research |
-| **Documentation Writing** | Creating guides, drafting communications |
-| **Meeting Facilitation** | `/meeting` command for stakeholder discussions |
+| Skill | File | Trigger condition |
+|-------|------|-------------------|
+| **Research Analysis** | `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research, evidence gathering |
+| **Documentation Writing** | `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications, synthesizing complex information |
+| **Meeting Facilitation** | `../common/skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
+| **Skill Lifecycle Manager** | `../common/skills/skill-lifecycle-manager/SKILL.md` | PM managing skill lifecycle and validation |
 
 ---
 
