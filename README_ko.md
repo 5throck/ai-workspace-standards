@@ -53,11 +53,11 @@ bash scripts/new-project.sh "my-project-name"
 bash scripts/new-project.sh "my-project-name" --variant co-develop
 
 # 특정 템플릿 버전 사용 (목록 확인: bash scripts/list-template-versions.sh)
-bash scripts/new-project.sh "my-project-name" --version 0.4.0
+bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
 .\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.4.0
+.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.5.0
 ```
 
 > **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"`을 사용할 수 있습니다.
@@ -117,19 +117,26 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── .gitleaks.toml           # 시크릿 스캔 설정 (상위 기본값 확장)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
 ├── templates/               # 버전 관리되는 template variant (template-vX.Y.Z 태그로 관리)
-│   ├── VERSION              # 현재 template semver (0.4.0)
+│   ├── VERSION              # 현재 template semver (0.5.0)
 │   ├── CHANGELOG.md         # Template 레벨 변경 이력
+│   ├── common/              # 모든 variant에서 공유하는 스킬
+│   │   └── skills/          # skill-lifecycle-manager, meeting-facilitation
 │   ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 에이전트 팀
 │   │   ├── variant.json     # Variant 메타데이터 (name, status, version)
 │   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
 │   │   ├── docs/            # context.md (10섹션 템플릿), security.md
 │   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
 │   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog 등)
+│   │   │   └── skills/      # code-review, test-driven-development, refactoring
 │   │   ├── .gemini/         # settings.json, commands/
 │   │   ├── .githooks/       # pre-commit, pre-push
 │   │   └── .github/         # CODEOWNERS, workflows, dependabot
-│   ├── co-design/           # 🔵 Planned — UI/UX 디자인 워크플로
-│   └── co-work/             # 🔵 Planned — 범용 협업 워크플로
+│   ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로
+│   │   ├── agents/          # pm.md, design-lead.md, ux-researcher.md, visual-designer.md, prototype-engineer.md, storyteller.md, service-designer.md, typography-expert.md
+│   │   └── .claude/skills/  # ui-ux-design-intelligence, service-design
+│   └── co-work/             # ✅ Stable — 범용 협업 워크플로
+│       ├── agents/          # pm.md, analyst.md, technical-writer.md, content-writer.md, project-coordinator.md, storyteller.md, ms365-expert.md
+│       └── .claude/skills/  # research-analysis, documentation-writing, api-documentation
 ├── scripts/
 │   ├── audit.sh / .ps1                       # 문서 감사 (## Coding Guidelines, CHANGELOG 등 검사)
 │   ├── dev-sync.sh / .ps1                    # 전체 파이프라인: memlog → sync-md → changelog → audit → commit → PR
@@ -199,8 +206,8 @@ PM Orchestrator (PM 오케스트레이터)
 | Variant | 상태 | 설명 |
 |---------|------|------|
 | `co-develop` | ✅ Stable | 소프트웨어 개발 전용 워크플로 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
-| `co-design` | 🔵 Planned | UI/UX 디자인 워크플로 |
-| `co-work` | 🔵 Planned | 범용 협업 워크플로 |
+| `co-design` | ✅ Stable | UI/UX 디자인 워크플로 — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
+| `co-work` | ✅ Stable | 범용 협업 워크플로 — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 
 ### 버전 및 Variant 선택
 
@@ -212,7 +219,7 @@ bash scripts/list-template-versions.sh
 bash scripts/new-project.sh my-project
 
 # 특정 버전 지정
-bash scripts/new-project.sh my-project --version 0.4.0
+bash scripts/new-project.sh my-project --version 0.5.0
 
 # 특정 variant 지정
 bash scripts/new-project.sh my-project --variant co-develop
@@ -246,7 +253,7 @@ bash scripts/validate-templates.sh
 
 이 저장소는 **공개 저장소(Public Repository)**입니다. 누구나 Pull Request를 통해 기여할 수 있습니다.
 
-1. `pr/<YYYYMMDD-HHmmss>-<slug>` 네이밍 규칙을 사용하여 `main`에서 브랜치를 땁니다.
+1. `feat/<slug>`, `fix/<slug>`, `docs/<slug>` 네이밍 규칙을 사용하여 `main`에서 브랜치를 생성합니다.
 2. 모든 PR은 `bash scripts/audit.sh`를 통과해야 합니다.
 3. 병합(merge)하기 전에 `[Unreleased]` 아래에 `CHANGELOG.md` 항목을 추가합니다.
 4. `CONSTITUTION.md §8 - Coding Behavior Guidelines`를 준수합니다.
