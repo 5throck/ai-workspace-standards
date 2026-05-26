@@ -118,14 +118,14 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 
 ### Workspace Constitution Reference
 
-All projects must read [`CONSTITUTION.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md) at session start, including the files listed in its `## Required Reading` block:
+All projects must read [`CONSTITUTION.md`](../../CONSTITUTION.md) at session start, including the files listed in its `## Required Reading` block:
 - `docs/constitution/05-multi-agent-architecture.md` — Agent architecture, 3-tier model, PM governance workflow
 - `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
 
 For full lifecycle procedures:
-- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#agent-lifecycle-management)
-- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#skills)
-- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#script-lifecycle-management)
+- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](../../CONSTITUTION.md#agent-lifecycle-management)
+- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](../../CONSTITUTION.md#skills)
+- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](../../CONSTITUTION.md#script-lifecycle-management)
 
 ---
 

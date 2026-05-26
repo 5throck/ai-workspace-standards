@@ -1,4 +1,4 @@
-﻿param([string]$Msg = "chore: update")
+param([string]$Msg = "chore: update")
 
 # UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
@@ -42,6 +42,11 @@ Add-Content "memory\$Date.md" $template -Encoding UTF8
 
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 .\scripts\sync-md.ps1 $Date $Msg
+
+# ── 2.5. Generate scripts/README.md ───────────────────────────────────────────
+if (Test-Path "scripts\generate-scripts-readme.ts") {
+    bun scripts\generate-scripts-readme.ts
+}
 
 # ── 3. Auto-add to CHANGELOG.md [Unreleased] if the entry is missing ────
 if (Test-Path "CHANGELOG.md") {

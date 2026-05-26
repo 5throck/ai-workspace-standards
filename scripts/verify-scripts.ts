@@ -137,6 +137,28 @@ function verify(): boolean {
   const registeredNames = new Set(registry.map((e) => e.script));
   const actualNames = new Set(actualScripts);
 
+  // Check 0: Architecture compliance (.sh/.ps1 pairs and .ts orchestration)
+  const shScripts = actualScripts.filter(s => s.endsWith('.sh')).map(s => s.replace('.sh', ''));
+  const ps1Scripts = actualScripts.filter(s => s.endsWith('.ps1')).map(s => s.replace('.ps1', ''));
+  
+  for (const name of shScripts) {
+    if (!ps1Scripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.ps1\` is missing for \`${name}.sh\``);
+    }
+  }
+  for (const name of ps1Scripts) {
+    if (!shScripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.sh\` is missing for \`${name}.ps1\``);
+    }
+  }
+  for (const script of actualScripts) {
+    if (script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch')) {
+      if (!script.endsWith('.ts') && !script.endsWith('.md')) {
+         errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
+      }
+    }
+  }
+
   // Check 1: Scripts on disk but not in registry
   for (const script of actualScripts) {
     if (!registeredNames.has(script)) {

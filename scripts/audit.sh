@@ -95,6 +95,26 @@ if [ -f "CHANGELOG.md" ]; then
   fi
 fi
 
+# 3.5. UTF-8 BOM check for Markdown files
+bom_errors=0
+FIND_CMD="find . -name \"*.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" -print0"
+if [ ! -f "docs/context.md" ] && [ -d "templates" ]; then
+  # We are at workspace root, avoid scanning project folders
+  FIND_CMD="find . -maxdepth 1 -name \"*.md\" -print0 2>/dev/null; find agents docs memory scripts skills templates .claude -name \"*.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" -print0 2>/dev/null"
+fi
+
+while IFS= read -r -d '' file; do
+  if head -c 3 "$file" | grep -q $'\xEF\xBB\xBF'; then
+    red "UTF-8 BOM found in $file - files must be UTF-8 without BOM"
+    ((bom_errors++)) || true
+  fi
+done < <(eval "$FIND_CMD" || true)
+if [ "$bom_errors" -eq 0 ]; then
+  green "UTF-8 BOM check: all markdown files are clean"
+else
+  ((errors += bom_errors)) || true
+fi
+
 # --- Agent checks (applicable to all projects AND workspace root) ---
 
 # 4. AGENTS.md must exist

@@ -1,4 +1,4 @@
-﻿# GEMINI.md
+# GEMINI.md
 
 This file provides guidance to Gemini (including the Antigravity agentic engine and Gemini CLI) when working in this workspace.
 

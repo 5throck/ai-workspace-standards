@@ -7,7 +7,7 @@
 
 > **Canonical agent index** - auto-loaded by Claude Code; referenced by all other AI tools.
 > Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#multi-agent-architecture).
+> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture).
 
 ---
 
@@ -93,13 +93,13 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
 
 ---
 
 ## Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#54-pm-governance-workflow-6-phases):
+Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-6-phases):
 
 ```
 Phase 0 - Team Assembly & Skill Orchestration (Kickoff)
@@ -151,7 +151,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ## Skills
 
-> **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
+> **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
@@ -236,13 +236,13 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Use the `agent-lifecycle-manager` skill to guide the process.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
 5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
 1. Use the `skill-lifecycle-manager` skill to guide the process.
 2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
+3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md#1-standard-folder-structure).
+> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).

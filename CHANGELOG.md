@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to this workspace configuration are documented in this file.
 
@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## [Unreleased]
+
+### Added
+- **[2026-05-27]**: feat: Implement architectural refinements (TS migration, URL fix, Script parity)
 
 ### Added
 - **[2026-05-27]**: chore\:\ update
@@ -450,6 +453,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 *Last Updated: 2026-05-27*
+
 
 
 

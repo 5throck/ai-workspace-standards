@@ -24,6 +24,11 @@ printf '%s## Session Summary\n%s\n\n## Changes\n%s\n\n## Decisions\n- None\n\n##
 # ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
 bash scripts/sync-md.sh "$DATE" "$MSG"
 
+# ── 2.5. Generate scripts/README.md ───────────────────────────────────────────
+if [ -f "scripts/generate-scripts-readme.ts" ]; then
+  bun scripts/generate-scripts-readme.ts
+fi
+
 # ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
 if [ -f "CHANGELOG.md" ]; then
   SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)

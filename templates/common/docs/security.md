@@ -1,4 +1,4 @@
-﻿# security.md
+# security.md
 
 Security policy and data sanitization rules for this project.
 

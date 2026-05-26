@@ -48,12 +48,12 @@
 
 | Skill | Directory | Trigger | Status |
 |-------|-----------|---------|--------|
-| Research Analysis | `.claude/skills/research-analysis/` | Analyzing topics, synthesizing research | active |
-| Documentation Writing | `.claude/skills/documentation-writing/` | Creating guides, drafting communications | active |
-| API Documentation | `.claude/skills/api-documentation/` | Documenting APIs and developer-facing specs | active |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/` | Managing agent lifecycle | active |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/` | Managing skill lifecycle | active |
-| Meeting Facilitation | `skills/meeting-facilitation/` | Multi-agent meetings | active |
+| Research Analysis | `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research | active |
+| Documentation Writing | `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications | active |
+| API Documentation | `.claude/skills/api-documentation/SKILL.md` | Documenting APIs and developer-facing specs | active |
+| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
+| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
+| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
 
