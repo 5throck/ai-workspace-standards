@@ -46,16 +46,23 @@ git config core.hooksPath .githooks
 ### 3. Create your first project
 
 ```bash
-# macOS / Linux / Windows (Git Bash)
+# Default (latest template, co-develop variant)
 bash scripts/new-project.sh "my-project-name"
 
-# Windows - Command Prompt or PowerShell
+# Specify a variant
+bash scripts/new-project.sh "my-project-name" --variant co-develop
+
+# Use a specific template version (see available: bash scripts/list-template-versions.sh)
+bash scripts/new-project.sh "my-project-name" --version 0.4.0
+
+# Windows PowerShell
 .\scripts\new-project.ps1 "my-project-name"
+.\scripts\new-project.ps1 "my-project-name" -Variant co-develop -Version 0.4.0
 ```
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
 
-Each new project is scaffolded with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files automatically.
+Each new project is scaffolded from the selected template variant with `docs/context.md`, `AGENTS.md`, `agents/pm.md`, and all required configuration files. The template version and variant are recorded in `docs/context.md` for traceability.
 
 ### 4. Move to the new project & Start PM Kick-off
 
@@ -111,23 +118,27 @@ C:\git\ (workspace root - this repo)
 ├── README_ko.md             # This file (Korean)
 ├── .gitleaks.toml           # Secret scan config (extends upstream defaults)
 ├── memory/                  # Workspace-level memory logs
-├── templates/               # Authoritative scaffold - new-project.sh copies this
-│   ├── agents/              # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
-│   ├── docs/                  
-│   │   ├── context.md       # Full 10-section project context template
-│   │   └── security.md      # Internal data sanitization guidelines
-│   ├── scripts/             # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
-│   ├── .claude/             # settings.json ({}), commands/changelog.md, sync.md, etc.
-│   ├── .gemini/             # settings.json ({}), commands/changelog.md, sync.md, etc.
-│   ├── .githooks/           # pre-commit (smart conditional), pre-push
-│   ├── .github/             # GitHub templates (CODEOWNERS, workflows, dependabot)
-│   ├── SECURITY.md          # GitHub vulnerability policy template
-│   └── _examples/           # Reference-only ADR, analyst agent, session log, skill
+├── templates/               # Versioned template variants (tagged as template-vX.Y.Z)
+│   ├── VERSION              # Current template semver (0.4.0)
+│   ├── CHANGELOG.md         # Template-level change history
+│   ├── co-develop/          # ✅ Stable — full software development agent team
+│   │   ├── variant.json     # Variant metadata (name, status, version)
+│   │   ├── agents/          # pm.md, architect.md, designer.md, code-writer.md, test-runner.md, security-monitor.md
+│   │   ├── docs/            # context.md (10-section template), security.md
+│   │   ├── scripts/         # dev-sync.sh/.ps1, sync-md.sh/.ps1, audit.sh/.ps1
+│   │   ├── .claude/         # settings.json, commands/ (changelog, sync, memlog, etc.)
+│   │   ├── .gemini/         # settings.json, commands/
+│   │   ├── .githooks/       # pre-commit, pre-push
+│   │   └── .github/         # CODEOWNERS, workflows, dependabot
+│   ├── co-design/           # 🔵 Planned — UI/UX design workflow
+│   └── co-work/             # 🔵 Planned — general collaboration workflow
 ├── scripts/
-│   ├── audit.sh / .ps1      # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
-│   ├── dev-sync.sh / .ps1   # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
-│   ├── sync-md.sh / .ps1    # MEMORY.md index updater
-│   └── new-project.sh / .ps1 # New project scaffolding (copies templates/)
+│   ├── audit.sh / .ps1                         # Documentation audit (checks ## Coding Guidelines, CHANGELOG, etc.)
+│   ├── dev-sync.sh / .ps1                      # Full pipeline: memlog → sync-md → changelog → audit → commit → PR
+│   ├── sync-md.sh / .ps1                       # MEMORY.md index updater
+│   ├── new-project.sh / .ps1                   # New project scaffolding (--variant, --version flags)
+│   ├── list-template-versions.sh / .ps1        # List available template versions (git tags)
+│   └── validate-templates.sh / .ps1            # Validate template variant structural integrity
 ├── .githooks/
 │   ├── pre-commit           # Smart conditional audit (memory/ files exempt)
 │   └── pre-push             # Blocks direct push to main
@@ -179,7 +190,45 @@ PM Orchestrator
   └─ Phase 6:   Finalization                →  memlog → sync → PR
 ```
 
-Agent scaffold templates for all roles live in `templates/agents/`.
+Agent scaffold templates for all roles live in `templates/co-develop/agents/`.
+
+---
+
+## Template Variants
+
+New projects are scaffolded from versioned template variants. Templates are tagged in git as `template-vX.Y.Z`.
+
+| Variant | Status | Description |
+|---------|--------|-------------|
+| `co-develop` | ✅ Stable | Full software development workflow — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
+| `co-design` | 🔵 Planned | UI/UX design workflow |
+| `co-work` | 🔵 Planned | General collaboration workflow |
+
+### Selecting a version and variant
+
+```bash
+# List available template versions
+bash scripts/list-template-versions.sh
+
+# Use latest template (default)
+bash scripts/new-project.sh my-project
+
+# Use a specific version
+bash scripts/new-project.sh my-project --version 0.4.0
+
+# Use a specific variant
+bash scripts/new-project.sh my-project --variant co-develop
+```
+
+### Validating templates
+
+When modifying template files, run the lifecycle validator to catch structural issues:
+
+```bash
+bash scripts/validate-templates.sh
+```
+
+Checks: agent frontmatter completeness, required sections (`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md roster parity, script `.sh`/`.ps1` parity, and shared file sync warnings. Also runs automatically via pre-commit when `templates/` files are staged.
 
 ---
 
@@ -213,4 +262,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-25*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-26*

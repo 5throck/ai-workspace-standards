@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work]
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work] [--version X.Y.Z]
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -9,14 +9,17 @@ export LANG=C
 set -euo pipefail
 
 VARIANT="co-develop"
+TEMPLATE_VER=""
 PROJECT_NAME=""
 
-# Parse arguments: project name (first non-flag arg) + --variant flag
+# Parse optional arguments
 prev_arg=""
 for arg in "$@"; do
   if [ "$prev_arg" = "--variant" ]; then
     VARIANT="$arg"
-  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ -z "$PROJECT_NAME" ]; then
+  elif [ "$prev_arg" = "--version" ]; then
+    TEMPLATE_VER="$arg"
+  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ "$prev_arg" != "--version" ] && [ -z "$PROJECT_NAME" ]; then
     PROJECT_NAME="$arg"
   fi
   prev_arg="$arg"
@@ -38,6 +41,33 @@ WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_DIR="$WORKSPACE_ROOT/$PROJECT_NAME"
 TEMPLATES_DIR="$WORKSPACE_ROOT/templates/$VARIANT"
 VERSION_FILE="$WORKSPACE_ROOT/templates/VERSION"
+
+# ── Version resolution ─────────────────────────────────────────────────────────
+TEMP_DIR=""
+if [ -n "$TEMPLATE_VER" ]; then
+  TAG="template-v${TEMPLATE_VER}"
+  if ! git -C "$WORKSPACE_ROOT" tag -l "$TAG" | grep -q "^${TAG}$"; then
+    echo "❌ Template version not found: $TAG"
+    echo "   Run: bash scripts/list-template-versions.sh"
+    exit 1
+  fi
+  TEMP_DIR=$(mktemp -d)
+  # Extract tagged template files to temp dir
+  git -C "$WORKSPACE_ROOT" archive "$TAG" "templates/${VARIANT}/" | tar -x -C "$TEMP_DIR" 2>/dev/null || {
+    echo "❌ Failed to extract template version $TAG"
+    rm -rf "$TEMP_DIR"
+    exit 1
+  }
+  TEMPLATES_DIR="$TEMP_DIR/templates/${VARIANT}"
+  if [ ! -d "$TEMPLATES_DIR" ]; then
+    echo "❌ Variant '$VARIANT' not found in template version $TAG"
+    rm -rf "$TEMP_DIR"
+    exit 1
+  fi
+  echo "📦 Using template version: $TAG"
+fi
+# Cleanup temp dir on exit
+[ -n "$TEMP_DIR" ] && trap "rm -rf '$TEMP_DIR'" EXIT
 
 if [ -d "$PROJECT_DIR" ]; then
   echo "❌ Directory already exists: $PROJECT_DIR"
@@ -87,10 +117,7 @@ done < <(find "$PROJECT_DIR" -type f \
   -print0)
 
 # ── 4.5. Record template provenance in docs/context.md ────────────────────────
-TEMPLATE_VERSION="unknown"
-if [ -f "$VERSION_FILE" ]; then
-  TEMPLATE_VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
-fi
+TEMPLATE_VERSION="${TEMPLATE_VER:-$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]' || echo 'unknown')}"
 CONTEXT_MD="$PROJECT_DIR/docs/context.md"
 if [ -f "$CONTEXT_MD" ]; then
   # Add template provenance if not already present
