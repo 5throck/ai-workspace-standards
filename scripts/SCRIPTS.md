@@ -1,8 +1,8 @@
 # SCRIPTS.md — Script Lifecycle Registry
 
-> **L1 Template Snapshot** — published from `scripts/SCRIPTS.md` (L0 workspace SSOT).
-> Do not edit directly; run `bash scripts/publish-to-template.sh` to sync from L0.
-> Projects created from this template get a copy of this file as their starting L2 registry.
+> This file is the Single Source of Truth (L0) for all scripts in `scripts/` (workspace root).
+> Template `templates/common/scripts/` (L1) is a snapshot published from here via `bash scripts/publish-to-template.sh`.
+> Project `scripts/` (L2) is a snapshot created from L1 at `new-project` time.
 >
 > **Machine parsing**: `verify-scripts.ts --verify` reads the `## Registry` section only.
 > **Human reading**: see `## Guide` section below for purpose, usage, and deprecation notes.
@@ -52,6 +52,8 @@
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
 | `sync-skills.sh` | L1 | 1.1.0 | active | — | — | — |
 | `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
+| `publish-to-template.sh` | L1 | 1.0.0 | active | — | — | — |
+| `publish-to-template.ps1` | L1 | 1.0.0 | active | — | — | — |
 
 ---
 
@@ -200,6 +202,14 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 `templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
 **Usage**: `bash scripts/sync-skills.sh` / `.\scripts\sync-skills.ps1`
 
+#### `publish-to-template.sh` / `publish-to-template.ps1`
+**Purpose**: Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot
+(`templates/common/scripts/`). Copies all scripts labeled `L0` in the Registry plus
+`SCRIPTS.md` itself.
+**Usage**: `bash scripts/publish-to-template.sh` / `.\scripts\publish-to-template.ps1`
+**Dry-run**: `bash scripts/publish-to-template.sh --dry-run`
+**Note**: L1-only script (not propagated to template).
+
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
 (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects
@@ -242,5 +252,5 @@ When modifying a script:
 
 ---
 
-*SCRIPTS.md maintained by: publish-to-template.sh (L1 snapshot of workspace SSOT)*
+*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
 *Last updated: 2026-05-27*

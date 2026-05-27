@@ -6,7 +6,7 @@
  * enforces deprecation removal dates, and blocks on security advisories.
  *
  * Usage:
- *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift
+ *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
  *   bun scripts/verify-scripts.ts --generate  # Generate Registry draft from filesystem
  *   bun scripts/verify-scripts.ts --report    # Human-readable status report
  *
@@ -35,7 +35,8 @@ function findWorkspaceRoot(startDir: string): string {
 
 const scriptDir = import.meta.dir;
 const workspaceRoot = findWorkspaceRoot(scriptDir);
-const scriptsDir = join(workspaceRoot, "templates", "common", "scripts");
+const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT
+const l1TemplateDir = join(workspaceRoot, "templates", "common", "scripts");  // L1 snapshot
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -126,7 +127,6 @@ interface DriftResult {
 }
 
 function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean: string[] } {
-  const l1Dir = join(workspaceRoot, "scripts");
   const drifted: DriftResult[] = [];
   const clean: string[] = [];
 
@@ -134,8 +134,8 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
     if (entry.source !== "L0") continue;
     if (entry.drift === "intentional") continue;
 
-    const l0Path = join(scriptsDir, entry.script);
-    const l1Path = join(l1Dir, entry.script);
+    const l0Path = join(scriptsDir, entry.script);       // workspace L0
+    const l1Path = join(l1TemplateDir, entry.script);    // template L1
 
     if (!existsSync(l0Path) || !existsSync(l1Path)) continue;
 
@@ -167,7 +167,7 @@ function checkDriftReport(): void {
   const { drifted, clean } = detectDrift(registry);
   const intentional = registry.filter(e => e.source === "L0" && e.drift === "intentional");
 
-  console.log("\n=== L0/L1 Drift Report ===\n");
+  console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
 
   if (drifted.length === 0) {
     console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
@@ -178,7 +178,7 @@ function checkDriftReport(): void {
       const sign = diff >= 0 ? "+" : "";
       console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
     }
-    console.log("\n   Fix: sync L0←L1 or L0→L1, then re-verify.");
+    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.");
     console.log("   If divergence is intentional, set 'drift: intentional' in SCRIPTS.md.\n");
   }
 
@@ -248,13 +248,11 @@ function verify(): boolean {
   }
 
   // Check 2: Scripts in registry but not on disk
-  // L0 scripts are checked against templates/common/scripts/; L1 against workspace scripts/
-  const l1ScriptsDir = join(workspaceRoot, "scripts");
+  // All scripts (L0 and L1) live in workspace scripts/ (L0 SSOT)
   for (const entry of registry) {
-    const checkDir = entry.source === "L1" ? l1ScriptsDir : scriptsDir;
-    if (!existsSync(join(checkDir, entry.script))) {
+    if (!existsSync(join(scriptsDir, entry.script))) {
       errors.push(
-        `Ghost entry: \`${entry.script}\` in Registry but not on disk (${checkDir}) — remove from SCRIPTS.md`
+        `Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`
       );
     }
   }
@@ -307,7 +305,7 @@ function verify(): boolean {
 
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
-  console.log(`Registry: ${scriptsMdPath}`);
+  console.log(`Registry: ${scriptsMdPath} (L0 SSOT)`);
   console.log(`Scripts dir: ${scriptsDir}\n`);
 
   if (warnings.length > 0) {
