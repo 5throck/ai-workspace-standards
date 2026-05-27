@@ -24,7 +24,9 @@ foreach ($line in $registryLines) {
     if ($cols.Count -lt 4) { continue }
     $script = $cols[1].Trim().Trim('`')
     $source = $cols[2].Trim()
+    $drift  = if ($cols.Count -ge 8) { $cols[7].Trim() } else { "—" }
     if ($source -ne "L0") { continue }
+    if ($drift -eq "intentional") { continue }  # skip intentional divergences
     if (-not $script) { continue }
     $src = Join-Path $L0Dir $script
     $dst = Join-Path $L1Dir $script

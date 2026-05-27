@@ -19,10 +19,12 @@ echo "L0 → L1 publish: scripts/ → templates/common/scripts/"
 echo ""
 
 count=0
-while IFS='|' read -r _ script_col source_col _; do
+while IFS='|' read -r _ script_col source_col _ _ _ _ drift_col _; do
   script=$(echo "$script_col" | tr -d '` \t')
   source=$(echo "$source_col" | tr -d ' \t')
+  drift=$(echo "${drift_col:-}" | tr -d ' \t')
   [ "$source" != "L0" ] && continue
+  [ "$drift" = "intentional" ] && continue  # skip intentional divergences
   [ -z "$script" ] && continue
   src="$L0_DIR/$script"
   dst="$L1_DIR/$script"
