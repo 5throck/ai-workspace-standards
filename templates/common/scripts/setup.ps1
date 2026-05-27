@@ -1,29 +1,31 @@
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
-# setup.ps1 ??Post-scaffold environment setup (Windows PowerShell)
+# setup.ps1 — Post-scaffold environment setup (Windows PowerShell)
 # Mirrors setup.sh exactly. Called automatically by new-project.ps1;
 # can also be re-run manually at any time.
 #
 # Supported stacks:
-#   Node.js    package.json          ??npm install  ??license-checker audit
-#   Python     requirements.txt /    ??.venv (mandatory) + pip install ??pip-licenses audit
+#   Node.js    package.json          — npm install  + license-checker audit
+#   Python     requirements.txt /    — .venv (mandatory) + pip install + pip-licenses audit
 #              pyproject.toml
-#   Ruby       Gemfile               ??bundle install
-#   .NET       *.csproj / *.sln      ??dotnet restore
-#   Java       pom.xml (Maven)       ??mvn dependency:resolve
-#              build.gradle (Gradle) ??gradlew dependencies
-#   C/C++      CMakeLists.txt        ??cmake -B build (configure only)
-#              Makefile              ??info only (not run automatically)
+#   Ruby       Gemfile               — bundle install
+#   .NET       *.csproj / *.sln      — dotnet restore
+#   Java       pom.xml (Maven)       — mvn dependency:resolve
+#              build.gradle (Gradle) — gradlew dependencies
+#   C/C++      CMakeLists.txt        — cmake -B build (configure only)
+#              Makefile              — info only (not run automatically)
 #
 # Usage: .\scripts\setup.ps1 [-SkipInstall] [-SkipLicenseCheck] [-SkipCommit]
-
-# Force English culture for consistent error messages
-[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
 
 param(
     [switch]$SkipInstall,
     [switch]$SkipLicenseCheck,
     [switch]$SkipCommit
 )
+
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Force English culture for consistent error messages
+[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
 
 function Pass($msg) { Write-Host "[PASS] $msg" -ForegroundColor Green }
 function Info($msg) { Write-Host "[INFO] $msg" -ForegroundColor Cyan }

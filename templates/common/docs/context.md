@@ -106,6 +106,18 @@ All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 
 ---
 
+## Coding Guidelines
+
+This project follows the workspace coding standards defined in [`CONSTITUTION.md §8`](../../docs/constitution/08-coding-guidelines.md).
+
+Key rules:
+- All scripts must be provided as `.sh` / `.ps1` pairs
+- PowerShell scripts: `param()` block must be the first executable statement; `$OutputEncoding` follows after
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+
+---
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
