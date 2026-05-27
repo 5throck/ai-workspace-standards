@@ -207,20 +207,22 @@ if ((Test-Path $AgentsMdPath) -and (Test-Path $ContextMdPath)) {
 
 # ── 5. Initialize git ──────────────────────────────────────────────────────────
 Set-Location $ProjectDir
-git init
+try { git init 2>&1 | Out-Null } catch { }
 git config core.hooksPath .githooks
 git config core.fileMode false
 
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = ".githooks/" + $_.Name
-    git update-index --add --chmod=+x $rel
-    if ($LASTEXITCODE -ne 0) { Write-Warning "chmod +x failed for: $rel" }
+    try { git update-index --add --chmod=+x $rel 2>&1 | Out-Null } catch {
+        Write-Warning "chmod +x failed for: $rel"
+    }
 }
 Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = "scripts/" + $_.Name
-    git update-index --add --chmod=+x $rel
-    if ($LASTEXITCODE -ne 0) { Write-Warning "chmod +x failed for: $rel" }
+    try { git update-index --add --chmod=+x $rel 2>&1 | Out-Null } catch {
+        Write-Warning "chmod +x failed for: $rel"
+    }
 }
 
 # ── 7. Post-scaffold audit ─────────────────────────────────────────────────────

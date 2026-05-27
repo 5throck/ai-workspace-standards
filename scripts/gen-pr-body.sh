@@ -60,7 +60,8 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 
 ## Notes
 [Breaking changes, deployment steps, or reviewer guidance. Write 'None' if not applicable.]
----"
+
+---
 
   # Write prompt to temp file to avoid shell quoting issues
   TMPFILE=$(mktemp)

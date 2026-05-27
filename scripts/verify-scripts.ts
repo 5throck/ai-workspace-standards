@@ -6,7 +6,7 @@
  * enforces deprecation removal dates, and blocks on security advisories.
  *
  * Usage:
- *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift
+ *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
  *   bun scripts/verify-scripts.ts --generate  # Generate Registry draft from filesystem
  *   bun scripts/verify-scripts.ts --report    # Human-readable status report
  *
@@ -35,7 +35,8 @@ function findWorkspaceRoot(startDir: string): string {
 
 const scriptDir = import.meta.dir;
 const workspaceRoot = findWorkspaceRoot(scriptDir);
-const scriptsDir = join(workspaceRoot, "templates", "common", "scripts");
+const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT
+const l1TemplateDir = join(workspaceRoot, "templates", "common", "scripts");  // L1 snapshot
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ interface RegistryEntry {
   status: "active" | "deprecated" | "experimental";
   removalDate: string; // "—" or "YYYY-MM-DD"
   securityAdvisory: string; // "—" or "CVE-XXXX"
+  drift: string; // "—" (checked) | "intentional" (skip drift check)
 }
 
 // ── Registry Parser ──────────────────────────────────────────────────────────
@@ -96,6 +98,7 @@ function parseRegistry(content: string): RegistryEntry[] {
       status,
       removalDate: cols[4],
       securityAdvisory: cols[5],
+      drift: cols[6] ?? "—", // backward-compatible: 6-column rows default to "—"
     });
   }
 
@@ -113,6 +116,84 @@ function getActualScripts(): string[] {
         f !== SCRIPTS_MD_FILENAME
     )
     .sort();
+}
+
+// ── Drift Detection ──────────────────────────────────────────────────────────
+
+interface DriftResult {
+  script: string;
+  l0Lines: number;
+  l1Lines: number;
+}
+
+function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean: string[] } {
+  const drifted: DriftResult[] = [];
+  const clean: string[] = [];
+
+  for (const entry of registry) {
+    if (entry.source !== "L0") continue;
+    if (entry.drift === "intentional") continue;
+
+    const l0Path = join(scriptsDir, entry.script);       // workspace L0
+    const l1Path = join(l1TemplateDir, entry.script);    // template L1
+
+    if (!existsSync(l0Path) || !existsSync(l1Path)) continue;
+
+    const l0Content = readFileSync(l0Path, "utf-8");
+    const l1Content = readFileSync(l1Path, "utf-8");
+
+    if (l0Content !== l1Content) {
+      drifted.push({
+        script: entry.script,
+        l0Lines: l0Content.split("\n").length,
+        l1Lines: l1Content.split("\n").length,
+      });
+    } else {
+      clean.push(entry.script);
+    }
+  }
+
+  return { drifted, clean };
+}
+
+function checkDriftReport(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error("❌ SCRIPTS.md not found. Run --generate first.");
+    process.exit(1);
+  }
+
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const { drifted, clean } = detectDrift(registry);
+  const intentional = registry.filter(e => e.source === "L0" && e.drift === "intentional");
+
+  console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
+
+  if (drifted.length === 0) {
+    console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
+  } else {
+    console.log(`⚠️  Unintentional drift (${drifted.length} script(s)):`);
+    for (const d of drifted) {
+      const diff = d.l1Lines - d.l0Lines;
+      const sign = diff >= 0 ? "+" : "";
+      console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
+    }
+    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.");
+    console.log("   If divergence is intentional, set 'drift: intentional' in SCRIPTS.md.\n");
+  }
+
+  if (intentional.length > 0) {
+    console.log(`ℹ️  Intentional drift (skipped, ${intentional.length} script(s)):`);
+    for (const e of intentional) console.log(`   ${e.script}`);
+  }
+
+  if (clean.length > 0) {
+    console.log(`\n✅ In sync (${clean.length} script(s)):`);
+    for (const s of clean) console.log(`   ${s}`);
+  }
+
+  console.log();
+  process.exit(drifted.length > 0 ? 0 : 0); // drift is warn-only, not a hard fail
 }
 
 // ── Verify Mode ──────────────────────────────────────────────────────────────
@@ -140,7 +221,8 @@ function verify(): boolean {
   // Check 0: Architecture compliance (.sh/.ps1 pairs and .ts orchestration)
   const shScripts = actualScripts.filter(s => s.endsWith('.sh')).map(s => s.replace('.sh', ''));
   const ps1Scripts = actualScripts.filter(s => s.endsWith('.ps1')).map(s => s.replace('.ps1', ''));
-  
+  const tsBaseNames = new Set(actualScripts.filter(s => s.endsWith('.ts')).map(s => s.replace('.ts', '')));
+
   for (const name of shScripts) {
     if (!ps1Scripts.includes(name)) {
       errors.push(`Missing cross-platform pair: \`${name}.ps1\` is missing for \`${name}.sh\``);
@@ -152,10 +234,11 @@ function verify(): boolean {
     }
   }
   for (const script of actualScripts) {
-    if (script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch')) {
-      if (!script.endsWith('.ts') && !script.endsWith('.md')) {
-         errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
-      }
+    const baseName = script.replace(/\.(sh|ps1)$/, '');
+    const isOrchestrationKeyword = script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch');
+    const isTsWrapper = !script.endsWith('.ts') && tsBaseNames.has(baseName);
+    if (isOrchestrationKeyword && !script.endsWith('.ts') && !script.endsWith('.md') && !isTsWrapper) {
+      errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
     }
   }
 
@@ -167,12 +250,22 @@ function verify(): boolean {
   }
 
   // Check 2: Scripts in registry but not on disk
+  // All scripts (L0 and L1) live in workspace scripts/ (L0 SSOT)
   for (const entry of registry) {
-    if (!actualNames.has(entry.script)) {
+    if (!existsSync(join(scriptsDir, entry.script))) {
       errors.push(
         `Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`
       );
     }
+  }
+
+  // Check 6: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
+  const { drifted } = detectDrift(registry);
+  for (const d of drifted) {
+    warnings.push(
+      `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines. ` +
+      `Mark \`drift: intentional\` in SCRIPTS.md if divergence is expected.`
+    );
   }
 
   // Check 3: Security advisories — hard block
@@ -214,7 +307,7 @@ function verify(): boolean {
 
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
-  console.log(`Registry: ${scriptsMdPath}`);
+  console.log(`Registry: ${scriptsMdPath} (L0 SSOT)`);
   console.log(`Scripts dir: ${scriptsDir}\n`);
 
   if (warnings.length > 0) {
@@ -369,10 +462,12 @@ if (args.includes("--generate")) {
   generate();
 } else if (args.includes("--report")) {
   report();
+} else if (args.includes("--check-drift")) {
+  checkDriftReport();
 } else if (args.includes("--verify") || args.length === 0) {
   const ok = verify();
   process.exit(ok ? 0 : 1);
 } else {
-  console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report]`);
+  console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
   process.exit(1);
 }

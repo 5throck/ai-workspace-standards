@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * Agent Lifecycle Audit Script (Project Version)
+ * Agent Lifecycle Audit Script
  *
- * Agent health checker for Claude Code & Antigravity (Gemini CLI)
+ * Cross-platform agent health checker for Claude Code & Antigravity (Gemini CLI)
  * Checks: orphaned agents, missing frontmatter, status inconsistencies, skill references
  *
  * Usage:
@@ -58,6 +58,10 @@ const colors = {
 
 const ROOT = cwd();
 const AGENTS_FILE = join(ROOT, 'AGENTS.md');
+const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+
+// Detect if we're at workspace root or in a sub-project
+const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 
 // Platform detection
 const PLATFORM = detectPlatform();
@@ -153,7 +157,16 @@ function findAgentFiles(dir: string): string[] {
 
   if (!existsSync(dir)) return agents;
 
-  // Scan agents/ directory only
+  // At workspace root: only scan agents/ directory
+  if (IS_WORKSPACE_ROOT && dir === ROOT) {
+    const agentsDir = join(dir, 'agents');
+    if (existsSync(agentsDir)) {
+      return findAgentFiles(agentsDir);
+    }
+    return agents;
+  }
+
+  // In sub-project or specific directory: recursive scan
   const entries = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -242,7 +255,7 @@ function parseSkillFrontmatter(filePath: string): { owner?: string } | null {
 // Main audit function
 function auditAgents(jsonMode = false): AuditResult {
   const registeredAgents = getRegisteredAgents();
-  const agentFiles = findAgentFiles(join(ROOT, 'agents'));
+  const agentFiles = findAgentFiles(ROOT);
   const skillOwnerRefs = getSkillOwnerReferences();
 
   const errors: AgentIssue[] = [];
@@ -253,7 +266,7 @@ function auditAgents(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Agent Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: Current project${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
     console.log(`${colors.dim}Agents found: ${agentFiles.length}${colors.reset}`);
     console.log('');
   }
@@ -454,7 +467,7 @@ const helpMode = args.includes('--help') || args.includes('-h');
 
 if (helpMode) {
   console.log(`
-Agent Lifecycle Audit v1.1.0 (Project Version)
+Agent Lifecycle Audit v1.0.0
 
 Usage:
   bun scripts/agent-lifecycle-audit.ts          # Run audit

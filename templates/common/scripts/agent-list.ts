@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Agent Lister CLI
+ * Agent Lister CLI for Workspace Root
  * Lists all agents in the agents/ directory with metadata
  *
  * Usage:
@@ -58,7 +58,7 @@ function extractMetadata(content: string, filename: string): AgentMetadata {
     const triggers = triggerSection[1]
       .split("\n")
       .filter(line => line.trim().startsWith("-"))
-      .map(line => line.replace(/^-\s*/, "").trim());
+      .map(line => line.replace(/^[-*]\s*/, "").trim());
     metadata.triggers = triggers;
   }
 
@@ -109,7 +109,7 @@ async function listAgents(groupFilter?: string, verbose: boolean = false): Promi
       grouped.get(group)!.push(agent);
     }
 
-    console.log(`\n📋 Agent Registry (${filteredAgents.length} agents)\n`);
+    console.log(`\n📋 Workspace Agent Registry (${filteredAgents.length} agents)\n`);
     console.log(`━${"━".repeat(60)}`);
 
     for (const [group, groupAgents] of grouped) {
@@ -165,13 +165,13 @@ function parseArgs(): { group?: string; verbose: boolean } {
 Usage: bun scripts/agent-list.ts [options]
 
 Options:
-  --group <group>    Filter by agent group (e.g., Orchestration, Technical)
+  --group <group>    Filter by agent group (e.g., Orchestration, Design, Execution)
   --verbose, -v      Show detailed information
   --help, -h         Show this help message
 
 Examples:
   bun scripts/agent-list.ts
-  bun scripts/agent-list.ts --group Technical
+  bun scripts/agent-list.ts --group Orchestration
   bun scripts/agent-list.ts --verbose
 `);
         process.exit(0);

@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Skill Lifecycle Audit Script (Project Version)
+ * Skill Lifecycle Audit Script
  *
- * Skill health checker for Claude Code & Antigravity (Gemini CLI)
+ * Cross-platform skill health checker for Claude Code & Antigravity (Gemini CLI)
  * Checks: orphaned skills, deprecated skills, missing owners, circular dependencies
  *
  * Usage:
  *   bun scripts/skill-lifecycle-audit.ts
+ *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
  * @version 1.0.0
@@ -62,6 +63,10 @@ const colors = {
 
 const ROOT = cwd();
 const AGENTS_FILE = join(ROOT, 'AGENTS.md');
+const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+
+// Detect if we're at workspace root or in a sub-project
+const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 
 // Platform detection: Claude Code vs Antigravity
 const PLATFORM = detectPlatform();
@@ -142,6 +147,12 @@ function findSkillFiles(dir: string, baseDir: string = ROOT): string[] {
       if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
       // Skip agent directories (they don't contain skills)
       if (entry.name === 'agents') continue;
+
+      // At workspace root: only scan known subdirectories
+      if (IS_WORKSPACE_ROOT && dir === ROOT) {
+        // Only recurse into skills/ and .claude/ directories
+        if (entry.name !== 'skills' && entry.name !== '.claude') continue;
+      }
 
       skills.push(...findSkillFiles(fullPath, baseDir));
     } else if (entry.name === 'SKILL.md') {
@@ -226,7 +237,7 @@ function auditSkills(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Skill Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: Current project${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
     console.log(`${colors.dim}Skills found: ${skillFiles.length}${colors.reset}`);
     console.log('');
   }
@@ -377,7 +388,7 @@ const helpMode = args.includes('--help') || args.includes('-h');
 
 if (helpMode) {
   console.log(`
-Skill Lifecycle Audit v1.0.0 (Project Version)
+Skill Lifecycle Audit v1.0.0
 
 Usage:
   bun scripts/skill-lifecycle-audit.ts          # Run audit

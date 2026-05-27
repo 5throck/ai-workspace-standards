@@ -48,6 +48,7 @@ function getMemoryDir(): string {
     if (existsSync(candidate)) return candidate;
     dir = join(dir, "..");
   }
+  // Fallback: cwd/memory
   return join(process.cwd(), "memory");
 }
 
@@ -55,6 +56,7 @@ function parseMemoryIndex(content: string): Set<string> {
   const registered = new Set<string>();
   const lines = content.split("\n");
   for (const line of lines) {
+    // Match markdown link patterns: [filename](filename) or [date](date.md)
     const match = line.match(/\[([^\]]+)\]\(([^)]+\.md)\)/g);
     if (match) {
       for (const m of match) {
@@ -76,16 +78,19 @@ function validateSessionFile(filepath: string): SessionEntry[] {
   const content = readFileSync(filepath, "utf-8");
   const entries: SessionEntry[] = [];
 
+  // Split by --- separator to get individual entries
   const blocks = content.split(/\n---\n/);
 
   for (const block of blocks) {
     const trimmed = block.trim();
     if (!trimmed) continue;
 
+    // Find the first ## heading (session entry heading)
     const headingMatch = trimmed.match(/^## (.+)/m);
     if (!headingMatch) continue;
     const heading = headingMatch[1].trim();
 
+    // Check for required sections
     const missing: string[] = [];
     for (const section of REQUIRED_SECTIONS) {
       if (!trimmed.includes(section)) {
@@ -116,6 +121,7 @@ function verify(explicitFiles?: string[]): boolean {
 
   const memoryMdPath = join(memDir, "MEMORY.md");
 
+  // If explicit files provided (e.g. from pre-commit staged list), check only those
   let allFiles: string[];
   if (explicitFiles && explicitFiles.length > 0) {
     allFiles = explicitFiles
@@ -140,6 +146,7 @@ function verify(explicitFiles?: string[]): boolean {
   for (const file of sessionFiles) {
     const filepath = join(memDir, file);
     if (lastEntryOnly) {
+      // Only validate the last entry (most recently appended)
       const content = readFileSync(filepath, "utf-8");
       const blocks = content.split(/\n---\n/);
       const lastBlock = blocks[blocks.length - 1]?.trim();
@@ -176,7 +183,7 @@ function verify(explicitFiles?: string[]): boolean {
     }
   }
 
-  // Check 3: Orphaned files (on disk but not in MEMORY.md)
+  // Check 3: Orphaned files (on disk but not in MEMORY.md Sessions section)
   if (existsSync(memoryMdPath)) {
     const indexContent = readFileSync(memoryMdPath, "utf-8");
     const registered = parseMemoryIndex(indexContent);
@@ -259,6 +266,7 @@ function report(): void {
 // ── Entry Point ──────────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
+// Any non-flag arguments are treated as explicit file paths to check
 const fileArgs = args.filter((a) => !a.startsWith("--"));
 
 if (args.includes("--report")) {

@@ -1,7 +1,8 @@
 # SCRIPTS.md — Script Lifecycle Registry
 
-> This file is the Single Source of Truth (L0) for all scripts in `templates/common/scripts/`.
-> Workspace root `scripts/` (L1) and project `scripts/` (L2) derive from here.
+> **L1 Template Snapshot** — published from `scripts/SCRIPTS.md` (L0 workspace SSOT).
+> Do not edit directly; run `bash scripts/publish-to-template.sh` to sync from L0.
+> Projects created from this template get a copy of this file as their starting L2 registry.
 >
 > **Machine parsing**: `verify-scripts.ts --verify` reads the `## Registry` section only.
 > **Human reading**: see `## Guide` section below for purpose, usage, and deprecation notes.
@@ -11,41 +12,46 @@
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
-<!-- Required columns: script | source | version | status | removal-date | security-advisory -->
+<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift -->
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
 <!-- security-advisory: CVE-XXXX or — -->
+<!-- drift: — (checked) | intentional (L0/L1 divergence is expected, skip drift check) -->
 
-| script | source | version | status | removal-date | security-advisory |
-|--------|--------|---------|--------|--------------|-------------------|
-| `audit.sh` | L0 | 1.2.0 | active | — | — |
-| `audit.ps1` | L0 | 1.2.0 | active | — | — |
-| `dev-sync.sh` | L0 | 1.3.0 | active | — | — |
-| `dev-sync.ps1` | L0 | 1.3.0 | active | — | — |
-| `sync-md.sh` | L0 | 1.1.0 | active | — | — |
-| `sync-md.ps1` | L0 | 1.1.0 | active | — | — |
-| `setup.sh` | L0 | 1.0.0 | active | — | — |
-| `setup.ps1` | L0 | 1.0.0 | active | — | — |
-| `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — |
-| `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — |
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — |
+| script | source | version | status | removal-date | security-advisory | drift |
+|--------|--------|---------|--------|--------------|-------------------|-------|
+| `audit.sh` | L0 | 1.2.0 | active | — | — | intentional |
+| `audit.ps1` | L0 | 1.2.0 | active | — | — | intentional |
+| `dev-sync.sh` | L0 | 1.3.0 | active | — | — | — |
+| `dev-sync.ps1` | L0 | 1.4.0 | active | — | — | — |
+| `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
+| `new-project.ps1` | L1 | 1.3.0 | active | — | — | — |
+| `sync-md.sh` | L0 | 1.1.0 | active | — | — | intentional |
+| `sync-md.ps1` | L0 | 1.2.0 | active | — | — | — |
+| `setup.sh` | L0 | 1.0.0 | active | — | — | — |
+| `setup.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — | — |
+| `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
+| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — |
+| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-skills.sh` | L1 | 1.1.0 | active | — | — | — |
+| `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
 
 ---
 
@@ -53,12 +59,11 @@
 
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
-| **L0 — Template SSOT** | `templates/common/scripts/` | templates team | Versioned via this file |
-| **L1 — Workspace** | `scripts/` (workspace root) | workspace maintainer | Sync from L0 on release |
-| **L2 — Project** | `<project>/scripts/` | project team | Independent after creation (snapshot) |
+| **L0 — Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
+| **L1 — Template snapshot** | `templates/common/scripts/` | publish: `bash scripts/publish-to-template.sh` | Explicit publish from L0 |
+| **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: L0 → L1 → L2 (creation time only). No automatic back-propagation.
-Reverse sync (L2 → L1 → L0) requires an explicit PR.
+**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bash scripts/publish-to-template.sh`. L2 projects snapshot L1 at creation time only. No automatic back-propagation from L2.
 
 ---
 
@@ -181,6 +186,20 @@ skill files on disk. Detects missing or orphaned skill references.
 **Purpose**: Synchronizes skill status between SKILL.md and registry tables.
 **Usage**: `bun scripts/sync-skill-status.ts`
 
+#### `new-project.sh` / `new-project.ps1`
+**Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
+and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
+hooks, sets executable bits, and runs the post-scaffold audit.
+**Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
+**Claude Code**: `/new-project "Project Name"`
+**Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
+
+#### `sync-skills.sh` / `sync-skills.ps1`
+**Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
+(`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
+`templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
+**Usage**: `bash scripts/sync-skills.sh` / `.\scripts\sync-skills.ps1`
+
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
 (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects
@@ -223,5 +242,5 @@ When modifying a script:
 
 ---
 
-*SCRIPTS.md maintained by: templates team*
+*SCRIPTS.md maintained by: publish-to-template.sh (L1 snapshot of workspace SSOT)*
 *Last updated: 2026-05-27*

@@ -4,7 +4,7 @@ description: >
   Manages the creation, versioning, deprecation, and maintenance of automation scripts
   across the workspace and templates. Use when: creating new scripts, updating script versions,
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
-version: 1.0.0
+version: 1.2.0
 metadata:
   type: process
   triggers:
@@ -36,7 +36,10 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 ## Lifecycle Management Rules
 
 1. **Ownership Layers**:
-   - Changes originate in `templates/common/scripts/` (L0) and propagate to workspace `scripts/` (L1).
+   - L0 (SSOT): `scripts/` (workspace root). All development and registry (`SCRIPTS.md`) live here.
+   - L1 (Template snapshot): `templates/common/scripts/`. Publish explicitly: `bash scripts/publish-to-template.sh`.
+   - L2 (Project): `<project>/scripts/`. Snapshot of L1 at `new-project` creation time.
+   - Never edit L1 directly; edit L0 and publish.
 2. **State Management**:
    - `active`: In production use, bump version on change.
    - `deprecated`: Scheduled for removal, requires `removal-date`.
@@ -45,6 +48,12 @@ This skill provides a systematic approach to managing the lifecycle of automatio
    - Must explicitly list dependencies in the `depends_on` column of `SCRIPTS.md`.
 4. **Encoding & Compatibility**:
    - All `.ps1` files must include UTF-8 encoding safeguard: `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;`
+   - This assignment must be placed **after** the `param()` block. PowerShell rejects any executable statement before `param()` with `UnexpectedAttribute`, aborting the entire script.
+5. **PS5.1 Error Propagation**:
+   - When a `.ps1` script invokes another script with the `&` operator, `ErrorActionPreference=Stop` is inherited by the child. Git writes informational output to stderr even on success, which triggers `NativeCommandError` under `Stop`. All `git` calls (`clone`, `pull`, `add`, `commit`, `rev-parse`, etc.) must use:
+     ```powershell
+     try { git <command> 2>&1 | Out-Null } catch { }
+     ```
 
 ## Step-by-Step Execution
 
@@ -52,7 +61,7 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 Implement the requested logic in the appropriate script file. If adding a new script, ensure both `.sh` and `.ps1` pairs are created (or use `.ts` for cross-platform). Apply the UTF-8 safeguard to `.ps1` files.
 
 ### Step 2: Update Registry
-Update the `SCRIPTS.md` registry with the new version, status, and any dependencies.
+Update the `scripts/SCRIPTS.md` registry (L0 SSOT) with the new version, status, and any dependencies. After making changes, run `bash scripts/publish-to-template.sh` to propagate to L1.
 
 ### Step 3: Auto-generate Documentation
 Run the `generate-scripts-readme.ts` script to ensure `README.md` is synchronized with `SCRIPTS.md`.

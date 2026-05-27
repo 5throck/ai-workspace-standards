@@ -16,26 +16,16 @@
  */
 
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "fs";
-import { join, dirname } from "path";
+import { join } from "path";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
 const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
-// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/)
-function findWorkspaceRoot(startDir: string): string {
-  let dir = startDir;
-  for (let i = 0; i < 6; i++) {
-    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
-    dir = dirname(dir);
-  }
-  throw new Error("Could not find workspace root (CONSTITUTION.md not found)");
-}
-
-const scriptDir = import.meta.dir;
-const workspaceRoot = findWorkspaceRoot(scriptDir);
-const scriptsDir = join(workspaceRoot, "templates", "common", "scripts");
+// This script is distributed to L2 projects — use its own directory as scripts dir.
+// When running in workspace context, the L0 workspace version (scripts/verify-scripts.ts) is used instead.
+const scriptsDir = import.meta.dir;
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 
 // ── Types ────────────────────────────────────────────────────────────────────
