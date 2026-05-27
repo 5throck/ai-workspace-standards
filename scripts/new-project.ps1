@@ -45,7 +45,7 @@ if ($Version -ne "") {
     # Extract BOTH common and variant from tag
     # Note: PowerShell pipes corrupt binary streams, so write the tar archive to a temp file first
     $TarFile = [System.IO.Path]::GetTempFileName() + ".tar"
-    git -C $WorkspaceRoot archive --format=tar $Tag "templates/common/" "templates/$Variant/" -o $TarFile 2>&1
+    try { git -C $WorkspaceRoot archive --format=tar $Tag "templates/common/" "templates/$Variant/" -o $TarFile 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $TarFile) -or (Get-Item $TarFile).Length -eq 0) {
         Write-Host "❌ Failed to create archive for template version $Tag" -ForegroundColor Red
         Write-Host "   This tag may predate the templates/common/ directory structure (introduced in v0.5.0)." -ForegroundColor Yellow
@@ -54,7 +54,7 @@ if ($Version -ne "") {
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    tar -x -C $TempDir -f $TarFile 2>&1
+    try { tar -x -C $TempDir -f $TarFile 2>&1 | Out-Null } catch { }
     $tarExit = $LASTEXITCODE
     Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
     if ($tarExit -ne 0) {
