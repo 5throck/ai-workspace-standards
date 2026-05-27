@@ -1,5 +1,7 @@
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # Bun installer for Windows
+
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 Write-Host "📦 Installing Bun..." -ForegroundColor Cyan
 

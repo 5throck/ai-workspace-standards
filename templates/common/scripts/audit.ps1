@@ -1,11 +1,12 @@
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 # audit.ps1 - Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
+
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Force English culture for consistent error messages
 [System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
 
-# UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 

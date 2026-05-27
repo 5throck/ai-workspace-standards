@@ -1,4 +1,3 @@
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -9,7 +8,8 @@ param(
     [string]$Version = ""
 )
 
-# UTF-8 encoding enforcement
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
@@ -207,15 +207,18 @@ if ((Test-Path $AgentsMdPath) -and (Test-Path $ContextMdPath)) {
 Set-Location $ProjectDir
 git init
 git config core.hooksPath .githooks
+git config core.fileMode false
 
 # ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = ".githooks/" + $_.Name
-    git update-index --chmod=+x $rel 2>$null
+    git update-index --add --chmod=+x $rel
+    if ($LASTEXITCODE -ne 0) { Write-Warning "chmod +x failed for: $rel" }
 }
 Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = "scripts/" + $_.Name
-    git update-index --chmod=+x $rel 2>$null
+    git update-index --add --chmod=+x $rel
+    if ($LASTEXITCODE -ne 0) { Write-Warning "chmod +x failed for: $rel" }
 }
 
 # ── 7. Post-scaffold audit ─────────────────────────────────────────────────────
