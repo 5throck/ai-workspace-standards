@@ -43,11 +43,22 @@ if ($Version -ne "") {
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
     New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
     # Extract BOTH common and variant from tag
-    $archiveOutput = git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" 2>&1 | tar -x -C $TempDir 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
+    # Note: PowerShell pipes corrupt binary streams, so write the tar archive to a temp file first
+    $TarFile = [System.IO.Path]::GetTempFileName() + ".tar"
+    git -C $WorkspaceRoot archive --format=tar $Tag "templates/common/" "templates/$Variant/" -o $TarFile 2>&1
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $TarFile) -or (Get-Item $TarFile).Length -eq 0) {
+        Write-Host "❌ Failed to create archive for template version $Tag" -ForegroundColor Red
         Write-Host "   This tag may predate the templates/common/ directory structure (introduced in v0.5.0)." -ForegroundColor Yellow
         Write-Host "   Available versions with common/ support: run .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
+        Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
+        Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    tar -x -C $TempDir -f $TarFile 2>&1
+    $tarExit = $LASTEXITCODE
+    Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
+    if ($tarExit -ne 0) {
+        Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }

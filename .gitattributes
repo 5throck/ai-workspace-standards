@@ -10,7 +10,7 @@
 *.jsx text
 *.tsx text
 *.json text
-*.md text
+*.md text eol=lf
 *.html text
 *.css text
 *.ps1 text
