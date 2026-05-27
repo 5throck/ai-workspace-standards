@@ -4,6 +4,7 @@ description: >
   Manages the creation, versioning, deprecation, and maintenance of automation scripts
   across the workspace and templates. Use when: creating new scripts, updating script versions,
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
+owner: pm
 version: 1.2.0
 metadata:
   type: process

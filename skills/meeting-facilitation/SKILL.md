@@ -4,6 +4,7 @@ description: >
   Facilitates structured multi-agent meetings using the /meeting command for collaborative
   decision-making and problem resolution. Use when: running agent meetings, coordinating
   multi-agent discussions, or facilitating collaborative problem-solving sessions.
+owner: pm
 version: 1.0.0
 metadata:
   type: process

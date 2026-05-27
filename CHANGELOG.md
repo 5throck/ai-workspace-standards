@@ -118,6 +118,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-25]**: docs: apply same README improvements to README_ko.md for bilingual consistency
 
 ### Fixed
+- **[2026-05-27]**: Wrap all git native commands in `setup.ps1` with `try/catch` to suppress PS5.1 `NativeCommandError` inheritance from `new-project.ps1` — affects `git clone`, `git rev-parse`, `git add`, `git commit` (`templates/common/scripts/setup.ps1`, #107, #108)
 - **[2026-05-25]**: feat: enhance memory log format - commit-msg hook now captures rich context (summary, file count, decisions, issues) from commit body instead of generic placeholders
 - **[2026-05-25]**: fix: resolve param syntax bug in powershell scripts
 

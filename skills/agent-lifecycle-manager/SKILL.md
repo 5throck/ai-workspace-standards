@@ -4,6 +4,7 @@ description: >
   Manages the creation, validation, and maintenance of AI agent files across the project.
   Use when: creating new agents, updating agent metadata/frontmatter, validating agent structures,
   or managing agent roles and 3-tier configurations.
+owner: pm
 version: 1.0.0
 metadata:
   type: process
