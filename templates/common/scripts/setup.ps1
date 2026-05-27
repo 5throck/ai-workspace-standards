@@ -464,4 +464,5 @@ Write-Host "Next:" -ForegroundColor Cyan
 Write-Host "  git remote add origin <url>"
 Write-Host "  git push -u origin main"
 
+exit 0
 
