@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# publish-to-template.sh — Publishes L0 scripts (workspace) to L1 template snapshot
+# publish-to-template.sh — Publishes L0 scripts and skills (workspace) to L1 template snapshot
 # Usage: bash scripts/publish-to-template.sh [--dry-run]
 set -euo pipefail
 
@@ -42,6 +42,42 @@ if [ "$DRY_RUN" = false ]; then
   count=$((count + 1))
   echo ""
   echo "✅ Published $count files  L0 (scripts/) → L1 (templates/common/scripts/)"
+fi
+
+# ── Skills: L0 (skills/) → L1 (templates/common/skills/) ─────────────────────
+WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+L0_SKILLS="$WORKSPACE_ROOT/skills"
+L1_SKILLS="$WORKSPACE_ROOT/templates/common/skills"
+
+echo ""
+echo "L0 → L1 publish: skills/ → templates/common/skills/"
+
+skill_count=0
+for item in "$L0_SKILLS"/*; do
+  item_name=$(basename "$item")
+  if [ -d "$item" ]; then
+    if [ "$DRY_RUN" = true ]; then
+      echo "  [dry-run] $item_name/"
+    else
+      rm -rf "$L1_SKILLS/$item_name"
+      cp -r "$item" "$L1_SKILLS/"
+      echo "  ✅ $item_name/"
+      skill_count=$((skill_count + 1))
+    fi
+  elif [ -f "$item" ]; then
+    if [ "$DRY_RUN" = true ]; then
+      echo "  [dry-run] $item_name"
+    else
+      cp "$item" "$L1_SKILLS/$item_name"
+      echo "  ✅ $item_name"
+      skill_count=$((skill_count + 1))
+    fi
+  fi
+done
+
+if [ "$DRY_RUN" = false ]; then
+  echo ""
+  echo "✅ Published $skill_count items  L0 (skills/) → L1 (templates/common/skills/)"
 else
   echo ""
   echo "(dry-run complete — no files written)"

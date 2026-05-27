@@ -4,7 +4,7 @@ description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,
   or managing skill-agent mappings.
-version: 1.1.0
+version: 1.2.0
 metadata:
   type: process
   triggers:
@@ -41,11 +41,14 @@ This skill provides a systematic approach to creating, validating, and maintaini
 
 **Steps**:
 1. Choose the correct ownership layer:
-   - **L0** (`templates/common/skills/`): Changes that should propagate to all new projects (template SSOT)
-   - **L1** (`skills/`): Workspace-level skills; distributed to `.claude/skills/` and `.gemini/skills/` via `sync-skills.sh`
+   - **L0** (`skills/`): Workspace SSOT — all skill development happens here.
+   - **L1** (`templates/common/skills/`): Template snapshot — published from L0 via `bash scripts/publish-to-template.sh`.
+   - **L2** (`<project>/skills/`): Project snapshot created from L1 at `new-project` time.
+   - Never edit L1 directly; edit L0 and publish.
 2. Create skill directory: `mkdir -p skills/<skill-name>/`
 3. Create SKILL.md file: `touch skills/<skill-name>/SKILL.md`
-4. If editing L0, also apply the change to L1 and run `bash scripts/sync-skills.sh` to propagate to runtime locations.
+4. After editing, run `bash scripts/sync-skills.sh` to distribute to `.claude/skills/` and `.gemini/skills/`.
+5. To propagate to the L1 template, run `bash scripts/publish-to-template.sh`.
 
 **Validation**:
 - Directory name should use kebab-case (lowercase with hyphens)

@@ -3,6 +3,7 @@ $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
+$WorkspaceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $L0Dir = $PSScriptRoot
 $L1Dir = Join-Path $PSScriptRoot "..\templates\common\scripts" | Resolve-Path
 
@@ -43,6 +44,36 @@ if (-not $DryRun) {
     $count++
     Write-Host ""
     Write-Host "✅ Published $count files  L0 (scripts/) → L1 (templates/common/scripts/)" -ForegroundColor Green
+}
+
+# ── Skills: L0 (skills/) → L1 (templates/common/skills/) ─────────────────────
+$L0Skills = Join-Path $WorkspaceRoot "skills"
+$L1Skills = Join-Path $WorkspaceRoot "templates\common\skills"
+
+Write-Host ""
+Write-Host "L0 → L1 publish: skills/ → templates/common/skills/"
+
+$skillCount = 0
+foreach ($item in Get-ChildItem $L0Skills) {
+    if ($DryRun) {
+        $suffix = if ($item.PSIsContainer) { "/" } else { "" }
+        Write-Host "  [dry-run] $($item.Name)$suffix"
+    } elseif ($item.PSIsContainer) {
+        $dst = Join-Path $L1Skills $item.Name
+        if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+        Copy-Item $item.FullName $L1Skills -Recurse -Force
+        Write-Host "  ✅ $($item.Name)/"
+        $skillCount++
+    } else {
+        Copy-Item $item.FullName (Join-Path $L1Skills $item.Name) -Force
+        Write-Host "  ✅ $($item.Name)"
+        $skillCount++
+    }
+}
+
+if (-not $DryRun) {
+    Write-Host ""
+    Write-Host "✅ Published $skillCount items  L0 (skills/) → L1 (templates/common/skills/)" -ForegroundColor Green
 } else {
     Write-Host ""
     Write-Host "(dry-run complete — no files written)" -ForegroundColor DarkGray
