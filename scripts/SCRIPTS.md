@@ -28,8 +28,6 @@
 | `new-project.ps1` | L1 | 1.3.0 | active | — | — | — |
 | `sync-md.sh` | L0 | 1.1.0 | active | — | — | intentional |
 | `sync-md.ps1` | L0 | 1.2.0 | active | — | — | — |
-| `setup.sh` | L0 | 1.0.0 | active | — | — | — |
-| `setup.ps1` | L0 | 1.0.0 | active | — | — | — |
 | `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — | — |
 | `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
@@ -54,6 +52,15 @@
 | `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
 | `publish-to-template.sh` | L1 | 1.0.0 | active | — | — | — |
 | `publish-to-template.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `list-template-versions.sh` | L1 | 1.0.0 | active | — | — | — |
+| `list-template-versions.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `qa-gate.sh` | L1 | 1.0.0 | active | — | — | — |
+| `qa-gate.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.sh` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
+| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
+| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
 
 ---
 

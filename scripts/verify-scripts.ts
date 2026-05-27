@@ -221,7 +221,8 @@ function verify(): boolean {
   // Check 0: Architecture compliance (.sh/.ps1 pairs and .ts orchestration)
   const shScripts = actualScripts.filter(s => s.endsWith('.sh')).map(s => s.replace('.sh', ''));
   const ps1Scripts = actualScripts.filter(s => s.endsWith('.ps1')).map(s => s.replace('.ps1', ''));
-  
+  const tsBaseNames = new Set(actualScripts.filter(s => s.endsWith('.ts')).map(s => s.replace('.ts', '')));
+
   for (const name of shScripts) {
     if (!ps1Scripts.includes(name)) {
       errors.push(`Missing cross-platform pair: \`${name}.ps1\` is missing for \`${name}.sh\``);
@@ -233,10 +234,11 @@ function verify(): boolean {
     }
   }
   for (const script of actualScripts) {
-    if (script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch')) {
-      if (!script.endsWith('.ts') && !script.endsWith('.md')) {
-         errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
-      }
+    const baseName = script.replace(/\.(sh|ps1)$/, '');
+    const isOrchestrationKeyword = script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch');
+    const isTsWrapper = !script.endsWith('.ts') && tsBaseNames.has(baseName);
+    if (isOrchestrationKeyword && !script.endsWith('.ts') && !script.endsWith('.md') && !isTsWrapper) {
+      errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
     }
   }
 
