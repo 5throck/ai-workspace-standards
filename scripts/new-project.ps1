@@ -1,4 +1,3 @@
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -9,7 +8,8 @@ param(
     [string]$Version = ""
 )
 
-# UTF-8 encoding enforcement
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
