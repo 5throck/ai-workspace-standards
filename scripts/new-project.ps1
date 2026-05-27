@@ -43,9 +43,11 @@ if ($Version -ne "") {
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
     New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
     # Extract BOTH common and variant from tag
-    git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" | tar -x -C $TempDir 2>$null
+    $archiveOutput = git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" 2>&1 | tar -x -C $TempDir 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
+        Write-Host "   This tag may predate the templates/common/ directory structure (introduced in v0.5.0)." -ForegroundColor Yellow
+        Write-Host "   Available versions with common/ support: run .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
