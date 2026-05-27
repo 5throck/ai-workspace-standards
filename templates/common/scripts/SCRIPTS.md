@@ -46,6 +46,8 @@
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — |
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — |
+| `sync-skills.sh` | L1 | 1.1.0 | active | — | — |
+| `sync-skills.ps1` | L1 | 1.1.0 | active | — | — |
 
 ---
 

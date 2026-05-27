@@ -1,14 +1,14 @@
 $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
 
 # sync-skills.ps1
-# Distributes skills from the SSOT (skills/) to .claude/skills/ and .gemini/skills/
+# Distributes skills from the SSOT (templates/common/skills/) to .claude/skills/ and .gemini/skills/
 
 $ErrorActionPreference = "Stop"
 
 $workspaceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = Split-Path -Parent $workspaceRoot
 
-$ssotSkills = Join-Path $workspaceRoot "skills"
+$ssotSkills = Join-Path $workspaceRoot "templates\common\skills"
 $claudeSkills = Join-Path $workspaceRoot ".claude\skills"
 $geminiSkills = Join-Path $workspaceRoot ".gemini\skills"
 
