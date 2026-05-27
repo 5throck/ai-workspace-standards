@@ -1,12 +1,12 @@
 #!/bin/bash
 # sync-skills.sh
-# Distributes skills from the SSOT (templates/common/skills/) to .claude/skills/ and .gemini/skills/
+# Distributes skills from the SSOT (skills/) to .claude/skills/ and .gemini/skills/
 
 set -e
 
 WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-SSOT_SKILLS="$WORKSPACE_ROOT/templates/common/skills"
+SSOT_SKILLS="$WORKSPACE_ROOT/skills"
 CLAUDE_SKILLS="$WORKSPACE_ROOT/.claude/skills"
 GEMINI_SKILLS="$WORKSPACE_ROOT/.gemini/skills"
 

@@ -40,9 +40,12 @@ This skill provides a systematic approach to creating, validating, and maintaini
 **Purpose**: Create proper directory structure for a new skill.
 
 **Steps**:
-1. Navigate to `skills/` directory (workspace root) or `templates/common/skills/`
+1. Choose the correct ownership layer:
+   - **L0** (`templates/common/skills/`): Changes that should propagate to all new projects (template SSOT)
+   - **L1** (`skills/`): Workspace-level skills; distributed to `.claude/skills/` and `.gemini/skills/` via `sync-skills.sh`
 2. Create skill directory: `mkdir -p skills/<skill-name>/`
 3. Create SKILL.md file: `touch skills/<skill-name>/SKILL.md`
+4. If editing L0, also apply the change to L1 and run `bash scripts/sync-skills.sh` to propagate to runtime locations.
 
 **Validation**:
 - Directory name should use kebab-case (lowercase with hyphens)
