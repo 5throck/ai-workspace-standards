@@ -25,7 +25,7 @@
 | `dev-sync.sh` | L0 | 1.3.0 | active | — | — | — |
 | `dev-sync.ps1` | L0 | 1.4.0 | active | — | — | — |
 | `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
-| `new-project.ps1` | L1 | 1.3.0 | active | — | — | — |
+| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — |
 | `sync-md.sh` | L0 | 1.1.0 | active | — | — | intentional |
 | `sync-md.ps1` | L0 | 1.2.0 | active | — | — | — |
 | `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — | — |

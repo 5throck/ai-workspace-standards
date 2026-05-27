@@ -42,10 +42,14 @@ if ($Version -ne "") {
     }
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
     New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
-    # Extract BOTH common and variant from tag
-    git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" | tar -x -C $TempDir 2>$null
-    if ($LASTEXITCODE -ne 0) {
+    # Extract BOTH common and variant from tag (try/catch: tar throws NativeCommandError under ErrorActionPreference=Stop when git fails)
+    try {
+        git -C $WorkspaceRoot archive $Tag "templates/common/" "templates/$Variant/" 2>$null | tar -x -C $TempDir 2>$null
+    } catch { }
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path (Join-Path $TempDir "templates"))) {
         Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
+        Write-Host "   The tag '$Tag' may not contain the expected template structure (templates/common/)." -ForegroundColor Yellow
+        Write-Host "   This can happen if the tag was created before the current template layout." -ForegroundColor Yellow
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
