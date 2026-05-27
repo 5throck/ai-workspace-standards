@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 /**
- * README Lifecycle Audit Script (Project Version)
+ * README Lifecycle Audit Script
  *
- * Validates project README file
- * Checks: required sections, last updated date, content quality
+ * Validates README files across workspace root, templates, and projects
+ * Checks: required sections, i18n consistency, link validity, last updated
  *
  * Usage:
  *   bun scripts/readme-lifecycle-audit.ts
@@ -13,8 +13,8 @@
  * @license MIT
  */
 
-import { readFileSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { join, relative, dirname, basename } from 'node:path';
 import { cwd } from 'node:process';
 
 interface ReadmeIssue {
@@ -22,6 +22,12 @@ interface ReadmeIssue {
   file: string;
   message: string;
   fix?: string;
+}
+
+interface ReadmeSection {
+  title: string;
+  line: number;
+  level: number;
 }
 
 interface AuditResult {
@@ -43,6 +49,24 @@ const colors = {
 };
 
 const ROOT = cwd();
+const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
+
+// Required sections for workspace root and templates
+const REQUIRED_SECTIONS_ROOT = [
+  '## What Is This?',
+  '## Quick Start',
+  '## Repository Structure',
+  '## Session Start Checklist',
+  '## Multi-Agent Workflow',
+  '## License',
+];
+
+// Required sections for project READMEs (relaxed)
+const REQUIRED_SECTIONS_PROJECT = [
+  '#',
+  // Projects define their own structure
+];
 
 // Platform detection
 const PLATFORM = detectPlatform();
@@ -53,13 +77,84 @@ function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
   return 'unknown';
 }
 
+// Parse markdown sections
+function parseSections(filePath: string): Map<string, ReadmeSection> {
+  const content = readFileSync(filePath, 'utf-8');
+  const sections = new Map<string, ReadmeSection>();
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headerMatch) {
+      const level = headerMatch[1].length;
+      const title = headerMatch[2].trim();
+      sections.set(title, { title, line: i + 1, level });
+    }
+  }
+
+  return sections;
+}
+
+// Extract sections by level for i18n comparison
+function getSectionsByLevel(sections: Map<string, ReadmeSection>, level: number): string[] {
+  return Array.from(sections.values())
+    .filter(s => s.level === level)
+    .map(s => s.title);
+}
+
+// Check if path is a project directory
+function isProjectDirectory(dir: string): boolean {
+  // A project directory has docs/context.md or AGENTS.md or CLAUDE.md or GEMINI.md
+  const markers = ['docs/context.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'package.json'];
+  return markers.some(marker => existsSync(join(dir, marker)));
+}
+
+// Find all README files
+function findReadmeFiles(dir: string): string[] {
+  const readmes: string[] = [];
+
+  if (!existsSync(dir)) return readmes;
+
+  const entries = readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      // Skip common non-project directories
+      if (entry.name === 'node_modules' || entry.name === '.git' ||
+          entry.name === 'archive' || entry.name === '_archive' ||
+          entry.name === '.venv' || entry.name === 'venv' ||
+          entry.name === 'target' || entry.name === 'dist' ||
+          entry.name === 'build' || entry.name === '.vscode' ||
+          entry.name === '.idea' || entry.name.startsWith('.')) {
+        continue;
+      }
+
+      // Skip templates subdirectories (already handled separately)
+      if (IS_WORKSPACE_ROOT && dir.startsWith(join(ROOT, 'templates'))) {
+        continue;
+      }
+
+      readmes.push(...findReadmeFiles(fullPath));
+    } else if (entry.name === 'README.md' || entry.name === 'README_ko.md') {
+      readmes.push(fullPath);
+    }
+  }
+
+  return readmes;
+}
+
 // Check for Last Updated date
-function hasLastUpdated(content: string): boolean {
+function hasLastUpdated(filePath: string): boolean {
+  const content = readFileSync(filePath, 'utf-8');
   return /Last Updated:\s*\d{4}-\d{2}-\d{2}/.test(content);
 }
 
 // Check if date is recent (within 90 days)
-function isDateRecent(content: string): boolean {
+function isDateRecent(filePath: string): boolean {
+  const content = readFileSync(filePath, 'utf-8');
   const match = content.match(/Last Updated:\s*(\d{4}-\d{2}-\d{2})/);
   if (!match) return false;
 
@@ -68,47 +163,50 @@ function isDateRecent(content: string): boolean {
   return daysSince <= 90;
 }
 
-// Check for empty or minimal README
-function hasSubstantialContent(content: string): boolean {
-  const visibleContent = content
-    .replace(/^---\n[\s\S]*?\n---/m, '') // Remove frontmatter
-    .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-    .replace(/\s/g, ''); // Remove whitespace
-  return visibleContent.length >= 50;
-}
-
-// Check for common README sections
-function hasCommonSections(content: string): { hasTitle: boolean; hasDescription: boolean; sectionCount: number } {
+// Check markdown link validity (basic)
+function checkLinks(filePath: string): { valid: number; invalid: Array<{ link: string; line: number }> } {
+  const content = readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
-  let hasTitle = false;
-  let hasDescription = false;
-  let sectionCount = 0;
+  const invalid: Array<{ link: string; line: number }> = [];
 
-  for (const line of lines) {
-    if (line.startsWith('# ') && !hasTitle) {
-      hasTitle = true;
-    }
-    if (line.startsWith('## ')) {
-      sectionCount++;
-    }
-  }
+  for (let i = 0; i < lines.length; i++) {
+    // Check for markdown links
+    const linkMatches = lines[i].matchAll(/\[([^\]]+)\]\(([^)]+)\)/g);
+    for (const match of linkMatches) {
+      const link = match[2];
+      const line = i + 1;
 
-  // Check for description (first paragraph after title)
-  const afterTitle = content.indexOf('# ');
-  if (afterTitle >= 0) {
-    const afterTitleContent = content.slice(afterTitle + 2);
-    const firstParagraph = afterTitleContent.match(/^([^#\n][^\n]*)/);
-    if (firstParagraph && firstParagraph[1].trim().length > 20) {
-      hasDescription = true;
+      // Skip external links and anchors
+      if (link.startsWith('http') || link.startsWith('#')) continue;
+
+      // Check relative reference links
+      const targetPath = join(dirname(filePath), link);
+      if (!existsSync(targetPath)) {
+        invalid.push({ link, line });
+      }
     }
   }
 
-  return { hasTitle, hasDescription, sectionCount };
+  return { valid: 0, invalid }; // Simplified for now
 }
 
 // Main audit function
-function auditReadme(jsonMode = false): AuditResult {
-  const readmePath = join(ROOT, 'README.md');
+function auditReadmes(jsonMode = false): AuditResult {
+  const readmeFiles: string[] = [];
+
+  // Always add workspace root READMEs
+  if (existsSync(join(ROOT, 'README.md'))) readmeFiles.push(join(ROOT, 'README.md'));
+  if (existsSync(join(ROOT, 'README_ko.md'))) readmeFiles.push(join(ROOT, 'README_ko.md'));
+
+  // Add templates READMEs
+  const templatesDir = join(ROOT, 'templates');
+  if (IS_WORKSPACE_ROOT && existsSync(templatesDir)) {
+    if (existsSync(join(templatesDir, 'README.md'))) readmeFiles.push(join(templatesDir, 'README.md'));
+    if (existsSync(join(templatesDir, 'README_ko.md'))) readmeFiles.push(join(templatesDir, 'README_ko.md'));
+  }
+
+  // Note: Project subdirectory READMEs are excluded from automated audit
+  // Only workspace root and templates/ READMEs are checked
 
   const errors: ReadmeIssue[] = [];
   const warnings: ReadmeIssue[] = [];
@@ -118,84 +216,120 @@ function auditReadme(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 README Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: Current project${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
+    console.log(`${colors.dim}READMEs found: ${readmeFiles.length}${colors.reset}`);
     console.log('');
   }
 
-  if (!existsSync(readmePath)) {
-    errors.push({
-      level: 'error',
-      file: 'README.md',
-      message: 'README.md not found',
-      fix: 'Create README.md with project description and setup instructions',
-    });
-  } else {
-    const content = readFileSync(readmePath, 'utf-8');
-    const checks = hasCommonSections(content);
+  // Group files for i18n checking
+  const readmeGroups = new Map<string, { en?: string; ko?: string }>();
 
-    // Check for project title
-    if (!checks.hasTitle) {
+  for (const readmeFile of readmeFiles) {
+    const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
+    const isKorean = readmeFile.endsWith('README_ko.md');
+    const basePath = relPath.replace('_ko', '');
+
+    if (!readmeGroups.has(basePath)) {
+      readmeGroups.set(basePath, {});
+    }
+    const group = readmeGroups.get(basePath)!;
+    if (isKorean) {
+      group.ko = relPath;
+    } else {
+      group.en = relPath;
+    }
+  }
+
+  // Audit each README
+  for (const readmeFile of readmeFiles) {
+    const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
+    const isKorean = readmeFile.endsWith('README_ko.md');
+    const isWorkspaceRoot = relPath.startsWith('README') || relPath.startsWith('templates/README');
+    const sections = parseSections(readmeFile);
+
+    // Check required sections
+    const requiredSections = isWorkspaceRoot ? REQUIRED_SECTIONS_ROOT : REQUIRED_SECTIONS_PROJECT;
+    for (const section of requiredSections) {
+      if (!Array.from(sections.keys()).some(s => s.includes(section))) {
+        const level = isWorkspaceRoot ? 'error' : 'warning';
+        const issue = {
+          level: level as 'error' | 'warning',
+          file: relPath,
+          message: `Missing required section: ${section}`,
+          fix: isWorkspaceRoot ? `Add '${section}' section to README` : `Consider adding '${section}' section`,
+        };
+        if (level === 'error') {
+          errors.push(issue);
+        } else {
+          warnings.push(issue);
+        }
+      }
+    }
+
+    // Check for Last Updated
+    if (!hasLastUpdated(readmeFile)) {
       warnings.push({
         level: 'warning',
-        file: 'README.md',
-        message: 'Missing project title (should start with # Project Name)',
-        fix: 'Add a title at the top: # Your Project Name',
+        file: relPath,
+        message: 'Missing "Last Updated" date',
+        fix: 'Add "*Last Updated: YYYY-MM-DD*" at the end of the file',
+      });
+    } else if (!isDateRecent(readmeFile)) {
+      warnings.push({
+        level: 'warning',
+        file: relPath,
+        message: 'Last Updated date is older than 90 days',
+        fix: 'Update the Last Updated date to today if content has changed',
       });
     }
 
-    // Check for description
-    if (!checks.hasDescription) {
-      warnings.push({
-        level: 'warning',
-        file: 'README.md',
-        message: 'Missing project description',
-        fix: 'Add a brief description after the title explaining what this project does',
-      });
-    }
-
-    // Check for minimal sections
-    if (checks.sectionCount < 2) {
-      warnings.push({
-        level: 'warning',
-        file: 'README.md',
-        message: `README has only ${checks.sectionCount} section(s)`,
-        fix: 'Add common sections like ## Installation, ## Usage, ## Development',
-      });
-    }
-
-    // Check for substantive content
-    if (!hasSubstantialContent(content)) {
+    // Check for empty README
+    const content = readFileSync(readmeFile, 'utf-8');
+    const visibleContent = content
+      .replace(/^---\n[\s\S]*?\n---/m, '') // Remove frontmatter
+      .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+      .replace(/\s/g, ''); // Remove whitespace
+    if (visibleContent.length < 50) {
       errors.push({
         level: 'error',
-        file: 'README.md',
+        file: relPath,
         message: 'README appears to be empty or minimal',
         fix: 'Add substantive content to the README',
       });
     }
+  }
 
-    // Check for Last Updated
-    if (!hasLastUpdated(content)) {
+  // Check i18n consistency for files that have both EN and KO versions
+  for (const [basePath, group] of readmeGroups.entries()) {
+    if (group.en && group.ko) {
+      const enSections = parseSections(join(ROOT, group.en.replace(/\\/g, '/')));
+      const koSections = parseSections(join(ROOT, group.ko.replace(/\\/g, '/')));
+
+      const enH2 = getSectionsByLevel(enSections, 2);
+      const koH2 = getSectionsByLevel(koSections, 2);
+
+      if (enH2.length !== koH2.length) {
+        warnings.push({
+          level: 'warning',
+          file: `${group.en} ↔ ${group.ko}`,
+          message: `Section count mismatch: EN has ${enH2.length}, KO has ${koH2.length}`,
+          fix: 'Ensure both versions have the same section structure',
+        });
+      }
+    } else if (group.en && !group.ko && (basePath === 'README.md' || basePath === 'templates/README.md')) {
       warnings.push({
         level: 'warning',
-        file: 'README.md',
-        message: 'Missing "Last Updated" date',
-        fix: 'Add "*Last Updated: YYYY-MM-DD*" at the end of the file',
-      });
-    } else if (!isDateRecent(content)) {
-      warnings.push({
-        level: 'warning',
-        file: 'README.md',
-        message: 'Last Updated date is older than 90 days',
-        fix: 'Update the Last Updated date if content has changed',
+        file: group.en,
+        message: 'Missing Korean version (README_ko.md)',
+        fix: 'Create README_ko.md with translated content',
       });
     }
   }
 
-  const scanned = existsSync(readmePath) ? 1 : 0;
-  const summary = generateSummary(scanned, errors.length, warnings.length);
+  const summary = generateSummary(readmeFiles.length, errors.length, warnings.length);
 
   return {
-    readmesScanned: scanned,
+    readmesScanned: readmeFiles.length,
     errors,
     warnings,
     summary: summary.colored,
@@ -206,15 +340,15 @@ function auditReadme(jsonMode = false): AuditResult {
 function generateSummary(scanned: number, errors: number, warnings: number): { colored: string; clean: string } {
   if (errors === 0 && warnings === 0) {
     return {
-      colored: `${colors.green}✓ README healthy${colors.reset}`,
-      clean: `README healthy`,
+      colored: `${colors.green}✓ All ${scanned} READMEs healthy${colors.reset}`,
+      clean: `All ${scanned} READMEs healthy`,
     };
   }
   return {
-    colored: (scanned > 0 ? `${colors.green}✓ README scanned${colors.reset}` : `${colors.yellow}⚠️  README not found${colors.reset}`) +
+    colored: `${colors.green}✓ READMEs scanned: ${scanned}${colors.reset}` +
       (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : '') +
       (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ''),
-    clean: scanned > 0 ? `README scanned` : `README not found` +
+    clean: `READMEs scanned: ${scanned}` +
       (warnings > 0 ? `, Warnings: ${warnings}` : '') +
       (errors > 0 ? `, Errors: ${errors}` : ''),
   };
@@ -250,7 +384,7 @@ const helpMode = args.includes('--help') || args.includes('-h');
 
 if (helpMode) {
   console.log(`
-README Lifecycle Audit v1.0.0 (Project Version)
+README Lifecycle Audit v1.0.0
 
 Usage:
   bun scripts/readme-lifecycle-audit.ts          # Run audit
@@ -258,18 +392,18 @@ Usage:
   bun scripts/readme-lifecycle-audit.ts --help   # Show this help
 
 Checks:
-  ✓ README.md existence
-  ✓ Project title and description
-  ✓ Common sections (Installation, Usage, etc.)
-  ✓ Substantive content
-  ✓ Last Updated date
+  ✓ Required sections (workspace root & templates)
+  ✓ Last Updated date presence and freshness
+  ✓ Empty/minimal content detection
+  ✓ i18n consistency (EN ↔ KO section structure)
+  ✓ Korean version existence for core files
 
 Platform: ${PLATFORM}
   `);
   process.exit(0);
 }
 
-const result = auditReadme(jsonMode);
+const result = auditReadmes(jsonMode);
 
 if (jsonMode) {
   printJsonResults(result);

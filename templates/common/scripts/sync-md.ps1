@@ -6,7 +6,8 @@ param(
     [string]$AdrId   = ""
 )
 
-# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
+# UTF-8 encoding enforcement
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
@@ -60,6 +61,7 @@ if ($content -notmatch "## Sessions") {
 
 # ── Append to appropriate section ────────────────────────────────────────────
 if ($Meeting) {
+    # Meeting entry
     $Slug = ($Summary -replace '[^a-z0-9]', '-' -replace '-+', '-').ToLower().TrimEnd('-')
     $Slug = $Slug.Substring(0, [Math]::Min(40, $Slug.Length))
     $File = "meeting-${Date}-${Slug}.md"
@@ -69,6 +71,7 @@ if ($Meeting) {
         Set-Content $MemFile $content -Encoding UTF8 -NoNewline
     }
 } elseif ($Adr) {
+    # ADR entry
     $Slug = ($Summary -replace '[^a-z0-9]', '-' -replace '-+', '-').ToLower().TrimEnd('-')
     $Slug = $Slug.Substring(0, [Math]::Min(50, $Slug.Length))
     $Id = if ($AdrId) { $AdrId } else { "ADR-XXXX" }

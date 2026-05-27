@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * Agent Verification Script
- * Verifies synchronization between agents/ directory and documentation (AGENTS.md, docs/context.md)
+ * Agent Verification Script for Workspace Root
+ * Verifies synchronization between agents/ directory and documentation (AGENTS.md, CONSTITUTION.md)
  *
  * Usage:
  *   bun scripts/agent-verify.ts
@@ -16,7 +16,7 @@ const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
 const agentsDir = path.join(projectRoot, "agents");
 const agentsMdPath = path.join(projectRoot, "AGENTS.md");
-const contextMdPath = path.join(projectRoot, "docs", "context.md");
+const constitutionMdPath = path.join(projectRoot, "CONSTITUTION.md");
 
 interface VerificationIssue {
   type: "missing_file" | "missing_docs" | "metadata_mismatch";
@@ -61,22 +61,22 @@ async function verifyAgents(): Promise<VerificationResult> {
   let agentFiles: string[] = [];
   try {
     const files = await fs.readdir(agentsDir);
-    agentFiles = files.filter((f) => f.endsWith(".md") && f !== "handoff-spec.md" && f !== "README.md" && f !== "README_ko.md");
+    agentFiles = files.filter((f) => f.endsWith(".md") && f !== "handoff-spec.md");
     stats.totalAgents = agentFiles.length;
   } catch {
     return { pass: false, issues: [{ type: "missing_file", agent: "N/A", message: "agents/ directory not found" }], stats };
   }
 
   let agentsMdContent = "";
-  let contextMdContent = "";
+  let constitutionMdContent = "";
   try { agentsMdContent = await fs.readFile(agentsMdPath, "utf-8"); } catch {
-    issues.push({ type: "missing_docs", agent: "AGENTS.md", message: "AGENTS.md not found at project root" });
+    issues.push({ type: "missing_docs", agent: "AGENTS.md", message: "AGENTS.md not found at workspace root" });
   }
-  try { contextMdContent = await fs.readFile(contextMdPath, "utf-8"); } catch { /* ignore */ }
+  try { constitutionMdContent = await fs.readFile(constitutionMdPath, "utf-8"); } catch { /* ignore */ }
 
   const documentedInAgentsMd = extractDocAgents(agentsMdContent);
-  const documentedInContextMd = extractDocAgents(contextMdContent);
-  const allDocumentedAgents = new Set([...documentedInAgentsMd, ...documentedInContextMd]);
+  const documentedInConstitutionMd = extractDocAgents(constitutionMdContent);
+  const allDocumentedAgents = new Set([...documentedInAgentsMd, ...documentedInConstitutionMd]);
 
   for (const file of agentFiles) {
     const agentName = file.replace(".md", "");
@@ -99,7 +99,7 @@ async function verifyAgents(): Promise<VerificationResult> {
 
 function displayResults(result: VerificationResult): void {
   console.log("\n" + "━".repeat(60));
-  console.log("🔍 Agent Verification Report");
+  console.log("🔍 Workspace Agent Verification Report");
   console.log("━".repeat(60) + "\n");
   console.log(`📊 Statistics:`);
   console.log(`   Total agent files: ${result.stats.totalAgents}`);

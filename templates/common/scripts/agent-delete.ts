@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Agent Deleter CLI
+ * Agent Deleter CLI for Workspace Root
  * Deletes agent definition files from the agents/ directory
  *
  * Usage:
@@ -53,8 +53,9 @@ async function deleteAgent(name: string, force: boolean = false): Promise<void> 
 
   // Reminder to update AGENTS.md
   console.log(`\n⚠️  Remember to:`);
-  console.log(`  1. Remove the agent from AGENTS.md if listed`);
-  console.log(`  2. Remove dispatch references from other agents`);
+  console.log(`  1. Remove the agent from AGENTS.md Agent Roster table`);
+  console.log(`  2. Remove the agent from Subagent Roster table in AGENTS.md`);
+  console.log(`  3. Update CONSTITUTION.md §5.2 Role Groups if needed`);
 }
 
 /**
