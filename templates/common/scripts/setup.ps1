@@ -390,7 +390,7 @@ if (-not (Test-Path $SuperpowersDir)) {
     Info "Gemini superpowers plugin not found ??installing globally??"
     $PluginsDir = Join-Path $HOME ".gemini\config\plugins"
     if (-not (Test-Path $PluginsDir)) { New-Item -ItemType Directory -Path $PluginsDir -Force | Out-Null }
-    git clone https://github.com/obra/superpowers $SuperpowersDir 2>$null
+    try { git clone https://github.com/obra/superpowers $SuperpowersDir 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -eq 0) { Pass "superpowers plugin installed successfully" }
     else { Warn "Failed to install superpowers plugin" }
 } else {
@@ -449,10 +449,10 @@ if (Test-Path $IndexPath) {
 
 # ???? 7. Initial commit ??????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 if (-not $SkipCommit) {
-    $gitDir = git rev-parse --git-dir 2>$null
+    try { git rev-parse --git-dir 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -eq 0) {
-        git add -A 2>$null
-        git commit -m $msg 2>$null
+        try { git add -A 2>&1 | Out-Null } catch { }
+        try { git commit -m $msg 2>&1 | Out-Null } catch { }
         if ($LASTEXITCODE -eq 0) { Pass "Initial commit created" } else { Warn "Nothing to commit (already committed?)" }
     } else { Warn "Not inside a git repository ??skipping initial commit" }
 } else { Info "Skipping initial commit (-SkipCommit)" }
