@@ -183,6 +183,12 @@ skill files on disk. Detects missing or orphaned skill references.
 **Purpose**: Synchronizes skill status between SKILL.md and registry tables.
 **Usage**: `bun scripts/sync-skill-status.ts`
 
+#### `sync-skills.sh` / `sync-skills.ps1`
+**Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
+(`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
+`templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
+**Usage**: `bash scripts/sync-skills.sh` / `.\scripts\sync-skills.ps1`
+
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
 (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects

@@ -4,7 +4,7 @@ description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,
   or managing skill-agent mappings.
-version: 1.0.0
+version: 1.1.0
 metadata:
   type: process
   triggers:

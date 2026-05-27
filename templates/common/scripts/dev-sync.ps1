@@ -110,7 +110,9 @@ if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
     $Slug = ($Msg -replace '[^a-z0-9]', '-' -replace '-+', '-').ToLower().TrimEnd('-')
     $Slug = $Slug.Substring(0, [Math]::Min(40, $Slug.Length))
     $Branch = "pr/$(Get-Date -Format 'yyyyMMdd-HHmmss')-$Slug"
-    git checkout -b $Branch
+    try { git checkout -b $Branch 2>&1 | Out-Null } catch {
+        Write-Host "❌ Failed to create branch '$Branch'" -ForegroundColor Red; exit 1
+    }
 } else {
     $Branch = $CurrentBranch
     Write-Host "ℹ️  Already on branch '$Branch' - committing here without creating a new branch." -ForegroundColor Cyan
@@ -126,9 +128,15 @@ if ($Sensitive) {
     exit 1
 }
 
-git add -A
-git commit -m "$Msg"
-git push -u origin $Branch
+try { git add -A 2>&1 | Out-Null } catch {
+    Write-Host "❌ git add failed: $_" -ForegroundColor Red; exit 1
+}
+try { git commit -m "$Msg" 2>&1 | Out-Null } catch {
+    Write-Host "❌ git commit failed: $_" -ForegroundColor Red; exit 1
+}
+try { git push -u origin $Branch 2>&1 | Out-Null } catch {
+    Write-Host "❌ git push failed: $_" -ForegroundColor Red; exit 1
+}
 
 # ── 7. Generate PR body and open PR ───────────────────────────────────────────
 $PrBody = ""
