@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-27]**: `scripts/publish-to-template.sh` / `.ps1` — new scripts to sync workspace changes into `templates/common/` (#109)
+- **[2026-05-27]**: `skills/` directory — 9 workspace-root skills with SKILL.md, data files, and Python scripts (`ui-ux-pro-max`, `agent-lifecycle-manager`, `skill-lifecycle-manager`, `script-lifecycle-manager`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `simulate-project-creation`, `validate-docs-links`) (#109)
+- **[2026-05-27]**: `template-v0.5.0` git tag — enables `.\scripts\new-project.ps1 "name" -Version 0.5.0` versioned scaffold (#110)
+
+### Fixed
+- **[2026-05-27]**: `scripts/new-project.ps1`: wrap `git archive` and `tar` in `try/catch` to suppress `NativeCommandError` under inherited `ErrorActionPreference=Stop` (#112)
+- **[2026-05-27]**: `scripts/new-project.ps1`: switch from PowerShell pipe to `git archive -o <tempfile>` + `tar -x -f <tempfile>` — PowerShell pipes corrupt binary tar streams (#111)
+- **[2026-05-27]**: `templates/common/scripts/setup.ps1`: add `exit 0` at end — `git commit` exit code 1 ("nothing to commit") was causing false ⚠️ Setup error warning in `new-project.ps1` (#110)
+- **[2026-05-27]**: `scripts/new-project.ps1`: improve error message for `git archive` failure on pre-v0.5.0 tags that lack `templates/common/` structure (#110)
+- **[2026-05-27]**: `.gitattributes`: add `eol=lf` to `*.md` rule — CRLF on Windows checkout was corrupting YAML frontmatter in SKILL.md files, breaking `skill-lifecycle-audit.ts` (#111)
+- **[2026-05-27]**: `skills/*.md`: normalize CRLF to LF; add missing `owner: pm` frontmatter field to 4 skills (`agent-lifecycle-manager`, `meeting-facilitation`, `script-lifecycle-manager`, `skill-lifecycle-manager`) (#109)
+- **[2026-05-27]**: `templates/common/scripts/setup.ps1`: wrap `git clone`, `git rev-parse`, `git add`, `git commit` in `try/catch` — all inherited `NativeCommandError` false positives (#107, #108)
+
+### Added
 - **[2026-05-27]**: feat: Implement README synchronization policy and workspace QA rules
 
 ### Added
