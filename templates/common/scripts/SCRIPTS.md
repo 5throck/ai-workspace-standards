@@ -11,43 +11,46 @@
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
-<!-- Required columns: script | source | version | status | removal-date | security-advisory -->
+<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift -->
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
 <!-- security-advisory: CVE-XXXX or — -->
+<!-- drift: — (checked) | intentional (L0/L1 divergence is expected, skip drift check) -->
 
-| script | source | version | status | removal-date | security-advisory |
-|--------|--------|---------|--------|--------------|-------------------|
-| `audit.sh` | L0 | 1.2.0 | active | — | — |
-| `audit.ps1` | L0 | 1.2.0 | active | — | — |
-| `dev-sync.sh` | L0 | 1.3.0 | active | — | — |
-| `dev-sync.ps1` | L0 | 1.3.0 | active | — | — |
-| `sync-md.sh` | L0 | 1.1.0 | active | — | — |
-| `sync-md.ps1` | L0 | 1.1.0 | active | — | — |
-| `setup.sh` | L0 | 1.0.0 | active | — | — |
-| `setup.ps1` | L0 | 1.0.0 | active | — | — |
-| `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — |
-| `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — |
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-skills.sh` | L1 | 1.1.0 | active | — | — |
-| `sync-skills.ps1` | L1 | 1.1.0 | active | — | — |
+| script | source | version | status | removal-date | security-advisory | drift |
+|--------|--------|---------|--------|--------------|-------------------|-------|
+| `audit.sh` | L0 | 1.2.0 | active | — | — | intentional |
+| `audit.ps1` | L0 | 1.2.0 | active | — | — | intentional |
+| `dev-sync.sh` | L0 | 1.3.0 | active | — | — | — |
+| `dev-sync.ps1` | L0 | 1.4.0 | active | — | — | — |
+| `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
+| `new-project.ps1` | L1 | 1.3.0 | active | — | — | — |
+| `sync-md.sh` | L0 | 1.1.0 | active | — | — | intentional |
+| `sync-md.ps1` | L0 | 1.2.0 | active | — | — | — |
+| `setup.sh` | L0 | 1.0.0 | active | — | — | — |
+| `setup.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — | — |
+| `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
+| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — |
+| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
+| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — |
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — |
+| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-skills.sh` | L1 | 1.1.0 | active | — | — | — |
+| `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
 
 ---
 
@@ -182,6 +185,14 @@ skill files on disk. Detects missing or orphaned skill references.
 #### `sync-skill-status.ts`
 **Purpose**: Synchronizes skill status between SKILL.md and registry tables.
 **Usage**: `bun scripts/sync-skill-status.ts`
+
+#### `new-project.sh` / `new-project.ps1`
+**Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
+and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
+hooks, sets executable bits, and runs the post-scaffold audit.
+**Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
+**Claude Code**: `/new-project "Project Name"`
+**Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
 
 #### `sync-skills.sh` / `sync-skills.ps1`
 **Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations

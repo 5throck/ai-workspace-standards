@@ -67,6 +67,11 @@ if [ -f "SCRIPTS.md" ]; then
   fi
 fi
 
+# ── 3.7. L0/L1 script drift check (warning only) ─────────────────────────────
+if command -v bun &>/dev/null && [ -f "scripts/verify-scripts.ts" ]; then
+  bun scripts/verify-scripts.ts --check-drift 2>/dev/null || true
+fi
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 bash scripts/audit.sh
 

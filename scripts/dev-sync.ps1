@@ -100,6 +100,11 @@ if (Test-Path "SCRIPTS.md") {
     }
 }
 
+# ── 3.7. L0/L1 script drift check (warning only) ─────────────────────────────
+if (Get-Command bun -ErrorAction SilentlyContinue) {
+    try { bun scripts/verify-scripts.ts --check-drift } catch { }
+}
+
 # ── 4. Audit gate ──────────────────────────────────────────────────────────────
 .\scripts\audit.ps1
 if ($LASTEXITCODE -ne 0) { exit 1 }

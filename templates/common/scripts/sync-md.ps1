@@ -1,16 +1,12 @@
 param(
     [string]$Date    = (Get-Date -Format "yyyy-MM-dd"),
-$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
     [string]$Summary = "update",
     [switch]$Meeting,
     [switch]$Adr,
     [string]$AdrId   = ""
 )
 
-# Force English culture for consistent error messages
-[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
-
-# UTF-8 encoding enforcement
+# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
