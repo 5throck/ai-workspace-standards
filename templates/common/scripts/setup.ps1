@@ -396,7 +396,7 @@ if (-not (Test-Path $SuperpowersDir)) {
 } else {
     Info "Gemini superpowers plugin already installed -- updating"
     Push-Location $SuperpowersDir
-    git pull origin main 2>$null
+    git pull origin main 2>&1 | Out-Null
     Pop-Location
 }
 
