@@ -76,7 +76,7 @@ function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
 
 // Parse markdown sections
 function parseSections(filePath: string): Map<string, ReadmeSection> {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const sections = new Map<string, ReadmeSection>();
   const lines = content.split('\n');
 
