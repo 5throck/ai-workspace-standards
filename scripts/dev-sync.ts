@@ -105,10 +105,8 @@ if (hasBun) {
     }
 }
 
-// 4. Audit gate
-const auditRes = process.platform === 'win32'
-    ? await $`powershell -ExecutionPolicy Bypass -File .\\scripts\\audit.ps1`.nothrow()
-    : await $`bash scripts/audit.sh`.nothrow();
+// 4. Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
+const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
     process.exit(1);
