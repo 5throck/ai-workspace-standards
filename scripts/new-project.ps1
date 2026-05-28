@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
     [string]$ProjectName,
@@ -282,6 +282,27 @@ if (Test-Path $ScriptsMd) {
     }
     $snapshot | ConvertTo-Json -Depth 5 | Set-Content $SnapshotFile -Encoding UTF8
     Write-Host "  ✅ scripts-snapshot.json written ($($scriptsMap.Count) scripts)" -ForegroundColor Green
+}
+
+# ── 4.5d. Merge workspace scripts into package.json (Tier 2 integration) ──────
+$PkgJsonPath = Join-Path $ProjectDir "package.json"
+if (Test-Path $PkgJsonPath) {
+    $pkgJson = Get-Content $PkgJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not $pkgJson.scripts) {
+        $pkgJson | Add-Member -MemberType NoteProperty -Name "scripts" -Value ([PSCustomObject]@{})
+    }
+    $workspaceScripts = @{
+        "audit" = "bun scripts/audit.ts"
+        "dev-sync" = "bun scripts/dev-sync.ts"
+        "sync-md" = "bun scripts/sync-md.ts"
+    }
+    foreach ($script in $workspaceScripts.Keys) {
+        if (-not $pkgJson.scripts.psobject.properties.match($script)) {
+            $pkgJson.scripts | Add-Member -MemberType NoteProperty -Name $script -Value $workspaceScripts[$script]
+        }
+    }
+    $pkgJson | ConvertTo-Json -Depth 10 | Set-Content $PkgJsonPath -Encoding UTF8
+    Write-Host "  ✅ Tier 2 scripts merged into package.json" -ForegroundColor Green
 }
 
 # ── 4.6. Write template-version.txt for upgrade tracking ──────────────────────

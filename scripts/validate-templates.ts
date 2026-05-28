@@ -55,6 +55,16 @@ const colors = {
 
 const ROOT = cwd();
 const TEMPLATES_DIR = join(ROOT, 'templates');
+
+// Guard: must be run from workspace root (where templates/ directory exists)
+if (!existsSync(TEMPLATES_DIR)) {
+  console.error(`\x1b[31m[ERROR] validate-templates.ts must be run from the workspace root.\x1b[0m`);
+  console.error(`        Current directory: ${ROOT}`);
+  console.error(`        Expected: a directory containing templates/`);
+  console.error(`        Usage: cd <workspace-root> && bun scripts/validate-templates.ts`);
+  process.exit(1);
+}
+
 const args = process.argv.slice(2);
 const JSON_MODE = args.includes('--json');
 const variantArg = (() => {

@@ -106,6 +106,9 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 ### 4. Script Domain
 
 **What it tracks:** Every script in `scripts/` must have a corresponding entry in `scripts/SCRIPTS.md`. The verification tool checks that: all registered scripts exist as files, all existing scripts are registered, and no registered script is marked active but missing.
+Additionally, script creation must follow the **Hybrid Scripting Architecture**:
+- **Tier 1**: Bootstrap & Native Scripts (Native Shell, `.sh`/`.ps1`) for environment setup.
+- **Tier 2**: Ops & Automation Scripts (Bun/TS + `package.json`) for routine pipeline tasks.
 
 **Lifecycle states:**
 - `active` — registered, file present, callable

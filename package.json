@@ -9,7 +9,15 @@
     "agent:delete": "bun scripts/agent-delete.ts",
     "agent:verify": "bun scripts/agent-verify.ts",
     "dispatch:parallel": "bun scripts/dispatch.ts parallel",
-    "dispatch:serial": "bun scripts/dispatch.ts serial"
+    "dispatch:serial": "bun scripts/dispatch.ts serial",
+    "audit": "bun scripts/audit.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts",
+    "gen-pr-body": "bun scripts/gen-pr-body.ts",
+    "qa-gate": "bun scripts/qa-gate.ts",
+    "publish-to-template": "bun scripts/publish-to-template.ts",
+    "list-template-versions": "bun scripts/list-template-versions.ts",
+    "sync-skills": "bun scripts/sync-skills.ts"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

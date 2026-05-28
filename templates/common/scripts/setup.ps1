@@ -1,4 +1,4 @@
-# setup.ps1 ??Post-scaffold environment setup (Windows PowerShell)
+﻿# setup.ps1 ??Post-scaffold environment setup (Windows PowerShell)
 # Mirrors setup.sh exactly. Called automatically by new-project.ps1;
 # can also be re-run manually at any time.
 #

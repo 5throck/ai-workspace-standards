@@ -30,7 +30,7 @@
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains .ps1 and .sh cross-platform scripts; ensures idempotency and robustness |
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
 | Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
@@ -88,7 +88,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
 | Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
 | Template Architect | `agents/architect.md` | High | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Script files only |
+| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Tier 1 shell scripts (.sh/.ps1) and Tier 2 automation (.ts / package.json) |
 | Documentation Writer | `agents/docs-writer.md` | **Medium** | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
@@ -140,7 +140,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
 | Design the implementation approach and folder structure | `architect` | `automation-engineer` |
-| Write or modify scripts (.sh, .ps1) | `automation-engineer` | `architect` |
+| Write or modify Tier 1 scripts (.sh, .ps1) or Tier 2 scripts (.ts, package.json) | `automation-engineer` | `architect` |
 | Update documentation files | `docs-writer` | `architect` |
 | Create new project from template | `scaffolding-expert` | `automation-engineer` |
 | Security review, Git hooks configuration | `security-expert` | `architect` |
