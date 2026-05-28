@@ -18,7 +18,7 @@ import { cwd } from 'node:process';
 interface VariantManifest {
   name: string;
   description: string;
-  status: 'stable' | 'planned' | 'deprecated' | 'draft';
+  status: 'stable' | 'planned' | 'deprecated' | 'draft' | 'beta';
   version?: string;
 }
 
@@ -161,9 +161,9 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         continue;
       }
 
-      const validStatuses = ['stable', 'planned', 'deprecated'];
+      const validStatuses = ['stable', 'planned', 'deprecated', 'draft', 'beta'];
       if (!validStatuses.includes(raw.status as string)) {
-        fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated`);
+        fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated | draft | beta`);
         continue;
       }
 
