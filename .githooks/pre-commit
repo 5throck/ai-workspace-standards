@@ -113,10 +113,58 @@ if [ -n "$MEMORY_STAGED" ] && command -v bun &>/dev/null && [ -f "scripts/verify
     echo -e "\033[33m[WARN]\033[0m Memory format: some entries use legacy format — run 'bun scripts/verify-memory.ts --report' for details"
 fi
 
+# ── 3.2. Memory Cleanup
+# Run cleanup script to move completed files to memory/completed/
+MEMORY_ANY_STAGED=$(echo "$STAGED" | grep "^memory/" || true)
+if [ -n "$MEMORY_ANY_STAGED" ]; then
+  echo ""
+  echo "=== Memory Cleanup ==="
+
+  if bash scripts/cleanup-completed-md.sh; then
+    echo -e "\033[32m[PASS]\033[0m Memory cleanup: completed files archived"
+  else
+    echo -e "\033[33m[WARN]\033[0m Memory cleanup encountered issues (non-blocking)"
+  fi
+fi
+
 # ── 3. Documentation audit
 # Skip documentation audit for memory-only commits (workflow optimization)
 if [ "$MEMORY_ONLY" = false ]; then
   bash scripts/audit.sh || exit 1
+fi
+
+# ── 3.1. Lifecycle Documentation Validation
+# Run when agent or skill files are modified
+LIFECYCLE_STAGED=$(echo "$STAGED" | grep -iE "^agents/|^skills/|^doc/lifecycle/" || true)
+if [ -n "$LIFECYCLE_STAGED" ]; then
+  echo ""
+  echo "=== Lifecycle Documentation Validation ==="
+
+  # Validate agents
+  if bash scripts/validate-agents.sh; then
+    echo -e "\033[32m[PASS]\033[0m Agent lifecycle documentation: all required sections present"
+  else
+    echo -e "\033[31m[FAIL]\033[0m Agent lifecycle documentation validation failed"
+    echo "       Run 'bash scripts/validate-agents.sh' to see details"
+    exit 1
+  fi
+
+  # Validate skills
+  if bash scripts/validate-skills.sh; then
+    echo -e "\033[32m[PASS]\033[0m Skill lifecycle documentation: all required sections present"
+  else
+    echo -e "\033[31m[FAIL]\033[0m Skill lifecycle documentation validation failed"
+    echo "       Run 'bash scripts/validate-skills.sh' to see details"
+    exit 1
+  fi
+
+  # Validate doc/ folder organization
+  if bash scripts/validate-doc-folder.sh; then
+    echo -e "\033[32m[PASS]\033[0m Doc folder organization: correct"
+  else
+    echo -e "\033[33m[WARN]\033[0m Doc folder organization: lifecycle files should be in doc/lifecycle/"
+    # Warning only - don't block commits
+  fi
 fi
 
 # ── 3.5. Agent Lifecycle Audit 

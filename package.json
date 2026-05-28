@@ -4,6 +4,9 @@
   "description": "AI Workspace - Utility scripts for template maintenance and agent management",
   "scripts": {
     "verify-skills": "bun scripts/verify-skills.ts",
+    "validate-agents": "bun scripts/validate-agents.ts",
+    "validate-doc-folder": "bun scripts/validate-doc-folder.ts",
+    "validate-skills": "bun scripts/validate-skills.ts",
     "agent:create": "bun scripts/agent-create.ts",
     "agent:list": "bun scripts/agent-list.ts",
     "agent:delete": "bun scripts/agent-delete.ts",

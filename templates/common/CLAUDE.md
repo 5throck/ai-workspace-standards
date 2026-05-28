@@ -60,7 +60,48 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
 
-### 4. Native Sub-agents (`Agent` Tool)
+### 4. Agent Dispatch Rules
+
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
+
+#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
+- Agent tool automatically rejects non-PM specialist calls
+- Bypass: Impossible
+
+#### Level 2: System Prompt-Level Enforcement (Secondary)
+- This section is enforced via system prompt priority
+- CLAUDE.md Agent Dispatch Rules are loaded first
+
+#### Level 3: Agent File-Level Enforcement (Tertiary)
+- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
+- Agents refuse direct requests and redirect to PM
+
+#### Level 4: QA Gate-Level Enforcement (Quarternary)
+- Auditor detects PM bypass in Phase 5 QA
+- Post-hoc detection - prevents commits but not execution
+
+#### Forbidden Direct Calls
+❌ DO NOT: `Agent(tool, subagent_type="architect")`
+❌ DO NOT: "Architect, design X"
+❌ DO NOT: Direct specialist invocation without PM triage
+
+#### Correct Workflow
+1. Submit request to PM: "PM, design X architecture"
+2. PM triages → dispatches specialist → synthesizes results
+3. PM enforces QA gate → approves completion
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- auditor (Phase 5)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 5)
+- lifecycle-manager (Phase 6)
+
+### 5. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.

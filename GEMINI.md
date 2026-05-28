@@ -118,7 +118,50 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 ---
 
-### 6. Slash Command Emulation Guide
+### 4. Agent Dispatch Rules
+
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
+
+#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
+- Agent tool automatically rejects non-PM specialist calls
+- Bypass: Impossible
+
+#### Level 2: System Prompt-Level Enforcement (Secondary)
+- This section is enforced via system prompt priority
+- GEMINI.md Agent Dispatch Rules are loaded first
+
+#### Level 3: Agent File-Level Enforcement (Tertiary)
+- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
+- Agents refuse direct requests and redirect to PM
+
+#### Level 4: QA Gate-Level Enforcement (Quarternary)
+- Auditor detects PM bypass in Phase 5 QA
+- Post-hoc detection - prevents commits but not execution
+
+#### Forbidden Direct Calls
+❌ DO NOT: Direct specialist invocation via Gemini CLI
+❌ DO NOT: "Specialist, perform task" without PM triage
+❌ DO NOT: Bypass PM dispatch workflow
+
+#### Correct Workflow
+1. Submit request to PM: "PM, need specialist for X"
+2. PM triages → dispatches specialist → synthesizes results
+3. PM enforces QA gate → approves completion
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- auditor (Phase 5)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 5)
+- lifecycle-manager (Phase 6)
+
+---
+
+### 5. Slash Command Emulation Guide
 Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS.
 
 > **Platform parity**: every command file in `.gemini/commands/` must have a matching file in `.claude/commands/`. Intentional Gemini-absent exceptions are marked `gemini-parity: skip` in the Claude-side frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
@@ -134,7 +177,7 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 
 ---
 
-### 7. Coexistence, Precedence & Migration of .claude
+### 6. Coexistence, Precedence & Migration of .claude
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.

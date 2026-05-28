@@ -86,6 +86,11 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `validate-agents.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | — | cleanup-completed-md.ps1 |
+| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | — | — |
 | `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — | upgrade-project.ps1 |
 | `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — | — | — |
 
