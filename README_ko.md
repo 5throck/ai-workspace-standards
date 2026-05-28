@@ -127,7 +127,8 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── common/              # 모든 템플릿이 공통으로 사용하는 스크립트/스킬/깃훅
     ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 워크플로 템플릿
     ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로 템플릿
-    └── co-work/             # ✅ Stable — 기획 및 범용 협업 워크플로 템플릿
+    ├── co-work/             # ✅ Stable — 기획 및 범용 협업 워크플로 템플릿
+    └── co-security/         # 🔶 Beta — 레드팀·위협 모델링·패치 자동화 보안 워크플로 템플릿
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -164,6 +165,7 @@ C:\git\
 - **co-develop**: 소프트웨어 개발 및 검증을 위한 6단계 선형 거버넌스 파이프라인
 - **co-design**: 빠른 프로토타이핑과 지속적인 사용자 검증에 초점을 맞춘 5단계 반복형(Iterative) 디자인 네이티브 워크플로
 - **co-work**: 병렬 작성과 지속적인 이해관계자 리뷰에 초점을 맞춘 6단계 비동기(Asynchronous) 협업 워크플로
+- **co-security**: 레드팀 운영, 위협 모델링, Ansible 기반 패치 자동화를 포함하는 6단계 보안 인게이지먼트 워크플로
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -181,6 +183,7 @@ C:\git\
 | `co-develop` | ✅ Stable | 소프트웨어 개발 전용 워크플로 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
 | `co-design` | ✅ Stable | UI/UX 디자인 워크플로 — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
 | `co-work` | ✅ Stable | 범용 협업 워크플로 — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
+| `co-security` | 🔶 Beta | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 
 ### 버전 및 Variant 선택
 

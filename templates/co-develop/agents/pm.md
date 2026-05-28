@@ -1,5 +1,6 @@
 ---
 name: pm
+status: active
 formal_name: Project Manager (PM) Agent
 tier:
   claude: high        # claude-opus-4-7

@@ -1,5 +1,6 @@
 ---
 name: architect
+status: active
 tier:
   claude: high        # claude-opus-4-7
   antigravity: high   # gemini-3.1-pro (thinking_level="medium")

@@ -54,19 +54,16 @@ const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 
 // Required sections for workspace root and templates
 const REQUIRED_SECTIONS_ROOT = [
-  '## What Is This?',
-  '## Quick Start',
-  '## Repository Structure',
-  '## Session Start Checklist',
-  '## Multi-Agent Workflow',
-  '## License',
+  'What Is This?',
+  'Quick Start',
+  'Repository Structure',
+  'Session Start Checklist',
+  'Multi-Agent Workflow',
+  'License',
 ];
 
-// Required sections for project READMEs (relaxed)
-const REQUIRED_SECTIONS_PROJECT = [
-  '#',
-  // Projects define their own structure
-];
+// Required sections for project READMEs — no required sections (projects define their own structure)
+const REQUIRED_SECTIONS_PROJECT: string[] = [];
 
 // Platform detection
 const PLATFORM = detectPlatform();
@@ -79,7 +76,7 @@ function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
 
 // Parse markdown sections
 function parseSections(filePath: string): Map<string, ReadmeSection> {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const sections = new Map<string, ReadmeSection>();
   const lines = content.split('\n');
 
@@ -244,10 +241,12 @@ function auditReadmes(jsonMode = false): AuditResult {
   for (const readmeFile of readmeFiles) {
     const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
     const isKorean = readmeFile.endsWith('README_ko.md');
-    const isWorkspaceRoot = relPath.startsWith('README') || relPath.startsWith('templates/README');
+    // Only the workspace-root EN README requires specific sections;
+    // KO variants are checked via i18n consistency, templates/README.md has its own structure.
+    const isWorkspaceRoot = relPath === 'README.md';
     const sections = parseSections(readmeFile);
 
-    // Check required sections
+    // Check required sections (EN workspace root only — skip KO and templates/README)
     const requiredSections = isWorkspaceRoot ? REQUIRED_SECTIONS_ROOT : REQUIRED_SECTIONS_PROJECT;
     for (const section of requiredSections) {
       if (!Array.from(sections.keys()).some(s => s.includes(section))) {

@@ -61,6 +61,8 @@
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
+| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — |
+| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — |
 
 ---
 

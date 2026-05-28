@@ -35,6 +35,8 @@ __pycache__/
 
 # --- Claude local settings (personal, not shared) ---
 .claude/settings.local.json
+# --- Claude Code worktrees (ephemeral, agent-created) ---
+.claude/worktrees/
 
 # --- Explicitly TRACK these workspace-level files ---
 # (gitignore negations — override the /*/  rule above)

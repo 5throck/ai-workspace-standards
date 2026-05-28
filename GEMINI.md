@@ -119,7 +119,9 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 ---
 
 ### 6. Slash Command Emulation Guide
-Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS:
+Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS.
+
+> **Platform parity**: every command file in `.gemini/commands/` must have a matching file in `.claude/commands/`. Intentional Gemini-absent exceptions are marked `gemini-parity: skip` in the Claude-side frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
 
 | Command | macOS / Linux (Bash) | Windows (PowerShell) |
 | :--- | :--- | :--- |

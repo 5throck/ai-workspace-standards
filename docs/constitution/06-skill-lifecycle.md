@@ -196,3 +196,23 @@ If audit fails:
 - Add missing `owner: agent-name` to frontmatter
 - Reassign orphaned skills to valid agents
 - Archive deprecated skills to `skills/_archive/`
+
+
+---
+
+### Cross-Platform Deployment Rule
+
+Any command file added or modified under `.claude/commands/` **MUST** have a corresponding file under `.gemini/commands/` at the same directory level. This rule applies at both the workspace root and template variant levels.
+
+**Enforcement**: `audit.sh` runs `check_command_parity()` on every commit and warns on any `.claude/commands/` file that lacks a matching `.gemini/commands/` file.
+
+**Intentional exceptions**: If a command is genuinely Claude Code-only (e.g., it relies on Claude-native tool dispatch with no Gemini equivalent), add the following to the file's frontmatter to suppress the parity warning:
+
+```markdown
+---
+gemini-parity: skip
+description: ...
+---
+```
+
+**Sync rule**: When the content of a command file changes, update both platforms simultaneously. The `.claude/commands/` version is the SSOT; `.gemini/commands/` must be kept in sync.

@@ -8,6 +8,7 @@ version: 1.0.0
 status: active
 owner: pm
 prerequisites: engagement-scoping must have been run (docs/scope.md must exist)
+security-gate: true
 ---
 
 # 🔒 Skill: verify-authorization

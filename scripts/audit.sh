@@ -208,6 +208,22 @@ if command -v bun &>/dev/null; then
             warn "Memory audit: some entries use legacy format (run 'bun scripts/verify-memory.ts --report')"
         fi
     fi
+    if [ -f "scripts/verify-scripts.ts" ]; then
+        if bun scripts/verify-scripts.ts --verify 2>/dev/null; then
+            green "Script registry audit: all scripts verified"
+        else
+            red "Script registry audit detected issues (run 'bun scripts/verify-scripts.ts --report' to see details)"
+            ((errors++)) || true
+        fi
+    fi
+    if [ -f "scripts/readme-lifecycle-audit.ts" ]; then
+        if bun scripts/readme-lifecycle-audit.ts 2>/dev/null; then
+            green "README audit: all READMEs healthy"
+        else
+            red "README audit detected issues (run 'bun scripts/readme-lifecycle-audit.ts' to see details)"
+            ((errors++)) || true
+        fi
+    fi
 else
     warn "Bun not installed - skipping lifecycle audits"
 fi
@@ -237,6 +253,29 @@ if [ -f "AGENTS.md" ] && [ -d "agents" ]; then
     green "Agent state synchronization: all agents in sync"
   else
     ((errors += sync_errors)) || true
+  fi
+fi
+
+# --- Cross-Platform Command Parity Check ---
+# Ensures every .claude/commands/ file has a matching .gemini/commands/ file.
+# Files with 'gemini-parity: skip' in their frontmatter are intentional exceptions.
+if [ -d ".claude/commands" ]; then
+  parity_warnings=0
+  for claude_cmd in .claude/commands/*.md; do
+    [ -f "$claude_cmd" ] || continue
+    cmd_name=$(basename "$claude_cmd")
+    # Check for explicit opt-out
+    if grep -q "^gemini-parity: skip" "$claude_cmd" 2>/dev/null; then
+      continue
+    fi
+    gemini_cmd=".gemini/commands/$cmd_name"
+    if [ ! -f "$gemini_cmd" ]; then
+      warn "Command parity gap: .claude/commands/$cmd_name has no matching .gemini/commands/$cmd_name (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)"
+      ((parity_warnings++)) || true
+    fi
+  done
+  if [ "$parity_warnings" -eq 0 ]; then
+    green "Command parity: all .claude/commands/ files have matching .gemini/commands/ files"
   fi
 fi
 

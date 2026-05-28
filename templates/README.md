@@ -16,7 +16,8 @@ templates/
 │   └── docs/_examples/  # Reference documentation
 ├── co-develop/          # Software development variant
 ├── co-design/           # Design workflow variant
-└── co-work/             # Collaboration variant
+├── co-work/             # Collaboration variant
+└── co-security/         # Security engagement variant
 ```
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
@@ -28,6 +29,7 @@ templates/
 | [`co-develop`](co-develop/) | ✅ Stable | Software development workflow with 7 agents (pm, architect, code-writer, etc.) |
 | [`co-design`](co-design/) | ✅ Stable | UI/UX design workflow with 5 agents (design pm, design-lead, ux-researcher, visual-designer, prototype-engineer) |
 | [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 4 agents (collaboration pm, analyst, content-writer, project-coordinator) |
+| [`co-security`](co-security/) | 🔶 Beta | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, patch-engineer, report-writer) |
 
 ## Usage
 
@@ -57,3 +59,5 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Major** bump: agent dispatch model changes
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
+
+*Last Updated: 2026-05-28*

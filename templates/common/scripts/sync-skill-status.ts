@@ -17,7 +17,9 @@ const colors = {
   reset: '\x1b[0m',
 };
 
-const ROOT = cwd();
+const args = process.argv.slice(2);
+const targetIdx = args.indexOf('--target');
+const ROOT = targetIdx !== -1 && args[targetIdx + 1] ? args[targetIdx + 1] : cwd();
 const SKILL_DIRS = ['skills', '.claude/skills'];
 const AGENTS_MD = join(ROOT, 'AGENTS.md');
 const CONTEXT_MD = join(ROOT, 'docs', 'context.md');

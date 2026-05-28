@@ -199,6 +199,76 @@ if (-not (Test-Path $CommonDir)) {
     exit 1
 }
 
+# ── C-05: scripts-snapshot.json version comparison ────────────────────────────
+$ScriptsSnapshot = Join-Path $ProjectDir 'scripts-snapshot.json'
+$ScriptsMd       = Join-Path $WorkspaceRoot 'scripts\SCRIPTS.md'
+
+if ((Test-Path $ScriptsSnapshot) -and (Test-Path $ScriptsMd)) {
+    Write-Host ""
+    Write-Host "--- Script version comparison (L2 snapshot vs L1 current) ---"
+    try {
+        $snapshot   = Get-Content $ScriptsSnapshot -Raw -Encoding UTF8 | ConvertFrom-Json
+        $l2Scripts  = $snapshot.scripts
+        $created    = if ($snapshot.created) { $snapshot.created } else { 'unknown' }
+        $l2Names    = $l2Scripts.PSObject.Properties.Name
+        Write-Host "  Snapshot created: $created  ($($l2Names.Count) scripts)"
+
+        $scriptsMdContent = Get-Content $ScriptsMd -Raw -Encoding UTF8
+        $l1Scripts = @{}
+        $inRegistry = $false
+        foreach ($line in $scriptsMdContent -split "`n") {
+            if ($line -match '^## Registry') { $inRegistry = $true; continue }
+            if ($inRegistry -and $line -match '^## ') { break }
+            if ($inRegistry -and $line -match '^\|') {
+                $parts = $line -split '\|' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+                if ($parts.Count -ge 4 -and $parts[2] -match '^\d+\.\d+\.\d+$') {
+                    $l1Scripts[$parts[0] -replace '`', ''] = @{ version = $parts[2]; status = $parts[3] }
+                }
+            }
+        }
+
+        $outdated   = @()
+        $deprecated = @()
+        foreach ($name in $l2Names) {
+            $l2Info = $l2Scripts.$name
+            $l1Info = $l1Scripts[$name]
+            if (-not $l1Info) { continue }
+            if ($l2Info.version -ne $l1Info.version) {
+                $outdated += [PSCustomObject]@{ Name=$name; L2=$l2Info.version; L1=$l1Info.version }
+            }
+            if ($l1Info.status -eq 'deprecated') {
+                $deprecated += [PSCustomObject]@{ Name=$name; Version=$l1Info.version }
+            }
+        }
+
+        if ($outdated.Count -eq 0 -and $deprecated.Count -eq 0) {
+            Write-Host "  ✅ All scripts up-to-date with L1 SCRIPTS.md" -ForegroundColor Green
+        } else {
+            if ($outdated.Count -gt 0) {
+                Write-Host "  ⚠️  $($outdated.Count) script(s) have newer versions available:" -ForegroundColor Yellow
+                foreach ($s in $outdated) {
+                    Write-Host ("  {0,-42} {1} → {2}" -f $s.Name, $s.L2, $s.L1)
+                }
+            }
+            if ($deprecated.Count -gt 0) {
+                Write-Host "  ❌ $($deprecated.Count) script(s) are deprecated in L1 SCRIPTS.md:" -ForegroundColor Red
+                foreach ($s in $deprecated) {
+                    Write-Host ("  {0,-42} {1}  (deprecated — remove or replace)" -f $s.Name, $s.Version)
+                }
+            }
+            Write-Host ""
+            Write-Host "  Run: .\scripts\upgrade-project.ps1 <path> to get updated scripts."
+        }
+    } catch {
+        Write-Host "  WARN: Could not parse scripts-snapshot.json: $_" -ForegroundColor Yellow
+    }
+    Write-Host ""
+} elseif (Test-Path $ScriptsSnapshot) {
+    Write-Host ""
+    Write-Host "  INFO: scripts-snapshot.json found but SCRIPTS.md not accessible — skipping version comparison."
+    Write-Host ""
+}
+
 # ============================================================
 # Print header
 # ============================================================

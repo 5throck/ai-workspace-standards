@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://templates.circuit.stream/common/variant.schema.json",
+  "title": "Variant JSON Schema",
+  "description": "Schema for variant.json files enforcing lifecycle management requirements",
+  "type": "object",
+  "required": ["name", "description", "status", "version", "lifecycle"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^co-[a-z]+$",
+      "description": "Variant identifier following naming convention (e.g., co-develop, co-security)"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Human-readable description of the variant's purpose and scope"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "beta", "stable", "deprecated"],
+      "description": "Current lifecycle stage"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Semantic version (MAJOR.MINOR.PATCH)"
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "Lifecycle tracking metadata",
+      "required": ["statusSince", "lastTransition"],
+      "properties": {
+        "statusSince": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when current status was entered (YYYY-MM-DD)"
+        },
+        "lastTransition": {
+          "type": "string",
+          "description": "Human-readable description of last status change (e.g., 'beta → stable on 2026-05-28')"
+        },
+        "betaEngagements": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of successful engagements during beta phase"
+        },
+        "betaPromotedOn": {
+          "type": "string",
+          "format": "date",
+          "description": "Date promoted to beta (null if not yet beta)"
+        },
+        "stablePromotedOn": {
+          "type": "string",
+          "format": "date",
+          "description": "Date promoted to stable (null if not yet stable)"
+        },
+        "deprecatedOn": {
+          "type": "string",
+          "format": "date",
+          "description": "Date variant was deprecated (null if not deprecated)"
+        },
+        "archiveOn": {
+          "type": "string",
+          "format": "date",
+          "description": "Scheduled archive date (null if not scheduled)"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "beta" }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "lifecycle": {
+            "properties": {
+              "betaEngagements": { "type": "integer" }
+            },
+            "required": ["betaEngagements"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "stable" }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "lifecycle": {
+            "properties": {
+              "stablePromotedOn": { "type": "string" }
+            },
+            "required": ["stablePromotedOn"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "deprecated" }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "lifecycle": {
+            "properties": {
+              "deprecatedOn": { "type": "string" }
+            },
+            "required": ["deprecatedOn"]
+          }
+        }
+      }
+    }
+  ]
+}

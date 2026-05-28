@@ -11,7 +11,7 @@
  *   bun scripts/validate-templates.ts --json
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 
@@ -81,6 +81,79 @@ function warn(variant: string, check: string, msg: string, fix?: string) {
   if (!JSON_MODE) {
     console.log(`${colors.yellow}[WARN]${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
+  }
+}
+
+// D-04: Governance policy loaded from lifecycle-governance.json
+interface GovernanceDomain {
+  applicable: boolean;
+  tool?: string;
+  mandatory?: boolean;
+  currentStatus?: string;
+}
+interface GovernanceLayer {
+  orchestrator: string | null;
+  domains: Record<string, GovernanceDomain>;
+}
+interface GovernancePolicy {
+  version: string;
+  layers: Record<string, GovernanceLayer>;
+  variantValidationPolicy: {
+    mandatoryBeforeProjectCreation: string[];
+    warningOnly: string[];
+  };
+}
+
+let governance: GovernancePolicy | null = null;
+function loadGovernance(): void {
+  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  if (!existsSync(govPath)) return;
+  try {
+    governance = JSON.parse(readFileSync(govPath, 'utf-8')) as GovernancePolicy;
+  } catch {
+    // governance stays null — checks will proceed without policy enforcement
+  }
+}
+
+function isMandatory(domain: string): boolean {
+  if (!governance) return true; // default to mandatory if governance file missing
+  const variantLayer = governance.layers['templates-variants'];
+  if (!variantLayer) return true;
+  const d = variantLayer.domains[domain];
+  if (!d || !d.applicable) return false;
+  return d.mandatory ?? true;
+}
+
+// Check D-04: Governance policy + common.lifecycle.json
+function checkGovernance(): void {
+  if (!JSON_MODE) console.log('\n=== Check D-04: Lifecycle governance ===');
+  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  if (!existsSync(govPath)) {
+    warn('common', 'governance-missing', 'templates/common/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
+    return;
+  }
+  pass('templates/common/lifecycle-governance.json: present');
+
+  const commonLcPath = join(TEMPLATES_DIR, 'common', 'common.lifecycle.json');
+  if (!existsSync(commonLcPath)) {
+    warn('common', 'common-lifecycle-missing', 'templates/common/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
+  } else {
+    try {
+      const lc = JSON.parse(readFileSync(commonLcPath, 'utf-8')) as Record<string, unknown>;
+      if (!lc.version || !lc.status || !lc.propagatedTo) {
+        warn('common', 'common-lifecycle-schema', 'common.lifecycle.json missing required fields: version, status, propagatedTo');
+      } else {
+        pass(`templates/common/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
+      }
+    } catch {
+      fail('common', 'common-lifecycle-invalid', 'templates/common/common.lifecycle.json is not valid JSON');
+    }
+  }
+
+  if (governance && !JSON_MODE) {
+    const policy = governance.variantValidationPolicy;
+    console.log(`       ${colors.dim}Mandatory domains: ${policy.mandatoryBeforeProjectCreation.join(', ')}${colors.reset}`);
+    console.log(`       ${colors.dim}Warning-only domains: ${policy.warningOnly.join(', ')}${colors.reset}`);
   }
 }
 
@@ -165,6 +238,22 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       if (!validStatuses.includes(raw.status as string)) {
         fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated | draft | beta`);
         continue;
+      }
+
+      // B-02: Lifecycle field validation
+      const lifecycle = raw.lifecycle as Record<string, unknown> | undefined;
+      if (!lifecycle) {
+        fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json missing 'lifecycle' object`);
+      } else {
+        if (!lifecycle.statusSince) {
+          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.statusSince is missing`, `Add "statusSince": "YYYY-MM-DD" to lifecycle object`);
+        }
+        if (!lifecycle.lastTransition) {
+          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.lastTransition is missing`, `Add "lastTransition": "... → ... on YYYY-MM-DD" to lifecycle object`);
+        }
+        if (lifecycle.statusSince && lifecycle.lastTransition) {
+          pass(`templates/${dir}/variant.json lifecycle fields OK (statusSince, lastTransition)`);
+        }
       }
 
       manifests.set(dir, raw as unknown as VariantManifest);
@@ -493,6 +582,55 @@ function checkL0L1ScriptParity() {
   }
 }
 
+// Check B-05: Per-variant skill lifecycle (presence-driven)
+function checkVariantSkills(variant: string): void {
+  const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  if (!existsSync(skillsDir)) {
+    pass(`${variant}/skills/: not present (OK — skill lifecycle check not applicable)`);
+    return;
+  }
+
+  if (!JSON_MODE) console.log(`\n=== Check B-05: Skill lifecycle in ${variant} ===`);
+
+  const dirs = readdirSync(skillsDir).filter(d =>
+    d !== '_archive' && statSync(join(skillsDir, d)).isDirectory()
+  );
+
+  if (dirs.length === 0) {
+    warn(variant, 'skill-lifecycle', `${variant}/skills/ exists but contains no skill directories`);
+    return;
+  }
+
+  let missingSkillMd = 0;
+  let deprecatedCount = 0;
+  for (const skillName of dirs) {
+    const skillMd = join(skillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMd)) {
+      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing`, `Create SKILL.md with required frontmatter`);
+      missingSkillMd++;
+      continue;
+    }
+    const content = readFileSync(skillMd, 'utf-8');
+    const fields = parseFrontmatter(content);
+    if (!('name' in fields) || !('description' in fields)) {
+      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (name, description)`);
+    }
+    if ('status' in fields) {
+      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
+      const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(':') + 1).trim() : '';
+      if (statusVal === 'deprecated') deprecatedCount++;
+    }
+  }
+
+  if (missingSkillMd === 0) {
+    if (deprecatedCount > 0) {
+      warn(variant, 'skill-lifecycle', `${variant}/skills/: ${deprecatedCount} deprecated skill(s) — remove before stable promotion`);
+    } else {
+      pass(`${variant}/skills/: ${dirs.length} skill(s) OK, no deprecated`);
+    }
+  }
+}
+
 // Check 11: Variant Contract compliance
 function checkVariantContract(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
@@ -534,6 +672,138 @@ function checkVariantContract(variant: string): void {
   }
 }
 
+// Check B-03: security-gate: true skills must NOT be in .claude/skills/
+function checkSecurityGateSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check B-03: security-gate skill placement in ${variant} ===`);
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+  if (!existsSync(claudeSkillsDir)) {
+    pass(`${variant}/.claude/skills/: not present (OK — security-gate check not applicable)`);
+    return;
+  }
+
+  const skillDirs = readdirSync(claudeSkillsDir).filter(d =>
+    statSync(join(claudeSkillsDir, d)).isDirectory()
+  );
+
+  let violations = 0;
+  for (const skillName of skillDirs) {
+    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue;
+
+    const rawContent = readFileSync(skillMdPath, 'utf-8');
+    const fields = parseFrontmatter(rawContent);
+
+    if ('security-gate' in fields) {
+      // Check if value is true
+      const content = normalizeContent(rawContent);
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (match) {
+        const fmText = match[1];
+        const sgLine = fmText.split('\n').find(l => l.startsWith('security-gate:'));
+        const sgValue = sgLine ? sgLine.slice(sgLine.indexOf(':') + 1).trim() : '';
+        if (sgValue === 'true') {
+          fail(
+            variant,
+            'security-gate-placement',
+            `${variant}/.claude/skills/${skillName}/SKILL.md has security-gate: true but is in .claude/skills/ (Claude Code-only). Move to skills/ (platform-neutral).`,
+            `Move skills/${skillName}/ out of .claude/skills/ into the top-level skills/ directory`
+          );
+          violations++;
+        }
+      }
+    }
+  }
+
+  if (violations === 0) {
+    pass(`${variant}/.claude/skills/: no security-gate: true skills found (OK)`);
+  }
+}
+
+// B-07: Sync scan results back to VERSION_REGISTRY.json
+function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
+  const registryPath = join(TEMPLATES_DIR, 'common', 'VERSION_REGISTRY.json');
+  if (!existsSync(registryPath)) return;
+
+  let registry: Record<string, unknown>;
+  try {
+    registry = JSON.parse(readFileSync(registryPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+
+  const variants = (registry.variants ?? {}) as Record<string, Record<string, unknown>>;
+  let changed = false;
+  const today = new Date().toISOString().slice(0, 10);
+
+  for (const [name, manifest] of manifests) {
+    const existing = variants[name] ?? {};
+    const newStatus = manifest.status;
+    const newVersion = manifest.version ?? existing.latest ?? '0.0.0';
+
+    if (existing.status !== newStatus || existing.latest !== newVersion) {
+      variants[name] = {
+        ...existing,
+        latest: newVersion,
+        status: newStatus,
+        released: existing.released ?? today,
+        security_advisories: existing.security_advisories ?? [],
+        migration_guides: existing.migration_guides ?? [],
+      };
+      changed = true;
+      if (!JSON_MODE) pass(`VERSION_REGISTRY.json: ${name} synced (status=${newStatus}, version=${newVersion})`);
+    }
+  }
+
+  if (changed) {
+    registry.variants = variants;
+    registry.last_updated = today;
+    writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+    if (!JSON_MODE) pass(`VERSION_REGISTRY.json updated (last_updated=${today})`);
+  } else {
+    if (!JSON_MODE) pass('VERSION_REGISTRY.json already up-to-date');
+  }
+}
+
+// B-08: Check for deprecated agents/skills in variant and warn about version bump
+function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest): void {
+  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
+
+  let deprecatedAgents = 0;
+  let deprecatedSkills = 0;
+
+  if (existsSync(agentsDir)) {
+    for (const file of readdirSync(agentsDir).filter(f => f.endsWith('.md') && !f.startsWith('README'))) {
+      const content = readFileSync(join(agentsDir, file), 'utf-8');
+      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
+      if (statusLine && statusLine.includes('deprecated')) deprecatedAgents++;
+    }
+  }
+
+  if (existsSync(skillsDir)) {
+    for (const d of readdirSync(skillsDir).filter(d => d !== '_archive' && statSync(join(skillsDir, d)).isDirectory())) {
+      const skillMd = join(skillsDir, d, 'SKILL.md');
+      if (!existsSync(skillMd)) continue;
+      const content = readFileSync(skillMd, 'utf-8');
+      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
+      if (statusLine && statusLine.includes('deprecated')) deprecatedSkills++;
+    }
+  }
+
+  if (deprecatedAgents > 0 || deprecatedSkills > 0) {
+    const currentVersion = manifest.version ?? '0.0.0';
+    const parts = currentVersion.split('.').map(Number);
+    const bumpedVersion = `${parts[0]}.${parts[1]}.${(parts[2] ?? 0) + 1}`;
+    warn(
+      variant,
+      'deprecated-version-bump',
+      `${variant} has ${deprecatedAgents} deprecated agent(s) and ${deprecatedSkills} deprecated skill(s) — consider bumping patch version ${currentVersion} → ${bumpedVersion}`,
+      `Update version in templates/${variant}/variant.json and VERSION_REGISTRY.json to ${bumpedVersion}`
+    );
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -542,6 +812,8 @@ function main() {
     console.log(`${colors.dim}Variant filter: ${variantArg}${colors.reset}`);
   }
 
+  loadGovernance();
+  checkGovernance();
   checkVersion();
   checkCommon();
   const manifests = checkVariantManifests();
@@ -555,6 +827,9 @@ function main() {
 
     // Check Variant Contract for all variants (including draft)
     checkVariantContract(variant);
+    checkSecurityGateSkills(variant);          // B-03
+    checkVariantSkills(variant);               // B-05: presence-driven skill lifecycle
+    checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
 
     if (manifest.status === 'stable') {
       checkAgents(variant);
@@ -569,6 +844,10 @@ function main() {
 
   checkSharedFileSync();
   checkL0L1ScriptParity();
+
+  // B-07: Sync validated variant info back to VERSION_REGISTRY.json
+  if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');
+  updateVersionRegistry(manifests);
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');

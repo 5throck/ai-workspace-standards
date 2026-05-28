@@ -4,6 +4,7 @@ description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,
   or managing skill-agent mappings.
+owner: pm
 version: 1.2.0
 metadata:
   type: process
@@ -69,6 +70,7 @@ name: skill-name
 description: >
   Brief description of what this skill does and when to use it.
   Use when: [specific trigger scenarios]
+owner: pm
 version: 1.0.0
 metadata:
   type: process | implementation | domain

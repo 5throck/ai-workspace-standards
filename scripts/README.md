@@ -23,11 +23,9 @@
 | `dev-sync.sh` | L0 | 1.3.0 | active | — | — | — |
 | `dev-sync.ps1` | L0 | 1.4.0 | active | — | — | — |
 | `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
-| `new-project.ps1` | L1 | 1.3.0 | active | — | — | — |
+| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — |
 | `sync-md.sh` | L0 | 1.1.0 | active | — | — | intentional |
 | `sync-md.ps1` | L0 | 1.2.0 | active | — | — | — |
-| `setup.sh` | L0 | 1.0.0 | active | — | — | — |
-| `setup.ps1` | L0 | 1.0.0 | active | — | — | — |
 | `gen-pr-body.sh` | L0 | 1.0.0 | active | — | — | — |
 | `gen-pr-body.ps1` | L0 | 1.0.0 | active | — | — | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
@@ -50,6 +48,19 @@
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
 | `sync-skills.sh` | L1 | 1.1.0 | active | — | — | — |
 | `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
+| `publish-to-template.sh` | L1 | 1.0.0 | active | — | — | — |
+| `publish-to-template.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `list-template-versions.sh` | L1 | 1.0.0 | active | — | — | — |
+| `list-template-versions.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `qa-gate.sh` | L1 | 1.0.0 | active | — | — | — |
+| `qa-gate.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.sh` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.ps1` | L1 | 1.0.0 | active | — | — | — |
+| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
+| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
+| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
+| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — |
+| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — |
 
 ---
 
@@ -197,6 +208,14 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 (`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
 `templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
 **Usage**: `bash scripts/sync-skills.sh` / `.\scripts\sync-skills.ps1`
+
+#### `publish-to-template.sh` / `publish-to-template.ps1`
+**Purpose**: Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot
+(`templates/common/scripts/`). Copies all scripts labeled `L0` in the Registry plus
+`SCRIPTS.md` itself.
+**Usage**: `bash scripts/publish-to-template.sh` / `.\scripts\publish-to-template.ps1`
+**Dry-run**: `bash scripts/publish-to-template.sh --dry-run`
+**Note**: L1-only script (not propagated to template).
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
