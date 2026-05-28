@@ -49,6 +49,7 @@ interface RegistryEntry {
   removalDate: string; // "—" or "YYYY-MM-DD"
   securityAdvisory: string; // "—" or "CVE-XXXX"
   drift: string; // "—" (checked) | "intentional" (skip drift check)
+  pair: string;  // "—" or "<script-name>" (.sh declares its .ps1 pair)
 }
 
 // ── Registry Parser ──────────────────────────────────────────────────────────
@@ -99,6 +100,7 @@ function parseRegistry(content: string): RegistryEntry[] {
       removalDate: cols[4],
       securityAdvisory: cols[5],
       drift: cols[6] ?? "—", // backward-compatible: 6-column rows default to "—"
+      pair: cols[7] ?? "—",  // new column: .sh declares its .ps1 horizontal pair
     });
   }
 
@@ -301,6 +303,52 @@ function verify(): boolean {
     if (entry.status === "deprecated" && (entry.removalDate === "—" || entry.removalDate === "")) {
       errors.push(
         `Missing removal-date for deprecated script: \`${entry.script}\` — add YYYY-MM-DD (min 90 days)`
+      );
+    }
+
+    // Check 5b: deprecated .sh/.ps1 with pair field should be thin wrappers (≤8 lines)
+    if (
+      entry.status === "deprecated" &&
+      entry.pair !== "—" &&
+      entry.pair !== "" &&
+      (entry.script.endsWith(".sh") || entry.script.endsWith(".ps1"))
+    ) {
+      const scriptPath = join(scriptsDir, entry.script);
+      if (existsSync(scriptPath)) {
+        const scriptContent = readFileSync(scriptPath, "utf-8");
+        const lineCount = scriptContent.split("\n").filter(l => l.trim()).length;
+        if (lineCount > 8) {
+          warnings.push(
+            `⚠️  FAT DEPRECATED WRAPPER: \`${entry.script}\` has ${lineCount} non-empty lines — deprecated scripts with a TS pair should be thin wrappers (≤8 lines). Convert to: exec bun $SCRIPT_DIR/${entry.pair.replace('.ps1', '.ts').replace('.sh', '.ts')} "$@"`
+          );
+        }
+      }
+    }
+  }
+
+  // Check 6: pair field horizontal sync — .sh declares pair, verify version match
+  const byScript = new Map(registry.map(e => [e.script, e]));
+  for (const entry of registry) {
+    if (entry.pair === "—" || entry.pair === "") continue;
+    const pairEntry = byScript.get(entry.pair);
+    if (!pairEntry) {
+      warnings.push(
+        `⚠️  PAIR MISSING: \`${entry.script}\` declares pair \`${entry.pair}\` but it is not in registry`
+      );
+      continue;
+    }
+    // Version sync check: both files should have same major.minor version
+    const [shMaj, shMin] = entry.version.split(".").map(Number);
+    const [ps1Maj, ps1Min] = pairEntry.version.split(".").map(Number);
+    if (shMaj !== ps1Maj || shMin !== ps1Min) {
+      warnings.push(
+        `⚠️  PAIR VERSION DRIFT: \`${entry.script}\` v${entry.version} ↔ \`${entry.pair}\` v${pairEntry.version} — consider aligning versions`
+      );
+    }
+    // Status sync check: both should have same status
+    if (entry.status !== pairEntry.status) {
+      warnings.push(
+        `⚠️  PAIR STATUS DRIFT: \`${entry.script}\` (${entry.status}) ↔ \`${entry.pair}\` (${pairEntry.status}) — statuses should match`
       );
     }
   }

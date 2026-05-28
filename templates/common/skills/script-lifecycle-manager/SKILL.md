@@ -1,5 +1,6 @@
 ---
 name: script-lifecycle-manager
+status: active
 description: >
   Manages the creation, versioning, deprecation, and maintenance of automation scripts
   across the workspace and templates. Use when: creating new scripts, updating script versions,

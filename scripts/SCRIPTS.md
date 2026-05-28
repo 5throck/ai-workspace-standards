@@ -30,63 +30,64 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
-<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift -->
+<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift | pair -->
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
 <!-- security-advisory: CVE-XXXX or — -->
 <!-- drift: — (checked) | intentional (L0/L1 divergence is expected, skip drift check) -->
+<!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
 
-| script | source | version | status | removal-date | security-advisory | drift |
-|--------|--------|---------|--------|--------------|-------------------|-------|
-| `audit.sh` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
-| `audit.ps1` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
-| `dev-sync.sh` | L0 | 1.3.0 | deprecated | 2026-08-29 | — | — |
-| `dev-sync.ps1` | L0 | 1.4.0 | deprecated | 2026-08-29 | — | — |
-| `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
-| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — |
-| `sync-md.sh` | L0 | 1.1.0 | deprecated | 2026-08-29 | — | intentional |
-| `sync-md.ps1` | L0 | 1.2.0 | deprecated | 2026-08-29 | — | — |
-| `gen-pr-body.sh` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `gen-pr-body.ps1` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — |
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
-| `audit.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `dev-sync.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-md.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `sync-skills.ts` | L1 | 1.0.0 | active | — | — | — |
-| `publish-to-template.ts` | L1 | 1.0.0 | active | — | — | — |
-| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — |
-| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — |
-| `sync-skills.sh` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — |
-| `sync-skills.ps1` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — |
-| `publish-to-template.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `publish-to-template.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `list-template-versions.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `list-template-versions.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `qa-gate.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `qa-gate.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
-| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
-| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
-| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — |
-| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — |
+| script | source | version | status | removal-date | security-advisory | drift | pair |
+|--------|--------|---------|--------|--------------|-------------------|-------|------|
+| `audit.sh` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional | audit.ps1 |
+| `audit.ps1` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional | — |
+| `dev-sync.sh` | L0 | 1.3.0 | deprecated | 2026-08-29 | — | — | dev-sync.ps1 |
+| `dev-sync.ps1` | L0 | 1.4.0 | deprecated | 2026-08-29 | — | — | — |
+| `new-project.sh` | L1 | 1.2.0 | active | — | — | — | new-project.ps1 |
+| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — | — |
+| `sync-md.sh` | L0 | 1.1.0 | deprecated | 2026-08-29 | — | intentional | sync-md.ps1 |
+| `sync-md.ps1` | L0 | 1.2.0 | deprecated | 2026-08-29 | — | — | — |
+| `gen-pr-body.sh` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — | gen-pr-body.ps1 |
+| `gen-pr-body.ps1` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — | — |
+| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — | install-bun.ps1 |
+| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — | — | — |
+| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `audit.ts` | L0 | 1.0.0 | active | — | — | intentional — | — |
+| `dev-sync.ts` | L0 | 1.0.0 | active | — | — | intentional — | — |
+| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — — | — |
+| `sync-md.ts` | L0 | 1.0.0 | active | — | — | intentional — | — |
+| `sync-skills.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `publish-to-template.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `sync-skills.sh` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — sync-skills.ps1 | sync-skills.ps1 |
+| `sync-skills.ps1` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — — | — |
+| `publish-to-template.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — publish-to-template.ps1 | publish-to-template.ps1 |
+| `publish-to-template.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — — | — |
+| `list-template-versions.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — list-template-versions.ps1 | list-template-versions.ps1 |
+| `list-template-versions.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — — | — |
+| `qa-gate.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — qa-gate.ps1 | qa-gate.ps1 |
+| `qa-gate.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — — | — |
+| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — — | — |
+| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — | upgrade-project.ps1 |
+| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — | — | — |
 
 ---
 
