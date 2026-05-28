@@ -129,7 +129,8 @@ C:\git\ (workspace root - this repo)
     ├── common/              # Shared scripts, hooks, and skills across all variants
     ├── co-develop/          # ✅ Stable — full software development agent team
     ├── co-design/           # ✅ Stable — UI/UX design workflow
-    └── co-work/             # ✅ Stable — general collaboration workflow
+    ├── co-work/             # ✅ Stable — general collaboration workflow
+    └── co-security/         # 🔶 Beta — Red Team, threat modeling, and patch automation
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -166,6 +167,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-develop**: A 6-phase linear governance pipeline for software development and verification
 - **co-design**: A 5-phase iterative design-native workflow focused on rapid prototyping and continuous user validation
 - **co-work**: A 6-phase asynchronous collaboration workflow focused on parallel drafting and continuous stakeholder review
+- **co-security**: A 6-phase security engagement workflow covering Red Team ops, threat modeling, and Ansible-based patch automation
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -183,6 +185,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-develop` | ✅ Stable | Full software development workflow — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
 | `co-design` | ✅ Stable | UI/UX design workflow — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
 | `co-work` | ✅ Stable | General collaboration workflow — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
+| `co-security` | 🔶 Beta | Security engagement workflow — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 
 ### Selecting a version and variant
 
