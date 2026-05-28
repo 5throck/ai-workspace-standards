@@ -38,8 +38,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | drift |
 |--------|--------|---------|--------|--------------|-------------------|-------|
-| `audit.sh` | L0 | 1.2.0 | active | — | — | intentional |
-| `audit.ps1` | L0 | 1.2.0 | active | — | — | intentional |
+| `audit.sh` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
+| `audit.ps1` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
 | `dev-sync.sh` | L0 | 1.3.0 | active | — | — | — |
 | `dev-sync.ps1` | L0 | 1.4.0 | active | — | — | — |
 | `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
@@ -82,8 +82,6 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `list-template-versions.ps1` | L1 | 1.0.0 | active | — | — | — |
 | `qa-gate.sh` | L1 | 1.0.0 | active | — | — | — |
 | `qa-gate.ps1` | L1 | 1.0.0 | active | — | — | — |
-| `validate-templates.sh` | L1 | 1.0.0 | active | — | — | — |
-| `validate-templates.ps1` | L1 | 1.0.0 | active | — | — | — |
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |

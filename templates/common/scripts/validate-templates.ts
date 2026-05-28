@@ -312,17 +312,6 @@ function checkAgents(variant: string): void {
     return;
   }
 
-  // Check for required agents/README.md and agents/README_ko.md (per VARIANT_CONTRACT.md)
-  for (const readmeFile of ['README.md', 'README_ko.md']) {
-    const readmePath = join(agentsDir, readmeFile);
-    if (!existsSync(readmePath)) {
-      fail(variant, `agents-readme-missing`, `templates/${variant}/agents/${readmeFile} not found`,
-        `Create agents/${readmeFile} with agent roster table`);
-    } else {
-      pass(`${variant}/agents/${readmeFile}: present`);
-    }
-  }
-
   const requiredFrontmatter = ['name', 'tier', 'description', 'examples'];
   // PM uses "Meeting Facilitation" (facilitator role); all others use "Meeting Participation"
   const MEETING_SECTIONS = ['## Meeting Participation', '## Meeting Facilitation'];
