@@ -91,7 +91,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design ( stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
     exit 1
 }
 

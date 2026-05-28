@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work] [--version X.Y.Z]
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security] [--version X.Y.Z]
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -30,7 +30,7 @@ done
 
 # Validate required arguments
 if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work] [--platform claude|antigravity|both] [--version X.Y.Z]"
+  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work|co-security] [--platform claude|antigravity|both] [--version X.Y.Z]"
   exit 1
 fi
 
@@ -47,7 +47,7 @@ fi
 
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ "$VARIANT" = "co-develop" ]; then
-  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work"
+  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security"
   exit 1
 fi
 
@@ -103,7 +103,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)"
   exit 1
 fi
 

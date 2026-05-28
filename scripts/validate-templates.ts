@@ -18,8 +18,15 @@ import { cwd } from 'node:process';
 interface VariantManifest {
   name: string;
   description: string;
-  status: 'stable' | 'planned' | 'deprecated';
+  status: 'stable' | 'planned' | 'deprecated' | 'draft';
   version?: string;
+}
+
+interface VariantContract {
+  version: string;
+  required: string[];
+  optional: string[];
+  context_file_pattern: string;
 }
 
 interface ValidationIssue {
@@ -486,6 +493,47 @@ function checkL0L1ScriptParity() {
   }
 }
 
+// Check 11: Variant Contract compliance
+function checkVariantContract(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
+
+  try {
+    const contractPath = join(TEMPLATES_DIR, 'common', 'variant-contract.json');
+    if (!existsSync(contractPath)) {
+      fail('root', 'variant-contract-missing', 'templates/common/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
+      return;
+    }
+
+    const contractRaw = readFileSync(contractPath, 'utf-8');
+    let contract: VariantContract;
+
+    try {
+      contract = JSON.parse(contractRaw) as VariantContract;
+    } catch (parseError) {
+      fail('root', 'variant-contract-invalid', 'templates/common/variant-contract.json is not valid JSON', 'Fix JSON syntax');
+      return;
+    }
+
+    const variantDir = join(TEMPLATES_DIR, variant);
+    const missingFiles: string[] = [];
+
+    for (const requiredFile of contract.required) {
+      const filePath = join(variantDir, requiredFile);
+      if (!existsSync(filePath)) {
+        missingFiles.push(requiredFile);
+      }
+    }
+
+    if (missingFiles.length > 0) {
+      fail(variant, 'variant-contract', `Variant Contract FAILED — missing ${missingFiles.length} required files:\n     - ${missingFiles.join('\n     - ')}`);
+    } else {
+      pass(`${variant}: Variant Contract satisfied (${contract.required.length}/${contract.required.length} required files present)`);
+    }
+  } catch (error) {
+    fail('root', 'variant-contract-error', `Failed to check Variant Contract: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -504,6 +552,9 @@ function main() {
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {
     if (variantArg !== 'all' && variant !== variantArg) continue;
+
+    // Check Variant Contract for all variants (including draft)
+    checkVariantContract(variant);
 
     if (manifest.status === 'stable') {
       checkAgents(variant);
