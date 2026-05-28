@@ -24,17 +24,26 @@ if [ -n "$MD_STAGED" ]; then
   done <<< "$MD_STAGED"
 fi
 
-# ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries 
+# ── 1-A. Auto-date CHANGELOG.md [Unreleased] entries
 if echo "$STAGED" | grep -q "CHANGELOG.md"; then
   TODAY=$(date +%Y-%m-%d)
-  perl -i -pe '
-    BEGIN { $today = shift; $in_unreleased = 0; }
-    if (/^## \[Unreleased\]/) { $in_unreleased = 1; }
-    elsif (/^## \[/ && !/^## \[Unreleased\]/) { $in_unreleased = 0; }
-    if ($in_unreleased && /^(\s*-\s+)(?!\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: )/) {
-      s/^(\s*-\s+)/$1**[$today]**: /;
-    }
-  ' "$TODAY" CHANGELOG.md
+  python3 -c "
+import sys, re
+today, path = sys.argv[1], sys.argv[2]
+content = open(path, encoding='utf-8').read()
+in_unreleased = False
+lines = content.splitlines(keepends=True)
+result = []
+for line in lines:
+    if re.match(r'^## \[Unreleased\]', line):
+        in_unreleased = True
+    elif re.match(r'^## \[', line) and not re.match(r'^## \[Unreleased\]', line):
+        in_unreleased = False
+    if in_unreleased and re.match(r'^\s*-\s+', line) and not re.search(r'\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: ', line):
+        line = re.sub(r'^(\s*-\s+)', rf'\g<1>**[{today}]**: ', line, count=1)
+    result.append(line)
+open(path, 'w', encoding='utf-8').write(''.join(result))
+" "$TODAY" CHANGELOG.md
   git add CHANGELOG.md
 fi
 
@@ -83,7 +92,7 @@ if [ -n "$DOCS_TO_CHECK" ]; then
   while IFS= read -r file; do
     [ -z "$file" ] && continue
     if [ -f "$file" ]; then
-      if ! perl -CSD -ne 'exit 1 if /\p{Hangul}/' "$file"; then
+      if ! python3 -c "import sys,re; data=open(sys.argv[1],encoding='utf-8').read(); sys.exit(1) if re.search(r'[가-힣ᄀ-ᇿ㄰-㆏]',data) else sys.exit(0)" "$file"; then
         echo -e "\033[31m[FAIL]\033[0m Non-English characters (Korean) detected in $file"
         echo "       CONSTITUTION.md mandates all PR artifacts must be strictly English."
         exit 1

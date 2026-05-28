@@ -153,9 +153,13 @@ rm -rf "$PROJECT_DIR/docs/_examples"
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
 # ── 5. Substitute [Project Name] placeholder in all text files ─────────────────
-# Use perl for cross-platform compatibility (macOS sed -i requires '' suffix)
 while IFS= read -r -d '' file; do
-  perl -pi -e "s/\[Project Name\]/\Q$PROJECT_NAME\E/g" "$file"
+  python3 -c "
+import sys
+path, name = sys.argv[1], sys.argv[2]
+content = open(path, encoding='utf-8').read()
+open(path, 'w', encoding='utf-8').write(content.replace('[Project Name]', name))
+" "$file" "$PROJECT_NAME"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \

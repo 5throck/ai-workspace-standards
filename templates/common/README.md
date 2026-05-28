@@ -1,4 +1,5 @@
 ---
+content_hash: PLACEHOLDER
 sync_version: 1
 ---
 

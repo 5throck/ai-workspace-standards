@@ -372,6 +372,42 @@ function checkSharedFileSync(): void {
   }
 }
 
+// Check 11: README presence in stable variants
+function checkReadmePresence(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: README presence in ${variant} ===`);
+
+  const readmePath = join(TEMPLATES_DIR, variant, 'README.md');
+  const readmeKoPath = join(TEMPLATES_DIR, variant, 'README_ko.md');
+
+  const readmeExists = existsSync(readmePath);
+  const readmeKoExists = existsSync(readmeKoPath);
+
+  if (!readmeExists) {
+    fail(variant, 'readme-presence', `templates/${variant}/README.md is missing`, `Create README.md with a content_hash: frontmatter field`);
+  }
+  if (!readmeKoExists) {
+    fail(variant, 'readme-presence', `templates/${variant}/README_ko.md is missing`, `Create README_ko.md with a translated_from_hash: frontmatter field`);
+  }
+
+  if (readmeExists && readmeKoExists) {
+    pass(`${variant}/README.md and README_ko.md both present`);
+  }
+
+  // Warn if frontmatter hash fields are missing
+  if (readmeExists) {
+    const readmeFields = parseFrontmatter(readFileSync(readmePath, 'utf-8'));
+    if (!('content_hash' in readmeFields)) {
+      warn(variant, 'readme-frontmatter', `templates/${variant}/README.md is missing 'content_hash:' frontmatter field`, `Add 'content_hash: <hash>' to the README.md frontmatter`);
+    }
+  }
+  if (readmeKoExists) {
+    const readmeKoFields = parseFrontmatter(readFileSync(readmeKoPath, 'utf-8'));
+    if (!('translated_from_hash' in readmeKoFields)) {
+      warn(variant, 'readme-frontmatter', `templates/${variant}/README_ko.md is missing 'translated_from_hash:' frontmatter field`, `Add 'translated_from_hash: <hash>' to the README_ko.md frontmatter`);
+    }
+  }
+}
+
 // Check 9: docs/context.md sync and broken paths
 function checkContextSync(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
@@ -475,6 +511,7 @@ function main() {
       checkCommands(variant);
       checkScriptParity(variant);
       checkContextSync(variant);
+      checkReadmePresence(variant);
       variantsChecked++;
     }
   }
