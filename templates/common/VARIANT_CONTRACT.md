@@ -51,6 +51,38 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
 | `.claude/skills/<name>/SKILL.md` | Claude Code only | Skills that use Claude Code-specific tools (Agent tool, TaskCreate, etc.) |
 | `skills/<name>/SKILL.md` | Platform-neutral | Security procedures, domain workflows — accessible from Claude, Gemini, Antigravity |
 
+### Security-Critical Skill Rule
+
+Any skill that acts as an **authorization gate, access control, or security enforcement mechanism** MUST be placed in `skills/` (platform-neutral), NOT in `.claude/skills/` (Claude Code-only).
+
+**Rationale:** Security gates must be enforceable regardless of which AI tool the team uses. A gate that only works in Claude Code can be bypassed by switching to Gemini CLI or Antigravity.
+
+**Criteria for classification as security-critical:**
+- The skill blocks or permits access to offensive/destructive actions
+- The skill validates authorization documents or signed permissions
+- The skill enforces scope boundaries or rules of engagement
+- The skill manages credential hygiene or secret exposure checks
+
+**Frontmatter enforcement:**
+
+Security-critical skills MUST declare `security-gate: true` in their `SKILL.md` frontmatter:
+
+```yaml
+---
+name: verify-authorization
+security-gate: true   # Triggers platform-neutral placement check
+...
+---
+```
+
+**Automated enforcement:** `scripts/validate-templates.ts` checks that any skill with `security-gate: true` in its frontmatter is located in `skills/` and NOT in `.claude/skills/`. A skill in the wrong location will fail validation.
+
+**Current security-critical skills:**
+
+| Skill | Location | Gate Function |
+|-------|----------|---------------|
+| `verify-authorization` | `co-security/skills/` | Blocks Phase 1+ without signed authorization |
+
 ## Status Lifecycle
 
 | Status | Requirements |
