@@ -130,4 +130,52 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 
 ---
 
-*Last Updated: 2026-05-27*
+### 10. Terminology → Canonical Definitions
+
+The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
+
+#### Template Variant
+One of three project archetypes: `co-design`, `co-develop`, `co-work`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+
+#### Platform Profile
+Controls which AI-platform-specific configuration files are included in a project. Three values:
+- `claude` — includes `CLAUDE.md` only; `GEMINI.md` is excluded
+- `antigravity` — includes `GEMINI.md` only; `CLAUDE.md` is excluded
+- `both` — includes both (default for all new projects)
+
+Recorded in `.claude/template-version.txt` as `platform=<value>`.
+
+#### WORKSPACE-MANAGED Marker
+A pair of HTML comment markers used in MERGE-tier files to delimit sections managed by the workspace template system:
+
+```
+<!-- WORKSPACE-MANAGED -->
+... content owned and updated by upgrade-project scripts ...
+<!-- /WORKSPACE-MANAGED -->
+```
+
+Rules:
+- Content between these markers is automatically replaced by `upgrade-project.sh/.ps1` during upgrades.
+- Content outside the markers is user-owned and is never modified by upgrade scripts.
+- `audit.sh` verifies that these markers exist in expected files.
+- Do **not** remove or reorder these markers manually.
+
+#### File Upgrade Tiers (LOCKED / MERGE / PRESERVE)
+
+Used by `upgrade-project.sh/.ps1` to classify every project file during a template upgrade:
+
+| Tier | Behavior | Examples |
+|------|----------|---------|
+| **LOCKED** | Always overwritten; diff shown before overwrite | `.githooks/*`, `.gitattributes`, `.gitleaks.toml` |
+| **MERGE** | Only `WORKSPACE-MANAGED` sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `CONSTITUTION.md`, `.gitignore`, `agents/*.md` |
+| **PRESERVE** | Never touched; listed in upgrade report only | `README.md`, `src/`, `docs/context.md`, project-specific files |
+
+#### Platform Documentation Parity
+The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`validate-templates.sh/.ps1`).
+
+#### Script Parity Annotation
+A comment tag added to both `.sh` and `.ps1` versions of a script to declare that a specific security or behavioral check is implemented in both. Format: `# [parity:<tag>]`. Example: `# [parity:secret-scan]`. The `validate-templates.ts` script checks that tags present in `.sh` exist in the paired `.ps1` and vice versa.
+
+---
+
+*Last Updated: 2026-05-28*
