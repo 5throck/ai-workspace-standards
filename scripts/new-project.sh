@@ -122,6 +122,56 @@ if [ -f "$VARIANT_JSON" ]; then
   fi
 fi
 
+# ── D-05: lifecycle-governance.json variant pre-check ─────────────────────────
+GOVERNANCE_JSON="$WORKSPACE_ROOT/templates/common/lifecycle-governance.json"
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/validate-templates.ts" ] && [ -f "$GOVERNANCE_JSON" ]; then
+  echo ""
+  echo "Running lifecycle governance pre-check for variant '$VARIANT'…"
+
+  # Determine mandatory domains from governance JSON
+  MANDATORY_DOMAINS=$(python3 -c "
+import json, sys
+data = json.load(open(sys.argv[1], encoding='utf-8'))
+policy = data.get('variantValidationPolicy', {})
+print(','.join(policy.get('mandatoryBeforeProjectCreation', ['variant', 'agent', 'skill'])))
+" "$GOVERNANCE_JSON" 2>/dev/null || echo "variant,agent,skill")
+
+  # Run validate-templates for the selected variant in JSON mode
+  VALIDATE_OUTPUT=$(bun "$WORKSPACE_ROOT/scripts/validate-templates.ts" --variant "$VARIANT" --json 2>/dev/null || echo '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}')
+
+  # Check mandatory domain errors
+  GOVERNANCE_ERRORS=$(python3 -c "
+import json, sys
+output, mandatory = sys.argv[1], sys.argv[2].split(',')
+try:
+    data = json.loads(output)
+    errors = data.get('errors', [])
+    mandatory_errors = [e for e in errors if any(d in e.get('check', '') for d in mandatory)]
+    if mandatory_errors:
+        for e in mandatory_errors:
+            print('  ❌ ' + e.get('message', ''))
+        sys.exit(1)
+except Exception as ex:
+    print('  WARN: Could not parse validation output: ' + str(ex))
+    sys.exit(0)
+" "$VALIDATE_OUTPUT" "$MANDATORY_DOMAINS" 2>/dev/null)
+
+  GOVERNANCE_EXIT=$?
+  if [ -n "$GOVERNANCE_ERRORS" ]; then
+    echo "$GOVERNANCE_ERRORS"
+  fi
+
+  if [ "$GOVERNANCE_EXIT" -ne 0 ]; then
+    echo ""
+    echo "❌ Lifecycle governance pre-check FAILED for variant '$VARIANT'."
+    echo "   Fix the issues above before creating a project from this variant."
+    echo "   Run: bun scripts/validate-templates.ts --variant $VARIANT"
+    exit 1
+  else
+    echo "  ✅ Lifecycle governance pre-check passed (mandatory domains: $MANDATORY_DOMAINS)"
+  fi
+fi
+
 echo "🚀 Scaffolding new project: $PROJECT_NAME"
 
 # ── 1. Copy common/ first (shared infrastructure) ────────────────────────────

@@ -116,6 +116,70 @@ if [ ! -d "$COMMON_DIR" ]; then
   exit 1
 fi
 
+# ── C-05: scripts-snapshot.json version comparison ────────────────────────────
+SCRIPTS_SNAPSHOT="$PROJECT_DIR/scripts-snapshot.json"
+SCRIPTS_MD="$WORKSPACE_ROOT/scripts/SCRIPTS.md"
+
+if [ -f "$SCRIPTS_SNAPSHOT" ] && [ -f "$SCRIPTS_MD" ]; then
+  echo ""
+  echo "--- Script version comparison (L2 snapshot vs L1 current) ---"
+
+  python3 - "$SCRIPTS_SNAPSHOT" "$SCRIPTS_MD" <<'PYEOF'
+import sys, json, re
+
+snapshot_path, scripts_md_path = sys.argv[1], sys.argv[2]
+
+try:
+    snapshot = json.load(open(snapshot_path, encoding='utf-8'))
+    l2_scripts = snapshot.get('scripts', {})
+    created = snapshot.get('created', 'unknown')
+    print(f"  Snapshot created: {created}  ({len(l2_scripts)} scripts)")
+except Exception as e:
+    print(f"  WARN: Could not parse scripts-snapshot.json: {e}")
+    sys.exit(0)
+
+content = open(scripts_md_path, encoding='utf-8').read()
+registry_match = re.search(r'## Registry\n.*?\n\|[-| ]+\|\n(.*?)(?=\n##|\Z)', content, re.DOTALL)
+l1_scripts = {}
+if registry_match:
+    for line in registry_match.group(1).strip().split('\n'):
+        parts = [p.strip() for p in line.split('|') if p.strip()]
+        if len(parts) >= 4 and re.match(r'^\d+\.\d+\.\d+$', parts[2]):
+            name = parts[0].strip('`')
+            l1_scripts[name] = {'version': parts[2], 'status': parts[3]}
+
+outdated = []
+deprecated_in_l1 = []
+for name, l2_info in l2_scripts.items():
+    l1_info = l1_scripts.get(name)
+    if not l1_info:
+        continue
+    if l2_info['version'] != l1_info['version']:
+        outdated.append((name, l2_info['version'], l1_info['version']))
+    if l1_info['status'] == 'deprecated':
+        deprecated_in_l1.append((name, l1_info['version']))
+
+if not outdated and not deprecated_in_l1:
+    print("  ✅ All scripts up-to-date with L1 SCRIPTS.md")
+else:
+    if outdated:
+        print(f"  ⚠️  {len(outdated)} script(s) have newer versions available:")
+        for name, old, new in outdated:
+            print(f"     {name:<40} {old} → {new}")
+    if deprecated_in_l1:
+        print(f"  ❌ {len(deprecated_in_l1)} script(s) are deprecated in L1 SCRIPTS.md:")
+        for name, ver in deprecated_in_l1:
+            print(f"     {name:<40} {ver}  (deprecated — remove or replace)")
+    print("")
+    print("  Run: bash scripts/upgrade-project.sh <path> to get updated scripts.")
+PYEOF
+  echo ""
+elif [ -f "$SCRIPTS_SNAPSHOT" ]; then
+  echo ""
+  echo "  INFO: scripts-snapshot.json found but SCRIPTS.md not accessible — skipping version comparison."
+  echo ""
+fi
+
 # --- print header ---
 echo ""
 echo "========================================================"

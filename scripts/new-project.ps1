@@ -110,6 +110,49 @@ if (Test-Path $VariantJson) {
     }
 }
 
+# ── D-05: lifecycle-governance.json variant pre-check ─────────────────────────
+$GovernanceJson = Join-Path $WorkspaceRoot "templates\common\lifecycle-governance.json"
+$ValidateScript = Join-Path $WorkspaceRoot "scripts\validate-templates.ts"
+$bunCmd = Get-Command bun -ErrorAction SilentlyContinue
+if ($bunCmd -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
+    Write-Host ""
+    Write-Host "Running lifecycle governance pre-check for variant '$Variant'…" -ForegroundColor Cyan
+
+    $govData = Get-Content $GovernanceJson -Raw -Encoding UTF8 | ConvertFrom-Json
+    $mandatoryDomains = $govData.variantValidationPolicy.mandatoryBeforeProjectCreation
+    if (-not $mandatoryDomains) { $mandatoryDomains = @('variant', 'agent', 'skill') }
+
+    try {
+        $validateOutput = & bun $ValidateScript --variant $Variant --json 2>$null | Out-String
+        $validateData   = $validateOutput | ConvertFrom-Json -ErrorAction SilentlyContinue
+        $mandatoryErrors = @()
+        if ($validateData -and $validateData.errors) {
+            foreach ($err in $validateData.errors) {
+                foreach ($domain in $mandatoryDomains) {
+                    if ($err.check -match $domain) {
+                        $mandatoryErrors += $err
+                        break
+                    }
+                }
+            }
+        }
+        if ($mandatoryErrors.Count -gt 0) {
+            foreach ($err in $mandatoryErrors) {
+                Write-Host "  ❌ $($err.message)" -ForegroundColor Red
+            }
+            Write-Host ""
+            Write-Host "❌ Lifecycle governance pre-check FAILED for variant '$Variant'." -ForegroundColor Red
+            Write-Host "   Fix the issues above before creating a project from this variant." -ForegroundColor Yellow
+            Write-Host "   Run: bun scripts\validate-templates.ts --variant $Variant" -ForegroundColor Yellow
+            exit 1
+        } else {
+            Write-Host "  ✅ Lifecycle governance pre-check passed (mandatory domains: $($mandatoryDomains -join ', '))" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "  WARN: Governance pre-check could not complete: $_" -ForegroundColor Yellow
+    }
+}
+
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
 # ── 1. Copy common/ first (shared infrastructure) ────────────────────────────

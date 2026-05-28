@@ -11,7 +11,7 @@
  *   bun scripts/validate-templates.ts --json
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 
@@ -720,6 +720,90 @@ function checkSecurityGateSkills(variant: string): void {
   }
 }
 
+// B-07: Sync scan results back to VERSION_REGISTRY.json
+function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
+  const registryPath = join(TEMPLATES_DIR, 'common', 'VERSION_REGISTRY.json');
+  if (!existsSync(registryPath)) return;
+
+  let registry: Record<string, unknown>;
+  try {
+    registry = JSON.parse(readFileSync(registryPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+
+  const variants = (registry.variants ?? {}) as Record<string, Record<string, unknown>>;
+  let changed = false;
+  const today = new Date().toISOString().slice(0, 10);
+
+  for (const [name, manifest] of manifests) {
+    const existing = variants[name] ?? {};
+    const newStatus = manifest.status;
+    const newVersion = manifest.version ?? existing.latest ?? '0.0.0';
+
+    if (existing.status !== newStatus || existing.latest !== newVersion) {
+      variants[name] = {
+        ...existing,
+        latest: newVersion,
+        status: newStatus,
+        released: existing.released ?? today,
+        security_advisories: existing.security_advisories ?? [],
+        migration_guides: existing.migration_guides ?? [],
+      };
+      changed = true;
+      if (!JSON_MODE) pass(`VERSION_REGISTRY.json: ${name} synced (status=${newStatus}, version=${newVersion})`);
+    }
+  }
+
+  if (changed) {
+    registry.variants = variants;
+    registry.last_updated = today;
+    writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+    if (!JSON_MODE) pass(`VERSION_REGISTRY.json updated (last_updated=${today})`);
+  } else {
+    if (!JSON_MODE) pass('VERSION_REGISTRY.json already up-to-date');
+  }
+}
+
+// B-08: Check for deprecated agents/skills in variant and warn about version bump
+function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest): void {
+  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
+
+  let deprecatedAgents = 0;
+  let deprecatedSkills = 0;
+
+  if (existsSync(agentsDir)) {
+    for (const file of readdirSync(agentsDir).filter(f => f.endsWith('.md') && !f.startsWith('README'))) {
+      const content = readFileSync(join(agentsDir, file), 'utf-8');
+      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
+      if (statusLine && statusLine.includes('deprecated')) deprecatedAgents++;
+    }
+  }
+
+  if (existsSync(skillsDir)) {
+    for (const d of readdirSync(skillsDir).filter(d => d !== '_archive' && statSync(join(skillsDir, d)).isDirectory())) {
+      const skillMd = join(skillsDir, d, 'SKILL.md');
+      if (!existsSync(skillMd)) continue;
+      const content = readFileSync(skillMd, 'utf-8');
+      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
+      if (statusLine && statusLine.includes('deprecated')) deprecatedSkills++;
+    }
+  }
+
+  if (deprecatedAgents > 0 || deprecatedSkills > 0) {
+    const currentVersion = manifest.version ?? '0.0.0';
+    const parts = currentVersion.split('.').map(Number);
+    const bumpedVersion = `${parts[0]}.${parts[1]}.${(parts[2] ?? 0) + 1}`;
+    warn(
+      variant,
+      'deprecated-version-bump',
+      `${variant} has ${deprecatedAgents} deprecated agent(s) and ${deprecatedSkills} deprecated skill(s) — consider bumping patch version ${currentVersion} → ${bumpedVersion}`,
+      `Update version in templates/${variant}/variant.json and VERSION_REGISTRY.json to ${bumpedVersion}`
+    );
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -743,8 +827,9 @@ function main() {
 
     // Check Variant Contract for all variants (including draft)
     checkVariantContract(variant);
-    checkSecurityGateSkills(variant);  // B-03
-    checkVariantSkills(variant);       // B-05: presence-driven skill lifecycle
+    checkSecurityGateSkills(variant);          // B-03
+    checkVariantSkills(variant);               // B-05: presence-driven skill lifecycle
+    checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
 
     if (manifest.status === 'stable') {
       checkAgents(variant);
@@ -759,6 +844,10 @@ function main() {
 
   checkSharedFileSync();
   checkL0L1ScriptParity();
+
+  // B-07: Sync validated variant info back to VERSION_REGISTRY.json
+  if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');
+  updateVersionRegistry(manifests);
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');
