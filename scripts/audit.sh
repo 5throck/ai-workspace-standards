@@ -256,6 +256,29 @@ if [ -f "AGENTS.md" ] && [ -d "agents" ]; then
   fi
 fi
 
+# --- Cross-Platform Command Parity Check ---
+# Ensures every .claude/commands/ file has a matching .gemini/commands/ file.
+# Files with 'gemini-parity: skip' in their frontmatter are intentional exceptions.
+if [ -d ".claude/commands" ]; then
+  parity_warnings=0
+  for claude_cmd in .claude/commands/*.md; do
+    [ -f "$claude_cmd" ] || continue
+    cmd_name=$(basename "$claude_cmd")
+    # Check for explicit opt-out
+    if grep -q "^gemini-parity: skip" "$claude_cmd" 2>/dev/null; then
+      continue
+    fi
+    gemini_cmd=".gemini/commands/$cmd_name"
+    if [ ! -f "$gemini_cmd" ]; then
+      warn "Command parity gap: .claude/commands/$cmd_name has no matching .gemini/commands/$cmd_name (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)"
+      ((parity_warnings++)) || true
+    fi
+  done
+  if [ "$parity_warnings" -eq 0 ]; then
+    green "Command parity: all .claude/commands/ files have matching .gemini/commands/ files"
+  fi
+fi
+
 echo ""
 if [ "$errors" -eq 0 ]; then
   echo -e "\033[32m✅ All checks passed.\033[0m"

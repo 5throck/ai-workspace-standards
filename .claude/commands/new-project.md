@@ -1,3 +1,8 @@
+---
+gemini-parity: skip
+description: Scaffold a new project under the workspace root (Claude Code only — uses native Agent tool dispatch)
+---
+
 Scaffold a new project under the workspace root.
 
 Arguments: $ARGUMENTS
