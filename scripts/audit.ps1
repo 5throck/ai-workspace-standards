@@ -220,6 +220,23 @@ if ((Test-Path "AGENTS.md") -and (Test-Path "agents")) {
     }
 }
 
+# --- Cross-Platform Command Parity Check ---
+$claudeCommandsDir = ".claude\commands"
+if (Test-Path $claudeCommandsDir) {
+    $parityWarnings = 0
+    Get-ChildItem "$claudeCommandsDir\*.md" | ForEach-Object {
+        $cmdName = $_.Name
+        $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+        if ($content -match '(?m)^gemini-parity:\s*skip') { return }
+        $geminiCmd = ".gemini\commands\$cmdName"
+        if (-not (Test-Path $geminiCmd)) {
+            Warn "Command parity gap: .claude/commands/$cmdName has no matching .gemini/commands/$cmdName (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)"
+            $parityWarnings++
+        }
+    }
+    if ($parityWarnings -eq 0) { Pass "Command parity: all .claude/commands/ files have matching .gemini/commands/ files" }
+}
+
 Write-Host ""
 if ($errors -eq 0) { Write-Host "✅ All checks passed." -ForegroundColor Green; exit 0 }
 else               { Write-Host "❌ $errors check(s) failed. Fix before committing." -ForegroundColor Red; exit 1 }
