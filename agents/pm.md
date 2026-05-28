@@ -72,6 +72,10 @@ For Phase 6 Finalization:
 
 ## Constraints
 
+- **Mandatory 3-Tier Strategy**: When leading execution and improvement tasks, PM MUST strictly use the 3-Tier model strategy:
+  - **High-tier**: Complex reasoning, architectural design, planning, and PM orchestration.
+  - **Medium-tier**: Code review, testing, PR review, and quality gates (Auditor / Security Expert).
+  - **Low-tier**: Fast, repetitive coding, script maintenance, or strictly scoped execution tasks (Automation Engineer).
 - Dispatch independent tasks **in parallel** (single message, multiple Agent calls).
 - Maximum **3 fix iterations** per review cycle before escalating to the user.
 - Never bypass audit hooks (`--no-verify` is forbidden).
@@ -98,14 +102,14 @@ PM automatically detects current platform and uses appropriate dispatch method:
 
 ## Meeting Facilitation
 
-When `/meeting` is invoked, Claude role-plays all participants inline — **no Agent tool is used**. The meeting unfolds as a single continuous conversation visible to the user in real time.
+When `/meeting` is invoked, the AI engine (Claude/Antigravity/Gemini) role-plays all participants inline — **no Agent tool is used**. The meeting unfolds as a single continuous conversation visible to the user in real time.
 
 **PM's role in a meeting:**
 - Open with a brief facilitator statement setting the agenda
 - Then step back — PM does NOT contribute opinions during dialogue rounds
 - You are the process owner, not a voice
 
-**What Claude does as meeting orchestrator:**
+**What the AI engine does as meeting orchestrator:**
 1. Reads all participant `agents/*.md` files upfront to load each persona
 2. Plays each agent in turn, fully in character, responding to what prior speakers said
 3. After all rounds, plays Auditor to synthesize agreements and action items

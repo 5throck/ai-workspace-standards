@@ -63,3 +63,4 @@ __pycache__/
 
 # --- CodeGraph Index ---
 .codegraph/
+NUL

@@ -66,7 +66,7 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ### 1. Standard Folder Structure → [Full details](docs/constitution/01-folder-structure.md)
 
-Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memory/`, `agents/`, `skills/`, `.github/`, `.claude/`, and `.gemini/` directories. Key rules: `docs/context.md` is mandatory for all projects, `scripts/` must provide cross-platform `.sh` + `.ps1` pairs, and ADRs use sequential 4-digit prefix naming (`0001-slug.md`) with mandatory Context/Decision/Consequences sections.
+Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memory/`, `agents/`, `skills/`, `.github/`, `.claude/`, and `.gemini/` directories. Key rules: `docs/context.md` is mandatory for all projects, `scripts/` must be divided into Tier 1 (Shell) and Tier 2 (Bun/TS) according to their purpose, and ADRs use sequential 4-digit prefix naming (`0001-slug.md`) with mandatory Context/Decision/Consequences sections.
 
 ---
 
@@ -120,7 +120,7 @@ Every new project starts with `/new-project` (Claude Code), `bash scripts/new-pr
 
 ### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
 
-Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: complex orchestration in Bun (.ts), utilities in cross-platform .sh/.ps1 pairs. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
+Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
 
 ---
 

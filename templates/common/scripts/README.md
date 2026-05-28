@@ -7,6 +7,24 @@
 
 ---
 
+## Architecture: Tier 1 vs Tier 2 Scripts
+
+All scripts in this workspace follow a Hybrid Scripting Architecture divided into two tiers. When creating a new script, you must determine its tier based on the following criteria:
+
+### Tier 1: Bootstrap & Native Scripts (Native Shell)
+*   **Purpose**: Initial project setup, bootstrapping, or scenarios where no external runtime (like Node.js or Bun) is guaranteed to exist.
+*   **Implementation**: Must be written as pure shell scripts (providing both `.sh` and `.ps1` pairs).
+*   **Execution**: Run directly via native shell (`bash scripts/name.sh` or `.\scripts\name.ps1`).
+*   **Examples**: `new-project.sh/.ps1`, `install-bun.sh/.ps1`, `upgrade-project.sh/.ps1`.
+
+### Tier 2: Ops & Automation Scripts (Bun/TS + package.json)
+*   **Purpose**: Everyday pipeline tasks, code generation, linting, syncing, and lifecycle audits.
+*   **Implementation**: Written in TypeScript (`.ts`) and executed via the Bun runtime. Wrapper shell scripts (`.sh`/`.ps1`) are **deprecated** for Tier 2.
+*   **Execution**: Must be registered in and run via `package.json` scripts (e.g., `bun run audit`, `bun run dev-sync`).
+*   **Examples**: `audit.ts`, `dev-sync.ts`, `gen-pr-body.ts`, `publish-to-template.ts`.
+
+---
+
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->

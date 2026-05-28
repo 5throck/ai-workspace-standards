@@ -1,11 +1,27 @@
-# [Project Name] — co-security Configuration
+# [Project Name] ??co-security Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
-> context.md is IMMUTABLE — all project-specific changes belong here.
+> context.md is IMMUTABLE ??all project-specific changes belong here.
 >
 > Read order for all AI tools:
->   1. docs/context.md              — immutable project identity (architecture, standards)
->   2. docs/co-security.context.md  — THIS FILE — engagement scope, agents, workflow, tool stack
+>   1. docs/context.md              ??immutable project identity (architecture, standards)
+>   2. docs/co-security.context.md  ??THIS FILE ??engagement scope, agents, workflow, tool stack
+
+## Scripts
+
+<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
+<!-- Status: active | deprecated | experimental -->
+
+| Script | Type | Entrypoint | Source Layer | Status |
+|--------|------|------------|-------------|--------|
+| `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
+| `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
+| `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
+
+> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
+
+### Hybrid Scripting
+Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json
 
 ---
 
@@ -31,7 +47,7 @@
 | File / Directory | Purpose |
 |-----------------|---------|
 | `ansible/inventory.yml` | YAML static inventory of authorized target hosts (Linux, macOS, Windows) |
-| `ansible/patch-all.yml` | Master playbook — imports all OS-specific patch playbooks |
+| `ansible/patch-all.yml` | Master playbook ??imports all OS-specific patch playbooks |
 | `ansible/patch-linux.yml` | Linux patching (apt security upgrades + yum security updates) |
 | `ansible/patch-macos.yml` | macOS patching (softwareupdate + homebrew) |
 | `ansible/patch-windows.yml` | Windows patching (PSWindowsUpdate / winget via SSH + PowerShell) |
@@ -45,14 +61,14 @@
 
 ---
 
-## Engagement Workflow (Phases 0–6)
+## Engagement Workflow (Phases 0??)
 
 | Phase | Name | Key Agents | Output |
 |-------|------|-----------|--------|
 | 0 | Scoping | PM | Authorization checklist, scope doc, RoE |
 | 1 | Recon | Red Team Lead, Threat Modeler | Recon findings, initial threat surface |
 | 2 | Threat Modeling | Threat Modeler | STRIDE table, DFD, attack trees, MITRE mapping |
-| 3 | Exploitation | Red Team Lead → Pentester | Finding tickets (`FIND-NNNN.md`) with CVSS scores |
+| 3 | Exploitation | Red Team Lead ??Pentester | Finding tickets (`FIND-NNNN.md`) with CVSS scores |
 | 4 | Remediation | Patch Engineer | Ansible playbooks, PATCH_LOG.md entries |
 | 5 | Reporting | Report Writer | Pentest report, executive summary |
 | 6 | Verification | Pentester (re-test) | Re-test results confirming fix effectiveness |
@@ -73,21 +89,21 @@ Unlike co-develop's single final commit, co-security runs `/sync` at **5 phase b
 4. Phase 4 complete: patches applied
 5. Phase 5 complete: final report ready
 
-Each commit captures the engagement state at that phase. **Phase 3 /sync is mandatory** — without committing findings to git history, the chain of evidence from finding to patch to report is broken.
+Each commit captures the engagement state at that phase. **Phase 3 /sync is mandatory** ??without committing findings to git history, the chain of evidence from finding to patch to report is broken.
 
-Suggested commit message format: `"security: phase3 complete — N findings documented"`
+Suggested commit message format: `"security: phase3 complete ??N findings documented"`
 
 ### Agent Dispatch Order
 
 ```
 Security PM
-  → [Phase 0] Scoping (PM only)
-  → [Phase 1] Recon (Red Team Lead + Threat Modeler, parallel)
-  → [Phase 2] Threat Modeling (Threat Modeler, sequential)
-  → [Phase 3] Exploitation (Red Team Lead → Pentester, sequential)
-  → [Phase 4] Remediation (Patch Engineer)
-  → [Phase 5] Reporting (Report Writer)
-  → [Phase 6] Verification (Pentester, re-test loop)
+  ??[Phase 0] Scoping (PM only)
+  ??[Phase 1] Recon (Red Team Lead + Threat Modeler, parallel)
+  ??[Phase 2] Threat Modeling (Threat Modeler, sequential)
+  ??[Phase 3] Exploitation (Red Team Lead ??Pentester, sequential)
+  ??[Phase 4] Remediation (Patch Engineer)
+  ??[Phase 5] Reporting (Report Writer)
+  ??[Phase 6] Verification (Pentester, re-test loop)
 ```
 
 All specialist agents are dispatched by PM only. Direct invocation is refused.
@@ -98,27 +114,27 @@ All specialist agents are dispatched by PM only. Direct invocation is refused.
 
 These rules are automatically enforced by the PostToolUse hook in `.claude/settings.json` (see CLAUDE.md).
 
-1. **Authorization first** — No offensive work (recon, exploitation, PoC) begins without a signed authorization document.
-2. **Scope compliance** — All agents must refuse work targeting out-of-scope hosts without PM re-authorization.
-3. **Secret hygiene** — Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
-4. **Dry-run mandatory** — All Ansible playbooks must pass `--check` (dry-run) before live apply.
-5. **Engagement log** — All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
+1. **Authorization first** ??No offensive work (recon, exploitation, PoC) begins without a signed authorization document.
+2. **Scope compliance** ??All agents must refuse work targeting out-of-scope hosts without PM re-authorization.
+3. **Secret hygiene** ??Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
+4. **Dry-run mandatory** ??All Ansible playbooks must pass `--check` (dry-run) before live apply.
+5. **Engagement log** ??All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
 
 ### Beta Usage Scope
 
 **Current Status**: co-security is in **beta** status.
 
 **Allowed Activities** (Beta Phase):
-- ✅ Test environment engagements only (sandbox, isolated lab, staging)
-- ✅ Learning and evaluation of co-security template workflow
-- ✅ Practice engagements with synthetic targets
-- ✅ Testing verify-authorization skill and security features
+- ??Test environment engagements only (sandbox, isolated lab, staging)
+- ??Learning and evaluation of co-security template workflow
+- ??Practice engagements with synthetic targets
+- ??Testing verify-authorization skill and security features
 
 **Prohibited Activities** (Beta Phase):
-- ❌ Actual customer environment engagements
-- ❌ Production data access or processing
-- ❌ Real-world credential handling
-- ❌ Live penetration testing on customer infrastructure
+- ??Actual customer environment engagements
+- ??Production data access or processing
+- ??Real-world credential handling
+- ??Live penetration testing on customer infrastructure
 
 **Beta Exit Criteria**:
 co-security will be promoted to **stable** status when:
@@ -137,9 +153,9 @@ Until stable status is achieved, co-security should only be used for learning an
 
 | Skill | File | Trigger condition | Status |
 |-------|------|-------------------|--------|
-| Verify Authorization | `skills/verify-authorization/SKILL.md` | Before any offensive activity — hard-blocks Phase 1+ | active |
+| Verify Authorization | `skills/verify-authorization/SKILL.md` | Before any offensive activity ??hard-blocks Phase 1+ | active |
 | Engagement Scoping | `skills/engagement-scoping/SKILL.md` | Defining scope, RoE, authorization at Phase 0 | active |
-| Threat Modeling | `skills/threat-modeling/SKILL.md` | STRIDE analysis and ATT&CK mapping at Phases 1–2 | active |
+| Threat Modeling | `skills/threat-modeling/SKILL.md` | STRIDE analysis and ATT&CK mapping at Phases 1?? | active |
 | Recon Surface | `skills/recon-surface/SKILL.md` | Passive and active reconnaissance at Phase 1 | active |
 | Finding Tracker | `skills/finding-tracker/SKILL.md` | Logging and classifying vulnerabilities at Phase 3 | active |
 | Pentest Report | `skills/pentest-report/SKILL.md` | Generating structured pentest reports at Phase 5 | active |
@@ -163,8 +179,8 @@ For managing agents, see `skills/agent-lifecycle-manager/SKILL.md`.
 
 ## Tool Stack
 
-> **Purple Team model**: Red Team (offense — pentest, threat modeling, PoC) +
-> Blue Team (defense — cross-platform patch automation via Ansible + SSH).
+> **Purple Team model**: Red Team (offense ??pentest, threat modeling, PoC) +
+> Blue Team (defense ??cross-platform patch automation via Ansible + SSH).
 > All offensive activity requires signed authorization before Phase 1.
 
 | Category | Tool / Standard |
@@ -185,13 +201,13 @@ For managing agents, see `skills/agent-lifecycle-manager/SKILL.md`.
 
 Run this checklist at the start of every session:
 
-- [ ] **Git hooks installed**: Run `git config core.hooksPath .githooks` once per clone to enable pre-commit secret scanning. If this returns no output, hooks are not active — security engagements require active `.gitleaks` scanning.
+- [ ] **Git hooks installed**: Run `git config core.hooksPath .githooks` once per clone to enable pre-commit secret scanning. If this returns no output, hooks are not active ??security engagements require active `.gitleaks` scanning.
 - [ ] **Scope doc exists**: Confirm `docs/findings/scope-*.md` or `docs/scope.md` is present and signed.
 - [ ] **Authorization confirmed**: Written authorization document is on file and covers all hosts in `ansible/inventory.yml`.
 - [ ] **Inventory reachability**: Run `bash scripts/inventory-check.sh` to confirm SSH connectivity to all target hosts.
 - [ ] **Open findings review**: Check `docs/findings/` for any `FIND-NNNN.md` files with status `Open` or `In-Progress`.
 - [ ] **PATCH_LOG status**: Review `PATCH_LOG.md` for any entries with `Partial` or `Failed` outcomes that need follow-up.
-- [ ] **Engagement phase**: Confirm current phase (0–6) with PM before dispatching any specialist agents.
+- [ ] **Engagement phase**: Confirm current phase (0??) with PM before dispatching any specialist agents.
 
 ---
 
@@ -220,13 +236,13 @@ bash scripts/patch-apply.sh   # all groups
 
 ```
 /sync "security: description"
-  →  1. memory log (memlog)
-  →  2. MEMORY.md index update (sync-md)
-  →  3. CHANGELOG.md [Unreleased] auto-add
-  →  4. audit.sh  (must exit 0)
-  →  5. git checkout -b pr/<date>-<slug>
-  →  6. git commit + push
-  →  7. gh pr create
+  ?? 1. memory log (memlog)
+  ?? 2. MEMORY.md index update (sync-md)
+  ?? 3. CHANGELOG.md [Unreleased] auto-add
+  ?? 4. audit.sh  (must exit 0)
+  ?? 5. git checkout -b pr/<date>-<slug>
+  ?? 6. git commit + push
+  ?? 7. gh pr create
 ```
 
 > All PR titles, bodies, and review comments must be in **English**.
@@ -243,4 +259,4 @@ bash scripts/patch-apply.sh   # all groups
 
 ---
 
-*co-security.context.md version: 0.1.0 — created by /new-project*
+*co-security.context.md version: 0.1.0 ??created by /new-project*

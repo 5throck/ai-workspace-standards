@@ -259,6 +259,29 @@ open(snapshot_path, 'a', encoding='utf-8').write('\n')
   echo "  ✅ scripts-snapshot.json written ($(python3 -c "import json; d=json.load(open('$SNAPSHOT_FILE')); print(len(d['scripts']))" 2>/dev/null || echo '?') scripts)"
 fi
 
+# ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ────────
+PKG_JSON="$PROJECT_DIR/package.json"
+if [ -f "$PKG_JSON" ]; then
+  python3 -c "
+import sys, json
+path = sys.argv[1]
+data = json.load(open(path, encoding='utf-8'))
+scripts = data.get('scripts', {})
+workspace_scripts = {
+    'audit': 'bun scripts/audit.ts',
+    'dev-sync': 'bun scripts/dev-sync.ts',
+    'sync-md': 'bun scripts/sync-md.ts'
+}
+for k, v in workspace_scripts.items():
+    if k not in scripts:
+        scripts[k] = v
+data['scripts'] = scripts
+json.dump(data, open(path, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)
+open(path, 'a', encoding='utf-8').write('\n')
+" "$PKG_JSON"
+  echo "  ✅ Tier 2 scripts merged into package.json"
+fi
+
 # ── 5.5. Record template provenance in variant context file ───────────────────
 TEMPLATE_VERSION="${TEMPLATE_VER:-$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]' || echo 'unknown')}"
 VARIANT_CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"

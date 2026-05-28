@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-05-29](2026-05-29.md) | fix: UTF-8 BOM for ps1 emoji scripts, validate-templates workspace guard, register new ts scripts in SCRIPTS.md |
 | [2026-05-28](2026-05-28.md) | PM-led 3-tier parallel agent execution: platform parity, upgrade-project, docs-writer promotion, Security Bootstrap, CONSTITUTION §10 Terminology |
 | [2026-05-23](2026-05-23.md) | feat: align markdown files with CONSTITUTION.md standards |
 | [2026-05-24](2026-05-24.md) | feat: Refactor PM to 3-tier agent strategy and repair Windows terminal CP949 encoding corruptions |
