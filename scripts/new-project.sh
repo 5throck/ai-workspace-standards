@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work] [--version X.Y.Z]
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security] [--version X.Y.Z]
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -11,6 +11,7 @@ set -euo pipefail
 VARIANT="co-develop"
 TEMPLATE_VER=""
 PROJECT_NAME=""
+PLATFORM="both"
 
 # Parse optional arguments
 prev_arg=""
@@ -19,7 +20,9 @@ for arg in "$@"; do
     VARIANT="$arg"
   elif [ "$prev_arg" = "--version" ]; then
     TEMPLATE_VER="$arg"
-  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ "$prev_arg" != "--version" ] && [ -z "$PROJECT_NAME" ]; then
+  elif [ "$prev_arg" = "--platform" ]; then
+    PLATFORM="$arg"
+  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ "$prev_arg" != "--version" ] && [ "$prev_arg" != "--platform" ] && [ -z "$PROJECT_NAME" ]; then
     PROJECT_NAME="$arg"
   fi
   prev_arg="$arg"
@@ -27,7 +30,7 @@ done
 
 # Validate required arguments
 if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work]"
+  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work|co-security] [--platform claude|antigravity|both] [--version X.Y.Z]"
   exit 1
 fi
 
@@ -44,7 +47,13 @@ fi
 
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ "$VARIANT" = "co-develop" ]; then
-  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work"
+  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security"
+  exit 1
+fi
+
+# Validate --platform flag
+if [[ "$PLATFORM" != "claude" && "$PLATFORM" != "antigravity" && "$PLATFORM" != "both" ]]; then
+  echo "❌ --platform must be: claude, antigravity, or both (default: both)"
   exit 1
 fi
 
@@ -94,7 +103,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)"
   exit 1
 fi
 
@@ -130,22 +139,33 @@ if [ ! -d "$TEMPLATES_DIR" ]; then
 fi
 cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
-# ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
+# ── 2.5. Apply platform profile ────────────────────────────────────────────────
+if [ "$PLATFORM" = "claude" ]; then
+  rm -f "$PROJECT_DIR/GEMINI.md"
+elif [ "$PLATFORM" = "antigravity" ]; then
+  rm -f "$PROJECT_DIR/CLAUDE.md"
+fi
+
+# ── 3. Remove docs/_examples (reference-only - not part of a real project) ───
 rm -rf "$PROJECT_DIR/docs/_examples"
 
-# ── 3. Remove .gitkeep placeholders ────────────────────────────────────────────
+# ── 4. Remove .gitkeep placeholders ────────────────────────────────────────────
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
-# ── 4. Substitute [Project Name] placeholder in all text files ─────────────────
-# Use perl for cross-platform compatibility (macOS sed -i requires '' suffix)
+# ── 5. Substitute [Project Name] placeholder in all text files ─────────────────
 while IFS= read -r -d '' file; do
-  perl -pi -e "s/\[Project Name\]/\Q$PROJECT_NAME\E/g" "$file"
+  python3 -c "
+import sys
+path, name = sys.argv[1], sys.argv[2]
+content = open(path, encoding='utf-8').read()
+open(path, 'w', encoding='utf-8').write(content.replace('[Project Name]', name))
+" "$file" "$PROJECT_NAME"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
   -print0)
 
-# ── 4.5. Record template provenance in variant context file ───────────────────
+# ── 5.5. Record template provenance in variant context file ───────────────────
 TEMPLATE_VERSION="${TEMPLATE_VER:-$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]' || echo 'unknown')}"
 VARIANT_CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
 if [ -f "$VARIANT_CONTEXT_MD" ]; then
@@ -156,7 +176,14 @@ if [ -f "$VARIANT_CONTEXT_MD" ]; then
   fi
 fi
 
-# ── 4.6. Protect context.md from accidental overwrites (merge=ours) ───────────
+# ── 5.6. Write template-version.txt for upgrade tracking ──────────────────────
+CLAUDE_DIR="$PROJECT_DIR/.claude"
+mkdir -p "$CLAUDE_DIR"
+printf 'variant=%s\nversion=%s\nplatform=%s\ncreated=%s\n' \
+  "$VARIANT" "$TEMPLATE_VERSION" "$PLATFORM" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  > "$CLAUDE_DIR/template-version.txt"
+
+# ── 5.7. Protect context.md from accidental overwrites (merge=ours) ───────────
 GITATTRIBUTES="$PROJECT_DIR/.gitattributes"
 if [ -f "$GITATTRIBUTES" ]; then
   if ! grep -q "docs/context.md" "$GITATTRIBUTES"; then
@@ -166,11 +193,11 @@ else
   echo "docs/context.md merge=ours" > "$GITATTRIBUTES"
 fi
 
-# ── 5. Make scripts and hooks executable ───────────────────────────────────────
+# ── 6. Make scripts and hooks executable ───────────────────────────────────────
 find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;
 find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 
-# ── 6. Initialize git ──────────────────────────────────────────────────────────
+# ── 7. Initialize git ──────────────────────────────────────────────────────────
 cd "$PROJECT_DIR"
 git init
 git config core.hooksPath .githooks
@@ -180,7 +207,60 @@ for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1 scripts/se
   [ -f "$rel" ] && git update-index --chmod=+x "$rel" 2>/dev/null || true
 done
 
-# ── 7. Post-scaffold audit ─────────────────────────────────────────────────────
+# ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
+echo ""
+echo "Running security bootstrap verification…"
+SECURITY_OK=true
+
+# Check 1: .gitleaks.toml
+if [ ! -f "$PROJECT_DIR/.gitleaks.toml" ]; then
+  echo "  ❌ .gitleaks.toml not found"
+  SECURITY_OK=false
+else
+  echo "  ✅ .gitleaks.toml present"
+fi
+
+# Check 2: pre-commit hook exists
+if [ ! -f "$PROJECT_DIR/.githooks/pre-commit" ]; then
+  echo "  ❌ .githooks/pre-commit not found"
+  SECURITY_OK=false
+else
+  echo "  ✅ .githooks/pre-commit present"
+fi
+
+# Check 3: .gitattributes has eol=lf
+if [ -f "$PROJECT_DIR/.gitattributes" ] && grep -q "eol=lf" "$PROJECT_DIR/.gitattributes"; then
+  echo "  ✅ .gitattributes has eol=lf"
+else
+  echo "  ❌ .gitattributes missing eol=lf"
+  SECURITY_OK=false
+fi
+
+# Check 4: .gitignore has .env pattern
+if [ -f "$PROJECT_DIR/.gitignore" ] && grep -q "\.env" "$PROJECT_DIR/.gitignore"; then
+  echo "  ✅ .gitignore excludes .env"
+else
+  echo "  ❌ .gitignore missing .env exclusion"
+  SECURITY_OK=false
+fi
+
+# Check 5: git config core.hooksPath set
+if git -C "$PROJECT_DIR" config core.hooksPath | grep -q "\.githooks"; then
+  echo "  ✅ git core.hooksPath configured"
+else
+  echo "  ❌ git core.hooksPath not set to .githooks"
+  SECURITY_OK=false
+fi
+
+if [ "$SECURITY_OK" = false ]; then
+  echo ""
+  echo "❌ Security bootstrap check FAILED. Fix the issues above before using this project."
+  echo "   Run 'bash scripts/audit.sh' after fixing to verify."
+  exit 1
+fi
+echo "  ✅ All security bootstrap checks passed"
+
+# ── 8. Post-scaffold audit ─────────────────────────────────────────────────────
 echo ""
 echo "Running post-scaffold audit…"
 if bash scripts/audit.sh; then
@@ -191,7 +271,7 @@ else
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
 
-# ── 8. Environment setup (env file, deps, initial commit) ─────────────────────
+# ── 9. Environment setup (env file, deps, initial commit) ─────────────────────
 echo ""
 echo "Running environment setup…"
 bash "$PROJECT_DIR/scripts/setup.sh" || {
@@ -199,7 +279,7 @@ bash "$PROJECT_DIR/scripts/setup.sh" || {
   echo "⚠️  Setup encountered an error - run 'bash scripts/setup.sh' manually to retry."
 }
 
-# ── 9. Move into project directory ────────────────────────────────────────────
+# ── 10. Move into project directory ────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "\033[36m📂 PROJECT DIRECTORY:\033[0m $PROJECT_DIR"

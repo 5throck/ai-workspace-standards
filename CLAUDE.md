@@ -65,6 +65,7 @@ Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. 
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
+> **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
 
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
@@ -124,4 +125,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-27*
+*Last Updated: 2026-05-28*

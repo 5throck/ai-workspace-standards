@@ -49,36 +49,17 @@ if (Test-Path "scripts\generate-scripts-readme.ts") {
     bun scripts\generate-scripts-readme.ts
 }
 
-# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the entry is missing ────
-if (Test-Path "CHANGELOG.md") {
-    $cl = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
-    if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
-        $section = $Matches[1]
-        $EscapedMsg = [regex]::Escape($Msg)
-        if ($section -notmatch $EscapedMsg) {
-            $Category = "### Changed"
-            if ($Msg -match "^feat") { $Category = "### Added" }
-            elseif ($Msg -match "^fix") { $Category = "### Fixed" }
-            elseif ($Msg -match "^revert") { $Category = "### Removed" }
-            
-            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n$Category`n- **[$Date]**: $Msg"
-            Set-Content "CHANGELOG.md" $cl -Encoding UTF8
-            Write-Host "📝 Auto-added changelog entry: $Msg" -ForegroundColor Cyan
-        }
-    }
-}
-
-# ── 3.5. Warn if [Unreleased] section has no bullet items ────────────────────
+# ── 3. Block if [Unreleased] section has no bullet items ─────────────────────
 if (Test-Path "CHANGELOG.md") {
     $clCheck = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
     if ($clCheck -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
         $unreleasedSection = $Matches[1]
         if ($unreleasedSection -notmatch '(?m)^\s*-\s+') {
             Write-Host ""
-            Write-Host "⚠️  CHANGELOG.md [Unreleased] section has no entries." -ForegroundColor Yellow
-            Write-Host "   Consider running: /changelog 'type: description' before syncing." -ForegroundColor Yellow
-            Write-Host "   (continuing anyway - use this warning to keep your changelog current)" -ForegroundColor DarkGray
+            Write-Host "❌ CHANGELOG.md [Unreleased] section has no entries." -ForegroundColor Red
+            Write-Host "   Run: /changelog 'type: description' to add an entry before syncing." -ForegroundColor Yellow
             Write-Host ""
+            exit 1
         }
     }
 }

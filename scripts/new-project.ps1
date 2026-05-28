@@ -5,7 +5,8 @@ param(
     [string]$Description = "A new project",
     [string]$TechStack = "Node.js / Python / etc",
     [string]$Variant = "co-develop",
-    [string]$Version = ""
+    [string]$Version = "",
+    [string]$Platform = "both"
 )
 
 # UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
@@ -21,6 +22,12 @@ if ($ProjectName -notmatch '^[a-zA-Z0-9_-]+$') {
 }
 if ($ProjectName.Length -gt 64) {
     Write-Host "❌ Project name too long ($($ProjectName.Length) chars). Maximum is 64 characters." -ForegroundColor Red
+    exit 1
+}
+
+# Validate Platform flag
+if ($Platform -notin @("claude", "antigravity", "both")) {
+    Write-Host "❌ --platform must be: claude, antigravity, or both (default: both)" -ForegroundColor Red
     exit 1
 }
 
@@ -84,7 +91,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design ( stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
     exit 1
 }
 
@@ -119,6 +126,15 @@ if (-not (Test-Path $TemplatesDir)) {
     exit 1
 }
 robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS /IS | Out-Null
+
+# ── 2.5. Apply platform profile ────────────────────────────────────────────────
+if ($Platform -eq "claude") {
+    $geminiFile = Join-Path $ProjectDir "GEMINI.md"
+    if (Test-Path $geminiFile) { Remove-Item $geminiFile -Force }
+} elseif ($Platform -eq "antigravity") {
+    $claudeFile = Join-Path $ProjectDir "CLAUDE.md"
+    if (Test-Path $claudeFile) { Remove-Item $claudeFile -Force }
+}
 
 # ── 2. Remove docs/_examples (reference-only - not part of a real project) ───
 $examplesDir = Join-Path $ProjectDir "docs\_examples"
@@ -182,7 +198,18 @@ if (Test-Path $VariantContextMd) {
     }
 }
 
-# ── 4.6. Protect context.md from accidental overwrites (merge=ours) ───────────
+# ── 4.6. Write template-version.txt for upgrade tracking ──────────────────────
+$ClaudeDir = Join-Path $ProjectDir ".claude"
+if (-not (Test-Path $ClaudeDir)) { New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null }
+$CreatedAt = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+@"
+variant=$Variant
+version=$TemplateVersion
+platform=$Platform
+created=$CreatedAt
+"@ | Set-Content (Join-Path $ClaudeDir "template-version.txt") -Encoding UTF8
+
+# ── 4.7. Protect context.md from accidental overwrites (merge=ours) ───────────
 $GitAttributesPath = Join-Path $ProjectDir ".gitattributes"
 $mergeOursLine = "docs/context.md merge=ours"
 if (Test-Path $GitAttributesPath) {
@@ -194,7 +221,7 @@ if (Test-Path $GitAttributesPath) {
     Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
-# ── 4.6. Inject AGENTS.md Skills into docs/context.md ────────────────────────
+# ── 4.8. Inject AGENTS.md Skills into docs/context.md ────────────────────────
 $AgentsMdPath = Join-Path $ProjectDir "AGENTS.md"
 $ContextMdPath = Join-Path $ProjectDir "docs\context.md"
 
@@ -207,7 +234,7 @@ if ((Test-Path $AgentsMdPath) -and (Test-Path $ContextMdPath)) {
             $skillsTable = $Matches['tableData'].Trim()
             $replacement = "`$1`n" + $skillsTable.Replace('$', '$$') + "`n`$2"
             $newContextContent = $contextContent -replace '(?s)(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)', $replacement
-            
+
             if ($newContextContent -ne $contextContent) {
                 Set-Content $ContextMdPath $newContextContent -Encoding UTF8 -NoNewline
                 Write-Host "🔄 Injected dynamic skills from AGENTS.md into docs/context.md" -ForegroundColor Cyan
@@ -235,6 +262,58 @@ Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.p
         Write-Warning "chmod +x failed for: $rel"
     }
 }
+
+# ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
+Write-Host ""
+Write-Host "Running security bootstrap verification…" -ForegroundColor Cyan
+$SecurityOk = $true
+
+# Check 1: .gitleaks.toml
+if (-not (Test-Path (Join-Path $ProjectDir ".gitleaks.toml"))) {
+    Write-Host "  ❌ .gitleaks.toml not found" -ForegroundColor Red
+    $SecurityOk = $false
+} else { Write-Host "  ✅ .gitleaks.toml present" -ForegroundColor Green }
+
+# Check 2: pre-commit hook
+if (-not (Test-Path (Join-Path $ProjectDir ".githooks\pre-commit"))) {
+    Write-Host "  ❌ .githooks/pre-commit not found" -ForegroundColor Red
+    $SecurityOk = $false
+} else { Write-Host "  ✅ .githooks/pre-commit present" -ForegroundColor Green }
+
+# Check 3: .gitattributes eol=lf
+$gitattribPath = Join-Path $ProjectDir ".gitattributes"
+if ((Test-Path $gitattribPath) -and ((Get-Content $gitattribPath -Raw) -match "eol=lf")) {
+    Write-Host "  ✅ .gitattributes has eol=lf" -ForegroundColor Green
+} else {
+    Write-Host "  ❌ .gitattributes missing eol=lf" -ForegroundColor Red
+    $SecurityOk = $false
+}
+
+# Check 4: .gitignore has .env
+$gitignorePath = Join-Path $ProjectDir ".gitignore"
+if ((Test-Path $gitignorePath) -and ((Get-Content $gitignorePath -Raw) -match '\.env')) {
+    Write-Host "  ✅ .gitignore excludes .env" -ForegroundColor Green
+} else {
+    Write-Host "  ❌ .gitignore missing .env exclusion" -ForegroundColor Red
+    $SecurityOk = $false
+}
+
+# Check 5: core.hooksPath
+$hooksPath = git -C $ProjectDir config core.hooksPath 2>$null
+if ($LASTEXITCODE -eq 0 -and $hooksPath -match '\.githooks') {
+    Write-Host "  ✅ git core.hooksPath configured" -ForegroundColor Green
+} else {
+    Write-Host "  ❌ git core.hooksPath not set to .githooks" -ForegroundColor Red
+    $SecurityOk = $false
+}
+
+if (-not $SecurityOk) {
+    Write-Host ""
+    Write-Host "❌ Security bootstrap check FAILED. Fix the issues above before using this project." -ForegroundColor Red
+    Write-Host "   Run '.\scripts\audit.ps1' after fixing to verify." -ForegroundColor Yellow
+    exit 1
+}
+Write-Host "  ✅ All security bootstrap checks passed" -ForegroundColor Green
 
 # ── 7. Post-scaffold audit ─────────────────────────────────────────────────────
 Write-Host ""

@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "required": [
+    "variant.json",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "AGENTS.md",
+    "agents/pm.md",
+    "agents/README.md",
+    "agents/README_ko.md",
+    ".claude/settings.json",
+    ".claude/commands/changelog.md",
+    ".claude/commands/memlog.md",
+    ".claude/commands/new-task.md",
+    ".claude/commands/sync.md",
+    ".claude/commands/meeting.md",
+    ".gemini/settings.json",
+    ".gemini/commands/changelog.md",
+    ".gemini/commands/memlog.md",
+    ".gemini/commands/new-task.md",
+    ".gemini/commands/sync.md"
+  ],
+  "optional": [
+    "README.md",
+    "README_ko.md",
+    ".claude/commands/security-check.md",
+    ".gemini/commands/security-check.md"
+  ],
+  "context_file_pattern": "docs/{variant}.context.md"
+}

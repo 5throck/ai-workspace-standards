@@ -9,6 +9,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-28]**: `scripts/upgrade-project.sh` / `.ps1` — new scripts to upgrade existing projects to the latest template version with 3-tier file classification (LOCKED/MERGE/PRESERVE), `--dry-run`, `--platform`, and pre-upgrade git stash snapshot
+- **[2026-05-28]**: `--platform claude|antigravity|both` flag to `scripts/new-project.sh` / `.ps1` — controls which AI platform config files are included (default: `both`)
+- **[2026-05-28]**: Security Bootstrap Check (5-point) to `scripts/new-project.sh` / `.ps1` and `upgrade-project.sh` / `.ps1` — halts on missing `.gitleaks.toml`, `.githooks/pre-commit`, `.gitattributes eol=lf`, `.gitignore .env`, or unset `core.hooksPath`
+- **[2026-05-28]**: `CONSTITUTION.md §10 Terminology` — canonical definitions for Template Variant, Platform Profile, WORKSPACE-MANAGED Marker, LOCKED/MERGE/PRESERVE tiers, Platform Documentation Parity, Script Parity Annotation
+- **[2026-05-28]**: Security & Hook Configuration section with `WORKSPACE-MANAGED` markers to all 3 variant `GEMINI.md` templates (`co-develop`, `co-design`, `co-work`)
+- **[2026-05-28]**: feat: Variant lifecycle management system - 4-stage lifecycle (draft → beta → stable → deprecated) with transition criteria
+- **[2026-05-28]**: feat: Template version tracking system - .template-info.json auto-generation on project creation
+- **[2026-05-28]**: feat: /template-status skill for checking current template version against latest
+- **[2026-05-28]**: feat: Template CHANGELOG.md and migration guide system in templates/common/
+- **[2026-05-28]**: feat: validate-templates.ts lifecycle-based validation (status-aware checks)
+- **[2026-05-28]**: feat: Common security-check.md for all variants (.gemini/commands/)
+- **[2026-05-28]**: docs: Beta usage scope documentation in co-security.context.md
+- **[2026-05-27]**: `scripts/publish-to-template.sh` / `.ps1` — new scripts to sync workspace changes into `templates/common/` (#109)
+- **[2026-05-27]**: `skills/` directory — 9 workspace-root skills with SKILL.md, data files, and Python scripts (`ui-ux-pro-max`, `agent-lifecycle-manager`, `skill-lifecycle-manager`, `script-lifecycle-manager`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `simulate-project-creation`, `validate-docs-links`) (#109)
+- **[2026-05-27]**: `template-v0.5.0` git tag — enables `.\scripts\new-project.ps1 "name" -Version 0.5.0` versioned scaffold (#110)
+
+### Changed
+- **[2026-05-28]**: `agents/docs-writer.md` — tier promoted Low→Medium (`claude-sonnet-4-6`); role split with Architect (DocsWriter executes, Architect designs document architecture)
+- **[2026-05-28]**: `AGENTS.md`, `CLAUDE.md` — Documentation Writer tier updated to Medium across all roster tables
+- **[2026-05-28]**: chore: Variant status corrections
+  - co-develop: stable 0.4.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - co-work: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - co-design: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - co-security: draft 0.1.0 → beta 0.2.0 (beta promotion after A-04 verification)
+- **[2026-05-28]**: chore: new-project.sh/ps1 now creates .template-info.json by default for all variants
+
+### Security
+- **[2026-05-28]**: security: co-security beta status restricts usage to test environments only (actual customer engagements prohibited)
+
+### Fixed
+- **[2026-05-27]**: `scripts/new-project.ps1`: wrap `git archive` and `tar` in `try/catch` to suppress `NativeCommandError` under inherited `ErrorActionPreference=Stop` (#112)
+- **[2026-05-27]**: `scripts/new-project.ps1`: switch from PowerShell pipe to `git archive -o <tempfile>` + `tar -x -f <tempfile>` — PowerShell pipes corrupt binary tar streams (#111)
+- **[2026-05-27]**: `templates/common/scripts/setup.ps1`: add `exit 0` at end — `git commit` exit code 1 ("nothing to commit") was causing false ⚠️ Setup error warning in `new-project.ps1` (#110)
+- **[2026-05-27]**: `scripts/new-project.ps1`: improve error message for `git archive` failure on pre-v0.5.0 tags that lack `templates/common/` structure (#110)
+- **[2026-05-27]**: `.gitattributes`: add `eol=lf` to `*.md` rule — CRLF on Windows checkout was corrupting YAML frontmatter in SKILL.md files, breaking `skill-lifecycle-audit.ts` (#111)
+- **[2026-05-27]**: `skills/*.md`: normalize CRLF to LF; add missing `owner: pm` frontmatter field to 4 skills (`agent-lifecycle-manager`, `meeting-facilitation`, `script-lifecycle-manager`, `skill-lifecycle-manager`) (#109)
+- **[2026-05-27]**: `templates/common/scripts/setup.ps1`: wrap `git clone`, `git rev-parse`, `git add`, `git commit` in `try/catch` — all inherited `NativeCommandError` false positives (#107, #108)
+
+### Added
 - **[2026-05-27]**: feat: Implement README synchronization policy and workspace QA rules
 
 ### Added
@@ -456,7 +495,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-27*
+*Last Updated: 2026-05-28*
 
 
 

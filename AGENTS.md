@@ -31,7 +31,7 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains .ps1 and .sh cross-platform scripts; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | Low | Standardizes Markdown documentation (README.md, CONSTITUTION.md, CHANGELOG.md) and manages locales/ translations |
+| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
 ### 🛡️ Security
@@ -89,7 +89,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
 | Template Architect | `agents/architect.md` | High | Design phase | No |
 | Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Script files only |
-| Documentation Writer | `agents/docs-writer.md` | Low | After design | .md files only |
+| Documentation Writer | `agents/docs-writer.md` | **Medium** | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 

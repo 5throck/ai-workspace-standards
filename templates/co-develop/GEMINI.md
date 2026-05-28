@@ -127,6 +127,30 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 ---
 
+### Security & Hook Configuration
+
+<!-- WORKSPACE-MANAGED -->
+Security defaults are enforced at project creation and verified during upgrades.
+
+| Control | Configuration | Verification |
+|---------|---------------|--------------|
+| Secret scanning | `.gitleaks.toml` (project root) | Pre-commit hook runs gitleaks |
+| Pre-commit hook | `.githooks/pre-commit` | `git hook run pre-commit` |
+| Pre-push hook | `.githooks/pre-push` | Blocks direct push to `main` |
+| Encoding safety | `.gitattributes` (`eol=lf`, `encoding=utf-8`) | Prevents CRLF corruption |
+| Secrets exclusion | `.gitignore` (`.env`, `*.key`, `*.pem`) | Audit script checks patterns |
+| Hook path | `git config core.hooksPath .githooks` | Run once per clone |
+
+**Activating hooks** (run once per clone):
+```bash
+git config core.hooksPath .githooks
+```
+
+**Equivalent to Claude's `.claude/settings.json` hooks**: This section defines the same security gate that Claude Code enforces via its PostToolUse hooks and `.githooks/` directory. Both platforms (Claude Code and Antigravity/Gemini CLI) must pass the same 5-point Security Bootstrap Check when creating or upgrading projects.
+<!-- /WORKSPACE-MANAGED -->
+
+---
+
 ### Git Commit Policy
 
 **Auto-commits and PostToolUse hooks are disabled in Gemini CLI.**

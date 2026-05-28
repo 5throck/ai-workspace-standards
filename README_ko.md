@@ -1,4 +1,5 @@
 ---
+translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
@@ -239,4 +240,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-28*

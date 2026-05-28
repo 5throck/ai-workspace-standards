@@ -18,8 +18,15 @@ import { cwd } from 'node:process';
 interface VariantManifest {
   name: string;
   description: string;
-  status: 'stable' | 'planned' | 'deprecated';
+  status: 'stable' | 'planned' | 'deprecated' | 'draft' | 'beta';
   version?: string;
+}
+
+interface VariantContract {
+  version: string;
+  required: string[];
+  optional: string[];
+  context_file_pattern: string;
 }
 
 interface ValidationIssue {
@@ -154,9 +161,9 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         continue;
       }
 
-      const validStatuses = ['stable', 'planned', 'deprecated'];
+      const validStatuses = ['stable', 'planned', 'deprecated', 'draft', 'beta'];
       if (!validStatuses.includes(raw.status as string)) {
-        fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated`);
+        fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated | draft | beta`);
         continue;
       }
 
@@ -372,6 +379,42 @@ function checkSharedFileSync(): void {
   }
 }
 
+// Check 11: README presence in stable variants
+function checkReadmePresence(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: README presence in ${variant} ===`);
+
+  const readmePath = join(TEMPLATES_DIR, variant, 'README.md');
+  const readmeKoPath = join(TEMPLATES_DIR, variant, 'README_ko.md');
+
+  const readmeExists = existsSync(readmePath);
+  const readmeKoExists = existsSync(readmeKoPath);
+
+  if (!readmeExists) {
+    fail(variant, 'readme-presence', `templates/${variant}/README.md is missing`, `Create README.md with a content_hash: frontmatter field`);
+  }
+  if (!readmeKoExists) {
+    fail(variant, 'readme-presence', `templates/${variant}/README_ko.md is missing`, `Create README_ko.md with a translated_from_hash: frontmatter field`);
+  }
+
+  if (readmeExists && readmeKoExists) {
+    pass(`${variant}/README.md and README_ko.md both present`);
+  }
+
+  // Warn if frontmatter hash fields are missing
+  if (readmeExists) {
+    const readmeFields = parseFrontmatter(readFileSync(readmePath, 'utf-8'));
+    if (!('content_hash' in readmeFields)) {
+      warn(variant, 'readme-frontmatter', `templates/${variant}/README.md is missing 'content_hash:' frontmatter field`, `Add 'content_hash: <hash>' to the README.md frontmatter`);
+    }
+  }
+  if (readmeKoExists) {
+    const readmeKoFields = parseFrontmatter(readFileSync(readmeKoPath, 'utf-8'));
+    if (!('translated_from_hash' in readmeKoFields)) {
+      warn(variant, 'readme-frontmatter', `templates/${variant}/README_ko.md is missing 'translated_from_hash:' frontmatter field`, `Add 'translated_from_hash: <hash>' to the README_ko.md frontmatter`);
+    }
+  }
+}
+
 // Check 9: docs/context.md sync and broken paths
 function checkContextSync(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
@@ -450,6 +493,47 @@ function checkL0L1ScriptParity() {
   }
 }
 
+// Check 11: Variant Contract compliance
+function checkVariantContract(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
+
+  try {
+    const contractPath = join(TEMPLATES_DIR, 'common', 'variant-contract.json');
+    if (!existsSync(contractPath)) {
+      fail('root', 'variant-contract-missing', 'templates/common/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
+      return;
+    }
+
+    const contractRaw = readFileSync(contractPath, 'utf-8');
+    let contract: VariantContract;
+
+    try {
+      contract = JSON.parse(contractRaw) as VariantContract;
+    } catch (parseError) {
+      fail('root', 'variant-contract-invalid', 'templates/common/variant-contract.json is not valid JSON', 'Fix JSON syntax');
+      return;
+    }
+
+    const variantDir = join(TEMPLATES_DIR, variant);
+    const missingFiles: string[] = [];
+
+    for (const requiredFile of contract.required) {
+      const filePath = join(variantDir, requiredFile);
+      if (!existsSync(filePath)) {
+        missingFiles.push(requiredFile);
+      }
+    }
+
+    if (missingFiles.length > 0) {
+      fail(variant, 'variant-contract', `Variant Contract FAILED — missing ${missingFiles.length} required files:\n     - ${missingFiles.join('\n     - ')}`);
+    } else {
+      pass(`${variant}: Variant Contract satisfied (${contract.required.length}/${contract.required.length} required files present)`);
+    }
+  } catch (error) {
+    fail('root', 'variant-contract-error', `Failed to check Variant Contract: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -469,12 +553,16 @@ function main() {
   for (const [variant, manifest] of manifests) {
     if (variantArg !== 'all' && variant !== variantArg) continue;
 
+    // Check Variant Contract for all variants (including draft)
+    checkVariantContract(variant);
+
     if (manifest.status === 'stable') {
       checkAgents(variant);
       checkAgentsRoster(variant);
       checkCommands(variant);
       checkScriptParity(variant);
       checkContextSync(variant);
+      checkReadmePresence(variant);
       variantsChecked++;
     }
   }

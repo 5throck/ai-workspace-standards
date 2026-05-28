@@ -2,6 +2,8 @@
 # dev-sync.sh - Full pipeline: memlog → sync-md → changelog → audit → commit → PR
 # Usage: bash scripts/dev-sync.sh "feat: description"
 set -euo pipefail
+export LC_ALL=C.UTF-8
+export PYTHONIOENCODING=utf-8
 
 MSG="${1:-chore: update}"
 DATE=$(date +%Y-%m-%d)
@@ -29,27 +31,15 @@ if [ -f "scripts/generate-scripts-readme.ts" ]; then
   bun scripts/generate-scripts-readme.ts
 fi
 
-# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
-if [ -f "CHANGELOG.md" ]; then
-  SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
-  if ! echo "$SECTION" | grep -Fq "$MSG"; then
-    TODAY=$(date +%Y-%m-%d)
-    perl -i -pe 'BEGIN{$m=shift; $d=shift}
-      if (/^## \[Unreleased\]/) { $_ .= "\n### Added\n- **[$d]**: \Q$m\E\n" }
-    ' "$MSG" "$TODAY" CHANGELOG.md
-    echo "📝 Auto-added changelog entry: $MSG"
-  fi
-fi
-
-# ── 3.5. Warn if [Unreleased] section has no bullet items ────────────────────
+# ── 3. Block if [Unreleased] section has no bullet items ─────────────────────
 if [ -f "CHANGELOG.md" ]; then
   UNRELEASED_CONTENT=$(awk '/^## \[Unreleased\]/{f=1;next} f && /^## \[/{exit} f{print}' CHANGELOG.md)
   if ! echo "$UNRELEASED_CONTENT" | grep -qE '^\s*-\s+'; then
     echo ""
-    echo "⚠️  CHANGELOG.md [Unreleased] section has no entries."
-    echo "   Consider running: /changelog \"type: description\" before syncing."
-    echo "   (continuing anyway - use this warning to keep your changelog current)"
+    echo "❌ CHANGELOG.md [Unreleased] section has no entries."
+    echo "   Run: /changelog \"type: description\" to add an entry before syncing."
     echo ""
+    exit 1
   fi
 fi
 

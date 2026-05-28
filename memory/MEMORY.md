@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-05-28](2026-05-28.md) | PM-led 3-tier parallel agent execution: platform parity, upgrade-project, docs-writer promotion, Security Bootstrap, CONSTITUTION §10 Terminology |
 | [2026-05-23](2026-05-23.md) | feat: align markdown files with CONSTITUTION.md standards |
 | [2026-05-24](2026-05-24.md) | feat: Refactor PM to 3-tier agent strategy and repair Windows terminal CP949 encoding corruptions |
 | [2026-05-25](2026-05-25.md) | feat: align template with hybrid scripting standards |
@@ -14,6 +15,10 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-28 | Kanban process and system design for current and new projects | [meeting-2026-05-28-kanban-process-and-system-design-for-cur.md](meeting-2026-05-28-kanban-process-and-system-design-for-cur.md) |
+| 2026-05-28 | Encoding and README sync review | [meeting-2026-05-28-encoding-and-readme-sync-review.md](meeting-2026-05-28-encoding-and-readme-sync-review.md) |
+| 2026-05-28 | Implementation direction for platform parity, upgrade-project, and team role changes | [meeting-2026-05-28-implementation-direction-for-platform-pa.md](meeting-2026-05-28-implementation-direction-for-platform-pa.md) |
+| 2026-05-28 | Team composition review and project improvement roadmap meeting | [meeting-2026-05-28-team-composition-review-and-project-impr.md](meeting-2026-05-28-team-composition-review-and-project-impr.md) |
 | 2026-05-27 | CONSTITUTION.md hub-and-spoke restructure proposal | [meeting-2026-05-27-constitution-md-hub-and-spoke-restructur.md](meeting-2026-05-27-constitution-md-hub-and-spoke-restructur.md) |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | [2026-05-24-multi-agent-meeting-summary.md](2026-05-24-multi-agent-meeting-summary.md) |
 | 2026-05-27 | Doc format best practices | [meeting-2026-05-27-doc-format-best-practices.md](meeting-2026-05-27-doc-format-best-practices.md) |
