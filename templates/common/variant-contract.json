@@ -5,8 +5,6 @@
     "CLAUDE.md",
     "GEMINI.md",
     "AGENTS.md",
-    "README.md",
-    "README_ko.md",
     "agents/pm.md",
     "agents/README.md",
     "agents/README_ko.md",
@@ -23,6 +21,8 @@
     ".gemini/commands/sync.md"
   ],
   "optional": [
+    "README.md",
+    "README_ko.md",
     ".claude/commands/security-check.md",
     ".gemini/commands/security-check.md"
   ],
