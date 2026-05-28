@@ -9,6 +9,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: `scripts/audit.sh` / `audit.ps1` — `check_command_parity()` check: compares `.claude/commands/` file list against `.gemini/commands/` and WARNs on missing files; supports `gemini-parity: skip` frontmatter for intentional Claude-only exceptions
+- **[2026-05-29]**: `.gemini/commands/` directory at workspace root — `meeting.md`, `changelog.md`, `memlog.md`, `new-task.md`, `sync.md` created (cross-platform parity with `.claude/commands/`)
+- **[2026-05-29]**: `docs/constitution/06-skill-lifecycle.md` — **Cross-Platform Deployment Rule** section: any command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; `gemini-parity: skip` frontmatter as explicit opt-out mechanism
+- **[2026-05-29]**: PM Orchestrator mode in `/meeting` skill — when PM is in participant list (default), PM opens each round (agenda + agent nomination), closes each round (synthesis + provisional decision), and delivers final synthesis owning the action items table; applied to all 6 meeting.md files (workspace root + 4 variants + templates/common/.gemini)
+- **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-gemini-parity-gap.md` — root cause analysis of Gemini command parity gap; 5 action items (A-01~A-05)
+- **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-script-pair-sync.md` — structural analysis of `intentional drift` policy flaw in `.sh`/`.ps1` horizontal sync; proposed `pair` field to SCRIPTS.md schema; 5 action items (A-01~A-05)
+
+### Changed
+- **[2026-05-29]**: `CLAUDE.md` §2 — added platform parity note: "every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; see CONSTITUTION.md §6"
+- **[2026-05-29]**: `GEMINI.md` §6 — added platform parity note referencing `CONSTITUTION.md §6 Cross-Platform Deployment Rule`
+- **[2026-05-29]**: `.claude/commands/new-project.md` — added `gemini-parity: skip` frontmatter (Claude Code Agent tool dispatch has no Gemini equivalent)
+- **[2026-05-29]**: `/meeting` skill — `Orchestrator: [PM | Facilitator]` field added to meeting header; transcript metadata includes orchestrator field
+
+### Fixed
+- **[2026-05-29]**: `templates/common/scripts/readme-lifecycle-audit.ts` (L1) — published CRLF fix from L0; L0/L1 drift resolved (both now normalize `\r\n` → `\n` in `parseSections`)
+- **[2026-05-29]**: `scripts/audit.ps1` — added command parity check block mirroring `audit.sh` `check_command_parity()` (was absent, discovered via user review)
+
+### Added
 - **[2026-05-28]**: `scripts/upgrade-project.sh` / `.ps1` — new scripts to upgrade existing projects to the latest template version with 3-tier file classification (LOCKED/MERGE/PRESERVE), `--dry-run`, `--platform`, and pre-upgrade git stash snapshot
 - **[2026-05-28]**: `--platform claude|antigravity|both` flag to `scripts/new-project.sh` / `.ps1` — controls which AI platform config files are included (default: `both`)
 - **[2026-05-28]**: Security Bootstrap Check (5-point) to `scripts/new-project.sh` / `.ps1` and `upgrade-project.sh` / `.ps1` — halts on missing `.gitleaks.toml`, `.githooks/pre-commit`, `.gitattributes eol=lf`, `.gitignore .env`, or unset `core.hooksPath`
