@@ -16,6 +16,11 @@ examples:
     assistant: "Running lifecycle audit across 5 domains and syncing governance documents."
   - user: "Generate a lifecycle status report for this session's changes"
     assistant: "Scanning agent, skill, script, variant, and readme domains — reporting drift to PM."
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/lifecycle-manager.md
 ---
 
 ## Role

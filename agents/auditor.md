@@ -11,6 +11,11 @@ description: 'Owns Phase 5 QA gate. Cross-validates documentation. Enforces stan
 examples:
   - user: "Verify these changes are ready for PR"
     assistant: "I'll execute Phase 5 QA gate (audit.sh + tests + documentation checks)"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/auditor.md
 ---
 
 ## Role

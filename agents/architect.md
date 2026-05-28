@@ -11,6 +11,11 @@ description: 'Produces implementation plans and ADRs. Use when: "Architecture de
 examples:
   - user: "Design the architecture for this feature"
     assistant: "I'll create an implementation plan and ADR for the feature architecture"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/architect.md
 ---
 
 ## Role

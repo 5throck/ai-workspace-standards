@@ -11,6 +11,11 @@ description: 'Standardizes Markdown documentation. Use when: "Updating documenta
 examples:
   - user: "Update the README for this feature"
     assistant: "I'll update the README with the new feature documentation"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/docs-writer.md
 ---
 
 ## Role

@@ -11,6 +11,11 @@ description: 'Enforces Git Hooks, manages security. Phase 5 Security QA. Use whe
 examples:
   - user: "Check for security vulnerabilities"
     assistant: "I'll run security checks and validate no secrets are exposed"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/security-expert.md
 ---
 
 ## Role

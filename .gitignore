@@ -58,8 +58,13 @@ __pycache__/
 !agents/
 !memory/
 !.github/
+!docs/
 !docs/constitution/
+!docs/governance/
+!docs/lifecycle/
+!docs/superpowers/
 !skills/
+!templates/common/
 
 # --- CodeGraph Index ---
 .codegraph/

@@ -11,6 +11,11 @@ description: 'Orchestrates Phases 0, 2, 6. Enforces quality gates. Use when: "Ma
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Team Assembly) and Phase 2 (Design approval)"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/pm.md
 ---
 
 ## Role
