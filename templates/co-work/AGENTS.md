@@ -8,6 +8,7 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Collaboration PM** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates research workflow, documentation strategy, stakeholder alignment |
+| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 
 ### 📊 Research & Analysis
 | Agent | File | Tier | Role |

@@ -17,6 +17,7 @@
 | Agent | File | Role |
 |-------|------|------|
 | **Security PM** | [`agents/pm.md`](agents/pm.md) | Single entry point — owns authorization, scope, engagement workflow |
+| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 
 ### 🔴 Red Team (Offense)
 

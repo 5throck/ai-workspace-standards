@@ -17,6 +17,7 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Design Project Manager (PM)** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates design workflow from brief to handoff; coordinates specialist agents; enforces quality gates |
+| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 
 ### 🎨 Research & Strategy
 
@@ -88,6 +89,7 @@ The Design PM delegates execution to the Medium and Low tiers before finalizing 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | Design PM | `agents/pm.md` | High | Orchestrates only | No |
+| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 | UX Researcher | `agents/ux-researcher.md` | Medium | Research phase | Research reports only |
 | Design Lead | `agents/design-lead.md` | High | Direction phase | Design docs only |
 | Visual Designer | `agents/visual-designer.md` | Medium | After direction | Design files + specs |

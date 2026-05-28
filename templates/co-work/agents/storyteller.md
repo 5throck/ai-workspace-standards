@@ -1,5 +1,6 @@
 ---
 name: storyteller
+status: active
 formal_name: Organizational Storyteller & Culture Steward
 tier:
   claude: medium    # claude-sonnet-4.6

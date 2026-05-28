@@ -16,6 +16,9 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-29 | lifecycle-manager scope reduction — secretary role, L0+L1 dual deployment | [meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md](meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md) |
+| 2026-05-29 | Lifecycle manager agent — new dedicated agent proposal unanimously agreed | [meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md](meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md) |
+| 2026-05-29 | Lifecycle governance audit review — 7 issues, C-01~C-07 remediation plan | [meeting-2026-05-29-lifecycle-governance-audit-review-7-issu.md](meeting-2026-05-29-lifecycle-governance-audit-review-7-issu.md) |
 | 2026-05-29 | Open items resolution — audit.sh thin wrapper sequence, agents/README policy | [meeting-2026-05-29-open-items-resolution-audit-sh-thin-wrap.md](meeting-2026-05-29-open-items-resolution-audit-sh-thin-wrap.md) |
 | 2026-05-29 | Comprehensive review — co-security, lifecycle governance, 2-Tier script strategy | [meeting-2026-05-29-comprehensive-review-co-security-lifecyc.md](meeting-2026-05-29-comprehensive-review-co-security-lifecyc.md) |
 | 2026-05-28 | Script pair sync gap — intentional drift policy flaw in .sh/.ps1 horizontal sync | [meeting-2026-05-28-script-pair-sync-gap-intentional-drift-p.md](meeting-2026-05-28-script-pair-sync-gap-intentional-drift-p.md) |

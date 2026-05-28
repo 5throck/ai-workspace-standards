@@ -1,5 +1,6 @@
 ---
 name: ms365-expert
+status: active
 formal_name: Microsoft 365 Collaboration Expert
 tier:
   claude: low       # claude-haiku-4-5

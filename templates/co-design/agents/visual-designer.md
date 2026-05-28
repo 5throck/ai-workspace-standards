@@ -1,5 +1,6 @@
 ---
 name: visual-designer
+status: active
 formal_name: UI Execution & Visual Design Specialist
 tier:
   claude: medium    # claude-sonnet-4.6

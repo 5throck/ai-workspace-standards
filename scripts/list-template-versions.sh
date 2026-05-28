@@ -1,30 +1,6 @@
 #!/usr/bin/env bash
-# list-template-versions.sh - List available template versions
-export LC_ALL=C
-export LANG=C
-
-WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-
-echo "Available template versions:"
-echo ""
-
-TAGS=$(git -C "$WORKSPACE_ROOT" tag -l "template-v*" | sort -V)
-
-if [ -z "$TAGS" ]; then
-  echo "  (no tagged versions found)"
-  echo ""
-  echo "  Current (untagged) version:"
-  VERSION_FILE="$WORKSPACE_ROOT/templates/VERSION"
-  if [ -f "$VERSION_FILE" ]; then
-    echo "  → $(cat "$VERSION_FILE") (latest, untagged)"
-  fi
-else
-  while IFS= read -r tag; do
-    version="${tag#template-v}"
-    echo "  → $version  ($tag)"
-  done <<< "$TAGS"
-fi
-
-echo ""
-echo "Usage: bash scripts/new-project.sh my-project --version X.Y.Z"
-echo "       (omit --version to use the latest template)"
+# list-template-versions.sh - Thin wrapper → delegates to list-template-versions.ts (Tier 2 TS implementation)
+# Deprecated: 2026-05-29 | Removal: 2026-08-29
+# Direct equivalent: bun scripts/list-template-versions.ts
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+exec bun "$SCRIPT_DIR/list-template-versions.ts" "$@"

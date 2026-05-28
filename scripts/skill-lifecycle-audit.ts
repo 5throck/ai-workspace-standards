@@ -295,6 +295,24 @@ function auditSkills(jsonMode = false): AuditResult {
       continue;
     }
 
+    // Check status field is present and valid
+    const validSkillStatuses = ['active', 'deprecated', 'experimental', 'archived'];
+    if (!frontmatter.status) {
+      errors.push({
+        level: 'error',
+        file: relPath,
+        message: 'Missing status in frontmatter',
+        fix: "Add 'status: active' (or deprecated/experimental/archived)",
+      });
+    } else if (!validSkillStatuses.includes(frontmatter.status as string)) {
+      errors.push({
+        level: 'error',
+        file: relPath,
+        message: `Invalid status value '${frontmatter.status}' (allowed: ${validSkillStatuses.join(' | ')})`,
+        fix: `Set status to one of: ${validSkillStatuses.join(', ')}`,
+      });
+    }
+
     if (frontmatter.status === 'deprecated' && wasModifiedRecently(skillFile, 30)) {
       warnings.push({
         level: 'warning',

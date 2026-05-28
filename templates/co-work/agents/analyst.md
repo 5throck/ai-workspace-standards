@@ -1,5 +1,6 @@
 ---
 name: analyst
+status: active
 formal_name: Research & Data Analyst
 tier:
   claude: medium    # claude-sonnet-4.6

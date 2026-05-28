@@ -17,6 +17,7 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
 | `README.md` | English project README |
 | `README_ko.md` | Korean translation |
 | `agents/pm.md` | PM is required in every variant |
+| `agents/lifecycle-manager.md` | Lifecycle state monitor; secretary role; dispatched at Phase 6 Finalization |
 | `agents/README.md` | Agent directory index |
 | `agents/README_ko.md` | Korean translation of agent index |
 | `docs/{variant}.context.md` | Project-specific context file (name is variant-dependent) |

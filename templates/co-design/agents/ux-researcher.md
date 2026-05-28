@@ -1,5 +1,6 @@
 ---
 name: ux-researcher
+status: active
 formal_name: User Research & Usability Testing Specialist
 tier:
   claude: medium    # claude-sonnet-4.6

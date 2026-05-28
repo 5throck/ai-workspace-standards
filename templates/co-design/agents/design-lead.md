@@ -1,5 +1,6 @@
 ---
 name: design-lead
+status: active
 formal_name: Design System & Visual Direction Lead
 tier:
   claude: high      # claude-opus-4-7

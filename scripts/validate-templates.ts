@@ -323,7 +323,8 @@ function checkAgents(variant: string): void {
     }
   }
 
-  const requiredFrontmatter = ['name', 'tier', 'description', 'examples'];
+  const requiredFrontmatter = ['name', 'status', 'tier', 'description', 'examples'];
+  const validAgentStatuses = ['active', 'deprecated', 'experimental'];
   // PM uses "Meeting Facilitation" (facilitator role); all others use "Meeting Participation"
   const MEETING_SECTIONS = ['## Meeting Participation', '## Meeting Facilitation'];
   const DISPATCH_SECTION = '## Dispatch Protocol';
@@ -342,9 +343,19 @@ function checkAgents(variant: string): void {
     // Check frontmatter (field must exist as a key, value can be empty/block)
     const missingFields = requiredFrontmatter.filter(f => !(f in fields));
     if (missingFields.length > 0) {
-      fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`);
+      fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`,
+        `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(', ')}`);
     } else {
-      pass(`agents/${file}: frontmatter OK`);
+      // Validate status enum value (extract actual value from raw content)
+      const statusLine = rawContent.split('\n').find(l => l.match(/^status:\s*\S/));
+      const statusVal = statusLine ? statusLine.replace(/^status:\s*/, '').trim() : '';
+      if (!validAgentStatuses.includes(statusVal)) {
+        fail(variant, 'agent-status-invalid',
+          `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(' | ')})`,
+          `Set status to one of: ${validAgentStatuses.join(', ')}`);
+      } else {
+        pass(`agents/${file}: frontmatter OK`);
+      }
     }
 
     // Check required sections

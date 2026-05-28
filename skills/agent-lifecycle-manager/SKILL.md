@@ -1,5 +1,6 @@
 ---
 name: agent-lifecycle-manager
+status: active
 description: >
   Manages the creation, validation, and maintenance of AI agent files across the project.
   Use when: creating new agents, updating agent metadata/frontmatter, validating agent structures,
@@ -56,7 +57,7 @@ This skill provides a systematic approach to creating, validating, and maintaini
 ---
 name: agent-name
 role: "Brief 2-4 word title"
-status: active | draft | deprecated | archived
+status: active
 description: "Short sentence on what the agent does"
 tier:
   claude: high | medium | low

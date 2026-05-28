@@ -1,5 +1,6 @@
 ---
 name: storyteller
+status: active
 formal_name: Design Storyteller & Brand Philosopher
 tier:
   claude: medium    # claude-sonnet-4.6

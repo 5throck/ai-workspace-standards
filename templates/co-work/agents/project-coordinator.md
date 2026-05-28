@@ -1,5 +1,6 @@
 ---
 name: project-coordinator
+status: active
 formal_name: Project Coordinator
 tier:
   claude: low       # claude-haiku-4-5

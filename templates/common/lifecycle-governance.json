@@ -1,9 +1,9 @@
 {
-  "version": "1.1.0",
-  "lastUpdated": "2026-05-28",
+  "version": "1.2.0",
+  "lastUpdated": "2026-05-29",
   "layers": {
     "workspace-root": {
-      "orchestrator": "scripts/audit.sh",
+      "orchestrator": "scripts/audit.ts",
       "domains": {
         "variant": { "applicable": false },
         "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
@@ -33,7 +33,7 @@
       }
     },
     "l2-projects": {
-      "orchestrator": "scripts/audit.sh (project copy)",
+      "orchestrator": "scripts/audit.ts (project copy)",
       "domains": {
         "variant": { "applicable": false },
         "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },

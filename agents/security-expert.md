@@ -1,5 +1,6 @@
 ---
 name: Security & Git Expert
+status: active
 tier:
   claude: medium        # claude-sonnet-4.6
   antigravity: medium   # gemini-3.5-flash (thinking_level="medium")

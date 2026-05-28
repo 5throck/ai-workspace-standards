@@ -18,7 +18,8 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 6); reduced bottleneck role |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency
+| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency |
+| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper; dispatched by PM at Phase 6 Finalization when lifecycle-managed artifacts change; secretary role — records, does not decide |
 
 ### 📐 Design
 
@@ -188,6 +189,24 @@ All agents, regardless of their role, must adhere to the following:
 ---
 
 ## Lifecycle Management
+
+### Phase 6 Finalization — Lifecycle Manager Review (Mandatory)
+
+At **Phase 6 (Finalization)**, PM **must** dispatch `lifecycle-manager` when any of the following occurred in the session:
+
+| Trigger | Dispatch lifecycle-manager? |
+|---------|---------------------------|
+| Agent added, modified, or deprecated | ✅ Yes |
+| Skill added, modified, or deprecated | ✅ Yes |
+| Script status changed in SCRIPTS.md | ✅ Yes |
+| Variant status changed (draft→beta, beta→stable, etc.) | ✅ Yes |
+| Governance tool updated (audit.ts, validate-templates.ts, etc.) | ✅ Yes |
+| README/documentation-only changes | ❌ No |
+| Memory log entries only | ❌ No |
+
+The lifecycle-manager will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
+
+---
 
 Use the dedicated lifecycle manager skills whenever creating, modifying, or retiring agents and skills. These skills are located in `.claude/skills/` and are loaded automatically by Claude Code.
 
