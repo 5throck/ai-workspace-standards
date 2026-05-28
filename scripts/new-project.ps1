@@ -198,6 +198,49 @@ if (Test-Path $VariantContextMd) {
     }
 }
 
+# ── 4.5b. Update lifecycle.statusSince in the project's variant.json ─────────
+$ProjectDate = Get-Date -Format "yyyy-MM-dd"
+$ProjVariantJson = Join-Path $ProjectDir "variant.json"
+if (Test-Path $ProjVariantJson) {
+    $variantObj = Get-Content $ProjVariantJson -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not $variantObj.lifecycle) {
+        $variantObj | Add-Member -MemberType NoteProperty -Name lifecycle -Value ([PSCustomObject]@{})
+    }
+    $variantObj.lifecycle | Add-Member -MemberType NoteProperty -Name statusSince -Value $ProjectDate -Force
+    $currentStatus = if ($variantObj.status) { $variantObj.status } else { "unknown" }
+    $variantObj.lifecycle | Add-Member -MemberType NoteProperty -Name lastTransition -Value "initial → $currentStatus on $ProjectDate" -Force
+    $variantObj | ConvertTo-Json -Depth 10 | Set-Content $ProjVariantJson -Encoding UTF8
+    Write-Host "  ✅ variant.json lifecycle.statusSince set to $ProjectDate" -ForegroundColor Green
+}
+
+# ── 4.5c. Write scripts-snapshot.json with L1 script version map ──────────────
+$ScriptsMd = Join-Path $WorkspaceRoot "scripts\SCRIPTS.md"
+$SnapshotFile = Join-Path $ProjectDir "scripts-snapshot.json"
+if (Test-Path $ScriptsMd) {
+    $scriptsMdContent = Get-Content $ScriptsMd -Raw -Encoding UTF8
+    $scriptsMap = @{}
+    $inRegistry = $false
+    foreach ($line in $scriptsMdContent -split "`n") {
+        if ($line -match '^## Registry') { $inRegistry = $true; continue }
+        if ($inRegistry -and $line -match '^## ') { break }
+        if ($inRegistry -and $line -match '^\|') {
+            $parts = $line -split '\|' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+            if ($parts.Count -ge 4 -and $parts[2] -match '^\d+\.\d+\.\d+$') {
+                $scriptName = $parts[0] -replace '`', ''
+                $scriptsMap[$scriptName] = @{ version = $parts[2]; status = $parts[3] }
+            }
+        }
+    }
+    $snapshot = [ordered]@{
+        created = $ProjectDate
+        variant = $Variant
+        l1_source = "templates/common/scripts"
+        scripts = $scriptsMap
+    }
+    $snapshot | ConvertTo-Json -Depth 5 | Set-Content $SnapshotFile -Encoding UTF8
+    Write-Host "  ✅ scripts-snapshot.json written ($($scriptsMap.Count) scripts)" -ForegroundColor Green
+}
+
 # ── 4.6. Write template-version.txt for upgrade tracking ──────────────────────
 $ClaudeDir = Join-Path $ProjectDir ".claude"
 if (-not (Test-Path $ClaudeDir)) { New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null }

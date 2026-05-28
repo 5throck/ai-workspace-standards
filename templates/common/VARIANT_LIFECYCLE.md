@@ -72,6 +72,7 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 | **Usage Duration** | Minimum 3 months in beta status |
 | **Documentation** | All docs reviewed and approved |
 | **User Feedback** | Positive feedback from beta users (no critical UX/functional complaints) |
+| **Script Health** | 0 deprecated scripts in use (all scripts at `active` status in SCRIPTS.md) |
 
 **Characteristics:**
 - Full support commitment

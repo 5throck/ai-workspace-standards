@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "status": "stable",
+  "lastUpdated": "2026-05-28",
+  "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
+  "propagatedTo": [
+    "co-develop",
+    "co-work",
+    "co-design",
+    "co-security"
+  ],
+  "history": [
+    {
+      "date": "2026-05-28",
+      "event": "initial",
+      "note": "Lifecycle tracking established for templates/common at v1.0.0"
+    }
+  ]
+}

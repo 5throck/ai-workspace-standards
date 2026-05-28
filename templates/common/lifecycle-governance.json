@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "lastUpdated": "2026-05-28",
   "layers": {
     "workspace-root": {
@@ -8,14 +8,14 @@
         "variant": { "applicable": false },
         "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
         "skill": { "applicable": true, "tool": "scripts/skill-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
-        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": true, "currentStatus": "gap" },
-        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "gap" }
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": true, "currentStatus": "active" },
+        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" }
       }
     },
     "templates-common": {
-      "orchestrator": null,
+      "orchestrator": "scripts/validate-templates.ts (checkGovernance)",
       "domains": {
-        "variant": { "applicable": true, "tool": "common.lifecycle.json", "mandatory": true, "currentStatus": "gap" },
+        "variant": { "applicable": true, "tool": "common.lifecycle.json", "mandatory": true, "currentStatus": "active" },
         "agent": { "applicable": false },
         "skill": { "applicable": false },
         "script": { "applicable": true, "tool": "scripts/verify-scripts.ts (L0/L1 drift)", "mandatory": true, "currentStatus": "partial" },
@@ -25,11 +25,11 @@
     "templates-variants": {
       "orchestrator": "scripts/validate-templates.ts",
       "domains": {
-        "variant": { "applicable": true, "tool": "scripts/validate-templates.ts", "mandatory": true, "currentStatus": "partial" },
-        "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "gap" },
-        "skill": { "applicable": true, "tool": "scripts/skill-lifecycle-audit.ts", "mandatory": true, "currentStatus": "gap" },
-        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": true, "currentStatus": "gap" },
-        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "gap" }
+        "variant": { "applicable": true, "tool": "scripts/validate-templates.ts (checkVariantManifests)", "mandatory": true, "currentStatus": "active" },
+        "agent": { "applicable": true, "tool": "scripts/validate-templates.ts (checkAgents, checkAgentsRoster)", "mandatory": true, "currentStatus": "active" },
+        "skill": { "applicable": true, "tool": "scripts/validate-templates.ts (checkVariantSkills)", "mandatory": true, "currentStatus": "active" },
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": false, "currentStatus": "partial" },
+        "readme": { "applicable": true, "tool": "scripts/validate-templates.ts (checkReadmePresence)", "mandatory": true, "currentStatus": "active" }
       }
     },
     "l2-projects": {
