@@ -18,8 +18,8 @@
         "variant": { "applicable": true, "tool": "common.lifecycle.json", "mandatory": true, "currentStatus": "active" },
         "agent": { "applicable": false },
         "skill": { "applicable": false },
-        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts (L0/L1 drift)", "mandatory": true, "currentStatus": "partial" },
-        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "partial" }
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts (L0/L1 drift)", "mandatory": true, "currentStatus": "active" },
+        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" }
       }
     },
     "templates-variants": {

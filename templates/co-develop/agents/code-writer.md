@@ -1,5 +1,6 @@
 ---
 name: code-writer
+status: active
 tier:
   claude: low        # claude-haiku-4-5
   antigravity: low   # gemini-3.5-flash

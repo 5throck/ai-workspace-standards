@@ -59,3 +59,5 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Major** bump: agent dispatch model changes
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
+
+*Last Updated: 2026-05-28*
