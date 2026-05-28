@@ -82,8 +82,6 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `list-template-versions.ps1` | L1 | 1.0.0 | active | — | — | — |
 | `qa-gate.sh` | L1 | 1.0.0 | active | — | — | — |
 | `qa-gate.ps1` | L1 | 1.0.0 | active | — | — | — |
-| `validate-templates.sh` | L1 | 1.0.0 | active | — | — | — |
-| `validate-templates.ps1` | L1 | 1.0.0 | active | — | — | — |
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |

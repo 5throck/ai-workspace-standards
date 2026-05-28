@@ -66,6 +66,14 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — |
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
+| `audit.ts` | L0 | 1.0.0 | active | — | — | intentional |
+| `dev-sync.ts` | L0 | 1.0.0 | active | — | — | intentional |
+| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — |
+| `sync-md.ts` | L0 | 1.0.0 | active | — | — | intentional |
+| `sync-skills.ts` | L1 | 1.0.0 | active | — | — | — |
+| `publish-to-template.ts` | L1 | 1.0.0 | active | — | — | — |
+| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — |
+| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — |
 | `sync-skills.sh` | L1 | 1.1.0 | active | — | — | — |
 | `sync-skills.ps1` | L1 | 1.1.0 | active | — | — | — |
 | `publish-to-template.sh` | L1 | 1.0.0 | active | — | — | — |
