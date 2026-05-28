@@ -15,6 +15,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-28 | Script pair sync gap — intentional drift policy flaw in .sh/.ps1 horizontal sync | [meeting-2026-05-28-script-pair-sync-gap-intentional-drift-p.md](meeting-2026-05-28-script-pair-sync-gap-intentional-drift-p.md) |
 | 2026-05-28 | Cross-platform parity gap in /meeting skill — root .gemini/commands missing | [meeting-2026-05-28-cross-platform-parity-gap-in-meeting-ski.md](meeting-2026-05-28-cross-platform-parity-gap-in-meeting-ski.md) |
 | 2026-05-28 | Unified lifecycle governance structure across workspace root and templates | [meeting-2026-05-28-unified-lifecycle-governance-structure-a.md](meeting-2026-05-28-unified-lifecycle-governance-structure-a.md) |
 | 2026-05-28 | Template lifecycle ↔ Script lifecycle integration review | [meeting-2026-05-28-template-lifecycle-script-lifecycle-inte.md](meeting-2026-05-28-template-lifecycle-script-lifecycle-inte.md) |
