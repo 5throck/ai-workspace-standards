@@ -4,6 +4,8 @@
   "status": "stable",
   "version": "1.0.0",
   "lifecycle": {
+    "statusSince": "2026-05-28",
+    "lastTransition": "initial → stable on 2026-05-28",
     "stablePromotedOn": "2026-05-28"
   }
 }

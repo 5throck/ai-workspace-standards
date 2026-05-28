@@ -4,6 +4,8 @@
   "status": "beta",
   "version": "0.2.0",
   "lifecycle": {
+    "statusSince": "2026-05-28",
+    "lastTransition": "draft → beta on 2026-05-28",
     "betaPromotedOn": "2026-05-28",
     "betaEngagements": 0
   }

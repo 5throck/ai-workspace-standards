@@ -15,6 +15,8 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-28 | Unified lifecycle governance structure across workspace root and templates | [meeting-2026-05-28-unified-lifecycle-governance-structure-a.md](meeting-2026-05-28-unified-lifecycle-governance-structure-a.md) |
+| 2026-05-28 | Template lifecycle ↔ Script lifecycle integration review | [meeting-2026-05-28-template-lifecycle-script-lifecycle-inte.md](meeting-2026-05-28-template-lifecycle-script-lifecycle-inte.md) |
 | 2026-05-28 | Variant structural gaps improvement plan meeting | [meeting-2026-05-28-variant-structural-gaps-improvement-plan.md](meeting-2026-05-28-variant-structural-gaps-improvement-plan.md) |
 | 2026-05-28 | Kanban process and system design for current and new projects | [meeting-2026-05-28-kanban-process-and-system-design-for-cur.md](meeting-2026-05-28-kanban-process-and-system-design-for-cur.md) |
 | 2026-05-28 | Encoding and README sync review | [meeting-2026-05-28-encoding-and-readme-sync-review.md](meeting-2026-05-28-encoding-and-readme-sync-review.md) |

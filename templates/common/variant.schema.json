@@ -45,6 +45,11 @@
           "minimum": 0,
           "description": "Count of successful engagements during beta phase"
         },
+        "betaPromotedOn": {
+          "type": "string",
+          "format": "date",
+          "description": "Date promoted to beta (null if not yet beta)"
+        },
         "stablePromotedOn": {
           "type": "string",
           "format": "date",

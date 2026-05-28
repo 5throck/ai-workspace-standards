@@ -167,6 +167,22 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         continue;
       }
 
+      // B-02: Lifecycle field validation
+      const lifecycle = raw.lifecycle as Record<string, unknown> | undefined;
+      if (!lifecycle) {
+        fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json missing 'lifecycle' object`);
+      } else {
+        if (!lifecycle.statusSince) {
+          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.statusSince is missing`, `Add "statusSince": "YYYY-MM-DD" to lifecycle object`);
+        }
+        if (!lifecycle.lastTransition) {
+          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.lastTransition is missing`, `Add "lastTransition": "... → ... on YYYY-MM-DD" to lifecycle object`);
+        }
+        if (lifecycle.statusSince && lifecycle.lastTransition) {
+          pass(`templates/${dir}/variant.json lifecycle fields OK (statusSince, lastTransition)`);
+        }
+      }
+
       manifests.set(dir, raw as unknown as VariantManifest);
       pass(`templates/${dir}/variant.json: status=${raw.status}`);
     } catch (e) {
@@ -534,6 +550,54 @@ function checkVariantContract(variant: string): void {
   }
 }
 
+// Check B-03: security-gate: true skills must NOT be in .claude/skills/
+function checkSecurityGateSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check B-03: security-gate skill placement in ${variant} ===`);
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+  if (!existsSync(claudeSkillsDir)) {
+    pass(`${variant}/.claude/skills/: not present (OK — security-gate check not applicable)`);
+    return;
+  }
+
+  const skillDirs = readdirSync(claudeSkillsDir).filter(d =>
+    statSync(join(claudeSkillsDir, d)).isDirectory()
+  );
+
+  let violations = 0;
+  for (const skillName of skillDirs) {
+    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue;
+
+    const rawContent = readFileSync(skillMdPath, 'utf-8');
+    const fields = parseFrontmatter(rawContent);
+
+    if ('security-gate' in fields) {
+      // Check if value is true
+      const content = normalizeContent(rawContent);
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (match) {
+        const fmText = match[1];
+        const sgLine = fmText.split('\n').find(l => l.startsWith('security-gate:'));
+        const sgValue = sgLine ? sgLine.slice(sgLine.indexOf(':') + 1).trim() : '';
+        if (sgValue === 'true') {
+          fail(
+            variant,
+            'security-gate-placement',
+            `${variant}/.claude/skills/${skillName}/SKILL.md has security-gate: true but is in .claude/skills/ (Claude Code-only). Move to skills/ (platform-neutral).`,
+            `Move skills/${skillName}/ out of .claude/skills/ into the top-level skills/ directory`
+          );
+          violations++;
+        }
+      }
+    }
+  }
+
+  if (violations === 0) {
+    pass(`${variant}/.claude/skills/: no security-gate: true skills found (OK)`);
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -555,6 +619,7 @@ function main() {
 
     // Check Variant Contract for all variants (including draft)
     checkVariantContract(variant);
+    checkSecurityGateSkills(variant);  // B-03
 
     if (manifest.status === 'stable') {
       checkAgents(variant);

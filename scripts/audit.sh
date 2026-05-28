@@ -208,6 +208,22 @@ if command -v bun &>/dev/null; then
             warn "Memory audit: some entries use legacy format (run 'bun scripts/verify-memory.ts --report')"
         fi
     fi
+    if [ -f "scripts/verify-scripts.ts" ]; then
+        if bun scripts/verify-scripts.ts --verify 2>/dev/null; then
+            green "Script registry audit: all scripts verified"
+        else
+            red "Script registry audit detected issues (run 'bun scripts/verify-scripts.ts --report' to see details)"
+            ((errors++)) || true
+        fi
+    fi
+    if [ -f "scripts/readme-lifecycle-audit.ts" ]; then
+        if bun scripts/readme-lifecycle-audit.ts 2>/dev/null; then
+            green "README audit: all READMEs healthy"
+        else
+            red "README audit detected issues (run 'bun scripts/readme-lifecycle-audit.ts' to see details)"
+            ((errors++)) || true
+        fi
+    fi
 else
     warn "Bun not installed - skipping lifecycle audits"
 fi
