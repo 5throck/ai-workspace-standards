@@ -21,7 +21,18 @@ Inline role-play solves this structurally:
 - **Real-time streaming**: the user watches the conversation unfold turn by turn, like being in the room
 - **Natural continuity**: Claude playing Agent B can quote Agent A's exact words from two lines above, not from a copied string
 
-The dialogue flow is:
+The dialogue flow when PM is present:
+
+```
+PM opens round → frames agenda, names which agent to speak first
+Agent A responds → addresses PM's question, builds on prior turns
+Agent B responds → reacts to Agent A, adds domain perspective
+PM closes round → resolves provisional decisions, sets up next round
+...
+PM delivers synthesis → owns the action items table
+```
+
+The dialogue flow when PM is absent:
 
 ```
 Claude (as Architect) speaks  →  output is now in conversation history
@@ -30,8 +41,6 @@ Claude (as Automation-Engineer) speaks  →  sees Architect + Security-Expert, r
 ...
 Claude (as Auditor) synthesizes  →  sees everything, closes the meeting
 ```
-
-This matches exactly how a real meeting works — each person heard everything before they spoke.
 
 ### Known limits
 
@@ -78,6 +87,9 @@ Default is silent because most callers need the outcome, not the transcript. Pas
 
 If no agents are found in the final list or `agents/` doesn't exist, error with a clear message. Read each target agent file now to hold all personas in context before the meeting starts.
 
+**PM presence check:**
+After resolving the final participant list, check whether `pm` (or any agent whose file name is `pm.md`) is included. Store this as `PM_PRESENT = true/false`. This flag controls the orchestration mode for all subsequent steps.
+
 ---
 
 ## Step 3 — Open the Meeting
@@ -94,12 +106,27 @@ Topic   : [TOPIC]
 Present : [comma-separated agent names]
 Rounds  : [N]
 Mode    : [Silent | Dialogue]
+Orchestrator: [PM | Facilitator]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**If silent (default)**: print `[회의 진행 중… 완료 시 결과를 출력합니다]` (or English equivalent) and proceed internally without any further per-turn output until Step 5.
+**If `PM_PRESENT = true` and `--dialogue`:**
+PM (in character) delivers the opening statement — introduces the topic, breaks it into agenda items for the rounds, and names which agent will speak first.
 
-**If `--dialogue`**: print the facilitator opening statement and continue to Step 4.
+```
+**PM**: (Opening)
+
+[Opening statement in the chosen language. PM MUST:
+ 1. Welcome participants by name
+ 2. State the meeting objective in one sentence
+ 3. Break the topic into N agenda items — one per round
+ 4. Name the first agent to speak and pose a specific question to them]
+
+---
+```
+
+**If `PM_PRESENT = false` and `--dialogue`:**
+Claude (as abstract Facilitator) delivers the opening statement.
 
 ```
 [Facilitator]: [Opening statement in the chosen language, setting the agenda and asking participants to respond directly to each other by name.]
@@ -107,16 +134,61 @@ Mode    : [Silent | Dialogue]
 ---
 ```
 
+**If silent (default):** Print `[회의 진행 중… 완료 시 결과를 출력합니다]` (or English equivalent) and proceed internally without any further per-turn output until Step 5.
+
 ---
 
 ## Step 4 — Run Dialogue Rounds
 
+### When `PM_PRESENT = true` (PM Orchestrator Mode)
+
+For each round (1 to N):
+
+**4a. PM opens the round** — PM speaks first, always:
+- States the agenda item for this round (from the breakdown made in Step 3)
+- Poses a specific, targeted question to a named agent
+- If round > 1: briefly acknowledges the prior round's outcome in one sentence
+
+**4b. Specialist agents respond** — in order, excluding PM:
+- Each agent directly addresses PM's question
+- Each agent must reference at least one prior speaker by name
+- Each agent adds the domain perspective only they hold
+- Each agent may redirect a question to a named colleague
+
+**4c. PM closes the round** — PM speaks last in every round:
+- Synthesizes what was heard from each agent this round
+- Resolves any provisional decision (or names it as an open question)
+- States what the next round will focus on (or "this concludes discussion" if final round)
+- Assigns any emerging action item to a named agent
+
+**If `--dialogue`**: print each PM and agent turn as it is generated:
+
+```
+**PM**: (Round N — Open)
+[PM's opening for the round]
+---
+
+**[AgentName]**: (Round N)
+[Agent's contribution]
+---
+
+**PM**: (Round N — Close)
+[PM's synthesis and close]
+---
+```
+
+**If silent**: hold all turns in context only — they still shape reasoning.
+
+---
+
+### When `PM_PRESENT = false` (Facilitator Mode)
+
 For each round (1 to N), iterate through each participant in order.
 
-For each participant's turn, Claude fully inhabits the agent's persona and generates their contribution internally (this always happens regardless of mode — the thinking is never skipped):
+For each participant's turn, Claude fully inhabits the agent's persona:
 
 1. **Fully inhabit that agent's persona** — you are now that character, not Claude
-2. **Everything said so far is already in your context** — every prior turn is visible above; use it naturally, as a person in the room would
+2. **Everything said so far is already in your context** — use it naturally
 3. **Generate their contribution** covering:
    - Name at least one prior speaker and reference their specific point
    - Add domain perspective only this agent holds
@@ -133,9 +205,9 @@ For each participant's turn, Claude fully inhabits the agent's persona and gener
 ---
 ```
 
-**If silent (default)**: do NOT print the turn. Hold it in context only — it still influences subsequent agents' reasoning.
+**If silent**: do NOT print the turn. Hold it in context only.
 
-All dialogue text follows the `--language` setting. Speaker labels (`**Architect**:`) are always in English regardless of language.
+---
 
 **Critical rules (both modes):**
 - Stay fully in character — the agent's constraints, tone, and knowledge domain apply
@@ -148,9 +220,25 @@ All dialogue text follows the `--language` setting. Speaker labels (`**Architect
 
 ## Step 5 — Synthesis (Final Turn)
 
-After all rounds, the most cross-domain agent (Auditor, Test-Runner, or the closest equivalent) speaks last as synthesizer.
+### When `PM_PRESENT = true`
 
-**Always print the synthesis regardless of mode** — this is the primary output of a silent meeting:
+PM delivers the final synthesis — always printed regardless of mode:
+
+```
+**PM**: (Synthesis)
+
+[PM MUST include:
+1. One-sentence outcome statement — what did this meeting decide?
+2. Points of agreement reached (specific, attributed to agents by name)
+3. Open questions remaining (if any)
+4. Concrete action items table — owner + deliverable, max 5 items]
+
+---
+```
+
+### When `PM_PRESENT = false`
+
+The most cross-domain agent (Auditor, Test-Runner, or closest equivalent) speaks last as synthesizer — always printed regardless of mode:
 
 ```
 **[Synthesizer]**: (Synthesis)
@@ -185,6 +273,7 @@ Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is
 **Topic**: [TOPIC in English]
 **Participants**: [list]
 **Rounds**: [N]
+**Orchestrator**: [PM | Facilitator]
 **Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
@@ -252,3 +341,5 @@ After saving the transcript (regardless of `--tasks`), register the meeting in M
 - ❌ Do not rush turns — each agent deserves a full, substantive contribution
 - ❌ Do not let agents all agree immediately — real expertise produces real friction
 - ❌ Do not run more than 3 rounds — persona consistency degrades after that
+- ❌ **When PM_PRESENT = true**: do not let other agents open or close rounds — PM exclusively owns round open/close
+- ❌ **When PM_PRESENT = true**: do not let PM skip the round-close turn — PM must synthesize every round before moving to the next
