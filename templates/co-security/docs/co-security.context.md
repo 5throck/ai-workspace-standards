@@ -94,6 +94,43 @@ All specialist agents are dispatched by PM only. Direct invocation is refused.
 
 ---
 
+## Security Engagement Rules
+
+These rules are automatically enforced by the PostToolUse hook in `.claude/settings.json` (see CLAUDE.md).
+
+1. **Authorization first** — No offensive work (recon, exploitation, PoC) begins without a signed authorization document.
+2. **Scope compliance** — All agents must refuse work targeting out-of-scope hosts without PM re-authorization.
+3. **Secret hygiene** — Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
+4. **Dry-run mandatory** — All Ansible playbooks must pass `--check` (dry-run) before live apply.
+5. **Engagement log** — All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
+
+### Beta Usage Scope
+
+**Current Status**: co-security is in **beta** status.
+
+**Allowed Activities** (Beta Phase):
+- ✅ Test environment engagements only (sandbox, isolated lab, staging)
+- ✅ Learning and evaluation of co-security template workflow
+- ✅ Practice engagements with synthetic targets
+- ✅ Testing verify-authorization skill and security features
+
+**Prohibited Activities** (Beta Phase):
+- ❌ Actual customer environment engagements
+- ❌ Production data access or processing
+- ❌ Real-world credential handling
+- ❌ Live penetration testing on customer infrastructure
+
+**Beta Exit Criteria**:
+co-security will be promoted to **stable** status when:
+1. Three successful sandbox test engagements are completed
+2. Zero critical bugs are reported in workflow or skills
+3. All A-04 verification items pass (full validation suite)
+4. Minimum 3 months of beta testing elapsed
+
+Until stable status is achieved, co-security should only be used for learning and testing purposes, not for actual customer security engagements.
+
+---
+
 ## Skills
 
 <!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->

@@ -2,5 +2,8 @@
   "name": "co-develop",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
   "status": "stable",
-  "version": "0.4.0"
+  "version": "1.0.0",
+  "lifecycle": {
+    "stablePromotedOn": "2026-05-28"
+  }
 }

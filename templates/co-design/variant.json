@@ -2,5 +2,8 @@
   "name": "co-design",
   "description": "Design-focused variant for UI/UX, design systems, and prototyping projects. Includes 5 specialized design agents.",
   "status": "stable",
-  "version": "0.5.0"
+  "version": "1.0.0",
+  "lifecycle": {
+    "stablePromotedOn": "2026-05-28"
+  }
 }
