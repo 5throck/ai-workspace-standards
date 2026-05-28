@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-05-28",
+  "description": "Central version registry for all template variants",
+  "variants": {
+    "co-develop": {
+      "latest": "1.0.0",
+      "released": "2026-05-28",
+      "status": "stable",
+      "security_advisories": [],
+      "migration_guides": []
+    },
+    "co-work": {
+      "latest": "1.0.0",
+      "released": "2026-05-28",
+      "status": "stable",
+      "security_advisories": [],
+      "migration_guides": []
+    },
+    "co-design": {
+      "latest": "1.0.0",
+      "released": "2026-05-28",
+      "status": "stable",
+      "security_advisories": [],
+      "migration_guides": []
+    },
+    "co-security": {
+      "latest": "0.2.0",
+      "released": "2026-05-28",
+      "status": "beta",
+      "security_advisories": [],
+      "migration_guides": [
+        "migrations/co-security/0.1.0-to-0.2.0.md"
+      ]
+    }
+  },
+  "schema_version": "1.0"
+}
