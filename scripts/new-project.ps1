@@ -9,7 +9,63 @@ param(
     [string]$Platform = "both"
 )
 
+function Initialize-UTF8Environment {
+    [CmdletBinding()]
+    param()
+
+    try {
+        # Force UTF-8 encoding for all operations
+        $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        [System.Text.Encoding]::RegisterProvider([System.Text.CodePages]::CodePagesEncodingProvider]::Instance)
+
+        # Set Git UTF-8 configuration
+        & git config --local core.quotepath false 2>$null
+        & git config --local i18n.commitencoding utf-8 2>$null
+        & git config --local i18n.logOutputEncoding utf-8 2>$null
+
+        Write-Verbose "UTF-8 environment initialized"
+    }
+    catch {
+        throw "Failed to initialize UTF-8 environment: $_"
+    }
+}
+
+function Validate-TemplateSync {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$TemplatePath
+    )
+
+    if (-not (Test-Path $TemplatePath)) {
+        throw "Template path not found: $TemplatePath"
+    }
+
+    $requiredFiles = @(
+        "CLAUDE.md",
+        "GEMINI.md",
+        "CONSTITUTION.md",
+        ".gitignore",
+        ".githooks/pre-commit"
+    )
+
+    $missingFiles = @()
+    foreach ($file in $requiredFiles) {
+        $filePath = Join-Path $TemplatePath $file
+        if (-not (Test-Path $filePath)) {
+            $missingFiles += $file
+        }
+    }
+
+    if ($missingFiles.Count -gt 0) {
+        throw "Missing required template files: $($missingFiles -join ', ')"
+    }
+
+    Write-Verbose "Template synchronization validated"
+}
+
 # UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+Initialize-UTF8Environment
 $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
@@ -154,6 +210,15 @@ if ($bunCmd -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
 }
 
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
+
+# ── Template validation before copying ───────────────────────────────────────
+try {
+    Validate-TemplateSync -TemplatePath $CommonDir
+    Write-Host "  ✅ Common template validation passed" -ForegroundColor Green
+} catch {
+    Write-Host "  ❌ Template validation failed: $_" -ForegroundColor Red
+    exit 1
+}
 
 # ── 1. Copy common/ first (shared infrastructure) ────────────────────────────
 if (-not (Test-Path $CommonDir)) {
