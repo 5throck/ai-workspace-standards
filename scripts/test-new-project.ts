@@ -93,7 +93,7 @@ console.log(`   Test dir     : ${testDir}`);
 console.log(`   OS           : ${isWin ? 'Windows (ps1)' : 'Unix (sh)'}\n`);
 
 try {
-  // ── Test 1: Project Creation ──────────────────────────────────────────────
+  // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
   console.log('Test 1: Project Creation');
   try {
     let result;
@@ -114,7 +114,7 @@ try {
     process.exit(1);
   }
 
-  // ── Test 2: UTF-8 Integrity ───────────────────────────────────────────────
+  // ── Test 2: UTF-8 Integrity [maps to: step 5 (encoding)] ───────────────────
   console.log('\nTest 2: UTF-8 Integrity');
   try {
     const content = readText('README.md');
@@ -125,7 +125,7 @@ try {
     }
   } catch (e) { fail('Test 2', String(e)); }
 
-  // ── Test 3: Placeholder Substitution ─────────────────────────────────────
+  // ── Test 3: Placeholder Substitution [maps to: step 5] ──────────────────────
   console.log('\nTest 3: Placeholder Substitution');
   try {
     const readme = readText('README.md');
@@ -140,7 +140,7 @@ try {
     }
   } catch (e) { fail('Test 3', String(e)); }
 
-  // ── Test 4: Git Initialisation ────────────────────────────────────────────
+  // ── Test 4: Git Initialisation [maps to: step 7] ──────────────────────────
   console.log('\nTest 4: Git Initialisation');
   try {
     if (!fileExists('.git')) {
@@ -156,7 +156,7 @@ try {
     }
   } catch (e) { fail('Test 4', String(e)); }
 
-  // ── Test 5: Git Hooks Installed ───────────────────────────────────────────
+  // ── Test 5: Git Hooks Installed [maps to: step 6 + step 7] ────────────────
   console.log('\nTest 5: Git Hooks Installed');
   try {
     const required = ['pre-commit', 'pre-push'];
@@ -168,7 +168,7 @@ try {
     }
   } catch (e) { fail('Test 5', String(e)); }
 
-  // ── Test 6: Security Bootstrap ────────────────────────────────────────────
+  // ── Test 6: Security Bootstrap [maps to: step 6.5] ────────────────────────
   console.log('\nTest 6: Security Bootstrap');
   const secChecks: [string, () => boolean][] = [
     ['.gitleaks.toml present',          () => fileExists('.gitleaks.toml')],
@@ -184,7 +184,7 @@ try {
     } catch (e)    { fail('Test 6', `${label}: ${e}`); secOk = false; }
   }
 
-  // ── Test 7: Required Template Files ──────────────────────────────────────
+  // ── Test 7: Required Template Files [maps to: step 1 + step 2] ───────────
   console.log('\nTest 7: Required Template Files');
   try {
     const required = ['AGENTS.md', 'agents/pm.md', '.gitignore', '.githooks/pre-commit'];
@@ -199,7 +199,7 @@ try {
     }
   } catch (e) { fail('Test 7', String(e)); }
 
-  // ── Test 8: Platform Profile ──────────────────────────────────────────────
+  // ── Test 8: Platform Profile [maps to: step 2.5] ────────────────────────
   console.log('\nTest 8: Platform Profile');
   try {
     if (platformArg === 'claude') {
@@ -216,7 +216,7 @@ try {
     }
   } catch (e) { fail('Test 8', String(e)); }
 
-  // ── Test 9: variant.json lifecycle.statusSince ────────────────────────────
+  // ── Test 9: variant.json lifecycle.statusSince [maps to: step 5.5b] ───────
   console.log('\nTest 9: variant.json lifecycle.statusSince');
   try {
     if (!fileExists('variant.json')) {
@@ -231,7 +231,7 @@ try {
     }
   } catch (e) { fail('Test 9', String(e)); }
 
-  // ── Test 10: scripts-snapshot.json ───────────────────────────────────────
+  // ── Test 10: scripts-snapshot.json [maps to: step 5.5c] ──────────────────
   console.log('\nTest 10: scripts-snapshot.json');
   try {
     if (!fileExists('scripts-snapshot.json')) {
@@ -246,7 +246,7 @@ try {
     }
   } catch (e) { fail('Test 10', String(e)); }
 
-  // ── Test 11: package.json Tier 2 scripts ─────────────────────────────────
+  // ── Test 11: package.json Tier 2 scripts [maps to: step 5.5d] ──────────────
   console.log('\nTest 11: package.json Tier 2 scripts');
   try {
     if (!fileExists('package.json')) {
@@ -263,7 +263,7 @@ try {
     }
   } catch (e) { fail('Test 11', String(e)); }
 
-  // ── Test 12: .claude/template-version.txt ────────────────────────────────
+  // ── Test 12: .claude/template-version.txt [maps to: step 5.6] ──────────────
   console.log('\nTest 12: .claude/template-version.txt');
   try {
     const tvPath = '.claude/template-version.txt';
@@ -283,7 +283,7 @@ try {
     }
   } catch (e) { fail('Test 12', String(e)); }
 
-  // ── Test 13: .gitattributes merge=ours ───────────────────────────────────
+  // ── Test 13: .gitattributes merge=ours [maps to: step 5.7] ────────────────
   console.log('\nTest 13: .gitattributes merge=ours for context.md');
   try {
     if (!fileExists('.gitattributes')) {
@@ -298,7 +298,7 @@ try {
     }
   } catch (e) { fail('Test 13', String(e)); }
 
-  // ── Test 14: docs/_examples removed ──────────────────────────────────────
+  // ── Test 14: docs/_examples removed [maps to: step 3] ────────────────────
   console.log('\nTest 14: docs/_examples removed');
   try {
     if (fileExists('docs/_examples')) {
@@ -308,7 +308,7 @@ try {
     }
   } catch (e) { fail('Test 14', String(e)); }
 
-  // ── Test 15: No .gitkeep files ────────────────────────────────────────────
+  // ── Test 15: No .gitkeep files [maps to: step 4] ────────────────────────
   console.log('\nTest 15: No .gitkeep files remain');
   try {
     const gitkeeps = findFiles(testDir, '.gitkeep');
@@ -319,7 +319,7 @@ try {
     }
   } catch (e) { fail('Test 15', String(e)); }
 
-  // ── Test 16: File permissions (Unix only) ─────────────────────────────────
+  // ── Test 16: File permissions (Unix only) [maps to: step 6] ───────────────
   console.log('\nTest 16: Hook file permissions');
   if (isWin) {
     skip('Test 16', 'file permission check not applicable on Windows (git index chmod used instead)');
@@ -340,7 +340,7 @@ try {
     } catch (e) { fail('Test 16', String(e)); }
   }
 
-  // ── Test 17: No .cmd files ────────────────────────────────────────────────
+  // ── Test 17: No .cmd files [maps to: step 2.6] ────────────────────────────
   console.log('\nTest 17: No .cmd files');
   try {
     function findCmdFiles(dir: string): string[] {
@@ -361,7 +361,7 @@ try {
     }
   } catch (e) { fail('Test 17', String(e)); }
 
-  // ── Test 18: Script pair validation in project scripts/ ───────────────────
+  // ── Test 18: Script pair validation in project scripts/ [maps to: step 3.5]
   console.log('\nTest 18: Script pair validation in project scripts/');
   try {
     const projScripts = join(testDir, 'scripts');
@@ -385,7 +385,7 @@ try {
     }
   } catch (e) { fail('Test 18', String(e)); }
 
-  // ── Test 19: AGENTS.md Skills injected into context.md ───────────────────
+  // ── Test 19: AGENTS.md Skills injected into context.md [maps to: step 5.6b]
   console.log('\nTest 19: AGENTS.md Skills injected into context.md');
   try {
     const contextPath = join(testDir, 'docs', `${variantArg}.context.md`);

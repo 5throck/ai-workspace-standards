@@ -256,7 +256,24 @@ if [ -n "$README_FILES" ]; then
   fi
 fi
 
-# ── 4. Script Parity Check 
+# ── 3.8. new-project Test Coverage Sync ──────────────────────────────────────
+# When new-project.sh/.ps1 or test-new-project.ts are staged, verify TEST: mapping
+if echo "$STAGED" | grep -qE "scripts/new-project\.(sh|ps1)|scripts/test-new-project\.ts"; then
+  if command -v bun &>/dev/null && [ -f "scripts/verify-new-project-tests.ts" ]; then
+    echo ""
+    echo -e "\033[36m=== new-project test coverage sync ===\033[0m"
+    if bun scripts/verify-new-project-tests.ts; then
+      true
+    else
+      echo ""
+      echo "       Fix: add '# TEST: Test N' or '# TEST: none' to each step in new-project.sh/.ps1"
+      echo "       Then add the corresponding '// ── Test N:' header to test-new-project.ts"
+      exit 1
+    fi
+  fi
+fi
+
+# ── 4. Script Parity Check
 # Ensure every .sh has a corresponding .ps1 and vice versa
 if [ -d "scripts" ]; then
   SH_NAMES=$(ls scripts/*.sh 2>/dev/null | sed 's|.*/||; s/\.sh$//' | sort)
