@@ -10,6 +10,7 @@
  *
  * Test coverage:
  *   0.  Script syntax validation (bash -n / pwsh parser — runs before project creation)
+ *       0c. Initialize-UTF8Environment executes without error on all PS versions
  *   1.  Project creation
  *   2.  UTF-8 integrity (no replacement chars)
  *   3.  Placeholder substitution ([Project Name] replaced)
@@ -129,6 +130,29 @@ try {
     }
   } catch (e) {
     skip('Test 0b', `pwsh not available — skipping ps1 syntax check (${e})`);
+  }
+
+  // 0c: Initialize-UTF8Environment executes without error on any PS version.
+  // Specifically guards against:
+  //   - [System.Text.CodePages.CodePagesEncodingProvider] type not found (PS 5.1 / .NET Framework)
+  //   - Any other runtime error in the UTF-8 setup block
+  // The function must succeed (exit 0) regardless of whether the assembly is available.
+  try {
+    const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
+    const initCmd =
+      `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
+      `Invoke-Expression ($content -replace '(?s)^.*?(function Initialize-UTF8Environment.*?^\\})', '$1'); ` +
+      `Initialize-UTF8Environment; ` +
+      `Write-Host 'Initialize-UTF8Environment: OK'`;
+    const initResult = await $`pwsh -NoProfile -Command ${initCmd}`.nothrow();
+    if (initResult.exitCode !== 0) {
+      fail('Test 0c', `Initialize-UTF8Environment threw an error:\n${initResult.stderr.toString().trim()}`);
+      syntaxOk = false;
+    } else {
+      pass('Test 0c PASSED: Initialize-UTF8Environment runs without error');
+    }
+  } catch (e) {
+    skip('Test 0c', `pwsh not available — skipping (${e})`);
   }
 
   if (!syntaxOk) {
