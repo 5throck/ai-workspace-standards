@@ -2,11 +2,18 @@
   "mcpServers": {
     "codegraph": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@colbymchenry/codegraph",
-        "serve"
-      ]
+      "args": ["-y", "@colbymchenry/codegraph", "serve"]
     }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [{ "type": "command", "command": "bun scripts/check-pm-approval.ts" }]
+      }
+    ],
+    "SessionStart": [
+      { "type": "command", "command": "rm -f .pm-approved" }
+    ]
   }
 }

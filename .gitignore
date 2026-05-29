@@ -7,6 +7,9 @@
 # --- Ignore all subdirectories (each is its own repo) ---
 /*/
 
+# --- PM gateway approval flag (session-local, must not be committed) ---
+.pm-approved
+
 # --- Secrets and local certs ---
 .env
 *.pem
