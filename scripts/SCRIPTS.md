@@ -75,6 +75,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |

@@ -13,7 +13,7 @@
       }
     ],
     "SessionStart": [
-      { "type": "command", "command": "rm -f .pm-approved" }
+      { "type": "command", "command": "bun scripts/clear-pm-approval.ts" }
     ]
   }
 }

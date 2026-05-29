@@ -90,6 +90,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `qa-gate.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
 | `qa-gate.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — |
+| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — |
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
