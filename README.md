@@ -30,7 +30,67 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 
 ---
 
+## Prerequisites
+
+**Before using this workspace**, ensure you have the required software installed:
+
+> **📖 Detailed Guide**: See [Getting Started](docs/getting-started.md) for complete installation instructions and troubleshooting.
+
+### Must-Have Tools
+
+| Tool | Version | Purpose | Install |
+|------|---------|---------|---------|
+| **Git** | 2.x+ | Version control, hooks automation | [git-scm.com](https://git-scm.com/downloads) |
+| **Bun** ⭐ | 1.x+ | TypeScript scripts, project creation (REQUIRED) | `curl -fsSL https://bun.sh/install \| bash` |
+
+**BREAKING CHANGE**: Bun is now **required** for project creation (replaces Python/PowerShell inline code).
+
+### Optional Tools
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| **GitHub CLI (gh)** | PR automation | [cli.github.com](https://cli.github.com/) |
+
+### Project-Specific Tools
+
+Install these **only** when creating projects of specific types:
+
+| Tool | Project Type | Install |
+|------|-------------|---------|
+| **Python 3** | Python projects | [python.org](https://www.python.org/downloads/) |
+| **Node.js** | Node.js projects | [nodejs.org](https://nodejs.org/) |
+| **.NET SDK** | .NET projects | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) |
+| **Rust** | Rust projects | [rust-lang.org](https://www.rust-lang.org/) |
+| **Go** | Go projects | [go.dev](https://go.dev/dl/) |
+
+> **Note**: `scripts/setup.sh/ps1` will automatically detect and install project dependencies after project creation.
+
+### Quick Verification
+
+```bash
+# Check essential tools
+git --version    # Should show 2.x.x
+bun --version    # Should show 1.x.x
+```
+
+**Install missing tools**: See [Getting Started](docs/getting-started.md#-essential-software-must-have) for detailed installation instructions.
+
+---
+
 ## Quick Start
+
+### 0. Install prerequisites (if not already installed)
+
+```bash
+# Install Bun (REQUIRED)
+bash scripts/install-bun.sh      # Unix/Linux/macOS
+pwsh scripts/install-bun.ps1      # Windows
+
+# Verify installation
+git --version
+bun --version
+python3 --version
+```
 
 ### 1. Clone as workspace root
 
