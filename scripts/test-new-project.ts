@@ -11,6 +11,7 @@
  * Test coverage:
  *   0.  Script syntax validation (bash -n / pwsh parser — runs before project creation)
  *       0c. Initialize-UTF8Environment executes without error on all PS versions
+ *       0d. Validate-TemplateSync correctly checks common/ and variant/ separately
  *   1.  Project creation
  *   2.  UTF-8 integrity (no replacement chars)
  *   3.  Placeholder substitution ([Project Name] replaced)
@@ -153,6 +154,29 @@ try {
     }
   } catch (e) {
     skip('Test 0c', `pwsh not available — skipping (${e})`);
+  }
+
+  // 0d: Validate-TemplateSync checks common/ and variant/ directories separately.
+  // Guards against the bug where CLAUDE.md/GEMINI.md/agents/pm.md were expected
+  // in templates/common/ but actually live in variant folders only.
+  try {
+    const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
+    const commonPath  = join(process.cwd(), 'templates', 'common').replace(/\\/g, '/');
+    const variantPath = join(process.cwd(), 'templates', variantArg).replace(/\\/g, '/');
+    const validateCmd =
+      `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
+      `Invoke-Expression ($content -replace '(?s)^.*?(function Validate-TemplateSync.*?^\\})', '$1'); ` +
+      `Validate-TemplateSync -CommonPath '${commonPath}' -VariantPath '${variantPath}'; ` +
+      `Write-Host 'Validate-TemplateSync: OK'`;
+    const vResult = await $`pwsh -NoProfile -Command ${validateCmd}`.nothrow();
+    if (vResult.exitCode !== 0) {
+      fail('Test 0d', `Validate-TemplateSync failed:\n${vResult.stderr.toString().trim()}`);
+      syntaxOk = false;
+    } else {
+      pass('Test 0d PASSED: Validate-TemplateSync passes for common/ and variant/');
+    }
+  } catch (e) {
+    skip('Test 0d', `pwsh not available (${e})`);
   }
 
   if (!syntaxOk) {
