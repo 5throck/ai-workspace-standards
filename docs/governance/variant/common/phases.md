@@ -1,3 +1,7 @@
+> **SSOT**: This file is the authoritative source for workspace-root phase definitions.
+> Phase definitions for each variant are in `docs/governance/variant/<variant-name>/phases.md`.
+> These files are governance records, NOT scaffold-time copy targets — they are not copied to new projects.
+
 # Workspace Root (Common) Core Phases
 
 ## Governance Workflow

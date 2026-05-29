@@ -23,6 +23,15 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 *   **Execution**: Must be registered in and run via `package.json` scripts (e.g., `bun run audit`, `bun run dev-sync`).
 *   **Examples**: `audit.ts`, `dev-sync.ts`, `gen-pr-body.ts`, `publish-to-template.ts`.
 
+### L1-only Tier 2: Template-Exclusive Scripts (Bun/TS, not published to L0)
+
+*   **Purpose**: Scripts that operate on the template layer (L1) itself — variant validation, template publishing, project scaffolding — and are never needed at the workspace root (L0) level.
+*   **Implementation**: TypeScript (`.ts`) executed via Bun runtime. No `.sh`/`.ps1` wrappers.
+*   **Execution**: `bun run <script>` within `templates/common/scripts/` context.
+*   **Examples**: `validate-templates.ts`, `verify-scripts.ts`, `publish-to-template.ts`, `qa-gate.ts`, `sync-skills.ts`, `list-template-versions.ts`.
+*   **Propagation**: These scripts are propagated to L2 projects via `new-project.sh`. They are NOT published back to L0 — `publish-to-template.ts` must exclude them.
+*   **Identification in Registry**: Source column = `L1` for L1-only scripts.
+
 ---
 
 ## Registry
@@ -240,6 +249,7 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bash scripts/publish-to-template.sh` / `.\scripts\publish-to-template.ps1`
 **Dry-run**: `bash scripts/publish-to-template.sh --dry-run`
 **Note**: L1-only script (not propagated to template).
+**L1-only exclude**: `publish-to-template.ts` must NOT overwrite L1-only scripts (source=L1 in Registry) when publishing L0→L1. Check the exclude list in `publish-to-template.ts`.
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance

@@ -366,10 +366,10 @@ fi
 
 ## References
 
-- [Phase 4: Template Validation System](../common/TEMPLATE_VALIDATION.md) (to be created)
-- [Variant JSON Schema](../common/variant.schema.json) (to be created)
-- [New Project Script](../scripts/new-project.sh)
-- [CHANGELOG.md](../CHANGELOG.md)
+- [Phase 4: Template Validation System](../governance/TEMPLATE_VALIDATION.md) (to be created)
+- [Variant JSON Schema](../governance/variant.schema.json) (to be created)
+- [New Project Script](../../scripts/new-project.sh)
+- [CHANGELOG.md](../../CHANGELOG.md)
 
 ---
 

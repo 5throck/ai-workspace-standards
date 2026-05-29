@@ -57,7 +57,7 @@ The `status` field MUST be one of the following:
 
 ## Migration Guide Paths
 
-Migration guide paths are relative to `templates/common/`:
+Migration guide paths are relative to `docs/governance/`:
 
 ```json
 {
