@@ -8,6 +8,8 @@ This guide covers the software you need to install before using this workspace e
 
 ## 🔧 Essential Software (Must-Have)
 
+> **Required for all users**: Git and Bun are mandatory for workspace functionality and project creation.
+
 ### 1. Git
 
 **Purpose**: Version control, git hooks automation
@@ -34,7 +36,7 @@ git config core.hooksPath .githooks
 
 ---
 
-### 2. Bun ⭐ (BREAKING CHANGE - Now Required)
+### 2. Bun ⭐ (REQUIRED - Breaking Change)
 
 **Purpose**: TypeScript helper script execution, project creation, validation
 
@@ -65,11 +67,16 @@ bun --version
 
 ---
 
-### 3. Python 3
+### 3. Python 3 (Optional - Project-Specific)
 
-**Purpose**: Some utility scripts, `setup.sh` functionality
+**Purpose**: Required **only** when creating Python projects
 
-**Installation**:
+**When You Need It**:
+- Creating Python projects (`--variant co-develop` with Python stack)
+- Running `scripts/setup.sh` for Python projects (venv creation, dependency installation)
+- Python license audits in project setup
+
+**Installation** (if creating Python projects):
 ```bash
 # Windows: https://www.python.org/downloads/
 # macOS: brew install python@3
@@ -91,9 +98,15 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 pip install uv
 ```
 
+> **Note**: If you're not creating Python projects, you can skip Python installation entirely.
+
 ---
 
-### 4. Shell Environment
+## 🎯 Optional Software (Recommended)
+
+> **Install as needed**: These tools are not required for basic workspace functionality but enhance the experience.
+
+### 1. GitHub CLI (gh)
 
 **Purpose**: Script execution
 
@@ -140,7 +153,50 @@ gh auth login
 
 ---
 
-### 6. Project-Specific Tools
+### 2. Python 3 (Project-Specific)
+
+**Purpose**: Required **only** when creating Python projects
+
+**When You Need It**:
+- Creating Python projects
+- Running `scripts/setup.sh` for Python projects
+- Python project dependency management
+
+**Installation** (if creating Python projects):
+```bash
+# Windows: https://www.python.org/downloads/
+# macOS: brew install python@3
+# Linux (Ubuntu/Debian): sudo apt install python3 python3-pip
+```
+
+**Verification**:
+```bash
+python3 --version
+# Expected output: Python 3.8 or higher
+```
+
+### 3. uv (Python Package Manager - Optional)
+
+**Purpose**: Faster Python dependency management (alternative to pip)
+
+**Installation**:
+```bash
+# All platforms
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# or
+pip install uv
+```
+
+**Verification**:
+```bash
+uv --version
+```
+
+---
+
+## 📋 Project-Specific Tools
+
+> **Install as needed**: These tools are required only when creating projects of specific types.
 
 Depending on the type of project you create, additional tools may be required:
 
@@ -163,7 +219,7 @@ Depending on the type of project you create, additional tools may be required:
 
 ## 📋 Pre-Installation Checklist
 
-Run this checklist to verify your environment:
+Run this checklist to verify your essential tools:
 
 ```bash
 #!/usr/bin/env bash
@@ -189,24 +245,19 @@ else
   echo "   Or: bash scripts/install-bun.sh"
 fi
 
-# Python
-if command -v python3 &>/dev/null; then
-  echo "✅ Python: $(python3 --version)"
-else
-  echo "❌ Python 3 not installed"
-  echo "   Install from: https://www.python.org/downloads/"
-fi
-
-# GitHub CLI (optional)
-if command -v gh &>/dev/null; then
-  echo "✅ GitHub CLI: $(gh --version)"
-else
-  echo "⚠️  GitHub CLI not installed (optional but recommended)"
-  echo "   Install from: https://cli.github.com/"
-fi
-
 echo ""
-echo "=== Checklist Complete ==="
+echo "=== Essential Tools Complete ==="
+echo ""
+echo "Optional tools (install as needed):"
+echo "  - Python 3 (for Python projects)"
+echo "  - GitHub CLI (for PR automation)"
+echo "  - uv (for faster Python package management)"
+```
+
+**Full verification script** (includes optional tools):
+```bash
+# Check all tools including optional
+check-env-full.sh
 ```
 
 Save this as `check-environment.sh`, make it executable, and run:
@@ -247,7 +298,6 @@ bash scripts/install-bun.sh
 # 4. Verify installation
 git --version
 bun --version
-python3 --version
 ```
 
 ### 3. (Optional) Install GitHub CLI

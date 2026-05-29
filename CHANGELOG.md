@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-script-pair-sync.md` — structural analysis of `intentional drift` policy flaw in `.sh`/`.ps1` horizontal sync; proposed `pair` field to SCRIPTS.md schema; 5 action items (A-01~A-05)
 
 ### Changed
+- **[2026-05-29]**: `docs/getting-started.md` — reclassified Python 3 from "essential" to "optional" (project-specific); updated prerequisites checklist to reflect Git + Bun as the only truly essential tools
+- **[2026-05-29]**: `README.md` — removed Python from "Must-Have Tools" section; moved to "Optional Tools" (Python projects only)
 - **[2026-05-29]**: `scripts/new-project.sh` — replaced all Python inline code with TypeScript helper calls; UTF-8 decoding errors resolved
 - **[2026-05-29]**: `scripts/new-project.ps1` — replaced PowerShell native code with TypeScript helper calls; now uses identical logic to SH version (single source of truth)
 - **[2026-05-29]**: `.claude/settings.json` and all template settings files — fixed SessionStart hook structure (added missing `matcher` and `hooks` wrapper)

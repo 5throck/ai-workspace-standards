@@ -42,7 +42,6 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 |------|---------|---------|---------|
 | **Git** | 2.x+ | Version control, hooks automation | [git-scm.com](https://git-scm.com/downloads) |
 | **Bun** ⭐ | 1.x+ | TypeScript scripts, project creation (REQUIRED) | `curl -fsSL https://bun.sh/install \| bash` |
-| **Python 3** | 3.8+ | Utility scripts | [python.org](https://www.python.org/downloads/) |
 
 **BREAKING CHANGE**: Bun is now **required** for project creation (replaces Python/PowerShell inline code).
 
@@ -51,6 +50,7 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 | Tool | Purpose | Install |
 |------|---------|---------|
 | **GitHub CLI (gh)** | PR automation | [cli.github.com](https://cli.github.com/) |
+| **Python 3** | Python projects only | [python.org](https://www.python.org/downloads/) |
 | **uv** | Fast Python package manager | `pip install uv` |
 
 ### Quick Verification
