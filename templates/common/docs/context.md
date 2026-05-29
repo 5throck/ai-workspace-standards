@@ -52,6 +52,21 @@ Standard directory layout for all projects in this workspace:
 
 ---
 
+## Platform-Specific Tools
+
+Standard package managers for each platform:
+
+| Platform | Package Manager | Example Usage |
+|----------|----------------|---------------|
+| **Windows** | `winget` | `winget install Git.Git`, `winget install OpenJS.NodeJS` |
+| **macOS** | `brew` | `brew install git`, `brew install node` |
+| **Linux (Ubuntu/Debian)** | `apt` | `sudo apt install git`, `sudo apt install python3` |
+| **Linux (Fedora/RHEL)** | `dnf` | `sudo dnf install git`, `sudo dnf install python3` |
+
+> **Why This Matters**: Standard package managers ensure consistent installation experiences across teams. Always prefer platform-native package managers over manual downloads when available.
+
+---
+
 ## Documentation Standards
 
 ### Session Log Format (`memory/YYYY-MM-DD.md`)

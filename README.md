@@ -55,13 +55,15 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 
 Install these **only** when creating projects of specific types:
 
-| Tool | Project Type | Install |
-|------|-------------|---------|
-| **Python 3** | Python projects | [python.org](https://www.python.org/downloads/) |
-| **Node.js** | Node.js projects | [nodejs.org](https://nodejs.org/) |
-| **.NET SDK** | .NET projects | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) |
-| **Rust** | Rust projects | [rust-lang.org](https://www.rust-lang.org/) |
-| **Go** | Go projects | [go.dev](https://go.dev/dl/) |
+| Tool | Project Type | Platform | Install Method |
+|------|-------------|---------|---------------|
+| **Python 3** | Python projects | All | [python.org](https://www.python.org/downloads/) |
+| **Node.js** | Node.js projects | All | [nodejs.org](https://nodejs.org/) or `winget install OpenJS.NodeJS` (Windows) |
+| **.NET SDK** | .NET projects | All | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) |
+| **Rust** | Rust projects | All | [rust-lang.org](https://www.rust-lang.org/) |
+| **Go** | Go projects | All | [go.dev](https://go.dev/dl/) |
+
+> **Note**: For comprehensive installation guides with platform-specific package managers, see [Getting Started](docs/getting-started.md#-platform-specific-tools).
 
 > **Note**: `scripts/setup.sh/ps1` will automatically detect and install project dependencies after project creation.
 

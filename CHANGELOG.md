@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: `README.md` — added platform-specific installation methods to Project-Specific Tools table (e.g., `winget install OpenJS.NodeJS` for Windows) and reference to Getting Started guide
+- **[2026-05-29]**: `templates/common/docs/context.md` — added "Platform-Specific Tools" table with standard package managers (winget, brew, apt, dnf) for consistent installation experiences
 - **[2026-05-29]**: `docs/getting-started.md` — comprehensive installation guide with prerequisites checklist, troubleshooting, and platform-specific instructions
 - **[2026-05-29]**: TypeScript helper scripts for project creation — `scripts/helpers/` directory with 8 modular scripts (template-validation.ts, lifecycle-governance.ts, validate-output.ts, substitute-placeholders.ts, update-variant-lifecycle.ts, write-scripts-snapshot.ts, merge-package-scripts.ts, inject-skills.ts)
 - **[2026-05-29]**: Test 0e to `test-new-project.ts` — validates new-project.sh template verification logic checks common/ and variant/ separately
