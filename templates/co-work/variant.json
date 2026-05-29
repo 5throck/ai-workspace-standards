@@ -1,6 +1,14 @@
 {
   "inherits_common": "1.0.0",
-  "agent_overrides": {},
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "co-work provides variant-specific Agent Roster (researcher, doc-writer, stakeholder-liaison, coordinator), Governance Workflow (Phase 3 = Stakeholder Alignment), and Dispatch Protocol",
+      "since": "2026-05-30",
+      "reviewed_by": "lifecycle-manager",
+      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+    }
+  },
   "phases": {
     "phase3_name": "Stakeholder Alignment"
   },

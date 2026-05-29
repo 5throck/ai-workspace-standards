@@ -17,6 +17,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | Common PM Skeleton Design — Baseline Methodology | [meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md](meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md) |
 | 2026-05-30 | Common Lifecycle Governance Deep Dive v2 | [meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md](meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md) |
 | 2026-05-30 | Common Skills and Agents Central Management Governance | [meeting-2026-05-30-common-skills-and-agents-central-managem.md](meeting-2026-05-30-common-skills-and-agents-central-managem.md) |
 | 2026-05-30 | Project Review Skill Design v2 — Naming and Scaffolding | [meeting-2026-05-30-project-review-skill-design-v2-naming-an.md](meeting-2026-05-30-project-review-skill-design-v2-naming-an.md) |

@@ -16,13 +16,29 @@
       "version": "1.0.0",
       "overridable": true,
       "override_type_allowed": ["additive", "replacement"],
-      "description": "Project Manager — orchestrates phases 0, 2, 6; universal across all variants"
+      "description": "Project Manager — orchestrates phases 0, 2, 6; universal across all variants",
+      "skeleton_sections": [
+        "Role",
+        "YOU ARE THE SINGLE ENTRY POINT",
+        "Consensus-Driven Facilitation Model",
+        "Proactive Review Triggers (T-02)",
+        "QA Self-Check Trigger (T-03)",
+        "Meeting Facilitation",
+        "Constraints"
+      ],
+      "variant_sections": [
+        "Agent Roster",
+        "Governance Workflow",
+        "Dispatch Protocol"
+      ]
     },
     "lifecycle-manager": {
       "source": "agents/lifecycle-manager.md",
       "version": "1.0.0",
       "overridable": false,
-      "description": "Lifecycle state monitor — governance record keeper; identical role across all variants"
+      "description": "Lifecycle state monitor — governance record keeper; identical role across all variants",
+      "skeleton_sections": ["Role", "Responsibilities", "Constraints", "Dispatch Protocol"],
+      "variant_sections": []
     }
   },
   "common_skills": {

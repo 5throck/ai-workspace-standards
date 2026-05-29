@@ -214,33 +214,69 @@ if [ -d "$SCRIPTS_DIR_PROJ" ]; then
   fi
 fi
 
-# ── 3.6. Agent Override Merge (common-contract.json additive overrides) ─────── # TEST: none
-# For additive overrides: concatenate common base + variant partial sections
+# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────
+# For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 if [ -f "$TEMPLATES_DIR/variant.json" ] && command -v bun &>/dev/null; then
-  AGENT_OVERRIDES=$(bun -e "
-    const v = JSON.parse(require('fs').readFileSync('$TEMPLATES_DIR/variant.json', 'utf8'));
-    const overrides = v.agent_overrides || {};
-    const additive = Object.entries(overrides)
-      .filter(([, o]) => o.type === 'additive')
-      .map(([name]) => name);
-    console.log(JSON.stringify(additive));
-  " 2>/dev/null || echo "[]")
+  bun - "$COMMON_DIR" "$TEMPLATES_DIR" "$PROJECT_DIR" <<'BUNSCRIPT'
+    const fs = require('fs');
+    const path = require('path');
+    const [,, commonDir, variantDir, projectDir] = process.argv;
 
-  # Process each additive override
-  echo "$AGENT_OVERRIDES" | bun -e "
-    const names = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-    names.forEach(name => {
-      const commonFile = '$COMMON_DIR/agents/' + name + '.md';
-      const variantFile = '$TEMPLATES_DIR/agents/' + name + '.md';
-      const outFile = '$PROJECT_DIR/agents/' + name + '.md';
-      if (require('fs').existsSync(commonFile) && require('fs').existsSync(variantFile)) {
-        const merged = require('fs').readFileSync(commonFile, 'utf8') + '\n\n' +
-                       require('fs').readFileSync(variantFile, 'utf8');
-        require('fs').writeFileSync(outFile, merged);
-        console.log('  [MERGE] agents/' + name + '.md (common + variant additive sections)');
+    const variantJsonPath = path.join(variantDir, 'variant.json');
+    if (!fs.existsSync(variantJsonPath)) process.exit(0);
+
+    const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
+    const overrides = variant.agent_overrides || {};
+
+    for (const [agentName, override] of Object.entries(overrides)) {
+      if (override.type !== 'additive') continue;
+
+      const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
+      const variantFile = path.join(variantDir, 'agents', agentName + '.md');
+      const outFile = path.join(projectDir, 'agents', agentName + '.md');
+
+      if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile)) continue;
+
+      let skeleton = fs.readFileSync(skeletonFile, 'utf8');
+      const variantContent = fs.readFileSync(variantFile, 'utf8');
+
+      // Parse all ## sections from variant file
+      const allSections = {};
+      const lines = variantContent.split('\n');
+      let currentHeading = null;
+      let currentLines = [];
+      for (const line of lines) {
+        if (line.startsWith('## ')) {
+          if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+          currentHeading = line.slice(3).trim();
+          currentLines = [line];
+        } else if (currentHeading) {
+          currentLines.push(line);
+        }
       }
-    });
-  " 2>/dev/null || true
+      if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+
+      // Map VARIANT-SECTION ids to heading names
+      const headingMap = {
+        'agent-roster': 'Agent Roster',
+        'governance-workflow': 'Governance Workflow',
+        'dispatch-protocol': 'Dispatch Protocol',
+      };
+
+      // Replace VARIANT-SECTION blocks in skeleton
+      const vsRegex = /<!-- VARIANT-SECTION: ([\w-]+) -->([\s\S]*?)<!-- END VARIANT-SECTION -->/g;
+      skeleton = skeleton.replace(vsRegex, (match, sectionId) => {
+        const heading = headingMap[sectionId];
+        if (heading && allSections[heading]) {
+          return allSections[heading];
+        }
+        return ''; // remove markers if no variant section found
+      });
+
+      fs.writeFileSync(outFile, skeleton, 'utf8');
+      console.log('  [SECTION-MERGE] agents/' + agentName + '.md (skeleton + variant sections)');
+    }
+BUNSCRIPT
 fi
 
 # ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15

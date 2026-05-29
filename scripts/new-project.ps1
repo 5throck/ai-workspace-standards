@@ -294,25 +294,76 @@ if (Test-Path $scriptsDir) {
     }
 }
 
-# ── 2.6. Agent Override Merge (common-contract.json additive overrides) ─────── # TEST: none
-# For additive overrides: concatenate common base + variant partial sections
+# ── 2.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────  # TEST: none
+# For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 $VariantJson = Join-Path $TemplatesDir "variant.json"
-if (Test-Path $VariantJson) {
-    $VariantConfig = Get-Content $VariantJson | ConvertFrom-Json
-    $AgentOverrides = $VariantConfig.agent_overrides
-    if ($AgentOverrides) {
-        $AgentOverrides.PSObject.Properties | Where-Object { $_.Value.type -eq "additive" } | ForEach-Object {
-            $AgentName = $_.Name
-            $CommonAgentFile = Join-Path $CommonDir "agents\$AgentName.md"
-            $VariantAgentFile = Join-Path $TemplatesDir "agents\$AgentName.md"
-            $OutAgentFile = Join-Path $ProjectDir "agents\$AgentName.md"
-            if ((Test-Path $CommonAgentFile) -and (Test-Path $VariantAgentFile)) {
-                $CommonContent = Get-Content $CommonAgentFile -Raw
-                $VariantContent = Get-Content $VariantAgentFile -Raw
-                "$CommonContent`n`n$VariantContent" | Set-Content $OutAgentFile -Encoding UTF8
-                Write-Host "  [MERGE] agents/$AgentName.md (common + variant additive sections)"
-            }
-        }
+if ((Test-Path $VariantJson) -and (Get-Command "bun" -ErrorAction SilentlyContinue)) {
+    $BunScript = @'
+const fs = require('fs');
+const path = require('path');
+const [,, commonDir, variantDir, projectDir] = process.argv;
+
+const variantJsonPath = path.join(variantDir, 'variant.json');
+if (!fs.existsSync(variantJsonPath)) process.exit(0);
+
+const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
+const overrides = variant.agent_overrides || {};
+
+for (const [agentName, override] of Object.entries(overrides)) {
+  if (override.type !== 'additive') continue;
+
+  const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
+  const variantFile = path.join(variantDir, 'agents', agentName + '.md');
+  const outFile = path.join(projectDir, 'agents', agentName + '.md');
+
+  if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile)) continue;
+
+  let skeleton = fs.readFileSync(skeletonFile, 'utf8');
+  const variantContent = fs.readFileSync(variantFile, 'utf8');
+
+  // Parse all ## sections from variant file
+  const allSections = {};
+  const lines = variantContent.split('\n');
+  let currentHeading = null;
+  let currentLines = [];
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+      currentHeading = line.slice(3).trim();
+      currentLines = [line];
+    } else if (currentHeading) {
+      currentLines.push(line);
+    }
+  }
+  if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+
+  // Map VARIANT-SECTION ids to heading names
+  const headingMap = {
+    'agent-roster': 'Agent Roster',
+    'governance-workflow': 'Governance Workflow',
+    'dispatch-protocol': 'Dispatch Protocol',
+  };
+
+  // Replace VARIANT-SECTION blocks in skeleton
+  const vsRegex = /<!-- VARIANT-SECTION: ([\w-]+) -->([\s\S]*?)<!-- END VARIANT-SECTION -->/g;
+  skeleton = skeleton.replace(vsRegex, (match, sectionId) => {
+    const heading = headingMap[sectionId];
+    if (heading && allSections[heading]) {
+      return allSections[heading];
+    }
+    return ''; // remove markers if no variant section found
+  });
+
+  fs.writeFileSync(outFile, skeleton, 'utf8');
+  console.log('  [SECTION-MERGE] agents/' + agentName + '.md (skeleton + variant sections)');
+}
+'@
+    $TmpScript = [System.IO.Path]::GetTempFileName() + ".mjs"
+    try {
+        Set-Content $TmpScript $BunScript -Encoding UTF8
+        & bun $TmpScript $CommonDir $TemplatesDir $ProjectDir
+    } finally {
+        Remove-Item $TmpScript -Force -ErrorAction SilentlyContinue
     }
 }
 

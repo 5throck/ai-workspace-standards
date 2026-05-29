@@ -1155,6 +1155,101 @@ function checkCommonContract(): void {
     }
   }
 
+  // C-SK-02: Invariant sections identical across all variant pm.md files
+  // Also: skeleton must not contain variant-specific agent names
+  const commonAgentsMap = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
+  for (const [agentName, agentMeta] of Object.entries(commonAgentsMap)) {
+    const skeletonSections = (agentMeta.skeleton_sections as string[] | undefined) ?? [];
+    if (skeletonSections.length === 0) continue;
+
+    const skeletonPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(skeletonPath)) continue; // C-CM-02 already flagged this
+
+    const skeletonRaw = normalizeContent(readFileSync(skeletonPath, 'utf-8'));
+
+    // Helper: extract section content (heading line + body until next ## heading)
+    function extractSection(content: string, heading: string): string | null {
+      // Match the heading line (## heading, possibly with bold/emoji prefix)
+      // We search for lines that contain the heading text after ##
+      const lines = content.split('\n');
+      let startIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('## ') && line.includes(heading)) {
+          startIdx = i;
+          break;
+        }
+      }
+      if (startIdx === -1) return null;
+
+      // Collect until next ## heading
+      const sectionLines: string[] = [lines[startIdx]];
+      for (let i = startIdx + 1; i < lines.length; i++) {
+        if (lines[i].startsWith('## ')) break;
+        sectionLines.push(lines[i]);
+      }
+      return sectionLines.join('\n').trimEnd();
+    }
+
+    // Build map of invariant section content from skeleton
+    const invariantSections = new Map<string, string>();
+    for (const sectionTitle of skeletonSections) {
+      const content = extractSection(skeletonRaw, sectionTitle);
+      if (content !== null) {
+        invariantSections.set(sectionTitle, content);
+      }
+    }
+
+    // Check each variant
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      if (!existsSync(variantAgentPath)) continue; // variant inherits from common — no override to check
+
+      const variantRaw = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+
+      // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
+      if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
+        fail(variant, 'C-SK-02',
+          `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
+          `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`
+        );
+      }
+
+      // Sub-check B: invariant sections present and unmodified
+      for (const [sectionTitle, skeletonContent] of invariantSections) {
+        const variantContent = extractSection(variantRaw, sectionTitle);
+        if (variantContent === null) {
+          warn(variant, 'C-SK-02',
+            `C-SK-02: ${variant}/agents/${agentName}.md is missing invariant section '## ${sectionTitle}' — may have been stripped during override`,
+            `Restore the '## ${sectionTitle}' section from templates/common/agents/${agentName}.md`
+          );
+        } else if (variantContent !== skeletonContent) {
+          warn(variant, 'C-SK-02',
+            `C-SK-02: ${variant}/agents/${agentName}.md has modified invariant section '## ${sectionTitle}' — invariant sections should not be changed in variant overrides`,
+            `Restore '## ${sectionTitle}' to match templates/common/agents/${agentName}.md, or promote the change to the skeleton`
+          );
+        }
+      }
+    }
+
+    // Sub-check C: skeleton must not contain variant-specific agent names
+    const variantSpecificNames = ['designer', 'code-writer', 'test-runner', 'red-team-lead'];
+    for (const agentSpecificName of variantSpecificNames) {
+      // Search in non-frontmatter body only (strip frontmatter)
+      const bodyStart = skeletonRaw.indexOf('\n---\n', skeletonRaw.indexOf('---\n'));
+      const body = bodyStart !== -1 ? skeletonRaw.slice(bodyStart + 5) : skeletonRaw;
+      // Use word-boundary-style check: the name must appear as a standalone reference
+      const nameRegex = new RegExp(`(?<![a-z])${agentSpecificName.replace('-', '[- ]')}(?![a-z])`, 'i');
+      if (nameRegex.test(body)) {
+        warn('common', 'C-SK-02',
+          `C-SK-02: Skeleton templates/common/agents/${agentName}.md contains variant-specific agent name: '${agentSpecificName}' — skeleton should be agent-agnostic`,
+          `Remove or generalize the reference to '${agentSpecificName}' in the skeleton`
+        );
+      }
+    }
+  }
+  if (!JSON_MODE) pass('C-SK-02: invariant section check complete');
+
   // WS-02 (WARNING): Anti-swelling 50% rule
   const totalVariants = variantDirs.length;
   for (const agentName of commonAgents) {
