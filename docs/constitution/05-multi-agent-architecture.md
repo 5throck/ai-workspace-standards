@@ -15,9 +15,9 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 ---
 name: <agent-name>
 tier:
-  claude: high|medium|low        # claude-opus-4-7 | claude-sonnet-4.6 | claude-haiku-4-5
-  antigravity: high|medium|low   # gemini-3.1-pro | gemini-3.5-flash
-  gemini-cli: high|medium|low    # gemini-3.1-pro | gemini-3.5-flash
+  claude: high|medium|low        # claude-opus-4-7 | claude-sonnet-4-6 | claude-haiku-4-5
+  antigravity: high|medium|low   # gemini-2.5-pro | gemini-2.0-flash
+  gemini-cli: high|medium|low    # gemini-2.5-pro | gemini-2.0-flash
 model: inherit
 color: yellow | blue | green | red | magenta | cyan | purple  # Claude Code only
 description: 'One-sentence role. Use when: "...", "...", "..."'
@@ -37,7 +37,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 | Analysis | Read-only investigation, codebase exploration, data gathering | Medium | `*-analyst.md`, `auditor.md` |
 | Design | Architecture decisions, implementation planning, technical spec | High | `architect.md` |
 | Design | UI/UX specifications, wireframes, component and interaction design | Medium | `designer.md` |
-| Execution | Code implementation and automated test verification | Low | `automation-engineer.md`, `docs-writer.md`, `scaffolding-expert.md` |
+| Execution | Code implementation and automated test verification | Medium | `automation-engineer.md`, `docs-writer.md`, `scaffolding-expert.md` |
 | Quality | Independent QA gate, security validation | Medium | `auditor.md`, `security-expert.md` |
 
 #### 5.3 PM Orchestrator Rules
@@ -59,35 +59,35 @@ The `description` field is how the AI tool selects the right agent - always writ
 
 - **Tool Abstraction**: The PM spawns child agent processes using the host tool's native subagent dispatching mechanism. The underlying tool handles process lifecycle and workspace sandboxing.
 
-#### 5.4 PM Governance Workflow (6 Phases)
+#### 5.4 PM Governance Workflow (7 Phases)
 
 ```
-Phase 0 - Team Assembly & Skill Orchestration (Kickoff)
+Phase 0 - Project Initiation (PM-owned)
   PM assesses workspace requirements
-  PM dynamically creates new agents/skills and resolves R&R overlap
+  scaffolding-expert creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and maintains skill registry
 
-Phase 1 - Analysis & Triage
-  PM classifies the request
-  Dispatch read-only agents in parallel (analysis, research)
-  PM synthesizes findings → acceptance criteria
-
-Phase 2 - Design
-  Architect produces implementation plan + ADR
+Phase 1-2 - Planning & Architecture (specialist-autonomous)
+  architect classifies the request and produces implementation plan + ADR
   PM validates design approach and obtains explicit user approval → GATE
 
-Phase 3 - Implementation (serial)
-  Automation Engineer implements per approved plan
-  Documentation Writer updates docs as needed
+Phase 3 - Design Handoff (variant-specific)
+  Variant-specific specialist produces design artifacts
   Agents can dispatch each other directly for routine handoffs
 
-Phase 4 - QA Gate (Independent Auditor)
-  Auditor executes qa-gate.sh/.ps1 autonomously
+Phase 4 - Execution (specialist-autonomous)
+  automation-engineer implements per approved plan
+  docs-writer updates documentation as needed
+
+Phase 5 - Quality Assurance (specialist-autonomous)
+  security-expert reviews for vulnerabilities and compliance
+  auditor executes qa-gate.sh/.ps1 autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
 
-Phase 5 - Finalization
+Phase 6 - Lifecycle Finalization (PM-owned)
   PM logs decisions to memory/YYYY-MM-DD.md
+  lifecycle-manager updates governance records
   PM runs /sync "type: description" → PR opened
 ```
 
@@ -97,9 +97,9 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-4-7, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-4.6, gemini-3.5-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.5-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Docs Writer |
+| **High** | claude-opus-4-7, gemini-2.5-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
+| **Medium** | claude-sonnet-4-6, gemini-2.0-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **Low** | claude-haiku-4-5, gemini-2.0-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
 
 **Tier Enforcement Rules:**
 - All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)

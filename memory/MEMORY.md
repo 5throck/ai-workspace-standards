@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-05-30](2026-05-30.md) | fix: Phase 1 — eliminate all stale .sh script references (C-01~C-05) |
 | [2026-05-29](2026-05-29.md) | fix: UTF-8 BOM for ps1 emoji scripts, validate-templates workspace guard, register new ts scripts in SCRIPTS.md |
 | [2026-05-28](2026-05-28.md) | PM-led 3-tier parallel agent execution: platform parity, upgrade-project, docs-writer promotion, Security Bootstrap, CONSTITUTION §10 Terminology |
 | [2026-05-23](2026-05-23.md) | feat: align markdown files with CONSTITUTION.md standards |
@@ -16,6 +17,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-29 | Review of PM Agent Facilitator Transition Implementation | [meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md](meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md) |
 | 2026-05-29 | 7-item system improvement plan — PM workflow, 3-tier todo, lifecycle docs, skill audit, file structure | [meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md](meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md) |
 | 2026-05-29 | lifecycle-manager scope reduction — secretary role, L0+L1 dual deployment | [meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md](meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md) |
 | 2026-05-29 | Lifecycle manager agent — new dedicated agent proposal unanimously agreed | [meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md](meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md) |

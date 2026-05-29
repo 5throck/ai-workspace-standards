@@ -80,8 +80,8 @@ if ! grep -qF "$COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
 fi
 
 # ── Auto-update MEMORY.md index ───────────────────────────────────────────────
-if [ -f "scripts/sync-md.sh" ]; then
-  bash scripts/sync-md.sh "$TODAY" "$COMMIT_MSG" 2>/dev/null || true
+if [ -f "scripts/sync-md.ts" ]; then
+  bun scripts/sync-md.ts "$TODAY" "$COMMIT_MSG" 2>/dev/null || true
 fi
 
 

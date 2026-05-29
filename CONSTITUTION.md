@@ -90,7 +90,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 
 ### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4.6, gemini-3.5-flash) for Auditor/QA; Low-tier (claude-haiku-4-5) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → QA → Finalization). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-2.5-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-2.0-flash) for Auditor/QA; Low-tier (claude-haiku-4-5) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → QA → Finalization). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
@@ -135,7 +135,7 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant
-One of three project archetypes: `co-design`, `co-develop`, `co-work`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+One of four project archetypes: `co-design`, `co-develop`, `co-work`, `co-security` (beta). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Three values:
@@ -178,4 +178,4 @@ A comment tag added to both `.sh` and `.ps1` versions of a script to declare tha
 
 ---
 
-*Last Updated: 2026-05-28*
+*Last Updated: 2026-05-30*

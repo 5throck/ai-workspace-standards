@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 
 # ── 1. Audit gate ──────────────────────────────────────────────────────────────
 Write-Host "=== pre-push audit ===" -ForegroundColor Cyan
-& bash scripts/audit.sh
+& bun scripts/audit.ts
 
 if ($LASTEXITCODE -ne 0) {
   Write-Host ""
@@ -18,7 +18,7 @@ Write-Host "=== pre-push integration tests ===" -ForegroundColor Cyan
 
 if (Get-Command bun -ErrorAction SilentlyContinue) {
   Write-Host "Running integration tests via Bun..." -ForegroundColor Yellow
-  bun test
+  bun scripts/test-runner.ts integration
 
   if ($LASTEXITCODE -ne 0) {
     Write-Host ""
@@ -35,6 +35,6 @@ $BRANCH = git rev-parse --abbrev-ref HEAD
 if ($BRANCH -eq "main" -or $BRANCH -eq "master") {
   Write-Host ""
   Write-Host "❌ Direct push to '$BRANCH' is blocked. Use a PR branch." -ForegroundColor Red
-  Write-Host "   Create a PR with: /sync `"feat: ..."`  or  bash scripts/dev-sync.sh `"feat: ..."` -ForegroundColor Yellow
+  Write-Host "   Create a PR with: /sync `"feat: ..."`  or  bun scripts/dev-sync.ts `"feat: ..."` -ForegroundColor Yellow
   exit 1
 }

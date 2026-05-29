@@ -108,7 +108,7 @@ fi
 # ── 3. Documentation audit ────────────────────────────────────────────────────
 # Skip documentation audit for memory-only commits (workflow optimization)
 if [ "$MEMORY_ONLY" = false ]; then
-  bash scripts/audit.sh || exit 1
+  bun scripts/audit.ts || exit 1
 fi
 
 # ── 3.5. Agent Lifecycle Audit ─────────────────────────────────────────────────

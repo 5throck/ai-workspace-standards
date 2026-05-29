@@ -119,7 +119,7 @@ bash scripts/new-project.sh "my-project-name"
 # Specify a variant
 bash scripts/new-project.sh "my-project-name" --variant co-develop
 
-# Use a specific template version (see available: bash scripts/list-template-versions.sh)
+# Use a specific template version (see available: bun scripts/list-template-versions.ts)
 bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
@@ -253,7 +253,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 
 ```bash
 # List available template versions
-bash scripts/list-template-versions.sh
+bun scripts/list-template-versions.ts
 
 # Use latest template (default)
 bash scripts/new-project.sh my-project
@@ -270,7 +270,7 @@ bash scripts/new-project.sh my-project --variant co-develop
 When modifying template files, run the lifecycle validator to catch structural issues:
 
 ```bash
-bash scripts/validate-templates.sh
+bun scripts/validate-templates.ts
 ```
 
 Checks: agent frontmatter completeness, required sections (`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md roster parity, script `.sh`/`.ps1` parity, and shared file sync warnings. Also runs automatically via pre-commit when `templates/` files are staged.
@@ -284,7 +284,7 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 - **PR-only workflow** - all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
 - **Cross-platform scripts** - every `.sh` has a `.cmd`/`.ps1` pair with identical behavior.
-- **Coding Guidelines are audited** - `audit.sh` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
+- **Coding Guidelines are audited** - `audit.ts` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 - **Security-First Scaffold** - Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
 ---
@@ -294,7 +294,7 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 This is a **public repository**. Contributions are welcome via pull requests.
 
 1. Branch off `main` using the naming convention: `feat/<slug>`, `fix/<slug>`, or `docs/<slug>`
-2. All PRs must pass `bash scripts/audit.sh`
+2. All PRs must pass `bun scripts/audit.ts`
 3. Add a `CHANGELOG.md` entry under `[Unreleased]` before merging
 4. Follow `CONSTITUTION.md §8 - Coding Behavior Guidelines`
 5. At least **1 approving review** is required before merging
@@ -307,4 +307,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-28*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-30*

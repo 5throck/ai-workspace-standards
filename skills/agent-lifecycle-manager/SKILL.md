@@ -7,6 +7,7 @@ description: >
   or managing agent roles and 3-tier configurations.
 owner: pm
 version: 1.0.0
+last_reviewed: 2026-05-30
 metadata:
   type: process
   triggers:

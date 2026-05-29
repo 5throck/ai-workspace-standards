@@ -18,8 +18,8 @@ bun scripts/agent-lifecycle-audit.ts
 bun scripts/skill-lifecycle-audit.ts
 
 # Review deprecated items
-bash scripts/sync-agent-status.sh
-bash scripts/sync-skill-status.sh
+bun scripts/sync-agent-status.ts
+bun scripts/sync-skill-status.ts
 ```
 
 **Checklist**:
@@ -114,13 +114,13 @@ git diff templates/common/ templates/co-work/
 **Commands**:
 ```bash
 # Sync agent status
-bash scripts/sync-agent-status.sh
+bun scripts/sync-agent-status.ts
 
 # Sync skill status
-bash scripts/sync-skill-status.sh
+bun scripts/sync-skill-status.ts
 
 # Full workspace audit
-bash scripts/audit.sh
+bun scripts/audit.ts
 
 # Template validation
 bun scripts/validate-templates.ts

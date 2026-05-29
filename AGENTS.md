@@ -139,7 +139,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
 2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 6 (Finalization)
-3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using qa-gate.sh/.ps1 scripts
+3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using bun scripts/qa-gate.ts
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
@@ -185,7 +185,7 @@ Phase 3 - Implementation (serial)
   Agents can dispatch each other directly for routine handoffs
 
 Phase 4 - QA Gate (Independent Auditor)
-  Auditor executes qa-gate.sh/.ps1 autonomously
+  Auditor executes bun scripts/qa-gate.ts autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
 
@@ -322,7 +322,7 @@ Skill("script-lifecycle-manager")
 | `skills/` | Workspace utility skills (validate, scan, simulate) |
 | `templates/common/skills/` | Single source of truth — changes here must sync to `.claude/skills/` |
 
-> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bash scripts/audit.sh` to verify.
+> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bun scripts/audit.ts` to verify.
 
 ---
 
@@ -342,3 +342,48 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
 > **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
+
+---
+
+## Periodic Skill Review Schedule
+
+**Frequency**: Quarterly (every 3 months)  
+**Owner**: lifecycle-manager  
+**Tool**: `bun scripts/skill-dependency-analysis.ts --report`
+
+### Review Cadence
+
+| Quarter | Target Month | Scope |
+|---------|-------------|-------|
+| Q1 | March | All active skills — full health report |
+| Q2 | June | All active skills — full health report |
+| Q3 | September | All active skills — full health report |
+| Q4 | December | All active skills — full health report + deprecation sweep |
+
+### Review Steps
+
+1. **Generate health report**
+   ```
+   bun scripts/skill-dependency-analysis.ts --report
+   bun scripts/validate-skills.ts
+   ```
+
+2. **Triage findings** by severity:
+   - 🔴 Broken dependencies or circular references → fix before quarter ends
+   - 🟡 Deprecated dependency usage → fix within 2 weeks
+   - 🟢 Wording or example improvements → batch in next release cycle
+
+3. **Apply modifications** using the checklist at [docs/lifecycle/skills/skill-modification-checklist.md](docs/lifecycle/skills/skill-modification-checklist.md)
+
+4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
+
+5. **Deprecation sweep** (Q4 only): review skills with `last_updated` older than 12 months — evaluate whether they remain relevant or should be deprecated
+
+6. **Log results** in the quarterly memory log: `memory/YYYY-MM-DD.md` with `## Skill Review Q[N] YYYY` heading
+
+### Trigger Conditions (Outside Quarterly Cadence)
+
+A skill health check should also be run outside the quarterly schedule when:
+- A tool, agent, or script referenced by any skill is renamed or removed
+- A new skill is added that may introduce dependency cycles
+- CI reports skill validation failures on any branch

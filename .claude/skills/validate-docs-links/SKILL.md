@@ -2,6 +2,7 @@
 name: validate-docs-links
 description: Scans Markdown documentation for dead links and file reference errors.
 version: 1.0.0
+last_reviewed: 2026-05-30
 status: active
 owner: docs-writer
 prerequisites: Python or grep

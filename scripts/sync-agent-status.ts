@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const colors = {
   red: '\x1b[31m',
@@ -75,7 +75,7 @@ for (const file of agentFiles) {
       }
       
       try {
-        const stdout = execSync(`git log -1 --format=%ct "${agentPath}"`, { encoding: 'utf-8', stdio: 'pipe' });
+        const stdout = execFileSync('git', ['log', '-1', '--format=%ct', agentPath], { encoding: 'utf-8' });
         const lastModified = parseInt(stdout.trim(), 10);
         if (!isNaN(lastModified)) {
           const daysSinceModified = (Math.floor(Date.now() / 1000) - lastModified) / 86400;

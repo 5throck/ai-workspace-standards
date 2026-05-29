@@ -2,6 +2,7 @@
 name: audit-workspace
 description: Runs the root workspace audit scripts to enforce CONSTITUTION.md compliance.
 version: 1.0.0
+last_reviewed: 2026-05-30
 status: active
 owner: auditor
 prerequisites: PowerShell or Bash

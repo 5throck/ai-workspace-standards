@@ -3,7 +3,7 @@
 
 # ── 1. Audit gate ─────────────────────────────────────────────────────────────
 echo "=== pre-push audit ==="
-bash scripts/audit.sh || {
+bun scripts/audit.ts || {
   echo ""
   echo -e "\033[31m❌ Audit failed — push blocked. Fix issues above before pushing.\033[0m"
   exit 1
@@ -12,15 +12,14 @@ bash scripts/audit.sh || {
 # ── 2. Integration tests ──────────────────────────────────────────────────────
 echo "=== pre-push integration tests ==="
 if command -v bun >/dev/null 2>&1; then
-  echo "Running integration tests via Bun..."
-  bun run test || {
+  echo "Running integration tests..."
+  bun scripts/test-runner.ts integration || {
     echo ""
     echo -e "\033[31m❌ Integration tests failed — push blocked. Fix test failures before pushing.\033[0m"
     exit 1
   }
 else
-  echo "⚠️  Bun not found — skipping integration tests (install Bun to enable)"
-  echo "   Run: curl -fsSL https://bun.sh/install | bash"
+  echo "⚠️  Bun not found — skipping integration tests"
 fi
 
 # ── 3. Block direct push to protected branches ────────────────────────────────
@@ -28,6 +27,6 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
   echo ""
   echo -e "\033[31m❌ Direct push to '$BRANCH' is blocked. Use a PR branch.\033[0m"
-  echo "   Create a PR with: /sync \"feat: ...\"  or  bash scripts/dev-sync.sh \"feat: ...\""
+  echo "   Create a PR with: /sync \"feat: ...\"  or  bun scripts/dev-sync.ts \"feat: ...\""
   exit 1
 fi
