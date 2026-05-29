@@ -13,21 +13,23 @@ function Initialize-UTF8Environment {
     [CmdletBinding()]
     param()
 
+    # Force UTF-8 encoding for all operations
+    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+    # Register additional code page provider if available (.NET 5+ / PowerShell 7+)
+    # Silently skipped on Windows PowerShell 5.1 where the assembly may not be present
     try {
-        # Force UTF-8 encoding for all operations
-        $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         [System.Text.Encoding]::RegisterProvider([System.Text.CodePages.CodePagesEncodingProvider]::Instance)
-
-        # Set Git UTF-8 configuration
-        & git config --local core.quotepath false 2>$null
-        & git config --local i18n.commitencoding utf-8 2>$null
-        & git config --local i18n.logOutputEncoding utf-8 2>$null
-
-        Write-Verbose "UTF-8 environment initialized"
+    } catch {
+        # Not critical — UTF-8 is already set above; legacy code page support simply unavailable
     }
-    catch {
-        throw "Failed to initialize UTF-8 environment: $_"
-    }
+
+    # Set Git UTF-8 configuration
+    & git config --local core.quotepath false 2>$null
+    & git config --local i18n.commitencoding utf-8 2>$null
+    & git config --local i18n.logOutputEncoding utf-8 2>$null
+
+    Write-Verbose "UTF-8 environment initialized"
 }
 
 function Validate-TemplateSync {
