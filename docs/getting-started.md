@@ -16,10 +16,20 @@ This guide covers the software you need to install before using this workspace e
 
 **Installation**:
 ```bash
-# Windows: https://git-scm.com/download/win
-# macOS: brew install git
-# Linux (Ubuntu/Debian): sudo apt install git
-# Linux (Fedora/RHEL): sudo dnf install git
+# Windows (winget - recommended)
+winget install Git.Git
+
+# Windows (manual installer)
+https://git-scm.com/download/win
+
+# macOS
+brew install git
+
+# Linux (Ubuntu/Debian)
+sudo apt install git
+
+# Linux (Fedora/RHEL)
+sudo dnf install git
 ```
 
 **Verification**:
