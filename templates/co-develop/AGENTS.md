@@ -10,6 +10,35 @@
 
 ---
 
+## Multi-Agent Phase Definitions
+
+**co-develop follows the standard 6-phase workflow** defined in [`templates/common/phase-definitions.md`](../common/phase-definitions.md).
+
+**Phase Summary:**
+| Phase | Name | PM Facilitation | Specialist Agents |
+|-------|------|------------------|-------------------|
+| 0 | Project Initiation | Orchestrator | scaffolding-expert |
+| 1-2 | Planning & Architecture | Orchestrator | architect |
+| 3 | Design Handoff | Orchestrator | designer |
+| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
+| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
+| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+
+**PM Facilitation Guidance:**
+See [`phase-definitions.md`](../common/phase-definitions.md) for detailed PM tasks in each phase:
+- Opening the phase (objective, specialist nomination, expectations)
+- Progress monitoring (intervene only if standards not met)
+- Synthesis of outputs (key findings, decisions)
+- Provisional decision with justification
+- Follow-up assignment
+
+**Phase-Specific Notes for co-develop:**
+- **Phase 3 (Design Handoff)**: Designer produces UI/UX specs before execution phase
+- **Phase 4 (Execution)**: automation-engineer and docs-writer work in parallel
+- **Phase 5 (QA)**: Both security-expert and auditor must approve before proceeding
+
+---
+
 ## Agent Roster
 
 ### 🛠️ Orchestration / Audit

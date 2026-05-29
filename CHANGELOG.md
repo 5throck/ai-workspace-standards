@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: `templates/common/phase-definitions.md` — comprehensive 6-phase workflow definition with PM facilitator tasks for each phase (Initiation, Planning, Design Handoff, Execution, QA, Finalization)
+- **[2026-05-29]**: Multi-Agent Phase Definitions section — added to all 4 variant AGENTS.md files (co-develop, co-design, co-work, co-security) with phase-specific specialist agent mappings and PM orchestrator guidance
+- **[2026-05-29]**: `memory/meeting-2026-05-29-pm-facilitator-transition-review.md` — meeting transcript documenting 3-agenda review: PM facilitator transition, skill lifecycle procedures, and script advancement needs
 - **[2026-05-29]**: `README.md` — added platform-specific installation methods to Project-Specific Tools table (e.g., `winget install OpenJS.NodeJS` for Windows) and reference to Getting Started guide
 - **[2026-05-29]**: `templates/common/docs/context.md` — added "Platform-Specific Tools" table with standard package managers (winget, brew, apt, dnf) for consistent installation experiences
 - **[2026-05-29]**: `docs/getting-started.md` — comprehensive installation guide with prerequisites checklist, troubleshooting, and platform-specific instructions
@@ -67,10 +70,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-28]**: `agents/docs-writer.md` — tier promoted Low→Medium (`claude-sonnet-4-6`); role split with Architect (DocsWriter executes, Architect designs document architecture)
 - **[2026-05-28]**: `AGENTS.md`, `CLAUDE.md` — Documentation Writer tier updated to Medium across all roster tables
 - **[2026-05-28]**: chore: Variant status corrections
-  - co-develop: stable 0.4.0 → stable 1.0.0 (version bump per lifecycle requirements)
-  - co-work: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
-  - co-design: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
-  - co-security: draft 0.1.0 → beta 0.2.0 (beta promotion after A-04 verification)
+  - **[2026-05-29]**: co-develop: stable 0.4.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - **[2026-05-29]**: co-work: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - **[2026-05-29]**: co-design: stable 0.5.0 → stable 1.0.0 (version bump per lifecycle requirements)
+  - **[2026-05-29]**: co-security: draft 0.1.0 → beta 0.2.0 (beta promotion after A-04 verification)
 - **[2026-05-28]**: chore: new-project.sh/ps1 now creates .template-info.json by default for all variants
 
 ### Security
@@ -533,7 +536,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-28*
+*Last Updated: 2026-05-29*
 
 
 

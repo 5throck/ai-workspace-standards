@@ -16,6 +16,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-29 | Review of PM Agent Facilitator Transition Implementation | [meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md](meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md) |
 | 2026-05-29 | 7-item system improvement plan — PM workflow, 3-tier todo, lifecycle docs, skill audit, file structure | [meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md](meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md) |
 | 2026-05-29 | lifecycle-manager scope reduction — secretary role, L0+L1 dual deployment | [meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md](meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md) |
 | 2026-05-29 | Lifecycle manager agent — new dedicated agent proposal unanimously agreed | [meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md](meeting-2026-05-29-lifecycle-manager-agent-new-dedicated-ag.md) |

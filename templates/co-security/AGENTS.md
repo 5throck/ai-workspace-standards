@@ -10,6 +10,36 @@
 
 ---
 
+## Multi-Agent Phase Definitions
+
+**co-security follows the standard 6-phase workflow** defined in [`templates/common/phase-definitions.md`](../common/phase-definitions.md).
+
+**Phase Summary:**
+| Phase | Name | PM Facilitation | Specialist Agents |
+|-------|------|------------------|-------------------|
+| 0 | Project Initiation | Orchestrator | scaffolding-expert |
+| 1-2 | Planning & Architecture | Orchestrator | architect |
+| 3 | Design Handoff | Orchestrator | threat-modeler (threat modeling, attack surface analysis) |
+| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
+| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
+| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+
+**PM Facilitation Guidance:**
+See [`phase-definitions.md`](../common/phase-definitions.md) for detailed PM tasks in each phase:
+- Opening the phase (objective, specialist nomination, expectations)
+- Progress monitoring (intervene only if standards not met)
+- Synthesis of outputs (key findings, decisions)
+- Provisional decision with justification
+- Follow-up assignment
+
+**Phase-Specific Notes for co-security:**
+- **Phase 1-2 (Planning)**: Red Team Lead contributes to attack methodology and MITRE ATT&CK TTPs planning
+- **Phase 3 (Design Handoff)**: Threat Modeler conducts STRIDE analysis and ATT&CK mapping; produces threat models and risk scoring
+- **Phase 4 (Execution)**: Pentester performs vulnerability discovery and PoC development; Patch Engineer executes Ansible-based cross-platform patch deployment
+- **Phase 5 (QA)**: All Red Team (Pentester) and Blue Team (Patch Engineer) outputs must pass security-expert and auditor validation
+
+---
+
 ## Agent Roster
 
 ### 🛠️ Orchestration

@@ -10,6 +10,35 @@
 
 ---
 
+## Multi-Agent Phase Definitions
+
+**co-design follows the standard 6-phase workflow** defined in [`templates/common/phase-definitions.md`](../common/phase-definitions.md).
+
+**Phase Summary:**
+| Phase | Name | PM Facilitation | Specialist Agents |
+|-------|------|------------------|-------------------|
+| 0 | Project Initiation | Orchestrator | scaffolding-expert |
+| 1-2 | Planning & Architecture | Orchestrator | architect |
+| 3 | Design Handoff | Orchestrator | design-lead, visual-designer |
+| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
+| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
+| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+
+**PM Facilitation Guidance:**
+See [`phase-definitions.md`](../common/phase-definitions.md) for detailed PM tasks in each phase:
+- Opening the phase (objective, specialist nomination, expectations)
+- Progress monitoring (intervene only if standards not met)
+- Synthesis of outputs (key findings, decisions)
+- Provisional decision with justification
+- Follow-up assignment
+
+**Phase-Specific Notes for co-design:**
+- **Phase 1-2 (Planning)**: Design Lead and Design Storyteller contribute to design direction and creative strategy
+- **Phase 3 (Design Handoff)**: UX Researcher provides user insights, Design Lead owns design system architecture, Visual Designer produces visual designs and component specs, Typography Expert specializes in type systems
+- **Phase 4 (Execution)**: Prototype Engineer builds interactive prototypes and creates design handoff artifacts
+
+---
+
 ## Agent Roster
 
 ### 🛠️ Orchestration

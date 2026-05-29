@@ -2,6 +2,37 @@
 
 > **Canonical agent index** for collaboration-focused projects.
 
+---
+
+## Multi-Agent Phase Definitions
+
+**co-work follows the standard 6-phase workflow** defined in [`templates/common/phase-definitions.md`](../common/phase-definitions.md).
+
+**Phase Summary:**
+| Phase | Name | PM Facilitation | Specialist Agents |
+|-------|------|------------------|-------------------|
+| 0 | Project Initiation | Orchestrator | scaffolding-expert |
+| 1-2 | Planning & Architecture | Orchestrator | architect |
+| 3 | Design Handoff | Orchestrator | analyst (content research, data gathering) |
+| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
+| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
+| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+
+**PM Facilitation Guidance:**
+See [`phase-definitions.md`](../common/phase-definitions.md) for detailed PM tasks in each phase:
+- Opening the phase (objective, specialist nomination, expectations)
+- Progress monitoring (intervene only if standards not met)
+- Synthesis of outputs (key findings, decisions)
+- Provisional decision with justification
+- Follow-up assignment
+
+**Phase-Specific Notes for co-work:**
+- **Phase 1-2 (Planning)**: Storyteller contributes to organizational culture and change narrative strategy
+- **Phase 3 (Design Handoff)**: Analyst conducts systematic investigation and data synthesis; Content Writer and Technical Writer transform research into documentation; Project Coordinator manages stakeholder communication
+- **Phase 4 (Execution)**: Content Writer produces documentation and communications; Technical Writer creates technical resources; MS 365 Expert provides platform expertise for collaboration tools
+
+---
+
 ## Agent Roster
 
 ### 🛠️ Orchestration
