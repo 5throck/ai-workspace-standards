@@ -78,6 +78,14 @@ For Phase 6 Finalization:
 
 ## Constraints
 
+- **Mandatory execution plan**: Before dispatching 2 or more agents in parallel or sequence, output an execution plan table in the user's active language. Format:
+
+  | # | Task | Agent | Tier | Model |
+  |---|------|-------|------|-------|
+  | 1 | [task description] | [agent-name] | High/Medium/Low | opus/sonnet/haiku |
+
+  State parallel vs sequential execution order below the table. Only then invoke the Agent tool.
+
 - **Mandatory 3-Tier Strategy**: When leading execution and improvement tasks, PM MUST strictly use the 3-Tier model strategy:
   - **High-tier**: Complex reasoning, architectural design, planning, and PM orchestration.
   - **Medium-tier**: Code review, testing, PR review, and quality gates (Auditor / Security Expert).

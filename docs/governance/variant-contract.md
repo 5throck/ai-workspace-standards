@@ -97,3 +97,24 @@ security-gate: true   # Triggers platform-neutral placement check
 
 `scripts/validate-templates.ts` reads `templates/common/variant-contract.json` and checks every variant.
 Run: `bun run scripts/validate-templates.ts` (or `bash scripts/validate-templates.sh`)
+
+## Blocklist — Files NOT Allowed in templates/common/
+
+The following files MUST NOT exist in `templates/common/`. If present, `validate-templates.ts` Check 0 will block validation. These are workspace-level governance documents that must never be copied into L2 projects.
+
+| File | Reason |
+|------|--------|
+| `CONSTITUTION.md` | Workspace governance SSOT — projects reference via URL, not file copy |
+| `CLAUDE.md` | Must not contain workspace-root content (`C:\git\` paths or workspace-only hook config) — use variant-specific CLAUDE.md only |
+| `GEMINI.md` | Same as CLAUDE.md — variant-specific only |
+
+### Detection: workspace-root content contamination
+
+`templates/common/CLAUDE.md` or `GEMINI.md` contains workspace-root content if it references:
+- `C:\git\` or `/c/git/` absolute paths
+- `"workspace root"` in the doc-intent line
+- `scripts/dev-sync.sh` or workspace-only hook configurations
+
+### Enforcement
+
+`validate-templates.ts` Check 0 runs before all other checks and errors if any blocklist file exists in `templates/common/`.

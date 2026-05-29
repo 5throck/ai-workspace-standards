@@ -186,6 +186,17 @@ function checkCommon(): void {
   }
 
   pass('templates/common/ exists with required subdirectories');
+
+  // Check forbidden files — files that must NOT exist in templates/common/
+  const forbiddenFiles = ['CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'];
+  const presentForbidden = forbiddenFiles.filter(f => existsSync(join(commonDir, f)));
+  if (presentForbidden.length > 0) {
+    for (const f of presentForbidden) {
+      fail('common', 'forbidden-file', `templates/common/${f} must not exist — workspace-level file must not be copied to L2 projects. Delete it from templates/common/.`);
+    }
+  } else {
+    pass('templates/common/ blocklist: no forbidden files present');
+  }
 }
 
 // Check 1: templates/VERSION
@@ -410,41 +421,43 @@ function checkAgentsRoster(variant: string): void {
   }
 }
 
-// Check 6: .claude/commands in variant
+// Check 6: commands structure — shared in common/, variant-specific only in variants
 function checkCommands(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check 6: .claude/commands in ${variant} ===`);
+  if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  // For common/, check universal commands only
+  const allSharedCommands = ['changelog.md', 'meeting.md', 'memlog.md', 'new-task.md', 'sync.md'];
+
   if (variant === 'common') {
-    const commandsDir = join(TEMPLATES_DIR, 'common', '.claude', 'commands');
-    if (!existsSync(commandsDir)) {
-      fail('common', 'commands-dir', 'templates/common/.claude/commands/ not found');
-      return;
-    }
-
-    const universalCommands = ['changelog.md', 'memlog.md', 'new-task.md', 'sync.md'];
-    for (const cmd of universalCommands) {
-      const cmdPath = join(commandsDir, cmd);
-      if (!existsSync(cmdPath)) {
-        fail('common', 'command-missing', `.claude/commands/${cmd} not found in common/`);
+    // common/ must have all 5 shared commands in BOTH .claude/commands/ and .gemini/commands/
+    for (const platform of ['.claude', '.gemini']) {
+      const commandsDir = join(TEMPLATES_DIR, 'common', platform, 'commands');
+      if (!existsSync(commandsDir)) {
+        fail('common', 'commands-dir', `templates/common/${platform}/commands/ not found`);
+        continue;
       }
+      for (const cmd of allSharedCommands) {
+        if (!existsSync(join(commandsDir, cmd))) {
+          fail('common', 'command-missing', `${platform}/commands/${cmd} not found in common/`);
+        }
+      }
+      pass(`common/${platform}/commands: ${allSharedCommands.length} shared commands OK`);
     }
-    pass(`common/.claude/commands: ${universalCommands.length} universal commands OK`);
     return;
   }
 
-  // For variants, check meeting.md exists
-  const commandsDir = join(TEMPLATES_DIR, variant, '.claude', 'commands');
-  if (!existsSync(commandsDir)) {
-    warn(variant, 'commands-dir', `templates/${variant}/.claude/commands/ not found`);
-    return;
-  }
-
-  const meetingCmd = join(commandsDir, 'meeting.md');
-  if (!existsSync(meetingCmd)) {
-    fail(variant, 'command-missing', `templates/${variant}/.claude/commands/meeting.md not found`);
-  } else {
-    pass(`${variant}/.claude/commands/meeting.md: OK`);
+  // Variants must NOT have shared commands (inherited from common/ via new-project.sh overlay)
+  // Only security-check.md is allowed as a variant-specific command
+  const allowedVariantCommands = new Set(['security-check.md']);
+  for (const platform of ['.claude', '.gemini']) {
+    const commandsDir = join(TEMPLATES_DIR, variant, platform, 'commands');
+    if (!existsSync(commandsDir)) continue;
+    const files = readdirSync(commandsDir);
+    const unexpected = files.filter(f => !allowedVariantCommands.has(f));
+    if (unexpected.length > 0) {
+      fail(variant, 'command-duplicate', `${platform}/commands/ contains shared commands that belong in common/ only: ${unexpected.join(', ')}`);
+    } else {
+      pass(`${variant}/${platform}/commands: OK (${files.length} variant-specific file(s))`);
+    }
   }
 }
 
@@ -483,7 +496,7 @@ function checkScriptParity(variant: string): void {
 function checkSharedFileSync(): void {
   if (!JSON_MODE) console.log('\n=== Check 8: Shared file sync ===');
   const workspaceMeeting = join(ROOT, '.claude', 'commands', 'meeting.md');
-  const templateMeeting = join(TEMPLATES_DIR, 'co-develop', '.claude', 'commands', 'meeting.md');
+  const templateMeeting = join(TEMPLATES_DIR, 'common', '.claude', 'commands', 'meeting.md');
 
   if (!existsSync(workspaceMeeting) || !existsSync(templateMeeting)) {
     // One or both missing — skip silently
@@ -494,9 +507,9 @@ function checkSharedFileSync(): void {
   const tplContent = normalizeContent(readFileSync(templateMeeting, 'utf-8'));
 
   if (wsContent !== tplContent) {
-    warn('root', 'shared-sync', 'meeting.md differs between workspace and templates/co-develop', 'Run: cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md');
+    warn('root', 'shared-sync', 'meeting.md differs between workspace and templates/common', 'Run: cp .claude/commands/meeting.md templates/common/.claude/commands/meeting.md');
   } else {
-    pass('meeting.md: workspace and co-develop are in sync');
+    pass('meeting.md: workspace and common are in sync');
   }
 }
 

@@ -159,6 +159,15 @@ This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
 2. PM triages → dispatches specialist → synthesizes results
 3. PM enforces QA gate → approves completion
 
+#### Mandatory Execution Plan Display
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
+
+State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
+
 #### Specialist Agent List
 All agents below require PM dispatch:
 - architect (Phase 1-2)

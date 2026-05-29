@@ -1,9 +1,11 @@
 ---
 name: meeting-facilitation
+status: active
 description: >
   Facilitates structured multi-agent meetings using the /meeting command for collaborative
   decision-making and problem resolution. Use when: running agent meetings, coordinating
   multi-agent discussions, or facilitating collaborative problem-solving sessions.
+owner: pm
 version: 1.0.0
 metadata:
   type: process
@@ -52,7 +54,7 @@ This skill provides the framework for running structured multi-agent meetings wh
 ```
 
 **Mode Selection**:
-- **Silent** (default): Shows opening header → [meeting in progress] → synthesis only
+- **Silent** (default): Shows opening header ??[meeting in progress] ??synthesis only
   - Use for: Quick decisions, outcome-focused meetings
   - Token cost: ~1,000 tokens
 - **Dialogue**: Shows full real-time conversation, every turn
@@ -68,7 +70,7 @@ This skill provides the framework for running structured multi-agent meetings wh
 **Agent Detection Logic**:
 1. Check if `agents/` directory exists in current working directory
 2. List all `*.md` files in `agents/` (excluding README.md)
-3. Extract agent names from filenames (e.g., `architect.md` → `architect`)
+3. Extract agent names from filenames (e.g., `architect.md` ??`architect`)
 4. If `--agents` list specified, filter to only those agents
 5. Load each agent file to understand persona and role
 
@@ -90,22 +92,21 @@ This skill provides the framework for running structured multi-agent meetings wh
 
 **Meeting Header** (always displayed):
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🗣️  MEETING STARTED
+?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━???���? MEETING STARTED
 Topic   : [meeting topic]
 Present : [agent names]
 Rounds  : [N]
 Mode    : [Silent | Dialogue]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━??```
 
 **Facilitator Opening** (Dialogue mode only):
 - Set agenda and objectives
 - Ask participants to respond directly to each other by name
 - Establish discussion norms
+- **Facilitator Exception**: The PM acts solely as a facilitator and does NOT contribute opinions.
 
 **Silent Mode**:
-- Display: `[회의 진행 중… 완료 시 결과를 출력합니다]`
+- Display: `[?�의 진행 중�??�료 ??결과�?출력?�니??`
 - Proceed internally without per-turn output until synthesis
 
 ---
@@ -119,14 +120,15 @@ Mode    : [Silent | Dialogue]
 - Each agent fully inhabits their persona and contributes:
   - **Name** prior speaker and reference their specific point
   - **Add domain perspective** only this agent holds
-  - **Agree, build on, or respectfully challenge** — like real conversation
+  - **Agree, build on, or respectfully challenge** ??like real conversation
   - **End with concrete proposal** or direct question to named colleague
+- **Facilitator Exception**: The PM is excluded from sharing opinions or participating in the discussion rounds. The PM only listens.
 
 **Dialogue Mode**: Display each turn as generated:
 ```
 **[AgentName]**: (Round N)
 
-[2–4 paragraphs of in-character contribution]
+[2?? paragraphs of in-character contribution]
 
 ---
 ```
@@ -134,10 +136,10 @@ Mode    : [Silent | Dialogue]
 **Silent Mode**: Hold contributions in context only, don't display
 
 **Critical Rules**:
-- Stay fully in character — agent constraints and tone apply
+- Stay fully in character ??agent constraints and tone apply
 - Reference specific things previous speakers said
 - Never break character with meta-commentary
-- Maximum 3 rounds — stop early if discussion converges
+- Maximum 3 rounds ??stop early if discussion converges
 - Language follows `--language` setting (speaker labels always English)
 
 ---
@@ -150,11 +152,12 @@ Mode    : [Silent | Dialogue]
 - Most cross-domain agent speaks last
 - Typical choices: Auditor, Test-Runner, or closest equivalent
 - Must see entire discussion context
+- **Facilitator Exception**: The PM must NEVER summarize mid-meeting or at the end; synthesis is always performed by a cross-domain agent.
 
 **Synthesis Requirements**:
 1. **Points of Agreement** (specific)
 2. **Open Disagreements or Unresolved Questions**
-3. **Concrete Next Action Items** (max 5) — owner + deliverable
+3. **Concrete Next Action Items** (max 5) ??owner + deliverable
 
 **Always Displayed** (regardless of mode):
 ```
@@ -167,37 +170,32 @@ Mode    : [Silent | Dialogue]
 
 ---
 
-## Step 6: Close and Archive Meeting
+## Step 6: Archive Transcript — MANDATORY
 
-**Purpose**: Finalize meeting and create permanent record.
+> ⚠️ **MANDATORY**: Execute this step BEFORE printing the closing header. Do NOT proceed to Step 7 without completing this step. This rule applies regardless of platform, mode, or flags.
 
-**Closing Header**:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅  MEETING CLOSED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+**Purpose**: Create a permanent record of the meeting in memory/.
 
-**Archive Transcript**:
-- File: `memory/meeting-YYYY-MM-DD-[slug].md`
+**Language Rule**: Regardless of the discussion language, the archived transcript file MUST be written in English.
+
+**File**: `memory/meeting-YYYY-MM-DD-[slug].md`
 - Slug: 2-3 word kebab-case summary of topic
-- Format: Markdown with full dialogue and action items
 
 **Transcript Structure**:
 ```markdown
 # Meeting Transcript
 **Date**: YYYY-MM-DD
-**Topic**: [meeting topic]
+**Topic**: [meeting topic in English]
 **Participants**: [agent list]
 **Rounds**: [N]
-**Language**: [Korean | English]
+**Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
 ---
 
 ## Transcript
 
-[Full dialogue — each turn in order]
+[Full dialogue — each turn in order, translated to English if meeting was in Korean]
 
 ---
 
@@ -213,28 +211,54 @@ Mode    : [Silent | Dialogue]
 |---|-----------|--------------|
 ```
 
+**After writing the file**, run the appropriate sync command:
+- **Bash**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>/dev/null || true`
+- **PowerShell**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>$null`
+
+If the sync command fails or is unavailable, continue — file archiving is the critical step.
+
 ---
 
-## Step 7: Task Conversion (Optional)
+## Step 7: Close Meeting
+
+> Only execute this step AFTER Step 6 (archive) is complete.
+
+**Purpose**: Signal meeting end to the user.
+
+**Closing Header**:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅  MEETING CLOSED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Print the transcript file path so the user can verify:
+```
+트랜스크립트 저장: memory/meeting-YYYY-MM-DD-[slug].md
+```
+
+---
+
+## Step 8: Task Conversion (Optional)
 
 **Purpose**: Convert action items into tracked tasks if `--tasks` flag set.
 
 **If --tasks Flag Present**:
 1. Extract each action item from synthesis
 2. Call `TaskCreate` for each item:
-   - `title`: "[Owner] — [Deliverable]"
+   - `title`: "[Owner] ??[Deliverable]"
    - `description`: Full acceptance criterion or deliverable detail
    - `status`: "pending"
 3. Display summary:
 ```
-📋 [N] tasks created from meeting action items.
+?�� [N] tasks created from meeting action items.
 Run /sync to commit the transcript, or dispatch agents to begin execution.
 ```
 
 **If --tasks Flag Not Set**:
 ```
-트랜스크립트 저장: memory/meeting-YYYY-MM-DD-[slug].md
-액션 아이템을 태스크로 변환하려면 /meeting ... --tasks 옵션을 사용하세요.
+?�랜?�크립트 ?�?? memory/meeting-YYYY-MM-DD-[slug].md
+?�션 ?�이?�을 ?�스?�로 변?�하?�면 /meeting ... --tasks ?�션???�용?�세??
 ```
 
 ---
@@ -244,7 +268,7 @@ Run /sync to commit the transcript, or dispatch agents to begin execution.
 **Successful Meeting**:
 - Structured dialogue across specified rounds
 - Synthesis with agreements, disagreements, and action items
-- Archived transcript in memory/
+- Archived transcript in memory/ (Step 6, mandatory — always before closing)
 - Optional task creation for action items
 
 **Quality Indicators**:
@@ -258,26 +282,26 @@ Run /sync to commit the transcript, or dispatch agents to begin execution.
 ## Best Practices
 
 **Meeting Setup**:
-✅ **Do**:
+??**Do**:
 - Use clear, specific meeting topics
 - Limit to 2-3 rounds for best quality
 - Choose dialogue mode for training or transparency
 - Include relevant specialists in participant list
 
-❌ **Don't**:
+??**Don't**:
 - Run more than 3 rounds (persona consistency degrades)
 - Mix unrelated topics in single meeting
 - Include unnecessary agents (keep focused)
 - Use dialogue mode for routine decisions (token cost)
 
 **Facilitation**:
-✅ **Do**:
+??**Do**:
 - Let agents challenge each other respectfully
 - Allow expertise to create real friction
 - Stop early if consensus reached
 - Document all action items clearly
 
-❌ **Don't**:
+??**Don't**:
 - Force agreement when expertise disagrees
 - Rush through complex discussions
 - Let agents all agree immediately

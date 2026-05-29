@@ -92,12 +92,12 @@ This skill provides the framework for running structured multi-agent meetings wh
 
 **Meeting Header** (always displayed):
 ```
-?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━???���? MEETING STARTED
+?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━???���? MEETING STARTED
 Topic   : [meeting topic]
 Present : [agent names]
 Rounds  : [N]
 Mode    : [Silent | Dialogue]
-?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━??```
+?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━??```
 
 **Facilitator Opening** (Dialogue mode only):
 - Set agenda and objectives
@@ -106,7 +106,7 @@ Mode    : [Silent | Dialogue]
 - **Facilitator Exception**: The PM acts solely as a facilitator and does NOT contribute opinions.
 
 **Silent Mode**:
-- Display: `[?�의 진행 중�??�료 ??결과�?출력?�니??`
+- Display: `[?�의 진행 중�??�료 ??결과�?출력?�니??`
 - Proceed internally without per-turn output until synthesis
 
 ---
@@ -170,36 +170,32 @@ Mode    : [Silent | Dialogue]
 
 ---
 
-## Step 6: Close and Archive Meeting
+## Step 6: Archive Transcript — MANDATORY
 
-**Purpose**: Finalize meeting and create permanent record.
+> ⚠️ **MANDATORY**: Execute this step BEFORE printing the closing header. Do NOT proceed to Step 7 without completing this step. This rule applies regardless of platform, mode, or flags.
 
-**Closing Header**:
-```
-?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━???? MEETING CLOSED
-?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━?�━??```
+**Purpose**: Create a permanent record of the meeting in memory/.
 
-**Archive Transcript**:
-- **Language Rule**: Regardless of the discussion language, the archived transcript file MUST be written in English.
-- File: `memory/meeting-YYYY-MM-DD-[slug].md`
+**Language Rule**: Regardless of the discussion language, the archived transcript file MUST be written in English.
+
+**File**: `memory/meeting-YYYY-MM-DD-[slug].md`
 - Slug: 2-3 word kebab-case summary of topic
-- Format: Markdown with full dialogue and action items
 
 **Transcript Structure**:
 ```markdown
 # Meeting Transcript
 **Date**: YYYY-MM-DD
-**Topic**: [meeting topic]
+**Topic**: [meeting topic in English]
 **Participants**: [agent list]
 **Rounds**: [N]
-**Language**: [Korean | English]
+**Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
 ---
 
 ## Transcript
 
-[Full dialogue ??each turn in order]
+[Full dialogue — each turn in order, translated to English if meeting was in Korean]
 
 ---
 
@@ -215,9 +211,35 @@ Mode    : [Silent | Dialogue]
 |---|-----------|--------------|
 ```
 
+**After writing the file**, run the appropriate sync command:
+- **Bash**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>/dev/null || true`
+- **PowerShell**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>$null`
+
+If the sync command fails or is unavailable, continue — file archiving is the critical step.
+
 ---
 
-## Step 7: Task Conversion (Optional)
+## Step 7: Close Meeting
+
+> Only execute this step AFTER Step 6 (archive) is complete.
+
+**Purpose**: Signal meeting end to the user.
+
+**Closing Header**:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅  MEETING CLOSED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Print the transcript file path so the user can verify:
+```
+트랜스크립트 저장: memory/meeting-YYYY-MM-DD-[slug].md
+```
+
+---
+
+## Step 8: Task Conversion (Optional)
 
 **Purpose**: Convert action items into tracked tasks if `--tasks` flag set.
 
@@ -229,14 +251,14 @@ Mode    : [Silent | Dialogue]
    - `status`: "pending"
 3. Display summary:
 ```
-?�� [N] tasks created from meeting action items.
+?�� [N] tasks created from meeting action items.
 Run /sync to commit the transcript, or dispatch agents to begin execution.
 ```
 
 **If --tasks Flag Not Set**:
 ```
-?�랜?�크립트 ?�?? memory/meeting-YYYY-MM-DD-[slug].md
-?�션 ?�이?�을 ?�스?�로 변?�하?�면 /meeting ... --tasks ?�션???�용?�세??
+?�랜?�크립트 ?�?? memory/meeting-YYYY-MM-DD-[slug].md
+?�션 ?�이?�을 ?�스?�로 변?�하?�면 /meeting ... --tasks ?�션???�용?�세??
 ```
 
 ---
@@ -246,7 +268,7 @@ Run /sync to commit the transcript, or dispatch agents to begin execution.
 **Successful Meeting**:
 - Structured dialogue across specified rounds
 - Synthesis with agreements, disagreements, and action items
-- Archived transcript in memory/
+- Archived transcript in memory/ (Step 6, mandatory — always before closing)
 - Optional task creation for action items
 
 **Quality Indicators**:

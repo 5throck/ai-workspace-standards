@@ -9,16 +9,7 @@
     "agents/README.md",
     "agents/README_ko.md",
     ".claude/settings.json",
-    ".claude/commands/changelog.md",
-    ".claude/commands/memlog.md",
-    ".claude/commands/new-task.md",
-    ".claude/commands/sync.md",
-    ".claude/commands/meeting.md",
-    ".gemini/settings.json",
-    ".gemini/commands/changelog.md",
-    ".gemini/commands/memlog.md",
-    ".gemini/commands/new-task.md",
-    ".gemini/commands/sync.md"
+    ".gemini/settings.json"
   ],
   "optional": [
     "README.md",
