@@ -2,6 +2,7 @@
 name: security-scan
 description: Runs static analysis and secret detection (via gitleaks) across the workspace.
 version: 1.0.0
+last_reviewed: 2026-05-30
 status: active
 owner: security-expert
 prerequisites: gitleaks

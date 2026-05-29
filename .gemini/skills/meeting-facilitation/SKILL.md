@@ -7,6 +7,7 @@ description: >
   multi-agent discussions, or facilitating collaborative problem-solving sessions.
 owner: pm
 version: 1.0.0
+last_reviewed: 2026-05-30
 metadata:
   type: process
   triggers:

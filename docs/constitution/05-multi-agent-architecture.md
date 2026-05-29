@@ -15,9 +15,9 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 ---
 name: <agent-name>
 tier:
-  claude: high|medium|low        # claude-opus-4-7 | claude-sonnet-4.6 | claude-haiku-4-5
-  antigravity: high|medium|low   # gemini-3.1-pro | gemini-3.5-flash
-  gemini-cli: high|medium|low    # gemini-3.1-pro | gemini-3.5-flash
+  claude: high|medium|low        # claude-opus-4-7 | claude-sonnet-4-6 | claude-haiku-4-5
+  antigravity: high|medium|low   # gemini-2.5-pro | gemini-2.0-flash
+  gemini-cli: high|medium|low    # gemini-2.5-pro | gemini-2.0-flash
 model: inherit
 color: yellow | blue | green | red | magenta | cyan | purple  # Claude Code only
 description: 'One-sentence role. Use when: "...", "...", "..."'
@@ -97,9 +97,9 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-4-7, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-4.6, gemini-3.5-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.5-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
+| **High** | claude-opus-4-7, gemini-2.5-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
+| **Medium** | claude-sonnet-4-6, gemini-2.0-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **Low** | claude-haiku-4-5, gemini-2.0-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
 
 **Tier Enforcement Rules:**
 - All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)

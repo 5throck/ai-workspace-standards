@@ -2,6 +2,7 @@
 name: simulate-project-creation
 description: Performs end-to-end (E2E) testing of the project scaffolding scripts to verify cross-platform functionality and encoding integrity.
 version: 1.0.0
+last_reviewed: 2026-05-30
 status: active
 owner: scaffolding-expert
 prerequisites: PowerShell or Bash

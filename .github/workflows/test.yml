@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, 'pr/**' ]
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -19,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@4bc047ad6b6d6d3d7177b5f3d8b8e060b4958ead
         with:
           bun-version: latest
 
