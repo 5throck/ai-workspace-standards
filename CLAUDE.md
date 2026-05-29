@@ -62,7 +62,17 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
 
-### 4. Agent Dispatch Rules
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
+- All documentation in docs/, agents/, skills/ → English only
+- Git commit messages, PR titles, PR descriptions → English only
+- Branch names → English only
+- Code comments → English (unless documenting locale-specific logic)
+
+### 5. Agent Dispatch Rules
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.

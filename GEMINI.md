@@ -118,7 +118,17 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 ---
 
-### 4. Agent Dispatch Rules
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
+- All documentation in docs/, agents/, skills/ → English only
+- Git commit messages, PR titles, PR descriptions → English only
+- Branch names → English only
+- Code comments → English (unless documenting locale-specific logic)
+
+### 5. Agent Dispatch Rules
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.

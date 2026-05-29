@@ -77,6 +77,34 @@ All specialist agents below are dispatched ONLY through PM:
 
 ---
 
+## Language Policy
+
+**English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for Korean translation zones.
+
+### English Documentation Requirement
+- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Rationale: English documentation ensures global accessibility and cross-team collaboration
+
+### Korean Translation Zones (Explicit Exceptions)
+- `ko/` directories - Korean-language documentation for Korean-speaking users
+- `locales/ko/` - Korean translation files for internationalization
+- These are the ONLY locations where Korean `.md` files are permitted
+
+### Enforcement
+- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
+- PR reviews reject non-English documentation outside translation zones
+- Auditor validates compliance during Phase 5 QA gate
+
+### Git/PR Artifacts Language Rule
+- All commit messages: English
+- All PR titles: English
+- All PR descriptions: English
+- All branch names: English
+- Code comments: English (unless documenting locale-specific logic)
+
+---
+
 ## PM Subagent Dispatch Protocol
 
 ### Dispatch Decision

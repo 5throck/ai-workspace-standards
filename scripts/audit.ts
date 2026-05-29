@@ -241,6 +241,16 @@ if (hasBun) {
     Warn('Bun not installed - skipping lifecycle audits');
 }
 
+// 3.7. Language validation: Korean-only markdown files outside ko/ and locales/ko/
+console.log(""); // Add spacing before language validation output
+const langValidate = await $`bun ${path.join('scripts', 'validate-md-language.ts')}`.nothrow();
+if (langValidate.exitCode === 0) {
+    Pass('Language validation: no Korean-only markdown files found');
+} else {
+    Fail('Language validation: Korean-only markdown files detected');
+    errors++;
+}
+
 // Agent/Skill State Synchronization Check
 if (fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
     let syncErrors = 0;
