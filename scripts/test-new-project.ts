@@ -9,6 +9,7 @@
  *   bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity]
  *
  * Test coverage:
+ *   0.  Script syntax validation (bash -n / pwsh parser — runs before project creation)
  *   1.  Project creation
  *   2.  UTF-8 integrity (no replacement chars)
  *   3.  Placeholder substitution ([Project Name] replaced)
@@ -93,6 +94,48 @@ console.log(`   Test dir     : ${testDir}`);
 console.log(`   OS           : ${isWin ? 'Windows (ps1)' : 'Unix (sh)'}\n`);
 
 try {
+  // ── Test 0: Script Syntax Validation ─────────────────────────────────────────
+  // Runs BEFORE project creation — catches bracket/syntax errors early.
+  console.log('Test 0: Script Syntax Validation');
+  let syntaxOk = true;
+
+  // 0a: bash -n (dry-run syntax check) for new-project.sh
+  try {
+    const shResult = await $`bash -n scripts/new-project.sh`.nothrow();
+    if (shResult.exitCode !== 0) {
+      fail('Test 0a', `new-project.sh syntax error:\n${shResult.stderr.toString().trim()}`);
+      syntaxOk = false;
+    } else {
+      pass('Test 0a PASSED: new-project.sh syntax OK');
+    }
+  } catch (e) { fail('Test 0a', String(e)); syntaxOk = false; }
+
+  // 0b: PowerShell scriptblock parser for new-project.ps1
+  // Uses [scriptblock]::Create() which parses without executing.
+  // Works on any platform where pwsh is available.
+  try {
+    const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
+    const parseCmd = `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
+      `$errors = @(); ` +
+      `[System.Management.Automation.Language.Parser]::ParseInput($content, [ref]$null, [ref]$errors) | Out-Null; ` +
+      `if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 } ` +
+      `else { Write-Host 'syntax OK' }`;
+    const ps1Result = await $`pwsh -NoProfile -Command ${parseCmd}`.nothrow();
+    if (ps1Result.exitCode !== 0) {
+      fail('Test 0b', `new-project.ps1 syntax error:\n${ps1Result.stderr.toString().trim()}`);
+      syntaxOk = false;
+    } else {
+      pass('Test 0b PASSED: new-project.ps1 syntax OK');
+    }
+  } catch (e) {
+    skip('Test 0b', `pwsh not available — skipping ps1 syntax check (${e})`);
+  }
+
+  if (!syntaxOk) {
+    console.error('\n❌ Syntax errors found — remaining tests skipped.');
+    process.exit(1);
+  }
+
   // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
   console.log('Test 1: Project Creation');
   try {
