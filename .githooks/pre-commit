@@ -141,25 +141,25 @@ if [ -n "$LIFECYCLE_STAGED" ]; then
   echo "=== Lifecycle Documentation Validation ==="
 
   # Validate agents
-  if bash scripts/validate-agents.sh; then
+  if bun scripts/validate-agents.ts; then
     echo -e "\033[32m[PASS]\033[0m Agent lifecycle documentation: all required sections present"
   else
     echo -e "\033[31m[FAIL]\033[0m Agent lifecycle documentation validation failed"
-    echo "       Run 'bash scripts/validate-agents.sh' to see details"
+    echo "       Run 'bun scripts/validate-agents.ts' to see details"
     exit 1
   fi
 
   # Validate skills
-  if bash scripts/validate-skills.sh; then
+  if bun scripts/validate-skills.ts; then
     echo -e "\033[32m[PASS]\033[0m Skill lifecycle documentation: all required sections present"
   else
     echo -e "\033[31m[FAIL]\033[0m Skill lifecycle documentation validation failed"
-    echo "       Run 'bash scripts/validate-skills.sh' to see details"
+    echo "       Run 'bun scripts/validate-skills.ts' to see details"
     exit 1
   fi
 
   # Validate doc/ folder organization
-  if bash scripts/validate-doc-folder.sh; then
+  if bun scripts/validate-doc-folder.ts; then
     echo -e "\033[32m[PASS]\033[0m Doc folder organization: correct"
   else
     echo -e "\033[33m[WARN]\033[0m Doc folder organization: lifecycle files should be in doc/lifecycle/"
