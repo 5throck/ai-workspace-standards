@@ -461,34 +461,46 @@ function checkCommands(variant: string): void {
   }
 }
 
-// Check 7: scripts parity
+// Check 7: scripts and .githooks parity
 function checkScriptParity(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 7: scripts parity in ${variant} ===`);
 
   // Only check common/ for script parity
   if (variant !== 'common') return;
 
+  // 7a: scripts/ bidirectional .sh/.ps1 parity (Fail)
   const scriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
   if (!existsSync(scriptsDir)) {
     warn('common', 'scripts-dir', 'templates/common/scripts/ not found');
-    return;
+  } else {
+    const files = readdirSync(scriptsDir);
+    const shNames = new Set(files.filter(f => f.endsWith('.sh') && !f.startsWith('test-')).map(f => f.replace('.sh', '')));
+    const ps1Names = new Set(files.filter(f => f.endsWith('.ps1') && !f.startsWith('test-')).map(f => f.replace('.ps1', '')));
+
+    const missingPs1 = [...shNames].filter(n => !ps1Names.has(n));
+    const missingSh = [...ps1Names].filter(n => !shNames.has(n));
+
+    if (missingPs1.length > 0) {
+      fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
+    }
+    if (missingSh.length > 0) {
+      fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
+    }
+    if (missingPs1.length === 0 && missingSh.length === 0) {
+      pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs, test-* excluded)`);
+    }
   }
 
-  const files = readdirSync(scriptsDir);
-  const shNames = new Set(files.filter(f => f.endsWith('.sh')).map(f => f.replace('.sh', '')));
-  const ps1Names = new Set(files.filter(f => f.endsWith('.ps1')).map(f => f.replace('.ps1', '')));
-
-  const missingPs1 = [...shNames].filter(n => !ps1Names.has(n));
-  const missingSh = [...ps1Names].filter(n => !shNames.has(n));
-
-  if (missingPs1.length > 0) {
-    fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
-  }
-  if (missingSh.length > 0) {
-    fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
-  }
-  if (missingPs1.length === 0 && missingSh.length === 0) {
-    pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs)`);
+  // 7b: .githooks/ parity — Warn only (Git Bash assumed on Windows)
+  const hooksDir = join(TEMPLATES_DIR, 'common', '.githooks');
+  if (existsSync(hooksDir)) {
+    const hookFiles = readdirSync(hooksDir).filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
+    const missingHookPs1 = hookFiles.filter(h => !existsSync(join(hooksDir, `${h}.ps1`)));
+    if (missingHookPs1.length > 0) {
+      warn('common', 'githooks-parity', `.githooks/ missing .ps1 counterparts: ${missingHookPs1.join(', ')} (Windows users require Git Bash)`);
+    } else {
+      pass(`common/.githooks: all hooks have .ps1 counterparts`);
+    }
   }
 }
 
@@ -863,8 +875,9 @@ function main() {
   checkCommon();
   const manifests = checkVariantManifests();
 
-  // Check common/ commands
+  // Check common/ commands and parity
   checkCommands('common');
+  checkScriptParity('common');
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {

@@ -185,15 +185,37 @@ if (fs.existsSync(projectCtxPath)) {
     }
 
     if (fs.existsSync('scripts')) {
-        for (const file of fs.readdirSync('scripts')) {
-            if (file.endsWith('.sh')) {
-                const baseName = path.basename(file, '.sh');
-                const ps1 = path.join('scripts', `${baseName}.ps1`);
-                if (fs.existsSync(ps1)) {
-                    Pass(`script parity: ${file} / ${baseName}.ps1`);
-                } else {
-                    Warn(`script parity gap: ${file} has no matching .ps1`);
-                }
+        const scriptFiles = fs.readdirSync('scripts');
+        const shFiles = scriptFiles.filter(f => f.endsWith('.sh') && !f.startsWith('test-'));
+        const ps1Files = scriptFiles.filter(f => f.endsWith('.ps1') && !f.startsWith('test-'));
+
+        // S-02: Bidirectional parity check — both directions, Fail (not Warn)
+        let parityOk = true;
+        for (const f of shFiles) {
+            const base = path.basename(f, '.sh');
+            if (!fs.existsSync(path.join('scripts', `${base}.ps1`))) {
+                Fail(`script parity: ${f} has no matching ${base}.ps1`);
+                parityOk = false;
+            }
+        }
+        for (const f of ps1Files) {
+            const base = path.basename(f, '.ps1');
+            if (!fs.existsSync(path.join('scripts', `${base}.sh`))) {
+                Fail(`script parity: ${f} has no matching ${base}.sh`);
+                parityOk = false;
+            }
+        }
+        if (parityOk) {
+            Pass(`script parity: all .sh/.ps1 pairs present (${shFiles.length} pairs, test-* excluded)`);
+        }
+    }
+
+    // S-03: .githooks parity check — Warn only (Git Bash assumed on Windows)
+    if (fs.existsSync('.githooks')) {
+        const hookFiles = fs.readdirSync('.githooks').filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
+        for (const hook of hookFiles) {
+            if (!fs.existsSync(path.join('.githooks', `${hook}.ps1`))) {
+                Warn(`.githooks parity: .githooks/${hook} has no .ps1 counterpart (Windows users require Git Bash)`);
             }
         }
     }
