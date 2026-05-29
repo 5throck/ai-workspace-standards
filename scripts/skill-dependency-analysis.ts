@@ -137,20 +137,16 @@ function loadSkills(): Map<string, SkillMeta> {
 function findCycle(
   start: string,
   skills: Map<string, SkillMeta>,
-  visited: Set<string> = new Set(),
   path: string[] = []
 ): string[] | null {
   if (path.includes(start)) {
     return [...path.slice(path.indexOf(start)), start];
   }
-  if (visited.has(start)) return null;
-  visited.add(start);
-
   const skill = skills.get(start);
   if (!skill) return null;
 
   for (const dep of skill.dependencies) {
-    const cycle = findCycle(dep, skills, visited, [...path, start]);
+    const cycle = findCycle(dep, skills, [...path, start]);
     if (cycle) return cycle;
   }
   return null;

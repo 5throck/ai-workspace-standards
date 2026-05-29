@@ -12,10 +12,10 @@
 | Phase | Name | Key Agents | PM Facilitation Mode | Exit Criteria |
 |-------|------|------------|----------------------|----------------|
 | 0 | Project Initiation | scaffolding-expert | Orchestrator | Project scaffolded, template validated |
-| 1-2 | Planning & Architecture | architect | Orchestrator | Implementation plan approved, ADRs filed |
-| 3 | Design Handoff | (varies by variant) | Orchestrator | Design specs ready, team aligned |
-| 4 | Execution | automation-engineer, docs-writer | Orchestrator | Features implemented, docs updated |
-| 5 | Quality Assurance | security-expert, auditor | Orchestrator | QA passed, security cleared |
+| 1-2 | Planning & Architecture | architect | Approver (architect leads) | Implementation plan approved, ADRs filed |
+| 3 | Design Handoff | (varies by variant) | Approver (variant specialist leads) | Design specs ready, team aligned |
+| 4 | Execution | automation-engineer, docs-writer | Absent (autonomous) | Features implemented, docs updated |
+| 5 | Quality Assurance | security-expert, auditor | Absent (autonomous) | QA passed, security cleared |
 | 6 | Lifecycle Finalization | lifecycle-manager | Orchestrator | Governance documents updated, lifecycle transition complete |
 
 ---
@@ -56,26 +56,22 @@
 
 **Specialist Agent**: architect
 
-**PM Facilitation Tasks (Orchestrator Mode):**
+> **PM Role**: Approver — architect leads this phase autonomously. PM does not orchestrate execution; PM reviews and approves the output before Phase 3 begins.
 
-1. **Opening the Phase**
-   - State the planning objective: "We need an implementation plan and technical decisions"
-   - Nominate architect to lead design
-   - Set expectations: "Produce implementation plan with file structure and ADRs for key decisions"
+**PM Responsibilities (Approver Mode):**
 
-2. **During Execution**
-   - Review architect's proposed architecture
-   - Challenge assumptions if they conflict with workspace standards
-   - Ensure architectural decisions are documented as ADRs
+1. **At Phase Start**
+   - Confirm the planning objective is clear and hand off to architect
+   - Architect proceeds independently: produces implementation plan, file structure, and ADRs
 
-3. **Closing the Phase**
-   - Verify exit criteria: implementation plan approved, ADRs filed
-   - Synthesize architect's recommendations
-   - Make provisional decision: approve architecture or request revisions
+2. **At Phase Close**
+   - Review architect's implementation plan and ADRs
+   - Approve or request targeted revisions (PM does not rewrite the plan)
    - Assign follow-up: "Update docs/context.md with architecture decisions"
 
 **PM Behaviors to Avoid:**
-- ❌ Do not dictate technical architecture (let architect lead)
+- ❌ Do not orchestrate or direct architect's design process
+- ❌ Do not dictate technical architecture (architect leads)
 - ❌ Do not skip ADR documentation
 
 ---
@@ -90,25 +86,21 @@
 - **co-work**: analyst (content research, data gathering)
 - **co-security**: threat-modeler (threat modeling, attack surface analysis)
 
-**PM Facilitation Tasks (Orchestrator Mode):**
+> **PM Role**: Approver — variant specialist(s) lead this phase autonomously. PM does not orchestrate execution; PM reviews and approves design outputs before Phase 4 begins.
 
-1. **Opening the Phase**
-   - State the design objective based on variant workflow
-   - Nominate appropriate design specialists
-   - Set expectations: "Produce design specs that guide Phase 4 execution"
+**PM Responsibilities (Approver Mode):**
 
-2. **During Execution**
-   - Monitor design specialist progress
-   - Ensure designs are actionable for implementation phase
-   - Facilitate handoff to execution team
+1. **At Phase Start**
+   - Confirm design objective and hand off to the appropriate variant specialist(s)
+   - Specialists proceed independently: produce design specs that guide Phase 4 execution
 
-3. **Closing the Phase**
-   - Verify exit criteria: design specs complete, execution team aligned
-   - Synthesize design specialist outputs
-   - Make provisional decision: designs approved for implementation
+2. **At Phase Close**
+   - Review design specialist outputs
+   - Approve or request targeted revisions (PM does not produce design artifacts)
    - Assign follow-up: "Update implementation plan with design decisions"
 
 **PM Behaviors to Avoid:**
+- ❌ Do not orchestrate or direct the specialist's design process
 - ❌ Do not produce design artifacts directly (let specialists execute)
 - ❌ Do not bypass design review
 
@@ -118,29 +110,19 @@
 
 **Purpose**: Implement features, create scripts, update documentation.
 
-**Specialist Agents**: automation-engineer, docs-writer
+**Specialist Agents**: automation-engineer (scripts/code), docs-writer (documentation)
 
-**PM Facilitation Tasks (Orchestrator Mode):**
+> **Phase 4 is autonomous — PM does not orchestrate.** The Lead Agent (automation-engineer for scripts, docs-writer for documentation) executes independently per the approved plan from Phases 1-2. PM is not involved during execution and does not monitor, intervene, or synthesize outputs in this phase.
 
-1. **Opening the Phase**
-   - State the execution objective: "We are implementing the approved plan"
-   - Nominate automation-engineer for code/scripts, docs-writer for documentation
-   - Set expectations: "Follow the implementation plan and produce quality outputs"
-
-2. **During Execution**
-   - Monitor parallel execution of automation-engineer and docs-writer
-   - Ensure outputs align with approved architecture and designs
-   - Intervene only if quality standards are not met
-
-3. **Closing the Phase**
-   - Verify exit criteria: features implemented, docs updated, code quality acceptable
-   - Synthesize execution outputs from both specialists
-   - Make provisional decision: ready for QA or needs revision
-   - Assign follow-up: "Address these quality issues before Phase 5"
+**How Phase 4 Runs:**
+- automation-engineer and docs-writer execute the approved plan without PM direction
+- They follow the implementation plan and quality standards established in Phases 1-2
+- Phase 5 (QA) begins only after both agents have completed their work
 
 **PM Behaviors to Avoid:**
-- ❌ Do not write code or scripts directly (let specialists execute)
-- ❌ Do not bypass documentation updates
+- ❌ Do not orchestrate, monitor, or intervene during Phase 4
+- ❌ Do not write code or scripts directly (automation-engineer owns this)
+- ❌ Do not bypass documentation updates (docs-writer owns this)
 
 ---
 
@@ -148,27 +130,18 @@
 
 **Purpose**: Verify quality, ensure security compliance, enforce standards.
 
-**Specialist Agents**: security-expert, auditor
+**Specialist Agents**: auditor (quality gate), security-expert (security review)
 
-**PM Facilitation Tasks (Orchestrator Mode):**
+> **Phase 5 is autonomous — PM does not orchestrate.** The Auditor leads the QA gate independently. The security-expert conducts security review independently. PM is not present during Phase 5 and does not direct, monitor, or synthesize findings in this phase.
 
-1. **Opening the Phase**
-   - State the QA objective: "We are verifying quality and security"
-   - Nominate security-expert for security review, auditor for quality verification
-   - Set expectations: "Enforce workspace standards and security policies"
-
-2. **During Execution**
-   - Monitor security-expert and auditor findings
-   - Ensure all issues are documented with severity levels
-   - Facilitate resolution of critical blockers
-
-3. **Closing the Phase**
-   - Verify exit criteria: QA passed, security cleared, no critical issues
-   - Synthesize QA findings and issue resolutions
-   - Make provisional decision: approve for merge or require fixes
-   - Assign follow-up: "Address these security/quality issues before finalizing"
+**How Phase 5 Runs:**
+- auditor runs the quality gate against workspace standards
+- security-expert conducts security review independently
+- If issues are found, execution agents (Phase 4) address them and Phase 5 re-runs
+- PM is notified only when Phase 5 passes all gates (or if escalation is required)
 
 **PM Behaviors to Avoid:**
+- ❌ Do not orchestrate, monitor, or intervene during Phase 5
 - ❌ Do not bypass security or quality gates
 - ❌ Do not override auditor findings without justification
 
@@ -204,23 +177,28 @@
 
 ---
 
-## PM Orchestrator Mode vs. Direct Management
+## PM Orchestrator Mode vs. Approver Mode vs. Absent
 
-**Orchestrator Mode (Default):**
-- PM facilitates, nomnates specialists, synthesizes outputs
+**PM owns Phases 0, 2, and 6 (Orchestrator Mode):**
+- PM facilitates, nominates specialists, synthesizes outputs
 - PM does not execute specialist work directly
 - PM makes provisional decisions that require specialist confirmation
+
+**PM approves Phases 1-2 and 3 (Approver Mode):**
+- Architect leads Phase 1-2 autonomously; PM reviews and approves the output
+- Variant specialists lead Phase 3 autonomously; PM reviews and approves design specs
+- PM does not direct or monitor execution in these phases
+
+**PM is absent from Phases 4 and 5 (Autonomous):**
+- Phase 4 (Execution): automation-engineer and docs-writer execute per the approved plan
+- Phase 5 (QA): auditor and security-expert run the quality gate independently
+- PM receives the result after Phase 5 passes all gates
 
 **Direct Management (Exception Cases):**
 - PM may directly execute when:
   - Task is trivial (single-line fix, simple question)
   - Specialist is unavailable and urgency is high
   - Task requires PM-specific domain knowledge (meeting facilitation, task tracking)
-
-**When to Switch Modes:**
-- Use orchestrator mode by default for all multi-step tasks
-- Switch to direct management only with explicit justification
-- Document mode switches in meeting transcripts or task logs
 
 ---
 

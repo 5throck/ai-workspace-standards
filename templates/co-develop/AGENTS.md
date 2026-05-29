@@ -12,7 +12,7 @@
 
 ## Multi-Agent Phase Definitions
 
-**co-develop follows the standard 6-phase workflow** defined in [`templates/common/phase-definitions.md`](../common/phase-definitions.md).
+**co-develop follows the standard 7-phase workflow** defined in [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding -->.
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
@@ -25,7 +25,7 @@
 | 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
 
 **PM Facilitation Guidance:**
-See [`phase-definitions.md`](../common/phase-definitions.md) for detailed PM tasks in each phase:
+See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
 - Opening the phase (objective, specialist nomination, expectations)
 - Progress monitoring (intervene only if standards not met)
 - Synthesis of outputs (key findings, decisions)
@@ -95,12 +95,12 @@ All specialist agents below are dispatched ONLY through PM:
 
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|-------------------|
-| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
 | **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
-| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
-| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
-| **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
-| **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
+| **stack-setup** | 0-1 | "Unknown stack detected", "Setup procedure needed", "Environment configuration" |
+| **designer** | 3 | "UI/UX specs needed", "Wireframes required", "Component definitions" |
+| **code-writer** | 4 | "Implementing features", "Writing source code", "Applying approved plan" |
+| **test-runner** | 4 | "Running tests", "Verifying acceptance criteria", "Test suite execution" |
+| **security-monitor** | 0,5 | "Security policy check", "Secret scan", "Dependency audit" |
 | **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
