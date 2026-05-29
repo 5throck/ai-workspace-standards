@@ -1,5 +1,6 @@
 ---
 name: skill-lifecycle-manager
+status: active
 description: >
   Manages the creation, validation, and maintenance of skill files across the project.
   Use when: creating new skills, updating skill metadata, validating skill structure,
@@ -67,6 +68,7 @@ This skill provides a systematic approach to creating, validating, and maintaini
 ```yaml
 ---
 name: skill-name
+status: active
 description: >
   Brief description of what this skill does and when to use it.
   Use when: [specific trigger scenarios]
@@ -222,6 +224,7 @@ bun run verify-skills
 ```yaml
 ---
 name: debugging-workflow
+status: active
 description: Use when troubleshooting code issues, investigating bugs, or diagnosing errors
 metadata:
   type: process
@@ -236,6 +239,7 @@ metadata:
 ```yaml
 ---
 name: frontend-design
+status: active
 description: Use when implementing user interfaces, creating visual designs, or building UI components
 metadata:
   type: implementation
@@ -250,6 +254,7 @@ metadata:
 ```yaml
 ---
 name: api-integration
+status: active
 description: Use when integrating with external APIs, handling authentication, or managing API clients
 metadata:
   type: domain

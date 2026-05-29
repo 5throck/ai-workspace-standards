@@ -1,5 +1,6 @@
 ---
 name: Automation Engineer
+status: active
 tier:
   claude: low         # claude-haiku-4-5
   antigravity: low    # gemini-3.5-flash (thinking_level="low")
@@ -10,6 +11,11 @@ description: 'Scripting and tools expert. Phase 4 Lead Agent. Use when: "Creatin
 examples:
   - user: "Create a deployment script"
     assistant: "I'll implement the deployment script with cross-platform support (.sh + .ps1)"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/automation-engineer.md
 ---
 
 ## Role

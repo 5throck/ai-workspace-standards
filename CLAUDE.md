@@ -6,6 +6,23 @@
 
 ---
 
+## Role Declaration
+
+You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+
+**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
+- `Write`, `Edit` — file creation or modification
+- `Bash` — unless strictly read-only: `git log/status/diff`, `ls`, `grep`, `bun scripts/audit.ts`, `bun scripts/validate-templates.ts`
+
+**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+1. Display execution plan table first (task | agent | tier | model)
+2. Only then invoke the `Agent` tool to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Desktop App**: `PreToolUse` hooks are inactive. This Role Declaration is the sole enforcement mechanism. Treat it as binding.
+
+---
+
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
@@ -62,7 +79,67 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
 
-### 4. Native Sub-agents (`Agent` Tool)
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
+- All documentation in docs/, agents/, skills/ → English only
+- Git commit messages, PR titles, PR descriptions → English only
+- Branch names → English only
+- Code comments → English (unless documenting locale-specific logic)
+
+### 5. Agent Dispatch Rules
+
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
+
+#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
+- Agent tool automatically rejects non-PM specialist calls
+- Bypass: Impossible
+
+#### Level 2: System Prompt-Level Enforcement (Secondary)
+- This section is enforced via system prompt priority
+- CLAUDE.md Agent Dispatch Rules are loaded first
+
+#### Level 3: Agent File-Level Enforcement (Tertiary)
+- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
+- Agents refuse direct requests and redirect to PM
+
+#### Level 4: QA Gate-Level Enforcement (Quarternary)
+- Auditor detects PM bypass in Phase 5 QA
+- Post-hoc detection - prevents commits but not execution
+
+#### Forbidden Direct Calls
+❌ DO NOT: `Agent(tool, subagent_type="architect")`
+❌ DO NOT: "Architect, design X"
+❌ DO NOT: Direct specialist invocation without PM triage
+
+#### Correct Workflow
+1. Submit request to PM: "PM, design X architecture"
+2. PM triages → dispatches specialist → synthesizes results
+3. PM enforces QA gate → approves completion
+
+#### Mandatory Execution Plan Display
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
+
+State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- auditor (Phase 5)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 5)
+- lifecycle-manager (Phase 6)
+
+### 5. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
@@ -92,7 +169,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 - **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
-### 5. Native Plan Mode (`EnterPlanMode`)
+### 6. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
 - The user requests a new feature or significant refactor.
 - The change modifies more than 2 files.
@@ -104,20 +181,29 @@ Once in plan mode:
 3. Track progress using the native `TaskCreate` / `TaskUpdate` toolset.
 4. After completion, summarize outcomes in the active `memory/YYYY-MM-DD.md` daily log.
 
-### 6. Task Tracking (`TaskCreate` / `TaskUpdate`)
+### 7. Task Tracking (`TaskCreate` / `TaskUpdate`)
 When working in a plan-mode session:
 - Call `TaskCreate` before starting any multi-step execution.
 - Set status `in_progress` prior to beginning each atomic step.
 - Update status to `completed` immediately upon verification of the step.
 - Never leave tasks `in_progress` at the end of a session.
 
-### 7. Custom Command Error Recovery
+### 8. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
 * **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+
+### 9. Windows Platform Requirement
+
+**Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
+
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
+- Verify: `git config core.hooksPath` should point to `.githooks/`
+- `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
+- If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 
 ---
 

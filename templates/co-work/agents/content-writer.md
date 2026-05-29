@@ -1,5 +1,6 @@
 ---
 name: content-writer
+status: active
 formal_name: Content Writer & Documentation Specialist
 tier:
   claude: medium    # claude-sonnet-4.6

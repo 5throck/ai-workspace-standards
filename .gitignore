@@ -7,6 +7,9 @@
 # --- Ignore all subdirectories (each is its own repo) ---
 /*/
 
+# --- PM gateway approval flag (session-local, must not be committed) ---
+.pm-approved
+
 # --- Secrets and local certs ---
 .env
 *.pem
@@ -58,8 +61,13 @@ __pycache__/
 !agents/
 !memory/
 !.github/
+!docs/
 !docs/constitution/
+!docs/governance/
+!docs/lifecycle/
+!docs/superpowers/
 !skills/
+!templates/common/
 
 # --- CodeGraph Index ---
 .codegraph/

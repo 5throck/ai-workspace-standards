@@ -8,6 +8,23 @@ This file provides guidance to Gemini (including the Antigravity agentic engine 
 
 ---
 
+## Role Declaration
+
+You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+
+**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
+- `write_to_file`, `replace_file_content`, `multi_replace_file_content` — file modification
+- `run_command` — unless strictly read-only: `grep_search`, `git log/status/diff`, `ls`
+
+**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+1. Display execution plan table first (task | agent | tier | model)
+2. Only then use `invoke_subagent` to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Note**: `PreToolUse` hooks enforce this rule at the tool level in CLI environments. This Role Declaration serves as the system-prompt-level enforcement (Level 2).
+
+---
+
 ## Gemini-Specific & Antigravity Workflows
 
 ### 1. Active Antigravity Tool Suite Mapping & Safeguards
@@ -118,7 +135,69 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 ---
 
-### 6. Slash Command Emulation Guide
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
+- All documentation in docs/, agents/, skills/ → English only
+- Git commit messages, PR titles, PR descriptions → English only
+- Branch names → English only
+- Code comments → English (unless documenting locale-specific logic)
+
+### 5. Agent Dispatch Rules
+
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
+
+#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
+- Agent tool automatically rejects non-PM specialist calls
+- Bypass: Impossible
+
+#### Level 2: System Prompt-Level Enforcement (Secondary)
+- This section is enforced via system prompt priority
+- GEMINI.md Agent Dispatch Rules are loaded first
+
+#### Level 3: Agent File-Level Enforcement (Tertiary)
+- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
+- Agents refuse direct requests and redirect to PM
+
+#### Level 4: QA Gate-Level Enforcement (Quarternary)
+- Auditor detects PM bypass in Phase 5 QA
+- Post-hoc detection - prevents commits but not execution
+
+#### Forbidden Direct Calls
+❌ DO NOT: Direct specialist invocation via Gemini CLI
+❌ DO NOT: "Specialist, perform task" without PM triage
+❌ DO NOT: Bypass PM dispatch workflow
+
+#### Correct Workflow
+1. Submit request to PM: "PM, need specialist for X"
+2. PM triages → dispatches specialist → synthesizes results
+3. PM enforces QA gate → approves completion
+
+#### Mandatory Execution Plan Display
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
+
+State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- auditor (Phase 5)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 5)
+- lifecycle-manager (Phase 6)
+
+---
+
+### 5. Slash Command Emulation Guide
 Gemini does not natively run slash commands. Emulate custom slash commands using platform terminal utilities based on the current host OS.
 
 > **Platform parity**: every command file in `.gemini/commands/` must have a matching file in `.claude/commands/`. Intentional Gemini-absent exceptions are marked `gemini-parity: skip` in the Claude-side frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
@@ -134,7 +213,7 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 
 ---
 
-### 7. Coexistence, Precedence & Migration of .claude
+### 6. Coexistence, Precedence & Migration of .claude
 Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
 *   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
 *   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
@@ -148,6 +227,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
 *Last Updated: 2026-05-27*
 

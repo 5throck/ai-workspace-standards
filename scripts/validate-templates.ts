@@ -186,6 +186,17 @@ function checkCommon(): void {
   }
 
   pass('templates/common/ exists with required subdirectories');
+
+  // Check forbidden files — files that must NOT exist in templates/common/
+  const forbiddenFiles = ['CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'];
+  const presentForbidden = forbiddenFiles.filter(f => existsSync(join(commonDir, f)));
+  if (presentForbidden.length > 0) {
+    for (const f of presentForbidden) {
+      fail('common', 'forbidden-file', `templates/common/${f} must not exist — workspace-level file must not be copied to L2 projects. Delete it from templates/common/.`);
+    }
+  } else {
+    pass('templates/common/ blocklist: no forbidden files present');
+  }
 }
 
 // Check 1: templates/VERSION
@@ -323,7 +334,8 @@ function checkAgents(variant: string): void {
     }
   }
 
-  const requiredFrontmatter = ['name', 'tier', 'description', 'examples'];
+  const requiredFrontmatter = ['name', 'status', 'tier', 'description', 'examples'];
+  const validAgentStatuses = ['active', 'deprecated', 'experimental'];
   // PM uses "Meeting Facilitation" (facilitator role); all others use "Meeting Participation"
   const MEETING_SECTIONS = ['## Meeting Participation', '## Meeting Facilitation'];
   const DISPATCH_SECTION = '## Dispatch Protocol';
@@ -342,9 +354,19 @@ function checkAgents(variant: string): void {
     // Check frontmatter (field must exist as a key, value can be empty/block)
     const missingFields = requiredFrontmatter.filter(f => !(f in fields));
     if (missingFields.length > 0) {
-      fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`);
+      fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`,
+        `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(', ')}`);
     } else {
-      pass(`agents/${file}: frontmatter OK`);
+      // Validate status enum value (extract actual value from raw content)
+      const statusLine = rawContent.split('\n').find(l => l.match(/^status:\s*\S/));
+      const statusVal = statusLine ? statusLine.replace(/^status:\s*/, '').trim() : '';
+      if (!validAgentStatuses.includes(statusVal)) {
+        fail(variant, 'agent-status-invalid',
+          `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(' | ')})`,
+          `Set status to one of: ${validAgentStatuses.join(', ')}`);
+      } else {
+        pass(`agents/${file}: frontmatter OK`);
+      }
     }
 
     // Check required sections
@@ -399,72 +421,86 @@ function checkAgentsRoster(variant: string): void {
   }
 }
 
-// Check 6: .claude/commands in variant
+// Check 6: commands structure — shared in common/, variant-specific only in variants
 function checkCommands(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check 6: .claude/commands in ${variant} ===`);
+  if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  // For common/, check universal commands only
+  const allSharedCommands = ['changelog.md', 'meeting.md', 'memlog.md', 'new-task.md', 'sync.md'];
+
   if (variant === 'common') {
-    const commandsDir = join(TEMPLATES_DIR, 'common', '.claude', 'commands');
-    if (!existsSync(commandsDir)) {
-      fail('common', 'commands-dir', 'templates/common/.claude/commands/ not found');
-      return;
-    }
-
-    const universalCommands = ['changelog.md', 'memlog.md', 'new-task.md', 'sync.md'];
-    for (const cmd of universalCommands) {
-      const cmdPath = join(commandsDir, cmd);
-      if (!existsSync(cmdPath)) {
-        fail('common', 'command-missing', `.claude/commands/${cmd} not found in common/`);
+    // common/ must have all 5 shared commands in BOTH .claude/commands/ and .gemini/commands/
+    for (const platform of ['.claude', '.gemini']) {
+      const commandsDir = join(TEMPLATES_DIR, 'common', platform, 'commands');
+      if (!existsSync(commandsDir)) {
+        fail('common', 'commands-dir', `templates/common/${platform}/commands/ not found`);
+        continue;
       }
+      for (const cmd of allSharedCommands) {
+        if (!existsSync(join(commandsDir, cmd))) {
+          fail('common', 'command-missing', `${platform}/commands/${cmd} not found in common/`);
+        }
+      }
+      pass(`common/${platform}/commands: ${allSharedCommands.length} shared commands OK`);
     }
-    pass(`common/.claude/commands: ${universalCommands.length} universal commands OK`);
     return;
   }
 
-  // For variants, check meeting.md exists
-  const commandsDir = join(TEMPLATES_DIR, variant, '.claude', 'commands');
-  if (!existsSync(commandsDir)) {
-    warn(variant, 'commands-dir', `templates/${variant}/.claude/commands/ not found`);
-    return;
-  }
-
-  const meetingCmd = join(commandsDir, 'meeting.md');
-  if (!existsSync(meetingCmd)) {
-    fail(variant, 'command-missing', `templates/${variant}/.claude/commands/meeting.md not found`);
-  } else {
-    pass(`${variant}/.claude/commands/meeting.md: OK`);
+  // Variants must NOT have shared commands (inherited from common/ via new-project.sh overlay)
+  // Only security-check.md is allowed as a variant-specific command
+  const allowedVariantCommands = new Set(['security-check.md']);
+  for (const platform of ['.claude', '.gemini']) {
+    const commandsDir = join(TEMPLATES_DIR, variant, platform, 'commands');
+    if (!existsSync(commandsDir)) continue;
+    const files = readdirSync(commandsDir);
+    const unexpected = files.filter(f => !allowedVariantCommands.has(f));
+    if (unexpected.length > 0) {
+      fail(variant, 'command-duplicate', `${platform}/commands/ contains shared commands that belong in common/ only: ${unexpected.join(', ')}`);
+    } else {
+      pass(`${variant}/${platform}/commands: OK (${files.length} variant-specific file(s))`);
+    }
   }
 }
 
-// Check 7: scripts parity
+// Check 7: scripts and .githooks parity
 function checkScriptParity(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 7: scripts parity in ${variant} ===`);
 
   // Only check common/ for script parity
   if (variant !== 'common') return;
 
+  // 7a: scripts/ bidirectional .sh/.ps1 parity (Fail)
   const scriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
   if (!existsSync(scriptsDir)) {
     warn('common', 'scripts-dir', 'templates/common/scripts/ not found');
-    return;
+  } else {
+    const files = readdirSync(scriptsDir);
+    const shNames = new Set(files.filter(f => f.endsWith('.sh') && !f.startsWith('test-')).map(f => f.replace('.sh', '')));
+    const ps1Names = new Set(files.filter(f => f.endsWith('.ps1') && !f.startsWith('test-')).map(f => f.replace('.ps1', '')));
+
+    const missingPs1 = [...shNames].filter(n => !ps1Names.has(n));
+    const missingSh = [...ps1Names].filter(n => !shNames.has(n));
+
+    if (missingPs1.length > 0) {
+      fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
+    }
+    if (missingSh.length > 0) {
+      fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
+    }
+    if (missingPs1.length === 0 && missingSh.length === 0) {
+      pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs, test-* excluded)`);
+    }
   }
 
-  const files = readdirSync(scriptsDir);
-  const shNames = new Set(files.filter(f => f.endsWith('.sh')).map(f => f.replace('.sh', '')));
-  const ps1Names = new Set(files.filter(f => f.endsWith('.ps1')).map(f => f.replace('.ps1', '')));
-
-  const missingPs1 = [...shNames].filter(n => !ps1Names.has(n));
-  const missingSh = [...ps1Names].filter(n => !shNames.has(n));
-
-  if (missingPs1.length > 0) {
-    fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
-  }
-  if (missingSh.length > 0) {
-    fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
-  }
-  if (missingPs1.length === 0 && missingSh.length === 0) {
-    pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs)`);
+  // 7b: .githooks/ parity — Warn only (Git Bash assumed on Windows)
+  const hooksDir = join(TEMPLATES_DIR, 'common', '.githooks');
+  if (existsSync(hooksDir)) {
+    const hookFiles = readdirSync(hooksDir).filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
+    const missingHookPs1 = hookFiles.filter(h => !existsSync(join(hooksDir, `${h}.ps1`)));
+    if (missingHookPs1.length > 0) {
+      warn('common', 'githooks-parity', `.githooks/ missing .ps1 counterparts: ${missingHookPs1.join(', ')} (Windows users require Git Bash)`);
+    } else {
+      pass(`common/.githooks: all hooks have .ps1 counterparts`);
+    }
   }
 }
 
@@ -472,7 +508,7 @@ function checkScriptParity(variant: string): void {
 function checkSharedFileSync(): void {
   if (!JSON_MODE) console.log('\n=== Check 8: Shared file sync ===');
   const workspaceMeeting = join(ROOT, '.claude', 'commands', 'meeting.md');
-  const templateMeeting = join(TEMPLATES_DIR, 'co-develop', '.claude', 'commands', 'meeting.md');
+  const templateMeeting = join(TEMPLATES_DIR, 'common', '.claude', 'commands', 'meeting.md');
 
   if (!existsSync(workspaceMeeting) || !existsSync(templateMeeting)) {
     // One or both missing — skip silently
@@ -483,9 +519,9 @@ function checkSharedFileSync(): void {
   const tplContent = normalizeContent(readFileSync(templateMeeting, 'utf-8'));
 
   if (wsContent !== tplContent) {
-    warn('root', 'shared-sync', 'meeting.md differs between workspace and templates/co-develop', 'Run: cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md');
+    warn('root', 'shared-sync', 'meeting.md differs between workspace and templates/common', 'Run: cp .claude/commands/meeting.md templates/common/.claude/commands/meeting.md');
   } else {
-    pass('meeting.md: workspace and co-develop are in sync');
+    pass('meeting.md: workspace and common are in sync');
   }
 }
 
@@ -839,8 +875,9 @@ function main() {
   checkCommon();
   const manifests = checkVariantManifests();
 
-  // Check common/ commands
+  // Check common/ commands and parity
   checkCommands('common');
+  checkScriptParity('common');
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {

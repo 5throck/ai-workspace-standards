@@ -17,6 +17,7 @@
 | Agent | File | Role |
 |-------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
+| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 | Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Enforces security policies; prevents secrets leaks; monitors safe dependencies |
 
 ### 📐 Design
@@ -40,6 +41,40 @@
 | Stack Setup | [`agents/stack-setup.md`](agents/stack-setup.md) | Identifies unknown stacks, web-searches setup procedures, mandatory security review, requires explicit user approval before executing any commands |
 
 *(Add domain-specific agents as needed -see the extension guidance below.)*
+
+---
+
+## PM Gateway Policy
+
+**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
+All specialist agents require PM dispatch - enforced at 4 levels.
+
+### Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 5 QA
+
+### Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+### Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
+| **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
+| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
+
+**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
 ---
 

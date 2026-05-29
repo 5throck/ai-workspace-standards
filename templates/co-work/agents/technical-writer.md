@@ -1,5 +1,6 @@
 ---
 name: technical-writer
+status: active
 formal_name: Technical Writer & Developer Documentation Specialist
 tier:
   claude: medium    # claude-sonnet-4.6

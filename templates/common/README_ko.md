@@ -3,13 +3,13 @@ translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# {{PROJECT_NAME}}
+# [Project Name]
 
-{{PROJECT_DESCRIPTION}}
+[Project Description]
 
 ## 프로젝트 특성 (Project Characteristics)
 
-{{PROJECT_CHARACTERISTICS}}
+[Project Characteristics]
 
 ## 이 프로젝트 사용 방법
 

@@ -63,7 +63,7 @@ TEMPLATES_DIR="$WORKSPACE_ROOT/templates/$VARIANT"
 COMMON_DIR="$WORKSPACE_ROOT/templates/common"
 VERSION_FILE="$WORKSPACE_ROOT/templates/VERSION"
 
-# ── Version resolution ─────────────────────────────────────────────────────────
+# ── Version resolution ─────────────────────────────────────────────────────────  # TEST: none
 TEMP_DIR=""
 if [ -n "$TEMPLATE_VER" ]; then
   TAG="template-v${TEMPLATE_VER}"
@@ -122,7 +122,7 @@ if [ -f "$VARIANT_JSON" ]; then
   fi
 fi
 
-# ── D-05: lifecycle-governance.json variant pre-check ─────────────────────────
+# ── D-05: lifecycle-governance.json variant pre-check ───────────────────────── # TEST: none
 GOVERNANCE_JSON="$WORKSPACE_ROOT/templates/common/lifecycle-governance.json"
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/validate-templates.ts" ] && [ -f "$GOVERNANCE_JSON" ]; then
   echo ""
@@ -174,7 +174,7 @@ fi
 
 echo "🚀 Scaffolding new project: $PROJECT_NAME"
 
-# ── 1. Copy common/ first (shared infrastructure) ────────────────────────────
+# ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
 if [ ! -d "$COMMON_DIR" ]; then
   echo "❌ Common templates directory not found: $COMMON_DIR"
   exit 1
@@ -182,40 +182,75 @@ fi
 mkdir -p "$PROJECT_DIR"
 cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
 
-# ── 2. Overlay variant/ on top (variant-specific files override common) ──────
+# ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Variant templates directory not found: $TEMPLATES_DIR"
   exit 1
 fi
 cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
-# ── 2.5. Apply platform profile ────────────────────────────────────────────────
+# ── 2.5. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
 if [ "$PLATFORM" = "claude" ]; then
   rm -f "$PROJECT_DIR/GEMINI.md"
 elif [ "$PLATFORM" = "antigravity" ]; then
   rm -f "$PROJECT_DIR/CLAUDE.md"
 fi
 
-# ── 3. Remove docs/_examples (reference-only - not part of a real project) ───
+# ── 2.6. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
+find "$PROJECT_DIR" -name "*.cmd" -delete
+
+# ── 3. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
 rm -rf "$PROJECT_DIR/docs/_examples"
 
-# ── 4. Remove .gitkeep placeholders ────────────────────────────────────────────
+# ── 3.5. Enforce .sh / .ps1 script pairs ──────────────────────────────────────  # TEST: Test 18
+SCRIPTS_DIR_PROJ="$PROJECT_DIR/scripts"
+if [ -d "$SCRIPTS_DIR_PROJ" ]; then
+  PAIR_OK=true
+  for f in "$SCRIPTS_DIR_PROJ"/*.ps1; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f" .ps1)"
+    [[ "$base" == test-* ]] && continue
+    if [ ! -f "$SCRIPTS_DIR_PROJ/${base}.sh" ]; then
+      echo "❌ Script Pair Validation Failed: Missing .sh pair for ${base}.ps1"
+      PAIR_OK=false
+    fi
+  done
+  for f in "$SCRIPTS_DIR_PROJ"/*.sh; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f" .sh)"
+    [[ "$base" == test-* ]] && continue
+    if [ ! -f "$SCRIPTS_DIR_PROJ/${base}.ps1" ]; then
+      echo "❌ Script Pair Validation Failed: Missing .ps1 pair for ${base}.sh"
+      PAIR_OK=false
+    fi
+  done
+  if [ "$PAIR_OK" = false ]; then
+    echo "   Fix script pairs in templates before scaffolding."
+    exit 1
+  fi
+fi
+
+# ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
-# ── 5. Substitute [Project Name] placeholder in all text files ─────────────────
+# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3
 while IFS= read -r -d '' file; do
   python3 -c "
 import sys
 path, name = sys.argv[1], sys.argv[2]
 content = open(path, encoding='utf-8').read()
-open(path, 'w', encoding='utf-8').write(content.replace('[Project Name]', name))
+content = content.replace('[Project Name]', name)
+content = content.replace('{{PROJECT_NAME}}', name)
+content = content.replace('{{PROJECT_DESCRIPTION}}', 'A new project')
+content = content.replace('{{PROJECT_CHARACTERISTICS}}', '')
+open(path, 'w', encoding='utf-8').write(content)
 " "$file" "$PROJECT_NAME"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
   -print0)
 
-# ── 5.5b. Update lifecycle.statusSince in the project's variant.json ─────────
+# ── 5.5b. Update lifecycle.statusSince in the project's variant.json ────────  # TEST: Test 9
 PROJECT_DATE="$(date -u +%Y-%m-%d)"
 PROJ_VARIANT_JSON="$PROJECT_DIR/variant.json"
 if [ -f "$PROJ_VARIANT_JSON" ]; then
@@ -233,7 +268,7 @@ open(path, 'a', encoding='utf-8').write('\n')
   echo "  ✅ variant.json lifecycle.statusSince set to $PROJECT_DATE"
 fi
 
-# ── 5.5c. Write scripts-snapshot.json with L1 script version map ──────────────
+# ── 5.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
 SCRIPTS_MD="$WORKSPACE_ROOT/scripts/SCRIPTS.md"
 SNAPSHOT_FILE="$PROJECT_DIR/scripts-snapshot.json"
 if [ -f "$SCRIPTS_MD" ]; then
@@ -259,7 +294,7 @@ open(snapshot_path, 'a', encoding='utf-8').write('\n')
   echo "  ✅ scripts-snapshot.json written ($(python3 -c "import json; d=json.load(open('$SNAPSHOT_FILE')); print(len(d['scripts']))" 2>/dev/null || echo '?') scripts)"
 fi
 
-# ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ────────
+# ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
 PKG_JSON="$PROJECT_DIR/package.json"
 if [ -f "$PKG_JSON" ]; then
   python3 -c "
@@ -282,7 +317,7 @@ open(path, 'a', encoding='utf-8').write('\n')
   echo "  ✅ Tier 2 scripts merged into package.json"
 fi
 
-# ── 5.5. Record template provenance in variant context file ───────────────────
+# ── 5.5. Record template provenance in variant context file ───────────────────  # TEST: none
 TEMPLATE_VERSION="${TEMPLATE_VER:-$(cat "$VERSION_FILE" 2>/dev/null | tr -d '[:space:]' || echo 'unknown')}"
 VARIANT_CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
 if [ -f "$VARIANT_CONTEXT_MD" ]; then
@@ -293,14 +328,37 @@ if [ -f "$VARIANT_CONTEXT_MD" ]; then
   fi
 fi
 
-# ── 5.6. Write template-version.txt for upgrade tracking ──────────────────────
+# ── 5.6. Write template-version.txt for upgrade tracking ─────────────────────  # TEST: Test 12
 CLAUDE_DIR="$PROJECT_DIR/.claude"
 mkdir -p "$CLAUDE_DIR"
 printf 'variant=%s\nversion=%s\nplatform=%s\ncreated=%s\n' \
   "$VARIANT" "$TEMPLATE_VERSION" "$PLATFORM" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   > "$CLAUDE_DIR/template-version.txt"
 
-# ── 5.7. Protect context.md from accidental overwrites (merge=ours) ───────────
+# ── 5.6b. Inject AGENTS.md Skills into docs/context.md ──────────────────────  # TEST: Test 19
+AGENTS_MD="$PROJECT_DIR/AGENTS.md"
+CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
+if [ -f "$AGENTS_MD" ] && [ -f "$CONTEXT_MD" ]; then
+  python3 -c "
+import sys, re
+agents_path, context_path = sys.argv[1], sys.argv[2]
+agents = open(agents_path, encoding='utf-8').read()
+context = open(context_path, encoding='utf-8').read()
+m = re.search(r'^## Skills\s*(\| Skill .*?)(?=\n---|\Z)', agents, re.MULTILINE | re.DOTALL)
+if m:
+    skills_table = m.group(1).strip()
+    new_context = re.sub(
+        r'(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)',
+        r'\1\n' + skills_table + r'\n\2',
+        context, flags=re.DOTALL
+    )
+    if new_context != context:
+        open(context_path, 'w', encoding='utf-8').write(new_context)
+        print('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md')
+" "$AGENTS_MD" "$CONTEXT_MD" 2>/dev/null || true
+fi
+
+# ── 5.7. Protect context.md from accidental overwrites (merge=ours) ──────────  # TEST: Test 13
 GITATTRIBUTES="$PROJECT_DIR/.gitattributes"
 if [ -f "$GITATTRIBUTES" ]; then
   if ! grep -q "docs/context.md" "$GITATTRIBUTES"; then
@@ -310,11 +368,11 @@ else
   echo "docs/context.md merge=ours" > "$GITATTRIBUTES"
 fi
 
-# ── 6. Make scripts and hooks executable ───────────────────────────────────────
+# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16
 find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;
 find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 
-# ── 7. Initialize git ──────────────────────────────────────────────────────────
+# ── 7. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
 cd "$PROJECT_DIR"
 git init
 git config core.hooksPath .githooks
@@ -324,7 +382,7 @@ for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1 scripts/se
   [ -f "$rel" ] && git update-index --chmod=+x "$rel" 2>/dev/null || true
 done
 
-# ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
+# ── 6.5. Security Bootstrap Verification ──────────────────────────────────────  # TEST: Test 6
 echo ""
 echo "Running security bootstrap verification…"
 SECURITY_OK=true
@@ -377,7 +435,7 @@ if [ "$SECURITY_OK" = false ]; then
 fi
 echo "  ✅ All security bootstrap checks passed"
 
-# ── 8. Post-scaffold audit ─────────────────────────────────────────────────────
+# ── 8. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 echo ""
 echo "Running post-scaffold audit…"
 if bash scripts/audit.sh; then
@@ -388,7 +446,7 @@ else
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
 
-# ── 9. Environment setup (env file, deps, initial commit) ─────────────────────
+# ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
 echo ""
 echo "Running environment setup…"
 bash "$PROJECT_DIR/scripts/setup.sh" || {
@@ -396,7 +454,7 @@ bash "$PROJECT_DIR/scripts/setup.sh" || {
   echo "⚠️  Setup encountered an error - run 'bash scripts/setup.sh' manually to retry."
 }
 
-# ── 10. Move into project directory ────────────────────────────────────────────
+# ── 10. Move into project directory ───────────────────────────────────────────  # TEST: none
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "\033[36m📂 PROJECT DIRECTORY:\033[0m $PROJECT_DIR"

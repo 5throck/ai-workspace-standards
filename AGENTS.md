@@ -18,7 +18,8 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 6); reduced bottleneck role |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency
+| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency |
+| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper; dispatched by PM at Phase 6 Finalization when lifecycle-managed artifacts change; secretary role — records, does not decide |
 
 ### 📐 Design
 
@@ -39,6 +40,68 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
+
+---
+
+## PM Gateway Policy
+
+**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
+All specialist agents require PM dispatch - enforced at 4 levels.
+
+### Enforcement Layers
+1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
+2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
+3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
+4. **QA Gate-Level**: Auditor detects bypass in Phase 5 QA
+
+### Specialist Agent Dispatch Flow
+```
+User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
+```
+
+### Specialist Agent Roster (PM-ONLY INVOCATION)
+
+All specialist agents below are dispatched ONLY through PM:
+
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|-------------------|
+| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
+| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
+| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
+| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
+| **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
+| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
+
+**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+---
+
+## Language Policy
+
+**English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for Korean translation zones.
+
+### English Documentation Requirement
+- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Rationale: English documentation ensures global accessibility and cross-team collaboration
+
+### Korean Translation Zones (Explicit Exceptions)
+- `ko/` directories - Korean-language documentation for Korean-speaking users
+- `locales/ko/` - Korean translation files for internationalization
+- These are the ONLY locations where Korean `.md` files are permitted
+
+### Enforcement
+- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
+- PR reviews reject non-English documentation outside translation zones
+- Auditor validates compliance during Phase 5 QA gate
+
+### Git/PR Artifacts Language Rule
+- All commit messages: English
+- All PR titles: English
+- All PR descriptions: English
+- All branch names: English
+- Code comments: English (unless documenting locale-specific logic)
 
 ---
 
@@ -188,6 +251,24 @@ All agents, regardless of their role, must adhere to the following:
 ---
 
 ## Lifecycle Management
+
+### Phase 6 Finalization — Lifecycle Manager Review (Mandatory)
+
+At **Phase 6 (Finalization)**, PM **must** dispatch `lifecycle-manager` when any of the following occurred in the session:
+
+| Trigger | Dispatch lifecycle-manager? |
+|---------|---------------------------|
+| Agent added, modified, or deprecated | ✅ Yes |
+| Skill added, modified, or deprecated | ✅ Yes |
+| Script status changed in SCRIPTS.md | ✅ Yes |
+| Variant status changed (draft→beta, beta→stable, etc.) | ✅ Yes |
+| Governance tool updated (audit.ts, validate-templates.ts, etc.) | ✅ Yes |
+| README/documentation-only changes | ❌ No |
+| Memory log entries only | ❌ No |
+
+The lifecycle-manager will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
+
+---
 
 Use the dedicated lifecycle manager skills whenever creating, modifying, or retiring agents and skills. These skills are located in `.claude/skills/` and are loaded automatically by Claude Code.
 

@@ -3,13 +3,13 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# {{PROJECT_NAME}}
+# [Project Name]
 
-{{PROJECT_DESCRIPTION}}
+[Project Description]
 
 ## Project Characteristics
 
-{{PROJECT_CHARACTERISTICS}}
+[Project Characteristics]
 
 ## How to Use This Project
 

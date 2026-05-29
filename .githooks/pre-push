@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pre-push: run audit gate + block direct push to main/master.
+# pre-push: run audit gate + integration tests + block direct push to main/master.
 
 # ── 1. Audit gate ─────────────────────────────────────────────────────────────
 echo "=== pre-push audit ==="
@@ -9,7 +9,21 @@ bash scripts/audit.sh || {
   exit 1
 }
 
-# ── 2. Block direct push to protected branches ────────────────────────────────
+# ── 2. Integration tests ──────────────────────────────────────────────────────
+echo "=== pre-push integration tests ==="
+if command -v bun >/dev/null 2>&1; then
+  echo "Running integration tests via Bun..."
+  bun run test || {
+    echo ""
+    echo -e "\033[31m❌ Integration tests failed — push blocked. Fix test failures before pushing.\033[0m"
+    exit 1
+  }
+else
+  echo "⚠️  Bun not found — skipping integration tests (install Bun to enable)"
+  echo "   Run: curl -fsSL https://bun.sh/install | bash"
+fi
+
+# ── 3. Block direct push to protected branches ────────────────────────────────
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
   echo ""

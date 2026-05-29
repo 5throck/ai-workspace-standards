@@ -1,5 +1,6 @@
 ---
 name: service-designer
+status: active
 formal_name: Service Designer & Customer Experience Strategist
 tier:
   claude: medium    # claude-sonnet-4.6

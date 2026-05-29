@@ -1,5 +1,6 @@
 ---
 name: prototype-engineer
+status: active
 formal_name: Interactive Prototyping Specialist
 tier:
   claude: medium    # claude-sonnet-4.6

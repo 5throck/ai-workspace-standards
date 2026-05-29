@@ -1,5 +1,6 @@
 ---
 name: Scaffolding Expert
+status: active
 tier:
   claude: low         # claude-haiku-4-5
   antigravity: low    # gemini-3.5-flash (thinking_level="low")
@@ -10,6 +11,11 @@ description: 'New Project & Template Specialist. Use when: "Creating new project
 examples:
   - user: "Create a new project"
     assistant: "I'll scaffold a new project following workspace standards"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/scaffolding-expert.md
 ---
 
 ## Role

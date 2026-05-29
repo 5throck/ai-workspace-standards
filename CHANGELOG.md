@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: Documentation restructuring — Runtime vs Governance separation: `agents/*.md` with lifecycle frontmatter (phase, created, last_updated, governance) and `docs/lifecycle/agents/*.md` with detailed governance records
+- **[2026-05-29]**: `docs/governance/` directory — centralized governance documentation (branch-strategy.md, pr-workflow.md, skill-update-procedure.md, LIFECYCLE_GOVERNANCE.md, lifecycle-governance.json)
+- **[2026-05-29]**: `templates/common/variant/` directory — variant phase definitions moved from `docs/variant/` to correct template location
+- **[2026-05-29]**: Lifecycle validation scripts — `validate-agents.sh`, `validate-skills.sh`, `validate-doc-folder.sh`, `cleanup-completed-md.sh`
+- **[2026-05-29]**: `docs/lifecycle/` directory — governance records for all agents and skills with Phase History and Acceptance Criteria sections
 - **[2026-05-29]**: `scripts/audit.sh` / `audit.ps1` — `check_command_parity()` check: compares `.claude/commands/` file list against `.gemini/commands/` and WARNs on missing files; supports `gemini-parity: skip` frontmatter for intentional Claude-only exceptions
 - **[2026-05-29]**: `.gemini/commands/` directory at workspace root — `meeting.md`, `changelog.md`, `memlog.md`, `new-task.md`, `sync.md` created (cross-platform parity with `.claude/commands/`)
 - **[2026-05-29]**: `docs/constitution/06-skill-lifecycle.md` — **Cross-Platform Deployment Rule** section: any command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; `gemini-parity: skip` frontmatter as explicit opt-out mechanism
@@ -17,12 +22,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-script-pair-sync.md` — structural analysis of `intentional drift` policy flaw in `.sh`/`.ps1` horizontal sync; proposed `pair` field to SCRIPTS.md schema; 5 action items (A-01~A-05)
 
 ### Changed
+- **[2026-05-29]**: `.gitignore` — added negation patterns for `!docs/governance/`, `!docs/lifecycle/`, `!docs/variant/`, `!docs/superpowers/`, `!templates/common/`
 - **[2026-05-29]**: `CLAUDE.md` §2 — added platform parity note: "every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; see CONSTITUTION.md §6"
 - **[2026-05-29]**: `GEMINI.md` §6 — added platform parity note referencing `CONSTITUTION.md §6 Cross-Platform Deployment Rule`
 - **[2026-05-29]**: `.claude/commands/new-project.md` — added `gemini-parity: skip` frontmatter (Claude Code Agent tool dispatch has no Gemini equivalent)
 - **[2026-05-29]**: `/meeting` skill — `Orchestrator: [PM | Facilitator]` field added to meeting header; transcript metadata includes orchestrator field
 
 ### Fixed
+- **[2026-05-29]**: Template folder structure — deleted completed plan files (`PHASE_3_DELIVERY.md`, `VARIANT_LIFECYCLE_INTEGRATION.md`), moved governance docs to `docs/governance/`
 - **[2026-05-29]**: `templates/common/scripts/readme-lifecycle-audit.ts` (L1) — published CRLF fix from L0; L0/L1 drift resolved (both now normalize `\r\n` → `\n` in `parseSections`)
 - **[2026-05-29]**: `scripts/audit.ps1` — added command parity check block mirroring `audit.sh` `check_command_parity()` (was absent, discovered via user review)
 

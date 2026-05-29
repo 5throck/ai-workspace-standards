@@ -1,15 +1,19 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [{ "type": "command", "command": "bun scripts/check-pm-approval.ts" }]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash scripts/audit.sh"
-          }
-        ]
+        "hooks": [{ "type": "command", "command": "bash scripts/audit.sh" }]
       }
+    ],
+    "SessionStart": [
+      { "type": "command", "command": "bun scripts/clear-pm-approval.ts" }
     ]
   }
 }

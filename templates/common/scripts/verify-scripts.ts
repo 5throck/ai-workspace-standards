@@ -180,6 +180,24 @@ function verify(): boolean {
     }
   }
 
+  // Check 6: Tier violation — active .ts script with active .sh/.ps1 wrapper
+  const activeTs = new Set(
+    registry
+      .filter((e) => e.status === "active" && e.script.endsWith(".ts"))
+      .map((e) => e.script.replace(/\.ts$/, ""))
+  );
+  for (const entry of registry) {
+    if (entry.status !== "active") continue;
+    if (!entry.script.endsWith(".sh") && !entry.script.endsWith(".ps1")) continue;
+    const base = entry.script.replace(/\.(sh|ps1)$/, "");
+    if (activeTs.has(base)) {
+      errors.push(
+        `Tier violation: \`${entry.script}\` is active but \`${base}.ts\` also exists as active — ` +
+        `mark the shell wrapper as deprecated (Tier 2 scripts must not have active shell wrappers)`
+      );
+    }
+  }
+
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
   console.log(`Registry: ${scriptsMdPath}`);

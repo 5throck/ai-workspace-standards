@@ -1,5 +1,6 @@
 ---
 name: typography-expert
+status: active
 formal_name: Typography Expert & Type System Designer
 tier:
   claude: medium    # claude-sonnet-4.6

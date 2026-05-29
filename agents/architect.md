@@ -1,5 +1,6 @@
 ---
 name: Template Architect
+status: active
 tier:
   claude: high        # claude-opus-4-7
   antigravity: high   # gemini-3.1-pro (thinking_level="medium")
@@ -10,6 +11,11 @@ description: 'Produces implementation plans and ADRs. Use when: "Architecture de
 examples:
   - user: "Design the architecture for this feature"
     assistant: "I'll create an implementation plan and ADR for the feature architecture"
+lifecycle:
+  phase: production
+  created: 2026-05-29
+  last_updated: 2026-05-29
+  governance: docs/lifecycle/agents/architect.md
 ---
 
 ## Role

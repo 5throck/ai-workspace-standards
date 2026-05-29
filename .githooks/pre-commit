@@ -113,10 +113,58 @@ if [ -n "$MEMORY_STAGED" ] && command -v bun &>/dev/null && [ -f "scripts/verify
     echo -e "\033[33m[WARN]\033[0m Memory format: some entries use legacy format — run 'bun scripts/verify-memory.ts --report' for details"
 fi
 
+# ── 3.2. Memory Cleanup
+# Run cleanup script to move completed files to memory/completed/
+MEMORY_ANY_STAGED=$(echo "$STAGED" | grep "^memory/" || true)
+if [ -n "$MEMORY_ANY_STAGED" ]; then
+  echo ""
+  echo "=== Memory Cleanup ==="
+
+  if bash scripts/cleanup-completed-md.sh; then
+    echo -e "\033[32m[PASS]\033[0m Memory cleanup: completed files archived"
+  else
+    echo -e "\033[33m[WARN]\033[0m Memory cleanup encountered issues (non-blocking)"
+  fi
+fi
+
 # ── 3. Documentation audit
 # Skip documentation audit for memory-only commits (workflow optimization)
 if [ "$MEMORY_ONLY" = false ]; then
   bash scripts/audit.sh || exit 1
+fi
+
+# ── 3.1. Lifecycle Documentation Validation
+# Run when agent or skill files are modified
+LIFECYCLE_STAGED=$(echo "$STAGED" | grep -iE "^agents/|^skills/|^doc/lifecycle/" || true)
+if [ -n "$LIFECYCLE_STAGED" ]; then
+  echo ""
+  echo "=== Lifecycle Documentation Validation ==="
+
+  # Validate agents
+  if bun scripts/validate-agents.ts; then
+    echo -e "\033[32m[PASS]\033[0m Agent lifecycle documentation: all required sections present"
+  else
+    echo -e "\033[31m[FAIL]\033[0m Agent lifecycle documentation validation failed"
+    echo "       Run 'bun scripts/validate-agents.ts' to see details"
+    exit 1
+  fi
+
+  # Validate skills
+  if bun scripts/validate-skills.ts; then
+    echo -e "\033[32m[PASS]\033[0m Skill lifecycle documentation: all required sections present"
+  else
+    echo -e "\033[31m[FAIL]\033[0m Skill lifecycle documentation validation failed"
+    echo "       Run 'bun scripts/validate-skills.ts' to see details"
+    exit 1
+  fi
+
+  # Validate doc/ folder organization
+  if bun scripts/validate-doc-folder.ts; then
+    echo -e "\033[32m[PASS]\033[0m Doc folder organization: correct"
+  else
+    echo -e "\033[33m[WARN]\033[0m Doc folder organization: lifecycle files should be in doc/lifecycle/"
+    # Warning only - don't block commits
+  fi
 fi
 
 # ── 3.5. Agent Lifecycle Audit 
@@ -208,7 +256,24 @@ if [ -n "$README_FILES" ]; then
   fi
 fi
 
-# ── 4. Script Parity Check 
+# ── 3.8. new-project Test Coverage Sync ──────────────────────────────────────
+# When new-project.sh/.ps1 or test-new-project.ts are staged, verify TEST: mapping
+if echo "$STAGED" | grep -qE "scripts/new-project\.(sh|ps1)|scripts/test-new-project\.ts"; then
+  if command -v bun &>/dev/null && [ -f "scripts/verify-new-project-tests.ts" ]; then
+    echo ""
+    echo -e "\033[36m=== new-project test coverage sync ===\033[0m"
+    if bun scripts/verify-new-project-tests.ts; then
+      true
+    else
+      echo ""
+      echo "       Fix: add '# TEST: Test N' or '# TEST: none' to each step in new-project.sh/.ps1"
+      echo "       Then add the corresponding '// ── Test N:' header to test-new-project.ts"
+      exit 1
+    fi
+  fi
+fi
+
+# ── 4. Script Parity Check
 # Ensure every .sh has a corresponding .ps1 and vice versa
 if [ -d "scripts" ]; then
   SH_NAMES=$(ls scripts/*.sh 2>/dev/null | sed 's|.*/||; s/\.sh$//' | sort)

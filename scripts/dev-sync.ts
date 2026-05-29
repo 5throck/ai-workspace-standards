@@ -60,10 +60,10 @@ if (fs.existsSync(genReadmeTs)) {
 // 3. Block if [Unreleased] section has no bullet items
 if (fs.existsSync('CHANGELOG.md')) {
     const clCheck = fs.readFileSync('CHANGELOG.md', 'utf-8');
-    const match = /## \[Unreleased\]([\s\S]*?)(?=\n## |\z)/.exec(clCheck);
+    const match = /## \[Unreleased\]([\s\S]*?)(?=\n## |$)/.exec(clCheck);
     if (match) {
         const unreleasedSection = match[1];
-        if (!/(?m)^\s*-\s+/.test(unreleasedSection)) {
+        if (!/^\s*-\s+/m.test(unreleasedSection)) {
             console.log("");
             console.log(`${RED}❌ CHANGELOG.md [Unreleased] section has no entries.${RESET}`);
             console.log(`${YELLOW}   Run: /changelog 'type: description' to add an entry before syncing.${RESET}`);
