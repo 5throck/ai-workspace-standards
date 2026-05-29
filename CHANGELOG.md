@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: `docs/getting-started.md` — comprehensive installation guide with prerequisites checklist, troubleshooting, and platform-specific instructions
 - **[2026-05-29]**: TypeScript helper scripts for project creation — `scripts/helpers/` directory with 8 modular scripts (template-validation.ts, lifecycle-governance.ts, validate-output.ts, substitute-placeholders.ts, update-variant-lifecycle.ts, write-scripts-snapshot.ts, merge-package-scripts.ts, inject-skills.ts)
 - **[2026-05-29]**: Test 0e to `test-new-project.ts` — validates new-project.sh template verification logic checks common/ and variant/ separately
 - **[2026-05-29]**: Documentation restructuring — Runtime vs Governance separation: `agents/*.md` with lifecycle frontmatter (phase, created, last_updated, governance) and `docs/lifecycle/agents/*.md` with detailed governance records
