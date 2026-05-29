@@ -1,4 +1,6 @@
 {
+  "inherits_common": "1.0.0",
+  "agent_overrides": {},
   "phases": {
     "phase3_name": "Threat Modeling"
   },

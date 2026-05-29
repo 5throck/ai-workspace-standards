@@ -407,8 +407,15 @@ function checkAgentsRoster(variant: string): void {
     f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
   ));
 
+  // Also consider agents inherited from templates/common/agents/ as "present"
+  const commonAgentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  const commonAgentFiles = existsSync(commonAgentsDir)
+    ? new Set(readdirSync(commonAgentsDir).filter(f => f.endsWith('.md') && !f.startsWith('_') && !f.startsWith('README')))
+    : new Set<string>();
+  const allAvailableFiles = new Set([...actualFiles, ...commonAgentFiles]);
+
   const orphaned = [...actualFiles].filter(f => !registeredFiles.has(f));
-  const missing = [...registeredFiles].filter(f => !actualFiles.has(f));
+  const missing = [...registeredFiles].filter(f => !allAvailableFiles.has(f));
 
   if (orphaned.length > 0) {
     fail(variant, 'agents-roster', `Orphaned agent files (not in AGENTS.md): ${orphaned.join(', ')}`, 'Add to AGENTS.md roster table');
@@ -712,9 +719,13 @@ function checkVariantContract(variant: string): void {
     const variantDir = join(TEMPLATES_DIR, variant);
     const missingFiles: string[] = [];
 
+    const commonDir = join(TEMPLATES_DIR, 'common');
     for (const requiredFile of contract.required) {
       const filePath = join(variantDir, requiredFile);
-      if (!existsSync(filePath)) {
+      const commonFilePath = join(commonDir, requiredFile);
+      // A required file is satisfied if it exists in the variant OR in templates/common/
+      // (common-inherited files are copied to the project by new-project.sh)
+      if (!existsSync(filePath) && !existsSync(commonFilePath)) {
         missingFiles.push(requiredFile);
       }
     }
@@ -1048,6 +1059,124 @@ function checkWorkspaceSchema(): void {
   }
 }
 
+// Check WS-02: common-contract.json compliance (C-CM-01, C-CM-02, C-SK-01, C-AG-01, C-AG-02, WS-02)
+function checkCommonContract(): void {
+  if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
+
+  const contractPath = join(TEMPLATES_DIR, 'common', 'common-contract.json');
+  if (!existsSync(contractPath)) {
+    warn('common', 'common-contract-missing', 'templates/common/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
+    return;
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    fail('common', 'common-contract-invalid', 'templates/common/common-contract.json is not valid JSON');
+    return;
+  }
+
+  const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
+  const commonAgents = Object.keys((contract.common_agents as Record<string, unknown>) ?? {});
+
+  const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
+    const fullPath = join(TEMPLATES_DIR, e);
+    try { return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'; } catch { return false; }
+  });
+
+  // C-CM-01 (ERROR): common/skills/ matches common-contract.json
+  for (const skillName of commonSkills) {
+    const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(skillPath)) {
+      fail('common', 'C-CM-01', `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`, `Create templates/common/skills/${skillName}/SKILL.md`);
+    } else {
+      pass(`C-CM-01: common skill '${skillName}' → SKILL.md present`);
+    }
+  }
+
+  // C-CM-02 (ERROR): common/agents/ matches common-contract.json
+  for (const agentName of commonAgents) {
+    const agentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(agentPath)) {
+      fail('common', 'C-CM-02', `common-contract.json lists common agent '${agentName}' but templates/common/agents/${agentName}.md is missing`, `Create templates/common/agents/${agentName}.md`);
+    } else {
+      pass(`C-CM-02: common agent '${agentName}' → agent file present`);
+    }
+  }
+
+  // C-SK-01 (WARNING): No duplicate common skills in variant dirs
+  for (const skillName of commonSkills) {
+    const commonSkillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(commonSkillPath)) continue; // C-CM-01 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonSkillPath, 'utf-8'));
+    for (const variant of variantDirs) {
+      const variantSkillPath = join(TEMPLATES_DIR, variant, 'skills', skillName, 'SKILL.md');
+      if (existsSync(variantSkillPath)) {
+        const variantContent = normalizeContent(readFileSync(variantSkillPath, 'utf-8'));
+        if (variantContent === commonContent) {
+          warn(variant, 'C-SK-01', `Duplicate common skill '${skillName}' in ${variant}/skills/ — remove variant copy to inherit from common`);
+        }
+      }
+    }
+  }
+
+  // C-AG-01 (WARNING): No duplicate common agents in variant dirs
+  for (const agentName of commonAgents) {
+    const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonAgentPath, 'utf-8'));
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      if (existsSync(variantAgentPath)) {
+        const variantContent = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+        if (variantContent === commonContent) {
+          warn(variant, 'C-AG-01', `Duplicate common agent '${agentName}' in ${variant}/agents/ — remove variant copy to inherit from common`);
+        }
+      }
+    }
+  }
+
+  // C-AG-02 (INFO/WARNING): Replacement overrides flagged
+  for (const variant of variantDirs) {
+    const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+    if (!existsSync(variantJsonPath)) continue;
+    let variantJson: Record<string, unknown>;
+    try {
+      variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+    } catch { continue; }
+    const agentOverrides = variantJson.agent_overrides as Record<string, Record<string, unknown>> | undefined;
+    if (!agentOverrides) continue;
+    for (const [agentName, override] of Object.entries(agentOverrides)) {
+      if (override.type === 'replacement') {
+        const reason = (override.reason as string | undefined) ?? 'no reason given';
+        warn(variant, 'C-AG-02', `${variant}: ${agentName} has replacement override (reason: ${reason}) — lifecycle-manager review confirmed`);
+      }
+    }
+  }
+
+  // WS-02 (WARNING): Anti-swelling 50% rule
+  const totalVariants = variantDirs.length;
+  for (const agentName of commonAgents) {
+    let overrideCount = 0;
+    for (const variant of variantDirs) {
+      const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+      if (!existsSync(variantJsonPath)) continue;
+      let variantJson: Record<string, unknown>;
+      try {
+        variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+      } catch { continue; }
+      const agentOverrides = variantJson.agent_overrides as Record<string, unknown> | undefined;
+      if (agentOverrides && agentName in agentOverrides) overrideCount++;
+    }
+    if (totalVariants > 0 && overrideCount / totalVariants >= 0.5) {
+      warn('common', 'WS-02', `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`);
+    }
+  }
+
+  pass('WS-02: common-contract.json compliance check complete');
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -1088,6 +1217,7 @@ function main() {
   }
 
   checkWorkspaceSchema();
+  checkCommonContract();
   checkSharedFileSync();
   checkL0L1ScriptParity();
 

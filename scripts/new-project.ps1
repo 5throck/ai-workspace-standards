@@ -294,6 +294,28 @@ if (Test-Path $scriptsDir) {
     }
 }
 
+# ── 2.6. Agent Override Merge (common-contract.json additive overrides) ─────── # TEST: none
+# For additive overrides: concatenate common base + variant partial sections
+$VariantJson = Join-Path $TemplatesDir "variant.json"
+if (Test-Path $VariantJson) {
+    $VariantConfig = Get-Content $VariantJson | ConvertFrom-Json
+    $AgentOverrides = $VariantConfig.agent_overrides
+    if ($AgentOverrides) {
+        $AgentOverrides.PSObject.Properties | Where-Object { $_.Value.type -eq "additive" } | ForEach-Object {
+            $AgentName = $_.Name
+            $CommonAgentFile = Join-Path $CommonDir "agents\$AgentName.md"
+            $VariantAgentFile = Join-Path $TemplatesDir "agents\$AgentName.md"
+            $OutAgentFile = Join-Path $ProjectDir "agents\$AgentName.md"
+            if ((Test-Path $CommonAgentFile) -and (Test-Path $VariantAgentFile)) {
+                $CommonContent = Get-Content $CommonAgentFile -Raw
+                $VariantContent = Get-Content $VariantAgentFile -Raw
+                "$CommonContent`n`n$VariantContent" | Set-Content $OutAgentFile -Encoding UTF8
+                Write-Host "  [MERGE] agents/$AgentName.md (common + variant additive sections)"
+            }
+        }
+    }
+}
+
 # ── 3. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 

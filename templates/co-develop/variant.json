@@ -1,4 +1,13 @@
 {
+  "inherits_common": "1.0.0",
+  "agent_overrides": {
+    "pm": {
+      "type": "replacement",
+      "reason": "co-develop workflow omits designer parallel in Phase 1-2; uses explicit code-writer/test-runner serial in Phase 4",
+      "since": "2026-05-30",
+      "reviewed_by": "lifecycle-manager"
+    }
+  },
   "phases": {
     "phase3_name": "Design Handoff"
   },

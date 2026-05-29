@@ -2,7 +2,7 @@
 name: skill-lifecycle-manager
 description: >
   Guides the PM through creating, modifying, validating, and deprecating skills in the
-  co-security variant. Ensures skills follow the required frontmatter schema and are
+  co-work variant. Ensures skills follow the required frontmatter schema and are
   registered in AGENTS.md § Skills.
 version: 1.0.0
 status: active
@@ -35,7 +35,7 @@ deprecating an existing one.
    ```
 2. Add sections: `## Context`, `## Execution Steps`, `## Output Format`, `## Related Skills`.
 3. Update `AGENTS.md § Skills` — add row to Skills table with trigger condition.
-4. Update `docs/co-security.context.md § Skills` — add row.
+4. Update `docs/co-work.context.md § Skills` — add row.
 
 ### Deprecating a Skill
 

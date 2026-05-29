@@ -1,6 +1,7 @@
 ---
 name: Project Manager (PM) Agent
 status: active
+version: 1.0.0
 tier:
   claude: high        # claude-opus-4-7
   antigravity: high   # gemini-3.1-pro (thinking_level="medium")

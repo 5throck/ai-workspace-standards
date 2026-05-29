@@ -214,6 +214,35 @@ if [ -d "$SCRIPTS_DIR_PROJ" ]; then
   fi
 fi
 
+# ── 3.6. Agent Override Merge (common-contract.json additive overrides) ─────── # TEST: none
+# For additive overrides: concatenate common base + variant partial sections
+if [ -f "$TEMPLATES_DIR/variant.json" ] && command -v bun &>/dev/null; then
+  AGENT_OVERRIDES=$(bun -e "
+    const v = JSON.parse(require('fs').readFileSync('$TEMPLATES_DIR/variant.json', 'utf8'));
+    const overrides = v.agent_overrides || {};
+    const additive = Object.entries(overrides)
+      .filter(([, o]) => o.type === 'additive')
+      .map(([name]) => name);
+    console.log(JSON.stringify(additive));
+  " 2>/dev/null || echo "[]")
+
+  # Process each additive override
+  echo "$AGENT_OVERRIDES" | bun -e "
+    const names = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+    names.forEach(name => {
+      const commonFile = '$COMMON_DIR/agents/' + name + '.md';
+      const variantFile = '$TEMPLATES_DIR/agents/' + name + '.md';
+      const outFile = '$PROJECT_DIR/agents/' + name + '.md';
+      if (require('fs').existsSync(commonFile) && require('fs').existsSync(variantFile)) {
+        const merged = require('fs').readFileSync(commonFile, 'utf8') + '\n\n' +
+                       require('fs').readFileSync(variantFile, 'utf8');
+        require('fs').writeFileSync(outFile, merged);
+        console.log('  [MERGE] agents/' + name + '.md (common + variant additive sections)');
+      }
+    });
+  " 2>/dev/null || true
+fi
+
 # ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
