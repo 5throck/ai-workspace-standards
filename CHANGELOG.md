@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-script-pair-sync.md` — structural analysis of `intentional drift` policy flaw in `.sh`/`.ps1` horizontal sync; proposed `pair` field to SCRIPTS.md schema; 5 action items (A-01~A-05)
 
 ### Changed
+- **[2026-05-29]**: `docs/getting-started.md` — removed redundant "Python 3 (Optional - Project-Specific)" section; simplified to avoid duplication with Optional Software section
+- **[2026-05-29]**: `README.md` — added "Project-Specific Tools" table; removed Python/uv from Optional Tools; clarified project-specific tool installation
 - **[2026-05-29]**: `docs/getting-started.md` — reclassified Python 3 from "essential" to "optional" (project-specific); updated prerequisites checklist to reflect Git + Bun as the only truly essential tools
 - **[2026-05-29]**: `README.md` — removed Python from "Must-Have Tools" section; moved to "Optional Tools" (Python projects only)
 - **[2026-05-29]**: `scripts/new-project.sh` — replaced all Python inline code with TypeScript helper calls; UTF-8 decoding errors resolved

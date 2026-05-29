@@ -50,8 +50,20 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 | Tool | Purpose | Install |
 |------|---------|---------|
 | **GitHub CLI (gh)** | PR automation | [cli.github.com](https://cli.github.com/) |
-| **Python 3** | Python projects only | [python.org](https://www.python.org/downloads/) |
-| **uv** | Fast Python package manager | `pip install uv` |
+
+### Project-Specific Tools
+
+Install these **only** when creating projects of specific types:
+
+| Tool | Project Type | Install |
+|------|-------------|---------|
+| **Python 3** | Python projects | [python.org](https://www.python.org/downloads/) |
+| **Node.js** | Node.js projects | [nodejs.org](https://nodejs.org/) |
+| **.NET SDK** | .NET projects | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) |
+| **Rust** | Rust projects | [rust-lang.org](https://www.rust-lang.org/) |
+| **Go** | Go projects | [go.dev](https://go.dev/dl/) |
+
+> **Note**: `scripts/setup.sh/ps1` will automatically detect and install project dependencies after project creation.
 
 ### Quick Verification
 
@@ -59,7 +71,6 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 # Check essential tools
 git --version    # Should show 2.x.x
 bun --version    # Should show 1.x.x
-python3 --version # Should show 3.8+
 ```
 
 **Install missing tools**: See [Getting Started](docs/getting-started.md#-essential-software-must-have) for detailed installation instructions.

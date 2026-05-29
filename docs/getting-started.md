@@ -67,41 +67,6 @@ bun --version
 
 ---
 
-### 3. Python 3 (Optional - Project-Specific)
-
-**Purpose**: Required **only** when creating Python projects
-
-**When You Need It**:
-- Creating Python projects (`--variant co-develop` with Python stack)
-- Running `scripts/setup.sh` for Python projects (venv creation, dependency installation)
-- Python license audits in project setup
-
-**Installation** (if creating Python projects):
-```bash
-# Windows: https://www.python.org/downloads/
-# macOS: brew install python@3
-# Linux (Ubuntu/Debian): sudo apt install python3 python3-pip
-# Linux (Fedora/RHEL): sudo dnf install python3 python3-pip
-```
-
-**Verification**:
-```bash
-python3 --version
-# Expected output: Python 3.8 or higher
-```
-
-**Optional (Recommended)**: `uv` - Faster Python package manager
-```bash
-# Install uv for faster Python dependency management
-curl -LsSf https://astral.sh/uv/install.sh | sh
-# or
-pip install uv
-```
-
-> **Note**: If you're not creating Python projects, you can skip Python installation entirely.
-
----
-
 ## 🎯 Optional Software (Recommended)
 
 > **Install as needed**: These tools are not required for basic workspace functionality but enhance the experience.
