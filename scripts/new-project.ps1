@@ -16,7 +16,7 @@ function Initialize-UTF8Environment {
     try {
         # Force UTF-8 encoding for all operations
         $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-        [System.Text.Encoding]::RegisterProvider([System.Text.CodePages]::CodePagesEncodingProvider]::Instance)
+        [System.Text.Encoding]::RegisterProvider([System.Text.CodePages.CodePagesEncodingProvider]::Instance)
 
         # Set Git UTF-8 configuration
         & git config --local core.quotepath false 2>$null
