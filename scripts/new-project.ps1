@@ -230,12 +230,15 @@ if ($bunCmd -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
 Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
 # ── Template validation before copying ────────────────────────────────────────  # TEST: none
-try {
-    Validate-TemplateSync -CommonPath $CommonDir -VariantPath $TemplatesDir
-    Write-Host "  ✅ Common template validation passed" -ForegroundColor Green
-} catch {
-    Write-Host "  ❌ Template validation failed: $_" -ForegroundColor Red
-    exit 1
+if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+    Write-Host "Validating template integrity…" -ForegroundColor Cyan
+    $validationExit = & bun "$WorkspaceRoot/scripts/helpers/template-validation.ts" $Variant 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  ❌ Template validation failed: $validationExit" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "⚠️  Template validation skipped (bun not available)" -ForegroundColor Yellow
 }
 
 # ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
@@ -295,23 +298,11 @@ if (Test-Path $scriptsDir) {
 Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 
 # ── 4. Substitute placeholders in all text files ──────────────────  # TEST: Test 3
-$extensions = @('.md', '.json', '.sh', '.ps1', '.yaml', '.yml', '.sample')
-Get-ChildItem -Path $ProjectDir -Recurse -File |
-  Where-Object { $_.Extension -in $extensions } |
-  ForEach-Object {
-    $content = Get-Content $_.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-    if ($content) {
-        $modified = $false
-        if ($content -match '\[Project Name\]') { $content = $content -replace '\[Project Name\]', $ProjectName; $modified = $true }
-        if ($content -match '\{\{PROJECT_NAME\}\}') { $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName; $modified = $true }
-        if ($content -match '\{\{PROJECT_DESCRIPTION\}\}') { $content = $content -replace '\{\{PROJECT_DESCRIPTION\}\}', $Description; $modified = $true }
-        if ($content -match '\{\{PROJECT_CHARACTERISTICS\}\}') { $content = $content -replace '\{\{PROJECT_CHARACTERISTICS\}\}', $TechStack; $modified = $true }
-
-        if ($modified) {
-            Set-Content $_.FullName $content -Encoding UTF8 -NoNewline
-        }
-    }
-  }
+if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+    & bun "$WorkspaceRoot/scripts/helpers/substitute-placeholders.ts" $ProjectDir $ProjectName $Description $TechStack | Out-Null
+} else {
+    Write-Host "⚠️  Placeholder substitution skipped (bun not available)" -ForegroundColor Yellow
+}
 
 # ── 4.5. Record template provenance in variant context file ───────────────────  # TEST: none
 $TemplateVersion = if ($Version -ne "") { $Version } elseif (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "unknown" }
@@ -328,64 +319,26 @@ if (Test-Path $VariantContextMd) {
 $ProjectDate = Get-Date -Format "yyyy-MM-dd"
 $ProjVariantJson = Join-Path $ProjectDir "variant.json"
 if (Test-Path $ProjVariantJson) {
-    $variantObj = Get-Content $ProjVariantJson -Raw -Encoding UTF8 | ConvertFrom-Json
-    if (-not $variantObj.lifecycle) {
-        $variantObj | Add-Member -MemberType NoteProperty -Name lifecycle -Value ([PSCustomObject]@{})
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/update-variant-lifecycle.ts" $ProjectDir $ProjectDate $Variant | Out-Null
     }
-    $variantObj.lifecycle | Add-Member -MemberType NoteProperty -Name statusSince -Value $ProjectDate -Force
-    $currentStatus = if ($variantObj.status) { $variantObj.status } else { "unknown" }
-    $variantObj.lifecycle | Add-Member -MemberType NoteProperty -Name lastTransition -Value "initial → $currentStatus on $ProjectDate" -Force
-    $variantObj | ConvertTo-Json -Depth 10 | Set-Content $ProjVariantJson -Encoding UTF8
-    Write-Host "  ✅ variant.json lifecycle.statusSince set to $ProjectDate" -ForegroundColor Green
 }
 
 # ── 4.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
 $ScriptsMd = Join-Path $WorkspaceRoot "scripts\SCRIPTS.md"
 $SnapshotFile = Join-Path $ProjectDir "scripts-snapshot.json"
 if (Test-Path $ScriptsMd) {
-    $scriptsMdContent = Get-Content $ScriptsMd -Raw -Encoding UTF8
-    $scriptsMap = @{}
-    $inRegistry = $false
-    foreach ($line in $scriptsMdContent -split "`n") {
-        if ($line -match '^## Registry') { $inRegistry = $true; continue }
-        if ($inRegistry -and $line -match '^## ') { break }
-        if ($inRegistry -and $line -match '^\|') {
-            $parts = $line -split '\|' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
-            if ($parts.Count -ge 4 -and $parts[2] -match '^\d+\.\d+\.\d+$') {
-                $scriptName = $parts[0] -replace '`', ''
-                $scriptsMap[$scriptName] = @{ version = $parts[2]; status = $parts[3] }
-            }
-        }
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/write-scripts-snapshot.ts" $ProjectDir $ProjectDate $Variant "templates/common/scripts" | Out-Null
     }
-    $snapshot = [ordered]@{
-        created = $ProjectDate
-        variant = $Variant
-        l1_source = "templates/common/scripts"
-        scripts = $scriptsMap
-    }
-    $snapshot | ConvertTo-Json -Depth 5 | Set-Content $SnapshotFile -Encoding UTF8
-    Write-Host "  ✅ scripts-snapshot.json written ($($scriptsMap.Count) scripts)" -ForegroundColor Green
 }
 
 # ── 4.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
 $PkgJsonPath = Join-Path $ProjectDir "package.json"
 if (Test-Path $PkgJsonPath) {
-    $pkgJson = Get-Content $PkgJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if (-not $pkgJson.scripts) {
-        $pkgJson | Add-Member -MemberType NoteProperty -Name "scripts" -Value ([PSCustomObject]@{})
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/merge-package-scripts.ts" $ProjectDir | Out-Null
     }
-    $workspaceScripts = @{
-        "audit" = "bun scripts/audit.ts"
-        "dev-sync" = "bun scripts/dev-sync.ts"
-        "sync-md" = "bun scripts/sync-md.ts"
-    }
-    foreach ($script in $workspaceScripts.Keys) {
-        if (-not $pkgJson.scripts.psobject.properties.match($script)) {
-            $pkgJson.scripts | Add-Member -MemberType NoteProperty -Name $script -Value $workspaceScripts[$script]
-        }
-    }
-    $pkgJson | ConvertTo-Json -Depth 10 | Set-Content $PkgJsonPath -Encoding UTF8
-    Write-Host "  ✅ Tier 2 scripts merged into package.json" -ForegroundColor Green
 }
 
 # ── 4.6. Write template-version.txt for upgrade tracking ─────────────────────  # TEST: Test 12
@@ -412,25 +365,8 @@ if (Test-Path $GitAttributesPath) {
 }
 
 # ── 4.8. Inject AGENTS.md Skills into docs/context.md ───────────────────────  # TEST: Test 19
-$AgentsMdPath = Join-Path $ProjectDir "AGENTS.md"
-$ContextMdPath = Join-Path $ProjectDir "docs\context.md"
-
-if ((Test-Path $AgentsMdPath) -and (Test-Path $ContextMdPath)) {
-    $agentsContent = Get-Content $AgentsMdPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-    $contextContent = Get-Content $ContextMdPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-
-    if ($agentsContent -and $contextContent) {
-        if ($agentsContent -match '(?ms)^## Skills\s*(?<tableData>\| Skill .*?)(?=\n---|\Z)') {
-            $skillsTable = $Matches['tableData'].Trim()
-            $replacement = "`$1`n" + $skillsTable.Replace('$', '$$') + "`n`$2"
-            $newContextContent = $contextContent -replace '(?s)(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)', $replacement
-
-            if ($newContextContent -ne $contextContent) {
-                Set-Content $ContextMdPath $newContextContent -Encoding UTF8 -NoNewline
-                Write-Host "🔄 Injected dynamic skills from AGENTS.md into docs/context.md" -ForegroundColor Cyan
-            }
-        }
-    }
+if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+    & bun "$WorkspaceRoot/scripts/helpers/inject-skills.ts" $ProjectDir | Out-Null
 }
 
 # ── 5. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
