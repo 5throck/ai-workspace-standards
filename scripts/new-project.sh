@@ -196,19 +196,54 @@ elif [ "$PLATFORM" = "antigravity" ]; then
   rm -f "$PROJECT_DIR/CLAUDE.md"
 fi
 
+# ── 2.6. Remove any accidentally copied .cmd files ────────────────────────────
+find "$PROJECT_DIR" -name "*.cmd" -delete
+
 # ── 3. Remove docs/_examples (reference-only - not part of a real project) ───
 rm -rf "$PROJECT_DIR/docs/_examples"
+
+# ── 3.5. Enforce .sh / .ps1 script pairs ──────────────────────────────────────
+SCRIPTS_DIR_PROJ="$PROJECT_DIR/scripts"
+if [ -d "$SCRIPTS_DIR_PROJ" ]; then
+  PAIR_OK=true
+  for f in "$SCRIPTS_DIR_PROJ"/*.ps1; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f" .ps1)"
+    [[ "$base" == test-* ]] && continue
+    if [ ! -f "$SCRIPTS_DIR_PROJ/${base}.sh" ]; then
+      echo "❌ Script Pair Validation Failed: Missing .sh pair for ${base}.ps1"
+      PAIR_OK=false
+    fi
+  done
+  for f in "$SCRIPTS_DIR_PROJ"/*.sh; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f" .sh)"
+    [[ "$base" == test-* ]] && continue
+    if [ ! -f "$SCRIPTS_DIR_PROJ/${base}.ps1" ]; then
+      echo "❌ Script Pair Validation Failed: Missing .ps1 pair for ${base}.sh"
+      PAIR_OK=false
+    fi
+  done
+  if [ "$PAIR_OK" = false ]; then
+    echo "   Fix script pairs in templates before scaffolding."
+    exit 1
+  fi
+fi
 
 # ── 4. Remove .gitkeep placeholders ────────────────────────────────────────────
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
-# ── 5. Substitute [Project Name] placeholder in all text files ─────────────────
+# ── 5. Substitute placeholders in all text files ─────────────────────────────
 while IFS= read -r -d '' file; do
   python3 -c "
 import sys
 path, name = sys.argv[1], sys.argv[2]
 content = open(path, encoding='utf-8').read()
-open(path, 'w', encoding='utf-8').write(content.replace('[Project Name]', name))
+content = content.replace('[Project Name]', name)
+content = content.replace('{{PROJECT_NAME}}', name)
+content = content.replace('{{PROJECT_DESCRIPTION}}', 'A new project')
+content = content.replace('{{PROJECT_CHARACTERISTICS}}', '')
+open(path, 'w', encoding='utf-8').write(content)
 " "$file" "$PROJECT_NAME"
 done < <(find "$PROJECT_DIR" -type f \
   \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
@@ -299,6 +334,29 @@ mkdir -p "$CLAUDE_DIR"
 printf 'variant=%s\nversion=%s\nplatform=%s\ncreated=%s\n' \
   "$VARIANT" "$TEMPLATE_VERSION" "$PLATFORM" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   > "$CLAUDE_DIR/template-version.txt"
+
+# ── 5.6b. Inject AGENTS.md Skills into docs/context.md ───────────────────────
+AGENTS_MD="$PROJECT_DIR/AGENTS.md"
+CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
+if [ -f "$AGENTS_MD" ] && [ -f "$CONTEXT_MD" ]; then
+  python3 -c "
+import sys, re
+agents_path, context_path = sys.argv[1], sys.argv[2]
+agents = open(agents_path, encoding='utf-8').read()
+context = open(context_path, encoding='utf-8').read()
+m = re.search(r'^## Skills\s*(\| Skill .*?)(?=\n---|\Z)', agents, re.MULTILINE | re.DOTALL)
+if m:
+    skills_table = m.group(1).strip()
+    new_context = re.sub(
+        r'(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)',
+        r'\1\n' + skills_table + r'\n\2',
+        context, flags=re.DOTALL
+    )
+    if new_context != context:
+        open(context_path, 'w', encoding='utf-8').write(new_context)
+        print('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md')
+" "$AGENTS_MD" "$CONTEXT_MD" 2>/dev/null || true
+fi
 
 # ── 5.7. Protect context.md from accidental overwrites (merge=ours) ───────────
 GITATTRIBUTES="$PROJECT_DIR/.gitattributes"

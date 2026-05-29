@@ -44,9 +44,9 @@ function Validate-TemplateSync {
     $requiredFiles = @(
         "CLAUDE.md",
         "GEMINI.md",
-        "CONSTITUTION.md",
         ".gitignore",
-        ".githooks/pre-commit"
+        ".githooks/pre-commit",
+        "agents/pm.md"
     )
 
     $missingFiles = @()
@@ -61,7 +61,7 @@ function Validate-TemplateSync {
         throw "Missing required template files: $($missingFiles -join ', ')"
     }
 
-    Write-Verbose "Template synchronization validated"
+    Write-Verbose "Template synchronization validated ($($requiredFiles.Count) required files present)"
 }
 
 # UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)

@@ -25,6 +25,9 @@
  *   14. docs/_examples removed
  *   15. No .gitkeep files remain
  *   16. File permissions (.sh hooks executable on Unix)
+ *   17. No .cmd files remain
+ *   18. Script pair validation in project scripts/
+ *   19. AGENTS.md Skills injected into context.md (if markers present)
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -336,6 +339,82 @@ try {
       }
     } catch (e) { fail('Test 16', String(e)); }
   }
+
+  // ── Test 17: No .cmd files ────────────────────────────────────────────────
+  console.log('\nTest 17: No .cmd files');
+  try {
+    function findCmdFiles(dir: string): string[] {
+      const results: string[] = [];
+      if (!existsSync(dir)) return results;
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = join(dir, entry.name);
+        if (entry.isDirectory()) results.push(...findCmdFiles(fullPath));
+        else if (entry.name.endsWith('.cmd')) results.push(fullPath);
+      }
+      return results;
+    }
+    const cmdFiles = findCmdFiles(testDir);
+    if (cmdFiles.length > 0) {
+      fail('Test 17', `.cmd files found: ${cmdFiles.join(', ')}`);
+    } else {
+      pass('Test 17 PASSED: No .cmd files present');
+    }
+  } catch (e) { fail('Test 17', String(e)); }
+
+  // ── Test 18: Script pair validation in project scripts/ ───────────────────
+  console.log('\nTest 18: Script pair validation in project scripts/');
+  try {
+    const projScripts = join(testDir, 'scripts');
+    if (!existsSync(projScripts)) {
+      skip('Test 18', 'scripts/ directory not found in project');
+    } else {
+      const files = readdirSync(projScripts);
+      const shBases  = new Set(files.filter(f => f.endsWith('.sh')  && !f.startsWith('test-')).map(f => f.replace('.sh', '')));
+      const ps1Bases = new Set(files.filter(f => f.endsWith('.ps1') && !f.startsWith('test-')).map(f => f.replace('.ps1', '')));
+      const missingPs1 = [...shBases].filter(b => !ps1Bases.has(b));
+      const missingSh  = [...ps1Bases].filter(b => !shBases.has(b));
+      if (missingPs1.length > 0 || missingSh.length > 0) {
+        const msg = [
+          ...missingPs1.map(b => `${b}.sh missing .ps1`),
+          ...missingSh.map(b => `${b}.ps1 missing .sh`),
+        ].join(', ');
+        fail('Test 18', msg);
+      } else {
+        pass(`Test 18 PASSED: All script pairs present (${shBases.size} pairs)`);
+      }
+    }
+  } catch (e) { fail('Test 18', String(e)); }
+
+  // ── Test 19: AGENTS.md Skills injected into context.md ───────────────────
+  console.log('\nTest 19: AGENTS.md Skills injected into context.md');
+  try {
+    const contextPath = join(testDir, 'docs', `${variantArg}.context.md`);
+    const agentsPath  = join(testDir, 'AGENTS.md');
+    if (!existsSync(contextPath)) {
+      skip('Test 19', `docs/${variantArg}.context.md not found`);
+    } else if (!existsSync(agentsPath)) {
+      skip('Test 19', 'AGENTS.md not found');
+    } else {
+      const context = readFileSync(contextPath, 'utf-8');
+      const agents  = readFileSync(agentsPath, 'utf-8');
+      // Only test injection if context.md has the marker AND AGENTS.md has Skills section
+      const hasMarker   = context.includes('<!-- DYNAMIC_SKILLS_START -->');
+      const hasSkills   = /^## Skills/m.test(agents);
+      if (!hasMarker) {
+        skip('Test 19', 'context.md has no DYNAMIC_SKILLS_START marker — injection not applicable');
+      } else if (!hasSkills) {
+        skip('Test 19', 'AGENTS.md has no Skills section');
+      } else {
+        // Check that the content between markers is not empty
+        const injected = context.match(/<!-- DYNAMIC_SKILLS_START -->([\s\S]*?)<!-- DYNAMIC_SKILLS_END -->/);
+        if (!injected || injected[1].trim().length === 0) {
+          fail('Test 19', 'Skills table not injected between markers');
+        } else {
+          pass('Test 19 PASSED: AGENTS.md Skills injected into context.md');
+        }
+      }
+    }
+  } catch (e) { fail('Test 19', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));
