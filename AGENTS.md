@@ -342,3 +342,48 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
 > **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
+
+---
+
+## Periodic Skill Review Schedule
+
+**Frequency**: Quarterly (every 3 months)  
+**Owner**: lifecycle-manager  
+**Tool**: `bun scripts/skill-dependency-analysis.ts --report`
+
+### Review Cadence
+
+| Quarter | Target Month | Scope |
+|---------|-------------|-------|
+| Q1 | March | All active skills — full health report |
+| Q2 | June | All active skills — full health report |
+| Q3 | September | All active skills — full health report |
+| Q4 | December | All active skills — full health report + deprecation sweep |
+
+### Review Steps
+
+1. **Generate health report**
+   ```
+   bun scripts/skill-dependency-analysis.ts --report
+   bun scripts/validate-skills.ts
+   ```
+
+2. **Triage findings** by severity:
+   - 🔴 Broken dependencies or circular references → fix before quarter ends
+   - 🟡 Deprecated dependency usage → fix within 2 weeks
+   - 🟢 Wording or example improvements → batch in next release cycle
+
+3. **Apply modifications** using the checklist at [docs/lifecycle/skills/skill-modification-checklist.md](docs/lifecycle/skills/skill-modification-checklist.md)
+
+4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
+
+5. **Deprecation sweep** (Q4 only): review skills with `last_updated` older than 12 months — evaluate whether they remain relevant or should be deprecated
+
+6. **Log results** in the quarterly memory log: `memory/YYYY-MM-DD.md` with `## Skill Review Q[N] YYYY` heading
+
+### Trigger Conditions (Outside Quarterly Cadence)
+
+A skill health check should also be run outside the quarterly schedule when:
+- A tool, agent, or script referenced by any skill is renamed or removed
+- A new skill is added that may introduce dependency cycles
+- CI reports skill validation failures on any branch
