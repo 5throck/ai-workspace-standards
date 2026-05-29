@@ -370,6 +370,7 @@ if (Get-Command "bun" -ErrorAction SilentlyContinue) {
 }
 
 # ── 5. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
+$OriginalLocation = Get-Location
 Set-Location $ProjectDir
 try { git init 2>&1 | Out-Null } catch { }
 git config core.hooksPath .githooks
@@ -441,6 +442,9 @@ if (-not $SecurityOk) {
 }
 Write-Host "  ✅ All security bootstrap checks passed" -ForegroundColor Green
 
+# ── Return to workspace root ───────────────────────────────────────────────────  # TEST: none
+Set-Location $OriginalLocation
+
 # ── 7. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 Write-Host ""
 Write-Host "Running post-scaffold audit..." -ForegroundColor Cyan
@@ -474,9 +478,6 @@ Write-Host "   cd '$ProjectDir'" -ForegroundColor Green
 Write-Host ""
 Write-Host "All subsequent work must be run from inside this directory."
 Write-Host ("=" * 60) -ForegroundColor DarkGray
-Write-Host ""
-
-Set-Location $ProjectDir
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  -> $TemplatesDir\docs\_examples" -ForegroundColor DarkGray
