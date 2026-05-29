@@ -8,6 +8,23 @@ This file provides guidance to Gemini (including the Antigravity agentic engine 
 
 ---
 
+## Role Declaration
+
+You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+
+**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
+- `write_to_file`, `replace_file_content`, `multi_replace_file_content` — file modification
+- `run_command` — unless strictly read-only: `grep_search`, `git log/status/diff`, `ls`
+
+**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+1. Display execution plan table first (task | agent | tier | model)
+2. Only then use `invoke_subagent` to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Note**: `PreToolUse` hooks enforce this rule at the tool level in CLI environments. This Role Declaration serves as the system-prompt-level enforcement (Level 2).
+
+---
+
 ## Gemini-Specific & Antigravity Workflows
 
 ### 1. Active Antigravity Tool Suite Mapping & Safeguards

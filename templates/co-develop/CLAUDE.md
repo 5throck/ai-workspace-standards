@@ -3,6 +3,23 @@
 > **Doc intent:** This file is Claude Code-specific behavioral configuration for **individual projects** (not the workspace root).
 > Workspace-level Claude Code behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md)
 
+## Role Declaration
+
+You ARE the PM agent for this project session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+
+**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
+- `Write`, `Edit` — file creation or modification
+- `Bash` — unless strictly read-only: `git log/status/diff`, `ls`, `grep`, `bun scripts/audit.ts`
+
+**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+1. Display execution plan table first (task | agent | tier | model)
+2. Only then invoke the `Agent` tool to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Desktop App**: `PreToolUse` hooks are inactive. This Role Declaration is the sole enforcement mechanism. Treat it as binding.
+
+---
+
 ## Session Start — Context Loading Order
 
 At the start of every session, read these files **in order**:
