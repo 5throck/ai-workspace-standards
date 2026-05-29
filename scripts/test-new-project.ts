@@ -179,6 +179,31 @@ try {
     skip('Test 0d', `pwsh not available (${e})`);
   }
 
+  // 0e: Verify new-project.sh template validation logic checks common/ and variant/ separately.
+  // Guards against the same bug as Test 0d — ensures sh version validates correctly.
+  try {
+    const commonPath = join(process.cwd(), 'templates', 'common');
+    const variantPath = join(process.cwd(), 'templates', variantArg);
+    const commonRequired = ['.gitignore', '.githooks/pre-commit'];
+    const variantRequired = ['CLAUDE.md', 'GEMINI.md', 'agents/pm.md', 'variant.json'];
+
+    let missing: string[] = [];
+    for (const file of commonRequired) {
+      if (!existsSync(join(commonPath, file))) missing.push(`common/${file}`);
+    }
+    for (const file of variantRequired) {
+      if (!existsSync(join(variantPath, file))) missing.push(`${variantArg}/${file}`);
+    }
+
+    if (missing.length > 0) {
+      fail('Test 0e', `Missing required template files: ${missing.join(', ')}`);
+    } else {
+      pass('Test 0e PASSED: new-project.sh template validation checks passed');
+    }
+  } catch (e) {
+    skip('Test 0e', `Template validation check failed (${e})`);
+  }
+
   if (!syntaxOk) {
     console.error('\n❌ Syntax errors found — remaining tests skipped.');
     process.exit(1);

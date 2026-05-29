@@ -129,39 +129,13 @@ if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/validate-template
   echo "Running lifecycle governance pre-check for variant '$VARIANT'…"
 
   # Determine mandatory domains from governance JSON
-  MANDATORY_DOMAINS=$(python3 -c "
-import json, sys
-data = json.load(open(sys.argv[1], encoding='utf-8'))
-policy = data.get('variantValidationPolicy', {})
-print(','.join(policy.get('mandatoryBeforeProjectCreation', ['variant', 'agent', 'skill'])))
-" "$GOVERNANCE_JSON" 2>/dev/null || echo "variant,agent,skill")
+  MANDATORY_DOMAINS=$(bun "$WORKSPACE_ROOT/scripts/helpers/lifecycle-governance.ts" 2>/dev/null || echo "variant,agent,skill")
 
   # Run validate-templates for the selected variant in JSON mode
   VALIDATE_OUTPUT=$(bun "$WORKSPACE_ROOT/scripts/validate-templates.ts" --variant "$VARIANT" --json 2>/dev/null || echo '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}')
 
   # Check mandatory domain errors
-  GOVERNANCE_ERRORS=$(python3 -c "
-import json, sys
-output, mandatory = sys.argv[1], sys.argv[2].split(',')
-try:
-    data = json.loads(output)
-    errors = data.get('errors', [])
-    mandatory_errors = [e for e in errors if any(d in e.get('check', '') for d in mandatory)]
-    if mandatory_errors:
-        for e in mandatory_errors:
-            print('  ❌ ' + e.get('message', ''))
-        sys.exit(1)
-except Exception as ex:
-    print('  WARN: Could not parse validation output: ' + str(ex))
-    sys.exit(0)
-" "$VALIDATE_OUTPUT" "$MANDATORY_DOMAINS" 2>/dev/null)
-
-  GOVERNANCE_EXIT=$?
-  if [ -n "$GOVERNANCE_ERRORS" ]; then
-    echo "$GOVERNANCE_ERRORS"
-  fi
-
-  if [ "$GOVERNANCE_EXIT" -ne 0 ]; then
+  if ! bun "$WORKSPACE_ROOT/scripts/helpers/validate-output.ts" "$MANDATORY_DOMAINS" "$VALIDATE_OUTPUT" 2>/dev/null; then
     echo ""
     echo "❌ Lifecycle governance pre-check FAILED for variant '$VARIANT'."
     echo "   Fix the issues above before creating a project from this variant."
@@ -173,6 +147,16 @@ except Exception as ex:
 fi
 
 echo "🚀 Scaffolding new project: $PROJECT_NAME"
+
+# ── Template validation before copying ────────────────────────────────────────  # TEST: none
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" ]; then
+  echo "Validating template integrity…"
+  if ! bun "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" "$VARIANT" 2>/dev/null; then
+    exit 1
+  fi
+else
+  echo "⚠️  Template validation skipped (bun not available or helper missing)"
+fi
 
 # ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
 if [ ! -d "$COMMON_DIR" ]; then
@@ -234,87 +218,36 @@ fi
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
 # ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3
-while IFS= read -r -d '' file; do
-  python3 -c "
-import sys
-path, name = sys.argv[1], sys.argv[2]
-content = open(path, encoding='utf-8').read()
-content = content.replace('[Project Name]', name)
-content = content.replace('{{PROJECT_NAME}}', name)
-content = content.replace('{{PROJECT_DESCRIPTION}}', 'A new project')
-content = content.replace('{{PROJECT_CHARACTERISTICS}}', '')
-open(path, 'w', encoding='utf-8').write(content)
-" "$file" "$PROJECT_NAME"
-done < <(find "$PROJECT_DIR" -type f \
-  \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" \
-     -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sample" \) \
-  -print0)
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" ]; then
+  bun "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" "$PROJECT_DIR" "$PROJECT_NAME" "A new project" ""
+else
+  echo "⚠️  Placeholder substitution skipped (bun not available or helper missing)"
+fi
 
 # ── 5.5b. Update lifecycle.statusSince in the project's variant.json ────────  # TEST: Test 9
 PROJECT_DATE="$(date -u +%Y-%m-%d)"
 PROJ_VARIANT_JSON="$PROJECT_DIR/variant.json"
 if [ -f "$PROJ_VARIANT_JSON" ]; then
-  python3 -c "
-import sys, json
-path, date, variant = sys.argv[1], sys.argv[2], sys.argv[3]
-data = json.load(open(path, encoding='utf-8'))
-lc = data.get('lifecycle', {})
-lc['statusSince'] = date
-lc['lastTransition'] = 'initial → ' + data.get('status', 'unknown') + ' on ' + date
-data['lifecycle'] = lc
-json.dump(data, open(path, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)
-open(path, 'a', encoding='utf-8').write('\n')
-" "$PROJ_VARIANT_JSON" "$PROJECT_DATE" "$VARIANT"
-  echo "  ✅ variant.json lifecycle.statusSince set to $PROJECT_DATE"
+  if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/update-variant-lifecycle.ts" ]; then
+    bun "$WORKSPACE_ROOT/scripts/helpers/update-variant-lifecycle.ts" "$PROJECT_DIR" "$PROJECT_DATE" "$VARIANT"
+  fi
 fi
 
 # ── 5.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
 SCRIPTS_MD="$WORKSPACE_ROOT/scripts/SCRIPTS.md"
 SNAPSHOT_FILE="$PROJECT_DIR/scripts-snapshot.json"
 if [ -f "$SCRIPTS_MD" ]; then
-  python3 -c "
-import sys, json, re
-scripts_md, snapshot_path, date, variant, l1_source = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
-content = open(scripts_md, encoding='utf-8').read()
-registry_match = re.search(r'## Registry\n.*?\n\|[-| ]+\|\n(.*?)(?=\n##|\Z)', content, re.DOTALL)
-scripts = {}
-if registry_match:
-    for line in registry_match.group(1).strip().split('\n'):
-        parts = [p.strip() for p in line.split('|') if p.strip()]
-        if len(parts) >= 4:
-            name = parts[0].strip('\`')
-            version = parts[2]
-            status = parts[3]
-            if re.match(r'^\d+\.\d+\.\d+$', version):
-                scripts[name] = {'version': version, 'status': status}
-snapshot = {'created': date, 'variant': variant, 'l1_source': l1_source, 'scripts': scripts}
-json.dump(snapshot, open(snapshot_path, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)
-open(snapshot_path, 'a', encoding='utf-8').write('\n')
-" "$SCRIPTS_MD" "$SNAPSHOT_FILE" "$PROJECT_DATE" "$VARIANT" "templates/common/scripts"
-  echo "  ✅ scripts-snapshot.json written ($(python3 -c "import json; d=json.load(open('$SNAPSHOT_FILE')); print(len(d['scripts']))" 2>/dev/null || echo '?') scripts)"
+  if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/write-scripts-snapshot.ts" ]; then
+    bun "$WORKSPACE_ROOT/scripts/helpers/write-scripts-snapshot.ts" "$PROJECT_DIR" "$PROJECT_DATE" "$VARIANT" "templates/common/scripts"
+  fi
 fi
 
 # ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
 PKG_JSON="$PROJECT_DIR/package.json"
 if [ -f "$PKG_JSON" ]; then
-  python3 -c "
-import sys, json
-path = sys.argv[1]
-data = json.load(open(path, encoding='utf-8'))
-scripts = data.get('scripts', {})
-workspace_scripts = {
-    'audit': 'bun scripts/audit.ts',
-    'dev-sync': 'bun scripts/dev-sync.ts',
-    'sync-md': 'bun scripts/sync-md.ts'
-}
-for k, v in workspace_scripts.items():
-    if k not in scripts:
-        scripts[k] = v
-data['scripts'] = scripts
-json.dump(data, open(path, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)
-open(path, 'a', encoding='utf-8').write('\n')
-" "$PKG_JSON"
-  echo "  ✅ Tier 2 scripts merged into package.json"
+  if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/merge-package-scripts.ts" ]; then
+    bun "$WORKSPACE_ROOT/scripts/helpers/merge-package-scripts.ts" "$PROJECT_DIR"
+  fi
 fi
 
 # ── 5.5. Record template provenance in variant context file ───────────────────  # TEST: none
@@ -336,26 +269,8 @@ printf 'variant=%s\nversion=%s\nplatform=%s\ncreated=%s\n' \
   > "$CLAUDE_DIR/template-version.txt"
 
 # ── 5.6b. Inject AGENTS.md Skills into docs/context.md ──────────────────────  # TEST: Test 19
-AGENTS_MD="$PROJECT_DIR/AGENTS.md"
-CONTEXT_MD="$PROJECT_DIR/docs/$VARIANT.context.md"
-if [ -f "$AGENTS_MD" ] && [ -f "$CONTEXT_MD" ]; then
-  python3 -c "
-import sys, re
-agents_path, context_path = sys.argv[1], sys.argv[2]
-agents = open(agents_path, encoding='utf-8').read()
-context = open(context_path, encoding='utf-8').read()
-m = re.search(r'^## Skills\s*(\| Skill .*?)(?=\n---|\Z)', agents, re.MULTILINE | re.DOTALL)
-if m:
-    skills_table = m.group(1).strip()
-    new_context = re.sub(
-        r'(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)',
-        r'\1\n' + skills_table + r'\n\2',
-        context, flags=re.DOTALL
-    )
-    if new_context != context:
-        open(context_path, 'w', encoding='utf-8').write(new_context)
-        print('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md')
-" "$AGENTS_MD" "$CONTEXT_MD" 2>/dev/null || true
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/inject-skills.ts" ]; then
+  bun "$WORKSPACE_ROOT/scripts/helpers/inject-skills.ts" "$PROJECT_DIR"
 fi
 
 # ── 5.7. Protect context.md from accidental overwrites (merge=ours) ──────────  # TEST: Test 13

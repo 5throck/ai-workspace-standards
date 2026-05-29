@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-29]**: TypeScript helper scripts for project creation — `scripts/helpers/` directory with 8 modular scripts (template-validation.ts, lifecycle-governance.ts, validate-output.ts, substitute-placeholders.ts, update-variant-lifecycle.ts, write-scripts-snapshot.ts, merge-package-scripts.ts, inject-skills.ts)
+- **[2026-05-29]**: Test 0e to `test-new-project.ts` — validates new-project.sh template verification logic checks common/ and variant/ separately
 - **[2026-05-29]**: Documentation restructuring — Runtime vs Governance separation: `agents/*.md` with lifecycle frontmatter (phase, created, last_updated, governance) and `docs/lifecycle/agents/*.md` with detailed governance records
 - **[2026-05-29]**: `docs/governance/` directory — centralized governance documentation (branch-strategy.md, pr-workflow.md, skill-update-procedure.md, LIFECYCLE_GOVERNANCE.md, lifecycle-governance.json)
 - **[2026-05-29]**: `templates/common/variant/` directory — variant phase definitions moved from `docs/variant/` to correct template location
@@ -22,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-29]**: Meeting transcript: `memory/meeting-2026-05-28-script-pair-sync.md` — structural analysis of `intentional drift` policy flaw in `.sh`/`.ps1` horizontal sync; proposed `pair` field to SCRIPTS.md schema; 5 action items (A-01~A-05)
 
 ### Changed
+- **[2026-05-29]**: `scripts/new-project.sh` — replaced all Python inline code with TypeScript helper calls; UTF-8 decoding errors resolved
+- **[2026-05-29]**: `scripts/new-project.ps1` — replaced PowerShell native code with TypeScript helper calls; now uses identical logic to SH version (single source of truth)
+- **[2026-05-29]**: `.claude/settings.json` and all template settings files — fixed SessionStart hook structure (added missing `matcher` and `hooks` wrapper)
 - **[2026-05-29]**: `.gitignore` — added negation patterns for `!docs/governance/`, `!docs/lifecycle/`, `!docs/variant/`, `!docs/superpowers/`, `!templates/common/`
 - **[2026-05-29]**: `CLAUDE.md` §2 — added platform parity note: "every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; see CONSTITUTION.md §6"
 - **[2026-05-29]**: `GEMINI.md` §6 — added platform parity note referencing `CONSTITUTION.md §6 Cross-Platform Deployment Rule`

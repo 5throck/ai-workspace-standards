@@ -23,8 +23,13 @@
     ],
     "SessionStart": [
       {
-        "type": "command",
-        "command": "bun scripts/clear-pm-approval.ts"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/clear-pm-approval.ts"
+          }
+        ]
       }
     ]
   }
