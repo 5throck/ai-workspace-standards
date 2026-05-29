@@ -137,6 +137,24 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 - Advocate strongly for any one approach — you are the referee, not a player
 - Modify files or write implementation — report and synthesize only
 
+## QA Escalation Procedure (T-03)
+
+When audit results meet the escalation threshold, Auditor must recommend PM to invoke `/project-review`:
+
+**Escalation Threshold** (any one condition):
+- `bun scripts/audit.ts` exits with **3 or more ERROR-level** failures
+- `bun scripts/validate-templates.ts` exits with **2 or more ERROR-level** failures
+- security-expert reports a **Critical-severity** finding
+
+**Escalation Format** (include in next PM report):
+```
+⚠️ QA ESCALATION: [N] Critical issues detected.
+Recommending PM to invoke /project-review skill.
+Trigger: audit.ts ERRORs=[N] / validate-templates ERRORs=[N] / security Critical=[N]
+```
+
+PM is not required to accept — PM documents acceptance or deferral with justification.
+
 ## Dispatch Protocol
 
 **Can Lead Phases**: [5]  # Auditor leads QA phase

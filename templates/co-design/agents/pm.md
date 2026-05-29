@@ -130,3 +130,15 @@ When `/meeting` is invoked, the AI engine (Claude/Antigravity/Gemini) role-plays
 **Tier**: high
 **Communication Style**: sync  # PM gates require user confirmation
 
+## QA Self-Check Trigger (T-03)
+
+In the absence of a dedicated Auditor agent, PM monitors audit results directly and self-triggers `/project-review` when:
+
+- `bun scripts/audit.ts` exits with **3 or more ERROR-level** failures
+- Any specialist agent reports a **Critical-severity** finding during a session
+
+**Self-trigger procedure**:
+1. State: "QA threshold exceeded — invoking /project-review (T-03)"
+2. Invoke the `project-review` skill
+3. Document findings in session memory log
+

@@ -17,6 +17,8 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | Project Review Skill Design v2 — Naming and Scaffolding | [meeting-2026-05-30-project-review-skill-design-v2-naming-an.md](meeting-2026-05-30-project-review-skill-design-v2-naming-an.md) |
+| 2026-05-30 | Workspace Review Skill Design | [meeting-2026-05-30-workspace-review-skill-design.md](meeting-2026-05-30-workspace-review-skill-design.md) |
 | 2026-05-30 | SSOT Design for Phase Numbering Schema | [meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md](meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md) |
 | 2026-05-30 | Phase 1/2/3 Root Cause Analysis and Prevention Measures | [meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md](meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md) |
 | 2026-05-29 | Review of PM Agent Facilitator Transition Implementation | [meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md](meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md) |
