@@ -36,26 +36,42 @@ function Validate-TemplateSync {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [string]$TemplatePath
+        [string]$CommonPath,
+        [Parameter(Mandatory=$true)]
+        [string]$VariantPath
     )
 
-    if (-not (Test-Path $TemplatePath)) {
-        throw "Template path not found: $TemplatePath"
-    }
+    # Files that must exist in templates/common/ (shared infrastructure)
+    $commonRequired = @(
+        ".gitignore",
+        ".githooks/pre-commit"
+    )
 
-    $requiredFiles = @(
+    # Files that must exist in the variant folder (variant-specific)
+    $variantRequired = @(
         "CLAUDE.md",
         "GEMINI.md",
-        ".gitignore",
-        ".githooks/pre-commit",
-        "agents/pm.md"
+        "agents/pm.md",
+        "variant.json"
     )
 
     $missingFiles = @()
-    foreach ($file in $requiredFiles) {
-        $filePath = Join-Path $TemplatePath $file
-        if (-not (Test-Path $filePath)) {
-            $missingFiles += $file
+
+    if (-not (Test-Path $CommonPath)) {
+        throw "Common template path not found: $CommonPath"
+    }
+    foreach ($file in $commonRequired) {
+        if (-not (Test-Path (Join-Path $CommonPath $file))) {
+            $missingFiles += "common/$file"
+        }
+    }
+
+    if (-not (Test-Path $VariantPath)) {
+        throw "Variant template path not found: $VariantPath"
+    }
+    foreach ($file in $variantRequired) {
+        if (-not (Test-Path (Join-Path $VariantPath $file))) {
+            $missingFiles += "variant/$file"
         }
     }
 
@@ -63,7 +79,7 @@ function Validate-TemplateSync {
         throw "Missing required template files: $($missingFiles -join ', ')"
     }
 
-    Write-Verbose "Template synchronization validated ($($requiredFiles.Count) required files present)"
+    Write-Verbose "Template synchronization validated ($($commonRequired.Count + $variantRequired.Count) required files present)"
 }
 
 # UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
@@ -215,7 +231,7 @@ Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
 # ── Template validation before copying ────────────────────────────────────────  # TEST: none
 try {
-    Validate-TemplateSync -TemplatePath $CommonDir
+    Validate-TemplateSync -CommonPath $CommonDir -VariantPath $TemplatesDir
     Write-Host "  ✅ Common template validation passed" -ForegroundColor Green
 } catch {
     Write-Host "  ❌ Template validation failed: $_" -ForegroundColor Red
