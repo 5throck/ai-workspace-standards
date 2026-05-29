@@ -327,6 +327,67 @@ if (fs.existsSync(claudeCommandsDir)) {
     }
 }
 
+// Stale shell/script reference check
+function checkStaleShellReferences() {
+    const filesToScan: string[] = [
+        'CLAUDE.md',
+        'README.md',
+        'AGENTS.md',
+        'GEMINI.md',
+        'docs/constitution/09-operations-workflow.md',
+        '.githooks/pre-push.ps1',
+        '.githooks/commit-msg',
+    ];
+
+    // Add any .md files in docs/governance/
+    const govDir = path.join('docs', 'governance');
+    if (fs.existsSync(govDir)) {
+        for (const f of fs.readdirSync(govDir)) {
+            if (f.endsWith('.md')) filesToScan.push(path.join(govDir, f));
+        }
+    }
+
+    // Add any SKILL.md files in skills/*/
+    if (fs.existsSync('skills')) {
+        for (const dir of fs.readdirSync('skills')) {
+            const skillMd = path.join('skills', dir, 'SKILL.md');
+            if (fs.existsSync(skillMd)) filesToScan.push(skillMd);
+        }
+    }
+
+    let staleErrors = 0;
+    for (const filePath of filesToScan) {
+        if (!fs.existsSync(filePath)) continue;
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const lines = content.split('\n');
+        lines.forEach((line, idx) => {
+            // Skip lines that are documentation examples (e.g. anti-pattern tables with backtick-quoted examples)
+            // A line is an example if the pattern only appears inside backticks
+            const strippedLine = line.replace(/`[^`]*`/g, '');
+            const re = /(?:bash|node)\s+scripts\/([\w.-]+\.(sh|ps1|ts))/g;
+            let match: RegExpExecArray | null;
+            while ((match = re.exec(strippedLine)) !== null) {
+                const refFile = match[1];
+                const refExt = match[2];
+                // For .ts files, only flag when invoked with 'node' (bun is fine)
+                const runner = match[0].split(' ')[0];
+                if (refExt === 'ts' && runner !== 'node') continue;
+                const scriptPath = path.join('scripts', refFile);
+                if (!fs.existsSync(scriptPath)) {
+                    Fail(`Stale shell reference: ${filePath}:${idx + 1} references non-existent scripts/${refFile}`);
+                    staleErrors++;
+                }
+            }
+        });
+    }
+
+    if (staleErrors === 0) {
+        Pass('Stale shell reference check: no stale references found');
+    }
+}
+
+checkStaleShellReferences();
+
 console.log("");
 if (errors === 0) {
     console.log(`${GREEN}✅ All checks passed.${RESET}`);

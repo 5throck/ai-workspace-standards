@@ -1,4 +1,7 @@
 {
+  "phases": {
+    "phase3_name": "Stakeholder Alignment"
+  },
   "name": "co-work",
   "description": "Collaboration-focused variant for research, documentation, and project coordination. Includes 4 specialized collaboration agents.",
   "status": "stable",

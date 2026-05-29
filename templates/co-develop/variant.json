@@ -1,4 +1,7 @@
 {
+  "phases": {
+    "phase3_name": "Design Handoff"
+  },
   "name": "co-develop",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
   "status": "stable",

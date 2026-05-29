@@ -861,6 +861,193 @@ function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest):
   }
 }
 
+// Check WS-01: workspace-schema.json consistency
+function checkWorkspaceSchema(): void {
+  if (!JSON_MODE) console.log('\n=== Check WS-01: workspace-schema.json consistency ===');
+
+  const schemaPath = join(ROOT, 'workspace-schema.json');
+  if (!existsSync(schemaPath)) {
+    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at workspace root', 'Create workspace-schema.json with workflow.phases and agent_tiers');
+    return;
+  }
+
+  let schema: Record<string, unknown>;
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    fail('root', 'ws-schema-invalid', 'workspace-schema.json is not valid JSON');
+    return;
+  }
+
+  pass('workspace-schema.json: present and valid JSON');
+
+  const workflow = schema.workflow as Record<string, unknown> | undefined;
+  const phases = workflow?.phases as Record<string, unknown> | undefined;
+  const agentTiers = schema.agent_tiers as Record<string, string> | undefined;
+
+  if (!phases) {
+    fail('root', 'ws-schema-structure', 'workspace-schema.json missing workflow.phases');
+    return;
+  }
+
+  const schemaPmOwned = (phases.pm_owned as string[] | undefined) ?? [];
+  const schemaCanonical = (phases.canonical as string[] | undefined) ?? [];
+  const schemaCount = phases.count as number | undefined;
+
+  // --- WS-01 Check 1: agents/pm.md Can Lead Phases vs schema pm_owned ---
+  const pmMdPath = join(ROOT, 'agents', 'pm.md');
+  if (!existsSync(pmMdPath)) {
+    warn('root', 'ws-01-pm-missing', 'agents/pm.md not found — skipping PM phase check');
+  } else {
+    const pmContent = readFileSync(pmMdPath, 'utf-8');
+    const phaseLineMatch = pmContent.match(/\*{0,2}Can Lead Phases\*{0,2}\s*:\s*\[([^\]]+)\]/);
+    if (!phaseLineMatch) {
+      warn('root', 'ws-01-pm-phases', 'agents/pm.md: Can Lead Phases line not found');
+    } else {
+      const pmPhases = phaseLineMatch[1].split(',').map(s => s.trim().replace(/"/g, '').replace(/'/g, ''));
+      const pmSorted = [...pmPhases].sort();
+      const schemaSorted = [...schemaPmOwned].sort();
+      if (JSON.stringify(pmSorted) === JSON.stringify(schemaSorted)) {
+        pass(`agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] matches schema pm_owned`);
+      } else {
+        fail('root', 'ws-01-pm-phases',
+          `[FAIL] agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] does not match workspace-schema.json pm_owned [${schemaPmOwned.join(', ')}]`,
+          'Update Can Lead Phases in agents/pm.md or pm_owned in workspace-schema.json'
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 2: templates/common/phase-definitions.md canonical phases ---
+  const phaseDefPath = join(ROOT, 'templates', 'common', 'phase-definitions.md');
+  if (!existsSync(phaseDefPath)) {
+    warn('root', 'ws-01-phase-defs-missing', 'templates/common/phase-definitions.md not found — skipping canonical phase check');
+  } else {
+    const phaseDefContent = readFileSync(phaseDefPath, 'utf-8');
+    // Extract phase identifiers from Phase Overview table rows (first column)
+    const tableRowRegex = /^\|\s*([0-9][0-9-]*)\s*\|/gm;
+    const foundPhases = new Set<string>();
+    for (const m of phaseDefContent.matchAll(tableRowRegex)) {
+      foundPhases.add(m[1].trim());
+    }
+    const missingFromDoc = schemaCanonical.filter(p => !foundPhases.has(p));
+    if (missingFromDoc.length === 0) {
+      pass(`templates/common/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
+    } else {
+      for (const missing of missingFromDoc) {
+        fail('root', 'ws-01-phase-defs',
+          `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
+          `Add phase "${missing}" to the Phase Overview table in templates/common/phase-definitions.md`
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 3: docs/constitution/05-multi-agent-architecture.md phase count ---
+  const constitutionPath = join(ROOT, 'docs', 'constitution', '05-multi-agent-architecture.md');
+  if (!existsSync(constitutionPath)) {
+    warn('root', 'ws-01-constitution-missing', 'docs/constitution/05-multi-agent-architecture.md not found — skipping phase count check');
+  } else {
+    const constitutionContent = readFileSync(constitutionPath, 'utf-8');
+    // Find §5.4 section (including heading line) and look for "N phases" or "N-phase" pattern
+    const section54Match = constitutionContent.match(/(#{1,4}\s*5\.4[^\n]*\n[\s\S]*?)(?=\n#{1,4}\s*5\.\d|$)/);
+    const searchContent = section54Match ? section54Match[1] : constitutionContent;
+    const phaseCountMatch = searchContent.match(/(\d+)[- ]phase/i) ?? searchContent.match(/(\d+)\s+phases/i);
+    if (!phaseCountMatch) {
+      warn('root', 'ws-01-constitution-count', 'constitution §5.4: phase count pattern not found (may be stated differently) — manual review recommended');
+    } else {
+      const declaredCount = parseInt(phaseCountMatch[1], 10);
+      if (declaredCount === schemaCount) {
+        pass(`docs/constitution/05-multi-agent-architecture.md §5.4: declares ${declaredCount} phases — matches schema`);
+      } else {
+        fail('root', 'ws-01-constitution-count',
+          `[FAIL] constitution §5.4: declares ${declaredCount} phases, schema requires ${schemaCount}`,
+          `Update phase count in docs/constitution/05-multi-agent-architecture.md §5.4 or workspace-schema.json workflow.phases.count`
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 4: agents/*.md tier frontmatter vs schema agent_tiers ---
+  if (!agentTiers) {
+    warn('root', 'ws-01-agent-tiers-missing', 'workspace-schema.json missing agent_tiers — skipping tier check');
+  } else {
+    const agentsDir = join(ROOT, 'agents');
+    if (!existsSync(agentsDir)) {
+      warn('root', 'ws-01-agents-dir', 'agents/ directory not found at workspace root — skipping tier check');
+    } else {
+      const agentFiles = readdirSync(agentsDir).filter(f =>
+        f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
+      );
+
+      const tierToModelKeyword: Record<string, string> = {
+        high: 'opus',
+        medium: 'sonnet',
+        low: 'haiku',
+      };
+
+      for (const file of agentFiles) {
+        const agentName = file.replace(/\.md$/, '');
+        const filePath = join(agentsDir, file);
+        const rawContent = readFileSync(filePath, 'utf-8');
+        const content = normalizeContent(rawContent);
+
+        // Extract frontmatter block
+        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (!fmMatch) continue;
+        const fm = fmMatch[1];
+
+        // Check if this agent is in schema
+        if (!(agentName in agentTiers)) {
+          // Not in schema — skip without warning (variant-specific agents are not in schema)
+          continue;
+        }
+
+        const expectedTier = agentTiers[agentName];
+
+        // Try simple tier: high/medium/low
+        const simpleTierMatch = fm.match(/^tier:\s*(high|medium|low)\s*$/m);
+        if (simpleTierMatch) {
+          const actualTier = simpleTierMatch[1];
+          if (actualTier === expectedTier) {
+            pass(`agents/${file}: tier "${actualTier}" matches schema`);
+          } else {
+            fail('root', 'ws-01-agent-tier',
+              `[FAIL] agents/${file}: tier "${actualTier}" does not match schema "${expectedTier}" for agent "${agentName}"`,
+              `Update tier in agents/${file} or agent_tiers in workspace-schema.json`
+            );
+          }
+          continue;
+        }
+
+        // Complex tier object — check claude: sub-field
+        const claudeTierMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
+        if (claudeTierMatch) {
+          const claudeTier = claudeTierMatch[1];
+          const expectedKeyword = tierToModelKeyword[expectedTier] ?? expectedTier;
+          // Also check the comment for model name as secondary signal
+          const claudeLine = fm.split('\n').find(l => l.match(/^\s+claude:/));
+          const modelHint = claudeLine?.toLowerCase() ?? '';
+          if (claudeTier === expectedTier) {
+            pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
+          } else if (!modelHint.includes(expectedKeyword)) {
+            warn('root', 'ws-01-agent-tier-complex',
+              `agents/${file}: complex tier — claude tier "${claudeTier}" does not match schema "${expectedTier}" for "${agentName}" (manual review recommended)`
+            );
+          } else {
+            pass(`agents/${file}: claude tier "${claudeTier}" matches schema (model hint confirms "${expectedKeyword}")`);
+          }
+        } else {
+          // Can't reliably parse tier
+          warn('root', 'ws-01-agent-tier-unreadable',
+            `agents/${file}: tier block too complex to parse reliably — manual review recommended`
+          );
+        }
+      }
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -900,6 +1087,7 @@ function main() {
     }
   }
 
+  checkWorkspaceSchema();
   checkSharedFileSync();
   checkL0L1ScriptParity();
 

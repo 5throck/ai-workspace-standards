@@ -152,7 +152,7 @@ For production emergencies:
    ```bash
    # ... implement fix ...
    bun test
-   bash scripts/audit.sh
+   bun scripts/audit.ts
    ```
 
 3. Push and create PR:

@@ -17,6 +17,8 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | SSOT Design for Phase Numbering Schema | [meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md](meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md) |
+| 2026-05-30 | Phase 1/2/3 Root Cause Analysis and Prevention Measures | [meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md](meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md) |
 | 2026-05-29 | Review of PM Agent Facilitator Transition Implementation | [meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md](meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md) |
 | 2026-05-29 | 7-item system improvement plan — PM workflow, 3-tier todo, lifecycle docs, skill audit, file structure | [meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md](meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md) |
 | 2026-05-29 | lifecycle-manager scope reduction — secretary role, L0+L1 dual deployment | [meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md](meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md) |

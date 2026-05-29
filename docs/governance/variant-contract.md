@@ -96,7 +96,7 @@ security-gate: true   # Triggers platform-neutral placement check
 ## Enforcement
 
 `scripts/validate-templates.ts` reads `templates/common/variant-contract.json` and checks every variant.
-Run: `bun run scripts/validate-templates.ts` (or `bash scripts/validate-templates.sh`)
+Run: `bun run scripts/validate-templates.ts` (or `bun scripts/validate-templates.ts`)
 
 ## Blocklist — Files NOT Allowed in templates/common/
 

@@ -1,4 +1,7 @@
 {
+  "phases": {
+    "phase3_name": "Design Handoff"
+  },
   "name": "co-design",
   "description": "Design-focused variant for UI/UX, design systems, and prototyping projects. Includes 5 specialized design agents.",
   "status": "stable",

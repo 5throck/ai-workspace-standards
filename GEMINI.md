@@ -204,12 +204,12 @@ Gemini does not natively run slash commands. Emulate custom slash commands using
 
 | Command | macOS / Linux (Bash) | Windows (PowerShell) |
 | :--- | :--- | :--- |
-| `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` | `.\scripts\dev-sync.ps1 "feat: ..."` |
+| `/sync "feat: ..."` | `bun scripts/dev-sync.ts "feat: ..."` | `.\scripts\dev-sync.ps1 "feat: ..."` |
 | `/memlog` | Append to `memory/YYYY-MM-DD.md` manually (no script) | Append to `memory/YYYY-MM-DD.md` manually (no script) |
 | `/changelog "..."` | Append entry to `CHANGELOG.md` under `[Unreleased]` | Append entry to `CHANGELOG.md` under `[Unreleased]` |
 | `/new-task "..."` | Manually create `memory/YYYY-MM-DD.md` task entry | Manually create `memory/YYYY-MM-DD.md` task entry |
 | `/new-project` | `bash scripts/new-project.sh "<project-name>"` | `.\scripts\new-project.ps1 "<project-name>"` |
-| `/post-write` | `bash scripts/audit.sh` (Run manually) | `.\scripts\audit.ps1` (Run manually) |
+| `/post-write` | `bun scripts/audit.ts` (Run manually) | `.\scripts\audit.ps1` (Run manually) |
 
 ---
 
@@ -229,6 +229,6 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-*Last Updated: 2026-05-27*
+*Last Updated: 2026-05-30*
 
 

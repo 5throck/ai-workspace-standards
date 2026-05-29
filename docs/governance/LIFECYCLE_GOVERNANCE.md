@@ -2,7 +2,7 @@
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-05-28
+> Last Updated: 2026-05-30
 
 ---
 
@@ -184,7 +184,7 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 - [ ] Create `README.md` (English) with sections: Overview, Usage, Prerequisites, Last Updated
 - [ ] Create `README_ko.md` (Korean) with matching section structure
 - [ ] Add variant entry to workspace `templates/common/VERSION_REGISTRY.json` if applicable
-- [ ] Run `npx ts-node scripts/validate-templates.ts --variant co-<name>` — all mandatory checks must pass
+- [ ] Run `bun scripts/validate-templates.ts --variant co-<name>` — all mandatory checks must pass
 - [ ] Promote `variant.json` `status` from `"draft"` to `"beta"` once validation passes
 - [ ] Submit PR; `validate-templates.ts` runs in CI as a required check
 
