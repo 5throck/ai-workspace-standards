@@ -26,9 +26,9 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` is currently `{}` - **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.sh` pipeline.
+The workspace `.claude/settings.json` is currently `{}` - **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.ts` pipeline.
 
-To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add the following to `.claude/settings.json`:
+To re-enable the PostToolUse hook (fires `audit.ts` after every Write/Edit), add the following to `.claude/settings.json`:
 
 ```json
 {
@@ -39,7 +39,7 @@ To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/audit.sh"
+            "command": "bun scripts/audit.ts"
           }
         ]
       }
@@ -48,12 +48,12 @@ To re-enable the PostToolUse hook (fires `audit.sh` after every Write/Edit), add
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bash scripts/audit.sh` manually before committing.
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
 
 | Environment | Hook active by default? | Manual fallback |
 |-------------|:-----------------------:|-----------------|
-| Claude Code CLI | ❌ (disabled) | `bash scripts/audit.sh` |
-| Claude Code Desktop App | ❌ (always) | `bash scripts/audit.sh` |
+| Claude Code CLI | ❌ (disabled) | `bun scripts/audit.ts` |
+| Claude Code Desktop App | ❌ (always) | `bun scripts/audit.ts` |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
@@ -64,7 +64,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.sh` |
+| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.ts` |
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
@@ -213,4 +213,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-28*
+*Last Updated: 2026-05-30*

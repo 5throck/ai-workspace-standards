@@ -139,7 +139,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
 2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 6 (Finalization)
-3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using qa-gate.sh/.ps1 scripts
+3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using bun scripts/qa-gate.ts
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
@@ -185,7 +185,7 @@ Phase 3 - Implementation (serial)
   Agents can dispatch each other directly for routine handoffs
 
 Phase 4 - QA Gate (Independent Auditor)
-  Auditor executes qa-gate.sh/.ps1 autonomously
+  Auditor executes bun scripts/qa-gate.ts autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
 
@@ -322,7 +322,7 @@ Skill("script-lifecycle-manager")
 | `skills/` | Workspace utility skills (validate, scan, simulate) |
 | `templates/common/skills/` | Single source of truth — changes here must sync to `.claude/skills/` |
 
-> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bash scripts/audit.sh` to verify.
+> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bun scripts/audit.ts` to verify.
 
 ---
 

@@ -1,1 +1,1 @@
-Failed to authenticate. API Error: 401 Invalid bearer token
+API Error: Request rejected (429) · [1308][Usage limit reached for 5 hour. Your limit will reset at 2026-05-29 22:40:03][20260529213639d83edfbad56d4c2a]

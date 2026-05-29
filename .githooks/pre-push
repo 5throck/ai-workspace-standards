@@ -11,15 +11,15 @@ bun scripts/audit.ts || {
 
 # ── 2. Integration tests ──────────────────────────────────────────────────────
 echo "=== pre-push integration tests ==="
-if command -v node >/dev/null 2>&1; then
+if command -v bun >/dev/null 2>&1; then
   echo "Running integration tests..."
-  node scripts/test-runner.ts integration || {
+  bun scripts/test-runner.ts integration || {
     echo ""
     echo -e "\033[31m❌ Integration tests failed — push blocked. Fix test failures before pushing.\033[0m"
     exit 1
   }
 else
-  echo "⚠️  Node not found — skipping integration tests"
+  echo "⚠️  Bun not found — skipping integration tests"
 fi
 
 # ── 3. Block direct push to protected branches ────────────────────────────────
