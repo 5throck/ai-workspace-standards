@@ -560,7 +560,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # ── 10. Move into project directory ───────────────────────────────────────────  # TEST: none
 Write-Host ""
-Write-Host ("━" * 60) -ForegroundColor DarkGray
+Write-Host ("-" * 60) -ForegroundColor DarkGray
 Write-Host "📂 PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "⚠️  Your shell is still at the workspace root." -ForegroundColor Yellow
@@ -570,7 +570,7 @@ Write-Host "   cd '$ProjectDir'" -ForegroundColor Green
 Write-Host ""
 Write-Host "   All subsequent work (git, scripts, sessions) must be run"
 Write-Host "   from inside this directory, not the workspace root."
-Write-Host ("━" * 60) -ForegroundColor DarkGray
+Write-Host ("-" * 60) -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):"
 Write-Host "  -> $TemplatesDir\docs\_examples"
