@@ -20,11 +20,12 @@ Key characteristics:
 
 ## Quick Start
 
-```bash
-bash scripts/new-project.sh "project-name" --variant co-develop
-```
+This project was scaffolded from the **co-develop** template.
 
-This scaffolds a new project directory under the workspace root, copies all co-develop template files, and performs initial variable substitution (project name, dates).
+> To scaffold a new project from the workspace root, run:
+> `scripts/new-project.sh "project-name" --variant co-develop`
+
+This copies all co-develop template files and performs initial variable substitution (project name, dates).
 
 After scaffolding:
 
