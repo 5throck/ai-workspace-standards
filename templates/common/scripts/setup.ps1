@@ -118,8 +118,12 @@ function Audit-NodeLicenses {
     Info "Running Node.js license audit??"
     if (Get-Command npx -ErrorAction SilentlyContinue) {
         try {
+            $prevEAP = $ErrorActionPreference
+            $ErrorActionPreference = 'SilentlyContinue'
             $result = npx --yes license-checker --summary --onlyAllow $OssLicenses 2>$null | Out-String
-            if ($LASTEXITCODE -eq 0) {
+            $exitCode = $LASTEXITCODE
+            $ErrorActionPreference = $prevEAP
+            if ($exitCode -eq 0) {
                 Pass "License audit passed ??all packages use OSI-approved licenses"
             } else {
                 Warn "?? License audit flagged non-OSS packages. Review before committing."
