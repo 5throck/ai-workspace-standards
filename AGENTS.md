@@ -162,34 +162,36 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ## Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-6-phases):
+Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-7-phases):
 
 ```
-Phase 0 - Team Assembly & Skill Orchestration (Kickoff)
+Phase 0 - Project Initiation (PM-owned)
   PM assesses workspace requirements
   PM dynamically creates new agents/skills and resolves R&R overlap
   PM updates AGENTS.md and maintains skill registry
 
-Phase 1 - Analysis & Triage
-  PM classifies the request
+Phase 1-2 - Planning & Architecture (specialist-autonomous)
+  PM classifies the request; Architect produces implementation plan + ADR
   Dispatch read-only agents in parallel (analysis, research)
   PM synthesizes findings → acceptance criteria
-
-Phase 2 - Design
-  Architect produces implementation plan + ADR
   PM validates design approach and obtains explicit user approval → GATE
 
-Phase 3 - Implementation (serial)
+Phase 3 - Design Handoff (variant-specific)
+  Architect hands off approved plan to execution agents
+  Agents can dispatch each other directly for routine handoffs
+
+Phase 4 - Execution (specialist-autonomous)
   Automation Engineer implements per approved plan
   Documentation Writer updates docs as needed
   Agents can dispatch each other directly for routine handoffs
 
-Phase 4 - QA Gate (Independent Auditor)
+Phase 5 - Quality Assurance (specialist-autonomous)
   Auditor executes bun scripts/qa-gate.ts autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
 
-Phase 5 - Finalization
+Phase 6 - Lifecycle Finalization (PM-owned)
+  lifecycle-manager updates governance records for any changed artifacts
   PM logs decisions to memory/YYYY-MM-DD.md
   PM runs /sync "type: description" → PR opened
 ```
@@ -228,7 +230,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
 | Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
-| project-review | `.claude/skills/project-review/` | pm | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
+| project-review | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.
@@ -324,6 +326,10 @@ Skill("script-lifecycle-manager")
 | `templates/common/skills/` | Single source of truth — changes here must sync to `.claude/skills/` |
 
 > **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bun scripts/audit.ts` to verify.
+
+> **Workspace-root-originated skills**: Skills added directly to `.claude/skills/`
+> (not via `templates/common/skills/`) must be annotated with `gemini-parity: skip`
+> in their SKILL.md frontmatter and listed here with `workspace-only: true`.
 
 ---
 
