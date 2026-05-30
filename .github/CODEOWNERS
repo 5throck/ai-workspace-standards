@@ -1,0 +1,23 @@
+# Workspace CODEOWNERS
+# Replace @your-team with your actual GitHub team or username before going live.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+# * @your-team
+
+# Critical governance files — require explicit review
+/CLAUDE.md @your-team
+/AGENTS.md @your-team
+/CONSTITUTION.md @your-team
+/GEMINI.md @your-team
+
+# Agent definitions
+/agents/ @your-team
+
+# Hook and automation scripts
+/scripts/ @your-team
+/.githooks/ @your-team
+/.github/workflows/ @your-team
+
+# Template system
+/templates/ @your-team
