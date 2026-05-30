@@ -5,8 +5,7 @@
  */
 
 import { $ } from "bun";
-import { readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
