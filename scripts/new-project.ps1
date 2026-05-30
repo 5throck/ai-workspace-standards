@@ -7,7 +7,7 @@ param(
     [string]$Platform = "both"
 )
 
-# UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
+# UTF-8 encoding enforcement -- must follow param() block (PowerShell parser requirement)
 $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 try {
     [System.Text.Encoding]::RegisterProvider([System.Text.CodePages.CodePagesEncodingProvider]::Instance)
@@ -17,35 +17,35 @@ $ErrorActionPreference = 'Stop'
 
 # Validate ProjectName: alphanumeric, hyphens, underscores only; max 64 chars
 if ($ProjectName -notmatch '^[a-zA-Z0-9_-]+$') {
-    Write-Host "❌ Invalid project name: '$ProjectName'" -ForegroundColor Red
+    Write-Host "[FAIL] Invalid project name: '$ProjectName'" -ForegroundColor Red
     Write-Host "   Only letters, numbers, hyphens (-), and underscores (_) are allowed." -ForegroundColor Yellow
     exit 1
 }
 if ($ProjectName.Length -gt 64) {
-    Write-Host "❌ Project name too long ($($ProjectName.Length) chars). Maximum is 64 characters." -ForegroundColor Red
+    Write-Host "[FAIL] Project name too long ($($ProjectName.Length) chars). Maximum is 64 characters." -ForegroundColor Red
     exit 1
 }
 
 # Validate Platform flag
 if ($Platform -notin @("claude", "antigravity", "both")) {
-    Write-Host "❌ --platform must be: claude, antigravity, or both (default: both)" -ForegroundColor Red
+    Write-Host "[FAIL] --platform must be: claude, antigravity, or both (default: both)" -ForegroundColor Red
     exit 1
 }
 
-# ── Workspace Root Resolution ──────────────────────────────────────────────────────
+# -- Workspace Root Resolution ------------------------------------------------------
 $WorkspaceRoot = $PWD
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
 $CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"
 $VersionFile   = Join-Path (Join-Path $WorkspaceRoot "templates") "VERSION"
 
-# ── Version resolution ─────────────────────────────────────────────────────────  # TEST: none
+# -- Version resolution ---------------------------------------------------------  # TEST: none
 $TempDir = $null
 if ($Version -ne "") {
     $Tag = "template-v$Version"
     $tagExists = git -C $WorkspaceRoot tag -l $Tag 2>$null
     if (-not $tagExists) {
-        Write-Host "❌ Template version not found: $Tag" -ForegroundColor Red
+        Write-Host "[FAIL] Template version not found: $Tag" -ForegroundColor Red
         Write-Host "   Run: .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
         exit 1
     }
@@ -54,7 +54,7 @@ if ($Version -ne "") {
     $TarFile = [System.IO.Path]::GetTempFileName() + ".tar"
     try { git -C $WorkspaceRoot archive --format=tar $Tag "templates/common/" "templates/$Variant/" -o $TarFile 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $TarFile) -or (Get-Item $TarFile).Length -eq 0) {
-        Write-Host "❌ Failed to create archive for template version $Tag" -ForegroundColor Red
+        Write-Host "[FAIL] Failed to create archive for template version $Tag" -ForegroundColor Red
         Write-Host "   This tag may predate the templates/common/ directory structure (introduced in v0.5.0)." -ForegroundColor Yellow
         Write-Host "   Available versions with common/ support: run .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
         Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
@@ -65,32 +65,32 @@ if ($Version -ne "") {
     $tarExit = $LASTEXITCODE
     Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
     if ($tarExit -ne 0) {
-        Write-Host "❌ Failed to extract template version $Tag" -ForegroundColor Red
+        Write-Host "[FAIL] Failed to extract template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
     $CommonDir    = Join-Path (Join-Path $TempDir "templates") "common"
     $TemplatesDir = Join-Path (Join-Path $TempDir "templates") $Variant
     if (-not (Test-Path $TemplatesDir)) {
-        Write-Host "❌ Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
+        Write-Host "[FAIL] Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
     if (-not (Test-Path $CommonDir)) {
-        Write-Host "❌ templates/common/ not found in template version $Tag" -ForegroundColor Red
+        Write-Host "[FAIL] templates/common/ not found in template version $Tag" -ForegroundColor Red
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    Write-Host "📦 Using template version: $Tag" -ForegroundColor Cyan
+    Write-Host "[PKG] Using template version: $Tag" -ForegroundColor Cyan
 }
 
 if (Test-Path $ProjectDir) {
-    Write-Host "❌ Directory already exists: $ProjectDir" -ForegroundColor Red
+    Write-Host "[FAIL] Directory already exists: $ProjectDir" -ForegroundColor Red
     exit 1
 }
 
 if (-not (Test-Path $TemplatesDir)) {
-    Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "[FAIL] Template variant not found: $TemplatesDir" -ForegroundColor Red
     Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
     exit 1
 }
@@ -100,7 +100,7 @@ $VariantJson = Join-Path $TemplatesDir "variant.json"
 if (Test-Path $VariantJson) {
     $variantData = Get-Content $VariantJson -Raw | ConvertFrom-Json
     if ($variantData.status -ne "stable") {
-        Write-Host "⚠️  Variant '$Variant' has status: $($variantData.status)" -ForegroundColor Yellow
+        Write-Host "[WARN]  Variant '$Variant' has status: $($variantData.status)" -ForegroundColor Yellow
         Write-Host "   This variant may not be fully implemented." -ForegroundColor Yellow
         $confirm = Read-Host "   Continue anyway? [y/N]"
         if ($confirm -ne "y" -and $confirm -ne "Y") {
@@ -110,12 +110,12 @@ if (Test-Path $VariantJson) {
     }
 }
 
-# ── D-05: lifecycle-governance.json variant pre-check ───────────────────────── # TEST: none
+# -- D-05: lifecycle-governance.json variant pre-check ------------------------- # TEST: none
 $GovernanceJson = Join-Path $WorkspaceRoot "templates\common\lifecycle-governance.json"
 $ValidateScript = Join-Path $WorkspaceRoot "scripts\validate-templates.ts"
 if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
     Write-Host ""
-    Write-Host "Running lifecycle governance pre-check for variant '$Variant'…" -ForegroundColor Cyan
+    Write-Host "Running lifecycle governance pre-check for variant '$Variant'..." -ForegroundColor Cyan
 
     $govData = Get-Content $GovernanceJson -Raw -Encoding UTF8 | ConvertFrom-Json
     $mandatoryDomains = $govData.variantValidationPolicy.mandatoryBeforeProjectCreation
@@ -137,51 +137,51 @@ if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $ValidateScr
         }
         if ($mandatoryErrors.Count -gt 0) {
             foreach ($err in $mandatoryErrors) {
-                Write-Host "  ❌ $($err.message)" -ForegroundColor Red
+                Write-Host "  [FAIL] $($err.message)" -ForegroundColor Red
             }
             Write-Host ""
-            Write-Host "❌ Lifecycle governance pre-check FAILED for variant '$Variant'." -ForegroundColor Red
+            Write-Host "[FAIL] Lifecycle governance pre-check FAILED for variant '$Variant'." -ForegroundColor Red
             Write-Host "   Fix the issues above before creating a project from this variant." -ForegroundColor Yellow
             Write-Host "   Run: bun scripts\validate-templates.ts --variant $Variant" -ForegroundColor Yellow
             exit 1
         } else {
-            Write-Host "  ✅ Lifecycle governance pre-check passed (mandatory domains: $($mandatoryDomains -join ', '))" -ForegroundColor Green
+            Write-Host "  [OK] Lifecycle governance pre-check passed (mandatory domains: $($mandatoryDomains -join ', '))" -ForegroundColor Green
         }
     } catch {
         Write-Host "  WARN: Governance pre-check could not complete: $_" -ForegroundColor Yellow
     }
 }
 
-Write-Host "🚀 Scaffolding new project: $ProjectName" -ForegroundColor Cyan
+Write-Host " Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 
-# ── Template validation before copying ────────────────────────────────────────  # TEST: none
+# -- Template validation before copying ----------------------------------------  # TEST: none
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-    Write-Host "Validating template integrity…" -ForegroundColor Cyan
+    Write-Host "Validating template integrity..." -ForegroundColor Cyan
     $validationExit = & bun "$WorkspaceRoot/scripts/helpers/template-validation.ts" $Variant 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "  ❌ Template validation failed: $validationExit" -ForegroundColor Red
+        Write-Host "  [FAIL] Template validation failed: $validationExit" -ForegroundColor Red
         exit 1
     }
 } else {
-    Write-Host "⚠️  Template validation skipped (bun not available or helper missing)" -ForegroundColor Yellow
+    Write-Host "[WARN]  Template validation skipped (bun not available or helper missing)" -ForegroundColor Yellow
 }
 
-# ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
+# -- 1. Copy common/ first (shared infrastructure) ---------------------------- # TEST: Test 1
 if (-not (Test-Path $CommonDir)) {
-    Write-Host "❌ Common templates directory not found: $CommonDir" -ForegroundColor Red
+    Write-Host "[FAIL] Common templates directory not found: $CommonDir" -ForegroundColor Red
     exit 1
 }
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
-# ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1
+# -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1
 if (-not (Test-Path $TemplatesDir)) {
-    Write-Host "❌ Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
+    Write-Host "[FAIL] Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
     exit 1
 }
 
 # Copy with extends resolution - process files BEFORE losing template context
-Write-Host "📝 Copying variant templates with extends resolution..."
+Write-Host " Copying variant templates with extends resolution..."
 Get-ChildItem -Path $TemplatesDir -Recurse -Filter "*.md" | ForEach-Object {
     $srcFile = $_.FullName
     $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
@@ -198,10 +198,10 @@ Get-ChildItem -Path $TemplatesDir -Recurse -Filter "*.md" | ForEach-Object {
             Copy-Item $srcFile $destFile -Force
             $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath 2>&1
             if ($LASTEXITCODE -ne 0) {
-                Write-Host "⚠️  Extends merge failed: $relPath" -ForegroundColor Yellow
+                Write-Host "[WARN]  Extends merge failed: $relPath" -ForegroundColor Yellow
             }
         } catch {
-            Write-Host "⚠️  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
+            Write-Host "[WARN]  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
             $destDir = Split-Path $destFile
             if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
             Copy-Item $srcFile $destFile -Force
@@ -223,20 +223,20 @@ Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -
     Copy-Item $srcFile $destFile -Force
 }
 
-# ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
-Write-Host "📝 Verifying extends resolution..."
+# -- 2.5. Verify extends resolution (post-copy validation) --------------------  # TEST: Test 18
+Write-Host " Verifying extends resolution..."
 $extendsFiles = Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.md" | Where-Object {
     Select-String -Path $_.FullName -Pattern '^extends:' -Quiet
 }
 if ($extendsFiles.Count -gt 0) {
-    Write-Host "⚠️  Found $($extendsFiles.Count) files with unresolved extends field:" -ForegroundColor Yellow
+    Write-Host "[WARN]  Found $($extendsFiles.Count) files with unresolved extends field:" -ForegroundColor Yellow
     $extendsFiles | ForEach-Object { Write-Host "   - $($_.FullName)" -ForegroundColor Yellow }
     Write-Host "   This should not happen - extends fields should be resolved during copy." -ForegroundColor Yellow
 } else {
-    Write-Host "  ✅ All extends fields resolved" -ForegroundColor Green
+    Write-Host "  [OK] All extends fields resolved" -ForegroundColor Green
 }
 
-# ── 2.6. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
+# -- 2.6. Apply platform profile -----------------------------------------------  # TEST: Test 8
 if ($Platform -eq "claude") {
     $geminiFile = Join-Path $ProjectDir "GEMINI.md"
     if (Test-Path $geminiFile) { Remove-Item $geminiFile -Force }
@@ -245,14 +245,14 @@ if ($Platform -eq "claude") {
     if (Test-Path $claudeFile) { Remove-Item $claudeFile -Force }
 }
 
-# ── 2.7. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
+# -- 2.7. Remove any accidentally copied .cmd files ---------------------------  # TEST: Test 17
 Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.cmd" | Remove-Item -Force
 
-# ── 3. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
+# -- 3. Remove docs/_examples (reference-only - not part of a real project) --  # TEST: Test 14
 $examplesDir = Join-Path $ProjectDir "docs\_examples"
 if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
 
-# ── 3.5. Enforce .sh / .ps1 script pairs ──────────────────────────────────────  # TEST: Test 18
+# -- 3.5. Enforce .sh / .ps1 script pairs --------------------------------------  # TEST: Test 18
 $scriptsDir = Join-Path $ProjectDir "scripts"
 if (Test-Path $scriptsDir) {
     $pairOk = $true
@@ -261,7 +261,7 @@ if (Test-Path $scriptsDir) {
         if ($base -like "test-*") { return }
         $shPair = Join-Path $scriptsDir "$base.sh"
         if (-not (Test-Path $shPair)) {
-            Write-Host "❌ Script Pair Validation Failed: Missing .sh pair for $($_.Name)" -ForegroundColor Red
+            Write-Host "[FAIL] Script Pair Validation Failed: Missing .sh pair for $($_.Name)" -ForegroundColor Red
             $pairOk = $false
         }
     }
@@ -270,7 +270,7 @@ if (Test-Path $scriptsDir) {
         if ($base -like "test-*") { return }
         $ps1Pair = Join-Path $scriptsDir "$base.ps1"
         if (-not (Test-Path $ps1Pair)) {
-            Write-Host "❌ Script Pair Validation Failed: Missing .ps1 pair for $($_.Name)" -ForegroundColor Red
+            Write-Host "[FAIL] Script Pair Validation Failed: Missing .ps1 pair for $($_.Name)" -ForegroundColor Red
             $pairOk = $false
         }
     }
@@ -280,7 +280,7 @@ if (Test-Path $scriptsDir) {
     }
 }
 
-# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────
+# -- 3.6. Agent Override Merge (VARIANT-SECTION substitution) -----------------
 # For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 # NOTE: Skip files that use 'extends' pattern (already processed above)
 $VariantJson = Join-Path $TemplatesDir "variant.json"
@@ -384,17 +384,17 @@ for (const [agentName, override] of Object.entries(overrides)) {
     }
 }
 
-# ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
+# -- 4. Remove .gitkeep placeholders -------------------------------------------  # TEST: Test 15
 Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 
-# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3
+# -- 5. Substitute placeholders in all text files ------------------------------ # TEST: Test 3
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
     & bun "$WorkspaceRoot/scripts/helpers/substitute-placeholders.ts" $ProjectDir $ProjectName "A new project" "" | Out-Null
 } else {
-    Write-Host "⚠️  Placeholder substitution skipped (bun not available or helper missing)" -ForegroundColor Yellow
+    Write-Host "[WARN]  Placeholder substitution skipped (bun not available or helper missing)" -ForegroundColor Yellow
 }
 
-# ── 5.5b. Update lifecycle.statusSince in the project's variant.json ────────  # TEST: Test 9
+# -- 5.5b. Update lifecycle.statusSince in the project's variant.json --------  # TEST: Test 9
 $ProjectDate = Get-Date -Format "yyyy-MM-dd"
 $ProjVariantJson = Join-Path $ProjectDir "variant.json"
 if (Test-Path $ProjVariantJson) {
@@ -403,7 +403,7 @@ if (Test-Path $ProjVariantJson) {
     }
 }
 
-# ── 5.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
+# -- 5.5c. Write scripts-snapshot.json with L1 script version map -------------  # TEST: Test 10
 $ScriptsMd = Join-Path $WorkspaceRoot "scripts\SCRIPTS.md"
 if (Test-Path $ScriptsMd) {
     if (Get-Command "bun" -ErrorAction SilentlyContinue) {
@@ -411,7 +411,7 @@ if (Test-Path $ScriptsMd) {
     }
 }
 
-# ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
+# -- 5.5d. Merge workspace scripts into package.json (Tier 2 integration) -------  # TEST: Test 11
 $PkgJsonPath = Join-Path $ProjectDir "package.json"
 if (Test-Path $PkgJsonPath) {
     if (Get-Command "bun" -ErrorAction SilentlyContinue) {
@@ -419,7 +419,7 @@ if (Test-Path $PkgJsonPath) {
     }
 }
 
-# ── 5.5. Record template provenance in variant context file ───────────────────  # TEST: none
+# -- 5.5. Record template provenance in variant context file -------------------  # TEST: none
 $TemplateVersion = if ($Version -ne "") { $Version } elseif (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "unknown" }
 $VariantContextMd = Join-Path $ProjectDir "docs\$Variant.context.md"
 if (Test-Path $VariantContextMd) {
@@ -430,7 +430,7 @@ if (Test-Path $VariantContextMd) {
     }
 }
 
-# ── 5.6. Write template-version.txt for upgrade tracking ─────────────────────  # TEST: Test 12
+# -- 5.6. Write template-version.txt for upgrade tracking ---------------------  # TEST: Test 12
 $ClaudeDir = Join-Path $ProjectDir ".claude"
 if (-not (Test-Path $ClaudeDir)) { New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null }
 $CreatedAt = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
@@ -441,12 +441,12 @@ platform=$Platform
 created=$CreatedAt
 "@ | Set-Content (Join-Path $ClaudeDir "template-version.txt") -Encoding UTF8
 
-# ── 5.6b. Inject AGENTS.md Skills into docs/context.md ──────────────────────  # TEST: Test 19
+# -- 5.6b. Inject AGENTS.md Skills into docs/context.md ----------------------  # TEST: Test 19
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
     & bun "$WorkspaceRoot/scripts/helpers/inject-skills.ts" $ProjectDir | Out-Null
 }
 
-# ── 5.7. Protect context.md from accidental overwrites (merge=ours) ──────────  # TEST: Test 13
+# -- 5.7. Protect context.md from accidental overwrites (merge=ours) ----------  # TEST: Test 13
 $GitAttributesPath = Join-Path $ProjectDir ".gitattributes"
 $mergeOursLine = "docs/context.md merge=ours"
 if (Test-Path $GitAttributesPath) {
@@ -458,10 +458,10 @@ if (Test-Path $GitAttributesPath) {
     Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
-# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16
-# (Note: chmod not available on Windows — executable bits set via git update-index after init)
+# -- 6. Make scripts and hooks executable ---------------------------------------  # TEST: Test 16
+# (Note: chmod not available on Windows -- executable bits set via git update-index after init)
 
-# ── 7. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
+# -- 7. Initialize git ----------------------------------------------------------  # TEST: Test 4
 $OriginalLocation = Get-Location
 Set-Location $ProjectDir
 try { git init 2>&1 | Out-Null } catch { }
@@ -482,83 +482,83 @@ Get-ChildItem -Path (Join-Path $ProjectDir "scripts") -File -Include "*.sh","*.p
     }
 }
 
-# ── 6.5. Security Bootstrap Verification ──────────────────────────────────────  # TEST: Test 6
+# -- 6.5. Security Bootstrap Verification --------------------------------------  # TEST: Test 6
 Write-Host ""
-Write-Host "Running security bootstrap verification…" -ForegroundColor Cyan
+Write-Host "Running security bootstrap verification..." -ForegroundColor Cyan
 $SecurityOk = $true
 
 # Check 1: .gitleaks.toml
 if (-not (Test-Path (Join-Path $ProjectDir ".gitleaks.toml"))) {
-    Write-Host "  ❌ .gitleaks.toml not found" -ForegroundColor Red
+    Write-Host "  [FAIL] .gitleaks.toml not found" -ForegroundColor Red
     $SecurityOk = $false
-} else { Write-Host "  ✅ .gitleaks.toml present" -ForegroundColor Green }
+} else { Write-Host "  [OK] .gitleaks.toml present" -ForegroundColor Green }
 
 # Check 2: pre-commit hook
 if (-not (Test-Path (Join-Path $ProjectDir ".githooks\pre-commit"))) {
-    Write-Host "  ❌ .githooks/pre-commit not found" -ForegroundColor Red
+    Write-Host "  [FAIL] .githooks/pre-commit not found" -ForegroundColor Red
     $SecurityOk = $false
-} else { Write-Host "  ✅ .githooks/pre-commit present" -ForegroundColor Green }
+} else { Write-Host "  [OK] .githooks/pre-commit present" -ForegroundColor Green }
 
 # Check 3: .gitattributes eol=lf
 $gitattribPath = Join-Path $ProjectDir ".gitattributes"
 if ((Test-Path $gitattribPath) -and ((Get-Content $gitattribPath -Raw) -match "eol=lf")) {
-    Write-Host "  ✅ .gitattributes has eol=lf" -ForegroundColor Green
+    Write-Host "  [OK] .gitattributes has eol=lf" -ForegroundColor Green
 } else {
-    Write-Host "  ❌ .gitattributes missing eol=lf" -ForegroundColor Red
+    Write-Host "  [FAIL] .gitattributes missing eol=lf" -ForegroundColor Red
     $SecurityOk = $false
 }
 
 # Check 4: .gitignore has .env
 $gitignorePath = Join-Path $ProjectDir ".gitignore"
 if ((Test-Path $gitignorePath) -and ((Get-Content $gitignorePath -Raw) -match '\.env')) {
-    Write-Host "  ✅ .gitignore excludes .env" -ForegroundColor Green
+    Write-Host "  [OK] .gitignore excludes .env" -ForegroundColor Green
 } else {
-    Write-Host "  ❌ .gitignore missing .env exclusion" -ForegroundColor Red
+    Write-Host "  [FAIL] .gitignore missing .env exclusion" -ForegroundColor Red
     $SecurityOk = $false
 }
 
 # Check 5: core.hooksPath
 $hooksPath = git -C $ProjectDir config core.hooksPath 2>$null
 if ($LASTEXITCODE -eq 0 -and $hooksPath -match '\.githooks') {
-    Write-Host "  ✅ git core.hooksPath configured" -ForegroundColor Green
+    Write-Host "  [OK] git core.hooksPath configured" -ForegroundColor Green
 } else {
-    Write-Host "  ❌ git core.hooksPath not set to .githooks" -ForegroundColor Red
+    Write-Host "  [FAIL] git core.hooksPath not set to .githooks" -ForegroundColor Red
     $SecurityOk = $false
 }
 
 if (-not $SecurityOk) {
     Write-Host ""
-    Write-Host "❌ Security bootstrap check FAILED. Fix the issues above before using this project." -ForegroundColor Red
+    Write-Host "[FAIL] Security bootstrap check FAILED. Fix the issues above before using this project." -ForegroundColor Red
     Write-Host "   Run 'bash scripts/audit.sh' after fixing to verify." -ForegroundColor Yellow
     Set-Location $OriginalLocation
     exit 1
 }
-Write-Host "  ✅ All security bootstrap checks passed" -ForegroundColor Green
+Write-Host "  [OK] All security bootstrap checks passed" -ForegroundColor Green
 
 Set-Location $OriginalLocation
 
-# ── 8. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
+# -- 8. Post-scaffold audit ----------------------------------------------------  # TEST: none
 Write-Host ""
-Write-Host "Running post-scaffold audit…" -ForegroundColor Cyan
+Write-Host "Running post-scaffold audit..." -ForegroundColor Cyan
 & bun "$WorkspaceRoot/scripts/audit.ts"
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
-    Write-Host "✅ Project '$ProjectName' scaffolded and verified at: $ProjectDir" -ForegroundColor Green
+    Write-Host "[OK] Project '$ProjectName' scaffolded and verified at: $ProjectDir" -ForegroundColor Green
 } else {
     Write-Host ""
-    Write-Host "⚠️  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
+    Write-Host "[WARN]  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
 }
 
-# ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
+# -- 9. Environment setup (env file, deps, initial commit) -------------------- # TEST: none
 Write-Host ""
-Write-Host "Running environment setup…" -ForegroundColor Cyan
+Write-Host "Running environment setup..." -ForegroundColor Cyan
 & "$ProjectDir\scripts\setup.ps1"
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
-    Write-Host "⚠️  Setup encountered an error - run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
+    Write-Host "[WARN]  Setup encountered an error - run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
 }
 
-# ── 10. Move into project directory ───────────────────────────────────────────  # TEST: none
+# -- 10. Move into project directory -------------------------------------------  # TEST: none
 Write-Host ""
 Write-Host ("-" * 60) -ForegroundColor DarkGray
 Write-Host "PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
@@ -580,7 +580,7 @@ if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $InjectScrip
     bun $InjectScript $ProjectDir $Platform
 }
 
-# ── Cleanup temp dir ───────────────────────────────────────────────────────────  # TEST: none
+# -- Cleanup temp dir -----------------------------------------------------------  # TEST: none
 if ($TempDir -and (Test-Path $TempDir)) {
     Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
