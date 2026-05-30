@@ -118,7 +118,7 @@ function Audit-NodeLicenses {
     Info "Running Node.js license audit??"
     if (Get-Command npx -ErrorAction SilentlyContinue) {
         try {
-            $result = npx --yes license-checker --summary --onlyAllow $OssLicenses 2>&1 | Out-String
+            $result = npx --yes license-checker --summary --onlyAllow $OssLicenses 2>$null | Out-String
             if ($LASTEXITCODE -eq 0) {
                 Pass "License audit passed ??all packages use OSI-approved licenses"
             } else {
@@ -127,7 +127,7 @@ function Audit-NodeLicenses {
                 Warn "   Document justified exceptions in docs/context.md 짠 Non-OSS Dependencies"
             }
         } catch {
-            Warn "npx license-checker execution failed ??skipping audit"
+            Warn "npx license-checker execution failed — skipping audit"
             Warn "  This is not critical. Your project is still functional."
         }
     } else { Warn "npx not available ??skipping Node.js license audit" }
