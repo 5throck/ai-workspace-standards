@@ -17,6 +17,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | Superpowers Plugin Integration and Dynamic Plugin Injection Strategy | [meeting-2026-05-30-superpowers-plugin-integration-and-dynam.md](meeting-2026-05-30-superpowers-plugin-integration-and-dynam.md) |
 | 2026-05-30 | Command Documentation Inconsistency | [meeting-2026-05-30-command-documentation-inconsistency.md](meeting-2026-05-30-command-documentation-inconsistency.md) |
 | 2026-05-30 | C-SK-02 Resolution Plan — Variant PM Migration | [meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md](meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md) |
 | 2026-05-30 | Common PM Skeleton Design — Baseline Methodology | [meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md](meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md) |
