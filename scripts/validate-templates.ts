@@ -13,7 +13,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
-import { cwd } from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 
 interface VariantManifest {
@@ -54,15 +54,12 @@ const colors = {
   dim: '\x1b[2m',
 };
 
-const ROOT = cwd();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
 const TEMPLATES_DIR = join(ROOT, 'templates');
 
-// Guard: must be run from workspace root (where templates/ directory exists)
 if (!existsSync(TEMPLATES_DIR)) {
-  console.error(`\x1b[31m[ERROR] validate-templates.ts must be run from the workspace root.\x1b[0m`);
-  console.error(`        Current directory: ${ROOT}`);
-  console.error(`        Expected: a directory containing templates/`);
-  console.error(`        Usage: cd <workspace-root> && bun scripts/validate-templates.ts`);
+  console.error(`\x1b[31m[ERROR] templates/ directory not found at: ${TEMPLATES_DIR}\x1b[0m`);
   process.exit(1);
 }
 

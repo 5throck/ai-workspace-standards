@@ -71,7 +71,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `validate-templates.ts` | L1 | 1.0.1 | active | — | — | — | — |
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | — | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | — | — |
