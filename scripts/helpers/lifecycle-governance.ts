@@ -9,9 +9,11 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const governancePath = join(process.cwd(), 'templates', 'common', 'lifecycle-governance.json');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const governancePath = join(__dirname, '..', '..', 'templates', 'common', 'lifecycle-governance.json');
 
 try {
   const content = readFileSync(governancePath, 'utf-8');
