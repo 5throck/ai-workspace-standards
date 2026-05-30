@@ -16,6 +16,12 @@ examples:
     assistant: "Running STRIDE analysis across all trust boundaries, mapping findings to MITRE ATT&CK, and generating the threat model document for PM review."
   - user: "Score the risk for the identified attack surface"
     assistant: "Applying CVSS scoring to each threat identified in the STRIDE analysis and producing a prioritized risk register."
+status: active
+lifecycle:
+  phase: active
+  created: "2026-05-27"
+  last_updated: "2026-05-30"
+  governance: lifecycle-manager
 ---
 
 ## Role
