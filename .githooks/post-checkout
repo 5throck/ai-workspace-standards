@@ -22,6 +22,11 @@ if ! echo "$BRANCH_NAME" | grep -qE '^[a-zA-Z0-9/_.-]+$'; then
     exit 0
 fi
 
+# Set AI_AUTOSTART=0 in your shell profile to disable automatic AI session launch on branch creation.
+if [ "${AI_AUTOSTART:-1}" = "0" ]; then
+  exit 0
+fi
+
 # Trigger only for new feature/design/fix branches
 if [[ "$BRANCH_NAME" == "feat/"* || "$BRANCH_NAME" == "feature/"* || "$BRANCH_NAME" == "design/"* || "$BRANCH_NAME" == "fix/"* ]]; then
     echo "=========================================================="
