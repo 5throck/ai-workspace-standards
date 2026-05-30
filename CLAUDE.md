@@ -26,7 +26,11 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` is currently `{}` - **PostToolUse hooks are disabled**. Audit is enforced exclusively via the pre-commit hook and the `dev-sync.ts` pipeline.
+The workspace `.claude/settings.json` currently has **two active hook types** and PostToolUse disabled:
+
+- **PreToolUse** (`Write|Edit|Bash`) → runs `bun scripts/check-pm-approval.ts` before any state-changing tool call, enforcing the PM-approval gate (`.pm-approved` flag).
+- **SessionStart** → runs `bun scripts/clear-pm-approval.ts` at the start of each session to reset approval state.
+- **PostToolUse** is **disabled** — audit is enforced exclusively via the pre-commit hook and the `dev-sync.ts` pipeline.
 
 To re-enable the PostToolUse hook (fires `audit.ts` after every Write/Edit), add the following to `.claude/settings.json`:
 
@@ -48,12 +52,15 @@ To re-enable the PostToolUse hook (fires `audit.ts` after every Write/Edit), add
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
+> ⚠️ **Desktop App limitation**: `PreToolUse` and `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing. The Role Declaration in this file is the sole PM-approval enforcement mechanism in the Desktop App.
 
-| Environment | Hook active by default? | Manual fallback |
-|-------------|:-----------------------:|-----------------|
-| Claude Code CLI | ❌ (disabled) | `bun scripts/audit.ts` |
-| Claude Code Desktop App | ❌ (always) | `bun scripts/audit.ts` |
+| Hook | Environment | Active? | Notes |
+|------|-------------|:-------:|-------|
+| PreToolUse (PM-approval gate) | Claude Code CLI | ✅ | Blocks Write/Edit/Bash without `.pm-approved` |
+| PreToolUse (PM-approval gate) | Claude Code Desktop App | ❌ | Role Declaration enforces instead |
+| SessionStart (state clear) | Claude Code CLI | ✅ | Clears `.pm-approved` on session start |
+| SessionStart (state clear) | Claude Code Desktop App | ❌ | No automatic clear |
+| PostToolUse (audit) | Both | ❌ (disabled) | Use `bun scripts/audit.ts` manually |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
