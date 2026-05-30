@@ -248,27 +248,27 @@ See `AGENTS.md` for the full workflow and dispatch protocol.
 Create `templates/co-work/agents/README_ko.md` as a Korean translation of Step 5.
 
 ```markdown
-# 에이전트 디렉토리
+# Agents Directory
 
-이 디렉토리에는 co-work 협업 워크플로우에서 사용되는 에이전트 정의 파일이 포함되어 있습니다.
+This directory contains agent definition files for the co-work collaboration workflow.
 
-## 사용 가능한 에이전트
+## Available Agents
 
-| 에이전트 | 파일 | 역할 |
-|---------|------|------|
-| 협업 PM | `pm.md` | 리서치 워크플로우, 문서화 전략, 이해관계자 조율 |
-| 분석가 | `analyst.md` | 리서치 종합, 데이터 분석, 근거 수집 |
-| 콘텐츠 라이터 | `content-writer.md` | 보고서, 아티클, 구조화된 콘텐츠 초안 작성 |
-| MS365 전문가 | `ms365-expert.md` | Microsoft 365 도구, SharePoint, Teams 연동 |
-| 프로젝트 코디네이터 | `project-coordinator.md` | 태스크 추적, 일정 관리, 회의 진행 |
-| 스토리텔러 | `storyteller.md` | 내러티브 구조, 대상 독자별 커뮤니케이션 |
-| 테크니컬 라이터 | `technical-writer.md` | 기술 문서, API 문서, 프로세스 가이드 |
+| Agent | File | Role |
+|-------|------|------|
+| Collaboration PM | `pm.md` | Research workflow, documentation strategy, stakeholder alignment |
+| Analyst | `analyst.md` | Research synthesis, data analysis, evidence gathering |
+| Content Writer | `content-writer.md` | Drafts reports, articles, and structured content |
+| MS365 Expert | `ms365-expert.md` | Microsoft 365 tools, SharePoint, Teams integrations |
+| Project Coordinator | `project-coordinator.md` | Task tracking, timeline management, meeting facilitation |
+| Storyteller | `storyteller.md` | Narrative structure, audience-appropriate communication |
+| Technical Writer | `technical-writer.md` | Technical documentation, API docs, process guides |
 
-## 에이전트 생성
+## Creating New Agents
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-work.context.md § Agents`를 업데이트하세요.
+After creating an agent, update `AGENTS.md` and `docs/co-work.context.md § Agents`.
 
-전체 워크플로우는 `AGENTS.md`를 참고하세요.
+See `AGENTS.md` for the full workflow.
 ```
 
 - [ ] **Step 7: Verify structure**
@@ -353,26 +353,26 @@ See `AGENTS.md` for the full workflow and dispatch protocol.
 - [ ] **Step 4: Create `agents/README_ko.md`**
 
 ```markdown
-# 에이전트 디렉토리
+# Agents Directory
 
-이 디렉토리에는 co-design 워크플로우에서 사용되는 에이전트 정의 파일이 포함되어 있습니다.
+This directory contains agent definition files for the co-design workflow.
 
-## 사용 가능한 에이전트
+## Available Agents
 
-| 에이전트 | 파일 | 역할 |
-|---------|------|------|
-| 디자인 PM | `pm.md` | 디자인 워크플로우 총괄, 전문 에이전트 디스패치 |
-| 디자인 리드 | `design-lead.md` | 디자인 시스템 권위자, 시각 일관성, 컴포넌트 표준 |
-| 프로토타입 엔지니어 | `prototype-engineer.md` | 인터랙티브 프로토타입, 컴포넌트 구현 |
-| 서비스 디자이너 | `service-designer.md` | 엔드-투-엔드 서비스 블루프린트, 여정 지도 |
-| 스토리텔러 | `storyteller.md` | 디자인 내러티브, 발표 전략, 이해관계자 조율 |
-| 타이포그래피 전문가 | `typography-expert.md` | 타입 시스템, 폰트 페어링, 가독성 기준 |
-| UX 리서처 | `ux-researcher.md` | 사용자 리서치, 사용성 테스트, 인사이트 도출 |
-| 비주얼 디자이너 | `visual-designer.md` | 비주얼 아이덴티티, 컬러 시스템, 레이아웃 구성 |
+| Agent | File | Role |
+|-------|------|------|
+| Design PM | `pm.md` | Owns design workflow; dispatches design specialist agents |
+| Design Lead | `design-lead.md` | Design system authority, visual consistency, component standards |
+| Prototype Engineer | `prototype-engineer.md` | Interactive prototypes, component implementation |
+| Service Designer | `service-designer.md` | End-to-end service blueprints, journey maps |
+| Storyteller | `storyteller.md` | Design narrative, presentation strategy, stakeholder alignment |
+| Typography Expert | `typography-expert.md` | Type systems, font pairing, readability standards |
+| UX Researcher | `ux-researcher.md` | User research, usability testing, insight synthesis |
+| Visual Designer | `visual-designer.md` | Visual identity, color systems, layout composition |
 
-## 에이전트 생성
+## Creating New Agents
 
-에이전트 생성 후 `AGENTS.md`와 `docs/co-design.context.md § Agents`를 업데이트하세요.
+After creating an agent, update `AGENTS.md` and `docs/co-design.context.md § Agents`.
 ```
 
 - [ ] **Step 5: Verify and commit**
@@ -638,27 +638,27 @@ See `AGENTS.md` for the full engagement workflow (Phases 0–6).
 - [ ] **Step 8: Create `agents/README_ko.md`**
 
 ```markdown
-# 에이전트 디렉토리
+# Agents Directory
 
-이 디렉토리에는 co-security 보안 인게이지먼트 워크플로우에서 사용되는 에이전트 정의 파일이 포함되어 있습니다.
+This directory contains agent definition files for co-security engagement workflows.
 
-## 사용 가능한 에이전트
+## Available Agents
 
-| 에이전트 | 파일 | 역할 |
-|---------|------|------|
-| 보안 PM | `pm.md` | 단일 진입점 — 인가, 범위 정의, 인게이지먼트 워크플로우 총괄 |
-| 레드팀 리드 | `red-team-lead.md` | 공격 방법론, MITRE ATT&CK TTP 설계, PoC 검토 |
-| 펜테스터 | `pentester.md` | 취약점 발견, PoC 개발, 재검증 |
-| 위협 모델러 | `threat-modeler.md` | STRIDE 분석, ATT&CK 매핑, 위험 점수 산정 |
-| 패치 엔지니어 | `patch-engineer.md` | Ansible 기반 크로스플랫폼 패치 배포 |
-| 리포트 라이터 | `report-writer.md` | 펜테스트 보고서, 경영진 요약본 작성 |
+| Agent | File | Role |
+|-------|------|------|
+| Security PM | `pm.md` | Single entry point — owns authorization, scope, and engagement workflow |
+| Red Team Lead | `red-team-lead.md` | Attack methodology, MITRE ATT&CK TTPs, PoC review |
+| Pentester | `pentester.md` | Vulnerability discovery, PoC development, re-testing |
+| Threat Modeler | `threat-modeler.md` | STRIDE analysis, ATT&CK mapping, risk scoring |
+| Patch Engineer | `patch-engineer.md` | Ansible-based cross-platform patch deployment |
+| Report Writer | `report-writer.md` | Pentest reports, executive summaries |
 
-## ⚠️ 인가 문서 필수
+## ⚠️ Authorization Required
 
-PM을 제외한 모든 에이전트는 디스패치 전 인가 문서 확인이 필요합니다.
-PM은 Phase 1+ 작업 전 `verify-authorization` 스킬을 자동으로 실행합니다.
+All agents except PM require a confirmed authorization document before dispatching.
+PM runs `verify-authorization` skill automatically before any Phase 1+ activity.
 
-전체 인게이지먼트 워크플로우(Phase 0–6)는 `AGENTS.md`를 참고하세요.
+See `AGENTS.md` for the full engagement workflow (Phase 0–6).
 ```
 
 ### 4d — Missing Skills
