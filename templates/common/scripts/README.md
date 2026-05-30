@@ -45,7 +45,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | — | cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | — | — |
-| `audit.ts` | L0 | 2.0.0 | active | — | — | intentional | — |
+| `audit.ts` | L0 | 2.1.0 | active | — | — | intentional | — |
 | `dev-sync.ts` | L0 | 1.4.0 | active | — | — | intentional | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | intentional | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — | — |
@@ -57,8 +57,9 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
+| `lifecycle-sync-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — | — |
@@ -69,8 +70,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — | — |
-| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `validate-templates.ts` | L1 | 1.0.1 | active | — | — | — | — |
+| `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `test-new-project.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
@@ -82,7 +83,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-md-language.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `hooks/pre-commit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-commit.ts` | L0 | 1.0.2 | active | — | — | — | — |
 | `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | — | — |
 
 ---

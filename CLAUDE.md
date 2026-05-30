@@ -196,7 +196,28 @@ When working in a plan-mode session:
 - Update status to `completed` immediately upon verification of the step.
 - Never leave tasks `in_progress` at the end of a session.
 
-### 8. Custom Command Error Recovery
+### 8. Lifecycle Management Rules
+
+> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+
+When modifying files, apply the following rules **before** running `/sync` or committing:
+
+| Modified file(s) | Required follow-up actions |
+|-----------------|---------------------------|
+| `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
+| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
+
+**Verification** (run after any of the above):
+```bash
+bun scripts/audit.ts                  # full workspace audit including lifecycle sync
+bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
+```
+
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+
+### 9. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
@@ -204,7 +225,7 @@ If a custom slash command or background script returns a non-zero exit code:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
 
-### 9. Windows Platform Requirement
+### 10. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
