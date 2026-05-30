@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-30]**: Meeting transcript: `memory/meeting-2026-05-30-translator-guide-language-and-skill-conversion.md` — resolved TRANSLATOR_GUIDE.md language policy violation via skill integration
 
 ### Changed
+- **[2026-05-30]**: `scripts/new-project.ps1` — realigned structure and step numbering to match `new-project.sh`; removed unused `-Description`/`-TechStack` params and dead `Validate-TemplateSync` function; added `test-*` exclusion to script-pair check
+- **[2026-05-30]**: `.claude/settings.json` — removed PM approval `PreToolUse` hook (`check-pm-approval.ts`)
 - **[2026-05-30]**: `scripts/hooks/pre-commit.ts` — bumped to v1.0.2; added Tier 1 Gatekeeper lifecycle compliance check
 - **[2026-05-30]**: `scripts/verify-readme-sync.ts` — bumped to v1.0.1; enhanced error messages with structured guidance
 - **[2026-05-30]**: `scripts/SCRIPTS.md` — registered `translate-readme.ts` (v1.0.0), `verify-agent-deliverables.ts` (v1.0.0), and `hooks/pre-commit.ts` (v1.0.2)

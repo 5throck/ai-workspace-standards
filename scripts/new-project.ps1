@@ -1,90 +1,17 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
     [string]$ProjectName,
-    [string]$Description = "A new project",
-    [string]$TechStack = "Node.js / Python / etc",
     [string]$Variant = "co-develop",
     [string]$Version = "",
     [string]$Platform = "both"
 )
 
-function Initialize-UTF8Environment {
-    [CmdletBinding()]
-    param()
-
-    # Force UTF-8 encoding for all operations
-    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
-    # Register additional code page provider if available (.NET 5+ / PowerShell 7+)
-    # Silently skipped on Windows PowerShell 5.1 where the assembly may not be present
-    try {
-        [System.Text.Encoding]::RegisterProvider([System.Text.CodePages.CodePagesEncodingProvider]::Instance)
-    } catch {
-        # Not critical — UTF-8 is already set above; legacy code page support simply unavailable
-    }
-
-    # Set Git UTF-8 configuration
-    & git config --local core.quotepath false 2>$null
-    & git config --local i18n.commitencoding utf-8 2>$null
-    & git config --local i18n.logOutputEncoding utf-8 2>$null
-
-    Write-Verbose "UTF-8 environment initialized"
-}
-
-function Validate-TemplateSync {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$CommonPath,
-        [Parameter(Mandatory=$true)]
-        [string]$VariantPath
-    )
-
-    # Files that must exist in templates/common/ (shared infrastructure)
-    $commonRequired = @(
-        ".gitignore",
-        ".githooks/pre-commit"
-    )
-
-    # Files that must exist in the variant folder (variant-specific)
-    $variantRequired = @(
-        "CLAUDE.md",
-        "GEMINI.md",
-        "agents/pm.md",
-        "variant.json"
-    )
-
-    $missingFiles = @()
-
-    if (-not (Test-Path $CommonPath)) {
-        throw "Common template path not found: $CommonPath"
-    }
-    foreach ($file in $commonRequired) {
-        if (-not (Test-Path (Join-Path $CommonPath $file))) {
-            $missingFiles += "common/$file"
-        }
-    }
-
-    if (-not (Test-Path $VariantPath)) {
-        throw "Variant template path not found: $VariantPath"
-    }
-    foreach ($file in $variantRequired) {
-        if (-not (Test-Path (Join-Path $VariantPath $file))) {
-            $missingFiles += "variant/$file"
-        }
-    }
-
-    if ($missingFiles.Count -gt 0) {
-        throw "Missing required template files: $($missingFiles -join ', ')"
-    }
-
-    Write-Verbose "Template synchronization validated ($($commonRequired.Count + $variantRequired.Count) required files present)"
-}
-
 # UTF-8 encoding enforcement — must follow param() block (PowerShell parser requirement)
-Initialize-UTF8Environment
 $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+try {
+    [System.Text.Encoding]::RegisterProvider([System.Text.CodePages.CodePagesEncodingProvider]::Instance)
+} catch { }
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
@@ -105,10 +32,8 @@ if ($Platform -notin @("claude", "antigravity", "both")) {
     exit 1
 }
 
-# ── Workspace Root Resolution ──────────────────────────────────────────────────────  # TEST: none
-# Use current working directory as workspace root (portable deployment)
+# ── Workspace Root Resolution ──────────────────────────────────────────────────────
 $WorkspaceRoot = $PWD
-Write-Verbose "Using current directory as workspace root: $WorkspaceRoot"
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
 $CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"
@@ -126,8 +51,6 @@ if ($Version -ne "") {
     }
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
     New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
-    # Extract BOTH common and variant from tag
-    # Note: PowerShell pipes corrupt binary streams, so write the tar archive to a temp file first
     $TarFile = [System.IO.Path]::GetTempFileName() + ".tar"
     try { git -C $WorkspaceRoot archive --format=tar $Tag "templates/common/" "templates/$Variant/" -o $TarFile 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $TarFile) -or (Get-Item $TarFile).Length -eq 0) {
@@ -146,7 +69,7 @@ if ($Version -ne "") {
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    $CommonDir = Join-Path (Join-Path $TempDir "templates") "common"
+    $CommonDir    = Join-Path (Join-Path $TempDir "templates") "common"
     $TemplatesDir = Join-Path (Join-Path $TempDir "templates") $Variant
     if (-not (Test-Path $TemplatesDir)) {
         Write-Host "❌ Variant '$Variant' not found in template version $Tag" -ForegroundColor Red
@@ -168,7 +91,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "❌ Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design ( stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
     exit 1
 }
 
@@ -190,8 +113,7 @@ if (Test-Path $VariantJson) {
 # ── D-05: lifecycle-governance.json variant pre-check ───────────────────────── # TEST: none
 $GovernanceJson = Join-Path $WorkspaceRoot "templates\common\lifecycle-governance.json"
 $ValidateScript = Join-Path $WorkspaceRoot "scripts\validate-templates.ts"
-$bunCmd = Get-Command bun -ErrorAction SilentlyContinue
-if ($bunCmd -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
+if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
     Write-Host ""
     Write-Host "Running lifecycle governance pre-check for variant '$Variant'…" -ForegroundColor Cyan
 
@@ -241,7 +163,7 @@ if (Get-Command "bun" -ErrorAction SilentlyContinue) {
         exit 1
     }
 } else {
-    Write-Host "⚠️  Template validation skipped (bun not available)" -ForegroundColor Yellow
+    Write-Host "⚠️  Template validation skipped (bun not available or helper missing)" -ForegroundColor Yellow
 }
 
 # ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
@@ -261,64 +183,44 @@ if (-not (Test-Path $TemplatesDir)) {
 # Copy with extends resolution - process files BEFORE losing template context
 Write-Host "📝 Copying variant templates with extends resolution..."
 Get-ChildItem -Path $TemplatesDir -Recurse -Filter "*.md" | ForEach-Object {
-  $srcFile = $_.FullName
-  $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
-  $destFile = Join-Path $ProjectDir $relPath
+    $srcFile = $_.FullName
+    $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
+    $destFile = Join-Path $ProjectDir $relPath
 
-  # Check if file has extends field
-  if (Select-String -Path $srcFile -Pattern '^extends:' -Quiet) {
-    # Extract skeleton path
-    $extendsLine = Select-String -Path $srcFile -Pattern '^extends:' | Select-Object -First 1
-    $extendsPath = $extendsLine.Line.Replace("extends:", "").Trim()
-
-    # Resolve skeleton absolute path (relative to template storage)
-    $srcDir = Split-Path $srcFile
-    try {
-      $skeletonAbsPath = (Join-Path $srcDir $extendsPath | Resolve-Path -ErrorAction Stop).Path
-
-      # Create destination directory
-      $destDir = Split-Path $destFile
-      if (-not (Test-Path $destDir)) {
-        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-      }
-
-      # Copy file to destination
-      Copy-Item $srcFile $destFile -Force
-
-      # Merge with explicit skeleton path
-      $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath 2>&1
-      if ($LASTEXITCODE -ne 0) {
-        Write-Host "⚠️  Extends merge failed: $relPath" -ForegroundColor Yellow
-      }
-    } catch {
-      Write-Host "⚠️  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
-      # Copy as-is
-      $destDir = Split-Path $destFile
-      if (-not (Test-Path $destDir)) {
-        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-      }
-      Copy-Item $srcFile $destFile -Force
+    if (Select-String -Path $srcFile -Pattern '^extends:' -Quiet) {
+        $extendsLine = Select-String -Path $srcFile -Pattern '^extends:' | Select-Object -First 1
+        $extendsPath = $extendsLine.Line.Replace("extends:", "").Trim()
+        $srcDir = Split-Path $srcFile
+        try {
+            $skeletonAbsPath = (Join-Path $srcDir $extendsPath | Resolve-Path -ErrorAction Stop).Path
+            $destDir = Split-Path $destFile
+            if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+            Copy-Item $srcFile $destFile -Force
+            $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "⚠️  Extends merge failed: $relPath" -ForegroundColor Yellow
+            }
+        } catch {
+            Write-Host "⚠️  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
+            $destDir = Split-Path $destFile
+            if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+            Copy-Item $srcFile $destFile -Force
+        }
+    } else {
+        $destDir = Split-Path $destFile
+        if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+        Copy-Item $srcFile $destFile -Force
     }
-  } else {
-    # Normal copy
-    $destDir = Split-Path $destFile
-    if (-not (Test-Path $destDir)) {
-      New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-    }
-    Copy-Item $srcFile $destFile -Force
-  }
 }
 
 # Copy all non-.md files normally
 Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -ne ".md" } | ForEach-Object {
-  $srcFile = $_.FullName
-  $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
-  $destFile = Join-Path $ProjectDir $relPath
-  $destDir = Split-Path $destFile
-  if (-not (Test-Path $destDir)) {
-    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-  }
-  Copy-Item $srcFile $destFile -Force
+    $srcFile = $_.FullName
+    $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
+    $destFile = Join-Path $ProjectDir $relPath
+    $destDir = Split-Path $destFile
+    if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+    Copy-Item $srcFile $destFile -Force
 }
 
 # ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
@@ -328,9 +230,7 @@ $extendsFiles = Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.md" | Where-
 }
 if ($extendsFiles.Count -gt 0) {
     Write-Host "⚠️  Found $($extendsFiles.Count) files with unresolved extends field:" -ForegroundColor Yellow
-    $extendsFiles | ForEach-Object {
-        Write-Host "   - $($_.FullName)" -ForegroundColor Yellow
-    }
+    $extendsFiles | ForEach-Object { Write-Host "   - $($_.FullName)" -ForegroundColor Yellow }
     Write-Host "   This should not happen - extends fields should be resolved during copy." -ForegroundColor Yellow
 } else {
     Write-Host "  ✅ All extends fields resolved" -ForegroundColor Green
@@ -345,36 +245,42 @@ if ($Platform -eq "claude") {
     if (Test-Path $claudeFile) { Remove-Item $claudeFile -Force }
 }
 
-# ── 2.7. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
+# ── 2.7. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
+Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.cmd" | Remove-Item -Force
+
+# ── 3. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
 $examplesDir = Join-Path $ProjectDir "docs\_examples"
 if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
 
-# ── 2.5. Remove any accidentally copied .cmd files and Enforce .ps1 / .sh Pairs ── # TEST: Test 17, Test 18
-Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.cmd" | Remove-Item -Force
-
+# ── 3.5. Enforce .sh / .ps1 script pairs ──────────────────────────────────────  # TEST: Test 18
 $scriptsDir = Join-Path $ProjectDir "scripts"
 if (Test-Path $scriptsDir) {
-    # Check .ps1 missing .sh
+    $pairOk = $true
     Get-ChildItem -Path $scriptsDir -Filter "*.ps1" | ForEach-Object {
         $base = $_.BaseName
+        if ($base -like "test-*") { return }
         $shPair = Join-Path $scriptsDir "$base.sh"
         if (-not (Test-Path $shPair)) {
-            Write-Host "❌ Script Pair Validation Failed: Missing .sh pair for $_.Name" -ForegroundColor Red
-            exit 1
+            Write-Host "❌ Script Pair Validation Failed: Missing .sh pair for $($_.Name)" -ForegroundColor Red
+            $pairOk = $false
         }
     }
-    # Check .sh missing .ps1
     Get-ChildItem -Path $scriptsDir -Filter "*.sh" | ForEach-Object {
         $base = $_.BaseName
+        if ($base -like "test-*") { return }
         $ps1Pair = Join-Path $scriptsDir "$base.ps1"
         if (-not (Test-Path $ps1Pair)) {
-            Write-Host "❌ Script Pair Validation Failed: Missing .ps1 pair for $_.Name" -ForegroundColor Red
-            exit 1
+            Write-Host "❌ Script Pair Validation Failed: Missing .ps1 pair for $($_.Name)" -ForegroundColor Red
+            $pairOk = $false
         }
+    }
+    if (-not $pairOk) {
+        Write-Host "   Fix script pairs in templates before scaffolding." -ForegroundColor Yellow
+        exit 1
     }
 }
 
-# ── 2.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────  # TEST: none
+# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────
 # For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 # NOTE: Skip files that use 'extends' pattern (already processed above)
 $VariantJson = Join-Path $TemplatesDir "variant.json"
@@ -408,7 +314,6 @@ for (const [agentName, override] of Object.entries(overrides)) {
 
   let skeleton = fs.readFileSync(skeletonFile, 'utf8');
 
-  // Parse YAML frontmatter from content, return { fm: {key: val}, body: string }
   function parseFrontmatter(content) {
     const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
     if (!match) return { fm: {}, body: content };
@@ -433,11 +338,9 @@ for (const [agentName, override] of Object.entries(overrides)) {
     ? '---\n' + Object.entries(mergedFm).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n'
     : '';
 
-  // Use varBody (frontmatter stripped) for section parsing; rebuild skeleton body only
   skeleton = fmStr + skelBody;
   const effectiveVariantContent = varBody;
 
-  // Parse all ## sections from variant file
   const allSections = {};
   const lines = effectiveVariantContent.split('\n');
   let currentHeading = null;
@@ -453,21 +356,19 @@ for (const [agentName, override] of Object.entries(overrides)) {
   }
   if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
 
-  // Map VARIANT-SECTION ids to heading names
   const headingMap = {
     'agent-roster': 'Agent Roster',
     'governance-workflow': 'Governance Workflow',
     'dispatch-protocol': 'Dispatch Protocol',
   };
 
-  // Replace VARIANT-SECTION blocks in skeleton
   const vsRegex = /<!-- VARIANT-SECTION: ([\w-]+) -->([\s\S]*?)<!-- END VARIANT-SECTION -->/g;
   skeleton = skeleton.replace(vsRegex, (match, sectionId) => {
     const heading = headingMap[sectionId];
     if (heading && allSections[heading]) {
       return allSections[heading];
     }
-    return ''; // remove markers if no variant section found
+    return '';
   });
 
   fs.writeFileSync(outFile, skeleton, 'utf8');
@@ -483,17 +384,42 @@ for (const [agentName, override] of Object.entries(overrides)) {
     }
 }
 
-# ── 3. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
+# ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 
-# ── 4. Substitute placeholders in all text files ──────────────────  # TEST: Test 3
+# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-    & bun "$WorkspaceRoot/scripts/helpers/substitute-placeholders.ts" $ProjectDir $ProjectName $Description $TechStack | Out-Null
+    & bun "$WorkspaceRoot/scripts/helpers/substitute-placeholders.ts" $ProjectDir $ProjectName "A new project" "" | Out-Null
 } else {
-    Write-Host "⚠️  Placeholder substitution skipped (bun not available)" -ForegroundColor Yellow
+    Write-Host "⚠️  Placeholder substitution skipped (bun not available or helper missing)" -ForegroundColor Yellow
 }
 
-# ── 4.5. Record template provenance in variant context file ───────────────────  # TEST: none
+# ── 5.5b. Update lifecycle.statusSince in the project's variant.json ────────  # TEST: Test 9
+$ProjectDate = Get-Date -Format "yyyy-MM-dd"
+$ProjVariantJson = Join-Path $ProjectDir "variant.json"
+if (Test-Path $ProjVariantJson) {
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/update-variant-lifecycle.ts" $ProjectDir $ProjectDate $Variant | Out-Null
+    }
+}
+
+# ── 5.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
+$ScriptsMd = Join-Path $WorkspaceRoot "scripts\SCRIPTS.md"
+if (Test-Path $ScriptsMd) {
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/write-scripts-snapshot.ts" $ProjectDir $ProjectDate $Variant "templates/common/scripts" | Out-Null
+    }
+}
+
+# ── 5.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
+$PkgJsonPath = Join-Path $ProjectDir "package.json"
+if (Test-Path $PkgJsonPath) {
+    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+        & bun "$WorkspaceRoot/scripts/helpers/merge-package-scripts.ts" $ProjectDir | Out-Null
+    }
+}
+
+# ── 5.5. Record template provenance in variant context file ───────────────────  # TEST: none
 $TemplateVersion = if ($Version -ne "") { $Version } elseif (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "unknown" }
 $VariantContextMd = Join-Path $ProjectDir "docs\$Variant.context.md"
 if (Test-Path $VariantContextMd) {
@@ -504,33 +430,7 @@ if (Test-Path $VariantContextMd) {
     }
 }
 
-# ── 4.5b. Update lifecycle.statusSince in the project's variant.json ────────  # TEST: Test 9
-$ProjectDate = Get-Date -Format "yyyy-MM-dd"
-$ProjVariantJson = Join-Path $ProjectDir "variant.json"
-if (Test-Path $ProjVariantJson) {
-    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-        & bun "$WorkspaceRoot/scripts/helpers/update-variant-lifecycle.ts" $ProjectDir $ProjectDate $Variant | Out-Null
-    }
-}
-
-# ── 4.5c. Write scripts-snapshot.json with L1 script version map ─────────────  # TEST: Test 10
-$ScriptsMd = Join-Path $WorkspaceRoot "scripts\SCRIPTS.md"
-$SnapshotFile = Join-Path $ProjectDir "scripts-snapshot.json"
-if (Test-Path $ScriptsMd) {
-    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-        & bun "$WorkspaceRoot/scripts/helpers/write-scripts-snapshot.ts" $ProjectDir $ProjectDate $Variant "templates/common/scripts" | Out-Null
-    }
-}
-
-# ── 4.5d. Merge workspace scripts into package.json (Tier 2 integration) ───────  # TEST: Test 11
-$PkgJsonPath = Join-Path $ProjectDir "package.json"
-if (Test-Path $PkgJsonPath) {
-    if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-        & bun "$WorkspaceRoot/scripts/helpers/merge-package-scripts.ts" $ProjectDir | Out-Null
-    }
-}
-
-# ── 4.6. Write template-version.txt for upgrade tracking ─────────────────────  # TEST: Test 12
+# ── 5.6. Write template-version.txt for upgrade tracking ─────────────────────  # TEST: Test 12
 $ClaudeDir = Join-Path $ProjectDir ".claude"
 if (-not (Test-Path $ClaudeDir)) { New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null }
 $CreatedAt = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
@@ -541,7 +441,12 @@ platform=$Platform
 created=$CreatedAt
 "@ | Set-Content (Join-Path $ClaudeDir "template-version.txt") -Encoding UTF8
 
-# ── 4.7. Protect context.md from accidental overwrites (merge=ours) ──────────  # TEST: Test 13
+# ── 5.6b. Inject AGENTS.md Skills into docs/context.md ──────────────────────  # TEST: Test 19
+if (Get-Command "bun" -ErrorAction SilentlyContinue) {
+    & bun "$WorkspaceRoot/scripts/helpers/inject-skills.ts" $ProjectDir | Out-Null
+}
+
+# ── 5.7. Protect context.md from accidental overwrites (merge=ours) ──────────  # TEST: Test 13
 $GitAttributesPath = Join-Path $ProjectDir ".gitattributes"
 $mergeOursLine = "docs/context.md merge=ours"
 if (Test-Path $GitAttributesPath) {
@@ -553,19 +458,17 @@ if (Test-Path $GitAttributesPath) {
     Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
-# ── 4.8. Inject AGENTS.md Skills into docs/context.md ───────────────────────  # TEST: Test 19
-if (Get-Command "bun" -ErrorAction SilentlyContinue) {
-    & bun "$WorkspaceRoot/scripts/helpers/inject-skills.ts" $ProjectDir | Out-Null
-}
+# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16
+# (Note: chmod not available on Windows — executable bits set via git update-index after init)
 
-# ── 5. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
+# ── 7. Initialize git ──────────────────────────────────────────────────────────  # TEST: Test 4
 $OriginalLocation = Get-Location
 Set-Location $ProjectDir
 try { git init 2>&1 | Out-Null } catch { }
 git config core.hooksPath .githooks
 git config core.fileMode false
 
-# ── 6. Set executable bit on hooks and scripts (for WSL / Git Bash users) ──────  # TEST: Test 16
+# Mark hooks and scripts executable in git index
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = ".githooks/" + $_.Name
     try { git update-index --add --chmod=+x $rel 2>&1 | Out-Null } catch {
@@ -626,17 +529,17 @@ if ($LASTEXITCODE -eq 0 -and $hooksPath -match '\.githooks') {
 if (-not $SecurityOk) {
     Write-Host ""
     Write-Host "❌ Security bootstrap check FAILED. Fix the issues above before using this project." -ForegroundColor Red
-    Write-Host "   Run 'bun scripts/audit.ts' from workspace root after fixing to verify." -ForegroundColor Yellow
+    Write-Host "   Run 'bash scripts/audit.sh' after fixing to verify." -ForegroundColor Yellow
+    Set-Location $OriginalLocation
     exit 1
 }
 Write-Host "  ✅ All security bootstrap checks passed" -ForegroundColor Green
 
-# ── Return to workspace root ───────────────────────────────────────────────────  # TEST: none
 Set-Location $OriginalLocation
 
-# ── 7. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
+# ── 8. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 Write-Host ""
-Write-Host "Running post-scaffold audit..." -ForegroundColor Cyan
+Write-Host "Running post-scaffold audit…" -ForegroundColor Cyan
 & bun "$WorkspaceRoot/scripts/audit.ts"
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
@@ -646,32 +549,33 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "⚠️  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
 }
 
-# ── 8. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
+# ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
 Write-Host ""
-Write-Host "Running environment setup..." -ForegroundColor Cyan
+Write-Host "Running environment setup…" -ForegroundColor Cyan
 & "$ProjectDir\scripts\setup.ps1"
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "⚠️  Setup encountered an error - run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
 }
 
-# ── 9. Move into project directory ───────────────────────────────────────────  # TEST: none
+# ── 10. Move into project directory ───────────────────────────────────────────  # TEST: none
 Write-Host ""
-Write-Host ("=" * 60) -ForegroundColor DarkGray
-Write-Host "PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
+Write-Host ("━" * 60) -ForegroundColor DarkGray
+Write-Host "📂 PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "WARNING: Your shell is still at the workspace root." -ForegroundColor Yellow
-Write-Host "Run the following command to move into your new project:"
+Write-Host "⚠️  Your shell is still at the workspace root." -ForegroundColor Yellow
+Write-Host "   Run the following command to move into your new project:"
 Write-Host ""
 Write-Host "   cd '$ProjectDir'" -ForegroundColor Green
 Write-Host ""
-Write-Host "All subsequent work must be run from inside this directory."
-Write-Host ("=" * 60) -ForegroundColor DarkGray
+Write-Host "   All subsequent work (git, scripts, sessions) must be run"
+Write-Host "   from inside this directory, not the workspace root."
+Write-Host ("━" * 60) -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
-Write-Host "  -> $TemplatesDir\docs\_examples" -ForegroundColor DarkGray
+Write-Host "Extension templates (ADR, analyst agent, skill, daily log):"
+Write-Host "  -> $TemplatesDir\docs\_examples"
 
-# --- L1: Dynamic Plugin Injection (inject-global-plugins.ts) ---
+# --- Dynamic Plugin Injection ---
 $InjectScript = Join-Path $WorkspaceRoot 'scripts\helpers\inject-global-plugins.ts'
 if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $InjectScript)) {
     bun $InjectScript $ProjectDir $Platform
@@ -681,8 +585,3 @@ if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $InjectScrip
 if ($TempDir -and (Test-Path $TempDir)) {
     Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
-
-
-
-
-
