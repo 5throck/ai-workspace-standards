@@ -14,6 +14,8 @@ if command -v bun &> /dev/null; then
 fi
 
 # Install Bun using official installer
+# TODO: Security — pin to a specific release URL with SHA-256 verification before production use
+# See: https://bun.sh/docs/installation for versioned release URLs
 curl -fsSL https://bun.sh/install | bash
 
 # Set up environment

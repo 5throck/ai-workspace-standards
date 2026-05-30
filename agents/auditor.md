@@ -2,7 +2,7 @@
 name: Consistency Auditor
 status: active
 tier:
-  claude: medium        # claude-sonnet-4.6
+  claude: medium        # claude-sonnet-4-6
   antigravity: medium   # gemini-3.5-flash (thinking_level="medium")
   gemini-cli: medium    # gemini-3.5-flash
 model: inherit

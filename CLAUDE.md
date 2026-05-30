@@ -26,13 +26,13 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` currently has **two active hook types** and PostToolUse disabled:
+The workspace `.claude/settings.json` currently has **three active hook types**:
 
 - **PreToolUse** (`Write|Edit|Bash`) → runs `bun scripts/check-pm-approval.ts` before any state-changing tool call, enforcing the PM-approval gate (`.pm-approved` flag).
-- **SessionStart** → runs `bun scripts/clear-pm-approval.ts` at the start of each session to reset approval state.
-- **PostToolUse** is **disabled** — audit is enforced exclusively via the pre-commit hook and the `dev-sync.ts` pipeline.
+- **SessionStart** → runs `bun scripts/clear-pm-approval.ts` at the start of each session to reset approval state. Also runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured.
+- **PostToolUse** is **enabled** — fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
 
-To re-enable the PostToolUse hook (fires `audit.ts` after every Write/Edit), add the following to `.claude/settings.json`:
+To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
 
 ```json
 {
@@ -58,9 +58,10 @@ To re-enable the PostToolUse hook (fires `audit.ts` after every Write/Edit), add
 |------|-------------|:-------:|-------|
 | PreToolUse (PM-approval gate) | Claude Code CLI | ✅ | Blocks Write/Edit/Bash without `.pm-approved` |
 | PreToolUse (PM-approval gate) | Claude Code Desktop App | ❌ | Role Declaration enforces instead |
-| SessionStart (state clear) | Claude Code CLI | ✅ | Clears `.pm-approved` on session start |
+| SessionStart (state clear) | Claude Code CLI | ✅ | Clears `.pm-approved`; also runs `git config core.hooksPath .githooks` |
 | SessionStart (state clear) | Claude Code Desktop App | ❌ | No automatic clear |
-| PostToolUse (audit) | Both | ❌ (disabled) | Use `bun scripts/audit.ts` manually |
+| PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
+| PostToolUse (audit) | Claude Code Desktop App | ❌ | Hooks don't fire; run `bun scripts/audit.ts` manually |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
@@ -75,7 +76,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
-| `/new-project "name"` | Scaffold a new project | `bash scripts/new-project.sh "$ARGUMENTS"` |
+| `/new-project "name"` | Scaffold a new project | `.\scripts\new-project.ps1 "$ARGUMENTS"` |
 
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.

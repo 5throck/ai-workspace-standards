@@ -181,7 +181,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
+| 1 | [task] | [agent] | High/Medium/Low | high/medium/low |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 
@@ -225,7 +225,7 @@ Many active repositories under the workspace root possess `.claude/` directories
 
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
-- **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`scripts/audit.sh` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
+- **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`bun scripts/audit.ts` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 

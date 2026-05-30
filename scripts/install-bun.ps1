@@ -13,6 +13,8 @@ if (Get-Command bun -ErrorAction SilentlyContinue) {
 }
 
 # Install Bun using official installer
+# TODO: Security — pin to a specific release URL with SHA-256 verification before production use
+# See: https://bun.sh/docs/installation for versioned release URLs
 powershell -c "irm bun.sh/install.ps1 | iex"
 
 Write-Host ""

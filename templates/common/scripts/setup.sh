@@ -447,7 +447,7 @@ if [ "$OS_TYPE" = "macos" ] || [ "$OS_TYPE" = "linux" ]; then
             brew install rtk
             pass "rtk installed via Homebrew"
         elif command -v cargo >/dev/null 2>&1; then
-            cargo install --git https://github.com/rtk-ai/rtk
+            cargo install --git https://github.com/rtk-ai/rtk --rev main  # TODO: pin to specific --rev <sha> before production
             pass "rtk installed via Cargo"
         else
             warn "Neither Homebrew nor Cargo found - skipping rtk installation."
@@ -463,8 +463,8 @@ fi
 # ── 5. Initialize CodeGraph MCP ───────────────────────────────────────────────
 if command -v npx >/dev/null 2>&1; then
     info "Initializing and indexing CodeGraph for AI context…"
-    npx -y @colbymchenry/codegraph init 2>/dev/null || true
-    npx -y @colbymchenry/codegraph index 2>/dev/null || true
+    npx -y @colbymchenry/codegraph@latest  # TODO: pin version init 2>/dev/null || true
+    npx -y @colbymchenry/codegraph@latest  # TODO: pin version index 2>/dev/null || true
     if [ $? -eq 0 ]; then
         pass "CodeGraph initialized successfully"
     else

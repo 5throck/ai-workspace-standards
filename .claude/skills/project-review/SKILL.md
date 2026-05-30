@@ -7,7 +7,7 @@ description: >
   generates an execution plan, dispatches agents in parallel, and produces
   a prioritized improvement plan (Critical/High/Medium/Low).
   Use when: user requests a full project review ("/project-review" or
-  "전체 검토해줘"); PM detects structural changes (3+ agent files modified,
+  "do a full project review"); PM detects structural changes (3+ agent files modified,
   phase schema changes, workspace-schema.json modified, new variant added);
   QA escalation from auditor (audit.ts ERROR >= 3 or security Critical finding).
 owner: pm

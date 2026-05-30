@@ -6,7 +6,7 @@
     "phases": {
       "canonical": ["0", "1-2", "3", "4", "5", "6"],
       "count": 7,
-      "pm_owned": ["0", "2", "6"],
+      "pm_owned": ["0", "1-2", "6"],
       "autonomous": ["1-2", "3", "4", "5"],
       "definitions": {
         "0":   "Project Initiation",
@@ -27,6 +27,23 @@
     "scaffolding-expert":  "low",
     "lifecycle-manager":   "medium",
     "security-expert":     "medium"
+  },
+  "models": {
+    "claude": {
+      "high":   "claude-opus-4-7",
+      "medium": "claude-sonnet-4-6",
+      "low":    "claude-haiku-4-5"
+    },
+    "antigravity": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    },
+    "gemini-cli": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    }
   },
   "_notes": {
     "variant_specific": "Variant-specific phase names (e.g., co-security Phase 3 = Threat Modeling) are declared in each variant's variant.json under phases.phase3_name",

@@ -164,7 +164,7 @@ Mode    : [Silent | Dialogue]
 **Synthesis Requirements**:
 1. **Points of Agreement** (specific)
 2. **Open Disagreements or Unresolved Questions**
-3. **Concrete Next Action Items** (max 5) - owner + deliverable
+3. **Concrete Next Action Items** (max 5) - owner + deliverable + agent tier (High/Medium/Low based on workspace-schema.json)
 
 **Always Displayed** (regardless of mode):
 ```
@@ -208,9 +208,9 @@ Mode    : [Silent | Dialogue]
 
 ## Action Items
 
-| # | Owner | Deliverable | Phase |
-|---|-------|-------------|-------|
-| A-01 | [Agent] | [What] | [When] |
+| # | Owner | Tier | Deliverable | Phase |
+|---|-------|------|-------------|-------|
+| A-01 | [Agent] | [High/Med/Low] | [What] | [When] |
 
 ## Acceptance Criteria (if any)
 
