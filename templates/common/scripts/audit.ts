@@ -260,6 +260,34 @@ if (hasBun) {
             Fail("Skill audit detected issues (run 'bun scripts/skill-lifecycle-audit.ts' to see details)");
         }
     }
+    if (fs.existsSync(path.join('scripts', 'verify-scripts.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'verify-scripts.ts')} --verify`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Script registry detected issues (run 'bun scripts/verify-scripts.ts --verify' to see details)");
+        else
+            Pass("Script registry: all scripts verified");
+    }
+    if (fs.existsSync(path.join('scripts', 'readme-lifecycle-audit.ts')) && fs.existsSync('templates')) {
+        const out = await $`bun ${path.join('scripts', 'readme-lifecycle-audit.ts')} --json`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("README lifecycle audit detected issues (run 'bun scripts/readme-lifecycle-audit.ts' to see details)");
+        else
+            Pass("README lifecycle audit: all READMEs healthy");
+    }
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md')) {
+        const out = await $`bun ${path.join('scripts', 'verify-memory.ts')}`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Warn("Memory log format issues detected (run 'bun scripts/verify-memory.ts' to see details)");
+        else
+            Pass("Memory logs: format valid");
+    }
+    if (fs.existsSync(path.join('scripts', 'lifecycle-sync-audit.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'lifecycle-sync-audit.ts')} --json`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Lifecycle sync audit detected issues (run 'bun scripts/lifecycle-sync-audit.ts' to see details)");
+        else
+            Pass("Lifecycle sync audit: all artifacts in sync");
+    }
 } else {
     Warn('Bun not installed - skipping lifecycle audits');
 }
