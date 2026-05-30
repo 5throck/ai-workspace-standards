@@ -78,6 +78,24 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Agent lifecycle management"
+    },
+    "script-lifecycle-manager": {
+      "source": "skills/script-lifecycle-manager/SKILL.md",
+      "version": "1.2.0",
+      "overridable": false,
+      "description": "Script lifecycle management — tracks script health and deprecation"
+    },
+    "simulate-project-creation": {
+      "source": "skills/simulate-project-creation/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Simulates new-project scaffolding for dry-run validation"
+    },
+    "validate-docs-links": {
+      "source": "skills/validate-docs-links/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Validates documentation cross-references and link integrity"
     }
   }
 }
