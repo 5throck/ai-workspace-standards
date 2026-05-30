@@ -45,6 +45,26 @@ jobs:
             echo "Skipping E2E tests on non-Windows (requires PowerShell)"
           }
 
+      - name: Tier 3 Auditor - Lifecycle Compliance Check
+        shell: pwsh
+        run: |
+          Write-Host "=== Tier 3 Auditor: Lifecycle Compliance Audit ===" -ForegroundColor Cyan
+
+          # Run lifecycle audit tools
+          Write-Host "Running agent lifecycle audit..." -ForegroundColor Yellow
+          bun run agent-lifecycle-audit
+
+          Write-Host "Running skill lifecycle audit..." -ForegroundColor Yellow
+          bun run skill-lifecycle-audit
+
+          Write-Host "Running README lifecycle audit..." -ForegroundColor Yellow
+          bun run readme-lifecycle-audit
+
+          Write-Host "Running scripts verification..." -ForegroundColor Yellow
+          bun run verify-scripts
+
+          Write-Host "✅ Tier 3 Auditor: All lifecycle checks passed" -ForegroundColor Green
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

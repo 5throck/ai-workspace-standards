@@ -74,6 +74,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | — | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `test-new-project.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
