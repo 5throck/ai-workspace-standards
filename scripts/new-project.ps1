@@ -105,7 +105,39 @@ if ($Platform -notin @("claude", "antigravity", "both")) {
     exit 1
 }
 
-$WorkspaceRoot = Split-Path $PSScriptRoot -Parent
+# ── Workspace Root Resolution ──────────────────────────────────────────────────────  # TEST: none
+# Priority 1: Environment variable (for portable deployment)
+if ($env:WORKSPACE_ROOT -and (Test-Path $env:WORKSPACE_ROOT)) {
+    $WorkspaceRoot = $env:WORKSPACE_ROOT
+    Write-Verbose "Using workspace root from environment: $WorkspaceRoot"
+}
+# Priority 2: Auto-detect by searching for templates/ folder
+else {
+    $CurrentDir = $PSScriptRoot
+    while ($CurrentDir -ne [System.IO.Path]::GetPathRoot($CurrentDir)) {
+        $TemplatesPath = Join-Path $CurrentDir "templates"
+        if ((Test-Path $TemplatesPath) -and (Test-Path (Join-Path $TemplatesPath "common"))) {
+            $WorkspaceRoot = $CurrentDir
+            Write-Verbose "Auto-detected workspace root: $WorkspaceRoot"
+            break
+        }
+        $CurrentDir = Split-Path $CurrentDir -Parent
+    }
+
+    # Priority 3: Fallback to script's parent directory
+    if (-not $WorkspaceRoot) {
+        $WorkspaceRoot = Split-Path $PSScriptRoot -Parent
+        Write-Verbose "Using fallback workspace root: $WorkspaceRoot"
+    }
+}
+
+# Verify workspace root is valid
+if (-not (Test-Path (Join-Path $WorkspaceRoot "templates/common"))) {
+    Write-Host "❌ Cannot find workspace templates folder." -ForegroundColor Red
+    Write-Host "   Set WORKSPACE_ROOT environment variable or run from workspace directory." -ForegroundColor Yellow
+    Write-Host "   Example: `$env:WORKSPACE_ROOT = 'C:\git'" -ForegroundColor Yellow
+    exit 1
+}
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
 $CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"
