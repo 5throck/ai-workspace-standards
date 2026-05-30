@@ -113,6 +113,28 @@ async function main() {
     }
   }
 
+  // 6. Lifecycle compliance check (Tier 1 Gatekeeper)
+  const scriptStaged = staged.filter(f => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, '/')));
+  const scriptsMdStaged = staged.includes('scripts/SCRIPTS.md');
+
+  if (scriptStaged.length > 0 && !scriptsMdStaged) {
+    console.log("\n=== Lifecycle Compliance Check ===");
+    console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts files were modified but scripts/SCRIPTS.md was not updated.");
+    console.error("");
+    console.error("Modified script files:");
+    for (const script of scriptStaged) {
+      console.error(`  - ${script}`);
+    }
+    console.error("");
+    console.error("Required actions:");
+    console.error("  1. Register new scripts in scripts/SCRIPTS.md");
+    console.error("  2. Bump version for modified scripts in scripts/SCRIPTS.md");
+    console.error("  3. Stage the updated scripts/SCRIPTS.md:");
+    console.error("     git add scripts/SCRIPTS.md");
+    console.error("");
+    process.exit(1);
+  }
+
   // 7. Secret scan
   console.log("\n=== Secret scan ===");
   try {
