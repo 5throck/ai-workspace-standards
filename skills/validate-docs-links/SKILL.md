@@ -6,6 +6,8 @@ last_reviewed: 2026-05-30
 status: active
 owner: docs-writer
 prerequisites: Python or grep
+metadata:
+  type: process
 ---
 
 # 🛠️ Skill: validate-docs-links

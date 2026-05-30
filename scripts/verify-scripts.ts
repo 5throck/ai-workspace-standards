@@ -6,9 +6,10 @@
  * enforces deprecation removal dates, and blocks on security advisories.
  *
  * Usage:
- *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
- *   bun scripts/verify-scripts.ts --generate  # Generate Registry draft from filesystem
- *   bun scripts/verify-scripts.ts --report    # Human-readable status report
+ *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
+ *   bun scripts/verify-scripts.ts --generate    # Generate Registry draft from filesystem
+ *   bun scripts/verify-scripts.ts --report      # Human-readable status report
+ *   bun scripts/verify-scripts.ts --check-drift # Detect scripts in package.json missing from scripts/ directory
  *
  * Exit codes:
  *   0 = all checks passed

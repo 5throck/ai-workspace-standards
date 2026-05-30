@@ -16,6 +16,12 @@ examples:
     assistant: "Authoring an Ansible playbook for FIND-0023 (Apache version upgrade), running --check dry-run first, then awaiting approval before live apply."
   - user: "Apply the approved patches from Phase 4"
     assistant: "Confirming dry-run results on file, then executing approved playbooks and updating PATCH_LOG.md with results."
+status: active
+lifecycle:
+  phase: active
+  created: "2026-05-27"
+  last_updated: "2026-05-30"
+  governance: lifecycle-manager
 ---
 
 ## Role

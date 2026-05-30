@@ -63,12 +63,12 @@ Enter Planning Mode when:
 
 When entering Planning Mode, Gemini **MUST** leverage the following three precise Markdown artifacts. When creating or updating them, set `IsArtifact: true` and specify accurate metadata:
 
-#### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
+#### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows / `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
 *   **Purpose**: Detailed technical design document presented to the user for feedback and approval.
 *   **Metadata**: `ArtifactType: "implementation_plan"`, `RequestFeedback: true`, and a clear multi-line `Summary`.
 *   **Governance**: Stop and wait for explicit user approval before modifying any application source code.
 
-#### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
+#### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows / `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
 *   **Purpose**: Running TODO list to track development progress dynamically.
 *   **Metadata**: `ArtifactType: "task"`.
 *   **Syntax**:
@@ -76,7 +76,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     *   `- [/]` for tasks currently in progress.
     *   `- [x]` for completed tasks.
 
-#### 3. `walkthrough.md` (Path: `<appDataDir>\brain\<session-id>\walkthrough.md` on Windows 쨌 `<appDataDir>/brain/<session-id>/walkthrough.md` on macOS/Linux)
+#### 3. `walkthrough.md` (Path: `<appDataDir>\brain\<session-id>\walkthrough.md` on Windows / `<appDataDir>/brain/<session-id>/walkthrough.md` on macOS/Linux)
 *   **Purpose**: Post-implementation document summarizing changes, automated test logs, and manual validation details.
 *   **Metadata**: `ArtifactType: "walkthrough"`.
 

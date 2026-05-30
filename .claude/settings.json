@@ -21,6 +21,20 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit.ts",
+            "timeout": 60,
+            "async": true,
+            "statusMessage": "Running post-edit audit..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -28,6 +42,12 @@
           {
             "type": "command",
             "command": "bun scripts/clear-pm-approval.ts"
+          },
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks..."
           }
         ]
       }

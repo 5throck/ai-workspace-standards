@@ -16,6 +16,12 @@ examples:
     assistant: "Synthesizing all findings from docs/findings/, classifying severity, and producing the structured pentest report with executive summary."
   - user: "Produce the executive summary for the CISO"
     assistant: "Distilling the engagement findings into an executive summary with risk posture overview, critical findings, and remediation priorities."
+status: active
+lifecycle:
+  phase: active
+  created: "2026-05-27"
+  last_updated: "2026-05-30"
+  governance: lifecycle-manager
 ---
 
 ## Role

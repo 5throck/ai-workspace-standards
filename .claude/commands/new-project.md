@@ -29,8 +29,8 @@ Both scripts do the same thing:
 5. Record template provenance in `docs/context.md`
 6. Initialize git with `core.hooksPath .githooks`
 7. Run `bun scripts/audit.ts` to verify the scaffold
-8. Run `bun scripts/setup.ts` (if exists) for dependency installation
+8. Run `bash scripts/setup.sh` (if exists) for dependency installation
 
 After scaffolding, `cd` into the new project directory — all subsequent work runs from there.
 
-> ⚠️ This command is workspace-level only. Run from the workspace root (`C:\git`).
+> ⚠️ This command is workspace-level only. Run from the workspace root (`<workspace-root>`).

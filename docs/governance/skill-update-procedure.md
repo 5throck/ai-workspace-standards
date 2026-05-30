@@ -2,18 +2,18 @@
 
 ## Overview
 
-스킬이 production phase에서 수정이 필요할 때의 절차를 정의합니다.
+Defines the procedure for when a skill in the production phase requires modification.
 
 ## When to Use This Procedure
 
-**Trigger**: Production phase 스킬을 수정해야 할 때
+**Trigger**: When a production phase skill needs to be modified
 
 **Examples**:
-- 버그 수정
-- 기능 개선
-- 성능 최적화
-- 호환성 수정
-- 보안 패치
+- Bug fix
+- Feature improvement
+- Performance optimization
+- Compatibility fix
+- Security patch
 
 ## Procedure Steps
 
@@ -22,8 +22,8 @@
 **Initiator**: Anyone who identifies the need for change
 
 **Action**:
-1. Lifecycle-manager가 스킬의 phase를 "production"에서 "design"으로 rollback
-2. `doc/lifecycle/skills/[skill-name].md`의 Phase History에 rollback 기록
+1. Lifecycle-manager rolls back the skill's phase from "production" to "design"
+2. Record the rollback in the Phase History of `docs/lifecycle/skills/[skill-name].md`
 
 **Example**:
 ```markdown
@@ -48,9 +48,9 @@ git checkout -b skill-update/meeting-facilitation
 ### Step 3: Implement Changes
 
 **Action**:
-1. 스킬 파일 수정 (`skills/[skill-name]/SKILL.md`)
-2. 관련 문서 업데이트 (예: README, examples)
-3. 테스트 및 검증
+1. Modify the skill file (`skills/[skill-name]/SKILL.md`)
+2. Update related documentation (e.g., README, examples)
+3. Test and validate
 
 **Commit message format**:
 ```
@@ -63,7 +63,7 @@ Impact: [what behavior changes]
 
 ### Step 4: Update Lifecycle Document
 
-**Action**: `doc/lifecycle/skills/[skill-name].md` 업데이트
+**Action**: Update `docs/lifecycle/skills/[skill-name].md`
 
 **Add to Phase History**:
 ```markdown
@@ -172,9 +172,9 @@ Please validate:
 ### Step 7: Re-Promote to Production
 
 **Action**:
-1. PR merge 후, Auditor가 승인
-2. Lifecycle-manager가 phase를 "review"에서 "production"으로 승격
-3. `doc/lifecycle/skills/[skill-name].md`의 Phase History에 승격 기록
+1. After PR merge, Auditor approves
+2. Lifecycle-manager promotes the phase from "review" to "production"
+3. Record the promotion in the Phase History of `docs/lifecycle/skills/[skill-name].md`
 
 **Example**:
 ```markdown

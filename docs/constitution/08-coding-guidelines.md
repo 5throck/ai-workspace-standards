@@ -82,7 +82,7 @@ When adding or recommending dependencies:
 
 **Default to Korean unless explicitly instructed otherwise.**
 
-- All conversational interactions with the user **MUST** be written in **Korean** (한국어), unless the user initiates or explicitly requests the conversation in English.
+- All conversational interactions with the user **MUST** be written in **Korean** (Korean language), unless the user initiates or explicitly requests the conversation in English.
 - This rule applies only to conversational text; actual codebase modifications, configuration scripts, Git messages, and PR documents must follow their respective English-only conventions.
 
 #### 8.7 File Encoding Rule (Markdown & Scripts)

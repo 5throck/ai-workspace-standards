@@ -30,14 +30,14 @@ All notable changes to the template variants are documented here.
 - All agent files updated with `## Meeting Participation` sections (#91)
 - `## Dispatch Protocol` sections standardized across all agents (#91)
 
-## [0.3.0]
+## [0.3.0] - 2026-05-25
 ### Added
 - `## Meeting Participation` sections added to all workspace agents
 
-## [0.2.0]
+## [0.2.0] - 2026-05-24
 ### Added
 - 3-tier agent cost model (high/medium/low)
 
-## [0.1.0]
+## [0.1.0] - 2026-05-23
 ### Added
 - Initial template structure

@@ -14,20 +14,29 @@ jobs:
     name: Documentation Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Run audit.sh
-        run: bash scripts/audit.sh
+      - uses: oven-sh/setup-bun@4bc047ad317be86e772e62e09a80d557c476c58a # v2
+        with:
+          bun-version: latest
+
+      - name: Install script dependencies
+        working-directory: scripts
+        run: bun install
+        continue-on-error: true
+
+      - name: Run audit
+        run: bun scripts/audit.ts
 
   secret-scan:
     name: Secret Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@b6c5701469acc1b2db2e1d39a67a373da11f2ded # v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

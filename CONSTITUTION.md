@@ -96,7 +96,7 @@ Every project uses role-based agents defined in `agents/*.md` with YAML frontmat
 
 ### 5.6 Agent Lifecycle Management → [Full details](docs/constitution/05.6-agent-lifecycle.md)
 
-Agents have three states: **active** (production use), **deprecated** (being phased out—reassign skills within 30 days), **retired** (move to `agents/_archive/`, delete after 90 days). PM is the designated owner of all agents. If an agent's prompt contains a vulnerability, immediately set `status: deprecated` and open a PR. Manage lifecycle via `agent:create.ts`, `agent:delete.ts`, and `agent:verify.ts`. After any agent change, update both `AGENTS.md` (canonical roster) and `CONSTITUTION.md §5` (architecture references).
+Agents have three states: **active** (production use), **deprecated** (being phased out—reassign skills within 30 days), **retired** (move to `agents/_archive/`, delete after 90 days). PM is the designated owner of all agents. If an agent's prompt contains a vulnerability, immediately set `status: deprecated` and open a PR. Manage lifecycle via `agent-create.ts`, `agent-delete.ts`, and `agent-verify.ts`. After any agent change, update both `AGENTS.md` (canonical roster) and `CONSTITUTION.md §5` (architecture references).
 
 ---
 

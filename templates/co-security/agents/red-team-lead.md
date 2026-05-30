@@ -16,6 +16,12 @@ examples:
     assistant: "Analyzing scope and objectives, then producing a recon plan with selected MITRE ATT&CK TTPs and enumeration targets."
   - user: "Review this PoC before execution"
     assistant: "Reviewing PoC against approved attack path and scope boundaries. Providing sign-off or rejection with reasoning."
+status: active
+lifecycle:
+  phase: active
+  created: "2026-05-27"
+  last_updated: "2026-05-30"
+  governance: lifecycle-manager
 ---
 
 ## Role

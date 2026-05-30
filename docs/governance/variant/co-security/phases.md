@@ -2,53 +2,53 @@
 
 ## Domain Workflow
 
-co-security variant는 보안 엔게이지먼트 중심의 workflow를 따릅니다:
+The co-security variant follows a security engagement-centric workflow:
 
 **Authorization → Reconnaissance → Exploitation → Remediation → Reporting**
 
 ## Phase Definitions
 
 ### Authorization Phase (Pre-Phase 0)
-**Purpose**: 법적 권한 확인
-**Critical**: 서명된 authorization document 필수 (`docs/authorization.md`)
-- verify-authorization skill이 승인 확인
-- 승인 없으면 Phase 1+ 진행 불가
+**Purpose**: Verify legal authorization
+**Critical**: A signed authorization document is required (`docs/authorization.md`)
+- verify-authorization skill confirms approval
+- Phase 1+ cannot proceed without approval
 
 ### Phase 0: Team Assembly & Skill Orchestration
-**Purpose**: 보안 엔게이지먼트 kick-off 및 팀 구성
-- Engagement scope 확인 (`docs/scope.md`)
-- Security-monitor, Architect, Analyst 할당
-- 필요한 스킬 확인 (security-scan)
+**Purpose**: Security engagement kick-off and team assembly
+- Confirm engagement scope (`docs/scope.md`)
+- Assign Security-monitor, Architect, Analyst
+- Identify required skills (security-scan)
 
 ### Phase 1: Analysis & Triage (Reconnaissance)
-**Purpose**: 대상 시스템 정찰
+**Purpose**: Target system reconnaissance
 - Read-only reconnaissance
 - Vulnerability scanning
 - Threat modeling
 
 ### Phase 2: Design
-**Purpose**: 엔게이지먼트 계획 수립 및 승인
+**Purpose**: Establish and approve engagement plan
 - Architect: Exploitation strategy + ADR
 - Security-monitor: Attack path analysis
 - **User approval gate**
 
 ### Phase 3: Implementation (Exploitation & Remediation)
-**Purpose**: 취약점 입증 및 패치
+**Purpose**: Demonstrate vulnerabilities and apply patches
 - Security-monitor: Exploitation (authorized targets only)
 - Automation-engineer: Ansible playbook execution
 - Ansible dry-run first (--check flag)
 
 ### Phase 4: QA Gate
-**Purpose**: 보안 검증
+**Purpose**: Security validation
 - Test-runner: Patch validation
 - Auditor: Secret scan (.gitleaks), documentation check
 - Max 2 iterations before PM escalation
 
 ### Phase 5: Finalization
-**Purpose**: 최종 보고
+**Purpose**: Final reporting
 - Engagement log: memory/engagement-YYYY-MM-DD.md
 - Finding tickets: docs/findings/FIND-NNNN.md
-- PR 생성 및 handoff
+- Create PR and handoff
 
 ## Specialist Agents
 

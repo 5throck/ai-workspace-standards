@@ -104,11 +104,13 @@ git clone https://github.com/5throck/ai-workspace-standards.git C:\git
 git clone https://github.com/5throck/ai-workspace-standards.git ~/git
 ```
 
-### 2. Activate local git hooks
+### 2. Open Claude Code
 
 ```bash
-git config core.hooksPath .githooks
+claude
 ```
+
+> Git hooks (`.githooks/`) are configured automatically on first Claude session start via the `SessionStart` hook in `.claude/settings.json` — no manual `git config` needed.
 
 ### 3. Create your first project
 

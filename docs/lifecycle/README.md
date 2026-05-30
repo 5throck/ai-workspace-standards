@@ -2,13 +2,13 @@
 
 ## Purpose
 
-에이전트와 스킬의 생애주기를 기록하고 거버넌스합니다.
+Records and governs the lifecycle of agents and skills.
 
 ## File Structure
 
 ```
-doc/lifecycle/
-├── README.md (이 파일)
+docs/lifecycle/
+├── README.md (this file)
 ├── agents/
 │   ├── pm.md
 │   ├── architect.md
@@ -41,7 +41,7 @@ Each `[agent/skill/template].md` file MUST include the following sections:
 Created: [YYYY-MM-DD]
 ```
 
-**Purpose**: 에이전트/스킬이 언제 만들어졌는지 기록
+**Purpose**: Records when the agent/skill was created
 
 **Example**:
 ```markdown
@@ -59,13 +59,13 @@ Created: 2026-05-15
 | [YYYY-MM-DD] | [from-phase] | [to-phase] | [reason] | [approver] |
 ```
 
-**Purpose**: phase 변경 이력 추적 및 승인자 기록
+**Purpose**: Tracks phase change history and records approvers
 
 **Phases**:
-- **design**: 초기 설계 단계
-- **review**: 리뷰 및 검증 단계
-- **production**: 운영 환경에서 사용 가능
-- **deprecated**: 더 이상 사용되지 않음 (보통 replacement가 있음)
+- **design**: Initial design phase
+- **review**: Review and validation phase
+- **production**: Available for use in production environment
+- **deprecated**: No longer in use (usually has a replacement)
 
 **Example**:
 ```markdown
@@ -91,7 +91,7 @@ Created: 2026-05-15
 - [ ] [criterion-3] (optional)
 ```
 
-**Purpose**: 각 phase별 만족 기준 정의
+**Purpose**: Defines the satisfaction criteria for each phase
 
 **Example**:
 ```markdown
@@ -126,7 +126,7 @@ Created: 2026-05-15
 - [dependency-2]
 ```
 
-**Purpose**: 다른 에이전트/스킬과의 의존성 명시
+**Purpose**: Specifies dependencies on other agents/skills
 
 **Example**:
 ```markdown
@@ -141,7 +141,7 @@ Created: 2026-05-15
 
 ### 1. Design → Review
 
-**Trigger**: Architect 또는 Domain Expert가 승인
+**Trigger**: Approved by Architect or Domain Expert
 **Requirements**:
 - Agent role clearly defined
 - Tier assignment justified
@@ -152,7 +152,7 @@ Created: 2026-05-15
 
 ### 2. Review → Production
 
-**Trigger**: Auditor가 acceptance criteria 검증 후 승인
+**Trigger**: Approved by Auditor after validating acceptance criteria
 **Requirements**:
 - All review phase acceptance criteria met
 - Successfully tested in real scenario
@@ -163,7 +163,7 @@ Created: 2026-05-15
 
 ### 3. Production → Design (Rollback)
 
-**Trigger**: 수정 필요 시, Lifecycle-manager가 rollback
+**Trigger**: Lifecycle-manager initiates rollback when a fix is required
 **Requirements**:
 - Bug discovered that requires design change
 - Feature addition that changes agent role
@@ -185,15 +185,15 @@ Created: 2026-05-15
 ### Automated Validation
 
 **Scripts**:
-- `scripts/validate-skills.sh`: 모든 `skills/*.md` 파일의 필수 섹션 검증
-- `scripts/validate-agents.sh`: 모든 `agents/*.md` 파일의 필수 섹션 검증
-- `scripts/validate-doc-folder.sh`: workspace root에 lifecycle 관련 파일이 없는지 확인
+- `scripts/validate-skills.ts`: Validates required sections in all `skills/*.md` files
+- `scripts/validate-agents.ts`: Validates required sections in all `agents/*.md` files
+- `scripts/validate-doc-folder.sh`: Confirms no lifecycle-related files exist in the workspace root
 
 **Pre-commit hook**:
 ```bash
 # .git/hooks/pre-commit
-bun scripts/validate-skills.sh
-bun scripts/validate-agents.sh
+bun scripts/validate-skills.ts
+bun scripts/validate-agents.ts
 bash scripts/validate-doc-folder.sh
 ```
 
@@ -325,7 +325,7 @@ bash scripts/validate-doc-folder.sh
 
 1. **Create** (Design phase):
    - Create agent/skill file
-   - Create lifecycle document in `doc/lifecycle/`
+   - Create lifecycle document in `docs/lifecycle/`
    - Set phase to "design"
 
 2. **Review**:
