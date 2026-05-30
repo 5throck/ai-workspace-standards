@@ -23,7 +23,7 @@ Defines the procedure for when a skill in the production phase requires modifica
 
 **Action**:
 1. Lifecycle-manager rolls back the skill's phase from "production" to "design"
-2. Record the rollback in the Phase History of `doc/lifecycle/skills/[skill-name].md`
+2. Record the rollback in the Phase History of `docs/lifecycle/skills/[skill-name].md`
 
 **Example**:
 ```markdown
@@ -63,7 +63,7 @@ Impact: [what behavior changes]
 
 ### Step 4: Update Lifecycle Document
 
-**Action**: Update `doc/lifecycle/skills/[skill-name].md`
+**Action**: Update `docs/lifecycle/skills/[skill-name].md`
 
 **Add to Phase History**:
 ```markdown
@@ -174,7 +174,7 @@ Please validate:
 **Action**:
 1. After PR merge, Auditor approves
 2. Lifecycle-manager promotes the phase from "review" to "production"
-3. Record the promotion in the Phase History of `doc/lifecycle/skills/[skill-name].md`
+3. Record the promotion in the Phase History of `docs/lifecycle/skills/[skill-name].md`
 
 **Example**:
 ```markdown

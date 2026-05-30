@@ -7,7 +7,7 @@ Records and governs the lifecycle of agents and skills.
 ## File Structure
 
 ```
-doc/lifecycle/
+docs/lifecycle/
 ├── README.md (this file)
 ├── agents/
 │   ├── pm.md
@@ -185,15 +185,15 @@ Created: 2026-05-15
 ### Automated Validation
 
 **Scripts**:
-- `scripts/validate-skills.sh`: Validates required sections in all `skills/*.md` files
-- `scripts/validate-agents.sh`: Validates required sections in all `agents/*.md` files
+- `scripts/validate-skills.ts`: Validates required sections in all `skills/*.md` files
+- `scripts/validate-agents.ts`: Validates required sections in all `agents/*.md` files
 - `scripts/validate-doc-folder.sh`: Confirms no lifecycle-related files exist in the workspace root
 
 **Pre-commit hook**:
 ```bash
 # .git/hooks/pre-commit
-bun scripts/validate-skills.sh
-bun scripts/validate-agents.sh
+bun scripts/validate-skills.ts
+bun scripts/validate-agents.ts
 bash scripts/validate-doc-folder.sh
 ```
 
@@ -325,7 +325,7 @@ bash scripts/validate-doc-folder.sh
 
 1. **Create** (Design phase):
    - Create agent/skill file
-   - Create lifecycle document in `doc/lifecycle/`
+   - Create lifecycle document in `docs/lifecycle/`
    - Set phase to "design"
 
 2. **Review**:
