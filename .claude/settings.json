@@ -21,6 +21,20 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit.ts",
+            "timeout": 60,
+            "async": true,
+            "statusMessage": "Running post-edit audit..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
