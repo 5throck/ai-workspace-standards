@@ -130,7 +130,7 @@ When a user attempts to bypass you:
 <!-- VARIANT-SECTION: dispatch-protocol -->
 <!-- INSTRUCTIONS: Replace this section with your project's agent dispatch rules.
      Required fields:
-       Can Lead Phases: [0, 2, 6]
+       Can Lead Phases: [0, 1-2, 6]
        Can Support In: [list phase numbers PM may assist, or empty]
        Auto-Dispatch To: [list specialist agent names for this variant]
        Tier: high

@@ -464,7 +464,7 @@ git init
 git config core.hooksPath .githooks
 
 # Mark .ps1 scripts executable in git index (for WSL / Git Bash users)
-for rel in scripts/dev-sync.ps1 scripts/audit.ps1 scripts/sync-md.ps1 scripts/setup.ps1; do
+for rel in scripts/dev-sync.ps1 scripts/sync-md.ps1 scripts/setup.ps1; do
   [ -f "$rel" ] && git update-index --chmod=+x "$rel" 2>/dev/null || true
 done
 
@@ -516,7 +516,7 @@ fi
 if [ "$SECURITY_OK" = false ]; then
   echo ""
   echo "❌ Security bootstrap check FAILED. Fix the issues above before using this project."
-  echo "   Run 'bash scripts/audit.sh' after fixing to verify."
+  echo "   Run 'bun scripts/audit.ts' after fixing to verify."
   exit 1
 fi
 echo "  ✅ All security bootstrap checks passed"
@@ -524,7 +524,7 @@ echo "  ✅ All security bootstrap checks passed"
 # ── 8. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 echo ""
 echo "Running post-scaffold audit…"
-if bash scripts/audit.sh; then
+if bun "$WORKSPACE_ROOT/scripts/audit.ts"; then
   echo ""
   echo "✅ Project '$PROJECT_NAME' scaffolded and verified at: $PROJECT_DIR"
 else

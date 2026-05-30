@@ -86,18 +86,24 @@ function Show-VenvHint([string]$Mgr = "pip") {
 # Returns the manager string: "uv" or "pip".
 function Ensure-Venv {
     if ($UvBin) {
+        $created = $false
         if (-not (Test-Path ".venv")) {
             Info "Creating Python virtual environment with uv (.venv)??"
             uv venv .venv; Pass ".venv created (uv)"
+            $created = $true
         } else { Info ".venv already exists ??reusing (uv)" }
-        Activate-Venv; return "uv"
+        Activate-Venv
+        return [PSCustomObject]@{ Mgr = "uv"; Created = $created }
     } elseif ($PyBin) {
+        $created = $false
         if (-not (Test-Path ".venv")) {
             Info "uv not found ??creating .venv with $PyBin -m venv (fallback)"
             Info "  Install uv for faster installs: winget install astral-sh.uv  or  pip install uv"
             & $PyBin -m venv .venv; Pass ".venv created (venv)"
+            $created = $true
         } else { Info ".venv already exists ??reusing" }
-        Activate-Venv; return "pip"
+        Activate-Venv
+        return [PSCustomObject]@{ Mgr = "pip"; Created = $created }
     } else {
         Warn "Neither uv nor Python 3 found ??skipping venv"
         Warn "  Install uv (recommended): winget install astral-sh.uv"
@@ -417,7 +423,7 @@ if ($IsMac -or $IsLin) {
             brew install rtk
             if ($LASTEXITCODE -eq 0) { Pass "rtk installed via Homebrew" }
         } elseif (Get-Command cargo -ErrorAction SilentlyContinue) {
-            cargo install --git https://github.com/rtk-ai/rtk
+            cargo install --git https://github.com/rtk-ai/rtk --rev main  # TODO: pin to specific --rev <sha> before production
             if ($LASTEXITCODE -eq 0) { Pass "rtk installed via Cargo" }
         } else {
             Warn "Neither Homebrew nor Cargo found ??skipping rtk installation."
@@ -433,8 +439,8 @@ if ($IsMac -or $IsLin) {
 # ???? 5. Initialize CodeGraph MCP ??????????????????????????????????????????????????????????????????????????????????????????????
 if (Get-Command npx -ErrorAction SilentlyContinue) {
     Info "Initializing and indexing CodeGraph for AI context??"
-    npx -y @colbymchenry/codegraph init 2>$null
-    npx -y @colbymchenry/codegraph index 2>$null
+    npx -y @colbymchenry/codegraph@latest  # TODO: pin version init 2>$null
+    npx -y @colbymchenry/codegraph@latest  # TODO: pin version index 2>$null
     if ($LASTEXITCODE -eq 0) { Pass "CodeGraph initialized successfully" }
     else { Warn "Failed to initialize CodeGraph" }
 } else {
@@ -446,7 +452,7 @@ $Date = Get-Date -Format "yyyy-MM-dd"
 if (-not (Test-Path "memory")) { New-Item -ItemType Directory -Path "memory" -Force | Out-Null }
 $LogPath = "memory\$Date.md"
 if (-not (Test-Path $LogPath)) {
-    Add-Content $LogPath " -Encoding UTF8 ## Session ??chore: initial scaffold`n`n- Project successfully scaffolded from workspace templates.`n"
+    Add-Content $LogPath "## Session - chore: initial scaffold`n`n- Project successfully scaffolded from workspace templates.`n" -Encoding UTF8
 }
 $IndexPath = "memory\MEMORY.md"
 if (Test-Path $IndexPath) {
@@ -461,7 +467,7 @@ if (-not $SkipCommit) {
     try { git rev-parse --git-dir 2>&1 | Out-Null } catch { }
     if ($LASTEXITCODE -eq 0) {
         try { git add -A 2>&1 | Out-Null } catch { }
-        try { git commit -m $msg 2>&1 | Out-Null } catch { }
+        try { git commit -m "chore: initial scaffold" 2>&1 | Out-Null } catch { }
         if ($LASTEXITCODE -eq 0) { Pass "Initial commit created" } else { Warn "Nothing to commit (already committed?)" }
     } else { Warn "Not inside a git repository ??skipping initial commit" }
 } else { Info "Skipping initial commit (-SkipCommit)" }

@@ -7,7 +7,6 @@
     "test": "bun scripts/test-runner.ts integration",
     "test:unit": "bun scripts/test-runner.ts unit",
     "test:e2e": "bun scripts/test-runner.ts scenarios",
-    "test:encoding": "pwsh scripts/test-new-project.ps1 TestEncoding",
     "test:full": "bun scripts/test-runner.ts scenarios && bun scripts/test-runner.ts integration && bun scripts/test-runner.ts unit",
     "verify-skills": "bun scripts/verify-skills.ts",
     "validate-agents": "bun scripts/validate-agents.ts",
@@ -28,6 +27,10 @@
     "publish-to-template": "bun scripts/publish-to-template.ts",
     "list-template-versions": "bun scripts/list-template-versions.ts",
     "sync-skills": "bun scripts/sync-skills.ts",
+    "agent-lifecycle-audit": "bun scripts/agent-lifecycle-audit.ts",
+    "skill-lifecycle-audit": "bun scripts/skill-lifecycle-audit.ts",
+    "readme-lifecycle-audit": "bun scripts/readme-lifecycle-audit.ts",
+    "verify-scripts": "bun scripts/verify-scripts.ts",
     "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
   },
   "devDependencies": {
