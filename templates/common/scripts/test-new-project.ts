@@ -145,7 +145,7 @@ try {
     const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
     const initCmd =
       `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
-      `Invoke-Expression ($content -replace '(?s)^.*?(function Initialize-UTF8Environment.*?^\\})', '$1'); ` +
+      `Invoke-Expression ($content -replace '(?s)^.*?(function Initialize-UTF8Environment.*?\r?\n\}).*$', '$1'); ` +
       `Initialize-UTF8Environment; ` +
       `Write-Host 'Initialize-UTF8Environment: OK'`;
     const initResult = await $`powershell -NoProfile -Command ${initCmd}`.nothrow();
@@ -168,7 +168,7 @@ try {
     const variantPath = join(process.cwd(), 'templates', variantArg).replace(/\\/g, '/');
     const validateCmd =
       `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
-      `Invoke-Expression ($content -replace '(?s)^.*?(function Validate-TemplateSync.*?^\\})', '$1'); ` +
+      `Invoke-Expression ($content -replace '(?s)^.*?(function Validate-TemplateSync.*?\r?\n\}).*$', '$1'); ` +
       `Validate-TemplateSync -CommonPath '${commonPath}' -VariantPath '${variantPath}'; ` +
       `Write-Host 'Validate-TemplateSync: OK'`;
     const vResult = await $`powershell -NoProfile -Command ${validateCmd}`.nothrow();

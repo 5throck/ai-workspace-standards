@@ -103,6 +103,44 @@ if (fs.existsSync(l0Skills)) {
 if (!dryRun) {
   console.log('');
   console.log(`${GREEN}✅ Published ${skillCount} items  L0 (skills/) → L1 (templates/common/skills/)${RESET}`);
+}
+
+// ── Compiled Commands: L0 (.claude/commands, .gemini/commands) → L1 ───────
+console.log('');
+console.log('L0 → L1 publish: .claude/commands/ & .gemini/commands/ → templates/common/...');
+
+const platforms = ['.claude', '.gemini'];
+let cmdCount = 0;
+
+for (const platform of platforms) {
+  const srcDir = path.join(workspaceRoot, platform, 'commands');
+  const dstDir = path.join(workspaceRoot, 'templates', 'common', platform, 'commands');
+
+  if (fs.existsSync(srcDir)) {
+    if (!fs.existsSync(dstDir) && !dryRun) {
+      fs.mkdirSync(dstDir, { recursive: true });
+    }
+    
+    for (const item of fs.readdirSync(srcDir)) {
+      if (!item.endsWith('.md')) continue; // only copy markdown commands
+      
+      const itemPath = path.join(srcDir, item);
+      if (fs.statSync(itemPath).isFile()) {
+        if (dryRun) {
+          console.log(`  [dry-run] ${platform}/commands/${item}`);
+        } else {
+          fs.copyFileSync(itemPath, path.join(dstDir, item));
+          console.log(`  ✅ ${platform}/commands/${item}`);
+          cmdCount++;
+        }
+      }
+    }
+  }
+}
+
+if (!dryRun) {
+  console.log('');
+  console.log(`${GREEN}✅ Published ${cmdCount} command files to L1 (templates/common/)${RESET}`);
 } else {
   console.log('');
   console.log(`${DARKGRAY}(dry-run complete — no files written)${RESET}`);

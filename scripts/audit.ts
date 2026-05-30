@@ -1,6 +1,7 @@
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 
 // Color helpers
 const GREEN = '\x1b[32m';
@@ -327,6 +328,41 @@ if (fs.existsSync(claudeCommandsDir)) {
     }
 }
 
+// Script sync check: workspace root scripts/ vs templates/common/scripts/
+function checkScriptSync() {
+    const rootScriptsDir = 'scripts';
+    const templateScriptsDir = path.join('templates', 'common', 'scripts');
+
+    if (!fs.existsSync(rootScriptsDir) || !fs.existsSync(templateScriptsDir)) {
+        return; // Not applicable in this context
+    }
+
+    const rootFiles = new Set(
+        fs.readdirSync(rootScriptsDir).filter(f => f.endsWith('.ts'))
+    );
+    const templateFiles = new Set(
+        fs.readdirSync(templateScriptsDir).filter(f => f.endsWith('.ts'))
+    );
+
+    const sharedFiles = [...rootFiles].filter(f => templateFiles.has(f));
+
+    let divergentCount = 0;
+    for (const file of sharedFiles) {
+        const rootContent = fs.readFileSync(path.join(rootScriptsDir, file));
+        const templateContent = fs.readFileSync(path.join(templateScriptsDir, file));
+        const rootHash = crypto.createHash('sha256').update(rootContent).digest('hex');
+        const templateHash = crypto.createHash('sha256').update(templateContent).digest('hex');
+        if (rootHash !== templateHash) {
+            Fail(`Script sync: scripts/${file} differs from templates/common/scripts/${file}`);
+            divergentCount++;
+        }
+    }
+
+    if (divergentCount === 0) {
+        Pass(`Script sync: workspace root and templates/common/scripts/ are in sync (${sharedFiles.length} shared files)`);
+    }
+}
+
 // Stale shell/script reference check
 function checkStaleShellReferences() {
     const filesToScan: string[] = [
@@ -386,6 +422,7 @@ function checkStaleShellReferences() {
     }
 }
 
+checkScriptSync();
 checkStaleShellReferences();
 
 console.log("");
