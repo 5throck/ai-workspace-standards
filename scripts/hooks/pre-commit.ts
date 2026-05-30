@@ -100,7 +100,20 @@ async function main() {
     }
   }
 
-  // 5. Secret scan
+  // 5. README sync check
+  const readmeStaged = staged.some(f => /README(\_ko)?\.md$/.test(f));
+  if (readmeStaged) {
+    console.log("\n=== README Synchronization ===");
+    try {
+      await $`bun scripts/verify-readme-sync.ts --pre-commit`;
+      console.log("\x1b[32m[PASS]\x1b[0m README sync: all hashes match");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m README sync check failed — commit blocked.");
+      process.exit(1);
+    }
+  }
+
+  // 7. Secret scan
   console.log("\n=== Secret scan ===");
   try {
     const hasGitleaks = await $`gitleaks version`.nothrow().quiet();
