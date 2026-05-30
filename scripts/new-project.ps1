@@ -623,7 +623,7 @@ if ($LASTEXITCODE -eq 0 -and $hooksPath -match '\.githooks') {
 if (-not $SecurityOk) {
     Write-Host ""
     Write-Host "❌ Security bootstrap check FAILED. Fix the issues above before using this project." -ForegroundColor Red
-    Write-Host "   Run '.\scripts\audit.ps1' after fixing to verify." -ForegroundColor Yellow
+    Write-Host "   Run 'bun audit.ts' after fixing to verify." -ForegroundColor Yellow
     exit 1
 }
 Write-Host "  ✅ All security bootstrap checks passed" -ForegroundColor Green
@@ -634,7 +634,7 @@ Set-Location $OriginalLocation
 # ── 7. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 Write-Host ""
 Write-Host "Running post-scaffold audit..." -ForegroundColor Cyan
-.\scripts\audit.ps1
+bun audit.ts
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "✅ Project '$ProjectName' scaffolded and verified at: $ProjectDir" -ForegroundColor Green
