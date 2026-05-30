@@ -5,7 +5,7 @@ sync_version: 1
 
 # co-work variant
 
-> **Status**: Planned — not yet available
+> **Status**: Stable — v1.0.0
 
 This variant is planned for a future release. It will provide a flexible agent team for:
 - General knowledge work collaboration
