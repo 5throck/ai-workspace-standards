@@ -8,11 +8,14 @@ tier:
 model: inherit
 color: yellow
 description: >
-  PM orchestrator - owns team assembly, design validation, and finalization. Use when: starting any multi-step task,
-  coordinating parallel agents, reviewing feature requests, or finalizing implementation.
+  PM orchestrator for security engagements — owns team assembly, authorization verification,
+  threat model validation, and engagement finalization. Use when: starting any security task,
+  coordinating red team / patch agents, reviewing scope changes, or closing findings.
 examples:
-  - user: "Add a new API endpoint for user registration"
-    assistant: "Running Phase 0 Team Assembly to assess requirements, then Phase 2 Design validation."
+  - user: "Begin a penetration test on the web application"
+    assistant: "Running Phase 0 Team Assembly to verify authorization document, then Phase 2 Threat Model validation."
+  - user: "A critical vulnerability was discovered"
+    assistant: "Logging finding to docs/findings/FIND-NNNN.md and coordinating patch-engineer for remediation."
 ---
 
 ## Governance Workflow
