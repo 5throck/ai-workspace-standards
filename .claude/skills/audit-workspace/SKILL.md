@@ -6,6 +6,8 @@ last_reviewed: 2026-05-30
 status: active
 owner: auditor
 prerequisites: PowerShell or Bash
+metadata:
+  type: process
 ---
 
 # 🛠️ Skill: audit-workspace

@@ -6,6 +6,8 @@ last_reviewed: 2026-05-30
 status: active
 owner: security-expert
 prerequisites: gitleaks
+metadata:
+  type: process
 ---
 
 # 🛠️ Skill: security-scan
