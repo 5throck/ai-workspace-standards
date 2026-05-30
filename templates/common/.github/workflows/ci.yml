@@ -16,8 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run audit.sh
-        run: bash scripts/audit.sh
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install script dependencies
+        working-directory: scripts
+        run: bun install
+        continue-on-error: true
+
+      - name: Run audit
+        run: bun scripts/audit.ts
 
   secret-scan:
     name: Secret Scan
