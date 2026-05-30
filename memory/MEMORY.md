@@ -17,6 +17,7 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | C-SK-02 Resolution Plan — Variant PM Migration | [meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md](meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md) |
 | 2026-05-30 | Common PM Skeleton Design — Baseline Methodology | [meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md](meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md) |
 | 2026-05-30 | Common Lifecycle Governance Deep Dive v2 | [meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md](meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md) |
 | 2026-05-30 | Common Skills and Agents Central Management Governance | [meeting-2026-05-30-common-skills-and-agents-central-managem.md](meeting-2026-05-30-common-skills-and-agents-central-managem.md) |

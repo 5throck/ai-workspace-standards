@@ -16,6 +16,7 @@
       "version": "1.0.0",
       "overridable": true,
       "override_type_allowed": ["additive", "replacement"],
+      "expected_override_all_variants": true,
       "description": "Project Manager — orchestrates phases 0, 2, 6; universal across all variants",
       "skeleton_sections": [
         "Role",

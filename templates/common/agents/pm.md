@@ -177,7 +177,7 @@ When `/meeting` is invoked, the AI engine (Claude/Antigravity/Gemini) role-plays
 **What the AI engine does as meeting orchestrator:**
 1. Reads all participant `agents/*.md` files upfront to load each persona
 2. Plays each agent in turn, fully in character, responding to what prior speakers said
-3. After all rounds, plays Auditor (or equivalent synthesis agent) to summarize agreements and action items
+3. After all rounds, plays Auditor (or equivalent synthesis agent) to synthesize agreements and action items
 4. Writes the full transcript to `memory/meeting-YYYY-MM-DD-HHMM.md`
 
 **PM never:**

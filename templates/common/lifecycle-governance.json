@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "layers": {
+    "templates-variants": {
+      "orchestrator": null,
+      "domains": {
+        "variant": {
+          "applicable": true,
+          "mandatory": true
+        },
+        "agent": {
+          "applicable": true,
+          "mandatory": true
+        },
+        "skill": {
+          "applicable": true,
+          "mandatory": true
+        },
+        "lifecycle": {
+          "applicable": true,
+          "mandatory": false
+        }
+      }
+    }
+  },
+  "variantValidationPolicy": {
+    "mandatoryBeforeProjectCreation": ["variant", "agent", "skill"],
+    "warningOnly": ["lifecycle"]
+  },
+  "status": "stable",
+  "lastUpdated": "2026-05-30",
+  "description": "Lifecycle governance for templates/common — L1 base layer propagated to all co-* variants",
+  "history": [
+    {
+      "date": "2026-05-28",
+      "event": "initial",
+      "note": "Lifecycle governance established for templates/common at v1.0.0"
+    },
+    {
+      "date": "2026-05-30",
+      "event": "pm-merge-migration",
+      "note": "Updated for frontmatter merge migration - governance inheritance confirmed"
+    }
+  ]
+}
