@@ -552,8 +552,11 @@ if ($LASTEXITCODE -eq 0) {
 # -- 9. Environment setup (env file, deps, initial commit) -------------------- # TEST: none
 Write-Host ""
 Write-Host "Running environment setup..." -ForegroundColor Cyan
-& "$ProjectDir\scripts\setup.ps1"
-if ($LASTEXITCODE -ne 0) {
+Set-Location $ProjectDir
+& ".\scripts\setup.ps1"
+$setupExit = $LASTEXITCODE
+Set-Location $OriginalLocation
+if ($setupExit -ne 0) {
     Write-Host ""
     Write-Host "[WARN]  Setup encountered an error - run '.\scripts\setup.ps1' manually to retry." -ForegroundColor Yellow
 }
