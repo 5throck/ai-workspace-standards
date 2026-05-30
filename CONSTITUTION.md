@@ -118,6 +118,55 @@ Every new project starts with `/new-project` (Claude Code), `bash scripts/new-pr
 
 ---
 
+### 7.5 Common Layer Governance (`templates/common/`)
+
+The `templates/common/` directory is the shared foundation for all variant templates (`co-design`, `co-develop`, `co-work`, `co-security`). When `/new-project` runs, common content is copied first; variant-specific overlays are applied on top.
+
+#### Purpose
+- Agents and skills that are identical across all variants live in `templates/common/agents/` and `templates/common/skills/`.
+- The authoritative manifest of common content is `templates/common/common-contract.json`. Every file listed there is guaranteed to be present in every generated project.
+- Variant templates may extend or replace common files via the override system described below.
+
+#### Classification Criteria
+
+| Category | Condition | Examples |
+|----------|-----------|---------|
+| **Common agent** | Exists identically across all variants | `pm.md`, `lifecycle-manager.md` |
+| **Common skill** | Used in all variants without modification | `project-review`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `skill-lifecycle-manager`, `agent-lifecycle-manager` |
+| **Variant-specific** | Unique to one variant; not applicable elsewhere | Domain-expert agents, variant-only skills |
+
+#### Override Types
+
+| Type | When to use | Approval | `variant.json` declaration |
+|------|-------------|----------|----------------------------|
+| **Additive** | Variant appends sections to a common file | Auto-approved | `"type": "additive"` |
+| **Replacement** | Variant modifies common content | Requires lifecycle-manager review before commit | `"type": "replacement"` |
+
+Additive overrides are concatenated with the common file during scaffolding. Replacement overrides fully substitute the common file. Both types require `reason` and `since` fields in the `variant.json` entry.
+
+#### Anti-Swelling Rule
+If **≥ 50 %** of variants declare an override for the same agent or skill, the common definition must be updated instead of accumulating per-variant overrides. `bun scripts/validate-templates.ts` enforces this threshold and will fail with an actionable error listing the affected files.
+
+#### Adding a New Common Agent or Skill
+1. Add the file to `templates/common/agents/` or `templates/common/skills/`.
+2. Register it in `templates/common/common-contract.json`.
+3. Run `bun scripts/validate-templates.ts` — must exit 0 before committing.
+
+#### Adding a Variant Override
+1. Create the partial (additive) or replacement file under `templates/co-xxx/agents/` or `templates/co-xxx/skills/`.
+2. Add an entry to `templates/co-xxx/variant.json` under `agent_overrides` or `skill_overrides`:
+   ```json
+   {
+     "file": "agents/pm.md",
+     "type": "additive",
+     "reason": "Adds co-design-specific PM rituals",
+     "since": "2026-05-30"
+   }
+   ```
+3. For **replacement** overrides, open a PR and request lifecycle-manager review before merging.
+
+---
+
 ### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
 
 Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.

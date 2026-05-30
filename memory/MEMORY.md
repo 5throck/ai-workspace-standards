@@ -17,6 +17,15 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-05-30 | Command Documentation Inconsistency | [meeting-2026-05-30-command-documentation-inconsistency.md](meeting-2026-05-30-command-documentation-inconsistency.md) |
+| 2026-05-30 | C-SK-02 Resolution Plan — Variant PM Migration | [meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md](meeting-2026-05-30-c-sk-02-resolution-plan-variant-pm-migra.md) |
+| 2026-05-30 | Common PM Skeleton Design — Baseline Methodology | [meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md](meeting-2026-05-30-common-pm-skeleton-design-baseline-metho.md) |
+| 2026-05-30 | Common Lifecycle Governance Deep Dive v2 | [meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md](meeting-2026-05-30-common-lifecycle-governance-deep-dive-v2.md) |
+| 2026-05-30 | Common Skills and Agents Central Management Governance | [meeting-2026-05-30-common-skills-and-agents-central-managem.md](meeting-2026-05-30-common-skills-and-agents-central-managem.md) |
+| 2026-05-30 | Project Review Skill Design v2 — Naming and Scaffolding | [meeting-2026-05-30-project-review-skill-design-v2-naming-an.md](meeting-2026-05-30-project-review-skill-design-v2-naming-an.md) |
+| 2026-05-30 | Workspace Review Skill Design | [meeting-2026-05-30-workspace-review-skill-design.md](meeting-2026-05-30-workspace-review-skill-design.md) |
+| 2026-05-30 | SSOT Design for Phase Numbering Schema | [meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md](meeting-2026-05-30-ssot-design-for-phase-numbering-schema.md) |
+| 2026-05-30 | Phase 1/2/3 Root Cause Analysis and Prevention Measures | [meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md](meeting-2026-05-30-phase-1-2-3-root-cause-analysis-and-prev.md) |
 | 2026-05-29 | Review of PM Agent Facilitator Transition Implementation | [meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md](meeting-2026-05-29-review-of-pm-agent-facilitator-transitio.md) |
 | 2026-05-29 | 7-item system improvement plan — PM workflow, 3-tier todo, lifecycle docs, skill audit, file structure | [meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md](meeting-2026-05-29-7-item-system-improvement-plan-pm-workfl.md) |
 | 2026-05-29 | lifecycle-manager scope reduction — secretary role, L0+L1 dual deployment | [meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md](meeting-2026-05-29-lifecycle-manager-scope-reduction-secret.md) |

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12",
+  "version": "1.0.0",
+  "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.sh and may declare overrides in their variant.json.",
+  "governance": {
+    "anti_swelling_threshold": 0.5,
+    "anti_swelling_note": "If >= 50% of variants override the same agent, the common definition should be updated instead",
+    "override_types": {
+      "additive": "Variant adds sections to common content. Auto-approved. Scaffolding: concatenate common + partial.",
+      "replacement": "Variant modifies common content. Requires lifecycle-manager review. Scaffolding: variant file replaces common."
+    }
+  },
+  "common_agents": {
+    "pm": {
+      "source": "agents/pm.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": ["additive", "replacement"],
+      "expected_override_all_variants": true,
+      "description": "Project Manager — orchestrates phases 0, 2, 6; universal across all variants",
+      "skeleton_sections": [
+        "Role",
+        "YOU ARE THE SINGLE ENTRY POINT",
+        "Consensus-Driven Facilitation Model",
+        "Proactive Review Triggers (T-02)",
+        "QA Self-Check Trigger (T-03)",
+        "Meeting Facilitation",
+        "Constraints"
+      ],
+      "variant_sections": [
+        "Agent Roster",
+        "Governance Workflow",
+        "Dispatch Protocol"
+      ]
+    },
+    "lifecycle-manager": {
+      "source": "agents/lifecycle-manager.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Lifecycle state monitor — governance record keeper; identical role across all variants",
+      "skeleton_sections": ["Role", "Responsibilities", "Constraints", "Dispatch Protocol"],
+      "variant_sections": []
+    }
+  },
+  "common_skills": {
+    "project-review": {
+      "source": "skills/project-review/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Comprehensive parallel project review — universal across all variants"
+    },
+    "meeting-facilitation": {
+      "source": "skills/meeting-facilitation/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Structured multi-agent meeting facilitation"
+    },
+    "audit-workspace": {
+      "source": "skills/audit-workspace/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Workspace standards audit"
+    },
+    "security-scan": {
+      "source": "skills/security-scan/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Security vulnerability scan"
+    },
+    "skill-lifecycle-manager": {
+      "source": "skills/skill-lifecycle-manager/SKILL.md",
+      "version": "1.2.0",
+      "overridable": false,
+      "description": "Skill lifecycle management"
+    },
+    "agent-lifecycle-manager": {
+      "source": "skills/agent-lifecycle-manager/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Agent lifecycle management"
+    }
+  }
+}

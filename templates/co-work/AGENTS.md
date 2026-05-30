@@ -123,6 +123,7 @@ All specialist agents below are dispatched ONLY through PM:
 | **Agent Lifecycle Manager** | `skills/agent-lifecycle-manager/SKILL.md` | PM managing agent lifecycle and validation |
 | **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | PM managing skill lifecycle and validation |
 | **API Documentation** | `.claude/skills/api-documentation/SKILL.md` | Documenting REST APIs, GraphQL interfaces, SDKs, and developer-facing technical specifications |
+| project-review | `.claude/skills/project-review/` | pm | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
 
 ---
 

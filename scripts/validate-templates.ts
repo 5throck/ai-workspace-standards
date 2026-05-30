@@ -12,8 +12,9 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { cwd } from 'node:process';
+import { load } from 'js-yaml';
 
 interface VariantManifest {
   name: string;
@@ -308,6 +309,69 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
   return fields;
 }
 
+/**
+ * Resolve extends pattern in frontmatter
+ * If file has "extends: path/to/skeleton.md", read skeleton and merge frontmatters
+ * @param filePath - Absolute path to the variant file
+ * @param frontmatter - Parsed frontmatter fields from the variant file
+ * @returns Merged frontmatter fields (skeleton + variant overrides)
+ */
+function resolveExtends(filePath: string, frontmatter: Record<string, true>): Record<string, true> {
+  if (!frontmatter.extends) {
+    return frontmatter; // No extends, return as-is
+  }
+
+  // Extract the extends path from the raw content (we need the actual path string, not just 'true')
+  const rawContent = readFileSync(filePath, 'utf-8');
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return frontmatter;
+
+  // Parse the extends value from YAML
+  let extendsPath: string | undefined;
+  try {
+    const yamlObj = load(match[1]) as Record<string, unknown>;
+    extendsPath = yamlObj.extends as string | undefined;
+  } catch {
+    return frontmatter; // Invalid YAML, return original
+  }
+
+  if (!extendsPath) return frontmatter;
+
+  // Resolve skeleton path relative to current file
+  const skeletonPath = resolve(dirname(filePath), extendsPath);
+
+  try {
+    if (!existsSync(skeletonPath)) {
+      console.warn(`[WARN] Skeleton file not found: ${skeletonPath}`);
+      return frontmatter;
+    }
+
+    const skeletonContent = readFileSync(skeletonPath, 'utf-8');
+    const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!skeletonMatch) {
+      // No frontmatter in skeleton, return variant frontmatter
+      return frontmatter;
+    }
+
+    const skeletonFrontmatter = parseFrontmatter(skeletonContent);
+
+    // Merge: skeleton base + variant overrides (variant takes precedence)
+    const merged = { ...skeletonFrontmatter };
+    for (const key of Object.keys(frontmatter)) {
+      if (key !== 'extends') {
+        merged[key] = frontmatter[key];
+      }
+    }
+
+    return merged;
+  } catch (error) {
+    console.warn(`[WARN] Failed to resolve extends: ${skeletonPath}`, error);
+    return frontmatter; // Fallback to original
+  }
+}
+
 // Check 3 & 4: Agent frontmatter and required sections
 function checkAgents(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 3-4: Agent files in ${variant} ===`);
@@ -351,15 +415,54 @@ function checkAgents(variant: string): void {
     const content = normalizeContent(rawContent);
     const fields = parseFrontmatter(rawContent);
 
+    // Resolve extends pattern - merge skeleton frontmatter with variant frontmatter
+    const resolvedFields = resolveExtends(filePath, fields);
+
     // Check frontmatter (field must exist as a key, value can be empty/block)
-    const missingFields = requiredFrontmatter.filter(f => !(f in fields));
+    const missingFields = requiredFrontmatter.filter(f => !(f in resolvedFields));
     if (missingFields.length > 0) {
       fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`,
         `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(', ')}`);
     } else {
-      // Validate status enum value (extract actual value from raw content)
-      const statusLine = rawContent.split('\n').find(l => l.match(/^status:\s*\S/));
-      const statusVal = statusLine ? statusLine.replace(/^status:\s*/, '').trim() : '';
+      // Validate status enum value (extract actual value from resolved content)
+      // If file has extends, we need to check the skeleton file for the status value
+      let statusVal = '';
+
+      // Check if the original (non-resolved) frontmatter has extends
+      const hasExtends = 'extends' in fields;
+
+      if (hasExtends) {
+        // Read status from skeleton file
+        const extendsLine = rawContent.split('\n').find(l => l.match(/^extends:\s*\S/));
+        const extendsVal = extendsLine ? extendsLine.replace(/^extends:\s*/, '').trim() : '';
+        const skeletonPath = resolve(dirname(filePath), extendsVal);
+
+        try {
+          const skeletonContent = readFileSync(skeletonPath, 'utf-8');
+          // Extract status from skeleton frontmatter
+          const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
+          if (skeletonMatch) {
+            const skeletonYaml = load(skeletonMatch[1]) as Record<string, unknown>;
+            statusVal = (skeletonYaml.status as string) ?? '';
+          }
+        } catch (error) {
+          // If skeleton read fails, fall back to variant file
+          console.warn(`[WARN] Failed to read skeleton for status validation: ${skeletonPath}`, error);
+          const variantMatch = content.match(/^---\n([\s\S]*?)\n---/);
+          if (variantMatch) {
+            const variantYaml = load(variantMatch[1]) as Record<string, unknown>;
+            statusVal = (variantYaml.status as string) ?? '';
+          }
+        }
+      } else {
+        // No extends, read from variant file directly
+        const match = content.match(/^---\n([\s\S]*?)\n---/);
+        if (match) {
+          const yamlObj = load(match[1]) as Record<string, unknown>;
+          statusVal = (yamlObj.status as string) ?? '';
+        }
+      }
+
       if (!validAgentStatuses.includes(statusVal)) {
         fail(variant, 'agent-status-invalid',
           `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(' | ')})`,
@@ -370,8 +473,27 @@ function checkAgents(variant: string): void {
     }
 
     // Check required sections
-    const hasMeetingSection = MEETING_SECTIONS.some(s => content.includes(s));
-    const hasDispatchSection = content.includes(DISPATCH_SECTION);
+    // For additive overrides, invariant sections may be missing from variant file (provided by skeleton)
+    const agentName = file.replace('.md', '');
+    const variantJsonForAgent = join(TEMPLATES_DIR, variant, 'variant.json');
+    let agentOverrideType = 'replacement';
+    if (existsSync(variantJsonForAgent)) {
+      try {
+        const vj = JSON.parse(readFileSync(variantJsonForAgent, 'utf-8'));
+        agentOverrideType = vj.agent_overrides?.[agentName]?.type ?? 'replacement';
+      } catch { /* keep default */ }
+    }
+    const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', file);
+    const commonAgentContent = existsSync(commonAgentPath)
+      ? normalizeContent(readFileSync(commonAgentPath, 'utf-8'))
+      : '';
+
+    // Section is "present" if in variant file OR (additive override AND in skeleton)
+    const hasMeetingSection = MEETING_SECTIONS.some(s =>
+      content.includes(s) || (agentOverrideType === 'additive' && commonAgentContent.includes(s))
+    );
+    const hasDispatchSection = content.includes(DISPATCH_SECTION) ||
+      (agentOverrideType === 'additive' && commonAgentContent.includes(DISPATCH_SECTION));
     const missingSections: string[] = [];
     if (!hasMeetingSection) missingSections.push('## Meeting Participation (or ## Meeting Facilitation)');
     if (!hasDispatchSection) missingSections.push(DISPATCH_SECTION);
@@ -407,8 +529,15 @@ function checkAgentsRoster(variant: string): void {
     f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
   ));
 
+  // Also consider agents inherited from templates/common/agents/ as "present"
+  const commonAgentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  const commonAgentFiles = existsSync(commonAgentsDir)
+    ? new Set(readdirSync(commonAgentsDir).filter(f => f.endsWith('.md') && !f.startsWith('_') && !f.startsWith('README')))
+    : new Set<string>();
+  const allAvailableFiles = new Set([...actualFiles, ...commonAgentFiles]);
+
   const orphaned = [...actualFiles].filter(f => !registeredFiles.has(f));
-  const missing = [...registeredFiles].filter(f => !actualFiles.has(f));
+  const missing = [...registeredFiles].filter(f => !allAvailableFiles.has(f));
 
   if (orphaned.length > 0) {
     fail(variant, 'agents-roster', `Orphaned agent files (not in AGENTS.md): ${orphaned.join(', ')}`, 'Add to AGENTS.md roster table');
@@ -712,9 +841,13 @@ function checkVariantContract(variant: string): void {
     const variantDir = join(TEMPLATES_DIR, variant);
     const missingFiles: string[] = [];
 
+    const commonDir = join(TEMPLATES_DIR, 'common');
     for (const requiredFile of contract.required) {
       const filePath = join(variantDir, requiredFile);
-      if (!existsSync(filePath)) {
+      const commonFilePath = join(commonDir, requiredFile);
+      // A required file is satisfied if it exists in the variant OR in templates/common/
+      // (common-inherited files are copied to the project by new-project.sh)
+      if (!existsSync(filePath) && !existsSync(commonFilePath)) {
         missingFiles.push(requiredFile);
       }
     }
@@ -861,6 +994,446 @@ function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest):
   }
 }
 
+// Check WS-01: workspace-schema.json consistency
+function checkWorkspaceSchema(): void {
+  if (!JSON_MODE) console.log('\n=== Check WS-01: workspace-schema.json consistency ===');
+
+  const schemaPath = join(ROOT, 'workspace-schema.json');
+  if (!existsSync(schemaPath)) {
+    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at workspace root', 'Create workspace-schema.json with workflow.phases and agent_tiers');
+    return;
+  }
+
+  let schema: Record<string, unknown>;
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    fail('root', 'ws-schema-invalid', 'workspace-schema.json is not valid JSON');
+    return;
+  }
+
+  pass('workspace-schema.json: present and valid JSON');
+
+  const workflow = schema.workflow as Record<string, unknown> | undefined;
+  const phases = workflow?.phases as Record<string, unknown> | undefined;
+  const agentTiers = schema.agent_tiers as Record<string, string> | undefined;
+
+  if (!phases) {
+    fail('root', 'ws-schema-structure', 'workspace-schema.json missing workflow.phases');
+    return;
+  }
+
+  const schemaPmOwned = (phases.pm_owned as string[] | undefined) ?? [];
+  const schemaCanonical = (phases.canonical as string[] | undefined) ?? [];
+  const schemaCount = phases.count as number | undefined;
+
+  // --- WS-01 Check 1: agents/pm.md Can Lead Phases vs schema pm_owned ---
+  const pmMdPath = join(ROOT, 'agents', 'pm.md');
+  if (!existsSync(pmMdPath)) {
+    warn('root', 'ws-01-pm-missing', 'agents/pm.md not found — skipping PM phase check');
+  } else {
+    const pmContent = readFileSync(pmMdPath, 'utf-8');
+    const phaseLineMatch = pmContent.match(/\*{0,2}Can Lead Phases\*{0,2}\s*:\s*\[([^\]]+)\]/);
+    if (!phaseLineMatch) {
+      warn('root', 'ws-01-pm-phases', 'agents/pm.md: Can Lead Phases line not found');
+    } else {
+      const pmPhases = phaseLineMatch[1].split(',').map(s => s.trim().replace(/"/g, '').replace(/'/g, ''));
+      const pmSorted = [...pmPhases].sort();
+      const schemaSorted = [...schemaPmOwned].sort();
+      if (JSON.stringify(pmSorted) === JSON.stringify(schemaSorted)) {
+        pass(`agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] matches schema pm_owned`);
+      } else {
+        fail('root', 'ws-01-pm-phases',
+          `[FAIL] agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] does not match workspace-schema.json pm_owned [${schemaPmOwned.join(', ')}]`,
+          'Update Can Lead Phases in agents/pm.md or pm_owned in workspace-schema.json'
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 2: templates/common/phase-definitions.md canonical phases ---
+  const phaseDefPath = join(ROOT, 'templates', 'common', 'phase-definitions.md');
+  if (!existsSync(phaseDefPath)) {
+    warn('root', 'ws-01-phase-defs-missing', 'templates/common/phase-definitions.md not found — skipping canonical phase check');
+  } else {
+    const phaseDefContent = readFileSync(phaseDefPath, 'utf-8');
+    // Extract phase identifiers from Phase Overview table rows (first column)
+    const tableRowRegex = /^\|\s*([0-9][0-9-]*)\s*\|/gm;
+    const foundPhases = new Set<string>();
+    for (const m of phaseDefContent.matchAll(tableRowRegex)) {
+      foundPhases.add(m[1].trim());
+    }
+    const missingFromDoc = schemaCanonical.filter(p => !foundPhases.has(p));
+    if (missingFromDoc.length === 0) {
+      pass(`templates/common/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
+    } else {
+      for (const missing of missingFromDoc) {
+        fail('root', 'ws-01-phase-defs',
+          `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
+          `Add phase "${missing}" to the Phase Overview table in templates/common/phase-definitions.md`
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 3: docs/constitution/05-multi-agent-architecture.md phase count ---
+  const constitutionPath = join(ROOT, 'docs', 'constitution', '05-multi-agent-architecture.md');
+  if (!existsSync(constitutionPath)) {
+    warn('root', 'ws-01-constitution-missing', 'docs/constitution/05-multi-agent-architecture.md not found — skipping phase count check');
+  } else {
+    const constitutionContent = readFileSync(constitutionPath, 'utf-8');
+    // Find §5.4 section (including heading line) and look for "N phases" or "N-phase" pattern
+    const section54Match = constitutionContent.match(/(#{1,4}\s*5\.4[^\n]*\n[\s\S]*?)(?=\n#{1,4}\s*5\.\d|$)/);
+    const searchContent = section54Match ? section54Match[1] : constitutionContent;
+    const phaseCountMatch = searchContent.match(/(\d+)[- ]phase/i) ?? searchContent.match(/(\d+)\s+phases/i);
+    if (!phaseCountMatch) {
+      warn('root', 'ws-01-constitution-count', 'constitution §5.4: phase count pattern not found (may be stated differently) — manual review recommended');
+    } else {
+      const declaredCount = parseInt(phaseCountMatch[1], 10);
+      if (declaredCount === schemaCount) {
+        pass(`docs/constitution/05-multi-agent-architecture.md §5.4: declares ${declaredCount} phases — matches schema`);
+      } else {
+        fail('root', 'ws-01-constitution-count',
+          `[FAIL] constitution §5.4: declares ${declaredCount} phases, schema requires ${schemaCount}`,
+          `Update phase count in docs/constitution/05-multi-agent-architecture.md §5.4 or workspace-schema.json workflow.phases.count`
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 4: agents/*.md tier frontmatter vs schema agent_tiers ---
+  if (!agentTiers) {
+    warn('root', 'ws-01-agent-tiers-missing', 'workspace-schema.json missing agent_tiers — skipping tier check');
+  } else {
+    const agentsDir = join(ROOT, 'agents');
+    if (!existsSync(agentsDir)) {
+      warn('root', 'ws-01-agents-dir', 'agents/ directory not found at workspace root — skipping tier check');
+    } else {
+      const agentFiles = readdirSync(agentsDir).filter(f =>
+        f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
+      );
+
+      const tierToModelKeyword: Record<string, string> = {
+        high: 'opus',
+        medium: 'sonnet',
+        low: 'haiku',
+      };
+
+      for (const file of agentFiles) {
+        const agentName = file.replace(/\.md$/, '');
+        const filePath = join(agentsDir, file);
+        const rawContent = readFileSync(filePath, 'utf-8');
+        const content = normalizeContent(rawContent);
+
+        // Extract frontmatter block
+        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (!fmMatch) continue;
+        const fm = fmMatch[1];
+
+        // Check if this agent is in schema
+        if (!(agentName in agentTiers)) {
+          // Not in schema — skip without warning (variant-specific agents are not in schema)
+          continue;
+        }
+
+        const expectedTier = agentTiers[agentName];
+
+        // Try simple tier: high/medium/low
+        const simpleTierMatch = fm.match(/^tier:\s*(high|medium|low)\s*$/m);
+        if (simpleTierMatch) {
+          const actualTier = simpleTierMatch[1];
+          if (actualTier === expectedTier) {
+            pass(`agents/${file}: tier "${actualTier}" matches schema`);
+          } else {
+            fail('root', 'ws-01-agent-tier',
+              `[FAIL] agents/${file}: tier "${actualTier}" does not match schema "${expectedTier}" for agent "${agentName}"`,
+              `Update tier in agents/${file} or agent_tiers in workspace-schema.json`
+            );
+          }
+          continue;
+        }
+
+        // Complex tier object — check claude: sub-field
+        const claudeTierMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
+        if (claudeTierMatch) {
+          const claudeTier = claudeTierMatch[1];
+          const expectedKeyword = tierToModelKeyword[expectedTier] ?? expectedTier;
+          // Also check the comment for model name as secondary signal
+          const claudeLine = fm.split('\n').find(l => l.match(/^\s+claude:/));
+          const modelHint = claudeLine?.toLowerCase() ?? '';
+          if (claudeTier === expectedTier) {
+            pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
+          } else if (!modelHint.includes(expectedKeyword)) {
+            warn('root', 'ws-01-agent-tier-complex',
+              `agents/${file}: complex tier — claude tier "${claudeTier}" does not match schema "${expectedTier}" for "${agentName}" (manual review recommended)`
+            );
+          } else {
+            pass(`agents/${file}: claude tier "${claudeTier}" matches schema (model hint confirms "${expectedKeyword}")`);
+          }
+        } else {
+          // Can't reliably parse tier
+          warn('root', 'ws-01-agent-tier-unreadable',
+            `agents/${file}: tier block too complex to parse reliably — manual review recommended`
+          );
+        }
+      }
+    }
+  }
+}
+
+// Check WS-02: common-contract.json compliance (C-CM-01, C-CM-02, C-SK-01, C-AG-01, C-AG-02, WS-02)
+function checkCommonContract(): void {
+  if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
+
+  const contractPath = join(TEMPLATES_DIR, 'common', 'common-contract.json');
+  if (!existsSync(contractPath)) {
+    warn('common', 'common-contract-missing', 'templates/common/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
+    return;
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    fail('common', 'common-contract-invalid', 'templates/common/common-contract.json is not valid JSON');
+    return;
+  }
+
+  const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
+  const commonAgents = Object.keys((contract.common_agents as Record<string, unknown>) ?? {});
+
+  const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
+    const fullPath = join(TEMPLATES_DIR, e);
+    try { return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'; } catch { return false; }
+  });
+
+  // C-CM-01 (ERROR): common/skills/ matches common-contract.json
+  for (const skillName of commonSkills) {
+    const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(skillPath)) {
+      fail('common', 'C-CM-01', `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`, `Create templates/common/skills/${skillName}/SKILL.md`);
+    } else {
+      pass(`C-CM-01: common skill '${skillName}' → SKILL.md present`);
+    }
+  }
+
+  // C-CM-02 (ERROR): common/agents/ matches common-contract.json
+  for (const agentName of commonAgents) {
+    const agentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(agentPath)) {
+      fail('common', 'C-CM-02', `common-contract.json lists common agent '${agentName}' but templates/common/agents/${agentName}.md is missing`, `Create templates/common/agents/${agentName}.md`);
+    } else {
+      pass(`C-CM-02: common agent '${agentName}' → agent file present`);
+    }
+  }
+
+  // C-SK-01 (WARNING): No duplicate common skills in variant dirs
+  for (const skillName of commonSkills) {
+    const commonSkillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(commonSkillPath)) continue; // C-CM-01 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonSkillPath, 'utf-8'));
+    for (const variant of variantDirs) {
+      const variantSkillPath = join(TEMPLATES_DIR, variant, 'skills', skillName, 'SKILL.md');
+      if (existsSync(variantSkillPath)) {
+        const variantContent = normalizeContent(readFileSync(variantSkillPath, 'utf-8'));
+        if (variantContent === commonContent) {
+          warn(variant, 'C-SK-01', `Duplicate common skill '${skillName}' in ${variant}/skills/ — remove variant copy to inherit from common`);
+        }
+      }
+    }
+  }
+
+  // C-AG-01 (WARNING): No duplicate common agents in variant dirs
+  for (const agentName of commonAgents) {
+    const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonAgentPath, 'utf-8'));
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      if (existsSync(variantAgentPath)) {
+        const variantContent = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+        if (variantContent === commonContent) {
+          warn(variant, 'C-AG-01', `Duplicate common agent '${agentName}' in ${variant}/agents/ — remove variant copy to inherit from common`);
+        }
+      }
+    }
+  }
+
+  // C-AG-02 (INFO/WARNING): Replacement overrides flagged
+  for (const variant of variantDirs) {
+    const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+    if (!existsSync(variantJsonPath)) continue;
+    let variantJson: Record<string, unknown>;
+    try {
+      variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+    } catch { continue; }
+    const agentOverrides = variantJson.agent_overrides as Record<string, Record<string, unknown>> | undefined;
+    if (!agentOverrides) continue;
+    for (const [agentName, override] of Object.entries(agentOverrides)) {
+      if (override.type === 'replacement') {
+        const reason = (override.reason as string | undefined) ?? 'no reason given';
+        warn(variant, 'C-AG-02', `${variant}: ${agentName} has replacement override (reason: ${reason}) — lifecycle-manager review confirmed`);
+      }
+    }
+  }
+
+  // C-SK-02: Invariant sections identical across all variant pm.md files
+  // Also: skeleton must not contain variant-specific agent names
+  const commonAgentsMap = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
+  for (const [agentName, agentMeta] of Object.entries(commonAgentsMap)) {
+    const skeletonSections = (agentMeta.skeleton_sections as string[] | undefined) ?? [];
+    if (skeletonSections.length === 0) continue;
+
+    const skeletonPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    if (!existsSync(skeletonPath)) continue; // C-CM-02 already flagged this
+
+    const skeletonRaw = normalizeContent(readFileSync(skeletonPath, 'utf-8'));
+
+    // Helper: extract section content (heading line + body until next ## heading)
+    function extractSection(content: string, heading: string): string | null {
+      // Match the heading line (## heading, possibly with bold/emoji prefix)
+      // We search for lines that contain the heading text after ##
+      const lines = content.split('\n');
+      let startIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('## ') && line.includes(heading)) {
+          startIdx = i;
+          break;
+        }
+      }
+      if (startIdx === -1) return null;
+
+      // Collect until next ## heading
+      const sectionLines: string[] = [lines[startIdx]];
+      for (let i = startIdx + 1; i < lines.length; i++) {
+        if (lines[i].startsWith('## ')) break;
+        sectionLines.push(lines[i]);
+      }
+      return sectionLines.join('\n').trimEnd();
+    }
+
+    // Build map of invariant section content from skeleton
+    const invariantSections = new Map<string, string>();
+    for (const sectionTitle of skeletonSections) {
+      const content = extractSection(skeletonRaw, sectionTitle);
+      if (content !== null) {
+        invariantSections.set(sectionTitle, content);
+      }
+    }
+
+    // Check each variant
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      if (!existsSync(variantAgentPath)) continue; // variant inherits from common — no override to check
+
+      const variantRaw = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+
+      // Check if variant uses extends pattern
+      const variantFields = parseFrontmatter(variantRaw);
+      const hasExtends = 'extends' in variantFields;
+
+      if (hasExtends) {
+        // Variant using extends should ONLY contain the extends field in frontmatter
+        // This is the new pattern — variant is a pure reference to skeleton
+        const fieldKeys = Object.keys(variantFields);
+        const nonExtendsKeys = fieldKeys.filter(k => k !== 'extends');
+
+        if (nonExtendsKeys.length > 0) {
+          warn(variant, 'C-SK-02',
+            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has other frontmatter fields: ${nonExtendsKeys.join(', ')} — with extends, only the extends field should be present`,
+            `Remove extra frontmatter fields from variant file or remove extends and use additive override pattern`
+          );
+        }
+
+        // Skip the rest of the checks for extends-based variants
+        // The skeleton file is already validated above
+        continue;
+      }
+
+      // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
+      if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
+        fail(variant, 'C-SK-02',
+          `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
+          `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`
+        );
+      }
+
+      // Sub-check B: invariant sections — behavior depends on override type
+      // additive: skeleton provides invariant sections → missing in variant is EXPECTED (skip warn)
+      // replacement: variant provides everything → missing invariant = may have been stripped (warn)
+      // both: if invariant section IS present but DIFFERENT → always warn
+      const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+      let overrideType = 'replacement'; // conservative default
+      if (existsSync(variantJsonPath)) {
+        try {
+          const vj = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+          overrideType = vj.agent_overrides?.[agentName]?.type ?? 'replacement';
+        } catch { /* keep default */ }
+      }
+
+      for (const [sectionTitle, skeletonContent] of invariantSections) {
+        const variantContent = extractSection(variantRaw, sectionTitle);
+        if (variantContent === null) {
+          if (overrideType !== 'additive') {
+            warn(variant, 'C-SK-02',
+              `C-SK-02: ${variant}/agents/${agentName}.md is missing invariant section '## ${sectionTitle}' — may have been stripped during override`,
+              `Restore the '## ${sectionTitle}' section from templates/common/agents/${agentName}.md`
+            );
+          }
+          // additive: missing invariant section is EXPECTED — skeleton provides it at scaffolding time
+        } else if (variantContent !== skeletonContent) {
+          warn(variant, 'C-SK-02',
+            `C-SK-02: ${variant}/agents/${agentName}.md has modified invariant section '## ${sectionTitle}' — invariant sections should not be changed in variant overrides`,
+            `Restore '## ${sectionTitle}' to match templates/common/agents/${agentName}.md, or promote the change to the skeleton`
+          );
+        }
+      }
+    }
+
+    // Sub-check C: skeleton must not contain variant-specific agent names
+    const variantSpecificNames = ['designer', 'code-writer', 'test-runner', 'red-team-lead'];
+    for (const agentSpecificName of variantSpecificNames) {
+      // Search in non-frontmatter body only (strip frontmatter)
+      const bodyStart = skeletonRaw.indexOf('\n---\n', skeletonRaw.indexOf('---\n'));
+      const body = bodyStart !== -1 ? skeletonRaw.slice(bodyStart + 5) : skeletonRaw;
+      // Use word-boundary-style check: the name must appear as a standalone reference
+      const nameRegex = new RegExp(`(?<![a-z])${agentSpecificName.replace('-', '[- ]')}(?![a-z])`, 'i');
+      if (nameRegex.test(body)) {
+        warn('common', 'C-SK-02',
+          `C-SK-02: Skeleton templates/common/agents/${agentName}.md contains variant-specific agent name: '${agentSpecificName}' — skeleton should be agent-agnostic`,
+          `Remove or generalize the reference to '${agentSpecificName}' in the skeleton`
+        );
+      }
+    }
+  }
+  if (!JSON_MODE) pass('C-SK-02: invariant section check complete');
+
+  // WS-02 (WARNING): Anti-swelling 50% rule
+  const totalVariants = variantDirs.length;
+  for (const agentName of commonAgents) {
+    let overrideCount = 0;
+    for (const variant of variantDirs) {
+      const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+      if (!existsSync(variantJsonPath)) continue;
+      let variantJson: Record<string, unknown>;
+      try {
+        variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+      } catch { continue; }
+      const agentOverrides = variantJson.agent_overrides as Record<string, unknown> | undefined;
+      if (agentOverrides && agentName in agentOverrides) overrideCount++;
+    }
+    const agentContract = (contract.common_agents as Record<string, Record<string, unknown>>)?.[agentName];
+    if (agentContract?.expected_override_all_variants) {
+      // skip anti-swelling check for this agent — all variants are expected to override
+    } else if (totalVariants > 0 && overrideCount / totalVariants >= 0.5) {
+      warn('common', 'WS-02', `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`);
+    }
+  }
+
+  pass('WS-02: common-contract.json compliance check complete');
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -900,6 +1473,8 @@ function main() {
     }
   }
 
+  checkWorkspaceSchema();
+  checkCommonContract();
   checkSharedFileSync();
   checkL0L1ScriptParity();
 

@@ -1,6 +1,7 @@
 ---
 name: Project Manager (PM) Agent
 status: active
+version: 1.0.0
 tier:
   claude: high        # claude-opus-4-7
   antigravity: high   # gemini-3.1-pro (thinking_level="medium")
@@ -113,6 +114,21 @@ PM automatically detects current platform and uses appropriate dispatch method:
 - **Claude Code**: Native `Agent` tool
 - **Antigravity**: `invoke_subagent` + `send_message`
 - **Gemini CLI**: `@agent.md` syntax
+
+## Proactive Review Triggers (T-02)
+
+PM must autonomously invoke `/project-review` (without user request) when ANY of the following structural changes are detected in the current session:
+
+- **3 or more agent files modified** in `agents/` in a single session
+- **Phase schema changed**: any edit to `workspace-schema.json` or `templates/common/workspace-schema.json`
+- **Phase ownership changed**: `Can Lead Phases:` declaration modified in any `agents/pm.md`
+- **New variant added** or variant status promoted (beta → stable) in `variant.json`
+- **Variant contract changed**: `variant-contract.json` or `variant-contract.json` schema modified
+
+**Procedure**:
+1. State: "Structural change detected — invoking /project-review proactively (T-02)"
+2. Invoke the `project-review` skill
+3. Document the trigger reason in the session memory log
 
 ## Meeting Facilitation
 

@@ -143,3 +143,4 @@ See `docs/co-security.context.md § Skills` for the full skill registry includin
 - verify-authorization (hard gate for Phase 1+)
 - engagement-scoping, threat-modeling, recon-surface, finding-tracker, pentest-report, patch-automation
 - meeting-facilitation, agent-lifecycle-manager, skill-lifecycle-manager
+- project-review (`.claude/skills/project-review/`) — Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03).

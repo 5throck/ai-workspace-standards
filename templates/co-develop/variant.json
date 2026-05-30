@@ -1,4 +1,17 @@
 {
+  "inherits_common": "1.0.0",
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "co-develop provides variant-specific Agent Roster (code-writer, test-runner, stack-setup), Governance Workflow (explicit serial Phase 4), and Dispatch Protocol (no designer in auto-dispatch)",
+      "since": "2026-05-30",
+      "reviewed_by": "lifecycle-manager",
+      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+    }
+  },
+  "phases": {
+    "phase3_name": "Design Handoff"
+  },
   "name": "co-develop",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
   "status": "stable",

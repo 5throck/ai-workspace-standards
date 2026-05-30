@@ -18,6 +18,24 @@ if (!commitMsg) {
   process.exit(1);
 }
 
+// ── Language validation ───────────────────────────────────────────────────────
+// PR titles, bodies, and commit messages must be in English per CONSTITUTION.md §3.
+const KOREAN_RANGE = /[가-힯ᄀ-ᇿ㄰-㆏]/;
+
+function validateLanguage(text: string, label = 'PR body'): void {
+  if (KOREAN_RANGE.test(text)) {
+    process.stderr.write(
+      `\x1b[31m[FAIL]\x1b[0m Non-English characters (Korean) detected in ${label}.\n` +
+      `       CONSTITUTION.md §3 mandates all PR titles and bodies must be written in English.\n` +
+      `       Translate the content to English before generating the PR.\n`
+    );
+    process.exit(1);
+  }
+}
+
+// Validate commit message used as PR title/summary
+validateLanguage(commitMsg, 'commit message / PR title');
+
 const today = new Date().toISOString().split('T')[0];
 
 // ── Collect changed files ──────────────────────────────────────────────────────
@@ -88,6 +106,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
     const claudeRes = await $`claude -p ${prompt}`.quiet().nothrow();
     const body = claudeRes.stdout.toString().trim();
     if (body) {
+      validateLanguage(body, 'AI-generated PR body');
       process.stdout.write(body + '\n');
       process.exit(0);
     }
@@ -120,4 +139,5 @@ None
 ---
 `;
 
+validateLanguage(fallback, 'fallback PR body');
 process.stdout.write(fallback);

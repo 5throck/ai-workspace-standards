@@ -2,8 +2,8 @@
 name: agent-lifecycle-manager
 description: >
   Guides the PM through creating, modifying, validating, and deprecating agents in the
-  co-security variant. Ensures agents follow the required frontmatter schema and are
-  registered in AGENTS.md and docs/co-security.context.md.
+  co-develop variant. Ensures agents follow the required frontmatter schema and are
+  registered in AGENTS.md and docs/co-develop.context.md.
 version: 1.0.0
 status: active
 owner: pm
@@ -36,12 +36,12 @@ deprecating an existing one. Ensures the roster stays consistent.
    ```
 2. Add `## Role`, `## Responsibilities`, `## Constraints`, `## Dispatch Protocol`, `## Meeting Participation` sections.
 3. Update `AGENTS.md` — add row to Agent Roster table.
-4. Update `docs/co-security.context.md § Agents` — add row to Agents table with `status: active`.
+4. Update `docs/co-develop.context.md § Agents` — add row to Agents table with `status: active`.
 5. Update `agents/README.md` — add row to Available Agents table.
 
 ### Deprecating an Agent
 
-1. In `docs/co-security.context.md § Agents`, change agent `status` to `deprecated`.
+1. In `docs/co-develop.context.md § Agents`, change agent `status` to `deprecated`.
 2. In `AGENTS.md`, move agent row to a `### Deprecated` subsection.
 3. Do NOT delete the `agents/<name>.md` file — retain for reference.
 
@@ -49,5 +49,5 @@ deprecating an existing one. Ensures the roster stays consistent.
 
 After any change, verify:
 - [ ] `AGENTS.md` roster matches files in `agents/`
-- [ ] `docs/co-security.context.md § Agents` matches `AGENTS.md`
+- [ ] `docs/co-develop.context.md § Agents` matches `AGENTS.md`
 - [ ] `agents/README.md` is up to date

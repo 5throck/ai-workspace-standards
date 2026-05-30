@@ -1,4 +1,17 @@
 {
+  "inherits_common": "1.0.0",
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "co-security provides variant-specific Agent Roster (security-monitor, threat-modeler, patch-engineer), Governance Workflow (Phase 3 = Threat Modeling with authorization-first gate), and Dispatch Protocol",
+      "since": "2026-05-30",
+      "reviewed_by": "lifecycle-manager",
+      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+    }
+  },
+  "phases": {
+    "phase3_name": "Threat Modeling"
+  },
   "name": "co-security",
   "description": "Security engineering workflow — Red Team operations, threat modeling, and cross-platform patch automation (Windows/macOS/Linux via SSH + Ansible)",
   "status": "beta",

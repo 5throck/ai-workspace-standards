@@ -15,7 +15,7 @@ All Git artifacts must be written in English - **no exceptions**:
 
 Before creating a PR, ensure:
 - [ ] All tests pass (`bun test` or equivalent)
-- [ ] Audit passes (`bash scripts/audit.sh`)
+- [ ] Audit passes (`bun scripts/audit.ts`)
 - [ ] CHANGELOG.md entry added (use `/changelog` command)
 - [ ] No secrets committed (check `.gitleaks` output)
 - [ ] Documentation updated (if applicable)
@@ -69,7 +69,7 @@ When updating a production-phase skill, use the `[skill-update]` prefix:
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing completed (if applicable)
-- [ ] Audit passes (`bash scripts/audit.sh`)
+- [ ] Audit passes (`bun scripts/audit.ts`)
 
 ## Breaking changes
 [List any breaking changes here, or "None"]

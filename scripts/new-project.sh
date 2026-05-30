@@ -18,14 +18,24 @@ prev_arg=""
 for arg in "$@"; do
   if [ "$prev_arg" = "--variant" ]; then
     VARIANT="$arg"
+    prev_arg=""
+    continue
   elif [ "$prev_arg" = "--version" ]; then
     TEMPLATE_VER="$arg"
+    prev_arg=""
+    continue
   elif [ "$prev_arg" = "--platform" ]; then
     PLATFORM="$arg"
-  elif [[ "$arg" != --* ]] && [ "$prev_arg" != "--variant" ] && [ "$prev_arg" != "--version" ] && [ "$prev_arg" != "--platform" ] && [ -z "$PROJECT_NAME" ]; then
+    prev_arg=""
+    continue
+  elif [[ "$arg" == --* ]]; then
+    prev_arg="$arg"
+  elif [ -z "$PROJECT_NAME" ]; then
     PROJECT_NAME="$arg"
+  elif [ "$prev_arg" != "--variant" ] && [ "$prev_arg" != "--version" ] && [ "$prev_arg" != "--platform" ]; then
+    VARIANT="$arg"
+    break
   fi
-  prev_arg="$arg"
 done
 
 # Validate required arguments
@@ -171,16 +181,76 @@ if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Variant templates directory not found: $TEMPLATES_DIR"
   exit 1
 fi
-cp -r "$TEMPLATES_DIR/." "$PROJECT_DIR/"
 
-# ── 2.5. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
+# Copy with extends resolution - process files BEFORE losing template context
+echo "📝 Copying variant templates with extends resolution..."
+find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
+  rel_path="${src_file#$TEMPLATES_DIR/}"
+  dest_file="$PROJECT_DIR/$rel_path"
+
+  # Check if file has extends field
+  if grep -q "^extends:" "$src_file" 2>/dev/null; then
+    # Read skeleton path from extends field
+    extends_path=$(grep "^extends:" "$src_file" | sed 's/^extends: *//')
+
+    # Resolve skeleton absolute path (relative to template storage)
+    src_dir=$(dirname "$src_file")
+    skeleton_abs_path=$(cd "$src_dir" && realpath "$extends_path" 2>/dev/null || echo "")
+
+    # Verify skeleton exists
+    if [ -z "$skeleton_abs_path" ] || [ ! -f "$skeleton_abs_path" ]; then
+      echo "⚠️  Skeleton not found for $rel_path (extends: $extends_path)"
+      # Copy as-is
+      mkdir -p "$(dirname "$dest_file")"
+      cp "$src_file" "$dest_file"
+    else
+      # Create destination directory
+      mkdir -p "$(dirname "$dest_file")"
+
+      # Copy file to destination
+      cp "$src_file" "$dest_file"
+
+      # Merge with explicit skeleton path
+      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" 2>/dev/null || {
+        echo "⚠️  Extends merge failed: $rel_path"
+      }
+    fi
+  else
+    # Normal copy
+    mkdir -p "$(dirname "$dest_file")"
+    cp "$src_file" "$dest_file"
+  fi
+done
+
+# Copy all non-.md files normally
+find "$TEMPLATES_DIR" -type f ! -name "*.md" | while read -r src_file; do
+  rel_path="${src_file#$TEMPLATES_DIR/}"
+  dest_file="$PROJECT_DIR/$rel_path"
+  mkdir -p "$(dirname "$dest_file")"
+  cp "$src_file" "$dest_file"
+done
+
+# ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
+echo "📝 Verifying extends resolution..."
+extends_count=$(find "$PROJECT_DIR" -type f -name "*.md" -exec grep -l "^extends:" {} \; | wc -l)
+if [ "$extends_count" -gt 0 ]; then
+  echo "⚠️  Found $extends_count files with unresolved extends field:"
+  find "$PROJECT_DIR" -type f -name "*.md" -exec grep -l "^extends:" {} \; | while read -r file; do
+    echo "   - $file"
+  done
+  echo "   This should not happen - extends fields should be resolved during copy."
+else
+  echo "  ✅ All extends fields resolved"
+fi
+
+# ── 2.6. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
 if [ "$PLATFORM" = "claude" ]; then
   rm -f "$PROJECT_DIR/GEMINI.md"
 elif [ "$PLATFORM" = "antigravity" ]; then
   rm -f "$PROJECT_DIR/CLAUDE.md"
 fi
 
-# ── 2.6. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
+# ── 2.7. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
 find "$PROJECT_DIR" -name "*.cmd" -delete
 
 # ── 3. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
@@ -212,6 +282,107 @@ if [ -d "$SCRIPTS_DIR_PROJ" ]; then
     echo "   Fix script pairs in templates before scaffolding."
     exit 1
   fi
+fi
+
+# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────
+# For additive overrides: substitute VARIANT-SECTION placeholders with variant content
+# NOTE: Skip files that use 'extends' pattern (already processed above)
+if [ -f "$TEMPLATES_DIR/variant.json" ] && command -v bun &>/dev/null; then
+  bun - "$COMMON_DIR" "$TEMPLATES_DIR" "$PROJECT_DIR" <<'BUNSCRIPT'
+    const fs = require('fs');
+    const path = require('path');
+    const [,, commonDir, variantDir, projectDir] = process.argv;
+
+    const variantJsonPath = path.join(variantDir, 'variant.json');
+    if (!fs.existsSync(variantJsonPath)) process.exit(0);
+
+    const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
+    const overrides = variant.agent_overrides || {};
+
+    for (const [agentName, override] of Object.entries(overrides)) {
+      if (override.type !== 'additive') continue;
+
+      const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
+      const variantFile = path.join(variantDir, 'agents', agentName + '.md');
+      const outFile = path.join(projectDir, 'agents', agentName + '.md');
+
+      if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile) || !fs.existsSync(outFile)) continue;
+
+      // Check if variant file uses 'extends' pattern - if so, skip additive processing
+      const variantContent = fs.readFileSync(variantFile, 'utf8');
+      if (variantContent.match(/^---\n[\s\S]*?^extends:/m)) {
+        console.log('  [SKIP-ADDITIVE] agents/' + agentName + '.md (uses extends pattern)');
+        continue;
+      }
+
+      let skeleton = fs.readFileSync(skeletonFile, 'utf8');
+
+      // Parse YAML frontmatter from content, return { fm: {key: val}, body: string }
+      function parseFrontmatter(content) {
+        const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
+        if (!match) return { fm: {}, body: content };
+        const fmLines = match[1].split('\n');
+        const fm = {};
+        for (const line of fmLines) {
+          const colonIdx = line.indexOf(':');
+          if (colonIdx > 0) {
+            const key = line.slice(0, colonIdx).trim();
+            const val = line.slice(colonIdx + 1).trim();
+            if (key && !key.startsWith('#')) fm[key] = val;
+          }
+        }
+        return { fm, body: content.slice(match[0].length) };
+      }
+
+      const { fm: skelFm, body: skelBody } = parseFrontmatter(skeleton);
+      const { fm: varFm, body: varBody } = parseFrontmatter(variantContent);
+      const mergedFm = { ...skelFm, ...varFm };
+      const hasFrontmatter = Object.keys(mergedFm).length > 0;
+      const fmStr = hasFrontmatter
+        ? '---\n' + Object.entries(mergedFm).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n'
+        : '';
+
+      // Use varBody (frontmatter stripped) for section parsing; rebuild skeleton body only
+      skeleton = fmStr + skelBody;
+      const effectiveVariantContent = varBody;
+
+      // Parse all ## sections from variant file
+      const allSections = {};
+      const lines = effectiveVariantContent.split('\n');
+      let currentHeading = null;
+      let currentLines = [];
+      for (const line of lines) {
+        if (line.startsWith('## ')) {
+          if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+          currentHeading = line.slice(3).trim();
+          currentLines = [line];
+        } else if (currentHeading) {
+          currentLines.push(line);
+        }
+      }
+      if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+
+      // Map VARIANT-SECTION ids to heading names
+      const headingMap = {
+        'agent-roster': 'Agent Roster',
+        'governance-workflow': 'Governance Workflow',
+        'dispatch-protocol': 'Dispatch Protocol',
+      };
+
+      // Replace VARIANT-SECTION blocks in skeleton
+      const vsRegex = /<!-- VARIANT-SECTION: ([\w-]+) -->([\s\S]*?)<!-- END VARIANT-SECTION -->/g;
+      skeleton = skeleton.replace(vsRegex, (match, sectionId) => {
+        const heading = headingMap[sectionId];
+        if (heading && allSections[heading]) {
+          return allSections[heading];
+        }
+        return ''; // remove markers if no variant section found
+      });
+
+      fs.writeFileSync(outFile, skeleton, 'utf8');
+      console.log('  [SECTION-MERGE] agents/' + agentName + '.md (skeleton + variant sections)');
+    }
+BUNSCRIPT
 fi
 
 # ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15

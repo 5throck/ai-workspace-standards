@@ -222,6 +222,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | **Code Review** | `.claude/skills/code-review/SKILL.md` | Conducting thorough code reviews focusing on correctness, maintainability, security, and best practices |
 | **Test-Driven Development** | `.claude/skills/test-driven-development/SKILL.md` | Implementing software using TDD methodology with red-green-refactor cycle |
 | **Refactoring** | `.claude/skills/refactoring/SKILL.md` | Improving code structure and design while preserving behavior using systematic refactoring techniques |
+| project-review | `.claude/skills/project-review/` | pm | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
 
 *(When a skill is created, add a row here and in `docs/context.md § Skills`.)*
 

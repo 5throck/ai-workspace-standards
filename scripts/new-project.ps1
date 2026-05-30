@@ -254,9 +254,86 @@ if (-not (Test-Path $TemplatesDir)) {
     Write-Host "❌ Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
     exit 1
 }
-robocopy $TemplatesDir $ProjectDir /E /NFL /NDL /NJH /NJS /IS | Out-Null
 
-# ── 2.5. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
+# Copy with extends resolution - process files BEFORE losing template context
+Write-Host "📝 Copying variant templates with extends resolution..."
+Get-ChildItem -Path $TemplatesDir -Recurse -Filter "*.md" | ForEach-Object {
+  $srcFile = $_.FullName
+  $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
+  $destFile = Join-Path $ProjectDir $relPath
+
+  # Check if file has extends field
+  if (Select-String -Path $srcFile -Pattern '^extends:' -Quiet) {
+    # Extract skeleton path
+    $extendsLine = Select-String -Path $srcFile -Pattern '^extends:' | Select-Object -First 1
+    $extendsPath = $extendsLine.Line.Replace("extends:", "").Trim()
+
+    # Resolve skeleton absolute path (relative to template storage)
+    $srcDir = Split-Path $srcFile
+    try {
+      $skeletonAbsPath = (Join-Path $srcDir $extendsPath | Resolve-Path -ErrorAction Stop).Path
+
+      # Create destination directory
+      $destDir = Split-Path $destFile
+      if (-not (Test-Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+      }
+
+      # Copy file to destination
+      Copy-Item $srcFile $destFile -Force
+
+      # Merge with explicit skeleton path
+      $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath 2>&1
+      if ($LASTEXITCODE -ne 0) {
+        Write-Host "⚠️  Extends merge failed: $relPath" -ForegroundColor Yellow
+      }
+    } catch {
+      Write-Host "⚠️  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
+      # Copy as-is
+      $destDir = Split-Path $destFile
+      if (-not (Test-Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+      }
+      Copy-Item $srcFile $destFile -Force
+    }
+  } else {
+    # Normal copy
+    $destDir = Split-Path $destFile
+    if (-not (Test-Path $destDir)) {
+      New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+    Copy-Item $srcFile $destFile -Force
+  }
+}
+
+# Copy all non-.md files normally
+Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -ne ".md" } | ForEach-Object {
+  $srcFile = $_.FullName
+  $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
+  $destFile = Join-Path $ProjectDir $relPath
+  $destDir = Split-Path $destFile
+  if (-not (Test-Path $destDir)) {
+    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+  }
+  Copy-Item $srcFile $destFile -Force
+}
+
+# ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
+Write-Host "📝 Verifying extends resolution..."
+$extendsFiles = Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.md" | Where-Object {
+    Select-String -Path $_.FullName -Pattern '^extends:' -Quiet
+}
+if ($extendsFiles.Count -gt 0) {
+    Write-Host "⚠️  Found $($extendsFiles.Count) files with unresolved extends field:" -ForegroundColor Yellow
+    $extendsFiles | ForEach-Object {
+        Write-Host "   - $($_.FullName)" -ForegroundColor Yellow
+    }
+    Write-Host "   This should not happen - extends fields should be resolved during copy." -ForegroundColor Yellow
+} else {
+    Write-Host "  ✅ All extends fields resolved" -ForegroundColor Green
+}
+
+# ── 2.6. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
 if ($Platform -eq "claude") {
     $geminiFile = Join-Path $ProjectDir "GEMINI.md"
     if (Test-Path $geminiFile) { Remove-Item $geminiFile -Force }
@@ -265,7 +342,7 @@ if ($Platform -eq "claude") {
     if (Test-Path $claudeFile) { Remove-Item $claudeFile -Force }
 }
 
-# ── 2. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
+# ── 2.7. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
 $examplesDir = Join-Path $ProjectDir "docs\_examples"
 if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
 
@@ -291,6 +368,115 @@ if (Test-Path $scriptsDir) {
             Write-Host "❌ Script Pair Validation Failed: Missing .ps1 pair for $_.Name" -ForegroundColor Red
             exit 1
         }
+    }
+}
+
+# ── 2.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────  # TEST: none
+# For additive overrides: substitute VARIANT-SECTION placeholders with variant content
+# NOTE: Skip files that use 'extends' pattern (already processed above)
+$VariantJson = Join-Path $TemplatesDir "variant.json"
+if ((Test-Path $VariantJson) -and (Get-Command "bun" -ErrorAction SilentlyContinue)) {
+    $BunScript = @'
+const fs = require('fs');
+const path = require('path');
+const [,, commonDir, variantDir, projectDir] = process.argv;
+
+const variantJsonPath = path.join(variantDir, 'variant.json');
+if (!fs.existsSync(variantJsonPath)) process.exit(0);
+
+const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
+const overrides = variant.agent_overrides || {};
+
+for (const [agentName, override] of Object.entries(overrides)) {
+  if (override.type !== 'additive') continue;
+
+  const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
+  const variantFile = path.join(variantDir, 'agents', agentName + '.md');
+  const outFile = path.join(projectDir, 'agents', agentName + '.md');
+
+  if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile) || !fs.existsSync(outFile)) continue;
+
+  // Check if variant file uses 'extends' pattern - if so, skip additive processing
+  const variantContent = fs.readFileSync(variantFile, 'utf8');
+  if (variantContent.match(/^---\n[\s\S]*?^extends:/m)) {
+    console.log('  [SKIP-ADDITIVE] agents/' + agentName + '.md (uses extends pattern)');
+    continue;
+  }
+
+  let skeleton = fs.readFileSync(skeletonFile, 'utf8');
+
+  // Parse YAML frontmatter from content, return { fm: {key: val}, body: string }
+  function parseFrontmatter(content) {
+    const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (!match) return { fm: {}, body: content };
+    const fmLines = match[1].split('\n');
+    const fm = {};
+    for (const line of fmLines) {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0) {
+        const key = line.slice(0, colonIdx).trim();
+        const val = line.slice(colonIdx + 1).trim();
+        if (key && !key.startsWith('#')) fm[key] = val;
+      }
+    }
+    return { fm, body: content.slice(match[0].length) };
+  }
+
+  const { fm: skelFm, body: skelBody } = parseFrontmatter(skeleton);
+  const { fm: varFm, body: varBody } = parseFrontmatter(variantContent);
+  const mergedFm = { ...skelFm, ...varFm };
+  const hasFrontmatter = Object.keys(mergedFm).length > 0;
+  const fmStr = hasFrontmatter
+    ? '---\n' + Object.entries(mergedFm).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n'
+    : '';
+
+  // Use varBody (frontmatter stripped) for section parsing; rebuild skeleton body only
+  skeleton = fmStr + skelBody;
+  const effectiveVariantContent = varBody;
+
+  // Parse all ## sections from variant file
+  const allSections = {};
+  const lines = effectiveVariantContent.split('\n');
+  let currentHeading = null;
+  let currentLines = [];
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+      currentHeading = line.slice(3).trim();
+      currentLines = [line];
+    } else if (currentHeading) {
+      currentLines.push(line);
+    }
+  }
+  if (currentHeading) allSections[currentHeading] = currentLines.join('\n');
+
+  // Map VARIANT-SECTION ids to heading names
+  const headingMap = {
+    'agent-roster': 'Agent Roster',
+    'governance-workflow': 'Governance Workflow',
+    'dispatch-protocol': 'Dispatch Protocol',
+  };
+
+  // Replace VARIANT-SECTION blocks in skeleton
+  const vsRegex = /<!-- VARIANT-SECTION: ([\w-]+) -->([\s\S]*?)<!-- END VARIANT-SECTION -->/g;
+  skeleton = skeleton.replace(vsRegex, (match, sectionId) => {
+    const heading = headingMap[sectionId];
+    if (heading && allSections[heading]) {
+      return allSections[heading];
+    }
+    return ''; // remove markers if no variant section found
+  });
+
+  fs.writeFileSync(outFile, skeleton, 'utf8');
+  console.log('  [SECTION-MERGE] agents/' + agentName + '.md (skeleton + variant sections)');
+}
+'@
+    $TmpScript = [System.IO.Path]::GetTempFileName() + ".mjs"
+    try {
+        Set-Content $TmpScript $BunScript -Encoding UTF8
+        & bun $TmpScript $CommonDir $TemplatesDir $ProjectDir
+    } finally {
+        Remove-Item $TmpScript -Force -ErrorAction SilentlyContinue
     }
 }
 
