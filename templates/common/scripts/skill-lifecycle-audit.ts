@@ -10,7 +10,7 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @license MIT
  */
 
@@ -275,7 +275,9 @@ function auditSkills(jsonMode = false): AuditResult {
       });
     }
 
-    if (!frontmatter.owner) {
+    const isPlatformSkill = skillFile.includes('/.claude/skills/') || skillFile.includes('\\.claude\\skills\\');
+
+    if (!isPlatformSkill && !frontmatter.owner) {
       errors.push({
         level: 'error',
         file: relPath,
@@ -285,7 +287,7 @@ function auditSkills(jsonMode = false): AuditResult {
       continue;
     }
 
-    if (!agentExists(frontmatter.owner, registry)) {
+    if (!isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
       errors.push({
         level: 'error',
         file: relPath,
@@ -297,14 +299,14 @@ function auditSkills(jsonMode = false): AuditResult {
 
     // Check status field is present and valid
     const validSkillStatuses = ['active', 'deprecated', 'experimental', 'archived'];
-    if (!frontmatter.status) {
+    if (!isPlatformSkill && !frontmatter.status) {
       errors.push({
         level: 'error',
         file: relPath,
         message: 'Missing status in frontmatter',
         fix: "Add 'status: active' (or deprecated/experimental/archived)",
       });
-    } else if (!validSkillStatuses.includes(frontmatter.status as string)) {
+    } else if (!isPlatformSkill && frontmatter.status && !validSkillStatuses.includes(frontmatter.status as string)) {
       errors.push({
         level: 'error',
         file: relPath,
