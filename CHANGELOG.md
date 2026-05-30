@@ -9,6 +9,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-30]**: feat: implement 3-Tier QA Framework for lifecycle governance
+  - **[2026-05-30]**: Tier 1 (Gatekeeper): Pre-commit hook lifecycle compliance verification in `scripts/hooks/pre-commit.ts`
+  - **[2026-05-30]**: Tier 2 (Sentinel): Agent execution result verification in `scripts/verify-agent-deliverables.ts`
+  - **[2026-05-30]**: Tier 3 (Auditor): CI/CD pipeline comprehensive audit in `.github/workflows/test.yml`
+  - **[2026-05-30]**: Prevents recurring governance failures: script modifications without SCRIPTS.md updates, agent "report forgery", and missing lifecycle audits
+- **[2026-05-30]**: `scripts/verify-readme-sync.ts` — improved warning messages with change summary and actionable guidance for translators
+- **[2026-05-30]**: `scripts/translate-readme.ts` — translation helper tool with diff preview, section analysis, and hash synchronization check
+- **[2026-05-30]**: `skills/translate/SKILL.md` — translation helper skill with integrated English + Korean documentation
+- **[2026-05-30]**: Meeting transcript: `memory/meeting-2026-05-30-readme-auto-sync-review.md` — rejected automatic README overwriting; adopted improved warnings + translation helper tool
+- **[2026-05-30]**: Meeting transcript: `memory/meeting-2026-05-30-qa-lifecycle-enforcement.md` — 3-Tier QA Framework design and implementation plan
+- **[2026-05-30]**: Meeting transcript: `memory/meeting-2026-05-30-translator-guide-language-and-skill-conversion.md` — resolved TRANSLATOR_GUIDE.md language policy violation via skill integration
+
+### Changed
+- **[2026-05-30]**: `scripts/hooks/pre-commit.ts` — bumped to v1.0.2; added Tier 1 Gatekeeper lifecycle compliance check
+- **[2026-05-30]**: `scripts/verify-readme-sync.ts` — bumped to v1.0.1; enhanced error messages with structured guidance
+- **[2026-05-30]**: `scripts/SCRIPTS.md` — registered `translate-readme.ts` (v1.0.0), `verify-agent-deliverables.ts` (v1.0.0), and `hooks/pre-commit.ts` (v1.0.2)
+
+### Fixed
+- **[2026-05-30]**: Language policy violation — resolved `scripts/TRANSLATOR_GUIDE.md` Korean documentation by integrating into `skills/translate/SKILL.md` with English primary + Korean section
+- **[2026-05-30]**: Agent "report forgery" incident — `translate-readme.ts` reported as complete but file not created; implemented verification to prevent recurrence via Tier 2 Sentinel
+
+### Added
 - **[2026-05-30]**: feat: implement TS-based hooks and template synchronization
 - **[2026-05-29]**: `templates/common/phase-definitions.md` — comprehensive 6-phase workflow definition with PM facilitator tasks for each phase (Initiation, Planning, Design Handoff, Execution, QA, Finalization)
 - **[2026-05-29]**: Multi-Agent Phase Definitions section — added to all 4 variant AGENTS.md files (co-develop, co-design, co-work, co-security) with phase-specific specialist agent mappings and PM orchestrator guidance
@@ -537,7 +559,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-29*
+*Last Updated: 2026-05-30*
 
 
 
