@@ -50,9 +50,12 @@ if (!projectName) {
   process.exit(1);
 }
 
-const testDir  = `Test-${projectName}`;
+const testDir  = join('.sandbox', `Test-${projectName}`);
 const isWin    = platform === 'win32';
 const today    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+import { mkdirSync } from 'node:fs';
+if (!existsSync('.sandbox')) mkdirSync('.sandbox');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

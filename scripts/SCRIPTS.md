@@ -84,6 +84,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-md-language.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-commit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | — | — |
 
 ---
 

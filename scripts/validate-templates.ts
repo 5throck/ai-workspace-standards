@@ -620,16 +620,10 @@ function checkScriptParity(variant: string): void {
     }
   }
 
-  // 7b: .githooks/ parity — Warn only (Git Bash assumed on Windows)
+  // 7b: .githooks/ parity — Removed since hooks are now TS wrappers without .ps1 equivalents
   const hooksDir = join(TEMPLATES_DIR, 'common', '.githooks');
   if (existsSync(hooksDir)) {
-    const hookFiles = readdirSync(hooksDir).filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
-    const missingHookPs1 = hookFiles.filter(h => !existsSync(join(hooksDir, `${h}.ps1`)));
-    if (missingHookPs1.length > 0) {
-      warn('common', 'githooks-parity', `.githooks/ missing .ps1 counterparts: ${missingHookPs1.join(', ')} (Windows users require Git Bash)`);
-    } else {
-      pass(`common/.githooks: all hooks have .ps1 counterparts`);
-    }
+    pass(`common/.githooks: present`);
   }
 }
 

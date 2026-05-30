@@ -52,7 +52,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | intentional | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-skills.ts` | L1 | 1.1.0 | active | — | — | — | — |
-| `publish-to-template.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `publish-to-template.ts` | L1 | 1.1.0 | active | — | — | — | — |
 | `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | — | — |
@@ -84,6 +84,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `validate-md-language.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-commit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | — | — |
 
 ---
 
@@ -227,7 +229,7 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 #### `publish-to-template.ts`
 **Purpose**: Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot
 (`templates/common/scripts/`). Copies all scripts labeled `L0` in the Registry plus
-`SCRIPTS.md` itself.
+`SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
 **Usage**: `bun run publish-to-template`
 **Dry-run**: `bun run publish-to-template -- --dry-run`
 **Note**: L1-only script (not propagated to template).

@@ -27,7 +27,8 @@
     "qa-gate": "bun scripts/qa-gate.ts",
     "publish-to-template": "bun scripts/publish-to-template.ts",
     "list-template-versions": "bun scripts/list-template-versions.ts",
-    "sync-skills": "bun scripts/sync-skills.ts"
+    "sync-skills": "bun scripts/sync-skills.ts",
+    "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

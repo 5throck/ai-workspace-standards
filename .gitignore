@@ -72,3 +72,6 @@ __pycache__/
 # --- CodeGraph Index ---
 .codegraph/
 NUL
+
+# --- Sandbox for testing ---
+.sandbox/
