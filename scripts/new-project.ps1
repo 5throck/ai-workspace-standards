@@ -561,15 +561,14 @@ if ($LASTEXITCODE -ne 0) {
 # ── 10. Move into project directory ───────────────────────────────────────────  # TEST: none
 Write-Host ""
 Write-Host ("-" * 60) -ForegroundColor DarkGray
-Write-Host "📂 PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
+Write-Host "PROJECT DIRECTORY: $ProjectDir" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "⚠️  Your shell is still at the workspace root." -ForegroundColor Yellow
+Write-Host "NOTE: Your shell is still at the workspace root." -ForegroundColor Yellow
 Write-Host "   Run the following command to move into your new project:"
 Write-Host ""
 Write-Host "   cd '$ProjectDir'" -ForegroundColor Green
 Write-Host ""
-Write-Host "   All subsequent work (git, scripts, sessions) must be run"
-Write-Host "   from inside this directory, not the workspace root."
+Write-Host "   All subsequent work must be run from inside this directory."
 Write-Host ("-" * 60) -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):"
