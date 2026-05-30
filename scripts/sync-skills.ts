@@ -39,6 +39,23 @@ for (const item of fs.readdirSync(ssotSkills)) {
   if (fs.existsSync(geminiTarget)) fs.rmSync(geminiTarget, { recursive: true, force: true });
   fs.cpSync(itemPath, geminiTarget, { recursive: true });
   console.log(`  -> Synced ${item} to .gemini/skills/`);
+
+  // Special logic for commands derived from skills
+  if (item === 'meeting-facilitation') {
+    const claudeCmdDir = path.join(workspaceRoot, '.claude', 'commands');
+    const geminiCmdDir = path.join(workspaceRoot, '.gemini', 'commands');
+    fs.mkdirSync(claudeCmdDir, { recursive: true });
+    fs.mkdirSync(geminiCmdDir, { recursive: true });
+
+    const skillMdPath = path.join(itemPath, 'SKILL.md');
+    if (fs.existsSync(skillMdPath)) {
+      fs.copyFileSync(skillMdPath, path.join(claudeCmdDir, 'meeting.md'));
+      console.log(`  -> Synced SKILL.md to .claude/commands/meeting.md`);
+      
+      fs.copyFileSync(skillMdPath, path.join(geminiCmdDir, 'meeting.md'));
+      console.log(`  -> Synced SKILL.md to .gemini/commands/meeting.md`);
+    }
+  }
 }
 
 console.log('Skill synchronization complete!');

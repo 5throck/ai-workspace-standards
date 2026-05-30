@@ -28,8 +28,8 @@ Both scripts do the same thing:
 4. Substitute `[Project Name]` placeholder with `$ARGUMENTS` in all text files
 5. Record template provenance in `docs/context.md`
 6. Initialize git with `core.hooksPath .githooks`
-7. Run `scripts/audit.ps1` or `scripts/audit.sh` to verify the scaffold
-8. Run `scripts/setup.ps1` or `scripts/setup.sh` for dependency installation
+7. Run `bun scripts/audit.ts` to verify the scaffold
+8. Run `bun scripts/setup.ts` (if exists) for dependency installation
 
 After scaffolding, `cd` into the new project directory — all subsequent work runs from there.
 
