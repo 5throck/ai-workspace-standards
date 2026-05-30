@@ -556,3 +556,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "Extension templates (ADR, analyst agent, skill, daily log):"
 echo "  → $TEMPLATES_DIR/docs/_examples/"
+
+# --- Dynamic Plugin Injection ---
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/inject-global-plugins.ts" ]; then
+  bun "$WORKSPACE_ROOT/scripts/helpers/inject-global-plugins.ts" "$PROJECT_DIR" "${PLATFORM:-both}"
+fi

@@ -51,3 +51,6 @@ Thumbs.db
 
 # CodeGraph Index
 .codegraph/
+
+# --- Sandbox for testing ---
+.sandbox/

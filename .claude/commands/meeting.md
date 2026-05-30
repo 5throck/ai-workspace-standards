@@ -1,279 +1,200 @@
 ---
-description: Run a natural multi-agent meeting where Claude role-plays each participant inline — no Agent tool spawning, real-time dialogue visible to the user
+name: meeting-facilitation
+status: active
+description: >
+  Facilitates structured multi-agent meetings using the /meeting command for collaborative
+  decision-making and problem resolution. Use when: running agent meetings, coordinating
+  multi-agent discussions, or facilitating collaborative problem-solving sessions.
+owner: pm
+version: 1.3.1
+last_reviewed: 2026-05-30
+metadata:
+  type: process
+  triggers:
+    - meeting
+    - agent discussion
+    - collaborative decision
+    - multi-agent coordination
+    - facilitate meeting
 ---
 
-# Multi-Agent Meeting
+## Overview
 
-Arguments: $ARGUMENTS
+This skill provides the framework for running structured multi-agent meetings where agents discuss topics, share perspectives, and reach decisions through dialogue.
 
-## Core Principle
+**Execution Mode**:
+- **Inline Role-Play (Default for all engines)**: The PM acts as a facilitator and adopts multiple agent personas inline to generate a real-time role-played meeting. This guarantees fast execution, avoids file I/O bottlenecks, and maintains context atomicity. No subagents or tools are spawned unless explicitly requested.
+- **Deep Work Mode (Optional)**: If complex parallel tool usage is required, the user can explicitly trigger native subagent relay mode.
 
-**Do NOT use the Agent tool.** Claude itself plays every participant in turn, reading each agent's `.md` file to adopt their voice, expertise, and perspective. The entire meeting unfolds inline in a single conversation — the user watches it happen in real time, like sitting in the room.
+## When to Use This Skill
 
-This is role-play orchestration, not sub-agent dispatch.
+**Collaborative Decision Making:**
+- Trigger: "Need input from multiple agents on X" or "Facilitate meeting about Y"
+- Use Case: Complex decisions requiring input from multiple specialist perspectives
 
-### Why inline role-play instead of Agent tool dispatch?
+**Problem Resolution:**
+- Trigger: "Investigate issue with team input" or "Get agent consensus on problem"
+- Use Case: Technical or design problems that benefit from multi-agent analysis
 
-The Agent tool spawns isolated sub-agents that cannot see each other's output. To simulate dialogue you would need to: collect A's result → manually inject it into B's prompt → collect B's result → inject A+B into C's prompt, etc. This produces stitched-together monologues, not dialogue — and the user sees nothing until all agents finish.
-
-Inline role-play solves this structurally:
-- **Shared context by default**: every prior turn is already in the conversation window when Claude writes the next turn — no manual transcript injection needed
-- **Real-time streaming**: the user watches the conversation unfold turn by turn, like being in the room
-- **Natural continuity**: Claude playing Agent B can quote Agent A's exact words from two lines above, not from a copied string
-
-The dialogue flow when PM is present:
-
-```
-PM opens round → frames agenda, names which agent to speak first
-Agent A responds → addresses PM's question, builds on prior turns
-Agent B responds → reacts to Agent A, adds domain perspective
-PM closes round → resolves provisional decisions, sets up next round
-...
-PM delivers synthesis → owns the action items table
-```
-
-The dialogue flow when PM is absent:
-
-```
-Claude (as Architect) speaks  →  output is now in conversation history
-Claude (as Security-Expert) speaks  →  sees Architect's words naturally, reacts
-Claude (as Automation-Engineer) speaks  →  sees Architect + Security-Expert, reacts
-...
-Claude (as Auditor) synthesizes  →  sees everything, closes the meeting
-```
-
-### Known limits
-
-- **Long sessions**: persona consistency weakens past round 3-4 as context compresses. Keep meetings to 2 rounds for best quality.
-- **Repeated meetings in one session**: prior meeting content bleeds into the new one. Start a fresh Claude session for unrelated meetings.
+**Design Validation:**
+- Trigger: "Review design with all specialists" or "Validate approach with team"
+- Use Case: Design reviews, architecture decisions, or technical trade-off analysis
 
 ---
 
-## Step 1 — Parse Arguments
+## Step 1: Define Meeting Parameters
 
-Extract from `$ARGUMENTS`:
-- **Topic**: The meeting agenda (required)
-- **Participants**: e.g. `--agents architect,security-expert,auditor` (optional — if omitted, defaults to context-aware roles based on execution directory. Root defaults to `pm, architect, auditor`; sub-projects default to `pm, automation-engineer, docs-writer` or available variant agents)
-- **Rounds**: e.g. `--rounds 2` (optional — default 2, max 3)
-- **Language**: e.g. `--language en` (optional — defaults to Korean; `en` switches all dialogue to English)
-- **Tasks**: e.g. `--tasks` flag (optional — if set, after the meeting automatically convert action items into a task plan)
-- **Dialogue**: e.g. `--dialogue` flag (optional — prints every agent turn in real time so the user can watch the conversation unfold. High token cost; use when the reasoning process itself is valuable to observe.)
+**Purpose**: Set up meeting structure and participant list.
 
-### Mode comparison
+**Required Parameters**:
+- **Topic**: Clear meeting agenda (required)
+- **Participants**: Agent names or leave empty for all available agents (optional)
+- **Rounds**: Number of discussion rounds, default 2, max 3 (optional)
+- **Language**: Discussion language - default Korean, `en` for English (optional)
+- **Mode**: Silent (default) or Dialogue for full transparency (optional)
 
-| Mode | Command | What you see | Token cost |
-|------|---------|--------------|------------|
-| **Silent** (default) | `/meeting "topic"` | Opening header → `[meeting in progress…]` → synthesis only | ~1,000 tokens |
-| **Dialogue** | `/meeting "topic" --dialogue` | Full real-time conversation, every turn | ~5,000+ tokens |
+**Command Format**:
+```bash
+/meeting "meeting topic here" --agents agent1,agent2 --rounds 2 --language ko --dialogue
+```
 
-Default is silent because most callers need the outcome, not the transcript. Pass `--dialogue` only when watching the agents reason together adds value.
+**Mode Selection**:
+- **Silent** (default): Shows opening header - [meeting in progress] - synthesis only
+  - Use for: Quick decisions, outcome-focused meetings
+  - Token cost: ~1,000 tokens
+- **Dialogue**: Shows full real-time conversation, every turn
+  - Use for: Watching reasoning process, training, transparency
+  - Token cost: ~5,000+ tokens
 
 ---
 
-## Step 2 — Detect Project Context
+## Step 2: Detect Available Agents
 
-**Automatically detect available agents:**
+**Purpose**: Identify which agents can participate in the meeting.
+
+**Agent Detection Logic**:
 1. Check if `agents/` directory exists in current working directory
 2. List all `*.md` files in `agents/` (excluding README.md)
-3. Extract agent names from filenames (e.g., `architect.md` → `architect`)
+3. Extract agent names from filenames (e.g., `architect.md` -> `architect`)
+4. If `--agents` list specified, filter to only those agents
+5. Load each agent file to understand persona and role
 
-**Context-Aware Defaulting (if `--agents` is NOT specified):**
-- **Workspace Root Execution**: Default to `pm, architect, auditor`. This focuses the meeting on high-level architecture, standards, and cross-project consistency.
-- **Variant/Sub-project Execution**: Default to `pm, automation-engineer, docs-writer, security-expert` (or the specific agents present in that variant's local `agents/` folder). This focuses the meeting on execution, implementation, and variant-specific details.
-- *Note: Only load agents that actually exist in the detected `agents/` directories.*
+**Variant-Specific Agents**:
+- **Workspace root**: architect, auditor, pm, security-expert, etc.
+- **co-design variant**: design-lead, ux-researcher, visual-designer, etc.
+- **co-work variant**: analyst, content-writer, technical-writer, etc.
 
-**If `--agents` IS specified:**
-- Filter the available agents to exactly match those provided in the list.
-
-If no agents are found in the final list or `agents/` doesn't exist, error with a clear message. Read each target agent file now to hold all personas in context before the meeting starts.
-
-**PM presence check:**
-After resolving the final participant list, check whether `pm` (or any agent whose file name is `pm.md`) is included. Store this as `PM_PRESENT = true/false`. This flag controls the orchestration mode for all subsequent steps.
+**Validation**:
+- At least one agent must be available
+- Specified agents must exist in current directory
+- Agent files must be readable and properly formatted
 
 ---
 
-## Step 3 — Open the Meeting
+## Step 3: Open Meeting Structure
 
-Determine dialogue language from `--language` flag (default: Korean).
-Determine output mode: **silent by default**; `--dialogue` flag switches to full output.
+**Purpose**: Set meeting context and begin discussion.
 
-Print the meeting header regardless of mode:
-
+**Meeting Header** (always displayed):
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🗣️  MEETING STARTED
-Topic   : [TOPIC]
-Present : [comma-separated agent names]
+---------------------------------------- MEETING STARTED
+Topic   : [meeting topic]
+Present : [agent names]
 Rounds  : [N]
 Mode    : [Silent | Dialogue]
-Orchestrator: [PM | Facilitator]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------
 ```
 
-**If `PM_PRESENT = true` and `--dialogue`:**
-PM (in character) delivers the opening statement — introduces the topic, breaks it into agenda items for the rounds, and names which agent will speak first.
+**Facilitator Opening** (Dialogue mode only):
+- Set agenda and objectives
+- Ask participants to respond directly to each other by name
+- Establish discussion norms
+- **Facilitator Exception**: The PM acts solely as a facilitator and does NOT contribute opinions.
 
-```
-**PM**: (Opening)
-
-[Opening statement in the chosen language. PM MUST:
- 1. Welcome participants by name
- 2. State the meeting objective in one sentence
- 3. Break the topic into N agenda items — one per round
- 4. Name the first agent to speak and pose a specific question to them]
-
----
-```
-
-**If `PM_PRESENT = false` and `--dialogue`:**
-Claude (as abstract Facilitator) delivers the opening statement.
-
-```
-[Facilitator]: [Opening statement in the chosen language, setting the agenda and asking participants to respond directly to each other by name.]
-
----
-```
-
-**If silent (default):** Print `[회의 진행 중… 완료 시 결과를 출력합니다]` (or English equivalent) and proceed internally without any further per-turn output until Step 5.
+**Silent Mode**:
+- Display: `[Meeting in progress... Results will be displayed upon completion]`
+- Proceed internally without per-turn output until synthesis
 
 ---
 
-## Step 4 — Run Dialogue Rounds
+## Step 4: Conduct Discussion Rounds
 
-### When `PM_PRESENT = true` (PM Orchestrator Mode)
+**Purpose**: Facilitate structured agent dialogue.
 
-For each round (1 to N):
+**Meeting Execution (Inline Role-Play):**
+- The PM agent generates the entire meeting transcript in its response by adopting the persona of each participating agent in sequence.
+- Iterate through each participant in order for the specified number of rounds.
+- Each agent fully inhabits their persona and contributes:
+  - **Name** prior speaker and reference their specific point
+  - **Add domain perspective** only this agent holds
+  - **Agree, build on, or respectfully challenge** – like real conversation
+  - **End with concrete proposal** or direct question to named colleague
+- **Facilitator Exception**: The PM acts solely as the orchestrator and does NOT inject personal opinions into the discussion rounds. The PM only listens and facilitates.
 
-**4a. PM opens the round** — PM speaks first, always:
-- States the agenda item for this round (from the breakdown made in Step 3)
-- Poses a specific, targeted question to a named agent
-- If round > 1: briefly acknowledges the prior round's outcome in one sentence
-
-**4b. Specialist agents respond** — in order, excluding PM:
-- Each agent directly addresses PM's question
-- Each agent must reference at least one prior speaker by name
-- Each agent adds the domain perspective only they hold
-- Each agent may redirect a question to a named colleague
-
-**4c. PM closes the round** — PM speaks last in every round:
-- Synthesizes what was heard from each agent this round
-- Resolves any provisional decision (or names it as an open question)
-- States what the next round will focus on (or "this concludes discussion" if final round)
-- Assigns any emerging action item to a named agent
-
-**If `--dialogue`**: print each PM and agent turn as it is generated:
-
-```
-**PM**: (Round N — Open)
-[PM's opening for the round]
----
-
-**[AgentName]**: (Round N)
-[Agent's contribution]
----
-
-**PM**: (Round N — Close)
-[PM's synthesis and close]
----
-```
-
-**If silent**: hold all turns in context only — they still shape reasoning.
-
----
-
-### When `PM_PRESENT = false` (Facilitator Mode)
-
-For each round (1 to N), iterate through each participant in order.
-
-For each participant's turn, Claude fully inhabits the agent's persona:
-
-1. **Fully inhabit that agent's persona** — you are now that character, not Claude
-2. **Everything said so far is already in your context** — use it naturally
-3. **Generate their contribution** covering:
-   - Name at least one prior speaker and reference their specific point
-   - Add domain perspective only this agent holds
-   - Agree, build on, or respectfully challenge — like a real conversation
-   - End with a concrete proposal or a direct question to a named colleague
-
-**If `--dialogue`**: print each turn as it is generated:
-
+**Dialogue Mode Output (Claude or specific Antigravity reporting)**: Display each turn as generated:
 ```
 **[AgentName]**: (Round N)
 
-[2–4 paragraphs]
+[2-3 paragraphs of in-character contribution]
 
 ---
 ```
 
-**If silent**: do NOT print the turn. Hold it in context only.
+**Silent Mode**: Hold contributions in context only, don't display
+
+**Critical Rules**:
+- Stay fully in character - agent constraints and tone apply
+- Reference specific things previous speakers said
+- Never break character with meta-commentary
+- Maximum 3 rounds - stop early if discussion converges
+- Language follows `--language` setting (speaker labels always English)
 
 ---
 
-**Critical rules (both modes):**
-- Stay fully in character — the agent's constraints, tone, and knowledge domain apply
-- Reference specific things previous speakers said (quote or paraphrase with their name)
-- Never break character to explain what you're doing
-- No meta-commentary like "As the architect agent, I will now..."
-- Maximum 3 rounds — stop and synthesize if the discussion converges earlier
+## Step 5: Synthesize Discussion
 
----
+**Purpose**: Cross-domain agent synthesizes full discussion.
 
-## Step 5 — Synthesis (Final Turn)
+**Synthesizer Selection**:
+- Most cross-domain agent speaks last
+- Typical choices: Auditor, Test-Runner, or closest equivalent
+- Must see entire discussion context
+- **Facilitator Exception**: The PM must NEVER summarize mid-meeting or at the end; synthesis is always performed by a cross-domain agent.
 
-### When `PM_PRESENT = true`
+**Synthesis Requirements**:
+1. **Points of Agreement** (specific)
+2. **Open Disagreements or Unresolved Questions**
+3. **Concrete Next Action Items** (max 5) - owner + deliverable
 
-PM delivers the final synthesis — always printed regardless of mode:
-
-```
-**PM**: (Synthesis)
-
-[PM MUST include:
-1. One-sentence outcome statement — what did this meeting decide?
-2. Points of agreement reached (specific, attributed to agents by name)
-3. Open questions remaining (if any)
-4. Concrete action items table — owner + deliverable, max 5 items]
-
----
-```
-
-### When `PM_PRESENT = false`
-
-The most cross-domain agent (Auditor, Test-Runner, or closest equivalent) speaks last as synthesizer — always printed regardless of mode:
-
+**Always Displayed** (regardless of mode):
 ```
 **[Synthesizer]**: (Synthesis)
 
-[Summarize the full discussion. MUST include:
-1. Points of agreement (specific)
-2. Open disagreements or unresolved questions
-3. Concrete next action items — owner + deliverable, max 5]
+[Full discussion summary]
 
 ---
 ```
 
 ---
 
-## Step 6 — Close and Archive
+## Step 6: Archive Transcript - MANDATORY
 
-Print the closing header:
+> **MANDATORY**: Execute this step BEFORE printing the closing header. Do NOT proceed to Step 7 without completing this step. This rule applies regardless of platform, mode, or flags.
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅  MEETING CLOSED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+**Purpose**: Create a permanent record of the meeting in memory/.
 
-Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is a 2-3 word kebab-case summary of the topic.
+**Language Rule**: Regardless of the discussion language, the archived transcript file MUST be written in English.
 
-> **Language rule**: The saved transcript file MUST always be written in **English**, regardless of the dialogue language used during the meeting. If the meeting was conducted in Korean, translate all dialogue, action items, and acceptance criteria to English before saving. This follows the workspace documentation standard (CONSTITUTION.md §2).
+**File**: `memory/meeting-YYYY-MM-DD-[slug].md`
+- Slug: 2-3 word kebab-case summary of topic
 
+**Transcript Structure**:
 ```markdown
 # Meeting Transcript
 **Date**: YYYY-MM-DD
-**Topic**: [TOPIC in English]
-**Participants**: [list]
+**Topic**: [meeting topic in English]
+**Participants**: [agent list]
 **Rounds**: [N]
-**Orchestrator**: [PM | Facilitator]
 **Language**: [Korean | English] (transcript always saved in English)
 **Status**: Complete
 
@@ -281,7 +202,7 @@ Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is
 
 ## Transcript
 
-[Full dialogue in English — each turn in order]
+[Full dialogue – each turn in order, translated to English if meeting was in Korean]
 
 ---
 
@@ -297,49 +218,121 @@ Write the full transcript to `memory/meeting-YYYY-MM-DD-[slug].md` where slug is
 |---|-----------|--------------|
 ```
 
+**After writing the file**, run the appropriate sync command:
+- **Bash**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>/dev/null || true`
+- **PowerShell**: `bun scripts/sync-md.ts "YYYY-MM-DD" "[TOPIC]" 2>$null`
+
+If the sync command fails or is unavailable, continue - file archiving is the critical step.
+
 ---
 
-## Step 7 — Task Conversion (if `--tasks` flag is set)
+## Step 7: Close Meeting
 
-If the user passed `--tasks`, after archiving do the following:
+> Only execute this step AFTER Step 6 (archive) is complete.
 
-1. Extract each action item from the synthesis
-2. For each item, call `TaskCreate` with:
-   - `title`: "[Owner] — [Deliverable]"
-   - `description`: the full acceptance criterion or deliverable detail
-   - `status`: `pending`
-3. Print a summary:
+**Purpose**: Signal meeting end to the user.
+
+**Closing Header**:
 ```
-📋 [N] tasks created from meeting action items.
+---------------------------------------- MEETING CLOSED
+----------------------------------------
+```
+
+Print the transcript file path so the user can verify:
+```
+Transcript path: memory/meeting-YYYY-MM-DD-[slug].md
+```
+
+---
+
+## Step 8: Task Conversion (Optional)
+
+**Purpose**: Convert action items into tracked tasks if `--tasks` flag set.
+
+**If --tasks Flag Present**:
+1. Extract each action item from synthesis
+2. Call `TaskCreate` for each item:
+   - `title`: "[Owner] - [Deliverable]"
+   - `description`: Full acceptance criterion or deliverable detail
+   - `status`: "pending"
+3. Display summary:
+```
+[N] tasks created from meeting action items.
 Run /sync to commit the transcript, or dispatch agents to begin execution.
 ```
 
-If `--tasks` was not passed, instead print:
+**If --tasks Flag Not Set**:
 ```
-트랜스크립트 저장: memory/meeting-YYYY-MM-DD-[slug].md
-액션 아이템을 태스크로 변환하려면 /meeting ... --tasks 옵션을 사용하세요.
+Transcript path: memory/meeting-YYYY-MM-DD-[slug].md
+To convert action items into tasks, use the --tasks option with /meeting
 ```
-
-After saving the transcript (regardless of `--tasks`), register the meeting in MEMORY.md — detect OS and run the appropriate script:
-
-- **Bash (Git Bash / WSL / macOS / Linux):**
-  ```bash
-  bash scripts/sync-md.sh "YYYY-MM-DD" "[TOPIC]" --meeting
-  ```
-- **Windows (PowerShell native):**
-  ```powershell
-  .\scripts\sync-md.ps1 -Date "YYYY-MM-DD" -Summary "[TOPIC]" -Meeting
-  ```
 
 ---
 
-## What NOT to Do
+## Expected Outputs
 
-- ❌ Do not use the `Agent` tool — no sub-agent spawning
-- ❌ Do not summarize what an agent "would say" — actually say it, in their voice
-- ❌ Do not add "(as Claude)" or meta-narration between turns
-- ❌ Do not rush turns — each agent deserves a full, substantive contribution
-- ❌ Do not let agents all agree immediately — real expertise produces real friction
-- ❌ Do not run more than 3 rounds — persona consistency degrades after that
-- ❌ **When PM_PRESENT = true**: do not let other agents open or close rounds — PM exclusively owns round open/close
-- ❌ **When PM_PRESENT = true**: do not let PM skip the round-close turn — PM must synthesize every round before moving to the next
+**Successful Meeting**:
+- Structured dialogue across specified rounds
+- Synthesis with agreements, disagreements, and action items
+- Archived transcript in memory/ (Step 6, mandatory - always before closing)
+- Optional task creation for action items
+
+**Quality Indicators**:
+- Agents stay in character throughout
+- Each agent references prior speakers by name
+- Discussion converges or identifies clear blockers
+- Action items have specific owners and deliverables
+
+---
+
+## Best Practices
+
+**Meeting Setup**:
+**Do**:
+- Use clear, specific meeting topics
+- Limit to 2-3 rounds for best quality
+- Choose dialogue mode for training or transparency
+- Include relevant specialists in participant list
+
+**Don't**:
+- Run more than 3 rounds (persona consistency degrades)
+- Mix unrelated topics in single meeting
+- Include unnecessary agents (keep focused)
+- Use dialogue mode for routine decisions (token cost)
+
+**Facilitation**:
+**Do**:
+- Let agents challenge each other respectfully
+- Allow expertise to create real friction
+- Stop early if consensus reached
+- Document all action items clearly
+
+**Don't**:
+- Force agreement when expertise disagrees
+- Rush through complex discussions
+- Let agents all agree immediately
+- Skip synthesis or action items
+
+---
+
+## Common Issues and Solutions
+
+**Issue**: Agents don't reference prior speakers
+**Solution**: Ensure proper context is maintained; each turn should quote or paraphrase specific prior points
+
+**Issue**: Discussion doesn't converge
+**Solution**: Stop after round 2, let synthesizer identify open questions for follow-up
+
+**Issue**: Action items lack specificity
+**Solution**: Request synthesizer to specify owner, deliverable, and acceptance criteria
+
+**Issue**: Wrong agents participating
+**Solution**: Check current directory has correct `agents/` for desired variant
+
+---
+
+## Related Skills
+
+- **skill-lifecycle-manager**: For creating and managing other skills
+- **task-tracking**: For managing action items from meetings
+- **documentation-writing**: For documenting meeting outcomes

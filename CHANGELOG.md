@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-30]**: feat: implement TS-based hooks and template synchronization
 - **[2026-05-29]**: `templates/common/phase-definitions.md` — comprehensive 6-phase workflow definition with PM facilitator tasks for each phase (Initiation, Planning, Design Handoff, Execution, QA, Finalization)
 - **[2026-05-29]**: Multi-Agent Phase Definitions section — added to all 4 variant AGENTS.md files (co-develop, co-design, co-work, co-security) with phase-specific specialist agent mappings and PM orchestrator guidance
 - **[2026-05-29]**: `memory/meeting-2026-05-29-pm-facilitator-transition-review.md` — meeting transcript documenting 3-agenda review: PM facilitator transition, skill lifecycle procedures, and script advancement needs

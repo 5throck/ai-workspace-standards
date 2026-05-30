@@ -668,6 +668,12 @@ Write-Host ""
 Write-Host "Extension templates (ADR, analyst agent, skill, daily log):" -ForegroundColor DarkGray
 Write-Host "  -> $TemplatesDir\docs\_examples" -ForegroundColor DarkGray
 
+# --- L1: Dynamic Plugin Injection (inject-global-plugins.ts) ---
+$InjectScript = Join-Path $WorkspaceRoot 'scripts\helpers\inject-global-plugins.ts'
+if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $InjectScript)) {
+    bun $InjectScript $ProjectDir $Platform
+}
+
 # ── Cleanup temp dir ───────────────────────────────────────────────────────────  # TEST: none
 if ($TempDir -and (Test-Path $TempDir)) {
     Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue

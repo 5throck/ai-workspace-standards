@@ -23,79 +23,67 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 *   **Execution**: Must be registered in and run via `package.json` scripts (e.g., `bun run audit`, `bun run dev-sync`).
 *   **Examples**: `audit.ts`, `dev-sync.ts`, `gen-pr-body.ts`, `publish-to-template.ts`.
 
-### L1-only Tier 2: Template-Exclusive Scripts (Bun/TS, not published to L0)
-
-*   **Purpose**: Scripts that operate on the template layer (L1) itself — variant validation, template publishing, project scaffolding — and are never needed at the workspace root (L0) level.
-*   **Implementation**: TypeScript (`.ts`) executed via Bun runtime. No `.sh`/`.ps1` wrappers.
-*   **Execution**: `bun run <script>` within `templates/common/scripts/` context.
-*   **Examples**: `validate-templates.ts`, `verify-scripts.ts`, `publish-to-template.ts`, `qa-gate.ts`, `sync-skills.ts`, `list-template-versions.ts`.
-*   **Propagation**: These scripts are propagated to L2 projects via `new-project.sh`. They are NOT published back to L0 — `publish-to-template.ts` must exclude them.
-*   **Identification in Registry**: Source column = `L1` for L1-only scripts.
-
 ---
 
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
-<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift -->
+<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift | pair -->
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
 <!-- security-advisory: CVE-XXXX or — -->
 <!-- drift: — (checked) | intentional (L0/L1 divergence is expected, skip drift check) -->
+<!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
 
-| script | source | version | status | removal-date | security-advisory | drift |
-|--------|--------|---------|--------|--------------|-------------------|-------|
-| `audit.sh` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
-| `audit.ps1` | L0 | 2.0.0 | deprecated | 2026-08-29 | — | intentional |
-| `dev-sync.sh` | L0 | 1.3.0 | deprecated | 2026-08-29 | — | — |
-| `dev-sync.ps1` | L0 | 1.4.0 | deprecated | 2026-08-29 | — | — |
-| `new-project.sh` | L1 | 1.2.0 | active | — | — | — |
-| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — |
-| `sync-md.sh` | L0 | 1.1.0 | deprecated | 2026-08-29 | — | intentional |
-| `sync-md.ps1` | L0 | 1.2.0 | deprecated | 2026-08-29 | — | — |
-| `gen-pr-body.sh` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `gen-pr-body.ps1` | L0 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — |
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — |
-| `audit.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `dev-sync.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — |
-| `sync-md.ts` | L0 | 1.0.0 | active | — | — | intentional |
-| `sync-skills.ts` | L1 | 1.0.0 | active | — | — | — |
-| `publish-to-template.ts` | L1 | 1.0.0 | active | — | — | — |
-| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — |
-| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — |
-| `sync-skills.sh` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — |
-| `sync-skills.ps1` | L1 | 1.1.0 | deprecated | 2026-08-29 | — | — |
-| `publish-to-template.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `publish-to-template.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `list-template-versions.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `list-template-versions.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `qa-gate.sh` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `qa-gate.ps1` | L1 | 1.0.0 | deprecated | 2026-08-29 | — | — |
-| `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — |
-| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — |
-| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — |
-| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — |
-| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — |
-| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — |
-| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — |
+| script | source | version | status | removal-date | security-advisory | drift | pair |
+|--------|--------|---------|--------|--------------|-------------------|-------|------|
+| `new-project.sh` | L1 | 1.2.0 | active | — | — | — | new-project.ps1 |
+| `new-project.ps1` | L1 | 1.4.0 | active | — | — | — | — |
+| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — | install-bun.ps1 |
+| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — | — |
+| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — | upgrade-project.ps1 |
+| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — | — |
+| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | — | cleanup-completed-md.ps1 |
+| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | — | — |
+| `audit.ts` | L0 | 2.0.0 | active | — | — | intentional | — |
+| `dev-sync.ts` | L0 | 1.4.0 | active | — | — | intentional | — |
+| `sync-md.ts` | L0 | 1.2.0 | active | — | — | intentional | — |
+| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `sync-skills.ts` | L1 | 1.1.0 | active | — | — | — | — |
+| `publish-to-template.ts` | L1 | 1.1.0 | active | — | — | — | — |
+| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `validate-templates.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `verify-readme-sync.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — | — |
+| `test-new-project.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `check-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `verify-new-project-tests.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `validate-agents.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `test-runner.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `validate-md-language.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-commit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | — | — |
 
 ---
 
@@ -107,7 +95,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | **L1 — Template snapshot** | `templates/common/scripts/` | publish: `bash scripts/publish-to-template.sh` | Explicit publish from L0 |
 | **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bash scripts/publish-to-template.sh`. L2 projects snapshot L1 at creation time only. No automatic back-propagation from L2.
+**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run publish-to-template`. L2 projects snapshot L1 at creation time only. No automatic back-propagation from L2.
 
 ---
 
@@ -121,52 +109,44 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 **Deprecation flow:**
 1. Set `status: deprecated` and `removal-date: YYYY-MM-DD` (minimum 90 days notice)
-2. `dev-sync.sh` warns L1/L2 consumers on every run
+2. `bun run dev-sync` warns L1/L2 consumers on every run
 3. On `removal-date`, `verify-scripts.ts --verify` **hard blocks** pre-commit
 
 **Security advisory flow:**
 1. Set `security-advisory: CVE-XXXX` (status can remain `active` or become `deprecated`)
-2. `dev-sync.sh` **hard blocks** in L1/L2 until the script is updated or removed
+2. `bun run dev-sync` **hard blocks** in L1/L2 until the script is updated or removed
 3. Unlike deprecation, security advisories take immediate effect with no grace period
 
 ---
 
 ## Guide
 
-### Everyday Development Scripts
+### Everyday Development Scripts (Tier 2 — `bun run <script>`)
 
-#### `audit.sh` / `audit.ps1`
+#### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, CONSTITUTION.md, AGENTS.md,
 agent frontmatter, skill health, and template lifecycle validation.
-**Usage**: `bash scripts/audit.sh` / `.\scripts\audit.ps1`
-**Runs automatically**: pre-commit hook, pre-push hook, `dev-sync.sh`
-**Pair rule**: `.sh` and `.ps1` must always be kept in sync.
+**Usage**: `bun run audit`
+**Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`
 
-#### `dev-sync.sh` / `dev-sync.ps1`
+#### `dev-sync.ts`
 **Purpose**: Full sync pipeline — session log → MEMORY.md index → CHANGELOG auto-add →
 audit gate → sensitive file check → branch creation → commit → push → PR.
-**Usage**: `bash scripts/dev-sync.sh "feat: description"` / `.\scripts\dev-sync.ps1 "feat: ..."`
-**Claude Code**: `/sync "feat: description"`
-**Pair rule**: `.sh` and `.ps1` must always be kept in sync.
+**Usage**: `bun run dev-sync "feat: description"`
+**Claude Code / Gemini**: `/sync "feat: description"`
 
-#### `sync-md.sh` / `sync-md.ps1`
+#### `sync-md.ts`
 **Purpose**: Updates `memory/MEMORY.md` index with today's session entry.
-**Usage**: Called automatically by `dev-sync.sh`. Rarely invoked directly.
-**Pair rule**: `.sh` and `.ps1` must always be kept in sync.
+**Usage**: Called automatically by `bun run dev-sync`. Rarely invoked directly.
 
-#### `setup.sh` / `setup.ps1`
-**Purpose**: Project environment initialization — env file creation, dependency install,
-git hooks installation, initial commit.
-**Usage**: `bash scripts/setup.sh` (run once after `new-project`)
-
-#### `gen-pr-body.sh` / `gen-pr-body.ps1`
-**Purpose**: Generates PR body from commit log and memory log. Called by `dev-sync.sh`.
-**Usage**: Invoked automatically. Can be called standalone: `bash scripts/gen-pr-body.sh "msg"`
+#### `gen-pr-body.ts`
+**Purpose**: Generates PR body from commit log and memory log. Called by `dev-sync.ts`.
+**Usage**: Invoked automatically. Can be called standalone: `bun run gen-pr-body "msg"`
 
 #### `generate-scripts-readme.ts`
 **Purpose**: Auto-generates scripts/README.md from SCRIPTS.md registry.
 **Usage**: `bun scripts/generate-scripts-readme.ts`
-**Runs automatically**: `dev-sync.sh`
+**Runs automatically**: `bun run dev-sync`
 
 ---
 
@@ -238,20 +218,19 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 **Claude Code**: `/new-project "Project Name"`
 **Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
 
-#### `sync-skills.sh` / `sync-skills.ps1`
+#### `sync-skills.ts`
 **Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
 (`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
 `templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
-**Usage**: `bash scripts/sync-skills.sh` / `.\scripts\sync-skills.ps1`
+**Usage**: `bun run sync-skills`
 
-#### `publish-to-template.sh` / `publish-to-template.ps1`
+#### `publish-to-template.ts`
 **Purpose**: Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot
 (`templates/common/scripts/`). Copies all scripts labeled `L0` in the Registry plus
-`SCRIPTS.md` itself.
-**Usage**: `bash scripts/publish-to-template.sh` / `.\scripts\publish-to-template.ps1`
-**Dry-run**: `bash scripts/publish-to-template.sh --dry-run`
+`SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
+**Usage**: `bun run publish-to-template`
+**Dry-run**: `bun run publish-to-template -- --dry-run`
 **Note**: L1-only script (not propagated to template).
-**L1-only exclude**: `publish-to-template.ts` must NOT overwrite L1-only scripts (source=L1 in Registry) when publishing L0→L1. Check the exclude list in `publish-to-template.ts`.
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
