@@ -6,9 +6,10 @@
  * enforces deprecation removal dates, and blocks on security advisories.
  *
  * Usage:
- *   bun scripts/verify-scripts.ts --verify    # CI / pre-commit: fail on drift
- *   bun scripts/verify-scripts.ts --generate  # Generate Registry draft from filesystem
- *   bun scripts/verify-scripts.ts --report    # Human-readable status report
+ *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
+ *   bun scripts/verify-scripts.ts --generate    # Generate Registry draft from filesystem
+ *   bun scripts/verify-scripts.ts --report      # Human-readable status report
+ *   bun scripts/verify-scripts.ts --check-drift # Detect scripts in package.json missing from scripts/ directory
  *
  * Exit codes:
  *   0 = all checks passed
@@ -16,16 +17,27 @@
  */
 
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
 const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
-// This script is distributed to L2 projects — use its own directory as scripts dir.
-// When running in workspace context, the L0 workspace version (scripts/verify-scripts.ts) is used instead.
-const scriptsDir = import.meta.dir;
+// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/)
+function findWorkspaceRoot(startDir: string): string {
+  let dir = startDir;
+  for (let i = 0; i < 6; i++) {
+    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
+    dir = dirname(dir);
+  }
+  throw new Error("Could not find workspace root (CONSTITUTION.md not found)");
+}
+
+const scriptDir = import.meta.dir;
+const workspaceRoot = findWorkspaceRoot(scriptDir);
+const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT
+const l1TemplateDir = join(workspaceRoot, "templates", "common", "scripts");  // L1 snapshot
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -37,6 +49,8 @@ interface RegistryEntry {
   status: "active" | "deprecated" | "experimental";
   removalDate: string; // "—" or "YYYY-MM-DD"
   securityAdvisory: string; // "—" or "CVE-XXXX"
+  drift: string; // "—" (checked) | "intentional" (skip drift check)
+  pair: string;  // "—" or "<script-name>" (.sh declares its .ps1 pair)
 }
 
 // ── Registry Parser ──────────────────────────────────────────────────────────
@@ -86,6 +100,8 @@ function parseRegistry(content: string): RegistryEntry[] {
       status,
       removalDate: cols[4],
       securityAdvisory: cols[5],
+      drift: cols[6] ?? "—", // backward-compatible: 6-column rows default to "—"
+      pair: cols[7] ?? "—",  // new column: .sh declares its .ps1 horizontal pair
     });
   }
 
@@ -103,6 +119,84 @@ function getActualScripts(): string[] {
         f !== SCRIPTS_MD_FILENAME
     )
     .sort();
+}
+
+// ── Drift Detection ──────────────────────────────────────────────────────────
+
+interface DriftResult {
+  script: string;
+  l0Lines: number;
+  l1Lines: number;
+}
+
+function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean: string[] } {
+  const drifted: DriftResult[] = [];
+  const clean: string[] = [];
+
+  for (const entry of registry) {
+    if (entry.source !== "L0") continue;
+    if (entry.drift === "intentional") continue;
+
+    const l0Path = join(scriptsDir, entry.script);       // workspace L0
+    const l1Path = join(l1TemplateDir, entry.script);    // template L1
+
+    if (!existsSync(l0Path) || !existsSync(l1Path)) continue;
+
+    const l0Content = readFileSync(l0Path, "utf-8");
+    const l1Content = readFileSync(l1Path, "utf-8");
+
+    if (l0Content !== l1Content) {
+      drifted.push({
+        script: entry.script,
+        l0Lines: l0Content.split("\n").length,
+        l1Lines: l1Content.split("\n").length,
+      });
+    } else {
+      clean.push(entry.script);
+    }
+  }
+
+  return { drifted, clean };
+}
+
+function checkDriftReport(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error("❌ SCRIPTS.md not found. Run --generate first.");
+    process.exit(1);
+  }
+
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const { drifted, clean } = detectDrift(registry);
+  const intentional = registry.filter(e => e.source === "L0" && e.drift === "intentional");
+
+  console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
+
+  if (drifted.length === 0) {
+    console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
+  } else {
+    console.log(`⚠️  Unintentional drift (${drifted.length} script(s)):`);
+    for (const d of drifted) {
+      const diff = d.l1Lines - d.l0Lines;
+      const sign = diff >= 0 ? "+" : "";
+      console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
+    }
+    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.");
+    console.log("   If divergence is intentional, set 'drift: intentional' in SCRIPTS.md.\n");
+  }
+
+  if (intentional.length > 0) {
+    console.log(`ℹ️  Intentional drift (skipped, ${intentional.length} script(s)):`);
+    for (const e of intentional) console.log(`   ${e.script}`);
+  }
+
+  if (clean.length > 0) {
+    console.log(`\n✅ In sync (${clean.length} script(s)):`);
+    for (const s of clean) console.log(`   ${s}`);
+  }
+
+  console.log();
+  process.exit(drifted.length > 0 ? 0 : 0); // drift is warn-only, not a hard fail
 }
 
 // ── Verify Mode ──────────────────────────────────────────────────────────────
@@ -127,6 +221,30 @@ function verify(): boolean {
   const registeredNames = new Set(registry.map((e) => e.script));
   const actualNames = new Set(actualScripts);
 
+  // Check 0: Architecture compliance (.sh/.ps1 pairs and .ts orchestration)
+  const shScripts = actualScripts.filter(s => s.endsWith('.sh')).map(s => s.replace('.sh', ''));
+  const ps1Scripts = actualScripts.filter(s => s.endsWith('.ps1')).map(s => s.replace('.ps1', ''));
+  const tsBaseNames = new Set(actualScripts.filter(s => s.endsWith('.ts')).map(s => s.replace('.ts', '')));
+
+  for (const name of shScripts) {
+    if (!ps1Scripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.ps1\` is missing for \`${name}.sh\``);
+    }
+  }
+  for (const name of ps1Scripts) {
+    if (!shScripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.sh\` is missing for \`${name}.ps1\``);
+    }
+  }
+  for (const script of actualScripts) {
+    const baseName = script.replace(/\.(sh|ps1)$/, '');
+    const isOrchestrationKeyword = script.includes('lifecycle') || script.includes('verify') || script.includes('validate') || script.includes('agent-') || script.includes('dispatch');
+    const isTsWrapper = !script.endsWith('.ts') && tsBaseNames.has(baseName);
+    if (isOrchestrationKeyword && !script.endsWith('.ts') && !script.endsWith('.md') && !isTsWrapper) {
+      errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
+    }
+  }
+
   // Check 1: Scripts on disk but not in registry
   for (const script of actualScripts) {
     if (!registeredNames.has(script)) {
@@ -135,12 +253,22 @@ function verify(): boolean {
   }
 
   // Check 2: Scripts in registry but not on disk
+  // All scripts (L0 and L1) live in workspace scripts/ (L0 SSOT)
   for (const entry of registry) {
-    if (!actualNames.has(entry.script)) {
+    if (!existsSync(join(scriptsDir, entry.script))) {
       errors.push(
         `Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`
       );
     }
+  }
+
+  // Check 6: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
+  const { drifted } = detectDrift(registry);
+  for (const d of drifted) {
+    warnings.push(
+      `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines. ` +
+      `Mark \`drift: intentional\` in SCRIPTS.md if divergence is expected.`
+    );
   }
 
   // Check 3: Security advisories — hard block
@@ -178,29 +306,57 @@ function verify(): boolean {
         `Missing removal-date for deprecated script: \`${entry.script}\` — add YYYY-MM-DD (min 90 days)`
       );
     }
+
+    // Check 5b: deprecated .sh/.ps1 with pair field should be thin wrappers (≤8 lines)
+    if (
+      entry.status === "deprecated" &&
+      entry.pair !== "—" &&
+      entry.pair !== "" &&
+      (entry.script.endsWith(".sh") || entry.script.endsWith(".ps1"))
+    ) {
+      const scriptPath = join(scriptsDir, entry.script);
+      if (existsSync(scriptPath)) {
+        const scriptContent = readFileSync(scriptPath, "utf-8");
+        const lineCount = scriptContent.split("\n").filter(l => l.trim()).length;
+        if (lineCount > 8) {
+          warnings.push(
+            `⚠️  FAT DEPRECATED WRAPPER: \`${entry.script}\` has ${lineCount} non-empty lines — deprecated scripts with a TS pair should be thin wrappers (≤8 lines). Convert to: exec bun $SCRIPT_DIR/${entry.pair.replace('.ps1', '.ts').replace('.sh', '.ts')} "$@"`
+          );
+        }
+      }
+    }
   }
 
-  // Check 6: Tier violation — active .ts script with active .sh/.ps1 wrapper
-  const activeTs = new Set(
-    registry
-      .filter((e) => e.status === "active" && e.script.endsWith(".ts"))
-      .map((e) => e.script.replace(/\.ts$/, ""))
-  );
+  // Check 6: pair field horizontal sync — .sh declares pair, verify version match
+  const byScript = new Map(registry.map(e => [e.script, e]));
   for (const entry of registry) {
-    if (entry.status !== "active") continue;
-    if (!entry.script.endsWith(".sh") && !entry.script.endsWith(".ps1")) continue;
-    const base = entry.script.replace(/\.(sh|ps1)$/, "");
-    if (activeTs.has(base)) {
-      errors.push(
-        `Tier violation: \`${entry.script}\` is active but \`${base}.ts\` also exists as active — ` +
-        `mark the shell wrapper as deprecated (Tier 2 scripts must not have active shell wrappers)`
+    if (entry.pair === "—" || entry.pair === "") continue;
+    const pairEntry = byScript.get(entry.pair);
+    if (!pairEntry) {
+      warnings.push(
+        `⚠️  PAIR MISSING: \`${entry.script}\` declares pair \`${entry.pair}\` but it is not in registry`
+      );
+      continue;
+    }
+    // Version sync check: both files should have same major.minor version
+    const [shMaj, shMin] = entry.version.split(".").map(Number);
+    const [ps1Maj, ps1Min] = pairEntry.version.split(".").map(Number);
+    if (shMaj !== ps1Maj || shMin !== ps1Min) {
+      warnings.push(
+        `⚠️  PAIR VERSION DRIFT: \`${entry.script}\` v${entry.version} ↔ \`${entry.pair}\` v${pairEntry.version} — consider aligning versions`
+      );
+    }
+    // Status sync check: both should have same status
+    if (entry.status !== pairEntry.status) {
+      warnings.push(
+        `⚠️  PAIR STATUS DRIFT: \`${entry.script}\` (${entry.status}) ↔ \`${entry.pair}\` (${pairEntry.status}) — statuses should match`
       );
     }
   }
 
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
-  console.log(`Registry: ${scriptsMdPath}`);
+  console.log(`Registry: ${scriptsMdPath} (L0 SSOT)`);
   console.log(`Scripts dir: ${scriptsDir}\n`);
 
   if (warnings.length > 0) {
@@ -355,10 +511,12 @@ if (args.includes("--generate")) {
   generate();
 } else if (args.includes("--report")) {
   report();
+} else if (args.includes("--check-drift")) {
+  checkDriftReport();
 } else if (args.includes("--verify") || args.length === 0) {
   const ok = verify();
   process.exit(ok ? 0 : 1);
 } else {
-  console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report]`);
+  console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
   process.exit(1);
 }

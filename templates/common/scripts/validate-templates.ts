@@ -12,8 +12,9 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { cwd } from 'node:process';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { load } from 'js-yaml';
 
 interface VariantManifest {
   name: string;
@@ -53,15 +54,12 @@ const colors = {
   dim: '\x1b[2m',
 };
 
-const ROOT = cwd();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
 const TEMPLATES_DIR = join(ROOT, 'templates');
 
-// Guard: must be run from workspace root (where templates/ directory exists)
 if (!existsSync(TEMPLATES_DIR)) {
-  console.error(`\x1b[31m[ERROR] validate-templates.ts must be run from the workspace root.\x1b[0m`);
-  console.error(`        Current directory: ${ROOT}`);
-  console.error(`        Expected: a directory containing templates/`);
-  console.error(`        Usage: cd <workspace-root> && bun scripts/validate-templates.ts`);
+  console.error(`\x1b[31m[ERROR] templates/ directory not found at: ${TEMPLATES_DIR}\x1b[0m`);
   process.exit(1);
 }
 
@@ -308,6 +306,69 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
   return fields;
 }
 
+/**
+ * Resolve extends pattern in frontmatter
+ * If file has "extends: path/to/skeleton.md", read skeleton and merge frontmatters
+ * @param filePath - Absolute path to the variant file
+ * @param frontmatter - Parsed frontmatter fields from the variant file
+ * @returns Merged frontmatter fields (skeleton + variant overrides)
+ */
+function resolveExtends(filePath: string, frontmatter: Record<string, true>): Record<string, true> {
+  if (!frontmatter.extends) {
+    return frontmatter; // No extends, return as-is
+  }
+
+  // Extract the extends path from the raw content (we need the actual path string, not just 'true')
+  const rawContent = readFileSync(filePath, 'utf-8');
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return frontmatter;
+
+  // Parse the extends value from YAML
+  let extendsPath: string | undefined;
+  try {
+    const yamlObj = load(match[1]) as Record<string, unknown>;
+    extendsPath = yamlObj.extends as string | undefined;
+  } catch {
+    return frontmatter; // Invalid YAML, return original
+  }
+
+  if (!extendsPath) return frontmatter;
+
+  // Resolve skeleton path relative to current file
+  const skeletonPath = resolve(dirname(filePath), extendsPath);
+
+  try {
+    if (!existsSync(skeletonPath)) {
+      console.warn(`[WARN] Skeleton file not found: ${skeletonPath}`);
+      return frontmatter;
+    }
+
+    const skeletonContent = readFileSync(skeletonPath, 'utf-8');
+    const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!skeletonMatch) {
+      // No frontmatter in skeleton, return variant frontmatter
+      return frontmatter;
+    }
+
+    const skeletonFrontmatter = parseFrontmatter(skeletonContent);
+
+    // Merge: skeleton base + variant overrides (variant takes precedence)
+    const merged = { ...skeletonFrontmatter };
+    for (const key of Object.keys(frontmatter)) {
+      if (key !== 'extends') {
+        merged[key] = frontmatter[key];
+      }
+    }
+
+    return merged;
+  } catch (error) {
+    console.warn(`[WARN] Failed to resolve extends: ${skeletonPath}`, error);
+    return frontmatter; // Fallback to original
+  }
+}
+
 // Check 3 & 4: Agent frontmatter and required sections
 function checkAgents(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 3-4: Agent files in ${variant} ===`);
@@ -351,15 +412,54 @@ function checkAgents(variant: string): void {
     const content = normalizeContent(rawContent);
     const fields = parseFrontmatter(rawContent);
 
+    // Resolve extends pattern - merge skeleton frontmatter with variant frontmatter
+    const resolvedFields = resolveExtends(filePath, fields);
+
     // Check frontmatter (field must exist as a key, value can be empty/block)
-    const missingFields = requiredFrontmatter.filter(f => !(f in fields));
+    const missingFields = requiredFrontmatter.filter(f => !(f in resolvedFields));
     if (missingFields.length > 0) {
       fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`,
         `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(', ')}`);
     } else {
-      // Validate status enum value (extract actual value from raw content)
-      const statusLine = rawContent.split('\n').find(l => l.match(/^status:\s*\S/));
-      const statusVal = statusLine ? statusLine.replace(/^status:\s*/, '').trim() : '';
+      // Validate status enum value (extract actual value from resolved content)
+      // If file has extends, we need to check the skeleton file for the status value
+      let statusVal = '';
+
+      // Check if the original (non-resolved) frontmatter has extends
+      const hasExtends = 'extends' in fields;
+
+      if (hasExtends) {
+        // Read status from skeleton file
+        const extendsLine = rawContent.split('\n').find(l => l.match(/^extends:\s*\S/));
+        const extendsVal = extendsLine ? extendsLine.replace(/^extends:\s*/, '').trim() : '';
+        const skeletonPath = resolve(dirname(filePath), extendsVal);
+
+        try {
+          const skeletonContent = readFileSync(skeletonPath, 'utf-8');
+          // Extract status from skeleton frontmatter
+          const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
+          if (skeletonMatch) {
+            const skeletonYaml = load(skeletonMatch[1]) as Record<string, unknown>;
+            statusVal = (skeletonYaml.status as string) ?? '';
+          }
+        } catch (error) {
+          // If skeleton read fails, fall back to variant file
+          console.warn(`[WARN] Failed to read skeleton for status validation: ${skeletonPath}`, error);
+          const variantMatch = content.match(/^---\n([\s\S]*?)\n---/);
+          if (variantMatch) {
+            const variantYaml = load(variantMatch[1]) as Record<string, unknown>;
+            statusVal = (variantYaml.status as string) ?? '';
+          }
+        }
+      } else {
+        // No extends, read from variant file directly
+        const match = content.match(/^---\n([\s\S]*?)\n---/);
+        if (match) {
+          const yamlObj = load(match[1]) as Record<string, unknown>;
+          statusVal = (yamlObj.status as string) ?? '';
+        }
+      }
+
       if (!validAgentStatuses.includes(statusVal)) {
         fail(variant, 'agent-status-invalid',
           `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(' | ')})`,
@@ -517,16 +617,10 @@ function checkScriptParity(variant: string): void {
     }
   }
 
-  // 7b: .githooks/ parity — Warn only (Git Bash assumed on Windows)
+  // 7b: .githooks/ parity — Removed since hooks are now TS wrappers without .ps1 equivalents
   const hooksDir = join(TEMPLATES_DIR, 'common', '.githooks');
   if (existsSync(hooksDir)) {
-    const hookFiles = readdirSync(hooksDir).filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
-    const missingHookPs1 = hookFiles.filter(h => !existsSync(join(hooksDir, `${h}.ps1`)));
-    if (missingHookPs1.length > 0) {
-      warn('common', 'githooks-parity', `.githooks/ missing .ps1 counterparts: ${missingHookPs1.join(', ')} (Windows users require Git Bash)`);
-    } else {
-      pass(`common/.githooks: all hooks have .ps1 counterparts`);
-    }
+    pass(`common/.githooks: present`);
   }
 }
 
@@ -1225,6 +1319,28 @@ function checkCommonContract(): void {
       if (!existsSync(variantAgentPath)) continue; // variant inherits from common — no override to check
 
       const variantRaw = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+
+      // Check if variant uses extends pattern
+      const variantFields = parseFrontmatter(variantRaw);
+      const hasExtends = 'extends' in variantFields;
+
+      if (hasExtends) {
+        // Variant using extends should ONLY contain the extends field in frontmatter
+        // This is the new pattern — variant is a pure reference to skeleton
+        const fieldKeys = Object.keys(variantFields);
+        const nonExtendsKeys = fieldKeys.filter(k => k !== 'extends');
+
+        if (nonExtendsKeys.length > 0) {
+          warn(variant, 'C-SK-02',
+            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has other frontmatter fields: ${nonExtendsKeys.join(', ')} — with extends, only the extends field should be present`,
+            `Remove extra frontmatter fields from variant file or remove extends and use additive override pattern`
+          );
+        }
+
+        // Skip the rest of the checks for extends-based variants
+        // The skeleton file is already validated above
+        continue;
+      }
 
       // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
       if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
