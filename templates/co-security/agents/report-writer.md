@@ -2,9 +2,10 @@
 name: report-writer
 formal_name: Report Writer
 tier:
-  claude: medium      # claude-sonnet-4-6
-  antigravity: medium # gemini-3.1-flash
-  gemini-cli: medium  # gemini-3.1-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: green
 description: >

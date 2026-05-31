@@ -1,41 +1,26 @@
 # GEMINI.md
 
-> **Doc intent:** This file contains Gemini CLI / Antigravity-specific overrides only.
-> Workspace-level Gemini behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md)
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
+
+---
 
 ## Role Declaration
 
-You ARE the PM agent for this project session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
 
-**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
-- `write_to_file`, `replace_file_content`, `multi_replace_file_content` — file modification
-- `run_command` — unless strictly read-only: `grep_search`, `git log/status/diff`, `ls`
-
-**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+**Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then use `invoke_subagent` to dispatch specialist agents
 3. Never bypass PM workflow — direct specialist invocation is forbidden
 
-> **Note**: `PreToolUse` hooks enforce this rule at the tool level in CLI environments. This Role Declaration serves as the system-prompt-level enforcement (Level 2).
+> **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
 ---
 
-## Session Start — Context Loading Order
+## Gemini-Specific & Antigravity Workflows
 
-At the start of every session, read these files **in order**:
-
-1. **[`docs/context.md`](templates/common/docs/context.md)** — Immutable project identity (architecture, key files, documentation standards). Do NOT modify.
-2. **[`docs/co-work.context.md`](docs/co-work.context.md)** — Tool stack, agents, skills, scripts, workflow. All project-specific changes go here.
-3. **[`AGENTS.md`](AGENTS.md)** — Canonical agent index and dispatch protocols.
-
-> The two-file split is intentional: `context.md` never changes after project creation;
-> `co-work.context.md` evolves with the project (agents, skills, tool stack, workflow).
-
-## Project-Specific Gemini Settings
-
-### Tool Name Mapping & Safeguards
-
-Gemini CLI uses different tool names from Claude Code:
+### 1. Active Antigravity Tool Suite Mapping & Safeguards
+Antigravity utilizes the following specialized, fine-grained toolset for filesystem and system operations. Refer to this mapping and the mandatory operational safeguards below:
 
 | Tool Category | Tool Name | Operational Guidance |
 | :--- | :--- | :--- |
@@ -45,11 +30,11 @@ Gemini CLI uses different tool names from Claude Code:
 | **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file simultaneously. Order chunks descendingly (bottom-to-top) to avoid line offsets. |
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
 | **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. |
-| **Agent** | `invoke_subagent` | Pass agent role from `agents/<name>.md` |
 
-#### ⚠️ Surgical Multi-Replace Offset Safeguard
+#### 🚨 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
-- **Rule**: Sort and process `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
+- **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
+- This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
 #### 🚨 Windows Terminal & Code Page Safeguard
 When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
@@ -57,167 +42,202 @@ When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the d
 
 #### 🚨 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
-- **Rule**: If a search yields 50 results, do **NOT** assume you have all occurrences.
-- **Remediation**: Partition the search by targeting specific subdirectories or applying restrictive file glob filters via the `Includes` parameter.
+- **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
+- **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
 
-### Native Antigravity 2.0 Features
+---
 
-Antigravity 2.0 introduces new native features that should be leveraged:
-- **Slash Commands**: Recommend `/goal`, `/schedule`, `/browser`, and `/grill-me` to users when appropriate.
-- **Artifacts**: Write complex plans or analysis results into the Artifacts UI (creates `.md` in the brain directory). Set `IsArtifact: true` with accurate `ArtifactMetadata`.
-- **Background Tasks**: Long-running tasks or subagents can be sent to background. Monitor them with `manage_task`.
-
-### Planning Mode & Artifact Specifications
-
+### 2. Planning Mode & Artifact Specifications
 Enter Planning Mode when:
 - The user requests a new feature or significant refactor.
 - The change modifies more than 2 files.
 - The correct approach is unclear or contains architectural trade-offs.
 
-When entering Planning Mode, leverage these three Markdown artifacts (set `IsArtifact: true` with accurate metadata):
+When entering Planning Mode, Gemini **MUST** leverage the following three precise Markdown artifacts. When creating or updating them, set `IsArtifact: true` and specify accurate metadata:
 
-#### 1. `implementation_plan.md`
-*Path: `<appDataDir>\brain\<session-id>\implementation_plan.md`*
-- **Purpose**: Detailed technical design document presented to the user for feedback and approval.
-- **Metadata**: `ArtifactType: "implementation_plan"`, `RequestFeedback: true`.
-- **Governance**: Stop and wait for explicit user approval before modifying any application source code.
+#### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows / `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
+*   **Purpose**: Detailed technical design document presented to the user for feedback and approval.
+*   **Metadata**: `ArtifactType: "implementation_plan"`, `RequestFeedback: true`, and a clear multi-line `Summary`.
+*   **Format Requirement**: MUST use the exact markdown template below for the document structure.
+    ```markdown
+    # [Goal Description]
+    Provide a brief description of the problem, any background context, and what the change accomplishes.
 
-#### 2. `task.md`
-*Path: `<appDataDir>\brain\<session-id>\task.md`*
-- **Purpose**: Running TODO list to track development progress dynamically.
-- **Metadata**: `ArtifactType: "task"`.
-- **Syntax**: `- [ ]` uncompleted · `- [/]` in progress · `- [x]` completed.
+    ## User Review Required
+    Document anything that requires user review or feedback.
 
-#### 3. `walkthrough.md`
-*Path: `<appDataDir>\brain\<session-id>\walkthrough.md`*
-- **Purpose**: Post-implementation document summarizing changes, automated test logs, and manual validation details.
-- **Metadata**: `ArtifactType: "walkthrough"`.
+    ## Proposed Changes
+    Group files by component and order logically.
+    #### [MODIFY] [file basename](file:///absolute/path/to/modifiedfile)
+    #### [NEW] [file basename](file:///absolute/path/to/newfile)
 
-### Subagent Instantiation & Async Orchestration
+    ## Execution Task Plan (Agent Dispatch Rules)
+    | Step | Task | Agent | Tier | Model |
+    |:---:|---|:---:|:---:|---|
+    | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
+    | N-1 | Phase 6: Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [Model String] |
+    | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model String] |
 
+    *Execution Order: [Parallel/Sequential]*
+    ```
+*   **Governance**: Stop and wait for explicit user approval before modifying any application source code.
+
+#### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows / `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
+*   **Purpose**: Running TODO list to track development progress dynamically.
+*   **Metadata**: `ArtifactType: "task"`.
+*   **Syntax**:
+    *   `- [ ]` for uncompleted tasks.
+    *   `- [/]` for tasks currently in progress.
+    *   `- [x]` for completed tasks.
+
+#### 3. `walkthrough.md` (Path: `<appDataDir>\brain\<session-id>\walkthrough.md` on Windows / `<appDataDir>/brain/<session-id>/walkthrough.md` on macOS/Linux)
+*   **Purpose**: Post-implementation document summarizing changes, automated test logs, and manual validation details.
+*   **Metadata**: `ArtifactType: "walkthrough"`.
+
+---
+
+### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
+
 #### Define Subagent (`define_subagent`)
+Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "test-runner",
-  "description": "Executes tests and verifies code changes against acceptance criteria",
-  "system_prompt": "You are a QA test runner...",
+  "name": "auditor",
+  "description": "Cross-validates documentation and ensures rules are not contradicted",
+  "system_prompt": "You are a consistency auditor...",
   "enable_write_tools": false,
   "enable_subagent_tools": false
 }
 ```
 
 #### Invoke Subagent (`invoke_subagent`)
+Spawn parallel instances to execute dedicated work concurrently.
 ```json
 {
   "Subagents": [
     {
-      "TypeName": "test-runner",
-      "Role": "Test Runner",
-      "Prompt": "Verify the code changes in src/ against acceptance criteria and run tests"
+      "TypeName": "auditor",
+      "Role": "Consistency Auditor",
+      "Prompt": "Cross-validate the documentation changes and check for contradictions"
     }
   ]
 }
 ```
 
 #### Communication (`send_message`)
-Interact with spawned agents via their unique `conversationID`.
-**Reactive Wakeup**: Do not poll in a loop - simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
+Interact and exchange contracts with spawned agents via their unique `conversationID`.
+The platform supports **Reactive Wakeup**: you do not need to poll or query tasks in a loop. Simply yield execution, and the platform will wake you up automatically as soon as an agent replies or a background task completes.
 
-### Behavioral Rules & Multi-Agent Workflow
+#### Phase 4 Execution Loop
+See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete agent list:
+1.  **automation-engineer** implements the changes.
+2.  **auditor** verifies against acceptance criteria and consistency.
+3.  **Quality gate (audit script)** validates compliance.
 
-All behavioral rules (Multi-Agent Workflow, Response Language, Plan Mode, Task Tracking, Subagent Pattern) have been consolidated into the project-level context file to avoid duplication.
+> Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
-The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy:
+The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
 - **High-tier (Design/Planning)** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
 - **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** → `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
-> **Full guidelines:** See [docs/context.md § Coding Guidelines](docs/context.md#coding-guidelines) and [docs/context.md § Multi-Agent Workflow](docs/context.md#multi-agent-workflow)
+---
 
-### Optimal Interaction Guidelines
-- **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
-- **Tool Usage**: Actively use tools like `search_web` for real-time package version verification or resolving external dependencies.
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
+- All documentation in docs/, agents/, skills/ → English only
+- Git commit messages, PR titles, PR descriptions → English only
+- Branch names → English only
+- Code comments → English (unless documenting locale-specific logic)
+
+### 5. Agent Dispatch Rules
+
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+
+#### Mandatory Execution Plan Display
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task] | [agent] | High/Medium/Low | high/medium/low |
+
+State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- auditor (Phase 5)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 5)
+- lifecycle-manager (Phase 6)
+
+#### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
-### Security & Hook Configuration
+### 6. Lifecycle Management Rules
 
-<!-- WORKSPACE-MANAGED -->
-Security defaults are enforced at project creation and verified during upgrades.
+> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
-| Control | Configuration | Verification |
-|---------|---------------|--------------|
-| Secret scanning | `.gitleaks.toml` (project root) | Pre-commit hook runs gitleaks |
-| Pre-commit hook | `.githooks/pre-commit` | `git hook run pre-commit` |
-| Pre-push hook | `.githooks/pre-push` | Blocks direct push to `main` |
-| Encoding safety | `.gitattributes` (`eol=lf`, `encoding=utf-8`) | Prevents CRLF corruption |
-| Secrets exclusion | `.gitignore` (`.env`, `*.key`, `*.pem`) | Audit script checks patterns |
-| Hook path | `git config core.hooksPath .githooks` | Run once per clone |
+When modifying files, apply the following rules **before** running `/sync` or committing:
 
-**Activating hooks** (run once per clone):
+| Modified file(s) | Required follow-up actions |
+|-----------------|---------------------------|
+| `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
+| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+
+**Verification** (run after any of the above):
 ```bash
-git config core.hooksPath .githooks
+bun scripts/audit.ts                  # full workspace audit including lifecycle sync
+bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-**Security Bootstrap Verification**: This section defines the security gate that Antigravity enforces when creating or upgrading projects. Both the Antigravity engine and the `.githooks/` directory must pass the same 5-point Security Bootstrap Check.
-<!-- /WORKSPACE-MANAGED -->
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 
 ---
 
-### Git Commit Policy
+## Git & PR Additions (Gemini)
 
-**Auto-commits and PostToolUse hooks are disabled in Gemini CLI.**
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
-After completing a task, manually run the sync pipeline:
+- **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`bun scripts/audit.ts` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-```bash
-# bash (macOS/Linux)
-bash scripts/dev-sync.sh "feat: description"
+*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
-# PowerShell (Windows)
-.\scripts\dev-sync.ps1 "feat: description"
-```
 
----
-
-### Executing Project Commands
-
-To execute project commands, run the corresponding script directly:
-
-| Equivalent to | Run instead |
-|---------------|------------|
-| `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` |
-| `/memlog "summary"` | Manually append `## Session - summary` to `memory/YYYY-MM-DD.md` |
-| `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
-| `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
-| `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) · `.\scripts\new-project.ps1 "<name>"` (Windows) |
-| `/post-write` | `bash scripts/audit.sh` (macOS/Linux) · `.\scripts\audit.ps1` (Windows) |
-| `/security-check` | Run Workflow 2 of `agents/security-monitor.md` (Pre-PR Advisory Check) |
-
----
-
-### Pre-PR Security Gate (public repos only)
-
-Before pushing and creating a PR, check if the repo is public:
-
-```bash
-gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
-```
-
-If the result is `false` (public repo): run `/security-check` (Workflow 2 of `agents/security-monitor.md` - read-only, no scan).
-
-- If CRITICAL advisories are found: show the warning and **pause** - let the user decide whether to proceed or stop.
-- If no CRITICAL advisories: continue with the push and PR creation.
-
-For private repos: skip the security gate entirely.
-
----
-
-### Model Selection Override
-<!-- Uncomment to override workspace defaults for this project only.          -->
-<!-- - Default      : gemini-2.5-pro                                          -->
-<!-- - Fast lookups : gemini-2.5-flash                                        -->

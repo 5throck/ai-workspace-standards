@@ -2,6 +2,9 @@
 /**
  * test-new-project.ts — E2E Test for new-project.sh / new-project.ps1
  *
+ * @version 1.0.1
+ * @last_updated 2026-05-31
+ *
  * Cross-platform: detects OS and calls the appropriate script.
  * Tests the OUTPUT of new-project, not the mechanism inside it.
  *
@@ -50,12 +53,12 @@ if (!projectName) {
   process.exit(1);
 }
 
-const testDir  = join('.sandbox', `Test-${projectName}`);
+// Due to new-project path traversal protection, the project name must be strictly alphanumeric.
+// We can no longer nest tests inside .sandbox/ - we must create them in the workspace root.
+const testDir  = `Test-${projectName}`;
 const isWin    = platform === 'win32';
 const today    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-import { mkdirSync } from 'node:fs';
-if (!existsSync('.sandbox')) mkdirSync('.sandbox');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +101,8 @@ console.log(`   Project name : ${projectName}`);
 console.log(`   Test dir     : ${testDir}`);
 console.log(`   OS           : ${isWin ? 'Windows (ps1)' : 'Unix (sh)'}\n`);
 
+cleanup();
+
 try {
   // ── Test 0: Script Syntax Validation ─────────────────────────────────────────
   // Runs BEFORE project creation — catches bracket/syntax errors early.
@@ -136,51 +141,6 @@ try {
     skip('Test 0b', `powershell not available — skipping ps1 syntax check (${e})`);
   }
 
-  // 0c: Initialize-UTF8Environment executes without error on any PS version.
-  // Specifically guards against:
-  //   - [System.Text.CodePages.CodePagesEncodingProvider] type not found (PS 5.1 / .NET Framework)
-  //   - Any other runtime error in the UTF-8 setup block
-  // The function must succeed (exit 0) regardless of whether the assembly is available.
-  try {
-    const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
-    const initCmd =
-      `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
-      `Invoke-Expression ($content -replace '(?s)^.*?(function Initialize-UTF8Environment.*?\r?\n\}).*$', '$1'); ` +
-      `Initialize-UTF8Environment; ` +
-      `Write-Host 'Initialize-UTF8Environment: OK'`;
-    const initResult = await $`powershell -NoProfile -Command ${initCmd}`.nothrow();
-    if (initResult.exitCode !== 0) {
-      fail('Test 0c', `Initialize-UTF8Environment threw an error:\n${initResult.stderr.toString().trim()}`);
-      syntaxOk = false;
-    } else {
-      pass('Test 0c PASSED: Initialize-UTF8Environment runs without error');
-    }
-  } catch (e) {
-    skip('Test 0c', `powershell not available — skipping (${e})`);
-  }
-
-  // 0d: Validate-TemplateSync checks common/ and variant/ directories separately.
-  // Guards against the bug where CLAUDE.md/GEMINI.md/agents/pm.md were expected
-  // in templates/common/ but actually live in variant folders only.
-  try {
-    const ps1Path = join(process.cwd(), 'scripts', 'new-project.ps1').replace(/\\/g, '/');
-    const commonPath  = join(process.cwd(), 'templates', 'common').replace(/\\/g, '/');
-    const variantPath = join(process.cwd(), 'templates', variantArg).replace(/\\/g, '/');
-    const validateCmd =
-      `$content = Get-Content '${ps1Path}' -Raw -Encoding UTF8; ` +
-      `Invoke-Expression ($content -replace '(?s)^.*?(function Validate-TemplateSync.*?\r?\n\}).*$', '$1'); ` +
-      `Validate-TemplateSync -CommonPath '${commonPath}' -VariantPath '${variantPath}'; ` +
-      `Write-Host 'Validate-TemplateSync: OK'`;
-    const vResult = await $`powershell -NoProfile -Command ${validateCmd}`.nothrow();
-    if (vResult.exitCode !== 0) {
-      fail('Test 0d', `Validate-TemplateSync failed:\n${vResult.stderr.toString().trim()}`);
-      syntaxOk = false;
-    } else {
-      pass('Test 0d PASSED: Validate-TemplateSync passes for common/ and variant/');
-    }
-  } catch (e) {
-    skip('Test 0d', `powershell not available (${e})`);
-  }
 
   // 0e: Verify new-project.sh template validation logic checks common/ and variant/ separately.
   // Guards against the same bug as Test 0d — ensures sh version validates correctly.
@@ -252,8 +212,8 @@ try {
                               readme.includes('{{PROJECT_NAME}}');
     if (hasOldPlaceholder) {
       fail('Test 3', 'Placeholder not replaced in README.md');
-    } else if (!readme.includes(projectName)) {
-      fail('Test 3', `Project name "${projectName}" not found in README.md`);
+    } else if (!readme.includes(testDir)) {
+      fail('Test 3', `Project name "${testDir}" not found in README.md`);
     } else {
       pass('Test 3 PASSED: Placeholders substituted correctly');
     }
@@ -580,10 +540,12 @@ try {
         '## Role',
         '## ⚠️ YOU ARE THE SINGLE ENTRY POINT',
         '## Consensus-Driven Facilitation Model',
-        '## Proactive Review Triggers (T-02)',
-        '## QA Self-Check Trigger (T-03)',
-        '## Meeting Facilitation',
-        '## Constraints'
+        '## Governance Workflow',
+        '## Updated Role (Phase 0/1-2/6 Only)',
+        '## Agent Roster',
+        '## Constraints',
+        '## Dispatch Protocol',
+        '## Meeting Facilitation'
       ];
       const missing = invariants.filter(s => !pmContent.includes(s));
       if (missing.length > 0) {

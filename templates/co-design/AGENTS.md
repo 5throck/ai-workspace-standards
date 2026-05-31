@@ -12,7 +12,7 @@
 
 ## Multi-Agent Phase Definitions
 
-**co-design follows the standard 7-phase workflow** defined in [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding -->.
+**co-design follows the standard 7-phase workflow** defined in [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding -->.
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
@@ -25,7 +25,7 @@
 | 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
 
 **PM Facilitation Guidance:**
-See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
+See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
 - Opening the phase (objective, specialist nomination, expectations)
 - Progress monitoring (intervene only if standards not met)
 - Synthesis of outputs (key findings, decisions)
@@ -241,3 +241,5 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 2. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
 3. Update the `## Agents` table in `docs/context.md` to match.
 4. If the agent uses a skill, add a row to the Skills table above and in `docs/context.md § Skills`.
+
+

@@ -2,7 +2,7 @@
 
 > **Purpose**: Document when and how the PM agent switches between Orchestrator mode and Direct Management mode, with concrete usage examples and decision criteria.  
 > **Owner**: pm  
-> **Related**: [agents/pm.md](../../agents/pm.md), [phase-definitions.md](../../templates/common/phase-definitions.md)
+> **Related**: [agents/pm.md](../../agents/pm.md), [phase-definitions.md](../../templates/common/docs/phase-definitions.md)
 
 ---
 
@@ -183,3 +183,4 @@ New task received
 ## Acceptance Criteria
 
 - AC-05: This file documents PM orchestrator parameters with activation conditions and usage examples ✅
+

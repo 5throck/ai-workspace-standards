@@ -16,6 +16,12 @@ async function main() {
 
   console.log("=== TS Pre-commit Hook ===");
 
+  if (process.env.SYNC_ACTIVE !== "1") {
+    console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
+    console.error("\x1b[33m[WARN]\x1b[0m Using --no-verify to bypass this check skips secret scanning (gitleaks). Only use this for intentional hotfixes.");
+    process.exit(1);
+  }
+
   // 1. Auto-update Markdown "Last Updated" dates
   const mdStaged = staged.filter(f => f.toLowerCase().endsWith('.md'));
   if (mdStaged.length > 0) {

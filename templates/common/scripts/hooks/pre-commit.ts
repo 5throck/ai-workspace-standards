@@ -5,8 +5,7 @@
  */
 
 import { $ } from "bun";
-import { readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
@@ -16,6 +15,12 @@ async function main() {
   const memoryOnly = staged.every(f => f.startsWith('memory/'));
 
   console.log("=== TS Pre-commit Hook ===");
+
+  if (process.env.SYNC_ACTIVE !== "1") {
+    console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
+    console.error("\x1b[33m[WARN]\x1b[0m Using --no-verify to bypass this check skips secret scanning (gitleaks). Only use this for intentional hotfixes.");
+    process.exit(1);
+  }
 
   // 1. Auto-update Markdown "Last Updated" dates
   const mdStaged = staged.filter(f => f.toLowerCase().endsWith('.md'));
@@ -101,7 +106,42 @@ async function main() {
     }
   }
 
-  // 5. Secret scan
+  // 5. README sync check
+  const readmeStaged = staged.some(f => /README(\_ko)?\.md$/.test(f));
+  if (readmeStaged) {
+    console.log("\n=== README Synchronization ===");
+    try {
+      await $`bun scripts/verify-readme-sync.ts --pre-commit`;
+      console.log("\x1b[32m[PASS]\x1b[0m README sync: all hashes match");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m README sync check failed — commit blocked.");
+      process.exit(1);
+    }
+  }
+
+  // 6. Lifecycle compliance check (Tier 1 Gatekeeper)
+  const scriptStaged = staged.filter(f => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, '/')));
+  const scriptsMdStaged = staged.includes('scripts/SCRIPTS.md');
+
+  if (scriptStaged.length > 0 && !scriptsMdStaged) {
+    console.log("\n=== Lifecycle Compliance Check ===");
+    console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts files were modified but scripts/SCRIPTS.md was not updated.");
+    console.error("");
+    console.error("Modified script files:");
+    for (const script of scriptStaged) {
+      console.error(`  - ${script}`);
+    }
+    console.error("");
+    console.error("Required actions:");
+    console.error("  1. Register new scripts in scripts/SCRIPTS.md");
+    console.error("  2. Bump version for modified scripts in scripts/SCRIPTS.md");
+    console.error("  3. Stage the updated scripts/SCRIPTS.md:");
+    console.error("     git add scripts/SCRIPTS.md");
+    console.error("");
+    process.exit(1);
+  }
+
+  // 7. Secret scan
   console.log("\n=== Secret scan ===");
   try {
     const hasGitleaks = await $`gitleaks version`.nothrow().quiet();

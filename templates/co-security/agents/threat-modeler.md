@@ -2,9 +2,10 @@
 name: threat-modeler
 formal_name: Threat Modeler
 tier:
-  claude: high        # claude-opus-4-7
-  antigravity: high   # gemini-3.1-pro (thinking_level="medium")
-  gemini-cli: high    # gemini-3.1-pro
+  claude: high
+  gemini: high
+  antigravity: high
+  gemini-cli: high
 model: inherit
 color: purple
 description: >

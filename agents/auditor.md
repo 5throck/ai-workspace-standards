@@ -2,9 +2,10 @@
 name: Consistency Auditor
 status: active
 tier:
-  claude: medium        # claude-sonnet-4-6
-  antigravity: medium   # gemini-3.5-flash (thinking_level="medium")
-  gemini-cli: medium    # gemini-3.5-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: cyan
 description: 'Owns Phase 5 QA gate. Cross-validates documentation. Enforces standards. Use when: "Quality verification", "Documentation consistency check", "QA gate required"'

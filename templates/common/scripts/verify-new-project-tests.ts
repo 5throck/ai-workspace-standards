@@ -2,6 +2,9 @@
 /**
  * verify-new-project-tests.ts — Test Coverage Sync Verifier
  *
+ * @version 1.0.2
+ * @last_updated 2026-05-31
+ *
  * Checks that TEST: comments in new-project.sh/.ps1 align with
  * test headers in test-new-project.ts.
  *
@@ -32,7 +35,7 @@ function extractTestTags(content: string): { step: string; testNum: number | nul
   const lines = content.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const match = line.match(/^#\s*──\s*(.+?)\s*#\s*TEST:\s*(.+)/i);
+    const match = line.match(/^#\s*[-─]+\s*(.+?)\s*#\s*TEST:\s*(.+)/i);
     if (!match) continue;
     const step = match[1].replace(/─+/g, '').trim();
     const tag  = match[2].trim();

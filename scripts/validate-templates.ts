@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
+ * @version 1.0.3
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -114,7 +115,7 @@ interface GovernancePolicy {
 
 let governance: GovernancePolicy | null = null;
 function loadGovernance(): void {
-  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
   if (!existsSync(govPath)) return;
   try {
     governance = JSON.parse(readFileSync(govPath, 'utf-8')) as GovernancePolicy;
@@ -135,26 +136,26 @@ function isMandatory(domain: string): boolean {
 // Check D-04: Governance policy + common.lifecycle.json
 function checkGovernance(): void {
   if (!JSON_MODE) console.log('\n=== Check D-04: Lifecycle governance ===');
-  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
   if (!existsSync(govPath)) {
-    warn('common', 'governance-missing', 'templates/common/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
+    warn('common', 'governance-missing', 'docs/templates/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
     return;
   }
-  pass('templates/common/lifecycle-governance.json: present');
+  pass('docs/templates/lifecycle-governance.json: present');
 
-  const commonLcPath = join(TEMPLATES_DIR, 'common', 'common.lifecycle.json');
+  const commonLcPath = join(ROOT, 'docs', 'templates', 'common.lifecycle.json');
   if (!existsSync(commonLcPath)) {
-    warn('common', 'common-lifecycle-missing', 'templates/common/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
+    warn('common', 'common-lifecycle-missing', 'docs/templates/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
   } else {
     try {
       const lc = JSON.parse(readFileSync(commonLcPath, 'utf-8')) as Record<string, unknown>;
       if (!lc.version || !lc.status || !lc.propagatedTo) {
         warn('common', 'common-lifecycle-schema', 'common.lifecycle.json missing required fields: version, status, propagatedTo');
       } else {
-        pass(`templates/common/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
+        pass(`docs/templates/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
       }
     } catch {
-      fail('common', 'common-lifecycle-invalid', 'templates/common/common.lifecycle.json is not valid JSON');
+      fail('common', 'common-lifecycle-invalid', 'docs/templates/common.lifecycle.json is not valid JSON');
     }
   }
 
@@ -759,6 +760,106 @@ function checkL0L1ScriptParity() {
   }
 }
 
+// Check P-01: Platform Documentation Parity and Template Sync
+function checkPlatformDocumentationParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check P-01: Platform Documentation Parity ===');
+  
+  const claudePath = join(ROOT, 'CLAUDE.md');
+  const geminiPath = join(ROOT, 'GEMINI.md');
+  
+  if (!existsSync(claudePath) || !existsSync(geminiPath)) return;
+  
+  const extractSections = (content: string) => {
+    const matches = content.matchAll(/^#{2,4} (.+)$/gm);
+    return new Set(Array.from(matches).map(m => m[1].trim().replace(/^\d+\.\s*/, '')));
+  };
+  
+  const claudeSections = extractSections(readFileSync(claudePath, 'utf-8'));
+  const geminiSections = extractSections(readFileSync(geminiPath, 'utf-8'));
+  
+  // Parity between root CLAUDE.md and root GEMINI.md
+  const ignoreParity = [
+    'Claude Code-Specific Behaviors', 
+    'Project-Specific Gemini Settings', 
+    'Tool Name Mapping & Safeguards', 
+    'Native Antigravity 2.0 Features', 
+    'Git & PR Additions (Claude Code)',
+    'Git & PR Additions (Gemini)',
+    'Gemini-Specific & Antigravity Workflows',
+    'Active Antigravity Tool Suite Mapping & Safeguards',
+    'Planning Mode & Artifact Specifications',
+    'Subagent Instantiation & Async Orchestration',
+    'Automated Hooks',
+    'Native Slash Commands',
+    'MCP Configurations & Absolute Resolving',
+    'Native Sub-agents',
+    'Native Plan Mode',
+    'Task Tracking',
+    'Custom Command Error Recovery',
+    'Windows Platform Requirement',
+    'Language Policy for Documentation',
+    'Agent Dispatch Rules',
+    'Lifecycle Management Rules',
+    'Security & Hook Configuration',
+    'Git Commit Policy',
+    'Executing Project Commands',
+    'Pre-PR Security Gate',
+    'Model Selection Override',
+    'Security Engagement Rules',
+    'Surgical Multi-Replace Offset Safeguard',
+    'Windows Terminal & Code Page Safeguard',
+    'Grep Search 50-Match Cap Safeguard',
+    'implementation_plan.md',
+    'task.md',
+    'walkthrough.md',
+    'Define Subagent',
+    'Invoke Subagent',
+    'Communication',
+    'Phase 4 Execution Loop',
+    'Mandatory Execution Plan Display',
+    'Specialist Agent List',
+    'Superpowers Plugin & Cost Optimization'
+  ];
+  
+  const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));
+  
+  const missingInClaude = [...geminiSections].filter(s => !claudeSections.has(s) && !isIgnored(s));
+  const missingInGemini = [...claudeSections].filter(s => !geminiSections.has(s) && !isIgnored(s));
+  
+  if (missingInClaude.length > 0) {
+    fail('root', 'platform-parity', `CLAUDE.md is missing sections present in GEMINI.md: ${missingInClaude.join(', ')}`);
+  }
+  if (missingInGemini.length > 0) {
+    fail('root', 'platform-parity', `GEMINI.md is missing sections present in CLAUDE.md: ${missingInGemini.join(', ')}`);
+  }
+  if (missingInClaude.length === 0 && missingInGemini.length === 0) {
+    pass('Platform parity: CLAUDE.md and GEMINI.md section parity OK');
+  }
+  
+  // Sync check: Root vs Templates
+  const templatesDir = readdirSync(TEMPLATES_DIR);
+  for (const tpl of templatesDir) {
+    if (tpl === 'common' || tpl.startsWith('.')) continue;
+    const tplPath = join(TEMPLATES_DIR, tpl);
+    if (!statSync(tplPath).isDirectory()) continue;
+    
+    for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+      const rootDoc = join(ROOT, doc);
+      const variantDoc = join(tplPath, doc);
+      if (!existsSync(rootDoc) || !existsSync(variantDoc)) continue;
+      
+      const rootSecs = extractSections(readFileSync(rootDoc, 'utf-8'));
+      const variantSecs = extractSections(readFileSync(variantDoc, 'utf-8'));
+      
+      const missingInVariant = [...rootSecs].filter(s => !variantSecs.has(s) && !isIgnored(s));
+      
+      if (missingInVariant.length > 0) {
+        fail(tpl, 'template-sync', `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(', ')}`);
+      }
+    }
+  }
+}
+
 // Check B-05: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
@@ -813,9 +914,9 @@ function checkVariantContract(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
 
   try {
-    const contractPath = join(TEMPLATES_DIR, 'common', 'variant-contract.json');
+    const contractPath = join(ROOT, 'docs', 'templates', 'variant-contract.json');
     if (!existsSync(contractPath)) {
-      fail('root', 'variant-contract-missing', 'templates/common/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
+      fail('root', 'variant-contract-missing', 'docs/templates/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
       return;
     }
 
@@ -825,7 +926,7 @@ function checkVariantContract(variant: string): void {
     try {
       contract = JSON.parse(contractRaw) as VariantContract;
     } catch (parseError) {
-      fail('root', 'variant-contract-invalid', 'templates/common/variant-contract.json is not valid JSON', 'Fix JSON syntax');
+      fail('root', 'variant-contract-invalid', 'docs/templates/variant-contract.json is not valid JSON', 'Fix JSON syntax');
       return;
     }
 
@@ -903,7 +1004,7 @@ function checkSecurityGateSkills(variant: string): void {
 
 // B-07: Sync scan results back to VERSION_REGISTRY.json
 function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
-  const registryPath = join(TEMPLATES_DIR, 'common', 'VERSION_REGISTRY.json');
+  const registryPath = join(ROOT, 'docs', 'templates', 'VERSION_REGISTRY.json');
   if (!existsSync(registryPath)) return;
 
   let registry: Record<string, unknown>;
@@ -1042,10 +1143,10 @@ function checkWorkspaceSchema(): void {
     }
   }
 
-  // --- WS-01 Check 2: templates/common/phase-definitions.md canonical phases ---
-  const phaseDefPath = join(ROOT, 'templates', 'common', 'phase-definitions.md');
+  // --- WS-01 Check 2: templates/common/docs/phase-definitions.md canonical phases ---
+  const phaseDefPath = join(ROOT, 'templates', 'common', 'docs', 'phase-definitions.md');
   if (!existsSync(phaseDefPath)) {
-    warn('root', 'ws-01-phase-defs-missing', 'templates/common/phase-definitions.md not found — skipping canonical phase check');
+    warn('root', 'ws-01-phase-defs-missing', 'templates/common/docs/phase-definitions.md not found — skipping canonical phase check');
   } else {
     const phaseDefContent = readFileSync(phaseDefPath, 'utf-8');
     // Extract phase identifiers from Phase Overview table rows (first column)
@@ -1056,12 +1157,12 @@ function checkWorkspaceSchema(): void {
     }
     const missingFromDoc = schemaCanonical.filter(p => !foundPhases.has(p));
     if (missingFromDoc.length === 0) {
-      pass(`templates/common/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
+      pass(`templates/common/docs/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
     } else {
       for (const missing of missingFromDoc) {
         fail('root', 'ws-01-phase-defs',
           `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
-          `Add phase "${missing}" to the Phase Overview table in templates/common/phase-definitions.md`
+          `Add phase "${missing}" to the Phase Overview table in templates/common/docs/phase-definitions.md`
         );
       }
     }
@@ -1144,22 +1245,26 @@ function checkWorkspaceSchema(): void {
           continue;
         }
 
-        // Complex tier object — check claude: sub-field
+        // Complex tier object — check claude: and gemini: sub-fields
         const claudeTierMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
-        if (claudeTierMatch) {
-          const claudeTier = claudeTierMatch[1];
-          const expectedKeyword = tierToModelKeyword[expectedTier] ?? expectedTier;
-          // Also check the comment for model name as secondary signal
-          const claudeLine = fm.split('\n').find(l => l.match(/^\s+claude:/));
-          const modelHint = claudeLine?.toLowerCase() ?? '';
-          if (claudeTier === expectedTier) {
-            pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
-          } else if (!modelHint.includes(expectedKeyword)) {
-            warn('root', 'ws-01-agent-tier-complex',
-              `agents/${file}: complex tier — claude tier "${claudeTier}" does not match schema "${expectedTier}" for "${agentName}" (manual review recommended)`
-            );
-          } else {
-            pass(`agents/${file}: claude tier "${claudeTier}" matches schema (model hint confirms "${expectedKeyword}")`);
+        const geminiTierMatch = fm.match(/^\s+gemini:\s*(high|medium|low)/m);
+        
+        if (claudeTierMatch || geminiTierMatch) {
+          if (claudeTierMatch) {
+            const claudeTier = claudeTierMatch[1];
+            if (claudeTier === expectedTier) {
+              pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
+            } else {
+              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: claude tier "${claudeTier}" != schema "${expectedTier}"`);
+            }
+          }
+          if (geminiTierMatch) {
+            const geminiTier = geminiTierMatch[1];
+            if (geminiTier === expectedTier) {
+              pass(`agents/${file}: gemini tier "${geminiTier}" matches schema`);
+            } else {
+              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: gemini tier "${geminiTier}" != schema "${expectedTier}"`);
+            }
           }
         } else {
           // Can't reliably parse tier
@@ -1176,9 +1281,9 @@ function checkWorkspaceSchema(): void {
 function checkCommonContract(): void {
   if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
 
-  const contractPath = join(TEMPLATES_DIR, 'common', 'common-contract.json');
+  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
   if (!existsSync(contractPath)) {
-    warn('common', 'common-contract-missing', 'templates/common/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
+    warn('common', 'common-contract-missing', 'docs/templates/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
     return;
   }
 
@@ -1186,7 +1291,7 @@ function checkCommonContract(): void {
   try {
     contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
   } catch {
-    fail('common', 'common-contract-invalid', 'templates/common/common-contract.json is not valid JSON');
+    fail('common', 'common-contract-invalid', 'docs/templates/common-contract.json is not valid JSON');
     return;
   }
 
@@ -1468,6 +1573,7 @@ function main() {
   checkCommonContract();
   checkSharedFileSync();
   checkL0L1ScriptParity();
+  checkPlatformDocumentationParity();
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');
@@ -1496,3 +1602,4 @@ function main() {
 }
 
 main();
+

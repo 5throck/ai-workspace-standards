@@ -2,9 +2,10 @@
 name: Security & Git Expert
 status: active
 tier:
-  claude: medium        # claude-sonnet-4-6
-  antigravity: medium   # gemini-3.5-flash (thinking_level="medium")
-  gemini-cli: medium    # gemini-3.5-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: red
 description: 'Enforces Git Hooks, manages security. Phase 5 Security QA. Use when: "Security review", "Hook configuration", "Secret detection"'

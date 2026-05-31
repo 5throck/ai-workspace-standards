@@ -6,7 +6,7 @@
 
 ## Multi-Agent Phase Definitions
 
-**co-work follows the standard 7-phase workflow** defined in [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding -->.
+**co-work follows the standard 7-phase workflow** defined in [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding -->.
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
@@ -19,7 +19,7 @@
 | 6 | Lifecycle Finalization | Orchestrator | PM |
 
 **PM Facilitation Guidance:**
-See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
+See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
 - Opening the phase (objective, specialist nomination, expectations)
 - Progress monitoring (intervene only if standards not met)
 - Synthesis of outputs (key findings, decisions)
@@ -128,3 +128,5 @@ All specialist agents below are dispatched ONLY through PM:
 ## Maintenance Rule
 
 When creating new agents, update AGENTS.md and docs/context.md § Agents to maintain consistency.
+
+

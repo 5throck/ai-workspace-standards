@@ -134,7 +134,7 @@ if (Test-Path $VariantJson) {
 }
 
 # -- D-05: lifecycle-governance.json variant pre-check ------------------------- # TEST: none
-$GovernanceJson = Join-Path $WorkspaceRoot "templates\common\lifecycle-governance.json"
+$GovernanceJson = Join-Path $WorkspaceRoot "docs\templates\lifecycle-governance.json"
 $ValidateScript = Join-Path $WorkspaceRoot "scripts\validate-templates.ts"
 if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $ValidateScript) -and (Test-Path $GovernanceJson)) {
     Write-Host ""
@@ -189,7 +189,7 @@ if (Get-Command "bun" -ErrorAction SilentlyContinue) {
     Write-Host "[WARN]  Template validation skipped (bun not available or helper missing)" -ForegroundColor Yellow
 }
 
-# -- 1. Copy common/ first (shared infrastructure) ---------------------------- # TEST: Test 1
+# -- 1. Copy common/ first (shared infrastructure) ---------------------------- # TEST: Test 1, Test 7
 if (-not (Test-Path $CommonDir)) {
     Write-Host "[FAIL] Common templates directory not found: $CommonDir" -ForegroundColor Red
     exit 1
@@ -197,7 +197,7 @@ if (-not (Test-Path $CommonDir)) {
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
-# -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1
+# -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1, Test 7
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
     exit 1
@@ -303,7 +303,7 @@ if (Test-Path $scriptsDir) {
     }
 }
 
-# -- 3.6. Agent Override Merge (VARIANT-SECTION substitution) -----------------
+# -- 3.6. Agent Override Merge (VARIANT-SECTION substitution) ----------------- # TEST: Test 20, Test 21, Test 22
 # For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 # NOTE: Skip files that use 'extends' pattern (already processed above)
 $VariantJson = Join-Path $TemplatesDir "variant.json"
@@ -410,7 +410,7 @@ for (const [agentName, override] of Object.entries(overrides)) {
 # -- 4. Remove .gitkeep placeholders -------------------------------------------  # TEST: Test 15
 Get-ChildItem -Path $ProjectDir -Recurse -Filter ".gitkeep" | Remove-Item -Force
 
-# -- 5. Substitute placeholders in all text files ------------------------------ # TEST: Test 3
+# -- 5. Substitute placeholders in all text files ------------------------------ # TEST: Test 3, Test 2
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
     & bun "$WorkspaceRoot/scripts/helpers/substitute-placeholders.ts" $ProjectDir $ProjectName "A new project" "" | Out-Null
 } else {
@@ -481,7 +481,7 @@ if (Test-Path $GitAttributesPath) {
     Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
-# -- 6. Make scripts and hooks executable ---------------------------------------  # TEST: Test 16
+# -- 6. Make scripts and hooks executable ---------------------------------------  # TEST: Test 16, Test 5
 # (Note: chmod not available on Windows -- executable bits set via git update-index after init)
 
 # -- 7. Initialize git ----------------------------------------------------------  # TEST: Test 4

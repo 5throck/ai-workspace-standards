@@ -40,6 +40,27 @@
       "description": "Lifecycle state monitor — governance record keeper; identical role across all variants",
       "skeleton_sections": ["Role", "Responsibilities", "Constraints", "Dispatch Protocol"],
       "variant_sections": []
+    },
+    "auditor": {
+      "source": "agents/auditor.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": ["additive", "replacement"],
+      "expected_override_all_variants": false,
+      "description": "Consistency Auditor — owns Phase 5 QA gate, verifies docs and code standards",
+      "skeleton_sections": [
+        "Role",
+        "Updated Role (Phase 5 QA Owner)",
+        "PM-ONLY INVOCATION",
+        "Responsibilities",
+        "Audit Checklist",
+        "Output Format",
+        "Constraints",
+        "Meeting Participation",
+        "QA Escalation Procedure (T-03)",
+        "Dispatch Protocol"
+      ],
+      "variant_sections": []
     }
   },
   "common_skills": {

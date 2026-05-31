@@ -2,9 +2,10 @@
 name: Documentation Writer
 status: active
 tier:
-  claude: medium      # claude-sonnet-4-6
-  antigravity: medium # gemini-3.5-flash (thinking_level="medium")
-  gemini-cli: medium  # gemini-3.5-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: purple
 description: 'Standardizes Markdown documentation. Use when: "Updating documentation", "README creation", "CHANGELOG updates"'
