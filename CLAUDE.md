@@ -124,11 +124,12 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update | pm (direct) | Medium | [Model] |
-| N | Final QA Audit (bun scripts/audit.ts) | pm (direct) | Medium | [Model] |
+| N-1 | Lifecycle Update | lifecycle-manager (workspace) / pm (variant) | Medium | [Model] |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model] |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 *Rule: You MUST always include the Final QA Audit followed by the Lifecycle Update as the final two steps of the plan.*
+*Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root → specialist dispatch" or "**Context**: variant project → pm direct".*
 
 #### Specialist Agent List
 All agents below require PM dispatch:

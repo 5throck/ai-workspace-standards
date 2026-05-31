@@ -186,6 +186,9 @@ C:\git\ (workspace root - this repo)
 ├── README.md                # This file
 ├── README_ko.md             # This file (Korean)
 ├── memory/                  # Workspace-level memory logs
+├── agents/                  # Workspace-level specialist agents
+├── skills/                  # Workspace-level reusable skills
+├── tests/                   # Integration and unit test suites
 ├── scripts/                 # Core automation and audit scripts
 ├── .githooks/               # Git hooks for enforcing PR policies and rules
 ├── .claude/ & .gemini/      # AI tools global settings and custom slash commands
@@ -285,7 +288,7 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 - **`CLAUDE.md` / `GEMINI.md` (project-level) contain only platform-specific overrides.**
 - **PR-only workflow** - all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **Cross-platform scripts** - every `.sh` has a `.cmd`/`.ps1` pair with identical behavior.
+- **Cross-platform scripts** - every `.sh` has a `.ps1` pair with identical behavior.
 - **Coding Guidelines are audited** - `audit.ts` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 - **Security-First Scaffold** - Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
@@ -309,4 +312,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-30*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-31*
