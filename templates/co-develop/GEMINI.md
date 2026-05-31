@@ -142,6 +142,28 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 - **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
 - **Tool Usage**: Actively use tools like `search_web` for real-time package version verification or resolving external dependencies.
 
+### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "회의", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
 ---
 
 ### Security & Hook Configuration
