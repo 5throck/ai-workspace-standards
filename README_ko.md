@@ -120,6 +120,9 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── README.md                # 영문 README
 ├── README_ko.md             # 본 파일 (국문)
 ├── memory/                  # 워크스페이스 레벨 메모리 로그
+├── agents/                  # Workspace-level specialist agents
+├── skills/                  # Workspace-level reusable skills
+├── tests/                   # Integration and unit test suites
 ├── scripts/                 # 공통 자동화, 템플릿 검증 및 문서 감사 스크립트
 ├── .githooks/               # PR 산출물 강제 및 시크릿 검사를 위한 Git 훅
 ├── .claude/ & .gemini/      # AI 툴 전역 설정 및 커스텀 슬래시 명령어
@@ -219,7 +222,7 @@ bash scripts/validate-templates.sh
 - **`CLAUDE.md` / `GEMINI.md` (프로젝트 레벨)는 플랫폼 특화 오버라이드만 포함합니다.**
 - **PR 전용 워크플로** - 모든 변경 사항은 Pull Request를 통해 `main` 브랜치에 도달합니다. 직접 push는 `.githooks/pre-push`에 의해 차단됩니다.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **크로스 플랫폼 스크립트** - 모든 `.sh` 파일은 동일한 동작을 하는 `.cmd`/`.ps1` 파일과 짝을 이룹니다.
+- **크로스 플랫폼 스크립트** - 모든 `.sh` 파일은 동일한 동작을 하는 `.ps1` 파일과 짝을 이룹니다.
 - **코딩 가이드라인 감사** - `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.sh`가 빌드를 실패 처리합니다.
 - **보안 중심 스캐폴드** - 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
 
@@ -243,4 +246,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-28*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-31*
