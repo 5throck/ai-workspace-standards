@@ -75,7 +75,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L1 | 1.2.1 | active | — | — | common | — |
+| `validate-templates.ts` | L1 | 1.2.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -95,7 +95,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/pre-commit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 
