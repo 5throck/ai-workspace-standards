@@ -158,7 +158,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 
 | User says | Correct skill | Priority |
 |-----------|--------------|----------|
-| "meeting", "회의", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "meeting", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
 | "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
 
 When ambiguous, prefer the local skill and confirm intent with the user.
