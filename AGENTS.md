@@ -349,10 +349,8 @@ Skill("script-lifecycle-manager")
 
 > **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bun scripts/audit.ts` to verify.
 
-> **Schema propagation**: `workspace-schema.json` at the workspace root is the SSOT.
-> `templates/common/workspace-schema.json` is a synchronized copy — after any schema
-> changes, run `diff workspace-schema.json templates/common/workspace-schema.json`
-> to verify parity before committing.
+> **Schema propagation**: `docs/workspace-schema.json` is the SSOT for workflow phases, agent tiers, and model assignments.
+> Validated automatically by `scripts/validate-model-registry.ts` and `scripts/validate-templates.ts`.
 
 > **Workspace-root-originated skills**: Skills added directly to `.claude/skills/`
 > (not via `templates/common/skills/`) must be annotated with `gemini-parity: skip`

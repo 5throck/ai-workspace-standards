@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
  * validate-model-registry.ts
- * Validates that all agents/*.md frontmatter model comments match workspace-schema.json models block.
- * Level: L0 | Status: active
+ * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block.
+ * Level: L0 | Status: active | @version 1.0.1
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -97,17 +97,17 @@ function parseTierBlock(frontmatter: string): Map<string, { tier: string; modelC
 // --- Main ---
 
 // Step 1: Load and validate workspace-schema.json
-const schemaPath = join(WORKSPACE_ROOT, "workspace-schema.json");
+const schemaPath = join(WORKSPACE_ROOT, "docs", "workspace-schema.json");
 let schema: WorkspaceSchema;
 try {
   schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
 } catch (err) {
-  console.error(`ERROR: Could not read workspace-schema.json at ${schemaPath}`);
+  console.error(`ERROR: Could not read docs/workspace-schema.json at ${schemaPath}`);
   process.exit(1);
 }
 
 if (!schema.models) {
-  console.error("ERROR: workspace-schema.json is missing the 'models' block.");
+  console.error("ERROR: docs/workspace-schema.json is missing the 'models' block.");
   process.exit(1);
 }
 

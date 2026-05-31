@@ -101,7 +101,7 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 | **Medium** | claude-sonnet-4-6, gemini-3.5-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
 | **Low** | claude-haiku-4-5, gemini-3.5-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
 
-> **Model Registry**: Current model assignments are maintained in `workspace-schema.json` (`models` block). The table above reflects those values.
+> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
 
 **Tier Enforcement Rules:**
 - All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)
