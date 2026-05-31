@@ -11,13 +11,14 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @license MIT
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
+import { createHash } from 'node:crypto';
 
 // ANSI colors for terminal output
 const colors = {
@@ -170,6 +171,61 @@ function runCheckA(): SyncIssue[] {
 }
 
 /**
+ * Check C: Detect content drift between skills/<name>/SKILL.md (workspace root)
+ * and templates/common/skills/<name>/SKILL.md.
+ * Severity: WARN — L0→L1 publish is explicit, so differences may be intentional.
+ */
+function runCheckC(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  if (!IS_WORKSPACE_ROOT) return issues;
+
+  const templateSkillsDir = join(ROOT, 'templates', 'common', 'skills');
+  if (!existsSync(templateSkillsDir)) return issues;
+
+  const rootSkillsDir = join(ROOT, 'skills');
+  if (!existsSync(rootSkillsDir)) return issues;
+
+  let checkedCount = 0;
+
+  const skillEntries = readdirSync(rootSkillsDir, { withFileTypes: true });
+  for (const entry of skillEntries) {
+    if (!entry.isDirectory()) continue;
+
+    const skillName = entry.name;
+    const rootSkillFile = join(rootSkillsDir, skillName, 'SKILL.md');
+    const templateSkillFile = join(templateSkillsDir, skillName, 'SKILL.md');
+
+    if (!existsSync(rootSkillFile)) continue;
+    if (!existsSync(templateSkillFile)) continue;
+
+    checkedCount++;
+
+    const rootHash = createHash('sha256').update(readFileSync(rootSkillFile)).digest('hex');
+    const templateHash = createHash('sha256').update(readFileSync(templateSkillFile)).digest('hex');
+
+    if (rootHash !== templateHash) {
+      issues.push({
+        level: 'warning',
+        file: `skills/${skillName}/SKILL.md`,
+        message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md (run publish-to-template to sync)`,
+        fix: `Run 'bun run publish-to-template' to sync skills/${skillName}/SKILL.md to templates/common/skills/`,
+      });
+    }
+  }
+
+  if (checkedCount > 0) {
+    issues.push({
+      level: 'warning',
+      file: 'skills/',
+      message: `Check C: checked ${checkedCount} skill(s) for content drift`,
+    });
+  }
+
+  return issues;
+}
+
+/**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
  * templates/common/scripts/SCRIPTS.md for scripts that appear in both.
  * Only runs at workspace root.
@@ -254,23 +310,29 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check B: scripts/SCRIPTS.md vs templates/common/scripts/SCRIPTS.md${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check C: skills/ vs templates/common/skills/ content${colors.reset}`,
+    );
     console.log('');
   }
 
   const checkAIssues = runCheckA();
   const checkBIssues = runCheckB();
+  const checkCIssues = runCheckC();
 
   const allErrors = [
     ...checkAIssues.filter((i) => i.level === 'error'),
     ...checkBIssues.filter((i) => i.level === 'error'),
+    ...checkCIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
     ...checkBIssues.filter((i) => i.level === 'warning'),
+    ...checkCIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 2,
+    checksRun: 3,
     errors: allErrors,
     warnings: allWarnings,
     passed: allErrors.length === 0,

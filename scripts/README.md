@@ -59,7 +59,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-verify.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
-| `lifecycle-sync-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `lifecycle-sync-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — | — |
