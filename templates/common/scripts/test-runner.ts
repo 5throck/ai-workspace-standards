@@ -62,6 +62,14 @@ export async function runTests(suiteName: string): Promise<boolean> {
   } catch (error: any) {
     console.error(`✗ Test failed: ${error.message}`);
     return false;
+  } finally {
+    try {
+      import('node:fs').then(fs => {
+        if (fs.existsSync('tests/.temp')) {
+          fs.rmSync('tests/.temp', { recursive: true, force: true });
+        }
+      });
+    } catch(e) {}
   }
 }
 

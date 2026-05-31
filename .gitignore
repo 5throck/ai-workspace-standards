@@ -84,3 +84,6 @@ Pricing-Mgmt-Simulation/
 
 # Archive directory ignored to save space (local preservation only)
 memory/archive/
+
+# Ignore test temp directories
+tests/.temp/

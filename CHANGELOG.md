@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-31]**: refactor: `meeting-facilitation` SKILL.md converted to stubs; established `.gemini/commands/meeting.md` as SSOT alongside `.claude/commands/meeting.md`; updated Antigravity Command Intercept Rule in `GEMINI.md` (and template copies)
 
 ### Fixed
+- **[2026-06-01]**: fix: resolve stray test files cluttering the workspace root
+  - **[2026-06-01]**: Created a standard test scratchpad at `tests/.temp/` and ignored it in all `.gitignore` files.
+  - **[2026-06-01]**: Updated test scripts (`test-runner.ts`, `test-new-project.ts`, `new-project` wrappers) to output there and perform automated cleanup.
+  - **[2026-06-01]**: Documented `tests/.temp/` in `CONSTITUTION.md` and updated `audit.ts` to actively scan and block stray test files (e.g., `out.txt`, `NUL`, `Test-*`).
 - **[2026-05-31]**: fix: propagate PR gate protections to Antigravity platform and all generated projects — added SessionStart `.githooks` hook to all 4 variant `.gemini/settings.json` files (clone-safe), created `.gemini/commands/commit-push-pr.md` and `.gemini/skills/finishing-a-development-branch/SKILL.md` for Gemini/Antigravity, propagated all protections to `templates/common/.claude/` and `templates/common/.gemini/`, added Check P-02 to `validate-templates.ts` (root↔common command parity for both platforms), added `.claude/commands/`, `.claude/skills/`, `.gemini/commands/`, `.gemini/skills/` lifecycle rules to CLAUDE.md and GEMINI.md §9
 - **[2026-05-31]**: fix: enforce `/sync` as sole PR creation path across Claude, Gemini, and Antigravity platforms — pre-commit `--no-verify` prohibition hardened, local `finishing-a-development-branch` override created, `commit-push-pr` redirect command added, `SYNC_ACTIVE` mechanism documented in all variant CLAUDE.md and GEMINI.md (9 files), `run_command` git safety rules and `invoke_subagent` commit prohibition added to GEMINI.md for Antigravity, `templates/common/.claude/settings.json` PostToolUse hook added
 

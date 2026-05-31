@@ -68,6 +68,8 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memory/`, `agents/`, `skills/`, `.github/`, `.claude/`, and `.gemini/` directories. Key rules: `docs/context.md` is mandatory for all projects, `scripts/` must be divided into Tier 1 (Shell) and Tier 2 (Bun/TS) according to their purpose, and ADRs use sequential 4-digit prefix naming (`0001-slug.md`) with mandatory Context/Decision/Consequences sections.
 
+**Temporary Testing Artifacts (`tests/.temp/`)**: The `tests/.temp/` directory is the officially defined standard temporary directory for testing and simulation scratchpads. This folder MUST be ignored by Git. All automation scripts and tests should use this folder for temporary test artifacts and automatically clean it up.
+
 ---
 
 ### 2. Memory System → [Full details](docs/constitution/02-memory-system.md)
