@@ -124,11 +124,11 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Phase 6: Lifecycle Update | lifecycle-manager | Medium | [Model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model] |
+| N-1 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model] |
+| N | Lifecycle Update | lifecycle-manager | Medium | [Model] |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
-*Rule: You MUST always include the Phase 6 Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
+*Rule: You MUST always include the Final QA Audit followed by the Lifecycle Update as the final two steps of the plan.*
 
 #### Specialist Agent List
 All agents below require PM dispatch:

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-31]**: refactor: removed "Phase 5:" and "Phase 6:" prefixes from execution plan boilerplate in CLAUDE.md and GEMINI.md (both at root and across all 4 templates) to reduce cognitive friction between 'Steps' and 'Phases'
 - **[2026-05-31]**: refactor: `meeting-facilitation` SKILL.md converted to stubs; established `.gemini/commands/meeting.md` as SSOT alongside `.claude/commands/meeting.md`; updated Antigravity Command Intercept Rule in `GEMINI.md` (and template copies)
 
 ### Fixed
