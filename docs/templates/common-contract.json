@@ -118,5 +118,14 @@
       "overridable": false,
       "description": "Validates documentation cross-references and link integrity"
     }
+  },
+  "common_commands": {
+    "commit-push-pr": {
+      "source": ".claude/commands/commit-push-pr.md",
+      "gemini_source": ".gemini/commands/commit-push-pr.md",
+      "gemini-parity": "partial",
+      "description": "Redirects commit+push+PR requests to /sync pipeline — enforces CHANGELOG, memlog, and audit gates",
+      "propagated_to_common": true
+    }
   }
 }

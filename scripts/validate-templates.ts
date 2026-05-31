@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -888,6 +888,42 @@ function checkPlatformDocumentationParity(): void {
   }
 }
 
+// Check P-02: Root .claude/commands/ and .gemini/commands/ must be mirrored in templates/common/
+function checkRootCommonCommandsParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check P-02: Root ↔ Common Commands Parity ===');
+
+  const pairs = [
+    {
+      rootDir: join(ROOT, '.claude', 'commands'),
+      commonDir: join(TEMPLATES_DIR, 'common', '.claude', 'commands'),
+      label: '.claude/commands',
+    },
+    {
+      rootDir: join(ROOT, '.gemini', 'commands'),
+      commonDir: join(TEMPLATES_DIR, 'common', '.gemini', 'commands'),
+      label: '.gemini/commands',
+    },
+  ];
+
+  for (const { rootDir, commonDir, label } of pairs) {
+    if (!existsSync(rootDir)) continue;
+    const rootFiles = readdirSync(rootDir).filter(f => f.endsWith('.md'));
+    const commonFiles = existsSync(commonDir)
+      ? new Set(readdirSync(commonDir).filter(f => f.endsWith('.md')))
+      : new Set<string>();
+
+    const missing = rootFiles.filter(f => !commonFiles.has(f));
+    if (missing.length > 0) {
+      fail('root', 'command-parity',
+        `Root ${label}/ has files not mirrored in templates/common/${label}/: ${missing.join(', ')}`,
+        `Copy missing files to templates/common/${label}/`
+      );
+    } else {
+      pass(`Root ↔ common ${label} parity OK (${rootFiles.length} file(s))`);
+    }
+  }
+}
+
 // Check B-05: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
@@ -1602,6 +1638,7 @@ function main() {
   checkSharedFileSync();
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();
+  checkRootCommonCommandsParity();
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');
