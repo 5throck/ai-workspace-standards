@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-05-31]**: fix: enforce `/sync` as sole PR creation path across Claude, Gemini, and Antigravity platforms — pre-commit `--no-verify` prohibition hardened, local `finishing-a-development-branch` override created, `commit-push-pr` redirect command added, `SYNC_ACTIVE` mechanism documented in all variant CLAUDE.md and GEMINI.md (9 files), `run_command` git safety rules and `invoke_subagent` commit prohibition added to GEMINI.md for Antigravity, `templates/common/.claude/settings.json` PostToolUse hook added
+
 ### Added
 - **[2026-05-31]**: feat: implement Mandatory Lifecycle Dispatch across all platforms
   - **[2026-05-31]**: Hardcoded the `lifecycle-manager` as the mandatory Step N-1 (Phase 6) in the `implementation_plan.md` boilerplate inside `GEMINI.md`, immediately followed by a Final QA Audit (`auditor`) as Step N.

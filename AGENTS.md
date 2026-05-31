@@ -231,6 +231,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
 | project-review | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
+| Finishing a Development Branch | `.claude/skills/finishing-a-development-branch/SKILL.md` | Workspace override — redirects branch completion to `/sync` pipeline; enforces CHANGELOG, memlog, audit, and PR creation gates. `workspace-only: true` |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.

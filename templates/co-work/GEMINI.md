@@ -29,7 +29,7 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Surgical Edit** | `replace_file_content` | Replace a single contiguous block of code. Specify `StartLine`, `EndLine`, `TargetContent`, and `ReplacementContent` with 100% exact leading whitespace matching. |
 | **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file simultaneously. Order chunks descendingly (bottom-to-top) to avoid line offsets. |
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
-| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. |
+| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. NEVER run `git commit --no-verify` or `git push --no-verify` — forbidden in this workspace. All commits must go through `bun scripts/dev-sync.ts` (sets `SYNC_ACTIVE=1`). Direct `git commit` calls are blocked by pre-commit hook. |
 
 #### 🚨 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
@@ -127,6 +127,8 @@ Spawn parallel instances to execute dedicated work concurrently.
   ]
 }
 ```
+
+> ⚠️ **Subagent commit rule**: Subagents must NOT issue `git commit` or `git push` directly. All commits must be initiated by PM via `/sync` command only. Direct commits are blocked by the pre-commit `SYNC_ACTIVE` gate.
 
 #### Communication (`send_message`)
 Interact and exchange contracts with spawned agents via their unique `conversationID`.
@@ -237,6 +239,7 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`bun scripts/audit.ts` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
+- **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` calls are blocked by the pre-commit hook unless executed through `/sync`. The hook checks for `SYNC_ACTIVE=1` which only `dev-sync.ts` sets. If you see `[FAIL] Direct git commits are restricted`, run `/sync "type: description"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 

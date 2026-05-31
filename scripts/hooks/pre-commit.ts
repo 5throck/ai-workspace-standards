@@ -2,6 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
+ * @version 1.0.3
  */
 
 import { $ } from "bun";
@@ -18,7 +19,7 @@ async function main() {
 
   if (process.env.SYNC_ACTIVE !== "1") {
     console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
-    console.error("\x1b[33m[WARN]\x1b[0m Using --no-verify to bypass this check skips secret scanning (gitleaks). Only use this for intentional hotfixes.");
+    console.error("\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.");
     process.exit(1);
   }
 
