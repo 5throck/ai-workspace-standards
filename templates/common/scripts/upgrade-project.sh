@@ -394,7 +394,6 @@ MERGE_FILES+=(
   ".gitignore"
   "agents/pm.md"
   "agents/architect.md"
-  "agents/auditor.md"
   "agents/automation-engineer.md"
   "agents/docs-writer.md"
   "agents/scaffolding-expert.md"
@@ -415,24 +414,6 @@ for rel in "${MERGE_FILES[@]}"; do
   MERGE_CHANGED=$((MERGE_CHANGED + 1))
 done
 
-echo ""
-
-# ============================================================
-# Patch .gitignore for archiving ignore policy
-# ============================================================
-echo "--- Patching .gitignore ---"
-if [ -f "$PROJECT_DIR/.gitignore" ]; then
-  if ! grep -q 'memory/archive/' "$PROJECT_DIR/.gitignore" 2>/dev/null; then
-    echo "  Appending 'memory/archive/' to .gitignore"
-    if ! $DRY_RUN; then
-      printf '\n# Archiving ignore policy\nmemory/archive/\n' >> "$PROJECT_DIR/.gitignore"
-    fi
-  else
-    echo "  OK  'memory/archive/' already ignored"
-  fi
-else
-  echo "  WARN .gitignore not found"
-fi
 echo ""
 
 # ============================================================

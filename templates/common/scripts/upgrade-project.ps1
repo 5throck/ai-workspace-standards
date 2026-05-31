@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
     [string]$ProjectPath,
@@ -372,7 +372,6 @@ $MergeFiles.AddRange([string[]]@(
     '.gitignore',
     'agents/pm.md',
     'agents/architect.md',
-    'agents/auditor.md',
     'agents/automation-engineer.md',
     'agents/docs-writer.md',
     'agents/scaffolding-expert.md',
@@ -394,27 +393,6 @@ foreach ($rel in $MergeFiles) {
     $MergeChanged++
 }
 
-Write-Host ""
-
-# ============================================================
-# Patch .gitignore for archiving ignore policy
-# ============================================================
-Write-Host "--- Patching .gitignore ---"
-$gitignorePath = Join-Path $ProjectDir '.gitignore'
-if (Test-Path $gitignorePath) {
-    if (-not (Select-String -Path $gitignorePath -Pattern 'memory/archive/' -Quiet)) {
-        Write-Host "  Appending 'memory/archive/' to .gitignore"
-        if (-not $DryRun) {
-            $currentIgnore = Get-Content -Path $gitignorePath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-            $newIgnore = $currentIgnore + "`n# Archiving ignore policy`nmemory/archive/`n"
-            [System.IO.File]::WriteAllText($gitignorePath, $newIgnore, [System.Text.Encoding]::UTF8)
-        }
-    } else {
-        Write-Host "  OK  'memory/archive/' already ignored"
-    }
-} else {
-    Write-Host "  WARN .gitignore not found"
-}
 Write-Host ""
 
 # ============================================================

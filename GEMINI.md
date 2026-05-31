@@ -75,8 +75,8 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     | Step | Task | Agent | Tier | Model |
     |:---:|---|:---:|:---:|---|
     | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
-    | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [Model String] |
-    | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model String] |
+    | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm (direct) | Medium | [Model String] |
+    | N | Final QA Audit (bun scripts/audit.ts) | pm (direct) | Medium | [Model String] |
 
     *Execution Order: [Parallel/Sequential]*
     ```
@@ -137,7 +137,7 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 #### Phase 4 Execution Loop
 See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete agent list:
 1.  **automation-engineer** implements the changes.
-2.  **auditor** verifies against acceptance criteria and consistency.
+2.  **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
 3.  **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
@@ -177,12 +177,10 @@ State parallel vs sequential order below the table. The Agent tool must not be c
 #### Specialist Agent List
 All agents below require PM dispatch:
 - architect (Phase 1-2)
-- auditor (Phase 5)
 - automation-engineer (Phase 4)
 - docs-writer (Phase 4)
 - scaffolding-expert (Phase 0)
 - security-expert (Phase 5)
-- lifecycle-manager (Phase 6)
 
 #### Permission Denial Protocol
 

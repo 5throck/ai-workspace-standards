@@ -25,7 +25,7 @@ This skill provides a systematic approach to creating, validating, and maintaini
 ## When to Use This Skill
 
 **Create New Agent:**
-- Trigger: "Create a new agent for X" or "Add an auditor agent"
+- Trigger: "Create a new agent for X" or "Add a new agent to the project"
 - Use Case: A new specific role is needed that requires its own system prompt and tools.
 
 **Validate Existing Agents:**
@@ -115,6 +115,7 @@ bun scripts/agent-verify.ts <agent-name>
 - [ ] No orphaned agents (every `.md` file in `agents/` is listed in `AGENTS.md`)
 - [ ] Frontmatter passes all audit checks
 - [ ] Tier mappings are correctly structured
+- [ ] **Recommended**: Consider declaring the skill's deployment scope — is it needed in all variant projects (common) or workspace-root-only? Workspace-only skills should not be placed in `templates/common/skills/`.
 
 ---
 

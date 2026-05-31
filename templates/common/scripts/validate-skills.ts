@@ -156,7 +156,7 @@ function validateRuntimeDefinitions(): void {
         skillDir,
         'frontmatter-missing',
         `${skillDir}: Missing frontmatter fields: ${missingFields.join(', ')}`,
-        `Add missing fields to YAML frontmatter:\n     ---\n     name: ${skillDir}\n     status: active\n     description: >\n       Brief description of what this skill does.\n       Use when: trigger phrases or conditions.\n     owner: pm|automation-engineer|auditor\n     version: 1.0.0\n     ---`
+        `Add missing fields to YAML frontmatter:\n     ---\n     name: ${skillDir}\n     status: active\n     description: >\n       Brief description of what this skill does.\n       Use when: trigger phrases or conditions.\n     owner: pm|automation-engineer\n     version: 1.0.0\n     ---`
       );
     } else {
       pass(`${skillDir}: All required frontmatter fields present`);
@@ -250,7 +250,7 @@ function main() {
       console.log(`     description: >`);
       console.log(`       Brief description of what this skill does.`);
       console.log(`       Use when: trigger phrases or conditions.`);
-      console.log(`     owner: pm|automation-engineer|auditor`);
+      console.log(`     owner: pm|automation-engineer`);
       console.log(`     version: 1.0.0`);
       console.log(`     ---`);
       console.log(`  2. For governance record errors: Add missing sections to docs/lifecycle/skills/*.md`);

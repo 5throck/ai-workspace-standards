@@ -10,7 +10,7 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @license MIT
  */
 
@@ -288,13 +288,12 @@ function auditSkills(jsonMode = false): AuditResult {
     }
 
     if (!isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
-      errors.push({
-        level: 'error',
+      warnings.push({
+        level: 'warning',
         file: relPath,
         message: `Orphaned skill (owner: ${frontmatter.owner} not found)`,
         fix: `Reassign to valid agent or create agents/${frontmatter.owner}.md`,
       });
-      continue;
     }
 
     // Check status field is present and valid
