@@ -4,8 +4,8 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 ### Changed
-- `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
-- `co-security` variant: Fixed PM-ONLY Agent Roster in `AGENTS.md` and `docs/co-security.context.md`
+- **[2026-06-01]**: `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
+- **[2026-06-01]**: `co-security` variant: Fixed PM-ONLY Agent Roster in `AGENTS.md` and `docs/co-security.context.md`
 ## [0.5.0] - 2026-05-27
 ### Added
 - `.github/pull_request_template.md` with Summary/Changes/Test Plan/Security Checklist sections (#92)

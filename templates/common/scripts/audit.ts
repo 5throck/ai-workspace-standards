@@ -1,4 +1,4 @@
-// @version 2.2.0
+// @version 2.3.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -531,6 +531,23 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
         if (syncWarnings === 0) {
             Pass('AGENTS.md PM Direct Scope: synced');
         }
+    }
+}
+
+// Check: Workspace root should not contain stray test artifacts or unauthorized files
+if (IS_WORKSPACE_ROOT) {
+    const knownStrayPatterns = [/^Test-.*/i, /^out.*\.txt$/i, /^temp-cleanup.*/i, /^NUL$/i];
+    let strayFound = 0;
+    
+    const items = fs.readdirSync('.');
+    for (const item of items) {
+        if (knownStrayPatterns.some(p => p.test(item))) {
+            Fail(`Stray test artifact found in workspace root: ${item}`);
+            strayFound++;
+        }
+    }
+    if (strayFound === 0) {
+        Pass('Workspace root is clean from stray test artifacts');
     }
 }
 

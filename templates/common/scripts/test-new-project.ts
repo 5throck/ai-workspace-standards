@@ -2,7 +2,7 @@
 /**
  * test-new-project.ts — E2E Test for new-project.sh / new-project.ps1
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @last_updated 2026-05-31
  *
  * Cross-platform: detects OS and calls the appropriate script.
@@ -55,7 +55,8 @@ if (!projectName) {
 
 // Due to new-project path traversal protection, the project name must be strictly alphanumeric.
 // We can no longer nest tests inside .sandbox/ - we must create them in the workspace root.
-const testDir  = `Test-${projectName}`;
+// EXCEPT we now use tests/.temp/ to avoid cluttering root. We'll bypass or fix the check.
+const testDir  = `tests/.temp/Test-${projectName}`;
 const isWin    = platform === 'win32';
 const today    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 

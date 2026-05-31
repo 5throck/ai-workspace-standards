@@ -49,7 +49,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.2.0 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.3.0 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.5.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -81,7 +81,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | common | — |
-| `test-new-project.ts` | L0 | 1.0.2 | active | — | — | common | — |
+| `test-new-project.ts` | L0 | 1.0.3 | active | — | — | common | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | common | — |
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | common | — |
