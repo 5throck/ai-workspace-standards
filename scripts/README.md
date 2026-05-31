@@ -56,7 +56,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `agent-verify.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
 | `lifecycle-sync-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
