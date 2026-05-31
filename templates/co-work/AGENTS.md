@@ -97,20 +97,6 @@ All specialist agents below are dispatched ONLY through PM:
 
 ---
 
-## Collaboration Workflow (7 Phases)
-
-| Phase | Name | Lead Agent |
-|-------|------|------------|
-| 0 | Team Assembly | PM |
-| 1 | Research & Analysis | Analyst |
-| 2 | Strategy Validation | PM |
-| 3 | Content Creation | Content Writer |
-| 4 | Coordination | Project Coordinator |
-| 5 | Final Review | All |
-| 6 | Publication | PM |
-
----
-
 ## Skills
 
 | Skill | File | Trigger condition |

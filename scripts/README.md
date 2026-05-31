@@ -37,8 +37,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | drift | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L1 | 1.2.1 | active | — | — | — | pair: new-project.ps1 |
-| `new-project.ps1` | L1 | 1.4.1 | active | — | — | — | — |
+| `new-project.sh` | L1 | 1.3.0 | active | — | — | — | pair: new-project.ps1 |
+| `new-project.ps1` | L1 | 1.5.0 | active | — | — | — | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | — | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — | — |
 | `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — | pair: upgrade-project.ps1 |
@@ -70,7 +70,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-templates.ts` | L1 | 1.0.3 | active | — | — | — | — |
+| `validate-templates.ts` | L1 | 1.1.0 | active | — | — | — | — |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | — | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | — | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |

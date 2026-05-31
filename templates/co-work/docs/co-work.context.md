@@ -46,15 +46,8 @@
 <!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->
 <!-- Status: active | deprecated | experimental -->
 
-| Skill | Directory | Trigger | Status |
-|-------|-----------|---------|--------|
-| Research Analysis | `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research | active |
-| Documentation Writing | `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications | active |
-| API Documentation | `.claude/skills/api-documentation/SKILL.md` | Documenting APIs and developer-facing specs | active |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
-| Script Lifecycle Manager | .claude/skills/script-lifecycle-manager/SKILL.md | PM agent managing script lifecycle... | active |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
-| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
+<!-- DYNAMIC_SKILLS_START -->
+<!-- DYNAMIC_SKILLS_END -->
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
 

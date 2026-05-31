@@ -174,12 +174,15 @@ State parallel vs sequential order below the table. The Agent tool must not be c
 
 #### Specialist Agent List
 All agents below require PM dispatch:
-- architect (Phase 1-2)
-- auditor (Phase 5)
-- automation-engineer (Phase 4)
-- docs-writer (Phase 4)
 - scaffolding-expert (Phase 0)
-- security-expert (Phase 5)
+- design-lead (Phase 1-3)
+- ux-researcher (Phase 1, 3)
+- storyteller (Phase 1-2)
+- service-designer (Phase 3)
+- visual-designer (Phase 3)
+- typography-expert (Phase 3)
+- prototype-engineer (Phase 4)
+- auditor (Phase 5)
 - lifecycle-manager (Phase 6)
 
 #### Skill Resolution Priority

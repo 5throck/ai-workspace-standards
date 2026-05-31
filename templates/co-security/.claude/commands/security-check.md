@@ -7,6 +7,8 @@ allowed-tools: ["Bash", "Read", "Glob", "Grep"]
 
 # Security Check (Engagement Gate)
 
+**Dispatcher**: security-expert (triggered at Phase 5 entry by PM)
+
 Arguments: $ARGUMENTS
 
 This command runs the engagement security gate. It is automatically called before Phase 1+ work.

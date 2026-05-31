@@ -47,14 +47,8 @@
 <!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->
 <!-- Status: active | deprecated | experimental -->
 
-| Skill | Directory | Trigger | Status |
-|-------|-----------|---------|--------|
-| UI/UX Design Intelligence | `.claude/skills/ui-ux-design-intelligence/SKILL.md` | Building design systems, visual designs, UI components | active |
-| Service Design | `.claude/skills/service-design/SKILL.md` | Designing end-to-end service experiences | active |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
-| Script Lifecycle Manager | .claude/skills/script-lifecycle-manager/SKILL.md | PM agent managing script lifecycle... | active |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
-| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
+<!-- DYNAMIC_SKILLS_START -->
+<!-- DYNAMIC_SKILLS_END -->
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
 

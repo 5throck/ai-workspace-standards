@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.0.3
+ * @version 1.1.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -712,6 +712,12 @@ function checkContextSync(variant: string): void {
     expectedSkills.add(match[1]);
   }
 
+  // If DYNAMIC_SKILLS markers are present, inject-skills.ts handles sync at scaffold time — skip static check
+  if (contextMd.includes('<!-- DYNAMIC_SKILLS_START -->')) {
+    pass(`${variant}/docs/context.md uses DYNAMIC_SKILLS injection (runtime sync via inject-skills.ts)`);
+    return;
+  }
+
   // Check if they are all in contextMd
   const missingSkills: string[] = [];
   for (const skill of expectedSkills) {
@@ -856,6 +862,28 @@ function checkPlatformDocumentationParity(): void {
       if (missingInVariant.length > 0) {
         fail(tpl, 'template-sync', `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(', ')}`);
       }
+    }
+  }
+
+  // P-01b: Variant CLAUDE.md <-> GEMINI.md Specialist Agent List content parity
+  if (!JSON_MODE) console.log('\n=== Check P-01b: Variant Specialist Agent List Parity ===');
+  const extractAgentList = (content: string): string => {
+    const match = content.match(/####\s*Specialist Agent List[\s\S]*?(?=\n###|\n##|\n---|\Z)/);
+    return match ? match[0].trim() : '';
+  };
+  for (const tpl of templatesDir) {
+    if (tpl === 'common' || tpl.startsWith('.')) continue;
+    const tplPath = join(TEMPLATES_DIR, tpl);
+    if (!statSync(tplPath).isDirectory()) continue;
+    const claudeVariant = join(tplPath, 'CLAUDE.md');
+    const geminiVariant = join(tplPath, 'GEMINI.md');
+    if (!existsSync(claudeVariant) || !existsSync(geminiVariant)) continue;
+    const claudeList = extractAgentList(readFileSync(claudeVariant, 'utf-8'));
+    const geminiList = extractAgentList(readFileSync(geminiVariant, 'utf-8'));
+    if (claudeList && geminiList && claudeList !== geminiList) {
+      fail(tpl, 'agent-list-parity', `templates/${tpl}/CLAUDE.md and GEMINI.md have different Specialist Agent List content`, 'Apply identical §5 changes to both files');
+    } else if (claudeList || geminiList) {
+      pass(`${tpl}: Specialist Agent List parity OK`);
     }
   }
 }

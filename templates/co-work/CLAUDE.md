@@ -130,12 +130,14 @@ State parallel vs sequential order below the table. The Agent tool must not be c
 
 #### Specialist Agent List
 All agents below require PM dispatch:
-- architect (Phase 1-2)
-- auditor (Phase 5)
-- automation-engineer (Phase 4)
-- docs-writer (Phase 4)
 - scaffolding-expert (Phase 0)
-- security-expert (Phase 5)
+- analyst (Phase 1, 3)
+- storyteller (Phase 1-2)
+- content-writer (Phase 3)
+- technical-writer (Phase 3)
+- ms365-expert (Phase 3-4)
+- project-coordinator (Phase 4)
+- auditor (Phase 5)
 - lifecycle-manager (Phase 6)
 
 ### 6. Native Sub-agents (`Agent` Tool)

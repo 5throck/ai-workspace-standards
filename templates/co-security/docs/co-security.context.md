@@ -151,18 +151,8 @@ Until stable status is achieved, co-security should only be used for learning an
 
 <!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->
 
-| Skill | File | Trigger condition | Status |
-|-------|------|-------------------|--------|
-| Verify Authorization | `skills/verify-authorization/SKILL.md` | Before any offensive activity ??hard-blocks Phase 1+ | active |
-| Engagement Scoping | `skills/engagement-scoping/SKILL.md` | Defining scope, RoE, authorization at Phase 0 | active |
-| Threat Modeling | `skills/threat-modeling/SKILL.md` | STRIDE analysis and ATT&CK mapping at Phases 1?? | active |
-| Recon Surface | `skills/recon-surface/SKILL.md` | Passive and active reconnaissance at Phase 1 | active |
-| Finding Tracker | `skills/finding-tracker/SKILL.md` | Logging and classifying vulnerabilities at Phase 3 | active |
-| Pentest Report | `skills/pentest-report/SKILL.md` | Generating structured pentest reports at Phase 5 | active |
-| Patch Automation | `skills/patch-automation/SKILL.md` | Ansible playbook design and deployment at Phase 4 | active |
-| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Multi-agent meetings | active |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle | active |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle | active |
+<!-- DYNAMIC_SKILLS_START -->
+<!-- DYNAMIC_SKILLS_END -->
 
 ### Skill Lifecycle Management
 
