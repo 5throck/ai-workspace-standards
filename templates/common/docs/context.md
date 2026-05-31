@@ -148,6 +148,26 @@ Key rules:
 
 ---
 
+## File Organization Policy
+
+All agents must follow this file routing policy. **Creating `.md` files at the project root is prohibited** unless they are standard root files.
+
+### Standard Root Files (allowed at root)
+`README.md`, `CHANGELOG.md`, `AGENTS.md`, `SECURITY.md`, `CONSTITUTION.md`, `CLAUDE.md`, `GEMINI.md`
+
+### File Type Routing
+| File Type | Default Location |
+|-----------|-----------------|
+| Analysis, research, investigation results | `docs/` |
+| Final reports, deliverables | `docs/` |
+| Work-in-progress, drafts | `docs/drafts/` |
+| Session logs, meeting transcripts | `memory/` |
+| Configuration, tooling files | project root (allowed) |
+
+> **Rule**: When creating any file, always specify the full relative path. If unsure, default to `docs/`. Never create `.md` files at the project root unless it is a standard root file listed above.
+
+---
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.

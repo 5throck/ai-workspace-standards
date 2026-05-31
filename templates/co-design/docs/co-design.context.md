@@ -136,6 +136,18 @@ Design PM
 
 ---
 
+## File Organization Policy
+
+### Recommended Folder Structure (co-design)
+| Folder | Purpose |
+|--------|---------|
+| `docs/designs/` | Design decisions and rationale |
+| `docs/specs/` | UI/UX specifications |
+| `docs/prototypes/` | Prototype documentation |
+| `memory/` | Session logs, design review transcripts |
+
+---
+
 ## Domain Rules
 
 <!-- co-design variant specific rules ??edit after project creation -->

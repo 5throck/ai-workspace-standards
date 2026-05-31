@@ -1,4 +1,4 @@
-// @version 2.3.0
+// @version 2.3.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -221,6 +221,19 @@ if (fs.existsSync(projectCtxPath)) {
                 Warn(`.githooks parity: .githooks/${hook} has no .ps1 counterpart (Windows users require Git Bash)`);
             }
         }
+    }
+
+    // Check: no non-standard .md files at project root (file organization policy)
+    const STANDARD_ROOT_MD = new Set([
+        'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
+        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'
+    ]);
+    const rootMdFiles = fs.readdirSync('.')
+        .filter(f => f.endsWith('.md') && !STANDARD_ROOT_MD.has(f));
+    if (rootMdFiles.length > 0) {
+        Fail(`Non-standard .md files found at project root: ${rootMdFiles.join(', ')} — move to docs/ or memory/ per File Organization Policy`);
+    } else {
+        Pass('Project root: no non-standard .md files (File Organization Policy compliant)');
     }
 } else {
     Warn('docs/context.md not found - skipping project-level checks (workspace root)');
