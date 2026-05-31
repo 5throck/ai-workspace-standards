@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(bun scripts/audit.ts *)",
+      "Bash(bun scripts/lifecycle-sync-audit.ts *)",
+      "Bash(bun run agent:verify *)",
+      "Bash(curl -sI *)"
+    ]
+  },
   "mcpServers": {
     "codegraph": {
       "command": "npx",
