@@ -135,6 +135,18 @@ Collaboration PM
 
 ---
 
+## File Organization Policy
+
+### Recommended Folder Structure (co-work)
+| Folder | Purpose |
+|--------|---------|
+| `docs/reports/` | Final deliverables, client-ready reports |
+| `docs/drafts/` | Work-in-progress documents and drafts |
+| `docs/research/` | Research notes, reference materials |
+| `memory/` | Session logs, meeting transcripts |
+
+---
+
 ## Domain Rules
 
 <!-- co-work variant specific rules ??edit after project creation -->

@@ -170,6 +170,18 @@ Avoid: GPL-3.0, AGPL-3.0, SSPL, BSL unless explicitly justified.
 
 ---
 
+## File Organization Policy
+
+### Recommended Folder Structure (co-develop)
+| Folder | Purpose |
+|--------|---------|
+| `docs/adr/` | Architecture Decision Records |
+| `docs/specs/` | Technical specifications |
+| `docs/api/` | API documentation |
+| `memory/` | Session logs, meeting transcripts |
+
+---
+
 ## Domain Rules
 
 <!-- co-develop variant specific rules ??edit after project creation -->

@@ -238,6 +238,18 @@ bash scripts/patch-apply.sh   # all groups
 
 ---
 
+## File Organization Policy
+
+### Recommended Folder Structure (co-security)
+| Folder | Purpose |
+|--------|---------|
+| `docs/reports/` | Security assessment reports |
+| `docs/threat-models/` | Threat modeling documents |
+| `docs/findings/` | Vulnerability findings (consider .gitignore for sensitive items) |
+| `memory/` | Session logs, engagement transcripts |
+
+---
+
 ## Domain Rules
 
 1. **Authorization first**: No offensive work (recon, exploitation, PoC) begins without a signed authorization document.

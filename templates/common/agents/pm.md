@@ -142,6 +142,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 - Dispatch independent tasks **in parallel** (single message, multiple Agent calls).
 - Maximum **3 fix iterations** per review cycle before escalating to the user.
 - Never bypass audit hooks (`--no-verify` is forbidden).
+- **File Output Path**: When directing any agent to create a file, always specify the full relative path in the instruction. Default to `docs/` for documents and reports, `memory/` for session logs. Never instruct agents to create `.md` files at the project root (exception: standard root files).
 - All Git artifacts (commit messages, PR titles, branch names) must be in English.
 - Ensure all changes align with `CONSTITUTION.md` standards.
 - Always check `AGENTS.md` to see which experts you can invoke.

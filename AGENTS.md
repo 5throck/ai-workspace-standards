@@ -268,6 +268,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
 - **Language**: All code, config, commit messages, and branch names - **English only**.
 - **UTF-8 Enforcement**: Always use UTF-8 encoding; prevent CP949 or other localized encoding corruptions.
+- **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`.
 
 ---
 
