@@ -11,11 +11,11 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @license MIT
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { createHash } from 'node:crypto';
@@ -43,10 +43,17 @@ interface SyncIssue {
   };
 }
 
+interface DuplicateEntry {
+  file: string;
+  source: string;
+  reason: string;
+}
+
 interface AuditResult {
   checksRun: number;
   errors: SyncIssue[];
   warnings: SyncIssue[];
+  registry: DuplicateEntry[];
   passed: boolean;
 }
 
@@ -259,6 +266,58 @@ function runCheckB(): SyncIssue[] {
 }
 
 /**
+ * Check D: Scan all .md files for intentional-duplicate annotations.
+ * Informational only — never produces errors or warnings.
+ */
+function runCheckD(): DuplicateEntry[] {
+  const entries: DuplicateEntry[] = [];
+  const PATTERN = /<!--\s*intentional-duplicate:\s*([^—\n]+)\s*—\s*([^;>\n]+)/g;
+  const EXCLUDED = ['node_modules', '.git', '_archive', 'memory'];
+  // Skip CONSTITUTION.md itself (contains the annotation definition/example, not a real duplicate)
+
+  function walkDir(dir: string): void {
+    let items: ReturnType<typeof readdirSync>;
+    try {
+      items = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const item of items) {
+      if (EXCLUDED.includes(item.name)) continue;
+
+      const fullPath = join(dir, item.name);
+
+      if (item.isDirectory()) {
+        walkDir(fullPath);
+      } else if (item.isFile() && item.name.endsWith('.md')) {
+        // Skip CONSTITUTION.md (contains definition example, not a real duplicate)
+        if (item.name === 'CONSTITUTION.md') continue;
+        let content: string;
+        try {
+          content = readFileSync(fullPath, 'utf-8');
+        } catch {
+          continue;
+        }
+
+        let match: RegExpExecArray | null;
+        PATTERN.lastIndex = 0;
+        while ((match = PATTERN.exec(content)) !== null) {
+          entries.push({
+            file: fullPath.replace(ROOT + '\\', '').replace(ROOT + '/', ''),
+            source: match[1].trim(),
+            reason: match[2].trim(),
+          });
+        }
+      }
+    }
+  }
+
+  walkDir(ROOT);
+  return entries;
+}
+
+/**
  * Apply --fix for Check A errors: update version entries in scripts/SCRIPTS.md
  * to match the @version found in each file.
  */
@@ -298,7 +357,7 @@ function applyFix(checkAIssues: SyncIssue[]): void {
 }
 
 /**
- * Run both checks and return the combined result.
+ * Run all checks and return the combined result.
  */
 function runAudit(jsonMode = false): AuditResult {
   if (!jsonMode) {
@@ -313,12 +372,29 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check C: skills/ vs templates/common/skills/ content${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check D: intentional-duplicate registry${colors.reset}`,
+    );
     console.log('');
   }
 
   const checkAIssues = runCheckA();
   const checkBIssues = runCheckB();
   const checkCIssues = runCheckC();
+  const registryEntries = runCheckD();
+
+  if (!jsonMode) {
+    if (registryEntries.length === 0) {
+      console.log(`${colors.dim}Check D: No intentional duplicates registered.${colors.reset}`);
+    } else {
+      console.log(`${colors.cyan}Check D: Intentional Duplicate Registry${colors.reset}`);
+      console.log(`  Found ${registryEntries.length} intentional duplicate(s):`);
+      for (const entry of registryEntries) {
+        console.log(`  · ${entry.file} → ${entry.source} (${entry.reason})`);
+      }
+    }
+    console.log('');
+  }
 
   const allErrors = [
     ...checkAIssues.filter((i) => i.level === 'error'),
@@ -332,9 +408,10 @@ function runAudit(jsonMode = false): AuditResult {
   ];
 
   return {
-    checksRun: 3,
+    checksRun: 4,
     errors: allErrors,
     warnings: allWarnings,
+    registry: registryEntries,
     passed: allErrors.length === 0,
   };
 }
@@ -395,6 +472,7 @@ if (fixMode) {
       ...result,
       errors: result.errors.map(({ fixData: _fd, ...rest }) => rest),
       warnings: result.warnings.map(({ fixData: _fd, ...rest }) => rest),
+      registry: result.registry,
     };
     console.log(JSON.stringify(cleanResult, null, 2));
   } else {
