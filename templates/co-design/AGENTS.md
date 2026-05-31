@@ -46,7 +46,6 @@ See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaff
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Design Project Manager (PM)** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates design workflow from brief to handoff; coordinates specialist agents; enforces quality gates |
-| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 
 ### 🎨 Research & Strategy
 
@@ -100,7 +99,6 @@ All specialist agents below are dispatched ONLY through PM:
 | **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
 | **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
 | **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
-| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -152,7 +150,6 @@ The Design PM delegates execution to the Medium and Low tiers before finalizing 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | Design PM | `agents/pm.md` | High | Orchestrates only | No |
-| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 | UX Researcher | `agents/ux-researcher.md` | Medium | Research phase | Research reports only |
 | Design Lead | `agents/design-lead.md` | High | Direction phase | Design docs only |
 | Visual Designer | `agents/visual-designer.md` | Medium | After direction | Design files + specs |

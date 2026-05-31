@@ -163,7 +163,7 @@ Security defaults are enforced at project creation and verified during upgrades.
 git config core.hooksPath .githooks
 ```
 
-**Equivalent to Claude's `.claude/settings.json` hooks**: This section defines the same security gate that Claude Code enforces via its PostToolUse hooks and `.githooks/` directory. Both platforms (Claude Code and Antigravity/Gemini CLI) must pass the same 5-point Security Bootstrap Check when creating or upgrading projects.
+**Security Bootstrap Verification**: This section defines the security gate that Antigravity enforces when creating or upgrading projects. Both the Antigravity engine and the `.githooks/` directory must pass the same 5-point Security Bootstrap Check.
 <!-- /WORKSPACE-MANAGED -->
 
 ---
@@ -186,8 +186,7 @@ bash scripts/dev-sync.sh "feat: description"
 
 ### Executing Project Commands
 
-Gemini CLI does not natively register `.claude/commands/` slash commands as Skills.
-Instead, emulate them by reading the `.md` file and executing the described script via `shell`:
+To execute project commands, run the corresponding script directly:
 
 | Equivalent to | Run instead |
 |---------------|------------|
@@ -215,18 +214,6 @@ If the result is `false` (public repo): run `/security-check` (Workflow 2 of `ag
 - If no CRITICAL advisories: continue with the push and PR creation.
 
 For private repos: skip the security gate entirely.
-
----
-
-### Coexistence with `.claude/`
-
-This project uses `.claude/` for Claude Code configuration. Gemini follows these rules:
-
-- **Absolute Precedence**: `.gemini/` always takes precedence over `.claude/` if both exist.
-- **Fallback**: If no `.gemini/` directory exists, Gemini may read `.claude/settings.json` and `.claude/commands/` as a fallback source of truth.
-- **Command Emulation**: Slash commands defined as `.claude/commands/<name>.md` can be emulated - read the file to understand the underlying script and run it directly via `shell`.
-- **Agent Roles**: Gemini can instantiate roles defined in `agents/*.md` using `define_subagent` and `invoke_subagent`.
-- **Migration**: If the project transitions away from Claude Code, proactively offer to migrate `.claude/` configuration to `.gemini/` rather than leaving legacy files orphaned.
 
 ---
 

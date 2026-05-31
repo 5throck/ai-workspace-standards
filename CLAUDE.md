@@ -1,8 +1,6 @@
 # CLAUDE.md
 
 > **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
->
-> For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
 ---
 
@@ -100,33 +98,8 @@ All `.md` files you create or modify MUST be in English, except when working in 
 ### 5. Agent Dispatch Rules
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
-This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
 
-#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
-- Agent tool automatically rejects non-PM specialist calls
-- Bypass: Impossible
-
-#### Level 2: System Prompt-Level Enforcement (Secondary)
-- This section is enforced via system prompt priority
-- CLAUDE.md Agent Dispatch Rules are loaded first
-
-#### Level 3: Agent File-Level Enforcement (Tertiary)
-- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
-- Agents refuse direct requests and redirect to PM
-
-#### Level 4: QA Gate-Level Enforcement (Quarternary)
-- Auditor detects PM bypass in Phase 5 QA
-- Post-hoc detection - prevents commits but not execution
-
-#### Forbidden Direct Calls
-❌ DO NOT: `Agent(tool, subagent_type="architect")`
-❌ DO NOT: "Architect, design X"
-❌ DO NOT: Direct specialist invocation without PM triage
-
-#### Correct Workflow
-1. Submit request to PM: "PM, design X architecture"
-2. PM triages → dispatches specialist → synthesizes results
-3. PM enforces QA gate → approves completion
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:

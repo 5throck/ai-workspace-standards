@@ -1,14 +1,14 @@
 # GEMINI.md
 
 > **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
->
-> For Claude Code, see [`CLAUDE.md`](CLAUDE.md).
 
 ---
 
 ## Role Declaration
 
 You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
+
+> ⚠️ **Antigravity**: `PreToolUse` hooks do **not** fire in Antigravity sessions. This Role Declaration is the **sole enforcement mechanism** for the PM approval gate — there is no automated `.pm-approved` gate check. Treat it as strictly binding.
 
 **Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
 - `write_to_file`, `replace_file_content`, `multi_replace_file_content` — file modification
@@ -145,34 +145,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 
 ### 5. Agent Dispatch Rules
 
-**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
-This is enforced at 4 levels - tool, system prompt, agent file, and QA gate.
-
-#### Level 1: Tool-Level Enforcement (Primary - Hard Enforcement)
-- Agent tool automatically rejects non-PM specialist calls
-- Bypass: Impossible
-
-#### Level 2: System Prompt-Level Enforcement (Secondary)
-- This section is enforced via system prompt priority
-- GEMINI.md Agent Dispatch Rules are loaded first
-
-#### Level 3: Agent File-Level Enforcement (Tertiary)
-- All specialist agents have "⚠️ PM-ONLY INVOCATION" section
-- Agents refuse direct requests and redirect to PM
-
-#### Level 4: QA Gate-Level Enforcement (Quarternary)
-- Auditor detects PM bypass in Phase 5 QA
-- Post-hoc detection - prevents commits but not execution
-
-#### Forbidden Direct Calls
-❌ DO NOT: Direct specialist invocation via Gemini CLI
-❌ DO NOT: "Specialist, perform task" without PM triage
-❌ DO NOT: Bypass PM dispatch workflow
-
-#### Correct Workflow
-1. Submit request to PM: "PM, need specialist for X"
-2. PM triages → dispatches specialist → synthesizes results
-3. PM enforces QA gate → approves completion
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
@@ -215,14 +188,6 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 ```
 
 > Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
-
----
-
-### 7. Coexistence, Precedence & Migration of .claude
-Many active repositories under the workspace root possess `.claude/` directories rather than `.gemini/`.
-*   **`.gemini/` exists**: Rely on `.gemini/` settings only. Ignore `.claude/` configurations entirely.
-*   **`.claude/` exists, `.gemini/` absent**: Read `.claude/settings.json` and `.claude/commands/` as fallbacks. Emulate custom commands by executing their target scripts.
-*   **Migration**: Offer the user a migration of `.claude/` -`.gemini/` (copying and adapting configurations) when fully transitioning a project away from Claude Code.
 
 ---
 

@@ -225,6 +225,21 @@ The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maint
 #### Script Parity Annotation
 A comment tag added to both `.sh` and `.ps1` versions of a script to declare that a specific security or behavioral check is implemented in both. Format: `# [parity:<tag>]`. Example: `# [parity:secret-scan]`. The `validate-templates.ts` script checks that tags present in `.sh` exist in the paired `.ps1` and vice versa.
 
+#### Intentional Duplicate Annotation
+
+When a section in a project file deliberately repeats CONSTITUTION.md content (e.g., for AI context proximity or variant-specific contextualization), annotate it immediately below the section heading:
+
+```
+<!-- intentional-duplicate: CONSTITUTION.md §N — [reason]; update when source changes -->
+```
+
+This annotation:
+- Signals to AI tools and reviewers that the duplication is deliberate, not an oversight
+- Documents the sync obligation: update the local section when the referenced CONSTITUTION section changes significantly
+- Enables future tooling to generate a registry of all intentional duplicates (`intentional-duplicate:` keyword is machine-parseable)
+
+Valid reasons include: AI context proximity (faster access without full CONSTITUTION.md load), variant-specific contextualization, platform-specific adaptation.
+
 ---
 
-*Last Updated: 2026-05-30*
+*Last Updated: 2026-05-31*

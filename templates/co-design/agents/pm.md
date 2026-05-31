@@ -28,7 +28,7 @@ Follow the 7-phase PM workflow defined in [CONSTITUTION.md §5](../../CONSTITUTI
 3. **Design Handoff** (variant-specific) - Variant-specific specialist produces design artifacts; agents can dispatch each other directly for routine handoffs.
 4. **Execution** (specialist-autonomous) - Specialist agents implement per approved plan; agents dispatch each other directly for routine handoffs.
 5. **Quality Assurance** (specialist-autonomous) - auditor executes qa-gate.sh/.ps1 autonomously; validates workspace audit, project tests, documentation consistency. Maximum 2 iterations before PM escalation.
-6. **Lifecycle Finalization** (PM-owned) - Run memlog → sync; lifecycle-manager updates governance records; open PR; hand off to user.
+6. **Lifecycle Finalization** (PM-owned) - Run memlog → sync; PM logs decisions to memory and finalizes PR; open PR; hand off to user.
 
 
 ## Agent Roster
@@ -38,18 +38,20 @@ Add rows as specialist agents are created. Start with PM only; expand when the p
 | Phase | Group | Agent file | Responsibility |
 |-------|-------|------------|----------------|
 | Triage / Analysis | Analysis | *(add `agents/<name>-analyst.md`)* | Read-only investigation, findings report |
-| Design | Design | `agents/architect.md` | Implementation plan + ADR; awaits user approval |
-| Design | Design | `agents/designer.md` | UI/UX specs, wireframes, component definitions; awaits user approval |
-| Implementation | Execution | `agents/code-writer.md` | Write code per approved plan |
-| QA / Verification | Execution | `agents/test-runner.md` | Run tests, verify acceptance criteria |
-| Setup (unknown stack) | Setup | `agents/stack-setup.md` | Identify stack, research, security review, scaffold setup scripts |
+| Research | Research | `agents/ux-researcher.md` | User research, insights, personas |
+| Direction | Design | `agents/design-lead.md` | Design direction and decision-making |
+| Visual | Design | `agents/visual-designer.md` | UI/visual design, component specs |
+| Prototype | Execution | `agents/prototype-engineer.md` | Interactive prototypes and handoff |
+| Service | Design | `agents/service-designer.md` | Service blueprints, journey maps |
+| Typography | Design | `agents/typography-expert.md` | Type system and readability standards |
+| Narrative | Content | `agents/storyteller.md` | Design narratives and presentations |
 
 
 ## Dispatch Protocol
 
 **Can Lead Phases**: [0, 2, 6]  # PM owns project initiation, design validation, and lifecycle finalization
 **Can Support In**: []
-**Auto-Dispatch To**: architect, designer, code-writer, test-runner, stack-setup
+**Auto-Dispatch To**: ux-researcher, design-lead, visual-designer, prototype-engineer, service-designer, typography-expert, storyteller
 **Tier**: high
 **Communication Style**: sync  # PM gates require user confirmation
 
