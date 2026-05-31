@@ -23,6 +23,8 @@ Key characteristics:
 
 ## Quick Start
 
+> **Note:** The command below must be run from the **workspace root**, not from within a generated co-security project. Generated projects do not contain a `scripts/` directory.
+
 ```bash
 bash scripts/new-project.sh "engagement-name" --variant co-security
 ```

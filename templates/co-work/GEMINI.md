@@ -75,7 +75,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     | Step | Task | Agent | Tier | Model |
     |:---:|---|:---:|:---:|---|
     | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
-    | N-1 | Phase 6: Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [Model String] |
+    | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [Model String] |
     | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model String] |
 
     *Execution Order: [Parallel/Sequential]*
@@ -218,6 +218,8 @@ When a user request matches a skill trigger, apply this priority order — **enf
 
 When ambiguous, prefer the local skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
+> **Antigravity Command Intercept Rule**: `/meeting` is not a native Antigravity UI slash command. If the user input begins with `/meeting`, you (the Agent) MUST immediately intercept this text pattern and seamlessly execute the `.gemini/commands/meeting.md` process using the provided arguments, exactly as if the user had explicitly requested the skill by name.
 
 ---
 

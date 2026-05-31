@@ -30,70 +30,75 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 ## Registry
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
-<!-- Required columns: script | source | version | status | removal-date | security-advisory | drift | pair -->
+<!-- Required columns: script | source | version | status | removal-date | security-advisory | layer | pair -->
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
 <!-- security-advisory: CVE-XXXX or — -->
-<!-- drift: — (checked) | intentional (L0/L1 divergence is expected, skip drift check) -->
+<!-- Layer column values:
+  common   = script exists in both scripts/ and templates/common/scripts/
+  L0-only  = workspace root only, must NOT be referenced from templates/common/
+  L1-only  = generated project only, must exist in templates/common/scripts/
+-->
 <!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
 
-| script | source | version | status | removal-date | security-advisory | drift | pair |
+| script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L1 | 1.3.0 | active | — | — | — | pair: new-project.ps1 |
-| `new-project.ps1` | L1 | 1.5.0 | active | — | — | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — | — | pair: install-bun.ps1 |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | — | — |
-| `upgrade-project.sh` | L1 | 1.0.0 | active | — | — | — | pair: upgrade-project.ps1 |
-| `upgrade-project.ps1` | L1 | 1.0.0 | active | — | — | — | — |
-| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | — | pair: cleanup-completed-md.ps1 |
-| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | — | — |
-| `audit.ts` | L0 | 2.1.2 | active | — | — | intentional | — |
-| `dev-sync.ts` | L0 | 1.4.0 | active | — | — | intentional | — |
-| `sync-md.ts` | L0 | 1.2.0 | active | — | — | intentional | — |
-| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `sync-skills.ts` | L1 | 1.1.0 | active | — | — | — | — |
-| `publish-to-template.ts` | L1 | 1.1.0 | active | — | — | — | — |
-| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | — | — |
-| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | — | — |
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `agent-verify.ts` | L0 | 1.1.0 | active | — | — | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | — | — |
-| `lifecycle-sync-audit.ts` | L0 | 1.2.1 | active | — | — | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-templates.ts` | L1 | 1.2.0 | active | — | — | — | — |
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | — | — |
-| `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | — | — |
-| `translate-readme.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | — | — |
-| `test-new-project.ts` | L0 | 1.0.1 | active | — | — | — | — |
-| `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | — | — |
-| `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | — | — |
-| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-agents.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `test-runner.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-md-language.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `hooks/pre-commit.ts` | L0 | 1.1.0 | active | — | — | — | — |
-| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `validate-model-registry.ts` | L0 | 1.0.0 | active | — | — | — | — |
-| `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | — | — |
+| `new-project.sh` | L1 | 1.3.0 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L1 | 1.5.0 | active | — | — | L0-only | — |
+| `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
+| `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
+| `upgrade-project.sh` | L0 | 1.0.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
+| `upgrade-project.ps1` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
+| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.1.3 | active | — | — | common | — |
+| `dev-sync.ts` | L0 | 1.4.0 | active | — | — | common | — |
+| `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `sync-skills.ts` | L1 | 1.1.0 | active | — | — | common | — |
+| `publish-to-template.ts` | L1 | 1.1.0 | active | — | — | common | — |
+| `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | common | — |
+| `qa-gate.ts` | L1 | 1.0.0 | active | — | — | common | — |
+| `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `agent-verify.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `lifecycle-sync-audit.ts` | L0 | 1.3.0 | active | — | — | common | — |
+| `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `dispatch.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-templates.ts` | L1 | 1.2.0 | active | — | — | common | — |
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | common | — |
+| `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | common | — |
+| `test-new-project.ts` | L0 | 1.0.2 | active | — | — | common | — |
+| `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | common | — |
+| `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
+| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-md-language.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `hooks/pre-commit.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-model-registry.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 
 ---
 
