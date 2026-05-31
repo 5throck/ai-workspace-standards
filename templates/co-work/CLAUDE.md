@@ -128,6 +128,29 @@ The PM agent MUST utilize the `superpowers` plugin to perform harness engineerin
 
 ---
 
+### Lifecycle Management Rules
+
+> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+
+When modifying files, apply the following rules **before** running `/sync` or committing:
+
+| Modified file(s) | Required follow-up actions |
+|-----------------|---------------------------|
+| `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
+| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
+
+**Verification** (run after any of the above):
+```bash
+bun scripts/audit.ts                  # full workspace audit including lifecycle sync
+bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
+```
+
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+
+---
+
 ### Custom Command Error Recovery
 
 If a slash command or background script returns a non-zero exit code:
