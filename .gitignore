@@ -10,6 +10,9 @@
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
 
+# --- dev-sync pipeline temp files ---
+CHANGELOG_ENTRY.md
+
 # --- Secrets and local certs ---
 .env
 *.pem
