@@ -12,17 +12,18 @@
 
 ## Multi-Agent Phase Definitions
 
-**co-security follows the standard 7-phase workflow** defined in [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding -->.
+**co-security uses a 6-phase engagement model** (deviation from standard 7-phase). Phases are security-engagement-specific and do not map 1:1 to the common phase-definitions.md workflow.
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
 |-------|------|------------------|-------------------|
-| 0 | Project Initiation | Orchestrator | scaffolding-expert |
-| 1-2 | Planning & Architecture | Orchestrator | architect |
-| 3 | Design Handoff | Orchestrator | threat-modeler (threat modeling, attack surface analysis) |
-| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
-| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
-| 6 | Lifecycle Finalization | Orchestrator | PM (memlog → sync → PR) |
+| 0 | Scoping | Orchestrator | PM only |
+| 1 | Recon | Orchestrator | red-team-lead, threat-modeler |
+| 2 | Threat Modeling | Orchestrator | threat-modeler |
+| 3 | Exploitation | Orchestrator | red-team-lead → pentester |
+| 4 | Remediation | Orchestrator | patch-engineer |
+| 5 | Reporting | Orchestrator | report-writer, security-expert, auditor |
+| 6 | Verification | Orchestrator | pentester (re-test), patch-engineer (sign-off), report-writer (update) |
 
 **PM Facilitation Guidance:**
 See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
@@ -86,6 +87,19 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
 ```
 
+### PM Direct Execution Scope
+
+PM is an escalation gateway, not an executor. The following whitelist defines what PM may execute directly.
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
+| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (other paths), Bash (write/execute) | Must delegate to specialist |
+
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+
 ### Specialist Agent Roster (PM-ONLY INVOCATION)
 
 All specialist agents below are dispatched ONLY through PM:
@@ -122,18 +136,37 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 | 0 (Scoping) | PM only | Engagement start |
 | 1 (Recon) | Red Team Lead + Threat Modeler | Authorization confirmed |
 | 2 (Threat Modeling) | Threat Modeler | Phase 1 complete |
-| 3 (Exploitation) | Red Team Lead → Pentester | Threat model approved |
+| 3 (Exploitation) | Red Team Lead → Pentester | 1) Threat model (STRIDE) complete and PM-approved; 2) ATT&CK TTP list finalized; 3) Red Team Lead PoC methodology review complete |
 | 4 (Remediation) | Patch Engineer | Findings documented |
 | 5 (Reporting) | Report Writer | Patches applied |
-| 6 (Verification) | Pentester (re-test) | Report complete |
+| 6 (Verification) | Pentester (re-test) → Patch Engineer (sign-off) → Report Writer (update) → PM (close) | Report complete; Condition A: unpatched items found → append "Verification Gap", re-enter Phase 4; Condition B: all patched → update Executive Summary, PM closes |
 
 ### Quality Gates
 
 - Phase 1: Authorization required (verify-authorization PASS)
-- Phase 3: PoC must be reviewed by Red Team Lead
-- Phase 4: All Ansible playbooks must pass `--check` (dry-run) before apply
+- Phase 3: All three entry conditions must be met (STRIDE complete + TTP list + Red Team Lead review) — PM must confirm before dispatching Pentester
+- Phase 4: All Ansible playbooks must pass `--check` (dry-run) before apply — PM must receive dry-run output before dispatching apply
+- Phase 6: Patch Engineer sign-off required before Report Writer update; if unpatched items found, re-enter Phase 4
 
 ---
+
+## Co-Security Role Overlay
+
+The following workspace-common agents have co-security-specific responsibilities that override their general role descriptions:
+
+### Security Expert — co-security Role
+
+| General Role | Co-Security Override |
+|--------------|---------------------|
+| Security review, hook configuration, secret detection | Pentest methodology soundness, PoC risk level assessment, ATT&CK mapping accuracy verification |
+
+### Auditor — co-security Role
+
+| General Role | Co-Security Override |
+|--------------|---------------------|
+| Quality verification, documentation consistency check | Report completeness, scope adherence verification, evidence chain integrity |
+
+> These overrides apply only within co-security projects. In other variants, security-expert and auditor retain their general role definitions.
 
 ## Skills
 

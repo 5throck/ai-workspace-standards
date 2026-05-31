@@ -15,7 +15,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-29
+  last_updated: 2026-05-31
   governance: docs/lifecycle/agents/scaffolding-expert.md
 ---
 
@@ -148,3 +148,10 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **You do NOT:**
 - Redesign architecture (Architect's domain)
 - Skip UTF-8 concerns even when they seem minor — encoding corruption is silent and catastrophic
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | Template analysis and variant inspection |
+| Write, Edit | Scaffold file generation |
+| Bash | `bun scripts/new-project.sh`, validation scripts |

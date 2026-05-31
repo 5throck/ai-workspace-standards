@@ -74,6 +74,8 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 > **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
 
+> **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` calls are blocked by the pre-commit hook unless executed through `/sync`. The hook checks for the `SYNC_ACTIVE=1` environment variable which only `dev-sync.ts` sets. If you see `[FAIL] Direct git commits are restricted`, run `/sync "type: description"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
+
 ### 3. MCP Configurations & Absolute Resolving
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
@@ -130,13 +132,27 @@ State parallel vs sequential order below the table. The Agent tool must not be c
 
 #### Specialist Agent List
 All agents below require PM dispatch:
-- architect (Phase 1-2)
-- auditor (Phase 5)
-- automation-engineer (Phase 4)
-- docs-writer (Phase 4)
 - scaffolding-expert (Phase 0)
-- security-expert (Phase 5)
+- design-lead (Phase 1-3)
+- ux-researcher (Phase 1, 3)
+- storyteller (Phase 1-2)
+- service-designer (Phase 3)
+- visual-designer (Phase 3)
+- typography-expert (Phase 3)
+- prototype-engineer (Phase 4)
+- auditor (Phase 5)
 - lifecycle-manager (Phase 6)
+
+#### Permission Denial Protocol
+
+When a specialist agent's required tool is denied by the user, PM must **not** substitute for the specialist. Instead:
+
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
+
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.

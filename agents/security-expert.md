@@ -15,7 +15,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-29
+  last_updated: 2026-05-31
   governance: docs/lifecycle/agents/security-expert.md
 ---
 
@@ -118,3 +118,10 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **Auto-Dispatch To**: N/A
 **Tier**: medium
 **Communication Style**: async  # Security checks can run independently
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | Security-relevant file analysis |
+| Write, Edit | Security policy and hook file updates |
+| Bash | Hook testing and security scan scripts |

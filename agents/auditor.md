@@ -15,7 +15,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-29
+  last_updated: 2026-05-31
   governance: docs/lifecycle/agents/auditor.md
 ---
 
@@ -171,3 +171,10 @@ PM is not required to accept — PM documents acceptance or deferral with justif
 - Auditor executes QA gate without PM intervention
 - Direct agent-to-agent feedback loop for fixes
 - PM receives Pass/Fail report only
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | File content and structure verification |
+| Bash | Run audit scripts (`bun scripts/audit.ts` and related) |
+| Write, Edit | Audit reports and memory logs |

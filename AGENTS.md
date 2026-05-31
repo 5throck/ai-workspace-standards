@@ -48,6 +48,19 @@
 **Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
 All specialist agents require PM dispatch - enforced at 4 levels.
 
+### PM Direct Execution Scope
+
+PM is an escalation gateway, not an executor. The following whitelist defines what PM may execute directly.
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
+| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (other paths), Bash (write/execute) | Must delegate to specialist |
+
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+
 ### Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
 2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
@@ -224,6 +237,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Skill Lifecycle Manager | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
 | Script Lifecycle Manager | `.claude/skills/script-lifecycle-manager/SKILL.md` | PM agent managing script lifecycle; creating scripts, managing versions and dependencies in SCRIPTS.md |
 | Agent Lifecycle Manager | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
+| Platform Skill Lifecycle Manager | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle — creation, versioning, propagation for .claude/skills/ and .gemini/skills/ |
+| Platform Command Lifecycle Manager | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle — creation, parity, propagation for .claude/commands/ and .gemini/commands/ |
 | Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
 | Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
@@ -231,6 +246,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
 | project-review | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
+| Finishing a Development Branch | `.claude/skills/finishing-a-development-branch/SKILL.md` · `.gemini/skills/finishing-a-development-branch/SKILL.md` | Workspace override — redirects branch completion to `/sync` pipeline; enforces CHANGELOG, memlog, audit, and PR creation gates. Available on both Claude Code and Gemini CLI. |
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.
@@ -266,10 +282,16 @@ At **Phase 6 (Finalization)**, PM **must** dispatch `lifecycle-manager` when any
 | Script status changed in SCRIPTS.md | ✅ Yes |
 | Variant status changed (draft→beta, beta→stable, etc.) | ✅ Yes |
 | Governance tool updated (audit.ts, validate-templates.ts, etc.) | ✅ Yes |
+| `.claude/commands/*.md` or `.gemini/commands/*.md` added or removed | ✅ Yes |
+| `.claude/skills/*/SKILL.md` or `.gemini/skills/*/SKILL.md` added or modified | ✅ Yes |
+| `templates/common/.claude/` or `templates/common/.gemini/` structure changed | ✅ Yes |
+| `common-contract.json` or `docs/templates/*.json` governance files modified | ✅ Yes |
 | README/documentation-only changes | ❌ No |
 | Memory log entries only | ❌ No |
 
 The lifecycle-manager will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
+
+PM does NOT dispatch lifecycle-manager for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
 
 ---
 

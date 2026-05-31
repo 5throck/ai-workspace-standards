@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$ProjectName,
-    [string]$Variant = "co-develop",
+    [string]$Variant = "",
     [string]$Version = "",
     [string]$Platform = "both"
 )
@@ -52,6 +52,20 @@ if ($ProjectName.Length -gt 64) {
 # Validate Platform flag
 if ($Platform -notin @("claude", "antigravity", "both")) {
     Write-Host "[FAIL] --platform must be: claude, antigravity, or both (default: both)" -ForegroundColor Red
+    exit 1
+}
+
+# -- Require explicit variant selection ------------------------------------------
+if ($Variant -eq "") {
+    Write-Host ""
+    Write-Host "[INFO] No variant specified. Please choose one:" -ForegroundColor Cyan
+    Write-Host "   co-develop  — Software development (stable)" -ForegroundColor Green
+    Write-Host "   co-design   — UI/UX design (stable)" -ForegroundColor Green
+    Write-Host "   co-work     — Collaboration & documentation (stable)" -ForegroundColor Green
+    Write-Host "   co-security — Security engagement (draft)" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   Usage: .\scripts\new-project.ps1 `"$ProjectName`" -Variant co-develop" -ForegroundColor White
+    Write-Host ""
     exit 1
 }
 

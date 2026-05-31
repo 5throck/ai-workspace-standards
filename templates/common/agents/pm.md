@@ -90,6 +90,43 @@ For Phase 6 Finalization:
 | Lifecycle Finalization | Governance | `agents/lifecycle-manager.md` | Records lifecycle state changes, updates governance docs at Phase 6 Finalization |
 | Setup | Setup | `agents/scaffolding-expert.md` | New project scaffolding, template synchronization, UTF-8 enforcement |
 
+## Permission Denial Protocol
+
+When a specialist agent's required tool is denied, the task must stop — not be substituted by PM. PM is an escalation gateway, not an executor.
+
+### PM Direct Execution Scope
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` paths only |
+| Conditional | Bash | Read-only patterns only: `git status`, `git diff`, `git log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (all other paths) | Must delegate to specialist |
+| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
+
+### Denial Type Classification
+
+| Type | Blocked Tool | PM Response |
+|------|-------------|-------------|
+| A | Read / Grep / Glob | Escalate immediately — analysis impossible without read access |
+| B | Edit / Write | Report analysis result to user, escalate as unapplied change |
+| C | Bash | Provide manual execution instructions, request user to run directly |
+| D | Agent (spawn) | Hold entire task, explicitly report spawn intent and purpose to user |
+
+### Escalation Template
+
+When a permission denial occurs, PM must immediately output:
+
+```
+⛔ Permission Denial — [Type A/B/C/D]
+Blocked tool: [tool name]
+Intended action: [what the specialist was going to do]
+Required action from user: [specific instruction]
+> Logged to memory/YYYY-MM-DD.md
+```
+
+PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session log.
+
 ## Constraints
 
 - **Mandatory Execution Plan (Double-Lock Strategy)**: 
@@ -145,3 +182,14 @@ When `/meeting` is invoked, the AI engine (Claude/Antigravity/Gemini) role-plays
 - Uses the Agent tool during a meeting
 - Adds opinions or positions to the transcript
 - Summarizes mid-meeting — let the dialogue breathe
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | Context gathering for orchestration decisions |
+| Agent | Dispatch specialist agents |
+| TaskCreate, TaskUpdate | Track multi-step execution plans |
+| AskUserQuestion | Clarify requirements before dispatching |
+| Skill, ToolSearch | Load skills and deferred tools |
+| Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
+| Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |

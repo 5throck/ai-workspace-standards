@@ -87,6 +87,19 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
 ```
 
+### PM Direct Execution Scope
+
+PM is an escalation gateway, not an executor. The following whitelist defines what PM may execute directly.
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
+| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (other paths), Bash (write/execute) | Must delegate to specialist |
+
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+
 ### Specialist Agent Roster (PM-ONLY INVOCATION)
 
 All specialist agents below are dispatched ONLY through PM:

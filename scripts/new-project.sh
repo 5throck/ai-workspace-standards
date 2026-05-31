@@ -8,7 +8,7 @@ export LANG=C
 
 set -euo pipefail
 
-VARIANT="co-develop"
+VARIANT=""
 TEMPLATE_VER=""
 PROJECT_NAME=""
 PLATFORM="both"
@@ -56,7 +56,7 @@ if [ "${#PROJECT_NAME}" -gt 64 ]; then
 fi
 
 # Validate --variant was not left without a value (last arg was --variant)
-if [ "$prev_arg" = "--variant" ] && [ "$VARIANT" = "co-develop" ]; then
+if [ "$prev_arg" = "--variant" ] && [ -z "$VARIANT" ]; then
   echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security"
   exit 1
 fi
@@ -65,6 +65,20 @@ fi
 if [[ "$PLATFORM" != "claude" && "$PLATFORM" != "antigravity" && "$PLATFORM" != "both" ]]; then
   echo "❌ --platform must be: claude, antigravity, or both (default: both)"
   exit 1
+fi
+
+# -- Require explicit variant selection ------------------------------------------
+if [ -z "$VARIANT" ]; then
+    echo ""
+    echo "[INFO] No variant specified. Please choose one:"
+    echo "   co-develop  — Software development (stable)"
+    echo "   co-design   — UI/UX design (stable)"
+    echo "   co-work     — Collaboration & documentation (stable)"
+    echo "   co-security — Security engagement (draft)"
+    echo ""
+    echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant co-develop"
+    echo ""
+    exit 1
 fi
 
 WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

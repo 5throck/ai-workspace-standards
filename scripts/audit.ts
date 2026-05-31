@@ -1,3 +1,4 @@
+// @version 2.1.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -288,6 +289,12 @@ if (hasBun) {
         else
             Pass("Lifecycle sync audit: all artifacts in sync");
     }
+    // Platform lifecycle verification (Check E/F/G/H)
+    if (fs.existsSync(path.join('scripts', 'verify-platform-lifecycle.ts'))) {
+        try {
+            await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
+        } catch { /* non-blocking */ }
+    }
 } else {
     Warn('Bun not installed - skipping lifecycle audits');
 }
@@ -452,6 +459,68 @@ function checkStaleShellReferences() {
 
 checkScriptSync();
 checkStaleShellReferences();
+
+// Check: Agent files must have a non-empty ## Required Tools section
+if (fs.existsSync('agents')) {
+    const agentFiles = fs.readdirSync('agents').filter(f =>
+        f.endsWith('.md') && f !== '_COMMON.md' && f !== 'README.md'
+    );
+    let missingSection = 0;
+    let emptySection = 0;
+    for (const file of agentFiles) {
+        const filePath = path.join('agents', file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const sectionIdx = content.indexOf('## Required Tools');
+        if (sectionIdx === -1) {
+            Fail(`Agent file missing Required Tools section: ${file}`);
+            missingSection++;
+        } else {
+            // Check if the section has any table rows: look for a '|' line after the header
+            const afterSection = content.slice(sectionIdx + '## Required Tools'.length);
+            const hasTableRow = /^\|[^|]+\|/m.test(afterSection.split(/^##\s/m)[0]);
+            if (!hasTableRow) {
+                Warn(`Agent Required Tools section is empty: ${file}`);
+                emptySection++;
+            }
+        }
+    }
+    if (missingSection === 0 && emptySection === 0) {
+        Pass('Agent Required Tools sections: all present');
+    }
+    errors += missingSection;
+}
+
+// Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md
+if (fs.existsSync('AGENTS.md')) {
+    const agentsMdContent = fs.readFileSync('AGENTS.md', 'utf-8');
+    const hasPmScope = agentsMdContent.includes('### PM Direct Execution Scope');
+    if (hasPmScope) {
+        const templatesDir = 'templates';
+        let syncWarnings = 0;
+        let checkedVariants = 0;
+        if (fs.existsSync(templatesDir)) {
+            for (const entry of fs.readdirSync(templatesDir)) {
+                if (!entry.startsWith('co-')) continue;
+                const variantAgentsMd = path.join(templatesDir, entry, 'AGENTS.md');
+                if (!fs.existsSync(variantAgentsMd)) continue;
+                const variantContent = fs.readFileSync(variantAgentsMd, 'utf-8');
+                // Only check variants that have a pm agent entry
+                const hasPmEntry = /\|\s*pm\s*\|/.test(variantContent)
+                    || /pm\.md/.test(variantContent)
+                    || /\*\*pm\*\*/.test(variantContent);
+                if (!hasPmEntry) continue;
+                checkedVariants++;
+                if (!variantContent.includes('### PM Direct Execution Scope')) {
+                    Warn(`AGENTS.md PM Direct Execution Scope not synced to: templates/${entry}/AGENTS.md`);
+                    syncWarnings++;
+                }
+            }
+        }
+        if (syncWarnings === 0) {
+            Pass('AGENTS.md PM Direct Scope: synced');
+        }
+    }
+}
 
 console.log("");
 if (errors === 0) {

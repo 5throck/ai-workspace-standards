@@ -8,5 +8,14 @@
         "serve"
       ]
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "git config core.hooksPath .githooks",
+        "statusMessage": "Configuring git hooks..."
+      }
+    ]
   }
 }
