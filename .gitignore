@@ -81,3 +81,6 @@ test-*/
 
 # External projects (not part of ai-workspace-standards)
 Pricing-Mgmt-Simulation/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/

@@ -126,9 +126,9 @@ function verify(explicitFiles?: string[]): boolean {
   if (explicitFiles && explicitFiles.length > 0) {
     allFiles = explicitFiles
       .map((f) => f.replace(/^memory\//, ""))
-      .filter((f) => f.endsWith(".md") && existsSync(join(memDir, f)));
+      .filter((f) => f.endsWith(".md") && existsSync(join(memDir, f)) && !f.includes("archive"));
   } else {
-    allFiles = readdirSync(memDir).filter((f) => f.endsWith(".md"));
+    allFiles = readdirSync(memDir).filter((f) => f.endsWith(".md") && !f.includes("archive"));
   }
 
   const sessionFiles = allFiles.filter(

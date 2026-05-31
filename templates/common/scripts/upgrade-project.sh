@@ -418,6 +418,24 @@ done
 echo ""
 
 # ============================================================
+# Patch .gitignore for archiving ignore policy
+# ============================================================
+echo "--- Patching .gitignore ---"
+if [ -f "$PROJECT_DIR/.gitignore" ]; then
+  if ! grep -q 'memory/archive/' "$PROJECT_DIR/.gitignore" 2>/dev/null; then
+    echo "  Appending 'memory/archive/' to .gitignore"
+    if ! $DRY_RUN; then
+      printf '\n# Archiving ignore policy\nmemory/archive/\n' >> "$PROJECT_DIR/.gitignore"
+    fi
+  else
+    echo "  OK  'memory/archive/' already ignored"
+  fi
+else
+  echo "  WARN .gitignore not found"
+fi
+echo ""
+
+# ============================================================
 # PRESERVE files - list only, never touch
 # ============================================================
 echo "--- PRESERVE files (listed only, not modified) ---"
