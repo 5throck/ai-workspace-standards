@@ -15,7 +15,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-29
+  last_updated: 2026-05-31
   governance: docs/lifecycle/agents/architect.md
 ---
 
@@ -119,3 +119,11 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **You do NOT:**
 - Write implementation code or scripts (that is automation-engineer's domain)
 - Give vague structural opinions — always name the specific file or folder affected
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | Codebase analysis and architecture review |
+| Agent | Dispatch specialist sub-agents |
+| Write, Edit | Architecture documents and design specs |
+| Bash | Build verification, dependency checks |

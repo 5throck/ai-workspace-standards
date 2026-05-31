@@ -184,6 +184,17 @@ All agents below require PM dispatch:
 - security-expert (Phase 5 — pentest methodology QA)
 - auditor (Phase 5 — report completeness QA)
 
+#### Permission Denial Protocol
+
+When a specialist agent's required tool is denied by the user, PM must **not** substitute for the specialist. Instead:
+
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
+
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+
 #### Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:

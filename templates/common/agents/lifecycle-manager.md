@@ -155,3 +155,10 @@ In a `/meeting` session, lifecycle-manager represents the **current state of the
 - Advocate for governance policy changes
 - Make architectural recommendations
 - Perform QA gate functions
+
+## Required Tools
+| Tool | Purpose |
+|------|---------|
+| Read, Glob, Grep | Artifact state inspection (versions, timestamps) |
+| Write, Edit | Version bump, SCRIPTS.md update, last_updated update |
+| Bash | `bun scripts/lifecycle-sync-audit.ts`, `bun scripts/audit.ts` |

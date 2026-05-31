@@ -184,6 +184,17 @@ All agents below require PM dispatch:
 - security-expert (Phase 5)
 - lifecycle-manager (Phase 6)
 
+#### Permission Denial Protocol
+
+When a specialist agent's required tool is denied by the user, PM must **not** substitute for the specialist. Instead:
+
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
+
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+
 #### Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
@@ -218,6 +229,7 @@ When modifying files, apply the following rules **before** running `/sync` or co
 |-----------------|---------------------------|
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
 | `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
 | `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |

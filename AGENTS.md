@@ -48,6 +48,19 @@
 **Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
 All specialist agents require PM dispatch - enforced at 4 levels.
 
+### PM Direct Execution Scope
+
+PM is an escalation gateway, not an executor. The following whitelist defines what PM may execute directly.
+
+| Category | Tools | Scope |
+|----------|-------|-------|
+| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
+| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
+| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Forbidden | Write, Edit (other paths), Bash (write/execute) | Must delegate to specialist |
+
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+
 ### Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
 2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
