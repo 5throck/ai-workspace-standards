@@ -9,6 +9,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-31]**: feat: implement Mandatory Lifecycle Dispatch across all platforms
+  - **[2026-05-31]**: Hardcoded the `lifecycle-manager` as the mandatory Step N-1 (Phase 6) in the `implementation_plan.md` boilerplate inside `GEMINI.md`, immediately followed by a Final QA Audit (`auditor`) as Step N.
+  - **[2026-05-31]**: Added an explicit `lifecycle-manager` row and `auditor` Final QA row to the `Mandatory Execution Plan Display` section in `CLAUDE.md`, enforcing that all file modifications are strictly audited before `/sync`.
+- **[2026-05-31]**: refactor: deprecate legacy physical PM Approval hooks globally
+  - **[2026-05-31]**: Purged `check-pm-approval.ts` and `clear-pm-approval.ts` from all `settings.json` files in the workspace root and all variant templates.
+  - **[2026-05-31]**: Deleted the obsolete hook scripts from `templates/common/scripts/` to prevent propagation, and formally marked them as `deprecated` in `SCRIPTS.md`.
+  - **[2026-05-31]**: Removed outdated `.pm-approved` flag instructions from `GEMINI.md` and `CLAUDE.md`, cementing the Double-Lock Strategy as the sole enforcement mechanism.
+- **[2026-05-31]**: fix: resolve template compatibility crash caused by lifecycle boilerplate
+  - **[2026-05-31]**: Promoted the `auditor` QA agent to a Common Agent (`templates/common/agents/auditor.md`) to ensure it is scaffolded into all new projects, preventing dispatch errors when executing the hardcoded Phase 6 QA boilerplate.
+  - **[2026-05-31]**: Registered `auditor` in `common-contract.json` while deliberately preserving the root `agents/auditor.md` to maintain the framework's own stringent QA validation logic.
+  - **[2026-05-31]**: Retroactively applied missing lifecycle updates (`@version 1.0.3` to `validate-templates.ts`, `last_updated` to `pm.md`) and propagated to all templates.
+- **[2026-05-31]**: feat: implement Double-Lock Strategy for systemic Agent Dispatch Rules enforcement
+  - **[2026-05-31]**: Injected literal Markdown boilerplate for `implementation_plan.md` into root and template `GEMINI.md` files to eliminate instruction drift.
+  - **[2026-05-31]**: Strengthened `agents/pm.md` constraints to strictly mandate copy-pasting the exact `[Step, Task, Agent, Tier, Model]` table format into chat and artifacts.
+- **[2026-05-31]**: feat: enforce Planning Mode Agent Dispatch Rules and adopt Hybrid Abstraction for model tiers
+  - **[2026-05-31]**: Decoupled hardware model versions from agent definitions by stripping literal model comments (`# gemini-3.1-pro`) from 45 agent files across root and templates.
+  - **[2026-05-31]**: Established `templates/common/docs/context.md` as the local Single Source of Truth for model tier mappings in scaffolded projects.
+  - **[2026-05-31]**: Added `Execution Task Plan` format requirement to `GEMINI.md` to force the PM to explicitly declare Agent Dispatch Rules in `implementation_plan.md`.
+  - **[2026-05-31]**: Refactored `validate-templates.ts` to support the new Hybrid Abstraction architecture by removing comment hint validation.
+- **[2026-05-31]**: feat: enforce `/sync` pipeline usage and upgrade Gemini 3-Tier models
+  - **[2026-05-31]**: Block direct `git commit` via `scripts/hooks/pre-commit.ts` to enforce `dev-sync.ts` logging. Added `--no-verify` fallback for intentional hotfixes.
+  - **[2026-05-31]**: Upgraded Gemini models in `workspace-schema.json` and all agent files (`gemini-3.1-pro` for High, `gemini-3.5-flash` for Medium/Low).
+  - **[2026-05-31]**: Updated `validate-templates.ts` to strictly validate `gemini` platform schema across 38 agent templates.
 - **[2026-05-31]**: feat: implement Skill Resolution Priority and cross-platform section parity check
   - **[2026-05-31]**: Defined 3-tier Skill Resolution Priority (Local > Config > Global) in `docs/decisions/0001-skill-resolution-priority.md`
   - **[2026-05-31]**: Added Skill Resolution Priority rule to `CLAUDE.md` and all template variants' `CLAUDE.md` and `GEMINI.md`

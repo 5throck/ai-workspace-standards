@@ -133,7 +133,7 @@ if [ -f "$VARIANT_JSON" ]; then
 fi
 
 # ── D-05: lifecycle-governance.json variant pre-check ───────────────────────── # TEST: none
-GOVERNANCE_JSON="$WORKSPACE_ROOT/templates/common/lifecycle-governance.json"
+GOVERNANCE_JSON="$WORKSPACE_ROOT/docs/templates/lifecycle-governance.json"
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/validate-templates.ts" ] && [ -f "$GOVERNANCE_JSON" ]; then
   echo ""
   echo "Running lifecycle governance pre-check for variant '$VARIANT'…"
@@ -168,7 +168,7 @@ else
   echo "⚠️  Template validation skipped (bun not available or helper missing)"
 fi
 
-# ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1
+# ── 1. Copy common/ first (shared infrastructure) ──────────────────────────── # TEST: Test 1, Test 7
 if [ ! -d "$COMMON_DIR" ]; then
   echo "❌ Common templates directory not found: $COMMON_DIR"
   exit 1
@@ -176,7 +176,7 @@ fi
 mkdir -p "$PROJECT_DIR"
 cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
 
-# ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1
+# ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1, Test 7
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Variant templates directory not found: $TEMPLATES_DIR"
   exit 1
@@ -284,7 +284,7 @@ if [ -d "$SCRIPTS_DIR_PROJ" ]; then
   fi
 fi
 
-# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ─────────────────
+# ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ───────────────── # TEST: Test 20, Test 21, Test 22
 # For additive overrides: substitute VARIANT-SECTION placeholders with variant content
 # NOTE: Skip files that use 'extends' pattern (already processed above)
 if [ -f "$TEMPLATES_DIR/variant.json" ] && command -v bun &>/dev/null; then
@@ -388,7 +388,7 @@ fi
 # ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
-# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3
+# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3, Test 2
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" ]; then
   bun "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" "$PROJECT_DIR" "$PROJECT_NAME" "A new project" ""
 else
@@ -454,7 +454,7 @@ else
   echo "docs/context.md merge=ours" > "$GITATTRIBUTES"
 fi
 
-# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16
+# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16, Test 5
 find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;
 find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 

@@ -30,10 +30,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/clear-pm-approval.ts"
-          },
-          {
-            "type": "command",
             "command": "git config core.hooksPath .githooks",
             "async": true,
             "statusMessage": "Configuring git hooks..."

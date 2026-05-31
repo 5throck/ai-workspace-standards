@@ -8,18 +8,12 @@
 
 You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
 
-> ⚠️ **Antigravity**: `PreToolUse` hooks do **not** fire in Antigravity sessions. This Role Declaration is the **sole enforcement mechanism** for the PM approval gate — there is no automated `.pm-approved` gate check. Treat it as strictly binding.
-
-**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
-- `write_to_file`, `replace_file_content`, `multi_replace_file_content` — file modification
-- `run_command` — unless strictly read-only: `grep_search`, `git log/status/diff`, `ls`
-
-**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+**Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then use `invoke_subagent` to dispatch specialist agents
 3. Never bypass PM workflow — direct specialist invocation is forbidden
 
-> **Note**: `PreToolUse` hooks enforce this rule at the tool level in CLI environments. This Role Declaration serves as the system-prompt-level enforcement (Level 2).
+> **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
 ---
 
@@ -64,6 +58,28 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 #### 1. `implementation_plan.md` (Path: `<appDataDir>\brain\<session-id>\implementation_plan.md` on Windows / `<appDataDir>/brain/<session-id>/implementation_plan.md` on macOS/Linux)
 *   **Purpose**: Detailed technical design document presented to the user for feedback and approval.
 *   **Metadata**: `ArtifactType: "implementation_plan"`, `RequestFeedback: true`, and a clear multi-line `Summary`.
+*   **Format Requirement**: MUST use the exact markdown template below for the document structure.
+    ```markdown
+    # [Goal Description]
+    Provide a brief description of the problem, any background context, and what the change accomplishes.
+
+    ## User Review Required
+    Document anything that requires user review or feedback.
+
+    ## Proposed Changes
+    Group files by component and order logically.
+    #### [MODIFY] [file basename](file:///absolute/path/to/modifiedfile)
+    #### [NEW] [file basename](file:///absolute/path/to/newfile)
+
+    ## Execution Task Plan (Agent Dispatch Rules)
+    | Step | Task | Agent | Tier | Model |
+    |:---:|---|:---:|:---:|---|
+    | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
+    | N-1 | Phase 6: Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [Model String] |
+    | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model String] |
+
+    *Execution Order: [Parallel/Sequential]*
+    ```
 *   **Governance**: Stop and wait for explicit user approval before modifying any application source code.
 
 #### 2. `task.md` (Path: `<appDataDir>\brain\<session-id>\task.md` on Windows / `<appDataDir>/brain/<session-id>/task.md` on macOS/Linux)
@@ -222,6 +238,6 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row*
+*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 

@@ -21,6 +21,21 @@
 
 ## Architecture
 
+### 3-Tier Agent Model Strategy
+
+This project follows the workspace-wide 3-Tier model architecture to decouple agent roles from hardware.
+The mapping is immutable per generation:
+
+**Gemini Tier Mapping (3.x Generation):**
+- **High**: `gemini-3.1-pro` (Complex reasoning, planning, PM/Architect)
+- **Medium**: `gemini-3.5-flash` (Reviews, testing, QA)
+- **Low**: `gemini-3.5-flash` (Fast, repetitive execution)
+
+**Claude Tier Mapping:**
+- **High**: `claude-opus-4-7`
+- **Medium**: `claude-sonnet-3-7`
+- **Low**: `claude-haiku-3-5`
+
 Standard directory layout for all projects in this workspace:
 
 ```

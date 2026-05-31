@@ -8,26 +8,21 @@
 
 You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
 
-**Never directly use the following tools for state-changing operations without PM approval (`.pm-approved` flag):**
-- `Write`, `Edit` — file creation or modification
-- `Bash` — unless strictly read-only: `git log/status/diff`, `ls`, `grep`, `bun scripts/audit.ts`, `bun scripts/validate-templates.ts`
-
-**For ALL multi-step tasks (2+ files or 2+ sequential steps):**
+**Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then invoke the `Agent` tool to dispatch specialist agents
 3. Never bypass PM workflow — direct specialist invocation is forbidden
 
-> **Desktop App**: `PreToolUse` hooks are inactive. This Role Declaration is the sole enforcement mechanism. Treat it as binding.
+> **Desktop App**: The Role Declaration and Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway. Treat them as strictly binding.
 
 ---
 
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` currently has **three active hook types**:
+The workspace `.claude/settings.json` currently has **two active hook types**:
 
-- **PreToolUse** (`Write|Edit|Bash`) → runs `bun scripts/check-pm-approval.ts` before any state-changing tool call, enforcing the PM-approval gate (`.pm-approved` flag).
-- **SessionStart** → runs `bun scripts/clear-pm-approval.ts` at the start of each session to reset approval state. Also runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured.
+- **SessionStart** → runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
 - **PostToolUse** is **enabled** — fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
 
 To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
@@ -50,14 +45,12 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PreToolUse` and `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing. The Role Declaration in this file is the sole PM-approval enforcement mechanism in the Desktop App.
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
-| PreToolUse (PM-approval gate) | Claude Code CLI | ✅ | Blocks Write/Edit/Bash without `.pm-approved` |
-| PreToolUse (PM-approval gate) | Claude Code Desktop App | ❌ | Role Declaration enforces instead |
-| SessionStart (state clear) | Claude Code CLI | ✅ | Clears `.pm-approved`; also runs `git config core.hooksPath .githooks` |
-| SessionStart (state clear) | Claude Code Desktop App | ❌ | No automatic clear |
+| SessionStart (git hooks) | Claude Code CLI | ✅ | runs `git config core.hooksPath .githooks` |
+| SessionStart (git hooks) | Claude Code Desktop App | ❌ | hooks don't fire; run manually |
 | PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
 | PostToolUse (audit) | Claude Code Desktop App | ❌ | Hooks don't fire; run `bun scripts/audit.ts` manually |
 
@@ -129,8 +122,11 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
+| N-1 | Phase 6: Lifecycle Update | lifecycle-manager | Medium | [Model] |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model] |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
+*Rule: You MUST always include the Phase 6 Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
 
 #### Specialist Agent List
 All agents below require PM dispatch:
@@ -238,4 +234,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-31*
+*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
+ * @version 1.0.3
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -114,7 +115,7 @@ interface GovernancePolicy {
 
 let governance: GovernancePolicy | null = null;
 function loadGovernance(): void {
-  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
   if (!existsSync(govPath)) return;
   try {
     governance = JSON.parse(readFileSync(govPath, 'utf-8')) as GovernancePolicy;
@@ -135,26 +136,26 @@ function isMandatory(domain: string): boolean {
 // Check D-04: Governance policy + common.lifecycle.json
 function checkGovernance(): void {
   if (!JSON_MODE) console.log('\n=== Check D-04: Lifecycle governance ===');
-  const govPath = join(TEMPLATES_DIR, 'common', 'lifecycle-governance.json');
+  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
   if (!existsSync(govPath)) {
-    warn('common', 'governance-missing', 'templates/common/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
+    warn('common', 'governance-missing', 'docs/templates/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
     return;
   }
-  pass('templates/common/lifecycle-governance.json: present');
+  pass('docs/templates/lifecycle-governance.json: present');
 
-  const commonLcPath = join(TEMPLATES_DIR, 'common', 'common.lifecycle.json');
+  const commonLcPath = join(ROOT, 'docs', 'templates', 'common.lifecycle.json');
   if (!existsSync(commonLcPath)) {
-    warn('common', 'common-lifecycle-missing', 'templates/common/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
+    warn('common', 'common-lifecycle-missing', 'docs/templates/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
   } else {
     try {
       const lc = JSON.parse(readFileSync(commonLcPath, 'utf-8')) as Record<string, unknown>;
       if (!lc.version || !lc.status || !lc.propagatedTo) {
         warn('common', 'common-lifecycle-schema', 'common.lifecycle.json missing required fields: version, status, propagatedTo');
       } else {
-        pass(`templates/common/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
+        pass(`docs/templates/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
       }
     } catch {
-      fail('common', 'common-lifecycle-invalid', 'templates/common/common.lifecycle.json is not valid JSON');
+      fail('common', 'common-lifecycle-invalid', 'docs/templates/common.lifecycle.json is not valid JSON');
     }
   }
 
@@ -913,9 +914,9 @@ function checkVariantContract(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
 
   try {
-    const contractPath = join(TEMPLATES_DIR, 'common', 'variant-contract.json');
+    const contractPath = join(ROOT, 'docs', 'templates', 'variant-contract.json');
     if (!existsSync(contractPath)) {
-      fail('root', 'variant-contract-missing', 'templates/common/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
+      fail('root', 'variant-contract-missing', 'docs/templates/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
       return;
     }
 
@@ -925,7 +926,7 @@ function checkVariantContract(variant: string): void {
     try {
       contract = JSON.parse(contractRaw) as VariantContract;
     } catch (parseError) {
-      fail('root', 'variant-contract-invalid', 'templates/common/variant-contract.json is not valid JSON', 'Fix JSON syntax');
+      fail('root', 'variant-contract-invalid', 'docs/templates/variant-contract.json is not valid JSON', 'Fix JSON syntax');
       return;
     }
 
@@ -1003,7 +1004,7 @@ function checkSecurityGateSkills(variant: string): void {
 
 // B-07: Sync scan results back to VERSION_REGISTRY.json
 function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
-  const registryPath = join(TEMPLATES_DIR, 'common', 'VERSION_REGISTRY.json');
+  const registryPath = join(ROOT, 'docs', 'templates', 'VERSION_REGISTRY.json');
   if (!existsSync(registryPath)) return;
 
   let registry: Record<string, unknown>;
@@ -1142,10 +1143,10 @@ function checkWorkspaceSchema(): void {
     }
   }
 
-  // --- WS-01 Check 2: templates/common/phase-definitions.md canonical phases ---
-  const phaseDefPath = join(ROOT, 'templates', 'common', 'phase-definitions.md');
+  // --- WS-01 Check 2: templates/common/docs/phase-definitions.md canonical phases ---
+  const phaseDefPath = join(ROOT, 'templates', 'common', 'docs', 'phase-definitions.md');
   if (!existsSync(phaseDefPath)) {
-    warn('root', 'ws-01-phase-defs-missing', 'templates/common/phase-definitions.md not found — skipping canonical phase check');
+    warn('root', 'ws-01-phase-defs-missing', 'templates/common/docs/phase-definitions.md not found — skipping canonical phase check');
   } else {
     const phaseDefContent = readFileSync(phaseDefPath, 'utf-8');
     // Extract phase identifiers from Phase Overview table rows (first column)
@@ -1156,12 +1157,12 @@ function checkWorkspaceSchema(): void {
     }
     const missingFromDoc = schemaCanonical.filter(p => !foundPhases.has(p));
     if (missingFromDoc.length === 0) {
-      pass(`templates/common/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
+      pass(`templates/common/docs/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
     } else {
       for (const missing of missingFromDoc) {
         fail('root', 'ws-01-phase-defs',
           `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
-          `Add phase "${missing}" to the Phase Overview table in templates/common/phase-definitions.md`
+          `Add phase "${missing}" to the Phase Overview table in templates/common/docs/phase-definitions.md`
         );
       }
     }
@@ -1244,22 +1245,26 @@ function checkWorkspaceSchema(): void {
           continue;
         }
 
-        // Complex tier object — check claude: sub-field
+        // Complex tier object — check claude: and gemini: sub-fields
         const claudeTierMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
-        if (claudeTierMatch) {
-          const claudeTier = claudeTierMatch[1];
-          const expectedKeyword = tierToModelKeyword[expectedTier] ?? expectedTier;
-          // Also check the comment for model name as secondary signal
-          const claudeLine = fm.split('\n').find(l => l.match(/^\s+claude:/));
-          const modelHint = claudeLine?.toLowerCase() ?? '';
-          if (claudeTier === expectedTier) {
-            pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
-          } else if (!modelHint.includes(expectedKeyword)) {
-            warn('root', 'ws-01-agent-tier-complex',
-              `agents/${file}: complex tier — claude tier "${claudeTier}" does not match schema "${expectedTier}" for "${agentName}" (manual review recommended)`
-            );
-          } else {
-            pass(`agents/${file}: claude tier "${claudeTier}" matches schema (model hint confirms "${expectedKeyword}")`);
+        const geminiTierMatch = fm.match(/^\s+gemini:\s*(high|medium|low)/m);
+        
+        if (claudeTierMatch || geminiTierMatch) {
+          if (claudeTierMatch) {
+            const claudeTier = claudeTierMatch[1];
+            if (claudeTier === expectedTier) {
+              pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
+            } else {
+              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: claude tier "${claudeTier}" != schema "${expectedTier}"`);
+            }
+          }
+          if (geminiTierMatch) {
+            const geminiTier = geminiTierMatch[1];
+            if (geminiTier === expectedTier) {
+              pass(`agents/${file}: gemini tier "${geminiTier}" matches schema`);
+            } else {
+              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: gemini tier "${geminiTier}" != schema "${expectedTier}"`);
+            }
           }
         } else {
           // Can't reliably parse tier
@@ -1276,9 +1281,9 @@ function checkWorkspaceSchema(): void {
 function checkCommonContract(): void {
   if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
 
-  const contractPath = join(TEMPLATES_DIR, 'common', 'common-contract.json');
+  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
   if (!existsSync(contractPath)) {
-    warn('common', 'common-contract-missing', 'templates/common/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
+    warn('common', 'common-contract-missing', 'docs/templates/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
     return;
   }
 
@@ -1286,7 +1291,7 @@ function checkCommonContract(): void {
   try {
     contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
   } catch {
-    fail('common', 'common-contract-invalid', 'templates/common/common-contract.json is not valid JSON');
+    fail('common', 'common-contract-invalid', 'docs/templates/common-contract.json is not valid JSON');
     return;
   }
 
@@ -1597,3 +1602,4 @@ function main() {
 }
 
 main();
+

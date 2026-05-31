@@ -34,6 +34,11 @@
       "medium": "claude-sonnet-4-6",
       "low":    "claude-haiku-4-5"
     },
+    "gemini": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    },
     "antigravity": {
       "high":   "gemini-3.1-pro",
       "medium": "gemini-3.5-flash",

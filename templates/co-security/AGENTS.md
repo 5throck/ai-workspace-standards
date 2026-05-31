@@ -12,7 +12,7 @@
 
 ## Multi-Agent Phase Definitions
 
-**co-security follows the standard 7-phase workflow** defined in [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding -->.
+**co-security follows the standard 7-phase workflow** defined in [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding -->.
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
@@ -25,7 +25,7 @@
 | 6 | Lifecycle Finalization | Orchestrator | PM (memlog → sync → PR) |
 
 **PM Facilitation Guidance:**
-See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
+See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
 - Opening the phase (objective, specialist nomination, expectations)
 - Progress monitoring (intervene only if standards not met)
 - Synthesis of outputs (key findings, decisions)
@@ -142,3 +142,5 @@ See `docs/co-security.context.md § Skills` for the full skill registry includin
 - engagement-scoping, threat-modeling, recon-surface, finding-tracker, pentest-report, patch-automation
 - meeting-facilitation, agent-lifecycle-manager, skill-lifecycle-manager
 - project-review (`.claude/skills/project-review/`) — Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03).
+
+

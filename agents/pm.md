@@ -2,9 +2,10 @@
 name: pm
 status: active
 tier:
-  claude: high        # claude-opus-4-7
-  antigravity: high   # gemini-3.1-pro (thinking_level="medium")
-  gemini-cli: high    # gemini-3.1-pro
+  claude: high
+  gemini: high
+  antigravity: high
+  gemini-cli: high
 model: inherit
 color: yellow
 description: 'Orchestrates Phases 0, 2, 6. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
@@ -14,7 +15,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-30
+  last_updated: 2026-05-31
   governance: docs/lifecycle/agents/pm.md
 ---
 
@@ -91,13 +92,11 @@ For Phase 6 Finalization:
 
 ## Constraints
 
-- **Mandatory execution plan**: Before dispatching 2 or more agents in parallel or sequence, output an execution plan table in the user's active language. Format:
-
-  | # | Task | Agent | Tier | Model |
-  |---|------|-------|------|-------|
-  | 1 | [task description] | [agent-name] | High/Medium/Low | opus/sonnet/haiku |
-
-  State parallel vs sequential execution order below the table. Only then invoke the Agent tool.
+- **Mandatory Execution Plan (Double-Lock Strategy)**: 
+  When creating an `implementation_plan.md` artifact or before dispatching 2+ agents, you **MUST** copy the exact Execution Task Plan markdown boilerplate defined in `GEMINI.md` / `CLAUDE.md`.
+  - You MUST include the exact columns: `[Step, Task, Agent, Tier, Model]`.
+  - Failing to reproduce this exact table format and columns is a **CRITICAL GOVERNANCE VIOLATION**.
+  - Always output this table in the chat so it is immediately visible to the user before dispatching.
 
 - **Mandatory 3-Tier Strategy**: When leading execution and improvement tasks, PM MUST strictly use the 3-Tier model strategy:
   - **High-tier**: Complex reasoning, architectural design, planning, and PM orchestration.

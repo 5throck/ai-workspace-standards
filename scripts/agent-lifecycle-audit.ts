@@ -496,3 +496,4 @@ if (jsonMode) {
 }
 
 process.exit(result.errors.length > 0 ? 1 : 0);
+

@@ -2,9 +2,10 @@
 name: Automation Engineer
 status: active
 tier:
-  claude: low         # claude-haiku-4-5
-  antigravity: low    # gemini-3.5-flash (thinking_level="low")
-  gemini-cli: low     # gemini-3.5-flash
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 model: inherit
 color: green
 description: 'Scripting and tools expert. Phase 4 Lead Agent. Use when: "Creating scripts", "Cross-platform automation", "Implementation tasks"'

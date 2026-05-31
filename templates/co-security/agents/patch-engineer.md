@@ -2,9 +2,10 @@
 name: patch-engineer
 formal_name: Patch Engineer
 tier:
-  claude: medium      # claude-sonnet-4-6
-  antigravity: medium # gemini-3.1-flash
-  gemini-cli: medium  # gemini-3.1-flash
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: blue
 description: >

@@ -90,7 +90,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 
 ### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-2.5-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-2.0-flash) for Auditor/QA; Low-tier (claude-haiku-4-5) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → QA → Finalization). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for Auditor/QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → QA → Finalization). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
@@ -124,7 +124,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 
 #### Purpose
 - Agents and skills that are identical across all variants live in `templates/common/agents/` and `templates/common/skills/`.
-- The authoritative manifest of common content is `templates/common/common-contract.json`. Every file listed there is guaranteed to be present in every generated project.
+- The authoritative manifest of common content is `docs/templates/common-contract.json`. Every file listed there is guaranteed to be present in every generated project.
 - Variant templates may extend or replace common files via the override system described below.
 
 #### Classification Criteria
@@ -149,7 +149,7 @@ If **≥ 50 %** of variants declare an override for the same agent or skill, the
 
 #### Adding a New Common Agent or Skill
 1. Add the file to `templates/common/agents/` or `templates/common/skills/`.
-2. Register it in `templates/common/common-contract.json`.
+2. Register it in `docs/templates/common-contract.json`.
 3. Run `bun scripts/validate-templates.ts` — must exit 0 before committing.
 
 #### Adding a Variant Override
@@ -243,3 +243,4 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 ---
 
 *Last Updated: 2026-05-31*
+

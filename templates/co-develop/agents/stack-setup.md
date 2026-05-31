@@ -2,9 +2,10 @@
 name: stack-setup
 status: active
 tier:
-  claude: low        # claude-haiku-4-5
-  antigravity: low   # gemini-3.5-flash
-  gemini-cli: low    # gemini-3.5-flash
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 model: inherit
 color: orange
 description: 'Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization"'
