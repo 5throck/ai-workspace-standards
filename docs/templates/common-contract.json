@@ -127,5 +127,28 @@
       "description": "Redirects commit+push+PR requests to /sync pipeline — enforces CHANGELOG, memlog, and audit gates",
       "propagated_to_common": true
     }
+  },
+  "common_platform_skills": {
+    "finishing-a-development-branch": {
+      "claude_source": ".claude/skills/finishing-a-development-branch/SKILL.md",
+      "gemini_source": ".gemini/skills/finishing-a-development-branch/SKILL.md",
+      "version": "1.0.0",
+      "description": "Workspace override — redirects branch completion to /sync pipeline",
+      "propagated_to_common": true
+    },
+    "platform-skill-lifecycle-manager": {
+      "claude_source": ".claude/skills/platform-skill-lifecycle-manager/SKILL.md",
+      "gemini_source": ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
+      "version": "1.0.0",
+      "description": "Platform skill lifecycle management for .claude/skills/ and .gemini/skills/",
+      "propagated_to_common": true
+    },
+    "platform-command-lifecycle-manager": {
+      "claude_source": ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
+      "gemini_source": ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
+      "version": "1.0.0",
+      "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
+      "propagated_to_common": true
+    }
   }
 }

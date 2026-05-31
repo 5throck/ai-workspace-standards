@@ -288,6 +288,12 @@ if (hasBun) {
         else
             Pass("Lifecycle sync audit: all artifacts in sync");
     }
+    // Platform lifecycle verification (Check E/F/G/H)
+    if (fs.existsSync(path.join('scripts', 'verify-platform-lifecycle.ts'))) {
+        try {
+            await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
+        } catch { /* non-blocking */ }
+    }
 } else {
     Warn('Bun not installed - skipping lifecycle audits');
 }

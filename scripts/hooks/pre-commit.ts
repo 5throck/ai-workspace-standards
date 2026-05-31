@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.0.3
+ * @version 1.1.0
  */
 
 import { $ } from "bun";
@@ -140,6 +140,37 @@ async function main() {
     console.error("     git add scripts/SCRIPTS.md");
     console.error("");
     process.exit(1);
+  }
+
+  // 6b. Platform Skill/Command lifecycle check (non-blocking WARN)
+  const claudeSkillStaged = staged.filter(f => /^\.claude\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
+  const geminiSkillStaged = staged.filter(f => /^\.gemini\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
+  const claudeCommandStaged = staged.filter(f => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
+  const geminiCommandStaged = staged.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
+
+  for (const f of [...claudeSkillStaged, ...geminiSkillStaged]) {
+    try {
+      const content = readFileSync(f, 'utf-8');
+      if (!/^version:\s*\d+\.\d+\.\d+/m.test(content)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f}: missing 'version:' in frontmatter — add version: 1.0.0 for new skills`);
+      }
+    } catch { /* file may be deleted */ }
+  }
+
+  for (const f of claudeCommandStaged) {
+    const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/').replace(/\\/g, '/');
+    if (!existsSync(commonPath)) {
+      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+    }
+  }
+
+  for (const f of geminiCommandStaged) {
+    const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/').replace(/\\/g, '/');
+    if (!existsSync(commonPath)) {
+      console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+      console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+    }
   }
 
   // 7. Secret scan

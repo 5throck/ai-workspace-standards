@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @license MIT
  */
 
@@ -156,8 +156,16 @@ function runCheckA(): SyncIssue[] {
 
     const fileVersion = extractFileVersion(scriptPath);
 
-    // Skip if file has no @version comment
-    if (fileVersion === null) continue;
+    // WARN: @version missing — SCRIPTS.md version cannot be validated against file
+    if (fileVersion === null) {
+      if (!jsonMode) console.log(`\x1b[33m[WARN]\x1b[0m ${filename}: @version header missing — SCRIPTS.md version cannot be validated (add @version JSDoc to enable Check A)`);
+      issues.push({
+        level: 'warning',
+        file: `scripts/${filename}`,
+        message: `Check A: @version header missing in ${filename} — SCRIPTS.md version unvalidatable (add @version to enable Check A)`,
+      });
+      continue;
+    }
 
     if (fileVersion !== registryVersion) {
       issues.push({
