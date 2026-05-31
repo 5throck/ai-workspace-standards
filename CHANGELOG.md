@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **[2026-05-31]**: update: modified `audit.ts`, `dev-sync.ts`, `verify-memory.ts`, `upgrade-project` scripts, and `CONSTITUTION.md` for memory system archiving support
 - **[2026-05-31]**: refactor: swapped the order of the last two steps in the Execution Task Plan boilerplate (Lifecycle Update is now N-1, and Final QA Audit is N) across all 10 CLAUDE.md and GEMINI.md files (at root and in the 4 templates)
 - **[2026-05-31]**: refactor: removed "Phase 5:" and "Phase 6:" prefixes from execution plan boilerplate in CLAUDE.md and GEMINI.md (both at root and across all 4 templates) to reduce cognitive friction between 'Steps' and 'Phases'
 - **[2026-05-31]**: refactor: `meeting-facilitation` SKILL.md converted to stubs; established `.gemini/commands/meeting.md` as SSOT alongside `.claude/commands/meeting.md`; updated Antigravity Command Intercept Rule in `GEMINI.md` (and template copies)
@@ -18,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-31]**: fix: enforce `/sync` as sole PR creation path across Claude, Gemini, and Antigravity platforms — pre-commit `--no-verify` prohibition hardened, local `finishing-a-development-branch` override created, `commit-push-pr` redirect command added, `SYNC_ACTIVE` mechanism documented in all variant CLAUDE.md and GEMINI.md (9 files), `run_command` git safety rules and `invoke_subagent` commit prohibition added to GEMINI.md for Antigravity, `templates/common/.claude/settings.json` PostToolUse hook added
 
 ### Added
+- **[2026-05-31]**: feat: added `archive-memory.ts` script to archive memory markdown files older than 7 days
 - **[2026-05-31]**: feat: implement Mandatory Lifecycle Dispatch across all platforms
   - **[2026-05-31]**: Hardcoded the `lifecycle-manager` as the mandatory Step N-1 (Phase 6) in the `implementation_plan.md` boilerplate inside `GEMINI.md`, immediately followed by a Final QA Audit (`auditor`) as Step N.
   - **[2026-05-31]**: Added an explicit `lifecycle-manager` row and `auditor` Final QA row to the `Mandatory Execution Plan Display` section in `CLAUDE.md`, enforcing that all file modifications are strictly audited before `/sync`.

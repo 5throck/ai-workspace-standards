@@ -1,4 +1,4 @@
-// @version 2.1.3
+// @version 2.2.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -147,6 +147,7 @@ function walkDir(dir: string, callback: (fPath: string) => void) {
 for (const dir of searchDirs) {
     if (fs.existsSync(dir)) {
         walkDir(dir, (filePath) => {
+            if (filePath.replace(/\\/g, '/').includes('memory/archive/')) return;
             if (filePath.endsWith('.md') && !filePath.includes('node_modules') && !filePath.includes('.git')) {
                 const buf = fs.readFileSync(filePath);
                 if (buf.length >= 3 && buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) {
@@ -276,6 +277,13 @@ if (hasBun) {
             Pass("README lifecycle audit: all READMEs healthy");
     }
     if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md')) {
+        // explicitly skip any files located in memory/archive/
+        const memoryFiles = fs.readdirSync('memory')
+            .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
+            .map(f => path.join('memory', f));
+            
+        // We do not pass explicit files to verify-memory.ts to avoid triggering its pre-commit mode (which only checks the last entry),
+        // but verify-memory.ts natively only reads files in memory/ directly.
         const out = await $`bun ${path.join('scripts', 'verify-memory.ts')}`.quiet().nothrow();
         if (out.exitCode !== 0)
             Warn("Memory log format issues detected (run 'bun scripts/verify-memory.ts' to see details)");

@@ -105,6 +105,12 @@ if (hasBun) {
     }
 }
 
+// 3.8 Archive old memory files
+const archiveMemoryTs = path.join('scripts', 'archive-memory.ts');
+if (fs.existsSync(archiveMemoryTs)) {
+    await $`bun ${archiveMemoryTs}`;
+}
+
 // 4. Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
 const auditRes = await $`bun scripts/audit.ts`.nothrow();
 

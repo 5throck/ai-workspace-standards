@@ -54,3 +54,6 @@ Thumbs.db
 
 # --- Sandbox for testing ---
 .sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/

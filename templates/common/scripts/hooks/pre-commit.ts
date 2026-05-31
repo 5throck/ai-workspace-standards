@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.1.0
+ * @version 1.1.1
  */
 
 import { $ } from "bun";
@@ -67,6 +67,7 @@ async function main() {
   // 2-B. Enforce English Only in PR Artifacts
   const docsToCheck = staged.filter(f => /^memory\/.*\.md$|^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
+    if (!existsSync(file)) continue;
     const content = readFileSync(file, 'utf-8');
     if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(content)) {
       console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters (Korean) detected in ${file}`);

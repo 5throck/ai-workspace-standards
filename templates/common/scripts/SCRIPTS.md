@@ -47,12 +47,12 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `new-project.ps1` | L1 | 1.5.0 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `upgrade-project.sh` | L0 | 1.0.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
-| `upgrade-project.ps1` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
+| `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.1.3 | active | — | — | common | — |
-| `dev-sync.ts` | L0 | 1.4.0 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.2.0 | active | — | — | common | — |
+| `dev-sync.ts` | L0 | 1.5.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skills.ts` | L1 | 1.1.0 | active | — | — | common | — |
@@ -68,7 +68,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lifecycle-sync-audit.ts` | L0 | 1.3.0 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-memory.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `archive-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `dispatch.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -93,7 +94,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `hooks/pre-commit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -253,6 +254,10 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 orphaned files not registered in `MEMORY.md` index.
 **Usage**: `bun scripts/verify-memory.ts [--verify | --report]`
 **Runs automatically**: pre-commit hook when `memory/*.md` files are staged.
+
+#### `archive-memory.ts`
+**Purpose**: Archives memory markdown files older than 7 days to keep the root memory directory clean and within context limits.
+**Usage**: `bun scripts/archive-memory.ts`
 
 ---
 
