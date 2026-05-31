@@ -75,8 +75,8 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     | Step | Task | Agent | Tier | Model |
     |:---:|---|:---:|:---:|---|
     | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
-    | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm (direct) | Medium | [Model String] |
-    | N | Final QA Audit (bun scripts/audit.ts) | pm (direct) | Medium | [Model String] |
+    | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
+    | N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
 
     *Execution Order: [Parallel/Sequential]*
     ```
