@@ -32,35 +32,6 @@
         "Governance Workflow",
         "Dispatch Protocol"
       ]
-    },
-    "lifecycle-manager": {
-      "source": "agents/lifecycle-manager.md",
-      "version": "1.0.0",
-      "overridable": false,
-      "description": "Lifecycle state monitor — governance record keeper; identical role across all variants",
-      "skeleton_sections": ["Role", "Responsibilities", "Constraints", "Dispatch Protocol"],
-      "variant_sections": []
-    },
-    "auditor": {
-      "source": "agents/auditor.md",
-      "version": "1.0.0",
-      "overridable": true,
-      "override_type_allowed": ["additive", "replacement"],
-      "expected_override_all_variants": false,
-      "description": "Consistency Auditor — owns Phase 5 QA gate, verifies docs and code standards",
-      "skeleton_sections": [
-        "Role",
-        "Updated Role (Phase 5 QA Owner)",
-        "PM-ONLY INVOCATION",
-        "Responsibilities",
-        "Audit Checklist",
-        "Output Format",
-        "Constraints",
-        "Meeting Participation",
-        "QA Escalation Procedure (T-03)",
-        "Dispatch Protocol"
-      ],
-      "variant_sections": []
     }
   },
   "common_skills": {
@@ -105,12 +76,6 @@
       "version": "1.2.0",
       "overridable": false,
       "description": "Script lifecycle management — tracks script health and deprecation"
-    },
-    "simulate-project-creation": {
-      "source": "skills/simulate-project-creation/SKILL.md",
-      "version": "1.0.0",
-      "overridable": false,
-      "description": "Simulates new-project scaffolding for dry-run validation"
     },
     "validate-docs-links": {
       "source": "skills/validate-docs-links/SKILL.md",

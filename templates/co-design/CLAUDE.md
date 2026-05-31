@@ -124,8 +124,8 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update | lifecycle-manager | Medium | [Model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [Model] |
+| N-1 | Lifecycle Update | pm (direct) | Medium | [Model] |
+| N | Final QA Audit (bun scripts/audit.ts) | pm (direct) | Medium | [Model] |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 *Rule: You MUST always include the Final QA Audit followed by the Lifecycle Update as the final two steps of the plan.*
@@ -140,8 +140,6 @@ All agents below require PM dispatch:
 - visual-designer (Phase 3)
 - typography-expert (Phase 3)
 - prototype-engineer (Phase 4)
-- auditor (Phase 5)
-- lifecycle-manager (Phase 6)
 
 #### Permission Denial Protocol
 
@@ -172,7 +170,7 @@ Agent(
 
 Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
 1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
-2. **auditor** verifies against acceptance criteria and consistency.
+2. **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
 3. **Quality gate (audit script)** validates compliance.
 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.

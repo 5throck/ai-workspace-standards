@@ -18,7 +18,7 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 6); reduced bottleneck role |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Cross-validates documentation; owns Phase 5 QA gate independently; ensures rules consistency |
+| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper; dispatched by PM at Phase 6 Finalization when lifecycle-managed artifacts change; secretary role — records, does not decide |
 
 ### 📐 Design
@@ -230,6 +230,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 ## Skills
 
 > **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
+
+> **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|

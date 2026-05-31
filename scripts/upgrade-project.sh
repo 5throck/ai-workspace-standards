@@ -394,7 +394,6 @@ MERGE_FILES+=(
   ".gitignore"
   "agents/pm.md"
   "agents/architect.md"
-  "agents/auditor.md"
   "agents/automation-engineer.md"
   "agents/docs-writer.md"
   "agents/scaffolding-expert.md"

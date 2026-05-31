@@ -64,7 +64,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-verify.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | common | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `lifecycle-sync-audit.ts` | L0 | 1.3.0 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -77,7 +77,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L1 | 1.2.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L1 | 1.2.2 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -90,7 +90,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `validate-skills.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.0.1 | active | — | — | common | — |
