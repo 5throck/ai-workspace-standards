@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# Co-Develop Template
+# {{PROJECT_NAME}}
 
 AI-assisted software development workspace template. Optimized for collaborative coding with Claude and Gemini AI assistants using a multi-agent architecture.
 
