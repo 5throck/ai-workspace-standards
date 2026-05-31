@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.1
 /**
  * Markdown Language Validation Script
  *
@@ -9,7 +10,6 @@
  * Exit codes: 0 (pass), 1 (violation found)
  */
 
-import { glob } from "glob";
 import { readFileSync } from "fs";
 
 // Korean character range (Hangul syllables and jamo)
@@ -44,9 +44,10 @@ function isExcludedPath(filePath: string): boolean {
     return true;
   }
 
-  // Condition 2: Filename patterns (_ko, .ko., -ko)
+  // Condition 2: Filename patterns (_ko.md, .ko., -ko)
   const filename = normalizedPath.split("/").pop() || "";
-  return filename.includes("_ko") ||
+  return filename.endsWith("_ko.md") ||
+         filename.includes("_ko") ||
          filename.includes(".ko.") ||
          filename.includes("-ko");
 }
@@ -90,14 +91,15 @@ function analyzeFile(filePath: string): Violation | null {
 async function validateMarkdownLanguage(): Promise<void> {
   console.log("🔍 Scanning for Korean-only markdown files...\n");
 
-  // Find all .md files
-  const mdFiles = await glob("**/*.md", {
-    ignore: [
-      "**/node_modules/**",
-      "**/.git/**",
-      "**/dist/**",
-      "**/build/**"
-    ]
+  // Find all .md files using Bun's built-in Glob API
+  const globber = new Bun.Glob("**/*.md");
+  const allFiles = await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true }));
+  const mdFiles = allFiles.filter((f) => {
+    const normalized = f.replace(/\\/g, "/");
+    return !normalized.includes("node_modules/") &&
+           !normalized.includes(".git/") &&
+           !normalized.includes("dist/") &&
+           !normalized.includes("build/");
   });
 
   const violations: Violation[] = [];

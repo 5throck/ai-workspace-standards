@@ -1,4 +1,4 @@
-// @version 2.1.2
+// @version 2.1.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -460,8 +460,12 @@ function checkStaleShellReferences() {
 checkScriptSync();
 checkStaleShellReferences();
 
-// Check: Agent files must have a non-empty ## Required Tools section
-if (fs.existsSync('agents')) {
+// Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
+// distinguishes the governance root from generated project copies.
+const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('variant.json');
+
+// Check: Agent files must have a non-empty ## Required Tools section (workspace root only)
+if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
     const agentFiles = fs.readdirSync('agents').filter(f =>
         f.endsWith('.md') && f !== '_COMMON.md' && f !== 'README.md'
     );
@@ -490,8 +494,8 @@ if (fs.existsSync('agents')) {
     errors += missingSection;
 }
 
-// Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md
-if (fs.existsSync('AGENTS.md')) {
+// Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md (workspace root only)
+if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
     const agentsMdContent = fs.readFileSync('AGENTS.md', 'utf-8');
     const hasPmScope = agentsMdContent.includes('### PM Direct Execution Scope');
     if (hasPmScope) {

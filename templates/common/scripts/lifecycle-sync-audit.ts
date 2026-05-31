@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.2.1
+ * @version 1.3.0
  * @license MIT
  */
 
@@ -64,16 +64,23 @@ const TEMPLATE_SCRIPTS_MD = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPT
 // Detect workspace root by presence of CONSTITUTION.md
 const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'CONSTITUTION.md'));
 
+interface RegistryEntry {
+  version: string;
+  /** Deployment layer: 'common' (both L0 + L1), 'L0-only' (workspace root only), 'L1-only' (generated projects only). Defaults to 'common' when column is absent. */
+  layer: 'common' | 'L0-only' | 'L1-only';
+}
+
 /**
  * Parse the Registry table from a SCRIPTS.md file.
- * Returns a map of { filename -> version }.
- * Only includes rows with status 'active' or 'experimental'.
+ * Returns a map of { filename -> RegistryEntry }.
+ * The table may optionally have a `layer` column (common / L0-only / L1-only).
+ * Only includes rows with status 'active' or 'experimental' when activeOnly=true.
  */
 function parseScriptsMdRegistry(
   filePath: string,
   activeOnly = false,
-): Map<string, string> {
-  const result = new Map<string, string>();
+): Map<string, RegistryEntry> {
+  const result = new Map<string, RegistryEntry>();
 
   if (!existsSync(filePath)) return result;
 
@@ -86,18 +93,38 @@ function parseScriptsMdRegistry(
   const section = registryMatch[1];
   const lines = section.split('\n');
 
+  // Detect column positions from the header row
+  // Expected columns (may vary): script | source | version | status  [| layer]
+  // OR:                          script | source | version | layer | status
+  let versionColIdx = 3;
+  let statusColIdx = 4;
+  let layerColIdx = -1; // -1 = column absent; defaults to 'common'
+
+  for (const line of lines) {
+    if (!line.startsWith('|')) continue;
+    const cols = line.split('|').map((c) => c.trim());
+    if (cols[1] === 'script') {
+      // Header row — detect column indices
+      for (let i = 1; i < cols.length; i++) {
+        const h = cols[i].toLowerCase();
+        if (h === 'version') versionColIdx = i;
+        else if (h === 'status') statusColIdx = i;
+        else if (h === 'layer') layerColIdx = i;
+      }
+      break;
+    }
+  }
+
   for (const line of lines) {
     // Data rows start with | and have a backtick-wrapped filename in column 1
     if (!line.startsWith('|')) continue;
 
     const cols = line.split('|').map((c) => c.trim());
-    // cols[0] is empty (before leading |), cols[1] is script, cols[2] is source,
-    // cols[3] is version, cols[4] is status
     if (cols.length < 5) continue;
 
     const rawName = cols[1];
-    const version = cols[3];
-    const status = cols[4];
+    const version = cols[versionColIdx] ?? '';
+    const status = cols[statusColIdx] ?? '';
 
     // Skip header/separator rows
     if (rawName === 'script' || rawName.startsWith('-')) continue;
@@ -109,7 +136,12 @@ function parseScriptsMdRegistry(
     // For Check A we only care about active/experimental
     if (activeOnly && status !== 'active' && status !== 'experimental') continue;
 
-    result.set(filename, version);
+    const rawLayer = layerColIdx >= 0 ? (cols[layerColIdx] ?? '') : '';
+    let layer: RegistryEntry['layer'] = 'common';
+    if (rawLayer === 'L0-only') layer = 'L0-only';
+    else if (rawLayer === 'L1-only') layer = 'L1-only';
+
+    result.set(filename, { version, layer });
   }
 
   return result;
@@ -145,7 +177,7 @@ function runCheckA(): SyncIssue[] {
 
   const registry = parseScriptsMdRegistry(SCRIPTS_MD, true);
 
-  for (const [filename, registryVersion] of registry) {
+  for (const [filename, { version: registryVersion }] of registry) {
     // Only check .ts files (not .sh/.ps1)
     if (!filename.endsWith('.ts')) continue;
 
@@ -242,7 +274,11 @@ function runCheckC(): SyncIssue[] {
 
 /**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
- * templates/common/scripts/SCRIPTS.md for scripts that appear in both.
+ * templates/common/scripts/SCRIPTS.md. Uses the layer column to decide
+ * whether each script should be present in templates/common/:
+ *   - L0-only  → skip (intentionally absent from templates)
+ *   - common / L1-only → must exist in templates/common/scripts/SCRIPTS.md
+ *     AND as an actual file in templates/common/scripts/<filename>
  * Only runs at workspace root.
  */
 function runCheckB(): SyncIssue[] {
@@ -256,10 +292,37 @@ function runCheckB(): SyncIssue[] {
   const rootRegistry = parseScriptsMdRegistry(SCRIPTS_MD);
   const templateRegistry = parseScriptsMdRegistry(TEMPLATE_SCRIPTS_MD);
 
-  for (const [filename, rootVersion] of rootRegistry) {
-    if (!templateRegistry.has(filename)) continue;
+  for (const [filename, rootEntry] of rootRegistry) {
+    const { version: rootVersion, layer } = rootEntry;
 
-    const templateVersion = templateRegistry.get(filename)!;
+    if (layer === 'L0-only') {
+      continue; // legitimate — L0-only scripts intentionally absent from templates
+    }
+
+    // layer === 'common' or 'L1-only': should exist in templates/common/
+    if (!templateRegistry.has(filename)) {
+      issues.push({
+        level: 'error',
+        file: 'scripts/SCRIPTS.md',
+        message: `Check B: ${filename} (layer: ${layer}) registered in root SCRIPTS.md but missing from templates/common/scripts/SCRIPTS.md`,
+        fix: `Add ${filename} entry to templates/common/scripts/SCRIPTS.md or copy the script file`,
+      });
+      continue;
+    }
+
+    // Also check actual file existence in templates/common/scripts/
+    const templateScriptPath = join('templates', 'common', 'scripts', filename);
+    if (!existsSync(join(ROOT, templateScriptPath))) {
+      issues.push({
+        level: 'error',
+        file: templateScriptPath,
+        message: `Check B: ${filename} (layer: ${layer}) registered as ${layer} but file missing from templates/common/scripts/`,
+        fix: `Copy scripts/${filename} to templates/common/scripts/${filename}`,
+      });
+      continue;
+    }
+
+    const templateVersion = templateRegistry.get(filename)!.version;
     if (rootVersion !== templateVersion) {
       issues.push({
         level: 'error',
@@ -267,6 +330,62 @@ function runCheckB(): SyncIssue[] {
         message: `Check B: scripts/SCRIPTS.md version for ${filename} (${rootVersion}) differs from templates/common/scripts/SCRIPTS.md (${templateVersion})`,
         fix: `Run 'bun run publish-to-template' to sync or manually align versions`,
       });
+    }
+  }
+
+  return issues;
+}
+
+/**
+ * Check X: Scan templates/common/scripts/ for references to L0-only scripts.
+ * If an L0-only script is called from a templates/common script, that is a
+ * deployment contract violation — the L0-only script won't exist in generated projects.
+ */
+function runCheckX(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+  if (!IS_WORKSPACE_ROOT) return issues;
+  if (!existsSync(SCRIPTS_MD)) return issues;
+
+  const rootRegistry = parseScriptsMdRegistry(SCRIPTS_MD);
+
+  // Collect L0-only script base names (without extension)
+  const l0OnlyScripts: string[] = [];
+  for (const [filename, entry] of rootRegistry) {
+    if (entry.layer === 'L0-only') {
+      l0OnlyScripts.push(filename.replace(/\.(ts|sh|ps1)$/, ''));
+    }
+  }
+
+  if (l0OnlyScripts.length === 0) return issues;
+
+  // Scan templates/common/scripts/ for references
+  const templateScriptsDir = join(ROOT, 'templates', 'common', 'scripts');
+  if (!existsSync(templateScriptsDir)) return issues;
+
+  const tsFiles = readdirSync(templateScriptsDir)
+    .filter((f) => f.endsWith('.ts'))
+    .map((f) => join(templateScriptsDir, f));
+
+  for (const file of tsFiles) {
+    const content = readFileSync(file, 'utf-8');
+    for (const scriptName of l0OnlyScripts) {
+      // Match: bun run scripts/<name>, bun scripts/<name>, import from '.../<name>'
+      const patterns = [
+        new RegExp(`bun\\s+(?:run\\s+)?scripts\\/${scriptName}`, 'g'),
+        new RegExp(`import.*from\\s+['"].*\\/${scriptName}['"]`, 'g'),
+      ];
+      for (const pattern of patterns) {
+        if (pattern.test(content)) {
+          const relFile = file.replace(ROOT + '\\', '').replace(ROOT + '/', '');
+          issues.push({
+            level: 'error',
+            file: relFile,
+            message: `Check X: L0-only script '${scriptName}' is referenced in ${relFile} — this script won't exist in generated projects`,
+            fix: `Either promote '${scriptName}' to 'common' layer and copy to templates/common/scripts/, or remove the reference`,
+          });
+          break;
+        }
+      }
     }
   }
 
@@ -383,12 +502,16 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check D: intentional-duplicate registry${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check X: templates/common/scripts/ references to L0-only scripts${colors.reset}`,
+    );
     console.log('');
   }
 
   const checkAIssues = runCheckA();
   const checkBIssues = runCheckB();
   const checkCIssues = runCheckC();
+  const checkXIssues = runCheckX();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -408,15 +531,17 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkAIssues.filter((i) => i.level === 'error'),
     ...checkBIssues.filter((i) => i.level === 'error'),
     ...checkCIssues.filter((i) => i.level === 'error'),
+    ...checkXIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
     ...checkBIssues.filter((i) => i.level === 'warning'),
     ...checkCIssues.filter((i) => i.level === 'warning'),
+    ...checkXIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 4,
+    checksRun: 5,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

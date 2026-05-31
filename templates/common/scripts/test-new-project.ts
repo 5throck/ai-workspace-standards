@@ -2,7 +2,7 @@
 /**
  * test-new-project.ts — E2E Test for new-project.sh / new-project.ps1
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @last_updated 2026-05-31
  *
  * Cross-platform: detects OS and calls the appropriate script.
@@ -555,6 +555,34 @@ try {
       }
     }
   } catch (e) { fail('Test 22', String(e)); }
+
+  // ── Test 23: Smoke test — dev-sync.ts and sync-md.ts present ─────────────
+  console.log('\nTest 23: Smoke test — dev-sync.ts and sync-md.ts present');
+  try {
+    const devSyncPath = join(testDir, 'scripts', 'dev-sync.ts');
+    const syncMdPath  = join(testDir, 'scripts', 'sync-md.ts');
+    if (!existsSync(devSyncPath)) {
+      fail('Test 23', 'Smoke test: scripts/dev-sync.ts missing from scaffolded project');
+    } else {
+      pass('Smoke test: scripts/dev-sync.ts present');
+    }
+    if (!existsSync(syncMdPath)) {
+      fail('Test 23', 'Smoke test: scripts/sync-md.ts missing from scaffolded project (required by dev-sync.ts)');
+    } else {
+      pass('Smoke test: scripts/sync-md.ts present');
+    }
+  } catch (e) { fail('Test 23', String(e)); }
+
+  // ── Test 24: Smoke test — verify-readme-sync.ts present ──────────────────
+  console.log('\nTest 24: Smoke test — verify-readme-sync.ts present');
+  try {
+    const verifyReadmeSyncPath = join(testDir, 'scripts', 'verify-readme-sync.ts');
+    if (!existsSync(verifyReadmeSyncPath)) {
+      fail('Test 24', 'Smoke test: scripts/verify-readme-sync.ts missing from scaffolded project');
+    } else {
+      pass('Smoke test: scripts/verify-readme-sync.ts present');
+    }
+  } catch (e) { fail('Test 24', String(e)); }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));
