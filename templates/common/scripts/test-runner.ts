@@ -12,7 +12,7 @@ interface TestSuite {
 
 const suites: TestSuite[] = [
   { name: 'unit', pattern: '*.test.ts', timeout: 30000, dir: 'tests/unit', ext: '.test.ts' },
-  { name: 'integration', pattern: '*.test.ts', timeout: 120000, dir: 'tests/integration', ext: '.test.ts' },
+  { name: 'integration', pattern: '*.test.ts', timeout: 120000, dir: 'tests', ext: '.test.ts' },
   { name: 'scenarios', pattern: '*', timeout: 300000, dir: 'tests/scenarios', ext: '' }
 ];
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1154,9 +1154,9 @@ function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest):
 function checkWorkspaceSchema(): void {
   if (!JSON_MODE) console.log('\n=== Check WS-01: workspace-schema.json consistency ===');
 
-  const schemaPath = join(ROOT, 'workspace-schema.json');
+  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
   if (!existsSync(schemaPath)) {
-    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at workspace root', 'Create workspace-schema.json with workflow.phases and agent_tiers');
+    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at docs/', 'Create docs/workspace-schema.json with workflow.phases and agent_tiers');
     return;
   }
 
