@@ -256,3 +256,23 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 *Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
+For private repos: skip the security gate entirely.
+
+---
+
+### Model Selection Override
+<!-- Uncomment to override workspace defaults for this project only.          -->
+<!-- - Default      : gemini-2.5-pro                                          -->
+<!-- - Fast lookups : gemini-2.5-flash                                        -->
+
+---
+
+## Security Engagement Rules
+
+These rules are **enforced by the PM Role Declaration** and must be followed in every Antigravity session:
+
+1. **Authorization first** — No Phase 1+ work (recon, exploitation, patching) may begin without the `verify-authorization` skill confirming a signed authorization document exists.
+2. **Scope enforcement** — Any target not listed in `docs/scope.md` is out-of-scope. PM must update scope and re-run authorization before expanding.
+3. **Secret hygiene** — Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
+4. **Ansible dry-run first** — All patch automation must run with `--check` flag before live apply.
+5. **Engagement log** — All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
