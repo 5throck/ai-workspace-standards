@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# Co-Security Template
+# {{PROJECT_NAME}}
 
 AI-assisted security engagement workspace template. Optimized for Red Team operations, threat modeling, and cross-platform patch automation with a structured multi-agent architecture.
 

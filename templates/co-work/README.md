@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# co-work variant
+# {{PROJECT_NAME}}
 
 > **Status**: Stable — v1.0.0
 

@@ -58,6 +58,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - **[2026-05-30]**: Language policy violation — resolved `scripts/TRANSLATOR_GUIDE.md` Korean documentation by integrating into `skills/translate/SKILL.md` with English primary + Korean section
 - **[2026-05-30]**: Agent "report forgery" incident — `translate-readme.ts` reported as complete but file not created; implemented verification to prevent recurrence via Tier 2 Sentinel
+- **[2026-05-31]**: Template README titles — replaced hardcoded titles in co-develop, co-security, co-work README.md with {{PROJECT_NAME}} placeholder for better template flexibility
+- **[2026-05-31]**: Documentation — added meeting transcript for PR sync conflict resolution (finishing-a-development-branch vs /sync workflow)
 
 ### Added
 - **[2026-05-30]**: feat: implement TS-based hooks and template synchronization
