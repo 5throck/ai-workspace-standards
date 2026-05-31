@@ -18,8 +18,7 @@
 | Phase | Name | PM Facilitation | Specialist Agents |
 |-------|------|------------------|-------------------|
 | 0 | Scoping | Orchestrator | PM only |
-| 1 | Recon | Orchestrator | red-team-lead, threat-modeler |
-| 2 | Threat Modeling | Orchestrator | threat-modeler |
+| 1-2 | Recon & Threat Modeling | Orchestrator | red-team-lead, threat-modeler |
 | 3 | Exploitation | Orchestrator | red-team-lead → pentester |
 | 4 | Remediation | Orchestrator | patch-engineer |
 | 5 | Reporting | Orchestrator | report-writer, security-expert, auditor |
@@ -34,10 +33,10 @@ See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-
 - Follow-up assignment
 
 **Phase-Specific Notes for co-security:**
-- **Phase 1-2 (Planning)**: Red Team Lead contributes to attack methodology and MITRE ATT&CK TTPs planning
-- **Phase 3 (Design Handoff)**: Threat Modeler conducts STRIDE analysis and ATT&CK mapping; produces threat models and risk scoring
-- **Phase 4 (Execution)**: Pentester performs vulnerability discovery and PoC development; Patch Engineer executes Ansible-based cross-platform patch deployment
-- **Phase 5 (QA)**: All Red Team (Pentester) and Blue Team (Patch Engineer) outputs must pass security-expert and auditor validation
+- **Phase 1-2 (Recon & Threat Modeling)**: Red Team Lead contributes to attack methodology and MITRE ATT&CK TTPs planning; Threat Modeler conducts STRIDE analysis and ATT&CK mapping, producing threat models and risk scoring
+- **Phase 3 (Exploitation)**: Pentester performs vulnerability discovery and PoC development
+- **Phase 4 (Remediation)**: Patch Engineer executes Ansible-based cross-platform patch deployment
+- **Phase 5 (Reporting & QA)**: All Red Team (Pentester) and Blue Team (Patch Engineer) outputs must pass security-expert and auditor validation
 
 ---
 
@@ -106,10 +105,11 @@ All specialist agents below are dispatched ONLY through PM:
 
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|-------------------|
-| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
-| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
-| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
-| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
+| **red-team-lead** | 1-2, 3 | "Recon needed", "Attack methodology", "PoC review" |
+| **threat-modeler** | 1-2 | "STRIDE analysis", "ATT&CK mapping", "Risk scoring" |
+| **pentester** | 3, 6 | "Vulnerability discovery", "PoC development", "Re-testing" |
+| **patch-engineer** | 4, 6 | "Ansible playbooks", "Patch deployment", "Sign-off" |
+| **report-writer** | 5, 6 | "Pentest reports", "Executive summaries" |
 | **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
 | **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
 
@@ -134,8 +134,7 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 | Phase | Agent(s) | Trigger |
 |-------|-----------|---------|
 | 0 (Scoping) | PM only | Engagement start |
-| 1 (Recon) | Red Team Lead + Threat Modeler | Authorization confirmed |
-| 2 (Threat Modeling) | Threat Modeler | Phase 1 complete |
+| 1-2 (Recon & Threat Modeling) | Red Team Lead + Threat Modeler | Authorization confirmed |
 | 3 (Exploitation) | Red Team Lead → Pentester | 1) Threat model (STRIDE) complete and PM-approved; 2) ATT&CK TTP list finalized; 3) Red Team Lead PoC methodology review complete |
 | 4 (Remediation) | Patch Engineer | Findings documented |
 | 5 (Reporting) | Report Writer | Patches applied |
@@ -149,24 +148,6 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 - Phase 6: Patch Engineer sign-off required before Report Writer update; if unpatched items found, re-enter Phase 4
 
 ---
-
-## Co-Security Role Overlay
-
-The following workspace-common agents have co-security-specific responsibilities that override their general role descriptions:
-
-### Security Expert — co-security Role
-
-| General Role | Co-Security Override |
-|--------------|---------------------|
-| Security review, hook configuration, secret detection | Pentest methodology soundness, PoC risk level assessment, ATT&CK mapping accuracy verification |
-
-### Auditor — co-security Role
-
-| General Role | Co-Security Override |
-|--------------|---------------------|
-| Quality verification, documentation consistency check | Report completeness, scope adherence verification, evidence chain integrity |
-
-> These overrides apply only within co-security projects. In other variants, security-expert and auditor retain their general role definitions.
 
 ## Skills
 

@@ -98,6 +98,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 
 ---
 

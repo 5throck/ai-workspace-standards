@@ -36,7 +36,7 @@ Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.
 | Pentester | `agents/pentester.md` | Vulnerability discovery, PoC development | active |
 | Threat Modeler | `agents/threat-modeler.md` | STRIDE analysis, MITRE ATT&CK mapping | active |
 | Patch Engineer | `agents/patch-engineer.md` | Ansible playbooks, cross-platform patch deployment | active |
-| Security Report Writer | `agents/report-writer.md` | Pentest reports, executive summaries | active |
+| Report Writer | `agents/report-writer.md` | Pentest reports, executive summaries | active |
 
 > All specialist agents are dispatched by PM only. Direct invocation is refused.
 
@@ -66,8 +66,7 @@ Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.
 | Phase | Name | Key Agents | Output |
 |-------|------|-----------|--------|
 | 0 | Scoping | PM | Authorization checklist, scope doc, RoE |
-| 1 | Recon | Red Team Lead, Threat Modeler | Recon findings, initial threat surface |
-| 2 | Threat Modeling | Threat Modeler | STRIDE table, DFD, attack trees, MITRE mapping |
+| 1-2 | Recon & Threat Modeling | Red Team Lead, Threat Modeler | Recon findings, STRIDE table, DFD, attack trees, MITRE mapping |
 | 3 | Exploitation | Red Team Lead ??Pentester | Finding tickets (`FIND-NNNN.md`) with CVSS scores |
 | 4 | Remediation | Patch Engineer | Ansible playbooks, PATCH_LOG.md entries |
 | 5 | Reporting | Report Writer | Pentest report, executive summary |
@@ -84,7 +83,7 @@ The real workflow entry gate is **verify-authorization**, not code editing. No P
 **`/sync` Commit Timing (Multi-Commit Pattern):**
 Unlike co-develop's single final commit, co-security runs `/sync` at **5 phase boundaries**:
 1. Phase 0 complete: authorization and scope established
-2. Phase 2 complete: threat model approved
+2. Phase 1-2 complete: threat model approved
 3. Phase 3 complete: findings documented (CRITICAL for chain of evidence)
 4. Phase 4 complete: patches applied
 5. Phase 5 complete: final report ready
@@ -98,8 +97,7 @@ Suggested commit message format: `"security: phase3 complete ??N findings docume
 ```
 Security PM
   ??[Phase 0] Scoping (PM only)
-  ??[Phase 1] Recon (Red Team Lead + Threat Modeler, parallel)
-  ??[Phase 2] Threat Modeling (Threat Modeler, sequential)
+  ??[Phase 1-2] Recon & Threat Modeling (Red Team Lead + Threat Modeler, parallel)
   ??[Phase 3] Exploitation (Red Team Lead ??Pentester, sequential)
   ??[Phase 4] Remediation (Patch Engineer)
   ??[Phase 5] Reporting (Report Writer)
@@ -250,4 +248,4 @@ bash scripts/patch-apply.sh   # all groups
 
 ---
 
-*co-security.context.md version: 0.1.0 ??created by /new-project*
+*co-security.context.md version: 0.2.0 ??created by /new-project*

@@ -5,7 +5,7 @@ description: Redirects commit+push+PR requests to the /sync pipeline (workspace 
 
 # Commit, Push, and Create PR
 
-> **This project requires all commits and PRs to go through `/sync`.**
+> **This workspace requires all commits and PRs to go through `/sync`.**
 
 Do NOT use direct `git commit` or `git push` commands. The pre-commit hook blocks any
 `git commit` not originating from `dev-sync.ts` (`SYNC_ACTIVE` gate).
