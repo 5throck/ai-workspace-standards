@@ -125,6 +125,7 @@ PM ??Architect (design + ADR)
 ---
 
 ## Coding Guidelines
+<!-- intentional-duplicate: CONSTITUTION.md §8 — maintained locally for AI context proximity; update when source changes -->
 
 ### Core Rules
 
@@ -159,6 +160,7 @@ Avoid: GPL-3.0, AGPL-3.0, SSPL, BSL unless explicitly justified.
 ---
 
 ## Git / PR Workflow
+<!-- intentional-duplicate: CONSTITUTION.md §3 — maintained locally for AI context proximity; update when source changes -->
 
 ```
 /sync "feat: description"

@@ -233,6 +233,7 @@ bash scripts/patch-apply.sh   # all groups
 ---
 
 ## Git / PR Workflow
+<!-- intentional-duplicate: CONSTITUTION.md §3 — maintained locally for security workflow context; update when source changes -->
 
 ```
 /sync "security: description"

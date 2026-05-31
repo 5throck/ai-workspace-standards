@@ -22,7 +22,7 @@
 | 3 | Design Handoff | Orchestrator | threat-modeler (threat modeling, attack surface analysis) |
 | 4 | Execution | Orchestrator | automation-engineer, docs-writer |
 | 5 | Quality Assurance | Orchestrator | security-expert, auditor |
-| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+| 6 | Lifecycle Finalization | Orchestrator | PM (memlog → sync → PR) |
 
 **PM Facilitation Guidance:**
 See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
@@ -47,7 +47,6 @@ See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaff
 | Agent | File | Role |
 |-------|------|------|
 | **Security PM** | [`agents/pm.md`](agents/pm.md) | Single entry point — owns authorization, scope, engagement workflow |
-| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 
 ### 🔴 Red Team (Offense)
 
@@ -99,7 +98,6 @@ All specialist agents below are dispatched ONLY through PM:
 | **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
 | **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
 | **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
-| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 

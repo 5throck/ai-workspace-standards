@@ -46,7 +46,6 @@ See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaff
 | Agent | File | Role |
 |-------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Owns the full workflow; dispatches parallel tasks; enforces quality gates |
-| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Lifecycle state monitor and governance record keeper; secretary role — records, does not decide; dispatched at Phase 6 |
 | Security Monitor | [`agents/security-monitor.md`](agents/security-monitor.md) | Enforces security policies; prevents secrets leaks; monitors safe dependencies |
 
 ### 📐 Design
@@ -101,7 +100,6 @@ All specialist agents below are dispatched ONLY through PM:
 | **code-writer** | 4 | "Implementing features", "Writing source code", "Applying approved plan" |
 | **test-runner** | 4 | "Running tests", "Verifying acceptance criteria", "Test suite execution" |
 | **security-monitor** | 0,5 | "Security policy check", "Secret scan", "Dependency audit" |
-| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 

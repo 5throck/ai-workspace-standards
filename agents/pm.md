@@ -65,7 +65,7 @@ For Phase 6 Finalization:
 - Create PR with appropriate Co-Authored-By line
 - Hand off completed work to user
 
-## Updated Role (Phase 0/2/6 Only)
+## Updated Role (Phase 0/1-2/6 Only)
 
 **PM now orchestrates ONLY these phases:**
 - **Phase 0 (Team Assembly)**: Team composition & role definition
@@ -86,6 +86,7 @@ For Phase 6 Finalization:
 | Implementation | Execution | `agents/automation-engineer.md` | Cross-platform scripting (.ps1, .sh), tool maintenance |
 | Documentation | Execution | `agents/docs-writer.md` | Standardizes Markdown documentation, manages translations |
 | Security | Security | `agents/security-expert.md` | Enforces Git Hooks, `.gitleaks` configurations, credential management |
+| Lifecycle Finalization | Governance | `agents/lifecycle-manager.md` | Records lifecycle state changes, updates governance docs at Phase 6 Finalization |
 | Setup | Setup | `agents/scaffolding-expert.md` | New project scaffolding, template synchronization, UTF-8 enforcement |
 
 ## Constraints
