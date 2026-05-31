@@ -199,7 +199,7 @@ For private repos: skip the security gate entirely.
 
 ## Security Engagement Rules
 
-These rules are **automatically enforced by the PostToolUse hook** in `.claude/settings.json`:
+These rules are **enforced by the PM Role Declaration** and must be followed in every Antigravity session:
 
 1. **Authorization first** — No Phase 1+ work (recon, exploitation, patching) may begin without the `verify-authorization` skill confirming a signed authorization document exists.
 2. **Scope enforcement** — Any target not listed in `docs/scope.md` is out-of-scope. PM must update scope and re-run authorization before expanding.
