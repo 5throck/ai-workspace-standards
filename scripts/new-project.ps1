@@ -15,6 +15,29 @@ try {
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $ErrorActionPreference = 'Stop'
 
+# -- Detect bash-style --double-dash arguments (common mistake on PowerShell) --
+# When a user types --variant or --version, PowerShell treats them as positional
+# string values instead of named parameters, causing silent misrouting.
+$doubleDashArgs = @()
+if ($Variant  -match '^--') { $doubleDashArgs += $Variant }
+if ($Version  -match '^--') { $doubleDashArgs += $Version }
+if ($Platform -match '^--') { $doubleDashArgs += $Platform }
+
+if ($doubleDashArgs.Count -gt 0) {
+    Write-Host ""
+    Write-Host "[FAIL] Double-dash (--) arguments detected. PowerShell uses a single dash (-)." -ForegroundColor Red
+    Write-Host "   Detected: $($doubleDashArgs -join ', ')" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   Correct PowerShell syntax:" -ForegroundColor Cyan
+    Write-Host "   .\scripts\new-project.ps1 `"my-project`"" -ForegroundColor Green
+    Write-Host "   .\scripts\new-project.ps1 `"my-project`" -variant co-work" -ForegroundColor Green
+    Write-Host "   .\scripts\new-project.ps1 `"my-project`" -variant co-develop -version 0.5.0" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "   (On bash/Linux: bash scripts/new-project.sh `"my-project`" --variant co-work)" -ForegroundColor DarkGray
+    Write-Host ""
+    exit 1
+}
+
 # Validate ProjectName: alphanumeric, hyphens, underscores only; max 64 chars
 if ($ProjectName -notmatch '^[a-zA-Z0-9_-]+$') {
     Write-Host "[FAIL] Invalid project name: '$ProjectName'" -ForegroundColor Red
