@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-> **Doc intent:** This file is Claude Code-specific behavioral configuration for the **workspace root** (`C:\git\`).
-> Shared workspace standards, project structure, and design philosophy live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
+>
 > For Gemini/Antigravity-specific behaviors, see [`GEMINI.md`](GEMINI.md).
 
 ---
@@ -147,7 +147,7 @@ All agents below require PM dispatch:
 - security-expert (Phase 5)
 - lifecycle-manager (Phase 6)
 
-### 5. Native Sub-agents (`Agent` Tool)
+### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
@@ -177,7 +177,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 - **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
-### 6. Native Plan Mode (`EnterPlanMode`)
+### 7. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
 - The user requests a new feature or significant refactor.
 - The change modifies more than 2 files.
@@ -189,14 +189,14 @@ Once in plan mode:
 3. Track progress using the native `TaskCreate` / `TaskUpdate` toolset.
 4. After completion, summarize outcomes in the active `memory/YYYY-MM-DD.md` daily log.
 
-### 7. Task Tracking (`TaskCreate` / `TaskUpdate`)
+### 8. Task Tracking (`TaskCreate` / `TaskUpdate`)
 When working in a plan-mode session:
 - Call `TaskCreate` before starting any multi-step execution.
 - Set status `in_progress` prior to beginning each atomic step.
 - Update status to `completed` immediately upon verification of the step.
 - Never leave tasks `in_progress` at the end of a session.
 
-### 8. Lifecycle Management Rules
+### 9. Lifecycle Management Rules
 
 > ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
@@ -217,7 +217,7 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 
 > Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 
-### 9. Custom Command Error Recovery
+### 10. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
@@ -225,7 +225,7 @@ If a custom slash command or background script returns a non-zero exit code:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
 
-### 10. Windows Platform Requirement
+### 11. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
@@ -242,4 +242,4 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-30*
+*Last Updated: 2026-05-31*

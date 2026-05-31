@@ -43,12 +43,14 @@ function extractDocAgents(content: string): string[] {
   let match;
   while ((match = tableRegex.exec(content)) !== null) {
     const agentName = match[1];
+    if (agentName === '*' || agentName.includes('*') || agentName.includes('<') || agentName.includes('>') || agentName.startsWith('_')) continue;
     if (!agents.includes(agentName)) agents.push(agentName);
   }
-  // Match inline agent references
+  // Match inline agent references (skip wildcards, placeholders, archive paths)
   const inlineRegex = /`agents\/([^. )]+)(?:\.md)?`/g;
   while ((match = inlineRegex.exec(content)) !== null) {
     const agentName = match[1];
+    if (agentName === '*' || agentName.includes('*') || agentName.includes('<') || agentName.includes('>') || agentName.startsWith('_')) continue;
     if (!agents.includes(agentName)) agents.push(agentName);
   }
   return agents;
