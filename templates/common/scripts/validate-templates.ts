@@ -759,6 +759,106 @@ function checkL0L1ScriptParity() {
   }
 }
 
+// Check P-01: Platform Documentation Parity and Template Sync
+function checkPlatformDocumentationParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check P-01: Platform Documentation Parity ===');
+  
+  const claudePath = join(ROOT, 'CLAUDE.md');
+  const geminiPath = join(ROOT, 'GEMINI.md');
+  
+  if (!existsSync(claudePath) || !existsSync(geminiPath)) return;
+  
+  const extractSections = (content: string) => {
+    const matches = content.matchAll(/^#{2,4} (.+)$/gm);
+    return new Set(Array.from(matches).map(m => m[1].trim().replace(/^\d+\.\s*/, '')));
+  };
+  
+  const claudeSections = extractSections(readFileSync(claudePath, 'utf-8'));
+  const geminiSections = extractSections(readFileSync(geminiPath, 'utf-8'));
+  
+  // Parity between root CLAUDE.md and root GEMINI.md
+  const ignoreParity = [
+    'Claude Code-Specific Behaviors', 
+    'Project-Specific Gemini Settings', 
+    'Tool Name Mapping & Safeguards', 
+    'Native Antigravity 2.0 Features', 
+    'Git & PR Additions (Claude Code)',
+    'Git & PR Additions (Gemini)',
+    'Gemini-Specific & Antigravity Workflows',
+    'Active Antigravity Tool Suite Mapping & Safeguards',
+    'Planning Mode & Artifact Specifications',
+    'Subagent Instantiation & Async Orchestration',
+    'Automated Hooks',
+    'Native Slash Commands',
+    'MCP Configurations & Absolute Resolving',
+    'Native Sub-agents',
+    'Native Plan Mode',
+    'Task Tracking',
+    'Custom Command Error Recovery',
+    'Windows Platform Requirement',
+    'Language Policy for Documentation',
+    'Agent Dispatch Rules',
+    'Lifecycle Management Rules',
+    'Security & Hook Configuration',
+    'Git Commit Policy',
+    'Executing Project Commands',
+    'Pre-PR Security Gate',
+    'Model Selection Override',
+    'Security Engagement Rules',
+    'Surgical Multi-Replace Offset Safeguard',
+    'Windows Terminal & Code Page Safeguard',
+    'Grep Search 50-Match Cap Safeguard',
+    'implementation_plan.md',
+    'task.md',
+    'walkthrough.md',
+    'Define Subagent',
+    'Invoke Subagent',
+    'Communication',
+    'Phase 4 Execution Loop',
+    'Mandatory Execution Plan Display',
+    'Specialist Agent List',
+    'Superpowers Plugin & Cost Optimization'
+  ];
+  
+  const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));
+  
+  const missingInClaude = [...geminiSections].filter(s => !claudeSections.has(s) && !isIgnored(s));
+  const missingInGemini = [...claudeSections].filter(s => !geminiSections.has(s) && !isIgnored(s));
+  
+  if (missingInClaude.length > 0) {
+    fail('root', 'platform-parity', `CLAUDE.md is missing sections present in GEMINI.md: ${missingInClaude.join(', ')}`);
+  }
+  if (missingInGemini.length > 0) {
+    fail('root', 'platform-parity', `GEMINI.md is missing sections present in CLAUDE.md: ${missingInGemini.join(', ')}`);
+  }
+  if (missingInClaude.length === 0 && missingInGemini.length === 0) {
+    pass('Platform parity: CLAUDE.md and GEMINI.md section parity OK');
+  }
+  
+  // Sync check: Root vs Templates
+  const templatesDir = readdirSync(TEMPLATES_DIR);
+  for (const tpl of templatesDir) {
+    if (tpl === 'common' || tpl.startsWith('.')) continue;
+    const tplPath = join(TEMPLATES_DIR, tpl);
+    if (!statSync(tplPath).isDirectory()) continue;
+    
+    for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+      const rootDoc = join(ROOT, doc);
+      const variantDoc = join(tplPath, doc);
+      if (!existsSync(rootDoc) || !existsSync(variantDoc)) continue;
+      
+      const rootSecs = extractSections(readFileSync(rootDoc, 'utf-8'));
+      const variantSecs = extractSections(readFileSync(variantDoc, 'utf-8'));
+      
+      const missingInVariant = [...rootSecs].filter(s => !variantSecs.has(s) && !isIgnored(s));
+      
+      if (missingInVariant.length > 0) {
+        fail(tpl, 'template-sync', `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(', ')}`);
+      }
+    }
+  }
+}
+
 // Check B-05: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
@@ -1468,6 +1568,7 @@ function main() {
   checkCommonContract();
   checkSharedFileSync();
   checkL0L1ScriptParity();
+  checkPlatformDocumentationParity();
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

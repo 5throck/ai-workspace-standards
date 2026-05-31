@@ -95,6 +95,28 @@ All `.md` files you create or modify MUST be in English, except when working in 
 - Branch names → English only
 - Code comments → English (unless documenting locale-specific logic)
 
+### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` or `.claude/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "회의", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
 ### 5. Agent Dispatch Rules
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
@@ -181,6 +203,7 @@ When modifying files, apply the following rules **before** running `/sync` or co
 | `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
 
 **Verification** (run after any of the above):
 ```bash

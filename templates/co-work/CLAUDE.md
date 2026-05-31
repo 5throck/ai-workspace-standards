@@ -112,6 +112,28 @@ git config core.hooksPath .githooks
 | `.githooks/pre-commit` | Every commit | Auto-logs memory + CHANGELOG; blocks .env files; runs audit + secret scan |
 | `.githooks/pre-push` | Every push | Runs `audit.sh`; aborts on failure |
 
+### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` or `.claude/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "회의", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
 ---
 
 ### Behavioral Rules

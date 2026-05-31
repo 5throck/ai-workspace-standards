@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-05-31]**: feat: implement Skill Resolution Priority and cross-platform section parity check
+  - **[2026-05-31]**: Defined 3-tier Skill Resolution Priority (Local > Config > Global) in `docs/decisions/0001-skill-resolution-priority.md`
+  - **[2026-05-31]**: Added Skill Resolution Priority rule to `CLAUDE.md` and all template variants' `CLAUDE.md` and `GEMINI.md`
+  - **[2026-05-31]**: Extended `validate-templates.ts` to perform strict section parity checks across root documentation and templates
 - **[2026-05-30]**: feat: implement 3-Tier QA Framework for lifecycle governance
   - **[2026-05-30]**: Tier 1 (Gatekeeper): Pre-commit hook lifecycle compliance verification in `scripts/hooks/pre-commit.ts`
   - **[2026-05-30]**: Tier 2 (Sentinel): Agent execution result verification in `scripts/verify-agent-deliverables.ts`
@@ -561,7 +565,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-05-30*
+*Last Updated: 2026-05-31*
 
 
 
