@@ -351,20 +351,17 @@ for (const [agentName, override] of Object.entries(overrides)) {
 
   let skeleton = fs.readFileSync(skeletonFile, 'utf8');
 
+  // Use js-yaml to preserve nested structures (e.g. tier: {antigravity: high})
+  const yaml = require('js-yaml');
   function parseFrontmatter(content) {
     const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
     if (!match) return { fm: {}, body: content };
-    const fmLines = match[1].split('\n');
-    const fm = {};
-    for (const line of fmLines) {
-      const colonIdx = line.indexOf(':');
-      if (colonIdx > 0) {
-        const key = line.slice(0, colonIdx).trim();
-        const val = line.slice(colonIdx + 1).trim();
-        if (key && !key.startsWith('#')) fm[key] = val;
-      }
+    try {
+      const fm = yaml.load(match[1]) || {};
+      return { fm, body: content.slice(match[0].length) };
+    } catch {
+      return { fm: {}, body: content };
     }
-    return { fm, body: content.slice(match[0].length) };
   }
 
   const { fm: skelFm, body: skelBody } = parseFrontmatter(skeleton);
@@ -372,7 +369,7 @@ for (const [agentName, override] of Object.entries(overrides)) {
   const mergedFm = { ...skelFm, ...varFm };
   const hasFrontmatter = Object.keys(mergedFm).length > 0;
   const fmStr = hasFrontmatter
-    ? '---\n' + Object.entries(mergedFm).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n'
+    ? '---\n' + yaml.dump(mergedFm).trimEnd() + '\n---\n'
     : '';
 
   skeleton = fmStr + skelBody;
