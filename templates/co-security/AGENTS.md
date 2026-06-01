@@ -151,10 +151,17 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 
 ## Skills
 
-See `docs/co-security.context.md § Skills` for the full skill registry including:
+| Skill | Path | Description |
+|-------|------|-------------|
+| **Agent Lifecycle Manager** | `skills/agent-lifecycle-manager/SKILL.md` | Security PM managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
+| **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | Security PM managing skill lifecycle after agent configuration changes |
+| **Meeting Facilitation** | `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
+| **Project Review** | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review by all available agents; produces prioritized improvement plan |
+| **Audit Workspace** | `skills/audit-workspace/SKILL.md` | Runs workspace audit scripts to enforce CONSTITUTION.md compliance |
+| **Security Scan** | `skills/security-scan/SKILL.md` | Runs security scanning tools across the workspace |
+
+See `docs/co-security.context.md § Skills` for the full skill registry including domain-specific skills:
 - verify-authorization (hard gate for Phase 1+)
 - engagement-scoping, threat-modeling, recon-surface, finding-tracker, pentest-report, patch-automation
-- meeting-facilitation, agent-lifecycle-manager, skill-lifecycle-manager
-- project-review (`.claude/skills/project-review/`) — Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03).
 
 

@@ -56,6 +56,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-skills.ts` | L1 | 1.1.0 | active | — | — | common | — |
 | `publish-to-template.ts` | L1 | 1.1.0 | active | — | — | common | — |
 | `list-template-versions.ts` | L1 | 1.0.0 | active | — | — | common | — |
+| `list-template-versions.sh` | L1 | 1.0.0 | active | — | — | common | Tier 1 Unix companion to list-template-versions.ts |
+| `list-template-versions.ps1` | L1 | 1.0.0 | active | — | — | common | Tier 1 Windows companion to list-template-versions.ts |
 | `qa-gate.ts` | L1 | 1.0.0 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -93,7 +95,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `hooks/pre-commit.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `hooks/pre-push.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
