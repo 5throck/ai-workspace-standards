@@ -51,7 +51,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.3.2 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.4.0 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.5.1 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -94,12 +94,13 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.1.2 | active | — | — | common | — |
+| `hooks/pre-commit.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/pre-push.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `generate-version-manifest.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 
 ---
 
