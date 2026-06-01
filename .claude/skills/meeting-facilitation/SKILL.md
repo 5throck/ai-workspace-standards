@@ -6,7 +6,7 @@ description: >
   decision-making and problem resolution. Use when: running agent meetings, coordinating
   multi-agent discussions, or facilitating collaborative problem-solving sessions.
 owner: pm
-version: 1.3.1
+version: 1.3.2
 last_reviewed: 2026-05-30
 metadata:
   type: process
