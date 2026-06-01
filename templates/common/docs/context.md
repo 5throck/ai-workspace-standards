@@ -166,6 +166,11 @@ All agents must follow this file routing policy. **Creating `.md` files at the p
 
 > **Rule**: When creating any file, always specify the full relative path. If unsure, default to `docs/`. Never create `.md` files at the project root unless it is a standard root file listed above.
 
+### Workspace & Template Boundary Policy
+
+- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
+- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
 ---
 
 ## Research Standards

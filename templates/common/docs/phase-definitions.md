@@ -15,8 +15,8 @@
 | 1-2 | Planning & Architecture | architect | Approver (architect leads) | Implementation plan approved, ADRs filed |
 | 3 | Design Handoff | (varies by variant) | Approver (variant specialist leads) | Design specs ready, team aligned |
 | 4 | Execution | automation-engineer, docs-writer | Absent (autonomous) | Features implemented, docs updated |
-| 5 | Quality Assurance | security-expert, auditor | Absent (autonomous) | QA passed, security cleared |
-| 6 | Lifecycle Finalization | lifecycle-manager | Orchestrator | Governance documents updated, lifecycle transition complete |
+| 5 | Quality Assurance | pm, security-expert | Executor (Variant) / Absent (Workspace) | QA passed, security cleared |
+| 6 | Lifecycle Finalization | pm | Executor | Governance documents updated, lifecycle transition complete |
 
 ---
 
@@ -117,7 +117,7 @@
 **How Phase 4 Runs:**
 - automation-engineer and docs-writer execute the approved plan without PM direction
 - They follow the implementation plan and quality standards established in Phases 1-2
-- Phase 5 (QA) begins only after both agents have completed their work
+- Phase 5 (Finalization) begins only after both agents have completed their work
 
 **PM Behaviors to Avoid:**
 - ❌ Do not orchestrate, monitor, or intervene during Phase 4
@@ -126,73 +126,66 @@
 
 ---
 
-## Phase 5: Quality Assurance
-
-**Purpose**: Verify quality, ensure security compliance, enforce standards.
-
-**Specialist Agents**: auditor (quality gate), security-expert (security review)
-
-> **Phase 5 is autonomous — PM does not orchestrate.** The Auditor leads the QA gate independently. The security-expert conducts security review independently. PM is not present during Phase 5 and does not direct, monitor, or synthesize findings in this phase.
-
-**How Phase 5 Runs:**
-- auditor runs the quality gate against workspace standards
-- security-expert conducts security review independently
-- If issues are found, execution agents (Phase 4) address them and Phase 5 re-runs
-- PM is notified only when Phase 5 passes all gates (or if escalation is required)
-
-**PM Behaviors to Avoid:**
-- ❌ Do not orchestrate, monitor, or intervene during Phase 5
-- ❌ Do not bypass security or quality gates
-- ❌ Do not override auditor findings without justification
-
----
-
-## Phase 6: Lifecycle Finalization
+## Phase 5: Lifecycle Finalization
 
 **Purpose**: Update governance documents, record lifecycle transitions.
 
-**Specialist Agent**: lifecycle-manager
+**Specialist Agent**: pm
 
-**PM Facilitation Tasks (Orchestrator Mode):**
+**PM Facilitation Tasks (Executor Mode):**
 
 1. **Opening the Phase**
    - State the finalization objective: "We are updating governance and lifecycle records"
-   - Nominate lifecycle-manager to update docs
-   - Set expectations: "Record all lifecycle transitions and update AGENTS.md"
 
 2. **During Execution**
-   - Monitor lifecycle-manager progress
    - Ensure all governance documents are synchronized
-   - Verify lifecycle state transitions are properly recorded
 
 3. **Closing the Phase**
    - Verify exit criteria: governance updated, lifecycle transition recorded
-   - Synthesize lifecycle-manager outputs
-   - Make final decision: close workflow or open follow-up items
-   - Assign follow-up: "Update CHANGELOG.md and commit governance changes"
 
 **PM Behaviors to Avoid:**
-- ❌ Do not modify governance documents directly (let lifecycle-manager execute)
 - ❌ Do not skip lifecycle state recording
+
+---
+
+## Phase 6: Quality Assurance & Finalization
+
+**Purpose**: Verify quality, ensure security compliance, enforce standards, and create PR.
+
+**Specialist Agents**: pm (variant QA scripts), security-expert (security review), auditor (workspace root only)
+
+> **Phase 6 Execution**: In variants, the PM directly executes QA skills (`audit-workspace`, `validate-docs-links`). In the workspace root, the Auditor leads the QA gate independently. The security-expert conducts security review independently.
+
+**How Phase 6 Runs:**
+- In variants, PM runs QA skills directly
+- In workspace root, auditor runs the quality gate against workspace standards
+- security-expert conducts security review independently
+- If issues are found, execution agents (Phase 4) address them and Phase 6 re-runs
+- PM validates completion of QA gates
+- PM runs `/sync` script and creates PR
+
+**PM Behaviors to Avoid:**
+- ❌ Do not bypass security or quality gates
+- ❌ Do not override auditor findings (in workspace root) without justification
+- ❌ Do not skip `/sync` pipeline
 
 ---
 
 ## PM Orchestrator Mode vs. Approver Mode vs. Absent
 
-**PM owns Phases 0, 2, and 6 (Orchestrator Mode):**
-- PM facilitates, nominates specialists, synthesizes outputs
-- PM does not execute specialist work directly
-- PM makes provisional decisions that require specialist confirmation
+**PM owns Phases 0, 5 (Orchestrator/Executor Mode), and 6 (variants):**
+- PM facilitates Phase 0, synthesizes outputs
+- PM directly executes Phase 5 Finalization
+- PM directly executes Phase 6 QA scripts in variants and Finalization (`/sync`, PR creation)
 
 **PM approves Phases 1-2 and 3 (Approver Mode):**
 - Architect leads Phase 1-2 autonomously; PM reviews and approves the output
 - Variant specialists lead Phase 3 autonomously; PM reviews and approves design specs
 - PM does not direct or monitor execution in these phases
 
-**PM is absent from Phases 4 and 5 (Autonomous):**
+**PM is absent from Phase 4 (and Phase 6 in workspace root):**
 - Phase 4 (Execution): automation-engineer and docs-writer execute per the approved plan
-- Phase 5 (QA): auditor and security-expert run the quality gate independently
-- PM receives the result after Phase 5 passes all gates
+- Phase 6 (QA - Workspace Root): auditor and security-expert run the quality gate independently
 
 **Direct Management (Exception Cases):**
 - PM may directly execute when:

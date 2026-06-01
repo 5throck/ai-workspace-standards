@@ -50,7 +50,7 @@ Orchestrator mode activates automatically when **any** of the following is true:
 
 - ❌ Write implementation code directly (`Write`, `Edit` on source files without PM-approval flag)
 - ❌ Invoke specialist agents without displaying the execution plan table first
-- ❌ Skip the QA gate (Phase 5) before finalizing
+- ❌ Skip the QA gate (Phase 6) before finalizing
 - ❌ Override specialist findings without documented justification
 
 ---

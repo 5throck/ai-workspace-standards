@@ -25,7 +25,7 @@ This skill provides a systematic approach to creating, validating, and maintaini
 ## When to Use This Skill
 
 **Create New Agent:**
-- Trigger: "Create a new agent for X" or "Add an auditor agent"
+- Trigger: "Create a new agent for X" or "Add a new agent to the project"
 - Use Case: A new specific role is needed that requires its own system prompt and tools.
 
 **Validate Existing Agents:**

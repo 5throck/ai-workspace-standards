@@ -15,7 +15,7 @@
 
 ### Production Phase
 
-- [x] Agent role clearly defined: Orchestrates Phases 0, 2, 6 only
+- [x] Agent role clearly defined: Orchestrates Phases 0, 2, 5, 6 only
 - [x] Tier assignment: High-tier (claude-opus-4-7, gemini-3.1-pro)
 - [x] Single entry point: All agent dispatch goes through PM
 - [x] 3-tier strategy enforcement documented
@@ -60,3 +60,4 @@
 - **Owner**: pm
 - **Last Updated**: 2026-05-30
 - **Last Reviewer**: antigravity
+

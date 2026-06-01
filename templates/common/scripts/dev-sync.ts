@@ -169,10 +169,17 @@ try {
 }
 
 try {
+    const syncContext = Date.now().toString();
     process.env.SYNC_ACTIVE = "1";
+    process.env.DEV_SYNC_CONTEXT = syncContext;
+    fs.writeFileSync('.sync_context.tmp', syncContext);
+    
     const commitRes = await $`git commit -m ${msg}`.nothrow();
+    
+    if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp');
     if (commitRes.exitCode !== 0) throw new Error(commitRes.stderr.toString());
 } catch (e) {
+    if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp');
     console.log(`${RED}❌ git commit failed: ${e}${RESET}`);
     process.exit(1);
 }

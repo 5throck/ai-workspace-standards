@@ -6,7 +6,7 @@
     "phases": {
       "canonical": ["0", "1-2", "3", "4", "5", "6"],
       "count": 7,
-      "pm_owned": ["0", "1-2", "6"],
+      "pm_owned": ["0", "1-2", "5", "6"],
       "autonomous": ["1-2", "3", "4", "5"],
       "definitions": {
         "0":   "Project Initiation",

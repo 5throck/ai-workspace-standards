@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.1.1
+ * @version 1.1.2
  */
 
 import { $ } from "bun";
@@ -20,6 +20,13 @@ async function main() {
   if (process.env.SYNC_ACTIVE !== "1") {
     console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
     console.error("\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.");
+    process.exit(1);
+  }
+
+  const expectedContext = process.env.DEV_SYNC_CONTEXT;
+  if (!expectedContext || !existsSync('.sync_context.tmp') || readFileSync('.sync_context.tmp', 'utf-8') !== expectedContext) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.");
+    console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
     process.exit(1);
   }
 
@@ -62,6 +69,21 @@ async function main() {
   if (envStaged.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");
     process.exit(1);
+  }
+
+  // 2-A. Block merge conflict markers
+  const textStaged = staged.filter(f => !f.match(/\.(png|jpg|jpeg|gif|ico|pdf|zip|tar|gz|mp4|webm|bin|exe|dll)$/i));
+  for (const file of textStaged) {
+    if (!existsSync(file)) continue;
+    try {
+      const content = readFileSync(file, 'utf-8');
+      if (/^<<<<<<<\s/m.test(content) || /^=======\r?\n/m.test(content) || /^>>>>>>>\s/m.test(content)) {
+        if (/^<<<<<<<\s/m.test(content) || /^>>>>>>>\s/m.test(content)) {
+          console.error(`\x1b[31m[FAIL]\x1b[0m Merge conflict marker detected in ${file}`);
+          process.exit(1);
+        }
+      }
+    } catch { /* ignore binary read errors */ }
   }
 
   // 2-B. Enforce English Only in PR Artifacts
