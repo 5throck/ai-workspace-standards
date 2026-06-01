@@ -445,8 +445,8 @@ Always include Lifecycle Update and Final QA Audit as final two steps.
 
 ### References
 
-- **CONSTITUTION.md** (workspace root): https://github.com/5throck/ai-workspace-standards/blob/main/CONSTITUTION.md
-- **co-develop template**: `C:\git\templates\co-develop\`
+- **CONSTITUTION.md** (workspace root): [`CONSTITUTION.md`](../../CONSTITUTION.md)
+- **co-develop template**: `templates/co-develop/` (relative to repo root)
 - **Meeting transcripts**:
   - `memory/meeting-2026-06-01-abap-migration-strategy.md` (initial - superseded)
   - `memory/meeting-2026-06-01-abap-codify-upgrade.md` (re-convene - superseded)

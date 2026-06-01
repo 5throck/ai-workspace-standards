@@ -9,8 +9,9 @@
 │              SSOT Hierarchy (Top = Authoritative)            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Tier 1 ── Workspace Root  (C:/git/)                        │
-│            The true source. Edit ONLY here.                 │
+│  Tier 1 ── Workspace Root  (repo root, e.g. the top-level   │
+│            directory returned by `git rev-parse --show-     │
+│            toplevel`). The true source. Edit ONLY here.     │
 │                                                             │
 │  Tier 2 ── templates/common/  +  templates/co-*/            │
 │            Copies of Workspace Root + variant overrides     │

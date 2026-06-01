@@ -2,7 +2,7 @@
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-05-30
+> Last Updated: 2026-06-01
 
 ---
 
@@ -18,8 +18,8 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 5. **README** — structural completeness, i18n consistency, and freshness
 
 **3 Layers:**
-- **Layer 0 — Workspace Root** (`C:/git/`): the workspace itself, orchestrated by `audit.sh`
-- **Layer 1 — Templates** (`C:/git/templates/`): split into `common/` (shared base) and `co-*/` (variant instances)
+- **Layer 0 — Workspace Root** (repo root — `git rev-parse --show-toplevel`): the workspace itself, orchestrated by `audit.sh`
+- **Layer 1 — Templates** (`templates/` relative to repo root): split into `common/` (shared base) and `co-*/` (variant instances)
 - **Layer 2 — L2 Projects**: scaffolded from L1 via `new-project.sh`, each carrying a project copy of `audit.sh`
 
 ---

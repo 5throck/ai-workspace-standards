@@ -33,8 +33,8 @@ The mapping is immutable per generation:
 
 **Claude Tier Mapping:**
 - **High**: `claude-opus-4-7`
-- **Medium**: `claude-sonnet-3-7`
-- **Low**: `claude-haiku-3-5`
+- **Medium**: `claude-sonnet-4-6`
+- **Low**: `claude-haiku-4-5`
 
 Standard directory layout for all projects in this workspace:
 
