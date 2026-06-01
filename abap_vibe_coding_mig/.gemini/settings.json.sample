@@ -1,0 +1,93 @@
+{
+  "ui": {
+    "useAlternateBuffer": true,
+    "terminalBuffer": true
+  },
+  "mcpServers": {
+    "abap": {
+      "command": "./vsp",
+      "args": [
+        "--mode",
+        "hyperfocused"
+      ],
+      "env": {
+        "SAP_MODE": "hyperfocused",
+        "SAP_ALLOWED_PACKAGES": "Z*,$TMP,$ZADT_VSP,$VSP_ADT",
+        "SAP_FEATURE_ABAPGIT": "on",
+        "SAP_FEATURE_TRANSPORT": "on",
+        "SAP_FEATURE_UI5": "on",
+        "SAP_FEATURE_RAP": "on"
+      }
+    },
+    "abap-docs": {
+      "type": "http",
+      "url": "https://mcp-abap.marianzeis.de/mcp"
+    },
+    "sap-docs": {
+      "type": "http",
+      "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    }
+  },
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_console_logs",
+      "mcp__Claude_Preview__preview_screenshot",
+      "mcp__Claude_Preview__preview_snapshot",
+      "mcp__Claude_Preview__preview_logs",
+      "mcp__Claude_Preview__preview_list",
+      "mcp__abap__sap_execute",
+      "mcp__abap__GetSource",
+      "mcp__abap__SearchObject",
+      "mcp__abap__GrepObjects",
+      "mcp__abap__GrepPackages",
+      "mcp__abap__FindDefinition",
+      "mcp__abap__FindReferences",
+      "mcp__abap__GetTableContents",
+      "mcp__abap__RunQuery",
+      "mcp__abap__GetCDSDependencies",
+      "mcp__abap__SyntaxCheck",
+      "mcp__abap__RunUnitTests",
+      "mcp__abap__RunATCCheck",
+      "mcp__abap__GetTable",
+      "mcp__abap__WriteSource",
+      "mcp__abap__EditSource",
+      "mcp__abap__GetConnectionInfo",
+      "mcp__abap__GetSystemInfo",
+      "mcp__abap__RunReport",
+      "mcp__abap__InstallZADTVSP",
+      "mcp__abap__InstallAbapGit",
+      "mcp__abap__GetInactiveObjects",
+      "mcp__abap__GetPackage",
+      "mcp__abap__ListTransports",
+      "mcp__abap__GetTransport",
+      "mcp__abap__CreateTransport",
+      "mcp__abap__ReleaseTransport",
+      "mcp__abap__GetODataMetadata",
+      "mcp__abap__TestODataService",
+      "mcp__abap__GetCDSExposure",
+      "mcp__abap__ListUI5Projects",
+      "mcp__abap__GetUI5Project",
+      "mcp__abap__ReadUI5File",
+      "mcp__abap-docs__*",
+      "mcp__sap-docs__*",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '*)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git credential *)",
+      "Bash(git check-ignore *)",
+      "Bash(powershell -Command *)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "abap",
+    "abap-docs",
+    "sap-docs"
+  ]
+}

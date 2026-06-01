@@ -1,0 +1,54 @@
+{
+  "trackingStart": "2026-06-01T12:41:12.315Z",
+  "executions": {
+    "total": 5,
+    "success": 3,
+    "failures": 2
+  },
+  "failureTypes": {
+    "llm-api": 1,
+    "script-execution": 1,
+    "pm-logic": 0,
+    "combined": 0
+  },
+  "failureRate": 40,
+  "last30Days": {
+    "total": 5,
+    "failures": 2,
+    "failureRate": 40
+  },
+  "recentExecutions": [
+    {
+      "timestamp": "2026-06-01T11:41:16.633Z",
+      "success": true,
+      "failureType": null,
+      "workflow": "code-writer dispatch"
+    },
+    {
+      "timestamp": "2026-06-01T11:36:16.633Z",
+      "success": false,
+      "failureType": "llm-api",
+      "workflow": "test-runner dispatch",
+      "errorMessage": "Rate limit exceeded"
+    },
+    {
+      "timestamp": "2026-06-01T11:31:16.633Z",
+      "success": true,
+      "failureType": null,
+      "workflow": "architect dispatch"
+    },
+    {
+      "timestamp": "2026-06-01T11:26:16.633Z",
+      "success": false,
+      "failureType": "script-execution",
+      "workflow": "automation dispatch",
+      "errorMessage": "Script timeout"
+    },
+    {
+      "timestamp": "2026-06-01T11:21:16.633Z",
+      "success": true,
+      "failureType": null,
+      "workflow": "docs-writer dispatch"
+    }
+  ]
+}

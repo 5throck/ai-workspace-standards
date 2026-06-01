@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/sync-md.sh 2>/dev/null || pwsh -NonInteractive -File scripts/sync-md.ps1 2>/dev/null || powershell -NonInteractive -File scripts/sync-md.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}

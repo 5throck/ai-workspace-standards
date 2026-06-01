@@ -7,6 +7,9 @@
 # --- Ignore all subdirectories (each is its own repo) ---
 /*/
 
+# --- Explicitly TRACK abap_vibe_coding_mig project ---
+!abap_vibe_coding_mig/
+
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
 
@@ -90,3 +93,5 @@ memory/archive/
 
 # Ignore test temp directories
 tests/.temp/
+abap_vibe_coding_mig/.env
+abap_vibe_coding_mig/.env.sample

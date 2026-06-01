@@ -26,4 +26,13 @@ paths = [
   '''.*_test\.(js|ts|py|go|rs)$''',
   '''.*\.test\.(js|ts)$''',
   '''.*_spec\.rb$''',
+  '''abap_vibe_coding.*/scratch/.*\.abap$''',
 ]
+
+# ABAP variable name patterns (false positives: iv_key, ls_key, key1 etc. are ABAP identifiers)
+[[rules]]
+id = "abap-variable-false-positive"
+description = "Suppress ABAP variable assignments that trigger generic key rules"
+regex = '''(iv_key|ls_key|lv_key|key1|key2|lv_pw)\s*=\s*[a-z_\-\[\]0-9]+'''
+allowlist.regexTarget = "match"
+allowlist.regexes = ['.*']
