@@ -96,6 +96,58 @@ Every project uses role-based agents defined in `agents/*.md` with YAML frontmat
 
 ---
 
+### 5.5 PM Gateway Workflow → [Full details](CLAUDE.md#5-agent-dispatch-rules)
+
+All specialist agent dispatch MUST go through the PM orchestrator. The PM Gateway enforces governance consistency across multi-agent tasks through a mandatory execution plan display.
+
+#### Enforcement Model
+
+The PM Gateway operates at **4 enforcement levels** (see [§5 Multi-Agent Architecture](docs/constitution/05-multi-agent-architecture.md) for full model):
+
+| Level | Trigger | PM Action | Specialist Involved |
+|-------|---------|-----------|-------------------|
+| **Level 1** | Single-step, single-file tasks | PM executes directly | None |
+| **Level 2** | Multi-step (2+ files) or multi-agent tasks | PM displays execution plan, then dispatches | Yes |
+| **Level 3** | Direct user invokes specialist | PM refuses, redirects through PM | Blocked |
+| **Level 4** | Emergency fix (production down) | PM executes directly, logs post-incident | Optional |
+
+#### Mandatory Execution Plan Display
+
+Before dispatching any specialist agents (Level 2 tasks), PM **must** output an execution plan table in the user's active language:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task description] | [agent name] | High/Medium/Low | opus/sonnet/haiku |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model] |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model] |
+
+**Rules**:
+- Declare execution order (parallel vs sequential) below the table
+- Always include Lifecycle Update and Final QA Audit as the final two steps
+- The Agent tool MUST NOT be called until this table is visible to the user
+- At workspace root, dispatch `lifecycle-manager` and `auditor`; in variant projects, PM handles both directly
+
+#### Specialist Agent List
+
+The following agents require PM dispatch (no direct invocation):
+- **architect** (Phase 1-2) - System design and architecture decisions
+- **automation-engineer** (Phase 4) - Script implementation and DevOps automation
+- **docs-writer** (Phase 4) - Documentation standardization and updates
+- **scaffolding-expert** (Phase 0) - Project scaffolding and template instantiation
+- **security-expert** (Phase 6) - Security audits and vulnerability assessments
+
+#### Permission Denial Protocol
+
+When a specialist agent's required tool is denied by the user, PM must **not substitute** for the specialist. Instead:
+1. Classify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
+
+For detailed PM procedures, dispatch rules, and escalation templates, see [`CLAUDE.md`](CLAUDE.md#5-agent-dispatch-rules) and [`agents/pm.md`](agents/pm.md).
+
+---
+
 ### 5.6 Agent Lifecycle Management → [Full details](docs/constitution/05.6-agent-lifecycle.md)
 
 Agents have three states: **active** (production use), **deprecated** (being phased out—reassign skills within 30 days), **retired** (move to `agents/_archive/`, delete after 90 days). PM is the designated owner of all agents. If an agent's prompt contains a vulnerability, immediately set `status: deprecated` and open a PR. Manage lifecycle via `agent-create.ts`, `agent-delete.ts`, and `agent-verify.ts`. After any agent change, update both `AGENTS.md` (canonical roster) and `CONSTITUTION.md §5` (architecture references).
@@ -111,6 +163,137 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 ### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)
 
 Scripts are managed across three ownership layers: L0 (`templates/common/scripts/`, templates team, SSOT), L1 (`scripts/` workspace root), L2 (`<project>/scripts/`, independent snapshot). Changes flow L0 → L1 → L2 at project creation time only—no automatic back-propagation. Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
+
+---
+
+### 6.6 VERSION_MANIFEST System → [Full details](docs/adr/0012-version-manifest-schema.md)
+
+The **VERSION_MANIFEST** is the single source of truth (SSOT) for lifecycle artifact versions across the workspace. It provides centralized visibility into agents, skills, scripts, and commands, along with platform parity status and drift detection.
+
+#### Location and Generation
+
+- **File**: `.claude/VERSION_MANIFEST.md`
+- **Update timing**: Generated during `/sync` pipeline only (not on every commit)
+- **Generation method**: Hybrid approach — auto-generated core sections + manual annotations section
+- **Generator script**: `scripts/generate-version-manifest.ts`
+
+#### Single Source of Truth Principle
+
+Source files remain authoritative:
+- **Agents**: `agents/*.md` (YAML frontmatter for tier/model/color)
+- **Skills**: `skills/*/SKILL.md` and `.claude/skills/*/SKILL.md` (version field in frontmatter)
+- **Scripts**: `scripts/*.ts` (`@version` comment in header)
+- **Commands**: `.claude/commands/*.md` and `.gemini/commands/*.md` (file analysis)
+
+VERSION_MANIFEST.md aggregates and displays this information — it does not replace source file definitions.
+
+#### Manifest Structure
+
+```markdown
+# Version Manifest
+
+> **Last Generated**: [ISO timestamp]
+> **Generation Source**: Auto-generated from source files by scripts/generate-version-manifest.ts
+> **Single Source of Truth**: Source files (agents/*.md, skills/*/SKILL.md, scripts/*.ts)
+> **Manual Annotations Section**: Below is human-maintained context
+
+---
+
+## Auto-Generated Sections
+
+### Agents
+| Name | File | Tier | Model | Last Modified |
+
+### Skills
+| Name | Version | Location | Platform | Triggers | Owner |
+
+### Scripts
+| Name | Version | Location | Dependencies |
+
+### Commands
+| Name | File | Platform | Skill Integration |
+
+### Platform Parity Status
+#### Claude ↔ Gemini Sync Status
+#### Workspace → Templates/Common Propagation
+
+### Drift Detection
+#### Lifecycle Sync Drift
+#### Platform Parity Drift
+#### Documentation Drift
+
+---
+
+## Manual Annotations Section
+
+> This section is human-maintained. Do not edit auto-generated sections above.
+
+### Release Notes
+### Migration Guides
+### Deprecation Warnings
+### Known Issues
+```
+
+#### Key Sections Explained
+
+**Auto-Generated Sections** (regenerated on each `/sync`):
+- **Agents**: Tier, model, last modified timestamp for all agents
+- **Skills**: Version, platform scope, trigger phrases, owner for all skills
+- **Scripts**: Version, dependencies (extracted from imports) for all scripts
+- **Commands**: Platform parity, skill integration for all commands
+- **Platform Parity Status**: Claude ↔ Gemini sync, workspace → templates propagation
+- **Drift Detection**: Lifecycle sync drift, platform parity violations, documentation version drift
+
+**Manual Annotations Section** (human-maintained, persists across regenerations):
+- **Release Notes**: Human-readable summary of manifest changes
+- **Migration Guides**: Instructions for transitioning from manual version tracking
+- **Deprecation Warnings**: Alerts for deprecated skills/agents/scripts
+- **Known Issues**: Documented limitations or bugs in manifest generation
+
+#### Usage Patterns
+
+**Checking current ecosystem state**:
+```bash
+# View all agent, skill, and script versions in one place
+cat .claude/VERSION_MANIFEST.md
+```
+
+**Detecting drift before releases**:
+```bash
+# Run /sync to regenerate manifest, then check Drift Detection section
+/sync "chore: regenerate version manifest"
+```
+
+**Verifying platform parity**:
+```bash
+# Check Platform Parity Status section for Claude ↔ Gemini sync status
+grep -A 10 "Platform Parity Status" .claude/VERSION_MANIFEST.md
+```
+
+#### Schema Stability and Versioning
+
+The VERSION_MANIFEST schema is governed by ADR process (see [ADR 0012](docs/adr/0012-version-manifest-schema.md)). Schema changes require:
+1. New ADR documenting the change
+2. Migration guide in Manual Annotations Section
+3. Update to `generate-version-manifest.ts` script
+4. Documentation update in this section (CONSTITUTION.md §6.6)
+
+#### Relationship to Other Lifecycle Systems
+
+| System | Purpose | VERSION_MANIFEST Role |
+|--------|---------|----------------------|
+| **CHANGELOG.md** | User-facing release history (what changed) | Provides "current state at a glance" for all versions |
+| **memory/YYYY-MM-DD.md** | Developer-facing session logs (how/why) | Release Notes section provides historical context |
+| **AGENTS.md** | Canonical agent roster | References VERSION_MANIFEST for skill versions (delegates version tracking) |
+| **SCRIPTS.md** | Script registry with metadata | VERSION_MANIFEST displays aggregated versions from SCRIPTS.md |
+
+#### Implementation Dependencies
+
+- **A-03** (automation-engineer): `scripts/generate-version-manifest.ts` implementation
+- **A-04** (lifecycle-manager): AGENTS.md Skills table update to reference VERSION_MANIFEST
+- **ADR 0012**: Full schema specification, rationale, and consequences
+
+See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-schema.md) for complete schema definition, generation algorithm, and open questions.
 
 ---
 

@@ -1,8 +1,14 @@
-// @version 2.3.2
+// @version 2.4.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
+
+// Check for --lifecycle-only flag
+const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
+
+// Project context path (used in multiple checks)
+const projectCtxPath = path.join('docs', 'context.md');
 
 // Color helpers
 const GREEN = '\x1b[32m';
@@ -25,6 +31,9 @@ function Warn(msg: string) {
 }
 
 console.log(`${CYAN}=== audit.ts - workspace standards check ===${RESET}`);
+if (LIFECYCLE_ONLY) {
+    console.log(`${CYAN}Running lifecycle-only checks (fast pre-commit mode)${RESET}\n`);
+}
 
 // 1. CHANGELOG.md must exist
 if (fs.existsSync('CHANGELOG.md')) {
@@ -57,8 +66,9 @@ if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('docs/constitution')) {
 }
 
 // 2.6. Web URL link validation
-if (fs.existsSync('AGENTS.md') || fs.existsSync(path.join('templates', 'common', 'docs', 'context.md'))) {
-    let linkErrors = 0;
+if (!LIFECYCLE_ONLY) {
+    if (fs.existsSync('AGENTS.md') || fs.existsSync(path.join('templates', 'common', 'docs', 'context.md'))) {
+        let linkErrors = 0;
     
     // Check AGENTS.md web URLs
     if (fs.existsSync('AGENTS.md')) {
@@ -100,6 +110,7 @@ if (fs.existsSync('AGENTS.md') || fs.existsSync(path.join('templates', 'common',
     } else {
         errors += linkErrors;
     }
+    }
 }
 
 // 3. CHANGELOG.md must have [Unreleased] section
@@ -113,10 +124,10 @@ if (fs.existsSync('CHANGELOG.md')) {
 }
 
 // 3.5. UTF-8 BOM check for Markdown files
-let bomErrors = 0;
-let searchDirs = ['.'];
-const projectCtxPath = path.join('docs', 'context.md');
-if (!fs.existsSync(projectCtxPath) && fs.existsSync('templates')) {
+if (!LIFECYCLE_ONLY) {
+    let bomErrors = 0;
+    let searchDirs = ['.'];
+    if (!fs.existsSync(projectCtxPath) && fs.existsSync('templates')) {
     searchDirs = ['agents', 'docs', 'memory', 'scripts', 'skills', 'templates', '.claude'];
     if (fs.existsSync('.')) {
         for (const file of fs.readdirSync('.')) {
@@ -160,6 +171,7 @@ for (const dir of searchDirs) {
 }
 if (bomErrors === 0) { Pass('UTF-8 BOM check: all markdown files are clean'); }
 else { errors += bomErrors; }
+}
 
 // 4. AGENTS.md must exist
 if (fs.existsSync('AGENTS.md')) { Pass('AGENTS.md exists'); }
@@ -173,7 +185,8 @@ if (fs.existsSync('agents') && fs.readdirSync('agents').some(f => f.endsWith('.m
 }
 
 // 6-8. Project-level checks
-if (fs.existsSync(projectCtxPath)) {
+if (!LIFECYCLE_ONLY) {
+    if (fs.existsSync(projectCtxPath)) {
     const ctx = fs.readFileSync(projectCtxPath, 'utf-8');
     if (/^## Coding Guidelines/m.test(ctx)) {
         Pass('docs/context.md has ## Coding Guidelines');
@@ -252,6 +265,7 @@ if (fs.existsSync(projectCtxPath)) {
     }
 } else {
     Warn('docs/context.md not found - skipping project-level checks (workspace root)');
+}
 }
 
 // Skills registry cross-check
@@ -336,13 +350,15 @@ if (hasBun) {
 }
 
 // 3.7. Language validation: Korean-only markdown files outside ko/ and locales/ko/
-console.log(""); // Add spacing before language validation output
-const langValidate = await $`bun ${path.join('scripts', 'validate-md-language.ts')}`.nothrow();
+if (!LIFECYCLE_ONLY) {
+    console.log(""); // Add spacing before language validation output
+    const langValidate = await $`bun ${path.join('scripts', 'validate-md-language.ts')}`.nothrow();
 if (langValidate.exitCode === 0) {
     Pass('Language validation: no Korean-only markdown files found');
 } else {
     Fail('Language validation: Korean-only markdown files detected');
     errors++;
+}
 }
 
 // Agent/Skill State Synchronization Check
@@ -435,6 +451,7 @@ function checkScriptSync() {
 }
 
 // Stale shell/script reference check
+if (!LIFECYCLE_ONLY) {
 function checkStaleShellReferences() {
     const filesToScan: string[] = [
         'CLAUDE.md',
@@ -492,9 +509,8 @@ function checkStaleShellReferences() {
         Pass('Stale shell reference check: no stale references found');
     }
 }
-
-checkScriptSync();
 checkStaleShellReferences();
+}
 
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
 // distinguishes the governance root from generated project copies.

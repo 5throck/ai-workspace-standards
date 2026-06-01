@@ -51,15 +51,15 @@ async function getGitTimestamp(filePath: string): Promise<string> {
 }
 
 function normalizePath(p: string): string {
-    return p.replace(/\\\\/g, '/');
+    return p.replace(/\\/g, '/');
 }
 
 function parseAgentFrontmatter(content: string): { tier?: string; model?: string } {
-    const tierMatch = /^tier:\s*(.+)$/m.exec(content);
-    const modelMatch = /^model:\s*(.+)$/m.exec(content);
+    const tierMatch = /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(content);
+    const modelMatch = /^model:[ \t]+(.+)$/m.exec(content);
     return {
-        tier: tierMatch ? tierMatch[1].trim() : undefined,
-        model: modelMatch ? modelMatch[1].trim() : undefined,
+        tier: tierMatch ? tierMatch[1].trim() : 'N/A',
+        model: modelMatch ? modelMatch[1].trim() : 'N/A',
     };
 }
 
