@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-06-01]**: feat: implement `propagate-to-templates.ts` + `propagation-map.json` — pull-based L0→L1 sync tool with `--dry-run`/`--apply` modes and 5-domain mapping (scripts, hooks, helpers, claude-skills, gemini-skills) (`scripts/propagate-to-templates.ts`, `scripts/propagation-map.json`)
+- **[2026-06-01]**: feat: add `engagement_criteria` schema to `workspace-schema.json` (v1.1.0) and populate `co-security/variant.json` — beta governance lifecycle field for all future beta variants (`docs/workspace-schema.json`, `templates/co-security/variant.json`)
+- **[2026-06-01]**: feat: add `triggers` metadata to 7 skills missing auto-invocation hints — `audit-workspace`, `project-review`, `security-scan`, `simulate-project-creation`, `translate`, `ui-ux-pro-max`, `validate-docs-links` (`skills/*/SKILL.md`, `.claude/skills/*/SKILL.md`)
+- **[2026-06-01]**: feat: add dependency vulnerability audit step to CI pipeline — `bun audit || npm audit --audit-level=high` on all OS matrix entries (`.github/workflows/test.yml`)
+- **[2026-06-01]**: feat: add `templates/common/package.json` baseline — enables new variant scaffolding without manual setup (`templates/common/package.json`)
+- **[2026-06-01]**: docs: create ADR-0013 — documents `content_hash` removal decision and `sync_version` retention (`docs/adr/0013-content-hash-removal.md`)
 - **[2026-06-01]**: feat: add File Organization Policy across all variants — prohibit non-standard `.md` files at project root; routing table (analysis→`docs/`, logs→`memory/`, drafts→`docs/drafts/`); `audit.ts` L2 root `.md` detection check; pre-created subdirectory scaffolding for all 4 variants (`docs/reports/`, `docs/drafts/`, `docs/research/`, `docs/adr/`, `docs/specs/`, etc.) (`templates/common/docs/context.md`, `scripts/audit.ts`)
 - **[2026-06-01]**: feat: add Research Standards — mandatory source citation policy for all agents; inline `[Source: URL]` format; `⚠️ Unverified` disclosure for unverifiable claims; `audit.ts` WARN check for missing `## References` in `docs/research/*.md`; education/research agent creation checklist item (`templates/common/docs/context.md`, `AGENTS.md`, `scripts/audit.ts`)
 - **[2026-06-01]**: feat: add Computational Integrity Standards — AI must not directly compute safety-critical or regulated financial calculations; mandatory external tool delegation (Fortran/gfortran for aerospace, Python+NumPy/SciPy for finance); 5-step procedure with security-reviewed installation; domain-tool mapping table; numerical computation agent creation checklist item (`templates/common/docs/context.md`, `AGENTS.md`)
@@ -16,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-01]**: feat: add permission allowlist entries to `.claude/settings.json` — `bun scripts/audit.ts`, `bun scripts/lifecycle-sync-audit.ts`, `bun run agent:verify`, `curl -sI`, `bun scripts/validate-templates.ts` to reduce permission prompts
 
 ### Changed
+- **[2026-06-01]**: fix: unify `meeting-facilitation` skill version to 1.3.2 across all layers (`skills/`, `.claude/skills/`, `.gemini/skills/`) (`skills/meeting-facilitation/SKILL.md`)
+- **[2026-06-01]**: fix: sync 4 stale scripts from L0 to L1 (`agent-create.ts`, `generate-scripts-readme.ts`, `sync-agent-status.ts`, `sync-skill-status.ts`) (`templates/common/scripts/`)
 - **[2026-06-01]**: refactor: remove `auditor` and `lifecycle-manager` agents from `templates/common/agents/` — isolated to workspace root only; all 5 variant common skill owners changed to `pm`; `simulate-project-creation` skill removed from `templates/common/skills/`; `skill-lifecycle-audit.ts` orphan check changed from FAIL to WARNING; `validate-templates.ts` common skill owner validation check added; `common-contract.json` updated; `upgrade-project.sh/.ps1` updated (`templates/common/agents/`, `scripts/`)
 - **[2026-06-01]**: refactor: move `workspace-schema.json` to `docs/workspace-schema.json`; `validate-model-registry.ts` and `validate-templates.ts` marked `L0-only`; removed from `templates/common/scripts/` (`docs/workspace-schema.json`, `scripts/SCRIPTS.md`)
 - **[2026-06-01]**: refactor: flatten `tests/integration/` to `tests/` — `script-registry-integrity.test.ts` and `workspace-smoke.test.ts` moved up; `test-runner.ts` path updated (`scripts/test-runner.ts`)
@@ -24,6 +32,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-01]**: docs: update README structure — add `agents/`, `skills/`, `tests/` to repository diagram; fix `.cmd`→`.ps1` reference; update Last Updated date (`README.md`, `README_ko.md`)
 
 ### Fixed
+- **[2026-06-01]**: fix: repair Unicode Mojibake corruption in `CLAUDE.md` and `GEMINI.md` -- replaced CP949-corrupted characters with correct Unicode symbols (warning emoji, section sign, arrow, em-dash) (`CLAUDE.md`, `GEMINI.md`)
+- **[2026-06-01]**: fix: sync `templates/common/scripts/new-project.sh` call signature — `validate_project_name` updated to 3-argument form matching workspace root (`templates/common/scripts/new-project.sh`)
+- **[2026-06-01]**: fix: add `lifecycle-manager` to `AGENTS.md` roster; add `role:` frontmatter to all 8 agent files (`pm`=orchestrator, others=specialist) (`AGENTS.md`, `agents/*.md`)
+- **[2026-06-01]**: fix: add `@version` JSDoc headers to 39 TypeScript scripts missing version tracking (`scripts/*.ts`, `scripts/hooks/*.ts`, `scripts/helpers/*.ts`)
+- **[2026-06-01]**: fix: standardize `docs/adr/0012-version-manifest-schema.md` frontmatter — converted markdown-bold pseudo-fields to valid YAML (`docs/adr/0012-version-manifest-schema.md`)
+- **[2026-06-01]**: fix: remove `content_hash: PLACEHOLDER` from all variant README frontmatter — field was never implemented (`templates/co-*/README.md`, `templates/common/README.md`)
+- **[2026-06-01]**: fix: replace placeholder body content in `co-design` and `co-work` README files with accurate stable feature descriptions (`templates/co-design/README.md`, `templates/co-work/README.md`)
+- **[2026-06-01]**: fix: allow tag pushes in `pre-push.ts` — branch protection check now skips when pushing refs/tags only; Bun stdin stream used for cross-platform compatibility (`scripts/hooks/pre-push.ts` v1.2.0)
+- **[2026-06-01]**: fix: `new-project.ps1`/`.sh` error message — updated to reference `bun scripts/list-template-versions.ts` instead of non-existent shell wrappers (`scripts/new-project.ps1`, `scripts/new-project.sh`)
+- **[2026-06-01]**: fix: push `template-v0.5.1` tag to remote — resolves user-blocking "Template version not found" error when cloning and scaffolding `co-work`
+- **[2026-06-01]**: fix: add skills table to `templates/co-security/AGENTS.md` — replaced text list with validator-compatible table format (`templates/co-security/AGENTS.md`)
+- **[2026-06-01]**: fix: transition `co-security` variant from `beta` to `stable` (`templates/co-security/variant.json` v0.3.0)
 - **[2026-06-01]**: fix: remove redundant variant `.gitignore` files — `templates/co-*/gitignore` (containing only `tests/.temp/`) were overwriting `templates/common/.gitignore` during scaffolding, stripping `.env` exclusion (`templates/co-develop/`, `co-design/`, `co-security/`, `co-work/`)
 - **[2026-06-01]**: fix: workspace root cleanup — removed `%userprofile%/` (Windows env var bug), `.sandbox/`, `CHANGELOG_ENTRY.md`, `.agents/` (stale skills mirror), `debug-test/`, `bootstrap.ps1` (unused); `CHANGELOG_ENTRY.md` added to `.gitignore`
 
