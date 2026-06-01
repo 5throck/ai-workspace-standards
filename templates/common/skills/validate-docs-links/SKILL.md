@@ -4,7 +4,7 @@ description: Scans Markdown documentation for dead links and file reference erro
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
-owner: docs-writer
+owner: pm
 prerequisites: Python or grep
 metadata:
   type: process
