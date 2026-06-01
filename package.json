@@ -41,5 +41,6 @@
   },
   "engines": {
     "bun": ">=1.0.0"
-  }
+  },
+  "workspace-scripts": true
 }

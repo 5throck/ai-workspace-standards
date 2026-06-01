@@ -233,12 +233,19 @@ if [ "$SKIP_INSTALL" = false ]; then
   fi
 
   # ── Node.js ────────────────────────────────────────────────────────────────
+  # Skip if package.json is a workspace-management artifact (sentinel: "workspace-scripts": true).
+  # Workspace root package.json contains bun/audit/dev-sync scripts only — not app dependencies.
+  # New projects that genuinely need Node.js should have their own package.json without this field.
   if [ -f "package.json" ]; then
-    if require npm "install Node.js from https://nodejs.org"; then
-      info "Node.js project detected - running npm install"
-      npm install
-      pass "npm install complete"
-      license_audit_node
+    if grep -q '"workspace-scripts"\s*:\s*true' "package.json" 2>/dev/null; then
+      info "Skipping npm install — package.json is a workspace-scripts artifact (not an app manifest)"
+    else
+      if require npm "install Node.js from https://nodejs.org"; then
+        info "Node.js project detected - running npm install"
+        npm install
+        pass "npm install complete"
+        license_audit_node
+      fi
     fi
   fi
 

@@ -43,7 +43,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L1 | 1.3.2 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.sh` | L1 | 1.3.3 | active | — | — | L0-only | pair: new-project.ps1 |
 | `new-project.ps1` | L1 | 1.5.4 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
