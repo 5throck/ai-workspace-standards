@@ -168,6 +168,36 @@ All agents must follow this file routing policy. **Creating `.md` files at the p
 
 ---
 
+## Research Standards
+
+When conducting research, investigation, or presenting factual claims from external sources:
+
+### 1. Source Citation (Required)
+Every factual claim derived from external sources must include a citation. Use one of these formats:
+
+- **Inline reference**: `[Source: <URL or document name>]`
+- **Dated inline reference**: `[Source: <URL>, accessed <YYYY-MM-DD>]`
+- **End-of-document section**: Add a `## References` section listing all sources
+
+### 2. Source Verification
+Before citing a source, verify it actually contains the claimed information:
+- If web access tools are available: access the URL and confirm the content exists
+- If access is not possible: mark the claim as unverified using the disclosure format below
+- Prefer primary sources (official documentation, academic papers, official announcements) over secondary sources (blog posts, summaries)
+
+### 3. Uncertainty Disclosure
+When a source cannot be verified or information is uncertain, explicitly disclose it:
+```
+⚠️ Unverified: [claim]. Recommend manual verification at [source].
+```
+
+### 4. Research Output Location
+Research results must follow the File Organization Policy:
+- Place research documents in `docs/research/` with a `## References` section
+- Place analysis results in `docs/` with inline citations
+
+---
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.

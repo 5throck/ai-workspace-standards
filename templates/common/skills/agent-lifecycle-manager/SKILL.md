@@ -82,6 +82,7 @@ tier:
 - Provide clear identity and context mapping.
 - Focus on specific behavioral guidelines and domain constraints.
 - Do NOT repeat global rules (like UTF-8 enforcement or standard PR procedures) that are already covered in `CONSTITUTION.md`.
+- **If the agent role involves research, investigation, or presenting external information**: explicitly include the Source Attribution principle in the agent's constraints or behavioral guidelines — require source citation for factual claims and use `⚠️ Unverified` disclosure for unverifiable information.
 
 ---
 
@@ -116,6 +117,7 @@ bun scripts/agent-verify.ts <agent-name>
 - [ ] Frontmatter passes all audit checks
 - [ ] Tier mappings are correctly structured
 - [ ] **Recommended**: Consider declaring the skill's deployment scope — is it needed in all variant projects (common) or workspace-root-only? Workspace-only skills should not be placed in `templates/common/skills/`.
+- [ ] **If research/investigation role**: agent content includes source citation requirements and uncertainty disclosure (`⚠️ Unverified`)
 
 ---
 

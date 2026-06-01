@@ -1,4 +1,4 @@
-// @version 2.3.1
+// @version 2.3.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -234,6 +234,21 @@ if (fs.existsSync(projectCtxPath)) {
         Fail(`Non-standard .md files found at project root: ${rootMdFiles.join(', ')} — move to docs/ or memory/ per File Organization Policy`);
     } else {
         Pass('Project root: no non-standard .md files (File Organization Policy compliant)');
+    }
+
+    // Check: docs/research/*.md files should have a ## References section (Research Standards)
+    const researchDir = path.join('docs', 'research');
+    if (fs.existsSync(researchDir)) {
+        const researchFiles = fs.readdirSync(researchDir).filter(f => f.endsWith('.md'));
+        const missingRefs = researchFiles.filter(f => {
+            const content = fs.readFileSync(path.join(researchDir, f), 'utf-8');
+            return !content.includes('## References') && !content.includes('## Sources');
+        });
+        if (missingRefs.length > 0) {
+            Warn(`Research files missing ## References section: ${missingRefs.join(', ')} — add citations per Research Standards policy`);
+        } else if (researchFiles.length > 0) {
+            Pass('docs/research/: all research files have ## References section');
+        }
     }
 } else {
     Warn('docs/context.md not found - skipping project-level checks (workspace root)');
