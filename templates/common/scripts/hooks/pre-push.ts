@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 import { $ } from "bun";
@@ -9,12 +9,16 @@ import { $ } from "bun";
 // Read stdin to determine what refs are being pushed.
 // Format per line: <local ref> <local sha1> <remote ref> <remote sha1>
 // Tag pushes have local ref like "refs/tags/..." — skip branch protection for those.
-function isTagOnlyPush(): boolean {
+async function isTagOnlyPush(): Promise<boolean> {
   try {
-    const stdin = require("fs").readFileSync("/dev/stdin", "utf8").trim();
+    const chunks: Buffer[] = [];
+    for await (const chunk of Bun.stdin.stream()) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const stdin = Buffer.concat(chunks).toString("utf8").trim();
     if (!stdin) return false;
     const lines = stdin.split("\n").filter(Boolean);
-    return lines.length > 0 && lines.every(line => line.startsWith("refs/tags/") || line.split(" ")[0]?.startsWith("refs/tags/"));
+    return lines.length > 0 && lines.every(line => line.split(" ")[0]?.startsWith("refs/tags/"));
   } catch {
     return false;
   }
@@ -39,7 +43,7 @@ async function main() {
   }
 
   // Tag-only pushes bypass the branch protection check — tags are not commits to main.
-  if (isTagOnlyPush()) return;
+  if (await isTagOnlyPush()) return;
 
   const branch = await $`git rev-parse --abbrev-ref HEAD`.text();
   if (branch.trim() === "main" || branch.trim() === "master") {
