@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 import { $ } from "bun";
@@ -17,27 +17,14 @@ async function main() {
 
   console.log("=== TS Pre-commit Hook ===");
 
-  // Check current project path - use staged files to detect project
-  const currentPath = process.cwd();
-  const projectPath = staged.length > 0 ? staged[0].split(/[/\\]/)[0] : '';
-  const isAbapVibeProject = staged.some(f => f.includes('abap_vibe_coding_mig') || f.includes('abap_vibe_coding'));
-
-  console.log(`[DEBUG] Current path: ${currentPath}`);
-  console.log(`[DEBUG] Project path: ${projectPath}`);
-  console.log(`[DEBUG] Staged files: ${staged.slice(0, 3).join(', ')}`);
-  console.log(`[DEBUG] Is abap project: ${isAbapVibeProject}`);
-  console.log(`[DEBUG] SYNC_ACTIVE: ${process.env.SYNC_ACTIVE}`);
-  console.log(`[DEBUG] DEV_SYNC_CONTEXT: ${process.env.DEV_SYNC_CONTEXT}`);
-
-  // abap projects use vsp-sync.ts instead of dev-sync.ts, skip SYNC_ACTIVE check
-  if (!isAbapVibeProject && process.env.SYNC_ACTIVE !== "1") {
+  if (process.env.SYNC_ACTIVE !== "1") {
     console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
     console.error("\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.");
     process.exit(1);
   }
 
   const expectedContext = process.env.DEV_SYNC_CONTEXT;
-  if (!isAbapVibeProject && (!expectedContext || !existsSync('.sync_context.tmp') || readFileSync('.sync_context.tmp', 'utf-8') !== expectedContext)) {
+  if (!expectedContext || !existsSync('.sync_context.tmp') || readFileSync('.sync_context.tmp', 'utf-8') !== expectedContext) {
     console.error("\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.");
     console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
     process.exit(1);
@@ -122,8 +109,7 @@ async function main() {
   }
 
   // 3.5. Lifecycle-only audit (fast pre-commit check)
-  // Skip workspace audit for abap projects (they have their own audit)
-  if (!memoryOnly && !isAbapVibeProject) {
+  if (!memoryOnly) {
     console.log("\n=== Lifecycle Audit (Pre-commit Gatekeeper) ===");
     try {
       await $`bun scripts/audit.ts --lifecycle-only`;
@@ -136,8 +122,7 @@ async function main() {
   }
 
   // 4. Audits
-  // Skip workspace audit for abap projects (they run their own project-specific audit)
-  if (!memoryOnly && !isAbapVibeProject) {
+  if (!memoryOnly) {
     console.log("\n=== Workspace Audit ===");
     try {
       await $`bun scripts/audit.ts`;
@@ -172,11 +157,10 @@ async function main() {
   }
 
   // 6. Lifecycle compliance check (Tier 1 Gatekeeper)
-  // Skip for abap projects (they manage their own lifecycle)
   const scriptStaged = staged.filter(f => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, '/')));
   const scriptsMdStaged = staged.includes('scripts/SCRIPTS.md');
 
-  if (!isAbapVibeProject && scriptStaged.length > 0 && !scriptsMdStaged) {
+  if (scriptStaged.length > 0 && !scriptsMdStaged) {
     console.log("\n=== Lifecycle Compliance Check ===");
     console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts files were modified but scripts/SCRIPTS.md was not updated.");
     console.error("");
