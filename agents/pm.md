@@ -1,5 +1,6 @@
 ---
 name: pm
+role: orchestrator
 status: active
 tier:
   claude: high

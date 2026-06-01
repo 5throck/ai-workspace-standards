@@ -1,5 +1,6 @@
 ---
 name: Lifecycle Manager
+role: specialist
 status: active
 version: 1.1.0
 tier:

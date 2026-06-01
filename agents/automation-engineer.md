@@ -1,5 +1,6 @@
 ---
 name: Automation Engineer
+role: specialist
 status: active
 tier:
   claude: low

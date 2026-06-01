@@ -93,7 +93,7 @@ if [ -n "$TEMPLATE_VER" ]; then
   TAG="template-v${TEMPLATE_VER}"
   if ! git -C "$WORKSPACE_ROOT" tag -l "$TAG" | grep -q "^${TAG}$"; then
     echo "❌ Template version not found: $TAG"
-    echo "   Run: bash scripts/list-template-versions.sh"
+    echo "   Run: bun scripts/list-template-versions.ts"
     exit 1
   fi
   TEMP_DIR=$(mktemp -d)
@@ -175,7 +175,7 @@ echo "🚀 Scaffolding new project: $PROJECT_NAME"
 # ── Template validation before copying ────────────────────────────────────────  # TEST: none
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" ]; then
   echo "Validating template integrity…"
-  if ! bun "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" "$VARIANT" 2>/dev/null; then
+  if ! bun "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" "$VARIANT" "$COMMON_DIR" "$TEMPLATES_DIR" 2>/dev/null; then
     exit 1
   fi
 else
