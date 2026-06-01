@@ -7,6 +7,7 @@ These principles apply to every project under the workspace root (the directory 
 ## Required Reading
 
 > **AI tools MUST load these files at session start** in addition to this document:
+> - `docs/constitution/00-ssot-architecture.md` (SSOT 3-Layer Structure)
 > - `docs/constitution/05-multi-agent-architecture.md`
 > - `docs/constitution/08-coding-guidelines.md`
 > - `docs/constitution/09-operations-workflow.md` (for PM and maintenance tasks)
@@ -15,7 +16,7 @@ These principles apply to every project under the workspace root (the directory 
 
 ### Workspace Overview
 
-> **Workspace Root** - The workspace root is simply the directory where you cloned the repository. While `C:\git` or `~/git` are frequently used as examples, you can clone and operate this workspace from any location on your machine.
+> **Workspace Root (Tier 1 SSOT)** - The workspace root is the directory where you cloned the repository. This is the **true source** and the ONLY place where core configurations, scripts, and agents should be edited. See [00-ssot-architecture.md](docs/constitution/00-ssot-architecture.md) for the 3-layer structural principles.
 > If you clone to a new location, ensure you update any hardcoded paths in your local environment or platform config files (`CLAUDE.md`, `GEMINI.md`) if necessary.
 
 This workspace contains multiple independent projects. Each subdirectory is a separate project/repository. Run `ls` (or `dir` on Windows) at the workspace root to see the current list - do not rely on a hardcoded list.

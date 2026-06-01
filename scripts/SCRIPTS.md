@@ -1,8 +1,8 @@
 # SCRIPTS.md — Script Lifecycle Registry
 
-> This file is the Single Source of Truth (L0) for all scripts in `scripts/` (workspace root).
-> Template `templates/common/scripts/` (L1) is a snapshot published from here via `bun run publish-to-template`.
-> Project `scripts/` (L2) is a snapshot created from L1 at `new-project` time.
+> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).
+> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run publish-to-template`.
+> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.
 >
 > **Machine parsing**: `verify-scripts.ts --verify` reads the `## Registry` section only.
 > **Human reading**: see `## Guide` section below for purpose, usage, and deprecation notes.
