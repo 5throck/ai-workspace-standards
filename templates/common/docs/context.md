@@ -198,6 +198,49 @@ Research results must follow the File Organization Policy:
 
 ---
 
+## Computational Integrity Standards
+
+For domains requiring high-precision or safety-critical numerical computation, **AI must NOT perform calculations directly**. Delegate to validated external tools instead.
+
+### When External Tools Are Mandatory (Class A)
+
+Use an external computation tool when the task involves ANY of the following:
+
+- **Safety-critical engineering**: aerospace, aviation, nuclear, medical devices, structural engineering
+- **Precision control systems**: PID tuning, transfer functions, stability margins, orbital mechanics, guidance systems
+- **Regulated financial calculations**: accounting, tax, contract amounts, options pricing (Black-Scholes etc.), VaR, WACC, IRR/NPV with legal implications
+- **High-precision requirements**: results requiring more than 4 decimal places of reliability
+- **Iterative numerical methods**: differential equation solving, loops > 100 iterations
+
+### Recommended Tools by Domain
+
+| Domain | Recommended Tool | Install |
+|--------|-----------------|---------|
+| Aerospace / Precision Control | Fortran (gfortran), Julia | `apt install gfortran` / `juliaup` |
+| Financial / Statistical | Python + NumPy, SciPy, pandas | `pip install numpy scipy pandas` |
+| Structural / Thermal Analysis | Python + FEniCS, Fortran | domain-specific |
+| General Scientific Computation | Python + NumPy | `pip install numpy` |
+
+### Required Procedure
+
+1. **Check availability**: verify the tool is installed (`which gfortran`, `python -c "import numpy"`)
+2. **Install if missing**: route through the `stack-setup` agent — **never install tools without security review and explicit user approval**
+3. **Write computation code**: document the algorithm, inputs, units, and assumptions in comments
+4. **Execute and validate**: verify units, test boundary values and edge cases
+5. **Document result**: state `Computed using: <tool> v<version>, code: <file-path>`
+
+### AI Estimation vs. Tool Computation
+
+| Scenario | Approach |
+|----------|----------|
+| Order-of-magnitude check or hypothesis formation | AI direct — label clearly as **approximate** |
+| Any Class A domain computation | External tool — mandatory |
+| Result to be cited, reported, or acted upon | External tool — mandatory |
+
+> **Rule**: When in doubt whether a computation requires a tool, use a tool. An AI-estimated result presented as authoritative is a safety and accuracy risk.
+
+---
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
