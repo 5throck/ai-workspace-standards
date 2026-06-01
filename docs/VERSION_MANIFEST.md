@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T09:09:28.206Z
+**Generated**: 2026-06-01T09:24:21.948Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -40,7 +40,7 @@
 | audit-workspace | 1.0.0 | .claude/skills/audit-workspace/SKILL.md | both | N/A | auditor |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
 | meeting-facilitation | 1.3.2 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
-| meeting-facilitation | 1.3.1 | .claude/skills/meeting-facilitation/SKILL.md | both | N/A | pm |
+| meeting-facilitation | 1.3.2 | .claude/skills/meeting-facilitation/SKILL.md | both | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
