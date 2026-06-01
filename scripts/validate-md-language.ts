@@ -1,16 +1,52 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.2.0
 /**
- * Markdown Language Validation Script
+ * Markdown Language Validation Script with I18N Support
  *
- * Policy: All .md files outside ko/ and locales/ko/ must contain English sentences.
- * Korean-only content is considered a violation of CONSTITUTION.md §3.
+ * Policy: Official documents and governance files must contain English sentences.
+ * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md,
+ * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
+ * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
+ * templates/, and SECURITY.md.
+ *
+ * Excludes: memory/ logs, docs/superpowers/, docs/adr/, locale-specific files
+ * for all supported I18N languages, and node_modules/.git directories.
+ *
+ * Locale-only content in excluded paths is acceptable. Mixed-language content
+ * is acceptable in all paths.
+ *
+ * Reference: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts
+ *            CONSTITUTION.md §4 - Internationalization (I18N)
  *
  * Usage: bun run scripts/validate-md-language.ts
  * Exit codes: 0 (pass), 1 (violation found)
  */
 
 import { readFileSync } from "fs";
+
+/**
+ * Supported locale codes for I18N exclusion.
+ * Add new language codes here to extend i18n support.
+ * Reference: CONSTITUTION.md §4 — Internationalization (i18n)
+ */
+const SUPPORTED_LOCALES: string[] = [
+  "ko",     // Korean
+  "ja",     // Japanese
+  "zh-CN",  // Chinese Simplified
+  "zh-TW",  // Chinese Traditional
+  "de",     // German
+  "es",     // Spanish
+  "fr",     // French
+  "pt",     // Portuguese
+  "vi",     // Vietnamese
+  "ms",     // Malay
+  "id",     // Indonesian
+  "th",     // Thai
+  "ru",     // Russian
+  "it",     // Italian
+  "ar",     // Arabic (RTL)
+  // Add future locale codes below this line
+];
 
 // Korean character range (Hangul syllables and jamo)
 const KOREAN_PATTERN = /[가-힯ᄀ-ᇿ]/;
@@ -24,32 +60,80 @@ interface Violation {
 }
 
 /**
- * Check if file path should be excluded from English validation
- * Exempts: 1) ko/ or locales/ko/ directories, 2) Files with _ko/.ko./-ko patterns
+ * Check if file path is an OFFICIAL document that requires English validation
+ *
+ * Only validates these allowlisted paths:
+ * - agents/ (subdirectories)
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
+ * - docs/constitution/ (subdirectories)
+ * - docs/governance/ (subdirectories)
+ * - skills/ (subdirectories)
+ * - .claude/skills/, .claude/commands/ (subdirectories)
+ * - .gemini/skills/, .gemini/commands/ (subdirectories)
+ * - templates/ (subdirectories)
+ */
+function isOfficialDocument(filePath: string): boolean {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+
+  // Allowlisted official paths
+  const officialPatterns = [
+    /^agents\/.*\.md$/,
+    /^AGENTS\.md$/,
+    /^CLAUDE\.md$/,
+    /^GEMINI\.md$/,
+    /^CONSTITUTION\.md$/,
+    /^CHANGELOG\.md$/,
+    /^SECURITY\.md$/,
+    /^docs\/constitution\/.*\.md$/,
+    /^docs\/governance\/.*\.md$/,
+    /^skills\/.*\.md$/,
+    /^\.claude\/skills\/.*\.md$/,
+    /^\.claude\/commands\/.*\.md$/,
+    /^\.gemini\/skills\/.*\.md$/,
+    /^\.gemini\/commands\/.*\.md$/,
+    /^templates\/.*\.md$/,
+  ];
+
+  return officialPatterns.some(pattern => pattern.test(normalizedPath));
+}
+
+/**
+ * Check if file path is a locale-specific path for any supported I18N language.
+ * Dynamically built from SUPPORTED_LOCALES to support extensibility.
+ */
+function isI18nLocalePath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/");
+  return SUPPORTED_LOCALES.some(locale => {
+    return (
+      normalized.endsWith(`_${locale}.md`) ||        // README_ko.md
+      normalized.endsWith(`-${locale}.md`) ||        // README-ko.md
+      normalized.endsWith(`.${locale}.md`) ||        // README.ko.md
+      normalized.startsWith(`${locale}/`) ||         // ko/...
+      normalized.includes(`/${locale}/`) ||          // .../ko/...
+      normalized.startsWith(`locales/${locale}/`) || // locales/ko/...
+      normalized.includes(`/locales/${locale}/`)     // .../locales/ko/...
+    );
+  });
+}
+
+/**
+ * Check if file path should be explicitly excluded (locale files, infrastructure)
  */
 function isExcludedPath(filePath: string): boolean {
   const normalizedPath = filePath.replace(/\\/g, "/");
 
-  // Condition 1: Directory exclusion
-  if (normalizedPath.startsWith("ko/") ||
-      normalizedPath.includes("/ko/") ||
-      normalizedPath.startsWith("locales/ko/") ||
-      normalizedPath.includes("/locales/ko/")) {
+  // I18N: exclude locale-specific files and directories for all supported languages
+  if (isI18nLocalePath(normalizedPath)) {
     return true;
   }
 
-  // Condition 1.5: Individual project directories (excluded from workspace validation scope)
-  if (normalizedPath.startsWith("Product-Planning/") ||
-      normalizedPath.startsWith("abap_vibe_coding/")) {
+  // Exclude planning/draft docs (locale-only content is acceptable here)
+  if (normalizedPath.startsWith("docs/superpowers/") ||
+      normalizedPath.startsWith("docs/adr/")) {
     return true;
   }
 
-  // Condition 2: Filename patterns (_ko.md, .ko., -ko)
-  const filename = normalizedPath.split("/").pop() || "";
-  return filename.endsWith("_ko.md") ||
-         filename.includes("_ko") ||
-         filename.includes(".ko.") ||
-         filename.includes("-ko");
+  return false;
 }
 
 /**
@@ -103,12 +187,20 @@ async function validateMarkdownLanguage(): Promise<void> {
   });
 
   const violations: Violation[] = [];
+  let officialCount = 0;
 
   for (const file of mdFiles) {
+    // Skip excluded paths (locales, planning docs)
     if (isExcludedPath(file)) {
-      continue; // Skip Korean directories
+      continue;
     }
 
+    // Only validate official documents
+    if (!isOfficialDocument(file)) {
+      continue;
+    }
+
+    officialCount++;
     const violation = analyzeFile(file);
     if (violation) {
       violations.push(violation);
@@ -117,16 +209,17 @@ async function validateMarkdownLanguage(): Promise<void> {
 
   // Report results
   if (violations.length === 0) {
-    console.log("✅ No Korean-only markdown files found.\n");
-    console.log(`   Scanned ${mdFiles.length} markdown files`);
+    console.log("✅ No language-only violations in official documents.\n");
+    console.log(`   Scanned ${officialCount} official markdown files (agents, governance, skills, templates)`);
+    console.log(`   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`);
     process.exit(0);
   } else {
-    console.log(`❌ Found ${violations.length} Korean-only markdown file(s):\n`);
+    console.log(`❌ Found ${violations.length} Korean-only violation(s) in official documents:\n`);
     violations.forEach((v) => {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: All .md files outside ko/ and locales/ko/ must contain English sentences.");
+    console.log("Policy: Official documents (agents, governance, skills, templates, etc.) must contain English sentences.");
     console.log("See: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts\n");
     process.exit(1);
   }
