@@ -11,7 +11,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then invoke the `Agent` tool to dispatch specialist agents
-3. Never bypass PM workflow ??direct specialist invocation is forbidden
+3. Never bypass PM workflow — direct specialist invocation is forbidden
 
 > **Desktop App**: The Role Declaration and Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway. Treat them as strictly binding.
 
@@ -22,8 +22,8 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ### 1. Automated Hooks (`.claude/settings.json`)
 The workspace `.claude/settings.json` currently has **two active hook types**:
 
-- **SessionStart** ??runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
-- **PostToolUse** is **enabled** ??fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
+- **SessionStart** — runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
+- **PostToolUse** is **enabled** — fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
 
 To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
 

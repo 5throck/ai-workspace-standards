@@ -11,6 +11,9 @@ metadata:
 **Source**: Project Review Meeting (A-01~A-15) + Unresolved Items Follow-up Meeting (B-01~B-04)  
 **Status snapshot**: A-15 complete (co-security → stable), B-03 partial (stable transition done, engagement_criteria pending B-02)
 
+**Lifecycle decisions recorded**:
+- `list-template-versions.sh/.ps1` Tier 1 wrappers: **rejected**. `list-template-versions.ts` is Tier 2 (bun required for workspace anyway); wrappers add maintenance burden with no benefit. `new-project.sh/.ps1` error messages updated to reference `bun scripts/list-template-versions.ts` directly. A-10 scope revised accordingly — only the 4 missing *other* `.ps1` pairs (dev-sync, gen-pr-body, sync-md, setup) remain, and each must be evaluated on the same grounds before creation.
+
 **Why:** Cross-modification conflicts between 17 action items across shared directories (scripts/, skills/, templates/common/, docs/adr/) require sequenced PR waves to prevent file-level merge conflicts and logical ordering violations.  
 **How to apply:** Before opening any PR, verify its Wave prereqs are met. Never bundle items marked as sequential into a single PR. Run the Wave QA gate before starting the next wave.
 
@@ -48,7 +51,7 @@ All three PRs have no file overlap → open simultaneously.
 |----|---------|-------|-----------|--------|
 | PR-4 | A-08 | lifecycle-manager | `skills/meeting-facilitation/SKILL.md`, `.claude/skills/meeting-facilitation/SKILL.md` | Wave 1 |
 | PR-5 | A-09 | security-expert + automation-engineer | `.github/workflows/test.yml` | Wave 1 |
-| PR-6 | A-05 + A-10 | automation-engineer + lifecycle-manager | `scripts/*.ts` (32 @version), `scripts/*.ps1` (4 new) | **PR-1 merge** |
+| PR-6 | A-05 + A-10 | automation-engineer + lifecycle-manager | `scripts/*.ts` (32 @version), `.ps1` pairs for dev-sync/gen-pr-body/sync-md/setup only if Tier 1 justified | **PR-1 merge** |
 | PR-7 | A-06 + A-07 + A-13 | lifecycle-manager + docs-writer + scaffolding-expert | `templates/common/skills/` (3), `templates/common/{CLAUDE.md,GEMINI.md,CONSTITUTION.md,CHANGELOG.md,.gitignore,package.json}` | Wave 1 |
 | PR-8 | B-02 | architect + security-expert | `workspace-schema.json`, `templates/co-security/variant.json` | Wave 1 |
 
