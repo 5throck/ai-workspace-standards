@@ -11,7 +11,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then invoke the `Agent` tool to dispatch specialist agents
-3. Never bypass PM workflow — direct specialist invocation is forbidden
+3. Never bypass PM workflow ??direct specialist invocation is forbidden
 
 > **Desktop App**: The Role Declaration and Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway. Treat them as strictly binding.
 
@@ -22,8 +22,8 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ### 1. Automated Hooks (`.claude/settings.json`)
 The workspace `.claude/settings.json` currently has **two active hook types**:
 
-- **SessionStart** → runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
-- **PostToolUse** is **enabled** — fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
+- **SessionStart** ??runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
+- **PostToolUse** is **enabled** ??fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
 
 To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
 
@@ -45,14 +45,14 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
+> ?좑툘 **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
-| SessionStart (git hooks) | Claude Code CLI | ✅ | runs `git config core.hooksPath .githooks` |
-| SessionStart (git hooks) | Claude Code Desktop App | ❌ | hooks don't fire; run manually |
-| PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
-| PostToolUse (audit) | Claude Code Desktop App | ❌ | Hooks don't fire; run `bun scripts/audit.ts` manually |
+| SessionStart (git hooks) | Claude Code CLI | ??| runs `git config core.hooksPath .githooks` |
+| SessionStart (git hooks) | Claude Code Desktop App | ??| hooks don't fire; run manually |
+| PostToolUse (audit) | Claude Code CLI | ??| Runs `bun scripts/audit.ts` async after every Write/Edit |
+| PostToolUse (audit) | Claude Code Desktop App | ??| Hooks don't fire; run `bun scripts/audit.ts` manually |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
@@ -63,7 +63,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.ts` |
+| `/sync "feat: ..."` | Full pipeline - memlog ??sync-md ??changelog ??audit ??commit ??PR | `scripts/dev-sync.ts` |
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
@@ -72,9 +72,9 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
-> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
+> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md 짠6 ??Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
 
-> **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` calls are blocked by the pre-commit hook unless executed through `/sync`. The hook checks for the `SYNC_ACTIVE=1` environment variable which only `dev-sync.ts` sets. If you see `[FAIL] Direct git commits are restricted`, run `/sync "type: description"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
+> **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via bash/powershell/run_command are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. All commits MUST go through the approved `/sync` pipeline or `dev-sync.ts`. **`--no-verify` is also forbidden**.
 
 ### 3. MCP Configurations & Absolute Resolving
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
@@ -84,15 +84,15 @@ Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the De
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
-- All documentation in docs/, agents/, skills/ → English only
-- Git commit messages, PR titles, PR descriptions → English only
-- Branch names → English only
-- Code comments → English (unless documenting locale-specific logic)
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md ??English only
+- All documentation in docs/, agents/, skills/ ??English only
+- Git commit messages, PR titles, PR descriptions ??English only
+- Branch names ??English only
+- Code comments ??English (unless documenting locale-specific logic)
 
 ### Skill Resolution Priority
 
-When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+When a user request matches a skill trigger, apply this priority order ??**enforced every session, regardless of platform**:
 
 | Priority | Source | Location |
 |----------|--------|----------|
@@ -100,9 +100,9 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | **2** | Platform config skills | `.gemini/skills/` or `.claude/skills/` in the project root |
 | **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
 
-**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it ??do **not** fall through to a global plugin with overlapping intent.
 
-**Canonical conflict — meeting vs. brainstorming**:
+**Canonical conflict ??meeting vs. brainstorming**:
 
 | User says | Correct skill | Priority |
 |-----------|--------------|----------|
@@ -116,7 +116,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See [CONSTITUTION.md 짠5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
@@ -124,11 +124,11 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update | lifecycle-manager (workspace) / pm (variant) | Medium | [Model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model] |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
-*Rule: You MUST always include the Final QA Audit followed by the Lifecycle Update as the final two steps of the plan.*
+*Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
 
 #### Specialist Agent List
 All agents below require PM dispatch:
@@ -148,16 +148,16 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
 2. Output the Escalation Template immediately
 3. Log the denial to `memory/YYYY-MM-DD.md`
-4. Halt the blocked task — do not proceed without the required tool
+4. Halt the blocked task ??do not proceed without the required tool
 
-See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
-> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
-> **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium (claude-sonnet-4-6) ??upgraded from Low per 2026-05-28 team restructuring.
 
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
@@ -178,9 +178,9 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
-- **High-tier (Design/Planning)** ➔ `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
-- **Medium-tier (Review/QA)** ➔ `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** ➔ `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
+- **High-tier (Design/Planning)** ??`claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
+- **Medium-tier (Review/QA)** ??`claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** ??`claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ### 7. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
@@ -201,19 +201,24 @@ When working in a plan-mode session:
 - Update status to `completed` immediately upon verification of the step.
 - Never leave tasks `in_progress` at the end of a session.
 
-### 9. Lifecycle Management Rules
+### 9. Workspace & Template Boundary Policy
 
-> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
+- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### 10. Lifecycle Management Rules
+
+> ?좑툘 If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
 When modifying files, apply the following rules **before** running `/sync` or committing:
 
 | Modified file(s) | Required follow-up actions |
 |-----------------|---------------------------|
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
-| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
-| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `agents/*.md` | Update `AGENTS.md` roster table ??run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md 짠 Skills` table ??run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity ??CONSTITUTION.md 짠10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` ??must pass P-01 platform parity check |
 
 **Verification** (run after any of the above):
 ```bash
@@ -221,9 +226,9 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+> Full rules: [짠5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) 쨌 [짠6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) 쨌 [짠6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 
-### 10. Custom Command Error Recovery
+### 11. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
@@ -231,11 +236,11 @@ If a custom slash command or background script returns a non-zero exit code:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
 
-### 11. Windows Platform Requirement
+### 12. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
-- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) ??install if not present.
 - Verify: `git config core.hooksPath` should point to `.githooks/`
 - `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
@@ -244,8 +249,10 @@ If a custom slash command or background script returns a non-zero exit code:
 
 ## Git & PR Additions (Claude Code)
 
-All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
 
-- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-01 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+
+

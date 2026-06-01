@@ -45,7 +45,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 - When no specific orchestrator is assigned, **always create `agents/pm.md`** - PM orchestrates Phases 0, 2, and 6 only.
 - PM dispatches independent tasks as **parallel agents in a single message** (never sequential).
 - **Autonomous Agent Handoffs**: Agents can dispatch each other directly via JSON contracts for routine workflows without PM intervention
-- **Independent QA Gate**: Auditor owns Phase 5 QA gate autonomously using qa-gate.sh/.ps1 scripts
+- **Independent QA Gate**: Auditor owns Phase 6 QA gate autonomously using qa-gate.sh/.ps1 scripts
 - Agents communicate via **structured JSON Input Contracts**:
 
 ```json
@@ -79,15 +79,15 @@ Phase 4 - Execution (specialist-autonomous)
   automation-engineer implements per approved plan
   docs-writer updates documentation as needed
 
-Phase 5 - Quality Assurance (specialist-autonomous)
+Phase 5 - Lifecycle Finalization (PM-owned)
+  PM logs decisions to memory/YYYY-MM-DD.md
+  lifecycle-manager updates governance records
+
+Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   security-expert reviews for vulnerabilities and compliance
   auditor executes qa-gate.sh/.ps1 autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-
-Phase 6 - Lifecycle Finalization (PM-owned)
-  PM logs decisions to memory/YYYY-MM-DD.md
-  lifecycle-manager updates governance records
   PM runs /sync "type: description" → PR opened
 ```
 

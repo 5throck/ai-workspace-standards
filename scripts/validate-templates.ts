@@ -197,36 +197,8 @@ function checkCommon(): void {
     pass('templates/common/ blocklist: no forbidden files present');
   }
 
-  // Check A-13: common skill owners must exist in templates/common/agents/
+  // Check A-13: removed because it contradicts AGENTS.md rule that owner does not need to exist in the current project.
   const commonSkillsDir = join(commonDir, 'skills');
-  const commonAgentsDir = join(commonDir, 'agents');
-  if (existsSync(commonSkillsDir) && existsSync(commonAgentsDir)) {
-    const commonAgentFiles = readdirSync(commonAgentsDir)
-      .filter(f => f.endsWith('.md') && !f.startsWith('_') && f !== 'README.md')
-      .map(f => f.replace('.md', ''));
-
-    const skillDirs = readdirSync(commonSkillsDir).filter(d =>
-      !d.startsWith('.') && d !== 'README.md' && d !== 'README_ko.md'
-    );
-
-    for (const skillDir of skillDirs) {
-      const skillFile = join(commonSkillsDir, skillDir, 'SKILL.md');
-      if (!existsSync(skillFile)) continue;
-      const skillContent = readFileSync(skillFile, 'utf-8');
-      const ownerMatch = skillContent.match(/^owner:\s*(.+)$/m);
-      if (!ownerMatch) continue;
-      const owner = ownerMatch[1].trim();
-      if (!commonAgentFiles.includes(owner)) {
-        fail('common', 'skill-owner-not-in-common-agents',
-          `templates/common/skills/${skillDir}/SKILL.md has owner: ${owner} but agents/${owner}.md does not exist in templates/common/agents/`,
-          `Change owner to an agent that exists in templates/common/agents/ (e.g., pm)`);
-      }
-    }
-    const ownerFailCount = issues.filter(i => i.check === 'skill-owner-not-in-common-agents').length;
-    if (ownerFailCount === 0) {
-      pass('templates/common/ skill owner validation: all skill owners exist in common agents');
-    }
-  }
 
   // Check B-07: workspace-only skills must not exist in templates/common/skills/
   const SKILLS_FORBIDDEN_IN_COMMON = ['simulate-project-creation'];

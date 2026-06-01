@@ -92,7 +92,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 
 ### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for Auditor/QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → QA → Finalization). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → Finalization → QA). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
@@ -133,7 +133,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 
 | Category | Condition | Examples |
 |----------|-----------|---------|
-| **Common agent** | Exists identically across all variants | `pm.md`, `lifecycle-manager.md` |
+| **Common agent** | Exists identically across all variants | `pm.md`, `automation-engineer.md` |
 | **Common skill** | Used in all variants without modification | `project-review`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `skill-lifecycle-manager`, `agent-lifecycle-manager` |
 | **Variant-specific** | Unique to one variant; not applicable elsewhere | Domain-expert agents, variant-only skills |
 
@@ -142,7 +142,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 | Type | When to use | Approval | `variant.json` declaration |
 |------|-------------|----------|----------------------------|
 | **Additive** | Variant appends sections to a common file | Auto-approved | `"type": "additive"` |
-| **Replacement** | Variant modifies common content | Requires lifecycle-manager review before commit | `"type": "replacement"` |
+| **Replacement** | Variant modifies common content | Requires PM review before commit | `"type": "replacement"` |
 
 Additive overrides are concatenated with the common file during scaffolding. Replacement overrides fully substitute the common file. Both types require `reason` and `since` fields in the `variant.json` entry.
 
@@ -165,7 +165,7 @@ If **≥ 50 %** of variants declare an override for the same agent or skill, the
      "since": "2026-05-30"
    }
    ```
-3. For **replacement** overrides, open a PR and request lifecycle-manager review before merging.
+3. For **replacement** overrides, open a PR and request PM review before merging.
 
 ---
 
@@ -177,7 +177,7 @@ Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Codin
 
 ### 9. Operations Workflow → [Full details](docs/constitution/09-operations-workflow.md)
 
-Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect + Auditor, first Friday): Review deprecated items ≥30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `sync-agent-status.sh` and `sync-skill-status.sh` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
+Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `sync-agent-status.sh` and `sync-skill-status.sh` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
 
 ---
 
@@ -244,5 +244,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-05-31*
+*Last Updated: 2026-06-01*
 

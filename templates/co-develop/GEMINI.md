@@ -11,7 +11,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then use `invoke_subagent` to dispatch specialist agents
-3. Never bypass PM workflow — direct specialist invocation is forbidden
+3. Never bypass PM workflow ??direct specialist invocation is forbidden
 
 > **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
@@ -29,18 +29,18 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Surgical Edit** | `replace_file_content` | Replace a single contiguous block of code. Specify `StartLine`, `EndLine`, `TargetContent`, and `ReplacementContent` with 100% exact leading whitespace matching. |
 | **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file simultaneously. Order chunks descendingly (bottom-to-top) to avoid line offsets. |
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
-| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. NEVER run `git commit --no-verify` or `git push --no-verify` — forbidden in this workspace. All commits must go through `bun scripts/dev-sync.ts` (sets `SYNC_ACTIVE=1`). Direct `git commit` calls are blocked by pre-commit hook. |
+| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. ?슚 **STRICT BAN**: NEVER run `git commit` or `git push` directly via this tool (e.g., using `$env:SYNC_ACTIVE=1; git commit` to bypass QA gates is FORBIDDEN). All commits must go through the approved `/sync` pipeline or `bun scripts/dev-sync.ts`. |
 
-#### 🚨 Surgical Multi-Replace Offset Safeguard
+#### ?슚 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 - This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
-#### 🚨 Windows Terminal & Code Page Safeguard
+#### ?슚 Windows Terminal & Code Page Safeguard
 When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
 - **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
 
-#### 🚨 Grep Search 50-Match Cap Safeguard
+#### ?슚 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
@@ -99,17 +99,17 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
-> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 
 #### Define Subagent (`define_subagent`)
 Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "auditor",
-  "description": "Cross-validates documentation and ensures rules are not contradicted",
-  "system_prompt": "You are a consistency auditor...",
-  "enable_write_tools": false,
+  "name": "docs-writer",
+  "description": "Standardizes Markdown documentation and manages translations",
+  "system_prompt": "You are a docs writer...",
+  "enable_write_tools": true,
   "enable_subagent_tools": false
 }
 ```
@@ -120,15 +120,15 @@ Spawn parallel instances to execute dedicated work concurrently.
 {
   "Subagents": [
     {
-      "TypeName": "auditor",
-      "Role": "Consistency Auditor",
-      "Prompt": "Cross-validate the documentation changes and check for contradictions"
+      "TypeName": "docs-writer",
+      "Role": "Documentation Writer",
+      "Prompt": "Standardize the new feature documentation in the docs folder"
     }
   ]
 }
 ```
 
-> ⚠️ **Subagent commit rule**: Subagents must NOT issue `git commit` or `git push` directly. All commits must be initiated by PM via `/sync` command only. Direct commits are blocked by the pre-commit `SYNC_ACTIVE` gate.
+> ?좑툘 **Subagent commit rule**: Subagents must NOT issue `git commit` or `git push` directly. All commits must be initiated by PM via `/sync` command only. Direct commits are blocked by the pre-commit `SYNC_ACTIVE` gate.
 
 #### Communication (`send_message`)
 Interact and exchange contracts with spawned agents via their unique `conversationID`.
@@ -145,9 +145,9 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- **High-tier (Design/Planning)** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** → `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** → `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
+- **High-tier (Design/Planning)** ??`gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
+- **Medium-tier (Review/QA)** ??`gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** ??`gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ---
 
@@ -155,15 +155,15 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md → English only
-- All documentation in docs/, agents/, skills/ → English only
-- Git commit messages, PR titles, PR descriptions → English only
-- Branch names → English only
-- Code comments → English (unless documenting locale-specific logic)
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md ??English only
+- All documentation in docs/, agents/, skills/ ??English only
+- Git commit messages, PR titles, PR descriptions ??English only
+- Branch names ??English only
+- Code comments ??English (unless documenting locale-specific logic)
 
 ### 5. Agent Dispatch Rules
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See [CONSTITUTION.md 짠5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
@@ -180,7 +180,7 @@ All agents below require PM dispatch:
 - automation-engineer (Phase 4)
 - docs-writer (Phase 4)
 - scaffolding-expert (Phase 0)
-- security-expert (Phase 5)
+- security-expert (Phase 6)
 
 #### Permission Denial Protocol
 
@@ -189,13 +189,13 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
 2. Output the Escalation Template immediately
 3. Log the denial to `memory/YYYY-MM-DD.md`
-4. Halt the blocked task — do not proceed without the required tool
+4. Halt the blocked task ??do not proceed without the required tool
 
-See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 #### Skill Resolution Priority
 
-When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+When a user request matches a skill trigger, apply this priority order ??**enforced every session, regardless of platform**:
 
 | Priority | Source | Location |
 |----------|--------|----------|
@@ -203,9 +203,9 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | **2** | Platform config skills | `.gemini/skills/` in the project root |
 | **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
 
-**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it ??do **not** fall through to a global plugin with overlapping intent.
 
-**Canonical conflict — meeting vs. brainstorming**:
+**Canonical conflict ??meeting vs. brainstorming**:
 
 | User says | Correct skill | Priority |
 |-----------|--------------|----------|
@@ -219,19 +219,24 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
-### 6. Lifecycle Management Rules
+### 6. Workspace & Template Boundary Policy
 
-> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
+- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### 7. Lifecycle Management Rules
+
+> ?좑툘 If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
 When modifying files, apply the following rules **before** running `/sync` or committing:
 
 | Modified file(s) | Required follow-up actions |
 |-----------------|---------------------------|
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
-| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
-| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `agents/*.md` | Update `AGENTS.md` roster table ??run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md 짠 Skills` table ??run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity ??CONSTITUTION.md 짠10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` ??must pass P-01 platform parity check |
 
 **Verification** (run after any of the above):
 ```bash
@@ -239,19 +244,22 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) · [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) · [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+> Full rules: [짠5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) 쨌 [짠6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) 쨌 [짠6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 
 ---
 
 ## Git & PR Additions (Gemini)
 
-All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`bun scripts/audit.ts` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
-- **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` calls are blocked by the pre-commit hook unless executed through `/sync`. The hook checks for `SYNC_ACTIVE=1` which only `dev-sync.ts` sets. If you see `[FAIL] Direct git commits are restricted`, run `/sync "type: description"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
-- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via `run_command` are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. If you see `[FAIL] Direct git commits are restricted`, run `/sync \"type: description\"` instead. **`--no-verify` is forbidden** ??it bypasses secret scanning and all quality gates.
+- **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-*Last Updated: 2026-05-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-01 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+
+
+
 
 

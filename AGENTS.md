@@ -17,9 +17,8 @@
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 6); reduced bottleneck role |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 5); reduced bottleneck role |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
-| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper; dispatched by PM at Phase 6 Finalization when lifecycle-managed artifacts change; secretary role — records, does not decide |
 
 ### 📐 Design
 
@@ -65,7 +64,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
 2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
 3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 5 QA
+4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
 
 ### Specialist Agent Dispatch Flow
 ```
@@ -82,9 +81,8 @@ All specialist agents below are dispatched ONLY through PM:
 | **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
 | **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
 | **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
-| **security-expert** | 5 | "Security review", "Hook configuration", "Secret detection" |
-| **auditor** | 5 | "Quality verification", "Documentation consistency check", "QA gate required" |
-| **lifecycle-manager** | 6 | "Governance documents update", "Lifecycle state report", "Phase 6 Finalization" |
+| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
+| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -107,7 +105,7 @@ All specialist agents below are dispatched ONLY through PM:
 ### Enforcement
 - Pre-commit audit checks for Korean content outside ko/ and locales/ko/
 - PR reviews reject non-English documentation outside translation zones
-- Auditor validates compliance during Phase 5 QA gate
+- Auditor validates compliance during Phase 6 QA gate
 
 ### Git/PR Artifacts Language Rule
 - All commit messages: English
@@ -151,8 +149,8 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 ### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 6 (Finalization)
-3. **Independent QA Gate** - Auditor owns Phase 5 QA gate autonomously using bun scripts/qa-gate.ts
+2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Finalization)
+3. **Independent QA Gate** - Auditor owns Phase 6 QA gate autonomously using bun scripts/qa-gate.ts
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
@@ -198,14 +196,15 @@ Phase 4 - Execution (specialist-autonomous)
   Documentation Writer updates docs as needed
   Agents can dispatch each other directly for routine handoffs
 
-Phase 5 - Quality Assurance (specialist-autonomous)
-  Auditor executes bun scripts/qa-gate.ts autonomously
+Phase 5 - Lifecycle Finalization (PM-owned)
+  PM updates governance records for any changed artifacts
+  PM logs decisions to memory/YYYY-MM-DD.md
+
+Phase 6 - Quality Assurance & Finalization (specialist-autonomous in workspace, PM in variants)
+  Auditor (workspace) executes bun scripts/qa-gate.ts autonomously
+  PM (variants) executes qa scripts
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-
-Phase 6 - Lifecycle Finalization (PM-owned)
-  lifecycle-manager updates governance records for any changed artifacts
-  PM logs decisions to memory/YYYY-MM-DD.md
   PM runs /sync "type: description" → PR opened
 ```
 
@@ -276,9 +275,9 @@ All agents, regardless of their role, must adhere to the following:
 
 ## Lifecycle Management
 
-### Phase 6 Finalization — Lifecycle Manager Review (Mandatory)
+### Phase 5 Finalization
 
-At **Phase 6 (Finalization)**, PM **must** dispatch `lifecycle-manager` when any of the following occurred in the session:
+At **Phase 5 (Finalization)**, PM **must** execute finalization when any of the following occurred in the session:
 
 | Trigger | Dispatch lifecycle-manager? |
 |---------|---------------------------|
@@ -294,9 +293,9 @@ At **Phase 6 (Finalization)**, PM **must** dispatch `lifecycle-manager` when any
 | README/documentation-only changes | ❌ No |
 | Memory log entries only | ❌ No |
 
-The lifecycle-manager will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
+PM will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
 
-PM does NOT dispatch lifecycle-manager for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
+PM does NOT execute finalization updates for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
 
 ---
 
