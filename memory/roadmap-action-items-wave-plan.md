@@ -15,6 +15,7 @@ metadata:
 - Wave 1: PR #183 — A-01, A-02+A-03, A-04 ✅
 - Wave 2: PR #184, #185(conflict-resolved into #184), #186 — A-05, A-08, A-09, A-13, B-02 ✅
 - Wave 3: PR #187 — A-11, A-12, A-14, B-01, B-03(no-op) ✅
+- B-04: PR #188 — propagate-to-templates.ts + propagation-map.json ✅ (completed 2026-06-01, ahead of 2026-06-15 schedule)
 
 **A-07 cancelled**: templates/common/CLAUDE.md & GEMINI.md — validator explicitly rejects workspace-level files in templates/common (must-not-exist rule). Original review diagnosis was incorrect.
 **A-06 already done**: 3 skills were already synced to templates/common before this session.
