@@ -1,5 +1,6 @@
 ---
 name: Consistency Auditor
+role: specialist
 status: active
 tier:
   claude: medium

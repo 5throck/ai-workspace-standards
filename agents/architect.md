@@ -1,5 +1,6 @@
 ---
 name: Template Architect
+role: specialist
 status: active
 tier:
   claude: high

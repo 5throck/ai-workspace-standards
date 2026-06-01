@@ -1,5 +1,6 @@
 ---
 name: Security & Git Expert
+role: specialist
 status: active
 tier:
   claude: medium

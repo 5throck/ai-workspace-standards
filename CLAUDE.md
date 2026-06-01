@@ -45,14 +45,14 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> ?좑툘 **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
+> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
-| SessionStart (git hooks) | Claude Code CLI | ??| runs `git config core.hooksPath .githooks` |
-| SessionStart (git hooks) | Claude Code Desktop App | ??| hooks don't fire; run manually |
-| PostToolUse (audit) | Claude Code CLI | ??| Runs `bun scripts/audit.ts` async after every Write/Edit |
-| PostToolUse (audit) | Claude Code Desktop App | ??| Hooks don't fire; run `bun scripts/audit.ts` manually |
+| SessionStart (git hooks) | Claude Code CLI | ✅ | runs `git config core.hooksPath .githooks` |
+| SessionStart (git hooks) | Claude Code Desktop App | ✅ | hooks don't fire; run manually |
+| PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
+| PostToolUse (audit) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/audit.ts` manually |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
@@ -63,7 +63,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 
 | Command | Purpose | Underlying Trigger |
 |---------|---------|--------------------|
-| `/sync "feat: ..."` | Full pipeline - memlog ??sync-md ??changelog ??audit ??commit ??PR | `scripts/dev-sync.ts` |
+| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.ts` |
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
@@ -72,7 +72,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
-> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md 짠6 ??Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
+> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
 
 > **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via bash/powershell/run_command are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. All commits MUST go through the approved `/sync` pipeline or `dev-sync.ts`. **`--no-verify` is also forbidden**.
 
@@ -84,15 +84,15 @@ Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the De
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md ??English only
-- All documentation in docs/, agents/, skills/ ??English only
-- Git commit messages, PR titles, PR descriptions ??English only
-- Branch names ??English only
-- Code comments ??English (unless documenting locale-specific logic)
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md — English only
+- All documentation in docs/, agents/, skills/ — English only
+- Git commit messages, PR titles, PR descriptions — English only
+- Branch names — English only
+- Code comments — English (unless documenting locale-specific logic)
 
 ### Skill Resolution Priority
 
-When a user request matches a skill trigger, apply this priority order ??**enforced every session, regardless of platform**:
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
 
 | Priority | Source | Location |
 |----------|--------|----------|
@@ -100,9 +100,9 @@ When a user request matches a skill trigger, apply this priority order ??**enfor
 | **2** | Platform config skills | `.gemini/skills/` or `.claude/skills/` in the project root |
 | **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
 
-**Rule**: If a local skill's `metadata.triggers` matches the user request, use it ??do **not** fall through to a global plugin with overlapping intent.
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
 
-**Canonical conflict ??meeting vs. brainstorming**:
+**Canonical conflict — meeting vs. brainstorming**:
 
 | User says | Correct skill | Priority |
 |-----------|--------------|----------|
@@ -116,7 +116,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See [CONSTITUTION.md 짠5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
@@ -129,7 +129,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 *Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
-*Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root ??specialist dispatch" or "**Context**: variant project ??pm direct".*
+*Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct".*
 
 #### Specialist Agent List
 All agents below require PM dispatch:

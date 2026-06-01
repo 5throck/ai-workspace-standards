@@ -1,5 +1,6 @@
 ---
 name: Documentation Writer
+role: specialist
 status: active
 tier:
   claude: medium

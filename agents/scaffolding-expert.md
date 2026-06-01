@@ -1,5 +1,6 @@
 ---
 name: Scaffolding Expert
+role: specialist
 status: active
 tier:
   claude: low
