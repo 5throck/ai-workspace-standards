@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 import { $ } from "bun";
@@ -99,13 +99,9 @@ async function main() {
     } catch { /* ignore binary read errors */ }
   }
 
-  // 2-B. Enforce English Only in PR Artifacts
-  // Skip memory files for abap projects (session logs can be in Korean)
-  const docsToCheck = staged.filter(f => {
-    const normalized = f.replace(/\\/g, '/');
-    if (isAbapVibeProject && normalized.startsWith('memory/')) return false;
-    return /^memory\/.*\.md$|^CHANGELOG\.md$/.test(normalized);
-  });
+  // 2-B. Enforce English Only in CHANGELOG.md (PR artifact)
+  // memory/*.md files are session logs — Korean is acceptable (user's active language)
+  const docsToCheck = staged.filter(f => /^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
     const content = readFileSync(file, 'utf-8');

@@ -4,11 +4,10 @@
 # All project subdirectories are independent git repos.
 # ============================================================
 
-# --- Ignore all subdirectories (each is its own repo) ---
+# --- Ignore all subdirectories (each is its own project, not tracked here) ---
+# Workspace Root tracks ONLY: scripts/, templates/, agents/, docs/, skills/,
+# memory/, and root-level config files. All other subdirectories are excluded.
 /*/
-
-# --- Explicitly TRACK abap_vibe_coding_mig project ---
-!abap_vibe_coding_mig/
 
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
@@ -93,5 +92,3 @@ memory/archive/
 
 # Ignore test temp directories
 tests/.temp/
-abap_vibe_coding_mig/.env
-abap_vibe_coding_mig/.env.sample
