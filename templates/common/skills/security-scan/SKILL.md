@@ -4,10 +4,15 @@ description: Runs static analysis and secret detection (via gitleaks) across the
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
-owner: pm
+owner: security-expert
 prerequisites: gitleaks
 metadata:
   type: process
+  triggers:
+    - security scan
+    - scan for vulnerabilities
+    - security check
+    - run security
 ---
 
 # 🛠️ Skill: security-scan

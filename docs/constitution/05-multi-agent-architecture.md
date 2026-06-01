@@ -33,7 +33,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 
 | Group | Responsibility | Tier | Core agents |
 |-------|---------------|------|-------------|
-| Orchestration | Team assembly, design validation, finalization | High | `pm.md` |
+| Orchestration | Team assembly, design validation, lifecycle finalization | High | `pm.md` |
 | Analysis | Read-only investigation, codebase exploration, data gathering | Medium | `*-analyst.md`, `auditor.md` |
 | Design | Architecture decisions, implementation planning, technical spec | High | `architect.md` |
 | Design | UI/UX specifications, wireframes, component and interaction design | Medium | `designer.md` |
@@ -51,7 +51,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 ```json
 {
   "task": "<task description>",
-  "phase": "<one of: Triage | Analysis | Design | Implementation | QA | Finalization>",
+  "phase": "<one of: Triage | Analysis | Design | Implementation | Lifecycle Finalization | QA & Finalization>",
   "context_file": "agents/<name>.md",
   "input": {}
 }

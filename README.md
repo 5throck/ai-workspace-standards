@@ -312,4 +312,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-31*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-01*

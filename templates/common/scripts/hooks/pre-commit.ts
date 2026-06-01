@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.1.2
+ * @version 1.2.0
  */
 
 import { $ } from "bun";
@@ -105,6 +105,19 @@ async function main() {
       await $`bun scripts/verify-memory.ts --verify ${memoryStaged}`.quiet();
     } catch {
       console.log("\x1b[33m[WARN]\x1b[0m Memory format: some entries use legacy format");
+    }
+  }
+
+  // 3.5. Lifecycle-only audit (fast pre-commit check)
+  if (!memoryOnly) {
+    console.log("\n=== Lifecycle Audit (Pre-commit Gatekeeper) ===");
+    try {
+      await $`bun scripts/audit.ts --lifecycle-only`;
+      console.log("\x1b[32m[PASS]\x1b[0m Lifecycle audit: all lifecycle checks passed");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m Lifecycle audit detected drift - commit blocked.");
+      console.error("\x1b[33m[INFO]\x1b[0m Run 'bun scripts/audit.ts --lifecycle-only' to see details.");
+      process.exit(1);
     }
   }
 

@@ -402,7 +402,7 @@ Create `templates/co-security/CLAUDE.md`. Base structure from `templates/co-deve
 # CLAUDE.md
 
 > **Doc intent:** This file is Claude Code-specific behavioral configuration for **individual co-security projects**.
-> Workspace-level Claude Code behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CLAUDE.md)
+> Workspace-level Claude Code behaviors → [`CLAUDE.md`](../../../../CLAUDE.md)
 
 ## Session Start — Context Loading Order
 
@@ -521,7 +521,7 @@ The header and context load section:
 # GEMINI.md
 
 > **Doc intent:** This file contains Gemini CLI / Antigravity-specific overrides only.
-> Workspace-level Gemini behaviors → [`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md)
+> Workspace-level Gemini behaviors → [`GEMINI.md`](../../../../GEMINI.md)
 
 ## Session Start — Context Loading Order
 

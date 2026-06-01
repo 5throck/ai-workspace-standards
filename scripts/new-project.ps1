@@ -70,7 +70,7 @@ if ($Variant -eq "") {
 }
 
 # -- Workspace Root Resolution ------------------------------------------------------
-$WorkspaceRoot = $PWD
+$WorkspaceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
 $CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"

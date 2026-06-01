@@ -248,14 +248,16 @@ chmod +x check-environment.sh
 ### 1. Clone Workspace
 
 ```bash
-# Windows
+# Windows (clone to any directory you prefer — C:\git is just an example)
 git clone https://github.com/5throck/ai-workspace-standards.git C:\git
 cd C:\git
 
-# macOS/Linux
+# macOS/Linux (clone to any directory you prefer — ~/git is just an example)
 git clone https://github.com/5throck/ai-workspace-standards.git ~/git
 cd ~/git
 ```
+
+> ⚠️ **Path is an example only.** You can clone to any directory. All internal references use paths relative to the repository root, so the workspace works regardless of where it is cloned.
 
 ### 2. Install Essential Software
 

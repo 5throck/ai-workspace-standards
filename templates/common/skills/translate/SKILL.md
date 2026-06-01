@@ -12,6 +12,13 @@ lifecycle:
   created: 2026-05-30
   last_updated: 2026-05-30
 status: active
+metadata:
+  type: process
+  triggers:
+    - translate
+    - translation
+    - localize
+    - Korean translation
 ---
 
 ## Purpose

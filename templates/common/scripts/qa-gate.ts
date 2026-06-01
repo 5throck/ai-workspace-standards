@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
-// qa-gate.ts - QA Gate Automation - Phase 5
+// qa-gate.ts - QA Gate Automation - Phase 6
 // Run by Consistency Auditor to verify workspace standards
+
+/** @version 1.0.2 */
 
 import { $ } from 'bun';
 
@@ -10,7 +12,7 @@ const YELLOW = '\x1b[33m';
 const GREEN  = '\x1b[32m';
 const RESET  = '\x1b[0m';
 
-console.log(`${CYAN}🔬 QA Gate - Phase 5${RESET}`);
+console.log(`${CYAN}🔬 QA Gate - Phase 6${RESET}`);
 console.log('=====================');
 
 // 1. Workspace audit

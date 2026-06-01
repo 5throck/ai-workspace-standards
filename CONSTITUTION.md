@@ -1,12 +1,13 @@
 # Project Constitution
 
-These principles apply to every project under the workspace root (`C:\git` on Windows, or `~/git` on macOS/Linux). They define the **design standard** - implementation is handled per-project via each project's own scripts and settings.
+These principles apply to every project under the workspace root (the directory where you cloned this repository, e.g., `C:\git` or `~/git`). They define the **design standard** - implementation is handled per-project via each project's own scripts and settings.
 
 ---
 
 ## Required Reading
 
 > **AI tools MUST load these files at session start** in addition to this document:
+> - `docs/constitution/00-ssot-architecture.md` (SSOT 3-Layer Structure)
 > - `docs/constitution/05-multi-agent-architecture.md`
 > - `docs/constitution/08-coding-guidelines.md`
 > - `docs/constitution/09-operations-workflow.md` (for PM and maintenance tasks)
@@ -15,12 +16,8 @@ These principles apply to every project under the workspace root (`C:\git` on Wi
 
 ### Workspace Overview
 
-> **Environment-specific path** - this file is configured for the current machine. If you move to a different OS or clone to a new location, update the workspace root in the platform config files (`CLAUDE.md`, `GEMINI.md`).
->
-> | OS | Workspace root |
-> |----|---------------|
-> | Windows (current) | `C:\git` |
-> | macOS / Linux | `~/git` or `/home/<user>/git` |
+> **Workspace Root (Tier 1 SSOT)** - The workspace root is the directory where you cloned the repository. This is the **true source** and the ONLY place where core configurations, scripts, and agents should be edited. See [00-ssot-architecture.md](docs/constitution/00-ssot-architecture.md) for the 3-layer structural principles.
+> If you clone to a new location, ensure you update any hardcoded paths in your local environment or platform config files (`CLAUDE.md`, `GEMINI.md`) if necessary.
 
 This workspace contains multiple independent projects. Each subdirectory is a separate project/repository. Run `ls` (or `dir` on Windows) at the workspace root to see the current list - do not rely on a hardcoded list.
 
@@ -162,7 +159,13 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 ### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)
 
-Scripts are managed across three ownership layers: L0 (`templates/common/scripts/`, templates team, SSOT), L1 (`scripts/` workspace root), L2 (`<project>/scripts/`, independent snapshot). Changes flow L0 → L1 → L2 at project creation time only—no automatic back-propagation. Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
+Scripts are managed across three ownership layers: L0 (`templates/common/scripts/`, templates team, SSOT), L1 (`scripts/` workspace root), L2 (`<project>/scripts/`, independent snapshot). 
+
+**Understanding the Layers:**
+- **L0 (Templates)** is the "Upstream Standard" and the Single Source of Truth for scripts. It is the foundational blueprint.
+- **L1 (Workspace Root)** is the "Local Workspace Realization". Although this is often the first layer you interact with, it is downstream of L0. 
+
+Changes flow L0 → L1 → L2 at project creation time only—no automatic back-propagation. Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
 
 ---
 

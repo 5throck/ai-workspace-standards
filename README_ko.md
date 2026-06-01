@@ -1,4 +1,4 @@
----
+﻿---
 translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
@@ -57,7 +57,7 @@ bash scripts/new-project.sh "my-project-name"
 # variant 지정
 bash scripts/new-project.sh "my-project-name" --variant co-develop
 
-# 특정 템플릿 버전 사용 (목록 확인: bash scripts/list-template-versions.sh)
+# 특정 템플릿 버전 사용 (목록 확인: bun scripts/list-template-versions.ts)
 bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 # Windows PowerShell
@@ -192,7 +192,7 @@ C:\git\
 
 ```bash
 # 사용 가능한 template 버전 목록 확인
-bash scripts/list-template-versions.sh
+bun scripts/list-template-versions.ts
 
 # 최신 template 사용 (기본값)
 bash scripts/new-project.sh my-project
@@ -246,4 +246,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-05-31*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-01*
