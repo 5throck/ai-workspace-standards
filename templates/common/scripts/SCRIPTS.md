@@ -100,7 +100,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `generate-version-manifest.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
 
 ---
 
@@ -296,4 +296,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-01*
+*Last updated: 2026-06-01 (generate-version-manifest.ts v1.0.1 bug fix)*

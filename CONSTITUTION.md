@@ -172,7 +172,7 @@ The **VERSION_MANIFEST** is the single source of truth (SSOT) for lifecycle arti
 
 #### Location and Generation
 
-- **File**: `.claude/VERSION_MANIFEST.md`
+- **File**: `docs/VERSION_MANIFEST.md`
 - **Update timing**: Generated during `/sync` pipeline only (not on every commit)
 - **Generation method**: Hybrid approach — auto-generated core sections + manual annotations section
 - **Generator script**: `scripts/generate-version-manifest.ts`
@@ -255,7 +255,7 @@ VERSION_MANIFEST.md aggregates and displays this information — it does not rep
 **Checking current ecosystem state**:
 ```bash
 # View all agent, skill, and script versions in one place
-cat .claude/VERSION_MANIFEST.md
+cat docs/VERSION_MANIFEST.md
 ```
 
 **Detecting drift before releases**:
@@ -267,7 +267,7 @@ cat .claude/VERSION_MANIFEST.md
 **Verifying platform parity**:
 ```bash
 # Check Platform Parity Status section for Claude ↔ Gemini sync status
-grep -A 10 "Platform Parity Status" .claude/VERSION_MANIFEST.md
+grep -A 10 "Platform Parity Status" docs/VERSION_MANIFEST.md
 ```
 
 #### Schema Stability and Versioning

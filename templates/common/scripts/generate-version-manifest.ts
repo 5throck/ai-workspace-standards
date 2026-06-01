@@ -1,9 +1,9 @@
-// @version 1.0.0
+// @version 1.0.1
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
 
-const MANIFEST_PATH = path.join('.claude', 'VERSION_MANIFEST.md');
+const MANIFEST_PATH = path.join('docs', 'VERSION_MANIFEST.md');
 const MANIFEST_VERSION = '1.0';
 
 const GREEN = '\x1b[32m';
@@ -218,3 +218,157 @@ async function collectCommands(): Promise<CommandInfo[]> {
     }
     return commands.sort((a, b) => a.name.localeCompare(b.name));
 }
+
+function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: CommandInfo[]): string[] {
+    const issues: string[] = [];
+
+    // Check for agents without tier/model metadata
+    for (const agent of agents) {
+        if (agent.tier === 'N/A' || agent.model === 'N/A') {
+            issues.push(`Agent ${agent.name} missing tier or model metadata`);
+        }
+    }
+
+    // Check for skills without version
+    for (const skill of skills) {
+        if (skill.version === 'N/A') {
+            issues.push(`Skill ${skill.name} missing version`);
+        }
+        if (skill.triggers.length === 0) {
+            issues.push(`Skill ${skill.name} has no triggers defined`);
+        }
+    }
+
+    // Check for command-skill integration drift
+    for (const cmd of commands) {
+        if (cmd.skill_integration === 'N/A') {
+            issues.push(`Command ${cmd.name} not integrated as a skill`);
+        }
+    }
+
+    return issues;
+}
+
+async function generateManifest() {
+    console.log(`${CYAN}Collecting workspace data...${RESET}`);
+
+    const [agents, skills, scripts, commands] = await Promise.all([
+        collectAgents(),
+        collectSkills(),
+        collectScripts(),
+        collectCommands(),
+    ]);
+
+    const driftIssues = detectDrift(agents, skills, commands);
+
+    let markdown = `# VERSION_MANIFEST.md
+
+**Generated**: ${new Date().toISOString()}
+**Manifest Version**: ${MANIFEST_VERSION}
+**Location**: ${MANIFEST_PATH}
+
+---
+
+## Summary
+
+- **Agents**: ${agents.length}
+- **Skills**: ${skills.length}
+- **Scripts**: ${scripts.length}
+- **Commands**: ${commands.length}
+
+---
+
+## Agents
+
+| Name | File | Tier | Model | Last Modified |
+|------|------|------|-------|---------------|
+`;
+
+    for (const agent of agents) {
+        markdown += `| ${agent.name} | ${agent.file} | ${agent.tier} | ${agent.model} | ${agent.last_modified} |\n`;
+    }
+
+    markdown += `
+---
+
+## Skills
+
+| Name | Version | Location | Platform | Triggers | Owner |
+|------|---------|----------|----------|----------|-------|
+`;
+
+    for (const skill of skills) {
+        markdown += `| ${skill.name} | ${skill.version} | ${skill.location} | ${skill.platform} | ${skill.triggers.join(', ') || 'N/A'} | ${skill.owner} |\n`;
+    }
+
+    markdown += `
+---
+
+## Scripts
+
+| Name | Version | Location | Dependencies |
+|------|---------|----------|--------------|
+`;
+
+    for (const script of scripts) {
+        markdown += `| ${script.name} | ${script.version} | ${script.location} | ${script.dependencies.join(', ') || 'N/A'} |\n`;
+    }
+
+    markdown += `
+---
+
+## Commands
+
+| Name | File | Platform | Skill Integration |
+|------|------|----------|-------------------|
+`;
+
+    for (const cmd of commands) {
+        markdown += `| ${cmd.name} | ${cmd.file} | ${cmd.platform} | ${cmd.skill_integration} |\n`;
+    }
+
+    markdown += `
+---
+
+## Platform Parity Status
+
+**Checked**: Claude (.claude/) vs Gemini (.gemini/)
+
+- **Commands with parity**: ${commands.filter(c => c.platform === 'both').length} / ${commands.length}
+- **Skills with parity**: ${skills.filter(s => s.platform === 'both').length} / ${skills.length}
+
+---
+
+## Drift Detection
+`;
+
+    if (driftIssues.length === 0) {
+        markdown += `
+✅ No drift detected. All components are properly versioned and integrated.
+`;
+    } else {
+        markdown += `
+⚠️ **Drift detected**:
+
+`;
+        for (const issue of driftIssues) {
+            markdown += `- ${issue}\n`;
+        }
+    }
+
+    // Ensure docs directory exists
+    const docsDir = path.dirname(MANIFEST_PATH);
+    if (!fs.existsSync(docsDir)) {
+        fs.mkdirSync(docsDir, { recursive: true });
+    }
+
+    // Write manifest
+    fs.writeFileSync(MANIFEST_PATH, markdown, 'utf-8');
+    console.log(`${GREEN}✓ Manifest generated: ${MANIFEST_PATH}${RESET}`);
+    console.log(`${GREEN}✓ ${agents.length} agents, ${skills.length} skills, ${scripts.length} scripts, ${commands.length} commands${RESET}`);
+    if (driftIssues.length > 0) {
+        console.log(`${CYAN}⚠ ${driftIssues.length} drift issues detected${RESET}`);
+    }
+}
+
+generateManifest().catch(console.error);

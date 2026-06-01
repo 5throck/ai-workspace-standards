@@ -39,7 +39,7 @@ I lean toward the pre-commit hook approach too, but with one nuance. Currently, 
 
 **Docs-writer**, this affects documentation consistency. When skills bump versions (e.g., meeting-facilitation from 1.0.0 → 1.3.1), the change history lives in skill files but isn't aggregated anywhere visible. Should we introduce a centralized version manifest that tracks all lifecycle artifacts and their current versions?
 
-Proposal: Create `.claude/VERSION_MANIFEST.md` that aggregates all agent/skill/script versions for single-source visibility.
+Proposal: Create `docs/VERSION_MANIFEST.md` that aggregates all agent/skill/script versions for single-source visibility.
 
 **[Docs-writer]**:
 A VERSION_MANIFEST would solve two problems I'm seeing:
@@ -93,7 +93,7 @@ Concrete implementation plan:
 **Phase 2 - Manifest Generation Script**:
 - Create `scripts/generate-version-manifest.ts`
 - Runs during `/sync`, not on every commit
-- Updates both `.claude/VERSION_MANIFEST.md` and `AGENTS.md` Skills table
+- Updates both `docs/VERSION_MANIFEST.md` and `AGENTS.md` Skills table
 
 **Phase 3 - Documentation Sync**:
 - Add manifest content to constitution docs

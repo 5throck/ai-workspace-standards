@@ -23,7 +23,7 @@ The multi-agent meeting on 2026-06-01 concluded that a VERSION_MANIFEST could so
 
 ### Location and File Structure
 
-**File**: `.claude/VERSION_MANIFEST.md`
+**File**: `docs/VERSION_MANIFEST.md`
 **Update frequency**: During `/sync` pipeline only (not on every commit)
 **Generation method**: Hybrid approach - auto-generated core + manual annotations
 
@@ -252,7 +252,7 @@ See [meeting-2026-06-01-lifecycle-version-improvements.md](../../memory/meeting-
    - **Recommendation**: Yes, include `## Manifest Version: 1.0` at top of file
 
 2. **Historical manifests**: Should we archive previous manifests, or overwrite in-place?
-   - **Recommendation**: Overwrite in-place (`.claude/VERSION_MANIFEST.md`), use git history for previous versions
+   - **Recommendation**: Overwrite in-place (`docs/VERSION_MANIFEST.md`), use git history for previous versions
 
 3. **Platform-specific manifests**: Should `.gemini/` have its own VERSION_MANIFEST.md?
    - **Recommendation**: No - single manifest with platform columns supports cross-platform visibility
