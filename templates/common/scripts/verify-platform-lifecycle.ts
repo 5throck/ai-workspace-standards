@@ -5,12 +5,12 @@
  * Checks:
  *   E: .claude/skills/ and .gemini/skills/ version: field completeness
  *   F: .claude/skills/ <-> .gemini/skills/ version synchronization
- *   G: .claude/commands/ <-> templates/common/.claude/commands/ parity (L0 only)
- *   H: Platform Skill propagation to templates/common/ (L0 only)
+ *   G: .claude/commands/ <-> templates/common/.claude/commands/ parity (Tier 1 only)
+ *   H: Platform Skill propagation to templates/common/ (Tier 1 only)
  *
- * L0 vs L2 auto-detection: if variant.json exists in cwd, runs L2 subset (E+F only).
+ * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -20,9 +20,9 @@ const args = process.argv.slice(2);
 const JSON_MODE = args.includes('--json');
 const ROOT = process.cwd();
 
-// Auto-detect L0 vs L2
-const IS_L2 = existsSync(join(ROOT, 'variant.json'));
-const LEVEL = IS_L2 ? 'L2' : 'L0';
+// Auto-detect Tier 1 vs Tier 3
+const IS_TIER3 = existsSync(join(ROOT, 'variant.json'));
+const LEVEL = IS_TIER3 ? 'Tier 3' : 'Tier 1 SSOT';
 
 const issues: Array<{ level: 'error' | 'warning'; check: string; message: string; fix?: string }> = [];
 
@@ -60,7 +60,7 @@ function listSkillDirs(baseDir: string): string[] {
 
 // Check E: version: field completeness
 function checkE(): void {
-  if (!JSON_MODE) console.log(`\n=== Check E: Platform Skill version: completeness (${LEVEL}) ===`);
+  if (!JSON_MODE) console.log(`=== Check E: Platform Skill version: completeness (${LEVEL}) ===`);
 
   for (const platform of ['.claude', '.gemini']) {
     const skillsDir = join(ROOT, platform, 'skills');
@@ -101,10 +101,10 @@ function checkF(): void {
   }
 }
 
-// Check G: .claude/commands/ parity with templates/common/ (L0 only)
+// Check G: .claude/commands/ parity with templates/common/ (Tier 1 only)
 function checkG(): void {
-  if (IS_L2) return; // L2 projects don't have templates/common/
-  if (!JSON_MODE) console.log('\n=== Check G: Platform Command propagation to templates/common/ (L0) ===');
+  if (IS_TIER3) return; // Tier 3 projects don't have templates/common/
+  if (!JSON_MODE) console.log('\n=== Check G: Platform Command propagation to templates/common/ (Tier 1 -> Tier 2) ===');
 
   for (const platform of ['.claude', '.gemini']) {
     const cmdDir = join(ROOT, platform, 'commands');
@@ -127,11 +127,11 @@ function checkG(): void {
   }
 }
 
-// Check H: Platform Skill propagation to templates/common/ (L0 only)
+// Check H: Platform Skill propagation to templates/common/ (Tier 1 only)
 // Only checks skills declared in common-contract.json common_platform_skills — not ALL workspace skills
 function checkH(): void {
-  if (IS_L2) return;
-  if (!JSON_MODE) console.log('\n=== Check H: Platform Skill propagation to templates/common/ (L0) ===');
+  if (IS_TIER3) return;
+  if (!JSON_MODE) console.log('\n=== Check H: Platform Skill propagation to templates/common/ (Tier 1 -> Tier 2) ===');
 
   // Load common-contract.json to find skills that should be propagated
   const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
@@ -167,7 +167,7 @@ function checkH(): void {
 }
 
 async function main() {
-  if (!JSON_MODE) console.log(`\n\x1b[36m=== verify-platform-lifecycle.ts (${LEVEL}) ===\x1b[0m`);
+  if (!JSON_MODE) console.log(`=== verify-platform-lifecycle.ts (${LEVEL}) ===\n`);
 
   checkE();
   checkF();

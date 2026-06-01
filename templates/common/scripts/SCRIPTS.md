@@ -1,8 +1,8 @@
 # SCRIPTS.md — Script Lifecycle Registry
 
-> This file is the Single Source of Truth (L0) for all scripts in `scripts/` (workspace root).
-> Template `templates/common/scripts/` (L1) is a snapshot published from here via `bun run publish-to-template`.
-> Project `scripts/` (L2) is a snapshot created from L1 at `new-project` time.
+> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).
+> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run publish-to-template`.
+> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.
 >
 > **Machine parsing**: `verify-scripts.ts --verify` reads the `## Registry` section only.
 > **Human reading**: see `## Guide` section below for purpose, usage, and deprecation notes.
@@ -99,10 +99,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
-| `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `propagate-to-templates.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `propagate-to-templates.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `propagation-map.json` | L0 | 1.0.0 | active | — | — | common | — |
 
 ---

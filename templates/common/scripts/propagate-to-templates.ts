@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * propagate-to-templates.ts — L0→L1 sync tool
- * Compares workspace root (L0) against templates/common/ (L1) and optionally applies updates.
- * @version 1.0.0
+ * propagate-to-templates.ts — Tier 1 → Tier 2 sync tool
+ * Compares workspace root (Tier 1 SSOT) against templates/common/ (Tier 2) and optionally applies updates.
+ * @version 1.1.0
  * @usage bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>]
  */
 
