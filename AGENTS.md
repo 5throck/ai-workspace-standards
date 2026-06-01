@@ -228,6 +228,11 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ## Skills
 
+> **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
+>
+> All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
+> The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
+>
 > **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
@@ -248,6 +253,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
 | project-review | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
 | Finishing a Development Branch | `.claude/skills/finishing-a-development-branch/SKILL.md` · `.gemini/skills/finishing-a-development-branch/SKILL.md` | Workspace override — redirects branch completion to `/sync` pipeline; enforces CHANGELOG, memlog, audit, and PR creation gates. Available on both Claude Code and Gemini CLI. |
+
+> **📌 VERSION_MANIFEST Reference**: For the complete, up-to-date list of all skill versions, status (active/deprecated), and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md). That file is the authoritative source — this table serves only as a quick reference for skill names and locations.
 
 > **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
 > Individual projects may define their own project-specific skills.

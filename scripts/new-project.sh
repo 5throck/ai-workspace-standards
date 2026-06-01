@@ -175,7 +175,7 @@ echo "🚀 Scaffolding new project: $PROJECT_NAME"
 # ── Template validation before copying ────────────────────────────────────────  # TEST: none
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" ]; then
   echo "Validating template integrity…"
-  if ! bun "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" "$VARIANT" 2>/dev/null; then
+  if ! bun "$WORKSPACE_ROOT/scripts/helpers/template-validation.ts" "$VARIANT" "$COMMON_DIR" "$TEMPLATES_DIR" 2>/dev/null; then
     exit 1
   fi
 else

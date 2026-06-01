@@ -1,3 +1,4 @@
+// @version 1.1.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -116,6 +117,18 @@ const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
     process.exit(1);
+}
+
+// 4.5. Generate VERSION_MANIFEST.md
+const genManifestTs = path.join('scripts', 'generate-version-manifest.ts');
+if (fs.existsSync(genManifestTs)) {
+    const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
+    if (genRes.exitCode !== 0) {
+        console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
+        console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
+        process.exit(1);
+    }
+    console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
 }
 
 // 5. Branch -> commit -> push -> PR

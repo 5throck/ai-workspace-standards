@@ -3,7 +3,11 @@
  * template-validation.ts — Validate required template files in common/ and variant/
  *
  * Usage:
- *   bun scripts/helpers/template-validation.ts <variant>
+ *   bun scripts/helpers/template-validation.ts <variant> [commonPath] [variantPath]
+ *
+ *   commonPath and variantPath are optional. When omitted, paths are resolved
+ *   relative to cwd (live workspace templates). Pass explicit paths when validating
+ *   versioned templates extracted to a temp directory.
  *
  * Exits with:
  *   0 if all required files exist
@@ -17,13 +21,13 @@ const args = process.argv.slice(2);
 const variant = args[0];
 
 if (!variant) {
-  console.error('Usage: bun template-validation.ts <variant>');
+  console.error('Usage: bun template-validation.ts <variant> [commonPath] [variantPath]');
   process.exit(1);
 }
 
 const workspaceRoot = process.cwd();
-const commonPath = join(workspaceRoot, 'templates', 'common');
-const variantPath = join(workspaceRoot, 'templates', variant);
+const commonPath = args[1] || join(workspaceRoot, 'templates', 'common');
+const variantPath = args[2] || join(workspaceRoot, 'templates', variant);
 
 // Files required in templates/common/
 const commonRequired = [

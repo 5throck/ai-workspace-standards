@@ -1,3 +1,4 @@
+// @version 1.1.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';

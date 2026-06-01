@@ -194,7 +194,7 @@ Write-Host " Scaffolding new project: $ProjectName" -ForegroundColor Cyan
 # -- Template validation before copying ----------------------------------------  # TEST: none
 if (Get-Command "bun" -ErrorAction SilentlyContinue) {
     Write-Host "Validating template integrity..." -ForegroundColor Cyan
-    $validationExit = & bun "$WorkspaceRoot/scripts/helpers/template-validation.ts" $Variant 2>&1
+    $validationExit = & bun "$WorkspaceRoot/scripts/helpers/template-validation.ts" $Variant $CommonDir $TemplatesDir 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "  [FAIL] Template validation failed: $validationExit" -ForegroundColor Red
         exit 1

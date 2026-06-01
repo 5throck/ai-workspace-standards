@@ -43,8 +43,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L1 | 1.3.1 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L1 | 1.5.1 | active | — | — | L0-only | — |
+| `new-project.sh` | L1 | 1.3.2 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L1 | 1.5.2 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
@@ -52,7 +52,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `audit.ts` | L0 | 2.4.0 | active | — | — | common | — |
-| `dev-sync.ts` | L0 | 1.5.1 | active | — | — | common | — |
+| `dev-sync.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skills.ts` | L1 | 1.1.0 | active | — | — | common | — |
@@ -79,6 +79,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-templates.ts` | L1 | 1.2.2 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -100,7 +101,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `generate-version-manifest.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
 
 ---
 
@@ -296,4 +297,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-05-31*
+*Last updated: 2026-06-01 (generate-version-manifest.ts v1.0.1 bug fix)*

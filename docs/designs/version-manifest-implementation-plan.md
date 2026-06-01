@@ -9,7 +9,7 @@
 
 ## Summary
 
-Design a hybrid auto-generated + manual annotations version manifest (`.claude/VERSION_MANIFEST.md`) that provides centralized visibility into all lifecycle artifacts (agents, skills, scripts, commands) with platform parity status and drift detection. The manifest will be generated during `/sync` pipeline only, maintaining schema stability for documentation references while ensuring freshness through regeneration from source files.
+Design a hybrid auto-generated + manual annotations version manifest (`docs/VERSION_MANIFEST.md`) that provides centralized visibility into all lifecycle artifacts (agents, skills, scripts, commands) with platform parity status and drift detection. The manifest will be generated during `/sync` pipeline only, maintaining schema stability for documentation references while ensuring freshness through regeneration from source files.
 
 **Key architectural decision**: Single source of truth remains source files; manifest is a derivative aggregation. Manual annotations section provides human context (release notes, migration guides, deprecation warnings) that cannot be auto-detected.
 
@@ -19,7 +19,7 @@ Design a hybrid auto-generated + manual annotations version manifest (`.claude/V
 
 | File | Action | Description |
 |------|--------|-------------|
-| `.claude/VERSION_MANIFEST.md` | CREATE | New manifest file with auto-generated sections + manual annotations |
+| `docs/VERSION_MANIFEST.md` | CREATE | New manifest file with auto-generated sections + manual annotations |
 | `scripts/generate-version-manifest.ts` | CREATE | Script to parse source files and generate manifest |
 | `scripts/SCRIPTS.md` | MODIFY | Add generate-version-manifest.ts entry with version |
 | `scripts/dev-sync.ts` | MODIFY | Integrate manifest generation into `/sync` pipeline |
@@ -31,8 +31,13 @@ Design a hybrid auto-generated + manual annotations version manifest (`.claude/V
 ## Directory Structure
 
 ```
-.claude/
+docs/
 ├── VERSION_MANIFEST.md          ← NEW (auto-generated + manual annotations)
+├── adr/
+├── constitution/
+└── designs/
+
+.claude/
 ├── commands/
 ├── settings.json
 └── skills/
@@ -142,7 +147,7 @@ templates/common/
 - [ ] **AC-01**: VERSION_MANIFEST.md schema defined with all 6 sections (Agents, Skills, Scripts, Commands, Platform Parity, Drift Detection)
 - [ ] **AC-02**: Manifest schema includes Manual Annotations section for release notes, migration guides, deprecation warnings
 - [ ] **AC-03**: Schema stability documented - changing manifest format requires ADR
-- [ ] **AC-04**: Manifest location confirmed as `.claude/VERSION_MANIFEST.md` (workspace root)
+- [ ] **AC-04**: Manifest location confirmed as `docs/VERSION_MANIFEST.md` (workspace root)
 - [ ] **AC-05**: Cross-platform considerations documented (Windows path handling, UTF-8 encoding, Unix permissions)
 - [ ] **AC-06**: Integration with `/sync` pipeline specified (generation timing, not on every commit)
 - [ ] **AC-07**: ADR 0012 approved and filed in `docs/adr/`
@@ -160,7 +165,7 @@ templates/common/
 ### Q2: Should we archive previous manifests, or overwrite in-place?
 **Status**: Resolved
 
-**Decision**: Overwrite in-place (`.claude/VERSION_MANIFEST.md`), use git history for previous versions. Archiving multiple manifest files creates maintenance burden without clear benefit - git history provides sufficient historical access.
+**Decision**: Overwrite in-place (`docs/VERSION_MANIFEST.md`), use git history for previous versions. Archiving multiple manifest files creates maintenance burden without clear benefit - git history provides sufficient historical access.
 
 ### Q3: Should `.gemini/` have its own VERSION_MANIFEST.md?
 **Status**: Resolved
