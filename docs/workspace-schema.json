@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
@@ -48,6 +48,18 @@
       "high":   "gemini-3.1-pro",
       "medium": "gemini-3.5-flash",
       "low":    "gemini-3.5-flash"
+    }
+  },
+  "variant_lifecycle": {
+    "description": "Governance rules for variant lifecycle transitions",
+    "beta_engagement_criteria_required": true,
+    "engagement_criteria_schema": {
+      "evaluation_start": "YYYY-MM-DD",
+      "evaluation_period_days": 14,
+      "green_threshold": "description of success condition",
+      "yellow_action": "action if no engagement within period",
+      "red_trigger": "condition for immediate beta cancellation",
+      "current_status": "green|yellow|red"
     }
   },
   "_notes": {

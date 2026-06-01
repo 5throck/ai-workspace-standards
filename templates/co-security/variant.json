@@ -22,5 +22,14 @@
     "betaPromotedOn": "2026-05-28",
     "stablePromotedOn": "2026-06-01",
     "betaEngagements": 0
+  },
+  "engagement_criteria": {
+    "evaluation_start": "2026-06-03",
+    "evaluation_period_days": 14,
+    "green_threshold": "1+ projects scaffolded",
+    "yellow_action": "promotion activities or stable demotion",
+    "red_trigger": "technical defect found",
+    "current_status": "green",
+    "note": "Promoted to stable on 2026-06-01 — criteria met via governance review"
   }
 }
