@@ -77,7 +77,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-templates.ts` | L1 | 1.2.2 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `verify-readme-sync.ts` | L1 | 1.0.1 | active | — | — | common | — |
+| `verify-readme-sync.ts` | L1 | 1.1.0 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | common | — |

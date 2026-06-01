@@ -2,7 +2,7 @@
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
 version: 1.0.0
-owner: automation-engineer
+owner: pm
 tier:
   claude: medium
   antigravity: medium
@@ -12,6 +12,13 @@ lifecycle:
   created: 2026-05-30
   last_updated: 2026-05-30
 status: active
+metadata:
+  type: process
+  triggers:
+    - translate
+    - translation
+    - localize
+    - Korean translation
 ---
 
 ## Purpose

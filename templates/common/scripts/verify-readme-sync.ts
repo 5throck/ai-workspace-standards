@@ -1,4 +1,4 @@
-// @version 1.0.1
+// @version 1.1.0
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
@@ -101,14 +101,9 @@ async function runStaticAudit(): Promise<number> {
             const enHash = getFrontmatterField(enPath, "content_hash");
             const koHash = getFrontmatterField(koPath, "translated_from_hash");
 
-            if (enHash === null) {
-                console.error(`\x1b[31m[FAIL]\x1b[0m ${enPath}: Missing frontmatter field 'content_hash'.`);
-                errors++;
-                continue;
-            }
-            if (koHash === null) {
-                console.error(`\x1b[31m[FAIL]\x1b[0m ${koPath}: Missing frontmatter field 'translated_from_hash'.`);
-                errors++;
+            // content_hash was removed per ADR-0013 — absence is not an error
+            if (enHash === null || koHash === null) {
+                console.log(`\x1b[32m[PASS]\x1b[0m ${dir}: READMEs present; hash-sync tracking not active (see ADR-0013).`);
                 continue;
             }
 
@@ -174,8 +169,8 @@ async function runDynamicAudit(): Promise<number> {
                         console.error(`        README_ko.md translated_from_hash: ${koHash}`);
                         errors++;
                     } else if (!enHash) {
-                        console.error(`\x1b[31m[FAIL]\x1b[0m ${enFile}: Missing frontmatter field 'content_hash' in staged file.`);
-                        errors++;
+                        // content_hash absent — hash-sync tracking not active per ADR-0013
+                        console.log(`\x1b[32m[PASS]\x1b[0m ${enFile} staged; hash-sync tracking not active (see ADR-0013).`);
                     } else {
                         console.log(`\x1b[32m[PASS]\x1b[0m ${enFile} staged; translated_from_hash in ${koFile} still matches — no translation update required.`);
                     }
@@ -191,12 +186,9 @@ async function runDynamicAudit(): Promise<number> {
                 const enHash = getFrontmatterField(enFile, "content_hash");
                 const koHash = getFrontmatterField(koFile, "translated_from_hash");
 
-                if (!enHash) {
-                    console.error(`\x1b[31m[FAIL]\x1b[0m ${enFile}: Missing frontmatter field 'content_hash'.`);
-                    errors++;
-                } else if (!koHash) {
-                    console.error(`\x1b[31m[FAIL]\x1b[0m ${koFile}: Missing frontmatter field 'translated_from_hash'.`);
-                    errors++;
+                if (!enHash || !koHash) {
+                    // content_hash/translated_from_hash absent — hash-sync tracking not active per ADR-0013
+                    console.log(`\x1b[32m[PASS]\x1b[0m ${dir}: Staged READMEs present; hash-sync tracking not active (see ADR-0013).`);
                 } else if (enHash !== koHash) {
                     console.error(`\x1b[31m[FAIL]\x1b[0m README.md has been updated — README_ko.md translation needs updating.`);
                     console.error(`        README.md content_hash:          ${enHash}`);

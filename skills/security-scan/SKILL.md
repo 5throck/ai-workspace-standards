@@ -8,6 +8,11 @@ owner: security-expert
 prerequisites: gitleaks
 metadata:
   type: process
+  triggers:
+    - security scan
+    - scan for vulnerabilities
+    - security check
+    - run security
 ---
 
 # 🛠️ Skill: security-scan

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T09:30:55.247Z
+**Generated**: 2026-06-01T09:38:41.490Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -54,7 +54,7 @@
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | skill-lifecycle-manager | 1.2.0 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
-| translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | automation-engineer |
+| translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | pm |
 | ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
 | ui-ux-pro-max | 1.0.0 | .claude/skills/ui-ux-pro-max/SKILL.md | both | N/A | architect |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
@@ -120,7 +120,7 @@
 | verify-memory.ts | N/A | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | N/A | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | N/A | scripts/verify-platform-lifecycle.ts | N/A |
-| verify-readme-sync.ts | 1.0.1 | scripts/verify-readme-sync.ts | bun, fs, path |
+| verify-readme-sync.ts | 1.1.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | N/A | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | N/A | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | N/A | scripts/verify-template-integrity.ts | crypto, fs, path |
