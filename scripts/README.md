@@ -99,6 +99,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-platform-lifecycle.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `propagate-to-templates.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `propagation-map.json` | L0 | 1.0.0 | active | — | — | common | — |
 
 ---
 

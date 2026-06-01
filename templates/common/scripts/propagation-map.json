@@ -1,0 +1,61 @@
+{
+  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/). Edit this file to add/remove sync domains.",
+  "version": "1.0.0",
+  "domains": {
+    "scripts": {
+      "description": "TypeScript automation scripts",
+      "source": "scripts",
+      "target": "templates/common/scripts",
+      "include_pattern": "*.ts",
+      "recursive": false,
+      "exclude": [
+        "validate-templates.ts",
+        "validate-model-registry.ts"
+      ],
+      "note": "L0-only scripts excluded — they reference workspace-level files not available in L2 projects"
+    },
+    "scripts-hooks": {
+      "description": "Git hook scripts",
+      "source": "scripts/hooks",
+      "target": "templates/common/scripts/hooks",
+      "include_pattern": "*.ts",
+      "recursive": false,
+      "exclude": []
+    },
+    "scripts-helpers": {
+      "description": "Helper/utility scripts used by scaffolding",
+      "source": "scripts/helpers",
+      "target": "templates/common/scripts/helpers",
+      "include_pattern": "*.ts",
+      "recursive": false,
+      "exclude": [
+        "inject-global-plugins.ts",
+        "inject-skills.ts",
+        "merge-frontmatter.ts",
+        "merge-package-scripts.ts",
+        "substitute-placeholders.ts",
+        "template-validation.ts",
+        "update-variant-lifecycle.ts",
+        "validate-output.ts",
+        "write-scripts-snapshot.ts"
+      ],
+      "note": "Scaffolding-internal helpers excluded — they are L0-only used only by new-project pipeline"
+    },
+    "claude-skills": {
+      "description": "Platform skills for Claude Code",
+      "source": ".claude/skills",
+      "target": "templates/common/.claude/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": []
+    },
+    "gemini-skills": {
+      "description": "Platform skills for Gemini CLI",
+      "source": ".gemini/skills",
+      "target": "templates/common/.gemini/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": []
+    }
+  }
+}

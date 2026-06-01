@@ -9,7 +9,15 @@ metadata:
 
 **Established**: 2026-06-01  
 **Source**: Project Review Meeting (A-01~A-15) + Unresolved Items Follow-up Meeting (B-01~B-04)  
-**Status snapshot**: A-15 complete (co-security → stable), B-03 partial (stable transition done, engagement_criteria pending B-02)
+**Status snapshot**: ALL WAVES COMPLETE (2026-06-01). Wave 1~3 fully executed. PR-13/B-04 (propagate-to-templates.ts) deferred to 2026-06-15 as scheduled.
+
+**Wave completion summary**:
+- Wave 1: PR #183 — A-01, A-02+A-03, A-04 ✅
+- Wave 2: PR #184, #185(conflict-resolved into #184), #186 — A-05, A-08, A-09, A-13, B-02 ✅
+- Wave 3: PR #187 — A-11, A-12, A-14, B-01, B-03(no-op) ✅
+
+**A-07 cancelled**: templates/common/CLAUDE.md & GEMINI.md — validator explicitly rejects workspace-level files in templates/common (must-not-exist rule). Original review diagnosis was incorrect.
+**A-06 already done**: 3 skills were already synced to templates/common before this session.
 
 **Lifecycle decisions recorded**:
 - `list-template-versions.sh/.ps1` Tier 1 wrappers: **rejected**. `list-template-versions.ts` is Tier 2 (bun required for workspace anyway); wrappers add maintenance burden with no benefit. `new-project.sh/.ps1` error messages updated to reference `bun scripts/list-template-versions.ts` directly. A-10 scope revised accordingly — only the 4 missing *other* `.ps1` pairs (dev-sync, gen-pr-body, sync-md, setup) remain, and each must be evaluated on the same grounds before creation.
