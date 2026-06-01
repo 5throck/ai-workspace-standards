@@ -94,7 +94,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-skills.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `validate-md-language.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/pre-commit.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |

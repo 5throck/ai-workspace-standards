@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T23:02:13.874Z
+**Generated**: 2026-06-01T23:08:33.936Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -112,7 +112,7 @@
 | update-variant-lifecycle.ts | N/A | scripts/helpers/update-variant-lifecycle.ts | N/A |
 | validate-agents.ts | N/A | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | N/A | scripts/validate-doc-folder.ts | fs, path |
-| validate-md-language.ts | 1.1.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.2.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | N/A | scripts/helpers/validate-output.ts | N/A |
 | validate-skills.ts | N/A | scripts/validate-skills.ts | N/A |
