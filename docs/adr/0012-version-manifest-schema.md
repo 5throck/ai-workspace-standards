@@ -1,8 +1,11 @@
+---
+status: Proposed
+date: 2026-06-01
+author: Architect (Phase 1-2)
+---
+
 # ADR 0012: VERSION_MANIFEST.md Schema Design
 
-**Status**: Proposed
-**Date**: 2026-06-01
-**Author: Architect (Phase 1-2)
 **Decision**: Hybrid auto-generated + manual annotations version manifest
 
 ---

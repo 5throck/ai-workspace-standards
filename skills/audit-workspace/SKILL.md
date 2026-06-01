@@ -8,6 +8,11 @@ owner: auditor
 prerequisites: PowerShell or Bash
 metadata:
   type: process
+  triggers:
+    - audit workspace
+    - run audit
+    - check compliance
+    - workspace check
 ---
 
 # 🛠️ Skill: audit-workspace
