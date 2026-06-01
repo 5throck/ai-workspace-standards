@@ -8,6 +8,11 @@ owner: docs-writer
 prerequisites: Python or grep
 metadata:
   type: process
+  triggers:
+    - validate links
+    - check links
+    - broken links
+    - docs validation
 ---
 
 # 🛠️ Skill: validate-docs-links

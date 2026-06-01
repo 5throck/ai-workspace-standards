@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T09:33:17.533Z
+**Generated**: 2026-06-01T09:34:15.288Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -54,7 +54,7 @@
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | skill-lifecycle-manager | 1.2.0 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
-| translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | automation-engineer |
+| translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | pm |
 | ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
 | ui-ux-pro-max | 1.0.0 | .claude/skills/ui-ux-pro-max/SKILL.md | both | N/A | architect |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |

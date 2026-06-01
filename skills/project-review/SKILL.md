@@ -13,6 +13,13 @@ description: >
 owner: pm
 version: 1.0.0
 last_reviewed: 2026-05-30
+metadata:
+  type: process
+  triggers:
+    - project review
+    - review project
+    - audit project
+    - quality review
 ---
 
 # project-review

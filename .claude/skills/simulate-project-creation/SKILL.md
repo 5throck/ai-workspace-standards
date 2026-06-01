@@ -8,6 +8,10 @@ owner: scaffolding-expert
 prerequisites: PowerShell or Bash
 metadata:
   type: process
+  triggers:
+    - simulate project
+    - test scaffolding
+    - dry run project creation
 ---
 
 # 🛠️ Skill: simulate-project-creation

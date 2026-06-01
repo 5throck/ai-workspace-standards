@@ -8,6 +8,13 @@ description: "UI/UX design intelligence. 67 styles, 96 palettes, 57 font pairing
 owner: architect
 version: 1.0.0
 last_reviewed: 2026-05-30
+metadata:
+  type: process
+  triggers:
+    - UI design
+    - UX design
+    - design component
+    - frontend design
 ---
 # UI/UX Pro Max - Design Intelligence
 
