@@ -1,16 +1,28 @@
 ---
-translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# co-design variant
+# co-design 변형
 
-> **Status**: Planned — not yet available
+> **Status**: Stable — v1.0.0
 
-This variant is planned for a future release. It will provide a design-focused agent team for:
-- UI/UX design workflows
-- Prototyping and wireframing
-- Design system management
-- Accessibility auditing
+AI 기반 디자인 워크스페이스 템플릿. 구조화된 멀티 에이전트 아키텍처를 통해 UI/UX 디자인 워크플로우, 프로토타이핑, 디자인 시스템 관리에 최적화되어 있습니다.
 
-Use the `co-develop` variant for current projects.
+## 개요
+
+co-design 템플릿은 전체 디자인 라이프사이클에 걸쳐 AI 어시스턴트를 활용하는 디자인 프로젝트를 위한 즉시 사용 가능한 워크스페이스를 제공합니다. Claude Code(`CLAUDE.md`)와 Gemini(`GEMINI.md`)를 리서치부터 산출물 전달까지 전 과정을 아우르는 구조화된 멀티 에이전트 시스템과 결합하여, 모든 프로젝트에 첫날부터 일관된 명령, 에이전트 역할, 품질 관리를 제공합니다.
+
+## 빠른 시작
+
+> 워크스페이스 루트에서 새 프로젝트를 스캐폴딩하려면 다음을 실행하세요:
+> `scripts/new-project.sh "project-name" --variant co-design`
+
+## 에이전트
+
+| 에이전트 | 역할 |
+|----------|------|
+| **PM** | 디자인 단계 오케스트레이션, 브리프 작성, 작업 순서 관리 |
+| **Design Lead** | 크리에이티브 디렉션, 디자인 시스템 관리, 단계 게이트 승인 |
+| **UX Researcher** | 사용자 리서치, 사용성 테스트, 인사이트 종합 |
+| **Visual Designer** | 비주얼 디자인, 컴포넌트 제작, 접근성 검토 |
+| **Prototype Engineer** | 인터랙티브 프로토타입 개발 및 전달 준비 |

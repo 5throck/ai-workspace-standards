@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T09:34:15.288Z
+**Generated**: 2026-06-01T09:38:41.490Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -120,7 +120,7 @@
 | verify-memory.ts | N/A | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | N/A | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | N/A | scripts/verify-platform-lifecycle.ts | N/A |
-| verify-readme-sync.ts | 1.0.1 | scripts/verify-readme-sync.ts | bun, fs, path |
+| verify-readme-sync.ts | 1.1.0 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | N/A | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | N/A | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | N/A | scripts/verify-template-integrity.ts | crypto, fs, path |
