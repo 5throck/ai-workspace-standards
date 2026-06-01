@@ -146,16 +146,16 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
 2. Output the Escalation Template immediately
 3. Log the denial to `memory/YYYY-MM-DD.md`
-4. Halt the blocked task ??do not proceed without the required tool
+4. Halt the blocked task — do not proceed without the required tool
 
-See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
-> **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
-> **docs-writer tier**: Medium (claude-sonnet-4-6) ??upgraded from Low per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
 
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
@@ -176,9 +176,9 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
-- **High-tier (Design/Planning)** ??`claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
-- **Medium-tier (Review/QA)** ??`claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** ??`claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
+- **High-tier (Design/Planning)** — `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
+- **Medium-tier (Review/QA)** — `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** — `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ### 7. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
@@ -206,18 +206,18 @@ When working in a plan-mode session:
 
 ### 10. Lifecycle Management Rules
 
-> ?좑툘 If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
 When modifying files, apply the following rules **before** running `/sync` or committing:
 
 | Modified file(s) | Required follow-up actions |
 |-----------------|---------------------------|
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
-| `agents/*.md` | Update `AGENTS.md` roster table ??run `bun run agent:verify` to check |
-| `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry ??run `bun run agent:verify` to check |
-| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md 짠 Skills` table ??run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity ??CONSTITUTION.md 짠10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` ??must pass P-01 platform parity check |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
 | `.claude/commands/*.md` | 1. Add identical file to `templates/common/.claude/commands/`  2. If not `gemini-parity: skip`, also add to `.gemini/commands/` and `templates/common/.gemini/commands/` |
 | `.claude/skills/*/SKILL.md` | 1. Add identical file to `templates/common/.claude/skills/`  2. If not `gemini-parity: skip`, also add to `.gemini/skills/` and `templates/common/.gemini/skills/` |
 | `.gemini/commands/*.md` | Add identical file to `templates/common/.gemini/commands/` |
@@ -229,7 +229,7 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full rules: [짠5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) 쨌 [짠6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) 쨌 [짠6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 
 ### 11. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
@@ -243,7 +243,7 @@ If a custom slash command or background script returns a non-zero exit code:
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
-- Git Bash ships with [Git for Windows](https://gitforwindows.org/) ??install if not present.
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
 - Verify: `git config core.hooksPath` should point to `.githooks/`
 - `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
@@ -252,10 +252,10 @@ If a custom slash command or background script returns a non-zero exit code:
 
 ## Git & PR Additions (Claude Code)
 
-All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
 
-- **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-01 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-01 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
