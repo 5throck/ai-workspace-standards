@@ -14,12 +14,13 @@
   },
   "name": "co-security",
   "description": "Security engineering workflow — Red Team operations, threat modeling, and cross-platform patch automation (Windows/macOS/Linux via SSH + Ansible)",
-  "status": "beta",
-  "version": "0.2.0",
+  "status": "stable",
+  "version": "0.3.0",
   "lifecycle": {
-    "statusSince": "2026-05-28",
-    "lastTransition": "draft → beta on 2026-05-28",
+    "statusSince": "2026-06-01",
+    "lastTransition": "beta → stable on 2026-06-01",
     "betaPromotedOn": "2026-05-28",
+    "stablePromotedOn": "2026-06-01",
     "betaEngagements": 0
   }
 }

@@ -1,9 +1,24 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
+ * @version 1.1.0
  */
 
 import { $ } from "bun";
+
+// Read stdin to determine what refs are being pushed.
+// Format per line: <local ref> <local sha1> <remote ref> <remote sha1>
+// Tag pushes have local ref like "refs/tags/..." — skip branch protection for those.
+function isTagOnlyPush(): boolean {
+  try {
+    const stdin = require("fs").readFileSync("/dev/stdin", "utf8").trim();
+    if (!stdin) return false;
+    const lines = stdin.split("\n").filter(Boolean);
+    return lines.length > 0 && lines.every(line => line.startsWith("refs/tags/") || line.split(" ")[0]?.startsWith("refs/tags/"));
+  } catch {
+    return false;
+  }
+}
 
 async function main() {
   console.log("=== pre-push audit ===");
@@ -22,6 +37,9 @@ async function main() {
     console.error("\n\x1b[31m❌ Integration tests failed — push blocked. Fix test failures before pushing.\x1b[0m");
     process.exit(1);
   }
+
+  // Tag-only pushes bypass the branch protection check — tags are not commits to main.
+  if (isTagOnlyPush()) return;
 
   const branch = await $`git rev-parse --abbrev-ref HEAD`.text();
   if (branch.trim() === "main" || branch.trim() === "master") {
