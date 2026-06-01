@@ -93,7 +93,7 @@ if [ -n "$TEMPLATE_VER" ]; then
   TAG="template-v${TEMPLATE_VER}"
   if ! git -C "$WORKSPACE_ROOT" tag -l "$TAG" | grep -q "^${TAG}$"; then
     echo "❌ Template version not found: $TAG"
-    echo "   Run: bash scripts/list-template-versions.sh"
+    echo "   Run: bun scripts/list-template-versions.ts"
     exit 1
   fi
   TEMP_DIR=$(mktemp -d)
