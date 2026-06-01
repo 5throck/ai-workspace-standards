@@ -119,6 +119,7 @@ bun scripts/agent-verify.ts <agent-name>
 - [ ] **Recommended**: Consider declaring the skill's deployment scope — is it needed in all variant projects (common) or workspace-root-only? Workspace-only skills should not be placed in `templates/common/skills/`.
 - [ ] **If research/investigation role**: agent content includes source citation requirements and uncertainty disclosure (`⚠️ Unverified`)
 - [ ] **If numerical computation role** (aerospace, finance, precision control, scientific): agent content includes Computational Integrity Standards — states that calculations must be delegated to external tools (Fortran, Python+NumPy, etc.) and never performed by AI directly
+- [ ] **If education/tutoring/coaching role**: agent content includes the Socratic Method as the default teaching approach — guide learners through questions before providing direct answers; include explicit exceptions for urgent or simple lookup contexts where direct answers are appropriate
 
 ---
 

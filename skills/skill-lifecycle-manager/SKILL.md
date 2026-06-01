@@ -161,6 +161,7 @@ metadata:
 - [ ] Content has Overview and When to Use sections
 - [ ] Documentation updated (AGENTS.md, docs/context.md)
 - [ ] No duplicate skill names exist
+- [ ] **If education/tutoring/explanation purpose**: skill content includes the Socratic Method procedure — questions before answers, progressive hints, learner-discovery approach; with explicit exceptions for urgent or reference-lookup contexts
 
 **Run Validation Script** (if available):
 ```bash
