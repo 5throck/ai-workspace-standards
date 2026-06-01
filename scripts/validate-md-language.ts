@@ -1,10 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 /**
  * Markdown Language Validation Script
  *
- * Policy: All .md files outside ko/ and locales/ko/ must contain English sentences.
- * Korean-only content is considered a violation of CONSTITUTION.md §3.
+ * Policy: Official documents and governance files must contain English sentences.
+ * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md,
+ * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, skills/,
+ * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
+ * templates/, and SECURITY.md.
+ *
+ * Excludes: memory/ logs, docs/superpowers/, docs/adr/, locale files (_ko.md,
+ * -ko.md, ko/, locales/ko/), and node_modules/.git directories.
+ *
+ * Korean-only content in excluded paths is acceptable. Korean+English mixed
+ * content is acceptable in all paths.
+ *
+ * Reference: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts
  *
  * Usage: bun run scripts/validate-md-language.ts
  * Exit codes: 0 (pass), 1 (violation found)
@@ -24,32 +35,66 @@ interface Violation {
 }
 
 /**
- * Check if file path should be excluded from English validation
- * Exempts: 1) ko/ or locales/ko/ directories, 2) Files with _ko/.ko./-ko patterns
+ * Check if file path is an OFFICIAL document that requires English validation
+ *
+ * Only validates these allowlisted paths:
+ * - agents/ (subdirectories)
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, CONSTITUTION.md, CHANGELOG.md, SECURITY.md
+ * - docs/constitution/ (subdirectories)
+ * - docs/governance/ (subdirectories)
+ * - skills/ (subdirectories)
+ * - .claude/skills/, .claude/commands/ (subdirectories)
+ * - .gemini/skills/, .gemini/commands/ (subdirectories)
+ * - templates/ (subdirectories)
+ */
+function isOfficialDocument(filePath: string): boolean {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+
+  // Allowlisted official paths
+  const officialPatterns = [
+    /^agents\/.*\.md$/,
+    /^AGENTS\.md$/,
+    /^CLAUDE\.md$/,
+    /^GEMINI\.md$/,
+    /^CONSTITUTION\.md$/,
+    /^CHANGELOG\.md$/,
+    /^SECURITY\.md$/,
+    /^docs\/constitution\/.*\.md$/,
+    /^docs\/governance\/.*\.md$/,
+    /^skills\/.*\.md$/,
+    /^\.claude\/skills\/.*\.md$/,
+    /^\.claude\/commands\/.*\.md$/,
+    /^\.gemini\/skills\/.*\.md$/,
+    /^\.gemini\/commands\/.*\.md$/,
+    /^templates\/.*\.md$/,
+  ];
+
+  return officialPatterns.some(pattern => pattern.test(normalizedPath));
+}
+
+/**
+ * Check if file path should be explicitly excluded (locale files, infrastructure)
  */
 function isExcludedPath(filePath: string): boolean {
   const normalizedPath = filePath.replace(/\\/g, "/");
 
-  // Condition 1: Directory exclusion
-  if (normalizedPath.startsWith("ko/") ||
+  // Exclude locale-specific files
+  if (normalizedPath.includes("_ko.md") ||
+      normalizedPath.includes("-ko.md") ||
+      normalizedPath.startsWith("ko/") ||
       normalizedPath.includes("/ko/") ||
       normalizedPath.startsWith("locales/ko/") ||
       normalizedPath.includes("/locales/ko/")) {
     return true;
   }
 
-  // Condition 1.5: Individual project directories (excluded from workspace validation scope)
-  if (normalizedPath.startsWith("Product-Planning/") ||
-      normalizedPath.startsWith("abap_vibe_coding/")) {
+  // Exclude planning/draft docs
+  if (normalizedPath.startsWith("docs/superpowers/") ||
+      normalizedPath.startsWith("docs/adr/")) {
     return true;
   }
 
-  // Condition 2: Filename patterns (_ko.md, .ko., -ko)
-  const filename = normalizedPath.split("/").pop() || "";
-  return filename.endsWith("_ko.md") ||
-         filename.includes("_ko") ||
-         filename.includes(".ko.") ||
-         filename.includes("-ko");
+  return false;
 }
 
 /**
@@ -103,12 +148,20 @@ async function validateMarkdownLanguage(): Promise<void> {
   });
 
   const violations: Violation[] = [];
+  let officialCount = 0;
 
   for (const file of mdFiles) {
+    // Skip excluded paths (locales, planning docs)
     if (isExcludedPath(file)) {
-      continue; // Skip Korean directories
+      continue;
     }
 
+    // Only validate official documents
+    if (!isOfficialDocument(file)) {
+      continue;
+    }
+
+    officialCount++;
     const violation = analyzeFile(file);
     if (violation) {
       violations.push(violation);
@@ -117,16 +170,16 @@ async function validateMarkdownLanguage(): Promise<void> {
 
   // Report results
   if (violations.length === 0) {
-    console.log("✅ No Korean-only markdown files found.\n");
-    console.log(`   Scanned ${mdFiles.length} markdown files`);
+    console.log("✅ No Korean-only violations in official documents.\n");
+    console.log(`   Scanned ${officialCount} official markdown files (agents, governance, skills, templates)`);
     process.exit(0);
   } else {
-    console.log(`❌ Found ${violations.length} Korean-only markdown file(s):\n`);
+    console.log(`❌ Found ${violations.length} Korean-only violation(s) in official documents:\n`);
     violations.forEach((v) => {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: All .md files outside ko/ and locales/ko/ must contain English sentences.");
+    console.log("Policy: Official documents (agents, governance, skills, templates, etc.) must contain English sentences.");
     console.log("See: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts\n");
     process.exit(1);
   }
