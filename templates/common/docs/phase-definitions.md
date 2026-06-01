@@ -15,8 +15,8 @@
 | 1-2 | Planning & Architecture | architect | Approver (architect leads) | Implementation plan approved, ADRs filed |
 | 3 | Design Handoff | (varies by variant) | Approver (variant specialist leads) | Design specs ready, team aligned |
 | 4 | Execution | automation-engineer, docs-writer | Absent (autonomous) | Features implemented, docs updated |
-| 5 | Quality Assurance | pm, security-expert | Executor (Variant) / Absent (Workspace) | QA passed, security cleared |
-| 6 | Lifecycle Finalization | pm | Executor | Governance documents updated, lifecycle transition complete |
+| 5 | Lifecycle Finalization | pm | Executor | Governance documents updated, lifecycle transition complete |
+| 6 | Quality Assurance & Finalization | pm, auditor, security-expert | Executor (Variant) / Absent (Workspace) | QA passed, PR created |
 
 ---
 
@@ -117,7 +117,7 @@
 **How Phase 4 Runs:**
 - automation-engineer and docs-writer execute the approved plan without PM direction
 - They follow the implementation plan and quality standards established in Phases 1-2
-- Phase 5 (Finalization) begins only after both agents have completed their work
+- Phase 5 (Lifecycle Finalization) begins only after both agents have completed their work
 
 **PM Behaviors to Avoid:**
 - ❌ Do not orchestrate, monitor, or intervene during Phase 4
@@ -175,7 +175,7 @@
 
 **PM owns Phases 0, 5 (Orchestrator/Executor Mode), and 6 (variants):**
 - PM facilitates Phase 0, synthesizes outputs
-- PM directly executes Phase 5 Finalization
+- PM directly executes Phase 5 Lifecycle Finalization
 - PM directly executes Phase 6 QA scripts in variants and Finalization (`/sync`, PR creation)
 
 **PM approves Phases 1-2 and 3 (Approver Mode):**

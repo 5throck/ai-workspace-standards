@@ -70,7 +70,7 @@ if ($Variant -eq "") {
 }
 
 # -- Workspace Root Resolution ------------------------------------------------------
-$WorkspaceRoot = $PWD
+$WorkspaceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $ProjectDir    = Join-Path $WorkspaceRoot $ProjectName
 $TemplatesDir  = Join-Path (Join-Path $WorkspaceRoot "templates") $Variant
 $CommonDir     = Join-Path (Join-Path $WorkspaceRoot "templates") "common"
@@ -83,7 +83,7 @@ if ($Version -ne "") {
     $tagExists = git -C $WorkspaceRoot tag -l $Tag 2>$null
     if (-not $tagExists) {
         Write-Host "[FAIL] Template version not found: $Tag" -ForegroundColor Red
-        Write-Host "   Run: .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
+        Write-Host "   Run: bun scripts/list-template-versions.ts" -ForegroundColor Yellow
         exit 1
     }
     $TempDir = [System.IO.Path]::GetTempPath() + [System.IO.Path]::GetRandomFileName()
@@ -93,7 +93,7 @@ if ($Version -ne "") {
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $TarFile) -or (Get-Item $TarFile).Length -eq 0) {
         Write-Host "[FAIL] Failed to create archive for template version $Tag" -ForegroundColor Red
         Write-Host "   This tag may predate the templates/common/ directory structure (introduced in v0.5.0)." -ForegroundColor Yellow
-        Write-Host "   Available versions with common/ support: run .\scripts\list-template-versions.ps1" -ForegroundColor Yellow
+        Write-Host "   Available versions with common/ support: run bun scripts/list-template-versions.ts" -ForegroundColor Yellow
         Remove-Item $TarFile -Force -ErrorAction SilentlyContinue
         Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
         exit 1

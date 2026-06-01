@@ -1,4 +1,4 @@
-# AGENTS.md
+﻿# AGENTS.md
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
@@ -17,7 +17,7 @@
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and finalization (Phase 5); reduced bottleneck role |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); syncs governance documents after changes; PM dispatches as N-1 step in every execution plan |
 
@@ -151,7 +151,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 ### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
-2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Finalization)
+2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
 3. **Independent QA Gate** - Auditor owns Phase 6 QA gate autonomously using bun scripts/qa-gate.ts
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
@@ -285,9 +285,9 @@ All agents, regardless of their role, must adhere to the following:
 
 ## Lifecycle Management
 
-### Phase 5 Finalization
+### Phase 5 Lifecycle Finalization
 
-At **Phase 5 (Finalization)**, PM **must** execute finalization when any of the following occurred in the session:
+At **Phase 5 (Lifecycle Finalization)**, PM **must** execute finalization when any of the following occurred in the session:
 
 | Trigger | Dispatch lifecycle-manager? |
 |---------|---------------------------|

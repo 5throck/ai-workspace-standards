@@ -4,10 +4,15 @@ description: Scans Markdown documentation for dead links and file reference erro
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
-owner: pm
+owner: docs-writer
 prerequisites: Python or grep
 metadata:
   type: process
+  triggers:
+    - validate links
+    - check links
+    - broken links
+    - docs validation
 ---
 
 # 🛠️ Skill: validate-docs-links

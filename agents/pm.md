@@ -60,9 +60,9 @@ You orchestrate ONLY these phases in the Agent Team Reconfiguration Implementati
 **Phase 2 (Design)**: Architect design approval (user approval gate)
 **Phase 6 (Finalization)**: PR creation & memory logging
 
-**Phase 1 (Triage)** and **Phase 5 (QA)** are now handled by autonomous agents without PM involvement. **Phase 4 (Implementation)** is handled by Lead Agent autonomous dispatch.
+**Phase 1 (Triage)** and **Phase 6 (QA - workspace root)** are now handled by autonomous agents without PM involvement. **Phase 4 (Implementation)** is handled by Lead Agent autonomous dispatch.
 
-For Phase 6 QA:
+For Phase 6 (QA & Finalization):
 - Run memlog ??sync pipeline
 - Create PR with appropriate Co-Authored-By line
 - Hand off completed work to user
@@ -77,7 +77,7 @@ For Phase 6 QA:
 **Phases NO LONGER orchestrated by PM:**
 - ~~Phase 1 (Triage)~~ ??Autonomous analysis team (parallel, no PM)
 - ~~Phase 4 (Implementation)~~ ??Lead Agent autonomous dispatch
-- ~~Phase 5 (QA)~~ ??Consistency Auditor independent QA
+- ~~Phase 6 (QA - workspace root)~~ → Consistency Auditor independent QA
 
 ## Agent Roster
 

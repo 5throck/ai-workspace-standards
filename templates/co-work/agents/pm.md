@@ -57,15 +57,16 @@ You orchestrate ONLY these phases in the Agent Team Reconfiguration Implementati
 
 **Phase 0 (Team Assembly)**: Team composition & role definition
 **Phase 2 (Design)**: Architect design approval (user approval gate)
-**Phase 5 (QA)**: PM runs QA scripts (`audit-workspace`, `validate-docs-links`) directly
-**Phase 6 (Finalization)**: PM runs `/sync`, PR creation & memory logging
+**Phase 5 (Lifecycle Finalization)**: PM updates governance records, logs decisions
+**Phase 6 (QA & Finalization)**: PM runs QA scripts (`audit-workspace`, `validate-docs-links`), runs `/sync`, PR creation
 
 **Phase 1 (Triage)** is handled by autonomous agents without PM involvement. **Phase 4 (Implementation)** is handled by Lead Agent autonomous dispatch.
 
-For Phase 5 Finalization:
-- Run `audit-workspace` and `validate-docs-links` skills directly
+For Phase 5 (Lifecycle Finalization):
+- Update governance records and log decisions to memory
 
-For Phase 6 QA:
+For Phase 6 (QA & Finalization):
+- Run `audit-workspace` and `validate-docs-links` skills directly
 - Run `/sync` script
 - Create PR with appropriate Co-Authored-By line
 - Hand off completed work to user
@@ -75,8 +76,8 @@ For Phase 6 QA:
 **PM now orchestrates ONLY these phases:**
 - **Phase 0 (Team Assembly)**: Team composition & role definition
 - **Phase 2 (Design)**: Architect design approval (user approval gate)
-- **Phase 5 (QA)**: PM runs QA skills (`audit-workspace`, `validate-docs-links`) directly
-- **Phase 6 (Finalization)**: PM runs `/sync`, PR creation & memory logging
+- **Phase 5 (Lifecycle Finalization)**: PM updates governance records, logs decisions
+- **Phase 6 (QA & Finalization)**: PM runs QA skills (`audit-workspace`, `validate-docs-links`), runs `/sync`, PR creation
 
 **Phases NO LONGER orchestrated by PM:**
 - ~~Phase 1 (Triage)~~ ??Autonomous analysis team (parallel, no PM)
