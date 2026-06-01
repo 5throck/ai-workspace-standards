@@ -20,12 +20,11 @@ async function main() {
   // Check current project path - use staged files to detect project
   const currentPath = process.cwd();
   const projectPath = staged.length > 0 ? staged[0].split(/[/\\]/)[0] : '';
-  const isAbapVibeProject = projectPath.includes('abap_vibe_coding_mig') ||
-                             projectPath.includes('abap_vibe_coding') ||
-                             staged.some(f => f.includes('abap_vibe_coding_mig') || f.includes('abap_vibe_coding'));
+  const isAbapVibeProject = staged.some(f => f.includes('abap_vibe_coding_mig') || f.includes('abap_vibe_coding'));
 
   console.log(`[DEBUG] Current path: ${currentPath}`);
   console.log(`[DEBUG] Project path: ${projectPath}`);
+  console.log(`[DEBUG] Staged files: ${staged.slice(0, 3).join(', ')}`);
   console.log(`[DEBUG] Is abap project: ${isAbapVibeProject}`);
   console.log(`[DEBUG] SYNC_ACTIVE: ${process.env.SYNC_ACTIVE}`);
   console.log(`[DEBUG] DEV_SYNC_CONTEXT: ${process.env.DEV_SYNC_CONTEXT}`);
@@ -142,7 +141,8 @@ async function main() {
   }
 
   // 4. Audits
-  if (!memoryOnly) {
+  // Skip workspace audit for abap projects (they run their own project-specific audit)
+  if (!memoryOnly && !isAbapVibeProject) {
     console.log("\n=== Workspace Audit ===");
     try {
       await $`bun scripts/audit.ts`;
