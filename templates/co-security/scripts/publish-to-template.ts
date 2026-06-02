@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.0
+// @version 1.3.1
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -92,9 +92,9 @@ for (const line of registryLines) {
   if (cols.length < 4) continue;
   const script = cols[1].trim().replace(/`/g, '');
   const source = cols[2].trim();
-  const drift  = cols.length >= 8 ? cols[7].trim() : '—';
+  const layer  = cols.length >= 8 ? cols[7].trim() : '—';
   if (source !== 'L0') continue;
-  if (drift === 'intentional') continue;
+  if (layer.includes('L0-only')) continue;
   if (!script) continue;
   const src = path.join(l0Dir, script);
   const dst = path.join(l1Dir, script);
