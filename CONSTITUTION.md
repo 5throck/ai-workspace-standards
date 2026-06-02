@@ -124,6 +124,11 @@ Before dispatching any specialist agents (Level 2 tasks), PM **must** output an 
 - The Agent tool MUST NOT be called until this table is visible to the user
 - At workspace root, dispatch `lifecycle-manager` and `auditor`; in variant projects, PM handles both directly
 
+#### Phase 2 (Planning & Architecture) Requirements
+
+**Cross-Modification Verification:**
+Before finalizing the work plan in Phase 2, the PM MUST verify cross-modification requirements. Specifically, when modifying any script, the PM must check `scripts/SCRIPTS.md` for the `pair:` attribute. If a target script has a paired counterpart (e.g., a `.sh` script paired with a `.ps1` script), both scripts MUST be included in the Execution Task Plan to guarantee simultaneous modification and maintain cross-platform parity.
+
 #### Specialist Agent List
 
 The following agents require PM dispatch (no direct invocation):
@@ -430,5 +435,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-01*
+*Last Updated: 2026-06-02*
 

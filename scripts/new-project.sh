@@ -194,6 +194,7 @@ mkdir -p "$PROJECT_DIR"
 # New projects that genuinely need Node.js should create their own package.json.
 WORKSPACE_ONLY_FILES=("package.json" "package-lock.json" "bun.lock" "bun.lockb")
 cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
+chmod -R u+w "$PROJECT_DIR"
 for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   if [ -f "$PROJECT_DIR/$f" ]; then
     rm -f "$PROJECT_DIR/$f"

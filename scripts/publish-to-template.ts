@@ -5,6 +5,41 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+// Helper to safely copy a file, managing read-only locks
+function safeCopyFile(src: string, dst: string) {
+  if (fs.existsSync(dst)) {
+    fs.chmodSync(dst, 0o644);
+  }
+  fs.copyFileSync(src, dst);
+  const stat = fs.statSync(src);
+  fs.chmodSync(dst, stat.mode & ~0o222);
+}
+
+// Helper to safely copy a directory, managing read-only locks
+function safeCopyDir(srcDir: string, dstDir: string) {
+  if (fs.existsSync(dstDir)) {
+    const walkLift = (dir: string) => {
+      for (const item of fs.readdirSync(dir)) {
+        const itemPath = path.join(dir, item);
+        if (fs.statSync(itemPath).isDirectory()) walkLift(itemPath);
+        else fs.chmodSync(itemPath, 0o644);
+      }
+    };
+    walkLift(dstDir);
+    fs.rmSync(dstDir, { recursive: true, force: true });
+  }
+  fs.cpSync(srcDir, dstDir, { recursive: true });
+  const walkLock = (dir: string) => {
+    for (const item of fs.readdirSync(dir)) {
+      const itemPath = path.join(dir, item);
+      const stat = fs.statSync(itemPath);
+      if (stat.isDirectory()) walkLock(itemPath);
+      else fs.chmodSync(itemPath, stat.mode & ~0o222);
+    }
+  };
+  walkLock(dstDir);
+}
+
 const GREEN    = '\x1b[32m';
 const DARKGRAY = '\x1b[90m';
 const RED      = '\x1b[31m';
@@ -51,14 +86,14 @@ for (const line of registryLines) {
   if (dryRun) {
     console.log(`  [dry-run] ${script}`);
   } else {
-    fs.copyFileSync(src, dst);
+    safeCopyFile(src, dst);
     console.log(`  ✅ ${script}`);
     count++;
   }
 }
 
 if (!dryRun) {
-  fs.copyFileSync(scriptsMdPath, path.join(l1Dir, 'SCRIPTS.md'));
+  safeCopyFile(scriptsMdPath, path.join(l1Dir, 'SCRIPTS.md'));
   console.log(`  ✅ SCRIPTS.md`);
   count++;
   console.log('');
@@ -76,6 +111,9 @@ let skillCount = 0;
 
 if (fs.existsSync(l0Skills)) {
   for (const item of fs.readdirSync(l0Skills)) {
+    // Skip workspace-only skills from being published to templates
+    if (item === 'simulate-project-creation') continue;
+    
     const itemPath = path.join(l0Skills, item);
     const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {
@@ -83,8 +121,7 @@ if (fs.existsSync(l0Skills)) {
         console.log(`  [dry-run] ${item}/`);
       } else {
         const dst = path.join(l1Skills, item);
-        if (fs.existsSync(dst)) fs.rmSync(dst, { recursive: true, force: true });
-        fs.cpSync(itemPath, dst, { recursive: true });
+        safeCopyDir(itemPath, dst);
         console.log(`  ✅ ${item}/`);
         skillCount++;
       }
@@ -92,7 +129,7 @@ if (fs.existsSync(l0Skills)) {
       if (dryRun) {
         console.log(`  [dry-run] ${item}`);
       } else {
-        fs.copyFileSync(itemPath, path.join(l1Skills, item));
+        safeCopyFile(itemPath, path.join(l1Skills, item));
         console.log(`  ✅ ${item}`);
         skillCount++;
       }
@@ -129,7 +166,7 @@ for (const platform of platforms) {
         if (dryRun) {
           console.log(`  [dry-run] ${platform}/commands/${item}`);
         } else {
-          fs.copyFileSync(itemPath, path.join(dstDir, item));
+          safeCopyFile(itemPath, path.join(dstDir, item));
           console.log(`  ✅ ${platform}/commands/${item}`);
           cmdCount++;
         }

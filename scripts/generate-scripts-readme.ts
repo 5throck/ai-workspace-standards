@@ -98,7 +98,11 @@ ${staticFooter}`;
   writeFileSync(README_MD, readmeContent, 'utf-8');
   
   // Write to template
+  if (existsSync(TEMPLATE_README_MD)) {
+      require('node:fs').chmodSync(TEMPLATE_README_MD, 0o644);
+  }
   writeFileSync(TEMPLATE_README_MD, readmeContent, 'utf-8');
+  require('node:fs').chmodSync(TEMPLATE_README_MD, 0o444);
   
   console.log('✅ Generated scripts/README.md from SCRIPTS.md');
 } catch (e) {
