@@ -5,6 +5,7 @@ description: >
   and operational processes. Use when: mapping customer experiences, optimizing touchpoints,
   aligning frontstage and backstage operations, or improving service delivery.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: process
   triggers:

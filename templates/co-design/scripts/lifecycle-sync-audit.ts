@@ -11,7 +11,8 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.0
+ * @version 1.3.1
+ * @last_updated 2026-06-02
  * @license MIT
  */
 

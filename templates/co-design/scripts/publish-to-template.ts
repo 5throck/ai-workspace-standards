@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.1
+// @version 1.3.2
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -127,9 +127,6 @@ let skillCount = 0;
 
 if (fs.existsSync(l0Skills)) {
   for (const item of fs.readdirSync(l0Skills)) {
-    // Skip workspace-only skills from being published to templates
-    if (item === 'simulate-project-creation') continue;
-    
     const itemPath = path.join(l0Skills, item);
     const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {

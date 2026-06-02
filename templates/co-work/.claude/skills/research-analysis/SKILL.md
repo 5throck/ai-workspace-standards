@@ -5,6 +5,7 @@ description: >
   decision-making and documentation. Use when: analyzing topics, synthesizing research,
   gathering evidence, or investigating questions for documentation or strategy.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: process
   triggers:

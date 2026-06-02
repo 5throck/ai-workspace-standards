@@ -5,6 +5,7 @@ description: >
   refactoring techniques. Use when: cleaning up code, reducing duplication, improving
   maintainability, or paying down technical debt.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: process
   triggers:

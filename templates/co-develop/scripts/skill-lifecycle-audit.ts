@@ -10,7 +10,8 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.1
+ * @version 1.1.2
+ * @last_updated 2026-06-02
  * @license MIT
  */
 

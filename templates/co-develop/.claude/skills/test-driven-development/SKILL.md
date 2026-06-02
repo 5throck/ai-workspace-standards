@@ -5,6 +5,7 @@ description: >
   cycle. Use when: developing new features, fixing bugs with tests, or ensuring code
   reliability through test-first approach.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: process
   triggers:

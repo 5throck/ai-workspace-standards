@@ -6,6 +6,7 @@ description: >
   building design systems, creating visual designs, designing UI components, or establishing
   design specifications.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: implementation
   triggers:
