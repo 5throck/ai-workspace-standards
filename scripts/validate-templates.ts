@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.2
+ * @version 1.4.3
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -755,8 +755,8 @@ function checkContextSync(variant: string): void {
 
 // Check 10: Root vs Template Alignment (L0 vs L1 Sync)
 function checkL0L1ScriptParity() {
-  const L1_SCRIPTS = join(ROOT, 'scripts');
-  const L0_SCRIPTS = join(ROOT, 'templates', 'common', 'scripts');
+  const L0_SCRIPTS = join(ROOT, 'scripts');
+  const L1_SCRIPTS = join(ROOT, 'templates', 'common', 'scripts');
 
   if (!existsSync(L1_SCRIPTS) || !existsSync(L0_SCRIPTS)) return;
 
@@ -816,7 +816,7 @@ function checkL0L1ScriptParity() {
       const l0Content = readFileSync(l0Path, 'utf-8');
 
       if (l1Content !== l0Content) {
-        fail('common', 'l0-l1-script-parity', `Script ${script} differs between L1 (root) and L0 (templates/common).`, `Backport L1 changes to L0 or update L1 to match L0.`);
+        fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
       }

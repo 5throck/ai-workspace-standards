@@ -54,7 +54,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.1.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.0 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.1 | active | — | — | common | — |
 | `list-template-versions.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -75,7 +75,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L1 | 1.4.2 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L0 | 1.4.3 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
@@ -86,10 +86,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/validate-output.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `verify-readme-sync.ts` | L1 | 1.1.0 | active | — | — | common | — |
+| `verify-readme-sync.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `verify-scripts.ts` | L1 | 1.0.0 | active | — | — | common | — |
+| `verify-scripts.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-new-project.ts` | L0 | 1.0.3 | active | — | — | common | — |
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | common | — |
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
