@@ -1,4 +1,8 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "auto",
   "hooks": {
     "SessionStart": [
       {
@@ -19,6 +23,18 @@
           {
             "type": "command",
             "command": "bun scripts/hooks/post-write-lifecycle-check.ts"
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "statusMessage": "Running teammate idle lifecycle check..."
           }
         ]
       }

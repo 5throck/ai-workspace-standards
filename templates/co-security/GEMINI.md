@@ -238,6 +238,8 @@ When modifying files, apply the following rules **before** running `/sync` or co
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md 짠 Skills` table ??run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
 | `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity ??CONSTITUTION.md 짠10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` ??must pass P-01 platform parity check |
+| `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json ?? platform_settings` for tier classification |
+| `.gemini/settings.json` | 1. Apply **shared** tier changes to `.claude/settings.json`  2. **gemini_only** tier changes do NOT require `.claude/settings.json` update  3. Propagate to all 4 variant `templates/<variant>/.gemini/settings.json` |
 
 **Verification** (run after any of the above):
 ```bash
@@ -258,7 +260,45 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 - **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-*Last Updated: 2026-06-01 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+## Agent Teams vs. Antigravity Agent Manager
+
+Claude Code has an **Agent Teams** feature (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`) that runs multiple Claude instances in-process with a shared task list and direct messaging. Antigravity 2.0 has a **different** but conceptually similar capability.
+
+### Antigravity Agent Manager
+
+Antigravity 2.0 replaces the single-agent model with an **Agent Manager** — a higher-level UI that orchestrates multiple agents across separate workspaces.
+
+| Aspect | Claude Code Agent Teams | Antigravity Agent Manager |
+|--------|------------------------|--------------------------|
+| Activation | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in settings | UI-based — enter Agent Manager view |
+| Architecture | In-process or tmux, single session | Separate workspaces per agent |
+| Shared task list | ✅ Programmatic, shared `~/.claude/tasks/` | ❌ Per-workspace, no shared task list |
+| Direct messaging | ✅ `SendMessage` tool between teammates | ❌ No inter-agent messaging |
+| Lifecycle hooks | `TeammateIdle`, `TaskCreated`, `TaskCompleted` | Not available (Antigravity hooks use different events) |
+| Config setting | `teammateMode: "auto"/"in-process"/"tmux"` | No equivalent setting |
+
+### Antigravity Parallel Agent Workflow
+
+Since Antigravity lacks in-process agent teams, use the **multi-workspace approach**:
+
+1. Open Agent Manager (separate from the editor view)
+2. Add multiple workspaces — one per specialist agent
+3. Assign tasks via natural language in each workspace
+4. Monitor progress via the Inbox
+5. Approve or redirect pending actions
+
+> **PM Gateway note**: In Antigravity sessions, the PM Gateway workflow runs within a single workspace session. For parallel work, use the Gemini CLI subagent dispatch (`invoke_subagent`) rather than Agent Teams.
+
+### GEMINI.md Equivalent Settings
+
+Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMode` equivalents. The following settings.json keys from CLAUDE.md are **Claude Code–only**:
+- `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+- `teammateMode`
+- Hook events: `TeammateIdle`, `TaskCreated`, `TaskCompleted`
+
+---
+
+*Last Updated: 2026-06-02 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
 
 
 For private repos: skip the security gate entirely.

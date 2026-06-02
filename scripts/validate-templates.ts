@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.0
+ * @version 1.4.2
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -882,7 +882,12 @@ function checkPlatformDocumentationParity(): void {
     'Phase 4 Execution Loop',
     'Mandatory Execution Plan Display',
     'Specialist Agent List',
-    'Superpowers Plugin & Cost Optimization'
+    'Superpowers Plugin & Cost Optimization',
+    'Agent Teams (Experimental)',
+    'Agent Teams vs. Antigravity Agent Manager',
+    'Antigravity Agent Manager',
+    'Antigravity Parallel Agent Workflow',
+    'GEMINI.md Equivalent Settings'
   ];
   
   const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));
@@ -1840,6 +1845,94 @@ function checkCommonContractVariantSkills(variant: string): void {
   }
 }
 
+// Check VA-04: Platform settings parity
+function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
+  const parts = dotKey.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current === null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function checkPlatformSettingsParity(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-04: Platform settings parity (${variant}) ===`);
+
+  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  if (!existsSync(contractPath)) {
+    return; // WS-02 already warned about missing contract
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    return; // WS-02 already reported invalid JSON
+  }
+
+  const platformSettings = contract.platform_settings as Record<string, unknown> | undefined;
+  if (!platformSettings) {
+    if (!JSON_MODE) console.log(`  (no platform_settings in common-contract.json -- skipping VA-04)`);
+    return;
+  }
+
+  const sharedKeys = Object.keys((platformSettings.shared as Record<string, unknown> | undefined)?.keys as Record<string, unknown> ?? {});
+  const claudeOnlyKeys = Object.keys((platformSettings.claude_only as Record<string, unknown> | undefined)?.keys as Record<string, unknown> ?? {});
+
+  const claudeSettingsPath = join(TEMPLATES_DIR, variant, '.claude', 'settings.json');
+  const geminiSettingsPath = join(TEMPLATES_DIR, variant, '.gemini', 'settings.json');
+
+  let claudeSettings: Record<string, unknown> | null = null;
+  let geminiSettings: Record<string, unknown> | null = null;
+
+  if (!existsSync(claudeSettingsPath)) {
+    warn(variant, 'VA-04', `templates/${variant}/.claude/settings.json is missing -- cannot verify shared settings parity`);
+  } else {
+    try {
+      claudeSettings = JSON.parse(readFileSync(claudeSettingsPath, 'utf-8')) as Record<string, unknown>;
+    } catch {
+      warn(variant, 'VA-04', `templates/${variant}/.claude/settings.json is invalid JSON`);
+    }
+  }
+
+  if (!existsSync(geminiSettingsPath)) {
+    warn(variant, 'VA-04', `templates/${variant}/.gemini/settings.json is missing -- cannot verify shared settings parity`);
+  } else {
+    try {
+      geminiSettings = JSON.parse(readFileSync(geminiSettingsPath, 'utf-8')) as Record<string, unknown>;
+    } catch {
+      warn(variant, 'VA-04', `templates/${variant}/.gemini/settings.json is invalid JSON`);
+    }
+  }
+
+  for (const key of sharedKeys) {
+    if (claudeSettings !== null) {
+      if (getNestedKey(claudeSettings, key) === undefined) {
+        warn(variant, 'VA-04', `Shared key '${key}' is missing from templates/${variant}/.claude/settings.json`);
+      } else {
+        pass(`VA-04: ${variant} -- shared key '${key}' present in .claude/settings.json`);
+      }
+    }
+    if (geminiSettings !== null) {
+      if (getNestedKey(geminiSettings, key) === undefined) {
+        warn(variant, 'VA-04', `Shared key '${key}' is missing from templates/${variant}/.gemini/settings.json`);
+      } else {
+        pass(`VA-04: ${variant} -- shared key '${key}' present in .gemini/settings.json`);
+      }
+    }
+  }
+
+  // claude_only keys should NOT appear in .gemini/settings.json
+  if (geminiSettings !== null) {
+    for (const key of claudeOnlyKeys) {
+      if (getNestedKey(geminiSettings, key) !== undefined) {
+        warn(variant, 'VA-04', `Claude-only key '${key}' was found in templates/${variant}/.gemini/settings.json -- incorrect parity attempt`);
+      }
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -1874,6 +1967,7 @@ function main() {
       checkPhaseSummaryAgents(variant);
       checkWorkspaceRootAgentIntrusion(variant);
       checkSkillPlatformParity(variant);
+      checkPlatformSettingsParity(variant);
       checkCommands(variant);
       checkScriptParity(variant);
       checkContextSync(variant);

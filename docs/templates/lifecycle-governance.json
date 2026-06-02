@@ -45,6 +45,16 @@
       "date": "2026-06-02",
       "event": "governance-tool-expansion",
       "note": "validate-templates.ts v1.4.0: 4 new check functions added (VA-01, VA-02, VA-03, WS-03); new-project scripts v1.3.6/v1.5.8 now invoke post-scaffolding variant validation"
+    },
+    {
+      "date": "2026-06-02",
+      "event": "agent-teams-propagation",
+      "note": "Agent Teams (Experimental) section propagated to all 4 variant CLAUDE.md files; Agent Teams vs. Antigravity Agent Manager section propagated to all 4 variant GEMINI.md files. Reflects new hooks: TeammateIdle, TaskCompleted added to .claude/settings.json and templates/common/.claude/settings.json"
+    },
+    {
+      "date": "2026-06-02",
+      "event": "platform-settings-governance",
+      "note": "common-contract.json v1.1.0: added platform_settings section (SSOT for settings parity). All 8 variant .claude/settings.json and .gemini/settings.json updated with shared hooks (SessionStart, PostToolUse). CLAUDE.md + GEMINI.md §10 lifecycle tables updated. validate-templates.ts v1.4.2: added VA-04 check + getNestedKey helper."
     }
   ]
 }
