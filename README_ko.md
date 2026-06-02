@@ -1,4 +1,4 @@
-﻿---
+---
 translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
@@ -131,7 +131,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 워크플로 템플릿
     ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로 템플릿
     ├── co-work/             # ✅ Stable — 기획 및 범용 협업 워크플로 템플릿
-    └── co-security/         # 🔶 Beta — 레드팀·위협 모델링·패치 자동화 보안 워크플로 템플릿
+    └── co-security/         # ✅ Stable — 레드팀·위협 모델링·패치 자동화 보안 워크플로 템플릿
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -186,7 +186,7 @@ C:\git\
 | `co-develop` | ✅ Stable | 소프트웨어 개발 전용 워크플로 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor |
 | `co-design` | ✅ Stable | UI/UX 디자인 워크플로 — PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer, Storyteller, Service Designer, Typography Expert |
 | `co-work` | ✅ Stable | 범용 협업 워크플로 — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
-| `co-security` | 🔶 Beta | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
+| `co-security` | ✅ Stable | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 
 ### 버전 및 Variant 선택
 
@@ -246,4 +246,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-01*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-02*
