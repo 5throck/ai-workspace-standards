@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-02T13:02:10.156Z
+**Generated**: 2026-06-02T13:40:04.662Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -52,7 +52,7 @@
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
 | simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
-| skill-lifecycle-manager | 1.2.0 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
+| skill-lifecycle-manager | 1.2.1 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
 | translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | pm |
 | ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |

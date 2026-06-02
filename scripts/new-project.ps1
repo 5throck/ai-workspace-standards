@@ -505,7 +505,28 @@ if (Test-Path $GitAttributesPath) {
     Set-Content $GitAttributesPath $mergeOursLine -Encoding UTF8
 }
 
-# -- 6. Make scripts and hooks executable ---------------------------------------  # TEST: Test 16, Test 5
+# -- 6. Cleanup Strictly L0 Files ----------------------------------------------
+$l0Scripts = @(
+    "publish-to-template.ts", "propagate-to-templates.ts", "validate-templates.ts",
+    "list-template-versions.ts", "generate-version-manifest.ts", "generate-scripts-readme.ts",
+    "verify-template-integrity.ts", "verify-new-project-tests.ts", "test-new-project.ts",
+    "new-project.ps1", "new-project.sh", "upgrade-project.ps1", "upgrade-project.sh",
+    "verify-readme-sync.ts"
+)
+foreach ($script in $l0Scripts) {
+    $filePath = Join-Path $ProjectDir "scripts\$script"
+    if (Test-Path $filePath) { Remove-Item $filePath -Force }
+}
+
+$l0Skills = @("simulate-project-creation")
+foreach ($skill in $l0Skills) {
+    foreach ($base in @("skills", ".claude\skills", ".gemini\skills")) {
+        $skillPath = Join-Path $ProjectDir "$base\$skill"
+        if (Test-Path $skillPath) { Remove-Item $skillPath -Recurse -Force }
+    }
+}
+
+# -- 6.1 Make scripts and hooks executable ---------------------------------------  # TEST: Test 16, Test 5
 # (Note: chmod not available on Windows -- executable bits set via git update-index after init)
 
 # -- 7. Initialize git ----------------------------------------------------------  # TEST: Test 4

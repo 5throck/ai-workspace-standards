@@ -475,7 +475,26 @@ else
   echo "docs/context.md merge=ours" > "$GITATTRIBUTES"
 fi
 
-# ── 6. Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16, Test 5
+# ── 6. Cleanup Strictly L0 Files ──────────────────────────────────────────────
+L0_SCRIPTS=(
+    "publish-to-template.ts" "propagate-to-templates.ts" "validate-templates.ts"
+    "list-template-versions.ts" "generate-version-manifest.ts" "generate-scripts-readme.ts"
+    "verify-template-integrity.ts" "verify-new-project-tests.ts" "test-new-project.ts"
+    "new-project.ps1" "new-project.sh" "upgrade-project.ps1" "upgrade-project.sh"
+    "verify-readme-sync.ts"
+)
+for script in "${L0_SCRIPTS[@]}"; do
+    rm -f "$PROJECT_DIR/scripts/$script"
+done
+
+L0_SKILLS=("simulate-project-creation")
+for skill in "${L0_SKILLS[@]}"; do
+    rm -rf "$PROJECT_DIR/skills/$skill"
+    rm -rf "$PROJECT_DIR/.claude/skills/$skill"
+    rm -rf "$PROJECT_DIR/.gemini/skills/$skill"
+done
+
+# ── 6.1 Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16, Test 5
 find "$PROJECT_DIR/.githooks" -type f -exec chmod +x {} \;
 find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 
