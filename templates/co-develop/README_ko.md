@@ -1,5 +1,5 @@
 ---
-translated_from_hash: PLACEHOLDER
+translated_from_hash: TBD
 sync_version: 1
 ---
 

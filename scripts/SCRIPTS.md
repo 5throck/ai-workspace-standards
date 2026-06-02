@@ -77,7 +77,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L0 | 1.4.3 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L0 | 1.4.4 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
