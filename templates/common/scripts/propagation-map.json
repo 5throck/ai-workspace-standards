@@ -56,6 +56,15 @@
       "include_pattern": "*/SKILL.md",
       "recursive": true,
       "exclude": []
+    },
+    "gemini-settings": {
+      "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
+      "source": ".gemini",
+      "target": "templates/common/.gemini",
+      "include_pattern": "settings.json",
+      "recursive": false,
+      "exclude": [],
+      "note": "Never include: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS, teammateMode, TeammateIdle, TaskCreated, TaskCompleted, permissions — all claude_only per common-contract.json platform_settings"
     }
   }
 }

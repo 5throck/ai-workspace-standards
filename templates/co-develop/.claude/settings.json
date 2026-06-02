@@ -1,4 +1,13 @@
 {
+  "effortLevel": "high",
+  "permissions": {
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(*--no-verify*)",
+      "Bash(rm -rf *)"
+    ]
+  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
@@ -33,6 +42,8 @@
           {
             "type": "command",
             "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "async": true,
+            "asyncRewake": true,
             "statusMessage": "Running post-edit lifecycle check..."
           }
         ]
@@ -45,7 +56,22 @@
           {
             "type": "command",
             "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "async": true,
+            "asyncRewake": true,
             "statusMessage": "Running teammate idle lifecycle check..."
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks in new worktree..."
           }
         ]
       }

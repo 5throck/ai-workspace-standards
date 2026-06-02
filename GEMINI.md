@@ -115,7 +115,7 @@ Instantiate a new reusable subagent type with a unique name, specialized role pr
 ```
 
 #### Invoke Subagent (`invoke_subagent`)
-Spawn parallel instances to execute dedicated work concurrently.
+Spawn parallel instances to execute dedicated work concurrently. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing.
 ```json
 {
   "Subagents": [
@@ -151,6 +151,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 ---
 
+<!-- COMMON-GEMINI:START -->
 ### 4. Language Policy for Documentation
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
@@ -160,6 +161,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 - Git commit messages, PR titles, PR descriptions — English only
 - Branch names — English only
 - Code comments — English (unless documenting locale-specific logic)
+<!-- COMMON-GEMINI:END -->
 
 ### 5. Agent Dispatch Rules
 
@@ -219,11 +221,14 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
+<!-- COMMON-GEMINI:START -->
 ### 6. Workspace & Template Boundary Policy
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+<!-- COMMON-GEMINI:END -->
 
+<!-- COMMON-GEMINI:START -->
 ### 7. Lifecycle Management Rules
 
 > ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
@@ -252,9 +257,11 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 ```
 
 > Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+<!-- COMMON-GEMINI:END -->
 
 ---
 
+<!-- COMMON-GEMINI:START -->
 ## Git & PR Additions (Gemini)
 
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
@@ -263,6 +270,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 - **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via `run_command` are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. If you see `[FAIL] Direct git commits are restricted`, run `/sync \"type: description\"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
+<!-- COMMON-GEMINI:END -->
 
 ## Agent Teams vs. Antigravity Agent Manager
 

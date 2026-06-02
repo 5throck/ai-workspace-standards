@@ -62,7 +62,7 @@ if ($Variant -eq "") {
     Write-Host "   co-develop  — Software development (stable)" -ForegroundColor Green
     Write-Host "   co-design   — UI/UX design (stable)" -ForegroundColor Green
     Write-Host "   co-work     — Collaboration & documentation (stable)" -ForegroundColor Green
-    Write-Host "   co-security — Security engagement (draft)" -ForegroundColor Yellow
+    Write-Host "   co-security — Security engagement (stable)" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "   Usage: .\scripts\new-project.ps1 `"$ProjectName`" -Variant co-develop" -ForegroundColor White
     Write-Host ""
@@ -128,7 +128,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable)" -ForegroundColor Yellow
     exit 1
 }
 
@@ -594,6 +594,18 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host ""
     Write-Host "[WARN]  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
+}
+
+# -- 8.5. Post-scaffolding variant validation ----------------------------------  # TEST: none
+Write-Host ""
+Write-Host "Running variant validation..." -ForegroundColor Cyan
+$validateResult = & bun scripts/validate-templates.ts --variant $Variant 2>&1
+$validateExit = $LASTEXITCODE
+if ($validateExit -eq 0) {
+    Write-Host "[OK] Variant validation passed." -ForegroundColor Green
+} elseif ($null -ne $validateExit) {
+    Write-Host "[WARN] Variant validation found issues. Review before using this project:" -ForegroundColor Yellow
+    Write-Host $validateResult -ForegroundColor Yellow
 }
 
 # -- 9. Environment setup (env file, deps, initial commit) -------------------- # TEST: none

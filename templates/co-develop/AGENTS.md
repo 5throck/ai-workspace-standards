@@ -141,6 +141,11 @@ The PM agent MUST leverage the **`superpowers`** plugin for harness engineering 
 - **Medium-tier (Review/QA)**: Used by Test Runner or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
 - **Low-tier (Coding/Execute)**: Used by Code Writer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
 
+**Tier Adjustment Rules:**
+- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
+- The PM can NEVER upgrade a Tier above the baseline.
+- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
+
 > **Note on 3-Tier Strategy Models:**
 > The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
 
@@ -247,6 +252,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
 - **Language**: All code, config, commit messages, and branch names -**English only**.
+- **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 
 ---
 

@@ -1,4 +1,5 @@
 {
+  "effortLevel": "high",
   "permissions": {
     "allow": [
       "Bash(bun scripts/audit.ts *)",
@@ -6,6 +7,12 @@
       "Bash(bun run agent:verify *)",
       "Bash(curl -sI *)",
       "Bash(bun scripts/validate-templates.ts *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(*--no-verify*)",
+      "Bash(rm -rf *)"
     ]
   },
   "mcpServers": {
@@ -22,6 +29,9 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "teammateMode": "auto",
+  "worktree": {
+    "bgIsolation": "none"
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -32,6 +42,7 @@
             "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
             "timeout": 60,
             "async": true,
+            "asyncRewake": true,
             "statusMessage": "Running post-edit lifecycle check..."
           }
         ]
@@ -59,6 +70,7 @@
             "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
             "timeout": 60,
             "async": true,
+            "asyncRewake": true,
             "statusMessage": "Running teammate idle lifecycle check..."
           }
         ]
@@ -74,6 +86,19 @@
             "timeout": 120,
             "async": true,
             "statusMessage": "Running QA audit on task completion..."
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks in new worktree..."
           }
         ]
       }

@@ -74,7 +74,7 @@ if [ -z "$VARIANT" ]; then
     echo "   co-develop  — Software development (stable)"
     echo "   co-design   — UI/UX design (stable)"
     echo "   co-work     — Collaboration & documentation (stable)"
-    echo "   co-security — Security engagement (draft)"
+    echo "   co-security — Security engagement (stable)"
     echo ""
     echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant co-develop"
     echo ""
@@ -127,7 +127,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable)"
   exit 1
 fi
 
@@ -551,6 +551,17 @@ if bun "$WORKSPACE_ROOT/scripts/audit.ts"; then
 else
   echo ""
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
+fi
+
+# ── 8.5. Post-scaffolding variant validation ─────────────────────────────────  # TEST: none
+echo ""
+echo "Running variant validation..."
+if command -v bun >/dev/null 2>&1; then
+    if bun scripts/validate-templates.ts --variant "$VARIANT" 2>&1; then
+        echo "[OK] Variant validation passed."
+    else
+        echo "[WARN] Variant validation found issues. Review before using this project."
+    fi
 fi
 
 # ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
