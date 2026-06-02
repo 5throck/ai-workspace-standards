@@ -80,13 +80,27 @@ Agent Teams allow multiple Claude Code instances to work in parallel with a shar
 | `TeammateIdle` | Teammate finishes work | Runs `post-write-lifecycle-check.ts` — validates lifecycle state |
 | `TaskCompleted` | Task marked complete | Runs `audit.ts` — full QA gate |
 
+**Desktop App limitations** — Agent Teams in the Desktop App have significant restrictions:
+
+| Capability | CLI | Desktop App |
+|-----------|-----|-------------|
+| Feature activation (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`) | ✅ | ✅ (settings.json loaded) |
+| in-process mode | ✅ | ⚠️ Functional but `Shift+Down` navigation unavailable |
+| tmux split-pane mode | ✅ | ❌ Not supported |
+| `TeammateIdle` / `TaskCompleted` hooks fire | ✅ | ❌ Hooks do not fire (same as PostToolUse) |
+
+> **Desktop App recommendation**: Use `teammateMode: "in-process"` explicitly. Hooks will not fire — run `bun scripts/audit.ts` manually after each teammate completes work.
+
 **PM workflow integration**: When using Agent Teams, the PM Gateway still applies. Dispatch specialist agents as teammates using their `agents/<name>.md` definitions:
 
 ```text
 Spawn a teammate using the automation-engineer agent type to implement the script per the approved plan.
 ```
 
-> ⚠️ **Antigravity (Gemini CLI) note**: Agent Teams is Claude Code–only. Antigravity 2.0 uses a different architecture (Agent Manager + separate workspaces). See GEMINI.md §Agent Manager for the Antigravity equivalent approach.
+> ⚠️ **Platform support summary**:
+> - **Claude Code CLI** ✅ Full support
+> - **Claude Code Desktop App** ⚠️ Partial — in-process only, no hooks, no tmux
+> - **Antigravity CLI** ❌ Not supported — use Agent Manager (UI-based) instead. See GEMINI.md §Agent Manager.
 
 ### 2. Native Slash Commands
 Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
