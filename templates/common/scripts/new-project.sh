@@ -188,7 +188,18 @@ if [ ! -d "$COMMON_DIR" ]; then
   exit 1
 fi
 mkdir -p "$PROJECT_DIR"
+# Exclude workspace-root-only files that must NOT be copied into new projects.
+# package.json at the root is a workspace management artifact (bun scripts for
+# audit, dev-sync, agent:verify, etc.) — not an app dependency manifest.
+# New projects that genuinely need Node.js should create their own package.json.
+WORKSPACE_ONLY_FILES=("package.json" "package-lock.json" "bun.lock" "bun.lockb")
 cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
+for f in "${WORKSPACE_ONLY_FILES[@]}"; do
+  if [ -f "$PROJECT_DIR/$f" ]; then
+    rm -f "$PROJECT_DIR/$f"
+    echo "  🗑️  Excluded workspace-only file: $f"
+  fi
+done
 
 # ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1, Test 7
 if [ ! -d "$TEMPLATES_DIR" ]; then

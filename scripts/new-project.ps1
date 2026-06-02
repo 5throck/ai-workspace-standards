@@ -211,6 +211,19 @@ if (-not (Test-Path $CommonDir)) {
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
 
+# Exclude workspace-root-only files that must NOT be copied into new projects.
+# package.json at the root is a workspace management artifact (bun scripts for
+# audit, dev-sync, agent:verify, etc.) - not an app dependency manifest.
+# New projects that genuinely need Node.js should create their own package.json.
+$workspaceFilesToRemove = @("package.json", "package-lock.json", "bun.lock", "bun.lockb")
+foreach ($file in $workspaceFilesToRemove) {
+    $filePath = Join-Path $ProjectDir $file
+    if (Test-Path $filePath) {
+        Remove-Item $filePath -Force
+        Write-Host "  🗑️  Excluded workspace-only file: $file"
+    }
+}
+
 # -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1, Test 7
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Variant templates directory not found: $TemplatesDir" -ForegroundColor Red

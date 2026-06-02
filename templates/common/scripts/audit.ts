@@ -1,8 +1,9 @@
-// @version 2.4.0
+// @version 2.4.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
+import { execSync } from 'node:child_process';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -232,6 +233,7 @@ if (!LIFECYCLE_ONLY) {
         if (parityOk) {
             Pass(`script parity: all .sh/.ps1 pairs present (${shFiles.length} pairs, test-* excluded)`);
         }
+
     }
 
     // S-03: .githooks parity check — Warn only (Git Bash assumed on Windows)
@@ -274,6 +276,46 @@ if (!LIFECYCLE_ONLY) {
 } else {
     Warn('docs/context.md not found - skipping project-level checks (workspace root)');
 }
+}
+
+// S-04: Script modification parity check based on SCRIPTS.md
+if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+    const statusOutput = (await $`git status --porcelain scripts/`.quiet().nothrow()).text();
+    const modifiedScripts = new Set<string>();
+    for (const line of statusOutput.split('\n')) {
+        if (line.length < 4) continue;
+        const fileStr = line.substring(3);
+        const files = fileStr.split(' -> ');
+        const filePath = files[files.length - 1].trim().replace(/^"|"$/g, '');
+        if (filePath.startsWith('scripts/')) {
+            modifiedScripts.add(filePath.substring(8));
+        }
+    }
+
+    if (modifiedScripts.size > 0) {
+        const scriptsMd = fs.readFileSync(path.join('scripts', 'SCRIPTS.md'), 'utf-8');
+        const registryLines = scriptsMd.split('\n').filter(l => l.startsWith('| `'));
+        
+        let pairErrors = 0;
+        for (const line of registryLines) {
+            const parts = line.split('|').map(p => p.trim());
+            if (parts.length >= 9) {
+                const scriptName = parts[1].replace(/`/g, '');
+                const pairField = parts[8];
+                
+                if (modifiedScripts.has(scriptName) && pairField.startsWith('pair: ')) {
+                    const pairName = pairField.substring(6).trim();
+                    if (!modifiedScripts.has(pairName)) {
+                        Fail(`script modification parity: ${scriptName} is modified but its pair ${pairName} is not`);
+                        pairErrors++;
+                    }
+                }
+            }
+        }
+        if (pairErrors === 0) {
+            Pass('script modification parity: all paired scripts are modified together');
+        }
+    }
 }
 
 // Skills registry cross-check
@@ -600,6 +642,36 @@ if (IS_WORKSPACE_ROOT) {
     }
     if (strayFound === 0) {
         Pass('Workspace root is clean from stray test artifacts');
+    }
+}
+
+// Check: Template scripts must retain executable bit
+if (fs.existsSync('templates')) {
+    let executableErrors = 0;
+    const checkExecutable = (dir: string) => {
+        for (const item of fs.readdirSync(dir)) {
+            const itemPath = path.join(dir, item);
+            const stat = fs.statSync(itemPath);
+            if (stat.isDirectory()) {
+                checkExecutable(itemPath);
+            } else if (stat.isFile()) {
+                if (item.endsWith('.sh') || item.endsWith('.ps1') || item.endsWith('.ts')) {
+                    try {
+                        const out = execSync(`git ls-files --stage "${itemPath.replace(/\\/g, '/')}"`, { encoding: 'utf-8' });
+                        if (out.startsWith('100644')) {
+                            Fail(`Template script lost executable bit: ${itemPath}`);
+                            executableErrors++;
+                        }
+                    } catch (e) {
+                        // Ignore if file is untracked or git command fails
+                    }
+                }
+            }
+        }
+    };
+    checkExecutable('templates');
+    if (executableErrors === 0) {
+        Pass('Templates executable bit check: all scripts retain executable bit');
     }
 }
 

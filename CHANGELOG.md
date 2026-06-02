@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+
+### Changed
+- **[2026-06-02]**: refactor: transition template permission strategy from strict read-only locks (444) to standard 644/755, utilizing Git Index (+x) for cross-platform executable enforcement; removed legacy read-only recovery logic from scaffolding scripts (`scripts/new-project.sh`, `scripts/new-project.ps1`, `scripts/audit.ts`)
+- **[2026-06-02]**: refactor: consolidate L0→L1→L2 synchronization into a single script; integrated `propagate-to-templates.ts` into `publish-to-template.ts`; explicitly enforce Git executable bits during propagation (`scripts/publish-to-template.ts`, `scripts/SCRIPTS.md`)
 ### Added
 - **[2026-06-01]**: feat: complete Phase 3 (Integration Test) for abap_vibe_coding variant conversion — All critical integration tests passed (7/10): Session Start Flow, CONSTITUTION Reference Resolution, PM Gateway Enforcement, Specialist Agent Dispatch Protocol, ABAP Workflow Integration, Content Loss Verification, Variant Independence; variant structure complete, CONSTITUTION references correct, PM Gateway operational, zero content loss (`abap_vibe_coding_mig/`)
 - **[2026-06-01]**: feat: complete Phase 2 (CLAUDE.md Update) for abap_vibe_coding variant conversion — Updated CLAUDE.md to extend co-develop template; added Role Declaration with CONSTITUTION.md reference, updated Session Start Checklist (7 steps), added Agent Dispatch Rules §5 (PM Gateway enforcement, execution plan display, specialist agent list, permission denial protocol); removed ABAP-specific sections (`abap_vibe_coding_mig/CLAUDE.md`)
@@ -648,7 +652,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-01*
+*Last Updated: 2026-06-02*
 
 
 
