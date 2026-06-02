@@ -20,7 +20,7 @@
       "target": "templates/common/scripts/hooks",
       "include_pattern": "*.ts",
       "recursive": false,
-      "exclude": []
+      "exclude": ["pre-commit.ts", "pre-push.ts"]
     },
     "scripts-helpers": {
       "description": "Helper/utility scripts used by scaffolding",

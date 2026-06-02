@@ -1,9 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * Project-level pre-push hook (generated from templates/common).
- * Workspace-root audit and integration tests are excluded — those run at the workspace level only.
- * @version 2.0.0
+ * @version 1.2.0
  */
 
 import { $ } from "bun";
@@ -27,6 +25,23 @@ async function isTagOnlyPush(): Promise<boolean> {
 }
 
 async function main() {
+  console.log("=== pre-push audit ===");
+  try {
+    await $`bun scripts/audit.ts`;
+  } catch {
+    console.error("\n\x1b[31m❌ Audit failed — push blocked. Fix issues above before pushing.\x1b[0m");
+    process.exit(1);
+  }
+
+  console.log("=== pre-push integration tests ===");
+  try {
+    console.log("Running integration tests...");
+    await $`bun scripts/test-runner.ts integration`;
+  } catch {
+    console.error("\n\x1b[31m❌ Integration tests failed — push blocked. Fix test failures before pushing.\x1b[0m");
+    process.exit(1);
+  }
+
   // Tag-only pushes bypass the branch protection check — tags are not commits to main.
   if (await isTagOnlyPush()) return;
 

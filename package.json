@@ -30,6 +30,11 @@
     "agent-lifecycle-audit": "bun scripts/agent-lifecycle-audit.ts",
     "skill-lifecycle-audit": "bun scripts/skill-lifecycle-audit.ts",
     "readme-lifecycle-audit": "bun scripts/readme-lifecycle-audit.ts",
+    "lifecycle-sync": "bun scripts/lifecycle-sync-audit.ts",
+    "propagate": "bun scripts/propagate-to-templates.ts",
+    "validate-templates": "bun scripts/validate-templates.ts",
+    "version-manifest": "bun scripts/generate-version-manifest.ts",
+    "translate-readme": "bun scripts/translate-readme.ts",
     "verify-scripts": "bun scripts/verify-scripts.ts",
     "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
   },

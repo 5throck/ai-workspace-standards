@@ -2,8 +2,50 @@
 /**
  * propagate-to-templates.ts — Tier 1 → Tier 2 sync tool
  * Compares workspace root (Tier 1 SSOT) against templates/common/ (Tier 2) and optionally applies updates.
- * @version 1.1.0
+ * @version 1.1.1
  * @usage bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>]
+ *
+ * TODO (M-10 consolidation — do NOT restructure yet, document only):
+ *
+ * OVERLAP ANALYSIS:
+ *   - This script (propagate-to-templates.ts): config-driven via propagation-map.json; covers
+ *     scripts/*.ts, scripts/hooks/*.ts, scripts/helpers/*.ts, .claude/skills, .gemini/skills.
+ *     Exclusions are the `exclude[]` arrays in propagation-map.json.
+ *   - publish-to-template.ts: SCRIPTS.md-driven (parses L0 column); covers scripts/*.ts,
+ *     skills/, .claude/commands/, .gemini/commands/. No hash comparison — always overwrites.
+ *   - lifecycle-sync-audit.ts Check B: SCRIPTS.md-driven (parses layer column); covers
+ *     scripts/*.ts only; does VERSION comparison (not content hash). Also does Check C
+ *     (skills/) using SHA-256 content hash.
+ *   - audit.ts checkScriptSync(): file-system diff of scripts/ vs templates/common/scripts/
+ *     using SHA-256. Overlaps directly with propagate-to-templates.ts scripts domain.
+ *
+ * EXCLUSION LIST DIVERGENCE (propagation-map.json vs SCRIPTS.md L0-only):
+ *   propagation-map.json scripts.exclude = ["validate-templates.ts", "validate-model-registry.ts"]
+ *   SCRIPTS.md L0-only (scripts/*.ts) = ["validate-templates.ts", "validate-model-registry.ts",
+ *     "new-project.sh", "new-project.ps1", "upgrade-project.sh", "upgrade-project.ps1",
+ *     "hooks/pre-commit.ts", "hooks/pre-push.ts"]
+ *   DIVERGENCE: propagation-map.json does NOT exclude the .sh/.ps1 scripts or the hooks,
+ *   because its include_pattern="*.ts" naturally skips .sh/.ps1, and hooks are in a separate
+ *   domain (scripts-hooks) where pre-commit.ts and pre-push.ts are NOT excluded — meaning
+ *   propagation-map.json WILL sync those hook files, contradicting their L0-only designation
+ *   in SCRIPTS.md. The scripts-helpers domain exclude list matches SCRIPTS.md L0-only
+ *   helpers exactly.
+ *
+ * CONSOLIDATION PLAN (future work):
+ *   1. SINGLE SOURCE OF TRUTH for exclusions: propagation-map.json should be the SSOT.
+ *      Migrate SCRIPTS.md layer column to be derived from / validated against propagation-map.json,
+ *      not maintained independently. lifecycle-sync-audit.ts Check B should cross-check
+ *      propagation-map.json rather than SCRIPTS.md layer column.
+ *   2. DEPRECATE publish-to-template.ts: its script-sync function is a strict subset of this
+ *      script's "scripts" domain. Retain only if the no-hash-check always-overwrite behavior
+ *      is intentional for a "force publish" use case; otherwise remove.
+ *   3. DEDUPLICATE SHA-256 drift detection: audit.ts checkScriptSync() is redundant with
+ *      this script's dry-run mode. Remove checkScriptSync() from audit.ts and replace with
+ *      a call to `bun scripts/propagate-to-templates.ts --dry-run --domain scripts`.
+ *   4. FIX scripts-hooks domain: pre-commit.ts and pre-push.ts are L0-only per SCRIPTS.md
+ *      but are NOT excluded in propagation-map.json scripts-hooks domain. Add them to the
+ *      exclude list for that domain.
+ *   5. HASH ALGORITHM: now aligned to SHA-256 (changed from MD5 in v1.1.1 per M-10).
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
@@ -53,8 +95,8 @@ interface FileDiff {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-function md5(content: string): string {
-  return createHash('md5').update(content).digest('hex');
+function sha256(content: string): string {
+  return createHash('sha256').update(content).digest('hex');
 }
 
 function padEnd(s: string, n: number): string {
@@ -154,7 +196,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
       } else {
         const srcContent = readFileSync(sourcePath, 'utf-8');
         const tgtContent = readFileSync(targetPath, 'utf-8');
-        status = md5(srcContent) === md5(tgtContent) ? 'in-sync' : 'differs';
+        status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
       }
 
       diffs.push({ domain: domainName, relativePath: relPath, sourcePath, targetPath, status });

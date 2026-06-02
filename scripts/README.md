@@ -41,7 +41,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L1 | 1.3.2 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.sh` | L1 | 1.3.3 | active | — | — | L0-only | pair: new-project.ps1 |
 | `new-project.ps1` | L1 | 1.5.4 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
@@ -50,7 +50,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `audit.ts` | L0 | 2.4.0 | active | — | — | common | — |
-| `dev-sync.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skills.ts` | L1 | 1.1.0 | active | — | — | common | — |
@@ -75,9 +75,17 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L1 | 1.2.2 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L1 | 1.3.0 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/validate-output.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `verify-readme-sync.ts` | L1 | 1.1.0 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -93,15 +101,16 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 2.0.0 | active | — | — | common | — |
-| `hooks/pre-push.ts` | L0 | 2.0.0 | active | — | — | common | — |
+| `hooks/pre-commit.ts` | L0 | 1.5.0 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
+| `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `propagate-to-templates.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `propagate-to-templates.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `propagation-map.json` | L0 | 1.0.0 | active | — | — | common | — |
+| `fix-parse-agent.sed` | L0 | 1.0.0 | active | — | — | L0-only | — |
 
 ---
 
@@ -337,4 +346,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-01*
+*Last Updated: 2026-06-02*

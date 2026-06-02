@@ -109,6 +109,7 @@ async function main() {
   }
 
   // 3.5. Lifecycle-only audit (fast pre-commit check)
+  let lifecycleOk = true;
   if (!memoryOnly) {
     console.log("\n=== Lifecycle Audit (Pre-commit Gatekeeper) ===");
     try {
@@ -117,12 +118,13 @@ async function main() {
     } catch {
       console.error("\x1b[31m[FAIL]\x1b[0m Lifecycle audit detected drift - commit blocked.");
       console.error("\x1b[33m[INFO]\x1b[0m Run 'bun scripts/audit.ts --lifecycle-only' to see details.");
+      lifecycleOk = false;
       process.exit(1);
     }
   }
 
-  // 4. Audits
-  if (!memoryOnly) {
+  // 4. Audits (only if lifecycle check passed)
+  if (!memoryOnly && lifecycleOk) {
     console.log("\n=== Workspace Audit ===");
     try {
       await $`bun scripts/audit.ts`;

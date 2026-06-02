@@ -15,11 +15,11 @@ triggers:
 
 # Finishing a Development Branch (Workspace Override)
 
-> **This project overrides the global `finishing-a-development-branch` skill.**
+> **This workspace overrides the global `finishing-a-development-branch` skill.**
 
 ## Why this override exists
 
-This project enforces a single PR creation path via `/sync` to guarantee:
+This workspace enforces a single PR creation path via `/sync` to guarantee:
 - CHANGELOG.md entry exists before committing
 - Session memlog is written to `memory/YYYY-MM-DD.md`
 - `bun scripts/audit.ts` passes before any push
@@ -35,7 +35,21 @@ The global skill's Option 2 (push without commit) bypasses CHANGELOG and memlog 
 /sync "type: description of what changed"
 ```
 
+Examples:
+```
+/sync "feat: add user authentication"
+/sync "fix: resolve null pointer in payment flow"
+/sync "docs: update API reference"
+```
+
+The `/sync` pipeline handles everything:
+1. Writes session entry to `memory/YYYY-MM-DD.md`
+2. Updates `memory/MEMORY.md` index
+3. Verifies CHANGELOG.md has an entry (blocks if missing — run `/changelog` first)
+4. Runs `bun scripts/audit.ts` (blocks on failure)
+5. Creates `pr/date-slug` branch, commits, pushes, opens GitHub PR
+
 ## Never use --no-verify
 
-`git commit --no-verify` and `git push --no-verify` are **forbidden**.
+`git commit --no-verify` and `git push --no-verify` are **forbidden** in this workspace.
 They bypass secret scanning (gitleaks) and all quality gates.

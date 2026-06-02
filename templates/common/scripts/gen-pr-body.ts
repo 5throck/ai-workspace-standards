@@ -8,9 +8,7 @@
 //   2. Otherwise → build a structured template from commit message + file list (fallback)
 
 import { $ } from 'bun';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
+import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 
 const commitMsg = process.argv.slice(2).join(' ');
 if (!commitMsg) {
@@ -62,20 +60,45 @@ const fileList = filesRaw
   .map(f => `- ${f}`)
   .join('\n') || '';
 
+// ── Prompt injection sanitizer ────────────────────────────────────────────────
+// Strips content that could hijack the Claude prompt when git output is embedded.
+function sanitizeForPrompt(text: string): string {
+  return text
+    .split('\n')
+    .filter(line => {
+      const trimmed = line.trimStart();
+      // Drop lines that look like injected prompt roles
+      return !/^(Human|Assistant|System)\s*:/i.test(trimmed);
+    })
+    .map(line =>
+      line
+        // Escape backtick sequences (break out of code-fence attacks)
+        .replace(/`/g, '⁠`')
+        // Escape closing XML-style tags that could confuse tag boundaries
+        .replace(/<\//g, '&lt;/')
+    )
+    .join('\n');
+}
+
 // ── AI mode: generate body via Claude CLI ────────────────────────────────────
 const hasClaudeRes = await $`claude --version`.quiet().nothrow();
 if (hasClaudeRes.exitCode === 0) {
+  const safeFiles = sanitizeForPrompt(filesRaw);
+  const safeDiffStat = sanitizeForPrompt(diffStat);
+
   const prompt = `Generate a GitHub Pull Request body for the following change.
 Output ONLY the PR body in markdown - no explanation, no code fences around the whole output.
 
 Commit message : ${commitMsg}
 Date           : ${today}
 
-Changed files  :
-${filesRaw}
+<file-list>
+${safeFiles}
+</file-list>
 
-Diff summary   :
-${diffStat}
+<diff-summary>
+${safeDiffStat}
+</diff-summary>
 
 Use EXACTLY this structure (keep all section headers, fill placeholders):
 
@@ -100,11 +123,14 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 ---
 `;
 
-  const tmpFile = path.join(os.tmpdir(), `gen-pr-body-${Date.now()}.txt`);
   try {
-    await Bun.write(tmpFile, prompt);
-    const claudeRes = await $`claude -p ${prompt}`.quiet().nothrow();
-    const body = claudeRes.stdout.toString().trim();
+    const claudeRetry = await withRetry(
+      () => $`claude -p ${prompt}`.quiet().nothrow(),
+      { ...DEFAULT_CONFIG, maxRetries: 2, initialDelay: 1000 },
+      'claude pr-body'
+    );
+    const claudeRes = claudeRetry.result;
+    const body = claudeRes?.stdout.toString().trim() ?? '';
     if (body) {
       validateLanguage(body, 'AI-generated PR body');
       process.stdout.write(body + '\n');
@@ -112,8 +138,6 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
     }
   } catch {
     // fall through to fallback
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch {}
   }
 }
 

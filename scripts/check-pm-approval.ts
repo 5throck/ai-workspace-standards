@@ -37,9 +37,12 @@ const toolInput = payload.tool_input ?? {};
 const READ_ONLY_PATTERN =
   /^(cat|ls|find|echo|pwd|which|type|head|tail|wc)\b|^git\s+(log|status|diff|show|branch|remote|rev-parse|tag)\b|^bun\s+(scripts\/(audit|validate|verify|list|report))|^gh\s+(pr\s+view|issue\s+view|repo\s+view)\b|^(touch|rm)\s+\.pm-approved\b/;
 
+// Shell chaining operators that could smuggle destructive commands past the read-only check
+const CHAIN_OPERATORS = /&&|\|\||;|\||\`|\$\(/;
+
 if (toolName === 'Bash' || toolName === 'bash') {
   const cmd = (toolInput.command ?? '').trim();
-  if (READ_ONLY_PATTERN.test(cmd)) {
+  if (READ_ONLY_PATTERN.test(cmd) && !CHAIN_OPERATORS.test(cmd)) {
     process.exit(0);
   }
 }

@@ -1,7 +1,8 @@
-// @version 1.1.0
+// @version 1.2.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -181,27 +182,33 @@ try {
     process.exit(1);
 }
 
+const syncContext = Date.now().toString();
+process.env.SYNC_ACTIVE = "1";
+process.env.DEV_SYNC_CONTEXT = syncContext;
+fs.writeFileSync('.sync_context.tmp', syncContext);
+
+const cleanupTmp = () => { try { if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp'); } catch {} };
+process.on('exit', cleanupTmp);
+
 try {
-    const syncContext = Date.now().toString();
-    process.env.SYNC_ACTIVE = "1";
-    process.env.DEV_SYNC_CONTEXT = syncContext;
-    fs.writeFileSync('.sync_context.tmp', syncContext);
-    
     const commitRes = await $`git commit -m ${msg}`.nothrow();
-    
-    if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp');
+    cleanupTmp();
     if (commitRes.exitCode !== 0) throw new Error(commitRes.stderr.toString());
 } catch (e) {
-    if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp');
+    cleanupTmp();
     console.log(`${RED}❌ git commit failed: ${e}${RESET}`);
     process.exit(1);
 }
 
-try {
-    const pushRes = await $`git push -u origin ${branch}`.nothrow();
-    if (pushRes.exitCode !== 0) throw new Error(pushRes.stderr.toString());
-} catch (e) {
-    console.log(`${RED}❌ git push failed: ${e}${RESET}`);
+const pushRetry = await withRetry(
+    () => $`git push -u origin ${branch}`.nothrow(),
+    { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+    'git push'
+);
+const pushProc = pushRetry.result as { exitCode: number; stderr: { toString(): string } } | undefined;
+if (!pushRetry.success || pushProc?.exitCode !== 0) {
+    const errMsg = pushProc?.stderr.toString().trim() || pushRetry.lastError?.message || 'unknown error';
+    console.log(`${RED}❌ git push failed: ${errMsg}${RESET}`);
     process.exit(1);
 }
 
@@ -213,10 +220,22 @@ try {
 } catch {}
 
 if (prBody) {
-    await $`gh pr create --title ${msg} --body ${prBody}`.nothrow();
+    await withRetry(
+        () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
+        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+        'gh pr create'
+    );
 } else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
     const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
-    await $`gh pr create --title ${msg} --body ${prTpl}`.nothrow();
+    await withRetry(
+        () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
+        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+        'gh pr create'
+    );
 } else {
-    await $`gh pr create --fill`.nothrow();
+    await withRetry(
+        () => $`gh pr create --fill`.nothrow(),
+        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+        'gh pr create'
+    );
 }

@@ -30,10 +30,26 @@ Use this skill when:
 
 ## Creation Checklist
 
-1. **Determine gemini-parity** and create in appropriate platform directories
-2. **Propagate to common**: copy to `templates/common/.claude/commands/` (and `.gemini/` if not skip)
+1. **Determine gemini-parity**: Does this command apply to Gemini/Antigravity?
+   - If yes: create in BOTH `.claude/commands/` AND `.gemini/commands/`
+   - If Claude-only: add `gemini-parity: skip` to frontmatter
+
+2. **Propagate to common**:
+   - Always: copy to `templates/common/.claude/commands/`
+   - If not `gemini-parity: skip`: also copy to `templates/common/.gemini/commands/`
+
 3. **Register in common-contract.json**: Add entry to `common_commands` section
+
 4. **Run verification**: `bun scripts/verify-platform-lifecycle.ts` must pass Check G
+
+## Propagation Rule
+
+```
+.claude/commands/<name>.md                    ← Claude Code source
+.gemini/commands/<name>.md                    ← Gemini/Antigravity (if not skip)
+templates/common/.claude/commands/<name>.md   ← Template propagation (Claude)
+templates/common/.gemini/commands/<name>.md   ← Template propagation (if not skip)
+```
 
 ## Verification
 

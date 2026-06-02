@@ -17,7 +17,7 @@
 
 import { $ } from "bun";
 import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import path, { join } from "path";
 import { createHash } from "node:crypto";
 
 interface SectionChange {
@@ -249,6 +249,20 @@ Examples:
 `);
             process.exit(0);
         }
+    }
+
+    // Guard against path traversal: both paths must resolve within the project root
+    const projectRoot = path.resolve(__dirname, '..');
+    const resolvedSource = path.resolve(sourcePath);
+    const resolvedTarget = path.resolve(targetPath);
+
+    if (!resolvedSource.startsWith(projectRoot + path.sep) && resolvedSource !== projectRoot) {
+        console.error('[translate-readme] Path must be within the project root.');
+        process.exit(1);
+    }
+    if (!resolvedTarget.startsWith(projectRoot + path.sep) && resolvedTarget !== projectRoot) {
+        console.error('[translate-readme] Path must be within the project root.');
+        process.exit(1);
     }
 
     // Validate files exist

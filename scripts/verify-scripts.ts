@@ -16,8 +16,9 @@
  *   1 = drift, expired removal date, or active security advisory detected
  */
 
+import * as fs from "fs";
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "fs";
-import { join, dirname } from "path";
+import { join, dirname, relative } from "path";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
@@ -110,14 +111,20 @@ function parseRegistry(content: string): RegistryEntry[] {
 
 // ── Filesystem Scanner ───────────────────────────────────────────────────────
 
+function walkScripts(dir: string): string[] {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory()
+      ? walkScripts(join(dir, entry.name))
+      : SCRIPT_EXTENSIONS.some((ext) => entry.name.endsWith(ext)) && entry.name !== SCRIPTS_MD_FILENAME
+        ? [join(dir, entry.name)]
+        : []
+  );
+}
+
 function getActualScripts(): string[] {
   if (!existsSync(scriptsDir)) return [];
-  return readdirSync(scriptsDir)
-    .filter(
-      (f) =>
-        SCRIPT_EXTENSIONS.some((ext) => f.endsWith(ext)) &&
-        f !== SCRIPTS_MD_FILENAME
-    )
+  return walkScripts(scriptsDir)
+    .map((absPath) => relative(scriptsDir, absPath).replace(/\\/g, "/"))
     .sort();
 }
 
@@ -196,7 +203,7 @@ function checkDriftReport(): void {
   }
 
   console.log();
-  process.exit(drifted.length > 0 ? 0 : 0); // drift is warn-only, not a hard fail
+  process.exit(0); // drift is warn-only
 }
 
 // ── Verify Mode ──────────────────────────────────────────────────────────────

@@ -30,12 +30,37 @@ Use this skill when:
 
 ## Creation Checklist
 
+When creating a new platform skill (`SKILL.md`):
+
 1. **Initialize version**: Add `version: 1.0.0` to frontmatter
 2. **Dual platform**: Create in BOTH `.claude/skills/<name>/SKILL.md` AND `.gemini/skills/<name>/SKILL.md`
-3. **Propagate to common**: Copy to `templates/common/.claude/skills/` AND `templates/common/.gemini/skills/`
+3. **Propagate to common**: Copy to `templates/common/.claude/skills/<name>/SKILL.md` AND `templates/common/.gemini/skills/<name>/SKILL.md`
 4. **Register in AGENTS.md**: Add row to `## Skills` table
 5. **Register in common-contract.json**: Add entry to `common_platform_skills` section
 6. **Run verification**: `bun scripts/verify-platform-lifecycle.ts` must pass Check E, F, H
+
+## Version Bump Rules
+
+| Change Type | Version Bump |
+|-------------|-------------|
+| New skill created | Initialize `version: 1.0.0` |
+| Trigger or description update | patch (1.0.0 → 1.0.1) |
+| New procedures or sections added | minor (1.0.0 → 1.1.0) |
+| Fundamental role change | major (1.0.0 → 2.0.0) |
+
+When bumping version: update ALL 4 files (`.claude/skills/`, `.gemini/skills/`, both `templates/common/` copies).
+
+## Propagation Rule
+
+Every platform skill must exist in 4 locations:
+```
+.claude/skills/<name>/SKILL.md
+.gemini/skills/<name>/SKILL.md
+templates/common/.claude/skills/<name>/SKILL.md
+templates/common/.gemini/skills/<name>/SKILL.md
+```
+
+`verify-platform-lifecycle.ts` Check H verifies propagation.
 
 ## Verification
 
