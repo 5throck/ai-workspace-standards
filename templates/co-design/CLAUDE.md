@@ -58,6 +58,32 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
+#### Agent Teams (Experimental)
+
+Agent Teams allow multiple Claude Code instances to work in parallel with a shared task list and direct inter-agent messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`.
+
+**Key settings** (already configured in `.claude/settings.json`):
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | `"1"` | Enables the feature (experimental, requires v2.1.32+) |
+| `teammateMode` | `"auto"` | Uses tmux split-pane if inside tmux, in-process otherwise |
+
+**New hooks** (fires during agent team sessions):
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| `TeammateIdle` | Teammate finishes work | Runs `post-write-lifecycle-check.ts` — validates lifecycle state |
+| `TaskCompleted` | Task marked complete | Runs `audit.ts` — full QA gate |
+
+**PM workflow integration**: When using Agent Teams, the PM Gateway still applies. Dispatch specialist agents as teammates using their `agents/<name>.md` definitions:
+
+```text
+Spawn a teammate using the automation-engineer agent type to implement the script per the approved plan.
+```
+
+> ⚠️ **Antigravity (Gemini CLI) note**: Agent Teams is Claude Code–only. Antigravity 2.0 uses a different architecture (Agent Manager + separate workspaces). See GEMINI.md §Agent Manager for the Antigravity equivalent approach.
+
 ### 2. Native Slash Commands
 Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
 
@@ -253,6 +279,6 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 
 - **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-01 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-02 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
 
 

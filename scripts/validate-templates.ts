@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.0
+ * @version 1.4.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -882,7 +882,12 @@ function checkPlatformDocumentationParity(): void {
     'Phase 4 Execution Loop',
     'Mandatory Execution Plan Display',
     'Specialist Agent List',
-    'Superpowers Plugin & Cost Optimization'
+    'Superpowers Plugin & Cost Optimization',
+    'Agent Teams (Experimental)',
+    'Agent Teams vs. Antigravity Agent Manager',
+    'Antigravity Agent Manager',
+    'Antigravity Parallel Agent Workflow',
+    'GEMINI.md Equivalent Settings'
   ];
   
   const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));

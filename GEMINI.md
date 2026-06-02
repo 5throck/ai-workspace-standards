@@ -262,7 +262,45 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 
-*Last Updated: 2026-06-01 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+## Agent Teams vs. Antigravity Agent Manager
+
+Claude Code has an **Agent Teams** feature (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`) that runs multiple Claude instances in-process with a shared task list and direct messaging. Antigravity 2.0 has a **different** but conceptually similar capability.
+
+### Antigravity Agent Manager
+
+Antigravity 2.0 replaces the single-agent model with an **Agent Manager** — a higher-level UI that orchestrates multiple agents across separate workspaces.
+
+| Aspect | Claude Code Agent Teams | Antigravity Agent Manager |
+|--------|------------------------|--------------------------|
+| Activation | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in settings | UI-based — enter Agent Manager view |
+| Architecture | In-process or tmux, single session | Separate workspaces per agent |
+| Shared task list | ✅ Programmatic, shared `~/.claude/tasks/` | ❌ Per-workspace, no shared task list |
+| Direct messaging | ✅ `SendMessage` tool between teammates | ❌ No inter-agent messaging |
+| Lifecycle hooks | `TeammateIdle`, `TaskCreated`, `TaskCompleted` | Not available (Antigravity hooks use different events) |
+| Config setting | `teammateMode: "auto"/"in-process"/"tmux"` | No equivalent setting |
+
+### Antigravity Parallel Agent Workflow
+
+Since Antigravity lacks in-process agent teams, use the **multi-workspace approach**:
+
+1. Open Agent Manager (separate from the editor view)
+2. Add multiple workspaces — one per specialist agent
+3. Assign tasks via natural language in each workspace
+4. Monitor progress via the Inbox
+5. Approve or redirect pending actions
+
+> **PM Gateway note**: In Antigravity sessions, the PM Gateway workflow runs within a single workspace session. For parallel work, use the Gemini CLI subagent dispatch (`invoke_subagent`) rather than Agent Teams.
+
+### GEMINI.md Equivalent Settings
+
+Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMode` equivalents. The following settings.json keys from CLAUDE.md are **Claude Code–only**:
+- `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+- `teammateMode`
+- Hook events: `TeammateIdle`, `TaskCreated`, `TaskCompleted`
+
+---
+
+*Last Updated: 2026-06-02 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

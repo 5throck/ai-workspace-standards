@@ -18,6 +18,10 @@
       ]
     }
   },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "auto",
   "hooks": {
     "PostToolUse": [
       {
@@ -42,6 +46,34 @@
             "command": "git config core.hooksPath .githooks",
             "async": true,
             "statusMessage": "Configuring git hooks..."
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "timeout": 60,
+            "async": true,
+            "statusMessage": "Running teammate idle lifecycle check..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit.ts",
+            "timeout": 120,
+            "async": true,
+            "statusMessage": "Running QA audit on task completion..."
           }
         ]
       }
