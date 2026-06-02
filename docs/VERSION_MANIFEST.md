@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-02T15:14:04.063Z
+**Generated**: 2026-06-02T17:13:34.558Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 15
-- **Scripts**: 59
+- **Skills**: 16
+- **Scripts**: 60
 - **Commands**: 7
 
 ---
@@ -46,6 +46,7 @@
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
 | simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
+| team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
 | ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
@@ -94,6 +95,7 @@
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | N/A | scripts/sync-skill-status.ts | N/A |
 | sync-skills.ts | N/A | scripts/sync-skills.ts | N/A |
+| team-builder.ts | N/A | scripts/team-builder.ts | fs, path |
 | template-validation.ts | N/A | scripts/helpers/template-validation.ts | N/A |
 | test-new-project.ts | N/A | scripts/test-new-project.ts | bun |
 | test-runner.ts | N/A | scripts/test-runner.ts | child_process, fs, path |
@@ -137,7 +139,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 6 / 7
-- **Skills with parity**: 4 / 15
+- **Skills with parity**: 4 / 16
 
 ---
 
@@ -157,6 +159,7 @@
 - Skill simulate-project-creation has no triggers defined
 - Skill simulate-project-creation has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
+- Skill team-builder has no triggers defined
 - Skill translate has no triggers defined
 - Skill ui-ux-pro-max has no triggers defined
 - Skill validate-docs-links has no triggers defined
