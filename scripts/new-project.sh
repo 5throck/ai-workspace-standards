@@ -553,6 +553,17 @@ else
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
 
+# ── 8.5. Post-scaffolding variant validation ─────────────────────────────────  # TEST: none
+echo ""
+echo "Running variant validation..."
+if command -v bun >/dev/null 2>&1; then
+    if bun scripts/validate-templates.ts --variant "$VARIANT" 2>&1; then
+        echo "[OK] Variant validation passed."
+    else
+        echo "[WARN] Variant validation found issues. Review before using this project."
+    fi
+fi
+
 # ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
 echo ""
 echo "Running environment setup…"

@@ -14,6 +14,10 @@ description: >
 examples:
   - user: "Design the data model for user authentication"
     assistant: "Analyzing requirements and producing an implementation plan with schema, API surface, and trade-offs."
+phases: [1, 2]
+handoff_to: [designer, code-writer]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

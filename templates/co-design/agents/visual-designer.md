@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Design the settings screen"
     assistant: "Creating visual designs for settings screen with design system components and interaction specifications."
+phases: [3]
+handoff_to: [prototype-engineer]
+handoff_from: [design-lead]
+required_skills: [ui-ux-design-intelligence]
 ---
 
 ## Role

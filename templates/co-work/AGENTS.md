@@ -10,13 +10,14 @@
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
-|-------|------|------------------|-------------------|
-| 0 | Project Initiation | Orchestrator | scaffolding-expert |
-| 1-2 | Planning & Architecture | Orchestrator | architect |
-| 3 | Design Handoff | Orchestrator | analyst (content research, data gathering) |
-| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
-| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
-| 6 | Lifecycle Finalization | Orchestrator | PM |
+|-------|------|-----------------|-------------------|
+| 0 | Project Initiation | Orchestrator | — (PM only) |
+| 1 | Research & Data Gathering | Observer | analyst, storyteller |
+| 2 | Design Review & Approval | Gate Keeper | storyteller |
+| 3 | Content Creation | Coordinator | content-writer, technical-writer |
+| 4 | Platform Delivery | Coordinator | ms365-expert, project-coordinator |
+| 5 | QA & Finalization | Owner | — (PM only) |
+| 6 | PR & Handoff | Owner | — (PM only) |
 
 **PM Facilitation Guidance:**
 See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:

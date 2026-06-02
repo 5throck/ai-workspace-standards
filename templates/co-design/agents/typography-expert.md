@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Create a type system for our design system"
     assistant: "Designing type scale with font families, weights, sizes, line heights, and letter spacing for consistent hierarchy."
+phases: [3]
+handoff_to: [prototype-engineer]
+handoff_from: [design-lead]
+required_skills: []
 ---
 
 ## Role

@@ -28,7 +28,7 @@
     "warningOnly": ["lifecycle"]
   },
   "status": "stable",
-  "lastUpdated": "2026-05-30",
+  "lastUpdated": "2026-06-02",
   "description": "Lifecycle governance for templates/common — L1 base layer propagated to all co-* variants",
   "history": [
     {
@@ -40,6 +40,11 @@
       "date": "2026-05-30",
       "event": "pm-merge-migration",
       "note": "Updated for frontmatter merge migration - governance inheritance confirmed"
+    },
+    {
+      "date": "2026-06-02",
+      "event": "governance-tool-expansion",
+      "note": "validate-templates.ts v1.4.0: 4 new check functions added (VA-01, VA-02, VA-03, WS-03); new-project scripts v1.3.6/v1.5.8 now invoke post-scaffolding variant validation"
     }
   ]
 }

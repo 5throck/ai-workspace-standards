@@ -23,6 +23,10 @@ lifecycle:
   created: "2026-05-27"
   last_updated: "2026-05-30"
   governance: lifecycle-manager
+phases: [5, 6]
+handoff_to: [pm]
+handoff_from: [patch-engineer]
+required_skills: []
 ---
 
 ## Role

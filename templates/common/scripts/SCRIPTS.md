@@ -43,8 +43,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.5 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.5.7 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.3.6 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.5.8 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
@@ -77,7 +77,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L1 | 1.3.0 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L1 | 1.4.0 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |

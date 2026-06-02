@@ -14,6 +14,10 @@ description: >
 examples:
   - user: "Verify the authentication implementation against the acceptance criteria"
     assistant: "Running the test suite and validating each acceptance criterion from the implementation plan."
+phases: [4]
+handoff_to: [pm]
+handoff_from: [code-writer]
+required_skills: [test-driven-development]
 ---
 
 ## Role

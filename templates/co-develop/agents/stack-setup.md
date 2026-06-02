@@ -12,6 +12,10 @@ description: 'Stack Setup Specialist. Use when: "Unrecognized tech stack", "Envi
 examples:
   - user: "Set up this unknown project"
     assistant: "I'll identify the tech stack and provide a security-assessed setup plan"
+phases: [0, 1]
+handoff_to: [architect]
+handoff_from: [pm]
+required_skills: []
 ---
 
 # Agent: stack-setup

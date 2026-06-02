@@ -114,6 +114,27 @@
       "version": "1.0.0",
       "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
       "propagated_to_common": true
+    },
+    "simulate-project-creation": {
+      "claude_source": ".claude/skills/simulate-project-creation/SKILL.md",
+      "gemini_source": ".gemini/skills/simulate-project-creation/SKILL.md",
+      "version": "1.0.0",
+      "description": "Tests new-project scaffolding logic in a temporary directory",
+      "propagated_to_common": true
+    },
+    "translate": {
+      "claude_source": ".claude/skills/translate/SKILL.md",
+      "gemini_source": ".gemini/skills/translate/SKILL.md",
+      "version": "1.0.0",
+      "description": "Translates documentation between languages",
+      "propagated_to_common": true
+    },
+    "ui-ux-pro-max": {
+      "claude_source": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "gemini_source": ".gemini/skills/ui-ux-pro-max/SKILL.md",
+      "version": "1.0.0",
+      "description": "Advanced UI/UX design intelligence for web components and applications",
+      "propagated_to_common": true
     }
   }
 }

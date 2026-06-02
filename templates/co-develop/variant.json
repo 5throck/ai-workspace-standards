@@ -12,6 +12,31 @@
   "phases": {
     "phase3_name": "Design Handoff"
   },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "code-review",
+        "layer": "platform",
+        "used_by_agents": ["code-writer"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "refactoring",
+        "layer": "platform",
+        "used_by_agents": ["code-writer"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "test-driven-development",
+        "layer": "platform",
+        "used_by_agents": ["test-runner"],
+        "phases": [4],
+        "platform_parity": "required"
+      }
+    ]
+  },
   "name": "co-develop",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
   "status": "stable",

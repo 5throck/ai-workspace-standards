@@ -23,6 +23,10 @@ lifecycle:
   created: "2026-05-27"
   last_updated: "2026-05-30"
   governance: lifecycle-manager
+phases: [1, 2, 3]
+handoff_to: [pentester, threat-modeler]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

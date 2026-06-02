@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Document the REST API endpoints based on the analyst's research"
     assistant: "Creating comprehensive API documentation with endpoint descriptions, request/response schemas, authentication details, and code examples."
+phases: [3]
+handoff_to: [ms365-expert]
+handoff_from: [analyst]
+required_skills: [api-documentation, documentation-writing]
 ---
 
 ## Role

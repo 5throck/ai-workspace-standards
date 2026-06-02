@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Map our customer onboarding journey and identify pain points"
     assistant: "Creating customer journey map with touchpoints, emotional arc, pain points, and service blueprint for operational alignment."
+phases: [3]
+handoff_to: [prototype-engineer]
+handoff_from: [design-lead]
+required_skills: [service-design]
 ---
 
 ## Role

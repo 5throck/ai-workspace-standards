@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "What should our design system's core philosophy be?"
     assistant: "Analyzing organizational values, user aspirations, and market context to craft a coherent design philosophy and narrative framework."
+phases: [1, 2]
+handoff_to: [pm]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

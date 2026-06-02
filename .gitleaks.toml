@@ -16,6 +16,10 @@ regexes = [
   '''your[_-]?secret[_-]?here''',
   '''replace[_-]?with[_-]?actual''',
   '''example[_\-.]com''',
+  # All-caps placeholder tokens used in documentation examples
+  '''YOUR_API_KEY''',
+  '''YOUR_TOKEN''',
+  '''YOUR_SECRET''',
   # gitleaks:allow inline marker (single-line suppression)
   '''gitleaks:allow''',
 ]
@@ -26,4 +30,6 @@ paths = [
   '''.*_test\.(js|ts|py|go|rs)$''',
   '''.*\.test\.(js|ts)$''',
   '''.*_spec\.rb$''',
+  # co-security agent docs legitimately discuss credentials/secrets as subject matter
+  '''templates/co-security/agents/.*\.md$''',
 ]

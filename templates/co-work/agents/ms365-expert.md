@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "How do I create a shared Excel workbook for team budget tracking?"
     assistant: "Guiding on Excel co-authoring setup, sharing permissions, version control, and integration with SharePoint for real-time collaboration."
+phases: [4]
+handoff_to: [pm]
+handoff_from: [content-writer, technical-writer]
+required_skills: []
 ---
 
 ## Role

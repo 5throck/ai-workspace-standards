@@ -85,13 +85,14 @@ For Phase 6 (QA & Finalization):
 
 ## Agent Roster
 
-| Phase | Group | Agent file | Responsibility |
-|-------|-------|------------|----------------|
-| Design | Design | `agents/architect.md` | Template structure design, folder hierarchies, architectural standards |
-| Implementation | Execution | `agents/automation-engineer.md` | Cross-platform scripting (.ps1, .sh), tool maintenance |
-| Documentation | Execution | `agents/docs-writer.md` | Standardizes Markdown documentation, manages translations |
-| Security | Security | `agents/security-expert.md` | Enforces Git Hooks, `.gitleaks` configurations, credential management |
-| Setup | Setup | `agents/scaffolding-expert.md` | New project scaffolding, template synchronization, UTF-8 enforcement |
+| Phase | Agent | File | Responsibility |
+|-------|-------|------|----------------|
+| 1 | analyst | `agents/analyst.md` | Research, data gathering, evidence synthesis |
+| 1-2 | storyteller | `agents/storyteller.md` | Context analysis, change management narrative |
+| 3 | content-writer | `agents/content-writer.md` | Transform research into documentation and communications |
+| 3 | technical-writer | `agents/technical-writer.md` | Technical documentation, API guides |
+| 4 | ms365-expert | `agents/ms365-expert.md` | Microsoft 365 platform deployment and integration |
+| 4 | project-coordinator | `agents/project-coordinator.md` | Schedule management, stakeholder communication |
 
 ## Permission Denial Protocol
 
