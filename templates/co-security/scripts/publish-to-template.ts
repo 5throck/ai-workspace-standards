@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
-// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>]
-// @version 1.2.0
+// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
+// @version 1.3.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -444,4 +444,119 @@ if (APPLY) {
   } else {
     console.log(`\n${GREEN}All files in sync.${RESET}`);
   }
+}
+
+// ============================================================================
+// ── --docs: L0 → L2 governance doc sync (CLAUDE.md, GEMINI.md) ─────────────
+// ============================================================================
+
+function extractCommonSections(content: string, marker: string): Array<{heading: string, fullBlock: string}> {
+  const sections: Array<{heading: string, fullBlock: string}> = [];
+  const startTag = `<!-- ${marker}:START -->`;
+  const endTag   = `<!-- ${marker}:END -->`;
+
+  let pos = 0;
+  while (true) {
+    const startIdx = content.indexOf(startTag, pos);
+    if (startIdx === -1) break;
+    const endIdx = content.indexOf(endTag, startIdx);
+    if (endIdx === -1) break;
+
+    const block = content.slice(startIdx, endIdx + endTag.length);
+    // Use first heading found inside the block as the section identifier
+    const headingMatch = block.match(/^#{1,4}\s+.+$/m);
+    const heading = headingMatch ? headingMatch[0] : `section-${sections.length}`;
+    sections.push({ heading, fullBlock: block });
+    pos = endIdx + endTag.length;
+  }
+  return sections;
+}
+
+function replaceCommonSection(
+  variantContent: string,
+  marker: string,
+  section: { heading: string; fullBlock: string }
+): { content: string; changed: boolean } {
+  // Escape the heading for use in a regex
+  const headingEscaped = section.heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(
+    `<!-- ${marker}:START -->\\s*${headingEscaped}[\\s\\S]*?<!-- ${marker}:END -->`,
+    'm'
+  );
+
+  if (pattern.test(variantContent)) {
+    const newContent = variantContent.replace(pattern, section.fullBlock);
+    return { content: newContent, changed: newContent !== variantContent };
+  }
+
+  // Section heading exists but has no markers yet — skip to avoid unintended overwrites
+  return { content: variantContent, changed: false };
+}
+
+function publishDocs(isDryRun: boolean): void {
+  console.log(`\n${CYAN}=== L0 → L2 publish: governance docs (CLAUDE.md, GEMINI.md) → templates/co-*/ ===${RESET}`);
+  if (isDryRun) console.log(`${DARKGRAY}(dry-run mode)${RESET}`);
+
+  const docPairs = [
+    { root: 'CLAUDE.md',  marker: 'COMMON-CLAUDE',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
+    { root: 'GEMINI.md',  marker: 'COMMON-GEMINI',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
+  ];
+
+  let totalUpdated = 0;
+  let totalSkipped = 0;
+
+  for (const { root, marker, variants } of docPairs) {
+    const rootPath = path.join(workspaceRoot, root);
+    if (!fs.existsSync(rootPath)) {
+      console.log(`  ${YELLOW}⚠️  ${root} not found at workspace root, skipping${RESET}`);
+      continue;
+    }
+
+    const rootContent = fs.readFileSync(rootPath, 'utf-8');
+    const sections = extractCommonSections(rootContent, marker);
+
+    if (sections.length === 0) {
+      console.log(`  ${YELLOW}⚠️  No <!-- ${marker}:START/END --> markers found in ${root}, skipping${RESET}`);
+      continue;
+    }
+
+    console.log(`\n  ${CYAN}${root}${RESET} — ${sections.length} common section(s) found`);
+
+    for (const variant of variants) {
+      const variantPath = path.join(workspaceRoot, 'templates', variant, root);
+      if (!fs.existsSync(variantPath)) {
+        console.log(`    ${YELLOW}⚠️  templates/${variant}/${root} not found, skipping${RESET}`);
+        continue;
+      }
+
+      let variantContent = fs.readFileSync(variantPath, 'utf-8');
+      let fileUpdated = false;
+
+      for (const section of sections) {
+        const result = replaceCommonSection(variantContent, marker, section);
+        if (result.changed) {
+          variantContent = result.content;
+          fileUpdated = true;
+        }
+      }
+
+      if (fileUpdated) {
+        if (!isDryRun) {
+          fs.writeFileSync(variantPath, variantContent, 'utf-8');
+        }
+        console.log(`    ${GREEN}✅ templates/${variant}/${root}${isDryRun ? ' [dry-run]' : ' updated'}${RESET}`);
+        totalUpdated++;
+      } else {
+        console.log(`    ${DARKGRAY}—  templates/${variant}/${root} already in sync${RESET}`);
+        totalSkipped++;
+      }
+    }
+  }
+
+  console.log('');
+  console.log(`${GREEN}Docs sync complete.${RESET} Updated: ${totalUpdated}, Already in sync: ${totalSkipped}`);
+}
+
+if (args.includes('--docs')) {
+  publishDocs(dryRun);
 }

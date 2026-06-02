@@ -1,4 +1,4 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
@@ -143,6 +143,11 @@ The PM agent MUST leverage the **`superpowers`** plugin for harness engineering 
 - **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
 - **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
 
+**Tier Adjustment Rules:**
+- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
+- The PM can NEVER upgrade a Tier above the baseline.
+- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
+
 > **Note on 3-Tier Strategy Models:**
 > The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
 
@@ -278,6 +283,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Language**: All code, config, commit messages, and branch names - **English only**.
 - **UTF-8 Enforcement**: Always use UTF-8 encoding; prevent CP949 or other localized encoding corruptions.
 - **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`.
+- **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 - **Source Attribution**: When presenting research findings, external data, or factual claims, always cite the source using `[Source: URL/document]` inline or a `## References` section. If a source cannot be verified, explicitly mark it as `⚠️ Unverified` and recommend manual verification. Never present unverified information as established fact.
 - **Computational Integrity**: Never perform high-precision or safety-critical numerical calculations directly. For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.) via the `stack-setup` agent. Label any AI-generated numerical estimate explicitly as **approximate**.
 

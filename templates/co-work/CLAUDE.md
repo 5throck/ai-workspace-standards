@@ -192,7 +192,7 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
-Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
+Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.

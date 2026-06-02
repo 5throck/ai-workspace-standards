@@ -120,6 +120,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the Desktop App.
 * **Path Resolving**: relative paths (e.g., `./server` or `python scripts/mcp.py`) are automatically resolved by Claude Code relative to the individual project's root folder. When defining commands inside `.mcp.json`, always keep command executable paths relative to the project directory for portable cross-platform runs.
 
+<!-- COMMON-CLAUDE:START -->
 ### 4. Language Policy for Documentation
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
@@ -129,6 +130,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 - Git commit messages, PR titles, PR descriptions ??English only
 - Branch names ??English only
 - Code comments ??English (unless documenting locale-specific logic)
+<!-- COMMON-CLAUDE:END -->
 
 ### Skill Resolution Priority
 
@@ -193,7 +195,7 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
-Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
+Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
@@ -222,6 +224,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 - **Medium-tier (Review/QA)** ??`claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** ??`claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
+<!-- COMMON-CLAUDE:START -->
 ### 7. Native Plan Mode (`EnterPlanMode`)
 Enter native plan mode using the `EnterPlanMode` tool when:
 - The user requests a new feature or significant refactor.
@@ -233,19 +236,25 @@ Once in plan mode:
 2. Obtain explicit user approval before modifying any code.
 3. Track progress using the native `TaskCreate` / `TaskUpdate` toolset.
 4. After completion, summarize outcomes in the active `memory/YYYY-MM-DD.md` daily log.
+<!-- COMMON-CLAUDE:END -->
 
+<!-- COMMON-CLAUDE:START -->
 ### 8. Task Tracking (`TaskCreate` / `TaskUpdate`)
 When working in a plan-mode session:
 - Call `TaskCreate` before starting any multi-step execution.
 - Set status `in_progress` prior to beginning each atomic step.
 - Update status to `completed` immediately upon verification of the step.
 - Never leave tasks `in_progress` at the end of a session.
+<!-- COMMON-CLAUDE:END -->
 
+<!-- COMMON-CLAUDE:START -->
 ### 9. Workspace & Template Boundary Policy
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+<!-- COMMON-CLAUDE:END -->
 
+<!-- COMMON-CLAUDE:START -->
 ### 10. Lifecycle Management Rules
 
 > ?좑툘 If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
@@ -269,7 +278,9 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 ```
 
 > Full rules: [짠5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) 쨌 [짠6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) 쨌 [짠6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+<!-- COMMON-CLAUDE:END -->
 
+<!-- COMMON-CLAUDE:START -->
 ### 11. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
@@ -277,7 +288,9 @@ If a custom slash command or background script returns a non-zero exit code:
 * **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
   * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+<!-- COMMON-CLAUDE:END -->
 
+<!-- COMMON-CLAUDE:START -->
 ### 12. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
@@ -286,9 +299,11 @@ If a custom slash command or background script returns a non-zero exit code:
 - Verify: `git config core.hooksPath` should point to `.githooks/`
 - `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
+<!-- COMMON-CLAUDE:END -->
 
 ---
 
+<!-- COMMON-CLAUDE:START -->
 ## Git & PR Additions (Claude Code)
 
 All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
@@ -296,5 +311,5 @@ All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-p
 - **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-06-02 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
-
+<!-- COMMON-CLAUDE:END -->
 

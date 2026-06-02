@@ -115,7 +115,7 @@ Instantiate a new reusable subagent type with a unique name, specialized role pr
 ```
 
 #### Invoke Subagent (`invoke_subagent`)
-Spawn parallel instances to execute dedicated work concurrently.
+Spawn parallel instances to execute dedicated work concurrently. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing.
 ```json
 {
   "Subagents": [

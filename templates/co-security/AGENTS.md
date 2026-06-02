@@ -119,6 +119,22 @@ All specialist agents below are dispatched ONLY through PM:
 
 ## PM Dispatch Protocol
 
+### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+
+The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
+
+- **High-tier (Design/Plan)**: Used exclusively by the PM/Red Team Lead for complex reasoning, architectural design, and writing precise sub-agent prompts.
+- **Medium-tier (Review/QA)**: Used by Threat Modeler or Patch Engineer to review code, run tests, and perform quality gates. Acts as an independent supervisor.
+- **Low-tier (Coding/Execute)**: Used by Pentester/Report Writer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+
+**Tier Adjustment Rules:**
+- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
+- The PM can NEVER upgrade a Tier above the baseline.
+- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
+
+> **Note on 3-Tier Strategy Models:**
+> The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
+
 ### Authorization Gate
 
 Before dispatching any Phase 1+ agent, PM **must** run `verify-authorization` skill to confirm:
@@ -163,5 +179,13 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 See `docs/co-security.context.md § Skills` for the full skill registry including domain-specific skills:
 - verify-authorization (hard gate for Phase 1+)
 - engagement-scoping, threat-modeling, recon-surface, finding-tracker, pentest-report, patch-automation
+
+---
+
+## Universal Baseline Behaviors
+
+All agents, regardless of their role, must adhere to the following:
+
+- **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 
 

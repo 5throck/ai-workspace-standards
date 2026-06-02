@@ -1933,6 +1933,63 @@ function checkPlatformSettingsParity(variant: string): void {
   }
 }
 
+// Helper: extract sections marked with <!-- MARKERNAME:START --> ... <!-- MARKERNAME:END -->
+function extractMarkedSections(content: string, markerName: string): Array<{heading: string, content: string}> {
+  const startTag = `<!-- ${markerName}:START -->`;
+  const endTag = `<!-- ${markerName}:END -->`;
+  const sections: Array<{heading: string, content: string}> = [];
+  let pos = 0;
+  while (true) {
+    const startIdx = content.indexOf(startTag, pos);
+    if (startIdx === -1) break;
+    const endIdx = content.indexOf(endTag, startIdx);
+    if (endIdx === -1) break;
+    const block = content.slice(startIdx + startTag.length, endIdx).trim();
+    const headingMatch = block.match(/^#{1,4}\s+.+$/m);
+    const heading = headingMatch ? headingMatch[0].trim() : `section-${sections.length}`;
+    sections.push({ heading, content: block });
+    pos = endIdx + endTag.length;
+  }
+  return sections;
+}
+
+// Check VA-05: CLAUDE.md and GEMINI.md common section sync between workspace root and variant files
+function checkDocumentCommonSections(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-05: Document common section sync (${variant}) ===`);
+
+  const docFiles: Array<{ file: string; markerName: string }> = [
+    { file: 'CLAUDE.md', markerName: 'COMMON-CLAUDE' },
+    { file: 'GEMINI.md', markerName: 'COMMON-GEMINI' },
+  ];
+
+  for (const { file: docFile, markerName } of docFiles) {
+    const rootPath = join(ROOT, docFile);
+    const variantPath = join(TEMPLATES_DIR, variant, docFile);
+
+    if (!existsSync(rootPath) || !existsSync(variantPath)) continue;
+
+    const rootContent = normalizeContent(readFileSync(rootPath, 'utf-8'));
+    const variantContent = normalizeContent(readFileSync(variantPath, 'utf-8'));
+
+    const rootSections = extractMarkedSections(rootContent, markerName);
+    if (rootSections.length === 0) continue; // root has no markers — pass silently
+
+    for (const { heading, content: rootBlock } of rootSections) {
+      // Find the same marker block in the variant file
+      const variantSections = extractMarkedSections(variantContent, markerName);
+      const variantSection = variantSections.find(s => s.heading === heading);
+
+      if (!variantSection) {
+        warn(variant, 'VA-05', `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run publish-to-template -- --docs' to sync`, `bun run publish-to-template -- --docs`);
+      } else if (variantSection.content !== rootBlock) {
+        warn(variant, 'VA-05', `${docFile}: common section "${heading}" differs from root — run 'bun run publish-to-template -- --docs' to sync`, `bun run publish-to-template -- --docs`);
+      } else {
+        pass(`VA-05: ${variant} ${docFile} common section "${heading}" in sync`);
+      }
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -1968,6 +2025,7 @@ function main() {
       checkWorkspaceRootAgentIntrusion(variant);
       checkSkillPlatformParity(variant);
       checkPlatformSettingsParity(variant);
+      checkDocumentCommonSections(variant);
       checkCommands(variant);
       checkScriptParity(variant);
       checkContextSync(variant);

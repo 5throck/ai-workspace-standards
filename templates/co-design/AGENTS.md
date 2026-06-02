@@ -143,6 +143,14 @@ The Design PM MUST leverage the **`superpowers`** plugin for harness engineering
 - **Medium-tier (Design/Research)**: Used by UX Researcher and Visual Designer for design execution, user research analysis, and visual design work.
 - **Low-tier (Prototyping/Production)**: Used by Prototype Engineer for building interactive prototypes, preparing design assets, and creating handoff documentation.
 
+**Tier Adjustment Rules:**
+- The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
+- The PM can NEVER upgrade a Tier above the baseline.
+- If a downgraded task fails, the PM MUST restore the agent's baseline Tier for the retry.
+
+> **Note on 3-Tier Strategy Models:**
+> The exact model configurations and prompt arguments (e.g. `thinking_level`) are explicitly managed within the workspace configuration files (`CLAUDE.md` and `GEMINI.md`). Please refer to those files for your specific tool's exact AI model mappings and tier strategies.
+
 The Design PM delegates execution to the Medium and Low tiers before finalizing design direction.
 
 ### Dispatch Rules
@@ -244,6 +252,7 @@ All design agents, regardless of their role, must adhere to the following:
 - **User-Centered Decision Making**: Default to choices that serve user needs over technical convenience when there's conflict.
 - **Handoff Quality**: All designs must include sufficient specification for implementation—no "I'll design it in code."
 - **Language**: All design documentation, file names, commit messages, and branch names - **English only**.
+- **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 
 ---
 
