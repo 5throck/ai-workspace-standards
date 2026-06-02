@@ -1,13 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Auto-generates scripts/README.md from templates/common/scripts/SCRIPTS.md
+ * Auto-generates scripts/README.md from scripts/SCRIPTS.md (L0 SSOT)
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 
 const ROOT = cwd();
-const SCRIPTS_MD = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPTS.md');
+const SCRIPTS_MD = join(ROOT, 'scripts', 'SCRIPTS.md');
 const README_MD = join(ROOT, 'scripts', 'README.md');
 const TEMPLATE_README_MD = join(ROOT, 'templates', 'common', 'scripts', 'README.md');
 

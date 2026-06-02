@@ -36,40 +36,41 @@ interface SerialExecutionOptions {
 }
 
 /**
- * Default serial pipeline for VSP development workflow
+ * Default serial pipeline for workspace development workflow.
+ * Roles map to agent definitions in agents/ directory.
  */
 const defaultPipeline: SerialAgentTask[] = [
   {
     description: "Implement feature",
-    role: "code-writer",
+    role: "automation-engineer",
     task: "Implement the new feature following the approved specification",
     verifyOutput: true
   },
   {
     description: "Review implementation",
-    role: "code-reviewer",
+    role: "architect",
     task: "Review the implemented feature for correctness and quality",
     dependsOn: "Implement feature",
     verifyOutput: true
   },
   {
     description: "Run quality gate",
-    role: "quality-gate",
-    task: "Execute post-write chain (SyntaxCheck → RunUnitTests → RunATCCheck)",
+    role: "auditor",
+    task: "Run bun scripts/audit.ts and verify all checks pass",
     dependsOn: "Review implementation",
     verifyOutput: true
   },
   {
     description: "Generate documentation",
-    role: "doc-writer",
+    role: "docs-writer",
     task: "Update documentation to reflect the implemented changes",
     dependsOn: "Run quality gate",
     continueOnError: true
   },
   {
-    description: "Create commit",
-    role: "git-keeper",
-    task: "Create a conventional commit with co-author signatures",
+    description: "Lifecycle update",
+    role: "lifecycle-manager",
+    task: "Bump versions and update SCRIPTS.md / AGENTS.md as required",
     dependsOn: "Generate documentation"
   }
 ];
@@ -102,25 +103,43 @@ async function executeSerialTask(
       console.log(`   Depends on: ${task.dependsOn}`);
     }
 
-    // Simulate task execution
-    // In real implementation, this would:
-    // - Invoke Agent tool with the role configuration
-    // - Wait for completion
-    // - Capture output and verify if requested
+    // TODO: Replace with Agent tool invocation when running inside Claude Code.
+    // The Agent tool cannot be called from a subprocess; this script is intended
+    // to be driven by PM/orchestrator code that substitutes real agent calls.
+    // For CLI use, we invoke dispatch.ts as a subprocess per task.
+    const { $ } = await import('bun');
+    const proc = await $`bun run scripts/dispatch.ts --task ${JSON.stringify(task)}`.nothrow();
 
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 800 + 300));
+    const stdout = proc.stdout.toString().trim();
+    const stderr = proc.stderr.toString().trim();
+    const exitCode = proc.exitCode ?? 1;
 
-    if (options.verbose) {
-      console.log(`   Output: [simulated output from ${task.role}]`);
+    if (options.verbose && stdout) {
+      console.log(`   Output: ${stdout}`);
+    }
+    if (stderr) {
+      console.log(`   Stderr: ${stderr}`);
     }
 
     const duration = Date.now() - startTime;
+
+    if (exitCode !== 0) {
+      console.log(`   ❌ Failed with exit code ${exitCode} (${duration}ms)\n`);
+      return {
+        task,
+        status: 'failed',
+        error: stderr || `exit code ${exitCode}`,
+        timestamp: new Date(),
+        duration
+      };
+    }
+
     console.log(`   ✅ Complete (${duration}ms)\n`);
 
     return {
       task,
       status: 'completed',
-      output: `Output from ${task.role}`,
+      output: stdout,
       timestamp: new Date(),
       duration
     };
@@ -249,10 +268,8 @@ async function main() {
   }
 
   try {
-    await dispatchSerial(pipeline, options);
-
-    const hasFailures = (await dispatchSerial(pipeline, options))
-      .some(r => r.status === 'failed');
+    const results = await dispatchSerial(pipeline, options);
+    const hasFailures = results.some(r => r.status === 'failed');
 
     process.exit(hasFailures ? 1 : 0);
   } catch (error) {

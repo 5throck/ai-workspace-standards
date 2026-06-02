@@ -151,6 +151,10 @@ async function runSerial(args: string[]): Promise<void> {
 
   if (pipelineIndex >= 0 && args[pipelineIndex + 1]) {
     const pipelinePath = path.resolve(projectRoot, args[pipelineIndex + 1]);
+    if (!pipelinePath.startsWith(projectRoot + path.sep) || !pipelinePath.endsWith('.ts')) {
+      console.error(`[dispatch] Invalid pipeline path: ${pipelinePath}`);
+      process.exit(1);
+    }
     try {
       const pipelineModule = await import(pipelinePath);
       pipeline = pipelineModule.default || pipelineModule.pipeline;

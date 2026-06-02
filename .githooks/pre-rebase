@@ -28,7 +28,8 @@ if [ $# -ge 2 ]; then
     REBASE_BRANCH="$2"
 
     # Scan each commit in the rebase range
-    git rev-list --no-merges "$UPSTREAM..$REBASE_BRANCH" | while read -r commit; do
+    SECRETS_FOUND=0
+    while IFS= read -r commit; do
         if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
@@ -37,20 +38,31 @@ if [ $# -ge 2 ]; then
             echo ""
             echo "To bypass (not recommended):"
             echo "  REBASE_BYPASS_SECRET_SCAN=1 git rebase $UPSTREAM $REBASE_BRANCH"
-            exit 1
+            SECRETS_FOUND=1
         fi
-    done
+    done < <(git rev-list --no-merges "$UPSTREAM..$REBASE_BRANCH")
+
+    if [ "$SECRETS_FOUND" -eq 1 ]; then
+        echo "❌ Rebase blocked: secrets detected in history."
+        exit 1
+    fi
 else
     # Fallback: scan recent commits if no parameters provided
     echo "⚠️  No rebase parameters - scanning last 10 commits"
-    git log -n 10 --format="%H" | while read -r commit; do
+    SECRETS_FOUND=0
+    while IFS= read -r commit; do
         if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --exit-code 2>/dev/null; then
             echo "✅ Commit $commit: clean"
         else
             echo "❌ SECRET DETECTED in commit $commit"
-            exit 1
+            SECRETS_FOUND=1
         fi
-    done
+    done < <(git log -n 10 --format="%H")
+
+    if [ "$SECRETS_FOUND" -eq 1 ]; then
+        echo "❌ Rebase blocked: secrets detected in history."
+        exit 1
+    fi
 fi
 
 echo "✅ No secrets found - rebase can proceed"

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-01T23:08:33.936Z
+**Generated**: 2026-06-02T00:11:17.038Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -76,7 +76,7 @@
 | audit.ts | 2.4.0 | scripts/audit.ts | bun |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
-| dev-sync.ts | 1.1.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |

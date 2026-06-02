@@ -67,49 +67,57 @@ if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('docs/constitution')) {
 
 // 2.6. Web URL link validation
 if (!LIFECYCLE_ONLY) {
-    if (fs.existsSync('AGENTS.md') || fs.existsSync(path.join('templates', 'common', 'docs', 'context.md'))) {
-        let linkErrors = 0;
-    
-    // Check AGENTS.md web URLs
-    if (fs.existsSync('AGENTS.md')) {
-        const content = fs.readFileSync('AGENTS.md', 'utf-8');
-        const regex = /https:\/\/raw\.githubusercontent\.com\/5throck\/ai-workspace-standards\/main\/CONSTITUTION\.md#[\w-]+/g;
-        let match;
-        while ((match = regex.exec(content)) !== null) {
-            const url = match[0];
-            try {
-                const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-                if (!response.ok) throw new Error('Bad status');
-            } catch {
-                Fail(`Dead link detected in AGENTS.md: ${url}`);
-                linkErrors++;
-            }
-        }
-    }
-
-    // Check templates/common/docs/context.md web URLs
+    // Collect all files to scan for web URLs
+    const urlCheckFiles: string[] = [];
+    if (fs.existsSync('AGENTS.md')) urlCheckFiles.push('AGENTS.md');
     const ctxPath = path.join('templates', 'common', 'docs', 'context.md');
-    if (fs.existsSync(ctxPath)) {
-        const content = fs.readFileSync(ctxPath, 'utf-8');
-        const regex = /https:\/\/raw\.githubusercontent\.com\/5throck\/ai-workspace-standards\/main\/CONSTITUTION\.md#[\w-]+/g;
-        let match;
-        while ((match = regex.exec(content)) !== null) {
-            const url = match[0];
-            try {
-                const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-                if (!response.ok) throw new Error('Bad status');
-            } catch {
-                Fail(`Dead link detected in templates/common/docs/context.md: ${url}`);
-                linkErrors++;
+    if (fs.existsSync(ctxPath)) urlCheckFiles.push(ctxPath);
+
+    // Add variant AGENTS.md files (templates/co-*/AGENTS.md)
+    const templateDir = path.join('templates');
+    if (fs.existsSync(templateDir)) {
+        for (const entry of fs.readdirSync(templateDir, { withFileTypes: true })) {
+            if (entry.isDirectory() && entry.name.startsWith('co-')) {
+                const variantAgents = path.join(templateDir, entry.name, 'AGENTS.md');
+                if (fs.existsSync(variantAgents)) urlCheckFiles.push(variantAgents);
             }
         }
     }
 
-    if (linkErrors === 0) {
-        Pass('Web URL validation: all external links resolve');
-    } else {
-        errors += linkErrors;
+    // Add constitution docs (docs/constitution/*.md)
+    const constitutionDir = path.join('docs', 'constitution');
+    if (fs.existsSync(constitutionDir)) {
+        for (const entry of fs.readdirSync(constitutionDir, { withFileTypes: true })) {
+            if (!entry.isDirectory() && entry.name.endsWith('.md')) {
+                urlCheckFiles.push(path.join(constitutionDir, entry.name));
+            }
+        }
     }
+
+    if (urlCheckFiles.length > 0) {
+        let linkErrors = 0;
+        const urlRegex = /https:\/\/raw\.githubusercontent\.com\/5throck\/ai-workspace-standards\/main\/CONSTITUTION\.md#[\w-]+/g;
+
+        for (const filePath of urlCheckFiles) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            let match;
+            while ((match = urlRegex.exec(content)) !== null) {
+                const url = match[0];
+                try {
+                    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+                    if (!response.ok) throw new Error('Bad status');
+                } catch {
+                    linkErrors++;
+                    errors++;
+                    console.log(`${RED}FAIL${RESET} Dead link detected in ${filePath}: ${url}`);
+                }
+            }
+            urlRegex.lastIndex = 0;
+        }
+
+        if (linkErrors === 0) {
+            Pass('Web URL validation: all external links resolve');
+        }
     }
 }
 
@@ -362,7 +370,7 @@ if (langValidate.exitCode === 0) {
 }
 
 // Agent/Skill State Synchronization Check
-if (fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
+if (!LIFECYCLE_ONLY && fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
     let syncErrors = 0;
     const agentsContent = fs.readFileSync('AGENTS.md', 'utf-8');
     
@@ -396,7 +404,7 @@ if (fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
 
 // Cross-Platform Command Parity Check
 const claudeCommandsDir = path.join('.claude', 'commands');
-if (fs.existsSync(claudeCommandsDir)) {
+if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
     let parityWarnings = 0;
     for (const file of fs.readdirSync(claudeCommandsDir)) {
         if (!file.endsWith('.md')) continue;

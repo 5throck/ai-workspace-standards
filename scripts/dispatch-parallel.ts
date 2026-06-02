@@ -30,12 +30,13 @@ interface DispatchResult {
 }
 
 /**
- * Default parallel agent configurations for common VSP workflows
+ * Default parallel agent configurations for workspace workflows.
+ * Roles map to agent definitions in agents/ directory.
  */
 const defaultTasks: ParallelAgentTask[] = [
   {
-    description: "Codebase analyzer",
-    role: "code-analyst",
+    description: "Codebase analysis",
+    role: "architect",
     task: "Analyze the codebase structure and identify key patterns",
     context: [
       "Look for architectural patterns",
@@ -46,8 +47,8 @@ const defaultTasks: ParallelAgentTask[] = [
     priority: "high"
   },
   {
-    description: "Documentation auditor",
-    role: "doc-auditor",
+    description: "Documentation audit",
+    role: "docs-writer",
     task: "Audit all documentation files for consistency and completeness",
     context: [
       "Check CLAUDE.md files",
@@ -58,25 +59,25 @@ const defaultTasks: ParallelAgentTask[] = [
     priority: "medium"
   },
   {
-    description: "Health check runner",
-    role: "health-checker",
-    task: "Run comprehensive health checks on the project",
+    description: "Security review",
+    role: "security-expert",
+    task: "Run security checks on the project",
     context: [
-      "Verify git hooks are installed",
-      "Check MCP server configuration",
-      "Validate skill definitions"
+      "Scan for secrets or unsafe patterns",
+      "Check dependency vulnerabilities",
+      "Validate permission configurations"
     ],
     outputFormat: "markdown",
     priority: "high"
   },
   {
-    description: "Memory indexer",
-    role: "memory-keeper",
-    task: "Update the memory index with recent session changes",
+    description: "Quality gate audit",
+    role: "auditor",
+    task: "Run bun scripts/audit.ts and report all findings",
     context: [
-      "Scan memory/ directory",
-      "Update MEMORY.md index",
-      "Check for orphaned entries"
+      "Run full workspace audit",
+      "Check lifecycle sync",
+      "Verify skill definitions"
     ],
     outputFormat: "markdown",
     priority: "low"
@@ -95,21 +96,41 @@ async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
     console.log(`   Role: ${task.role}`);
     console.log(`   Task: ${task.task.substring(0, 60)}${task.task.length > 60 ? '...' : ''}`);
 
-    // Simulate agent dispatch
-    // In real implementation, this would call:
-    // - Agent tool for Claude Code subagents
-    // - MCP server tools for specialized agents
-    // - External API calls for remote agents
+    // TODO: Replace with Agent tool invocation when running inside Claude Code.
+    // The Agent tool cannot be called from a subprocess; this script is intended
+    // to be driven by PM/orchestrator code that substitutes real agent calls.
+    // For CLI use, we invoke dispatch.ts as a subprocess per task.
+    const { $ } = await import('bun');
+    const { withRetry, DEFAULT_CONFIG } = await import('./retry-handler.ts');
+    const dispatchRetry = await withRetry(
+      () => $`bun run scripts/dispatch.ts --task ${JSON.stringify(task)}`.nothrow(),
+      { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+      `dispatch:${task.role}`
+    );
+    const proc = dispatchRetry.result ?? { stdout: Buffer.from(''), stderr: Buffer.from(''), exitCode: 1 };
 
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
+    const stdout = proc.stdout.toString().trim();
+    const stderr = proc.stderr.toString().trim();
+    const exitCode = proc.exitCode ?? 1;
 
     const elapsed = Date.now() - startTime;
+
+    if (exitCode !== 0) {
+      console.log(`   ❌ Failed with exit code ${exitCode} (${elapsed}ms)\n`);
+      return {
+        task,
+        status: 'failed',
+        error: stderr || `exit code ${exitCode}`,
+        timestamp: new Date()
+      };
+    }
+
     console.log(`   ✅ Complete (${elapsed}ms)\n`);
 
     return {
       task,
       status: 'completed',
-      output: `Output from ${task.role}`,
+      output: stdout,
       timestamp: new Date()
     };
   } catch (error) {

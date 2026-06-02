@@ -82,7 +82,7 @@ if (type === 'meeting') {
   const slug = makeSlug(summary, 40);
   const meetingFile = `meeting-${date}-${slug}.md`;
   // Only insert if not already present (dedup by date + summary)
-  if (!content.includes(date) || !content.includes(summary)) {
+  if (!content.includes(date) && !content.includes(summary)) {
     // Insert row after the separator line of the ## Meetings table
     content = content.replace(
       /(## Meetings\r?\n\r?\n\| Date \|[^\n]+\r?\n\|[-| ]+\|)/,

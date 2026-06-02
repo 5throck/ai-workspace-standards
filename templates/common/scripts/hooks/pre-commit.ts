@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.2.0
+ * @version 1.5.0
  */
 
 import { $ } from "bun";
@@ -86,7 +86,7 @@ async function main() {
     } catch { /* ignore binary read errors */ }
   }
 
-  // 2-B. Enforce English Only in PR Artifacts
+  // 2-B. Enforce English Only in PR Artifacts (memory logs and CHANGELOG)
   const docsToCheck = staged.filter(f => /^memory\/.*\.md$|^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;

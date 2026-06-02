@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.2.2
+ * @version 1.3.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -757,26 +757,64 @@ function checkContextSync(variant: string): void {
 function checkL0L1ScriptParity() {
   const L1_SCRIPTS = join(ROOT, 'scripts');
   const L0_SCRIPTS = join(ROOT, 'templates', 'common', 'scripts');
-  
+
   if (!existsSync(L1_SCRIPTS) || !existsSync(L0_SCRIPTS)) return;
-  
-  const whitelist = [
-    'agent-create.ts', 
-    'dev-sync.ps1', 
-    'dev-sync.sh', 
-    'generate-scripts-readme.ts', 
-    'sync-agent-status.ts', 
-    'sync-skill-status.ts'
-  ];
-  
-  for (const script of whitelist) {
+
+  // Build the parity list dynamically from scripts/SCRIPTS.md.
+  // Any script whose `layer` column is exactly "common" must exist in both
+  // scripts/ (workspace root) and templates/common/scripts/.
+  // To add a new script to the check, register it in SCRIPTS.md with layer=common.
+  const scriptsRegistryPath = join(ROOT, 'scripts', 'SCRIPTS.md');
+  const commonScripts = new Set<string>();
+
+  if (existsSync(scriptsRegistryPath)) {
+    const registryContent = readFileSync(scriptsRegistryPath, 'utf-8');
+    // Parse the markdown table rows between ## Registry and the next ## header.
+    // Column order: script | source | version | status | removal-date | security-advisory | layer | pair
+    const registrySection = registryContent.split(/^## /m).find(s => s.startsWith('Registry'));
+    if (registrySection) {
+      for (const line of registrySection.split('\n')) {
+        // Match table data rows (start with |, not separator rows with dashes)
+        const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*common\s*\|/);
+        if (match) {
+          commonScripts.add(match[1].trim());
+        }
+      }
+    }
+  }
+
+  // Glob-based fallback: files present in BOTH directories that are not
+  // explicitly marked L0-only in SCRIPTS.md. This catches unregistered common
+  // files without pulling in intentionally diverged L0-only scripts.
+  const l0OnlyScripts = new Set<string>();
+  if (existsSync(scriptsRegistryPath)) {
+    const registryContent = readFileSync(scriptsRegistryPath, 'utf-8');
+    const registrySection = registryContent.split(/^## /m).find(s => s.startsWith('Registry'));
+    if (registrySection) {
+      for (const line of registrySection.split('\n')) {
+        const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*L0-only\s*\|/);
+        if (match) l0OnlyScripts.add(match[1].trim());
+      }
+    }
+  }
+  const l0Files = new Set(readdirSync(L0_SCRIPTS).filter(f => !statSync(join(L0_SCRIPTS, f)).isDirectory()));
+  const l1Files = new Set(readdirSync(L1_SCRIPTS).filter(f => !statSync(join(L1_SCRIPTS, f)).isDirectory()));
+  const filesInBoth = [...l1Files].filter(f => l0Files.has(f) && !l0OnlyScripts.has(f));
+  for (const f of filesInBoth) {
+    commonScripts.add(f);
+  }
+
+  for (const script of commonScripts) {
+    // Skip helper sub-paths and non-file entries that may appear in the registry
+    if (script.includes('/')) continue;
+
     const l1Path = join(L1_SCRIPTS, script);
     const l0Path = join(L0_SCRIPTS, script);
-    
+
     if (existsSync(l1Path) && existsSync(l0Path)) {
       const l1Content = readFileSync(l1Path, 'utf-8');
       const l0Content = readFileSync(l0Path, 'utf-8');
-      
+
       if (l1Content !== l0Content) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L1 (root) and L0 (templates/common).`, `Backport L1 changes to L0 or update L1 to match L0.`);
       } else {

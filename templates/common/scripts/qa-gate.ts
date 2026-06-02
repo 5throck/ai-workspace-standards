@@ -17,9 +17,7 @@ console.log('=====================');
 
 // 1. Workspace audit
 console.log('Step 1: Workspace standards audit...');
-const auditRes = process.platform === 'win32'
-  ? await $`powershell -ExecutionPolicy Bypass -File .\\scripts\\audit.ps1`.nothrow()
-  : await $`bash scripts/audit.sh`.nothrow();
+const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
   console.log(`${RED}❌ FAIL: audit.sh failed${RESET}`);
@@ -32,7 +30,7 @@ if (await pkgFile.exists()) {
   console.log('Step 2: Running project tests...');
   const pkg = await pkgFile.json();
   if (pkg.scripts && 'test' in pkg.scripts) {
-    const testRes = await $`npm test`.nothrow();
+    const testRes = await $`bun run test`.nothrow();
     if (testRes.exitCode !== 0) {
       console.log(`${RED}❌ FAIL: Tests failed${RESET}`);
       process.exit(1);

@@ -27,6 +27,21 @@ if [ "${AI_AUTOSTART:-1}" = "0" ]; then
   exit 0
 fi
 
+# Lock guard: prevent concurrent Claude background processes.
+# Note: the Claude process only reads/analyzes and writes to the log file
+# (.claude/post-checkout.log), so file conflicts are unlikely. The lock
+# primarily prevents redundant parallel AI sessions when the user checks
+# out multiple branches in quick succession.
+LOCK_FILE="/tmp/post-checkout-claude.lock"
+
+if [ -f "$LOCK_FILE" ]; then
+  echo "[post-checkout] Claude analysis already running, skipping."
+  exit 0
+fi
+
+touch "$LOCK_FILE"
+trap "rm -f '$LOCK_FILE'" EXIT
+
 # Trigger only for new feature/design/fix branches
 if [[ "$BRANCH_NAME" == "feat/"* || "$BRANCH_NAME" == "feature/"* || "$BRANCH_NAME" == "design/"* || "$BRANCH_NAME" == "fix/"* ]]; then
     echo "=========================================================="
