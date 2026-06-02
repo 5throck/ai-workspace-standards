@@ -1,5 +1,6 @@
 ---
 sync_version: 1
+translated_from_hash: TBD
 ---
 
 # {{PROJECT_NAME}}

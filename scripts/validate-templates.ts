@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.3
+ * @version 1.4.4
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -814,8 +814,10 @@ function checkL0L1ScriptParity() {
     if (existsSync(l1Path) && existsSync(l0Path)) {
       const l1Content = readFileSync(l1Path, 'utf-8');
       const l0Content = readFileSync(l0Path, 'utf-8');
+      
+      const normalize = (str: string) => str.replace(/\r\n/g, '\n');
 
-      if (l1Content !== l0Content) {
+      if (normalize(l1Content) !== normalize(l0Content)) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
