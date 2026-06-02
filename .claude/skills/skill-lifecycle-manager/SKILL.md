@@ -6,8 +6,8 @@ description: >
   Use when: creating new skills, updating skill metadata, validating skill structure,
   or managing skill-agent mappings.
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-05-30
+version: 1.2.1
+last_reviewed: 2026-06-02
 metadata:
   type: process
   triggers:

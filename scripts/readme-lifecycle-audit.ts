@@ -9,7 +9,8 @@
  *   bun scripts/readme-lifecycle-audit.ts
  *   bun scripts/readme-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.0
+ * @version 1.0.1
+ * @last_updated 2026-06-02
  * @license MIT
  */
 
