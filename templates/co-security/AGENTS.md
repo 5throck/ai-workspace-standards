@@ -16,13 +16,13 @@
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
-|-------|------|------------------|-------------------|
-| 0 | Scoping | Orchestrator | PM only |
-| 1-2 | Recon & Threat Modeling | Orchestrator | red-team-lead, threat-modeler |
-| 3 | Exploitation | Orchestrator | red-team-lead → pentester |
-| 4 | Remediation | Orchestrator | patch-engineer |
-| 5 | Reporting | Orchestrator | report-writer, security-expert, auditor |
-| 6 | Verification | Orchestrator | pentester (re-test), patch-engineer (sign-off), report-writer (update) |
+|-------|------|-----------------|-------------------|
+| 0 | Authorization & Scope | Orchestrator | — (PM only) |
+| 1-2 | Reconnaissance & Threat Modeling | Observer | red-team-lead, threat-modeler |
+| 3 | Attack Execution | Coordinator | red-team-lead, pentester |
+| 4 | Remediation | Coordinator | patch-engineer |
+| 5 | Reporting | Coordinator | report-writer |
+| 6 | PR & Handoff | Owner | — (PM only) |
 
 **PM Facilitation Guidance:**
 See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:

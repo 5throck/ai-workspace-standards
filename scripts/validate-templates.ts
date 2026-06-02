@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.3.0
+ * @version 1.4.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1652,6 +1652,194 @@ function checkCommonContract(): void {
   pass('WS-02: common-contract.json compliance check complete');
 }
 
+// Check VA-01: Phase Summary x Actual Agents Cross-Validation
+function checkPhaseSummaryAgents(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-01: Phase Summary agents cross-validation (${variant}) ===`);
+
+  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+  if (!existsSync(agentsMdPath)) {
+    warn(variant, 'VA-01', `${variant}/AGENTS.md not found -- cannot validate Phase Summary agents`);
+    return;
+  }
+
+  const content = readFileSync(agentsMdPath, 'utf-8');
+
+  const SKIP_CELLS = new Set([
+    '—', 'Specialist Agents', 'Orchestrator', 'Observer', 'Gate Keeper', 'Coordinator', 'Owner',
+  ]);
+  // Match data rows: | <digit(s)> | <Name> | <PM Facilitation> | <Specialist Agents> |
+  const rowRegex = /^\|\s*\d+\s*\|[^|]*\|[^|]*\|([^|]+)\|/gm;
+  let match: RegExpExecArray | null;
+  const agentNames: string[] = [];
+
+  while ((match = rowRegex.exec(content)) !== null) {
+    const specialistCell = match[1].trim();
+    // Skip header, PM-only, and role-name cells
+    if (SKIP_CELLS.has(specialistCell) || specialistCell.includes('PM only') || specialistCell === '') continue;
+    // Split on comma or literal <br> tag, not on individual characters
+    const names = specialistCell.split(/,|<br\s*\/?>/).map((n: string) => n.trim()).filter(Boolean);
+    for (const name of names) {
+      const clean = name.replace(/[*_`—]/g, '').trim();
+      // Only accept lowercase hyphen-separated identifiers (e.g. analyst, content-writer)
+      if (clean && /^[a-z][a-z0-9-]*$/.test(clean)) {
+        agentNames.push(clean);
+      }
+    }
+  }
+
+  if (agentNames.length === 0) {
+    if (!JSON_MODE) console.log(`  (no specialist agents found in Phase Summary for ${variant})`);
+    return;
+  }
+
+  for (const agentName of agentNames) {
+    const agentFilePath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+    if (!existsSync(agentFilePath)) {
+      fail(variant, 'VA-01', `Phase Summary references agent '${agentName}' but templates/${variant}/agents/${agentName}.md is missing`, `Create templates/${variant}/agents/${agentName}.md or remove the reference from the Phase Summary`);
+    } else {
+      pass(`VA-01: ${variant} Phase Summary agent '${agentName}' -- agents/${agentName}.md present`);
+    }
+  }
+}
+
+// Check VA-02: Workspace-Root Agent Intrusion Detection
+function checkWorkspaceRootAgentIntrusion(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-02: Workspace-root agent intrusion detection (${variant}) ===`);
+
+  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+  if (!existsSync(agentsMdPath)) {
+    return; // VA-01 already warned about missing AGENTS.md
+  }
+
+  const WORKSPACE_ROOT_AGENTS = [
+    'scaffolding-expert',
+    'automation-engineer',
+    'docs-writer',
+    'security-expert',
+    'architect',
+    'auditor',
+    'lifecycle-manager',
+  ];
+
+  const content = readFileSync(agentsMdPath, 'utf-8');
+
+  const rowRegex = /^\|\s*\d+\s*\|[^|]*\|([^|]+)\|/gm;
+  let match2: RegExpExecArray | null;
+
+  while ((match2 = rowRegex.exec(content)) !== null) {
+    const specialistCell = match2[1].trim();
+    for (const wsAgent of WORKSPACE_ROOT_AGENTS) {
+      if (specialistCell.includes(wsAgent)) {
+        fail(variant, 'VA-02', `Workspace-root agent '${wsAgent}' referenced in ${variant}/AGENTS.md Phase Summary -- variants must use only their own agents`, `Remove '${wsAgent}' from the Phase Summary table in templates/${variant}/AGENTS.md`);
+      }
+    }
+  }
+
+  pass(`VA-02: ${variant} AGENTS.md Phase Summary workspace-root agent intrusion check complete`);
+}
+
+// Check VA-03: .claude/skills/ vs .gemini/skills/ Platform Parity
+function checkSkillPlatformParity(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-03: .claude/skills vs .gemini/skills platform parity (${variant}) ===`);
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+  if (!existsSync(claudeSkillsDir)) {
+    if (!JSON_MODE) console.log(`  (no .claude/skills/ directory for ${variant} -- skipping VA-03)`);
+    return;
+  }
+
+  let skillDirs: string[];
+  try {
+    skillDirs = readdirSync(claudeSkillsDir).filter(e => {
+      try { return statSync(join(claudeSkillsDir, e)).isDirectory(); } catch { return false; }
+    });
+  } catch {
+    warn(variant, 'VA-03', `Could not read ${variant}/.claude/skills/ directory`);
+    return;
+  }
+
+  for (const skillName of skillDirs) {
+    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) continue;
+
+    const raw = readFileSync(skillMdPath, 'utf-8');
+
+    let frontmatter: Record<string, unknown> = {};
+    const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (fmMatch) {
+      try {
+        frontmatter = (load(fmMatch[1]) as Record<string, unknown>) ?? {};
+      } catch { /* ignore parse errors */ }
+    }
+
+    if (frontmatter['gemini-parity'] === 'skip') {
+      if (!JSON_MODE) console.log(`  VA-03: ${variant}/.claude/skills/${skillName} -- gemini-parity: skip`);
+      continue;
+    }
+
+    const geminiSkillPath = join(TEMPLATES_DIR, variant, '.gemini', 'skills', skillName, 'SKILL.md');
+    if (!existsSync(geminiSkillPath)) {
+      fail(variant, 'VA-03', `${variant}/.claude/skills/${skillName}/SKILL.md exists but ${variant}/.gemini/skills/${skillName}/SKILL.md is missing -- platform parity required`, `Create templates/${variant}/.gemini/skills/${skillName}/SKILL.md or add 'gemini-parity: skip' to the SKILL.md frontmatter`);
+    } else {
+      pass(`VA-03: ${variant} skill '${skillName}' -- .gemini/skills counterpart present`);
+    }
+  }
+}
+
+// Check WS-03: Common-Contract x Variant .claude/skills/ Cross-Validation
+function checkCommonContractVariantSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
+
+  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  if (!existsSync(contractPath)) {
+    return; // WS-02 already warned about missing contract
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+  } catch {
+    return; // WS-02 already reported invalid JSON
+  }
+
+  const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
+  const commonPlatformSkills = Object.keys((contract.common_platform_skills as Record<string, unknown>) ?? {});
+  const allCommonSkills = [...new Set([...commonSkills, ...commonPlatformSkills])];
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+
+  for (const skillName of allCommonSkills) {
+    const skillPath = join(claudeSkillsDir, skillName);
+    if (!existsSync(skillPath)) {
+      warn(variant, 'WS-03', `Common skill '${skillName}' (from common-contract.json) has no corresponding directory in templates/${variant}/.claude/skills/ -- variant may be missing a common skill`);
+    } else {
+      pass(`WS-03: ${variant} -- common skill '${skillName}' directory present in .claude/skills/`);
+    }
+  }
+
+  // Check variant_specific skills from variant.json
+  const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+  if (!existsSync(variantJsonPath)) return;
+
+  let variantJson: Record<string, unknown>;
+  try {
+    variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+  } catch { return; }
+
+  const skillManifest = variantJson.skill_manifest as Record<string, unknown> | undefined;
+  const variantSpecificSkills = (skillManifest?.variant_specific as Array<{ name: string }> | undefined) ?? [];
+
+  for (const entry of variantSpecificSkills) {
+    const skillName = entry.name;
+    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(skillMdPath)) {
+      fail(variant, 'WS-03', `variant.json skill_manifest.variant_specific lists '${skillName}' but templates/${variant}/.claude/skills/${skillName}/SKILL.md is missing`, `Create templates/${variant}/.claude/skills/${skillName}/SKILL.md or remove from variant_specific in variant.json`);
+    } else {
+      pass(`WS-03: ${variant} -- variant_specific skill '${skillName}' SKILL.md present`);
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -1683,6 +1871,9 @@ function main() {
     if (manifest.status === 'stable') {
       checkAgents(variant);
       checkAgentsRoster(variant);
+      checkPhaseSummaryAgents(variant);
+      checkWorkspaceRootAgentIntrusion(variant);
+      checkSkillPlatformParity(variant);
       checkCommands(variant);
       checkScriptParity(variant);
       checkContextSync(variant);
@@ -1693,6 +1884,9 @@ function main() {
 
   checkWorkspaceSchema();
   checkCommonContract();
+  for (const [variant, manifest] of manifests) {
+    if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
+  }
   checkSharedFileSync();
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();

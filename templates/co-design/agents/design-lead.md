@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Define our design system foundation"
     assistant: "Establishing design token architecture, color system, typography scale, and component foundation."
+phases: [2, 3]
+handoff_to: [visual-designer, service-designer, typography-expert]
+handoff_from: [ux-researcher]
+required_skills: [ui-ux-design-intelligence, service-design]
 ---
 
 ## Role

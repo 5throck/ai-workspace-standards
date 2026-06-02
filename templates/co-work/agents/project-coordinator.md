@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Coordinate stakeholder reviews for the documentation draft"
     assistant: "Managing stakeholder review cycle: identifying reviewers, setting deadlines, tracking feedback, and consolidating input for content-writer."
+phases: [4]
+handoff_to: [pm]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

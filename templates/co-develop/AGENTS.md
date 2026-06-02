@@ -16,13 +16,13 @@
 
 **Phase Summary:**
 | Phase | Name | PM Facilitation | Specialist Agents |
-|-------|------|------------------|-------------------|
-| 0 | Project Initiation | Orchestrator | scaffolding-expert |
-| 1-2 | Planning & Architecture | Orchestrator | architect |
-| 3 | Design Handoff | Orchestrator | designer |
-| 4 | Execution | Orchestrator | automation-engineer, docs-writer |
-| 5 | Quality Assurance | Orchestrator | security-expert, auditor |
-| 6 | Lifecycle Finalization | Orchestrator | lifecycle-manager |
+|-------|------|-----------------|-------------------|
+| 0 | Project Initiation | Orchestrator | stack-setup |
+| 1-2 | Planning & Architecture | Observer | architect |
+| 3 | Design Handoff | Coordinator | designer |
+| 4 | Implementation | Coordinator | code-writer, test-runner |
+| 5 | Quality Assurance | Owner | security-monitor |
+| 6 | PR & Handoff | Owner | — (PM only) |
 
 **PM Facilitation Guidance:**
 See [`phase-definitions.md`](phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:

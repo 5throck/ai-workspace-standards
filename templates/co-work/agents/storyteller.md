@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Our team culture feels fragmented. What should our values be?"
     assistant: "Synthesizing team input, organizational history, and aspirational goals to craft a coherent culture narrative."
+phases: [1, 2]
+handoff_to: [pm]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

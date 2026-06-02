@@ -596,6 +596,18 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "[WARN]  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
 }
 
+# -- 8.5. Post-scaffolding variant validation ----------------------------------  # TEST: none
+Write-Host ""
+Write-Host "Running variant validation..." -ForegroundColor Cyan
+$validateResult = & bun scripts/validate-templates.ts --variant $Variant 2>&1
+$validateExit = $LASTEXITCODE
+if ($validateExit -eq 0) {
+    Write-Host "[OK] Variant validation passed." -ForegroundColor Green
+} elseif ($null -ne $validateExit) {
+    Write-Host "[WARN] Variant validation found issues. Review before using this project:" -ForegroundColor Yellow
+    Write-Host $validateResult -ForegroundColor Yellow
+}
+
 # -- 9. Environment setup (env file, deps, initial commit) -------------------- # TEST: none
 Write-Host ""
 Write-Host "Running environment setup..." -ForegroundColor Cyan

@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Research how users approach dashboard navigation"
     assistant: "Conducting user research to understand mental models, pain points, and navigation patterns."
+phases: [1]
+handoff_to: [design-lead]
+handoff_from: [pm]
+required_skills: []
 ---
 
 ## Role

@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Create a clickable prototype for user testing"
     assistant: "Building interactive prototype with realistic user flows and states for usability testing."
+phases: [4]
+handoff_to: [pm]
+handoff_from: [service-designer, visual-designer, typography-expert]
+required_skills: []
 ---
 
 ## Role

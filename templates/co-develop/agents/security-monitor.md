@@ -15,6 +15,10 @@ examples:
   - "Run a security scan before the PR"
   - "Check for any active CRITICAL advisories"
   - "Run the daily security scan"
+phases: [0, 5]
+handoff_to: [pm]
+handoff_from: [pm]
+required_skills: []
 ---
 
 # Security Monitor Agent

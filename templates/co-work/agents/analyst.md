@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Research the current state of GraphQL federation best practices"
     assistant: "Conducting systematic research: identifying authoritative sources, synthesizing best practices, and producing structured findings report."
+phases: [1]
+handoff_to: [content-writer, technical-writer]
+handoff_from: [pm]
+required_skills: [research-analysis]
 ---
 
 ## Role

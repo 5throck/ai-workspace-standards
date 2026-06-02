@@ -12,6 +12,31 @@
   "phases": {
     "phase3_name": "Stakeholder Alignment"
   },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "research-analysis",
+        "layer": "platform",
+        "used_by_agents": ["analyst"],
+        "phases": [1],
+        "platform_parity": "required"
+      },
+      {
+        "name": "documentation-writing",
+        "layer": "platform",
+        "used_by_agents": ["content-writer", "technical-writer"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "api-documentation",
+        "layer": "platform",
+        "used_by_agents": ["technical-writer"],
+        "phases": [3],
+        "platform_parity": "required"
+      }
+    ]
+  },
   "name": "co-work",
   "description": "Collaboration-focused variant for research, documentation, and project coordination. Includes 4 specialized collaboration agents.",
   "status": "stable",

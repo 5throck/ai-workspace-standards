@@ -16,6 +16,10 @@ description: >
 examples:
   - user: "Create a user guide based on the analyst's API research findings"
     assistant: "Transforming research findings into user guide: structuring for target audience, creating step-by-step instructions, and incorporating visual aids."
+phases: [3]
+handoff_to: [ms365-expert]
+handoff_from: [analyst]
+required_skills: [documentation-writing]
 ---
 
 ## Role

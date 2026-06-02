@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "status": "stable",
-  "lastUpdated": "2026-05-28",
+  "lastUpdated": "2026-06-02",
   "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
   "propagatedTo": [
     "co-develop",
@@ -14,6 +14,11 @@
       "date": "2026-05-28",
       "event": "initial",
       "note": "Lifecycle tracking established for templates/common at v1.0.0"
+    },
+    {
+      "date": "2026-06-02",
+      "event": "skill-contract-expansion",
+      "note": "common-contract.json updated: 3 skills added (simulate-project-creation, translate, ui-ux-pro-max)"
     }
   ]
 }

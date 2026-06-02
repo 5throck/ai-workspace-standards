@@ -15,6 +15,10 @@ description: >
 examples:
   - user: "Design the user registration flow"
     assistant: "Mapping the registration flow - producing wireframe description, component list, and interaction spec."
+phases: [3]
+handoff_to: [code-writer]
+handoff_from: [architect]
+required_skills: []
 ---
 
 ## Role

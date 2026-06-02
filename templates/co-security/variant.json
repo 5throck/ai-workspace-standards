@@ -12,6 +12,9 @@
   "phases": {
     "phase1_2_name": "Recon & Threat Modeling"
   },
+  "skill_manifest": {
+    "variant_specific": []
+  },
   "name": "co-security",
   "description": "Security engineering workflow — Red Team operations, threat modeling, and cross-platform patch automation (Windows/macOS/Linux via SSH + Ansible)",
   "status": "stable",

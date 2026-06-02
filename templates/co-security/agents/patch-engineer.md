@@ -23,6 +23,10 @@ lifecycle:
   created: "2026-05-27"
   last_updated: "2026-05-30"
   governance: lifecycle-manager
+phases: [4, 6]
+handoff_to: [report-writer]
+handoff_from: [pentester]
+required_skills: []
 ---
 
 ## Role
