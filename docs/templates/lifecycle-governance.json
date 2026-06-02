@@ -55,6 +55,11 @@
       "date": "2026-06-02",
       "event": "platform-settings-governance",
       "note": "common-contract.json v1.1.0: added platform_settings section (SSOT for settings parity). All 8 variant .claude/settings.json and .gemini/settings.json updated with shared hooks (SessionStart, PostToolUse). CLAUDE.md + GEMINI.md §10 lifecycle tables updated. validate-templates.ts v1.4.2: added VA-04 check + getNestedKey helper."
+    },
+    {
+      "date": "2026-06-02",
+      "event": "gemini-settings-common-layer",
+      "note": "templates/common/.gemini/settings.json created (shared items: mcpServers, SessionStart, PostToolUse hooks). propagation-map.json: added gemini-settings domain. publish-to-template.ts v1.3.0: added --docs flag + publishDocs() + extractCommonSections() + replaceCommonSection(). validate-templates.ts v1.4.2: added VA-05 checkDocumentCommonSections + extractMarkedSections helper. .claude/settings.json (root + common + 4 variants): added asyncRewake, effortLevel, permissions.deny, WorktreeCreate hook; root also got worktree.bgIsolation. CLAUDE.md + GEMINI.md (root + 4 variants each): added COMMON-CLAUDE:START/END and COMMON-GEMINI:START/END markers."
     }
   ]
 }

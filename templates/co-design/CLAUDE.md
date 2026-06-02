@@ -125,11 +125,11 @@ Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the De
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md ??English only
-- All documentation in docs/, agents/, skills/ ??English only
-- Git commit messages, PR titles, PR descriptions ??English only
-- Branch names ??English only
-- Code comments ??English (unless documenting locale-specific logic)
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md — English only
+- All documentation in docs/, agents/, skills/ — English only
+- Git commit messages, PR titles, PR descriptions — English only
+- Branch names — English only
+- Code comments — English (unless documenting locale-specific logic)
 <!-- COMMON-CLAUDE:END -->
 
 ### Skill Resolution Priority
@@ -257,19 +257,24 @@ When working in a plan-mode session:
 <!-- COMMON-CLAUDE:START -->
 ### 10. Lifecycle Management Rules
 
-> ?좑툘 If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
+> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
 
 When modifying files, apply the following rules **before** running `/sync` or committing:
 
 | Modified file(s) | Required follow-up actions |
 |-----------------|---------------------------|
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
-| `agents/*.md` | Update `AGENTS.md` roster table ??run `bun run agent:verify` to check |
-| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md 짠 Skills` table ??run `bun scripts/skill-lifecycle-audit.ts` to check |
+| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
+| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity ??CONSTITUTION.md 짠10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` ??must pass P-01 platform parity check |
-| `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json ?? platform_settings` for tier classification |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+| `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json § platform_settings` for tier classification |
 | `.gemini/settings.json` | 1. Apply **shared** tier changes to `.claude/settings.json`  2. **gemini_only** tier changes do NOT require `.claude/settings.json` update  3. Propagate to all 4 variant `templates/<variant>/.gemini/settings.json` |
+| `.claude/commands/*.md` | 1. Add identical file to `templates/common/.claude/commands/`  2. If not `gemini-parity: skip`, also add to `.gemini/commands/` and `templates/common/.gemini/commands/` |
+| `.claude/skills/*/SKILL.md` | 1. Add identical file to `templates/common/.claude/skills/`  2. If not `gemini-parity: skip`, also add to `.gemini/skills/` and `templates/common/.gemini/skills/` |
+| `.gemini/commands/*.md` | Add identical file to `templates/common/.gemini/commands/` |
+| `.gemini/skills/*/SKILL.md` | Add identical file to `templates/common/.gemini/skills/` |
 
 **Verification** (run after any of the above):
 ```bash
@@ -277,7 +282,7 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full rules: [짠5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) 쨌 [짠6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) 쨌 [짠6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
@@ -295,7 +300,7 @@ If a custom slash command or background script returns a non-zero exit code:
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
-- Git Bash ships with [Git for Windows](https://gitforwindows.org/) ??install if not present.
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
 - Verify: `git config core.hooksPath` should point to `.githooks/`
 - `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
@@ -306,10 +311,10 @@ If a custom slash command or background script returns a non-zero exit code:
 <!-- COMMON-CLAUDE:START -->
 ## Git & PR Additions (Claude Code)
 
-All shared Git/PR rules are in [CONSTITUTION.md 짠3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
+All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
 
-- **PR Language**: Governed by [CONSTITUTION.md 짠3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-02 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-02 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
