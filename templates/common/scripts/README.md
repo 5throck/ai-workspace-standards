@@ -58,6 +58,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `list-template-versions.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-verify.ts` | L0 | 1.1.0 | active | — | — | common | — |

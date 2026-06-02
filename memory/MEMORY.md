@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-03](2026-06-03.md) | chore: update |
 | [2026-06-02](2026-06-02.md) | fix: Limit changes to workspace root and templates to fix L0/L1 and phase definitions |
 | [2026-06-01](2026-06-01.md) | fix: create tests/.temp scratchpad and cleanup root stray files |
 | [2026-05-31](improvement-plan-2026-05-31.md) | Comprehensive workspace improvement plan — 28 Critical, 43 High, 46 Moderate issues identified across 3 phases |
