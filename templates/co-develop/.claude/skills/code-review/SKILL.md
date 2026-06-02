@@ -5,6 +5,7 @@ description: >
   best practices. Use when: reviewing pull requests, evaluating code quality, providing
   constructive feedback, or ensuring code standards compliance.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: process
   triggers:
@@ -253,7 +254,7 @@ This skill provides systematic code review capabilities, ensuring code changes a
 ### Must Fix
 1. [Critical issue with explanation and suggestion]
 
-### Should Fix  
+### Should Fix
 1. [Important improvement with explanation]
 
 ### Nice to Have

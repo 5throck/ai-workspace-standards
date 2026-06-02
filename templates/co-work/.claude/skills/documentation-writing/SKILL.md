@@ -5,6 +5,7 @@ description: >
   Use when: writing guides, creating documentation, drafting communications, or synthesizing
   complex information for technical and non-technical audiences.
 version: 1.0.0
+gemini-parity: skip
 metadata:
   type: implementation
   triggers:

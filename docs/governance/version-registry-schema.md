@@ -57,13 +57,13 @@ The `status` field MUST be one of the following:
 
 ## Migration Guide Paths
 
-Migration guide paths are relative to `docs/governance/`:
+Migration guide paths are relative to the workspace root:
 
 ```json
 {
   "migration_guides": [
-    "migrations/co-security/0.1.0-to-0.2.0.md",
-    "migrations/co-security/0.2.0-to-0.3.0.md"
+    "docs/migrations/co-security/0.1.0-to-0.2.0.md",
+    "docs/migrations/co-security/0.2.0-to-0.3.0.md"
   ]
 }
 ```
@@ -125,7 +125,7 @@ When releasing a new template version:
     "status": "beta",
     "security_advisories": [],
     "migration_guides": [
-      "migrations/co-security/0.1.0-to-0.2.0.md"
+      "docs/migrations/co-security/0.1.0-to-0.2.0.md"
     ]
   }
 }

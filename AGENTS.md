@@ -245,12 +245,43 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
+### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location | Purpose |
+|----------|--------|----------|---------|
+| **1 (highest)** | Workspace-level skills | `skills/<name>/SKILL.md` in the workspace root | Core workspace functionality (scaffolding, validation, security, audit) |
+| **2** | Platform config skills | `.claude/skills/` or `.gemini/skills/` in the project root | Platform-specific hooks, commands, and lifecycle management |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` | General-purpose development workflows |
+
+**Location Rules**:
+- **Single location requirement**: Workspace-level skills should exist **only** in `skills/` folder (priority 1). Do not duplicate these in `.claude/skills/` or `.gemini/skills/`.
+- **Platform-specific skills**: `.claude/skills/` and `.gemini/skills/` are reserved for platform-specific hooks, commands, and lifecycle management tools that differ between Claude Code and Gemini CLI.
+- **No cross-duplication**: Avoid duplicating the same skill across multiple locations. Choose the single most appropriate location based on the skill's purpose.
+
+**Resolution Rule**: If a higher-priority skill's `metadata.triggers` matches the user request, use it — do **not** fall through to lower-priority skills with overlapping intent.
+
+**Canonical conflict example — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
+---
+
+### Skill Registry
+
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
-| UI/UX Design Intelligence | `.claude/skills/ui-ux-pro-max/SKILL.md` | Building web components, pages, or applications; UI/UX design tasks |
-| Skill Lifecycle Manager | `.claude/skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
-| Script Lifecycle Manager | `.claude/skills/script-lifecycle-manager/SKILL.md` | PM agent managing script lifecycle; creating scripts, managing versions and dependencies in SCRIPTS.md |
-| Agent Lifecycle Manager | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
+| UI/UX Design Intelligence | `skills/ui-ux-pro-max/SKILL.md` | Building web components, pages, or applications; UI/UX design tasks |
+| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
+| Script Lifecycle Manager | `skills/script-lifecycle-manager/SKILL.md` | PM agent managing script lifecycle; creating scripts, managing versions and dependencies in SCRIPTS.md |
+| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
 | Platform Skill Lifecycle Manager | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle — creation, versioning, propagation for .claude/skills/ and .gemini/skills/ |
 | Platform Command Lifecycle Manager | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle — creation, parity, propagation for .claude/commands/ and .gemini/commands/ |
 | Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
@@ -259,7 +290,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
 | Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
 | Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
-| project-review | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
+| project-review | `skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
 | Finishing a Development Branch | `.claude/skills/finishing-a-development-branch/SKILL.md` · `.gemini/skills/finishing-a-development-branch/SKILL.md` | Workspace override — redirects branch completion to `/sync` pipeline; enforces CHANGELOG, memlog, audit, and PR creation gates. Available on both Claude Code and Gemini CLI. |
 
 > **📌 VERSION_MANIFEST Reference**: For the complete, up-to-date list of all skill versions, status (active/deprecated), and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md). That file is the authoritative source — this table serves only as a quick reference for skill names and locations.
@@ -363,18 +394,17 @@ Skill("script-lifecycle-manager")
 
 | Location | Purpose |
 |----------|---------|
-| `.claude/skills/` | Workspace-level skills (available in all sessions) |
-| `skills/` | Workspace utility skills (validate, scan, simulate) |
-| `templates/common/skills/` | Single source of truth — changes here must sync to `.claude/skills/` |
+| `skills/` | Workspace-level skills (single source of truth) |
+| `.claude/skills/` | Platform-specific skills for Claude Code only |
+| `.gemini/skills/` | Platform-specific skills for Gemini CLI only |
 
-> **Sync rule**: When updating a skill in `templates/common/skills/`, also update the corresponding file in `.claude/skills/`. Run `bun scripts/audit.ts` to verify.
+> **Sync rule**: Workspace-level skills in `skills/` are the single source of truth. Do not duplicate them in `.claude/skills/` or `.gemini/skills/`. Platform-specific skills may exist in both `.claude/skills/` and `.gemini/skills/` when they serve platform-specific purposes.
 
 > **Schema propagation**: `docs/workspace-schema.json` is the SSOT for workflow phases, agent tiers, and model assignments.
 > Validated automatically by `scripts/validate-model-registry.ts` and `scripts/validate-templates.ts`.
 
-> **Workspace-root-originated skills**: Skills added directly to `.claude/skills/`
-> (not via `templates/common/skills/`) must be annotated with `gemini-parity: skip`
-> in their SKILL.md frontmatter and listed here with `workspace-only: true`.
+> **Workspace-level skills**: All workspace-level skills reside in `skills/` folder only.
+> Platform-specific skills in `.claude/skills/` and `.gemini/skills/` must be annotated with `gemini-parity: skip` or `claude-parity: skip` in their SKILL.md frontmatter to indicate platform-specific implementation.
 
 ---
 

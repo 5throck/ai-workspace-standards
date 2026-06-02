@@ -9,7 +9,8 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.0
+ * @version 1.1.1
+ * @last_updated 2026-06-02
  * @license MIT
  */
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-02T13:40:04.662Z
+**Generated**: 2026-06-02T15:14:04.063Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 25
+- **Skills**: 15
 - **Scripts**: 59
 - **Commands**: 7
 
@@ -35,30 +35,20 @@
 | Name | Version | Location | Platform | Triggers | Owner |
 |------|---------|----------|----------|----------|-------|
 | agent-lifecycle-manager | 1.0.0 | skills/agent-lifecycle-manager/SKILL.md | workspace | N/A | pm |
-| agent-lifecycle-manager | 1.0.0 | .claude/skills/agent-lifecycle-manager/SKILL.md | both | N/A | pm |
 | audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | N/A | auditor |
-| audit-workspace | 1.0.0 | .claude/skills/audit-workspace/SKILL.md | both | N/A | auditor |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
 | meeting-facilitation | 1.3.2 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
-| meeting-facilitation | 1.3.2 | .claude/skills/meeting-facilitation/SKILL.md | both | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
-| project-review | 1.0.0 | .claude/skills/project-review/SKILL.md | both | N/A | pm |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | N/A | pm |
-| script-lifecycle-manager | 1.2.0 | .claude/skills/script-lifecycle-manager/SKILL.md | both | N/A | pm |
 | security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | N/A | security-expert |
-| security-scan | 1.0.0 | .claude/skills/security-scan/SKILL.md | both | N/A | security-expert |
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
 | simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
-| skill-lifecycle-manager | 1.2.1 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
-| translate | 1.0.0 | .claude/skills/translate/SKILL.md | both | N/A | pm |
 | ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
-| ui-ux-pro-max | 1.0.0 | .claude/skills/ui-ux-pro-max/SKILL.md | both | N/A | architect |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
-| validate-docs-links | 1.0.0 | .claude/skills/validate-docs-links/SKILL.md | both | N/A | docs-writer |
 
 ---
 
@@ -93,7 +83,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.3.1 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.3.2 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
@@ -147,7 +137,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 6 / 7
-- **Skills with parity**: 14 / 25
+- **Skills with parity**: 4 / 15
 
 ---
 
@@ -156,29 +146,19 @@
 ⚠️ **Drift detected**:
 
 - Skill agent-lifecycle-manager has no triggers defined
-- Skill agent-lifecycle-manager has no triggers defined
-- Skill audit-workspace has no triggers defined
 - Skill audit-workspace has no triggers defined
 - Skill finishing-a-development-branch has no triggers defined
-- Skill meeting-facilitation has no triggers defined
 - Skill meeting-facilitation has no triggers defined
 - Skill platform-command-lifecycle-manager has no triggers defined
 - Skill platform-skill-lifecycle-manager has no triggers defined
 - Skill project-review has no triggers defined
-- Skill project-review has no triggers defined
 - Skill script-lifecycle-manager has no triggers defined
-- Skill script-lifecycle-manager has no triggers defined
-- Skill security-scan has no triggers defined
 - Skill security-scan has no triggers defined
 - Skill simulate-project-creation has no triggers defined
 - Skill simulate-project-creation has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
-- Skill skill-lifecycle-manager has no triggers defined
-- Skill translate has no triggers defined
 - Skill translate has no triggers defined
 - Skill ui-ux-pro-max has no triggers defined
-- Skill ui-ux-pro-max has no triggers defined
-- Skill validate-docs-links has no triggers defined
 - Skill validate-docs-links has no triggers defined
 - Command changelog not integrated as a skill
 - Command commit-push-pr not integrated as a skill
