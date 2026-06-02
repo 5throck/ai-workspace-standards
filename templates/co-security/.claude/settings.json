@@ -1,4 +1,8 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "auto",
   "hooks": {
     "PostToolUse": [
       {
@@ -7,6 +11,18 @@
           {
             "type": "command",
             "command": "bash scripts/audit.sh"
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "statusMessage": "Running teammate idle lifecycle check..."
           }
         ]
       }
