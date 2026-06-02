@@ -41,20 +41,20 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.4 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.5.6 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.3.5 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.5.7 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.4.3 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.4.4 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.1.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.1.2 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `list-template-versions.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -108,7 +108,6 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `propagate-to-templates.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `propagation-map.json` | L0 | 1.0.0 | active | — | — | common | — |
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | — | — | L0-only | — |
 
@@ -119,10 +118,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
 | **L0 — Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
-| **L1 — Template snapshot** | `templates/common/scripts/` | publish: `bash scripts/publish-to-template.sh` | Explicit publish from L0 |
-| **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation |
+| **L1 — Template snapshot** | `templates/common/scripts/` | publish: `bun run publish-to-template` | Explicit publish from L0 via consolidated tool |
+| **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `publish-to-template.ts` |
 
-**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run publish-to-template`. L2 projects snapshot L1 at creation time only. No automatic back-propagation from L2.
+**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run publish-to-template`, which is now a consolidated tool that also handles L1->L2 propagation. L2 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L2.
 
 ---
 
@@ -252,9 +251,7 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bun run sync-skills`
 
 #### `publish-to-template.ts`
-**Purpose**: Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot
-(`templates/common/scripts/`). Copies all scripts labeled `L0` in the Registry plus
-`SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
+**Purpose**: A consolidated tool handling both L0->L1 publishing and L1->L2 propagation. Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot (`templates/common/scripts/`) and propagates updates to L2 project directories. Copies all scripts labeled `L0` in the Registry plus `SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
 **Usage**: `bun run publish-to-template`
 **Dry-run**: `bun run publish-to-template -- --dry-run`
 **Note**: L1-only script (not propagated to template).

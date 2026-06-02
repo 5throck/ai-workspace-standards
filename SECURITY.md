@@ -29,6 +29,8 @@ Instead, please report it privately via one of the following channels:
 
 We appreciate responsible disclosure and will credit reporters (unless anonymity is requested).
 
-## OS-Level Read-Only Template Enforcement Strategy
+## Template Enforcement Strategy
 
-All files in `templates/common/` (L1 snapshot) are strictly protected by OS-level read-only locks (`0o444` / `+R`). The only authorized mechanism to modify these files is through the `bun scripts/publish-to-template.ts` lifecycle script, which temporarily lifts the lock, performs the L0->L1 sync, and reapplies the lock. Manual bypasses (e.g., direct `cp` commands or file writes) are structurally prohibited to enforce the Single Source of Truth (SSOT) architecture.
+We have shifted to a 644/755 model, meaning templates are fully writable on the filesystem. The Single Source of Truth (SSOT) architecture is now enforced primarily via Git `pre-commit` hooks that block direct changes to `templates/` instead of filesystem-level read-only locks. The only authorized mechanism to modify these files is through the `bun scripts/publish-to-template.ts` lifecycle script. 
+
+Note that for scripts, Windows executable bits are maintained entirely via the Git Index (`+x`) rather than through Windows attributes.

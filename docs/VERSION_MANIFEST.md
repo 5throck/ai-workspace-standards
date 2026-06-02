@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-02T01:12:10.775Z
+**Generated**: 2026-06-02T01:30:25.615Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 25
-- **Scripts**: 60
+- **Scripts**: 59
 - **Commands**: 7
 
 ---
@@ -73,7 +73,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.4.3 | scripts/audit.ts | bun |
+| audit.ts | 2.4.4 | scripts/audit.ts | bun |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
@@ -93,8 +93,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | N/A | scripts/propagate-to-templates.ts | N/A |
-| publish-to-template.ts | N/A | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.2.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |

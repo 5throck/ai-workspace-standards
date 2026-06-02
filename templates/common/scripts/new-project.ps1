@@ -210,7 +210,6 @@ if (-not (Test-Path $CommonDir)) {
 }
 New-Item -ItemType Directory -Path $ProjectDir -Force | Out-Null
 robocopy $CommonDir $ProjectDir /E /NFL /NDL /NJH /NJS | Out-Null
-Get-ChildItem -Path $ProjectDir -Recurse -File | Set-ItemProperty -Name IsReadOnly -Value $false
 
 # Exclude workspace-root-only files that must NOT be copied into new projects.
 # package.json at the root is a workspace management artifact (bun scripts for

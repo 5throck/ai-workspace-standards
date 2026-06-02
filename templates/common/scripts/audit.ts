@@ -1,4 +1,4 @@
-// @version 2.4.3
+// @version 2.4.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -645,26 +645,22 @@ if (IS_WORKSPACE_ROOT) {
     }
 }
 
-// Check: All files in templates/ must be read-only
+// Check: Template scripts must retain executable bit
 if (fs.existsSync('templates')) {
-    let writableErrors = 0;
-    const checkReadOnly = (dir: string) => {
+    let executableErrors = 0;
+    const checkExecutable = (dir: string) => {
         for (const item of fs.readdirSync(dir)) {
             const itemPath = path.join(dir, item);
             const stat = fs.statSync(itemPath);
             if (stat.isDirectory()) {
-                checkReadOnly(itemPath);
+                checkExecutable(itemPath);
             } else if (stat.isFile()) {
-                if ((stat.mode & 0o222) !== 0) {
-                    Fail(`Template file is writable (must be read-only): ${itemPath}`);
-                    writableErrors++;
-                }
                 if (item.endsWith('.sh') || item.endsWith('.ps1') || item.endsWith('.ts')) {
                     try {
                         const out = execSync(`git ls-files --stage "${itemPath.replace(/\\/g, '/')}"`, { encoding: 'utf-8' });
                         if (out.startsWith('100644')) {
                             Fail(`Template script lost executable bit: ${itemPath}`);
-                            writableErrors++;
+                            executableErrors++;
                         }
                     } catch (e) {
                         // Ignore if file is untracked or git command fails
@@ -673,9 +669,9 @@ if (fs.existsSync('templates')) {
             }
         }
     };
-    checkReadOnly('templates');
-    if (writableErrors === 0) {
-        Pass('Templates read-only check: all files in templates/ are read-only');
+    checkExecutable('templates');
+    if (executableErrors === 0) {
+        Pass('Templates executable bit check: all scripts retain executable bit');
     }
 }
 
