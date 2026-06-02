@@ -74,7 +74,7 @@ if [ -z "$VARIANT" ]; then
     echo "   co-develop  — Software development (stable)"
     echo "   co-design   — UI/UX design (stable)"
     echo "   co-work     — Collaboration & documentation (stable)"
-    echo "   co-security — Security engagement (draft)"
+    echo "   co-security — Security engagement (stable)"
     echo ""
     echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant co-develop"
     echo ""
@@ -127,7 +127,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (draft)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable)"
   exit 1
 fi
 
