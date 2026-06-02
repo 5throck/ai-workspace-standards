@@ -224,6 +224,27 @@ foreach ($file in $workspaceFilesToRemove) {
     }
 }
 
+# --- Remove governance skills & commands that are L0-only ---
+$govSkills = @("skills", ".claude\skills", ".gemini\skills")
+foreach ($skillDir in $govSkills) {
+    $dirPath = Join-Path $ProjectDir $skillDir
+    if (Test-Path $dirPath) {
+        Get-ChildItem -Path $dirPath -Directory | Where-Object { $_.Name -match "lifecycle" -or $_.Name -eq "simulate-project-creation" } | ForEach-Object {
+            Remove-Item $_.FullName -Recurse -Force
+            Write-Host "  🗑️  Excluded workspace-only skill: $($_.Name)"
+        }
+    }
+}
+
+$govCmds = @(".claude\commands", ".gemini\commands")
+foreach ($cmdDir in $govCmds) {
+    $cmdPath = Join-Path $ProjectDir "$cmdDir\new-project.md"
+    if (Test-Path $cmdPath) {
+        Remove-Item $cmdPath -Force
+        Write-Host "  🗑️  Excluded workspace-only command: new-project.md"
+    }
+}
+
 # -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1, Test 7
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Variant templates directory not found: $TemplatesDir" -ForegroundColor Red

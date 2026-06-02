@@ -201,6 +201,25 @@ for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   fi
 done
 
+# --- Remove governance skills & commands that are L0-only ---
+GOV_SKILLS=("skills" ".claude/skills" ".gemini/skills")
+for skill_dir in "${GOV_SKILLS[@]}"; do
+  DIR_PATH="$PROJECT_DIR/$skill_dir"
+  if [ -d "$DIR_PATH" ]; then
+    find "$DIR_PATH" -maxdepth 1 -type d \( -name "*lifecycle*" -o -name "simulate-project-creation" \) -exec rm -rf {} + 2>/dev/null
+    echo "  🗑️  Excluded workspace-only skills from $skill_dir (if any)"
+  fi
+done
+
+GOV_CMDS=(".claude/commands" ".gemini/commands")
+for cmd_dir in "${GOV_CMDS[@]}"; do
+  CMD_PATH="$PROJECT_DIR/$cmd_dir/new-project.md"
+  if [ -f "$CMD_PATH" ]; then
+    rm -f "$CMD_PATH"
+    echo "  🗑️  Excluded workspace-only command: new-project.md"
+  fi
+done
+
 # ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1, Test 7
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Variant templates directory not found: $TEMPLATES_DIR"

@@ -1,4 +1,4 @@
-// @version 2.4.4
+// @version 2.4.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -338,22 +338,26 @@ for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
 // Lifecycle Audits
 const hasBun = (await $`bun --version`.quiet().nothrow()).exitCode === 0;
 if (hasBun) {
-    if (fs.existsSync(path.join('scripts', 'agent-lifecycle-audit.ts'))) {
-        const out = await $`bun ${path.join('scripts', 'agent-lifecycle-audit.ts')} --json`.quiet().nothrow();
-        if (/"errors":\s*\[\]/.test(out.text())) {
+    const agentAudit = 'agent-lifecycle-audit';
+    if (fs.existsSync(path.join('scripts', `${agentAudit}.ts`))) {
+        const out = await $`bun ${path.join('scripts', `${agentAudit}.ts`)} --json`.quiet().nothrow();
+        if (out.exitCode === 0) {
             Pass('Agent audit: all agents healthy');
         } else {
-            Fail("Agent audit detected issues (run 'bun scripts/agent-lifecycle-audit.ts' to see details)");
+            Fail(`Agent audit detected issues (run 'bun scripts/${agentAudit}.ts' to see details)`);
         }
     }
-    if (fs.existsSync(path.join('scripts', 'skill-lifecycle-audit.ts'))) {
-        const out = await $`bun ${path.join('scripts', 'skill-lifecycle-audit.ts')} --json`.quiet().nothrow();
-        if (/"errors":\s*\[\]/.test(out.text())) {
+
+    const skillAudit = 'skill-lifecycle-audit';
+    if (fs.existsSync(path.join('scripts', `${skillAudit}.ts`))) {
+        const out = await $`bun ${path.join('scripts', `${skillAudit}.ts`)} --json`.quiet().nothrow();
+        if (out.exitCode === 0) {
             Pass('Skill audit: all skills healthy');
         } else {
-            Fail("Skill audit detected issues (run 'bun scripts/skill-lifecycle-audit.ts' to see details)");
+            Fail(`Skill audit detected issues (run 'bun scripts/${skillAudit}.ts' to see details)`);
         }
     }
+
     if (fs.existsSync(path.join('scripts', 'verify-scripts.ts'))) {
         const out = await $`bun ${path.join('scripts', 'verify-scripts.ts')} --verify`.quiet().nothrow();
         if (out.exitCode !== 0)
@@ -361,13 +365,16 @@ if (hasBun) {
         else
             Pass("Script registry: all scripts verified");
     }
-    if (fs.existsSync(path.join('scripts', 'readme-lifecycle-audit.ts')) && fs.existsSync('templates')) {
-        const out = await $`bun ${path.join('scripts', 'readme-lifecycle-audit.ts')} --json`.quiet().nothrow();
+
+    const readmeAudit = 'readme-lifecycle-audit';
+    if (fs.existsSync(path.join('scripts', `${readmeAudit}.ts`)) && fs.existsSync('templates')) {
+        const out = await $`bun ${path.join('scripts', `${readmeAudit}.ts`)} --json`.quiet().nothrow();
         if (out.exitCode !== 0)
-            Fail("README lifecycle audit detected issues (run 'bun scripts/readme-lifecycle-audit.ts' to see details)");
+            Fail(`README lifecycle audit detected issues (run 'bun scripts/${readmeAudit}.ts' to see details)`);
         else
             Pass("README lifecycle audit: all READMEs healthy");
     }
+
     if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md')) {
         // explicitly skip any files located in memory/archive/
         const memoryFiles = fs.readdirSync('memory')
@@ -382,10 +389,12 @@ if (hasBun) {
         else
             Pass("Memory logs: format valid");
     }
-    if (fs.existsSync(path.join('scripts', 'lifecycle-sync-audit.ts'))) {
-        const out = await $`bun ${path.join('scripts', 'lifecycle-sync-audit.ts')} --json`.quiet().nothrow();
+
+    const syncAudit = 'lifecycle-sync-audit';
+    if (fs.existsSync(path.join('scripts', `${syncAudit}.ts`))) {
+        const out = await $`bun ${path.join('scripts', `${syncAudit}.ts`)} --json`.quiet().nothrow();
         if (out.exitCode !== 0)
-            Fail("Lifecycle sync audit detected issues (run 'bun scripts/lifecycle-sync-audit.ts' to see details)");
+            Fail(`Lifecycle sync audit detected issues (run 'bun scripts/${syncAudit}.ts' to see details)`);
         else
             Pass("Lifecycle sync audit: all artifacts in sync");
     }
