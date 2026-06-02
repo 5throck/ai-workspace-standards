@@ -16,6 +16,18 @@
         "command": "git config core.hooksPath .githooks",
         "statusMessage": "Configuring git hooks..."
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "statusMessage": "Running post-edit lifecycle check..."
+          }
+        ]
+      }
     ]
   }
 }
