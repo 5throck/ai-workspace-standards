@@ -179,10 +179,10 @@ C:\git\ (workspace root - this repo)
 └── templates/               # Versioned AI project templates (co-develop, co-design, etc.)
     ├── common/              # Shared scripts, hooks, and skills across all variants
     ├── co-develop/          # ✅ Stable — full software development agent team
-    ├── co-design/           # ✅ Stable — UI/UX design workflow
-    ├── co-work/             # ✅ Stable — general collaboration workflow
-    ├── co-security/         # ✅ Stable — Red Team, threat modeling, and patch automation
-    └── co-consult/          # ✅ Stable — strategy consulting workflow
+    ├── co-design/           # ✅ Stable — specialized UI/UX design agent team
+    ├── co-work/             # ✅ Stable — general collaboration and documentation agent team
+    ├── co-security/         # ✅ Stable — red team and threat modeling agent team
+    └── co-consult/          # ✅ Stable — strategy consulting and analysis agent team
 ```
 
 Each sub-project lives in its own directory and git repository:

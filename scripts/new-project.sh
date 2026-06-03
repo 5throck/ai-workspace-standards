@@ -55,6 +55,19 @@ if [ "${#PROJECT_NAME}" -gt 64 ]; then
   exit 1
 fi
 
+# Validate VARIANT against allowlist (prevent path traversal attacks)
+if [ -n "$VARIANT" ]; then
+  case "$VARIANT" in
+    co-develop|co-design|co-work|co-security|co-consult)
+      ;;
+    *)
+      echo "❌ Invalid variant: $VARIANT"
+      echo "   Valid variants: co-develop, co-design, co-work, co-security, co-consult"
+      exit 1
+      ;;
+  esac
+fi
+
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ -z "$VARIANT" ]; then
   echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security, co-consult"

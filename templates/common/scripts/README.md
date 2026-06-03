@@ -247,7 +247,6 @@ skill files on disk. Detects missing or orphaned skill references.
 and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
 hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
-**Claude Code**: `/new-project "Project Name"`
 **Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
 
 #### `sync-skills.ts`

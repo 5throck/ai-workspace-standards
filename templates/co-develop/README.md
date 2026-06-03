@@ -5,92 +5,49 @@ content_hash: TBD
 
 # {{PROJECT_NAME}}
 
-AI-assisted software development workspace template. Optimized for collaborative coding with Claude and Gemini AI assistants using a multi-agent architecture.
+Welcome to the **Co-Develop** workspace—your dedicated AI software development team. Optimized for collaborative coding with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to build, test, and document your software from day one.
 
-## Overview
+## 1. Team Mission
 
-The co-develop template provides a ready-to-use workspace for software projects that leverage multiple AI assistants in parallel. It pairs Claude Code (via `CLAUDE.md`) and Gemini (via `GEMINI.md`) with a structured multi-agent system, giving every project consistent commands, agent roles, and quality gates from day one.
+**Mission:** To provide a comprehensive, multi-agent software development partnership. 
 
-Key characteristics:
+We are designed to reduce context overload by delegating specific phases of work to specialized agents. Instead of chatting with a single omniscient AI, you act as the user or tech lead collaborating with a full product team. Our goal is to handle the scaffolding, architecture, implementation, documentation, and quality assurance while you guide the vision.
 
-- **Dual-AI support** — Claude and Gemini configurations ship together, so you can use either assistant (or both) without extra setup.
-- **Multi-agent architecture** — Specialized agents (PM, Architect, Auditor, etc.) handle distinct phases of work, reducing context overload in any single session.
-- **Opinionated workflow** — Pre-commit hooks, an audit script, and a sync pipeline enforce quality standards automatically.
-- **Slash-command driven** — Common operations are exposed as slash commands so daily work stays fast and consistent.
+## 2. Meet the AI Team
 
-## Quick Start
+Your development partners consist of specialized agents, each with a distinct role. The **Project Manager (PM)** is your single point of entry—they orchestrate the rest of the team.
 
-This project was scaffolded from the **co-develop** template.
+| Agent | Role & Capabilities |
+|-------|---------------------|
+| **PM (Project Manager)** | Your main point of contact. Orchestrates team assembly, design validation, enforces quality gates, and dispatches specialist agents. |
+| **Architect** | The system design expert. Produces implementation plans, folder hierarchies, and architectural decisions (ADRs). |
+| **Automation Engineer** | The coding and scripting specialist. Implements approved plans, writes code, and ensures robust automation. |
+| **Docs Writer** | The documentation expert. Writes and maintains READMEs, CHANGELOGs, and technical documentation with consistent terminology. |
+| **Scaffolding Expert** | The project setup specialist. Handles new project creation, validates template logic, and prevents structural drift. |
+| **Auditor** | The quality assurance inspector. Runs workspace cross-domain consistency checks and detects structural inconsistencies. |
+| **Lifecycle Manager** | The governance record keeper. Monitors state changes, syncs governance documents, and runs as a final step in executions. |
+| **Security Expert** | The threat modeler. Enforces Git Hooks, manages credentials, and ensures secure dependency handling. |
 
-> To scaffold a new project from the workspace root, run:
-> `scripts/new-project.sh "project-name" --variant co-develop`
+## 3. How to Collaborate with This Team
 
-This copies all co-develop template files and performs initial variable substitution (project name, dates).
+Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
 
-After scaffolding:
+### A. The PM Gateway
+Always start your requests by talking to the **PM**. Do not invoke specialist agents directly. The PM will analyze your request and bring in the right experts.
 
-1. Open the new project directory in your editor.
-2. Review and update `CLAUDE.md` / `GEMINI.md` with project-specific context.
-3. Run `/sync "chore: initial scaffold"` to create the first commit and PR.
+### B. Standard Workflow Phases
+1. **Design & Planning:** The PM will bring in the **Architect** to write an implementation plan and propose a design.
+2. **Review:** You review the proposed plan. Once you approve, the PM dispatches the execution team.
+3. **Execution:** The **Automation Engineer** writes the code, while the **Docs Writer** updates the documentation. (Agents run serially for write tasks to avoid conflicts).
+4. **Quality Assurance:** The **Auditor** or **Security Expert** runs checks (like `bun scripts/audit.ts`) to ensure nothing is broken.
+5. **Finalization:** The **Lifecycle Manager** updates any necessary governance records.
+6. **Sync:** We use `/sync "commit message"` to safely commit and open a PR.
 
-## Project Structure
+### C. Available Commands
+Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
+- `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — Add an entry to `CHANGELOG.md`.
+- `/memlog "summary"` — Append a summary to today's session log.
+- `/meeting` — Run a structured, inline multi-agent discussion.
 
-```
-<project-name>/
-├── CLAUDE.md               # Claude Code behavioral config
-├── GEMINI.md               # Gemini behavioral config
-├── CONSTITUTION.md         # Shared workspace standards (symlinked from root)
-├── AGENTS.md               # Agent roster and dispatch rules
-├── CHANGELOG.md            # Unreleased + versioned history
-├── agents/                 # Per-agent role definition files
-│   ├── pm.md
-│   ├── architect.md
-│   ├── code-writer.md
-│   ├── designer.md
-│   ├── security-monitor.md
-│   ├── stack-setup.md
-│   └── test-runner.md
-├── docs/                   # Project documentation
-├── memory/                 # Daily session logs (YYYY-MM-DD.md)
-└── scripts/                # Utility scripts (audit.sh, dev-sync.sh, …)
-```
-
-## Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR |
-| `/changelog "..."` | Add an entry to `CHANGELOG.md` under `[Unreleased]` |
-| `/memlog "summary"` | Append a session summary to today's memory log only |
-| `/meeting` | Run a structured multi-agent meeting (inline role-play, no spawning) |
-| `/new-task "name"` | Create a task tracking block in today's memory log |
-
-All commands are defined in `.claude/commands/` and are auto-registered as Skills by Claude Code.
-
-## Agents
-
-The co-develop template ships with seven specialized agents. Each agent's role definition lives in `agents/<name>.md`.
-
-| Agent | Responsibility |
-|-------|---------------|
-| **PM** | Orchestrates end-to-end workflow, enforces quality gates, dispatches specialist agents |
-| **Architect** | System design, ADRs, and implementation plans (Phases 1-2); never writes code directly |
-| **Code-Writer** | Implements approved plans precisely (Phase 3); reports plan issues to PM rather than adapting silently |
-| **Designer** | Visual and interaction design specifications (Phases 1-2); works alongside Architect on user-facing layer |
-| **Security-Monitor** | Scans for vulnerabilities, advisories, and secrets issues; saves findings to `security/` |
-| **Stack-Setup** | Environment initialization, tech stack research, and project bootstrapping |
-| **Test-Runner** | Runs test suite and acceptance criteria checks (Phase 4 QA Gate); reports pass/fail to PM |
-
-Dispatch agents via the native `Agent` tool. Embed the relevant `agents/<name>.md` content in the prompt rather than referencing the file path — sub-agents do not share filesystem context with the parent session.
-
-## Configuration
-
-### CLAUDE.md
-
-Controls Claude Code behavior: automated hooks, slash command definitions, plan-mode rules, task tracking conventions, and Git/PR standards. Edit this file to adjust Claude-specific behaviors without affecting Gemini workflows.
-
-### GEMINI.md
-
-Mirrors the behavioral configuration for the Gemini CLI. Keeps phrasing consistent with `CLAUDE.md` while adapting to Gemini-specific conventions (e.g., `/google-search` integration, Gemini model tiers).
-
-Both files inherit shared standards from `CONSTITUTION.md`. When updating policies that apply to all AI assistants, edit `CONSTITUTION.md` first, then propagate the changes to `CLAUDE.md` and `GEMINI.md`.
+Let's build something great together!

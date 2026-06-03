@@ -10,7 +10,7 @@
     }
   },
   "phases": {
-    "phase3_name": "Design Handoff"
+    "phase3_name": "Implementation"
   },
   "skill_manifest": {
     "variant_specific": [

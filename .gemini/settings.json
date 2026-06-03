@@ -3,8 +3,7 @@
     "codegraph": {
       "command": "npx",
       "args": [
-        "-y",
-        "@colbymchenry/codegraph",
+        "@colbymchenry/codegraph@0.9.7",
         "serve"
       ]
     }
