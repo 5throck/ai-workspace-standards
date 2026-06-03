@@ -128,11 +128,11 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── .claude/ & .gemini/      # AI 툴 전역 설정 및 커스텀 슬래시 명령어
 └── templates/               # 새 프로젝트 스캐폴딩을 위한 버전 관리 템플릿들
     ├── common/              # 모든 템플릿이 공통으로 사용하는 스크립트/스킬/깃훅
-    ├── co-develop/          # ✅ Stable — 소프트웨어 개발 전용 워크플로 템플릿
-    ├── co-design/           # ✅ Stable — UI/UX 디자인 워크플로 템플릿
-    ├── co-work/             # ✅ Stable — 기획 및 범용 협업 워크플로 템플릿
-    ├── co-security/         # ✅ Stable — 레드팀·위협 모델링·패치 자동화 보안 워크플로 템플릿
-    └── co-consult/          # ✅ Stable — 전략 컨설팅 워크플로 템플릿
+    ├── co-develop/          # ✅ Stable — 종합 소프트웨어 개발 에이전트 팀
+    ├── co-design/           # ✅ Stable — 특화된 UI/UX 디자인 에이전트 팀
+    ├── co-work/             # ✅ Stable — 범용 협업 및 문서화 에이전트 팀
+    ├── co-security/         # ✅ Stable — 레드팀 및 위협 모델링 에이전트 팀
+    └── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:

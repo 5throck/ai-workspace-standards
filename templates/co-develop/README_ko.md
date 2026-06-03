@@ -3,91 +3,51 @@ translated_from_hash: TBD
 sync_version: 1
 ---
 
-# Co-Develop 템플릿
+# {{PROJECT_NAME}}
 
-AI 지원 소프트웨어 개발 워크스페이스 템플릿. Claude와 Gemini AI 어시스턴트의 멀티 에이전트 아키텍처를 활용한 협업 코딩에 최적화되어 있습니다.
+여러분의 전담 개발 파트너, **Co-Develop** 워크스페이스에 오신 것을 환영합니다! Claude와 Gemini AI 어시스턴트의 멀티 에이전트 아키텍처를 활용하여, 프로젝트 첫날부터 설계, 구현, 테스트, 문서화를 전담할 AI 팀이 준비되어 있습니다.
 
-## 개요
+## 1. 팀 미션 (Team Mission)
 
-co-develop 템플릿은 여러 AI 어시스턴트를 병렬로 활용하는 소프트웨어 프로젝트를 위한 즉시 사용 가능한 워크스페이스를 제공합니다. Claude Code(`CLAUDE.md`)와 Gemini(`GEMINI.md`)를 구조화된 멀티 에이전트 시스템과 결합하여, 모든 프로젝트에 일관된 커맨드, 에이전트 역할, 품질 게이트를 첫날부터 제공합니다.
+**미션:** 포괄적이고 전문적인 멀티 에이전트 소프트웨어 개발 파트너십 제공.
 
-주요 특징:
+저희 팀은 특정 작업 단계를 전문 에이전트에게 위임하여 단일 세션의 컨텍스트 과부하를 줄이도록 설계되었습니다. 단일 AI와 대화하는 대신, 여러분은 테크 리드(Tech Lead)가 되어 전체 제품 팀과 협업하게 됩니다. 여러분이 비전을 제시하면, 저희가 스캐폴딩, 아키텍처, 구현, 문서화 및 품질 보증을 책임집니다.
 
-- **듀얼 AI 지원** — Claude와 Gemini 설정이 함께 제공되어, 별도 설정 없이 두 어시스턴트를 모두 사용할 수 있습니다.
-- **멀티 에이전트 아키텍처** — 전문화된 에이전트(PM, Architect, Auditor 등)가 작업의 각 단계를 담당하여 단일 세션의 컨텍스트 과부하를 줄입니다.
-- **의견이 반영된 워크플로우** — Pre-commit 훅, 감사 스크립트, 동기화 파이프라인이 품질 기준을 자동으로 적용합니다.
-- **슬래시 커맨드 기반** — 일상적인 작업을 슬래시 커맨드로 노출하여 일관되고 빠른 작업 흐름을 유지합니다.
+## 2. AI 팀 소개 (Meet the AI Team)
 
-## 빠른 시작
+여러분의 개발 파트너는 각자 고유한 역할을 가진 전문 에이전트들로 구성되어 있습니다. **PM(프로젝트 매니저)**이 여러분의 단일 진입점이 되어 전체 팀을 조율합니다.
 
-```bash
-bash scripts/new-project.sh "project-name" --variant co-develop
-```
+| 에이전트 | 역할 및 역량 |
+|---------|-------------|
+| **PM (Project Manager)** | 메인 담당자입니다. 팀 구성을 조율하고, 설계를 검증하며, 품질 게이트를 강제하고, 전문 에이전트를 적재적소에 디스패치합니다. |
+| **Architect** | 시스템 설계 전문가입니다. 구현 계획, 폴더 계층 구조 및 아키텍처 결정(ADRs)을 담당합니다. |
+| **Automation Engineer** | 코딩 및 스크립트 작성 전문가입니다. 승인된 계획을 구현하고 자동화 스크립트를 작성하여 견고한 동작을 보장합니다. |
+| **Docs Writer** | 문서화 전문가입니다. 일관된 용어를 사용하여 README, CHANGELOG 및 기술 문서를 작성하고 유지 관리합니다. |
+| **Scaffolding Expert** | 프로젝트 설정 전문가입니다. 새 프로젝트 생성, 템플릿 검증 및 폴더 동기화를 처리합니다. |
+| **Auditor** | 품질 보증 검사관입니다. 워크스페이스 구조적 일관성을 교차 검증하고 구조적 오류를 탐지합니다. |
+| **Lifecycle Manager** | 거버넌스 기록 관리자입니다. 상태 변경을 모니터링하고 거버넌스 문서를 동기화하며, 작업의 최종 단계를 마무리합니다. |
+| **Security Expert** | 보안 및 위협 모델러입니다. Git Hooks를 강제하고, 자격 증명을 관리하며, 안전한 의존성 처리를 보장합니다. |
 
-이 명령은 워크스페이스 루트 아래에 새 프로젝트 디렉터리를 스캐폴딩하고, co-develop 템플릿 파일을 모두 복사하며, 초기 변수 치환(프로젝트 이름, 날짜)을 수행합니다.
+## 3. 협업 방법 (How to Collaborate)
 
-스캐폴딩 후:
+저희와의 협업은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 다음은 기본 워크플로우입니다:
 
-1. 편집기에서 새 프로젝트 디렉터리를 엽니다.
-2. `CLAUDE.md` / `GEMINI.md`를 검토하고 프로젝트별 컨텍스트로 업데이트합니다.
-3. `/sync "chore: initial scaffold"`를 실행하여 첫 번째 커밋과 PR을 생성합니다.
+### A. PM 게이트웨이
+모든 요청은 항상 **PM**에게 먼저 전달해 주세요. 전문 에이전트를 직접 호출해서는 안 됩니다. PM이 요청을 분석하고 적절한 전문가를 투입합니다.
 
-## 프로젝트 구조
+### B. 표준 워크플로우 단계
+1. **설계 및 계획 (Design & Planning):** PM이 **Architect**를 호출하여 구현 계획과 설계를 제안합니다.
+2. **검토 (Review):** 여러분이 제안된 계획을 검토합니다. 승인하면 PM이 실행 팀을 투입합니다.
+3. **실행 (Execution):** **Automation Engineer**가 코드를 작성하고, **Docs Writer**가 문서를 업데이트합니다 (충돌 방지를 위해 쓰기 작업은 순차적으로 진행됩니다).
+4. **품질 보증 (QA):** **Auditor** 또는 **Security Expert**가 검사(예: `bun scripts/audit.ts`)를 수행합니다.
+5. **마무리 (Finalization):** **Lifecycle Manager**가 필요한 거버넌스 기록을 업데이트합니다.
+6. **동기화 (Sync):** `/sync "commit message"` 커맨드를 사용하여 안전하게 커밋하고 PR을 엽니다.
 
-```
-<project-name>/
-├── CLAUDE.md               # Claude Code 동작 설정
-├── GEMINI.md               # Gemini 동작 설정
-├── CONSTITUTION.md         # 공유 워크스페이스 표준 (루트에서 심볼릭 링크)
-├── AGENTS.md               # 에이전트 목록 및 디스패치 규칙
-├── CHANGELOG.md            # 미릴리스 및 버전별 변경 이력
-├── agents/                 # 에이전트별 역할 정의 파일
-│   ├── pm.md
-│   ├── architect.md
-│   ├── automation-engineer.md
-│   ├── security-expert.md
-│   ├── docs-writer.md
-│   └── auditor.md
-├── docs/                   # 프로젝트 문서
-├── memory/                 # 일별 세션 로그 (YYYY-MM-DD.md)
-└── scripts/                # 유틸리티 스크립트 (audit.sh, dev-sync.sh 등)
-```
+### C. 사용 가능한 커맨드 (Available Commands)
+일상적인 작업은 슬래시 커맨드로 구동됩니다:
+- `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — `CHANGELOG.md`에 항목을 추가합니다.
+- `/memlog "summary"` — 오늘의 세션 로그에 요약을 추가합니다.
+- `/meeting` — 구조화된 멀티 에이전트 인라인 미팅을 진행합니다.
 
-## 사용 가능한 커맨드
-
-| 커맨드 | 설명 |
-|--------|------|
-| `/sync "feat: ..."` | 전체 파이프라인 — memlog → sync-md → changelog → audit → commit → PR |
-| `/changelog "..."` | `CHANGELOG.md`의 `[Unreleased]` 섹션에 항목 추가 |
-| `/memlog "summary"` | 오늘의 메모리 로그에만 세션 요약 추가 |
-| `/meeting` | 구조화된 멀티 에이전트 미팅 진행 (인라인 역할극, 에이전트 스폰 없음) |
-| `/new-task "name"` | 오늘의 메모리 로그에 태스크 추적 블록 생성 |
-
-모든 커맨드는 `.claude/commands/`에 정의되어 있으며 Claude Code에 의해 Skills로 자동 등록됩니다.
-
-## 에이전트
-
-co-develop 템플릿에는 여섯 개의 전문화된 에이전트가 포함됩니다. 각 에이전트의 역할 정의는 `agents/<name>.md`에 있습니다.
-
-| 에이전트 | 담당 역할 |
-|---------|----------|
-| **PM** | 계획 조율, 스펙 작성, 태스크 순서 관리 |
-| **Architect** | 시스템 설계, ADR 작성, 의존성 결정 |
-| **Automation-Engineer** | 스크립트 작성, CI/CD, 인프라 자동화 |
-| **Security-Expert** | 위협 모델링, 의존성 감사, 보안 기본값 검토 |
-| **Docs-Writer** | 기술 문서 작성, README 관리, 변경 이력 작성 |
-| **Auditor** | 구현 후 검수 기준 검증 |
-
-에이전트는 네이티브 `Agent` 툴을 통해 디스패치합니다. 파일 경로를 참조하는 대신 `agents/<name>.md` 내용을 프롬프트에 직접 포함하세요 — 서브 에이전트는 부모 세션과 파일시스템 컨텍스트를 공유하지 않습니다.
-
-## 설정
-
-### CLAUDE.md
-
-Claude Code 동작을 제어합니다: 자동화 훅, 슬래시 커맨드 정의, plan-mode 규칙, 태스크 추적 규칙, Git/PR 표준. Gemini 워크플로우에 영향을 주지 않고 Claude 전용 동작을 조정하려면 이 파일을 수정하세요.
-
-### GEMINI.md
-
-Gemini CLI를 위한 동작 설정을 미러링합니다. `CLAUDE.md`와 일관된 표현을 유지하면서 Gemini 전용 규칙(`/google-search` 통합, Gemini 모델 티어 등)에 맞게 조정됩니다.
-
-두 파일 모두 `CONSTITUTION.md`에서 공유 표준을 상속받습니다. 모든 AI 어시스턴트에 적용되는 정책을 업데이트할 때는 `CONSTITUTION.md`를 먼저 수정한 후 `CLAUDE.md`와 `GEMINI.md`에 변경 사항을 전파하세요.
+멋진 프로젝트를 함께 만들어 봅시다!

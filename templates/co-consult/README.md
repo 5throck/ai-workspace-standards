@@ -3,56 +3,55 @@ sync_version: 1
 content_hash: TBD
 ---
 
-# co-consult
+# {{PROJECT_NAME}}
 
-> **Status**: Stable — v1.0.0
+> **Status**: ✅ Stable — v1.0.0
 
-AI-assisted knowledge work workspace template. Optimized for documentation-heavy projects, research, and cross-functional team coordination with a structured multi-agent architecture.
+Welcome to the **Co-Consult** workspace—your dedicated AI strategy consulting and analysis agent team. Optimized for collaborative work with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to support your projects from day one.
 
-## Overview
+## 1. Team Mission
 
-The co-consult template provides a ready-to-use workspace for consulting engagements that leverage AI assistants for research, strategy development, and client deliverable creation. It pairs Claude Code (via `CLAUDE.md`) and Gemini (via `GEMINI.md`) with a structured multi-agent consulting team, giving every engagement consistent commands, agent roles, and quality gates from day one.
+**Mission:** To provide a comprehensive, multi-agent strategy consulting partnership. 
 
-Key characteristics:
+We are designed to reduce context overload by delegating specific phases of work to specialized agents. Instead of chatting with a single omniscient AI, you act as the user or team lead collaborating with a full product team. Our goal is to handle the market research, solution architecture, and deliverable creation while you guide the vision.
 
-- **Consulting agent team** — Specialized agents (Engagement Leader, Strategy Analyst, Communications Lead, Solutions Architect, and more) handle distinct engagement phases, keeping context organized.
-- **Dual-AI support** — Claude and Gemini configurations ship together so you can use either assistant without extra setup.
-- **Delivery-first workflow** — Pre-commit hooks, an audit script, and a sync pipeline enforce quality standards on client deliverables automatically.
-- **Slash-command driven** — Common operations are exposed as slash commands so daily work stays fast and consistent.
+## 2. Meet the AI Team
 
-## Quick Start
+Your partners consist of specialized agents, each with a distinct role. The **Project Manager (PM)** is your single point of entry—they orchestrate the rest of the team.
 
-This project was scaffolded from the **co-consult** template.
-
-> To scaffold a new project from the workspace root, run:
-> `scripts/new-project.sh "project-name" --variant co-consult`
-
-After scaffolding:
-
-1. Open the new project directory in your editor.
-2. Review and update `CLAUDE.md` / `GEMINI.md` with project-specific context.
-3. Run `/sync "chore: initial scaffold"` to create the first commit and PR.
-
-## Agents
-
-The co-consult template ships with specialized consulting agents. Each agent's role definition lives in `agents/<name>.md`.
-
-| Agent | Responsibility |
-|-------|---------------|
-| **Engagement Leader** | Orchestrates engagement phases, manages client interface, enforces quality gates |
-| **Change Management Partner** | Organizational transformation, culture strategy, stakeholder alignment |
+| Agent | Role & Capabilities |
+|-------|---------------------|
+| **Engagement Leader** | Orchestrates engagement phases, manages client interface |
 | **Strategy Analyst** | Market analysis, competitive research, financial modeling |
-| **Communications Lead** | Client-facing communications, presentations, strategic narratives |
-| **Solutions Architect** | Technical solution design, system architecture, implementation roadmaps |
-| **Delivery Manager** | Project delivery, operations coordination, stakeholder management |
-| **Technology Specialist** | M365 platforms, workflow automation, digital transformation support |
+| **Industry Expert** | Industry-specific insights, regulatory landscape |
+| **Change Management Partner** | Organizational transformation, stakeholder alignment |
+| **Communications Lead** | Client-facing communications, strategic narratives |
+| **Solutions Architect** | Technical solution design, implementation roadmaps |
+| **Subject Matter Expert (SME)** | Functional expertise (HR, Finance, Ops), solution design |
+| **Workstream Lead** | Workstream management, team coordination |
+| **Delivery Manager** | Project delivery, operations coordination |
+| **Technology Specialist** | Digital transformation support |
+| **Data Analyst** | Statistical analysis, data modeling, business insights |
 
-## Available Commands
+## 3. How to Collaborate with This Team
 
-| Command | Description |
-|---------|-------------|
-| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR |
-| `/changelog "..."` | Add an entry to `CHANGELOG.md` under `[Unreleased]` |
-| `/memlog "summary"` | Append a session summary to today's memory log only |
-| `/meeting` | Run a structured multi-agent meeting (inline role-play, no spawning) |
-| `/new-task "name"` | Create a task tracking block in today's memory log |
+Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
+
+### A. The PM Gateway
+Always start your requests by talking to the **PM**. Do not invoke specialist agents directly. The PM will analyze your request and bring in the right experts.
+
+### B. Standard Workflow Phases
+1. **Strategy & Planning:** The PM and **Engagement Leader** define the consulting scope.
+2. **Research & Architecture:** The **Strategy Analyst** and **Solutions Architect** design the approach.
+3. **Execution:** Subject Matter Experts (**SME**, **Industry Expert**) provide deep insights.
+4. **Delivery:** The **Communications Lead** and **Delivery Manager** finalize the client presentations.
+5. **Review & Sync:** We use `/sync "commit message"` to safely commit and open a PR.
+
+### C. Available Commands
+Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
+- `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — Add an entry to `CHANGELOG.md`.
+- `/memlog "summary"` — Append a summary to today's session log.
+- `/meeting` — Run a structured, inline multi-agent discussion.
+
+Let's build something great together!

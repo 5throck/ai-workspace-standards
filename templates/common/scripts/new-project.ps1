@@ -49,6 +49,14 @@ if ($ProjectName.Length -gt 64) {
     exit 1
 }
 
+# Validate Variant against allowlist (prevent path traversal attacks)
+$validVariants = @("co-develop", "co-design", "co-work", "co-security", "co-consult")
+if ($Variant -ne "" -and $Variant -notin $validVariants) {
+    Write-Host "[FAIL] Invalid variant: $Variant" -ForegroundColor Red
+    Write-Host "   Valid variants: co-develop, co-design, co-work, co-security, co-consult" -ForegroundColor Yellow
+    exit 1
+}
+
 # Validate Platform flag
 if ($Platform -notin @("claude", "antigravity", "both")) {
     Write-Host "[FAIL] --platform must be: claude, antigravity, or both (default: both)" -ForegroundColor Red

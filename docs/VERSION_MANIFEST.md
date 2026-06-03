@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T01:22:33.895Z
+**Generated**: 2026-06-03T02:41:18.181Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -11,7 +11,7 @@
 - **Agents**: 8
 - **Skills**: 16
 - **Scripts**: 65
-- **Commands**: 7
+- **Commands**: 6
 
 ---
 
@@ -133,7 +133,6 @@
 | commit-push-pr | .claude/commands/commit-push-pr.md | both | N/A |
 | meeting | .claude/commands/meeting.md | both | N/A |
 | memlog | .claude/commands/memlog.md | both | N/A |
-| new-project | .claude/commands/new-project.md | claude | N/A |
 | new-task | .claude/commands/new-task.md | both | N/A |
 | sync | .claude/commands/sync.md | both | N/A |
 
@@ -143,7 +142,7 @@
 
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
-- **Commands with parity**: 6 / 7
+- **Commands with parity**: 6 / 6
 - **Skills with parity**: 4 / 16
 
 ---
@@ -172,6 +171,5 @@
 - Command commit-push-pr not integrated as a skill
 - Command meeting not integrated as a skill
 - Command memlog not integrated as a skill
-- Command new-project not integrated as a skill
 - Command new-task not integrated as a skill
 - Command sync not integrated as a skill

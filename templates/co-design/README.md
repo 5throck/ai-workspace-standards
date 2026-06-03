@@ -3,54 +3,52 @@ sync_version: 1
 content_hash: TBD
 ---
 
-# co-design variant
+# {{PROJECT_NAME}}
 
-> **Status**: Stable — v1.0.0
+> **Status**: ✅ Stable — v1.0.0
 
-AI-assisted design workspace template. Optimized for UI/UX design workflows, prototyping, and design system management with a structured multi-agent architecture.
+Welcome to the **Co-Design** workspace—your dedicated AI specialized UI/UX design agent team. Optimized for collaborative work with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to support your projects from day one.
 
-## Overview
+## 1. Team Mission
 
-The co-design template provides a ready-to-use workspace for design projects that leverage AI assistants throughout the full design lifecycle. It pairs Claude Code (via `CLAUDE.md`) and Gemini (via `GEMINI.md`) with a structured multi-agent system covering research through delivery, giving every project consistent commands, agent roles, and quality gates from day one.
+**Mission:** To provide a comprehensive, multi-agent UI/UX design partnership. 
 
-Key characteristics:
+We are designed to reduce context overload by delegating specific phases of work to specialized agents. Instead of chatting with a single omniscient AI, you act as the user or team lead collaborating with a full product team. Our goal is to handle the research, prototyping, and visual design while you guide the vision.
 
-- **Design-focused agent team** — Specialized agents (PM, Design Lead, UX Researcher, Visual Designer, Prototype Engineer) handle distinct design phases, keeping each session focused.
-- **Dual-AI support** — Claude and Gemini configurations ship together so you can use either assistant without extra setup.
-- **Full design lifecycle coverage** — Six phases from Discovery through Handoff, with explicit review gates at each stage.
-- **Slash-command driven** — Common operations are exposed as slash commands so daily design work stays fast and consistent.
+## 2. Meet the AI Team
 
-## Quick Start
+Your partners consist of specialized agents, each with a distinct role. The **Project Manager (PM)** is your single point of entry—they orchestrate the rest of the team.
 
-This project was scaffolded from the **co-design** template.
-
-> To scaffold a new project from the workspace root, run:
-> `scripts/new-project.sh "project-name" --variant co-design`
-
-After scaffolding:
-
-1. Open the new project directory in your editor.
-2. Review and update `CLAUDE.md` / `GEMINI.md` with project-specific context.
-3. Run `/sync "chore: initial scaffold"` to create the first commit and PR.
-
-## Agents
-
-The co-design template ships with specialized design agents. Each agent's role definition lives in `agents/<name>.md`.
-
-| Agent | Responsibility |
-|-------|---------------|
-| **PM** | Orchestrates design phases, writes briefs, manages task sequencing |
+| Agent | Role & Capabilities |
+|-------|---------------------|
+| **PM (Project Manager)** | Orchestrates design phases, writes briefs, manages task sequencing |
 | **Design Lead** | Creative direction, design system oversight, phase gate sign-off |
 | **UX Researcher** | User research, usability testing, insight synthesis |
 | **Visual Designer** | Visual design, component creation, accessibility review |
 | **Prototype Engineer** | Interactive prototype development and handoff preparation |
+| **Service Designer** | End-to-end journey mapping, service blueprints |
+| **Storyteller** | Narrative construction, presentation structure |
+| **Typography Expert** | Typeface selection, hierarchy, readibility tuning |
 
-## Available Commands
+## 3. How to Collaborate with This Team
 
-| Command | Description |
-|---------|-------------|
-| `/sync "feat: ..."` | Full pipeline — memlog → sync-md → changelog → audit → commit → PR |
-| `/changelog "..."` | Add an entry to `CHANGELOG.md` under `[Unreleased]` |
-| `/memlog "summary"` | Append a session summary to today's memory log only |
-| `/meeting` | Run a structured multi-agent design review (inline role-play) |
-| `/new-task "name"` | Create a task tracking block in today's memory log |
+Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
+
+### A. The PM Gateway
+Always start your requests by talking to the **PM**. Do not invoke specialist agents directly. The PM will analyze your request and bring in the right experts.
+
+### B. Standard Workflow Phases
+1. **Discovery & Research:** The PM will bring in the **UX Researcher** to gather insights.
+2. **Design Strategy:** The **Design Lead** will define the creative direction and design system.
+3. **Creation:** The **Visual Designer** and **Service Designer** will build out components and journeys.
+4. **Prototyping:** The **Prototype Engineer** creates interactive handoff materials.
+5. **Review & Sync:** We use `/sync "commit message"` to safely commit and open a PR.
+
+### C. Available Commands
+Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
+- `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — Add an entry to `CHANGELOG.md`.
+- `/memlog "summary"` — Append a summary to today's session log.
+- `/meeting` — Run a structured, inline multi-agent discussion.
+
+Let's build something great together!
