@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.1
+ * @version 1.5.2
  */
 
 import { $ } from "bun";
@@ -92,7 +92,9 @@ async function main() {
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
     const content = readFileSync(file, 'utf-8');
-    if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(content)) {
+    // Strip fenced code blocks (``` ... ```) before Korean check — data samples may contain Korean values
+    const textOnly = content.replace(/```[\s\S]*?```/g, '');
+    if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(textOnly)) {
       console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters (Korean) detected in ${file}`);
       process.exit(1);
     }
