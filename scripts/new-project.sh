@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security] [--version X.Y.Z]
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security|co-consult] [--version X.Y.Z]
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -40,7 +40,7 @@ done
 
 # Validate required arguments
 if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work|co-security] [--platform claude|antigravity|both] [--version X.Y.Z]"
+  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work|co-security|co-consult] [--platform claude|antigravity|both] [--version X.Y.Z]"
   exit 1
 fi
 
@@ -57,7 +57,7 @@ fi
 
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ -z "$VARIANT" ]; then
-  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security"
+  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security, co-consult"
   exit 1
 fi
 
@@ -75,6 +75,7 @@ if [ -z "$VARIANT" ]; then
     echo "   co-design   — UI/UX design (stable)"
     echo "   co-work     — Collaboration & documentation (stable)"
     echo "   co-security — Security engagement (stable)"
+    echo "   co-consult  — Strategy consulting (stable)"
     echo ""
     echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant co-develop"
     echo ""
@@ -127,7 +128,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable)"
+  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable), co-consult (stable)"
   exit 1
 fi
 

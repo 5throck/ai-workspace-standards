@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Documentation Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: oven-sh/setup-bun@4bc047ad317be86e772e62e09a80d557c476c58a # v2
+        with:
+          bun-version: latest
+
+      - name: Install script dependencies
+        working-directory: scripts
+        run: bun install
+        continue-on-error: true
+
+      - name: Run audit
+        run: bun scripts/audit.ts
+
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@b6c5701469acc1b2db2e1d39a67a373da11f2ded # v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Uncomment and configure the test job for your stack:
+
+  # test-python:
+  #   name: Python Tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
+  #     - run: pip install -r requirements.txt
+  #     - run: pytest
+
+  # test-node:
+  #   name: Node.js Tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #     - run: npm ci
+  #     - run: npm test

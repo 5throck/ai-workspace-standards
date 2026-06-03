@@ -1,0 +1,65 @@
+# Nested git repos — never commit
+.git/
+
+# Secrets — never commit
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates — never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Databases
+*.sqlite
+*.db
+
+# CodeGraph Index
+.codegraph/
+
+# --- Sandbox for testing ---
+.sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/
+
+# Ignore test temp directories
+tests/.temp/

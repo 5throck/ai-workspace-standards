@@ -43,8 +43,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.7 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.5.9 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.3.8 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.6.0 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
@@ -82,7 +82,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/inject-skills.ts` | L0 | 1.0.1 | active | — | — | L0-only | — |
 | `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
@@ -97,6 +97,11 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | common | — |
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `l2-to-variant-pipeline.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/error-handling.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/pipeline-state.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |

@@ -21,7 +21,7 @@ if (!projectDir) {
 }
 
 // Try to find variant context file
-const variants = ['co-develop', 'co-design', 'co-work', 'co-security'];
+const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult'];
 let contextMdPath: string | null = null;
 
 for (const variant of variants) {

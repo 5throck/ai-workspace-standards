@@ -1,0 +1,283 @@
+{
+  "created": "2026-06-03",
+  "variant": "co-consult",
+  "l1_source": "templates/common/scripts",
+  "scripts": {
+    "new-project.sh": {
+      "version": "1.3.7",
+      "status": "active"
+    },
+    "new-project.ps1": {
+      "version": "1.5.9",
+      "status": "active"
+    },
+    "install-bun.sh": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "install-bun.ps1": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "upgrade-project.sh": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "upgrade-project.ps1": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "cleanup-completed-md.sh": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "cleanup-completed-md.ps1": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "audit.ts": {
+      "version": "2.4.4",
+      "status": "active"
+    },
+    "dev-sync.ts": {
+      "version": "1.2.0",
+      "status": "active"
+    },
+    "sync-md.ts": {
+      "version": "1.2.0",
+      "status": "active"
+    },
+    "gen-pr-body.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "sync-skills.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "publish-to-template.ts": {
+      "version": "1.3.2",
+      "status": "active"
+    },
+    "list-template-versions.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "qa-gate.ts": {
+      "version": "1.0.2",
+      "status": "active"
+    },
+    "agent-create.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "agent-delete.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "agent-list.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "agent-verify.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "agent-lifecycle-audit.ts": {
+      "version": "1.1.1",
+      "status": "active"
+    },
+    "skill-lifecycle-audit.ts": {
+      "version": "1.1.2",
+      "status": "active"
+    },
+    "lifecycle-sync-audit.ts": {
+      "version": "1.3.1",
+      "status": "active"
+    },
+    "readme-lifecycle-audit.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "verify-skills.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "verify-memory.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "archive-memory.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "generate-scripts-readme.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "dispatch.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "dispatch-parallel.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "dispatch-serial.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "retry-handler.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "sync-agent-status.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "sync-skill-status.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "validate-templates.ts": {
+      "version": "1.4.4",
+      "status": "active"
+    },
+    "helpers/lifecycle-governance.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "helpers/template-validation.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "helpers/inject-global-plugins.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/inject-skills.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/merge-frontmatter.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/merge-package-scripts.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/substitute-placeholders.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/update-variant-lifecycle.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/validate-output.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "helpers/write-scripts-snapshot.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "verify-readme-sync.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "translate-readme.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "verify-agent-deliverables.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "verify-scripts.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "test-new-project.ts": {
+      "version": "1.0.3",
+      "status": "active"
+    },
+    "check-pm-approval.ts": {
+      "version": "1.0.0",
+      "status": "deprecated"
+    },
+    "verify-new-project-tests.ts": {
+      "version": "1.0.2",
+      "status": "active"
+    },
+    "clear-pm-approval.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "validate-agents.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "validate-doc-folder.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "verify-template-integrity.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "validate-skills.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "skill-dependency-analysis.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "test-runner.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "validate-md-language.ts": {
+      "version": "1.2.0",
+      "status": "active"
+    },
+    "hooks/pre-commit.ts": {
+      "version": "1.5.0",
+      "status": "active"
+    },
+    "hooks/pre-push.ts": {
+      "version": "1.2.0",
+      "status": "active"
+    },
+    "hooks/post-write-lifecycle-check.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "validate-model-registry.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "verify-platform-lifecycle.ts": {
+      "version": "1.1.0",
+      "status": "active"
+    },
+    "analyze-git-history.ts": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "generate-version-manifest.ts": {
+      "version": "1.0.1",
+      "status": "active"
+    },
+    "propagation-map.json": {
+      "version": "1.0.0",
+      "status": "active"
+    },
+    "fix-parse-agent.sed": {
+      "version": "1.0.0",
+      "status": "active"
+    }
+  }
+}

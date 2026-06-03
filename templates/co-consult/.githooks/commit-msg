@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# commit-msg: auto-log memory + CHANGELOG on every direct git commit.
+# Receives the commit message file path as $1.
+# Runs AFTER pre-commit, so the message is guaranteed to be available.
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE" | sed 's/[[:space:]]*$//')
+COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '1,/^$/d' -e '/^#/d' | sed 's/^[[:space:]]*//' | head -5)
+
+# Skip empty, Merge, WIP, fixup!, squash! commits
+[ -z "$COMMIT_MSG" ] && exit 0
+echo "$COMMIT_MSG" | grep -qE "^Merge|^WIP|^fixup!|^squash!" && exit 0
+
+# ── Enforce English Only ───────────────────────────────────────────────────────
+if ! python3 -c "import sys,re; data=open(sys.argv[1],encoding='utf-8').read(); sys.exit(1) if re.search(r'[가-힣ᄀ-ᇿ㄰-㆏]',data) else sys.exit(0)" "$COMMIT_MSG_FILE"; then
+  echo -e "\033[31m[FAIL]\033[0m Non-English characters (Korean) detected in commit message."
+  echo "       CONSTITUTION.md mandates all commit messages must be in English."
+  exit 1
+fi
+
+TODAY=$(date +%Y-%m-%d)
+mkdir -p memory
+
+STAGED=$(git diff --cached --name-only)
+
+# ── Extract decisions from commit body (look for "Decided:", "Choice:", etc.) ─
+DECISIONS=""
+if echo "$COMMIT_BODY" | grep -qiE "decided:|choice:|selected:|chose:|why:|because"; then
+  DECISIONS=$(echo "$COMMIT_BODY" | grep -iE "decided:|choice:|selected:|chose:|why:|because" | head -2 | sed 's/^[^:]*: //')
+fi
+
+# ── Extract issues/blockers from commit body ────────────────────────────────
+ISSUES=""
+if echo "$COMMIT_BODY" | grep -qiE "issue:|bug:|fix:|problem:|blocker:|error:|fail"; then
+  ISSUES=$(echo "$COMMIT_BODY" | grep -iE "issue:|bug:|fix:|problem:|blocker:|error:|fail" | head -2 | sed 's/^[^:]*: //')
+fi
+
+# ── Build purpose from commit body (first non-empty line) ───────────────────
+if [ -n "$COMMIT_BODY" ]; then
+  PURPOSE=$(echo "$COMMIT_BODY" | head -1)
+else
+  case "$COMMIT_MSG" in
+    feat:*)     PURPOSE="Feature implementation: ${COMMIT_MSG#feat: }" ;;
+    fix:*)      PURPOSE="Bug fix: ${COMMIT_MSG#fix: }" ;;
+    refactor:*) PURPOSE="Refactoring: ${COMMIT_MSG#refactor: }" ;;
+    docs:*)     PURPOSE="Documentation update: ${COMMIT_MSG#docs: }" ;;
+    test:*)     PURPOSE="Test improvement: ${COMMIT_MSG#test: }" ;;
+    chore:*)    PURPOSE="Maintenance task: ${COMMIT_MSG#chore: }" ;;
+    *)          PURPOSE="${COMMIT_MSG}" ;;
+  esac
+fi
+
+# ── Auto-append memory log in mandatory 4-section format ─────────────────────
+# (skip if dev-sync already wrote an entry for this commit message today)
+if ! grep -qF "$COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
+  SEPARATOR=""
+  [ -f "memory/$TODAY.md" ] && SEPARATOR=$'\n---\n\n'
+
+  # Build file list as markdown bullets (exclude memory/ self-references)
+  FILE_BULLETS=$(echo "$STAGED" | grep -v "^memory/" | sed 's/^/- `/' | sed 's/$/`/' 2>/dev/null || true)
+  [ -z "$(echo "${FILE_BULLETS}" | tr -d '[:space:]')" ] && FILE_BULLETS="- N/A"
+
+  DECISIONS_BLOCK="- None"
+  if [ -n "$DECISIONS" ]; then
+    DECISIONS_BLOCK=$(printf '%s' "$DECISIONS" | sed 's/^/- /')
+  fi
+
+  ISSUES_BLOCK="- None"
+  if [ -n "$ISSUES" ]; then
+    ISSUES_BLOCK=$(printf '%s' "$ISSUES" | sed 's/^/- /')
+  fi
+
+  printf '%s## Session Summary\n%s\n\n## Changes\n%s\n\n## Decisions\n%s\n\n## Open Issues\n%s\n' \
+    "$SEPARATOR" \
+    "$COMMIT_MSG" \
+    "$FILE_BULLETS" \
+    "$DECISIONS_BLOCK" \
+    "$ISSUES_BLOCK" \
+    >> "memory/$TODAY.md"
+fi
+
+# ── Auto-update MEMORY.md index ───────────────────────────────────────────────
+if [ -f "scripts/sync-md.ts" ]; then
+  bun scripts/sync-md.ts "$TODAY" "$COMMIT_MSG" 2>/dev/null || true
+fi
+
+
+exit 0

@@ -1,0 +1,133 @@
+{
+  "inherits_common": "1.0.0",
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "co-consult provides variant-specific Agent Roster (engagement-leader, strategy-analyst, industry-expert, change-management-partner, communications-lead, solutions-architect, workstream-lead, sme, data-analyst, delivery-manager, technology-specialist), Governance Workflow (Phase 3 = Deliverable Creation, Phase 4 = Implementation & Delivery), and Dispatch Protocol",
+      "since": "2026-06-03",
+      "reviewed_by": "lifecycle-manager",
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
+    }
+  },
+  "phases": {
+    "phase3_name": "Deliverable Creation",
+    "phase4_name": "Implementation & Delivery"
+  },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "competitive-intelligence",
+        "layer": "platform",
+        "used_by_agents": ["strategy-analyst"],
+        "phases": [1],
+        "platform_parity": "required"
+      },
+      {
+        "name": "financial-modeling",
+        "layer": "platform",
+        "used_by_agents": ["strategy-analyst"],
+        "phases": [1],
+        "platform_parity": "required"
+      },
+      {
+        "name": "insight-synthesis",
+        "layer": "platform",
+        "used_by_agents": ["strategy-analyst"],
+        "phases": [1, 3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "stakeholder-alignment",
+        "layer": "platform",
+        "used_by_agents": ["change-management-partner"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "org-readiness-assessment",
+        "layer": "platform",
+        "used_by_agents": ["change-management-partner"],
+        "phases": [1],
+        "platform_parity": "required"
+      },
+      {
+        "name": "change-impact-assessment",
+        "layer": "platform",
+        "used_by_agents": ["change-management-partner"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "narrative-framework",
+        "layer": "platform",
+        "used_by_agents": ["communications-lead"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "consulting-report-writing",
+        "layer": "platform",
+        "used_by_agents": ["communications-lead"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "executive-presentation",
+        "layer": "platform",
+        "used_by_agents": ["communications-lead"],
+        "phases": [3, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "solution-design",
+        "layer": "platform",
+        "used_by_agents": ["solutions-architect"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "technical-feasibility",
+        "layer": "platform",
+        "used_by_agents": ["solutions-architect"],
+        "phases": [2, 3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "project-delivery",
+        "layer": "platform",
+        "used_by_agents": ["delivery-manager"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "stakeholder-review-management",
+        "layer": "platform",
+        "used_by_agents": ["delivery-manager"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "agent-lifecycle-manager",
+        "layer": "platform",
+        "type": "override",
+        "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
+        "used_by_agents": ["pm"],
+        "phases": [0, 5, 6],
+        "platform_parity": "required"
+      }
+    ]
+  },
+  "name": "co-consult",
+  "description": "Strategy consulting variant for AI-assisted business consulting engagements. Includes 11 specialized consulting agents covering research, strategy, change management, communications, solutions design, and delivery.",
+  "status": "stable",
+  "version": "1.0.0",
+  "lifecycle": {
+    "statusSince": "2026-06-03",
+    "lastTransition": "initial → stable on 2026-06-03",
+    "stablePromotedOn": "2026-06-03"
+  }
+}

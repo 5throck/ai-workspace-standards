@@ -11,7 +11,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
 1. Display execution plan table first (task | agent | tier | model)
 2. Only then use `invoke_subagent` to dispatch specialist agents
-3. Never bypass PM workflow ??direct specialist invocation is forbidden
+3. Never bypass PM workflow — direct specialist invocation is forbidden
 
 > **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
@@ -29,18 +29,18 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Surgical Edit** | `replace_file_content` | Replace a single contiguous block of code. Specify `StartLine`, `EndLine`, `TargetContent`, and `ReplacementContent` with 100% exact leading whitespace matching. |
 | **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file simultaneously. Order chunks descendingly (bottom-to-top) to avoid line offsets. |
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
-| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. ?슚 **STRICT BAN**: NEVER run `git commit` or `git push` directly via this tool (e.g., using `$env:SYNC_ACTIVE=1; git commit` to bypass QA gates is FORBIDDEN). All commits must go through the approved `/sync` pipeline or `bun scripts/dev-sync.ts`. |
+| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. ⚠️ **STRICT BAN**: NEVER run `git commit` or `git push` directly via this tool (e.g., using `$env:SYNC_ACTIVE=1; git commit` to bypass QA gates is FORBIDDEN). All commits must go through the approved `/sync` pipeline or `bun scripts/dev-sync.ts`. |
 
-#### ?슚 Surgical Multi-Replace Offset Safeguard
+#### ⚠️ Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 - This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
-#### ?슚 Windows Terminal & Code Page Safeguard
+#### ⚠️ Windows Terminal & Code Page Safeguard
 When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
 - **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
 
-#### ?슚 Grep Search 50-Match Cap Safeguard
+#### ⚠️ Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
@@ -99,7 +99,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
-> **Agent Architecture**: See [CONSTITUTION.md 짠5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 
 #### Define Subagent (`define_subagent`)
@@ -128,7 +128,7 @@ Spawn parallel instances to execute dedicated work concurrently. PM MUST explici
 }
 ```
 
-> ?좑툘 **Subagent commit rule**: Subagents must NOT issue `git commit` or `git push` directly. All commits must be initiated by PM via `/sync` command only. Direct commits are blocked by the pre-commit `SYNC_ACTIVE` gate.
+> ⚠️ **Subagent commit rule**: Subagents must NOT issue `git commit` or `git push` directly. All commits must be initiated by PM via `/sync` command only. Direct commits are blocked by the pre-commit `SYNC_ACTIVE` gate.
 
 #### Communication (`send_message`)
 Interact and exchange contracts with spawned agents via their unique `conversationID`.
@@ -145,9 +145,9 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 #### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-development`, `dispatching-parallel-agents`) for multi-agent harness engineering using a 3-tier model strategy (see [AGENTS.md - Superpowers Plugin](AGENTS.md#superpowers-plugin--cost-optimization-3-tier-strategy)):
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- **High-tier (Design/Planning)** ??`gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** ??`gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** ??`gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
+- **High-tier (Design/Planning)** — `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
+- **Medium-tier (Review/QA)** — `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** — `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ---
 
@@ -165,7 +165,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 
 ### 5. Agent Dispatch Rules
 
-See [CONSTITUTION.md 짠5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
@@ -183,7 +183,7 @@ All agents below require PM dispatch:
 - pentester (Phase 3, 6)
 - patch-engineer (Phase 4, 6)
 - report-writer (Phase 6)
-- security-expert (Phase 5 ??pentest methodology QA)
+- security-expert (Phase 5 — pentest methodology QA)
 
 #### Permission Denial Protocol
 
@@ -192,13 +192,13 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
 2. Output the Escalation Template immediately
 3. Log the denial to `memory/YYYY-MM-DD.md`
-4. Halt the blocked task ??do not proceed without the required tool
+4. Halt the blocked task — do not proceed without the required tool
 
-See [`agents/pm.md` ??Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 #### Skill Resolution Priority
 
-When a user request matches a skill trigger, apply this priority order ??**enforced every session, regardless of platform**:
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
 
 | Priority | Source | Location |
 |----------|--------|----------|
@@ -206,9 +206,9 @@ When a user request matches a skill trigger, apply this priority order ??**enfor
 | **2** | Platform config skills | `.gemini/skills/` in the project root |
 | **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
 
-**Rule**: If a local skill's `metadata.triggers` matches the user request, use it ??do **not** fall through to a global plugin with overlapping intent.
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
 
-**Canonical conflict ??meeting vs. brainstorming**:
+**Canonical conflict — meeting vs. brainstorming**:
 
 | User says | Correct skill | Priority |
 |-----------|--------------|----------|
@@ -311,7 +311,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-02 ??added 짠5 Skill Resolution Priority; added 짠6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-03 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
 
 
 For private repos: skip the security gate entirely.
@@ -329,11 +329,11 @@ For private repos: skip the security gate entirely.
 
 These rules are **enforced by the PM Role Declaration** and must be followed in every Antigravity session:
 
-1. **Authorization first** ??No Phase 1+ work (recon, exploitation, patching) may begin without the `verify-authorization` skill confirming a signed authorization document exists.
-2. **Scope enforcement** ??Any target not listed in `docs/scope.md` is out-of-scope. PM must update scope and re-run authorization before expanding.
-3. **Secret hygiene** ??Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
-4. **Ansible dry-run first** ??All patch automation must run with `--check` flag before live apply.
-5. **Engagement log** ??All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
+1. **Authorization first** — No Phase 1+ work (recon, exploitation, patching) may begin without the `verify-authorization` skill confirming a signed authorization document exists.
+2. **Scope enforcement** — Any target not listed in `docs/scope.md` is out-of-scope. PM must update scope and re-run authorization before expanding.
+3. **Secret hygiene** — Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
+4. **Ansible dry-run first** — All patch automation must run with `--check` flag before live apply.
+5. **Engagement log** — All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
 
 
 

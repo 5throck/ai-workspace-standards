@@ -9,7 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 
+### Changed
+- **[2026-06-03]**: chore: clean up co-consult template — remove stale co-work skill copies (`meeting-facilitation`, `skill-lifecycle-manager`) from all 5 variants; register `agent-lifecycle-manager` as platform override in variant.json; remove template contamination files (`_COMMON.md`, `GLOBAL_TOOLS.md`, `settings.local.json`, `api-documentation` skill, empty `adr/`); add co-consult to `new-project.sh`/`ps1`/`md` at L0 and L1
+
 ### Added
+- **[2026-06-03]**: feat: add co-consult variant — strategy consulting template with 11 specialized agents (Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect, and more), 13 variant-specific skills, 7-phase workflow; removed Project-Specific Tools section from workspace README; added co-consult to all SSOT registries (`templates/co-consult/`, `scripts/helpers/inject-skills.ts`, `templates/README.md`, `README.md`)
 - **[2026-06-02]**: feat: add Claude Code Agent Teams support — enabled `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, `teammateMode: auto`, `TeammateIdle`/`TaskCompleted` hooks across workspace root and all 4 variant templates; documented Desktop App limitations and Antigravity CLI comparison in CLAUDE.md/GEMINI.md (`settings.json`, `CLAUDE.md`, `GEMINI.md`)
 - **[2026-06-02]**: feat: add variant workflow governance — agent `phases`/`handoff_to`/`handoff_from`/`required_skills` frontmatter across 24 agent files; `variant.json skill_manifest` sections; 4 new `validate-templates.ts` checks (VA-01 phase×agent cross-validation, VA-02 workspace-root intrusion, VA-03 platform parity, WS-03 common-contract×variant skills); post-scaffolding validation in `new-project` scripts (`templates/co-*/agents/*.md`, `templates/co-*/variant.json`, `scripts/validate-templates.ts`)
 - **[2026-06-02]**: feat: add platform settings parity policy — 3-tier classification (shared/claude_only/gemini_only) in `common-contract.json platform_settings`; Check VA-04 validates shared key presence in both `.claude/settings.json` and `.gemini/settings.json`; CLAUDE.md/GEMINI.md §10 lifecycle table updated with explicit settings file propagation rules (`docs/templates/common-contract.json`, `scripts/validate-templates.ts`)
@@ -664,7 +668,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-02*
+*Last Updated: 2026-06-03*
 
 
 

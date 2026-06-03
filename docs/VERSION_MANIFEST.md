@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-02T17:13:34.558Z
+**Generated**: 2026-06-03T01:22:33.895Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 16
-- **Scripts**: 60
+- **Scripts**: 65
 - **Commands**: 7
 
 ---
@@ -71,16 +71,21 @@
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
+| encoding-utils.ts | N/A | scripts/lib/encoding-utils.ts | fs, path |
+| error-handling.ts | N/A | scripts/lib/error-handling.ts | N/A |
 | gen-pr-body.ts | N/A | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | N/A | scripts/generate-scripts-readme.ts | N/A |
 | generate-version-manifest.ts | 1.0.1 | scripts/generate-version-manifest.ts | bun |
 | inject-global-plugins.ts | N/A | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | N/A | scripts/helpers/inject-skills.ts | N/A |
+| l2-to-variant-pipeline.ts | N/A | scripts/l2-to-variant-pipeline.ts | crypto, fs, path, semver |
 | lifecycle-governance.ts | N/A | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | N/A | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | N/A | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
+| pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
+| platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |

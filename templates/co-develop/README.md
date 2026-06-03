@@ -45,10 +45,11 @@ After scaffolding:
 ├── agents/                 # Per-agent role definition files
 │   ├── pm.md
 │   ├── architect.md
-│   ├── automation-engineer.md
-│   ├── security-expert.md
-│   ├── docs-writer.md
-│   └── auditor.md
+│   ├── code-writer.md
+│   ├── designer.md
+│   ├── security-monitor.md
+│   ├── stack-setup.md
+│   └── test-runner.md
 ├── docs/                   # Project documentation
 ├── memory/                 # Daily session logs (YYYY-MM-DD.md)
 └── scripts/                # Utility scripts (audit.sh, dev-sync.sh, …)
@@ -68,16 +69,17 @@ All commands are defined in `.claude/commands/` and are auto-registered as Skill
 
 ## Agents
 
-The co-develop template ships with six specialized agents. Each agent's role definition lives in `agents/<name>.md`.
+The co-develop template ships with seven specialized agents. Each agent's role definition lives in `agents/<name>.md`.
 
 | Agent | Responsibility |
 |-------|---------------|
-| **PM** | Orchestrates planning, writes specs, manages task sequencing |
-| **Architect** | System design, ADRs, dependency decisions |
-| **Automation-Engineer** | Script authoring, CI/CD, infrastructure automation |
-| **Security-Expert** | Threat modeling, dependency audits, secure-by-default review |
-| **Docs-Writer** | Technical writing, README maintenance, changelog authorship |
-| **Auditor** | Post-implementation verification against acceptance criteria |
+| **PM** | Orchestrates end-to-end workflow, enforces quality gates, dispatches specialist agents |
+| **Architect** | System design, ADRs, and implementation plans (Phases 1-2); never writes code directly |
+| **Code-Writer** | Implements approved plans precisely (Phase 3); reports plan issues to PM rather than adapting silently |
+| **Designer** | Visual and interaction design specifications (Phases 1-2); works alongside Architect on user-facing layer |
+| **Security-Monitor** | Scans for vulnerabilities, advisories, and secrets issues; saves findings to `security/` |
+| **Stack-Setup** | Environment initialization, tech stack research, and project bootstrapping |
+| **Test-Runner** | Runs test suite and acceptance criteria checks (Phase 4 QA Gate); reports pass/fail to PM |
 
 Dispatch agents via the native `Agent` tool. Embed the relevant `agents/<name>.md` content in the prompt rather than referencing the file path — sub-agents do not share filesystem context with the parent session.
 

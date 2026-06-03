@@ -8,7 +8,7 @@ Scaffold a new project under the workspace root.
 Arguments: $ARGUMENTS
 
 > **Variant selection required**: If no `-variant` is specified, the script defaults to `co-develop`.
-> Available variants: `co-develop` (software dev), `co-design` (UI/UX), `co-work` (collaboration/docs), `co-security` (security engagement — draft).
+> Available variants: `co-develop` (software dev), `co-design` (UI/UX), `co-work` (collaboration/docs), `co-security` (security engagement), `co-consult` (strategy consulting).
 > Example: `/new-project my-app -variant co-design`
 
 Detect the OS and run the appropriate script:

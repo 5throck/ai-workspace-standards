@@ -1,0 +1,21 @@
+# CODEOWNERS — Automatic PR reviewer assignment
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Format: <pattern>  <@owner or @org/team>
+# Last matching rule wins.
+
+# Default owner for everything
+# * @[Project Name]-team
+
+# Core AI configuration — require review for any changes
+# AGENTS.md        @[owner]
+# docs/context.md  @[owner]
+# CLAUDE.md        @[owner]
+# GEMINI.md        @[owner]
+
+# Agent definitions — architect or PM must review
+# agents/          @[owner]
+
+# Automation scripts — at least one DevOps reviewer
+# scripts/         @[owner]
+# .githooks/       @[owner]

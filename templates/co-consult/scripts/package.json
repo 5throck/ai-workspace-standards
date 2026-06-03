@@ -1,0 +1,21 @@
+{
+  "name": "project-scripts",
+  "version": "1.0.0",
+  "description": "Project utility scripts - TypeScript orchestration",
+  "scripts": {
+    "verify-skills": "bun scripts/verify-skills.ts",
+    "agent:create": "bun scripts/agent-create.ts",
+    "agent:list": "bun scripts/agent-list.ts",
+    "agent:delete": "bun scripts/agent-delete.ts",
+    "agent:verify": "bun scripts/agent-verify.ts",
+    "dispatch:parallel": "bun scripts/dispatch.ts parallel",
+    "dispatch:serial": "bun scripts/dispatch.ts serial"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
