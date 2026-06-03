@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# @version 1.3.9
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security|co-consult] [--version X.Y.Z]
 
@@ -516,6 +517,10 @@ find "$PROJECT_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
 cd "$PROJECT_DIR"
 git init
 git config core.hooksPath .githooks
+if [ -z "$(git config user.email)" ]; then
+  git config user.email "scaffold-bot@local"
+  git config user.name "Scaffold Bot"
+fi
 
 # Mark .ps1 scripts executable in git index (for WSL / Git Bash users)
 for rel in scripts/dev-sync.ps1 scripts/sync-md.ps1 scripts/setup.ps1; do
@@ -586,16 +591,6 @@ else
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
 
-# ── 8.5. Post-scaffolding variant validation ─────────────────────────────────  # TEST: none
-echo ""
-echo "Running variant validation..."
-if command -v bun >/dev/null 2>&1; then
-    if bun scripts/validate-templates.ts --variant "$VARIANT" 2>&1; then
-        echo "[OK] Variant validation passed."
-    else
-        echo "[WARN] Variant validation found issues. Review before using this project."
-    fi
-fi
 
 # ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
 echo ""
