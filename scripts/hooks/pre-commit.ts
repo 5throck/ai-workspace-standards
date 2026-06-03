@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.2
+ * @version 1.5.3
  */
 
 import { $ } from "bun";
@@ -181,6 +181,47 @@ async function main() {
     console.error("     git add scripts/SCRIPTS.md");
     console.error("");
     process.exit(1);
+  }
+
+  // 6c. Check A version blocking: @version in scripts/*.ts must match SCRIPTS.md
+  const scriptOrMdStaged = staged.some(f => {
+    const normalized = f.replace(/\\/g, '/');
+    return /^scripts\/.*\.ts$/.test(normalized) || normalized === 'scripts/SCRIPTS.md';
+  });
+
+  if (scriptOrMdStaged) {
+    console.log("\n=== Script Version Sync Check (Check A) ===");
+    try {
+      const auditResult = await $`bun scripts/lifecycle-sync-audit.ts --json`.quiet().nothrow();
+      const raw = auditResult.stdout.toString().trim();
+      let checkAErrors: Array<{ file: string; message: string; fixData?: { scriptName: string; fileVersion: string; registryVersion: string } }> = [];
+      try {
+        const parsed = JSON.parse(raw);
+        const results: Array<{ level: string; file: string; message: string; fix?: string; fixData?: { scriptName: string; fileVersion: string; registryVersion: string } }> = parsed.results ?? [];
+        checkAErrors = results.filter(r => r.level === 'error' && r.message.includes('Check A:'));
+      } catch {
+        console.error("\x1b[33m[WARN]\x1b[0m lifecycle-sync-audit.ts returned non-JSON output — skipping Check A version block");
+      }
+      if (checkAErrors.length > 0) {
+        console.error("\x1b[31m[FAIL]\x1b[0m Script @version / SCRIPTS.md mismatch detected:");
+        console.error("");
+        for (const err of checkAErrors) {
+          const fd = err.fixData;
+          if (fd) {
+            console.error(`[FAIL] ${err.file}: @version ${fd.fileVersion} does not match SCRIPTS.md entry ${fd.registryVersion}`);
+            console.error(`  → Fix: bun scripts/fix-script-versions.ts --script ${fd.scriptName}`);
+          } else {
+            console.error(`[FAIL] ${err.file}: ${err.message}`);
+          }
+        }
+        console.error("");
+        process.exit(1);
+      } else {
+        console.log("\x1b[32m[PASS]\x1b[0m Check A: all script @version tags match SCRIPTS.md");
+      }
+    } catch {
+      console.error("\x1b[33m[WARN]\x1b[0m Could not run lifecycle-sync-audit.ts — Check A skipped");
+    }
   }
 
   // 6b. Platform Skill/Command lifecycle check (non-blocking WARN)
