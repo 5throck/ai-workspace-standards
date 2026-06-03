@@ -5,7 +5,7 @@
  * Recursively scans L2 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 1: L2 Analysis
  *
  * Dependencies:
@@ -93,7 +93,7 @@ const SCAN_CATEGORIES = {
 
 /**
  * Compute SHA-256 hash of file content
- * @version 1.0.0
+ * @version 1.1.0
  */
 function computeHash(content: string): string {
   return createHash('sha256').update(content, 'utf8').digest('hex');
@@ -101,7 +101,7 @@ function computeHash(content: string): string {
 
 /**
  * Extract version from file header (@version X.Y.Z)
- * @version 1.0.0
+ * @version 1.1.0
  */
 function extractVersion(content: string): string | undefined {
   const versionMatch = content.match(/@version\s+(\d+\.\d+\.\d+)/);
@@ -110,7 +110,7 @@ function extractVersion(content: string): string | undefined {
 
 /**
  * Detect platform scope from file path
- * @version 1.0.0
+ * @version 1.1.0
  */
 function detectPlatformScope(relativePath: string): FileClassification['platformScope'] {
   if (relativePath.includes('.claude/') && !relativePath.includes('.gemini/')) {
@@ -127,7 +127,7 @@ function detectPlatformScope(relativePath: string): FileClassification['platform
 
 /**
  * Recursively scan directory for files
- * @version 1.0.0
+ * @version 1.1.0
  */
 function scanDirectoryRecursively(
   dirPath: string,
@@ -165,7 +165,7 @@ function scanDirectoryRecursively(
 
 /**
  * Classify a single file by comparing L0/L1/L2 versions
- * @version 1.0.0
+ * @version 1.1.0
  */
 function classifyFile(
   l2Path: string,
@@ -302,7 +302,7 @@ function classifyFile(
 
 /**
  * Scan L2 project and classify all files
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult> {
   console.log(`\n=== Scanning L2 Project ===`);
@@ -436,7 +436,7 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }
 

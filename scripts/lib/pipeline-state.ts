@@ -4,7 +4,7 @@
  * Rollback capability and intermediate state persistence.
  * Addresses Risk #5: Rollback Capability.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
@@ -46,7 +46,7 @@ const STATE_FILE = join(STATE_DIR, 'current-state.json');
 
 /**
  * Initialize pipeline state
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function initializeState(variantName: string, l2ProjectPath?: string): PipelineState {
   const state: PipelineState = {
@@ -65,7 +65,7 @@ export function initializeState(variantName: string, l2ProjectPath?: string): Pi
 
 /**
  * Save pipeline state
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function saveState(state: PipelineState): void {
   // Ensure state directory exists
@@ -78,7 +78,7 @@ export function saveState(state: PipelineState): void {
 
 /**
  * Load pipeline state
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function loadState(): PipelineState | null {
   if (!existsSync(STATE_FILE)) {
@@ -95,7 +95,7 @@ export function loadState(): PipelineState | null {
 
 /**
  * Update current phase
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function updatePhase(phase: ErrorPhase): void {
   const state = loadState();
@@ -109,7 +109,7 @@ export function updatePhase(phase: ErrorPhase): void {
 
 /**
  * Add rollback action
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function addRollbackAction(
   phase: ErrorPhase,
@@ -134,7 +134,7 @@ export function addRollbackAction(
 
 /**
  * Mark rollback action as executed
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function markRollbackExecuted(target: string): void {
   const state = loadState();
@@ -151,7 +151,7 @@ export function markRollbackExecuted(target: string): void {
 
 /**
  * Complete pipeline
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function completePipeline(): void {
   const state = loadState();
@@ -166,7 +166,7 @@ export function completePipeline(): void {
 
 /**
  * Fail pipeline
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function failPipeline(): void {
   const state = loadState();
@@ -181,7 +181,7 @@ export function failPipeline(): void {
 
 /**
  * Mark pipeline as rolled back
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function rollbackPipeline(): void {
   const state = loadState();
@@ -200,7 +200,7 @@ export function rollbackPipeline(): void {
 
 /**
  * Execute rollback actions
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function executeRollback(): Promise<boolean> {
   const state = loadState();
@@ -221,18 +221,18 @@ export async function executeRollback(): Promise<boolean> {
     const action = state.rollbackActions[i];
 
     if (action.executed) {
-      console.log(`⊘ Skipping already executed: ${action.action} (${action.target})`);
+      console.log(`??Skipping already executed: ${action.action} (${action.target})`);
       continue;
     }
 
-    console.log(`↶ Rolling back: ${action.action} (${action.target})`);
+    console.log(`??Rolling back: ${action.action} (${action.target})`);
 
     try {
       await executeRollbackAction(action);
       action.executed = true;
-      console.log(`✅ Rolled back: ${action.action}`);
+      console.log(`??Rolled back: ${action.action}`);
     } catch (error) {
-      console.error(`❌ Rollback failed: ${action.action}`);
+      console.error(`??Rollback failed: ${action.action}`);
       console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
       success = false;
     }
@@ -242,9 +242,9 @@ export async function executeRollback(): Promise<boolean> {
 
   if (success) {
     rollbackPipeline();
-    console.log('\n✅ Rollback complete');
+    console.log('\n??Rollback complete');
   } else {
-    console.log('\n⚠️  Rollback completed with errors');
+    console.log('\n?�️  Rollback completed with errors');
   }
 
   return success;
@@ -252,7 +252,7 @@ export async function executeRollback(): Promise<boolean> {
 
 /**
  * Execute individual rollback action
- * @version 1.0.0
+ * @version 1.1.0
  */
 async function executeRollbackAction(action: RollbackAction): Promise<void> {
   const { action: actionType, target } = action;
@@ -275,16 +275,16 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
 
     case 'modify_file':
       // Restore from backup (would need backup mechanism)
-      console.warn(`⚠️  Cannot restore file without backup: ${target}`);
+      console.warn(`?�️  Cannot restore file without backup: ${target}`);
       break;
 
     case 'update_registry':
       // Restore registry from backup
-      console.warn(`⚠️  Cannot restore registry without backup: ${target}`);
+      console.warn(`?�️  Cannot restore registry without backup: ${target}`);
       break;
 
     default:
-      console.warn(`⚠️  Unknown rollback action: ${actionType} on ${target}`);
+      console.warn(`?�️  Unknown rollback action: ${actionType} on ${target}`);
   }
 }
 
@@ -294,7 +294,7 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
 
 /**
  * Clear pipeline state
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function clearState(): void {
   if (existsSync(STATE_FILE)) {
@@ -304,7 +304,7 @@ export function clearState(): void {
 
 /**
  * Get state summary
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function getStateSummary(): string | null {
   const state = loadState();

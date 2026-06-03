@@ -5,7 +5,7 @@
  * Validates cross-platform parity between .claude/ and .gemini/ directories.
  * Ensures structural equivalence, settings schema parity, and command/skill alignment.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 3: Platform Parity Validation
  *
  * Dependencies:
@@ -82,7 +82,7 @@ const SETTINGS_JSON_SCHEMA = {
 
 /**
  * Recursively scan directory for files
- * @version 1.0.0
+ * @version 1.1.0
  */
 function scanDirectoryRecursively(dirPath: string, extensions: string[] = []): string[] {
   const files: string[] = [];
@@ -116,7 +116,7 @@ function scanDirectoryRecursively(dirPath: string, extensions: string[] = []): s
 
 /**
  * Check if file has gemini-parity: skip frontmatter
- * @version 1.0.0
+ * @version 1.1.0
  */
 function hasGeminiParitySkip(filePath: string): boolean {
   try {
@@ -130,7 +130,7 @@ function hasGeminiParitySkip(filePath: string): boolean {
 
 /**
  * Extract frontmatter from file
- * @version 1.0.0
+ * @version 1.1.0
  */
 function extractFrontmatter(filePath: string): Record<string, any> | null {
   try {
@@ -178,7 +178,7 @@ function extractFrontmatter(filePath: string): Record<string, any> | null {
 
 /**
  * Compare JSON schemas for shared tier settings
- * @version 1.0.0
+ * @version 1.1.0
  */
 function compareSharedSettingsSchema(
   claudeSettings: Record<string, any>,
@@ -208,7 +208,7 @@ function compareSharedSettingsSchema(
 
 /**
  * Build platform file manifest
- * @version 1.0.0
+ * @version 1.1.0
  */
 function buildPlatformManifest(variantPath: string): PlatformFileManifest {
   const claudePath = join(variantPath, '.claude');
@@ -269,7 +269,7 @@ function buildPlatformManifest(variantPath: string): PlatformFileManifest {
 
 /**
  * Validate settings.json schema parity
- * @version 1.0.0
+ * @version 1.1.0
  */
 function validateSettingsParity(variantPath: string): ParityViolation[] {
   const violations: ParityViolation[] = [];
@@ -341,7 +341,7 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
 
 /**
  * Validate command parity
- * @version 1.0.0
+ * @version 1.1.0
  */
 function validateCommandParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
@@ -383,7 +383,7 @@ function validateCommandParity(manifest: PlatformFileManifest): ParityViolation[
 
 /**
  * Validate skill parity
- * @version 1.0.0
+ * @version 1.1.0
  */
 function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
@@ -425,7 +425,7 @@ function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] 
 
 /**
  * Validate agent parity
- * @version 1.0.0
+ * @version 1.1.0
  */
 function validateAgentParity(manifest: PlatformFileManifest): ParityViolation[] {
   const violations: ParityViolation[] = [];
@@ -466,7 +466,7 @@ function validateAgentParity(manifest: PlatformFileManifest): ParityViolation[] 
 
 /**
  * Validate platform parity for a variant
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function validatePlatformParity(variantPath: string): Promise<ParityValidationResult> {
   console.log(`\n=== Validating Platform Parity ===`);
@@ -583,6 +583,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }

@@ -5,7 +5,7 @@
  * Compares L2 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:
@@ -94,7 +94,7 @@ const L1_COMMON = join(L0_ROOT, 'templates', 'common');
 /**
  * Compare versions using semver
  * Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal, undefined if incomparable
- * @version 1.0.0
+ * @version 1.1.0
  */
 function compareVersions(v1: string | undefined, v2: string | undefined): number | undefined {
   if (!v1 || !v2) {
@@ -116,7 +116,7 @@ function compareVersions(v1: string | undefined, v2: string | undefined): number
 
 /**
  * Determine if file should be moved to common based on override percentage
- * @version 1.0.0
+ * @version 1.1.0
  */
 function shouldMoveToCommon(
   file: FileClassification,
@@ -162,7 +162,7 @@ function shouldMoveToCommon(
 
 /**
  * Reconcile a single file against L0 and L1
- * @version 1.0.0
+ * @version 1.1.0
  */
 function reconcileFile(
   file: FileClassification,
@@ -314,7 +314,7 @@ function reconcileFile(
 
 /**
  * Apply anti-swelling protection
- * @version 1.0.0
+ * @version 1.1.0
  */
 function applyAntiSwellingProtection(
   files: FileClassification[],
@@ -379,7 +379,7 @@ function applyAntiSwellingProtection(
 
 /**
  * Reconcile L2 scan results with L0 and L1
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function reconcileWithL0L1(
   scanResult: L2ScanResult,
@@ -518,7 +518,7 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }
 
