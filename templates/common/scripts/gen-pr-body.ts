@@ -1,11 +1,14 @@
 #!/usr/bin/env bun
-// gen-pr-body.ts - Generate a structured PR body from commit message + diff
-// Usage: bun run scripts/gen-pr-body.ts "<commit message>"
-// Output: PR body markdown (stdout)
-//
-// Behaviour:
-//   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
-//   2. Otherwise → build a structured template from commit message + file list (fallback)
+/**
+ * gen-pr-body.ts - Generate a structured PR body from commit message + diff
+ * Usage: bun run scripts/gen-pr-body.ts "<commit message>"
+ * Output: PR body markdown (stdout)
+ * @version 1.1.0
+ *
+ * Behaviour:
+ *   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
+ *   2. Otherwise → build a structured template from commit message + file list (fallback)
+ */
 
 import { $ } from 'bun';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
@@ -18,10 +21,15 @@ if (!commitMsg) {
 
 // ── Language validation ───────────────────────────────────────────────────────
 // PR titles, bodies, and commit messages must be in English per CONSTITUTION.md §3.
+// Code blocks (``` ... ```) are stripped before checking — data samples may contain non-English values.
 const KOREAN_RANGE = /[가-힯ᄀ-ᇿ㄰-㆏]/;
 
+function stripCodeBlocks(text: string): string {
+  return text.replace(/```[\s\S]*?```/g, '').replace(/`[^`]*`/g, '');
+}
+
 function validateLanguage(text: string, label = 'PR body'): void {
-  if (KOREAN_RANGE.test(text)) {
+  if (KOREAN_RANGE.test(stripCodeBlocks(text))) {
     process.stderr.write(
       `\x1b[31m[FAIL]\x1b[0m Non-English characters (Korean) detected in ${label}.\n` +
       `       CONSTITUTION.md §3 mandates all PR titles and bodies must be written in English.\n` +
