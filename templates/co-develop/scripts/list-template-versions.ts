@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.1.0
 // list-template-versions.ts - List available template versions
 
 import { $ } from 'bun';
@@ -6,6 +7,8 @@ import * as path from 'node:path';
 
 const CYAN     = '\x1b[36m';
 const GREEN    = '\x1b[32m';
+const YELLOW   = '\x1b[33m';
+const RED      = '\x1b[31m';
 const DARKGRAY = '\x1b[90m';
 const RESET    = '\x1b[0m';
 
@@ -36,6 +39,28 @@ if (tags.length === 0) {
   for (const tag of tags) {
     const version = tag.replace(/^template-v/, '');
     console.log(`${GREEN}  → ${version}  (${tag})${RESET}`);
+  }
+}
+
+// Version mismatch check
+const versionFile = path.join(workspaceRoot, 'templates', 'VERSION');
+const vf = Bun.file(versionFile);
+if (await vf.exists()) {
+  const workspaceVersion = (await vf.text()).trim();
+  if (tags.length === 0) {
+    // Already printed the untagged version above — no tag to compare against
+  } else {
+    const latestTag = tags[tags.length - 1];
+    const latestTagVersion = latestTag.replace(/^template-v/, '');
+    console.log('');
+    if (workspaceVersion !== latestTagVersion) {
+      console.log(`${YELLOW}⚠  VERSION mismatch detected:${RESET}`);
+      console.log(`${YELLOW}   templates/VERSION = ${workspaceVersion}  (workspace)${RESET}`);
+      console.log(`${YELLOW}   Latest tag        = ${latestTagVersion}  (${latestTag})${RESET}`);
+      console.log(`${YELLOW}   Run: bun scripts/tag-template.ts to publish a new tag${RESET}`);
+    } else {
+      console.log(`${DARKGRAY}✓ templates/VERSION matches latest tag (${workspaceVersion})${RESET}`);
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T14:51:09.621Z
+**Generated**: 2026-06-03T15:50:21.836Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 16
-- **Scripts**: 72
+- **Scripts**: 73
 - **Commands**: 6
 
 ---
@@ -64,7 +64,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.4.5 | scripts/audit.ts | bun |
+| audit.ts | 2.5.0 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
@@ -84,7 +84,7 @@
 | l2-to-variant-pipeline.ts | N/A | scripts/l2-to-variant-pipeline.ts | fs, path |
 | lifecycle-governance.ts | N/A | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | N/A | scripts/lifecycle-sync-audit.ts | N/A |
-| list-template-versions.ts | N/A | scripts/list-template-versions.ts | bun |
+| list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
@@ -105,6 +105,7 @@
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | N/A | scripts/sync-skill-status.ts | N/A |
 | sync-skills.ts | N/A | scripts/sync-skills.ts | N/A |
+| tag-template.ts | 1.0.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | N/A | scripts/team-builder.ts | fs, path |
 | template-validation.ts | N/A | scripts/helpers/template-validation.ts | N/A |
 | test-new-project.ts | N/A | scripts/test-new-project.ts | bun |
