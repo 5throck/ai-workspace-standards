@@ -43,15 +43,15 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.8 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.6.0 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.3.9 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.6.1 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.4.4 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.4.5 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |

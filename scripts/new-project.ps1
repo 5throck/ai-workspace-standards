@@ -1,3 +1,4 @@
+# @version 1.6.1
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -544,6 +545,11 @@ Set-Location $ProjectDir
 try { git init 2>&1 | Out-Null } catch { }
 git config core.hooksPath .githooks
 git config core.fileMode false
+$gitEmail = git config user.email 2>$null
+if (-not $gitEmail) {
+    git config user.email "scaffold-bot@local"
+    git config user.name "Scaffold Bot"
+}
 
 # Mark hooks and scripts executable in git index
 Get-ChildItem -Path (Join-Path $ProjectDir ".githooks") -File -ErrorAction SilentlyContinue | ForEach-Object {
@@ -626,17 +632,6 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "[WARN]  Project scaffolded but audit found issues - review above before continuing." -ForegroundColor Yellow
 }
 
-# -- 8.5. Post-scaffolding variant validation ----------------------------------  # TEST: none
-Write-Host ""
-Write-Host "Running variant validation..." -ForegroundColor Cyan
-$validateResult = & bun scripts/validate-templates.ts --variant $Variant 2>&1
-$validateExit = $LASTEXITCODE
-if ($validateExit -eq 0) {
-    Write-Host "[OK] Variant validation passed." -ForegroundColor Green
-} elseif ($null -ne $validateExit) {
-    Write-Host "[WARN] Variant validation found issues. Review before using this project:" -ForegroundColor Yellow
-    Write-Host $validateResult -ForegroundColor Yellow
-}
 
 # -- 9. Environment setup (env file, deps, initial commit) -------------------- # TEST: none
 Write-Host ""

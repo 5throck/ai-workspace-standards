@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T02:41:18.181Z
+**Generated**: 2026-06-03T04:23:53.094Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -64,7 +64,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.4.4 | scripts/audit.ts | bun |
+| audit.ts | 2.4.5 | scripts/audit.ts | bun |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
