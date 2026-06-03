@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Verification Script for Workspace Root
+ * @version 1.0.0
  * Verifies synchronization between agents/ directory and documentation (AGENTS.md, CONSTITUTION.md)
  *
  * Usage:

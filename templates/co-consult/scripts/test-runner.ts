@@ -1,3 +1,7 @@
+/**
+ * test-runner.ts — Test Runner for TypeScript Test Suites
+ * @version 1.0.0
+ */
 import { execSync } from 'child_process';
 import { readdirSync } from 'fs';
 import { join } from 'path';

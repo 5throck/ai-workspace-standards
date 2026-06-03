@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T15:50:21.836Z
+**Generated**: 2026-06-03T21:07:15.896Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 16
-- **Scripts**: 73
+- **Scripts**: 74
 - **Commands**: 6
 
 ---
@@ -74,6 +74,7 @@
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
 | encoding-utils.ts | N/A | scripts/lib/encoding-utils.ts | fs, path |
 | error-handling.ts | N/A | scripts/lib/error-handling.ts | N/A |
+| fix-script-versions.ts | N/A | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | N/A | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | N/A | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | N/A | scripts/helpers/generate-variant.ts | fs, path |

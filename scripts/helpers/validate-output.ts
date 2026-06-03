@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * validate-output.ts — Parse validate-templates.ts JSON output and filter mandatory domain errors
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/validate-output.ts <mandatory-domains-comma-separated> <json-string>

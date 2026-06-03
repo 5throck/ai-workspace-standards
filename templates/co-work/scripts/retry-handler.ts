@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Error Recovery Handler
+ * @version 1.0.0
  * Implements retry logic with exponential backoff for subagent failures
  */
 

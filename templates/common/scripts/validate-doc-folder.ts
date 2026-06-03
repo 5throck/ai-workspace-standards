@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
+ * @version 1.0.0
  * Ensures required subdirectories exist in docs/ folder
  */
 

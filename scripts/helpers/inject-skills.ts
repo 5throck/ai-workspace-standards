@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 /**
+ * inject-skills.ts
+ * @version 1.0.0
  * inject-skills.ts — Inject AGENTS.md Skills table into context.md
  *
  * Usage:

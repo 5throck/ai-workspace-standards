@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
+ * @version 1.0.0
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md

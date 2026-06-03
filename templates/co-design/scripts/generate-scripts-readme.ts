@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Auto-generates scripts/README.md from scripts/SCRIPTS.md (L0 SSOT)
+ * @version 1.0.0
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';

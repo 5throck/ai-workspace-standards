@@ -53,8 +53,9 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
-| `sync-skills.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `publish-to-template.ts` | L0 | 1.3.2 | active | — | — | common | — |
+| `fix-script-versions.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
@@ -62,13 +63,13 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `agent-verify.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.2 | active | — | — | common | — |
 | `lifecycle-sync-audit.ts` | L0 | 1.3.1 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `verify-memory.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `archive-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `dispatch.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -78,10 +79,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-templates.ts` | L0 | 1.4.4 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `helpers/inject-skills.ts` | L0 | 1.0.1 | active | — | — | L0-only | — |
+| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
@@ -111,9 +112,9 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-skills.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `hooks/pre-commit.ts` | L0 | 1.5.2 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |

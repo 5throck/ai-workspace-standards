@@ -1,6 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
+ * @version 1.0.0
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`

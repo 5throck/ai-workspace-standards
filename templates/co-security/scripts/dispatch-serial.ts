@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Serial Agent Dispatcher
+ * @version 1.0.0
  * Automates dispatching subagents that must run sequentially
  *
  * This dispatcher is for tasks with dependencies:

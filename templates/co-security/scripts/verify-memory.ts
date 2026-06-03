@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-memory.ts — Memory Log Format Verifier
+ * @version 1.0.0
  *
  * Validates that memory/*.md session logs follow the mandatory 4-section format
  * and that MEMORY.md index is in sync with actual files on disk.

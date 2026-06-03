@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lister CLI for Workspace Root
+ * @version 1.0.0
  * Lists all agents in the agents/ directory with metadata
  *
  * Usage:

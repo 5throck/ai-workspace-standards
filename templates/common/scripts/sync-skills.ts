@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
-// sync-skills.ts
-// Distributes skills from the SSOT (skills/) to .claude/skills/ and .gemini/skills/
+/**
+ * sync-skills.ts
+ * Distributes skills from the SSOT (skills/) to .claude/skills/ and .gemini/skills/
+ * @version 1.0.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';

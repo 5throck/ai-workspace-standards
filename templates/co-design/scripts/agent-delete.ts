@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Deleter CLI for Workspace Root
+ * @version 1.0.0
  * Deletes agent definition files from the agents/ directory
  *
  * Usage:

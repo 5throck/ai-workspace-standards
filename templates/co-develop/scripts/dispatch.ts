@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Dispatcher CLI
+ * @version 1.0.0
  * Main entry point for agent dispatch operations
  *
  * Usage:

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Dependency Analysis Script (SC-02)
+ * @version 1.0.0
  * Analyzes /skill invocation references within SKILL.md files to detect:
  *   - Circular dependencies (A → B → A)
  *   - Orphaned references (skill calls a non-existent or archived skill)

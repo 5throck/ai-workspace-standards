@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-
 /**
  * Skill Verification Script
+ * @version 1.0.0
  * Verifies all skills in skills/ directory are loadable and properly formatted
  */
 

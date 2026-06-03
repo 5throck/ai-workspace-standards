@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Translation Helper Tool for README Files
+ * @version 1.0.0
  *
  * Purpose: Helps translators identify what changed between README.md versions
  * and provides guidance for updating translations.
