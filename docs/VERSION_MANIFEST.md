@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T06:58:14.327Z
+**Generated**: 2026-06-03T07:57:32.715Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 16
-- **Scripts**: 68
+- **Scripts**: 72
 - **Commands**: 6
 
 ---
@@ -65,6 +65,7 @@
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.4.5 | scripts/audit.ts | bun |
+| beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
@@ -75,10 +76,12 @@
 | error-handling.ts | N/A | scripts/lib/error-handling.ts | N/A |
 | gen-pr-body.ts | N/A | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | N/A | scripts/generate-scripts-readme.ts | N/A |
+| generate-variant.ts | N/A | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.1 | scripts/generate-version-manifest.ts | bun |
 | inject-global-plugins.ts | N/A | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | N/A | scripts/helpers/inject-skills.ts | N/A |
-| l2-to-variant-pipeline.ts | N/A | scripts/l2-to-variant-pipeline.ts | crypto, fs, path, semver |
+| integration-helpers.ts | N/A | scripts/helpers/integration-helpers.ts | fs, path |
+| l2-to-variant-pipeline.ts | N/A | scripts/l2-to-variant-pipeline.ts | fs, path |
 | lifecycle-governance.ts | N/A | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | N/A | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | N/A | scripts/list-template-versions.ts | bun |
@@ -113,6 +116,7 @@
 | validate-md-language.ts | 1.2.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | N/A | scripts/helpers/validate-output.ts | N/A |
+| validate-platform-parity.ts | N/A | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-skills.ts | N/A | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | N/A | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | N/A | scripts/helpers/variant-governance-rules.ts | N/A |
