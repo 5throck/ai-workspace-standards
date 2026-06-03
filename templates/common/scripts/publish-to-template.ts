@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.2
+// @version 1.3.3
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -130,6 +130,21 @@ if (fs.existsSync(l0Skills)) {
     const itemPath = path.join(l0Skills, item);
     const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {
+      // Check SKILL.md frontmatter for scope field
+      const skillMdPath = path.join(itemPath, 'SKILL.md');
+      let scope: string | undefined;
+      if (fs.existsSync(skillMdPath)) {
+        const skillMdContent = fs.readFileSync(skillMdPath, 'utf-8');
+        const scopeMatch = skillMdContent.match(/^scope:\s*(\S+)/m);
+        scope = scopeMatch?.[1];
+      }
+      if (scope === 'workspace') {
+        console.log(`  ⊘ Skipped (workspace-only): ${item}/`);
+        continue;
+      }
+      if (scope === undefined && fs.existsSync(skillMdPath)) {
+        console.log(`  ${YELLOW}[WARN]${RESET} ${item}/: scope field missing in SKILL.md, defaulting to common`);
+      }
       if (dryRun) {
         console.log(`  [dry-run] ${item}/`);
       } else {

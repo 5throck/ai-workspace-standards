@@ -4,6 +4,7 @@ description: Performs end-to-end (E2E) testing of the project scaffolding script
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
+scope: workspace
 owner: scaffolding-expert
 prerequisites: PowerShell or Bash
 metadata:

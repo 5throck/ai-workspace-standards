@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.4
+ * @version 1.4.5
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -200,8 +200,21 @@ function checkCommon(): void {
   // Check A-13: removed because it contradicts AGENTS.md rule that owner does not need to exist in the current project.
   const commonSkillsDir = join(commonDir, 'skills');
 
-  // Check B-07: workspace-only skills must not exist in templates/common/skills/
-  const SKILLS_FORBIDDEN_IN_COMMON = ['simulate-project-creation'];
+  // Check B-07: workspace-only skills (scope: workspace in SKILL.md) must not exist in templates/common/skills/
+  const l0SkillsDir = join(dirname(import.meta.path), '..', 'skills');
+  const SKILLS_FORBIDDEN_IN_COMMON: string[] = [];
+  if (existsSync(l0SkillsDir)) {
+    for (const skillName of readdirSync(l0SkillsDir)) {
+      const skillMd = join(l0SkillsDir, skillName, 'SKILL.md');
+      if (existsSync(skillMd)) {
+        const content = readFileSync(skillMd, 'utf-8');
+        const scopeMatch = content.match(/^scope:\s*(\S+)/m);
+        if (scopeMatch?.[1] === 'workspace') {
+          SKILLS_FORBIDDEN_IN_COMMON.push(skillName);
+        }
+      }
+    }
+  }
   if (existsSync(commonSkillsDir)) {
     const presentForbiddenSkills = SKILLS_FORBIDDEN_IN_COMMON.filter(s =>
       existsSync(join(commonSkillsDir, s))
@@ -209,11 +222,11 @@ function checkCommon(): void {
     if (presentForbiddenSkills.length > 0) {
       for (const s of presentForbiddenSkills) {
         fail('common', 'forbidden-skill-in-common',
-          `templates/common/skills/${s} must not exist — workspace-only skill must not be copied to L2 projects`,
+          `templates/common/skills/${s} must not exist — workspace-only skill (scope: workspace) must not be copied to L2 projects`,
           `Delete templates/common/skills/${s}/`);
       }
     } else {
-      pass('templates/common/ skills blocklist: no forbidden skills present');
+      pass('templates/common/ skills blocklist: no forbidden workspace-only skills present');
     }
   }
 }
