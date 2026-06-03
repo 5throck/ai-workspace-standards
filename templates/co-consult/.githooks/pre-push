@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# pre-push wrapper: routes to TS logic
+bun run scripts/hooks/pre-push.ts

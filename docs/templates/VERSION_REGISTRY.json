@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-06-01",
+  "last_updated": "2026-06-02",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -32,6 +32,13 @@
       "migration_guides": [
         "docs/migrations/co-security/0.1.0-to-0.2.0.md"
       ]
+    },
+    "co-consult": {
+      "latest": "1.0.0",
+      "status": "stable",
+      "released": "2026-06-02",
+      "security_advisories": [],
+      "migration_guides": []
     }
   },
   "schema_version": "1.0"

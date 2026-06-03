@@ -954,6 +954,7 @@ function checkPlatformDocumentationParity(): void {
 }
 
 // Check P-02: Root .claude/commands/ and .gemini/commands/ must be mirrored in templates/common/
+// Exception: new-project.md has gemini-parity: skip, so it only needs to be in .claude/commands/
 function checkRootCommonCommandsParity(): void {
   if (!JSON_MODE) console.log('\n=== Check P-02: Root ↔ Common Commands Parity ===');
 
@@ -977,14 +978,31 @@ function checkRootCommonCommandsParity(): void {
       ? new Set(readdirSync(commonDir).filter(f => f.endsWith('.md')))
       : new Set<string>();
 
-    const missing = rootFiles.filter(f => !commonFiles.has(f));
+    // Special case: new-project.md has gemini-parity: skip
+    // It should exist in .claude/commands/ but NOT in .gemini/commands/
+    const workspaceOnlyCmd = 'new-project.md';
+    const isGemini = label.includes('.gemini');
+
+    // Filter out the workspace-only command when checking parity
+    // new-project.md is workspace-only and should NOT be in common/
+    const filesToCheck = rootFiles.filter(f => f !== workspaceOnlyCmd);
+
+    const missing = filesToCheck.filter(f => !commonFiles.has(f));
     if (missing.length > 0) {
       fail('root', 'command-parity',
         `Root ${label}/ has files not mirrored in templates/common/${label}/: ${missing.join(', ')}`,
         `Copy missing files to templates/common/${label}/`
       );
     } else {
-      pass(`Root ↔ common ${label} parity OK (${rootFiles.length} file(s))`);
+      // Verify that new-project.md is NOT in .gemini/commands/
+      if (isGemini && rootFiles.includes(workspaceOnlyCmd)) {
+        fail('root', 'command-parity',
+          `Root ${label}/ contains ${workspaceOnlyCmd} but it has gemini-parity: skip — remove from ${label}`,
+          `Remove ${workspaceOnlyCmd} from ${label} (it should only exist in .claude/commands/)`
+        );
+      } else {
+        pass(`Root ↔ common ${label} parity OK (${rootFiles.length} file(s))`);
+      }
     }
   }
 }

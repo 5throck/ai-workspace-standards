@@ -1,0 +1,4 @@
+# Scratch area for temporary scripts and skill test scaffolds (e.g. simulate-project-creation).
+# All files placed here are intentionally excluded from git — only this .gitignore is tracked.
+*
+!.gitignore

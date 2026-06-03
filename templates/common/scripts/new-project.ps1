@@ -63,6 +63,7 @@ if ($Variant -eq "") {
     Write-Host "   co-design   — UI/UX design (stable)" -ForegroundColor Green
     Write-Host "   co-work     — Collaboration & documentation (stable)" -ForegroundColor Green
     Write-Host "   co-security — Security engagement (stable)" -ForegroundColor Yellow
+    Write-Host "   co-consult  — Strategy consulting (stable)" -ForegroundColor Green
     Write-Host ""
     Write-Host "   Usage: .\scripts\new-project.ps1 `"$ProjectName`" -Variant co-develop" -ForegroundColor White
     Write-Host ""
@@ -128,7 +129,7 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable)" -ForegroundColor Yellow
+    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable), co-consult (stable)" -ForegroundColor Yellow
     exit 1
 }
 
