@@ -40,6 +40,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
   L1-only  = generated project only, must exist in templates/common/scripts/
 -->
 <!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
+<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment — whether file content actually reflects version history — is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
@@ -57,7 +58,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `publish-to-template.ts` | L0 | 1.3.2 | active | — | — | common | — |
-| `fix-script-versions.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
@@ -68,7 +69,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-verify.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.2 | active | — | — | common | — |
-| `lifecycle-sync-audit.ts` | L0 | 1.3.1 | active | — | — | common | — |
+| `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -118,7 +119,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.5.2 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
+| `hooks/pre-commit.ts` | L0 | 1.5.3 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
@@ -319,4 +320,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-01 (generate-version-manifest.ts v1.0.1 bug fix)*
+*Last updated: 2026-06-04 — added Check A formal-consistency-only clarification comment*

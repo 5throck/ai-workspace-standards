@@ -5,7 +5,7 @@
  * Add @version headers to scripts that are missing them.
  * Resolves lifecycle-sync-audit warnings.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
@@ -58,7 +58,7 @@ const SCRIPTS_TO_FIX = [
 /**
  * Add @version tag to script header
  */
-function addVersionTag(filePath: string): boolean {
+function addVersionTag(filePath: string, relPath: string): boolean {
   console.log(`Processing: ${filePath}`);
 
   try {
@@ -105,6 +105,8 @@ function addVersionTag(filePath: string): boolean {
     writeUTF8File(filePath, updatedContent);
 
     console.log(`  ✅ Added @version tag`);
+    console.log(`  ⚠️  Content verification required: confirm file content matches version history.`);
+    console.log(`     Run: git log --oneline -- ${relPath}`);
     return true;
   } catch (error) {
     console.error(`  ❌ Failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -131,7 +133,8 @@ function main() {
       continue;
     }
 
-    const result = addVersionTag(scriptPath);
+    const relPath = `scripts/${script}`;
+    const result = addVersionTag(scriptPath, relPath);
     if (result) {
       processedCount++;
     } else {

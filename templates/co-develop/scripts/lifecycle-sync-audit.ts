@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.1
+ * @version 1.3.2
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -163,6 +163,8 @@ function extractFileVersion(filePath: string): string | null {
 /**
  * Check A: Compare @version in each active/experimental .ts file
  * against the version listed in scripts/SCRIPTS.md.
+ * NOTE: Check A verifies formal consistency only (@version header == SCRIPTS.md entry).
+ * Semantic content alignment (file content matches version history) is NOT verified.
  */
 function runCheckA(): SyncIssue[] {
   const issues: SyncIssue[] = [];
@@ -565,10 +567,10 @@ function printResults(result: AuditResult): void {
 
   console.log(`${colors.cyan}========================${colors.reset}`);
   if (result.passed && result.warnings.length === 0) {
-    console.log(`${colors.green}✅ All lifecycle sync checks passed.${colors.reset}`);
+    console.log(`${colors.green}✅ All lifecycle sync checks passed. (Check A: formal version consistency only — semantic content not verified)${colors.reset}`);
   } else if (result.passed) {
     console.log(
-      `${colors.green}✅ All lifecycle sync checks passed.${colors.reset} ` +
+      `${colors.green}✅ All lifecycle sync checks passed. (Check A: formal version consistency only — semantic content not verified)${colors.reset} ` +
         `${colors.yellow}(${result.warnings.length} warning(s))${colors.reset}`,
     );
   } else {
