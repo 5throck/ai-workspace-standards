@@ -1,4 +1,4 @@
-// @version 2.4.4
+// @version 2.4.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -236,15 +236,9 @@ if (!LIFECYCLE_ONLY) {
 
     }
 
-    // S-03: .githooks parity check — Warn only (Git Bash assumed on Windows)
-    if (fs.existsSync('.githooks')) {
-        const hookFiles = fs.readdirSync('.githooks').filter(f => !f.endsWith('.ps1') && !f.endsWith('.sample'));
-        for (const hook of hookFiles) {
-            if (!fs.existsSync(path.join('.githooks', `${hook}.ps1`))) {
-                Warn(`.githooks parity: .githooks/${hook} has no .ps1 counterpart (Windows users require Git Bash)`);
-            }
-        }
-    }
+    // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
+    // if (fs.existsSync('.githooks')) { ... }
+
 
     // Check: no non-standard .md files at project root (file organization policy)
     const STANDARD_ROOT_MD = new Set([

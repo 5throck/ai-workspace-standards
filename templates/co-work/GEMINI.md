@@ -258,7 +258,7 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full lifecycle rules: See [CONSTITUTION.md](CONSTITUTION.md) at workspace root.
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 <!-- COMMON-GEMINI:END -->
 
 ---

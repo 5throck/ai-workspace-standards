@@ -16,8 +16,7 @@
     "codegraph": {
       "command": "npx",
       "args": [
-        "-y",
-        "@colbymchenry/codegraph",
+        "@colbymchenry/codegraph@0.9.7",
         "serve"
       ]
     }
@@ -46,7 +45,8 @@
             "asyncRewake": true,
             "statusMessage": "Running post-edit lifecycle check..."
           }
-        ]
+        ],
+        "timeout": 60
       }
     ],
     "TeammateIdle": [
@@ -60,7 +60,8 @@
             "asyncRewake": true,
             "statusMessage": "Running teammate idle lifecycle check..."
           }
-        ]
+        ],
+        "timeout": 60
       }
     ],
     "WorktreeCreate": [
@@ -74,6 +75,13 @@
             "statusMessage": "Configuring git hooks in new worktree..."
           }
         ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "type": "command",
+        "command": "bun scripts/audit.ts",
+        "timeout": 60
       }
     ]
   }
