@@ -1,348 +1,479 @@
 #!/usr/bin/env tsx
 /**
- * L2-to-Variant Conversion Pipeline
+ * L2-to-Variant Pipeline
  *
- * Converts L2 projects into new template variants with full governance,
- * lifecycle management, and cross-platform support.
+ * Complete pipeline for converting L2 projects to beta variants.
+ * Orchestrates all wave components:
+ * - Wave 1: L2 scanning (scan-l2-project.ts)
+ * - Wave 2: L0/L1 reconciliation (reconcile-with-l0-l1.ts)
+ * - Wave 3: Variant generation (generate-variant.ts)
+ * - Wave 3: Beta lifecycle management (beta-lifecycle.ts)
+ * - Wave 3: Platform parity validation (validate-platform-parity.ts)
+ * - Wave 3: Workspace integration (integration-helpers.ts)
  *
  * @version 1.0.0
- * @phase 0: ADR Validation
- * @phase 1: Variant Structure Conversion (L2 Analysis)
- * @phase 2: L0/L1 Reflection & Reconciliation
- * @phase 3: Variant Generation
- * @phase 3.5: Beta Lifecycle Setup
- * @phase 4: Integration
+ * @phase: Complete pipeline orchestration
  *
- * @architecture docs/designs/l2-to-variant-conversion-pipeline.md
- * @governance CONSTITUTION.md §5 Multi-Agent Architecture
+ * Dependencies:
+ * - helpers/scan-l2-project.ts (L2 scanning)
+ * - helpers/reconcile-with-l0-l1.ts (Reconciliation)
+ * - helpers/generate-variant.ts (Variant generation)
+ * - helpers/beta-lifecycle.ts (Lifecycle management)
+ * - helpers/validate-platform-parity.ts (Parity validation)
+ * - helpers/integration-helpers.ts (Workspace integration)
+ * - helpers/variant-governance-rules.ts (Governance rules)
+ * - lib/error-handling.ts (Error management)
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, copyFileSync, readdirSync, statSync } from 'fs';
-import { join, relative, dirname, basename } from 'path';
-import { hash as createHash } from 'crypto';
-import * as semver from 'semver';
+import { join, basename } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { scanL2Project, L2ScanResult } from '../helpers/scan-l2-project.js';
+import { reconcileWithL0L1, ReconciledManifest } from '../helpers/reconcile-with-l0-l1.js';
+import { generateVariant, GeneratedVariant, VariantMetadata } from '../helpers/generate-variant.js';
+import {
+  initializeBetaLifecycle,
+  checkPromotionEligibilityDetails,
+  BetaLifecycleState,
+} from '../helpers/beta-lifecycle.js';
+import { validatePlatformParity, ParityValidationResult } from '../helpers/validate-platform-parity.js';
+import { integrateVariantToWorkspace, IntegrationResult } from '../helpers/integration-helpers.js';
+import { validateDependencies } from '../helpers/variant-governance-rules.js';
+import { ErrorPhase, fatalError, logError, logErrors } from '../lib/error-handling.js';
 
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 
-interface ADRValidationResult {
-  approved: boolean;
-  adrPath: string | null;
-  status: 'approved' | 'not_found' | 'rejected' | 'pending';
-  message: string;
+export interface PipelineConfig {
+  /** Path to L2 project */
+  l2ProjectPath: string;
+  /** Variant name */
+  variantName: string;
+  /** Variant type */
+  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+  /** Variant description */
+  variantDescription: string;
+  /** Skip platform parity validation */
+  skipParityValidation?: boolean;
+  /** Skip workspace integration */
+  skipIntegration?: boolean;
+  /** Output path for variant (optional) */
+  outputPath?: string;
 }
 
-interface FileClassification {
-  relativePath: string;
-  existsInL0: boolean;
-  existsInL1: boolean;
-  l0Version?: string;
-  l1Version?: string;
-  l2Version?: string;
-  hashL0?: string;
-  hashL1?: string;
-  hashL2?: string;
-  classification: 'new' | 'modified' | 'identical' | 'conflict';
-  platformScope: 'claude' | 'gemini' | 'both' | 'neutral';
-}
-
-interface L2ScanResult {
-  agents: FileClassification[];
-  skills: FileClassification[];
-  claude: FileClassification[];
-  gemini: FileClassification[];
-  docs: FileClassification[];
-  scripts: FileClassification[];
-  rootFiles: FileClassification[];
-}
-
-interface IntermediateManifest {
-  scanMetadata: {
-    l2ProjectPath: string;
-    l2ProjectName: string;
-    scannedAt: string;
-    totalFiles: number;
-    newFiles: number;
-    modifiedFiles: number;
-    identicalFiles: number;
+export interface PipelineResult {
+  /** Whether pipeline succeeded */
+  success: boolean;
+  /** Pipeline execution phases */
+  phases: {
+    scan: { success: boolean; result?: L2ScanResult; error?: string };
+    reconcile: { success: boolean; result?: ReconciledManifest; error?: string };
+    generate: { success: boolean; result?: GeneratedVariant; error?: string };
+    lifecycle: { success: boolean; result?: BetaLifecycleState; error?: string };
+    parity: { success: boolean; result?: ParityValidationResult; error?: string };
+    integrate: { success: boolean; result?: IntegrationResult; error?: string };
   };
-  classifications: {
-    agents: FileClassification[];
-    skills: FileClassification[];
-    claude: FileClassification[];
-    gemini: FileClassification[];
-    docs: FileClassification[];
-    rootFiles: FileClassification[];
-  };
-  variantCandidates: {
-    variantSpecificAgents: string[];
-    variantSpecificSkills: string[];
-    variantSpecificCommands: string[];
-    variantSpecificPlatformSkills: string[];
-    overrideCandidates: OverrideCandidate[];
-  };
-}
-
-interface OverrideCandidate {
-  filePath: string;
-  overrideType: 'additive' | 'replacement' | 'unknown';
-  reason: string;
-  existingInCommon: boolean;
-  affectedAgents: string[];
-}
-
-interface ReconciledManifest {
-  phase: 'reconciled';
-  decisions: {
-    keepInVariant: ReconciledFile[];
-    moveToCommon: ReconciledFile[];
-    discard: ReconciledFile[];
-    conflicts: ConflictResolution[];
-  };
-  variantJson: {
-    name: string;
-    inherits_common: string;
-    agent_overrides: Record<string, AgentOverride>;
-    skill_manifest: SkillManifest;
-    phases: PhaseOverrides;
-    version: string;
-    description: string;
-  };
-  propagationActions: {
-    updateCommon: string[];
-    backpropagateFromVariant: string[];
-  };
-}
-
-interface ReconciledFile {
-  sourcePath: string;
-  targetPath: string;
-  reason: string;
-  version?: string;
-  hash?: string;
-}
-
-interface ConflictResolution {
-  filePath: string;
-  conflict: 'version_mismatch' | 'content_divergence' | 'platform_parity';
-  resolution: 'keep_l2' | 'keep_l0' | 'keep_l1' | 'merge';
-  reason: string;
-}
-
-interface AgentOverride {
-  type: 'additive' | 'replacement' | 'none';
-  reason: string;
-  since: string;
-  reviewed_by: string;
-  overrides: string[];
-}
-
-interface SkillManifest {
-  variant_specific: Array<{
-    name: string;
-    layer: string;
-    used_by_agents: string[];
-    phases: number[];
-    platform_parity: string;
-  }>;
-}
-
-interface PhaseOverrides {
-  phase3_name: string;
-}
-
-interface VariantJson {
-  name: string;
-  version: string;
-  status: 'beta' | 'stable';
-  description: string;
-  inherits_common: string;
-  agent_overrides: Record<string, AgentOverride>;
-  skill_manifest: SkillManifest;
-  phases: PhaseOverrides;
-  lifecycle: {
-    statusSince: string;
-    lastTransition: string;
-    betaEngagements: number;
-    stablePromotedOn: string | null;
-  };
+  /** Final output path */
+  variantPath?: string;
+  /** Total execution time (ms) */
+  executionTime: number;
+  /** Pipeline errors */
+  errors: Array<{ phase: string; error: string }>;
 }
 
 // ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const PROJECT_ROOT = process.cwd();
-const TEMPLATES_DIR = join(PROJECT_ROOT, 'templates');
-const COMMON_DIR = join(TEMPLATES_DIR, 'common');
-const ADR_DIR = join(PROJECT_ROOT, 'docs', 'adr');
-
-// ============================================================================
-// PHASE 0: ADR VALIDATION
+// MAIN PIPELINE FUNCTION
 // ============================================================================
 
 /**
- * Validate ADR exists and is approved before pipeline execution
+ * Execute complete L2-to-variant pipeline
  * @version 1.0.0
  */
-function validateADRExists(variantName: string): ADRValidationResult {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+export async function executeL2ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
+  const startTime = Date.now();
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`L2-to-Variant Pipeline`);
+  console.log(`Variant: ${config.variantName}`);
+  console.log(`Type: ${config.variantType}`);
+  console.log(`${'='.repeat(60)}\n`);
 
-  // Expected ADR path pattern: docs/adr/YYYYMM-variant-creation-<variant>.md
-  const adrPattern = `docs/adr/${currentYear}${currentMonth}-variant-creation-${variantName}.md`;
-  const adrPath = join(PROJECT_ROOT, adrPattern);
+  const errors: Array<{ phase: string; error: string }> = [];
+  const phases: PipelineResult['phases'] = {
+    scan: { success: false },
+    reconcile: { success: false },
+    generate: { success: false },
+    lifecycle: { success: false },
+    parity: { success: false },
+    integrate: { success: false },
+  };
 
-  if (!existsSync(adrPath)) {
-    return {
-      approved: false,
-      adrPath: null,
-      status: 'not_found',
-      message: `ADR not found at ${adrPattern}. Create ADR before running pipeline. See template: docs/adr/templates/variant-creation-template.md`,
-    };
+  let scanResult: L2ScanResult | undefined;
+  let reconciledManifest: ReconciledManifest | undefined;
+  let generatedVariant: GeneratedVariant | undefined;
+  let lifecycleState: BetaLifecycleState | undefined;
+  let parityResult: ParityValidationResult | undefined;
+  let integrationResult: IntegrationResult | undefined;
+
+  // ============================================================================
+  // PHASE 1: SCAN L2 PROJECT
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 1: Scanning L2 Project`);
+    console.log(`${'─'.repeat(60)}`);
+
+    scanResult = await scanL2Project(config.l2ProjectPath);
+    phases.scan = { success: true, result: scanResult };
+    console.log(`✅ PHASE 1 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    phases.scan = { success: false, error: errorMsg };
+    errors.push({ phase: 'scan', error: errorMsg });
+    console.error(`❌ PHASE 1 FAILED: ${errorMsg}`);
   }
 
-  const adrContent = stripBOM(readFileSync(adrPath, 'utf-8'));
-
-  // Check ADR status
-  const statusMatch = adrContent.match(/\*\*Status\*\*:\s*(Proposed|Accepted|Rejected)/);
-  if (!statusMatch) {
-    return {
-      approved: false,
-      adrPath,
-      status: 'pending',
-      message: `ADR exists but status is not set. Must set 'Status: **Accepted**' in ADR before pipeline execution.`,
-    };
+  if (!phases.scan.success) {
+    return buildFailureResult(phases, errors, startTime);
   }
 
-  const status = statusMatch[1] as 'Proposed' | 'Accepted' | 'Rejected';
+  // ============================================================================
+  // PHASE 2: RECONCILE WITH L0/L1
+  // ============================================================================
 
-  if (status === 'Rejected') {
-    return {
-      approved: false,
-      adrPath,
-      status: 'rejected',
-      message: `ADR is rejected. Cannot proceed with variant creation.`,
-    };
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 2: Reconciling with L0/L1`);
+    console.log(`${'─'.repeat(60)}`);
+
+    reconciledManifest = await reconcileWithL0L1(scanResult!, config.variantName);
+    phases.reconcile = { success: true, result: reconciledManifest };
+    console.log(`✅ PHASE 2 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    phases.reconcile = { success: false, error: errorMsg };
+    errors.push({ phase: 'reconcile', error: errorMsg });
+    console.error(`❌ PHASE 2 FAILED: ${errorMsg}`);
   }
 
-  if (status === 'Proposed') {
-    return {
-      approved: false,
-      adrPath,
-      status: 'pending',
-      message: `ADR is in 'Proposed' status. Must change to 'Status: **Accepted**' before pipeline execution.`,
-    };
+  if (!phases.reconcile.success) {
+    return buildFailureResult(phases, errors, startTime);
   }
 
-  // Accepted - proceed
+  // ============================================================================
+  // PHASE 3: VALIDATE DEPENDENCIES
+  // ============================================================================
+
+  console.log(`\n${'─'.repeat(60)}`);
+  console.log(`PHASE 3: Validating Dependencies`);
+  console.log(`${'─'.repeat(60)}`);
+
+  const depValidation = validateDependencies(config.variantName);
+  if (!depValidation.valid) {
+    console.error(`❌ Dependency validation failed:`);
+    if (depValidation.circularDependencies.length > 0) {
+      console.error(`  Circular dependencies detected:`);
+      for (const cycle of depValidation.circularDependencies) {
+        console.error(`    - ${cycle.join(' → ')}`);
+      }
+    }
+    if (depValidation.missingDependencies.length > 0) {
+      console.error(`  Missing dependencies:`);
+      for (const missing of depValidation.missingDependencies) {
+        console.error(`    - ${missing}`);
+      }
+    }
+    errors.push({
+      phase: 'validate-deps',
+      error: `Dependency validation failed for variant ${config.variantName}`,
+    });
+    return buildFailureResult(phases, errors, startTime);
+  }
+  console.log(`✅ PHASE 3 COMPLETE`);
+
+  // ============================================================================
+  // PHASE 4: GENERATE VARIANT
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4: Generating Variant`);
+    console.log(`${'─'.repeat(60)}`);
+
+    // Extract agent roster and skills from L2 scan result
+    const agentRoster = extractAgentRoster(scanResult!);
+    const skills = extractSkills(scanResult!);
+
+    const metadata: VariantMetadata = {
+      name: config.variantName,
+      description: config.variantDescription,
+      variantType: config.variantType,
+      status: 'beta',
+      version: '0.1.0',
+      inherits_common: 'templates/common',
+      agentRoster,
+      skills,
+    };
+
+    generatedVariant = await generateVariant(metadata, reconciledManifest!, config.outputPath);
+    phases.generate = { success: true, result: generatedVariant };
+    console.log(`✅ PHASE 4 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    phases.generate = { success: false, error: errorMsg };
+    errors.push({ phase: 'generate', error: errorMsg });
+    console.error(`❌ PHASE 4 FAILED: ${errorMsg}`);
+  }
+
+  if (!phases.generate.success) {
+    return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 5: INITIALIZE BETA LIFECYCLE
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 5: Initializing Beta Lifecycle`);
+    console.log(`${'─'.repeat(60)}`);
+
+    lifecycleState = initializeBetaLifecycle(config.variantName, config.variantType);
+    phases.lifecycle = { success: true, result: lifecycleState };
+    console.log(`✅ PHASE 5 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    phases.lifecycle = { success: false, error: errorMsg };
+    errors.push({ phase: 'lifecycle', error: errorMsg });
+    console.error(`❌ PHASE 5 FAILED: ${errorMsg}`);
+  }
+
+  if (!phases.lifecycle.success) {
+    return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 6: VALIDATE PLATFORM PARITY
+  // ============================================================================
+
+  if (!config.skipParityValidation) {
+    try {
+      console.log(`\n${'─'.repeat(60)}`);
+      console.log(`PHASE 6: Validating Platform Parity`);
+      console.log(`${'─'.repeat(60)}`);
+
+      parityResult = await validatePlatformParity(generatedVariant!.variantPath);
+      phases.parity = { success: !parityResult.hasParityViolations, result: parityResult };
+
+      if (parityResult.hasParityViolations) {
+        console.warn(`⚠️  PHASE 6 COMPLETE WITH VIOLATIONS`);
+        errors.push({
+          phase: 'parity',
+          error: `Platform parity violations found: ${parityResult.violations.length}`,
+        });
+      } else {
+        console.log(`✅ PHASE 6 COMPLETE`);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      phases.parity = { success: false, error: errorMsg };
+      errors.push({ phase: 'parity', error: errorMsg });
+      console.error(`❌ PHASE 6 FAILED: ${errorMsg}`);
+    }
+  } else {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 6: Skipped (skipParityValidation=true)`);
+    console.log(`${'─'.repeat(60)}`);
+    phases.parity = { success: true };
+  }
+
+  // ============================================================================
+  // PHASE 7: WORKSPACE INTEGRATION
+  // ============================================================================
+
+  if (!config.skipIntegration) {
+    try {
+      console.log(`\n${'─'.repeat(60)}`);
+      console.log(`PHASE 7: Integrating to Workspace`);
+      console.log(`${'─'.repeat(60)}`);
+
+      const metadata: VariantMetadata = {
+        name: config.variantName,
+        description: config.variantDescription,
+        variantType: config.variantType,
+        status: 'beta',
+        version: '0.1.0',
+        inherits_common: 'templates/common',
+        agentRoster: [],
+        skills: [],
+      };
+
+      integrationResult = await integrateVariantToWorkspace(metadata);
+      phases.integrate = { success: true, result: integrationResult };
+      console.log(`✅ PHASE 7 COMPLETE`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      phases.integrate = { success: false, error: errorMsg };
+      errors.push({ phase: 'integrate', error: errorMsg });
+      console.error(`❌ PHASE 7 FAILED: ${errorMsg}`);
+    }
+  } else {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 7: Skipped (skipIntegration=true)`);
+    console.log(`${'─'.repeat(60)}`);
+    phases.integrate = { success: true };
+  }
+
+  // ============================================================================
+  // PIPELINE COMPLETE
+  // ============================================================================
+
+  const executionTime = Date.now() - startTime;
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`PIPELINE EXECUTION COMPLETE`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`Total time: ${executionTime}ms`);
+  console.log(`Phases succeeded: ${Object.values(phases).filter(p => p.success).length}/${Object.values(phases).length}`);
+
+  if (errors.length > 0) {
+    console.log(`\n⚠️  Errors encountered: ${errors.length}`);
+    for (const { phase, error } of errors) {
+      console.log(`  [${phase}] ${error}`);
+    }
+  }
+
+  console.log(`\n🎉 Variant generated successfully!`);
+  console.log(`Path: ${generatedVariant!.variantPath}`);
+
   return {
-    approved: true,
-    adrPath,
-    status: 'approved',
-    message: `ADR approved. Pipeline execution authorized.`,
+    success: true,
+    phases,
+    variantPath: generatedVariant!.variantPath,
+    executionTime,
+    errors,
   };
 }
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
 /**
- * Strip UTF-8 BOM if present
+ * Build failure result
  * @version 1.0.0
  */
-function stripBOM(content: string): string {
-  if (content.charCodeAt(0) === 0xFEFF) {
-    return content.slice(1);
+function buildFailureResult(
+  phases: PipelineResult['phases'],
+  errors: Array<{ phase: string; error: string }>,
+  startTime: number
+): PipelineResult {
+  return {
+    success: false,
+    phases,
+    executionTime: Date.now() - startTime,
+    errors,
+  };
+}
+
+/**
+ * Extract agent roster from L2 scan result
+ * @version 1.0.0
+ */
+function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
+  // Find agent files in scan result
+  const agentFiles = scanResult.files.filter(f =>
+    f.relativePath.startsWith('agents/') && f.relativePath.endsWith('.md')
+  );
+
+  return agentFiles.map(file => ({
+    name: file.relativePath.replace('agents/', '').replace('.md', ''),
+    tier: 'medium', // Default tier
+    model: 'claude-sonnet-4-6', // Default model
+    description: `Agent from L2 project: ${file.relativePath}`,
+  }));
+}
+
+/**
+ * Extract skills from L2 scan result
+ * @version 1.0.0
+ */
+function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
+  // Find skill files in scan result
+  const skillFiles = scanResult.files.filter(f =>
+    f.relativePath.includes('skills/') && f.relativePath.endsWith('SKILL.md')
+  );
+
+  const skills: VariantMetadata['skills'] = [];
+  const processedSkills = new Set<string>();
+
+  for (const file of skillFiles) {
+    // Extract skill name from path
+    const match = file.relativePath.match(/skills\/([^/]+)\//);
+    if (match && !processedSkills.has(match[1])) {
+      skills.push({
+        name: match[1],
+        description: `Skill from L2 project: ${file.relativePath}`,
+      });
+      processedSkills.add(match[1]);
+    }
   }
-  return content;
-}
 
-/**
- * Normalize line endings to LF
- * @version 1.0.0
- */
-function normalizeLineEndings(content: string): string {
-  return content.replace(/\r\n/g, '\n');
-}
-
-/**
- * Compute SHA-256 hash of file content
- * @version 1.0.0
- */
-function computeHash(content: string): string {
-  return createHash('sha256').update(content, 'utf8').digest('hex');
-}
-
-/**
- * Extract version from file header
- * @version 1.0.0
- */
-function extractVersion(content: string): string | undefined {
-  const versionMatch = content.match(/@version\s+(\d+\.\d+\.\d+)/);
-  return versionMatch ? versionMatch[1] : undefined;
+  return skills;
 }
 
 // ============================================================================
-// MAIN ENTRY POINT
+// MAIN ENTRY POINT (for standalone execution)
 // ============================================================================
 
 async function main() {
   const args = process.argv.slice(2);
-  const variantName = args.find(arg => arg.startsWith('--variant='))?.split('=')[1];
 
-  if (!variantName) {
-    console.error('Usage: bun scripts/l2-to-variant-pipeline.ts --variant=<variant-name> [--l2-path=<path>]');
+  // Parse arguments
+  const l2PathArg = args.find(arg => arg.startsWith('--l2-path='));
+  const nameArg = args.find(arg => arg.startsWith('--name='));
+  const typeArg = args.find(arg => arg.startsWith('--type='));
+  const descArg = args.find(arg => arg.startsWith('--description='));
+  const skipParityArg = args.includes('--skip-parity');
+  const skipIntegrationArg = args.includes('--skip-integration');
+  const outputArg = args.find(arg => arg.startsWith('--output='));
+
+  if (!l2PathArg || !nameArg || !typeArg || !descArg) {
+    console.error('Usage: bun scripts/pipeline/l2-to-variant-pipeline.ts \\');
+    console.error('  --l2-path=<path-to-l2-project> \\');
+    console.error('  --name=<variant-name> \\');
+    console.error('  --type=<security|development|design|consulting|collaboration> \\');
+    console.error('  --description=<variant-description> \\');
+    console.error('  [--skip-parity] \\');
+    console.error('  [--skip-integration] \\');
+    console.error('  [--output=<output-path>]');
     process.exit(1);
   }
 
-  console.log(`=== L2-to-Variant Conversion Pipeline ===`);
-  console.log(`Variant: ${variantName}\n`);
+  const config: PipelineConfig = {
+    l2ProjectPath: l2PathArg.split('=')[1],
+    variantName: nameArg.split('=')[1],
+    variantType: typeArg.split('=')[1] as any,
+    variantDescription: descArg.split('=')[1],
+    skipParityValidation: skipParityArg,
+    skipIntegration: skipIntegrationArg,
+    outputPath: outputArg?.split('=')[1],
+  };
 
-  // ============================================================================
-  // PHASE 0: ADR Validation
-  // ============================================================================
+  try {
+    const result = await executeL2ToVariantPipeline(config);
 
-  console.log(`=== Phase 0: ADR Validation ===\n`);
-
-  const adrCheck = validateADRExists(variantName);
-
-  if (!adrCheck.approved) {
-    console.error(`❌ ADR Check Failed: ${adrCheck.message}`);
-    console.error(`\nRequired action:`);
-    if (adrCheck.status === 'not_found') {
-      console.error(`  1. Create ADR: docs/adr/${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-variant-creation-${variantName}.md`);
-      console.error(`  2. Use template: docs/adr/templates/variant-creation-template.md`);
-      console.error(`  3. Set status: 'Status: **Accepted**'`);
-    } else if (adrCheck.status === 'pending') {
-      console.error(`  1. Review ADR: ${adrCheck.adrPath}`);
-      console.error(`  2. Update status: Change 'Status: **Proposed**' to 'Status: **Accepted**'`);
-    } else if (adrCheck.status === 'rejected') {
-      console.error(`  1. Review rejection rationale in ADR: ${adrCheck.adrPath}`);
-      console.error(`  2. Address concerns or create new ADR with revised proposal`);
+    if (result.success) {
+      console.log('\n✅ Pipeline execution successful');
+      process.exit(0);
+    } else {
+      console.log('\n❌ Pipeline execution failed');
+      process.exit(1);
     }
+  } catch (error) {
+    console.error('\n❌ Pipeline execution failed with exception:');
+    console.error(error);
     process.exit(1);
   }
-
-  console.log(`✅ ADR approved: ${adrCheck.adrPath}`);
-  console.log(`\n=== Proceeding to Phase 1: Variant Structure Conversion ===\n`);
-
-  // TODO: Implement remaining phases in Wave 2-4
-  console.log('Phase 1-4 implementation scheduled for Wave 2-4.');
-  console.log('Wave 1 complete: TypeScript core + ADR validation foundation.');
 }
 
 // Run main if executed directly
 if (require.main === module) {
   main().catch(console.error);
 }
-
-export {
-  validateADRExists,
-  stripBOM,
-  normalizeLineEndings,
-  computeHash,
-  extractVersion,
-};
