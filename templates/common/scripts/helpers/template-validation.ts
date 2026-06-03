@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * template-validation.ts — Validate required template files in common/ and variant/
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/template-validation.ts <variant> [commonPath] [variantPath]

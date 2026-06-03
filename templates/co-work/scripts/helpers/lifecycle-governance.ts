@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * lifecycle-governance.ts — Extract mandatory domains from governance JSON
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/lifecycle-governance.ts

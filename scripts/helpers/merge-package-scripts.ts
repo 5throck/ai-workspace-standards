@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * merge-package-scripts.ts — Merge workspace scripts into project package.json
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/merge-package-scripts.ts <project-dir>

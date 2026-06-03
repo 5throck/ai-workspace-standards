@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * write-scripts-snapshot.ts — Write scripts-snapshot.json with L1 script version map
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>

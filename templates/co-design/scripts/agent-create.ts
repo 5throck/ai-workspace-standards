@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Creator CLI for Workspace Root
+ * @version 1.0.0
  * Creates new agent definition files in the agents/ directory
  *
  * Usage:

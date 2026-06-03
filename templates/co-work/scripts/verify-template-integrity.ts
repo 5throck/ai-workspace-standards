@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-template-integrity.ts
+ * @version 1.0.0
  *
  * Verify template integrity of existing projects.
  * Reads .template/INTEGRITY and .template-bootstrap.log, validates file hashes.

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Status Synchronization Script
+ * @version 1.0.0
  * Synchronizes skill status between SKILL.md and registry tables
  */
 

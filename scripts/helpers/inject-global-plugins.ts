@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * inject-global-plugins.ts
+ * @version 1.0.0
  *
  * Dynamically instructs the scaffolded project to use global plugins (superpowers, ui-ux-pro-max)
  * instead of relying on statically copied skill files, reducing project bloat.

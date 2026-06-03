@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Status Synchronization Script
+ * @version 1.0.0
  * Synchronizes agent status between agent files and AGENTS.md
  */
 

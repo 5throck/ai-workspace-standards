@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-agent-deliverables.ts — Agent Execution Result Verification
+ * @version 1.0.0
  *
  * Purpose: Verify that files reported as "created" by agents actually exist.
  * Prevents "report forgery" where agents claim completion without actual deliverables.

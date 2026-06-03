@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * update-variant-lifecycle.ts — Update lifecycle.statusSince and lastTransition in variant.json
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/update-variant-lifecycle.ts <project-dir> <date> <variant>

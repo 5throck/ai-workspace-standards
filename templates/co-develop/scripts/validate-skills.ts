@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// Skill Lifecycle Validation Script
+/**
+ * Skill Lifecycle Validation Script
+ * @version 1.0.0
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
 //

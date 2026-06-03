@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
  * substitute-placeholders.ts — Replace placeholders in all text files
+ * @version 1.0.0
  *
  * Usage:
  *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics]

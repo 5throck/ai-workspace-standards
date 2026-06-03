@@ -1,6 +1,6 @@
 /**
- * @version 1.0.0
  * Archives memory markdown files older than 7 days.
+ * @version 1.0.0
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
