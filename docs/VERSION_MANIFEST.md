@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T04:23:53.094Z
+**Generated**: 2026-06-03T06:58:14.327Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 16
-- **Scripts**: 65
+- **Scripts**: 68
 - **Commands**: 6
 
 ---
@@ -92,7 +92,9 @@
 | publish-to-template.ts | 1.3.2 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
+| reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
+| scan-l2-project.ts | N/A | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
 | skill-dependency-analysis.ts | N/A | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | N/A | scripts/skill-lifecycle-audit.ts | N/A |
 | substitute-placeholders.ts | N/A | scripts/helpers/substitute-placeholders.ts | N/A |
@@ -113,6 +115,7 @@
 | validate-output.ts | N/A | scripts/helpers/validate-output.ts | N/A |
 | validate-skills.ts | N/A | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | N/A | scripts/validate-templates.ts | js-yaml |
+| variant-governance-rules.ts | N/A | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | N/A | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | N/A | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | N/A | scripts/verify-new-project-tests.ts | N/A |

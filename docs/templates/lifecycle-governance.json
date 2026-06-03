@@ -70,6 +70,11 @@
       "date": "2026-06-03",
       "event": "wave-1-critical-fixes",
       "note": "Wave 1 Critical fixes completed (A-01 through A-05): A-01 co-consult .gitignore updated (added .git/ entry); A-02 Mojibake fixed in 11 variant CLAUDE.md/GEMINI.md files (all 5 variants + 4 agent pm.md files + co-develop README.md); A-03 co-consult AGENTS.md PM Dispatch + Skills tables fixed; A-04 co-consult CLAUDE.md §5 Specialist Agent List fixed; A-05 co-develop README.md agent table fixed. All fixes were documentation corrections (encoding, formatting) - no version bump required."
+    },
+    {
+      "date": "2026-06-03",
+      "event": "wave-2-high-priority-fixes",
+      "note": "Wave 2 High Priority fixes completed (H-04+H-05, H-09): H-04+H-05 added TaskCompleted hook and timeout=60 to 6 template .claude/settings.json files (templates/common/, co-design/, co-develop/, co-work/, co-security/, co-consult/); H-09 pinned @colbymchenry/codegraph to version @0.9.7 and removed -y flag across 16 .claude/settings.json files and 4 setup scripts. Both fixes improve security posture - no version bump required (structural + supply-chain security fixes)."
     }
   ]
 }

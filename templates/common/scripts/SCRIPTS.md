@@ -98,6 +98,9 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `l2-to-variant-pipeline.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/scan-l2-project.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/variant-governance-rules.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `lib/error-handling.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |

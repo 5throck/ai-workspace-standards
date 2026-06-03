@@ -470,8 +470,8 @@ fi
 # ── 5. Initialize CodeGraph MCP ───────────────────────────────────────────────
 if command -v npx >/dev/null 2>&1; then
     info "Initializing and indexing CodeGraph for AI context…"
-    echo "" | npx -y @colbymchenry/codegraph@latest init 2>/dev/null || true
-    npx -y @colbymchenry/codegraph@latest index 2>/dev/null || true
+    echo "" | npx @colbymchenry/codegraph@0.9.7 init 2>/dev/null || true
+    npx @colbymchenry/codegraph@0.9.7 index 2>/dev/null || true
     if [ $? -eq 0 ]; then
         pass "CodeGraph initialized successfully"
     else

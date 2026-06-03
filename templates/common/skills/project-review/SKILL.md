@@ -40,7 +40,7 @@ Before dispatching agents, determine the execution context:
 2. **Determine project type**: check for `docs/context.md` (variant project) or `CONSTITUTION.md` (workspace root)
 3. **Announce context**:
    ```
-   Project type: [workspace-root | co-develop | co-design | co-work | co-consult | co-security | custom]
+   Project type: [workspace-root | co-develop | co-design | co-work | co-security | custom]
    Available agents: [list]
    Review domains: [mapped domains]
    ```
