@@ -49,13 +49,14 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.4.5 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.5.0 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `publish-to-template.ts` | L0 | 1.3.2 | active | — | — | common | — |
-| `list-template-versions.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |

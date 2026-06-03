@@ -1,4 +1,4 @@
-// @version 2.4.5
+// @version 2.5.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -666,6 +666,24 @@ if (fs.existsSync('templates')) {
     checkExecutable('templates');
     if (executableErrors === 0) {
         Pass('Templates executable bit check: all scripts retain executable bit');
+    }
+}
+
+// Check: templates/VERSION must have a corresponding git tag
+if (fs.existsSync('templates')) {
+    const versionFile = 'templates/VERSION';
+    if (fs.existsSync(versionFile)) {
+        try {
+            const version = fs.readFileSync(versionFile, 'utf-8').trim();
+            const tagOut = execSync(`git tag -l "template-v${version}"`, { encoding: 'utf-8' }).trim();
+            if (tagOut === '') {
+                Warn(`Template version ${version} in templates/VERSION has no corresponding git tag. Run: bun scripts/tag-template.ts`);
+            } else {
+                Pass(`Template version tag: template-v${version} published`);
+            }
+        } catch (e) {
+            Warn(`Could not verify template version tag: ${e}`);
+        }
     }
 }
 
