@@ -42,6 +42,7 @@
     "@types/node": "^20.0.0",
     "glob": "^11.0.0",
     "js-yaml": "^4.1.0",
+    "tsx": "^4.22.4",
     "typescript": "^5.0.0"
   },
   "engines": {

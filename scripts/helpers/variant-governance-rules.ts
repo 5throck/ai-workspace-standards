@@ -8,7 +8,7 @@
  * Addresses Gap #2: Variant-weighted criteria for promotion
  * Addresses Gap #3: Dependency graph for reconciliation order
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 2-3: Governance & Integration
  *
  * Dependencies:
@@ -23,7 +23,7 @@ import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
 
 /**
  * Variant promotion criteria by type
- * @version 1.0.0
+ * @version 1.1.0
  */
 export interface VariantPromotionCriteria {
   /** Variant type identifier */
@@ -40,7 +40,7 @@ export interface VariantPromotionCriteria {
 
 /**
  * Variant dependency specification
- * @version 1.0.0
+ * @version 1.1.0
  */
 export interface VariantDependency {
   /** Variant name (e.g., 'co-work', 'co-consult') */
@@ -57,7 +57,7 @@ export interface VariantDependency {
 
 /**
  * Promotion eligibility result
- * @version 1.0.0
+ * @version 1.1.0
  */
 export interface PromotionEligibility {
   eligible: boolean;
@@ -72,7 +72,7 @@ export interface PromotionEligibility {
 
 /**
  * Dependency validation result
- * @version 1.0.0
+ * @version 1.1.0
  */
 export interface DependencyValidation {
   valid: boolean;
@@ -86,7 +86,7 @@ export interface DependencyValidation {
 
 /**
  * L1 MAJOR update reconciliation plan
- * @version 1.0.0
+ * @version 1.1.0
  */
 export interface L1MajorReconciliationPlan {
   l1Version: string;
@@ -116,7 +116,7 @@ export interface L1MajorReconciliationPlan {
  * - Consulting/Collaboration variants require lower threshold (2 engagements / 2 months)
  *   as they are process-focused and less code-intensive
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 export const PROMOTION_CRITERIA_BY_TYPE: Record<string, VariantPromotionCriteria> = {
   security: {
@@ -188,7 +188,7 @@ export const PROMOTION_CRITERIA_BY_TYPE: Record<string, VariantPromotionCriteria
 
 /**
  * Check if variant is eligible for promotion from beta to stable
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function checkPromotionEligibility(
   variantName: string,
@@ -289,7 +289,7 @@ export function checkPromotionEligibility(
  * 3. Parallel reconciliation is enabled where safe
  * 4. L1 MAJOR updates trigger ordered reconciliation
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 export const VARIANT_DEPENDENCY_GRAPH: VariantDependency[] = [
   {
@@ -338,7 +338,7 @@ export const VARIANT_DEPENDENCY_GRAPH: VariantDependency[] = [
 
 /**
  * Build dependency map for quick lookup
- * @version 1.0.0
+ * @version 1.1.0
  */
 function buildDependencyMap(): Map<string, VariantDependency> {
   const map = new Map<string, VariantDependency>();
@@ -352,7 +352,7 @@ function buildDependencyMap(): Map<string, VariantDependency> {
 
 /**
  * Detect circular dependencies using DFS
- * @version 1.0.0
+ * @version 1.1.0
  */
 function detectCircularDependencies(
   variant: string,
@@ -389,7 +389,7 @@ function detectCircularDependencies(
 
 /**
  * Validate variant dependencies
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function validateDependencies(variantName: string): DependencyValidation {
   const dependencyMap = buildDependencyMap();
@@ -440,7 +440,7 @@ export function validateDependencies(variantName: string): DependencyValidation 
 
 /**
  * Get ordered reconciliation list for multiple variants
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function getReconciliationOrder(variantNames: string[]): Array<{
   variant: string;
@@ -465,7 +465,7 @@ export function getReconciliationOrder(variantNames: string[]): Array<{
 
 /**
  * Plan L1 MAJOR update reconciliation
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function planL1MajorUpdate(newL1Version: string): L1MajorReconciliationPlan {
   console.log(`\n=== Planning L1 MAJOR Update Reconciliation ===`);
@@ -600,6 +600,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }

@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -106,7 +106,7 @@ const COMMON_TEMPLATE = join(TEMPLATES_DIR, 'common');
 
 /**
  * Create directory recursively with error handling
- * @version 1.0.0
+ * @version 1.1.0
  */
 function createDirectory(dirPath: string): void {
   if (!existsSync(dirPath)) {
@@ -116,7 +116,7 @@ function createDirectory(dirPath: string): void {
 
 /**
  * Copy file with UTF-8 handling
- * @version 1.0.0
+ * @version 1.1.0
  */
 function copyFileUTF8(sourcePath: string, targetPath: string): void {
   try {
@@ -135,7 +135,7 @@ function copyFileUTF8(sourcePath: string, targetPath: string): void {
 
 /**
  * Substitute placeholders in template content
- * @version 1.0.0
+ * @version 1.1.0
  */
 function substitutePlaceholders(content: string, metadata: VariantMetadata): string {
   const placeholders: Record<string, string> = {
@@ -161,7 +161,7 @@ function substitutePlaceholders(content: string, metadata: VariantMetadata): str
 
 /**
  * Generate variant.json from metadata
- * @version 1.0.0
+ * @version 1.1.0
  */
 function generateVariantJson(metadata: VariantMetadata): string {
   const variantJson = {
@@ -190,7 +190,7 @@ function generateVariantJson(metadata: VariantMetadata): string {
 
 /**
  * Create variant directory structure
- * @version 1.0.0
+ * @version 1.1.0
  */
 function createDirectoryStructure(variantPath: string): string[] {
   const directories = [
@@ -215,7 +215,7 @@ function createDirectoryStructure(variantPath: string): string[] {
 
 /**
  * Generate agent override files
- * @version 1.0.0
+ * @version 1.1.0
  */
 function generateAgentOverrides(
   variantPath: string,
@@ -252,7 +252,7 @@ function generateAgentOverrides(
 
 /**
  * Generate skill directories and files
- * @version 1.0.0
+ * @version 1.1.0
  */
 function generateSkillDirectories(
   variantPath: string,
@@ -314,7 +314,7 @@ function generateSkillDirectories(
 
 /**
  * Generate CLAUDE.md from template
- * @version 1.0.0
+ * @version 1.1.0
  */
 function generateClaudeMd(variantPath: string, metadata: VariantMetadata, manifest: ReconciledManifest): string {
   const claudeMdPath = join(variantPath, 'CLAUDE.md');
@@ -366,9 +366,9 @@ ${metadata.skills.map(skill => `- **${skill.name}**: ${skill.description || skil
 
 /**
  * Generate GEMINI.md from template
- * @version 1.0.0
+ * @version 1.1.0
  */
-function generateGeminiMd(variantPath: string, metadata: VariantMetadata): string {
+function generateGeminiMd(variantPath: string, metadata: VariantMetadata, manifest: ReconciledManifest): string {
   const geminiMdPath = join(variantPath, 'GEMINI.md');
 
   // Try to use L2 project's GEMINI.md if it exists in manifest
@@ -401,7 +401,7 @@ function generateGeminiMd(variantPath: string, metadata: VariantMetadata): strin
 
 /**
  * Generate README.md with beta warning
- * @version 1.0.0
+ * @version 1.1.0
  */
 function generateReadme(variantPath: string, metadata: VariantMetadata): string {
   const readmePath = join(variantPath, 'README.md');
@@ -465,7 +465,7 @@ ${metadata.skills.map(skill => `- **${skill.name}**: ${skill.description || skil
 
 /**
  * Get required engagements for variant type
- * @version 1.0.0
+ * @version 1.1.0
  */
 function getRequiredEngagements(variantType: string): number {
   const requirements: Record<string, number> = {
@@ -480,7 +480,7 @@ function getRequiredEngagements(variantType: string): number {
 
 /**
  * Get required beta months for variant type
- * @version 1.0.0
+ * @version 1.1.0
  */
 function getRequiredBetaMonths(variantType: string): number {
   const requirements: Record<string, number> = {
@@ -495,7 +495,7 @@ function getRequiredBetaMonths(variantType: string): number {
 
 /**
  * Get variant type description
- * @version 1.0.0
+ * @version 1.1.0
  */
 function getVariantTypeDescription(variantType: string): string {
   const descriptions: Record<string, string> = {
@@ -514,7 +514,7 @@ function getVariantTypeDescription(variantType: string): string {
 
 /**
  * Generate variant from reconciled manifest and metadata
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function generateVariant(
   metadata: VariantMetadata,
@@ -560,7 +560,7 @@ export async function generateVariant(
 
   // Generate GEMINI.md
   console.log(`\n=== Generating GEMINI.md ===`);
-  const geminiMdPath = generateGeminiMd(variantPath, metadata);
+  const geminiMdPath = generateGeminiMd(variantPath, metadata, manifest);
   console.log(`Created: ${geminiMdPath}`);
 
   // Generate README.md
@@ -659,6 +659,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }

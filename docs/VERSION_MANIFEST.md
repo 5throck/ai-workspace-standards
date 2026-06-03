@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-03T08:30:04.908Z
+**Generated**: 2026-06-03T14:32:24.946Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -65,7 +65,7 @@
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.4.5 | scripts/audit.ts | bun |
-| beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs |
+| beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |

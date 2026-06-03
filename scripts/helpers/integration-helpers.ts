@@ -8,7 +8,7 @@
  * - docs/templates/VERSION_REGISTRY.json
  * - AGENTS.md PM Dispatch table
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 3: Workspace Integration
  *
  * Dependencies:
@@ -75,7 +75,7 @@ const AGENTS_MD = join(WORKSPACE_ROOT, 'AGENTS.md');
 
 /**
  * Update workspace root README.md with variant entry
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateReadme(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating README.md ===`);
@@ -138,7 +138,7 @@ function updateReadme(metadata: VariantMetadata): boolean {
 
 /**
  * Update new-project.ts with variant option
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateNewProjectTs(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating new-project.ts ===`);
@@ -191,7 +191,7 @@ function updateNewProjectTs(metadata: VariantMetadata): boolean {
 
 /**
  * Update new-project.sh with variant option
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateNewProjectSh(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating new-project.sh ===`);
@@ -244,7 +244,7 @@ function updateNewProjectSh(metadata: VariantMetadata): boolean {
 
 /**
  * Update new-project.ps1 with variant option
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateNewProjectPs1(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating new-project.ps1 ===`);
@@ -297,7 +297,7 @@ function updateNewProjectPs1(metadata: VariantMetadata): boolean {
 
 /**
  * Update all new-project scripts
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateNewProjectScripts(metadata: VariantMetadata): boolean {
   let updated = false;
@@ -315,7 +315,7 @@ function updateNewProjectScripts(metadata: VariantMetadata): boolean {
 
 /**
  * Update VERSION_REGISTRY.json with variant entry
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateVersionRegistry(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating VERSION_REGISTRY.json ===`);
@@ -378,7 +378,7 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
 
 /**
  * Update AGENTS.md PM Dispatch table with variant entry
- * @version 1.0.0
+ * @version 1.1.0
  */
 function updateAgentsMd(metadata: VariantMetadata): boolean {
   console.log(`\n=== Updating AGENTS.md ===`);
@@ -435,7 +435,7 @@ function updateAgentsMd(metadata: VariantMetadata): boolean {
 
 /**
  * Integrate variant into workspace
- * @version 1.0.0
+ * @version 1.1.0
  */
 export async function integrateVariantToWorkspace(
   metadata: VariantMetadata
@@ -528,6 +528,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }

@@ -5,7 +5,7 @@
  * Tracks beta variant lifecycle including engagements, bugs, and promotion eligibility.
  * Implements variant-weighted promotion criteria from governance rules.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase 3: Beta Lifecycle Management
  *
  * Dependencies:
@@ -13,7 +13,8 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
 import { PROMOTION_CRITERIA_BY_TYPE, checkPromotionEligibility } from './variant-governance-rules.js';
 
@@ -101,7 +102,7 @@ const LIFECYCLE_DIR = join(WORKSPACE_ROOT, '.pipeline-state', 'beta-lifecycle');
 
 /**
  * Get lifecycle state file path for variant
- * @version 1.0.0
+ * @version 1.1.0
  */
 function getLifecycleStatePath(variantName: string): string {
   return join(LIFECYCLE_DIR, `${variantName}.json`);
@@ -109,7 +110,7 @@ function getLifecycleStatePath(variantName: string): string {
 
 /**
  * Load lifecycle state for variant
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function loadLifecycleState(variantName: string): BetaLifecycleState | null {
   const statePath = getLifecycleStatePath(variantName);
@@ -134,7 +135,7 @@ export function loadLifecycleState(variantName: string): BetaLifecycleState | nu
 
 /**
  * Save lifecycle state for variant
- * @version 1.0.0
+ * @version 1.1.0
  */
 function saveLifecycleState(state: BetaLifecycleState): void {
   const statePath = getLifecycleStatePath(state.variantName);
@@ -159,7 +160,7 @@ function saveLifecycleState(state: BetaLifecycleState): void {
 
 /**
  * Initialize lifecycle state for new beta variant
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function initializeBetaLifecycle(
   variantName: string,
@@ -197,7 +198,7 @@ export function initializeBetaLifecycle(
 
 /**
  * Calculate beta age in months
- * @version 1.0.0
+ * @version 1.1.0
  */
 function calculateBetaAge(betaCreatedAt: string): number {
   const created = new Date(betaCreatedAt);
@@ -209,7 +210,7 @@ function calculateBetaAge(betaCreatedAt: string): number {
 
 /**
  * Record client engagement
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function recordEngagement(
   variantName: string,
@@ -267,7 +268,7 @@ export function recordEngagement(
 
 /**
  * Record bug report
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function recordBug(
   variantName: string,
@@ -310,7 +311,7 @@ export function recordBug(
 
 /**
  * Update bug status
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function updateBugStatus(
   variantName: string,
@@ -345,7 +346,7 @@ export function updateBugStatus(
 
 /**
  * Record completed validation check
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function recordCompletedCheck(
   variantName: string,
@@ -392,7 +393,7 @@ export function recordCompletedCheck(
 
 /**
  * Check promotion eligibility with full details
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function checkPromotionEligibilityDetails(
   variantName: string,
@@ -487,7 +488,7 @@ export function checkPromotionEligibilityDetails(
 
 /**
  * Promote variant to stable status
- * @version 1.0.0
+ * @version 1.1.0
  */
 export function promoteToStable(variantName: string): BetaLifecycleState {
   console.log(`\n=== Promoting Variant to Stable ===`);
@@ -644,6 +645,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (require.main === module) {
+if (import.meta.url === process.argv[1]) {
   main().catch(console.error);
 }
