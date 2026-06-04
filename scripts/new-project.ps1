@@ -230,7 +230,7 @@ foreach ($file in $workspaceFilesToRemove) {
     $filePath = Join-Path $ProjectDir $file
     if (Test-Path $filePath) {
         Remove-Item $filePath -Force
-        Write-Host "  🗑️  Excluded workspace-only file: $file"
+        Write-Host "  [SKIP] Excluded workspace-only file: $file"
     }
 }
 
@@ -621,8 +621,12 @@ Write-Host "  [OK] All security bootstrap checks passed" -ForegroundColor Green
 Set-Location $OriginalLocation
 
 # -- 8. Post-scaffold audit ----------------------------------------------------  # TEST: none
+# NOTE: Audit runs from $WorkspaceRoot (workspace root) intentionally — it validates
+# workspace-wide integrity after project creation. The rootAllowlist exception in
+# audit.ts (Fix-1) handles the newly created project directory so it does not appear
+# as a stray file and cause a false-positive failure.
 Write-Host ""
-Write-Host "Running post-scaffold audit..." -ForegroundColor Cyan
+Write-Host "Running post-scaffold audit (from workspace root)..." -ForegroundColor Cyan
 & bun "$WorkspaceRoot/scripts/audit.ts"
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""

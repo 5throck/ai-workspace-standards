@@ -1,4 +1,4 @@
-// @version 2.5.1
+// @version 2.5.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -636,6 +636,13 @@ if (IS_WORKSPACE_ROOT) {
             const isDir = fs.statSync(item).isDirectory();
             if (isDir) {
                 if (!allowedDirs.includes(item)) {
+                    // Exception: valid project directories (have AGENTS.md or variant.json)
+                    const hasAgentsMd = fs.existsSync(path.join(item, 'AGENTS.md'));
+                    const hasVariantJson = fs.existsSync(path.join(item, 'variant.json'));
+                    if (hasAgentsMd || hasVariantJson) {
+                        // Valid project directory — skip
+                        continue;
+                    }
                     Fail(`Stray directory in workspace root: ${item} (not in rootAllowlist — check workspace-schema.json)`);
                     strayFound++;
                 }

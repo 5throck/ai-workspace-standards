@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.5
+// @version 1.3.6
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -300,6 +300,22 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
   return results;
 }
 
+function parseScriptLayers(scriptsMdPath: string): Map<string, string> {
+  const layers = new Map<string, string>();
+  try {
+    const content = fs.readFileSync(scriptsMdPath, 'utf-8');
+    for (const line of content.split('\n')) {
+      if (!line.startsWith('| `')) continue;
+      const cols = line.split('|').map(c => c.trim());
+      if (cols.length < 8) continue;
+      const scriptName = cols[1].replace(/`/g, '');
+      const layer = cols[7];
+      if (scriptName && layer) layers.set(scriptName, layer);
+    }
+  } catch { /* ignore */ }
+  return layers;
+}
+
 function collectDiffs(mapPath: string): FileDiff[] {
   const raw = fs.readFileSync(mapPath, 'utf-8');
   const map: PropagationMap = JSON.parse(raw);
@@ -319,18 +335,29 @@ function collectDiffs(mapPath: string): FileDiff[] {
   const templateVariants = fs.readdirSync(path.join(workspaceRoot, 'templates'))
     .filter(d => d.startsWith('co-') && fs.statSync(path.join(workspaceRoot, 'templates', d)).isDirectory());
 
+  const scriptLayers = parseScriptLayers(path.join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+
   for (const [domainName, domain] of Object.entries(domains)) {
     // For L1 -> L2, the source is L1 (domain.target)
     const l1SourceDir = path.resolve(workspaceRoot, domain.target);
-    
+
     if (!fs.existsSync(l1SourceDir)) continue;
-    
+
+    // Derive the SCRIPTS.md key prefix from domain source (strip leading "scripts/" segment)
+    const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+
     const files = globFiles(l1SourceDir, domain.include_pattern, domain.recursive);
 
     for (const relPath of files) {
       const fileBasename = path.basename(relPath);
 
-      if (domain.exclude.includes(fileBasename) || domain.exclude.includes(relPath)) {
+      if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
+        continue;
+      }
+
+      // Skip L0-only files: check SCRIPTS.md layer column
+      const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relPath}` : relPath;
+      if (scriptLayers.get(scriptKey)?.includes('L0-only')) {
         continue;
       }
 
