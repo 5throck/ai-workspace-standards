@@ -186,5 +186,32 @@ When creating new agents, update AGENTS.md and docs/context.md § Agents to main
 All agents, regardless of their role, must adhere to the following:
 
 - **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
+<!-- COMMON-AGENTS:START -->
+## Language Policy
 
+**English-Only Documentation Rule**: All workspace documentation files (.md) must be written in English, with explicit exceptions for recognized locale translation zones (see Translation Zones below).
 
+### English Documentation Requirement
+- All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Rationale: English documentation ensures global accessibility and cross-team collaboration
+
+### Translation Zones (Locale Exceptions)
+- `<lang-code>/` directories — language-specific documentation (e.g. `ko/`, `ja/`)
+- `locales/<lang-code>/` — locale translation files for internationalization (e.g. `locales/ko/`, `locales/zh-CN/`)
+- These are the ONLY locations where non-English `.md` files are permitted
+- Recognized locale codes (from `docs/workspace-schema.json` `i18n.locale_codes`):
+  `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar`
+
+### Enforcement
+- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
+- PR reviews reject non-English documentation outside translation zones
+- Auditor validates compliance during Phase 6 QA gate
+
+### Git/PR Artifacts Language Rule
+- All commit messages: English
+- All PR titles: English
+- All PR descriptions: English
+- All branch names: English
+- Code comments: English (unless documenting locale-specific logic)
+<!-- COMMON-AGENTS:END -->

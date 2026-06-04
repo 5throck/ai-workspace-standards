@@ -104,3 +104,16 @@ Based on the current registry (SCRIPTS.md lines 85–114):
 | `hooks/pre-commit.ts` | script |
 | `hooks/pre-push.ts` | script |
 | `hooks/post-write-lifecycle-check.ts` | script |
+
+## Amendment: Check A Formal Consistency Policy (2026-06-04)
+
+**Related decision recorded here for traceability.**
+
+`lifecycle-sync-audit.ts` Check A verifies that the `@version` header in each `.ts` file matches the registered version in `scripts/SCRIPTS.md`. This is **formal consistency only** — Check A does NOT verify that file content semantically reflects the version history (i.e., that the code was actually updated to match the declared version).
+
+**Rationale**: Semantic content verification would require git-history analysis (~100 git log calls per commit), adding 3–5 seconds to pre-commit. The cost exceeds the benefit given that code review provides semantic verification.
+
+**Mitigation**: 
+- `fix-script-versions.ts` now prints `git log --oneline -- scripts/<file>` after each version update, prompting developers to manually verify content history.
+- `lifecycle-sync-audit.ts` Check A pass message includes `(formal version consistency only — semantic content not verified)`.
+- `scripts/SCRIPTS.md` Registry section includes a comment documenting this limitation.

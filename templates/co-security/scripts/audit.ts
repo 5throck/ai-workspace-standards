@@ -1,4 +1,4 @@
-// @version 2.5.0
+// @version 2.5.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -624,18 +624,33 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
 
 // Check: Workspace root should not contain stray test artifacts or unauthorized files
 if (IS_WORKSPACE_ROOT) {
-    const knownStrayPatterns = [/^Test-.*/i, /^out.*\.txt$/i, /^temp-cleanup.*/i, /^NUL$/i];
     let strayFound = 0;
-    
-    const items = fs.readdirSync('.');
-    for (const item of items) {
-        if (knownStrayPatterns.some(p => p.test(item))) {
-            Fail(`Stray test artifact found in workspace root: ${item}`);
-            strayFound++;
+    try {
+        const schemaRaw = fs.readFileSync(path.join('docs', 'workspace-schema.json'), 'utf-8');
+        const schema = JSON.parse(schemaRaw);
+        const allowedFiles: string[] = schema?.rootAllowlist?.files ?? [];
+        const allowedDirs: string[] = schema?.rootAllowlist?.dirs ?? [];
+
+        const items = fs.readdirSync('.');
+        for (const item of items) {
+            const isDir = fs.statSync(item).isDirectory();
+            if (isDir) {
+                if (!allowedDirs.includes(item)) {
+                    Fail(`Stray directory in workspace root: ${item} (not in rootAllowlist — check workspace-schema.json)`);
+                    strayFound++;
+                }
+            } else {
+                if (!allowedFiles.includes(item)) {
+                    Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
+                    strayFound++;
+                }
+            }
         }
-    }
-    if (strayFound === 0) {
-        Pass('Workspace root is clean from stray test artifacts');
+        if (strayFound === 0) {
+            Pass('Workspace root is clean from stray test artifacts');
+        }
+    } catch (_e) {
+        Warn('Could not read docs/workspace-schema.json for stray-artifact check — skipping');
     }
 }
 

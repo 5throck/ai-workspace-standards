@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.4
+// @version 1.3.5
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -544,6 +544,7 @@ function publishDocs(isDryRun: boolean): void {
   const docPairs = [
     { root: 'CLAUDE.md',  marker: 'COMMON-CLAUDE',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
     { root: 'GEMINI.md',  marker: 'COMMON-GEMINI',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
+    { root: 'AGENTS.md',  marker: 'COMMON-AGENTS',  variants: ['co-consult', 'co-design', 'co-develop', 'co-security', 'co-work'] },
   ];
 
   let totalUpdated = 0;
@@ -580,6 +581,11 @@ function publishDocs(isDryRun: boolean): void {
         const result = replaceCommonSection(variantContent, marker, section);
         if (result.changed) {
           variantContent = result.content;
+          fileUpdated = true;
+        } else if (!variantContent.includes(`<!-- ${marker}:START -->`)) {
+          // Markers not present in variant — append section on first propagation
+          const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
+          variantContent = variantContent.trimEnd() + separator + section.fullBlock + '\n';
           fileUpdated = true;
         }
       }

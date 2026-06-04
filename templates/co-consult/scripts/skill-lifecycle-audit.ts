@@ -10,7 +10,7 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.2
+ * @version 1.1.3
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -322,6 +322,26 @@ function auditSkills(jsonMode = false): AuditResult {
         message: `Deprecated skill still active (v${frontmatter.version || 'unknown'})`,
         fix: 'Archive to skills/_archive/ or remove from repository',
       });
+    }
+
+    // Check: scope field should be declared
+    const skillContent = readFileSync(skillFile, 'utf-8');
+    const scopeMatch = skillContent.match(/^scope:\s*(\S+)/m);
+    if (!scopeMatch) {
+      warnings.push({
+        level: 'warning',
+        file: relPath,
+        message: `scope field missing in SKILL.md frontmatter — declare scope: workspace | common | variant`,
+      });
+    } else {
+      const validScopes = ['workspace', 'common', 'variant'];
+      if (!validScopes.includes(scopeMatch[1])) {
+        warnings.push({
+          level: 'warning',
+          file: relPath,
+          message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant`,
+        });
+      }
     }
 
     if (frontmatter.requires && frontmatter.requires.length > 0) {
