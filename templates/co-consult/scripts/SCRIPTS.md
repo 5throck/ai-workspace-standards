@@ -40,35 +40,39 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
   L1-only  = generated project only, must exist in templates/common/scripts/
 -->
 <!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
+<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment — whether file content actually reflects version history — is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.7 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.5.9 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.3.9 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.6.1 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.4.4 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.5.1 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `gen-pr-body.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `sync-skills.ts` | L0 | 1.1.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.2 | active | — | — | common | — |
-| `list-template-versions.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.4 | active | — | — | common | — |
+| `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `agent-verify.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.1.2 | active | — | — | common | — |
-| `lifecycle-sync-audit.ts` | L0 | 1.3.1 | active | — | — | common | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | — | — | common | — |
+| `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `verify-memory.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `verify-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `archive-memory.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `dispatch.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -77,9 +81,9 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L0 | 1.4.4 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.1 | active | — | — | common | — |
-| `helpers/template-validation.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `validate-templates.ts` | L0 | 1.4.5 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
@@ -88,6 +92,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/validate-output.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/generate-variant.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `verify-readme-sync.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -96,14 +104,22 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — | common | — |
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — | common | — |
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `l2-to-variant-pipeline.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-skills.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `validate-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `test-runner.ts` | L0 | 1.0.1 | active | — | — | common | — |
+| `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.5.0 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
+| `hooks/pre-commit.ts` | L0 | 1.5.3 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
@@ -240,10 +256,9 @@ skill files on disk. Detects missing or orphaned skill references.
 
 #### `new-project.sh` / `new-project.ps1`
 **Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
-and an optional variant, substitutes `co-consult` placeholders, initializes git with
+and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
 hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
-**Claude Code**: `/new-project "Project Name"`
 **Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
 
 #### `sync-skills.ts`
@@ -305,4 +320,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-01 (generate-version-manifest.ts v1.0.1 bug fix)*
+*Last updated: 2026-06-04 — added Check A formal-consistency-only clarification comment*

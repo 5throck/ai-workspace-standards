@@ -52,12 +52,12 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.5.0 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.5.1 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.2 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.4 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -68,7 +68,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-verify.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.1.2 | active | — | — | common | — |
+| `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | — | — | common | — |
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | — | — | common | — |
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `verify-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -81,7 +81,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `retry-handler.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-templates.ts` | L0 | 1.4.4 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
+| `validate-templates.ts` | L0 | 1.4.5 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
