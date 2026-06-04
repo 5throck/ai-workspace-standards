@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.6
+// @version 1.3.7
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -75,6 +75,42 @@ if (!fs.existsSync(scriptsMdPath)) {
   process.exit(1);
 }
 
+// ── mergeScriptsMd: merge L0 SCRIPTS.md into a target dir, preserving independent @versions ──
+function mergeScriptsMd(l0Content: string, targetDir: string): string {
+  const lines = l0Content.split('\n');
+  const result: string[] = [];
+
+  for (const line of lines) {
+    // Only process registry table rows that are L0-only (independent implementations may exist in L1/L2)
+    if (line.startsWith('| `') && line.includes('L0-only')) {
+      const scriptMatch = line.match(/^\| `([^`]+)`/);
+      if (scriptMatch) {
+        const scriptName = scriptMatch[1];
+        const targetFilePath = path.join(targetDir, scriptName);
+
+        if (fs.existsSync(targetFilePath)) {
+          // File exists in target — read its @version header (first 2000 chars is enough)
+          const targetContent = fs.readFileSync(targetFilePath, 'utf-8').slice(0, 2000);
+          const vMatch = targetContent.match(/@version\s+(\d+\.\d+\.\d+)/);
+          if (vMatch) {
+            const targetVersion = vMatch[1];
+            // Replace version column in SCRIPTS.md row: | `script` | L0 | X.Y.Z | ...
+            const updated = line.replace(
+              /(\| L0 \| )(\d+\.\d+\.\d+)( \|)/,
+              `$1${targetVersion}$3`
+            );
+            result.push(updated);
+            continue;
+          }
+        }
+      }
+    }
+    result.push(line);
+  }
+
+  return result.join('\n');
+}
+
 console.log(`${CYAN}=== L0 → L1 publish: scripts/ & skills/ → templates/common/ ===${RESET}`);
 if (dryRun) console.log('(dry-run mode)');
 console.log('');
@@ -109,8 +145,12 @@ for (const line of registryLines) {
 }
 
 if (!dryRun) {
-  safeCopyFile(scriptsMdPath, path.join(l1Dir, 'SCRIPTS.md'));
-  console.log(`  ✅ SCRIPTS.md`);
+  const l0ScriptsMdContent = fs.readFileSync(scriptsMdPath, 'utf-8');
+  const mergedContent = mergeScriptsMd(l0ScriptsMdContent, l1Dir);
+  const l1ScriptsMdPath = path.join(l1Dir, 'SCRIPTS.md');
+  if (fs.existsSync(l1ScriptsMdPath)) fs.rmSync(l1ScriptsMdPath, { force: true });
+  fs.writeFileSync(l1ScriptsMdPath, mergedContent, 'utf-8');
+  console.log(`  ✅ SCRIPTS.md (merged — L0-only independent versions preserved)`);
   count++;
   console.log('');
   console.log(`${GREEN}✅ Published ${count} files  L0 (scripts/) → L1 (templates/common/scripts/)${RESET}`);
@@ -498,11 +538,13 @@ if (APPLY) {
     let scriptsMdSkipped = 0;
     console.log(`\n${CYAN}=== SCRIPTS.md: L1 → L2 propagation ===${RESET}`);
     for (const variant of variants) {
-      const dst = path.join(workspaceRoot, 'templates', variant, 'scripts', 'SCRIPTS.md');
-      if (!fs.existsSync(dst) || fs.readFileSync(dst, 'utf-8') !== l1Content) {
+      const variantScriptsDir = path.join(workspaceRoot, 'templates', variant, 'scripts');
+      const dst = path.join(variantScriptsDir, 'SCRIPTS.md');
+      const mergedForVariant = mergeScriptsMd(l1Content, variantScriptsDir);
+      if (!fs.existsSync(dst) || fs.readFileSync(dst, 'utf-8') !== mergedForVariant) {
         if (APPLY || dryRun === false) {
-          fs.writeFileSync(dst, l1Content, 'utf-8');
-          console.log(`  ${GREEN}✅ templates/${variant}/scripts/SCRIPTS.md${RESET}`);
+          fs.writeFileSync(dst, mergedForVariant, 'utf-8');
+          console.log(`  ${GREEN}✅ templates/${variant}/scripts/SCRIPTS.md (merged — L0-only independent versions preserved)${RESET}`);
           scriptsMdSynced++;
         } else {
           console.log(`  ${YELLOW}[dry-run] templates/${variant}/scripts/SCRIPTS.md differs${RESET}`);
