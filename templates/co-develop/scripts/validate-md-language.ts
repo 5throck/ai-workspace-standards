@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -23,30 +23,29 @@
  */
 
 import { readFileSync } from "fs";
+import { join, dirname } from "node:path";
 
 /**
- * Supported locale codes for I18N exclusion.
- * Add new language codes here to extend i18n support.
- * Reference: CONSTITUTION.md §4 — Internationalization (i18n)
+ * Supported locale codes are loaded from docs/workspace-schema.json (i18n.locale_codes).
+ * To add a new locale: update docs/workspace-schema.json — do NOT hardcode here.
+ * Falls back to a built-in list if the schema file is unavailable.
  */
-const SUPPORTED_LOCALES: string[] = [
-  "ko",     // Korean
-  "ja",     // Japanese
-  "zh-CN",  // Chinese Simplified
-  "zh-TW",  // Chinese Traditional
-  "de",     // German
-  "es",     // Spanish
-  "fr",     // French
-  "pt",     // Portuguese
-  "vi",     // Vietnamese
-  "ms",     // Malay
-  "id",     // Indonesian
-  "th",     // Thai
-  "ru",     // Russian
-  "it",     // Italian
-  "ar",     // Arabic (RTL)
-  // Add future locale codes below this line
-];
+// Read locale codes from workspace-schema.json (SSOT for i18n policy)
+// Falls back to a minimal default if schema is unavailable
+function loadSupportedLocales(): string[] {
+  try {
+    const schemaPath = join(dirname(import.meta.path), '..', 'docs', 'workspace-schema.json');
+    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+    const codes = schema?.i18n?.locale_codes;
+    if (Array.isArray(codes) && codes.length > 0) return codes;
+  } catch {
+    // fall through to default
+  }
+  // Fallback: minimal set if schema unavailable
+  return ['ko', 'ja', 'zh-CN', 'zh-TW', 'de', 'es', 'fr', 'pt', 'vi', 'ms', 'id', 'th', 'ru', 'it', 'ar'];
+}
+
+const SUPPORTED_LOCALES: string[] = loadSupportedLocales();
 
 // Korean character range (Hangul syllables and jamo)
 const KOREAN_PATTERN = /[가-힯ᄀ-ᇿ]/;

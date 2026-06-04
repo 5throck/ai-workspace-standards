@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
@@ -65,6 +65,15 @@
   "_notes": {
     "variant_specific": "Variant-specific phase names (e.g., co-security Phase 3 = Threat Modeling) are declared in each variant's variant.json under phases.phase3_name",
     "variant_agents": "Variant-specific agent tiers are declared in each variant's variant.json under agent_tiers"
+  },
+  "i18n": {
+    "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",
+    "locale_codes": ["ko", "ja", "zh-CN", "zh-TW", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar"],
+    "translation_zone_patterns": [
+      "<lang-code>/",
+      "locales/<lang-code>/"
+    ],
+    "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
   },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",

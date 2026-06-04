@@ -55,7 +55,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.4 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.5 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -116,7 +116,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `validate-md-language.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `validate-md-language.ts` | L0 | 1.3.0 | active | — | — | common | — |
 | `hooks/pre-commit.ts` | L0 | 1.5.3 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; L1 has independent v2.0.0 lightweight version |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |

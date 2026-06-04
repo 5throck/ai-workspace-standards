@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-04T00:11:04.024Z
+**Generated**: 2026-06-04T00:46:15.777Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -93,7 +93,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.3.4 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.3.5 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
@@ -115,7 +115,7 @@
 | update-variant-lifecycle.ts | N/A | scripts/helpers/update-variant-lifecycle.ts | N/A |
 | validate-agents.ts | N/A | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | N/A | scripts/validate-doc-folder.ts | fs, path |
-| validate-md-language.ts | 1.2.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.3.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | N/A | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | N/A | scripts/helpers/validate-platform-parity.ts | fs, path |
