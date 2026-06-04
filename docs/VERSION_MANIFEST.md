@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-04T21:19:32.734Z
+**Generated**: 2026-06-04T22:27:18.695Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 75
+- **Scripts**: 79
 - **Commands**: 6
 
 ---
@@ -19,12 +19,12 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-06-01 |
+| architect | agents/architect.md | high | inherit | 2026-06-04 |
 | auditor | agents/auditor.md | medium | inherit | 2026-06-01 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-01 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-01 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-01 |
-| pm | agents/pm.md | high | inherit | 2026-06-01 |
+| pm | agents/pm.md | high | inherit | 2026-06-04 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-01 |
 
@@ -67,8 +67,10 @@
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.5.2 | scripts/audit.ts | bun |
+| auto-executor.ts | N/A | scripts/lib/auto-executor.ts | N/A |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
+| checkpoint-manager.ts | N/A | scripts/lib/checkpoint-manager.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | N/A | scripts/create-l2-scaffold.ts | child_process, fs, path |
 | dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
@@ -92,7 +94,9 @@
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
+| plan-parser.ts | N/A | scripts/lib/plan-parser.ts | fs, js-yaml |
 | platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
+| platform-dispatcher.ts | N/A | scripts/lib/platform-dispatcher.ts | N/A |
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
