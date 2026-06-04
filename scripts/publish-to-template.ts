@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.3
+// @version 1.3.4
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -455,6 +455,38 @@ if (APPLY) {
     process.exitCode = 1;
   } else {
     console.log(`\n${GREEN}All files in sync.${RESET}`);
+  }
+}
+
+// ── SCRIPTS.md: L1 → L2 explicit propagation ────────────────────────────────
+// SCRIPTS.md is not a .ts file so it is excluded from the propagation-map
+// *.ts pattern. Propagate it explicitly to keep all variant registries in sync.
+{
+  const l1ScriptsMd = path.join(workspaceRoot, 'templates', 'common', 'scripts', 'SCRIPTS.md');
+  if (fs.existsSync(l1ScriptsMd)) {
+    const variants = fs.readdirSync(path.join(workspaceRoot, 'templates'))
+      .filter(d => d.startsWith('co-') && fs.statSync(path.join(workspaceRoot, 'templates', d)).isDirectory());
+    const l1Content = fs.readFileSync(l1ScriptsMd, 'utf-8');
+    let scriptsMdSynced = 0;
+    let scriptsMdSkipped = 0;
+    console.log(`\n${CYAN}=== SCRIPTS.md: L1 → L2 propagation ===${RESET}`);
+    for (const variant of variants) {
+      const dst = path.join(workspaceRoot, 'templates', variant, 'scripts', 'SCRIPTS.md');
+      if (!fs.existsSync(dst) || fs.readFileSync(dst, 'utf-8') !== l1Content) {
+        if (APPLY || dryRun === false) {
+          fs.writeFileSync(dst, l1Content, 'utf-8');
+          console.log(`  ${GREEN}✅ templates/${variant}/scripts/SCRIPTS.md${RESET}`);
+          scriptsMdSynced++;
+        } else {
+          console.log(`  ${YELLOW}[dry-run] templates/${variant}/scripts/SCRIPTS.md differs${RESET}`);
+          scriptsMdSynced++;
+        }
+      } else {
+        console.log(`  ${DARKGRAY}—  templates/${variant}/scripts/SCRIPTS.md already in sync${RESET}`);
+        scriptsMdSkipped++;
+      }
+    }
+    console.log(`${GREEN}SCRIPTS.md sync: ${scriptsMdSynced} updated, ${scriptsMdSkipped} already in sync.${RESET}`);
   }
 }
 
