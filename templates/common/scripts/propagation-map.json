@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/). Edit this file to add/remove sync domains.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -8,10 +8,6 @@
       "target": "templates/common/scripts",
       "include_pattern": "*.ts",
       "recursive": false,
-      "exclude": [
-        "validate-templates.ts",
-        "validate-model-registry.ts"
-      ],
       "note": "L0-only scripts excluded — they reference workspace-level files not available in L2 projects"
     },
     "scripts-hooks": {
@@ -19,8 +15,7 @@
       "source": "scripts/hooks",
       "target": "templates/common/scripts/hooks",
       "include_pattern": "*.ts",
-      "recursive": false,
-      "exclude": ["pre-commit.ts", "pre-push.ts"]
+      "recursive": false
     },
     "scripts-helpers": {
       "description": "Helper/utility scripts used by scaffolding",
@@ -28,18 +23,15 @@
       "target": "templates/common/scripts/helpers",
       "include_pattern": "*.ts",
       "recursive": false,
-      "exclude": [
-        "inject-global-plugins.ts",
-        "inject-skills.ts",
-        "merge-frontmatter.ts",
-        "merge-package-scripts.ts",
-        "substitute-placeholders.ts",
-        "template-validation.ts",
-        "update-variant-lifecycle.ts",
-        "validate-output.ts",
-        "write-scripts-snapshot.ts"
-      ],
-      "note": "Scaffolding-internal helpers excluded — they are L0-only used only by new-project pipeline"
+      "note": "L0-only helper exclusion is handled by SCRIPTS.md layer column — publish-to-template.ts reads layer before copying"
+    },
+    "scripts-lib": {
+      "description": "Library/utility modules for scripts",
+      "source": "scripts/lib",
+      "target": "templates/common/scripts/lib",
+      "include_pattern": "*.ts",
+      "recursive": false,
+      "note": "All lib/ files are currently L0-only per SCRIPTS.md — none will be copied until a file gets layer: common"
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",

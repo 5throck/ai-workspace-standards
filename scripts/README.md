@@ -50,12 +50,12 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.5.1 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.5.2 | active | — | — | common | — |
 | `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.5 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.6 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -80,8 +80,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-templates.ts` | L0 | 1.4.5 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
+| `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
 | `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
