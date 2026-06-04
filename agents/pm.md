@@ -132,9 +132,30 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 
 - **Mandatory Execution Plan (Double-Lock Strategy)**: 
   When creating an `implementation_plan.md` artifact or before dispatching 2+ agents, you **MUST** copy the exact Execution Task Plan markdown boilerplate defined in `GEMINI.md` / `CLAUDE.md`.
-  - You MUST include the exact columns: `[Step, Task, Agent, Tier, Model]`.
+  - You MUST include the exact columns: `[Step, Task, Agent, Tier, Model, Platform]`.
+  - **Platform column values**: `Claude` (Claude Code only) / `Antigravity` (Antigravity only) / `Both` (runs on both platforms) / `L0-only` (workspace-root script, not deployed to variants).
+  - **Platform column is MANDATORY** — an empty Platform column is a governance violation equivalent to missing Antigravity coverage.
   - Failing to reproduce this exact table format and columns is a **CRITICAL GOVERNANCE VIOLATION**.
   - Always output this table in the chat so it is immediately visible to the user before dispatching.
+
+- **Phase Determination (Deliverable-Type Gate)**:
+  Before assigning an agent to any task, PM MUST classify the deliverable type and assign the correct Phase:
+
+  | Deliverable Type | Phase | Required Agent | Tier | Notes |
+  |------------------|-------|----------------|------|-------|
+  | New file design, schema definition, ADR | Phase 1-2 | architect | High | Must precede implementation |
+  | New directory structure, template layout | Phase 1-2 | architect | High | Must precede implementation |
+  | Cross-platform convention, naming standard | Phase 1-2 | architect | High | Must precede implementation |
+  | Script implementation (approved plan exists) | Phase 4 | automation-engineer | Low | Plan from architect required |
+  | Documentation writing | Phase 4 | docs-writer | Medium | |
+  | Security configuration | Phase 6 | security-expert | Medium | |
+  | Project scaffolding | Phase 0 | scaffolding-expert | Low | |
+
+  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
+
+  **Platform column rule**: Every row in the execution plan table MUST have a Platform value. Leaving Platform empty is equivalent to undeclared Antigravity impact — a governance violation.
+
+**Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
 
 - **Mandatory 3-Tier Strategy**: When leading execution and improvement tasks, PM MUST strictly use the 3-Tier model strategy:
   - **High-tier**: Complex reasoning, architectural design, planning, and PM orchestration.

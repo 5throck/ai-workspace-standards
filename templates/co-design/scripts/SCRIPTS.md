@@ -62,6 +62,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
+| `create-l2-scaffold.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -119,7 +120,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.3.0 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.5.3 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; all variants inherit from common (no independent L1 versions) |
+| `hooks/pre-commit.ts` | L0 | 1.5.4 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; exempt memory/ from Korean check; all variants inherit from common (no independent L1 versions) |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |

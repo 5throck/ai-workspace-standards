@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.3
+ * @version 1.5.4
  */
 
 import { $ } from "bun";
@@ -86,9 +86,10 @@ async function main() {
     } catch { /* ignore binary read errors */ }
   }
 
-  // 2-B. Enforce English Only in PR Artifacts (memory logs and CHANGELOG)
+  // 2-B. Enforce English Only in PR Artifacts (CHANGELOG only)
   // Files ending in _ko.md are intentionally Korean — skip them
-  const docsToCheck = staged.filter(f => /^memory\/.*\.md$|^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')) && !/_ko\.md$/.test(f.replace(/\\/g, '/')));
+  // memory/ files are exempt (may contain Korean meeting transcripts and daily logs)
+  const docsToCheck = staged.filter(f => /^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')) && !/_ko\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
     const content = readFileSync(file, 'utf-8');

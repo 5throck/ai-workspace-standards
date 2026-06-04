@@ -69,6 +69,20 @@ One paragraph describing what will be built and why this approach was chosen.
 | Option | Pro | Con | Decision |
 |--------|-----|-----|---------|
 
+### Cross-platform considerations
+- Windows (PowerShell): [notes]
+- Unix (Bash): [notes]
+
+### Platform Impact (MANDATORY)
+
+| Platform | Impact | Files Affected |
+|----------|--------|----------------|
+| Claude Code | [changes required / None] | [file list or N/A] |
+| Antigravity (GEMINI.md) | [changes required / None — justify if None] | [file list or N/A] |
+| templates/common | [propagation required / None] | [file list or N/A] |
+
+> ⚠️ **Rule**: "None" for Antigravity requires explicit written justification. Leaving Antigravity impact undeclared is a governance violation equivalent to missing platform coverage.
+
 ### Acceptance criteria
 - [ ] Criterion 1
 - [ ] Criterion 2
@@ -83,6 +97,7 @@ One paragraph describing what will be built and why this approach was chosen.
 - Surface all ambiguities before finalizing the plan.
 - Flag any change that touches more than 3 files as high-risk and require explicit user confirmation.
 - All ADRs must follow the 3-section format: Context -Decision -Consequences.
+- All ADRs and implementation plans must include a `## Platform Impact` section (Claude Code / Antigravity / templates/common). "N/A" for any platform requires explicit written justification.
 - ADR template: see `https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/templates/_examples/adr/0001-example-decision.md` in the workspace root (not copied into the project -reference only).
 
 ## Meeting Participation

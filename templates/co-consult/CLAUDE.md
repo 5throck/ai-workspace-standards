@@ -9,7 +9,7 @@
 You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
 
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
-1. Display execution plan table first (task | agent | tier | model)
+1. Display execution plan table first (task | agent | tier | model | platform)
 2. Only then invoke the `Agent` tool to dispatch specialist agents
 3. Never bypass PM workflow — direct specialist invocation is forbidden
 
@@ -163,8 +163,8 @@ See [CONSTITUTION.md](CONSTITUTION.md) for the multi-agent architecture and gove
 #### Mandatory Execution Plan Display
 Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|-------|----------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
 | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
 | N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
@@ -196,7 +196,34 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 
 See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
-### 6. Native Sub-agents (`Agent` Tool)
+
+#### Phase Determination Checklist
+
+Before writing the execution plan table, PM MUST classify each task's deliverable type:
+
+| Deliverable Type | → Phase | → Required Agent | → Tier |
+|-----------------|---------|-----------------|--------|
+| New file design / schema / ADR | Phase 1-2 | architect | High |
+| New directory or template layout | Phase 1-2 | architect | High |
+| Cross-platform convention / naming standard | Phase 1-2 | architect | High |
+| Script or code implementation (plan approved) | Phase 4 | automation-engineer | Low |
+| Documentation update | Phase 4 | docs-writer | Medium |
+| Security configuration | Phase 6 | security-expert | Medium |
+| Project scaffolding | Phase 0 | scaffolding-expert | Low |
+
+**Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
+
+**Platform column**: Every row MUST declare `Platform` (`Claude` / `Antigravity` / `Both` / `L0-only`). An empty Platform column is a governance violation.
+
+#### PM Gateway Enforcement Summary
+
+Pre-dispatch validation (run mentally before every execution plan):
+1. ✅ Is each deliverable type correctly mapped to a Phase?
+2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
+3. ✅ Does every row have a Platform column value?
+4. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
+5. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
+
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
@@ -312,13 +339,29 @@ If a custom slash command or background script returns a non-zero exit code:
 ---
 
 <!-- COMMON-CLAUDE:START -->
+
+#### teammateMode (Claude Code Desktop App-only)
+
+**teammateMode**는 Claude Code Desktop App의 Agent Teams 기능 활성화 시 병렬 실행 방식을 지정합니다.
+
+**값**:
+- `in-process` — 동일한 프로세스 내에서 병렬 실행 (Claude Code Desktop App + Antigravity CLI 모두 해당)
+- `tmux` — tmux 분리하여 병렬 실행 (Antigravity CLI 전용)
+- `null` — 기본값
+
+**설정 위치**: `.claude/settings.json` → `hooks.teammateMode`
+
+**참고**: Antigravity에는 Agent Teams에 해당하는 기능이 없으므로, teammateMode는 Claude Code 전용 설정입니다. Antigravity 2.0+는 Agent Manager를 통해 다중 workspace 파편을 관리합니다.
+
+**실행 계획 테이블과의 관계**: teammateMode는 병렬 실행 방식 설정이며, execution plan 테이블의 Platform 열(AI 엔진 구분: Claude/Antigravity/Both/L0-only)과는 별개입니다.
+
 ## Git & PR Additions (Claude Code)
 
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-03 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-04 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 
