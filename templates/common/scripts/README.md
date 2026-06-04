@@ -55,7 +55,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.6 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.3.7 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -107,14 +107,14 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `lib/platform-dispatcher.ts` | L0 | 1.0.0 | active | — | — | L0-only | workspace-only: cross-platform dispatch abstraction for PM auto-mode (Claude Code + Antigravity) |
-| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `lib/plan-parser.ts` | L0 | 1.0.0 | active | — | — | L0-only | workspace-only: parses ExitPlanMode Markdown plans for auto-mode execution |
-| `lib/checkpoint-manager.ts` | L0 | 1.0.0 | active | — | — | L0-only | workspace-only: session-only checkpoint management for PM auto-mode |
-| `lib/auto-executor.ts` | L0 | 1.0.0 | active | — | — | L0-only | workspace-only: phase group execution orchestration for PM auto-mode |
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `lib/platform-dispatcher.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: cross-platform dispatch abstraction for PM auto-mode (Claude Code + Antigravity) |
+| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `lib/plan-parser.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: parses ExitPlanMode Markdown plans for auto-mode execution |
+| `lib/checkpoint-manager.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: session-only checkpoint management for PM auto-mode |
+| `lib/auto-executor.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: phase group execution orchestration for PM auto-mode |
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
