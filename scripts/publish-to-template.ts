@@ -96,6 +96,17 @@ for (const line of registryLines) {
   if (source !== 'L0') continue;
   if (layer.includes('L0-only')) continue;
   if (!script) continue;
+
+  const excludeScripts = [
+    'fix-script-versions.ts',
+    'l2-to-variant-pipeline.ts',
+    'validate-templates.ts',
+    'publish-to-template.ts',
+    'dev-sync.ts',
+    'audit.ts'
+  ];
+  if (excludeScripts.includes(script)) continue;
+
   const src = path.join(l0Dir, script);
   const dst = path.join(l1Dir, script);
   if (!fs.existsSync(src)) continue;

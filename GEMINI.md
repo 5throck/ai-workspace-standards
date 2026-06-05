@@ -233,33 +233,53 @@ Before dispatching 2+ agents, copy this exact format:
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 - Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 
-#### Auto-Mode Note (Antigravity Platform)
+#### Antigravity Security Configuration
 
-> **Platform-Specific Feature**: Auto-Mode is designed for Antigravity platform. For Claude Code, the native Agent tool provides equivalent functionality.
+For automated execution in Antigravity, configure `.gemini/settings.json`:
 
-Auto-Mode enables automated plan execution for Antigravity's Agent Manager workflow. After execution plan approval, Auto-Mode orchestrates specialist dispatch with checkpoint-based error handling.
-
-**Activation**:
-- User explicitly requests: "Auto-Mode on", "Run automatically"
-- Implicit: PM detects straightforward task with clear acceptance criteria
-- Default mode: Auto-Mode is the default execution mode for Antigravity after plan approval
-
-**User Interaction Flow**:
-```markdown
-PM: 📋 Execution plan approved
-   Antigravity default mode: Auto-Mode
-   ▶️ Auto-Mode orchestrates specialist dispatch with checkpoints
-   
-User: [Explicit opt-out → Manual mode]
+```json
+{
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Request Review",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
+}
 ```
 
-**Error Handling**:
-- Non-critical errors: Auto-fix and continue
-- Critical errors: Pause and request user guidance
-- Checkpoint creation: After each phase group completion
-- Rollback support: Restore to last checkpoint on critical failure
+**Field Descriptions**:
+- `terminal.executionPolicy: "Auto"` - Auto-approve agent spawns and safe commands
+- `artifact.reviewPolicy: "Request Review"` - **Require review for file edits (recommended security setting)**
+- `mcp.toolApproval: "Manual"` - Manual approval for MCP tools (security)
+- `terminal.denyList` - Dangerous commands that must never auto-execute
 
-See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for detailed architecture.
+**Security Rationale for "Request Review"**:
+- ✅ **Prevents silent code corruption** - All file edits require explicit user approval before applying
+- ✅ **Mitigates prompt injection attacks** - Human review layer blocks automated malicious edits
+- ✅ **Maintains audit trail** - User acknowledges each change, creating clear accountability
+- ✅ **Balances automation with oversight** - Agent spawning still automated, but file modifications supervised
+
+**Security Notes**:
+- ✅ Agent Spawn auto-approved (productivity)
+- ✅ File edits require manual review (security)
+- ✅ MCP Tools remain manual (external MCP server security)
+- ⚠️ Terminal Auto mode still vulnerable to prompt injection (mitigated by denyList + artifact review)
+- ⚠️ Recommend periodic Git commits (rollback capability)
+
+**Trade-off**: Productivity vs Security
+- **"Auto-Accept"** (not recommended): Full automation but vulnerable to silent code corruption
+- **"Request Review"** (recommended): Balanced approach — automated agent orchestration with human supervision for file changes
+- MCP tool auto-approval poses significant security risk → manual approval maintained regardless of artifact policy
 
 #### Phase Determination Checklist
 

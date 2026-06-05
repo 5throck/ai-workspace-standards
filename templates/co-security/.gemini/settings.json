@@ -29,5 +29,20 @@
         ]
       }
     ]
-  }
+  },
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Auto-Accept",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
 }

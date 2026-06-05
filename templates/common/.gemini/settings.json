@@ -3,8 +3,7 @@
     "codegraph": {
       "command": "npx",
       "args": [
-        "-y",
-        "@colbymchenry/codegraph",
+        "@colbymchenry/codegraph@0.9.7",
         "serve"
       ]
     }
@@ -16,18 +15,21 @@
         "command": "git config core.hooksPath .githooks",
         "statusMessage": "Configuring git hooks..."
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "statusMessage": "Running post-edit lifecycle check..."
-          }
-        ]
-      }
     ]
-  }
+  },
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Request Review",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
 }

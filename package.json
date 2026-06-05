@@ -50,6 +50,8 @@
   },
   "workspace-scripts": true,
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "codegraph": "^1.0.0",
     "semver": "^7.8.1"
   }
 }
