@@ -4,7 +4,7 @@ description: >
   Guides creation of a new workspace variant (Phase A independent prototype).
   Use when: creating a new co-<name> variant, scaffolding a new domain-specific AI team.
 status: active
-version: 1.0.0
+version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05
 metadata:
@@ -55,6 +55,8 @@ This creates `Projects/<variant-name>/` with:
 - Git initialized + .githooks configured
 - bun install complete
 - stub files (_ORIGIN.md, variant.json, PROMOTION_CHECKLIST.md, etc.)
+
+> **Fork Model**: After scaffold completes, L2 evolves independently from L1. L1 changes will NOT automatically propagate to this L2 project. To get L1 updates later, re-run `create-l2-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
 
 ### Step 2: Add variant section to CLAUDE.md
 
@@ -199,6 +201,8 @@ bun scripts/audit.ts   # or domain-specific audit script
 grep "^## " CLAUDE.md
 grep "^## " GEMINI.md
 ```
+
+> **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
 
 ---
 

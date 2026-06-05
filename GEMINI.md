@@ -168,7 +168,24 @@ All `.md` files you create or modify MUST be in English, except when working in 
 See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool.
+
+**Mandatory Criteria** (Boilerplate always required when ANY applies):
+
+1. **Multi-agent Dispatch**: 2 or more specialists involved
+2. **Breaking Changes**: Modifications that break existing functionality
+3. **Platform Parity Changes**: Changes to CLAUDE.md/GEMINI.md sync
+4. **Lifecycle-Related Items** (NEW):
+   - agents/*.md modifications → Requires AGENTS.md update
+   - skills/*/SKILL.md modifications → Requires AGENTS.md update
+   - scripts/*.ts modifications → Requires SCRIPTS.md update
+   - docs/adr/*.md modifications → Requires ADR index update
+5. **Root Configuration Changes** (NEW):
+   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
+   - README.md, CHANGELOG.md
+
+**Boilerplate Format**:
 
 | # | Task | Agent | Tier | Model | Platform |
 |---|------|-------|------|-------|----------|
@@ -177,6 +194,73 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 
 **Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
+
+<!-- COMMON-GEMINI:START -->
+## Execution Plan Boilerplate
+
+Before dispatching 2+ agents, copy this exact format:
+
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|-------|----------|
+| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | gemini-3.5-flash | L0-only |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash | L0-only |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash | L0-only |
+
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
+
+**Key points**:
+- Tier column is MANDATORY (High/Medium/Low)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- State parallel vs sequential order below the table
+
+#### Execution Plan Table Format Guidelines
+
+**WRONG** (Do NOT use):
+| # | Task | Agent | Platform |
+| 1 | Update agents/pm.md | pm (direct) | L0-only |
+
+**CORRECT** (Use this format):
+| # | Task | Implementer | Coordinator | Platform |
+|---|-----------|------------|----------|----------|
+| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
+
+**Key points**:
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+- Use "Implementer" column for the actual executing specialist
+- Use "Coordinator" column for pm (orchestration role only)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+
+#### Auto-Mode Note (Antigravity Platform)
+
+> **Platform-Specific Feature**: Auto-Mode is designed for Antigravity platform. For Claude Code, the native Agent tool provides equivalent functionality.
+
+Auto-Mode enables automated plan execution for Antigravity's Agent Manager workflow. After execution plan approval, Auto-Mode orchestrates specialist dispatch with checkpoint-based error handling.
+
+**Activation**:
+- User explicitly requests: "Auto-Mode on", "Run automatically"
+- Implicit: PM detects straightforward task with clear acceptance criteria
+- Default mode: Auto-Mode is the default execution mode for Antigravity after plan approval
+
+**User Interaction Flow**:
+```markdown
+PM: 📋 Execution plan approved
+   Antigravity default mode: Auto-Mode
+   ▶️ Auto-Mode orchestrates specialist dispatch with checkpoints
+   
+User: [Explicit opt-out → Manual mode]
+```
+
+**Error Handling**:
+- Non-critical errors: Auto-fix and continue
+- Critical errors: Pause and request user guidance
+- Checkpoint creation: After each phase group completion
+- Rollback support: Restore to last checkpoint on critical failure
+
+See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for detailed architecture.
 
 #### Phase Determination Checklist
 
@@ -250,11 +334,31 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
-<!-- COMMON-GEMINI:START -->
 ### 6. Workspace & Template Boundary Policy
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### L1-L2 Fork Model
+
+After a variant (L2) is scaffolded from `templates/common` (L1) via `create-l2-scaffold.ts`, the L1→L2 relationship **ends**. L2 evolves independently.
+
+**5 Fork Model Principles** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
+1. L1 delivers common infrastructure to L2 at scaffold time — relationship ends after that.
+2. L1 changes do **not** auto-propagate to L2 after fork.
+3. To reflect L2 changes as an official template, run `l2-to-variant-pipeline.ts` explicitly.
+4. L0→L1 publish runs automatically via `dev-sync.ts` (continuous pipeline).
+5. L1 vs L2 drift can be reported with `publish-to-template.ts --check-drift` (read-only).
+
+**`--docs` flag**: `bun scripts/publish-to-template.ts --docs` is an **explicit opt-in** tool that injects `COMMON-*` marked sections from L0 governance docs into L2 variants. It does not violate Fork Model independence because it requires deliberate invocation.
+
+| Action | Command | Auto? |
+|--------|---------|-------|
+| L0→L1 publish | `bun scripts/publish-to-template.ts` | ✅ via dev-sync |
+| L1→L2 scaffold (1×) | `bun scripts/create-l2-scaffold.ts` | Manual |
+| L2→template promote | `bun scripts/l2-to-variant-pipeline.ts` | Manual |
+| L1 vs L2 drift report | `bun scripts/publish-to-template.ts --check-drift` | Manual |
+| L0 governance inject | `bun scripts/publish-to-template.ts --docs` | Manual (opt-in) |
 <!-- COMMON-GEMINI:END -->
 
 <!-- COMMON-GEMINI:START -->
@@ -339,7 +443,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 - `teammateMode`
 - Hook events: `TeammateIdle`, `TaskCreated`, `TaskCompleted`
 
-#### teammateMode (Claude Code Desktop App-only)
+#### teammateMode (Claude Code Agent Teams execution mode)
 
 **teammateMode**는 Claude Code Desktop App의 Agent Teams 기능 활성화 시 병렬 실행 방식을 지정합니다.
 
@@ -356,7 +460,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-04 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

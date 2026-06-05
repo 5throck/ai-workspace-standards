@@ -210,3 +210,28 @@ The specialist agent list for this variant is defined in `AGENTS.md`. Consult `A
 | Skill, ToolSearch | Load skills and deferred tools |
 | Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
 | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+
+<!-- SHARED: synced from workspace root agents/pm.md — Auto-Mode Orchestration -->
+## Auto-Mode Orchestration
+
+When dispatching multi-phase plans, PM uses the auto-executor infrastructure:
+
+- `scripts/lib/auto-executor.ts` — phase group execution with retry and rollback
+- `scripts/lib/platform-dispatcher.ts` — cross-platform agent dispatch (Claude Code + Antigravity)
+- `scripts/lib/checkpoint-manager.ts` — session-only checkpoint tracking
+
+### Usage Pattern
+
+1. After user approves execution plan, PM calls `AutoExecutor.executePhaseGroup()`
+2. Each phase group runs sequentially with automatic retry on failure
+3. On critical failure: checkpoint saved → user notified → await resolution
+4. On success: next phase group dispatched automatically
+
+### Auto-Mode Best Practices
+
+1. **Clear communication**: Always state current phase and next action
+2. **Status visibility**: Use ✅ for completion, ⚠️ for warnings, ⛔ for critical errors
+3. **Safety checkpoints**: Never skip user approval gates for architectural decisions
+4. **Traceability**: Log all auto-mode decisions to memory/YYYY-MM-DD.md
+5. **Rollback readiness**: Maintain clean state between phases
+<!-- /SHARED -->

@@ -192,6 +192,11 @@ When a specialist agent's required tool is denied by the user, PM must **not** s
 
 See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
+#### Auto-Mode Note (Antigravity Platform)
+
+> **Claude Code Note**: Auto-Mode infrastructure is not required for Claude Code. The native Agent tool provides equivalent automated specialist dispatch functionality.
+
+Auto-Mode is an Antigravity-specific feature that automates plan execution for the Agent Manager workflow. For Claude Code, the native `Agent` tool already handles sequential specialist dispatch with equivalent functionality. See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for Antigravity Auto-Mode architecture details.
 
 #### Phase Determination Checklist
 
@@ -277,6 +282,27 @@ When working in a plan-mode session:
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### L1-L2 Fork Model
+
+After a variant (L2) is scaffolded from `templates/common` (L1) via `create-l2-scaffold.ts`, the L1→L2 relationship **ends**. L2 evolves independently.
+
+**5 Fork Model Principles** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
+1. L1 delivers common infrastructure to L2 at scaffold time — relationship ends after that.
+2. L1 changes do **not** auto-propagate to L2 after fork.
+3. To reflect L2 changes as an official template, run `l2-to-variant-pipeline.ts` explicitly.
+4. L0→L1 publish runs automatically via `dev-sync.ts` (continuous pipeline).
+5. L1 vs L2 drift can be reported with `publish-to-template.ts --check-drift` (read-only).
+
+**`--docs` flag**: `bun scripts/publish-to-template.ts --docs` is an **explicit opt-in** tool that injects `COMMON-*` marked sections from L0 governance docs into L2 variants. It does not violate Fork Model independence because it requires deliberate invocation.
+
+| Action | Command | Auto? |
+|--------|---------|-------|
+| L0→L1 publish | `bun scripts/publish-to-template.ts` | ✅ via dev-sync |
+| L1→L2 scaffold (1×) | `bun scripts/create-l2-scaffold.ts` | Manual |
+| L2→template promote | `bun scripts/l2-to-variant-pipeline.ts` | Manual |
+| L1 vs L2 drift report | `bun scripts/publish-to-template.ts --check-drift` | Manual |
+| L0 governance inject | `bun scripts/publish-to-template.ts --docs` | Manual (opt-in) |
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
@@ -358,6 +384,66 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-04 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
+<!-- COMMON-CLAUDE:START -->
+#### teammateMode (Claude Code Agent Teams execution mode)
 
+**teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
+
+**Values**:
+- `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `null` — Default value (auto-selects based on environment)
+
+**Configuration location**: `.claude/settings.json` → `teammateMode`
+
+**Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
+
+**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
+<!-- COMMON-CLAUDE:END -->
+<!-- COMMON-CLAUDE:START -->
+## Execution Plan Boilerplate
+
+Before dispatching 2+ agents, copy this exact format:
+
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|-------|----------|
+| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 | L0-only |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 | L0-only |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 | L0-only |
+
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
+
+**Key points**:
+- Tier column is MANDATORY (High/Medium/Low)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- State parallel vs sequential order below the table
+
+#### Execution Plan Table Format Guidelines
+
+**WRONG** (Do NOT use):
+| # | Task | Agent | Platform |
+| 1 | Update agents/pm.md | pm (direct) | L0-only |
+
+**CORRECT** (Use this format):
+| # | Task | Implementer | Coordinator | Platform |
+|---|-----------|------------|----------|----------|
+| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
+
+**Key points**:
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+- Use "Implementer" column for the actual executing specialist
+- Use "Coordinator" column for pm (orchestration role only)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+
+#### Auto-Mode Note (Antigravity Platform)
+
+> **Claude Code Note**: Auto-Mode infrastructure is not required for Claude Code. The native Agent tool provides equivalent automated specialist dispatch functionality.
+
+Auto-Mode is an Antigravity-specific feature that automates plan execution for the Agent Manager workflow. For Claude Code, the native `Agent` tool already handles sequential specialist dispatch with equivalent functionality. See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for Antigravity Auto-Mode architecture details.
+<!-- COMMON-CLAUDE:END -->

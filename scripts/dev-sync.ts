@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.2.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -130,6 +130,20 @@ if (fs.existsSync(genManifestTs)) {
         process.exit(1);
     }
     console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+}
+
+// 4.7 L0→L1 publish (workspace root only)
+const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
+if (isWorkspaceRoot) {
+    console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
+    try {
+        const publishRes = await $`bun scripts/publish-to-template.ts`.nothrow();
+        if (publishRes.exitCode !== 0) {
+            console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        }
+    } catch (e) {
+        console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+    }
 }
 
 // 5. Branch -> commit -> push -> PR

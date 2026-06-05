@@ -4,7 +4,7 @@ description: >
   Guides Phase B promotion of a completed Phase A prototype to an official workspace variant template.
   Use when: PROMOTION_CHECKLIST conditions are all met, ready to create templates/co-<name>/.
 status: active
-version: 1.0.0
+version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05
 metadata:
@@ -103,19 +103,16 @@ cp -r templates/common/.claude/skills/. templates/co-<variant-name>/.claude/skil
 cp -r templates/common/.gemini/skills/. templates/co-<variant-name>/.gemini/skills/
 ```
 
-### Step 6: Add co-<name> to new-project.sh and new-project.ps1
+> **Reconcile boundary**: `l2-to-variant-pipeline.ts` strips files from L2 that are identical to L0. Skills (`.claude/skills/`, `.gemini/skills/`) are **excluded from reconcile** and must always be present in L2. If skills are missing after pipeline run, restore them manually from `templates/common/.claude/skills/` and `templates/common/.gemini/skills/`.
 
-Edit `scripts/new-project.sh` — update 4 locations:
-1. **Line ~62**: `case "$VARIANT" in` allowlist — add `co-<name>` to pipe-list
-2. **Line ~74**: error message listing available variants
-3. **Lines ~85-97**: interactive menu echo lines
-4. **Lines ~44, ~145**: usage/error strings
+### Step 6: Verify new-project.sh/ps1 picks up the new variant
 
-Edit `scripts/new-project.ps1` — find equivalent allowlist and update same 4 patterns.
+`new-project.sh` and `new-project.ps1` automatically detect valid variants from `templates/` at runtime — **no manual update required**.
 
-Verify:
+Verify detection works:
 ```bash
-bash scripts/new-project.sh --help  # Should list co-<name> in variants
+bash scripts/new-project.sh --help
+# Should list co-<name> in the available variants output
 ```
 
 ### Step 6.5: Verify Antigravity coverage
@@ -193,7 +190,7 @@ bun run agent:verify
 ## Post-Promotion Checklist
 
 - [ ] `templates/co-<name>/` created and passes validate-templates.ts
-- [ ] `new-project.sh` and `new-project.ps1` updated with co-<name> enum
+- [ ] `new-project.sh` and `new-project.ps1` correctly list co-<name> in `--help` output (auto-detected from `templates/`)
 - [ ] `templates/co-<name>/variant.json` status is `beta` with correct lifecycle dates
 - [ ] `Projects/<variant-name>/variant.json` has `phaseAComplete: true`
 - [ ] `tag-template.ts` run and tag published

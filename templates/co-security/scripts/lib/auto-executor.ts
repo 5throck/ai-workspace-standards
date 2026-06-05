@@ -3,7 +3,7 @@
  * Auto-Executor for Auto-Mode Workflow
  * @version 1.0.0
  *
- * Orchestrates the entire auto-mode workflow with proper error handling
+ * Orchestrates the entire auto-executor workflow with proper error handling
  * and user interaction. Manages phase group execution, checkpoint creation,
  * rollback, and user notifications.
  *
@@ -359,7 +359,7 @@ export class AutoExecutor {
       const notification = this.notifyUser(task, error);
       console.log(`\n⚠️  User action required. Check notification above.`);
 
-      // In auto-mode, this would trigger a user interaction prompt
+      // In auto-executor, this would trigger a user interaction prompt
       // For now, we log and continue
       console.log(`   📋 Notification ID: ${notification.checkpointId}`);
       console.log(`   📋 Next step: Await user decision\n`);

@@ -1,9 +1,10 @@
-# ADR-0030: PM Auto-Mode Architecture
+# ADR-0030: Auto-Mode for Antigravity Platform
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-06-05
 **Deciders**: PM, architect
 **Supersedes**: —
+**Scope**: Antigravity-only
 
 ## Context
 
@@ -17,7 +18,7 @@ The current PM Gateway workflow requires repetitive manual dispatch of specialis
 
 **User expectation**: When a user approves an execution plan, they expect automatic execution of the approved tasks with appropriate checkpoints, not manual step-by-step dispatch.
 
-**Platform Impact**: PM auto-mode requires cross-platform support (Claude Code + Antigravity). The architecture must handle both native Agent tool dispatch (Claude Code) and Agent Manager UI-based dispatch (Antigravity).
+**Platform Impact**: **Auto-Mode is designed for Antigravity platform only.** Claude Code uses the native Agent tool which already provides equivalent automated specialist dispatch functionality. This ADR defines the Auto-Mode architecture specifically for Antigravity's Agent Manager workflow.
 
 ## Decision
 
@@ -27,10 +28,10 @@ PM auto-mode introduces a layered orchestration system for automatic plan execut
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   PM Auto-Mode                       │
+│                   Auto-Mode                       │
 ├─────────────────────────────────────────────────────┤
 │  1. Plan Parser (Markdown → Structured Tasks)       │
-│  2. Auto-Executor (Checkpoint-based Orchestration)  │
+│  2. Auto-Mode (Checkpoint-based Orchestration)  │
 │  3. Platform Dispatcher (Cross-platform Agent Spawn) │
 │  4. Checkpoint Manager (Session-only State)         │
 └─────────────────────────────────────────────────────┘
@@ -86,7 +87,7 @@ interface ParsedTask {
 - Easy editing during review phase
 - No migration burden for existing plans
 
-#### 3. Auto-Executor (`scripts/lib/auto-executor.ts`)
+#### 3. Auto-Mode (`scripts/lib/auto-mode.ts`)
 
 **Purpose**: Orchestrate task execution with checkpoint system and error handling.
 
@@ -163,7 +164,7 @@ interface CheckpointState {
 
 - [ ] Implement `scripts/lib/platform-dispatcher.ts`
 - [ ] Implement `scripts/lib/plan-parser.ts`
-- [ ] Implement `scripts/lib/auto-executor.ts`
+- [ ] Implement `scripts/lib/auto-mode.ts`
 - [ ] Implement `scripts/lib/checkpoint-manager.ts`
 - [ ] L0 → L1 propagation: Copy modules to `templates/common/scripts/lib/`
 - [ ] L1 → L2 propagation: Update all 4 variants (`templates/co-*/scripts/lib/`)
@@ -217,7 +218,7 @@ interface CheckpointState {
 **Implementation Files**:
 - `scripts/lib/platform-dispatcher.ts` (to be created)
 - `scripts/lib/plan-parser.ts` (to be created)
-- `scripts/lib/auto-executor.ts` (to be created)
+- `scripts/lib/auto-mode.ts` (to be created)
 - `scripts/lib/checkpoint-manager.ts` (to be created)
 
 **Example Plan** (for parser testing):

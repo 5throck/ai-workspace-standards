@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Verification Script for Workspace Root
- * @version 1.0.0
+ * @version 1.0.1
  * Verifies synchronization between agents/ directory and documentation (AGENTS.md, CONSTITUTION.md)
  *
  * Usage:
@@ -126,9 +126,81 @@ function displayResults(result: VerificationResult): void {
   }
 }
 
+async function verifySharedBlocks(): Promise<void> {
+  const rootPmPath = path.join(projectRoot, "agents", "pm.md");
+  let rootContent: string;
+  try {
+    rootContent = await fs.readFile(rootPmPath, "utf-8");
+  } catch {
+    return; // No root pm.md — nothing to verify
+  }
+
+  // Extract SHARED blocks from root pm.md
+  const sharedBlockRegex = /<!-- SHARED:([^>]+)-->([\s\S]*?)<!-- \/SHARED -->/g;
+  const rootBlocks: Array<{ label: string; full: string }> = [];
+  let match;
+  while ((match = sharedBlockRegex.exec(rootContent)) !== null) {
+    rootBlocks.push({ label: match[1].trim(), full: match[0] });
+  }
+
+  if (rootBlocks.length === 0) return; // No SHARED blocks in root — nothing to verify
+
+  const templatesDir = path.join(projectRoot, "templates");
+  let variantDirs: string[];
+  try {
+    const entries = await fs.readdir(templatesDir, { withFileTypes: true });
+    variantDirs = entries
+      .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+      .map((e) => e.name);
+  } catch {
+    return;
+  }
+
+  let warnCount = 0;
+  for (const variant of variantDirs) {
+    const variantPmPath = path.join(templatesDir, variant, "agents", "pm.md");
+    let variantContent: string;
+    try {
+      variantContent = await fs.readFile(variantPmPath, "utf-8");
+    } catch {
+      continue; // No pm.md in this variant — skip
+    }
+
+    for (const block of rootBlocks) {
+      const labelKey = block.label.split("—")[0].trim();
+      if (!variantContent.includes(`<!-- SHARED: ${labelKey}`)) {
+        console.log(`⚠️  [SHARED_BLOCK_MISSING] templates/${variant}/agents/pm.md`);
+        console.log(`   SHARED block missing: "${block.label}"`);
+        console.log(`   💡 Sync from workspace root agents/pm.md\n`);
+        warnCount++;
+      } else {
+        // Block present — check content matches
+        const escapedKey = labelKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const variantBlockRegex = new RegExp(
+          `<!-- SHARED:\\s*${escapedKey}[^>]*-->[\\s\\S]*?<!-- \\/SHARED -->`,
+        );
+        const variantMatch = variantContent.match(variantBlockRegex);
+        if (variantMatch && variantMatch[0] !== block.full) {
+          console.log(`⚠️  [SHARED_BLOCK_DRIFT] templates/${variant}/agents/pm.md`);
+          console.log(`   SHARED block content differs from workspace root: "${block.label}"`);
+          console.log(`   💡 Re-sync from workspace root agents/pm.md\n`);
+          warnCount++;
+        }
+      }
+    }
+  }
+
+  if (warnCount === 0) {
+    console.log(
+      `✅ SHARED blocks: all ${variantDirs.length} L2 variant pm.md files contain required SHARED blocks\n`,
+    );
+  }
+}
+
 async function main() {
   const result = await verifyAgents();
   displayResults(result);
+  await verifySharedBlocks();
   process.exit(result.pass ? 0 : 1);
 }
 

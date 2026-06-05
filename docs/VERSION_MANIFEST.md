@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-04T22:55:13.753Z
+**Generated**: 2026-06-05T06:39:15.928Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -36,13 +36,13 @@
 |------|---------|----------|----------|----------|-------|
 | agent-lifecycle-manager | 1.0.0 | skills/agent-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | N/A | auditor |
-| create-variant | 1.0.0 | skills/create-variant/SKILL.md | workspace | N/A | pm |
+| create-variant | 1.0.1 | skills/create-variant/SKILL.md | workspace | N/A | pm |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
 | meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
-| promote-variant | 1.0.0 | skills/promote-variant/SKILL.md | workspace | N/A | pm |
+| promote-variant | 1.0.1 | skills/promote-variant/SKILL.md | workspace | N/A | pm |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | N/A | security-expert |
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
@@ -66,14 +66,14 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.5.2 | scripts/audit.ts | bun |
+| audit.ts | 2.5.3 | scripts/audit.ts | bun |
 | auto-executor.ts | N/A | scripts/lib/auto-executor.ts | N/A |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | checkpoint-manager.ts | N/A | scripts/lib/checkpoint-manager.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | N/A | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.1 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
@@ -100,7 +100,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.3.7 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.4.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
@@ -133,7 +133,7 @@
 | verify-memory.ts | N/A | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | N/A | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | N/A | scripts/verify-platform-lifecycle.ts | N/A |
-| verify-readme-sync.ts | 1.1.0 | scripts/verify-readme-sync.ts | bun, fs, path |
+| verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | N/A | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | N/A | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | N/A | scripts/verify-template-integrity.ts | crypto, fs, path |

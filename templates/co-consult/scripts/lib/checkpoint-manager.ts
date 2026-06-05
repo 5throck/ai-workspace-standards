@@ -2,7 +2,7 @@
 /**
  * checkpoint-manager.ts
  * @version 1.0.0
- * @description Session-only checkpoint manager for auto-mode workflow
+ * @description Session-only checkpoint manager for auto-executor workflow
  *
  * Manages in-memory checkpoints for task rollback and state restoration.
  * No file persistence - all checkpoints cleared on session end.
