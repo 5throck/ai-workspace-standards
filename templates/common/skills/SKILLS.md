@@ -25,3 +25,25 @@
 | `translate` | 1.0.0 | active | L0+L1 | pm | 2026-06-06 | — | — |
 | `ui-ux-pro-max` | 1.0.0 | active | L0+L1 | architect | 2026-06-06 | — | Restored to L0+L1 — was incorrectly removed in PR 231 |
 | `validate-docs-links` | 1.0.0 | active | L0+L1 | docs-writer | 2026-05-30 | — | — |
+
+## Variant-Specific Skills (L0+L1+L2)
+
+> Skills below are variant-specific overrides in `templates/co-*/skills/`. They are NOT published to
+> `templates/common/skills/` — each variant owns them as delta items.
+
+| skill | version | status | layer | owner | last_reviewed | removal-date | notes |
+|-------|---------|--------|-------|-------|---------------|--------------|-------|
+| `change-impact-assessment` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `competitive-intelligence` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `consulting-report-writing` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `executive-presentation` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `financial-modeling` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `insight-synthesis` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `narrative-framework` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `org-readiness-assessment` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `project-delivery` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `solution-design` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `stakeholder-alignment` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `stakeholder-review-management` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `technical-feasibility` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `verify-authorization` | 1.0.0 | active | L0+L1+L2 | security-expert | 2026-06-06 | — | co-security only |
