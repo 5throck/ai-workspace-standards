@@ -30,105 +30,101 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
 <!-- Required columns: script | source | version | status | removal-date | security-advisory | layer | pair -->
 <!-- status: active | deprecated | experimental -->
-<!-- removal-date: YYYY-MM-DD (required when status=deprecated) or — -->
-<!-- security-advisory: CVE-XXXX or — -->
+<!-- removal-date: YYYY-MM-DD (required when status=deprecated) or ??-->
+<!-- security-advisory: CVE-XXXX or ??-->
 <!-- Layer column values:
   common   = script exists in both scripts/ and templates/common/scripts/
   L0-only  = workspace root only, must NOT be referenced from templates/common/
   L1-only  = generated project only, must exist in templates/common/scripts/
 -->
-<!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or — -->
-<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment — whether file content actually reflects version history — is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
+<!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or ??-->
+<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment ??whether file content actually reflects version history ??is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
 
-| script | source | version | status | removal-date | security-advisory |
-|--------|--------|---------|--------|--------------|-------------------|
-| `agent-create.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-delete.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — |
-| `agent-list.ts` | L0 | 1.0.0 | active | — | — |
-| `agent-verify.ts` | L0 | 1.0.1 | active | — | — |
-| `analyze-git-history.ts` | L0 | 1.0.0 | active | — | — |
-| `archive-memory.ts` | L0 | 1.0.0 | active | — | — |
-| `audit.ts` | L0 | 2.5.3 | active | — | — |
-| `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | — |
-| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — |
-| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — |
-| `clear-pm-approval.ts` | L0 | 1.0.0 | active | — | — |
-| `create-l2-scaffold.ts` | L0 | 1.2.0 | active | — | — |
-| `dev-sync.ts` | L0 | 1.2.1 | active | — | — |
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | — | — |
-| `dispatch.ts` | L0 | 1.0.0 | active | — | — |
-| `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — |
-| `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — |
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | — | — |
-| `generate-version-manifest.ts` | L0 | 1.0.1 | active | — | — |
-| `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/generate-variant.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/template-validation.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/validate-output.ts` | L0 | 1.0.0 | active | — | — |
-| `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | — | — |
-| `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | — | — |
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — |
-| `hooks/pre-commit.ts` | L0 | 1.5.4 | active | — | — |
-| `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — |
-| `install-bun.ps1` | L0 | 1.0.0 | active | — | — |
-| `install-bun.sh` | L0 | 1.0.0 | active | — | — |
-| `l2-to-variant-pipeline.ts` | L0 | 1.1.0 | active | — | — |
-| `lib/auto-executor.ts` | L0 | 1.0.0 | active | — | — |
-| `lib/checkpoint-manager.ts` | L0 | 1.0.0 | active | — | — |
-| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — |
-| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — |
-| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — |
-| `lib/plan-parser.ts` | L0 | 1.0.0 | active | — | — |
-| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — |
-| `lib/platform-dispatcher.ts` | L0 | 1.0.0 | active | — | — |
-| `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | — | — |
-| `list-template-versions.ts` | L0 | 1.1.0 | active | — | — |
-| `new-project.ps1` | L0 | 1.6.3 | active | — | — |
-| `new-project.sh` | L0 | 1.4.1 | active | — | — |
-| `publish-to-template.ts` | L0 | 1.4.1 | active | — | — |
-| `qa-gate.ts` | L0 | 1.0.2 | active | — | — |
-| `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | — | — |
-| `retry-handler.ts` | L0 | 1.0.0 | active | — | — |
-| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — |
-| `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | — | — |
-| `sync-agent-status.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-md.ts` | L0 | 1.2.0 | active | — | — |
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — |
-| `sync-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `tag-template.ts` | L0 | 1.0.0 | active | — | — |
-| `team-builder.ts` | L0 | 1.2.0 | active | — | — |
-| `test-new-project.ts` | L0 | 1.0.3 | active | — | — |
-| `test-runner.ts` | L0 | 1.0.0 | active | — | — |
-| `translate-readme.ts` | L0 | 1.0.0 | active | — | — |
-| `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — |
-| `upgrade-project.sh` | L0 | 1.1.0 | active | — | — |
-| `validate-agents.ts` | L0 | 1.0.0 | active | — | — |
-| `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — |
-| `validate-md-language.ts` | L0 | 1.3.0 | active | — | — |
-| `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — |
-| `validate-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `validate-templates.ts` | L0 | 1.4.5 | active | — | — |
-| `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-memory.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-new-project-tests.ts` | L0 | 1.0.2 | active | — | — |
-| `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | — | — |
-| `verify-readme-sync.ts` | L0 | 1.1.1 | active | — | — |
-| `verify-scripts.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-skills.ts` | L0 | 1.0.0 | active | — | — |
-| `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — |
+| script | source | version | status | removal-date | security-advisory | layer | pair |
+|--------|--------|---------|--------|--------------|-------------------|-------|------|
+| `agent-create.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `agent-delete.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | —| —| common | —|
+| `agent-list.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `agent-verify.ts` | L0 | 1.0.1 | active | —| —| common | —|
+| `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `archive-memory.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `audit.ts` | L0 | 2.5.3 | active | —| —| L0-only | —|
+| `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | —| common | —|
+| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| common | —|
+| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| common | —|
+| `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `create-l2-scaffold.ts` | L0 | 1.2.0 | active | —| —| L0-only | —|
+| `dev-sync.ts` | L0 | 1.2.1 | active | —| —| L0-only | —|
+| `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `dispatch.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `fix-script-versions.ts` | L0 | 1.1.0 | active | —| —| L0-only | —|
+| `gen-pr-body.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `generate-version-manifest.ts` | L0 | 1.0.1 | active | —| —| common | —|
+| `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/generate-variant.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/merge-frontmatter.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/template-validation.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/validate-output.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `hooks/pre-commit.ts` | L0 | 1.5.4 | active | —| —| common | —|
+| `hooks/pre-push.ts` | L0 | 1.2.0 | active | —| —| common | —|
+| `install-bun.ps1` | L0 | 1.0.0 | active | —| —| common | —|
+| `install-bun.sh` | L0 | 1.0.0 | active | —| —| common | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.1.0 | active | —| —| L0-only | —|
+| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| common | —|
+| `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `new-project.ps1` | L0 | 1.6.3 | active | —| —| common | —|
+| `new-project.sh` | L0 | 1.4.1 | active | —| —| common | —|
+| `publish-to-template.ts` | L0 | 1.4.1 | active | —| —| L0-only | —|
+| `qa-gate.ts` | L0 | 1.0.2 | active | —| —| L0-only | —|
+| `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| common | —|
+| `retry-handler.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | —| —| common | —|
+| `sync-agent-status.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `sync-md.ts` | L0 | 1.2.0 | active | —| —| common | —|
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `sync-skills.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `tag-template.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0-only | —|
+| `test-new-project.ts` | L0 | 1.0.3 | active | —| —| common | —|
+| `test-runner.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `translate-readme.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `upgrade-project.ps1` | L0 | 1.1.0 | active | —| —| common | —|
+| `upgrade-project.sh` | L0 | 1.1.0 | active | —| —| common | —|
+| `validate-agents.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| common | —|
+| `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| common | —|
+| `validate-skills.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `validate-templates.ts` | L0 | 1.4.5 | active | —| —| L0-only | —|
+| `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `verify-memory.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| common | —|
+| `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | —| —| common | —|
+| `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| common | —|
+| `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `verify-skills.ts` | L0 | 1.0.0 | active | —| —| common | —|
+| `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| common | —|
 
 ---
 
@@ -136,11 +132,11 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
-| **L0 — Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
-| **L1 — Template snapshot** | `templates/common/scripts/` | publish: `bun run publish-to-template` | Explicit publish from L0 via consolidated tool |
-| **L2 — Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `publish-to-template.ts` |
+| **L0 ??Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
+| **L1 ??Template snapshot** | `templates/common/scripts/` | publish: `bun run publish-to-template` | Explicit publish from L0 via consolidated tool |
+| **L2 ??Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `publish-to-template.ts` |
 
-**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run publish-to-template`, which is now a consolidated tool that also handles L1->L2 propagation. L2 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L2.
+**Propagation rule**: L0 is the development SSOT. Publish L0?묹1 explicitly with `bun run publish-to-template`, which is now a consolidated tool that also handles L1->L2 propagation. L2 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L2.
 
 ---
 
@@ -166,7 +162,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 ## Guide
 
-### Everyday Development Scripts (Tier 2 — `bun run <script>`)
+### Everyday Development Scripts (Tier 2 ??`bun run <script>`)
 
 #### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, CONSTITUTION.md, AGENTS.md,
@@ -175,8 +171,7 @@ agent frontmatter, skill health, and template lifecycle validation.
 **Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`
 
 #### `dev-sync.ts`
-**Purpose**: Full sync pipeline — session log → MEMORY.md index → CHANGELOG auto-add →
-audit gate → sensitive file check → branch creation → commit → push → PR.
+**Purpose**: Full sync pipeline ??session log ??MEMORY.md index ??CHANGELOG auto-add ??audit gate ??sensitive file check ??branch creation ??commit ??push ??PR.
 **Usage**: `bun run dev-sync "feat: description"`
 **Claude Code / Gemini**: `/sync "feat: description"`
 
@@ -223,7 +218,7 @@ audit gate → sensitive file check → branch creation → commit → push → 
 **Usage**: `bun scripts/agent-verify.ts`
 
 #### `agent-lifecycle-audit.ts`
-**Purpose**: Full agent lifecycle audit — frontmatter validation, AGENTS.md consistency,
+**Purpose**: Full agent lifecycle audit ??frontmatter validation, AGENTS.md consistency,
 deprecated agent references, missing fields.
 **Usage**: `bun scripts/agent-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `agents/*.md` files are staged.
@@ -237,7 +232,7 @@ deprecated agent references, missing fields.
 ### Skill Lifecycle Scripts (Bun / TypeScript)
 
 #### `skill-lifecycle-audit.ts`
-**Purpose**: Full skill lifecycle audit — owner validation, orphaned skills, deprecated
+**Purpose**: Full skill lifecycle audit ??owner validation, orphaned skills, deprecated
 skills still being modified, dependency graph, circular dependencies.
 **Usage**: `bun scripts/skill-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `skills/**` files are staged.

@@ -251,12 +251,57 @@ Before dispatching 2+ agents, copy this exact format:
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 - Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 
-#### Auto-Mode Note (Antigravity Platform)
+#### Antigravity Security Configuration
 
-> **Claude Code Note**: Auto-Mode infrastructure is not required for Claude Code. The native Agent tool provides equivalent automated specialist dispatch functionality.
+For automated execution in Antigravity, configure `.gemini/settings.json`:
 
-Auto-Mode is an Antigravity-specific feature that automates plan execution for the Agent Manager workflow. For Claude Code, the native `Agent` tool already handles sequential specialist dispatch with equivalent functionality. See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for Antigravity Auto-Mode architecture details.
+\`\`\`json
+{
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Request Review",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
+}
+\`\`\`
+
+**Field Descriptions**:
+- \`terminal.executionPolicy: "Auto"\` - Auto-approve agent spawns and safe commands
+- \`artifact.reviewPolicy: "Request Review"\` - **Require review for file edits (recommended security setting)**
+- \`mcp.toolApproval: "Manual"\` - Manual approval for MCP tools (security)
+- \`terminal.denyList\` - Dangerous commands that must never auto-execute
+
+**Security Rationale for "Request Review"**:
+- ✅ **Prevents silent code corruption** - All file edits require explicit user approval before applying
+- ✅ **Mitigates prompt injection attacks** - Human review layer blocks automated malicious edits
+- ✅ **Maintains audit trail** - User acknowledges each change, creating clear accountability
+- ✅ **Balances automation with oversight** - Agent spawning still automated, but file modifications supervised
+
+**Security Notes**:
+- ✅ Agent Spawn auto-approved (productivity)
+- ✅ File edits require manual review (security)
+- ✅ MCP Tools remain manual (external MCP server security)
+- ⚠️ Terminal Auto mode still vulnerable to prompt injection (mitigated by denyList + artifact review)
+- ⚠️ Recommend periodic Git commits (rollback capability)
+
+**Trade-off**: Productivity vs Security
+- **"Auto-Accept"** (not recommended): Full automation but vulnerable to silent code corruption
+- **"Request Review"** (recommended): Balanced approach — automated agent orchestration with human supervision for file changes
+- MCP tool auto-approval poses significant security risk → manual approval maintained regardless of artifact policy
+
+> **Claude Code Note**: For Claude Code, the native Agent tool provides equivalent automated specialist dispatch functionality without requiring Auto-Mode infrastructure.
 <!-- COMMON-CLAUDE:END -->
+
 
 #### Phase Determination Checklist
 

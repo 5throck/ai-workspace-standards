@@ -51,7 +51,7 @@ interface RegistryEntry {
   status: "active" | "deprecated" | "experimental";
   removalDate: string; // "—" or "YYYY-MM-DD"
   securityAdvisory: string; // "—" or "CVE-XXXX"
-  drift: string; // "—" (checked) | "intentional" (skip drift check)
+  layer: "common" | "L0-only" | "L1-only";
   pair: string;  // "—" or "<script-name>" (.sh declares its .ps1 pair)
 }
 
@@ -102,8 +102,8 @@ function parseRegistry(content: string): RegistryEntry[] {
       status,
       removalDate: cols[4],
       securityAdvisory: cols[5],
-      drift: cols[6] ?? "—", // backward-compatible: 6-column rows default to "—"
-      pair: cols[7] ?? "—",  // new column: .sh declares its .ps1 horizontal pair
+      layer: (cols[6] as RegistryEntry["layer"]) || "common",
+      pair: cols[7] || "—",
     });
   }
 
@@ -143,7 +143,6 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
 
   for (const entry of registry) {
     if (entry.source !== "L0") continue;
-    if (entry.drift === "intentional") continue;
 
     const l0Path = join(scriptsDir, entry.script);       // workspace L0
     const l1Path = join(l1TemplateDir, entry.script);    // template L1
@@ -176,7 +175,6 @@ function checkDriftReport(): void {
   const content = readFileSync(scriptsMdPath, "utf-8");
   const registry = parseRegistry(content);
   const { drifted, clean } = detectDrift(registry);
-  const intentional = registry.filter(e => e.source === "L0" && e.drift === "intentional");
 
   console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
 
@@ -189,13 +187,7 @@ function checkDriftReport(): void {
       const sign = diff >= 0 ? "+" : "";
       console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
     }
-    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.");
-    console.log("   If divergence is intentional, set 'drift: intentional' in SCRIPTS.md.\n");
-  }
-
-  if (intentional.length > 0) {
-    console.log(`ℹ️  Intentional drift (skipped, ${intentional.length} script(s)):`);
-    for (const e of intentional) console.log(`   ${e.script}`);
+    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.\n");
   }
 
   if (clean.length > 0) {
@@ -274,8 +266,7 @@ function verify(): boolean {
   const { drifted } = detectDrift(registry);
   for (const d of drifted) {
     warnings.push(
-      `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines. ` +
-      `Mark \`drift: intentional\` in SCRIPTS.md if divergence is expected.`
+      `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines.`
     );
   }
 
@@ -402,15 +393,15 @@ function generate(): void {
       const known = existingMap.get(script);
       if (known) {
         // Preserve existing metadata
-        return `| \`${known.script}\` | ${known.source} | ${known.version} | ${known.status} | ${known.removalDate} | ${known.securityAdvisory} |`;
+        return `| \`${known.script}\` | ${known.source} | ${known.version} | ${known.status} | ${known.removalDate} | ${known.securityAdvisory} | ${known.layer} | ${known.pair} |`;
       }
-      return `| \`${script}\` | L0 | 1.0.0 | active | — | — |`;
+      return `| \`${script}\` | L0 | 1.0.0 | active | — | — | common | — |`;
     });
 
     // Replace Registry section in existing file
     const header =
-      "| script | source | version | status | removal-date | security-advisory |\n" +
-      "|--------|--------|---------|--------|--------------|-------------------|";
+      "| script | source | version | status | removal-date | security-advisory | layer | pair |\n" +
+      "|--------|--------|---------|--------|--------------|-------------------|-------|------|";
 
     const updated = existing.replace(
       /(\| script \|.*?\n\|[-| ]+\|\n)([\s\S]*?)(?=\n---|\n## )/,
@@ -428,7 +419,7 @@ function generate(): void {
   // Fresh generate
   const rows = actualScripts
     .map(
-      (s) => `| \`${s}\` | L0 | 1.0.0 | active | — | — |`
+      (s) => `| \`${s}\` | L0 | 1.0.0 | active | — | — | common | — |`
     )
     .join("\n");
 
@@ -440,8 +431,8 @@ function generate(): void {
 
 ## Registry
 
-| script | source | version | status | removal-date | security-advisory |
-|--------|--------|---------|--------|--------------|-------------------|
+| script | source | version | status | removal-date | security-advisory | layer | pair |
+|--------|--------|---------|--------|--------------|-------------------|-------|------|
 ${rows}
 
 ---

@@ -88,7 +88,7 @@ function parseScriptsMdRegistry(
   const content = readFileSync(filePath, 'utf-8');
 
   // Extract section between ## Registry and the next ## header
-  const registryMatch = content.match(/## Registry\n([\s\S]*?)(?:\n## |\s*$)/);
+  const registryMatch = content.match(/## Registry\r?\n([\s\S]*?)(?:\r?\n## |\s*$)/);
   if (!registryMatch) return result;
 
   const section = registryMatch[1];
