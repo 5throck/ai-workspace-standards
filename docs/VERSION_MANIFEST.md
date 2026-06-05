@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-05T06:39:15.928Z
+**Generated**: 2026-06-05T07:02:41.738Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,12 +19,12 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-06-04 |
+| architect | agents/architect.md | high | inherit | 2026-06-05 |
 | auditor | agents/auditor.md | medium | inherit | 2026-06-01 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-01 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-01 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-01 |
-| pm | agents/pm.md | high | inherit | 2026-06-04 |
+| pm | agents/pm.md | high | inherit | 2026-06-05 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-01 |
 
@@ -100,7 +100,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.4.0 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.4.1 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

@@ -4,6 +4,7 @@ description: Runs the root workspace audit scripts to enforce CONSTITUTION.md co
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
+scope: common
 owner: auditor
 prerequisites: PowerShell or Bash
 metadata:

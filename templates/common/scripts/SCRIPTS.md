@@ -44,8 +44,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.4.0 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.6.2 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.4.1 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.6.3 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
@@ -57,7 +57,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.4.0 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.4.1 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -325,4 +325,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-04 — added Check A formal-consistency-only clarification comment*
+*Last updated: 2026-06-05 — added Check A formal-consistency-only clarification comment*

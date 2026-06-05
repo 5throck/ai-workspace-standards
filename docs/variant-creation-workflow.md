@@ -136,7 +136,7 @@ Create variant template and propagate to workspace root, enabling future project
 - **Location**: `templates/co-[variant-name]/`
 - **Method**:
   - **Option 1 (Manual)**: Manually copy files from `Projects/[variant-name]/` to `templates/co-[variant-name]/`
-  - **Option 2 (Automated)**: Run `bun run scripts/project-to-variant-pipeline.ts Projects/[variant-name]/`
+  - **Option 2 (Automated)**: Run `bun run scripts/l2-to-variant-pipeline.ts Projects/[variant-name]/`
 - **Structure**:
   ```
   templates/co-[variant-name]/
@@ -264,7 +264,7 @@ Create variant template and propagate to workspace root, enabling future project
 | Script | Purpose | Status |
 |--------|---------|--------|
 | `new-project.sh/ps1` | Create new project | ✅ Available |
-| `project-to-variant-pipeline.ts` | Automate Projects/ → templates/ conversion | 🔨 In Development |
+| `l2-to-variant-pipeline.ts` | Automate Projects/ → templates/ conversion | ✅ Available |
 | `validate-templates.ts` | Template structure validation | ✅ Available |
 | `audit.ts` | Workspace standards compliance | ✅ Available |
 | `verify-platform-lifecycle.ts` | Platform parity verification | ✅ Available |

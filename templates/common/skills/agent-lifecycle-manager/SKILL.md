@@ -1,6 +1,7 @@
 ---
 name: agent-lifecycle-manager
 status: active
+scope: common
 description: >
   Manages the creation, validation, and maintenance of AI agent files across the project.
   Use when: creating new agents, updating agent metadata/frontmatter, validating agent structures,

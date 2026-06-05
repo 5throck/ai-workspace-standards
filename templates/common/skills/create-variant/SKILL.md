@@ -4,6 +4,7 @@ description: >
   Guides creation of a new workspace variant (Phase A independent prototype).
   Use when: creating a new co-<name> variant, scaffolding a new domain-specific AI team.
 status: active
+scope: common
 version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05

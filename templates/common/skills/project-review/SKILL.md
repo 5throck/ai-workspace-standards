@@ -1,6 +1,7 @@
 ---
 name: project-review
 status: active
+scope: common
 description: >
   Performs a comprehensive parallel review of the current project using all
   available specialist agents. Auto-detects project type and agent roster,

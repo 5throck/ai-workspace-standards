@@ -88,6 +88,10 @@ Intentional L2 customizations to these files are preserved during reconcile beca
 - The distinction between intentional and accidental drift is explicit: drift is always intentional after fork, because propagation never happens automatically.
 - Reconcile keeps official templates lean without losing variant-specific customizations.
 
+#### Known Exception: Governance Doc Injection Target List
+
+The `governance-*` domains in `propagation-map.json` use an explicit `target_variants` list for `publishDocs()` marker injection. This is a deliberate exception — governance section injection requires explicit opt-in per variant, unlike script propagation which is content-agnostic. Adding a new variant requires updating `propagation-map.json` governance domain lists. This is documented here to distinguish it from the eliminated hardcoded script propagation lists.
+
 **Negative / Trade-offs**:
 
 - L1 improvements (e.g., script bug fixes, new agent capabilities) do **not** automatically reach existing L2 variants. Propagating a fix to an L2 variant requires either re-scaffolding or a manual copy, followed by explicit promotion via `l2-to-variant-pipeline.ts`.
@@ -141,5 +145,5 @@ Intentional L2 customizations to these files are preserved during reconcile beca
 - `scripts/dev-sync.ts` — continuous sync pipeline (integrates L0→L1 publish)
 
 **Related ADRs**:
-- [ADR-0026: Variant Registration Strategy](0026-variant-registration-strategy.md) — partially superseded; §5 manual allowlist replaced by dynamic directory resolution
+- [ADR-0026: Variant Creation Procedure](0026-variant-creation-procedure.md) — partially superseded; §5 manual allowlist replaced by dynamic directory resolution
 - [ADR-0030: Auto-Mode for Antigravity Platform](0030-auto-mode-architecture.md) — parallel ADR for platform dispatcher pattern

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.0
+# @version 1.4.1
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -68,6 +68,11 @@ if [ -n "$VARIANT" ]; then
       | grep -E "^templates/co-[^/]+/variant\.json$" \
       | sed 's|templates/||;s|/variant\.json||' \
       | sort -u || echo "")
+    if [ -z "$VALID_VARIANTS" ]; then
+      echo "❌ Could not detect variants from tag '$_TAG'. Tag may not exist or has no variant.json entries."
+      echo "   To list available tags: git tag --list 'template-v*'"
+      exit 1
+    fi
   else
     VALID_VARIANTS=$(ls "$_WS_ROOT/templates/" 2>/dev/null | grep "^co-" | sort)
   fi

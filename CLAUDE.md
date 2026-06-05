@@ -109,7 +109,7 @@ Spawn a teammate using the automation-engineer agent type to implement the scrip
 
 **Values**:
 - `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
 - `null` — Default value (auto-selects based on environment)
 
 **Configuration location**: `.claude/settings.json` → `teammateMode`

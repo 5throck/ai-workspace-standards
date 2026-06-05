@@ -102,13 +102,13 @@ Spawn a teammate using the automation-engineer agent type to implement the scrip
 > - **Claude Code Desktop App** ⚠️ Partial — in-process only, no hooks, no tmux
 > - **Antigravity CLI** ❌ Not supported — use Agent Manager (UI-based) instead. See GEMINI.md §Agent Manager.
 
-#### teammateMode (Claude Code Agent Teams 실행 방식)
+#### teammateMode (Claude Code Agent Teams execution mode)
 
 **teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
 
 **Values**:
 - `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
 - `null` — Default value (auto-selects based on environment)
 
 **Configuration location**: `.claude/settings.json` → `teammateMode`
@@ -433,7 +433,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 **Values**:
 - `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
 - `null` — Default value (auto-selects based on environment)
 
 **Configuration location**: `.claude/settings.json` → `teammateMode`
