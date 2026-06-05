@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.6
+ * @version 1.5.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
+import { getScriptLayer, getSkillLayer, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
 
 interface VariantManifest {
   name: string;
@@ -2072,6 +2073,68 @@ function checkDocumentCommonSections(variant: string): void {
   }
 }
 
+// Check WS-04: L0 scripts must NOT exist in templates/co-*/scripts/
+function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-04: L0 scripts must not exist in ${variant}/scripts/ ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  if (!existsSync(variantScriptsDir)) return;
+
+  function scanRecursive(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        scanRecursive(fullPath);
+      } else if (entry.endsWith('.ts') || entry.endsWith('.sh') || entry.endsWith('.ps1')) {
+        const layer = getScriptLayer(entry, scriptLayerMap);
+        if (layer === 'L0') {
+          const relFile = fullPath.slice(join(TEMPLATES_DIR, variant, 'scripts').length + 1).replace(/\\/g, '/');
+          fail(variant, 'WS-04', `templates/${variant}/scripts/${relFile} is classified L0 — must not exist in variant template`, `Remove templates/${variant}/scripts/${relFile}`);
+        }
+      }
+    }
+  }
+
+  scanRecursive(variantScriptsDir);
+}
+
+// Check WS-05: L0+L1 scripts must NOT exist in templates/co-*/scripts/ (flat root only)
+function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-05: L0+L1 scripts must not exist in ${variant}/scripts/ (flat) ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  if (!existsSync(variantScriptsDir)) return;
+
+  for (const entry of readdirSync(variantScriptsDir)) {
+    const fullPath = join(variantScriptsDir, entry);
+    if (statSync(fullPath).isDirectory()) continue;
+    if (!entry.endsWith('.ts') && !entry.endsWith('.sh') && !entry.endsWith('.ps1')) continue;
+    const layer = getScriptLayer(entry, scriptLayerMap);
+    if (layer === 'L0+L1') {
+      warn(variant, 'WS-05', `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`, `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`);
+    }
+  }
+}
+
+// Check WS-06: Skills in templates/co-*/skills/ must be L0+L1+L2
+function checkVariantSkillsLayer(variant: string, skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L1+L2 in ${variant}/skills/ ===`);
+
+  const variantSkillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  if (!existsSync(variantSkillsDir)) return;
+
+  for (const entry of readdirSync(variantSkillsDir)) {
+    if (entry === '_archive') continue;
+    const fullPath = join(variantSkillsDir, entry);
+    if (!statSync(fullPath).isDirectory()) continue;
+    const layer = getSkillLayer(entry, skillLayerMap);
+    if (layer !== 'L0+L1+L2') {
+      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not L0+L1+L2 — common skills belong in templates/common/skills/ only`, `Move templates/${variant}/skills/${entry}/ to templates/common/skills/${entry}/`);
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -2085,6 +2148,10 @@ function main() {
   checkVersion();
   checkCommon();
   const manifests = checkVariantManifests();
+
+  // Pre-load layer maps once for WS-04, WS-05, WS-06
+  const scriptLayerMap = parseScriptLayers();
+  const skillLayerMap = parseSkillLayers();
 
   // Check common/ commands and parity
   checkCommands('common');
@@ -2121,6 +2188,15 @@ function main() {
   for (const [variant, manifest] of manifests) {
     if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
   }
+
+  // WS-04, WS-05, WS-06: Reverse-direction layer checks for co-* variants
+  for (const [variant] of manifests) {
+    if (!variant.startsWith('co-')) continue;
+    checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
+    checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
+    checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
+  }
+
   checkSharedFileSync();
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();

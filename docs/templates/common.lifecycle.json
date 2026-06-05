@@ -1,7 +1,7 @@
 {
   "version": "1.1.0",
   "status": "stable",
-  "lastUpdated": "2026-06-05",
+  "lastUpdated": "2026-06-06",
   "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
   "propagatedTo": [
     "co-develop",
@@ -34,6 +34,11 @@
       "date": "2026-06-02",
       "event": "skill-contract-expansion",
       "note": "common-contract.json updated: 3 skills added (simulate-project-creation, translate, ui-ux-pro-max)"
+    },
+    {
+      "date": "2026-06-06",
+      "event": "layer-governance-framework",
+      "note": "ADR-0032 Layer Governance Framework adopted; scripts reclassified into L0/L1/L2 layers; layer-filter.ts helper added; publish-to-template.ts v1.5.0, create-l2-scaffold.ts v1.4.0, validate-templates.ts v1.5.0, new-project.sh v1.4.2"
     }
   ]
 }

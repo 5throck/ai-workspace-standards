@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-06](2026-06-06.md) | chore: update |
 | [2026-06-05](2026-06-05.md) | Tier governance violation analysis |
 | [2026-06-04](2026-06-04.md) | feat: add tag-template.ts, template version mismatch warning, and audit tag check |
 | [2026-06-03](2026-06-03.md) | chore: update |

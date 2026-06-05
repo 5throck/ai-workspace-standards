@@ -13,12 +13,13 @@
  * Note: all external commands are run via execFileSync (no shell) to avoid
  * command-injection; the variant name is additionally regex-validated.
  *
- * @version 1.3.0
+ * @version 1.4.0
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
+import { includeScriptInL2 } from './helpers/layer-filter.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -29,120 +30,6 @@ const COMMON_DIR = path.join(WORKSPACE_ROOT, "templates", "common");
 const COMMON_SCRIPTS_DIR = path.join(COMMON_DIR, "scripts");
 const TODAY = new Date().toISOString().split("T")[0];
 
-/**
- * Fallback exclusion list — used when SCRIPTS.md cannot be parsed.
- * Tier 3 scripts (bootstrap / template-management / setup) that MUST NOT be
- * copied into a generated L2 project's scripts/ directory.
- */
-const TIER3_EXCLUDE_SCRIPTS_FALLBACK = new Set([
-  "new-project.sh",
-  "new-project.ps1",
-  "propagate-to-templates.ts",
-  "publish-to-template.ts",
-  "tag-template.ts",
-  "list-template-versions.ts",
-  "test-new-project.ts",
-  "test-runner.ts",
-  "team-builder.ts",
-  "fix-parse-agent.sed",
-  "generate-scripts-readme.ts",
-  "install-bun.ps1",
-  "install-bun.sh",
-  "setup.ps1",
-  "setup.sh",
-]);
-
-/**
- * Parse SCRIPTS.md to find all scripts designated as "L0-only" in the layer
- * column. L0-only scripts must NOT be copied into a generated L2 project.
- *
- * The registry table has the format:
- *   | script | source | version | status | removal-date | security-advisory | layer | pair |
- *
- * Only rows where the `layer` column starts with "L0-only" are included.
- * Returns the base filename (no subdirectory prefix) for each match.
- *
- * Falls back to TIER3_EXCLUDE_SCRIPTS_FALLBACK if the file cannot be read or
- * the table cannot be parsed.
- */
-function parseTier3ExclusionsFromScriptsMd(scriptsMdPath: string): Set<string> {
-  try {
-    const content = fs.readFileSync(scriptsMdPath, "utf8");
-    const excluded = new Set<string>();
-    let inRegistry = false;
-    let headerParsed = false;
-    let layerColIndex = -1;
-    let scriptColIndex = -1;
-
-    for (const rawLine of content.split("\n")) {
-      const line = rawLine.trim();
-
-      // Detect start of the Registry section
-      if (/^## Registry/.test(line)) {
-        inRegistry = true;
-        continue;
-      }
-
-      // Stop at the next ## section after Registry
-      if (inRegistry && /^## /.test(line)) {
-        break;
-      }
-
-      if (!inRegistry) continue;
-
-      // Skip comment/blank lines
-      if (!line.startsWith("|")) continue;
-
-      // Parse the header row to find column indices
-      if (!headerParsed) {
-        const cols = line.split("|").map((c) => c.trim().toLowerCase());
-        scriptColIndex = cols.findIndex((c) => c === "script");
-        layerColIndex = cols.findIndex((c) => c === "layer");
-        if (scriptColIndex >= 0 && layerColIndex >= 0) {
-          headerParsed = true;
-        }
-        continue;
-      }
-
-      // Skip separator rows (---|---|...)
-      if (/^\|[-\s|]+\|$/.test(line)) continue;
-
-      const cols = line.split("|").map((c) => c.trim());
-      const scriptCell = cols[scriptColIndex] ?? "";
-      const layerCell = cols[layerColIndex] ?? "";
-
-      if (layerCell.startsWith("L0-only")) {
-        // Strip backtick decoration and extract the base filename
-        const scriptName = scriptCell.replace(/`/g, "").trim();
-        // Only add top-level filenames (no subdirectory prefix needed for exclusion check)
-        const baseName = path.basename(scriptName);
-        excluded.add(baseName);
-        // Also add with directory prefix for entries like helpers/foo.ts
-        if (scriptName.includes("/")) {
-          excluded.add(scriptName);
-        }
-      }
-    }
-
-    if (excluded.size === 0) {
-      console.warn(
-        "[create-l2-scaffold] Could not parse SCRIPTS.md for Tier3 exclusions, using fallback list",
-      );
-      return TIER3_EXCLUDE_SCRIPTS_FALLBACK;
-    }
-
-    return excluded;
-  } catch {
-    console.warn(
-      "[create-l2-scaffold] Could not parse SCRIPTS.md for Tier3 exclusions, using fallback list",
-    );
-    return TIER3_EXCLUDE_SCRIPTS_FALLBACK;
-  }
-}
-
-const TIER3_EXCLUDE_SCRIPTS = parseTier3ExclusionsFromScriptsMd(
-  path.join(WORKSPACE_ROOT, "scripts", "SCRIPTS.md"),
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -317,11 +204,11 @@ function copyCommonOverlay(projectDir: string): void {
     }
   }
 
-  // scripts/ — copy everything except the Tier 3 exclusion list.
+  // scripts/ — copy everything except L0-only scripts (resolved via layer-filter).
   const dstScripts = path.join(projectDir, "scripts");
   ensureDir(dstScripts);
   for (const entry of fs.readdirSync(COMMON_SCRIPTS_DIR)) {
-    if (TIER3_EXCLUDE_SCRIPTS.has(entry)) continue;
+    if (!includeScriptInL2(entry)) continue; // skip L0 scripts
     copyItem(path.join(COMMON_SCRIPTS_DIR, entry), path.join(dstScripts, entry));
   }
   log(`  ✅ scripts/ copied (Tier 3 bootstrap/setup scripts excluded)`);

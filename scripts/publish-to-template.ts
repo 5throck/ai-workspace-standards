@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. L1→L2 auto-propagation is forbidden per ADR-0031.
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift]
-// @version 1.4.1
+// @version 1.5.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
 
 import { execSync } from 'node:child_process';
+import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.js';
 
 // ── L0 → L1 Helper Functions ───────────────────────────────────────────────
 
@@ -94,7 +95,7 @@ for (const line of registryLines) {
   const source = cols[2].trim();
   const layer  = cols.length >= 8 ? cols[7].trim() : '—';
   if (source !== 'L0') continue;
-  if (layer.includes('L0-only')) continue;
+  if (layer === 'L0' || layer === 'L0-only') continue;
   if (!script) continue;
 
   const excludeScripts = [
@@ -148,20 +149,10 @@ if (fs.existsSync(l0Skills)) {
     const itemPath = path.join(l0Skills, item);
     const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {
-      // Check SKILL.md frontmatter for scope field
-      const skillMdPath = path.join(itemPath, 'SKILL.md');
-      let scope: string | undefined;
-      if (fs.existsSync(skillMdPath)) {
-        const skillMdContent = fs.readFileSync(skillMdPath, 'utf-8');
-        const scopeMatch = skillMdContent.match(/^scope:\s*(\S+)/m);
-        scope = scopeMatch?.[1];
-      }
-      if (scope === 'workspace') {
-        console.log(`  ⊘ Skipped (workspace-only): ${item}/`);
+      // Check layer-filter for skill inclusion in L1
+      if (!includeSkillInL1(item)) {
+        console.log(`  ⊘ Skipped (L0 only): ${item}/`);
         continue;
-      }
-      if (scope === undefined && fs.existsSync(skillMdPath)) {
-        console.log(`  ${YELLOW}[WARN]${RESET} ${item}/: scope field missing in SKILL.md, defaulting to common`);
       }
       if (dryRun) {
         console.log(`  [dry-run] ${item}/`);
@@ -315,22 +306,6 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
   return results;
 }
 
-function parseScriptLayers(scriptsMdPath: string): Map<string, string> {
-  const layers = new Map<string, string>();
-  try {
-    const content = fs.readFileSync(scriptsMdPath, 'utf-8');
-    for (const line of content.split('\n')) {
-      if (!line.startsWith('| `')) continue;
-      const cols = line.split('|').map(c => c.trim());
-      if (cols.length < 8) continue;
-      const scriptName = cols[1].replace(/`/g, '');
-      const layer = cols[7];
-      if (scriptName && layer) layers.set(scriptName, layer);
-    }
-  } catch { /* ignore */ }
-  return layers;
-}
-
 function collectDiffs(mapPath: string): FileDiff[] {
   const raw = fs.readFileSync(mapPath, 'utf-8');
   const map: PropagationMap = JSON.parse(raw);
@@ -380,9 +355,9 @@ function collectDiffs(mapPath: string): FileDiff[] {
         continue;
       }
 
-      // Skip L0-only files: check SCRIPTS.md layer column
+      // Skip L0-only files: use layer-filter helper
       const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relPath}` : relPath;
-      if (scriptLayers.get(scriptKey)?.includes('L0-only')) {
+      if (!includeScriptInL1(scriptKey, scriptLayers)) {
         continue;
       }
 

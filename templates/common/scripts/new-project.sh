@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.1
+# @version 1.4.2
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -505,16 +505,21 @@ else
 fi
 
 # ── 6. Cleanup Strictly L0 Files ──────────────────────────────────────────────
-L0_SCRIPTS=(
-    "publish-to-template.ts" "propagate-to-templates.ts" "validate-templates.ts"
-    "list-template-versions.ts" "generate-version-manifest.ts" "generate-scripts-readme.ts"
-    "verify-template-integrity.ts" "verify-new-project-tests.ts" "test-new-project.ts"
-    "new-project.ps1" "new-project.sh" "upgrade-project.ps1" "upgrade-project.sh"
-    "verify-readme-sync.ts"
-)
+# ── Remove L0-only scripts (SCRIPTS.md-driven via layer-filter.ts) ─────────────
+if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/layer-filter.ts" ]; then
+  # Authoritative: delegate to layer-filter.ts which reads SCRIPTS.md
+  mapfile -t L0_SCRIPTS < <(bun "$WORKSPACE_ROOT/scripts/helpers/layer-filter.ts" --scripts-l0-only --format=list 2>/dev/null)
+else
+  # Minimal bootstrap fallback (only truly critical L0-only scripts)
+  L0_SCRIPTS=("publish-to-template.ts" "validate-templates.ts" "create-l2-scaffold.ts" "l2-to-variant-pipeline.ts" "fix-script-versions.ts")
+fi
 for script in "${L0_SCRIPTS[@]}"; do
-    rm -f "$PROJECT_DIR/scripts/$script"
+  rm -f "$PROJECT_DIR/scripts/$script"
+  # Also clean up helpers and subdirs if they are L0
+  rm -f "$PROJECT_DIR/scripts/helpers/$script"
 done
+# Always remove helpers/ directory (L0 pipeline internals — never needed in L2 projects)
+rm -rf "$PROJECT_DIR/scripts/helpers/"
 
 L0_SKILLS=("simulate-project-creation")
 for skill in "${L0_SKILLS[@]}"; do

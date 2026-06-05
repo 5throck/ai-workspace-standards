@@ -17,7 +17,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { createHash } from 'node:crypto';
 
@@ -139,7 +139,7 @@ function parseScriptsMdRegistry(
 
     const rawLayer = layerColIdx >= 0 ? (cols[layerColIdx] ?? '') : '';
     let layer: RegistryEntry['layer'] = 'common';
-    if (rawLayer === 'L0-only') layer = 'L0-only';
+    if (rawLayer === 'L0-only' || rawLayer === 'L0') layer = 'L0-only';
     else if (rawLayer === 'L1-only') layer = 'L1-only';
 
     result.set(filename, { version, layer });
@@ -344,6 +344,16 @@ function runCheckB(): SyncIssue[] {
  * If an L0-only script is called from a templates/common script, that is a
  * deployment contract violation — the L0-only script won't exist in generated projects.
  */
+/**
+ * Intentional cross-references: L1 scripts that reference L0-only scripts
+ * in a context-guarded or string-only way (not a real deployment violation).
+ * Format: 'l1-script-base:l0-script-base'
+ */
+const INTENTIONAL_CROSS_REFS = new Set([
+  'audit:tag-template',           // audit.ts: string mention in warning message only
+  'dev-sync:publish-to-template', // dev-sync.ts: called only inside isL0Context guard
+]);
+
 function runCheckX(): SyncIssue[] {
   const issues: SyncIssue[] = [];
   if (!IS_WORKSPACE_ROOT) return issues;
@@ -380,6 +390,8 @@ function runCheckX(): SyncIssue[] {
       for (const pattern of patterns) {
         if (pattern.test(content)) {
           const relFile = file.replace(ROOT + '\\', '').replace(ROOT + '/', '');
+          const l1Base = basename(file).replace(/\.(ts|sh|ps1)$/, '');
+          if (INTENTIONAL_CROSS_REFS.has(`${l1Base}:${scriptName}`)) break;
           issues.push({
             level: 'error',
             file: relFile,
