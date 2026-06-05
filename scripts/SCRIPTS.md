@@ -34,10 +34,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or ??-->
 <!-- security-advisory: CVE-XXXX or ??-->
-<!-- Layer column values:
-  L0      = workspace root only; must NOT be copied to templates/common/ or L2 projects
-  L0+L1   = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
-  L1-only = generated project only; must exist in templates/common/scripts/ but not in scripts/
+<!-- Layer column values (ONLY 3 TYPES EXIST):
+  L0           = workspace root only; must NOT be copied to templates/common/ or L2 projects
+  L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
+  L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
 <!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or ??-->
 <!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment ??whether file content actually reflects version history ??is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
@@ -98,6 +98,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `new-project.ps1` | L0 | 1.6.3 | active | —| —| L0 | —|
 | `new-project.sh` | L0 | 1.4.2 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -128,6 +129,20 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+
+---
+
+## Layer Classification Framework
+
+> **Only 3 layer types exist**. L1-only is architecturally invalid and has been removed.
+
+| Layer | Description | Publish | Example |
+|-------|-------------|---------|---------|
+| L0 | Workspace infrastructure only | No | new-project.sh, publish-to-template.ts, propagate-to-templates.ts |
+| L0+L1 | Workspace + Template snapshot | Yes, to templates/common/ | audit.ts, hooks/pre-commit.ts |
+| L0+L1+L2 | Reserved for future use | Not used (Fork Model) | N/A |
+
+**Note**: All scripts must have L0 as their source of truth (SSOT principle). L0+L1+L2 is reserved for future architectural needs but not currently implemented due to the Fork Model (L2 variants evolve independently after scaffolding).
 
 ---
 
@@ -258,7 +273,7 @@ skill files on disk. Detects missing or orphaned skill references.
 and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
 hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
-**Note**: L1-only script (not in templates); changes must be versioned in SCRIPTS.md manually.
+**Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
 #### `sync-skills.ts`
 **Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
@@ -270,7 +285,7 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 **Purpose**: A consolidated tool handling both L0->L1 publishing and L1->L2 propagation. Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot (`templates/common/scripts/`) and propagates updates to L2 project directories. Copies all scripts labeled `L0` in the Registry plus `SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
 **Usage**: `bun run publish-to-template`
 **Dry-run**: `bun run publish-to-template -- --dry-run`
-**Note**: L1-only script (not propagated to template).
+**Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
@@ -319,4 +334,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-05 ??added Check A formal-consistency-only clarification comment*
+*Last updated: 2026-06-06 ??established 3-type layer framework (L0, L0+L1, L0+L1+L2), removed L1-only category, classified propagate-to-templates.ts as L0*
