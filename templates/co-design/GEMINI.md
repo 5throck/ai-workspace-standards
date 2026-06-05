@@ -281,9 +281,6 @@ For automated execution in Antigravity, configure `.gemini/settings.json`:
 - **"Request Review"** (recommended): Balanced approach — automated agent orchestration with human supervision for file changes
 - MCP tool auto-approval poses significant security risk → manual approval maintained regardless of artifact policy
 
-> **Claude Code Note**: For Claude Code, the native Agent tool provides equivalent automated specialist dispatch functionality without requiring Auto-Mode infrastructure.
-
-
 #### Phase Determination Checklist
 
 Before writing the execution plan table, PM MUST classify each task's deliverable type:

@@ -1,5 +1,6 @@
 ---
 name: ui-ux-pro-max
+scope: common
 status: active
 gemini-parity: skip
 gemini-parity-reason: "Workspace-root-only skill — not propagated to templates/common/skills/"

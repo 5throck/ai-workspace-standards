@@ -39,6 +39,13 @@
       "released": "2026-06-02",
       "security_advisories": [],
       "migration_guides": []
+    },
+    "co-safety": {
+      "latest": "0.1.0",
+      "status": "beta",
+      "released": "2026-06-05",
+      "security_advisories": [],
+      "migration_guides": []
     }
   },
   "schema_version": "1.0"

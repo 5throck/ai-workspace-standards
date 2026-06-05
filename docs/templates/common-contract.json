@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.sh and may declare overrides in their variant.json.",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -121,6 +121,16 @@
       "version": "1.0.0",
       "description": "Tests new-project scaffolding logic in a temporary directory",
       "propagated_to_common": true
+    }
+  },
+  "common_scripts": {
+    "description": "Scripts shared across L0, L1, and L2 layers. Source of truth: scripts/SCRIPTS.md Layer column. Scripts with Layer='L0+L1' are in templates/common/scripts/ but not in L2. Scripts with Layer='L0+L1+L2' are copied to all layers during scaffolding.",
+    "ssot": "scripts/SCRIPTS.md",
+    "layer_column": "Layer",
+    "layer_values": {
+      "L0": "Workspace root only — not propagated to L1 or L2",
+      "L0+L1": "Propagated to templates/common/scripts/ — not in L2 projects",
+      "L0+L1+L2": "Propagated to all layers including L2 projects"
     }
   },
   "platform_settings": {

@@ -1,0 +1,8 @@
+# GEMINI.md
+
+> This file was generated from templates/common/_GEMINI.md.template during scaffolding.
+> Customize it for your variant's specific behaviors.
+
+## Role Declaration
+
+You are the PM agent for this session. Load and follow `agents/pm.md` at all times.

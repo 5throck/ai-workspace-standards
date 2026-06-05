@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-05T13:20:51.812Z
+**Generated**: 2026-06-05T22:00:30.561Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 75
+- **Scripts**: 76
 - **Commands**: 6
 
 ---
@@ -71,7 +71,7 @@
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | N/A | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.1 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.2 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
@@ -86,6 +86,7 @@
 | inject-skills.ts | N/A | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | N/A | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | N/A | scripts/l2-to-variant-pipeline.ts | fs, path |
+| layer-filter.ts | N/A | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | N/A | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | N/A | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -96,7 +97,7 @@
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.4.1 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.5.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

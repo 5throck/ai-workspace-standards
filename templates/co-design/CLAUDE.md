@@ -251,11 +251,12 @@ Before dispatching 2+ agents, copy this exact format:
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 - Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 
+
 #### Antigravity Security Configuration
 
 For automated execution in Antigravity, configure `.gemini/settings.json`:
 
-\`\`\`json
+```json
 {
   "terminal.executionPolicy": "Auto",
   "artifact.reviewPolicy": "Request Review",
@@ -273,13 +274,13 @@ For automated execution in Antigravity, configure `.gemini/settings.json`:
     "mkfs"
   ]
 }
-\`\`\`
+```
 
 **Field Descriptions**:
-- \`terminal.executionPolicy: "Auto"\` - Auto-approve agent spawns and safe commands
-- \`artifact.reviewPolicy: "Request Review"\` - **Require review for file edits (recommended security setting)**
-- \`mcp.toolApproval: "Manual"\` - Manual approval for MCP tools (security)
-- \`terminal.denyList\` - Dangerous commands that must never auto-execute
+- `terminal.executionPolicy: "Auto"` - Auto-approve agent spawns and safe commands
+- `artifact.reviewPolicy: "Request Review"` - **Require review for file edits (recommended security setting)**
+- `mcp.toolApproval: "Manual"` - Manual approval for MCP tools (security)
+- `terminal.denyList` - Dangerous commands that must never auto-execute
 
 **Security Rationale for "Request Review"**:
 - ✅ **Prevents silent code corruption** - All file edits require explicit user approval before applying

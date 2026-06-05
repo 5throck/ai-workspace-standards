@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.5
+ * @version 1.5.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
+import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
 
 interface VariantManifest {
   name: string;
@@ -817,6 +818,8 @@ function checkL0L1ScriptParity() {
     commonScripts.add(f);
   }
 
+  const normalize = (str: string) => str.replace(/\r\n/g, '\n');
+
   for (const script of commonScripts) {
     // Skip helper sub-paths and non-file entries that may appear in the registry
     if (script.includes('/')) continue;
@@ -827,13 +830,62 @@ function checkL0L1ScriptParity() {
     if (existsSync(l1Path) && existsSync(l0Path)) {
       const l1Content = readFileSync(l1Path, 'utf-8');
       const l0Content = readFileSync(l0Path, 'utf-8');
-      
-      const normalize = (str: string) => str.replace(/\r\n/g, '\n');
 
       if (normalize(l1Content) !== normalize(l0Content)) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
+      }
+    }
+  }
+
+  // Recursively check subdirectories: helpers/, hooks/ (WARN on diff/missing), lib/ (ERROR on diff/missing)
+  const subdirs = [
+    { name: 'helpers', level: 'warn' as const },
+    { name: 'hooks',   level: 'warn' as const },
+    { name: 'lib',     level: 'error' as const },
+  ];
+
+  for (const { name: subdir, level } of subdirs) {
+    const l0SubDir = join(L0_SCRIPTS, subdir);
+    const l1SubDir = join(L1_SCRIPTS, subdir);
+
+    if (!existsSync(l0SubDir)) continue; // subdir doesn't exist in L0 — skip
+
+    const l0SubFiles = readdirSync(l0SubDir)
+      .filter(f => f.endsWith('.ts') && !statSync(join(l0SubDir, f)).isDirectory());
+
+    for (const file of l0SubFiles) {
+      const l0FilePath = join(l0SubDir, file);
+      const l1FilePath = join(l1SubDir, file);
+
+      if (!existsSync(l1SubDir) || !existsSync(l1FilePath)) {
+        // File exists in L0 subdir but not in L1 subdir
+        // If the script is classified L0-only, absence from L1 is correct — skip
+        if (!includeScriptInL1(file)) continue;
+        const msg = `scripts/${subdir}/${file} exists in L0 but is missing from templates/common/scripts/${subdir}/`;
+        const fix = `Copy scripts/${subdir}/${file} to templates/common/scripts/${subdir}/${file}`;
+        if (level === 'error') {
+          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        } else {
+          warn('common', 'l0-l1-subdir-parity', msg, fix);
+        }
+        continue;
+      }
+
+      const l0Content = readFileSync(l0FilePath, 'utf-8');
+      const l1Content = readFileSync(l1FilePath, 'utf-8');
+
+      if (normalize(l0Content) !== normalize(l1Content)) {
+        const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
+        const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;
+        if (level === 'error') {
+          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        } else {
+          warn('common', 'l0-l1-subdir-parity', msg, fix);
+        }
+      } else {
+        pass(`Script ${subdir}/${file} is in sync between L0 and L1`);
       }
     }
   }
@@ -1500,7 +1552,13 @@ function checkCommonContract(): void {
   }
 
   // C-AG-01 (WARNING): No duplicate common agents in variant dirs
+  // Exception: agents with expected_override_all_variants: true (e.g. pm) are intentionally
+  // overridden in every variant — skip the duplicate warning for those agents.
+  const commonAgentsMap2 = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
   for (const agentName of commonAgents) {
+    const agentMeta2 = commonAgentsMap2[agentName];
+    if (agentMeta2?.expected_override_all_variants) continue; // intentional override — skip
+
     const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
     if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
     const commonContent = normalizeContent(readFileSync(commonAgentPath, 'utf-8'));
@@ -1824,7 +1882,10 @@ function checkSkillPlatformParity(variant: string): void {
   }
 }
 
-// Check WS-03: Common-Contract x Variant .claude/skills/ Cross-Validation
+// Check WS-03: Common-Contract common_skills must be present in templates/common/skills/
+// common_skills are project skills (L0+L1+L2), provided by templates/common/skills/ at scaffold time.
+// They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
+// Per-variant variant_specific skills are still verified against the variant's .claude/skills/.
 function checkCommonContractVariantSkills(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
 
@@ -1841,21 +1902,22 @@ function checkCommonContractVariantSkills(variant: string): void {
   }
 
   const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
-  const commonPlatformSkills = Object.keys((contract.common_platform_skills as Record<string, unknown>) ?? {});
-  const allCommonSkills = [...new Set([...commonSkills, ...commonPlatformSkills])];
 
-  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
-
-  for (const skillName of allCommonSkills) {
-    const skillPath = join(claudeSkillsDir, skillName);
+  // common_skills are delivered via templates/common/skills/ — check there, NOT in each variant
+  // This check runs once per variant call but only needs to validate the common layer once.
+  // We gate it on variant === first stable variant to avoid repeating; simpler: always check, pass is idempotent.
+  const commonSkillsBase = join(TEMPLATES_DIR, 'common', 'skills');
+  for (const skillName of commonSkills) {
+    const skillPath = join(commonSkillsBase, skillName, 'SKILL.md');
     if (!existsSync(skillPath)) {
-      warn(variant, 'WS-03', `Common skill '${skillName}' (from common-contract.json) has no corresponding directory in templates/${variant}/.claude/skills/ -- variant may be missing a common skill`);
+      warn('common', 'WS-03', `Common skill '${skillName}' (from common-contract.json) is missing from templates/common/skills/${skillName}/SKILL.md`, `Create templates/common/skills/${skillName}/SKILL.md`);
     } else {
-      pass(`WS-03: ${variant} -- common skill '${skillName}' directory present in .claude/skills/`);
+      pass(`WS-03: common skill '${skillName}' → templates/common/skills/${skillName}/SKILL.md present`);
     }
   }
 
-  // Check variant_specific skills from variant.json
+  // Check variant_specific skills from variant.json (still against .claude/skills/ — platform skills)
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
   const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
   if (!existsSync(variantJsonPath)) return;
 
@@ -2023,6 +2085,68 @@ function checkDocumentCommonSections(variant: string): void {
   }
 }
 
+// Check WS-04: L0 scripts must NOT exist in templates/co-*/scripts/
+function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-04: L0 scripts must not exist in ${variant}/scripts/ ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  if (!existsSync(variantScriptsDir)) return;
+
+  function scanRecursive(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        scanRecursive(fullPath);
+      } else if (entry.endsWith('.ts') || entry.endsWith('.sh') || entry.endsWith('.ps1')) {
+        const layer = getScriptLayer(entry, scriptLayerMap);
+        if (layer === 'L0') {
+          const relFile = fullPath.slice(join(TEMPLATES_DIR, variant, 'scripts').length + 1).replace(/\\/g, '/');
+          fail(variant, 'WS-04', `templates/${variant}/scripts/${relFile} is classified L0 — must not exist in variant template`, `Remove templates/${variant}/scripts/${relFile}`);
+        }
+      }
+    }
+  }
+
+  scanRecursive(variantScriptsDir);
+}
+
+// Check WS-05: L0+L1 scripts must NOT exist in templates/co-*/scripts/ (flat root only)
+function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-05: L0+L1 scripts must not exist in ${variant}/scripts/ (flat) ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  if (!existsSync(variantScriptsDir)) return;
+
+  for (const entry of readdirSync(variantScriptsDir)) {
+    const fullPath = join(variantScriptsDir, entry);
+    if (statSync(fullPath).isDirectory()) continue;
+    if (!entry.endsWith('.ts') && !entry.endsWith('.sh') && !entry.endsWith('.ps1')) continue;
+    const layer = getScriptLayer(entry, scriptLayerMap);
+    if (layer === 'L0+L1') {
+      warn(variant, 'WS-05', `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`, `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`);
+    }
+  }
+}
+
+// Check WS-06: Skills in templates/co-*/skills/ must be L0+L1+L2
+function checkVariantSkillsLayer(variant: string, skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L1+L2 in ${variant}/skills/ ===`);
+
+  const variantSkillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  if (!existsSync(variantSkillsDir)) return;
+
+  for (const entry of readdirSync(variantSkillsDir)) {
+    if (entry === '_archive') continue;
+    const fullPath = join(variantSkillsDir, entry);
+    if (!statSync(fullPath).isDirectory()) continue;
+    const layer = getSkillLayer(entry, skillLayerMap);
+    if (layer !== 'L0+L1+L2') {
+      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not L0+L1+L2 — common skills belong in templates/common/skills/ only`, `Move templates/${variant}/skills/${entry}/ to templates/common/skills/${entry}/`);
+    }
+  }
+}
+
 // Main
 function main() {
   if (!JSON_MODE) {
@@ -2036,6 +2160,10 @@ function main() {
   checkVersion();
   checkCommon();
   const manifests = checkVariantManifests();
+
+  // Pre-load layer maps once for WS-04, WS-05, WS-06
+  const scriptLayerMap = parseScriptLayers();
+  const skillLayerMap = parseSkillLayers();
 
   // Check common/ commands and parity
   checkCommands('common');
@@ -2072,6 +2200,15 @@ function main() {
   for (const [variant, manifest] of manifests) {
     if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
   }
+
+  // WS-04, WS-05, WS-06: Reverse-direction layer checks for co-* variants
+  for (const [variant] of manifests) {
+    if (!variant.startsWith('co-')) continue;
+    checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
+    checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
+    checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
+  }
+
   checkSharedFileSync();
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();
