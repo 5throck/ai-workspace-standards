@@ -75,7 +75,6 @@ pwsh scripts/install-bun.ps1      # Windows
 # Verify installation
 git --version
 bun --version
-python3 --version
 ```
 
 ### 1. Clone as workspace root
@@ -299,4 +298,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-03*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-05*

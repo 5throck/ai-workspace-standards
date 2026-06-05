@@ -42,13 +42,7 @@ git clone https://github.com/5throck/ai-workspace-standards.git C:\git
 git clone https://github.com/5throck/ai-workspace-standards.git ~/git
 ```
 
-### 2. 로컬 Git Hooks 활성화
-
-```bash
-git config core.hooksPath .githooks
-```
-
-### 3. 첫 번째 프로젝트 생성
+### 2. 첫 번째 프로젝트 생성
 
 ```bash
 # 기본값 (최신 템플릿, co-develop variant)
@@ -69,7 +63,7 @@ bash scripts/new-project.sh "my-project-name" --version 0.5.0
 
 각 새 프로젝트는 선택한 template variant를 기반으로 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일과 함께 생성됩니다. 사용된 템플릿 버전과 variant는 추적 가능성을 위해 `docs/context.md`에 기록됩니다.
 
-### 4. 새 프로젝트로 이동 및 PM 킥오프 시작
+### 3. 새 프로젝트로 이동 및 PM 킥오프 시작
 
 **중요 (CRITICAL)**: 프로젝트 생성이 완료되면 반드시 현재 AI 세션을 종료하고, 방금 생성한 프로젝트 폴더 내부로 이동하여 새로운 AI 세션을 시작해야 합니다. 루트 폴더(최상단)에 계속 머물러 있으면, AI가 프로젝트 전용 환경 설정 파일을 읽지 못해 PM 킥오프 미팅이 생략됩니다.
 
@@ -212,7 +206,7 @@ bash scripts/new-project.sh my-project --variant co-develop
 Template 파일을 수정할 때는 라이프사이클 검증기를 실행하여 구조적 문제를 조기에 발견하세요:
 
 ```bash
-bash scripts/validate-templates.sh
+bun scripts/validate-templates.ts
 ```
 
 검증 항목: 에이전트 frontmatter 완결성, 필수 섹션(`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md 명단 일치, 스크립트 `.sh`/`.ps1` 패리티, 공유 파일 동기화 경고. `templates/` 파일이 스테이징될 때 pre-commit을 통해 자동으로 실행됩니다.
@@ -236,7 +230,7 @@ bash scripts/validate-templates.sh
 이 저장소는 **공개 저장소(Public Repository)**입니다. 누구나 Pull Request를 통해 기여할 수 있습니다.
 
 1. `feat/<slug>`, `fix/<slug>`, `docs/<slug>` 네이밍 규칙을 사용하여 `main`에서 브랜치를 생성합니다.
-2. 모든 PR은 `bash scripts/audit.sh`를 통과해야 합니다.
+2. 모든 PR은 `bun scripts/audit.ts`를 통과해야 합니다.
 3. 병합(merge)하기 전에 `[Unreleased]` 아래에 `CHANGELOG.md` 항목을 추가합니다.
 4. `CONSTITUTION.md §8 - Coding Behavior Guidelines`를 준수합니다.
 5. 병합하기 전에 최소 **1명의 승인 리뷰(approving review)**가 필요합니다.
@@ -249,4 +243,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-03*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-05*
