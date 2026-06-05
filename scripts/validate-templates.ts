@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.0
+ * @version 1.5.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -16,7 +16,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
-import { getScriptLayer, getSkillLayer, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
+import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
 
 interface VariantManifest {
   name: string;
@@ -861,6 +861,8 @@ function checkL0L1ScriptParity() {
 
       if (!existsSync(l1SubDir) || !existsSync(l1FilePath)) {
         // File exists in L0 subdir but not in L1 subdir
+        // If the script is classified L0-only, absence from L1 is correct — skip
+        if (!includeScriptInL1(file)) continue;
         const msg = `scripts/${subdir}/${file} exists in L0 but is missing from templates/common/scripts/${subdir}/`;
         const fix = `Copy scripts/${subdir}/${file} to templates/common/scripts/${subdir}/${file}`;
         if (level === 'error') {
@@ -1550,7 +1552,13 @@ function checkCommonContract(): void {
   }
 
   // C-AG-01 (WARNING): No duplicate common agents in variant dirs
+  // Exception: agents with expected_override_all_variants: true (e.g. pm) are intentionally
+  // overridden in every variant — skip the duplicate warning for those agents.
+  const commonAgentsMap2 = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
   for (const agentName of commonAgents) {
+    const agentMeta2 = commonAgentsMap2[agentName];
+    if (agentMeta2?.expected_override_all_variants) continue; // intentional override — skip
+
     const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
     if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
     const commonContent = normalizeContent(readFileSync(commonAgentPath, 'utf-8'));
@@ -1874,7 +1882,10 @@ function checkSkillPlatformParity(variant: string): void {
   }
 }
 
-// Check WS-03: Common-Contract x Variant .claude/skills/ Cross-Validation
+// Check WS-03: Common-Contract common_skills must be present in templates/common/skills/
+// common_skills are project skills (L0+L1+L2), provided by templates/common/skills/ at scaffold time.
+// They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
+// Per-variant variant_specific skills are still verified against the variant's .claude/skills/.
 function checkCommonContractVariantSkills(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
 
@@ -1891,21 +1902,22 @@ function checkCommonContractVariantSkills(variant: string): void {
   }
 
   const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
-  const commonPlatformSkills = Object.keys((contract.common_platform_skills as Record<string, unknown>) ?? {});
-  const allCommonSkills = [...new Set([...commonSkills, ...commonPlatformSkills])];
 
-  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
-
-  for (const skillName of allCommonSkills) {
-    const skillPath = join(claudeSkillsDir, skillName);
+  // common_skills are delivered via templates/common/skills/ — check there, NOT in each variant
+  // This check runs once per variant call but only needs to validate the common layer once.
+  // We gate it on variant === first stable variant to avoid repeating; simpler: always check, pass is idempotent.
+  const commonSkillsBase = join(TEMPLATES_DIR, 'common', 'skills');
+  for (const skillName of commonSkills) {
+    const skillPath = join(commonSkillsBase, skillName, 'SKILL.md');
     if (!existsSync(skillPath)) {
-      warn(variant, 'WS-03', `Common skill '${skillName}' (from common-contract.json) has no corresponding directory in templates/${variant}/.claude/skills/ -- variant may be missing a common skill`);
+      warn('common', 'WS-03', `Common skill '${skillName}' (from common-contract.json) is missing from templates/common/skills/${skillName}/SKILL.md`, `Create templates/common/skills/${skillName}/SKILL.md`);
     } else {
-      pass(`WS-03: ${variant} -- common skill '${skillName}' directory present in .claude/skills/`);
+      pass(`WS-03: common skill '${skillName}' → templates/common/skills/${skillName}/SKILL.md present`);
     }
   }
 
-  // Check variant_specific skills from variant.json
+  // Check variant_specific skills from variant.json (still against .claude/skills/ — platform skills)
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
   const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
   if (!existsSync(variantJsonPath)) return;
 
