@@ -187,52 +187,51 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 **Boilerplate Format**:
 
-| # | Task | Agent | Tier | Model | Platform |
-|---|------|-------|------|-------|----------|
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | high/medium/low |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 
-**Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
+**Platform Column Description**: Note: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification.
 
 <!-- COMMON-GEMINI:START -->
 ## Execution Plan Boilerplate
 
 Before dispatching 2+ agents, copy this exact format:
 
-| # | Task | Agent | Tier | Model | Platform |
-|---|------|-------|------|-------|----------|
-| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash | L0-only |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | gemini-3.5-flash | L0-only |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash | L0-only |
-| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash | L0-only |
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | gemini-3.5-flash |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | gemini-3.5-flash |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | gemini-3.5-flash |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
 **Key points**:
 - Tier column is MANDATORY (High/Medium/Low)
-- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
 - Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 - State parallel vs sequential order below the table
 
 #### Execution Plan Table Format Guidelines
 
 **WRONG** (Do NOT use):
-| # | Task | Agent | Platform |
-| 1 | Update agents/pm.md | pm (direct) | L0-only |
+| # | Task | Agent |
+| 1 | Update agents/pm.md | pm (direct) |
 
 **CORRECT** (Use this format):
-| # | Task | Implementer | Coordinator | Platform |
-|---|-----------|------------|----------|----------|
-| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash |
 
 **Key points**:
 - "pm (direct)" is FORBIDDEN - PM never executes directly
-- Use "Implementer" column for the actual executing specialist
-- Use "Coordinator" column for pm (orchestration role only)
-- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 
 #### Auto-Mode Note (Antigravity Platform)
 
@@ -278,16 +277,15 @@ Before writing the execution plan table, PM MUST classify each task's deliverabl
 
 **Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
 
-**Platform column**: Every row MUST declare `Platform` (`Claude` / `Antigravity` / `Both` / `L0-only`). An empty Platform column is a governance violation.
+**Platform Note**: PM will internally manage the L0-only task classification, though it is no longer required in the table.
 
 #### PM Gateway Enforcement Summary
 
 Pre-dispatch validation (run mentally before every execution plan):
 1. ✅ Is each deliverable type correctly mapped to a Phase?
 2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
-3. ✅ Does every row have a Platform column value?
-4. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
-5. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
+3. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
+4. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
 
 #### Specialist Agent List
 All agents below require PM dispatch:
@@ -456,7 +454,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 **Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
 
-**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
+**Relationship to execution plan table**: teammateMode controls parallel execution mode. The execution plan table defines the multi-agent task dispatch.
 
 ---
 

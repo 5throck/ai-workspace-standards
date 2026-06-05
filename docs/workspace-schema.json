@@ -78,6 +78,7 @@
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",
     "files": [
+      ".git",
       "package.json",
       "package-lock.json",
       "bun.lockb",
@@ -103,6 +104,7 @@
       "fix.mjs"
     ],
     "dirs": [
+      ".git",
       "scripts",
       "tests",
       "agents",

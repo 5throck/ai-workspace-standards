@@ -149,9 +149,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 
 - **Mandatory Execution Plan (Double-Lock Strategy)**:
   When creating an `implementation_plan.md` artifact or before dispatching 2+ agents, you **MUST** copy the exact Execution Task Plan markdown boilerplate defined in `GEMINI.md` / `CLAUDE.md`.
-  - You MUST include the exact columns: `[Step, Task, Agent, Tier, Model, Platform]`.
-  - **Platform column values**: `Claude` (Claude Code only) / `Antigravity` (Antigravity only) / `Both` (runs on both platforms) / `L0-only` (workspace-root script, not deployed to variants).
-  - **Platform column is MANDATORY** — an empty Platform column is a governance violation equivalent to missing Antigravity coverage.
+  - You MUST include the exact columns: `[Step, Task, Agent, Tier, Model]`.
   - Failing to reproduce this exact table format and columns is a **CRITICAL GOVERNANCE VIOLATION**.
   - Always output this table in the chat so it is immediately visible to the user before dispatching.
 
@@ -179,9 +177,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 
   **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
 
-  **Platform column rule**: Every row in the execution plan table MUST have a Platform value. Leaving Platform empty is equivalent to undeclared Antigravity impact — a governance violation.
-
-**Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
+**Platform Note**: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification.
 
 - **Mandatory 3-Tier Strategy**: When leading execution and improvement tasks, PM MUST strictly use the 3-Tier model strategy:
   - **High-tier**: Complex reasoning, architectural design, planning, and PM orchestration.
@@ -387,8 +383,10 @@ PM may skip boilerplate when ALL of the following apply:
 **Mandatory (Lifecycle Impact)**:
 ```
 PM: 📋 [Auto-Inject] Execution plan:
-   | # | Task | Agent | Tier | Model | Platform |
-   | 1 | Update agents/pm.md | pm | Medium | sonnet | L0-only |
+   | # | Task | Agent | Tier | Model |
+   | 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash |
+   | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash |
+   | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash |
 
 PM: ℹ️  Reason: Lifecycle update required
 PM: 📋 Impact: AGENTS.md update required
