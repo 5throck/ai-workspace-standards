@@ -1,4 +1,4 @@
-// @version 2.5.3
+// @version 2.5.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -592,9 +592,7 @@ function checkL2VariantIntegrity() {
     'AGENTS.md',
     'README.md',
     'variant.json',
-    'scripts/SCRIPTS.md',
     'agents',          // directory
-    'scripts',         // directory
     '.claude/settings.json',
     '.gemini/settings.json',
   ];

@@ -11,6 +11,7 @@
 | [2026-06-02](2026-06-02.md) | fix: Limit changes to workspace root and templates to fix L0/L1 and phase definitions |
 | [2026-06-01](2026-06-01.md) | fix: create tests/.temp scratchpad and cleanup root stray files |
 | [2026-05-31](improvement-plan-2026-05-31.md) | Comprehensive workspace improvement plan — 28 Critical, 43 High, 46 Moderate issues identified across 3 phases |
+| [2026-05-31](2026-05-31.md) | fix: align variant workflows, fix scaffolding defaults, and add cross-variant parity checks |
 | [2026-05-30](2026-05-30.md) | fix: Phase 1 — eliminate all stale .sh script references (C-01~C-05) |
 | [2026-05-29](2026-05-29.md) | fix: UTF-8 BOM for ps1 emoji scripts, validate-templates workspace guard, register new ts scripts in SCRIPTS.md |
 | [2026-05-28](2026-05-28.md) | PM-led 3-tier parallel agent execution: platform parity, upgrade-project, docs-writer promotion, Security Bootstrap, CONSTITUTION §10 Terminology |
