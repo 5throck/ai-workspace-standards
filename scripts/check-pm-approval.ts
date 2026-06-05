@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * check-pm-approval.ts — PM Gateway Hook
- * @version 1.0.0
+ * @version 1.0.1
  * @status deprecated
  *
  * PreToolUse hook for Claude Code and Antigravity/Gemini CLI.
@@ -64,7 +64,7 @@ const response = {
   decision: 'block',
   reason:
     'PM approval required before modifying files.\n' +
-    '1. Display execution plan table (agent | tier | model per task)\n' +
+    '1. Display execution plan table (| # | Task | Agent | Tier | Model |)\n' +
     '2. Create .pm-approved file to grant access\n' +
     '3. Delete .pm-approved when work is complete\n\n' +
     'To approve: touch .pm-approved',

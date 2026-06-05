@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # upgrade-project.sh - Upgrade an existing project to the current template version
-# Usage: bash scripts/upgrade-project.sh <project-path> [--variant co-develop|co-design|co-work] [--platform claude|antigravity|both] [--dry-run]
+# @version 1.1.0
+# Usage: bash scripts/upgrade-project.sh <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
+# Variants are auto-detected from the templates/ directory (e.g. co-develop, co-design, co-consult, co-security).
 
 export LC_ALL=C
 export LANG=C
@@ -29,7 +31,8 @@ done
 
 # --- usage ---
 if [ -z "$PROJECT_PATH" ]; then
-  echo "Usage: bash scripts/upgrade-project.sh <project-path> [--variant co-develop|co-design|co-work] [--platform claude|antigravity|both] [--dry-run]"
+  echo "Usage: bash scripts/upgrade-project.sh <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]"
+  echo "  Variants are auto-detected from templates/ (e.g. co-develop, co-design, co-consult, co-security)"
   exit 1
 fi
 
@@ -97,9 +100,12 @@ if [ -z "$VARIANT" ]; then
   fi
 fi
 
-# Validate variant
-if [[ "$VARIANT" != "co-develop" && "$VARIANT" != "co-design" && "$VARIANT" != "co-work" ]]; then
-  echo "ERROR: --variant must be one of: co-develop, co-design, co-work"
+# Validate variant - detect valid variants dynamically from templates/ directory
+VALID_VARIANTS=$(ls "$WORKSPACE_ROOT/templates/" 2>/dev/null | grep "^co-" | sort -u || echo "")
+
+if ! echo "$VALID_VARIANTS" | grep -qx "$VARIANT"; then
+  echo "ERROR: Invalid variant: $VARIANT"
+  echo "   Valid variants: $(echo $VALID_VARIANTS | tr '\n' ' ')"
   exit 1
 fi
 

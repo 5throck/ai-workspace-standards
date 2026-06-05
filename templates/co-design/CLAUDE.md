@@ -102,20 +102,22 @@ Spawn a teammate using the automation-engineer agent type to implement the scrip
 > - **Claude Code Desktop App** ⚠️ Partial — in-process only, no hooks, no tmux
 > - **Antigravity CLI** ❌ Not supported — use Agent Manager (UI-based) instead. See GEMINI.md §Agent Manager.
 
-#### teammateMode (Claude Code Agent Teams 실행 방식)
+<!-- COMMON-CLAUDE:START -->
+#### teammateMode (Claude Code Agent Teams execution mode)
 
 **teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
 
 **Values**:
 - `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
 - `null` — Default value (auto-selects based on environment)
 
 **Configuration location**: `.claude/settings.json` → `teammateMode`
 
 **Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
 
-**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
+**Relationship to execution plan table**: teammateMode controls parallel execution mode. The execution plan table defines the multi-agent task dispatch.
+<!-- COMMON-CLAUDE:END -->
 
 ### 2. Native Slash Commands
 Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
@@ -199,8 +201,8 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 **Boilerplate Format**:
 
-| # | Task | Agent | Tier | Model | Platform |
-|---|------|-------|------|-------|----------|
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
 | 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
 | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
 | N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
@@ -209,30 +211,52 @@ State parallel vs sequential order below the table. The Agent tool must not be c
 *Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
 *Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct".*
 
-**Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
+**Platform Column Description**: Note: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification.
+
+<!-- COMMON-CLAUDE:START -->
+## Execution Plan Boilerplate
+
+Before dispatching 2+ agents, copy this exact format:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 |
+
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
+
+**Key points**:
+- Tier column is MANDATORY (High/Medium/Low)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- State parallel vs sequential order below the table
 
 #### Execution Plan Table Format Guidelines
 
 **WRONG** (Do NOT use):
-| # | Task | Agent | Platform |
-| 1 | Update agents/pm.md | pm (direct) | L0-only |
+| # | Task | Agent |
+| 1 | Update agents/pm.md | pm (direct) |
 
 **CORRECT** (Use this format):
-| # | Task | Implementer | Coordinator | Platform |
-|---|-----------|------------|----------|----------|
-| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash |
 
 **Key points**:
 - "pm (direct)" is FORBIDDEN - PM never executes directly
-- Use "Implementer" column for the actual executing specialist
-- Use "Coordinator" column for pm (orchestration role only)
-- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
 
 #### Auto-Mode Note (Antigravity Platform)
 
 > **Claude Code Note**: Auto-Mode infrastructure is not required for Claude Code. The native Agent tool provides equivalent automated specialist dispatch functionality.
 
 Auto-Mode is an Antigravity-specific feature that automates plan execution for the Agent Manager workflow. For Claude Code, the native `Agent` tool already handles sequential specialist dispatch with equivalent functionality. See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for Antigravity Auto-Mode architecture details.
+<!-- COMMON-CLAUDE:END -->
 
 #### Phase Determination Checklist
 
@@ -250,16 +274,15 @@ Before writing the execution plan table, PM MUST classify each task's deliverabl
 
 **Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
 
-**Platform column**: Every row MUST declare `Platform` (`Claude` / `Antigravity` / `Both` / `L0-only`). An empty Platform column is a governance violation.
+**Platform Note**: PM will internally manage the L0-only task classification, though it is no longer required in the table.
 
 #### PM Gateway Enforcement Summary
 
 Pre-dispatch validation (run mentally before every execution plan):
 1. ✅ Is each deliverable type correctly mapped to a Phase?
 2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
-3. ✅ Does every row have a Platform column value?
-4. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
-5. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
+3. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
+4. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
 
 #### Specialist Agent List
 All agents below require PM dispatch:
@@ -426,64 +449,5 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 *Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
-<!-- COMMON-CLAUDE:START -->
-#### teammateMode (Claude Code Agent Teams execution mode)
 
-**teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
 
-**Values**:
-- `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
-- `null` — Default value (auto-selects based on environment)
-
-**Configuration location**: `.claude/settings.json` → `teammateMode`
-
-**Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
-
-**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
-<!-- COMMON-CLAUDE:END -->
-<!-- COMMON-CLAUDE:START -->
-## Execution Plan Boilerplate
-
-Before dispatching 2+ agents, copy this exact format:
-
-| # | Task | Agent | Tier | Model | Platform |
-|---|------|-------|------|-------|----------|
-| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 | L0-only |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 | L0-only |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 | L0-only |
-| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 | L0-only |
-
-**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
-
-**Key points**:
-- Tier column is MANDATORY (High/Medium/Low)
-- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
-- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
-- State parallel vs sequential order below the table
-
-#### Execution Plan Table Format Guidelines
-
-**WRONG** (Do NOT use):
-| # | Task | Agent | Platform |
-| 1 | Update agents/pm.md | pm (direct) | L0-only |
-
-**CORRECT** (Use this format):
-| # | Task | Implementer | Coordinator | Platform |
-|---|-----------|------------|----------|----------|
-| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
-
-**Key points**:
-- "pm (direct)" is FORBIDDEN - PM never executes directly
-- Use "Implementer" column for the actual executing specialist
-- Use "Coordinator" column for pm (orchestration role only)
-- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
-
-#### Auto-Mode Note (Antigravity Platform)
-
-> **Claude Code Note**: Auto-Mode infrastructure is not required for Claude Code. The native Agent tool provides equivalent automated specialist dispatch functionality.
-
-Auto-Mode is an Antigravity-specific feature that automates plan execution for the Agent Manager workflow. For Claude Code, the native `Agent` tool already handles sequential specialist dispatch with equivalent functionality. See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for Antigravity Auto-Mode architecture details.
-<!-- COMMON-CLAUDE:END -->

@@ -112,7 +112,7 @@ cp -r templates/common/.gemini/skills/. templates/co-<variant-name>/.gemini/skil
 
 Verify detection works:
 ```bash
-bash scripts/new-project.sh --help
+bash ./scripts/new-project.sh --help
 # Should list co-<name> in the available variants output
 ```
 
@@ -209,7 +209,7 @@ After Phase B, verify new-project.sh creates a working instance:
 
 ```bash
 # Dry run (if supported):
-bash scripts/new-project.sh "my-test-project" --variant co-<name>
+bash ./scripts/new-project.sh "my-test-project" --variant co-<name>
 
 # Verify created project structure:
 ls Projects/my-test-project/

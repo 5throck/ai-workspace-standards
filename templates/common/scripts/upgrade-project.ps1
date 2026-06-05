@@ -1,9 +1,11 @@
-﻿[CmdletBinding()]
+﻿# upgrade-project.ps1 - Upgrade an existing project to the current template version
+# @version 1.1.0
+# Variants are auto-detected from the templates/ directory (e.g. co-develop, co-design, co-consult, co-security).
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
     [string]$ProjectPath,
 
-    [ValidateSet('co-develop', 'co-design', 'co-work')]
     [string]$Variant = '',
 
     [ValidateSet('claude', 'antigravity', 'both')]
@@ -185,6 +187,16 @@ if ([string]::IsNullOrEmpty($Variant)) {
         Write-Error "ERROR: Could not detect variant from template-version.txt. Specify -Variant explicitly."
         exit 1
     }
+}
+
+# Dynamic variant validation - detect valid variants from templates/ directory
+$detectedVariants = Get-ChildItem (Join-Path $WorkspaceRoot "templates") -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match "^co-" } |
+    Select-Object -ExpandProperty Name
+
+if ($detectedVariants -notcontains $Variant) {
+    Write-Error "ERROR: Invalid variant '$Variant'. Valid variants (auto-detected from templates/): $($detectedVariants -join ', ')"
+    exit 1
 }
 
 $TemplatesDir = Join-Path $WorkspaceRoot "templates\$Variant"
