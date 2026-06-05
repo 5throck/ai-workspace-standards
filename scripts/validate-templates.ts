@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.4.5
+ * @version 1.4.6
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -817,6 +817,8 @@ function checkL0L1ScriptParity() {
     commonScripts.add(f);
   }
 
+  const normalize = (str: string) => str.replace(/\r\n/g, '\n');
+
   for (const script of commonScripts) {
     // Skip helper sub-paths and non-file entries that may appear in the registry
     if (script.includes('/')) continue;
@@ -827,13 +829,60 @@ function checkL0L1ScriptParity() {
     if (existsSync(l1Path) && existsSync(l0Path)) {
       const l1Content = readFileSync(l1Path, 'utf-8');
       const l0Content = readFileSync(l0Path, 'utf-8');
-      
-      const normalize = (str: string) => str.replace(/\r\n/g, '\n');
 
       if (normalize(l1Content) !== normalize(l0Content)) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
+      }
+    }
+  }
+
+  // Recursively check subdirectories: helpers/, hooks/ (WARN on diff/missing), lib/ (ERROR on diff/missing)
+  const subdirs = [
+    { name: 'helpers', level: 'warn' as const },
+    { name: 'hooks',   level: 'warn' as const },
+    { name: 'lib',     level: 'error' as const },
+  ];
+
+  for (const { name: subdir, level } of subdirs) {
+    const l0SubDir = join(L0_SCRIPTS, subdir);
+    const l1SubDir = join(L1_SCRIPTS, subdir);
+
+    if (!existsSync(l0SubDir)) continue; // subdir doesn't exist in L0 — skip
+
+    const l0SubFiles = readdirSync(l0SubDir)
+      .filter(f => f.endsWith('.ts') && !statSync(join(l0SubDir, f)).isDirectory());
+
+    for (const file of l0SubFiles) {
+      const l0FilePath = join(l0SubDir, file);
+      const l1FilePath = join(l1SubDir, file);
+
+      if (!existsSync(l1SubDir) || !existsSync(l1FilePath)) {
+        // File exists in L0 subdir but not in L1 subdir
+        const msg = `scripts/${subdir}/${file} exists in L0 but is missing from templates/common/scripts/${subdir}/`;
+        const fix = `Copy scripts/${subdir}/${file} to templates/common/scripts/${subdir}/${file}`;
+        if (level === 'error') {
+          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        } else {
+          warn('common', 'l0-l1-subdir-parity', msg, fix);
+        }
+        continue;
+      }
+
+      const l0Content = readFileSync(l0FilePath, 'utf-8');
+      const l1Content = readFileSync(l1FilePath, 'utf-8');
+
+      if (normalize(l0Content) !== normalize(l1Content)) {
+        const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
+        const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;
+        if (level === 'error') {
+          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        } else {
+          warn('common', 'l0-l1-subdir-parity', msg, fix);
+        }
+      } else {
+        pass(`Script ${subdir}/${file} is in sync between L0 and L1`);
       }
     }
   }

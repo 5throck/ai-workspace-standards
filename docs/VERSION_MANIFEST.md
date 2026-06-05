@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-05T13:20:51.812Z
+**Generated**: 2026-06-05T20:04:39.507Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -71,7 +71,7 @@
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | N/A | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.1 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.2 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |

@@ -1,4 +1,13 @@
+---
+name: security-check
+description: Run engagement security gate — verify authorization status and check for exposed secrets before any offensive activity.
+argument-hint: "[--pre-phase <phase-number>]"
+allowed-tools: ["Bash", "Read", "Glob", "Grep"]
+---
+
 # Security Check (Engagement Gate)
+
+**Dispatcher**: security-expert (triggered at Phase 5 entry by PM)
 
 Arguments: $ARGUMENTS
 

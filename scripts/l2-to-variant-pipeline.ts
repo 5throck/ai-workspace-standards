@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * L2-to-Variant Pipeline
  *
@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -87,7 +87,7 @@ export interface PipelineResult {
 
 /**
  * Execute complete L2-to-variant pipeline
- * @version 1.1.0
+ * @version 1.1.1
  */
 export async function executeL2ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
   const startTime = Date.now();
@@ -356,7 +356,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
 /**
  * Build failure result
- * @version 1.1.0
+ * @version 1.1.1
  */
 function buildFailureResult(
   phases: PipelineResult['phases'],
@@ -373,7 +373,7 @@ function buildFailureResult(
 
 /**
  * Extract agent roster from L2 scan result
- * @version 1.1.0
+ * @version 1.1.1
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
   // Find agent files in scan result
@@ -391,7 +391,7 @@ function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRos
 
 /**
  * Extract skills from L2 scan result
- * @version 1.1.0
+ * @version 1.1.1
  */
 function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
   // Find skill files in scan result

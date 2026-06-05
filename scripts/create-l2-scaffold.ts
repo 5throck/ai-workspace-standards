@@ -13,7 +13,7 @@
  * Note: all external commands are run via execFileSync (no shell) to avoid
  * command-injection; the variant name is additionally regex-validated.
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 import * as fs from "fs";
@@ -286,6 +286,8 @@ function copyCommonOverlay(projectDir: string): void {
   // Top-level files & directories (excluding scripts/ which is filtered below).
   const overlayItems = [
     ".gitignore",
+    ".gitattributes",
+    ".editorconfig",
     ".env.sample",
     ".githooks",
     ".claude/settings.json",
@@ -299,6 +301,20 @@ function copyCommonOverlay(projectDir: string): void {
 
   for (const item of overlayItems) {
     copyItem(path.join(COMMON_DIR, item), path.join(projectDir, item));
+  }
+
+  // CLAUDE.md/GEMINI.md are generated from _*.template files — customize after scaffolding.
+  // Template files provide a minimal starting point; add variant-specific content before Phase B.
+  for (const [templateFile, destFile] of [
+    ["_CLAUDE.md.template", "CLAUDE.md"],
+    ["_GEMINI.md.template", "GEMINI.md"],
+  ] as [string, string][]) {
+    const templatePath = path.join(COMMON_DIR, templateFile);
+    if (fs.existsSync(templatePath)) {
+      copyItem(templatePath, path.join(projectDir, destFile));
+    } else {
+      log(`  ⚠️  ${templateFile} not found in templates/common/ — skipping ${destFile} generation`);
+    }
   }
 
   // scripts/ — copy everything except the Tier 3 exclusion list.

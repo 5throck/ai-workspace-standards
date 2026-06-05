@@ -1,4 +1,4 @@
-// @version 1.2.1
+// @version 1.2.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -134,15 +134,27 @@ if (fs.existsSync(genManifestTs)) {
 
 // 4.7 L0→L1 publish (workspace root only)
 const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
+// L0 context: CONSTITUTION.md exists at workspace root — publish failures are fatal here.
+const isL0Context = fs.existsSync('CONSTITUTION.md');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
     try {
         const publishRes = await $`bun scripts/publish-to-template.ts`.nothrow();
         if (publishRes.exitCode !== 0) {
-            console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+            if (isL0Context) {
+                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+                process.exit(1);
+            } else {
+                console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+            }
         }
     } catch (e) {
-        console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        if (isL0Context) {
+            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+            process.exit(1);
+        } else {
+            console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        }
     }
 }
 

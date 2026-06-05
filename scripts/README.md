@@ -54,8 +54,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| common | —|
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| common | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| common | —|
-| `create-l2-scaffold.ts` | L0 | 1.2.0 | active | —| —| L0-only | —|
-| `dev-sync.ts` | L0 | 1.2.1 | active | —| —| L0-only | —|
+| `create-l2-scaffold.ts` | L0 | 1.3.0 | active | —| —| L0-only | —|
+| `dev-sync.ts` | L0 | 1.2.2 | active | —| —| L0-only | —|
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| common | —|
@@ -85,7 +85,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | —| —| common | —|
 | `install-bun.ps1` | L0 | 1.0.0 | active | —| —| common | —|
 | `install-bun.sh` | L0 | 1.0.0 | active | —| —| common | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.1.0 | active | —| —| L0-only | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.1.1 | active | —| —| L0-only | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| common | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| common | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| common | —|
@@ -116,7 +116,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| common | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| common | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| common | —|
-| `validate-templates.ts` | L0 | 1.4.5 | active | —| —| L0-only | —|
+| `validate-templates.ts` | L0 | 1.4.6 | active | —| —| L0-only | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| common | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| common | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| common | —|
