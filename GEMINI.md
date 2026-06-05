@@ -445,18 +445,18 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 #### teammateMode (Claude Code Agent Teams execution mode)
 
-**teammateMode**는 Claude Code Desktop App의 Agent Teams 기능 활성화 시 병렬 실행 방식을 지정합니다.
+**teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
 
-**값**:
-- `in-process` — 동일한 프로세스 내에서 병렬 실행 (Claude Code Desktop App + Antigravity CLI 모두 해당)
-- `tmux` — tmux 분리하여 병렬 실행 (Antigravity CLI 전용)
-- `null` — 기본값
+**Values**:
+- `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
+- `null` — Default value (auto-selects based on environment)
 
-**설정 위치**: `.claude/settings.json` → `hooks.teammateMode`
+**Configuration location**: `.claude/settings.json` → `teammateMode`
 
-**참고**: Antigravity에는 Agent Teams에 해당하는 기능이 없으므로, teammateMode는 Claude Code 전용 설정입니다. Antigravity 2.0+는 Agent Manager를 통해 다중 workspace 파편을 관리합니다.
+**Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
 
-**실행 계획 테이블과의 관계**: teammateMode는 병렬 실행 방식 설정이며, execution plan 테이블의 Platform 열(AI 엔진 구분: Claude/Antigravity/Both/L0-only)과는 별개입니다.
+**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
 
 ---
 

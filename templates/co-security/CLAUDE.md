@@ -359,25 +359,6 @@ If a custom slash command or background script returns a non-zero exit code:
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 <!-- COMMON-CLAUDE:END -->
 
----
-
-<!-- COMMON-CLAUDE:START -->
-
-#### teammateMode (Claude Code Desktop App-only)
-
-**teammateMode**는 Claude Code Desktop App의 Agent Teams 기능 활성화 시 병렬 실행 방식을 지정합니다.
-
-**값**:
-- `in-process` — 동일한 프로세스 내에서 병렬 실행 (Claude Code Desktop App + Antigravity CLI 모두 해당)
-- `tmux` — tmux 분리하여 병렬 실행 (Antigravity CLI 전용)
-- `null` — 기본값
-
-**설정 위치**: `.claude/settings.json` → `hooks.teammateMode`
-
-**참고**: Antigravity에는 Agent Teams에 해당하는 기능이 없으므로, teammateMode는 Claude Code 전용 설정입니다. Antigravity 2.0+는 Agent Manager를 통해 다중 workspace 파편을 관리합니다.
-
-**실행 계획 테이블과의 관계**: teammateMode는 병렬 실행 방식 설정이며, execution plan 테이블의 Platform 열(AI 엔진 구분: Claude/Antigravity/Both/L0-only)과는 별개입니다.
-
 ## Git & PR Additions (Claude Code)
 
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
@@ -393,7 +374,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 **Values**:
 - `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
-- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, Desktop App에서는 미지원)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
 - `null` — Default value (auto-selects based on environment)
 
 **Configuration location**: `.claude/settings.json` → `teammateMode`

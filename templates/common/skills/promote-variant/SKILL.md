@@ -4,6 +4,7 @@ description: >
   Guides Phase B promotion of a completed Phase A prototype to an official workspace variant template.
   Use when: PROMOTION_CHECKLIST conditions are all met, ready to create templates/co-<name>/.
 status: active
+scope: common
 version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05

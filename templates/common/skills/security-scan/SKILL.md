@@ -4,6 +4,7 @@ description: Runs static analysis and secret detection (via gitleaks) across the
 version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
+scope: common
 owner: security-expert
 prerequisites: gitleaks
 metadata:

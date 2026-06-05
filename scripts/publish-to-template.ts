@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-// publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
+// publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. L1→L2 auto-propagation is forbidden per ADR-0031.
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift]
-// @version 1.4.0
+// @version 1.4.1
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -60,7 +60,6 @@ const RESET    = '\x1b[0m';
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const checkDrift = args.includes('--check-drift');
-const APPLY = !dryRun && !checkDrift;
 const domainIdx = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
 
@@ -221,8 +220,8 @@ if (!dryRun) {
 
 
 // ============================================================================
-// ── L1 → L2 drift functions (collectDiffs / printTable / applyDiffs) ────────
-// Used by --check-drift (read-only). applyDiffs retained but not called by default.
+// ── L1 → L2 drift functions (collectDiffs / printTable) ─────────────────────
+// Used by --check-drift (read-only). L1→L2 auto-propagation is forbidden per ADR-0031.
 // ============================================================================
 
 interface Domain {
@@ -365,6 +364,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
       }
 
       const excludePrefixes = (domain as any).exclude_prefixes ?? [];
+      // relPath is relative to L1 source dir — "templates/" correctly excludes docs/templates/ subdir
       if (excludePrefixes.some((prefix: string) => relPath.startsWith(prefix))) {
         continue;
       }
@@ -437,31 +437,6 @@ function printTable(diffs: FileDiff[]): void {
   }
 
   console.log(`${DARKGRAY}${sep}${RESET}\n`);
-}
-
-function applyDiffs(diffs: FileDiff[]): number {
-  let copied = 0;
-  for (const d of diffs) {
-    if (d.status === 'in-sync') continue;
-
-    const targetDir = path.dirname(d.targetPath);
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-
-    if (fs.existsSync(d.targetPath)) {
-      fs.rmSync(d.targetPath, { force: true });
-    }
-    const content = fs.readFileSync(d.sourcePath, 'utf-8');
-    fs.writeFileSync(d.targetPath, content, 'utf-8');
-    setExecutableBit(d.targetPath);
-    
-    const relSrc = path.relative(workspaceRoot, d.sourcePath);
-    const relDst = path.relative(workspaceRoot, d.targetPath);
-    console.log(`${GREEN}  copied${RESET}  ${relSrc} → ${relDst}`);
-    copied++;
-  }
-  return copied;
 }
 
 const MAP_PATH = path.join(workspaceRoot, 'scripts', 'propagation-map.json');

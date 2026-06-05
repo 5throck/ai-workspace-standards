@@ -68,7 +68,7 @@ Every new variant addition MUST be accompanied by an ADR documenting:
 
 - Every variant addition requires an ADR (overhead for simple additions)
 - Manual VERSION bump required — not yet automated
-- `new-project.sh` / `new-project.ps1` must be updated manually when variants are added
+- `new-project.sh`, `new-project.ps1`, `upgrade-project.sh`, `upgrade-project.ps1` automatically detect valid variants from `templates/` at runtime — no manual registration required (see ADR-0031)
 
 **Future Work:**
 
