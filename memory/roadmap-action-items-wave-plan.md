@@ -123,3 +123,18 @@ Wave 3
 ---
 
 ## Total: 13 PRs · 3 Waves · Critical path: PR-3 → PR-6 → PR-9 → PR-10
+
+---
+
+## Safety OS 추가 항목 (2026-06-05)
+
+### A-14: agent-lifecycle-manager common 승격
+
+| 항목 | 내용 |
+|---|---|
+| 대상 | `agent-lifecycle-manager` SKILL.md |
+| 현황 | 모든 variant에 존재하지만 `templates/common/.claude(gemini)/skills/`에 미등록 |
+| 작업 | `templates/common/.claude/skills/agent-lifecycle-manager/SKILL.md` 추가 |
+|  | `templates/common/.gemini/skills/agent-lifecycle-manager/SKILL.md` 추가 |
+| 영향 | 워크스페이스 루트 변경 → validate-templates.ts 통과 확인 필요 |
+| 우선순위 | Medium — Safety OS Phase B 승격 전 완료 권장 |

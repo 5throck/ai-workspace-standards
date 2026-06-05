@@ -1,4 +1,4 @@
-# @version 1.6.1
+# @version 1.6.2
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -50,12 +50,25 @@ if ($ProjectName.Length -gt 64) {
     exit 1
 }
 
-# Validate Variant against allowlist (prevent path traversal attacks)
-$validVariants = @("co-develop", "co-design", "co-work", "co-security", "co-consult")
-if ($Variant -ne "" -and $Variant -notin $validVariants) {
-    Write-Host "[FAIL] Invalid variant: $Variant" -ForegroundColor Red
-    Write-Host "   Valid variants: co-develop, co-design, co-work, co-security, co-consult" -ForegroundColor Yellow
-    exit 1
+# Validate Variant against dynamically detected list (prevent path traversal attacks)
+if ($Variant -ne "") {
+    $_wsRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+    # Dynamic variant detection — git tag or filesystem
+    if ($Version -ne "") {
+        $_tag = "template-v$Version"
+        $gitOutput = git -C $_wsRoot archive $_tag --list 2>$null
+        $validVariants = $gitOutput | Where-Object { $_ -match "^templates/co-[^/]+/variant\.json$" } |
+            ForEach-Object { ($_ -replace "^templates/", "") -replace "/variant\.json$", "" } | Sort-Object
+    } else {
+        $validVariants = Get-ChildItem (Join-Path $_wsRoot "templates") -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match "^co-" } |
+            Select-Object -ExpandProperty Name | Sort-Object
+    }
+    if ($Variant -notin $validVariants) {
+        Write-Host "[FAIL] Invalid variant: $Variant" -ForegroundColor Red
+        Write-Host "   Valid variants: $($validVariants -join ', ')" -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 # Validate Platform flag
@@ -66,15 +79,17 @@ if ($Platform -notin @("claude", "antigravity", "both")) {
 
 # -- Require explicit variant selection ------------------------------------------
 if ($Variant -eq "") {
+    $_wsRoot2 = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+    $availableVariants = Get-ChildItem (Join-Path $_wsRoot2 "templates") -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match "^co-" } |
+        Select-Object -ExpandProperty Name | Sort-Object
     Write-Host ""
     Write-Host "[INFO] No variant specified. Please choose one:" -ForegroundColor Cyan
-    Write-Host "   co-develop  — Software development (stable)" -ForegroundColor Green
-    Write-Host "   co-design   — UI/UX design (stable)" -ForegroundColor Green
-    Write-Host "   co-work     — Collaboration & documentation (stable)" -ForegroundColor Green
-    Write-Host "   co-security — Security engagement (stable)" -ForegroundColor Yellow
-    Write-Host "   co-consult  — Strategy consulting (stable)" -ForegroundColor Green
+    foreach ($v in $availableVariants) {
+        Write-Host "   $v" -ForegroundColor Green
+    }
     Write-Host ""
-    Write-Host "   Usage: .\scripts\new-project.ps1 `"$ProjectName`" -Variant co-develop" -ForegroundColor White
+    Write-Host "   Usage: .\scripts\new-project.ps1 `"$ProjectName`" -Variant <variant>" -ForegroundColor White
     Write-Host ""
     exit 1
 }
@@ -138,7 +153,9 @@ if (Test-Path $ProjectDir) {
 
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Template variant not found: $TemplatesDir" -ForegroundColor Red
-    Write-Host "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable), co-consult (stable)" -ForegroundColor Yellow
+    $availableNow = (Get-ChildItem (Join-Path $WorkspaceRoot "templates") -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match "^co-" } | Select-Object -ExpandProperty Name) -join ", "
+    Write-Host "   Available variants: $availableNow" -ForegroundColor Yellow
     exit 1
 }
 

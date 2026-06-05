@@ -1,4 +1,4 @@
-// @version 2.5.2
+// @version 2.5.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -389,8 +389,89 @@ if (hasBun) {
             await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
         } catch { /* non-blocking */ }
     }
+
+    // Script lifecycle verification: version headers
+    if (fs.existsSync('scripts') && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+        const versionHeaderPass = verifyScriptVersionHeaders();
+        if (!versionHeaderPass) {
+            errors++;
+        }
+    }
+
+    // Script lifecycle verification: registry consistency
+    if (fs.existsSync('scripts') && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+        const registryConsistencyPass = verifyScriptRegistryConsistency();
+        if (!registryConsistencyPass) {
+            errors++;
+        }
+    }
 } else {
     Warn('Bun not installed - skipping lifecycle audits');
+}
+
+/**
+ * Verify that all TypeScript scripts have @version headers
+ */
+function verifyScriptVersionHeaders(): boolean {
+    const scriptsDir = path.join('scripts');
+    if (!fs.existsSync(scriptsDir)) {
+        return true; // Not applicable
+    }
+
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts'));
+    for (const script of scripts) {
+        const scriptPath = path.join(scriptsDir, script);
+        const content = fs.readFileSync(scriptPath, 'utf-8');
+        if (!content.match(/@version\s+\d+\.\d+\.\d+/)) {
+            Fail(`Missing @version header in ${script}`);
+            return false;
+        }
+    }
+    Pass('All scripts have version headers');
+    return true;
+}
+
+/**
+ * Verify that SCRIPTS.md matches actual script versions
+ */
+function verifyScriptRegistryConsistency(): boolean {
+    const scriptsDir = path.join('scripts');
+    const scriptsMdPath = path.join(scriptsDir, 'SCRIPTS.md');
+
+    if (!fs.existsSync(scriptsMdPath)) {
+        return true; // Not applicable
+    }
+
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts') && f !== 'test-');
+    const scriptsMdContent = fs.readFileSync(scriptsMdPath, 'utf-8');
+
+    for (const script of scripts) {
+        const scriptPath = path.join(scriptsDir, script);
+        const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
+        const versionMatch = scriptContent.match(/@version\s+(\d+\.\d+\.\d+)/);
+
+        if (!versionMatch) {
+            Fail(`${script} has no version`);
+            return false;
+        }
+
+        const version = versionMatch[1];
+        const scriptName = path.basename(script);
+
+        // Check if script is mentioned in SCRIPTS.md
+        if (!scriptsMdContent.includes(scriptName)) {
+            Fail(`${scriptName} not found in SCRIPTS.md`);
+            return false;
+        }
+
+        // Check if version is mentioned in SCRIPTS.md
+        if (!scriptsMdContent.includes(version)) {
+            Fail(`${scriptName} @${version} not found in SCRIPTS.md`);
+            return false;
+        }
+    }
+    Pass('SCRIPTS.md consistency verified');
+    return true;
 }
 
 // 3.7. Language validation: Korean-only markdown files outside ko/ and locales/ko/
@@ -494,6 +575,47 @@ function checkScriptSync() {
     }
 }
 
+// L2 variant structural integrity check
+function checkL2VariantIntegrity() {
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  // Required files every L2 variant must have
+  const requiredFiles = [
+    'CLAUDE.md',
+    'GEMINI.md',
+    'AGENTS.md',
+    'README.md',
+    'variant.json',
+    'scripts/SCRIPTS.md',
+    'agents',          // directory
+    'scripts',         // directory
+    '.claude/settings.json',
+    '.gemini/settings.json',
+  ];
+
+  let missingCount = 0;
+  for (const variant of variants) {
+    const variantDir = path.join(templatesDir, variant);
+    for (const required of requiredFiles) {
+      const fullPath = path.join(variantDir, required);
+      if (!fs.existsSync(fullPath)) {
+        Warn(`L2 integrity: templates/${variant}/${required} is missing`);
+        missingCount++;
+      }
+    }
+  }
+
+  if (missingCount === 0) {
+    Pass(`L2 variant integrity: all ${variants.length} variants have required structure`);
+  }
+}
+
 // Stale shell/script reference check
 if (!LIFECYCLE_ONLY) {
 function checkStaleShellReferences() {
@@ -554,6 +676,8 @@ function checkStaleShellReferences() {
     }
 }
 checkStaleShellReferences();
+checkScriptSync();
+checkL2VariantIntegrity();
 }
 
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)

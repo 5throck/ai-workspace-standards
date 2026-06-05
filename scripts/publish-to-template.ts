@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
-// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.6
+// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift]
+// @version 1.4.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -59,7 +59,8 @@ const RESET    = '\x1b[0m';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const APPLY = !dryRun;
+const checkDrift = args.includes('--check-drift');
+const APPLY = !dryRun && !checkDrift;
 const domainIdx = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
 
@@ -99,6 +100,13 @@ for (const line of registryLines) {
   const src = path.join(l0Dir, script);
   const dst = path.join(l1Dir, script);
   if (!fs.existsSync(src)) continue;
+
+  // Ensure parent directory exists
+  const dstDir = path.dirname(dst);
+  if (!fs.existsSync(dstDir) && !dryRun) {
+    fs.mkdirSync(dstDir, { recursive: true });
+  }
+
   if (dryRun) {
     console.log(`  [dry-run] ${script}`);
   } else {
@@ -213,12 +221,9 @@ if (!dryRun) {
 
 
 // ============================================================================
-// ── L1 → L2 PROPAGATION ────────────────────────────────────────────────────
+// ── L1 → L2 drift functions (collectDiffs / printTable / applyDiffs) ────────
+// Used by --check-drift (read-only). applyDiffs retained but not called by default.
 // ============================================================================
-
-console.log(`\n${CYAN}=== L1 → L2 propagation: templates/common/ → templates/co-*/ ===${RESET}`);
-if (DOMAIN_FILTER) console.log(`${DARKGRAY}Domain filter: ${DOMAIN_FILTER}${RESET}`);
-console.log(`${DARKGRAY}Mode: ${APPLY ? 'apply' : 'dry-run'}${RESET}`);
 
 interface Domain {
   description: string;
@@ -321,11 +326,15 @@ function collectDiffs(mapPath: string): FileDiff[] {
   const map: PropagationMap = JSON.parse(raw);
 
   const diffs: FileDiff[] = [];
-  const domains = DOMAIN_FILTER
+  // Exclude marker-inject domains (governance-*) — those are handled by publishDocs()
+  const allDomains = DOMAIN_FILTER
     ? Object.fromEntries(
         Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
       )
     : map.domains;
+  const domains = Object.fromEntries(
+    Object.entries(allDomains).filter(([_, d]: any) => d.mode !== 'marker-inject')
+  );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
     console.error(`${RED}Error: domain "${DOMAIN_FILTER}" not found in propagation-map.json${RESET}`);
@@ -352,6 +361,11 @@ function collectDiffs(mapPath: string): FileDiff[] {
       const fileBasename = path.basename(relPath);
 
       if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
+        continue;
+      }
+
+      const excludePrefixes = (domain as any).exclude_prefixes ?? [];
+      if (excludePrefixes.some((prefix: string) => relPath.startsWith(prefix))) {
         continue;
       }
 
@@ -457,63 +471,16 @@ if (!fs.existsSync(MAP_PATH)) {
   process.exit(1);
 }
 
-const diffs = collectDiffs(MAP_PATH);
-printTable(diffs);
-
-const outOfSync = diffs.filter(d => d.status !== 'in-sync');
-const inSync    = diffs.filter(d => d.status === 'in-sync');
-
-console.log(`Total files checked : ${diffs.length}`);
-console.log(`${GREEN}In sync             : ${inSync.length}${RESET}`);
-console.log(`${outOfSync.length > 0 ? YELLOW : GREEN}Out of sync         : ${outOfSync.length}${RESET}`);
-
-if (APPLY) {
-  if (outOfSync.length === 0) {
-    console.log(`\n${GREEN}Nothing to apply — all files in sync.${RESET}`);
-  } else {
-    console.log(`\n${CYAN}Applying ${outOfSync.length} file(s)...${RESET}`);
-    const copied = applyDiffs(outOfSync);
-    console.log(`\n${GREEN}Done. ${copied} file(s) copied.${RESET}`);
-  }
-} else {
-  // dry-run mode
+// ── --check-drift: L1 vs L2 drift report (read-only) ────────────────────────
+if (checkDrift) {
+  console.log(`\n${CYAN}=== --check-drift: L1 vs L2 drift report (read-only) ===${RESET}`);
+  const diffs = collectDiffs(MAP_PATH);
+  printTable(diffs);
+  const outOfSync = diffs.filter(d => d.status !== 'in-sync');
+  console.log(`Total checked: ${diffs.length}, Out of sync: ${outOfSync.length}`);
   if (outOfSync.length > 0) {
-    console.log(`\n${YELLOW}Run without --dry-run to sync these files.${RESET}`);
+    console.log(`\nℹ️  L2 drift is expected under Fork Model (ADR-0031). Run create-l2-scaffold.ts to re-scaffold.`);
     process.exitCode = 1;
-  } else {
-    console.log(`\n${GREEN}All files in sync.${RESET}`);
-  }
-}
-
-// ── SCRIPTS.md: L1 → L2 explicit propagation ────────────────────────────────
-// SCRIPTS.md is not a .ts file so it is excluded from the propagation-map
-// *.ts pattern. Propagate it explicitly to keep all variant registries in sync.
-{
-  const l1ScriptsMd = path.join(workspaceRoot, 'templates', 'common', 'scripts', 'SCRIPTS.md');
-  if (fs.existsSync(l1ScriptsMd)) {
-    const variants = fs.readdirSync(path.join(workspaceRoot, 'templates'))
-      .filter(d => d.startsWith('co-') && fs.statSync(path.join(workspaceRoot, 'templates', d)).isDirectory());
-    const l1Content = fs.readFileSync(l1ScriptsMd, 'utf-8');
-    let scriptsMdSynced = 0;
-    let scriptsMdSkipped = 0;
-    console.log(`\n${CYAN}=== SCRIPTS.md: L1 → L2 propagation ===${RESET}`);
-    for (const variant of variants) {
-      const dst = path.join(workspaceRoot, 'templates', variant, 'scripts', 'SCRIPTS.md');
-      if (!fs.existsSync(dst) || fs.readFileSync(dst, 'utf-8') !== l1Content) {
-        if (APPLY || dryRun === false) {
-          fs.writeFileSync(dst, l1Content, 'utf-8');
-          console.log(`  ${GREEN}✅ templates/${variant}/scripts/SCRIPTS.md${RESET}`);
-          scriptsMdSynced++;
-        } else {
-          console.log(`  ${YELLOW}[dry-run] templates/${variant}/scripts/SCRIPTS.md differs${RESET}`);
-          scriptsMdSynced++;
-        }
-      } else {
-        console.log(`  ${DARKGRAY}—  templates/${variant}/scripts/SCRIPTS.md already in sync${RESET}`);
-        scriptsMdSkipped++;
-      }
-    }
-    console.log(`${GREEN}SCRIPTS.md sync: ${scriptsMdSynced} updated, ${scriptsMdSkipped} already in sync.${RESET}`);
   }
 }
 
@@ -568,16 +535,22 @@ function publishDocs(isDryRun: boolean): void {
   console.log(`\n${CYAN}=== L0 → L2 publish: governance docs (CLAUDE.md, GEMINI.md) → templates/co-*/ ===${RESET}`);
   if (isDryRun) console.log(`${DARKGRAY}(dry-run mode)${RESET}`);
 
-  const docPairs = [
-    { root: 'CLAUDE.md',  marker: 'COMMON-CLAUDE',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
-    { root: 'GEMINI.md',  marker: 'COMMON-GEMINI',  variants: ['co-design', 'co-develop', 'co-security', 'co-work'] },
-    { root: 'AGENTS.md',  marker: 'COMMON-AGENTS',  variants: ['co-consult', 'co-design', 'co-develop', 'co-security', 'co-work'] },
-  ];
+  // Read governance-* domains from propagation-map.json
+  const mapRaw = fs.readFileSync(MAP_PATH, 'utf-8');
+  const map = JSON.parse(mapRaw);
+
+  const govDomains = Object.entries(map.domains)
+    .filter(([_, d]: any) => d.mode === 'marker-inject')
+    .map(([_, d]: any) => ({
+      root: d.source_file as string,
+      marker: d.marker as string,
+      variants: d.target_variants as string[],
+    }));
 
   let totalUpdated = 0;
   let totalSkipped = 0;
 
-  for (const { root, marker, variants } of docPairs) {
+  for (const { root, marker, variants } of govDomains) {
     const rootPath = path.join(workspaceRoot, root);
     if (!fs.existsSync(rootPath)) {
       console.log(`  ${YELLOW}⚠️  ${root} not found at workspace root, skipping${RESET}`);
@@ -609,8 +582,8 @@ function publishDocs(isDryRun: boolean): void {
         if (result.changed) {
           variantContent = result.content;
           fileUpdated = true;
-        } else if (!variantContent.includes(`<!-- ${marker}:START -->`)) {
-          // Markers not present in variant — append section on first propagation
+        } else if (!variantContent.includes(section.heading)) {
+          // Section not present in variant yet — append on first propagation
           const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
           variantContent = variantContent.trimEnd() + separator + section.fullBlock + '\n';
           fileUpdated = true;

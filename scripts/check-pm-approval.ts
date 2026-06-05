@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 /**
  * check-pm-approval.ts — PM Gateway Hook
+ * @version 1.0.0
+ * @status deprecated
  *
  * PreToolUse hook for Claude Code and Antigravity/Gemini CLI.
  * Blocks Write/Edit/Bash tool calls unless .pm-approved flag file exists.
@@ -13,6 +15,11 @@
  * Exit codes:
  *   0 = allow
  *   1 = block (also writes JSON reason to stdout)
+ *
+ * DEPRECATED: Physical PreToolUse hooks do not fire in Claude Code Desktop App
+ * or Antigravity sessions. PM Gateway enforcement now uses Double-Lock Strategy:
+ * - Markdown boilerplate in CLAUDE.md and GEMINI.md
+ * - Agent Constraints in agents/pm.md
  */
 
 import { existsSync, readFileSync } from 'node:fs';

@@ -1,10 +1,17 @@
-// @version 1.1.0
+// @version 1.1.1
 import { $ } from "bun";
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { createHash } from "node:crypto";
 
-const REQUIRED_DIRS = [".", "templates/common", "templates/co-design", "templates/co-develop", "templates/co-work"];
+// Dynamic variant detection from templates/ directory
+const variantDirs = existsSync('templates')
+  ? readdirSync('templates')
+      .filter(d => d.startsWith('co-') && statSync(`templates/${d}`).isDirectory())
+      .map(d => `templates/${d}`)
+  : [];
+
+const REQUIRED_DIRS = [".", "templates/common", ...variantDirs];
 
 /** Strips the leading frontmatter block (--- ... ---) and returns the body. */
 function stripFrontmatter(content: string): string {

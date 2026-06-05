@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-05](2026-06-05.md) | Tier governance violation analysis |
 | [2026-06-04](2026-06-04.md) | feat: add tag-template.ts, template version mismatch warning, and audit tag check |
 | [2026-06-03](2026-06-03.md) | chore: update |
 | [2026-06-02](2026-06-02.md) | fix: Limit changes to workspace root and templates to fix L0/L1 and phase definitions |
@@ -78,6 +79,10 @@
 | 2026-05-27 | README sync | [meeting-2026-05-27-readme-sync.md](meeting-2026-05-27-readme-sync.md) |
 | 2026-05-27 | PS1 parse error | [meeting-2026-05-27-ps1-parse-error.md](meeting-2026-05-27-ps1-parse-error.md) |
 | 2026-05-27 | chmod fix | [meeting-2026-05-27-chmod-fix.md](meeting-2026-05-27-chmod-fix.md) |
+| 2026-06-05 | Tier governance violation analysis — automation-engineer High tier breach, architect Phase 1-2 bypass | [meeting-2026-06-05-tier-governance-violation.md](meeting-2026-06-05-tier-governance-violation.md) |
+| 2026-06-05 | Tier governance L0→L1→L2 propagation strategy — principles vs specialist-list separation | [meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md](meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md) |
+| 2026-06-05 | Antigravity parity gap root cause — PM execution plan table missing Platform column | [meeting-2026-06-05-antigravity-parity-gap-root-cause.md](meeting-2026-06-05-antigravity-parity-gap-root-cause.md) |
+| 2026-06-05 | Action item completeness review — C-01 L0→L1→L2 scope, A-00 and D-01 added | [meeting-2026-06-05-action-item-completeness-review.md](meeting-2026-06-05-action-item-completeness-review.md) |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | [2026-05-24-multi-agent-meeting-summary.md](2026-05-24-multi-agent-meeting-summary.md) |
 
 ## ADRs

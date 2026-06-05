@@ -42,29 +42,30 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `new-project.sh` | L0 | 1.3.9 | active | — | — | L0-only | pair: new-project.ps1 |
-| `new-project.ps1` | L0 | 1.6.1 | active | — | — | L0-only | — |
+| `new-project.sh` | L0 | 1.4.0 | active | — | — | L0-only | pair: new-project.ps1 |
+| `new-project.ps1` | L0 | 1.6.2 | active | — | — | L0-only | — |
 | `install-bun.sh` | L0 | 1.0.0 | active | — | — | common | pair: install-bun.ps1 |
 | `install-bun.ps1` | L0 | 1.0.0 | active | — | — | common | — |
 | `upgrade-project.sh` | L0 | 1.1.0 | active | — | — | L0-only | pair: upgrade-project.ps1 |
 | `upgrade-project.ps1` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | — | — | common | pair: cleanup-completed-md.ps1 |
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | — | — | common | — |
-| `audit.ts` | L0 | 2.5.2 | active | — | — | common | — |
-| `dev-sync.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `audit.ts` | L0 | 2.5.3 | active | — | — | common | — |
+| `dev-sync.ts` | L0 | 1.2.1 | active | — | — | common | — |
 | `sync-md.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `publish-to-template.ts` | L0 | 1.3.6 | active | — | — | common | — |
+| `publish-to-template.ts` | L0 | 1.4.0 | active | — | — | common | — |
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `list-template-versions.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `qa-gate.ts` | L0 | 1.0.2 | active | — | — | common | — |
+| `create-l2-scaffold.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-create.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `team-builder.ts` | L0 | 1.2.0 | active | — | — | common | — |
 | `agent-delete.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `agent-list.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `agent-verify.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `agent-verify.ts` | L0 | 1.0.1 | active | — | — | common | — |
 | `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | — | — | common | — |
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | — | — | common | — |
@@ -94,7 +95,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/generate-variant.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `verify-readme-sync.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `verify-readme-sync.ts` | L0 | 1.1.1 | active | — | — | common | — |
 | `translate-readme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-scripts.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -106,10 +107,14 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | L0-only | — |
-| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
-| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — | L0-only | — |
+| `lib/platform-context.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `lib/platform-dispatcher.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: cross-platform dispatch abstraction for PM auto-mode (Claude Code + Antigravity) |
+| `lib/encoding-utils.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `lib/error-handling.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `lib/pipeline-state.ts` | L0 | 1.1.0 | active | — | — | common | — |
+| `lib/plan-parser.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: parses ExitPlanMode Markdown plans for auto-mode execution |
+| `lib/checkpoint-manager.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: session-only checkpoint management for PM auto-mode |
+| `lib/auto-executor.ts` | L0 | 1.0.0 | active | — | — | common | workspace-only: phase group execution orchestration for PM auto-mode |
 | `validate-agents.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -117,7 +122,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `test-runner.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-md-language.ts` | L0 | 1.3.0 | active | — | — | common | — |
-| `hooks/pre-commit.ts` | L0 | 1.5.3 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; all variants inherit from common (no independent L1 versions) |
+| `hooks/pre-commit.ts` | L0 | 1.5.4 | active | — | — | L0-only | workspace-only: SYNC_ACTIVE protection; exempt memory/ from Korean check; all variants inherit from common (no independent L1 versions) |
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | — | — | L0-only | workspace-only: full audit+tests; L1 has independent v2.0.0 branch-protection-only version |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | — | — | L0-only | workspace-only: references docs/workspace-schema.json |
@@ -358,4 +363,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-04*
+*Last Updated: 2026-06-05*

@@ -187,6 +187,42 @@ When `/meeting` is invoked, the AI engine (Claude/Antigravity/Gemini) role-plays
 - Adds opinions or positions to the transcript
 - Summarizes mid-meeting ??let the dialogue breathe
 
+## Tier Governance Principles
+
+These principles apply to ALL variants. They are variant-agnostic and must not be overridden by variant-specific PM configuration.
+
+### Phase Determination Gate
+
+Before assigning any agent, classify the deliverable type:
+
+| Deliverable Type | Phase | Minimum Agent Tier |
+|-----------------|-------|--------------------|
+| New file design, schema, ADR | Phase 1-2 | High (design-layer agent) |
+| Script/code implementation (approved plan exists) | Phase 4 | Low |
+| Documentation | Phase 4 | Medium |
+| Security configuration | Phase 6 | Medium |
+
+### Tier Ceiling Rule
+
+An agent's tier is defined in its frontmatter and is a hard ceiling:
+- A Low-tier agent (e.g., automation-engineer, code-writer) may NOT be assigned High-tier work (design, schema definition, ADR authoring).
+- A High-tier agent must produce a plan/ADR before Low-tier implementation begins.
+- Tier elevation in the execution plan table is a governance violation.
+
+### Platform Column Rule
+
+Every row in the execution plan table MUST include a `Platform` column:
+- `Both` — affects Claude Code AND Antigravity
+- `Claude` — Claude Code only (requires written justification for why Antigravity is excluded)
+- `Antigravity` — Antigravity only (rare)
+- `L0-only` — workspace root only, not propagated to variants
+
+An empty Platform column is equivalent to undeclared Antigravity impact — a governance violation.
+
+### Specialist List (Variant-Specific)
+
+The specialist agent list for this variant is defined in `AGENTS.md`. Consult `AGENTS.md` to identify which agents exist in this variant and their respective tiers before constructing the execution plan table.
+
 ## Required Tools
 | Tool | Purpose |
 |------|---------|

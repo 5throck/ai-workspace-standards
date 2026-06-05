@@ -162,6 +162,7 @@ All agents must follow this file routing policy. **Creating `.md` files at the p
 | Final reports, deliverables | `docs/` |
 | Work-in-progress, drafts | `docs/drafts/` |
 | Session logs, meeting transcripts | `memory/` |
+| Temporary code, scratch scripts | `tests/` |
 | Configuration, tooling files | project root (allowed) |
 
 > **Rule**: When creating any file, always specify the full relative path. If unsure, default to `docs/`. Never create `.md` files at the project root unless it is a standard root file listed above.

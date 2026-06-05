@@ -17,7 +17,7 @@
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role. **PM does NOT execute code or documentation directly — all specialist work dispatched through PM. See `agents/pm.md` for ⚠️ CRITICAL direct execution constraints.** |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); syncs governance documents after changes; PM dispatches as N-1 step in every execution plan |
 
@@ -50,16 +50,53 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 ### PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. The following whitelist defines what PM may execute directly.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
 | Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (other paths), Bash (write/execute) | Must delegate to specialist |
+| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
+| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
+
+**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
 
 When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+
+### PM Role Boundaries
+
+**What PM Does**:
+- Orchestrate multi-agent workflows
+- Create execution plans
+- Dispatch specialist agents
+- Enforce quality gates
+- Track progress
+
+**What PM Does NOT Do**:
+- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
+- Implement code or scripts
+- Perform documentation updates (delegate to docs-writer)
+- Perform design work (delegate to architect)
+
+**Task Owner vs Executor Distinction**:
+- **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
+- **Task executor (specialist)**: Agent who performs the actual work
+- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
+
+**User Communication for Specialist Tasks**:
+When work requires specialist delegation, PM uses the following template:
+```
+PM: 🔍 [Task Analysis] 이 작업은 [specialist] 전문 영역입니다.
+   Task: [description]
+   Specialist: [specialist name]
+   Reason: [why specialist needed]
+PM: [specialist]를 dispatch할까요?
+User: "Yes"
+PM: ▶️ [specialist] dispatch...
+```
+
+See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
 
 ### Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
@@ -289,6 +326,8 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | Platform Skill Lifecycle Manager | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle — creation, versioning, propagation for .claude/skills/ and .gemini/skills/ |
 | Platform Command Lifecycle Manager | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle — creation, parity, propagation for .claude/commands/ and .gemini/commands/ |
 | Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
+| Create Variant | `skills/create-variant/SKILL.md` | Phase A guided process for creating a new workspace variant prototype in Projects/ |
+| Promote Variant | `skills/promote-variant/SKILL.md` | Phase B guided process for promoting a completed Phase A prototype to templates/co-<name>/ |
 | Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
 | Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
 | Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
@@ -318,7 +357,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
 - **Language**: All code, config, commit messages, and branch names - **English only**.
 - **UTF-8 Enforcement**: Always use UTF-8 encoding; prevent CP949 or other localized encoding corruptions.
-- **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`.
+- **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`. Create all temporary code and scratch scripts in `tests/`.
 - **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 - **Source Attribution**: When presenting research findings, external data, or factual claims, always cite the source using `[Source: URL/document]` inline or a `## References` section. If a source cannot be verified, explicitly mark it as `⚠️ Unverified` and recommend manual verification. Never present unverified information as established fact.
 - **Computational Integrity**: Never perform high-precision or safety-critical numerical calculations directly. For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.) via the `stack-setup` agent. Label any AI-generated numerical estimate explicitly as **approximate**.

@@ -166,6 +166,18 @@ Mode    : [Silent | Dialogue]
 2. **Open Disagreements or Unresolved Questions**
 3. **Concrete Next Action Items** (max 5) - owner + deliverable + agent tier (High/Medium/Low based on workspace-schema.json)
 
+**⚠️ Platform Parity Check (MANDATORY before writing Action Items)**:
+Before finalizing Action Items, the Synthesizer MUST answer:
+- Does any Action Item affect `CLAUDE.md`, `GEMINI.md`, `agents/*.md`, `.claude/`, or `.gemini/` files?
+- If YES: every such item MUST have a paired counterpart for the other platform, OR explicitly state `Platform: Claude-only` / `Platform: Antigravity-only` with a written justification.
+- An Action Item affecting one platform with no platform declaration is a **governance violation**.
+
+Action Item table MUST include a `Platform` column:
+| # | Owner | Tier | Deliverable | Platform | Phase |
+Where Platform = `Claude` / `Antigravity` / `Both` / `L0-only`
+
+**Note**: See execution plan boilerplate in agents/pm.md, CLAUDE.md §5, and GEMINI.md §5 for the Platform column description defining AI Platform(AI model/execution environment) distinction.
+
 **Always Displayed** (regardless of mode):
 ```
 **[Synthesizer]**: (Synthesis)

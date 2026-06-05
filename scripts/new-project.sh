@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# @version 1.3.9
+# @version 1.4.0
 # new-project.sh - Scaffold a new project under the workspace root
-# Usage: bash scripts/new-project.sh "<project-name>" [--variant co-develop|co-design|co-work|co-security|co-consult] [--version X.Y.Z]
+# Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
+# Variants are auto-detected from templates/ directory (or git tag when --version is specified)
 
 # Force English locale for consistent error messages
 export LC_ALL=C
@@ -41,7 +42,8 @@ done
 
 # Validate required arguments
 if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant co-develop|co-design|co-work|co-security|co-consult] [--platform claude|antigravity|both] [--version X.Y.Z]"
+  echo "Usage: bash scripts/new-project.sh \"<project-name>\" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]"
+  echo "       Variants are auto-detected from templates/"
   exit 1
 fi
 
@@ -56,22 +58,30 @@ if [ "${#PROJECT_NAME}" -gt 64 ]; then
   exit 1
 fi
 
-# Validate VARIANT against allowlist (prevent path traversal attacks)
+# Validate VARIANT against dynamically detected list (prevent path traversal attacks)
 if [ -n "$VARIANT" ]; then
-  case "$VARIANT" in
-    co-develop|co-design|co-work|co-security|co-consult)
-      ;;
-    *)
-      echo "❌ Invalid variant: $VARIANT"
-      echo "   Valid variants: co-develop, co-design, co-work, co-security, co-consult"
-      exit 1
-      ;;
-  esac
+  _WS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  # Dynamic variant detection — git tag or filesystem
+  if [ -n "$TEMPLATE_VER" ]; then
+    _TAG="template-v${TEMPLATE_VER}"
+    VALID_VARIANTS=$(git -C "$_WS_ROOT" archive "$_TAG" --list 2>/dev/null \
+      | grep -E "^templates/co-[^/]+/variant\.json$" \
+      | sed 's|templates/||;s|/variant\.json||' \
+      | sort -u || echo "")
+  else
+    VALID_VARIANTS=$(ls "$_WS_ROOT/templates/" 2>/dev/null | grep "^co-" | sort)
+  fi
+
+  if ! echo "$VALID_VARIANTS" | grep -qx "$VARIANT"; then
+    echo "❌ Invalid variant: $VARIANT"
+    echo "   Valid variants: $(echo "$VALID_VARIANTS" | tr '\n' ' ')"
+    exit 1
+  fi
 fi
 
 # Validate --variant was not left without a value (last arg was --variant)
 if [ "$prev_arg" = "--variant" ] && [ -z "$VARIANT" ]; then
-  echo "❌ --variant requires a value. Available: co-develop, co-design, co-work, co-security, co-consult"
+  echo "❌ --variant requires a value (auto-detected from templates/)"
   exit 1
 fi
 
@@ -83,15 +93,14 @@ fi
 
 # -- Require explicit variant selection ------------------------------------------
 if [ -z "$VARIANT" ]; then
+    _WS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
     echo ""
     echo "[INFO] No variant specified. Please choose one:"
-    echo "   co-develop  — Software development (stable)"
-    echo "   co-design   — UI/UX design (stable)"
-    echo "   co-work     — Collaboration & documentation (stable)"
-    echo "   co-security — Security engagement (stable)"
-    echo "   co-consult  — Strategy consulting (stable)"
+    for v in $(ls "$_WS_ROOT/templates/" 2>/dev/null | grep "^co-" | sort); do
+      echo "   $v"
+    done
     echo ""
-    echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant co-develop"
+    echo "   Usage: bash scripts/new-project.sh \"$PROJECT_NAME\" --variant <variant>"
     echo ""
     exit 1
 fi
@@ -142,7 +151,7 @@ fi
 
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Template variant not found: $TEMPLATES_DIR"
-  echo "   Available variants: co-develop (stable), co-design (stable), co-work (stable), co-security (stable), co-consult (stable)"
+  echo "   Available variants: $(ls "$WORKSPACE_ROOT/templates/" 2>/dev/null | grep "^co-" | tr '\n' ' ')"
   exit 1
 fi
 

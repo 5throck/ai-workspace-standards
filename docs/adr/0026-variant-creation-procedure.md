@@ -1,6 +1,7 @@
 # ADR-0026: Variant Creation Procedure and Template Version Policy
 
-**Status**: Accepted
+**Status**: Accepted (Partially Superseded)
+**Superseded By**: ADR-0031 §5 (variant registration via dynamic detection, not manual script update)
 **Date**: 2026-06-04
 **Deciders**: architect, automation-engineer
 **Supersedes**: —
@@ -30,7 +31,7 @@ A new variant MUST:
    - `skills/` (domain-specific skill definitions)
    - `scripts/` (copied from `templates/common/scripts/`)
    - `docs/` (including `docs/adr/`)
-5. Be registered in `new-project.sh`, `new-project.ps1`, and any variant selection UI
+5. Be discoverable via the `templates/` directory (directory named `co-<name>` with `variant.json`). Scripts (`new-project.sh`, `new-project.ps1`, `upgrade-project.sh`, `upgrade-project.ps1`) dynamically detect valid variants from `templates/` at runtime — no manual registration required. See ADR-0031 for the dynamic detection design.
 6. Pass `bun scripts/validate-templates.ts` before the PR is merged
 7. Be accompanied by an ADR (see ADR Requirement below)
 
@@ -74,3 +75,7 @@ Every new variant addition MUST be accompanied by an ADR documenting:
 - [ ] Automate VERSION bump in `tag-template.ts` based on change type detection
 - [ ] Add variant addition checklist to `new-project.sh`
 - [ ] Extend `validate-templates.ts` to verify the ADR requirement is satisfied
+
+## Amendment (2026-06-05)
+
+§5 originally required manual registration in `new-project.sh/ps1`. This has been superseded by dynamic variant detection — scripts now enumerate `templates/co-*/` directories at runtime. ADR-0031 documents the full L1-L2 Fork Model that motivated this change.

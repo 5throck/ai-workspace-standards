@@ -9,7 +9,7 @@
 You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/pm.md) at all times.
 
 **Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
-1. Display execution plan table first (task | agent | tier | model)
+1. Display execution plan table first (task | agent | tier | model | platform)
 2. Only then use `invoke_subagent` to dispatch specialist agents
 3. Never bypass PM workflow — direct specialist invocation is forbidden
 
@@ -29,18 +29,18 @@ Antigravity utilizes the following specialized, fine-grained toolset for filesys
 | **Surgical Edit** | `replace_file_content` | Replace a single contiguous block of code. Specify `StartLine`, `EndLine`, `TargetContent`, and `ReplacementContent` with 100% exact leading whitespace matching. |
 | **Multi Edit** | `multi_replace_file_content` | Perform multiple non-contiguous edits within the same file simultaneously. Order chunks descendingly (bottom-to-top) to avoid line offsets. |
 | **Search** | `grep_search` | Search codebases via Ripgrep. Keep `MatchPerLine: true` for line-by-line matches. Apply partitioning if matches exceed 50. |
-| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. ⚠️ **STRICT BAN**: NEVER run `git commit` or `git push` directly via this tool (e.g., using `$env:SYNC_ACTIVE=1; git commit` to bypass QA gates is FORBIDDEN). All commits must go through the approved `/sync` pipeline or `bun scripts/dev-sync.ts`. |
+| **Command Execution** | `run_command` | Execute PowerShell/Bash shell commands. Returns task process IDs. NEVER use `cd` commands. ?슚 **STRICT BAN**: NEVER run `git commit` or `git push` directly via this tool (e.g., using `$env:SYNC_ACTIVE=1; git commit` to bypass QA gates is FORBIDDEN). All commits must go through the approved `/sync` pipeline or `bun scripts/dev-sync.ts`. |
 
-#### ⚠️ Surgical Multi-Replace Offset Safeguard
+#### ?슚 Surgical Multi-Replace Offset Safeguard
 When calling `multi_replace_file_content` with multiple `ReplacementChunks`, the line numbers of subsequent target blocks will shift if previous edits change the line count.
 - **Rule**: You **MUST** sort and process the `ReplacementChunks` from the **bottom of the file to the top** (descending order of line numbers: largest `StartLine` first).
 - This guarantees that edits made near the end of the file do not alter or corrupt the line numbers of target blocks located higher up in the file.
 
-#### ⚠️ Windows Terminal & Code Page Safeguard
+#### ?슚 Windows Terminal & Code Page Safeguard
 When executing CLI commands via `run_command` on Windows (PowerShell/CMD), the default Windows code page (e.g., CP949) often causes Unicode decoding errors.
 - **Rule:** Before running commands that output non-ASCII text, explicitly set the code page to UTF-8 by prepending `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` (PowerShell) or `chcp 65001` (CMD).
 
-#### ⚠️ Grep Search 50-Match Cap Safeguard
+#### ?슚 Grep Search 50-Match Cap Safeguard
 The `grep_search` tool silently truncates results at exactly **50 matches**.
 - **Rule**: If a codebase-wide search yields 50 results, do **NOT** assume you have all occurrences.
 - **Remediation**: Partition the search. Divide the search by targeting specific subdirectories (e.g., `C:\git\<project>\src`) or apply restrictive file glob filters using the `Includes` parameter (e.g., `["*.py"]` or `["*.ts"]`).
@@ -106,10 +106,10 @@ For parallel execution, quality reviews, or sandboxed research tasks, utilize th
 Instantiate a new reusable subagent type with a unique name, specialized role prompt, and permissions:
 ```json
 {
-  "name": "docs-writer",
-  "description": "Standardizes Markdown documentation and manages translations",
-  "system_prompt": "You are a docs writer...",
-  "enable_write_tools": true,
+  "name": "auditor",
+  "description": "Cross-validates documentation and ensures rules are not contradicted",
+  "system_prompt": "You are a consistency auditor...",
+  "enable_write_tools": false,
   "enable_subagent_tools": false
 }
 ```
@@ -120,9 +120,9 @@ Spawn parallel instances to execute dedicated work concurrently. PM MUST explici
 {
   "Subagents": [
     {
-      "TypeName": "docs-writer",
-      "Role": "Documentation Writer",
-      "Prompt": "Standardize the new feature documentation in the docs folder"
+      "TypeName": "auditor",
+      "Role": "Consistency Auditor",
+      "Prompt": "Cross-validate the documentation changes and check for contradictions"
     }
   ]
 }
@@ -165,45 +165,115 @@ All `.md` files you create or modify MUST be in English, except when working in 
 
 ### 5. Agent Dispatch Rules
 
-See [CONSTITUTION.md](CONSTITUTION.md) for the multi-agent architecture and governance rules.
+See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool.
+
+**Mandatory Criteria** (Boilerplate always required when ANY applies):
+
+1. **Multi-agent Dispatch**: 2 or more specialists involved
+2. **Breaking Changes**: Modifications that break existing functionality
+3. **Platform Parity Changes**: Changes to CLAUDE.md/GEMINI.md sync
+4. **Lifecycle-Related Items** (NEW):
+   - agents/*.md modifications → Requires AGENTS.md update
+   - skills/*/SKILL.md modifications → Requires AGENTS.md update
+   - scripts/*.ts modifications → Requires SCRIPTS.md update
+   - docs/adr/*.md modifications → Requires ADR index update
+5. **Root Configuration Changes** (NEW):
+   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
+   - README.md, CHANGELOG.md
+
+**Boilerplate Format**:
+
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|-------|----------|
 | 1 | [task] | [agent] | High/Medium/Low | high/medium/low |
 
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 
-**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+**Platform Column Description**: AI Platform(AI model/execution environment) distinction: Claude Code / Antigravity / Both / L0-only. Note: OS platforms (Windows/MacOS/Linux) are distinct and not referenced here.
 
-See [CONSTITUTION.md](CONSTITUTION.md) for the multi-agent architecture and governance rules.
+#### Execution Plan Table Format Guidelines
 
-#### Mandatory Execution Plan Display
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool:
+**WRONG** (Do NOT use):
+| # | Task | Agent | Platform |
+| 1 | Update agents/pm.md | pm (direct) | L0-only |
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
+**CORRECT** (Use this format):
+| # | Task | Implementer | Coordinator | Platform |
+|---|-----------|------------|----------|----------|
+| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
 
-State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
-*Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
+**Key points**:
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+- Use "Implementer" column for the actual executing specialist
+- Use "Coordinator" column for pm (orchestration role only)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+
+#### Auto-Mode Execution (Antigravity-Only)
+
+> **Platform-Specific Feature**: Auto-Mode is designed for Antigravity platform. For Claude Code, the native Agent tool provides equivalent functionality.
+
+Auto-Mode enables automated plan execution for Antigravity's Agent Manager workflow. After execution plan approval, Auto-Mode orchestrates specialist dispatch with checkpoint-based error handling.
+
+**Activation**:
+- User explicitly requests: "Auto-Mode on", "Run automatically"
+- Implicit: PM detects straightforward task with clear acceptance criteria
+- Default mode: Auto-Mode is the default execution mode for Antigravity after plan approval
+
+**User Interaction Flow**:
+```markdown
+PM: 📋 Execution plan approved
+   Antigravity default mode: Auto-Mode
+   ▶️ Auto-Mode orchestrates specialist dispatch with checkpoints
+   
+User: [Explicit opt-out → Manual mode]
+```
+
+**Error Handling**:
+- Non-critical errors: Auto-fix and continue
+- Critical errors: Pause and request user guidance
+- Checkpoint creation: After each phase group completion
+- Rollback support: Restore to last checkpoint on critical failure
+
+See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for detailed architecture.
+
+#### Phase Determination Checklist
+
+Before writing the execution plan table, PM MUST classify each task's deliverable type:
+
+| Deliverable Type | → Phase | → Required Agent | → Tier |
+|-----------------|---------|-----------------|--------|
+| New file design / schema / ADR | Phase 1-2 | architect | High |
+| New directory or template layout | Phase 1-2 | architect | High |
+| Cross-platform convention / naming standard | Phase 1-2 | architect | High |
+| Script or code implementation (plan approved) | Phase 4 | automation-engineer | Low |
+| Documentation update | Phase 4 | docs-writer | Medium |
+| Security configuration | Phase 6 | security-expert | Medium |
+| Project scaffolding | Phase 0 | scaffolding-expert | Low |
+
+**Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
+
+**Platform column**: Every row MUST declare `Platform` (`Claude` / `Antigravity` / `Both` / `L0-only`). An empty Platform column is a governance violation.
+
+#### PM Gateway Enforcement Summary
+
+Pre-dispatch validation (run mentally before every execution plan):
+1. ✅ Is each deliverable type correctly mapped to a Phase?
+2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
+3. ✅ Does every row have a Platform column value?
+4. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
+5. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
 
 #### Specialist Agent List
 All agents below require PM dispatch:
-- change-management-partner (Phase 1-2)
-- strategy-analyst (Phase 1, 3)
-- industry-expert (Phase 1-2)
-- sme (Phase 1-2)
-- communications-lead (Phase 3)
-- solutions-architect (Phase 3)
-- workstream-lead (Phase 3-4)
-- delivery-manager (Phase 4)
-- technology-specialist (Phase 4)
-- data-analyst (Phase 1, 4)
+- architect (Phase 1-2)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 6)
 
 #### Permission Denial Protocol
 
@@ -247,6 +317,27 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### L1-L2 Fork Model
+
+After a variant (L2) is scaffolded from `templates/common` (L1) via `create-l2-scaffold.ts`, the L1→L2 relationship **ends**. L2 evolves independently.
+
+**5 Fork Model Principles** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
+1. L1 delivers common infrastructure to L2 at scaffold time — relationship ends after that.
+2. L1 changes do **not** auto-propagate to L2 after fork.
+3. To reflect L2 changes as an official template, run `l2-to-variant-pipeline.ts` explicitly.
+4. L0→L1 publish runs automatically via `dev-sync.ts` (continuous pipeline).
+5. L1 vs L2 drift can be reported with `publish-to-template.ts --check-drift` (read-only).
+
+**`--docs` flag**: `bun scripts/publish-to-template.ts --docs` is an **explicit opt-in** tool that injects `COMMON-*` marked sections from L0 governance docs into L2 variants. It does not violate Fork Model independence because it requires deliberate invocation.
+
+| Action | Command | Auto? |
+|--------|---------|-------|
+| L0→L1 publish | `bun scripts/publish-to-template.ts` | ✅ via dev-sync |
+| L1→L2 scaffold (1×) | `bun scripts/create-l2-scaffold.ts` | Manual |
+| L2→template promote | `bun scripts/l2-to-variant-pipeline.ts` | Manual |
+| L1 vs L2 drift report | `bun scripts/publish-to-template.ts --check-drift` | Manual |
+| L0 governance inject | `bun scripts/publish-to-template.ts --docs` | Manual (opt-in) |
 <!-- COMMON-GEMINI:END -->
 
 <!-- COMMON-GEMINI:START -->
@@ -261,6 +352,7 @@ When modifying files, apply the following rules **before** running `/sync` or co
 | `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
 | `templates/` (any file) | Run `bun scripts/tag-template.ts` to publish a new `template-v{VERSION}` git tag — only after all template changes are committed and verified via `bun scripts/audit.ts` |
 | `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
+| `templates/common/agents/*.md` | Sync identical file to ALL `templates/co-*/agents/` variants — run `bun run agent:verify` to confirm |
 | `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
@@ -278,7 +370,7 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full lifecycle rules: See [CONSTITUTION.md](CONSTITUTION.md) at workspace root.
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 <!-- COMMON-GEMINI:END -->
 
 ---
@@ -330,11 +422,186 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 - `teammateMode`
 - Hook events: `TeammateIdle`, `TaskCreated`, `TaskCompleted`
 
+#### teammateMode (Claude Code Agent Teams execution mode)
+
+**teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
+
+**Values**:
+- `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
+- `null` — Default value (auto-selects based on environment)
+
+**Configuration location**: `.claude/settings.json` → `teammateMode`
+
+**Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
+
+**Relationship to execution plan table**: teammateMode controls parallel execution mode, while the Platform column in the execution plan table specifies the AI engine (Claude/Antigravity/Both/L0-only). These are separate concepts.
+
 ---
 
-*Last Updated: 2026-06-03 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; replaced lifecycle-manager and auditor with pm in boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+<!-- COMMON-GEMINI:START -->
+## Execution Plan Boilerplate
 
+Before dispatching 2+ agents, copy this exact format:
 
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|-------|----------|
+| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | gemini-3.5-flash | L0-only |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | gemini-3.5-flash | L0-only |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash | L0-only |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash | L0-only |
 
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
+**Key points**:
+- Tier column is MANDATORY (High/Medium/Low)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- State parallel vs sequential order below the table
 
+#### Execution Plan Table Format Guidelines
+
+**WRONG** (Do NOT use):
+| # | Task | Agent | Platform |
+| 1 | Update agents/pm.md | pm (direct) | L0-only |
+
+**CORRECT** (Use this format):
+| # | Task | Implementer | Coordinator | Platform |
+|---|-----------|------------|----------|----------|
+| 1 | Update agents/pm.md | docs-writer | pm | L0-only |
+
+**Key points**:
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+- Use "Implementer" column for the actual executing specialist
+- Use "Coordinator" column for pm (orchestration role only)
+- Platform column is MANDATORY (Claude/Antigravity/Both/L0-only)
+
+#### Auto-Mode Note (Antigravity Platform)
+
+> **Platform-Specific Feature**: Auto-Mode is designed for Antigravity platform. For Claude Code, the native Agent tool provides equivalent functionality.
+
+Auto-Mode enables automated plan execution for Antigravity's Agent Manager workflow. After execution plan approval, Auto-Mode orchestrates specialist dispatch with checkpoint-based error handling.
+
+**Activation**:
+- User explicitly requests: "Auto-Mode on", "Run automatically"
+- Implicit: PM detects straightforward task with clear acceptance criteria
+- Default mode: Auto-Mode is the default execution mode for Antigravity after plan approval
+
+**User Interaction Flow**:
+```markdown
+PM: 📋 Execution plan approved
+   Antigravity default mode: Auto-Mode
+   ▶️ Auto-Mode orchestrates specialist dispatch with checkpoints
+   
+User: [Explicit opt-out → Manual mode]
+```
+
+**Error Handling**:
+- Non-critical errors: Auto-fix and continue
+- Critical errors: Pause and request user guidance
+- Checkpoint creation: After each phase group completion
+- Rollback support: Restore to last checkpoint on critical failure
+
+See [ADR-0030](docs/adr/0030-auto-mode-architecture.md) for detailed architecture.
+
+#### Phase Determination Checklist
+
+Before writing the execution plan table, PM MUST classify each task's deliverable type:
+
+| Deliverable Type | → Phase | → Required Agent | → Tier |
+|-----------------|---------|-----------------|--------|
+| New file design / schema / ADR | Phase 1-2 | architect | High |
+| New directory or template layout | Phase 1-2 | architect | High |
+| Cross-platform convention / naming standard | Phase 1-2 | architect | High |
+| Script or code implementation (plan approved) | Phase 4 | automation-engineer | Low |
+| Documentation update | Phase 4 | docs-writer | Medium |
+| Security configuration | Phase 6 | security-expert | Medium |
+| Project scaffolding | Phase 0 | scaffolding-expert | Low |
+
+**Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
+
+**Platform column**: Every row MUST declare `Platform` (`Claude` / `Antigravity` / `Both` / `L0-only`). An empty Platform column is a governance violation.
+
+#### PM Gateway Enforcement Summary
+
+Pre-dispatch validation (run mentally before every execution plan):
+1. ✅ Is each deliverable type correctly mapped to a Phase?
+2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
+3. ✅ Does every row have a Platform column value?
+4. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
+5. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
+
+#### Specialist Agent List
+All agents below require PM dispatch:
+- architect (Phase 1-2)
+- automation-engineer (Phase 4)
+- docs-writer (Phase 4)
+- scaffolding-expert (Phase 0)
+- security-expert (Phase 6)
+
+#### Permission Denial Protocol
+
+When a specialist agent's required tool is denied by the user, PM must **not** substitute for the specialist. Instead:
+
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
+
+See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
+
+#### Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
+> **Antigravity Command Intercept Rule**: `/meeting` is not a native Antigravity UI slash command. If the user input begins with `/meeting`, you (the Agent) MUST immediately intercept this text pattern and seamlessly execute the `.gemini/commands/meeting.md` process using the provided arguments, exactly as if the user had explicitly requested the skill by name.
+
+---
+
+### 6. Workspace & Template Boundary Policy
+
+- **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
+- **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
+
+### L1-L2 Fork Model
+
+After a variant (L2) is scaffolded from `templates/common` (L1) via `create-l2-scaffold.ts`, the L1→L2 relationship **ends**. L2 evolves independently.
+
+**5 Fork Model Principles** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
+1. L1 delivers common infrastructure to L2 at scaffold time — relationship ends after that.
+2. L1 changes do **not** auto-propagate to L2 after fork.
+3. To reflect L2 changes as an official template, run `l2-to-variant-pipeline.ts` explicitly.
+4. L0→L1 publish runs automatically via `dev-sync.ts` (continuous pipeline).
+5. L1 vs L2 drift can be reported with `publish-to-template.ts --check-drift` (read-only).
+
+**`--docs` flag**: `bun scripts/publish-to-template.ts --docs` is an **explicit opt-in** tool that injects `COMMON-*` marked sections from L0 governance docs into L2 variants. It does not violate Fork Model independence because it requires deliberate invocation.
+
+| Action | Command | Auto? |
+|--------|---------|-------|
+| L0→L1 publish | `bun scripts/publish-to-template.ts` | ✅ via dev-sync |
+| L1→L2 scaffold (1×) | `bun scripts/create-l2-scaffold.ts` | Manual |
+| L2→template promote | `bun scripts/l2-to-variant-pipeline.ts` | Manual |
+| L1 vs L2 drift report | `bun scripts/publish-to-template.ts --check-drift` | Manual |
+| L0 governance inject | `bun scripts/publish-to-template.ts --docs` | Manual (opt-in) |
+<!-- COMMON-GEMINI:END -->

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts and skills to L1 (templates/common) and propagates to L2 (templates/co-*)
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs]
-// @version 1.3.6
+// @version 1.3.7
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -99,6 +99,13 @@ for (const line of registryLines) {
   const src = path.join(l0Dir, script);
   const dst = path.join(l1Dir, script);
   if (!fs.existsSync(src)) continue;
+
+  // Ensure parent directory exists
+  const dstDir = path.dirname(dst);
+  if (!fs.existsSync(dstDir) && !dryRun) {
+    fs.mkdirSync(dstDir, { recursive: true });
+  }
+
   if (dryRun) {
     console.log(`  [dry-run] ${script}`);
   } else {

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-04T01:50:10.073Z
+**Generated**: 2026-06-05T06:39:15.928Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 16
-- **Scripts**: 74
+- **Skills**: 18
+- **Scripts**: 79
 - **Commands**: 6
 
 ---
@@ -19,12 +19,12 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-06-01 |
+| architect | agents/architect.md | high | inherit | 2026-06-04 |
 | auditor | agents/auditor.md | medium | inherit | 2026-06-01 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-01 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-01 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-01 |
-| pm | agents/pm.md | high | inherit | 2026-06-01 |
+| pm | agents/pm.md | high | inherit | 2026-06-04 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-01 |
 
@@ -36,11 +36,13 @@
 |------|---------|----------|----------|----------|-------|
 | agent-lifecycle-manager | 1.0.0 | skills/agent-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | N/A | auditor |
+| create-variant | 1.0.1 | skills/create-variant/SKILL.md | workspace | N/A | pm |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
-| meeting-facilitation | 1.3.2 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
+| meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
+| promote-variant | 1.0.1 | skills/promote-variant/SKILL.md | workspace | N/A | pm |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | N/A | security-expert |
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
@@ -64,11 +66,14 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.5.2 | scripts/audit.ts | bun |
+| audit.ts | 2.5.3 | scripts/audit.ts | bun |
+| auto-executor.ts | N/A | scripts/lib/auto-executor.ts | N/A |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
+| checkpoint-manager.ts | N/A | scripts/lib/checkpoint-manager.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
-| dev-sync.ts | 1.2.0 | scripts/dev-sync.ts | bun |
+| create-l2-scaffold.ts | N/A | scripts/create-l2-scaffold.ts | child_process, fs, path |
+| dev-sync.ts | 1.2.1 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | N/A | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | N/A | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
@@ -89,11 +94,13 @@
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
+| plan-parser.ts | N/A | scripts/lib/plan-parser.ts | fs, js-yaml |
 | platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
+| platform-dispatcher.ts | N/A | scripts/lib/platform-dispatcher.ts | N/A |
 | post-write-lifecycle-check.ts | N/A | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
-| publish-to-template.ts | 1.3.6 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.4.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
@@ -126,7 +133,7 @@
 | verify-memory.ts | N/A | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | N/A | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | N/A | scripts/verify-platform-lifecycle.ts | N/A |
-| verify-readme-sync.ts | 1.1.0 | scripts/verify-readme-sync.ts | bun, fs, path |
+| verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | N/A | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | N/A | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | N/A | scripts/verify-template-integrity.ts | crypto, fs, path |
@@ -152,7 +159,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 6 / 6
-- **Skills with parity**: 4 / 16
+- **Skills with parity**: 4 / 18
 
 ---
 
@@ -162,11 +169,13 @@
 
 - Skill agent-lifecycle-manager has no triggers defined
 - Skill audit-workspace has no triggers defined
+- Skill create-variant has no triggers defined
 - Skill finishing-a-development-branch has no triggers defined
 - Skill meeting-facilitation has no triggers defined
 - Skill platform-command-lifecycle-manager has no triggers defined
 - Skill platform-skill-lifecycle-manager has no triggers defined
 - Skill project-review has no triggers defined
+- Skill promote-variant has no triggers defined
 - Skill script-lifecycle-manager has no triggers defined
 - Skill security-scan has no triggers defined
 - Skill simulate-project-creation has no triggers defined

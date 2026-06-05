@@ -31,7 +31,7 @@
       "target": "templates/common/scripts/lib",
       "include_pattern": "*.ts",
       "recursive": false,
-      "note": "All lib/ files are currently L0-only per SCRIPTS.md — none will be copied until a file gets layer: common"
+      "note": "lib/ files have layer: common in SCRIPTS.md and are propagated L0→L1 via publish-to-template.ts"
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",
@@ -57,6 +57,37 @@
       "recursive": false,
       "exclude": [],
       "note": "Never include: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS, teammateMode, TeammateIdle, TaskCreated, TaskCompleted, permissions — all claude_only per common-contract.json platform_settings"
+    },
+    "docs": {
+      "description": "Documentation and templates",
+      "source": "docs",
+      "target": "templates/common/docs",
+      "include_pattern": "**/*.md",
+      "recursive": true,
+      "exclude": [],
+      "exclude_prefixes": ["templates/"],
+      "note": "Propagates all markdown files from docs/ to templates/common/docs/. Excludes docs/templates/ subdirectory to avoid duplicate templates/ path."
+    },
+    "governance-claude": {
+      "description": "CLAUDE.md COMMON-CLAUDE section injection to all L2 variants (--docs mode only)",
+      "mode": "marker-inject",
+      "source_file": "CLAUDE.md",
+      "marker": "COMMON-CLAUDE",
+      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+    },
+    "governance-gemini": {
+      "description": "GEMINI.md COMMON-GEMINI section injection to all L2 variants (--docs mode only)",
+      "mode": "marker-inject",
+      "source_file": "GEMINI.md",
+      "marker": "COMMON-GEMINI",
+      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+    },
+    "governance-agents": {
+      "description": "AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only)",
+      "mode": "marker-inject",
+      "source_file": "AGENTS.md",
+      "marker": "COMMON-AGENTS",
+      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
     }
   }
 }
