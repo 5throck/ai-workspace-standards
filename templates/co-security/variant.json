@@ -23,6 +23,28 @@
         "phases": [0, 5, 6],
         "platform_parity": "required"
       }
+    ],
+    "external": []
+  },
+  "script_manifest": {
+    "local": [],
+    "external": [
+      {
+        "name": "agency-agents-generator",
+        "source_url": "https://raw.githubusercontent.com/user/agency-agents/main/generator.ts",
+        "ingest_path": "scripts/external/agency-agents-generator.ts",
+        "version_tag": "latest"
+      }
+    ]
+  },
+  "security_manifest": {
+    "external": [
+      {
+        "name": "owasp-top-10",
+        "source_url": "https://raw.githubusercontent.com/OWASP/Top10/master/README.md",
+        "ingest_path": "resources/owasp-top-10.md",
+        "version_tag": "latest"
+      }
     ]
   },
   "name": "co-security",

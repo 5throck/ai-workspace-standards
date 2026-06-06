@@ -149,6 +149,11 @@ if (fs.existsSync(l0Skills)) {
     const itemPath = path.join(l0Skills, item);
     const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {
+      // Skip local/ and external/ (variant-specific directories)
+      if (item === 'local' || item === 'external') {
+        continue;
+      }
+      
       // Check layer-filter for skill inclusion in L1
       if (!includeSkillInL1(item)) {
         console.log(`  ⊘ Skipped (L0 only): ${item}/`);

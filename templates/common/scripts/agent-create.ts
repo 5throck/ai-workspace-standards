@@ -102,6 +102,26 @@ The agent produces:
 `;
 }
 
+async function supplementFromAgencyAgents(agentPath: string, options: AgentOptions): Promise<void> {
+  const agencyGeneratorPath = path.join(projectRoot, "scripts", "external", "agency-agents-generator.ts");
+  let supplementText = `\n\n## Agency-Agents Supplement\n`;
+  try {
+    await fs.access(agencyGeneratorPath);
+    console.log(`⏳ Running agency-agents generator for supplementation...`);
+    const { $ } = await import("bun");
+    const res = await $`bun ${agencyGeneratorPath} --agent ${options.name}`.nothrow();
+    if (res.exitCode === 0) {
+      supplementText += res.stdout.toString();
+    } else {
+      supplementText += `> ⚠️ Supplementation failed or returned no data.\n`;
+    }
+  } catch {
+    console.log(`⚠️ agency-agents-generator not found at ${agencyGeneratorPath}. Skipping external supplementation.`);
+    supplementText += `> ℹ️ \`agency-agents-generator.ts\` not found. Run ingest-external-skills.ts to fetch external blueprints.\n`;
+  }
+  await fs.appendFile(agentPath, supplementText, "utf-8");
+}
+
 /**
  * Create agent file
  */
@@ -117,9 +137,12 @@ async function createAgent(options: AgentOptions): Promise<void> {
     // File doesn't exist, continue
   }
 
-  // Create agent file
+  // Create agent file (Step 1: Local Draft)
   const content = getAgentTemplate(options);
   await fs.writeFile(agentPath, content, "utf-8");
+
+  // Step 2: Supplementation
+  await supplementFromAgencyAgents(agentPath, options);
 
   console.log(`✅ Agent created: ${agentPath}`);
   console.log(`\nNext steps:`);

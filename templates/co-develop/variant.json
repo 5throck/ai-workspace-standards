@@ -6,7 +6,11 @@
       "reason": "co-develop provides variant-specific Agent Roster (code-writer, test-runner, stack-setup), Governance Workflow (explicit serial Phase 4), and Dispatch Protocol (no designer in auto-dispatch)",
       "since": "2026-05-30",
       "reviewed_by": "lifecycle-manager",
-      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
     }
   },
   "phases": {
@@ -17,22 +21,34 @@
       {
         "name": "code-review",
         "layer": "platform",
-        "used_by_agents": ["code-writer"],
-        "phases": [4],
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "refactoring",
         "layer": "platform",
-        "used_by_agents": ["code-writer"],
-        "phases": [4],
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "test-driven-development",
         "layer": "platform",
-        "used_by_agents": ["test-runner"],
-        "phases": [4],
+        "used_by_agents": [
+          "test-runner"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
@@ -40,9 +56,23 @@
         "layer": "platform",
         "type": "override",
         "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": ["pm"],
-        "phases": [0, 5, 6],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          0,
+          5,
+          6
+        ],
         "platform_parity": "required"
+      }
+    ],
+    "external": [
+      {
+        "name": "awesome-design-md",
+        "source_url": "https://raw.githubusercontent.com/user/awesome-design-md/main/SKILL.md",
+        "ingest_path": "skills/external/awesome-design-md/SKILL.md",
+        "version_tag": "v1.2.0"
       }
     ]
   },
@@ -54,5 +84,15 @@
     "statusSince": "2026-05-28",
     "lastTransition": "initial → stable on 2026-05-28",
     "stablePromotedOn": "2026-05-28"
+  },
+  "script_manifest": {
+    "external": [
+      {
+        "name": "agency-agents-generator",
+        "source_url": "https://raw.githubusercontent.com/user/agency-agents/main/generator.ts",
+        "ingest_path": "scripts/external/agency-agents-generator.ts",
+        "version_tag": "latest"
+      }
+    ]
   }
 }
