@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-05T23:02:42.998Z
+**Generated**: 2026-06-06T00:30:40.393Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 77
+- **Scripts**: 80
 - **Commands**: 6
 
 ---
@@ -82,6 +82,8 @@
 | generate-scripts-readme.ts | N/A | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | N/A | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.1 | scripts/generate-version-manifest.ts | bun |
+| ingest-external-skills.ts | 1.0.0 | scripts/ingest-external-skills.ts | N/A |
+| ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | N/A | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | N/A | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | N/A | scripts/helpers/integration-helpers.ts | fs, path |
@@ -110,6 +112,7 @@
 | sync-agent-status.ts | N/A | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | N/A | scripts/sync-skill-status.ts | N/A |
+| sync-skills-to-l2.ts | N/A | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | N/A | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | N/A | scripts/team-builder.ts | fs, path |

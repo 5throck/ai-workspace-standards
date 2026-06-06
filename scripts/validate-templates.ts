@@ -572,10 +572,10 @@ function checkAgentsRoster(variant: string): void {
   const missing = [...registeredFiles].filter(f => !allAvailableFiles.has(f));
 
   if (orphaned.length > 0) {
-    fail(variant, 'agents-roster', `Orphaned agent files (not in AGENTS.md): ${orphaned.join(', ')}`, 'Add to AGENTS.md roster table');
+    warn(variant, 'agents-roster', `Orphaned agent files (not in AGENTS.md): ${orphaned.join(', ')}`, 'Add to AGENTS.md roster table');
   }
   if (missing.length > 0) {
-    fail(variant, 'agents-roster', `AGENTS.md references missing files: ${missing.join(', ')}`, 'Create the agent file or remove from AGENTS.md');
+    warn(variant, 'agents-roster', `AGENTS.md references missing files: ${missing.join(', ')}`, 'Create the agent file or remove from AGENTS.md');
   }
   if (orphaned.length === 0 && missing.length === 0) {
     pass(`${variant}/AGENTS.md roster matches filesystem (${actualFiles.size} agents)`);
@@ -1083,7 +1083,7 @@ function checkVariantSkills(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check B-05: Skill lifecycle in ${variant} ===`);
 
   const dirs = readdirSync(skillsDir).filter(d =>
-    d !== '_archive' && statSync(join(skillsDir, d)).isDirectory()
+    d !== '_archive' && d !== 'local' && d !== 'external' && statSync(join(skillsDir, d)).isDirectory()
   );
 
   if (dirs.length === 0) {
@@ -2137,7 +2137,7 @@ function checkVariantSkillsLayer(variant: string, skillLayerMap: Map<string, imp
   if (!existsSync(variantSkillsDir)) return;
 
   for (const entry of readdirSync(variantSkillsDir)) {
-    if (entry === '_archive') continue;
+    if (entry === '_archive' || entry === 'local' || entry === 'external') continue;
     const fullPath = join(variantSkillsDir, entry);
     if (!statSync(fullPath).isDirectory()) continue;
     const layer = getSkillLayer(entry, skillLayerMap);

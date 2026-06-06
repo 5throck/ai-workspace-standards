@@ -86,6 +86,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.4 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `ingest-external-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `install-bun.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `install-bun.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -99,15 +101,16 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `new-project.sh` | L0 | 1.4.2 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `qa-gate.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `sync-skill-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `sync-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
+| `sync-skills-to-l2.ts` | L0 | 1.0.0 | active | — | — | L0 | — |
+| `sync-skills.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
@@ -281,6 +284,10 @@ hooks, sets executable bits, and runs the post-scaffold audit.
 `templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
 **Usage**: `bun run sync-skills`
 
+#### `sync-skills-to-l2.ts`
+**Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
+**Usage**: `bun scripts/sync-skills-to-l2.ts`
+
 #### `publish-to-template.ts`
 **Purpose**: A consolidated tool handling both L0->L1 publishing and L1->L2 propagation. Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot (`templates/common/scripts/`) and propagates updates to L2 project directories. Copies all scripts labeled `L0` in the Registry plus `SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
 **Usage**: `bun run publish-to-template`
@@ -334,4 +341,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-06 ??established 3-type layer framework (L0, L0+L1, L0+L1+L2), removed L1-only category, classified propagate-to-templates.ts as L0*
+*Last updated: 2026-06-06 — added ingest-external-skills.ts and ingest-security-frameworks.ts*
