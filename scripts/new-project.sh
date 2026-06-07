@@ -644,10 +644,15 @@ echo "  ✅ All security bootstrap checks passed"
 # ── 8. Post-scaffold audit ────────────────────────────────────────────────────  # TEST: none
 echo ""
 echo "Running post-scaffold audit…"
+# audit.ts must run from workspace root, not from new project directory
+CURRENT_DIR=$(pwd)
+cd "$WORKSPACE_ROOT" || { echo "❌ Failed to cd to workspace root"; exit 1; }
 if bun "$WORKSPACE_ROOT/scripts/audit.ts"; then
+  cd "$CURRENT_DIR" || { echo "❌ Failed to return to project directory"; exit 1; }
   echo ""
   echo "✅ Project '$PROJECT_NAME' scaffolded and verified at: $PROJECT_DIR"
 else
+  cd "$CURRENT_DIR" || { echo "❌ Failed to return to project directory"; exit 1; }
   echo ""
   echo "⚠️  Project scaffolded but audit found issues - review above before continuing."
 fi
