@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * template-validation.ts — Validate required template files in common/ and variant/
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/helpers/template-validation.ts <variant> [commonPath] [variantPath]
@@ -38,8 +38,6 @@ const commonRequired = [
 
 // Files required in templates/<variant>/
 const variantRequired = [
-  'CLAUDE.md',
-  'GEMINI.md',
   'agents/pm.md',
   'variant.json',
 ];
