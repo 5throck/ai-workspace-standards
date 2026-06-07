@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: Font selection, type systems, and visual hierarchy specialist
 color: violet
 description: >
   Typography expert - specializes in font selection, type systems, and visual hierarchy

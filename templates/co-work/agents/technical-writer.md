@@ -1,5 +1,6 @@
 ---
 name: technical-writer
+role: API documentation, technical guides, and developer resources creator
 status: active
 formal_name: Technical Writer & Developer Documentation Specialist
 tier:

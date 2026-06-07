@@ -1,6 +1,7 @@
 ---
 name: red-team-lead
 formal_name: Red Team Lead
+role: Attack methodology, MITRE ATT&CK TTPs, and PoC review specialist
 tier:
   claude: high
   gemini: high

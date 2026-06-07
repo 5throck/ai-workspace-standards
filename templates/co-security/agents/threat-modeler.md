@@ -1,6 +1,7 @@
 ---
 name: threat-modeler
 formal_name: Threat Modeler
+role: STRIDE analysis, ATT&CK mapping, and risk scoring specialist
 tier:
   claude: high
   gemini: high

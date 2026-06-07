@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: Visual designs, design tokens, and component specifications producer
 color: purple
 description: >
   Visual design execution - creates UI designs, mockups, and design specifications. 

@@ -1,5 +1,6 @@
 ---
 name: industry-expert
+role: Industry-specific insights and competitive dynamics specialist
 status: active
 formal_name: Industry Expert & Domain Specialist
 tier:

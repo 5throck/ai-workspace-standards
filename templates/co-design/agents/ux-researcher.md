@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: User research, needs analysis, and UX insights specialist
 color: teal
 description: >
   User research specialist - conducts user interviews, usability testing, and 

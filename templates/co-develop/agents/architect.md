@@ -1,5 +1,6 @@
 ---
 name: architect
+role: Implementation plans, ADRs, and system architecture design specialist
 status: active
 tier:
   claude: high

@@ -1,5 +1,6 @@
 ---
 name: solutions-architect
+role: Technical solution design and implementation planning specialist
 status: active
 formal_name: Solutions Architect & Technical Designer
 tier:

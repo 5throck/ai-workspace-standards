@@ -1,5 +1,6 @@
 ---
 name: project-coordinator
+role: Schedule management, stakeholder communication, and delivery logistics specialist
 status: active
 formal_name: Project Coordinator
 tier:

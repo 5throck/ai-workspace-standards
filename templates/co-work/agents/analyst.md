@@ -1,5 +1,6 @@
 ---
 name: analyst
+role: Systematic investigation, data synthesis, and evidence gathering specialist
 status: active
 formal_name: Research & Data Analyst
 tier:

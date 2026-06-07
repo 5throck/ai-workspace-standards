@@ -1,6 +1,7 @@
 ---
 name: report-writer
 formal_name: Report Writer
+role: Pentest reports and executive summary documentation specialist
 tier:
   claude: medium
   gemini: medium

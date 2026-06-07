@@ -8,6 +8,7 @@ tier:
   antigravity: high
   gemini-cli: high
 model: inherit
+role: Design direction, design system architecture, and creative strategy owner
 color: indigo
 description: >
   Design system architect - defines visual language, design tokens, and component 

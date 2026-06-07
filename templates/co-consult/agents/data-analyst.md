@@ -1,5 +1,6 @@
 ---
 name: data-analyst
+role: Statistical analysis, data modeling, and business insights specialist
 status: active
 formal_name: Data Analyst & Analytics Specialist
 tier:

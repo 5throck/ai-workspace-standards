@@ -1,5 +1,6 @@
 ---
 name: strategy-analyst
+role: Market analysis, competitive research, and strategic assessment lead
 status: active
 formal_name: Strategy Analyst & Research Lead
 tier:

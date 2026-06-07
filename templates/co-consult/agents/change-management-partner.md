@@ -1,5 +1,6 @@
 ---
 name: change-management-partner
+role: Organizational transformation and stakeholder alignment specialist
 status: active
 formal_name: Change Management Partner & Culture Strategist
 tier:

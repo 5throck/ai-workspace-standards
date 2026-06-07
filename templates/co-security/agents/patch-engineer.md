@@ -1,6 +1,7 @@
 ---
 name: patch-engineer
 formal_name: Patch Engineer
+role: Cross-platform patch deployment and remediation specialist
 tier:
   claude: medium
   gemini: medium

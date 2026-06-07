@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: Interactive prototypes and design handoff artifacts builder
 color: orange
 description: >
   Interactive prototyping specialist - creates functional prototypes for testing 

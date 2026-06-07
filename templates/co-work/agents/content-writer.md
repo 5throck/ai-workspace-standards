@@ -1,5 +1,6 @@
 ---
 name: content-writer
+role: Research-to-documentation transformation and communications specialist
 status: active
 formal_name: Content Writer & Documentation Specialist
 tier:

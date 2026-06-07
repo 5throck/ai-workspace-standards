@@ -1,5 +1,6 @@
 ---
 name: security-monitor
+role: Security policy enforcement and secrets leak prevention specialist
 status: active
 tier:
   claude: medium
