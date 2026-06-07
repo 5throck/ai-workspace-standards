@@ -69,9 +69,15 @@
     ],
     "TaskCompleted": [
       {
-        "type": "command",
-        "command": "bun scripts/audit.ts",
-        "timeout": 60
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit.ts",
+            "timeout": 60,
+            "statusMessage": "Running QA audit..."
+          }
+        ]
       }
     ]
   }

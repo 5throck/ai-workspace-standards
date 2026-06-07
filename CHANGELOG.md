@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 
+### Fixed
+- **[2026-06-07]**: fix: correct TaskCompleted hook structure in templates — add missing `hooks` wrapper and `matcher` field to `templates/common/.claude/settings.json` and `templates/co-consult/.claude/settings.json`; ensures proper hook format consistency across all templates (`templates/common/.claude/settings.json`, `templates/co-consult/.claude/settings.json`)
+
 ### Changed
 - **[2026-06-03]**: chore: clean up co-consult template — remove stale co-work skill copies (`meeting-facilitation`, `skill-lifecycle-manager`) from all 5 variants; register `agent-lifecycle-manager` as platform override in variant.json; remove template contamination files (`_COMMON.md`, `GLOBAL_TOOLS.md`, `settings.local.json`, `api-documentation` skill, empty `adr/`); add co-consult to `new-project.sh`/`ps1`/`md` at L0 and L1
 
