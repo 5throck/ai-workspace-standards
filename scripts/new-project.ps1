@@ -1,4 +1,4 @@
-# @version 1.6.3
+# @version 1.6.4
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -298,6 +298,11 @@ Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -
     $destDir = Split-Path $destFile
     if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
     Copy-Item $srcFile $destFile -Force
+}
+
+# Remove read-only attributes on all copied files to prevent EACCES errors
+Get-ChildItem -Path $ProjectDir -Recurse -File | ForEach-Object {
+    if ($_.IsReadOnly) { $_.IsReadOnly = $false }
 }
 
 # -- 2.5. Verify extends resolution (post-copy validation) --------------------  # TEST: Test 18
