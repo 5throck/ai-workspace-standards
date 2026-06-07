@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.3
+# @version 1.4.4
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -283,6 +283,10 @@ find "$TEMPLATES_DIR" -type f ! -name "*.md" | while read -r src_file; do
   mkdir -p "$(dirname "$dest_file")"
   cp "$src_file" "$dest_file"
 done
+
+# Make all copied files writable so that subsequent scripts and edits can write to them
+# (preventing EACCES issues for files like scripts/README.md which are read-only in template storage)
+chmod -R u+w "$PROJECT_DIR" 2>/dev/null || true
 
 # ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
 echo "📝 Verifying extends resolution..."
