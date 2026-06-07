@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.6
+# @version 1.4.7
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -271,7 +271,7 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
       chmod u+w "$dest_file" 2>/dev/null || true
 
       # Merge with explicit skeleton path
-      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" 2>/dev/null || {
+      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" "$src_file" 2>/dev/null || {
         echo "⚠️  Extends merge failed: $rel_path"
       }
     fi

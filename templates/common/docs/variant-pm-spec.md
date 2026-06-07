@@ -76,16 +76,16 @@ All other sections are inherited from the parent (L1 for L2 variants):
 
 **Phase 1 (Current)**: New variants use frontmatter-only extends
 ```yaml
----
-name: pm
-extends: ../../../common/agents/pm.md
-variant: co-design
-overrides:
-  - section: "## Role"
-    scope: "first_paragraph"
-  - section: "## Agent Roster"
-    scope: "full_section"
----
+  ---
+  name: pm
+  extends: ../../../common/agents/pm.md
+  variant: co-design
+  overrides:
+    - section: "## Role"
+      scope: "first_paragraph"
+    - section: "## Agent Roster"
+      scope: "full_section"
+  ---
 ```
 
 **Override Scope Definitions**:

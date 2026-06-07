@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.1.0
+ * @version 1.1.2
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -70,11 +70,51 @@ function mergeFrontmatter(
 }
 
 /**
+ * Recursively resolve the extends chain of a skeleton file
+ */
+function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter; content: string } {
+  const absolutePath = resolve(filePath);
+  const content = readFileSync(absolutePath, 'utf-8');
+  const parsed = parseFrontmatter(content);
+
+  if (!parsed.frontmatter.extends) {
+    return {
+      frontmatter: parsed.frontmatter,
+      content: parsed.content
+    };
+  }
+
+  const currentDir = dirname(absolutePath);
+  const skeletonPath = resolve(currentDir, parsed.frontmatter.extends);
+
+  const skeletonResolved = resolveExtendsRecursively(skeletonPath);
+
+  // Merge skeleton resolved frontmatter and current frontmatter
+  const mergedFrontmatter = { ...skeletonResolved.frontmatter };
+  for (const key of Object.keys(parsed.frontmatter)) {
+    if (key !== 'extends') {
+      mergedFrontmatter[key] = parsed.frontmatter[key];
+    }
+  }
+  delete (mergedFrontmatter as any).extends;
+
+  // Use current content if it exists, otherwise skeleton's content
+  const useCurrentContent = parsed.content.trim().length > 0;
+  const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+
+  return {
+    frontmatter: mergedFrontmatter,
+    content: finalContent
+  };
+}
+
+/**
  * Process a single file with `extends` directive
  * @param filePath - Path to the variant file
  * @param explicitSkeletonPath - Optional absolute path to skeleton (resolves extends field before copy)
+ * @param originalContextPath - Optional path to the original context file for extends validation
  */
-function processFile(filePath: string, explicitSkeletonPath?: string): string {
+function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string): string {
   const absolutePath = resolve(filePath);
   const content = readFileSync(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
@@ -84,8 +124,9 @@ function processFile(filePath: string, explicitSkeletonPath?: string): string {
   }
 
   // ADR-0033: Validate extends chain before processing
-  console.log(`🔍 Validating extends chain for: ${absolutePath}`);
-  const validationResult: ExtendsValidationResult = safeValidateExtends(absolutePath);
+  const validationPath = originalContextPath ? resolve(originalContextPath) : absolutePath;
+  console.log(`🔍 Validating extends chain for: ${validationPath}`);
+  const validationResult: ExtendsValidationResult = safeValidateExtends(validationPath);
 
   if (!validationResult.valid) {
     // Safe fallback behavior per ADR-0033
@@ -112,23 +153,31 @@ function processFile(filePath: string, explicitSkeletonPath?: string): string {
   }
 
   try {
-    const skeletonContent = readFileSync(skeletonPath, 'utf-8');
-    const skeletonParsed = parseFrontmatter(skeletonContent);
+    // Recursively resolve the skeleton path
+    const skeletonResolved = resolveExtendsRecursively(skeletonPath);
 
-    // Merge frontmatters
-    const mergedFrontmatter = mergeFrontmatter(skeletonParsed.frontmatter, parsed.frontmatter);
+    // Merge: variant frontmatter overrides the resolved skeleton frontmatter
+    const mergedFrontmatter = { ...skeletonResolved.frontmatter };
+    for (const key of Object.keys(parsed.frontmatter)) {
+      if (key !== 'extends') {
+        mergedFrontmatter[key] = parsed.frontmatter[key];
+      }
+    }
+    delete (mergedFrontmatter as any).extends;
 
-    // Combine: merged frontmatter + skeleton content body
-    // Use skeleton content body, not variant content body (which is typically empty for extends-only files)
+    // Use variant content if it is not empty, otherwise use the resolved skeleton content
+    const useCurrentContent = parsed.content.trim().length > 0;
+    const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+
     const result = `---
 ${dump(mergedFrontmatter).trim()}
 ---
 
-${skeletonParsed.content}`;
+${finalContent}`;
 
     return result;
   } catch (error) {
-    console.error(`Failed to read skeleton: ${skeletonPath}`, error);
+    console.error(`Failed to resolve skeleton: ${skeletonPath}`, error);
     console.warn(`⚠️  Falling back to safe default: returning original content`);
     return content;
   }
@@ -137,14 +186,16 @@ ${skeletonParsed.content}`;
 // CLI interface
 const args = process.argv.slice(2);
 if (args.length < 1) {
-  console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path]');
+  console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
   console.error('  file-path: Path to the variant file with extends directive');
   console.error('  skeleton-path: Optional absolute path to skeleton file');
+  console.error('  original-context-path: Optional path to the original context file for extends validation');
   process.exit(1);
 }
 
 const filePath = args[0];
 const explicitSkeletonPath = args[1] || undefined;
-const result = processFile(filePath, explicitSkeletonPath);
+const originalContextPath = args[2] || undefined;
+const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
 writeFileSync(filePath, result, 'utf-8');
 console.log(`✅ Merged frontmatter for ${filePath}`);

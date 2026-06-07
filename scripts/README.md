@@ -44,7 +44,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
 | `agent-create.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `agent-delete.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `agent-lifecycle-audit.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `agent-lifecycle-audit.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `agent-list.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -71,7 +71,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/layer-filter.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-frontmatter.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/merge-frontmatter.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.test.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -102,7 +102,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ps1` | L0 | 1.6.4 | active | —| —| L0 | —|
-| `new-project.sh` | L0 | 1.4.6 | active | —| —| L0 | —|
+| `new-project.sh` | L0 | 1.4.7 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
@@ -117,7 +117,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `test-platform-parity.ts` | L0 | 0.2.0 | active | —| —| L0+L1 | —|
+| `test-platform-parity.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
