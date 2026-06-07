@@ -71,7 +71,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/layer-filter.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-frontmatter.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
+| `helpers/merge-frontmatter.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.test.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
