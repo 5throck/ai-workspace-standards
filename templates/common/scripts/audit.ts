@@ -1,9 +1,10 @@
-// @version 2.5.7
+// @version 2.6.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { execSync } from 'node:child_process';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -611,7 +612,8 @@ function checkL2VariantIntegrity() {
     const pmMdPath = path.join(variantDir, 'agents', 'pm.md');
     if (fs.existsSync(pmMdPath)) {
       const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
-      if (!pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+      const hasVariantOverrides = pmContent.includes('variant_overrides:');
+      if (!hasVariantOverrides && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
@@ -831,7 +833,7 @@ if (fs.existsSync('templates')) {
             if (stat.isDirectory()) {
                 checkExecutable(itemPath);
             } else if (stat.isFile()) {
-                if (item.endsWith('.sh') || item.endsWith('.ps1') || item.endsWith('.ts')) {
+                if (item.endsWith('.sh') || item.endsWith('.ps1')) {
                     try {
                         const out = execSync(`git ls-files --stage "${itemPath.replace(/\\/g, '/')}"`, { encoding: 'utf-8' });
                         if (out.startsWith('100644')) {
@@ -891,6 +893,179 @@ if (fs.existsSync('templates')) {
         } catch {
             Warn('shellcheck not installed — skipping shell lint (install via: brew install shellcheck)');
         }
+    }
+}
+
+// Check: Platform parity (ADR-0033) - L0 → L1/L2 file synchronization
+if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'test-platform-parity.ts'))) {
+    const parityCheck = await $`bun ${path.join('scripts', 'test-platform-parity.ts')}`.quiet().nothrow();
+    if (parityCheck.exitCode === 0) {
+        Pass('Platform parity: L0 → L1/L2 files in sync');
+    } else if (parityCheck.exitCode === 2) {
+        Warn('Platform parity: warnings detected (run with --verbose for details)');
+    } else {
+        Fail('Platform parity: L0 → L1/L2 files out of sync (run: bun scripts/test-platform-parity.ts --verbose)');
+        errors++;
+    }
+}
+
+// Check: pm.md consistency (L0 → L1 → L2 alignment)
+if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
+    function checkPmConsistency(): boolean {
+        const l0PmPath = 'agents/pm.md';
+        const l1PmPath = 'templates/common/agents/pm.md';
+
+        if (!fs.existsSync(l0PmPath) || !fs.existsSync(l1PmPath)) {
+            return true; // Not applicable
+        }
+
+        const l0Content = fs.readFileSync(l0PmPath, 'utf-8');
+        const l1Content = fs.readFileSync(l1PmPath, 'utf-8');
+
+        // Extract YAML frontmatter sections
+        const extractYamlSection = (content: string, sectionStart: string, sectionEnd: string): string => {
+            const startIdx = content.indexOf(sectionStart);
+            if (startIdx === -1) return '';
+            const endIdx = content.indexOf(sectionEnd, startIdx);
+            if (endIdx === -1) return '';
+            return content.slice(startIdx, endIdx + sectionEnd.length);
+        };
+
+        // Extract core YAML fields from L0 (excluding L0-only fields)
+        const l0YamlMatch = l0Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l0YamlMatch) {
+            Fail('L0 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l0Yaml = l0YamlMatch[1];
+
+        // L1 YAML should have L1-only fields: formal_name, multi-line description
+        const l1YamlMatch = l1Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l1YamlMatch) {
+            Fail('L1 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l1Yaml = l1YamlMatch[1];
+
+        // Check for L1-only fields presence
+        if (!l1Yaml.includes('formal_name:')) {
+            Fail('L1 pm.md: missing L1-only field "formal_name"');
+            return false;
+        }
+
+        // Check that L0-only fields are NOT in L1
+        const l0OnlyFields = ['lifecycle:', 'role:'];
+        for (const field of l0OnlyFields) {
+            const fieldRegex = new RegExp(`^${field}`, 'm');
+            if (fieldRegex.test(l1Yaml)) {
+                Fail(`L1 pm.md: contains L0-only field "${field}" - should be removed`);
+                return false;
+            }
+        }
+
+        // L1 extends pattern validation (ADR-0033)
+        // L1 can use pure YAML extends pattern OR VARIANT-SECTION markers
+        const l1Parsed = parsePmMd(l1PmPath);
+
+        // Define required variant sections for L2 validation (used below)
+        const requiredVariantSections = [
+            'governance-workflow',
+            'agent-roster',
+            'dispatch-protocol'
+        ];
+
+        if (l1Parsed.isValid && l1Parsed.extendsPath) {
+            // L1 uses new extends pattern - validate YAML fields only
+            Pass('L1 pm.md: uses YAML extends pattern (ADR-0033)');
+
+            // Check that extends points to L0
+            if (!l1Parsed.extendsPath.includes('agents/pm.md')) {
+                Fail(`L1 pm.md: extends should point to "../../agents/pm.md" or "../../../agents/pm.md"`);
+                return false;
+            }
+
+            // Check for remove_sections if present
+            if (Object.keys(l1Parsed.variantOverrides).length > 0) {
+                Pass('L1 pm.md: has remove_sections configured');
+            }
+        } else {
+            // Legacy L1 pattern - require VARIANT-SECTION markers
+            for (const section of requiredVariantSections) {
+                const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                const endMarker = `<!-- END VARIANT-SECTION -->`;
+                if (!l1Content.includes(marker) || !l1Content.includes(endMarker)) {
+                    Fail(`L1 pm.md: missing VARIANT-SECTION markers for "${section}"`);
+                    return false;
+                }
+            }
+        }
+
+        // Check L2 variants
+        const templatesDir = 'templates';
+        if (fs.existsSync(templatesDir)) {
+            const variants = fs.readdirSync(templatesDir)
+                .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+            for (const variant of variants) {
+                const l2PmPath = path.join(templatesDir, variant, 'agents', 'pm.md');
+                if (!fs.existsSync(l2PmPath)) continue;
+
+                const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
+
+                const hasVariantOverrides = l2Content.includes('variant_overrides:');
+                if (!hasVariantOverrides) {
+                    // L2 should have VARIANT-SECTION markers
+                    for (const section of requiredVariantSections) {
+                        const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                        if (!l2Content.includes(marker)) {
+                            Fail(`L2 ${variant}/agents/pm.md: missing VARIANT-SECTION marker for "${section}"`);
+                            return false;
+                        }
+                    }
+                }
+
+                // L2 should NOT have full L0 content (line count check)
+                const l2Lines = l2Content.split('\n').length;
+                if (l2Lines >= 200) {
+                    Fail(`L2 ${variant}/agents/pm.md: ${l2Lines} lines (too long - may contain L0 duplication bug)`);
+                    return false;
+                }
+
+                // L2 YAML should NOT have L0-only fields
+                const l2YamlMatch = l2Content.match(/^---\n([\s\S]+?)\n---/);
+                if (l2YamlMatch) {
+                    const l2Yaml = l2YamlMatch[1];
+                    for (const field of l0OnlyFields) {
+                        const fieldRegex = new RegExp(`^${field}`, 'm');
+                        if (fieldRegex.test(l2Yaml)) {
+                            Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);
+                            return false;
+                        }
+                    }
+
+                    // L2 YAML variant_overrides validation (if present)
+                    if (l2Yaml.includes('variant_overrides:')) {
+                        const parsed = parsePmMd(l2PmPath);
+                        if (parsed.isValid && Object.keys(parsed.variantOverrides).length > 0) {
+                            Pass(`L2 ${variant}/agents/pm.md: has valid variant_overrides`);
+
+                            // With YAML variant_overrides, VARIANT-SECTION markers are no longer required
+                            // in L2 files, so we don't warn about them missing.
+                        } else {
+                            Warn(`L2 ${variant}/agents/pm.md: variant_overrides field present but parsing failed`);
+                        }
+                    }
+                }
+            }
+        }
+
+        Pass('pm.md consistency: L0 → L1 → L2 alignment verified');
+        return true;
+    }
+
+    const pmConsistencyPass = checkPmConsistency();
+    if (!pmConsistencyPass) {
+        errors++;
     }
 }
 

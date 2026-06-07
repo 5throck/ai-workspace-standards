@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.1.1
+ * @version 1.2.0
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -25,7 +25,7 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, basename } from 'path';
+import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.js';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.js';
@@ -39,6 +39,7 @@ import { validatePlatformParity, ParityValidationResult } from './helpers/valida
 import { integrateVariantToWorkspace, IntegrationResult } from './helpers/integration-helpers.js';
 import { validateDependencies } from './helpers/variant-governance-rules.js';
 import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.js';
+import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.js';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -87,7 +88,7 @@ export interface PipelineResult {
 
 /**
  * Execute complete L2-to-variant pipeline
- * @version 1.1.1
+ * @version 1.2.0
  */
 export async function executeL2ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
   const startTime = Date.now();
@@ -229,6 +230,43 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
+  // PHASE 4.5: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4.5: Processing pm.md and Generating context.md`);
+    console.log(`${'─'.repeat(60)}`);
+
+    // Find pm.md in the generated variant
+    const variantPmMdPath = join(generatedVariant!.variantPath, 'agents', 'pm.md');
+
+    if (existsSync(variantPmMdPath)) {
+      // Parse pm.md and extract variant_overrides
+      const pmMdData = parsePmMd(variantPmMdPath);
+
+      if (pmMdData.isValid && Object.keys(pmMdData.variantOverrides).length > 0) {
+        // Generate context.md from variant_overrides
+        const variantPath = generatedVariant!.variantPath;
+        writeContextMd(variantPath, config.variantName, pmMdData.variantOverrides);
+
+        console.log(`✅ Generated context.md from variant_overrides`);
+        console.log(`   Path: ${join(variantPath, 'docs', `${config.variantName}.context.md`)}`);
+      } else {
+        console.log(`ℹ️  No variant_overrides found in pm.md, skipping context.md generation`);
+      }
+    } else {
+      console.log(`ℹ️  No pm.md found in variant, skipping context.md generation`);
+    }
+
+    console.log(`✅ PHASE 4.5 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    // Don't fail the pipeline for context.md generation errors
+    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+  }
+
+  // ============================================================================
   // PHASE 5: INITIALIZE BETA LIFECYCLE
   // ============================================================================
 
@@ -356,7 +394,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
 /**
  * Build failure result
- * @version 1.1.1
+ * @version 1.2.0
  */
 function buildFailureResult(
   phases: PipelineResult['phases'],
@@ -373,7 +411,7 @@ function buildFailureResult(
 
 /**
  * Extract agent roster from L2 scan result
- * @version 1.1.1
+ * @version 1.2.0
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
   // Find agent files in scan result
@@ -391,7 +429,7 @@ function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRos
 
 /**
  * Extract skills from L2 scan result
- * @version 1.1.1
+ * @version 1.2.0
  */
 function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
   // Find skill files in scan result

@@ -13,13 +13,14 @@
  * Note: all external commands are run via execFileSync (no shell) to avoid
  * command-injection; the variant name is additionally regex-validated.
  *
- * @version 1.4.1
+ * @version 1.5.0
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { includeScriptInL2 } from './helpers/layer-filter.js';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -520,10 +521,42 @@ function createDomainDocs(projectDir: string, domain: string | null): void {
 `;
   writeFile(path.join(projectDir, "agents", "README.md"), agentsReadme);
 
-  // pm.md additive skeleton
+  // pm.md additive skeleton with variant_overrides support
   const pmMd = `---
 owner: "architect"
 status: "active"
+extends: ../../../agents/pm.md
+remove_sections:
+  - "## Governance Workflow"
+  - "## Updated Role"
+  - "## Agent Roster"
+  - "## Dispatch Protocol"
+  - "### Phase Determination (Deliverable-Type Gate)"
+variant_overrides:
+  governance_workflow: |
+    <!-- VARIANT-SECTION: governance-workflow -->
+    ## Governance Workflow
+
+    TODO: Add ${displayName}-specific governance workflow overrides here.
+
+    This section replaces the workspace PM's governance workflow with variant-specific logic.
+    <!-- END VARIANT-SECTION -->
+  agent_roster: |
+    <!-- VARIANT-SECTION: agent-roster -->
+    ## Agent Roster
+
+    TODO: Add ${displayName}-specific agent roster here.
+
+    This section replaces the workspace PM's agent roster with variant-specific agents.
+    <!-- END VARIANT-SECTION -->
+  dispatch_protocol: |
+    <!-- VARIANT-SECTION: dispatch-protocol -->
+    ## Dispatch Protocol
+
+    TODO: Add ${displayName}-specific dispatch protocol here.
+
+    This section replaces the workspace PM's dispatch protocol with variant-specific logic.
+    <!-- END VARIANT-SECTION -->
 ---
 # Project Manager (PM)
 
@@ -531,12 +564,27 @@ status: "active"
 > Do NOT duplicate the entire workspace PM file. Only add variant-specific changes within the sections below.
 
 <!-- VARIANT-SECTION: governance-workflow -->
+## Governance Workflow
+
+TODO: Add ${displayName}-specific governance workflow overrides here.
+
+This section replaces the workspace PM's governance workflow with variant-specific logic.
 <!-- END VARIANT-SECTION -->
 
 <!-- VARIANT-SECTION: agent-roster -->
+## Agent Roster
+
+TODO: Add ${displayName}-specific agent roster here.
+
+This section replaces the workspace PM's agent roster with variant-specific agents.
 <!-- END VARIANT-SECTION -->
 
 <!-- VARIANT-SECTION: dispatch-protocol -->
+## Dispatch Protocol
+
+TODO: Add ${displayName}-specific dispatch protocol here.
+
+This section replaces the workspace PM's dispatch protocol with variant-specific logic.
 <!-- END VARIANT-SECTION -->
 `;
   writeFile(path.join(projectDir, "agents", "pm.md"), pmMd);

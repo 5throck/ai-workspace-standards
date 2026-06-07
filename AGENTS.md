@@ -17,7 +17,7 @@
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role. **PM does NOT execute code or documentation directly — all specialist work dispatched through PM. See `agents/pm.md` for ⚠️ CRITICAL direct execution constraints.** |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
 | Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan |
 
@@ -156,6 +156,189 @@ All specialist agents below are dispatched ONLY through PM:
 - All branch names: English
 - Code comments: English (unless documenting locale-specific logic)
 <!-- COMMON-AGENTS:END -->
+
+---
+
+## L0→L1→L2 PM Agent Architecture
+
+The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
+
+### Architecture Overview
+
+```
+L0: agents/pm.md (workspace root)
+    ↓ extends
+L1: templates/common/agents/pm.md (pure YAML extends file)
+    ↓ extends
+L2: templates/<variant>/agents/pm.md (YAML variant_overrides)
+```
+
+**Key Principles**:
+- **L0**: Base PM agent with full governance workflow and orchestration logic
+- **L1**: Pure extends file (YAML frontmatter only) that removes L0-specific sections
+- **L2**: Variant-specific configuration via YAML `variant_overrides`
+- **Extends Chain Resolution**: L2 → L1 → L0 (L2 inherits from L1, which inherits from L0)
+
+### L1 Structure (Pure Extends File)
+
+L1 is a **YAML-only file** that extends L0 and removes workspace-specific sections:
+
+```yaml
+---
+extends: ../../../agents/pm.md
+formal_name: Project Manager (PM) Agent
+remove_sections:
+  - "## Governance Workflow"
+  - "## Updated Role"
+  - "## Agent Roster"
+  - "## Dispatch Protocol"
+  - "### Phase Determination (Deliverable-Type Gate)"
+---
+```
+
+**Key Points**:
+- L1 has **no markdown content** — only YAML frontmatter
+- `remove_sections` array lists L0 sections to exclude (workspace-specific governance)
+- L1 serves as a clean template base for L2 variants
+
+### L2 Structure (YAML variant_overrides)
+
+L2 variants use structured YAML frontmatter to override default behavior:
+
+```yaml
+---
+extends: ../../common/agents/pm.md
+variant: <variant-name>
+variant_overrides:
+  updated_role:
+    description: <string>
+    scope: <string>
+  governance_workflow:
+    phases: <array[number]>
+    triage_required: <boolean>
+  agent_roster:
+    - phase: <string>
+      group: <string>
+      agents: <array[string]>
+  dispatch_protocol:
+    can_lead_phases: <array[number]>
+    can_support_in: <array[number]>
+    auto_dispatch_to: <array[string]>
+    tier: <string>
+    communication_style: <string>
+  constraints:
+    phase_determination:
+      deliverable_types:
+        - type: <string>
+          phase: <string>
+          required_agent: <string>
+          tier: <string>
+---
+```
+
+**variant_overrides Sections**:
+
+| Section | Purpose | Required |
+|---------|---------|----------|
+| `updated_role` | Variant-specific role description and scope | No |
+| `governance_workflow` | Phase orchestration configuration | No |
+| `agent_roster` | Variant-specific specialist agents | No |
+| `dispatch_protocol` | Agent dispatch behavior and tier | No |
+| `constraints.phase_determination` | Deliverable-type classification rules | No |
+
+**Example - co-design Variant**:
+
+```yaml
+---
+extends: ../../common/agents/pm.md
+variant: co-design
+variant_overrides:
+  updated_role:
+    description: "PM orchestrator for design system projects — owns team assembly, design validation, and system finalization"
+    scope: "Design system governance, component lifecycle, design token management, design ops coordination"
+  governance_workflow:
+    phases: [0, 2, 6]
+    triage_required: false
+  agent_roster:
+    - phase: "Research"
+      group: "Research"
+      agents: ["ux-researcher"]
+    - phase: "Direction"
+      group: "Design"
+      agents: ["design-lead"]
+  dispatch_protocol:
+    can_lead_phases: [0, 2, 6]
+    auto_dispatch_to: [ux-researcher, design-lead, visual-designer]
+    tier: high
+    communication_style: sync
+---
+```
+
+### Extends Chain Resolution
+
+When an L2 variant PM agent loads:
+
+1. **Load L2** (`templates/<variant>/agents/pm.md`)
+   - Parse YAML `variant_overrides`
+   - Store variant-specific configuration
+
+2. **Extend L1** (`templates/common/agents/pm.md`)
+   - Apply `remove_sections` from L1 YAML
+   - Removes L0 workspace-specific sections
+
+3. **Extend L0** (`agents/pm.md`)
+   - Load base PM agent content
+   - Apply L1 `remove_sections`
+   - Merge L2 `variant_overrides`
+
+4. **Final Output**
+   - L0 base content minus removed sections
+   - Plus L2 variant-specific overrides
+   - Ready for variant project use
+
+### Schema Reference
+
+Complete YAML schema specification: **[`docs/variant/pm-yaml-schema.md`](docs/variant/pm-yaml-schema.md)**
+
+**Schema Coverage**:
+- Root-level fields (`extends`, `variant`, `variant_overrides`)
+- All `variant_overrides` sections with field specifications
+- Validation rules and examples
+- Scaffolding integration
+
+### ADR Reference
+
+**ADR-0033: Variant-Specific Skills & Scripts Blueprint** — [`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)
+
+**Relevant Content**:
+- Variant directory blueprint (`skills/local/`, `skills/external/`, `scripts/local/`, `scripts/external/`)
+- `variant.json` metadata schema extension for local/external dependencies
+- Ingestion workflow for external skills and scripts
+
+### Fork Model Relationship
+
+This architecture respects the **L1-L2 Fork Model** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
+
+- **L1 → L2 scaffold**: One-time inheritance via `create-l2-scaffold.ts`
+- **L2 independence**: After scaffolding, L2 evolves independently
+- **No auto-propagation**: L1 changes do not automatically flow to L2
+- **Explicit promotion**: Use `l2-to-variant-pipeline.ts` to promote L2 changes back to templates
+
+### Validation Checklist
+
+Before committing L2 variant pm.md changes:
+
+- [ ] YAML frontmatter is valid (no syntax errors)
+- [ ] `extends` path is correct: `../../common/agents/pm.md`
+- [ ] `variant` matches directory name
+- [ ] All `agent_roster` agents have corresponding `.md` files
+- [ ] All `auto_dispatch_to` agents exist in `agent_roster`
+- [ ] `tier` values are valid (high/medium/low)
+- [ ] `communication_style` is valid (sync/async)
+- [ ] Phase numbers are in range 0-6
+- [ ] No duplicate `type` entries in `constraints.phase_determination`
+
+Run validation: `bun scripts/validate-templates.ts`
 
 ---
 

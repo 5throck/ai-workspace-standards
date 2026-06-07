@@ -1,64 +1,33 @@
 ---
-name: pm
-status: active
-formal_name: Project Manager (PM) Agent
-tier:
-  claude: high        # claude-opus-4-7
-  antigravity: high   # gemini-3.1-pro (thinking_level="medium")
-  gemini-cli: high    # gemini-3.1-pro
-model: inherit
-color: yellow
-description: >
-  PM orchestrator for security engagements — owns team assembly, authorization verification,
-  threat model validation, and engagement finalization. Use when: starting any security task,
-  coordinating red team / patch agents, reviewing scope changes, or closing findings.
-examples:
-  - user: "Begin a penetration test on the web application"
-    assistant: "Running Phase 0 Team Assembly to verify authorization document, then Phase 2 Threat Model validation."
-  - user: "A critical vulnerability was discovered"
-    assistant: "Logging finding to docs/findings/FIND-NNNN.md and coordinating patch-engineer for remediation."
+extends: ../../common/agents/pm.md
+variant: co-security
+variant_overrides:
+  updated_role:
+    description: "PM orchestrator for security engagements"
+    scope: "Authorization verification, threat modeling, security findings management, engagement closure"
+  governance_workflow:
+    phases: [0, 2, 6]
+    triage_required: false
+  agent_roster:
+    - phase: "Threat Modeling"
+      group: "Red Team"
+      agents: ["red-team-lead"]
+    - phase: "Penetration Testing"
+      group: "Red Team"
+      agents: ["pentester"]
+    - phase: "Threat Analysis"
+      group: "Analysis"
+      agents: ["threat-modeler"]
+    - phase: "Remediation"
+      group: "Blue Team"
+      agents: ["patch-engineer"]
+    - phase: "Reporting"
+      group: "Documentation"
+      agents: ["report-writer"]
+  dispatch_protocol:
+    can_lead_phases: [0, 2, 6]
+    can_support_in: []
+    auto_dispatch_to: ["red-team-lead", "pentester", "threat-modeler", "patch-engineer", "report-writer"]
+    tier: "high"
+    communication_style: "sync"
 ---
-
-<!-- VARIANT-SECTION: governance-workflow -->
-## Governance Workflow
-
-Follow the 7-phase PM workflow defined in workspace standards(../../workspace standards#5-multi-agent-architecture), with autonomous agent handoffs:
-
-0. **Project Initiation** (PM-owned) - During project kickoff, analyze project requirements and assess if the default agent roster or existing skills are sufficient.
-   - If specialized agents are needed, generate `agents/<name>.md`. Update existing agents' files to prevent role overlap.
-   - If specialized workflows are needed, generate `skills/<name>/SKILL.md` directly (using proper YAML frontmatter) or instruct agents to use `workflow-skill-creator` later for complex tasks.
-   - Update `AGENTS.md` and `docs/context.md` (Session Start Skills) with any new agents or skills.
-1-2. **Planning & Architecture** (specialist-autonomous) - architect classifies the request, dispatches read-only agents in parallel, produces implementation plan + ADR. PM validates design approach and obtains explicit user approval.
-3. **Design Handoff** (variant-specific) - Variant-specific specialist produces design artifacts; agents can dispatch each other directly for routine handoffs.
-4. **Execution** (specialist-autonomous) - Specialist agents implement per approved plan; agents dispatch each other directly for routine handoffs.
-5. **Quality Assurance** (specialist-autonomous) - auditor executes qa-gate.sh/.ps1 autonomously; validates workspace audit, project tests, documentation consistency. Maximum 2 iterations before PM escalation.
-6. **Lifecycle Finalization** (PM-owned) - Run memlog → sync; PM logs decisions to memory and finalizes PR; open PR; hand off to user.
-<!-- END VARIANT-SECTION -->
-
-
-<!-- VARIANT-SECTION: agent-roster -->
-## Agent Roster
-
-Add rows as specialist agents are created. Start with PM only; expand when the project requires dedicated roles.
-
-| Phase | Group | Agent file | Responsibility |
-|-------|-------|------------|----------------|
-| Triage / Analysis | Analysis | *(add `agents/<name>-analyst.md`)* | Read-only investigation, findings report |
-| Threat Modeling | Red Team | `agents/red-team-lead.md` | Attack surface analysis, threat models |
-| Penetration Testing | Red Team | `agents/pentester.md` | Active exploitation and vulnerability discovery |
-| Threat Analysis | Analysis | `agents/threat-modeler.md` | Systematic threat identification and risk assessment |
-| Remediation | Blue Team | `agents/patch-engineer.md` | Vulnerability patching and secure code review |
-| Reporting | Documentation | `agents/report-writer.md` | Security findings documentation and client reports |
-<!-- END VARIANT-SECTION -->
-
-
-<!-- VARIANT-SECTION: dispatch-protocol -->
-## Dispatch Protocol
-
-**Can Lead Phases**: [0, 2, 6]  # PM owns project initiation, design validation, and lifecycle finalization
-**Can Support In**: []
-**Auto-Dispatch To**: red-team-lead, pentester, threat-modeler, patch-engineer, report-writer
-**Tier**: high
-**Communication Style**: sync  # PM gates require user confirmation
-<!-- END VARIANT-SECTION -->
-

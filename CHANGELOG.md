@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ### Fixed
+- **[2026-06-08]**: fix: resolve new-project scaffolding validation failure — remove `CLAUDE.md` and `GEMINI.md` from `variantRequired` in `scripts/helpers/template-validation.ts` to reflect template separation architecture where platform docs are inherited from common template; bumps version to `1.0.1`
 - **[2026-06-07]**: fix: correct TaskCompleted hook structure in templates — add missing `hooks` wrapper and `matcher` field to `templates/common/.claude/settings.json` and `templates/co-consult/.claude/settings.json`; ensures proper hook format consistency across all templates (`templates/common/.claude/settings.json`, `templates/co-consult/.claude/settings.json`)
 
 ### Changed

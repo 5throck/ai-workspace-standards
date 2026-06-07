@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-08](2026-06-08.md) | Fix variant scaffolding validation failure |
 | [2026-06-07](2026-06-07.md) | bash 3.2 compatibility mapfile fix meeting |
 | [2026-06-06](2026-06-06.md) | chore: update |
 | [2026-06-05](2026-06-05.md) | Tier governance violation analysis |
