@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.2
+# @version 1.4.3
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -508,12 +508,13 @@ fi
 # ── Remove L0-only scripts (SCRIPTS.md-driven via layer-filter.ts) ─────────────
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/layer-filter.ts" ]; then
   # Authoritative: delegate to layer-filter.ts which reads SCRIPTS.md
-  mapfile -t L0_SCRIPTS < <(bun "$WORKSPACE_ROOT/scripts/helpers/layer-filter.ts" --scripts-l0-only --format=list 2>/dev/null)
+  IFS=$'\n' read -r -d '' -a L0_SCRIPTS < <(bun "$WORKSPACE_ROOT/scripts/helpers/layer-filter.ts" --scripts-l0-only --format=list 2>/dev/null && printf '\0')
 else
   # Minimal bootstrap fallback (only truly critical L0-only scripts)
   L0_SCRIPTS=("publish-to-template.ts" "validate-templates.ts" "create-l2-scaffold.ts" "l2-to-variant-pipeline.ts" "fix-script-versions.ts")
 fi
 for script in "${L0_SCRIPTS[@]}"; do
+  [[ "$script" == */* ]] && continue
   rm -f "$PROJECT_DIR/scripts/$script"
   # Also clean up helpers and subdirs if they are L0
   rm -f "$PROJECT_DIR/scripts/helpers/$script"
@@ -523,9 +524,10 @@ rm -rf "$PROJECT_DIR/scripts/helpers/"
 
 L0_SKILLS=("simulate-project-creation")
 for skill in "${L0_SKILLS[@]}"; do
-    rm -rf "$PROJECT_DIR/skills/$skill"
-    rm -rf "$PROJECT_DIR/.claude/skills/$skill"
-    rm -rf "$PROJECT_DIR/.gemini/skills/$skill"
+  [[ "$skill" == */* ]] && continue
+  rm -rf "$PROJECT_DIR/skills/$skill"
+  rm -rf "$PROJECT_DIR/.claude/skills/$skill"
+  rm -rf "$PROJECT_DIR/.gemini/skills/$skill"
 done
 
 # ── 6.1 Make scripts and hooks executable ───────────────────────────────────────  # TEST: Test 16, Test 5

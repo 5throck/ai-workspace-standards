@@ -1,8 +1,8 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-06T00:30:40.393Z
+**Generated**: 2026-06-07T02:05:23.625Z
 **Manifest Version**: 1.0
-**Location**: docs\VERSION_MANIFEST.md
+**Location**: docs/VERSION_MANIFEST.md
 
 ---
 
@@ -23,7 +23,7 @@
 | auditor | agents/auditor.md | medium | inherit | 2026-06-01 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-01 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-01 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-01 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-06 |
 | pm | agents/pm.md | high | inherit | 2026-06-05 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-01 |
@@ -66,7 +66,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.5.4 | scripts/audit.ts | bun |
+| audit.ts | 2.5.5 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |

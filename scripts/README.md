@@ -49,7 +49,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.5.4 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.5.5 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -96,7 +96,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ps1` | L0 | 1.6.3 | active | —| —| L0 | —|
-| `new-project.sh` | L0 | 1.4.2 | active | —| —| L0 | —|
+| `new-project.sh` | L0 | 1.4.3 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
@@ -379,4 +379,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-06*
+*Last Updated: 2026-06-07*

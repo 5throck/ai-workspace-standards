@@ -1,4 +1,4 @@
-// @version 2.5.4
+// @version 2.5.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -827,6 +827,31 @@ if (fs.existsSync('templates')) {
             }
         } catch (e) {
             Warn(`Could not verify template version tag: ${e}`);
+        }
+    }
+}
+
+// Check: shellcheck on .sh files (optional — warn only if shellcheck not installed)
+{
+    const shFiles = fs.existsSync('scripts')
+        ? fs.readdirSync('scripts').filter(f => f.endsWith('.sh')).map(f => `scripts/${f}`)
+        : [];
+    if (shFiles.length > 0) {
+        try {
+            execSync('which shellcheck', { stdio: 'ignore' });
+            // shellcheck available
+            let scErrors = 0;
+            for (const shFile of shFiles) {
+                try {
+                    execSync(`shellcheck --shell=bash "${shFile}"`, { encoding: 'utf-8', stdio: 'pipe' });
+                } catch (e: any) {
+                    Fail(`shellcheck: ${shFile}\n${e.stdout || e.message}`);
+                    scErrors++;
+                }
+            }
+            if (scErrors === 0) Pass(`shellcheck: all ${shFiles.length} shell scripts passed`);
+        } catch {
+            Warn('shellcheck not installed — skipping shell lint (install via: brew install shellcheck)');
         }
     }
 }
