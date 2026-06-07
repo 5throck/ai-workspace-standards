@@ -48,7 +48,6 @@ See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role. **PM does NOT execute code or documentation directly — all specialist work dispatched through PM. See `agents/pm.md` for ⚠️ CRITICAL direct execution constraints.** |
-| Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan |
 
 ### 🎨 Design Specialists
 
@@ -143,7 +142,6 @@ All specialist agents below are dispatched ONLY through PM:
 | **service-designer** | 3 | "Service experience", "Customer journey", "End-to-end service design" |
 | **storyteller** | 1-2 | "Brand narrative", "Design philosophy", "Meaning and coherence", "Storytelling" |
 | **prototype-engineer** | 4 | "Interactive prototypes", "Design handoff artifacts", "Prototype implementation" |
-| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "N-1 step after any agent/skill/script/variant change" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -230,7 +228,6 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
-| Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | N-1 finalization step | Governance docs only |
 | Design Lead | `agents/design-lead.md` | High | Design phase (parallel with storyteller) | Design system docs only |
 | UX Researcher | `agents/ux-researcher.md` | Medium | Research phase (parallel) | Research docs only |
 | Visual Designer | `agents/visual-designer.md` | Medium | Serial (after design-lead) | Visual specs and component docs |

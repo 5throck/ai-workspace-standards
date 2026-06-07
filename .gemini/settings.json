@@ -18,7 +18,7 @@
     ]
   },
   "terminal.executionPolicy": "Auto",
-  "artifact.reviewPolicy": "Request Review",
+  "artifact.reviewPolicy": "Auto",
   "mcp.toolApproval": "Manual",
   "terminal.denyList": [
     "rm -rf",

@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-07]**: fix: correct TaskCompleted hook structure in templates — add missing `hooks` wrapper and `matcher` field to `templates/common/.claude/settings.json` and `templates/co-consult/.claude/settings.json`; ensures proper hook format consistency across all templates (`templates/common/.claude/settings.json`, `templates/co-consult/.claude/settings.json`)
 
 ### Changed
+- **[2026-06-08]**: Bumped `scripts/validate-templates.ts` to `1.5.4` to remove `CLAUDE.md` and `GEMINI.md` from the templates/common blocklist.
+- **[2026-06-08]**: Bumped `scripts/audit.ts` to `2.6.2` to remove `CLAUDE.md` and `GEMINI.md` from L2 variant structural requirements.
+- **[2026-06-08]**: Bumped `scripts/helpers/pm-md-parser.ts` to `1.0.2` to support structured object/array types in YAML frontmatter `variant_overrides`.
+- **[2026-06-08]**: Updated version entries in `scripts/SCRIPTS.md` and `templates/common/scripts/SCRIPTS.md`.
 - **[2026-06-08]**: Bumped `scripts/helpers/merge-frontmatter.ts` to `1.3.0` — add `injectVariantSections()` that generates `## Updated Role`, `## Governance Workflow`, `## Agent Roster`, `## Dispatch Protocol` markdown sections from `variant_overrides` YAML and appends them to body content after L0 section removal.
 - **[2026-06-08]**: Bumped `scripts/new-project.sh` to `1.4.7` to pass original template source path for extends validation during scaffolding.
 - **[2026-06-03]**: chore: clean up co-consult template — remove stale co-work skill copies (`meeting-facilitation`, `skill-lifecycle-manager`) from all 5 variants; register `agent-lifecycle-manager` as platform override in variant.json; remove template contamination files (`_COMMON.md`, `GLOBAL_TOOLS.md`, `settings.local.json`, `api-documentation` skill, empty `adr/`); add co-consult to `new-project.sh`/`ps1`/`md` at L0 and L1

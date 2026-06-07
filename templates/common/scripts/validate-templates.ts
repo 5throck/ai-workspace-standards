@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.3
+ * @version 1.5.4
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -188,7 +188,7 @@ function checkCommon(): void {
   pass('templates/common/ exists with required subdirectories');
 
   // Check forbidden files — files that must NOT exist in templates/common/
-  const forbiddenFiles = ['CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'];
+  const forbiddenFiles = ['CONSTITUTION.md'];
   const presentForbidden = forbiddenFiles.filter(f => existsSync(join(commonDir, f)));
   if (presentForbidden.length > 0) {
     for (const f of presentForbidden) {

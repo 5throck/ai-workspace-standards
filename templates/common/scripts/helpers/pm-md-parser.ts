@@ -5,7 +5,7 @@
  * Parses YAML frontmatter from pm.md files and extracts variant_overrides.
  * Handles both L0 (workspace root), L1 (templates/common), and L2 (templates/co-*) pm.md files.
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @author automation-engineer
  *
  * Usage:
@@ -47,10 +47,11 @@ export interface PmMdFrontmatter {
 }
 
 export interface VariantOverrides {
-  updated_role?: string;
-  governance_workflow?: string;
-  agent_roster?: string;
-  dispatch_protocol?: string;
+  role?: string | Record<string, unknown> | unknown[];
+  updated_role?: string | Record<string, unknown> | unknown[];
+  governance_workflow?: string | Record<string, unknown> | unknown[];
+  agent_roster?: string | Record<string, unknown> | unknown[];
+  dispatch_protocol?: string | Record<string, unknown> | unknown[];
   phase_determination?: {
     constraints?: {
       phase_determination?: string;
@@ -178,20 +179,24 @@ export function extractVariantOverrides(frontmatter: PmMdFrontmatter): VariantOv
   if (frontmatter.variant_overrides && typeof frontmatter.variant_overrides === 'object') {
     const vo = frontmatter.variant_overrides as Record<string, unknown>;
 
-    if (vo.updated_role && typeof vo.updated_role === 'string') {
-      overrides.updated_role = vo.updated_role;
+    if (vo.role !== undefined) {
+      overrides.role = vo.role as VariantOverrides['role'];
     }
 
-    if (vo.governance_workflow && typeof vo.governance_workflow === 'string') {
-      overrides.governance_workflow = vo.governance_workflow;
+    if (vo.updated_role !== undefined) {
+      overrides.updated_role = vo.updated_role as VariantOverrides['updated_role'];
     }
 
-    if (vo.agent_roster && typeof vo.agent_roster === 'string') {
-      overrides.agent_roster = vo.agent_roster;
+    if (vo.governance_workflow !== undefined) {
+      overrides.governance_workflow = vo.governance_workflow as VariantOverrides['governance_workflow'];
     }
 
-    if (vo.dispatch_protocol && typeof vo.dispatch_protocol === 'string') {
-      overrides.dispatch_protocol = vo.dispatch_protocol;
+    if (vo.agent_roster !== undefined) {
+      overrides.agent_roster = vo.agent_roster as VariantOverrides['agent_roster'];
+    }
+
+    if (vo.dispatch_protocol !== undefined) {
+      overrides.dispatch_protocol = vo.dispatch_protocol as VariantOverrides['dispatch_protocol'];
     }
 
     if (vo.phase_determination && typeof vo.phase_determination === 'object') {
@@ -303,31 +308,36 @@ export function generateContextMd(variantName: string, variantOverrides: Variant
   lines.push(`## Variant-Specific PM Configuration`);
   lines.push('');
 
+  const formatOverrideValue = (val: unknown): string => {
+    if (typeof val === 'string') return val;
+    return JSON.stringify(val, null, 2);
+  };
+
   if (variantOverrides.updated_role) {
     lines.push(`### Updated Role`);
     lines.push('');
-    lines.push(variantOverrides.updated_role);
+    lines.push(formatOverrideValue(variantOverrides.updated_role));
     lines.push('');
   }
 
   if (variantOverrides.governance_workflow) {
     lines.push(`### Governance Workflow`);
     lines.push('');
-    lines.push(variantOverrides.governance_workflow);
+    lines.push(formatOverrideValue(variantOverrides.governance_workflow));
     lines.push('');
   }
 
   if (variantOverrides.agent_roster) {
     lines.push(`### Agent Roster`);
     lines.push('');
-    lines.push(variantOverrides.agent_roster);
+    lines.push(formatOverrideValue(variantOverrides.agent_roster));
     lines.push('');
   }
 
   if (variantOverrides.dispatch_protocol) {
     lines.push(`### Dispatch Protocol`);
     lines.push('');
-    lines.push(variantOverrides.dispatch_protocol);
+    lines.push(formatOverrideValue(variantOverrides.dispatch_protocol));
     lines.push('');
   }
 

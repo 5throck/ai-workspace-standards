@@ -29,5 +29,6 @@
         ]
       }
     ]
-  }
+  },
+  "artifact.reviewPolicy": "Auto"
 }

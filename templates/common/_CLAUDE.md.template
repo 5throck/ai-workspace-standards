@@ -1,8 +1,0 @@
-# CLAUDE.md
-
-> This file was generated from templates/common/_CLAUDE.md.template during scaffolding.
-> Customize it for your variant's specific behaviors.
-
-## Role Declaration
-
-You are the PM agent for this session. Load and follow `agents/pm.md` at all times.

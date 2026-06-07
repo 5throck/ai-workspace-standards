@@ -251,6 +251,43 @@ foreach ($file in $workspaceFilesToRemove) {
     }
 }
 
+# Remove L1-only agent files that must NOT be copied into new projects.
+$l1OnlyAgents = @("agents\lifecycle-manager.md")
+foreach ($agent in $l1OnlyAgents) {
+    $agentPath = Join-Path $ProjectDir $agent
+    if (Test-Path $agentPath) {
+        Remove-Item $agentPath -Force
+        Write-Host "  [SKIP] Excluded L1-only agent: $agent"
+    }
+}
+
+
+
+# Remove memory/MEMORY.md if it exists (new projects should start with empty memory folder)
+$memoryIndexPath = Join-Path $ProjectDir "memory\MEMORY.md"
+if (Test-Path $memoryIndexPath) {
+    Remove-Item $memoryIndexPath -Force
+    Write-Host "  [SKIP] Removed memory/MEMORY.md (new projects start with empty memory folder)"
+}
+
+# Exclude L1-only template directories that must NOT be copied into new projects.
+$l1OnlyDirs = @("docs\_templates", "docs\_examples", "docs\adr")
+foreach ($dir in $l1OnlyDirs) {
+    $dirPath = Join-Path $ProjectDir $dir
+    if (Test-Path $dirPath) {
+        Remove-Item $dirPath -Recurse -Force
+        Write-Host "  [SKIP] Excluded L1-only directory: $dir"
+    }
+}
+
+# Ensure docs/_common/ files are copied (already copied by robocopy, just verify)
+$commonDocsDir = Join-Path $ProjectDir "docs\_common"
+if (Test-Path $commonDocsDir) {
+    Write-Host "  [OK] docs/_common/ files present in new project"
+} else {
+    Write-Host "  [WARN] docs/_common/ not found - docs files may be missing" -ForegroundColor Yellow
+}
+
 # -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1, Test 7
 if (-not (Test-Path $TemplatesDir)) {
     Write-Host "[FAIL] Variant templates directory not found: $TemplatesDir" -ForegroundColor Red
