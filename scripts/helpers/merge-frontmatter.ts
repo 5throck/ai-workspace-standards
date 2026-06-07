@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -183,6 +183,87 @@ function removeSections(content: string, sectionsToRemove: string[]): string {
 }
 
 /**
+ * Generate markdown sections from variant_overrides YAML structure.
+ *
+ * Handles four standard override sections:
+ *   - updated_role      → ## Updated Role
+ *   - governance_workflow → ## Governance Workflow
+ *   - agent_roster      → ## Agent Roster
+ *   - dispatch_protocol → ## Dispatch Protocol
+ *
+ * @param variantOverrides - The variant_overrides object from merged frontmatter
+ * @param variant - The variant name (e.g. "co-develop")
+ * @returns Markdown string with generated sections, or empty string if no overrides
+ */
+function injectVariantSections(variantOverrides: Record<string, any> | undefined, variant: string): string {
+  if (!variantOverrides || Object.keys(variantOverrides).length === 0) return '';
+
+  const sections: string[] = [];
+
+  // ## Updated Role
+  if (variantOverrides.updated_role) {
+    const r = variantOverrides.updated_role;
+    const lines = [`## Updated Role`];
+    if (r.description) lines.push(``, r.description);
+    if (r.scope) lines.push(``, `**Scope**: ${r.scope}`);
+    sections.push(lines.join('\n'));
+  }
+
+  // ## Governance Workflow
+  if (variantOverrides.governance_workflow) {
+    const g = variantOverrides.governance_workflow;
+    const lines = [`## Governance Workflow`];
+    if (Array.isArray(g.phases) && g.phases.length > 0) {
+      lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(', ')}`);
+    }
+    if (typeof g.triage_required === 'boolean') {
+      lines.push(``, `**Triage Required**: ${g.triage_required ? 'Yes' : 'No'}`);
+    }
+    sections.push(lines.join('\n'));
+  }
+
+  // ## Agent Roster
+  if (Array.isArray(variantOverrides.agent_roster) && variantOverrides.agent_roster.length > 0) {
+    const lines = [
+      `## Agent Roster`,
+      ``,
+      `| Phase | Group | Agents |`,
+      `|-------|-------|--------|`,
+    ];
+    for (const entry of variantOverrides.agent_roster) {
+      const agents = Array.isArray(entry.agents)
+        ? entry.agents.map((a: string) => `\`${a}\``).join(', ')
+        : '';
+      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | ${agents} |`);
+    }
+    sections.push(lines.join('\n'));
+  }
+
+  // ## Dispatch Protocol
+  if (variantOverrides.dispatch_protocol) {
+    const d = variantOverrides.dispatch_protocol;
+    const lines = [`## Dispatch Protocol`];
+    if (Array.isArray(d.can_lead_phases)) {
+      lines.push(``, `**Can Lead Phases**: [${d.can_lead_phases.join(', ')}]`);
+    }
+    if (Array.isArray(d.can_support_in) && d.can_support_in.length > 0) {
+      lines.push(`**Can Support In**: [${d.can_support_in.join(', ')}]`);
+    }
+    if (Array.isArray(d.auto_dispatch_to) && d.auto_dispatch_to.length > 0) {
+      lines.push(`**Auto-Dispatch To**: ${d.auto_dispatch_to.map((a: string) => `\`${a}\``).join(', ')}`);
+    }
+    if (d.tier) lines.push(`**Tier**: ${d.tier}`);
+    if (d.communication_style) lines.push(`**Communication Style**: ${d.communication_style}`);
+    sections.push(lines.join('\n'));
+  }
+
+  if (sections.length === 0) return '';
+
+  console.log(`💉  Injected ${sections.length} variant section(s) from variant_overrides for variant '${variant}'`);
+  return `\n\n` + sections.join(`\n\n`);
+}
+
+/**
  * Process a single file with `extends` directive
  * @param filePath - Path to the variant file
  * @param explicitSkeletonPath - Optional absolute path to skeleton (resolves extends field before copy)
@@ -250,6 +331,14 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
       if (finalContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
         console.log(`✂️  Removed ${sectionsToRemove.length} section(s) from content: ${sectionsToRemove.join(', ')}`);
       }
+    }
+
+    // Inject variant_overrides as markdown sections (appended after base content)
+    const variantOverrides = mergedFrontmatter.variant_overrides;
+    const variantName: string = mergedFrontmatter.variant || 'unknown';
+    const injected = injectVariantSections(variantOverrides, variantName);
+    if (injected) {
+      finalContent = finalContent + injected;
     }
 
     // Do not include remove_sections / extends directives in final output frontmatter

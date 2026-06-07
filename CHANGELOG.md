@@ -10,13 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ### Fixed
+- **[2026-06-08]**: fix: inject variant-specific sections from `variant_overrides` in `merge-frontmatter.ts` (v1.3.0) — `## Updated Role`, `## Governance Workflow`, `## Agent Roster`, `## Dispatch Protocol` sections are now generated from the variant's `variant_overrides` YAML and appended to the body after L0 section removal, ensuring generated `pm.md` reflects the correct variant characteristics instead of L0 workspace root values
 - **[2026-06-08]**: fix: implement `remove_sections` support in `merge-frontmatter.ts` (v1.2.0) — variant `pm.md` files now correctly strip L0-specific sections (e.g. `## Governance Workflow`, `## Updated Role`, `## Agent Roster`, `## Dispatch Protocol`, `### Phase Determination`) from the body when scaffolding new projects; prefix-based heading matching handles headings with suffixes (e.g. `## Updated Role (Phase 0/1-2/5/6 Only)`); `remove_sections` key no longer emitted in final output frontmatter
 - **[2026-06-08]**: Indented the yaml code block in `templates/common/docs/variant-pm-spec.md` to prevent extends validator false positives during scaffolding audit.
 - **[2026-06-08]**: fix: resolve new-project scaffolding validation failure — remove `CLAUDE.md` and `GEMINI.md` from `variantRequired` in `scripts/helpers/template-validation.ts` to reflect template separation architecture where platform docs are inherited from common template; bumps version to `1.0.1`
 - **[2026-06-07]**: fix: correct TaskCompleted hook structure in templates — add missing `hooks` wrapper and `matcher` field to `templates/common/.claude/settings.json` and `templates/co-consult/.claude/settings.json`; ensures proper hook format consistency across all templates (`templates/common/.claude/settings.json`, `templates/co-consult/.claude/settings.json`)
 
 ### Changed
-- **[2026-06-08]**: Bumped `scripts/helpers/merge-frontmatter.ts` to `1.2.0` — add `removeSections()` utility with prefix-based heading matching; apply `remove_sections` list from merged frontmatter to strip L0-specific sections from body; strip `remove_sections` key from emitted frontmatter.
+- **[2026-06-08]**: Bumped `scripts/helpers/merge-frontmatter.ts` to `1.3.0` — add `injectVariantSections()` that generates `## Updated Role`, `## Governance Workflow`, `## Agent Roster`, `## Dispatch Protocol` markdown sections from `variant_overrides` YAML and appends them to body content after L0 section removal.
 - **[2026-06-08]**: Bumped `scripts/new-project.sh` to `1.4.7` to pass original template source path for extends validation during scaffolding.
 - **[2026-06-03]**: chore: clean up co-consult template — remove stale co-work skill copies (`meeting-facilitation`, `skill-lifecycle-manager`) from all 5 variants; register `agent-lifecycle-manager` as platform override in variant.json; remove template contamination files (`_COMMON.md`, `GLOBAL_TOOLS.md`, `settings.local.json`, `api-documentation` skill, empty `adr/`); add co-consult to `new-project.sh`/`ps1`/`md` at L0 and L1
 
