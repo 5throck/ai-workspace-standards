@@ -251,6 +251,18 @@ foreach ($file in $workspaceFilesToRemove) {
     }
 }
 
+# Remove L1-only agent files that must NOT be copied into new projects.
+$l1OnlyAgents = @("agents\lifecycle-manager.md")
+foreach ($agent in $l1OnlyAgents) {
+    $agentPath = Join-Path $ProjectDir $agent
+    if (Test-Path $agentPath) {
+        Remove-Item $agentPath -Force
+        Write-Host "  [SKIP] Excluded L1-only agent: $agent"
+    }
+}
+
+
+
 # Remove memory/MEMORY.md if it exists (new projects should start with empty memory folder)
 $memoryIndexPath = Join-Path $ProjectDir "memory\MEMORY.md"
 if (Test-Path $memoryIndexPath) {

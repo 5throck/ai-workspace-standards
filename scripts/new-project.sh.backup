@@ -230,16 +230,6 @@ for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   fi
 done
 
-# Remove L1-only agent files that must NOT be copied into new projects.
-L1_ONLY_AGENTS=("agents/lifecycle-manager.md")
-for agent in "${L1_ONLY_AGENTS[@]}"; do
-  if [ -f "$PROJECT_DIR/$agent" ]; then
-    rm -f "$PROJECT_DIR/$agent"
-    echo "  🗑️  Excluded L1-only agent: $agent"
-  fi
-done
-
-
 # Exclude L1-only template directories that must NOT be copied into new projects.
 L1_ONLY_DIRS=("docs/_templates" "docs/_examples" "docs/adr")
 for dir in "${L1_ONLY_DIRS[@]}"; do

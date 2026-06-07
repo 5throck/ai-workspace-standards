@@ -16,7 +16,7 @@ examples:
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-06-05
+  last_updated: 2026-06-08
   governance: docs/lifecycle/agents/pm.md
 ---
 

@@ -1,4 +1,4 @@
-// @version 2.6.2
+// @version 2.6.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -818,6 +818,31 @@ if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     checkLeakage('templates');
     if (leakageErrors === 0) {
         Pass('L0 Leakage check: no unauthorized CONSTITUTION.md references in templates');
+    }
+}
+
+// Check: L0-only agent files should not exist in templates/co-*/agents/
+if (fs.existsSync('templates')) {
+    const L0_ONLY_AGENTS = ['lifecycle-manager.md'];
+    let l0OnlyErrors = 0;
+    const templatesDir = 'templates';
+
+    for (const entry of fs.readdirSync(templatesDir)) {
+        if (!entry.startsWith('co-')) continue;
+        const variantAgentsDir = path.join(templatesDir, entry, 'agents');
+        if (!fs.existsSync(variantAgentsDir)) continue;
+
+        for (const l0OnlyAgent of L0_ONLY_AGENTS) {
+            const agentPath = path.join(variantAgentsDir, l0OnlyAgent);
+            if (fs.existsSync(agentPath)) {
+                Fail(`L0-only agent: ${l0OnlyAgent} found in templates/${entry}/agents/ - this agent should only exist at workspace root (agents/)`);
+                l0OnlyErrors++;
+            }
+        }
+    }
+
+    if (l0OnlyErrors === 0) {
+        Pass('L0-only agent check: no L0-only agents found in templates/co-*/agents/');
     }
 }
 
