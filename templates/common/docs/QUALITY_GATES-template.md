@@ -157,7 +157,7 @@ Phase C: Template Creation & Validation
    - No file corruption (verify file sizes match)
 
 3. **Workspace Root Integration**
-   - `CONSTITUTION.md` updated (if variant introduces new governance)
+   - `workspace standards` updated (if variant introduces new governance)
    - `CLAUDE.md` updated (if variant affects PM workflow)
    - `GEMINI.md` updated (platform parity)
 

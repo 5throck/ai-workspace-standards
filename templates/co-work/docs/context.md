@@ -138,7 +138,7 @@ All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 
 ## Coding Guidelines
 
-This project follows the workspace coding standards defined in [`CONSTITUTION.md §8`](../../docs/constitution/08-coding-guidelines.md).
+This project follows the workspace coding standards defined in [`workspace standards §8`](../../docs/constitution/08-coding-guidelines.md).
 
 Key rules:
 - All scripts must be provided as `.sh` / `.ps1` pairs
@@ -153,7 +153,7 @@ Key rules:
 All agents must follow this file routing policy. **Creating `.md` files at the project root is prohibited** unless they are standard root files.
 
 ### Standard Root Files (allowed at root)
-`README.md`, `CHANGELOG.md`, `AGENTS.md`, `SECURITY.md`, `CONSTITUTION.md`, `CLAUDE.md`, `GEMINI.md`
+`README.md`, `CHANGELOG.md`, `AGENTS.md`, `SECURITY.md`, `workspace standards`, `CLAUDE.md`, `GEMINI.md`
 
 ### File Type Routing
 | File Type | Default Location |
@@ -254,19 +254,19 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 ### Common Principles
 
 - **Agent / Skill / Script** each have explicit lifecycle states (active, deprecated, retired/archived)
-- Full lifecycle rules are defined in the workspace `CONSTITUTION.md` section files
+- Full lifecycle rules are defined in the workspace `workspace standards` section files
 - Audit commands exist for each domain: `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`, `verify-scripts.ts`
 
 ### Workspace Constitution Reference
 
-All projects must read [`CONSTITUTION.md`](../../CONSTITUTION.md) at session start, including the files listed in its `## Required Reading` block:
+All projects must read [`workspace standards`](../../workspace standards) at session start, including the files listed in its `## Required Reading` block:
 - `docs/constitution/05-multi-agent-architecture.md` — Agent architecture, 3-tier model, PM governance workflow
 - `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
 
 For full lifecycle procedures:
-- **Agent Lifecycle**: See `CONSTITUTION.md` → [§5.6 Agent Lifecycle Management](../../CONSTITUTION.md#agent-lifecycle-management)
-- **Skill Lifecycle**: See `CONSTITUTION.md` → [§6 Skill Lifecycle Management](../../CONSTITUTION.md#skills)
-- **Script Lifecycle**: See `CONSTITUTION.md` → [§6.5 Script Lifecycle Management](../../CONSTITUTION.md#script-lifecycle-management)
+- **Agent Lifecycle**: See `workspace standards` → [§5.6 Agent Lifecycle Management](../../workspace standards#agent-lifecycle-management)
+- **Skill Lifecycle**: See `workspace standards` → [§6 Skill Lifecycle Management](../../workspace standards#skills)
+- **Script Lifecycle**: See `workspace standards` → [§6.5 Script Lifecycle Management](../../workspace standards#script-lifecycle-management)
 
 ---
 

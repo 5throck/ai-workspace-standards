@@ -156,6 +156,16 @@ Agents have three states: **active** (production use), **deprecated** (being pha
 
 ---
 
+### 5.8 Additive Template Architecture
+
+L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VARIANT-SECTION: [id] -->` markers.
+
+- `templates/common/agents/pm.md` acts as the single source of truth containing the base skeleton with injection anchors.
+- Variant `pm.md` files must ONLY contain the YAML frontmatter and the additive sections (`governance-workflow`, `agent-roster`, `dispatch-protocol`).
+- Variant `pm.md` files must NEVER duplicate the core PM text or exceed 200 lines.
+
+---
+
 ### 6. Skill Lifecycle Management → [Full details](docs/constitution/06-skill-lifecycle.md)
 
 Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.

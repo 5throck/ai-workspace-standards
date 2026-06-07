@@ -7,7 +7,7 @@
 
 > **Canonical agent index** - auto-loaded by Claude Code; referenced by all other AI tools.
 > Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture).
+> **Agent architecture and governance rules**: See workspace standards(workspace standards#5-multi-agent-architecture).
 
 ---
 
@@ -168,7 +168,7 @@ All agents, regardless of their role, must adhere to the following:
 
 ### English Documentation Requirement
 - All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
-- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)

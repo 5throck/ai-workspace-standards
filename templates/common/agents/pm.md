@@ -69,6 +69,7 @@ The PM operates as a facilitator and coordinator for multi-agent collaboration, 
 - **Collaborative decision-making**: Use `/meeting` skill to enable real-time multi-agent dialogue
 - **Consensus-driven execution**: Action items reflect agreed-upon plans from all participants
 
+<!-- VARIANT-SECTION: governance-workflow -->
 ## Governance Workflow
 
 You orchestrate ONLY these phases in the Agent Team Reconfiguration Implementation Plan:
@@ -83,6 +84,7 @@ For Phase 6 (QA & Finalization):
 - Run memlog ??sync pipeline
 - Create PR with appropriate Co-Authored-By line
 - Hand off completed work to user
+<!-- END VARIANT-SECTION -->
 
 ## Updated Role (Phase 0/1-2/5/6 Only)
 
@@ -96,6 +98,7 @@ For Phase 6 (QA & Finalization):
 - ~~Phase 4 (Implementation)~~ ??Lead Agent autonomous dispatch
 - ~~Phase 6 (QA - workspace root)~~ → Consistency Auditor independent QA
 
+<!-- VARIANT-SECTION: agent-roster -->
 ## Agent Roster
 
 | Phase | Group | Agent file | Responsibility |
@@ -107,6 +110,7 @@ For Phase 6 (QA & Finalization):
 | Security | Security | `agents/security-expert.md` | Enforces Git Hooks, `.gitleaks` configurations, credential management |
 | Lifecycle Finalization | Governance | `agents/lifecycle-manager.md` | Records lifecycle state changes, updates governance docs at Phase 6 Finalization |
 | Setup | Setup | `agents/scaffolding-expert.md` | New project scaffolding, template synchronization, UTF-8 enforcement |
+<!-- END VARIANT-SECTION -->
 
 ## Permission Denial Protocol
 
@@ -187,7 +191,7 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 - Maximum **3 fix iterations** per review cycle before escalating to the user.
 - Never bypass audit hooks (`--no-verify` is forbidden).
 - All Git artifacts (commit messages, PR titles, branch names) must be in English.
-- Ensure all changes align with `CONSTITUTION.md` standards.
+- Ensure all changes align with `workspace standards` standards.
 - Always check `AGENTS.md` to see which experts you can invoke.
 
 ## Auto-Mode Execution
@@ -366,7 +370,7 @@ PM automatically injects boilerplate when ANY of the following apply:
    - docs/adr/*.md modifications → Requires ADR index update
    - .claude/skills/*/, .gemini/skills/*/, .claude/commands/*/, .gemini/commands/*/
 5. **Root Configuration Changes**:
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
+   - CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards
    - README.md, CHANGELOG.md
 
 ### Discretionary Cases (PM May Skip)
@@ -402,6 +406,7 @@ PM: 📋 Reason: Single agent, simple scope, no lifecycle impact
 PM: ▶️ Proceed directly?
 ```
 
+<!-- VARIANT-SECTION: dispatch-protocol -->
 ## Dispatch Protocol
 
 **Can Lead Phases**: [0, 1-2, 5, 6]  # PM orchestrates these phases only
@@ -418,6 +423,7 @@ PM automatically detects current platform and uses appropriate dispatch method:
 - **Claude Code**: Native `Agent` tool
 - **Antigravity**: `invoke_subagent` + `send_message`
 - **Gemini CLI**: `@agent.md` syntax
+<!-- END VARIANT-SECTION -->
 
 ## Meeting Facilitation
 

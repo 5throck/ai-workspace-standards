@@ -287,7 +287,7 @@ To prevent divergence from workspace root common/ files:
 
 **Activities**:
 - C-1. Template creation (copy from `Projects/[variant-name]/`)
-- C-2. Workspace root reflection (update CONSTITUTION.md, CLAUDE.md, GEMINI.md if needed)
+- C-2. Workspace root reflection (update workspace standards, CLAUDE.md, GEMINI.md if needed)
 - C-3. Validation (run `validate-templates.ts`)
 - C-4. New project test (generate test project to verify end-to-end workflow)
 
@@ -706,7 +706,7 @@ Tier 3  Team Coordination    5%  → Team communication and handoffs
 - **Variant Creation Workflow**: `docs/variant-creation-workflow.md` (3-Phase process)
 - **Promotion Checklist**: `docs/templates/PROMOTION_CHECKLIST-template.md` (7 criteria)
 - **Quality Gates**: `docs/templates/QUALITY_GATES-template.md` (validation checkpoints)
-- **CONSTITUTION.md**: Workspace constitution and governance
+- **workspace standards**: Workspace constitution and governance
 - **AGENTS.md**: Agent roster and definitions
 
 ---

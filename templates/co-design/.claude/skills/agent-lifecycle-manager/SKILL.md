@@ -81,7 +81,7 @@ tier:
 **Content Guidelines**:
 - Provide clear identity and context mapping.
 - Focus on specific behavioral guidelines and domain constraints.
-- Do NOT repeat global rules (like UTF-8 enforcement or standard PR procedures) that are already covered in `CONSTITUTION.md`.
+- Do NOT repeat global rules (like UTF-8 enforcement or standard PR procedures) that are already covered in `workspace standards`.
 - **If the agent role involves research, investigation, or presenting external information**: explicitly include the Source Attribution principle in the agent's constraints or behavioral guidelines — require source citation for factual claims and use `⚠️ Unverified` disclosure for unverifiable information.
 
 ---

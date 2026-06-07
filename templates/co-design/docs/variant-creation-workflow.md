@@ -150,7 +150,7 @@ Create variant template and propagate to workspace root, enabling future project
 **C-2. Workspace Root Reflection**
 - **Activity**: Update workspace root files to reference new variant
 - **Files**:
-  - Update `CONSTITUTION.md` (if variant introduces new governance rules)
+  - Update `workspace standards` (if variant introduces new governance rules)
   - Update `CLAUDE.md` (if variant affects PM workflow)
   - Update `GEMINI.md` (platform parity)
 - **Method**: Manual edit + commit

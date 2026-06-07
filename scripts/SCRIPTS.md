@@ -51,12 +51,12 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.5.5 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.5.7 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
+| `create-l2-scaffold.ts` | L0 | 1.4.1 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -186,7 +186,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 ### Everyday Development Scripts (Tier 2 ??`bun run <script>`)
 
 #### `audit.ts`
-**Purpose**: Documentation audit gate. Checks CHANGELOG.md, CONSTITUTION.md, AGENTS.md,
+**Purpose**: Documentation audit gate. Checks CHANGELOG.md, workspace standards, AGENTS.md,
 agent frontmatter, skill health, and template lifecycle validation.
 **Usage**: `bun run audit`
 **Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`

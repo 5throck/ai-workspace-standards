@@ -37,7 +37,7 @@ bash scripts/setup.sh
 - **Project context & architecture** → [`docs/context.md`](docs/context.md)
 - **Agent index** → [`AGENTS.md`](AGENTS.md)
 - **Change history** → [`CHANGELOG.md`](CHANGELOG.md)
-- **Workspace standards** → [`CONSTITUTION.md`](../CONSTITUTION.md)
+- **Workspace standards** → [`workspace standards`](../workspace standards)
 - **Claude Code config** → [`CLAUDE.md`](CLAUDE.md)
 - **Gemini CLI config** → [`GEMINI.md`](GEMINI.md)
 

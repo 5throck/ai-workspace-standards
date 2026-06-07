@@ -1,4 +1,4 @@
-// @version 2.5.5
+// @version 2.5.7
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -607,6 +607,20 @@ function checkL2VariantIntegrity() {
         missingCount++;
       }
     }
+
+    const pmMdPath = path.join(variantDir, 'agents', 'pm.md');
+    if (fs.existsSync(pmMdPath)) {
+      const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
+      if (!pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+        Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
+        missingCount++;
+      }
+      const lineCount = pmContent.split('\\n').length;
+      if (lineCount >= 200) {
+        Fail(`L2 integrity: templates/${variant}/agents/pm.md has ${lineCount} lines (must be < 200 to prevent L0 duplication bug)`);
+        missingCount++;
+      }
+    }
   }
 
   if (missingCount === 0) {
@@ -780,6 +794,30 @@ if (IS_WORKSPACE_ROOT) {
         }
     } catch (_e) {
         Warn('Could not read docs/workspace-schema.json for stray-artifact check — skipping');
+    }
+}
+// Check: L0 Leakage (CONSTITUTION.md references in templates)
+if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
+    let leakageErrors = 0;
+    const checkLeakage = (dir: string) => {
+        for (const item of fs.readdirSync(dir)) {
+            const itemPath = path.join(dir, item);
+            const stat = fs.statSync(itemPath);
+            if (stat.isDirectory()) {
+                if (item === 'docs') continue;
+                checkLeakage(itemPath);
+            } else if (stat.isFile() && itemPath.endsWith('.md')) {
+                const content = fs.readFileSync(itemPath, 'utf-8');
+                if (content.includes('CONSTITUTION.md') && !content.includes('intentional-duplicate')) {
+                    Fail(`L0 Leakage: ${itemPath} contains unauthorized reference to CONSTITUTION.md`);
+                    leakageErrors++;
+                }
+            }
+        }
+    };
+    checkLeakage('templates');
+    if (leakageErrors === 0) {
+        Pass('L0 Leakage check: no unauthorized CONSTITUTION.md references in templates');
     }
 }
 

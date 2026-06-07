@@ -7,7 +7,7 @@
 
 > **Canonical agent index** - auto-loaded by Claude Code; referenced by all other AI tools.
 > Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture).
+> **Agent architecture and governance rules**: See workspace standards(workspace standards#5-multi-agent-architecture).
 
 ---
 
@@ -163,7 +163,7 @@ All specialist agents below are dispatched ONLY through PM:
 
 ### English Documentation Requirement
 - All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
-- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)
@@ -245,13 +245,13 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Security Monitor | `agents/security-monitor.md` | Medium | Review phase | No |
 | Stack Setup | `agents/stack-setup.md` | Low | Research phase | setup scripts only (after approval) |
 
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in workspace standards(workspace standards#51-agent-file-format-standard-frontmatter).
 
 ---
 
 ## Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-7-phases):
+Following the **PM governance workflow** defined in workspace standards(workspace standards#54-pm-governance-workflow-7-phases):
 
 ```
 Phase 0 - Project Initiation (PM-owned)
@@ -311,7 +311,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 > All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
 > The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
 >
-> **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
+> **Skill structure specification**: See workspace standards(workspace standards#6-skills) for frontmatter format and session skill registration.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -487,16 +487,16 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Use the `agent-lifecycle-manager` skill to guide the process.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+4. Ensure the agent file follows the frontmatter specification in workspace standards(workspace standards#51-agent-file-format-standard-frontmatter).
 5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
 1. Use the `skill-lifecycle-manager` skill to guide the process.
 2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
+3. Ensure the skill follows the frontmatter specification in workspace standards(workspace standards#62-skill-file-format-standard-frontmatter).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
+> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per workspace standards(workspace standards#1-standard-folder-structure).
 
 ---
 

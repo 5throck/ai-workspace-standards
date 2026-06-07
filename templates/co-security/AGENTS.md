@@ -7,7 +7,7 @@
 
 > **Canonical agent index** - auto-loaded by Claude Code; referenced by all other AI tools.
 > Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture).
+> **Agent architecture and governance rules**: See workspace standards(workspace standards#5-multi-agent-architecture).
 
 ---
 
@@ -174,7 +174,7 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 | **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | Security PM managing skill lifecycle after agent configuration changes |
 | **Meeting Facilitation** | `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings for collaborative decision-making |
 | **Project Review** | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review by all available agents; produces prioritized improvement plan |
-| **Audit Workspace** | `skills/audit-workspace/SKILL.md` | Runs workspace audit scripts to enforce CONSTITUTION.md compliance |
+| **Audit Workspace** | `skills/audit-workspace/SKILL.md` | Runs workspace audit scripts to enforce workspace standards compliance |
 | **Security Scan** | `skills/security-scan/SKILL.md` | Runs security scanning tools across the workspace |
 
 See `docs/co-security.context.md § Skills` for the full skill registry including domain-specific skills:
@@ -195,7 +195,7 @@ All agents, regardless of their role, must adhere to the following:
 
 ### English Documentation Requirement
 - All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
-- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)
