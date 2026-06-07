@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.1
+ * @version 1.1.2
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -112,19 +112,25 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
       const colonIndex = line.indexOf(':');
       if (colonIndex === -1) continue;
 
+      const indent = line.search(/\S/);
       const key = line.slice(0, colonIndex).trim();
       const value = line.slice(colonIndex + 1).trim();
 
       // Track if we're entering or leaving a tier block
-      if (key === 'tier' && value === '') {
+      if (key === 'tier' && value === '' && indent === 0) {
         inTierBlock = true;
-        currentIndentation = line.search(/\S/); // Get indentation level
+        currentIndentation = indent; // Get indentation level
         continue;
       }
 
       // Check if we've left the tier block (decreased indentation or new top-level key)
-      if (inTierBlock && line.search(/\S/) <= currentIndentation && key !== 'claude' && key !== 'antigravity' && key !== 'gemini-cli') {
+      if (inTierBlock && indent <= currentIndentation && key !== 'claude' && key !== 'antigravity' && key !== 'gemini-cli') {
         inTierBlock = false;
+      }
+
+      // Ignore nested keys unless we are parsing the tier block
+      if (!inTierBlock && indent > 0) {
+        continue;
       }
 
       if (value.startsWith('[') && value.endsWith(']')) {

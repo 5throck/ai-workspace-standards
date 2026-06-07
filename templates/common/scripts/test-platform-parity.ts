@@ -5,7 +5,7 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @author automation-engineer
  * @license MIT
  *
@@ -585,6 +585,12 @@ async function main() {
   const verbose = args.includes('--verbose');
 
   console.log('🔍 Platform Parity Test (ADR-0033)\n');
+
+  // Skip platform parity test if we are not in the workspace root (templates/ directory not found)
+  if (!existsSync(join(process.cwd(), 'templates'))) {
+    console.log('⚠️  Skipping platform parity test: not in workspace root (templates directory not found).');
+    process.exit(0);
+  }
 
   const results: ParityCheckResult[] = [];
   let totalErrors = 0;
