@@ -1,4 +1,4 @@
-// @version 2.6.1
+// @version 2.6.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -588,8 +588,6 @@ function checkL2VariantIntegrity() {
 
   // Required files every L2 variant must have
   const requiredFiles = [
-    'CLAUDE.md',
-    'GEMINI.md',
     'AGENTS.md',
     'README.md',
     'variant.json',
