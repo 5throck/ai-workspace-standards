@@ -1,6 +1,12 @@
 ---
 extends: ../../common/agents/pm.md
 variant: co-consult
+remove_sections:
+  - "## Role"
+  - "## ⚠️ ROLE CLARIFICATION"
+  - "## 🚨 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ?좑툘 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ⚠️ CRITICAL: PM Direct Execution Constraints"
 variant_overrides:
   updated_role:
     description: "Orchestrates Phases 0, 2, 5, 6. Enforces quality gates."

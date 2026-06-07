@@ -1,6 +1,12 @@
 ---
 extends: ../../common/agents/pm.md
 variant: co-design
+remove_sections:
+  - "## Role"
+  - "## ⚠️ ROLE CLARIFICATION"
+  - "## 🚨 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ?좑툘 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ⚠️ CRITICAL: PM Direct Execution Constraints"
 variant_overrides:
   updated_role:
     description: "PM orchestrator - owns team assembly, design validation, and finalization"

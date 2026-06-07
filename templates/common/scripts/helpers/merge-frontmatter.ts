@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.3.0
+ * @version 1.4.0
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -136,16 +136,28 @@ function removeSections(content: string, sectionsToRemove: string[]): string {
   });
 
   /**
+   * Helper to strip emojis and non-alphanumeric characters for robust comparison
+   */
+  function cleanText(str: string): string {
+    return str
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  /**
    * Returns true if `heading` (e.g. "## Updated Role (Phase 0/1-2/5/6 Only)")
    * starts with any removal spec (e.g. "## Updated Role").
    * Matching is case-insensitive prefix on the title part after the `#` markers.
    */
   function shouldRemove(hashes: string, title: string): boolean {
-    const titleLower = title.trim().replace(/\s+/g, ' ').toLowerCase();
-    return toRemove.some(r =>
-      r.hashes === hashes &&
-      (titleLower === r.prefix || titleLower.startsWith(r.prefix + ' ') || titleLower.startsWith(r.prefix + '('))
-    );
+    const cleanTitle = cleanText(title);
+    return toRemove.some(r => {
+      if (r.hashes !== hashes) return false;
+      const cleanPrefix = cleanText(r.prefix);
+      return cleanTitle === cleanPrefix || cleanTitle.startsWith(cleanPrefix + ' ') || cleanTitle.startsWith(cleanPrefix + '(');
+    });
   }
 
   const result: string[] = [];
@@ -182,47 +194,49 @@ function removeSections(content: string, sectionsToRemove: string[]): string {
   return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
+interface InjectedSections {
+  role: string;
+  agentRoster: string;
+  constraints: string;
+  governanceWorkflow: string;
+  dispatchProtocol: string;
+}
+
 /**
- * Generate markdown sections from variant_overrides YAML structure.
+ * Generate separate markdown sections from variant_overrides YAML structure.
  *
- * Handles four standard override sections:
- *   - updated_role      → ## Updated Role
- *   - governance_workflow → ## Governance Workflow
- *   - agent_roster      → ## Agent Roster
- *   - dispatch_protocol → ## Dispatch Protocol
+ * Handles five standard override sections:
+ *   - role (or updated_role) → ## Role
+ *   - agent_roster          → ## Agent Roster
+ *   - agent_roster (derived) → ## ⚠️ CRITICAL: PM Direct Execution Constraints
+ *   - governance_workflow   → ## Governance Workflow
+ *   - dispatch_protocol     → ## Dispatch Protocol
  *
  * @param variantOverrides - The variant_overrides object from merged frontmatter
  * @param variant - The variant name (e.g. "co-develop")
- * @returns Markdown string with generated sections, or empty string if no overrides
+ * @returns InjectedSections object with separate markdown strings for each section
  */
-function injectVariantSections(variantOverrides: Record<string, any> | undefined, variant: string): string {
-  if (!variantOverrides || Object.keys(variantOverrides).length === 0) return '';
+function injectVariantSections(variantOverrides: Record<string, any> | undefined, variant: string): InjectedSections {
+  const result: InjectedSections = {
+    role: '',
+    agentRoster: '',
+    constraints: '',
+    governanceWorkflow: '',
+    dispatchProtocol: ''
+  };
 
-  const sections: string[] = [];
+  if (!variantOverrides || Object.keys(variantOverrides).length === 0) return result;
 
-  // ## Updated Role
-  if (variantOverrides.updated_role) {
-    const r = variantOverrides.updated_role;
-    const lines = [`## Updated Role`];
+  // 1. ## Role (role || updated_role)
+  const r = variantOverrides.role || variantOverrides.updated_role;
+  if (r) {
+    const lines = [`## Role`];
     if (r.description) lines.push(``, r.description);
     if (r.scope) lines.push(``, `**Scope**: ${r.scope}`);
-    sections.push(lines.join('\n'));
+    result.role = lines.join('\n');
   }
 
-  // ## Governance Workflow
-  if (variantOverrides.governance_workflow) {
-    const g = variantOverrides.governance_workflow;
-    const lines = [`## Governance Workflow`];
-    if (Array.isArray(g.phases) && g.phases.length > 0) {
-      lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(', ')}`);
-    }
-    if (typeof g.triage_required === 'boolean') {
-      lines.push(``, `**Triage Required**: ${g.triage_required ? 'Yes' : 'No'}`);
-    }
-    sections.push(lines.join('\n'));
-  }
-
-  // ## Agent Roster
+  // 2. ## Agent Roster
   if (Array.isArray(variantOverrides.agent_roster) && variantOverrides.agent_roster.length > 0) {
     const lines = [
       `## Agent Roster`,
@@ -236,10 +250,73 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
         : '';
       lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | ${agents} |`);
     }
-    sections.push(lines.join('\n'));
+    result.agentRoster = lines.join('\n');
   }
 
-  // ## Dispatch Protocol
+  // 3. ## ⚠️ CRITICAL: PM Direct Execution Constraints
+  if (Array.isArray(variantOverrides.agent_roster) && variantOverrides.agent_roster.length > 0) {
+    const lines = [
+      `## ⚠️ CRITICAL: PM Direct Execution Constraints`,
+      ``,
+      `**FORBIDDEN**: PM performing Write/Edit on any file except:`,
+      `- \`memory/*.md\` (session logs)`,
+      `- \`CHANGELOG.md\` (sync pipeline only)`,
+      ``,
+      `**MANDATORY**: All file modifications MUST be dispatched to:`
+    ];
+
+    const agentMap = new Map<string, { groups: Set<string>; phases: Set<string> }>();
+    for (const entry of variantOverrides.agent_roster) {
+      if (!entry.agents) continue;
+      const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
+      for (const agent of agentsList) {
+        if (!agent) continue;
+        if (!agentMap.has(agent)) {
+          agentMap.set(agent, { groups: new Set<string>(), phases: new Set<string>() });
+        }
+        const info = agentMap.get(agent)!;
+        if (entry.group) info.groups.add(entry.group);
+        if (entry.phase) info.phases.add(entry.phase);
+      }
+    }
+
+    for (const [agentName, info] of agentMap.entries()) {
+      const groupsStr = Array.from(info.groups).join(', ');
+      const phasesStr = Array.from(info.phases).join(', ');
+      let taskDesc = '';
+      if (groupsStr && phasesStr) {
+        taskDesc = `Dispatch for ${groupsStr} / ${phasesStr} tasks`;
+      } else if (groupsStr) {
+        taskDesc = `Dispatch for ${groupsStr} tasks`;
+      } else if (phasesStr) {
+        taskDesc = `Dispatch for ${phasesStr} tasks`;
+      } else {
+        taskDesc = `Dispatch for assigned tasks`;
+      }
+      lines.push(`- **${agentName}**: ${taskDesc}`);
+    }
+
+    lines.push(
+      ``,
+      `**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.`
+    );
+    result.constraints = lines.join('\n');
+  }
+
+  // 4. ## Governance Workflow
+  if (variantOverrides.governance_workflow) {
+    const g = variantOverrides.governance_workflow;
+    const lines = [`## Governance Workflow`];
+    if (Array.isArray(g.phases) && g.phases.length > 0) {
+      lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(', ')}`);
+    }
+    if (typeof g.triage_required === 'boolean') {
+      lines.push(``, `**Triage Required**: ${g.triage_required ? 'Yes' : 'No'}`);
+    }
+    result.governanceWorkflow = lines.join('\n');
+  }
+
+  // 5. ## Dispatch Protocol
   if (variantOverrides.dispatch_protocol) {
     const d = variantOverrides.dispatch_protocol;
     const lines = [`## Dispatch Protocol`];
@@ -254,13 +331,22 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
     }
     if (d.tier) lines.push(`**Tier**: ${d.tier}`);
     if (d.communication_style) lines.push(`**Communication Style**: ${d.communication_style}`);
-    sections.push(lines.join('\n'));
+    result.dispatchProtocol = lines.join('\n');
   }
 
-  if (sections.length === 0) return '';
+  const sectionsCount = [
+    result.role,
+    result.agentRoster,
+    result.constraints,
+    result.governanceWorkflow,
+    result.dispatchProtocol
+  ].filter(Boolean).length;
 
-  console.log(`💉  Injected ${sections.length} variant section(s) from variant_overrides for variant '${variant}'`);
-  return `\n\n` + sections.join(`\n\n`);
+  if (sectionsCount > 0) {
+    console.log(`Injected ${sectionsCount} variant section(s) from variant_overrides for variant '${variant}'`);
+  }
+
+  return result;
 }
 
 /**
@@ -322,23 +408,52 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
 
     // Use variant content if it is not empty, otherwise use the resolved skeleton content
     const useCurrentContent = parsed.content.trim().length > 0;
-    let finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+    let baseContent = useCurrentContent ? parsed.content : skeletonResolved.content;
 
     // Apply remove_sections from the merged frontmatter to the body content
     const sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
     if (sectionsToRemove.length > 0) {
-      finalContent = removeSections(finalContent, sectionsToRemove);
-      if (finalContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
+      baseContent = removeSections(baseContent, sectionsToRemove);
+      if (baseContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
         console.log(`✂️  Removed ${sectionsToRemove.length} section(s) from content: ${sectionsToRemove.join(', ')}`);
       }
     }
 
-    // Inject variant_overrides as markdown sections (appended after base content)
+    // Process frontmatter overrides and lift keys to the top-level
     const variantOverrides = mergedFrontmatter.variant_overrides;
+    if (variantOverrides && typeof variantOverrides === 'object') {
+      if (variantOverrides.frontmatter_overrides && typeof variantOverrides.frontmatter_overrides === 'object') {
+        for (const [k, v] of Object.entries(variantOverrides.frontmatter_overrides)) {
+          mergedFrontmatter[k] = v;
+        }
+        delete variantOverrides.frontmatter_overrides;
+      }
+    }
+
     const variantName: string = mergedFrontmatter.variant || 'unknown';
-    const injected = injectVariantSections(variantOverrides, variantName);
-    if (injected) {
-      finalContent = finalContent + injected;
+    const sections = injectVariantSections(variantOverrides, variantName);
+
+    // Prepend content assembly
+    const prependParts: string[] = [];
+    if (sections.role) prependParts.push(sections.role);
+    if (sections.agentRoster) prependParts.push(sections.agentRoster);
+    if (sections.constraints) prependParts.push(sections.constraints);
+    const prependContent = prependParts.join('\n\n');
+
+    // Append content assembly
+    const appendParts: string[] = [];
+    if (sections.governanceWorkflow) appendParts.push(sections.governanceWorkflow);
+    if (sections.dispatchProtocol) appendParts.push(sections.dispatchProtocol);
+    const appendContent = appendParts.join('\n\n');
+
+    // Combine final body content
+    let finalBody = '';
+    if (prependContent) {
+      finalBody += prependContent + '\n\n';
+    }
+    finalBody += baseContent;
+    if (appendContent) {
+      finalBody += '\n\n' + appendContent;
     }
 
     // Do not include remove_sections / extends directives in final output frontmatter
@@ -348,7 +463,7 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
 ${dump(mergedFrontmatter).trim()}
 ---
 
-${finalContent}`;
+${finalBody}`;
 
     return result;
   } catch (error) {

@@ -1,6 +1,12 @@
 ---
 extends: ../../common/agents/pm.md
 variant: co-develop
+remove_sections:
+  - "## Role"
+  - "## ⚠️ ROLE CLARIFICATION"
+  - "## 🚨 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ?좑툘 YOU ARE THE SINGLE ENTRY POINT"
+  - "## ⚠️ CRITICAL: PM Direct Execution Constraints"
 variant_overrides:
   updated_role:
     description: "PM orchestrator for co-develop project. Owns end-to-end workflow from triage to PR creation. Never implements code directly."
