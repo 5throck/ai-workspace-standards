@@ -38,7 +38,7 @@ Comprehensive parallel review of the current project by all available specialist
 Before dispatching agents, determine the execution context:
 
 1. **List available agents**: scan `agents/` directory for `*.md` files (excluding README)
-2. **Determine project type**: check for `docs/context.md` (variant project) or `CONSTITUTION.md` (workspace root)
+2. **Determine project type**: check for `docs/context.md` (variant project) or workspace root indicator present (workspace root)
 3. **Announce context**:
    ```
    Project type: [workspace-root | co-develop | co-design | co-work | co-security | custom]

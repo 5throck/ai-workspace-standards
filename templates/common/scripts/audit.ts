@@ -1,4 +1,4 @@
-// @version 2.6.0
+// @version 2.6.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -832,7 +832,7 @@ if (fs.existsSync('templates')) {
             if (stat.isDirectory()) {
                 checkExecutable(itemPath);
             } else if (stat.isFile()) {
-                if (item.endsWith('.sh') || item.endsWith('.ps1') || item.endsWith('.ts')) {
+                if (item.endsWith('.sh') || item.endsWith('.ps1')) {
                     try {
                         const out = execSync(`git ls-files --stage "${itemPath.replace(/\\/g, '/')}"`, { encoding: 'utf-8' });
                         if (out.startsWith('100644')) {
