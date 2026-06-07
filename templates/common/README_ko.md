@@ -38,7 +38,7 @@ bash scripts/setup.sh
 - **프로젝트 컨텍스트 & 아키텍처** → [`docs/context.md`](docs/context.md)
 - **에이전트 인덱스** → [`AGENTS.md`](AGENTS.md)
 - **변경 이력** → [`CHANGELOG.md`](CHANGELOG.md)
-- **워크스페이스 표준** → [`CONSTITUTION.md`](../CONSTITUTION.md)
+- **워크스페이스 표준** → [`workspace standards`](../workspace standards)
 - **Claude Code 설정** → [`CLAUDE.md`](CLAUDE.md)
 - **Gemini CLI 설정** → [`GEMINI.md`](GEMINI.md)
 

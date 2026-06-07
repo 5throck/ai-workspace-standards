@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`workspace standards`](workspace standards) - read it first and the files listed in its `## Required Reading` block.**
 
 ---
 
@@ -133,7 +133,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
-> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [CONSTITUTION.md §6 — Cross-Platform Deployment Rule](docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
+> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See workspace standards(docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
 
 > **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via bash/powershell/run_command are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. All commits MUST go through the approved `/sync` pipeline or `dev-sync.ts`. **`--no-verify` is also forbidden**.
 
@@ -146,7 +146,7 @@ Config file: `.mcp.json` (project root) - auto-loaded by both the CLI and the De
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md — English only
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md — English only
 - All documentation in docs/, agents/, skills/ — English only
 - Git commit messages, PR titles, PR descriptions — English only
 - Branch names — English only
@@ -179,7 +179,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See workspace standards(docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 
@@ -196,7 +196,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
    - scripts/*.ts modifications → Requires SCRIPTS.md update
    - docs/adr/*.md modifications → Requires ADR index update
 5. **Root Configuration Changes** (NEW):
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
+   - CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards
    - README.md, CHANGELOG.md
 
 **Boilerplate Format**:
@@ -352,7 +352,7 @@ See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-deni
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
-> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See workspace standards(workspace standards#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 > **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
 
@@ -446,7 +446,7 @@ When modifying files, apply the following rules **before** running `/sync` or co
 | `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — workspace standards §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
 | `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json § platform_settings` for tier classification |
 | `.gemini/settings.json` | 1. Apply **shared** tier changes to `.claude/settings.json`  2. **gemini_only** tier changes do NOT require `.claude/settings.json` update  3. Propagate to all 4 variant `templates/<variant>/.gemini/settings.json` |
 | `.claude/commands/*.md` | 1. Add identical file to `templates/common/.claude/commands/`  2. If not `gemini-parity: skip`, also add to `.gemini/commands/` and `templates/common/.gemini/commands/` |
@@ -489,9 +489,9 @@ If a custom slash command or background script returns a non-zero exit code:
 <!-- COMMON-CLAUDE:START -->
 ## Git & PR Additions (Claude Code)
 
-All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Claude Code-specific additions:
+All shared Git/PR rules are in workspace standards(workspace standards#3-github-pr-workflow). Claude Code-specific additions:
 
-- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by workspace standards(workspace standards#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->

@@ -13,7 +13,7 @@
  * Note: all external commands are run via execFileSync (no shell) to avoid
  * command-injection; the variant name is additionally regex-validated.
  *
- * @version 1.4.0
+ * @version 1.4.1
  */
 
 import * as fs from "fs";
@@ -519,6 +519,27 @@ function createDomainDocs(projectDir: string, domain: string | null): void {
 > Register each agent in \`AGENTS.md\` and run \`bun run agent:verify\`.
 `;
   writeFile(path.join(projectDir, "agents", "README.md"), agentsReadme);
+
+  // pm.md additive skeleton
+  const pmMd = `---
+owner: "architect"
+status: "active"
+---
+# Project Manager (PM)
+
+> **⚠️ Additive Override Variant**: This file overrides specific sections of the workspace PM.
+> Do NOT duplicate the entire workspace PM file. Only add variant-specific changes within the sections below.
+
+<!-- VARIANT-SECTION: governance-workflow -->
+<!-- END VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: agent-roster -->
+<!-- END VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: dispatch-protocol -->
+<!-- END VARIANT-SECTION -->
+`;
+  writeFile(path.join(projectDir, "agents", "pm.md"), pmMd);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

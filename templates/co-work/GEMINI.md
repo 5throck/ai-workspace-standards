@@ -1,6 +1,6 @@
 # GEMINI.md
 
-> **Shared workspace setup, session start checklist, project structure, and design standards live in [`CONSTITUTION.md`](CONSTITUTION.md) - read it first and the files listed in its `## Required Reading` block.**
+> **Shared workspace setup, session start checklist, project structure, and design standards live in [`workspace standards`](workspace standards) - read it first and the files listed in its `## Required Reading` block.**
 
 ---
 
@@ -99,7 +99,7 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
 ### 3. Subagent Instantiation & Async Orchestration
 For parallel execution, quality reviews, or sandboxed research tasks, utilize the custom subagent orchestrator.
 
-> **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See workspace standards(workspace standards#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 
 #### Define Subagent (`define_subagent`)
@@ -156,7 +156,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 
 All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
 
-- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md, CHANGELOG.md — English only
+- README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md — English only
 - All documentation in docs/, agents/, skills/ — English only
 - Git commit messages, PR titles, PR descriptions — English only
 - Branch names — English only
@@ -165,7 +165,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 
 ### 5. Agent Dispatch Rules
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See workspace standards(docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 
@@ -182,7 +182,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
    - scripts/*.ts modifications → Requires SCRIPTS.md update
    - docs/adr/*.md modifications → Requires ADR index update
 5. **Root Configuration Changes** (NEW):
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
+   - CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards
    - README.md, CHANGELOG.md
 
 **Boilerplate Format**:
@@ -395,7 +395,7 @@ When modifying files, apply the following rules **before** running `/sync` or co
 | `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
 | `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
 | `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
+| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — workspace standards §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
 | `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json § platform_settings` for tier classification |
 | `.gemini/settings.json` | 1. Apply **shared** tier changes to `.claude/settings.json`  2. **gemini_only** tier changes do NOT require `.claude/settings.json` update  3. Propagate to all 4 variant `templates/<variant>/.gemini/settings.json` |
 | `.claude/commands/*.md` | 1. Add identical file to `templates/common/.claude/commands/`  2. If not `gemini-parity: skip`, also add to `.gemini/commands/` and `templates/common/.gemini/commands/` |
@@ -417,11 +417,11 @@ bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md v
 <!-- COMMON-GEMINI:START -->
 ## Git & PR Additions (Gemini)
 
-All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
+All shared Git/PR rules are in workspace standards(workspace standards#3-github-pr-workflow). Gemini-specific additions:
 
 - **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `dev-sync` or audit scripts (`bun scripts/audit.ts` or `scripts/audit.ps1`) after local edits, and run commits at task boundaries.
 - **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via `run_command` are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. If you see `[FAIL] Direct git commits are restricted`, run `/sync \"type: description\"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
-- **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by workspace standards(workspace standards#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. `.ps1` counterparts exist for `scripts/` Tier 1 scripts but not all hooks.
 <!-- COMMON-GEMINI:END -->
 
