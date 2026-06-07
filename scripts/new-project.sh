@@ -230,6 +230,30 @@ for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   fi
 done
 
+# Exclude L1-only template directories that must NOT be copied into new projects.
+L1_ONLY_DIRS=("docs/_templates" "docs/_examples" "docs/adr")
+for dir in "${L1_ONLY_DIRS[@]}"; do
+  if [ -d "$PROJECT_DIR/$dir" ]; then
+    rm -rf "$PROJECT_DIR/$dir"
+    echo "  🗑️  Excluded L1-only directory: $dir"
+  fi
+done
+
+# Remove memory/MEMORY.md if it exists (new projects should start with empty memory folder)
+MEMORY_INDEX="$PROJECT_DIR/memory/MEMORY.md"
+if [ -f "$MEMORY_INDEX" ]; then
+  rm -f "$MEMORY_INDEX"
+  echo "  🗑️  Removed memory/MEMORY.md (new projects start with empty memory folder)"
+fi
+
+# Ensure docs/_common/ files are copied (already copied by cp -r, just verify)
+COMMON_DOCS_DIR="$PROJECT_DIR/docs/_common"
+if [ -d "$COMMON_DOCS_DIR" ]; then
+  echo "  ✅ docs/_common/ files present in new project"
+else
+  echo "  ⚠️  docs/_common/ not found - docs files may be missing"
+fi
+
 # Make all copied files writable so that subsequent scripts and edits can write to them
 # (preventing EACCES issues for files like scripts/README.md which are read-only in template storage)
 chmod -R u+w "$PROJECT_DIR" 2>/dev/null || true
@@ -315,9 +339,6 @@ fi
 
 # ── 2.7. Remove any accidentally copied .cmd files ───────────────────────────  # TEST: Test 17
 find "$PROJECT_DIR" -name "*.cmd" -delete
-
-# ── 3. Remove docs/_examples (reference-only - not part of a real project) ──  # TEST: Test 14
-rm -rf "$PROJECT_DIR/docs/_examples"
 
 # ── 3.5. Enforce .sh / .ps1 script pairs ──────────────────────────────────────  # TEST: Test 18
 SCRIPTS_DIR_PROJ="$PROJECT_DIR/scripts"
@@ -447,7 +468,7 @@ fi
 # ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────  # TEST: Test 15
 find "$PROJECT_DIR" -name ".gitkeep" -delete
 
-# ── 5. Substitute placeholders in all text files ────────────────────────────── # TEST: Test 3, Test 2
+# ── 5. Substitute placeholders in all text files ──────────────────────────────  # TEST: Test 3, Test 2
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" ]; then
   bun "$WORKSPACE_ROOT/scripts/helpers/substitute-placeholders.ts" "$PROJECT_DIR" "$PROJECT_NAME" "A new project" ""
 else
@@ -622,7 +643,7 @@ else
 fi
 
 
-# ── 9. Environment setup (env file, deps, initial commit) ──────────────────── # TEST: none
+# ── 9. Environment setup (env file, deps, initial commit) ────────────────────  # TEST: none
 echo ""
 echo "Running environment setup…"
 bash "$PROJECT_DIR/scripts/setup.sh" || {

@@ -150,7 +150,6 @@ All specialist agents below are dispatched ONLY through PM:
 | **code-writer** | 4 | "Implementing approved plan", "Writing source files", "Code changes" |
 | **test-runner** | 4 | "Running tests", "Verifying acceptance criteria", "QA gate" |
 | **security-monitor** | 5 | "Security review", "Secret detection", "Vulnerability scan" |
-| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "N-1 step after any agent/skill/script/variant change" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -237,7 +236,6 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
-| Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | N-1 finalization step | Governance docs only |
 | Architect | `agents/architect.md` | High | Design phase | No |
 | Designer | `agents/designer.md` | Medium | Design phase | UI/UX specs only |
 | Code Writer | `agents/code-writer.md` | Low | Serial | Source files per approved plan |
