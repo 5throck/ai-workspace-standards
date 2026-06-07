@@ -101,7 +101,8 @@
       ".mcp.json",
       ".sync_context.tmp",
       "propagation-map.json",
-      "fix.mjs"
+      "fix.mjs",
+      ".DS_Store"
     ],
     "dirs": [
       ".git",

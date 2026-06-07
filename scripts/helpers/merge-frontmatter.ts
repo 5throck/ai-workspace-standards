@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.1.2
+ * @version 1.2.0
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -109,6 +109,80 @@ function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter
 }
 
 /**
+ * Remove markdown sections listed in `remove_sections` from a content string.
+ *
+ * A "section" starts at its heading line (e.g. `## Foo`) and ends just before
+ * the next heading of equal or higher level (fewer or equal `#` signs), or at
+ * the end of the content.
+ *
+ * @param content - The markdown body text
+ * @param sectionsToRemove - Array of heading strings (e.g. ["## Governance Workflow"])
+ * @returns The content with specified sections removed
+ */
+function removeSections(content: string, sectionsToRemove: string[]): string {
+  if (!sectionsToRemove || sectionsToRemove.length === 0) return content;
+
+  const lines = content.split('\n');
+  const headingRegex = /^(#{1,6})\s+(.+)$/;
+
+  // Normalize removal specs: "## Foo Bar" → ["##", "Foo Bar"]
+  const toRemove: Array<{ hashes: string; prefix: string }> = sectionsToRemove.map(s => {
+    const trimmed = s.trim().replace(/\s+/g, ' ');
+    const spaceIdx = trimmed.indexOf(' ');
+    return {
+      hashes: spaceIdx >= 0 ? trimmed.slice(0, spaceIdx) : trimmed,
+      prefix: spaceIdx >= 0 ? trimmed.slice(spaceIdx + 1).toLowerCase() : ''
+    };
+  });
+
+  /**
+   * Returns true if `heading` (e.g. "## Updated Role (Phase 0/1-2/5/6 Only)")
+   * starts with any removal spec (e.g. "## Updated Role").
+   * Matching is case-insensitive prefix on the title part after the `#` markers.
+   */
+  function shouldRemove(hashes: string, title: string): boolean {
+    const titleLower = title.trim().replace(/\s+/g, ' ').toLowerCase();
+    return toRemove.some(r =>
+      r.hashes === hashes &&
+      (titleLower === r.prefix || titleLower.startsWith(r.prefix + ' ') || titleLower.startsWith(r.prefix + '('))
+    );
+  }
+
+  const result: string[] = [];
+  let skipping = false;
+  let skipLevel = 0;
+
+  for (const line of lines) {
+    const match = line.match(headingRegex);
+    if (match) {
+      const level = match[1].length;
+      const hashes = match[1];
+      const title = match[2];
+
+      if (shouldRemove(hashes, title)) {
+        // Start skipping this section
+        skipping = true;
+        skipLevel = level;
+        continue;
+      }
+
+      if (skipping && level <= skipLevel) {
+        // A same-or-higher-level heading ends the skipped section
+        skipping = false;
+        skipLevel = 0;
+      }
+    }
+
+    if (!skipping) {
+      result.push(line);
+    }
+  }
+
+  // Collapse multiple consecutive blank lines left behind by removal
+  return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
  * Process a single file with `extends` directive
  * @param filePath - Path to the variant file
  * @param explicitSkeletonPath - Optional absolute path to skeleton (resolves extends field before copy)
@@ -167,7 +241,19 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
 
     // Use variant content if it is not empty, otherwise use the resolved skeleton content
     const useCurrentContent = parsed.content.trim().length > 0;
-    const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+    let finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+
+    // Apply remove_sections from the merged frontmatter to the body content
+    const sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
+    if (sectionsToRemove.length > 0) {
+      finalContent = removeSections(finalContent, sectionsToRemove);
+      if (finalContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
+        console.log(`✂️  Removed ${sectionsToRemove.length} section(s) from content: ${sectionsToRemove.join(', ')}`);
+      }
+    }
+
+    // Do not include remove_sections / extends directives in final output frontmatter
+    delete (mergedFrontmatter as any).remove_sections;
 
     const result = `---
 ${dump(mergedFrontmatter).trim()}
