@@ -1,5 +1,6 @@
 ---
 name: code-writer
+role: Approved plan implementation with surgical, minimal code changes
 status: active
 tier:
   claude: low

@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: End-to-end service experience and customer journey designer
 color: teal
 description: >
   Service designer - designs end-to-end service experiences, customer journeys, and

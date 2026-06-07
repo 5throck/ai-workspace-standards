@@ -1,5 +1,6 @@
 ---
 name: sme
+role: Functional expertise and solution design specialist
 status: active
 formal_name: Subject Matter Expert & Functional Specialist
 tier:

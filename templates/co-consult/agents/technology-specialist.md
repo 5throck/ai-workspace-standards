@@ -1,5 +1,6 @@
 ---
 name: technology-specialist
+role: Collaboration platforms and digital transformation support specialist
 status: active
 formal_name: Technology Specialist & Collaboration Platform Lead
 tier:

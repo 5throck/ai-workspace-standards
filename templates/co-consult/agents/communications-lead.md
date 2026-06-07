@@ -1,5 +1,6 @@
 ---
 name: communications-lead
+role: Client-facing communications and strategic narrative producer
 status: active
 formal_name: Communications Lead & Client Storyteller
 tier:

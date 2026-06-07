@@ -1,5 +1,6 @@
 ---
 name: designer
+role: UI/UX specs, wireframes, and component definition producer
 status: active
 tier:
   claude: medium

@@ -1,5 +1,6 @@
 ---
 name: stack-setup
+role: Unknown stack identification and secure setup procedure specialist
 status: active
 tier:
   claude: low

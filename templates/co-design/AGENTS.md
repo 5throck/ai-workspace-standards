@@ -11,6 +11,36 @@
 
 ---
 
+## Multi-Agent Phase Definitions
+
+**co-design follows the standard 7-phase workflow** defined in [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding -->.
+
+**Phase Summary:**
+| Phase | Name | PM Facilitation | Specialist Agents |
+|-------|------|-----------------|-------------------|
+| 0 | Project Initiation | Orchestrator | — (PM only) |
+| 1 | Research & Strategy | Observer | ux-researcher, storyteller |
+| 2 | Design Review & Approval | Gate Keeper | design-lead, storyteller |
+| 3 | Design Execution | Coordinator | design-lead, service-designer, visual-designer, typography-expert |
+| 4 | Prototyping | Coordinator | prototype-engineer |
+| 5 | QA & Finalization | Owner | — (PM only) |
+| 6 | PR & Handoff | Owner | — (PM only) |
+
+**PM Facilitation Guidance:**
+See [`phase-definitions.md`](docs/phase-definitions.md) <!-- path resolves post-scaffolding --> for detailed PM tasks in each phase:
+- Opening the phase (objective, specialist nomination, expectations)
+- Progress monitoring (intervene only if standards not met)
+- Synthesis of outputs (key findings, decisions)
+- Provisional decision with justification
+- Follow-up assignment
+
+**Phase-Specific Notes for co-design:**
+- **Phase 1-2 (Planning)**: Design Lead and Design Storyteller contribute to design direction and creative strategy
+- **Phase 3 (Design Handoff)**: UX Researcher provides user insights, Design Lead owns design system architecture, Visual Designer produces visual designs and component specs, Typography Expert specializes in type systems
+- **Phase 4 (Execution)**: Prototype Engineer builds interactive prototypes and creates design handoff artifacts
+
+---
+
 ## Agent Roster
 
 ### 🛠️ Orchestration / Audit
@@ -18,28 +48,19 @@
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 5); reduced bottleneck role. **PM does NOT execute code or documentation directly — all specialist work dispatched through PM. See `agents/pm.md` for ⚠️ CRITICAL direct execution constraints.** |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
 | Lifecycle Manager | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan |
 
-### 📐 Design
+### 🎨 Design Specialists
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
-
-### ⚙️ Execution
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
-| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
-
-### 🛡️ Security
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
+| Design Lead | [`agents/design-lead.md`](agents/design-lead.md) | High | Design direction, design system architecture, and creative strategy owner |
+| UX Researcher | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | User research, needs analysis, and UX insights specialist |
+| Visual Designer | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Visual designs, design tokens, and component specifications producer |
+| Typography Expert | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Font selection, type systems, and visual hierarchy specialist |
+| Service Designer | [`agents/service-designer.md`](agents/service-designer.md) | Medium | End-to-end service experience and customer journey designer |
+| Storyteller | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Philosophical foundation, meaning, and narrative coherence for design systems |
+| Prototype Engineer | [`agents/prototype-engineer.md`](agents/prototype-engineer.md) | Medium | Interactive prototypes and design handoff artifacts builder |
 
 ---
 
@@ -50,14 +71,14 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 ### PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (design-lead, ux-researcher, visual-designer, typography-expert, service-designer, storyteller, prototype-engineer). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
 | Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
+| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (design-lead, ux-researcher, visual-designer, typography-expert, service-designer, storyteller, prototype-engineer) |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
@@ -76,13 +97,13 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 **What PM Does NOT Do**:
 - Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
 - Implement code or scripts
-- Perform documentation updates (delegate to docs-writer)
-- Perform design work (delegate to architect)
+- Perform documentation updates (delegate to design-lead or appropriate specialist)
+- Perform design work (delegate to design-lead)
 
 **Task Owner vs Executor Distinction**:
 - **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
 - **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
+- PM creates tasks (owner: pm), dispatches specialists (executor: design-lead/ux-researcher/visual-designer/prototype-engineer/etc.), and updates task status upon completion
 
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
@@ -115,13 +136,14 @@ All specialist agents below are dispatched ONLY through PM:
 
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|-------------------|
-| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
-| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
-| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
-| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
-| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
-| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync", "N-1 step after any agent/skill/script/variant change" (Workspace root only) |
-| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+| **design-lead** | 2-3 | "Design direction needed", "Design system architecture", "Creative strategy", "Visual language" |
+| **ux-researcher** | 1 | "User research", "Usability testing", "Research synthesis", "User needs analysis" |
+| **visual-designer** | 3 | "Visual designs", "Design tokens", "Component specs", "UI execution" |
+| **typography-expert** | 3 | "Font selection", "Type system", "Visual hierarchy", "Typography" |
+| **service-designer** | 3 | "Service experience", "Customer journey", "End-to-end service design" |
+| **storyteller** | 1-2 | "Brand narrative", "Design philosophy", "Meaning and coherence", "Storytelling" |
+| **prototype-engineer** | 4 | "Interactive prototypes", "Design handoff artifacts", "Prototype implementation" |
+| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "N-1 step after any agent/skill/script/variant change" |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -208,13 +230,14 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
-| Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
 | Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | N-1 finalization step | Governance docs only |
-| Template Architect | `agents/architect.md` | High | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Tier 1 shell scripts (.sh/.ps1) and Tier 2 automation (.ts / package.json) |
-| Documentation Writer | `agents/docs-writer.md` | **Medium** | After design | .md files only |
-| Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
-| Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
+| Design Lead | `agents/design-lead.md` | High | Design phase (parallel with storyteller) | Design system docs only |
+| UX Researcher | `agents/ux-researcher.md` | Medium | Research phase (parallel) | Research docs only |
+| Visual Designer | `agents/visual-designer.md` | Medium | Serial (after design-lead) | Visual specs and component docs |
+| Typography Expert | `agents/typography-expert.md` | Medium | Parallel with visual-designer | Typography docs only |
+| Service Designer | `agents/service-designer.md` | Medium | Parallel with visual-designer | Service design docs only |
+| Storyteller | `agents/storyteller.md` | Medium | Research phase (parallel) | Narrative docs only |
+| Prototype Engineer | `agents/prototype-engineer.md` | Medium | Serial (after design approval) | Prototype files and handoff artifacts |
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
 
@@ -241,8 +264,8 @@ Phase 3 - Design Handoff (variant-specific)
   Agents can dispatch each other directly for routine handoffs
 
 Phase 4 - Execution (specialist-autonomous)
-  Automation Engineer implements per approved plan
-  Documentation Writer updates docs as needed
+  Prototype Engineer builds interactive prototypes per approved plan
+  Visual Designer and Typography Expert produce final design assets
   Agents can dispatch each other directly for routine handoffs
 
 Phase 5 - Lifecycle Finalization (PM-owned)
@@ -265,12 +288,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
-| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
-| Write or modify Tier 1 scripts (.sh, .ps1) or Tier 2 scripts (.ts, package.json) | `automation-engineer` | `architect` |
-| Update documentation files | `docs-writer` | `architect` |
-| Create new project from template | `scaffolding-expert` | `automation-engineer` |
-| Security review, Git hooks configuration | `security-expert` | `architect` |
-| Cross-validate documentation consistency | `auditor` | `docs-writer` |
+| Define design direction and creative strategy | `design-lead` | `ux-researcher` |
+| Conduct user research and usability testing | `ux-researcher` | `design-lead` |
+| Produce visual designs and component specs | `visual-designer` | `design-lead` |
+| Design type systems and font selection | `typography-expert` | `visual-designer` |
+| Design end-to-end service experiences | `service-designer` | `design-lead` |
+| Write design narrative and brand philosophy | `storyteller` | `design-lead` |
+| Build interactive prototypes and handoff artifacts | `prototype-engineer` | `visual-designer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
 ---

@@ -1,5 +1,6 @@
 ---
 name: delivery-manager
+role: Project delivery and operations coordination specialist
 status: active
 formal_name: Delivery Manager & Operations Lead
 tier:

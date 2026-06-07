@@ -1,5 +1,6 @@
 ---
 name: storyteller
+role: Organizational culture, change narratives, and historical context specialist
 status: active
 formal_name: Organizational Storyteller & Culture Steward
 tier:

@@ -1,5 +1,6 @@
 ---
 name: ms365-expert
+role: Microsoft 365 platform expertise for productivity and collaboration tools
 status: active
 formal_name: Microsoft 365 Collaboration Expert
 tier:

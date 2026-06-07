@@ -8,6 +8,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+role: Philosophical foundation, meaning, and narrative coherence for design systems
 color: purple
 description: >
   Design storyteller - provides philosophical foundation, meaning, and narrative coherence 

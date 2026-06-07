@@ -1,5 +1,6 @@
 ---
 name: test-runner
+role: Test execution and acceptance criteria verification specialist
 status: active
 tier:
   claude: medium

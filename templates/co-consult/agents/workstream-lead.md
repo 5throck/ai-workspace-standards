@@ -1,5 +1,6 @@
 ---
 name: workstream-lead
+role: Workstream management and delivery coordination lead
 status: active
 formal_name: Workstream Lead & Project Manager
 tier:
