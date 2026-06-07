@@ -7,7 +7,7 @@
  * Validates pm.md extends chains for correctness and compliance.
  * Implements validation rules from ADR-0033.
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @author automation-engineer
  *
  * Usage:
@@ -36,6 +36,7 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 interface ValidationResult {
   file: string;
@@ -77,35 +78,26 @@ const MAX_EXTENDS_DEPTH = 3;
 
 /**
  * Parse YAML frontmatter from a markdown file
+ * Now uses the shared pm-md-parser helper
  */
 function parseFrontmatter(filePath: string): ExtendsFrontmatter | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const frontmatterMatch = content.match(/^---\n([\s\S]+?)\n---/);
+    const parsed = parsePmMd(filePath);
 
-    if (!frontmatterMatch) {
+    if (!parsed.isValid) {
       return null;
     }
 
-    const yamlContent = frontmatterMatch[1];
     const result: ExtendsFrontmatter = {};
 
-    // Simple YAML parser for our specific use case
-    const lines = yamlContent.split('\n');
-    for (const line of lines) {
-      const extendsMatch = line.match(/^extends:\s*\[(.+)\]$/);
-      if (extendsMatch) {
-        result.extends = extendsMatch[1]
-          .split(',')
-          .map(s => s.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, ''))
-          .filter(Boolean);
-      }
+    // Extract extends
+    if (parsed.extendsPath) {
+      result.extends = [parsed.extendsPath];
+    }
 
-      const overrideMatch = line.match(/^extends_overrides:\s*\{(.+)\}$/);
-      if (overrideMatch) {
-        result.extends_overrides = {};
-        // Simple key-value parsing (extend as needed for complex cases)
-      }
+    // Extract variant_overrides as extends_overrides for compatibility
+    if (Object.keys(parsed.variantOverrides).length > 0) {
+      result.extends_overrides = parsed.variantOverrides;
     }
 
     return result;

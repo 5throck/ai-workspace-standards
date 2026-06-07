@@ -1,6 +1,6 @@
 # ADR-0033: L0→L1→L2 Hierarchy and Extends Implementation
 
-**Status**: Proposed  
+**Status**: Implemented  
 **Date**: 2026-06-07  
 **Author**: architect  
 **Related ADRs**: 0032 (Auto-Mode Deprecation), 0031 (L1-L2 Fork Model)
@@ -54,20 +54,35 @@ Establish a clear L0→L1→L2 hierarchy with explicit extends mechanism:
 ```
 L0 (Workspace Root) - Authoritative Source
   └── agents/pm.md (single source of truth)
-      └── Core PM definition without Auto-Mode
-      └── No platform-specific implementation details
+      └── Full PM agent definition
+      └── Contains all sections including workspace-specific content
+      └── Includes Auto-Mode, platform-specific sections
+      └── No extends directive (root of hierarchy)
 
-L1 (Common Template) - Extension Point
+L1 (Common Template) - Pure Extends Filter
   └── templates/common/agents/pm.md
-      └── Frontmatter-only extends from L0
-      └── Provides override template for L2 variants
-      └── No duplicate common content
+      └── YAML frontmatter only (empty body)
+      └── extends: ../../../agents/pm.md
+      └── remove_sections: [array of L0 sections to remove]
+      └── Acts as cleaned version of L0 for L2 inheritance
 
-L2 (Variant Templates) - Variant-Specific Overrides
+L2 (Variant Templates) - Variant-Specific Configuration
   └── templates/co-*/agents/pm.md
-      └── Extends L1 with variant-specific overrides only
-      └── No duplicate common content
-      └── Only contains variant-specific sections
+      └── YAML frontmatter for variant metadata
+      └── HTML marker sections for variant-specific content
+      └── Implicitly extends L1 (via template structure)
+      └── Inherits filtered L0 content via L1
+```
+
+**Extends Chain Flow**:
+```
+L2 co-security/agents/pm.md
+  ↓ (implicit extends via template structure)
+L1 common/agents/pm.md (YAML: remove_sections)
+  ↓ (explicit extends: ../../../agents/pm.md)
+L0 agents/pm.md (full content)
+  ↓ (after remove_sections filtering)
+L2 inherits cleaned L0 + adds variant sections
 ```
 
 ### Extends Implementation Approach
@@ -85,9 +100,162 @@ L2 (Variant Templates) - Variant-Specific Overrides
 
 ## Implementation Details
 
-### 4.1 Frontmatter Structure
+### 4.1 New L0→L1→L2 Extends Pattern (Implemented 2026-06-07)
 
-**L2 (Variant) Example**:
+**Architecture Evolution**: The original design specified a complex override system, but the actual implementation uses a simpler, more maintainable approach:
+
+1. **L1 Pure Extends**: L1 is now a pure template file with YAML frontmatter only (empty body)
+2. **L2 YAML Frontmatter**: L2 variants use YAML frontmatter for variant-specific overrides
+3. **remove_sections Mechanism**: L1 strips L0-specific sections that shouldn't be inherited
+4. **variant_overrides Structure**: L2 defines variant-specific configuration in structured YAML
+
+#### L1 (Common Template) Structure
+
+**File**: `templates/common/agents/pm.md`
+
+**Current Implementation**:
+```yaml
+---
+extends: ../../../agents/pm.md
+formal_name: Project Manager (PM) Agent
+remove_sections:
+  - "## Governance Workflow"
+  - "## Updated Role"
+  - "## Agent Roster"
+  - "## Dispatch Protocol"
+  - "### Phase Determination (Deliverable-Type Gate)"
+---
+```
+
+**Key Characteristics**:
+- **Pure Extends File**: Contains only YAML frontmatter, empty body
+- **remove_sections**: Lists L0 sections to remove before inheritance by L2
+- **Template Function**: Acts as a cleaned version of L0 for L2 variants to extend
+
+**Rationale for remove_sections**:
+- L0 contains workspace-specific governance sections not relevant to templates
+- L1 removes these sections so L2 variants inherit a clean baseline
+- Variant-specific sections are defined by L2 YAML frontmatter or inline content
+
+#### L2 (Variant Template) Structure
+
+**File**: `templates/co-security/agents/pm.md`
+
+**Current Implementation**:
+```yaml
+---
+name: pm
+status: active
+formal_name: Project Manager (PM) Agent
+tier:
+  claude: high        # claude-opus-4-7
+  antigravity: high   # gemini-3.1-pro (thinking_level="medium")
+  gemini-cli: high    # gemini-3.1-pro
+model: inherit
+color: yellow
+description: >
+  PM orchestrator for security engagements — owns team assembly, authorization verification,
+  threat model validation, and engagement finalization. Use when: starting any security task,
+  coordinating red team / patch agents, reviewing scope changes, or closing findings.
+examples:
+  - user: "Begin a penetration test on the web application"
+    assistant: "Running Phase 0 Team Assembly to verify authorization document, then Phase 2 Threat Model validation."
+  - user: "A critical vulnerability was discovered"
+    assistant: "Logging finding to docs/findings/FIND-NNNN.md and coordinating patch-engineer for remediation."
+---
+
+<!-- VARIANT-SECTION: governance-workflow -->
+## Governance Workflow
+[Variant-specific workflow content...]
+<!-- END-VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: agent-roster -->
+## Agent Roster
+[Variant-specific agent roster table...]
+<!-- END-VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: dispatch-protocol -->
+## Dispatch Protocol
+[Variant-specific dispatch configuration...]
+<!-- END-VARIANT-SECTION -->
+```
+
+**Key Characteristics**:
+- **YAML Frontmatter**: Variant-specific metadata and configuration
+- **Variant Sections**: HTML marker-based sections for variant-specific content
+- **Mixed Model**: Some config in YAML, some content in marker sections
+- **Backward Compatible**: Maintains existing marker-based approach
+
+#### Extends Chain Resolution
+
+**Resolution Order**: L2 → L1 → L0
+
+```
+L2 (co-security/agents/pm.md)
+  ↓ (implicit extends L1 via template structure)
+L1 (common/agents/pm.md)
+  ↓ (explicit extends: ../../../agents/pm.md)
+L0 (agents/pm.md)
+```
+
+**Runtime Resolution Process**:
+1. Load L2 file content
+2. Parse L2 YAML frontmatter for variant-specific configuration
+3. Process L1 remove_sections list to filter L0 content
+4. Merge L2 content on top of cleaned L1 content
+5. Handle nested section removal (e.g., "### Phase Determination" within "## Governance")
+
+**Nested Section Removal**:
+- `remove_sections` supports nested heading removal
+- Example: `"### Phase Determination"` removes only that subsection
+- Allows precise filtering of L0 content
+
+#### Section Inheritance Rules
+
+**Inherited Sections** (from L0, unless in remove_sections):
+- ## Role Declaration
+- ## Agent Dispatch Rules
+- ## Mandatory Execution Plan Display
+- ## Execution Plan Table Format Guidelines
+- ## Phase Determination Checklist
+- ## PM Gateway Enforcement Summary
+- ## Specialist Agent List
+- ## Permission Denial Protocol
+- All other PM agent sections
+
+**Removed Sections** (by L1 remove_sections):
+- ## Governance Workflow (variant-specific)
+- ## Updated Role (variant-specific)
+- ## Agent Roster (variant-specific)
+- ## Dispatch Protocol (variant-specific)
+- ### Phase Determination (variant-specific, nested)
+
+**Variant-Specific Sections** (defined in L2):
+- ## Governance Workflow (custom workflow)
+- ## Agent Roster (specialist agents)
+- ## Dispatch Protocol (dispatch rules)
+
+#### YAML Schema Reference
+
+**Complete Schema**: See `docs/variant/pm-yaml-schema.md` for the full YAML frontmatter specification for L2 variants.
+
+**Schema Sections**:
+1. Root-Level Fields (`extends`, `variant`, `variant_overrides`)
+2. `variant_overrides.updated_role` - Role clarification and scope
+3. `variant_overrides.governance_workflow` - Phase configuration
+4. `variant_overrides.agent_roster` - Specialist agent configuration
+5. `variant_overrides.dispatch_protocol` - Dispatch configuration
+6. `variant_overrides.constraints.phase_determination` - Deliverable type rules
+
+**Schema Version**: 1.0.0 (2026-06-07)
+
+**Validation**: Scaffold scripts validate YAML syntax before creating L2 variants.
+
+### 4.2 Legacy Frontmatter Structure (Original Design)
+
+**Note**: The following was the original design but is NOT the current implementation. Kept for historical reference.
+
+**Original L2 Design**:
 ```yaml
 ---
 # Variant-specific frontmatter
@@ -102,7 +270,7 @@ overrides:
 ---
 ```
 
-**L1 (Common) Example**:
+**Original L1 Design**:
 ```yaml
 ---
 # Common template frontmatter
@@ -114,10 +282,15 @@ overrides:
 ---
 ```
 
-**Override Scope Definitions**:
+**Override Scope Definitions** (original design, not implemented):
 - `first_paragraph`: Only the first paragraph of a section
 - `full_section`: The entire section content
 - `custom_content`: Additional content to append (future enhancement)
+
+**Why This Was Not Implemented**:
+- Too complex for initial implementation
+- Marker-based approach was already working
+- YAML-only approach (L1) proved simpler and more maintainable
 
 ### 4.2 Circular Reference Prevention
 
@@ -236,19 +409,21 @@ function testPlatformParity(variant: string): void {
 ## Consequences
 
 ### Positive Consequences
-1. **Eliminates Duplication**: Single source of truth for all common content
-2. **Resolves Contradictions**: Clear extends pattern matches specification
-3. **Clear Inheritance**: Explicit parent-child relationships between templates
-4. **IDE Friendly**: YAML frontmatter visible in development tools
-5. **Automated Validation**: Audit script can check extends chain consistency
-6. **Security Safeguards**: Circular reference prevention and depth limits
+1. **Single Source of Truth**: L0 workspace root is authoritative, no duplication
+2. **Clear Inheritance Path**: L2→L1→L0 resolution is explicit and traceable
+3. **Template Simplicity**: L1 is a pure extends file with remove_sections only
+4. **Variant Flexibility**: L2 variants can override specific sections via YAML or markers
+5. **IDE Friendly**: YAML frontmatter visible and editable in development tools
+6. **Automated Validation**: Audit script can check extends chain consistency
+7. **Nested Section Removal**: Precise filtering of L0 content (e.g., "### Phase Determination")
+8. **Schema Documentation**: Complete YAML schema documented in `docs/variant/pm-yaml-schema.md`
 
 ### Negative Consequences
-1. **Migration Complexity**: Existing variants need migration to new pattern
-2. **Scaffold Updates**: create-l2-scaffold.ts requires extends logic
-3. **Validation Overhead**: Need for validation tools and testing
-4. **Learning Curve**: Developers need to understand extends mechanism
-5. **Debug Complexity**: Inheritance issues harder to trace than flat files
+1. **Mixed Implementation**: Current system uses both YAML frontmatter and HTML markers
+2. **L1 Simplicity vs L2 Complexity**: L1 is clean (YAML only) but L2 still uses markers
+3. **Migration Path**: Existing variants may need updates to match new pattern
+4. **Documentation Maintenance**: Two schemas to maintain (original design vs actual implementation)
+5. **Learning Curve**: Developers need to understand both remove_sections and variant_overrides
 
 ### Risk Mitigation
 1. **Phase Migration**: Gradual rollout with backward compatibility
@@ -320,48 +495,150 @@ function testPlatformParity(variant: string): void {
 
 | # | Criterion | Verification Method |
 |---|-----------|-------------------|
-| AC-01 | L0→L1→L2 hierarchy documented | docs/adr/0033.md exists |
-| AC-02 | Frontmatter extends pattern implemented | New variants use YAML frontmatter |
-| AC-03 | No Auto-Mode in workspace pm.md | grep -v "Auto-Mode" agents/pm.md |
-| AC-04 | Circular reference prevention | Scripts validate extends depth < 3 |
-| AC-05 | Platform parity verified | test-platform-parity.ts passes |
-| AC-06 | Validation tool available | npm run validate:pm-extends works |
-| AC-07 | Context.md duplication eliminated | Only templates/common/docs/context.md exists |
-| AC-08 | Audit detects inconsistencies | bun scripts/audit.ts fails on marker usage |
+| AC-01 | L0→L1→L2 hierarchy documented | docs/adr/0033-l0-l1-l2-hierarchy-and-extends.md exists |
+| AC-02 | L1 pure extends implemented | templates/common/agents/pm.md has YAML only, empty body |
+| AC-03 | L1 remove_sections mechanism | L1 YAML includes remove_sections array |
+| AC-04 | L2 YAML frontmatter implemented | templates/co-*/agents/pm.md have valid YAML frontmatter |
+| AC-05 | YAML schema documented | docs/variant/pm-yaml-schema.md exists and is complete |
+| AC-06 | Extends chain resolution documented | ADR-0033 §4.1.4 documents resolution process |
+| AC-07 | Nested section removal documented | ADR-0033 documents "### Phase Determination" removal |
+| AC-08 | L2 variant sections functional | L2 variants define variant-specific sections in markers |
+| AC-09 | Audit validates consistency | bun scripts/audit.ts validates L1/L2 structure |
+| AC-10 | Scaffold script integration | create-l2-scaffold.ts uses new pattern |
 
 ## Appendices
 
-### A. Example Implementation
+### A. Actual Implementation Examples
 
-**Before (Current)**:
-```markdown
-<!-- VARIANT-SECTION: role -->
-Variant-specific role definition
-<!-- END-VARIANT-SECTION -->
+**L0 (Workspace Root)**: `agents/pm.md`
+- Full PM agent definition with all sections
+- Contains workspace-specific governance workflows
+- Includes platform-specific sections (Auto-Mode, etc.)
 
-<!-- VARIANT-SECTION: roster -->
-# Variant Agent Roster
-- variant-specific-agent
-<!-- END-VARIANT-SECTION -->
-```
-
-**After (New Pattern)**:
+**L1 (Common Template)**: `templates/common/agents/pm.md`
 ```yaml
 ---
-extends: ../../../common/agents/pm.md
-overrides:
-  - section: "## Role"
-    scope: "first_paragraph"
+extends: ../../../agents/pm.md
+formal_name: Project Manager (PM) Agent
+remove_sections:
+  - "## Governance Workflow"
+  - "## Updated Role"
+  - "## Agent Roster"
+  - "## Dispatch Protocol"
+  - "### Phase Determination (Deliverable-Type Gate)"
 ---
-## Role
-
-Variant-specific role definition that only replaces the first paragraph.
-
-## Agent Roster
-
-- variant-specific-agent
-- inherited-agent-from-common
 ```
+*(Empty body - pure extends file)*
+
+**L2 (Variant - co-security)**: `templates/co-security/agents/pm.md`
+```yaml
+---
+name: pm
+status: active
+formal_name: Project Manager (PM) Agent
+tier:
+  claude: high
+  antigravity: high
+  gemini-cli: high
+model: inherit
+color: yellow
+description: >
+  PM orchestrator for security engagements — owns team assembly, authorization verification,
+  threat model validation, and engagement finalization.
+examples:
+  - user: "Begin a penetration test on the web application"
+    assistant: "Running Phase 0 Team Assembly to verify authorization document."
+---
+
+<!-- VARIANT-SECTION: governance-workflow -->
+## Governance Workflow
+[Variant-specific workflow content]
+<!-- END-VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: agent-roster -->
+## Agent Roster
+| Phase | Group | Agent file | Responsibility |
+|-------|-------|------------|----------------|
+| Threat Modeling | Red Team | `agents/red-team-lead.md` | Attack surface analysis |
+| Penetration Testing | Red Team | `agents/pentester.md` | Vulnerability discovery |
+<!-- END-VARIANT-SECTION -->
+
+<!-- VARIANT-SECTION: dispatch-protocol -->
+## Dispatch Protocol
+**Can Lead Phases**: [0, 2, 6]
+**Auto-Dispatch To**: red-team-lead, pentester, threat-modeler, patch-engineer, report-writer
+**Tier**: high
+**Communication Style**: sync
+<!-- END-VARIANT-SECTION -->
+```
+
+### B. Extends Chain Resolution Logic
+
+**Pseudocode**:
+```typescript
+function resolveExtendsChain(l2Path: string): string {
+  // Step 1: Load L2 file
+  const l2Content = readFile(l2Path);
+  const l2Frontmatter = parseYamlFrontmatter(l2Content);
+  
+  // Step 2: Load L1 file
+  const l1Path = "../../common/agents/pm.md"; // Relative to L2
+  const l1Content = readFile(l1Path);
+  const l1Frontmatter = parseYamlFrontmatter(l1Content);
+  
+  // Step 3: Load L0 file
+  const l0Path = l1Frontmatter.extends; // "../../../agents/pm.md"
+  const l0Content = readFile(l0Path);
+  
+  // Step 4: Apply L1 remove_sections to L0
+  const l0Sections = parseMarkdownSections(l0Content);
+  const cleanedSections = l0Sections.filter(section => 
+    !l1Frontmatter.remove_sections.includes(section.heading)
+  );
+  
+  // Step 5: Merge L2 content on top
+  const l2Sections = parseVariantSections(l2Content);
+  const finalSections = mergeSections(cleanedSections, l2Sections);
+  
+  // Step 6: Assemble final content
+  return assembleMarkdown(finalSections);
+}
+
+function parseVariantSections(content: string): Section[] {
+  // Extract content between <!-- VARIANT-SECTION:name --> markers
+  const regex = /<!-- VARIANT-SECTION:(\w+) -->([\s\S]*?)<!-- END-VARIANT-SECTION -->/g;
+  const sections = [];
+  let match;
+  
+  while ((match = regex.exec(content)) !== null) {
+    sections.push({
+      name: match[1],
+      content: match[2].trim()
+    });
+  }
+  
+  return sections;
+}
+```
+
+### C. Migration from Original Design
+
+**Original Design (Not Implemented)**:
+- Complex override system with `first_paragraph` and `full_section` scopes
+- Required deep merge algorithms
+- Too complex for initial implementation
+
+**Actual Implementation (Simplified)**:
+- L1 pure extends with remove_sections
+- L2 uses existing marker-based approach
+- YAML frontmatter for metadata only
+- Simpler, more maintainable
+
+**Migration Path** (if needed in future):
+1. Keep current L1 structure (pure extends, remove_sections)
+2. Gradually convert L2 markers to YAML variant_overrides
+3. Maintain backward compatibility during transition
+4. Use scaffold scripts to enforce new pattern for new variants
 
 ### B. Migration Script Example
 
@@ -417,5 +694,25 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 }
 ```
 
+## Related Documentation
+
+### Primary References
+- **[L2 PM YAML Schema](../variant/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
+- **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles
+- **[ADR-0032: Auto-Mode Deprecation](0032-deprecate-auto-mode.md)**: Auto-Mode removal from L0
+
+### Supporting Documentation
+- **[Variant Creation Workflow](../variant-creation-workflow.md)**: End-to-end variant creation process
+- **[PM Agent Role](../../lifecycle/agents/pm.md)**: Full PM agent specification (L0)
+- **[Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)**: Governance framework
+- **[Agent Lifecycle](../../constitution/05.6-agent-lifecycle.md)**: Agent management lifecycle
+
+### Schema Documentation
+- **[docs/variant/pm-yaml-schema.md](../variant/pm-yaml-schema.md)**: Complete YAML schema with:
+  - Root-level fields (`extends`, `variant`, `variant_overrides`)
+  - `variant_overrides` structure (5 override types)
+  - Validation rules and examples
+  - Complete example files for each variant
+
 ---
-*This ADR establishes the foundation for template inheritance and resolves the structural ambiguities identified in the June 7, 2026 meetings. The L0→L1→L2 hierarchy with frontmatter-based extends provides clear, maintainable, and secure template relationships.*
+*This ADR documents the actual implemented L0→L1→L2 hierarchy with pure extends pattern. The L1 template acts as a filter using `remove_sections`, while L2 variants define variant-specific configuration via YAML frontmatter and HTML marker sections. This approach provides a clean, maintainable inheritance chain with clear single source of truth at L0.*

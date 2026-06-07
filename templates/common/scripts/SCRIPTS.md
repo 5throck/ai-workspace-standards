@@ -51,12 +51,12 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.5.9 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.6.0 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.4.1 | active | —| —| L0 | —|
+| `create-l2-scaffold.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -78,6 +78,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `helpers/security-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/pm-md-parser.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -94,7 +96,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `install-bun.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `install-bun.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -138,7 +140,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validate-pm-extends.ts` | L0 | 0.1.0 | active | —| —| L0+L1 | —|
+| `validate-pm-extends.ts` | L0 | 0.2.0 | active | —| —| L0+L1 | —|
 
 ---
 

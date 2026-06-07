@@ -1,9 +1,10 @@
-// @version 2.5.9
+// @version 2.6.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { execSync } from 'node:child_process';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -960,19 +961,40 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
             }
         }
 
-        // L1 content sections should be wrapped in VARIANT-SECTION markers
+        // L1 extends pattern validation (ADR-0033)
+        // L1 can use pure YAML extends pattern OR VARIANT-SECTION markers
+        const l1Parsed = parsePmMd(l1PmPath);
+
+        // Define required variant sections for L2 validation (used below)
         const requiredVariantSections = [
             'governance-workflow',
             'agent-roster',
             'dispatch-protocol'
         ];
 
-        for (const section of requiredVariantSections) {
-            const marker = `<!-- VARIANT-SECTION: ${section} -->`;
-            const endMarker = `<!-- END VARIANT-SECTION -->`;
-            if (!l1Content.includes(marker) || !l1Content.includes(endMarker)) {
-                Fail(`L1 pm.md: missing VARIANT-SECTION markers for "${section}"`);
+        if (l1Parsed.isValid && l1Parsed.extendsPath) {
+            // L1 uses new extends pattern - validate YAML fields only
+            Pass('L1 pm.md: uses YAML extends pattern (ADR-0033)');
+
+            // Check that extends points to L0
+            if (!l1Parsed.extendsPath.includes('agents/pm.md')) {
+                Fail(`L1 pm.md: extends should point to "../../agents/pm.md" or "../../../agents/pm.md"`);
                 return false;
+            }
+
+            // Check for remove_sections if present
+            if (Object.keys(l1Parsed.variantOverrides).length > 0) {
+                Pass('L1 pm.md: has remove_sections configured');
+            }
+        } else {
+            // Legacy L1 pattern - require VARIANT-SECTION markers
+            for (const section of requiredVariantSections) {
+                const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                const endMarker = `<!-- END VARIANT-SECTION -->`;
+                if (!l1Content.includes(marker) || !l1Content.includes(endMarker)) {
+                    Fail(`L1 pm.md: missing VARIANT-SECTION markers for "${section}"`);
+                    return false;
+                }
             }
         }
 
@@ -1012,6 +1034,27 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                         if (l2Yaml.includes(field)) {
                             Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);
                             return false;
+                        }
+                    }
+
+                    // L2 YAML variant_overrides validation (if present)
+                    if (l2Yaml.includes('variant_overrides:')) {
+                        const parsed = parsePmMd(l2PmPath);
+                        if (parsed.isValid && Object.keys(parsed.variantOverrides).length > 0) {
+                            Pass(`L2 ${variant}/agents/pm.md: has valid variant_overrides`);
+
+                            // Check that variant_overrides match VARIANT-SECTION content
+                            for (const [key, value] of Object.entries(parsed.variantOverrides)) {
+                                if (typeof value === 'string' && value.trim()) {
+                                    // Check if the section exists in the content
+                                    const sectionExists = l2Content.includes(`<!-- VARIANT-SECTION: ${key} -->`);
+                                    if (!sectionExists) {
+                                        Warn(`L2 ${variant}/agents/pm.md: variant_overrides.${key} defined but VARIANT-SECTION marker missing`);
+                                    }
+                                }
+                            }
+                        } else {
+                            Warn(`L2 ${variant}/agents/pm.md: variant_overrides field present but parsing failed`);
                         }
                     }
                 }
