@@ -36,7 +36,7 @@ Steps:
    ```
 7. Confirm: "📝 Session logged to memory/YYYY-MM-DD.md"
 
-> **Format note**: The four section headings (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) are mandatory. All AI tools must produce logs with these exact headings for cross-tool consistency. See workspace standards §2.
+> **Format note**: The four section headings (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) are mandatory. All AI tools must produce logs with these exact headings for cross-tool consistency. See workspace standards.
 
 > **MEMORY.md structure**: MEMORY.md has three sections — Sessions, Meetings, ADRs.
 > - Sessions: auto-updated by this command and the commit-msg hook.

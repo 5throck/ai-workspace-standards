@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.4
+# @version 1.4.6
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -230,6 +230,10 @@ for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   fi
 done
 
+# Make all copied files writable so that subsequent scripts and edits can write to them
+# (preventing EACCES issues for files like scripts/README.md which are read-only in template storage)
+chmod -R u+w "$PROJECT_DIR" 2>/dev/null || true
+
 # ── 2. Overlay variant/ on top (variant-specific files override common) ────── # TEST: Test 1, Test 7
 if [ ! -d "$TEMPLATES_DIR" ]; then
   echo "❌ Variant templates directory not found: $TEMPLATES_DIR"
@@ -257,12 +261,14 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
       # Copy as-is
       mkdir -p "$(dirname "$dest_file")"
       cp "$src_file" "$dest_file"
+      chmod u+w "$dest_file" 2>/dev/null || true
     else
       # Create destination directory
       mkdir -p "$(dirname "$dest_file")"
 
       # Copy file to destination
       cp "$src_file" "$dest_file"
+      chmod u+w "$dest_file" 2>/dev/null || true
 
       # Merge with explicit skeleton path
       bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" 2>/dev/null || {
@@ -273,6 +279,7 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
     # Normal copy
     mkdir -p "$(dirname "$dest_file")"
     cp "$src_file" "$dest_file"
+    chmod u+w "$dest_file" 2>/dev/null || true
   fi
 done
 
@@ -282,11 +289,9 @@ find "$TEMPLATES_DIR" -type f ! -name "*.md" | while read -r src_file; do
   dest_file="$PROJECT_DIR/$rel_path"
   mkdir -p "$(dirname "$dest_file")"
   cp "$src_file" "$dest_file"
+  chmod u+w "$dest_file" 2>/dev/null || true
 done
 
-# Make all copied files writable so that subsequent scripts and edits can write to them
-# (preventing EACCES issues for files like scripts/README.md which are read-only in template storage)
-chmod -R u+w "$PROJECT_DIR" 2>/dev/null || true
 
 # ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
 echo "📝 Verifying extends resolution..."

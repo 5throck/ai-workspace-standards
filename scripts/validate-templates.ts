@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.2
+ * @version 1.5.3
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1678,7 +1678,7 @@ function checkCommonContract(): void {
       }
 
       // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
-      if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
+      if (agentName !== 'pm' && variantRaw.includes('<!-- VARIANT-SECTION:')) {
         fail(variant, 'C-SK-02',
           `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
           `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # upgrade-project.sh - Upgrade an existing project to the current template version
-# @version 1.1.0
+# @version 1.1.1
 # Usage: bash scripts/upgrade-project.sh <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 # Variants are auto-detected from the templates/ directory (e.g. co-develop, co-design, co-consult, co-security).
 
@@ -122,7 +122,7 @@ if [ ! -d "$COMMON_DIR" ]; then
   exit 1
 fi
 
-# ── C-05: scripts-snapshot.json version comparison ────────────────────────────
+# ?? C-05: scripts-snapshot.json version comparison ????????????????????????????
 SCRIPTS_SNAPSHOT="$PROJECT_DIR/scripts-snapshot.json"
 SCRIPTS_MD="$WORKSPACE_ROOT/scripts/SCRIPTS.md"
 
@@ -166,23 +166,23 @@ for name, l2_info in l2_scripts.items():
         deprecated_in_l1.append((name, l1_info['version']))
 
 if not outdated and not deprecated_in_l1:
-    print("  ✅ All scripts up-to-date with L1 SCRIPTS.md")
+    print("  ??All scripts up-to-date with L1 SCRIPTS.md")
 else:
     if outdated:
-        print(f"  ⚠️  {len(outdated)} script(s) have newer versions available:")
+        print(f"  ?좑툘  {len(outdated)} script(s) have newer versions available:")
         for name, old, new in outdated:
-            print(f"     {name:<40} {old} → {new}")
+            print(f"     {name:<40} {old} ??{new}")
     if deprecated_in_l1:
-        print(f"  ❌ {len(deprecated_in_l1)} script(s) are deprecated in L1 SCRIPTS.md:")
+        print(f"  ??{len(deprecated_in_l1)} script(s) are deprecated in L1 SCRIPTS.md:")
         for name, ver in deprecated_in_l1:
-            print(f"     {name:<40} {ver}  (deprecated — remove or replace)")
+            print(f"     {name:<40} {ver}  (deprecated ??remove or replace)")
     print("")
     print("  Run: bash scripts/upgrade-project.sh <path> to get updated scripts.")
 PYEOF
   echo ""
 elif [ -f "$SCRIPTS_SNAPSHOT" ]; then
   echo ""
-  echo "  INFO: scripts-snapshot.json found but SCRIPTS.md not accessible — skipping version comparison."
+  echo "  INFO: scripts-snapshot.json found but SCRIPTS.md not accessible ??skipping version comparison."
   echo ""
 fi
 
@@ -283,7 +283,8 @@ merge_workspace_managed() {
     echo "    INFO: Project file does not exist, will create with template content"
     if ! $DRY_RUN; then
       mkdir -p "$(dirname "$project_file")"
-      cp "$template_file" "$project_file"
+      cp "\" "\"
+      chmod u+w "\" 2>/dev/null || true
     fi
     $(dry_prefix)echo "    CREATED: $rel"
     return 0
@@ -322,7 +323,7 @@ PYEOF
     fi
     echo "    $(dry_prefix)MERGED managed section in: $rel"
   else
-    # No markers in project file — append markers+content at end
+    # No markers in project file ??append markers+content at end
     echo "    WARNING: $rel has no WORKSPACE-MANAGED markers."
     echo "             Appending managed block at end of file."
     if ! $DRY_RUN; then
@@ -366,7 +367,8 @@ for rel in "${LOCKED_FILES[@]}"; do
 
   if ! $DRY_RUN; then
     mkdir -p "$(dirname "$dest")"
-    cp "$src" "$dest"
+    cp "\" "\"
+    chmod u+w "\" 2>/dev/null || true
     # Make hooks executable
     if [[ "$rel" == .githooks/* ]]; then
       chmod +x "$dest"
