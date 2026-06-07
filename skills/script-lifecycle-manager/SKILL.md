@@ -21,7 +21,7 @@ metadata:
 
 ## Overview
 
-This skill provides a systematic approach to managing the lifecycle of automation scripts (`scripts/*.sh`, `scripts/*.ps1`, `scripts/*.ts`) in accordance with CONSTITUTION.md §6.5. It ensures scripts are properly registered in `SCRIPTS.md`, have strict version bumps, handle dependencies, and follow deprecation protocols (90-day notice).
+This skill provides a systematic approach to managing the lifecycle of automation scripts (`scripts/*.sh`, `scripts/*.ps1`, `scripts/*.ts`) in accordance with workspace standards. It ensures scripts are properly registered in `SCRIPTS.md`, have strict version bumps, handle dependencies, and follow deprecation protocols (90-day notice).
 
 ## When to Use This Skill
 

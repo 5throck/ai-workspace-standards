@@ -98,7 +98,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ps1` | L0 | 1.6.4 | active | —| —| L0 | —|
-| `new-project.sh` | L0 | 1.4.4 | active | —| —| L0 | —|
+| `new-project.sh` | L0 | 1.4.5 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
@@ -341,4 +341,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-06 — added ingest-external-skills.ts and ingest-security-frameworks.ts*
+*Last updated: 2026-06-07 — bumped new-project.sh to 1.4.5 for permission denied bug fix*
