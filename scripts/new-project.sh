@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.4.5
+# @version 1.4.6
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -261,12 +261,14 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
       # Copy as-is
       mkdir -p "$(dirname "$dest_file")"
       cp "$src_file" "$dest_file"
+      chmod u+w "$dest_file" 2>/dev/null || true
     else
       # Create destination directory
       mkdir -p "$(dirname "$dest_file")"
 
       # Copy file to destination
       cp "$src_file" "$dest_file"
+      chmod u+w "$dest_file" 2>/dev/null || true
 
       # Merge with explicit skeleton path
       bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" 2>/dev/null || {
@@ -277,6 +279,7 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
     # Normal copy
     mkdir -p "$(dirname "$dest_file")"
     cp "$src_file" "$dest_file"
+    chmod u+w "$dest_file" 2>/dev/null || true
   fi
 done
 
@@ -286,6 +289,7 @@ find "$TEMPLATES_DIR" -type f ! -name "*.md" | while read -r src_file; do
   dest_file="$PROJECT_DIR/$rel_path"
   mkdir -p "$(dirname "$dest_file")"
   cp "$src_file" "$dest_file"
+  chmod u+w "$dest_file" 2>/dev/null || true
 done
 
 
