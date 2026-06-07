@@ -1,4 +1,4 @@
-// @version 2.5.7
+// @version 2.5.9
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -891,6 +891,140 @@ if (fs.existsSync('templates')) {
         } catch {
             Warn('shellcheck not installed — skipping shell lint (install via: brew install shellcheck)');
         }
+    }
+}
+
+// Check: Platform parity (ADR-0033) - L0 → L1/L2 file synchronization
+if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'test-platform-parity.ts'))) {
+    const parityCheck = await $`bun ${path.join('scripts', 'test-platform-parity.ts')}`.quiet().nothrow();
+    if (parityCheck.exitCode === 0) {
+        Pass('Platform parity: L0 → L1/L2 files in sync');
+    } else if (parityCheck.exitCode === 2) {
+        Warn('Platform parity: warnings detected (run with --verbose for details)');
+    } else {
+        Fail('Platform parity: L0 → L1/L2 files out of sync (run: bun scripts/test-platform-parity.ts --verbose)');
+        errors++;
+    }
+}
+
+// Check: pm.md consistency (L0 → L1 → L2 alignment)
+if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
+    function checkPmConsistency(): boolean {
+        const l0PmPath = 'agents/pm.md';
+        const l1PmPath = 'templates/common/agents/pm.md';
+
+        if (!fs.existsSync(l0PmPath) || !fs.existsSync(l1PmPath)) {
+            return true; // Not applicable
+        }
+
+        const l0Content = fs.readFileSync(l0PmPath, 'utf-8');
+        const l1Content = fs.readFileSync(l1PmPath, 'utf-8');
+
+        // Extract YAML frontmatter sections
+        const extractYamlSection = (content: string, sectionStart: string, sectionEnd: string): string => {
+            const startIdx = content.indexOf(sectionStart);
+            if (startIdx === -1) return '';
+            const endIdx = content.indexOf(sectionEnd, startIdx);
+            if (endIdx === -1) return '';
+            return content.slice(startIdx, endIdx + sectionEnd.length);
+        };
+
+        // Extract core YAML fields from L0 (excluding L0-only fields)
+        const l0YamlMatch = l0Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l0YamlMatch) {
+            Fail('L0 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l0Yaml = l0YamlMatch[1];
+
+        // L1 YAML should have L1-only fields: formal_name, multi-line description
+        const l1YamlMatch = l1Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l1YamlMatch) {
+            Fail('L1 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l1Yaml = l1YamlMatch[1];
+
+        // Check for L1-only fields presence
+        if (!l1Yaml.includes('formal_name:')) {
+            Fail('L1 pm.md: missing L1-only field "formal_name"');
+            return false;
+        }
+
+        // Check that L0-only fields are NOT in L1
+        const l0OnlyFields = ['lifecycle:', 'role:'];
+        for (const field of l0OnlyFields) {
+            if (l1Yaml.includes(field)) {
+                Fail(`L1 pm.md: contains L0-only field "${field}" - should be removed`);
+                return false;
+            }
+        }
+
+        // L1 content sections should be wrapped in VARIANT-SECTION markers
+        const requiredVariantSections = [
+            'governance-workflow',
+            'agent-roster',
+            'dispatch-protocol'
+        ];
+
+        for (const section of requiredVariantSections) {
+            const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+            const endMarker = `<!-- END VARIANT-SECTION -->`;
+            if (!l1Content.includes(marker) || !l1Content.includes(endMarker)) {
+                Fail(`L1 pm.md: missing VARIANT-SECTION markers for "${section}"`);
+                return false;
+            }
+        }
+
+        // Check L2 variants
+        const templatesDir = 'templates';
+        if (fs.existsSync(templatesDir)) {
+            const variants = fs.readdirSync(templatesDir)
+                .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+            for (const variant of variants) {
+                const l2PmPath = path.join(templatesDir, variant, 'agents', 'pm.md');
+                if (!fs.existsSync(l2PmPath)) continue;
+
+                const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
+
+                // L2 should have VARIANT-SECTION markers
+                for (const section of requiredVariantSections) {
+                    const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                    if (!l2Content.includes(marker)) {
+                        Fail(`L2 ${variant}/agents/pm.md: missing VARIANT-SECTION marker for "${section}"`);
+                        return false;
+                    }
+                }
+
+                // L2 should NOT have full L0 content (line count check)
+                const l2Lines = l2Content.split('\n').length;
+                if (l2Lines >= 200) {
+                    Fail(`L2 ${variant}/agents/pm.md: ${l2Lines} lines (too long - may contain L0 duplication bug)`);
+                    return false;
+                }
+
+                // L2 YAML should NOT have L0-only fields
+                const l2YamlMatch = l2Content.match(/^---\n([\s\S]+?)\n---/);
+                if (l2YamlMatch) {
+                    const l2Yaml = l2YamlMatch[1];
+                    for (const field of l0OnlyFields) {
+                        if (l2Yaml.includes(field)) {
+                            Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        Pass('pm.md consistency: L0 → L1 → L2 alignment verified');
+        return true;
+    }
+
+    const pmConsistencyPass = checkPmConsistency();
+    if (!pmConsistencyPass) {
+        errors++;
     }
 }
 

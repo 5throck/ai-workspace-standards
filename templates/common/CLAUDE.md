@@ -133,7 +133,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
 
-> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See workspace standards(docs/constitution/06-skill-lifecycle.md#cross-platform-deployment-rule).
+> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See workspace standards §6 — Cross-Platform Deployment Rule](docs/lifecycle/skill-lifecycle.md#cross-platform-deployment-rule).
 
 > **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via bash/powershell/run_command are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. All commits MUST go through the approved `/sync` pipeline or `dev-sync.ts`. **`--no-verify` is also forbidden**.
 
@@ -179,7 +179,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See workspace standards(docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+See workspace standards §5](docs/lifecycle/multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
 
 #### Mandatory Execution Plan Display
 
@@ -303,7 +303,6 @@ For automated execution in Antigravity, configure `.gemini/settings.json`:
 > **Claude Code Note**: For Claude Code, the native Agent tool provides equivalent automated specialist dispatch functionality without requiring Auto-Mode infrastructure.
 <!-- COMMON-CLAUDE:END -->
 
-
 #### Phase Determination Checklist
 
 Before writing the execution plan table, PM MUST classify each task's deliverable type:
@@ -352,7 +351,7 @@ See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-deni
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
 
-> **Agent Architecture**: See workspace standards(workspace standards#5-multi-agent-architecture) for governance rules.
+> **Agent Architecture**: See workspace standards §5 - Multi-Agent Architecture](workspace standards#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
 > **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
 
@@ -460,7 +459,7 @@ bun scripts/audit.ts                  # full workspace audit including lifecycle
 bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
 ```
 
-> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
+> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/lifecycle/skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
@@ -489,9 +488,9 @@ If a custom slash command or background script returns a non-zero exit code:
 <!-- COMMON-CLAUDE:START -->
 ## Git & PR Additions (Claude Code)
 
-All shared Git/PR rules are in workspace standards(workspace standards#3-github-pr-workflow). Claude Code-specific additions:
+All shared Git/PR rules are in workspace standards §3](workspace standards#3-github-pr-workflow). Claude Code-specific additions:
 
-- **PR Language**: Governed by workspace standards(workspace standards#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
+- **PR Language**: Governed by workspace standards §3 - Mandatory English Git & PR Artifacts](workspace standards#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
 *Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->

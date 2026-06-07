@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-07T07:54:45.268Z
+**Generated**: 2026-06-07T12:57:51.196Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 80
+- **Scripts**: 86
 - **Commands**: 6
 
 ---
@@ -66,7 +66,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.5.7 | scripts/audit.ts | bun |
+| audit.ts | 2.5.9 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
@@ -77,6 +77,7 @@
 | dispatch.ts | N/A | scripts/dispatch.ts | N/A |
 | encoding-utils.ts | N/A | scripts/lib/encoding-utils.ts | fs, path |
 | error-handling.ts | N/A | scripts/lib/error-handling.ts | N/A |
+| extends-validator.ts | N/A | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | N/A | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | N/A | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | N/A | scripts/generate-scripts-readme.ts | N/A |
@@ -106,6 +107,8 @@
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
 | scan-l2-project.ts | N/A | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
+| security-validator.test.ts | N/A | scripts/helpers/security-validator.test.ts | bun:test |
+| security-validator.ts | N/A | scripts/helpers/security-validator.ts | fs, path |
 | skill-dependency-analysis.ts | N/A | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | N/A | scripts/skill-lifecycle-audit.ts | N/A |
 | substitute-placeholders.ts | N/A | scripts/helpers/substitute-placeholders.ts | N/A |
@@ -117,7 +120,9 @@
 | tag-template.ts | 1.0.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | N/A | scripts/team-builder.ts | fs, path |
 | template-validation.ts | N/A | scripts/helpers/template-validation.ts | N/A |
+| test-extends-validator.ts | N/A | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | N/A | scripts/test-new-project.ts | bun |
+| test-platform-parity.ts | N/A | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | N/A | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | N/A | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | N/A | scripts/helpers/update-variant-lifecycle.ts | N/A |
@@ -127,6 +132,7 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | N/A | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | N/A | scripts/helpers/validate-platform-parity.ts | fs, path |
+| validate-pm-extends.ts | N/A | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | N/A | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | N/A | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | N/A | scripts/helpers/variant-governance-rules.ts | N/A |

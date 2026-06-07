@@ -1,6 +1,6 @@
 ---
 name: pm
-role: orchestrator
+formal_name: Project Manager (PM) Agent
 status: active
 tier:
   claude: high
@@ -13,11 +13,6 @@ description: 'Orchestrates Phases 0, 2, 5, 6. Enforces quality gates. Use when: 
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Team Assembly) and Phase 2 (Design approval)"
-lifecycle:
-  phase: production
-  created: 2026-06-03
-  last_updated: 2026-06-03
-  governance: docs/lifecycle/agents/pm.md
 ---
 
 <!-- VARIANT-SECTION: governance-workflow -->
