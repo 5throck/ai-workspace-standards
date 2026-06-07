@@ -612,7 +612,8 @@ function checkL2VariantIntegrity() {
     const pmMdPath = path.join(variantDir, 'agents', 'pm.md');
     if (fs.existsSync(pmMdPath)) {
       const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
-      if (!pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+      const hasVariantOverrides = pmContent.includes('variant_overrides:');
+      if (!hasVariantOverrides && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
@@ -955,7 +956,8 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
         // Check that L0-only fields are NOT in L1
         const l0OnlyFields = ['lifecycle:', 'role:'];
         for (const field of l0OnlyFields) {
-            if (l1Yaml.includes(field)) {
+            const fieldRegex = new RegExp(`^${field}`, 'm');
+            if (fieldRegex.test(l1Yaml)) {
                 Fail(`L1 pm.md: contains L0-only field "${field}" - should be removed`);
                 return false;
             }
@@ -1010,12 +1012,15 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
 
                 const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
 
-                // L2 should have VARIANT-SECTION markers
-                for (const section of requiredVariantSections) {
-                    const marker = `<!-- VARIANT-SECTION: ${section} -->`;
-                    if (!l2Content.includes(marker)) {
-                        Fail(`L2 ${variant}/agents/pm.md: missing VARIANT-SECTION marker for "${section}"`);
-                        return false;
+                const hasVariantOverrides = l2Content.includes('variant_overrides:');
+                if (!hasVariantOverrides) {
+                    // L2 should have VARIANT-SECTION markers
+                    for (const section of requiredVariantSections) {
+                        const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                        if (!l2Content.includes(marker)) {
+                            Fail(`L2 ${variant}/agents/pm.md: missing VARIANT-SECTION marker for "${section}"`);
+                            return false;
+                        }
                     }
                 }
 
@@ -1031,7 +1036,8 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                 if (l2YamlMatch) {
                     const l2Yaml = l2YamlMatch[1];
                     for (const field of l0OnlyFields) {
-                        if (l2Yaml.includes(field)) {
+                        const fieldRegex = new RegExp(`^${field}`, 'm');
+                        if (fieldRegex.test(l2Yaml)) {
                             Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);
                             return false;
                         }
@@ -1043,16 +1049,8 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                         if (parsed.isValid && Object.keys(parsed.variantOverrides).length > 0) {
                             Pass(`L2 ${variant}/agents/pm.md: has valid variant_overrides`);
 
-                            // Check that variant_overrides match VARIANT-SECTION content
-                            for (const [key, value] of Object.entries(parsed.variantOverrides)) {
-                                if (typeof value === 'string' && value.trim()) {
-                                    // Check if the section exists in the content
-                                    const sectionExists = l2Content.includes(`<!-- VARIANT-SECTION: ${key} -->`);
-                                    if (!sectionExists) {
-                                        Warn(`L2 ${variant}/agents/pm.md: variant_overrides.${key} defined but VARIANT-SECTION marker missing`);
-                                    }
-                                }
-                            }
+                            // With YAML variant_overrides, VARIANT-SECTION markers are no longer required
+                            // in L2 files, so we don't warn about them missing.
                         } else {
                             Warn(`L2 ${variant}/agents/pm.md: variant_overrides field present but parsing failed`);
                         }

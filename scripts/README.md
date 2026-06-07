@@ -129,7 +129,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.1 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.2 | active | —| —| L0+L1 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
