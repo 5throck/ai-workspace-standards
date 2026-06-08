@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.2
+ * @version 1.8.3
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -930,19 +930,7 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
 
   // 2. ## Agent Roster
   if (Array.isArray(variantOverrides.agent_roster) && variantOverrides.agent_roster.length > 0) {
-    const lines = [
-      `## Agent Roster`,
-      ``,
-      `| Phase | Group | Agents |`,
-      `|-------|-------|--------|`,
-    ];
-    for (const entry of variantOverrides.agent_roster) {
-      const agents = Array.isArray(entry.agents)
-        ? entry.agents.map((a: string) => `\`${a}\``).join(', ')
-        : '';
-      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | ${agents} |`);
-    }
-    result.agentRoster = lines.join('\n');
+    result.agentRoster = generateAgentRosterTable(variantOverrides.agent_roster);
   }
 
   // 3. ## ⚠️ CRITICAL: PM Direct Execution Constraints
