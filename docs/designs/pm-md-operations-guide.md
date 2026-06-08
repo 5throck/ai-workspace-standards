@@ -48,11 +48,11 @@ This section provides immediate guidance for different user personas and current
 | YAML Frontmatter | 1.0.0 | ✅ Implemented | 2026-06-08 | L1/L2 templates working |
 | L0→L1→L2 Extends Chain | 1.0.0 | ✅ Implemented | 2026-06-08 | Chain resolution functional |
 | Basic Extends Validation | 1.0.0 | ✅ Implemented | 2026-06-08 | Circular reference protection exists |
-| variant_sections Rename | 1.2.0 | 📋 Proposed | - | Low complexity, awaiting implementation |
+| variant_sections Rename | 1.2.0 | ✅ Documented | 2026-06-08 | Terminology standardized in design doc |
 | Layout Reconstruction | 1.5.0+ | 📋 Proposed | - | Medium complexity, requires rewrite |
 | YAML Injection Security | 1.3.0 | 📋 Proposed | - | P0 priority, awaiting implementation |
 | Error Recovery Strategy | 1.3.0 | 📋 Proposed | - | P1 priority, awaiting implementation |
-| Edge Case Handling | 1.3.0 | 📋 Proposed | - | 10 cases documented, awaiting testing |
+| Edge Case Handling | 1.4.0 | ✅ Documented | 2026-06-08 | **Phase 2 Complete**: All 10 cases documented with error types, behaviors, examples, and testing requirements |
 
 ---
 
@@ -93,7 +93,7 @@ This section provides immediate guidance for different user personas and current
 ## Document Information
 
 - **Status**: Final
-- **Version**: 1.2.0
+- **Version**: 1.4.0
 - **Last Updated**: 2026-06-08
 - **Authors**: Architect, Automation Engineer, Auditor (Joint Review)
 - **Related ADRs**: ADR-0031 (L1-L2 Fork Model), ADR-0033 (L0-L1-L2 Hierarchy)
@@ -771,6 +771,516 @@ This section documents current limitations in the PM.md operations implementatio
 
 ---
 
+## Edge Cases and Error Handling (v1.3.0+)
+
+This section documents the 10 identified edge cases in PM.md operations and their specified handling behaviors. This is the definitive reference for edge case resolution per ADR-0034 Phase 2.
+
+### Edge Case Classification
+
+Edge cases are classified into three categories:
+
+| Category | Definition | Recovery Strategy |
+|----------|------------|-------------------|
+| **Fatal Errors** | System integrity violations that prevent safe operation | Immediate termination with clear error message |
+| **Recoverable Errors** | Partial failures that can be resolved with fallback behavior | Graceful degradation with warning |
+| **Warnings** | Non-critical issues that don't affect functionality | Continue with notification to user |
+
+---
+
+### Fatal Errors (Category 1)
+
+**Fatal errors cause immediate termination and require user intervention before retry.**
+
+#### 1. Missing L0 Section
+
+**Condition**: A required L0 section (e.g., `## Role`, `## Agent Roster`) is referenced in `variant_sections` but doesn't exist in the base L0 file.
+
+**Error Type**: `MISSING_L0_SECTION`
+
+**Behavior**: 
+```typescript
+throw new PMError({
+  type: 'MISSING_L0_SECTION',
+  message: `Required L0 section "${sectionName}" not found in base file`,
+  recoverable: false,
+  suggestion: `Verify that "${sectionName}" exists in L0 agents/pm.md or remove it from variant_sections`
+});
+```
+
+**Example Scenario**:
+```yaml
+# L2 variant configuration
+variant_overrides:
+  variant_sections:
+    - "## Non-existent Section"  # This section doesn't exist in L0
+```
+
+**Error Output**:
+```
+[FATAL] Missing L0 Section: "## Non-existent Section" not found in base file
+Suggestion: Verify that "## Non-existent Section" exists in L0 agents/pm.md or remove it from variant_sections
+```
+
+---
+
+#### 2. Circular Extends
+
+**Condition**: The `extends` chain forms a circular reference (e.g., A → B → C → A).
+
+**Error Type**: `CIRCULAR_EXTENDS`
+
+**Behavior**:
+```typescript
+// Detection during chain resolution
+const visited = new Set<string>();
+
+function detectCircular(filePath: string, chain: string[]): void {
+  if (visited.has(filePath)) {
+    throw new PMError({
+      type: 'CIRCULAR_EXTENDS',
+      message: `Circular reference detected: ${chain.join(' → ')} → ${filePath}`,
+      recoverable: false,
+      suggestion: 'Break the circular reference by removing one of the extends directives'
+    });
+  }
+  visited.add(filePath);
+}
+```
+
+**Example Scenario**:
+```yaml
+# File A: agents/a.md
+extends: agents/b.md
+
+# File B: agents/b.md  
+extends: agents/c.md
+
+# File C: agents/c.md
+extends: agents/a.md  # Circular: A → B → C → A
+```
+
+**Error Output**:
+```
+[FATAL] Circular Extends: agents/a.md → agents/b.md → agents/c.md → agents/a.md
+Suggestion: Break the circular reference by removing one of the extends directives
+```
+
+---
+
+#### 3. Invalid Action
+
+**Condition**: A `variant_sections` entry specifies an action that is not one of the allowed values: `prepend`, `replace`, or `append`.
+
+**Error Type**: `INVALID_ACTION`
+
+**Behavior**:
+```typescript
+const VALID_ACTIONS = ['prepend', 'replace', 'append'];
+
+if (!VALID_ACTIONS.includes(action)) {
+  throw new PMError({
+    type: 'INVALID_ACTION',
+    message: `Invalid action "${action}". Must be one of: ${VALID_ACTIONS.join(', ')}`,
+    recoverable: false,
+    suggestion: `Use one of the valid actions: prepend, replace, append`
+  });
+}
+```
+
+**Example Scenario**:
+```yaml
+variant_overrides:
+  variant_sections:
+    - section: "## Role"
+      action: "insert"  # Invalid action
+```
+
+**Error Output**:
+```
+[FATAL] Invalid Action: "insert" is not a valid action
+Suggestion: Use one of the valid actions: prepend, replace, append
+```
+
+---
+
+#### 4. Deep Extends Chain (>10)
+
+**Condition**: The `extends` chain depth exceeds 10 levels.
+
+**Error Type**: `DEEP_EXTENDS_CHAIN`
+
+**Behavior**:
+```typescript
+const MAX_CHAIN_DEPTH = 10;
+
+if (chainDepth > MAX_CHAIN_DEPTH) {
+  throw new PMError({
+    type: 'DEEP_EXTENDS_CHAIN',
+    message: `Extends chain depth (${chainDepth}) exceeds maximum (${MAX_CHAIN_DEPTH})`,
+    recoverable: false,
+    suggestion: 'Simplify the template hierarchy or increase MAX_CHAIN_DEPTH in merge-frontmatter.ts'
+  });
+}
+```
+
+**Example Scenario**:
+```
+L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7 → L8 → L9 → L10 → L11  # Too deep
+```
+
+**Error Output**:
+```
+[FATAL] Deep Extends Chain: Chain depth (11) exceeds maximum (10)
+Suggestion: Simplify the template hierarchy or increase MAX_CHAIN_DEPTH in merge-frontmatter.ts
+```
+
+---
+
+#### 5. Invalid YAML Syntax
+
+**Condition**: YAML frontmatter contains syntax errors (indentation, quote mismatches, etc.).
+
+**Error Type**: `INVALID_YAML_SYNTAX`
+
+**Behavior**:
+```typescript
+try {
+  const parsed = parseYAML(content);
+} catch (error) {
+  throw new PMError({
+    type: 'INVALID_YAML_SYNTAX',
+    message: `YAML syntax error: ${error.message}`,
+    recoverable: false,
+    suggestion: 'Fix YAML syntax errors (indentation, quotes, colons, etc.)'
+  });
+}
+```
+
+**Example Scenario**:
+```yaml
+extends: agents/pm.md
+variant_overrides:
+  variant_sections:    # Missing proper indentation
+    - section: "## Role"
+action: "prepend"      # Misaligned key
+```
+
+**Error Output**:
+```
+[FATAL] Invalid YAML Syntax: YAML syntax error: unexpected token at line 4
+Suggestion: Fix YAML syntax errors (indentation, quotes, colons, etc.)
+```
+
+---
+
+### Recoverable Errors (Category 2)
+
+**Recoverable errors allow operation to continue with fallback behavior and issue warnings.**
+
+#### 6. Missing Extends
+
+**Condition**: A template file lacks the `extends` field in frontmatter.
+
+**Error Type**: `MISSING_EXTENDS`
+
+**Behavior**:
+```typescript
+if (!frontmatter.extends) {
+  console.warn(`[WARNING] Missing Extends: No extends field in ${filePath}`);
+  console.warn(`[WARNING] Using default L0 path: ${DEFAULT_L0_PATH}`);
+  
+  return {
+    success: true,
+    warnings: [`Missing extends field, using default L0 path: ${DEFAULT_L0_PATH}`],
+    data: mergeWithDefaultL0(filePath)
+  };
+}
+```
+
+**Example Scenario**:
+```yaml
+# L1 template without extends
+variant_overrides:
+  variant_sections:
+    - "## Role"
+```
+
+**Warning Output**:
+```
+[WARNING] Missing Extends: No extends field in templates/common/agents/pm.md
+[WARNING] Using default L0 path: ../../../agents/pm.md
+```
+
+---
+
+#### 7. Conflicting variant_sections
+
+**Condition**: Multiple entries in `variant_sections` specify the same section with different actions.
+
+**Error Type**: `CONFLICTING_VARIANT_SECTIONS`
+
+**Behavior**:
+```typescript
+// Detect conflicts
+const sectionMap = new Map<string, string[]>();
+
+for (const entry of variant_sections) {
+  if (!sectionMap.has(entry.section)) {
+    sectionMap.set(entry.section, []);
+  }
+  sectionMap.get(entry.section).push(entry.action);
+}
+
+// Report conflicts
+for (const [section, actions] of sectionMap.entries()) {
+  if (actions.length > 1) {
+    console.warn(`[WARNING] Conflicting variant_sections: "${section}" has multiple actions: ${actions.join(', ')}`);
+    console.warn(`[WARNING] Last action wins: "${actions[actions.length - 1]}"`);
+  }
+}
+```
+
+**Example Scenario**:
+```yaml
+variant_sections:
+  - section: "## Role"
+    action: "prepend"
+  - section: "## Role"
+    action: "replace"  # Conflict with previous entry
+```
+
+**Warning Output**:
+```
+[WARNING] Conflicting variant_sections: "## Role" has multiple actions: prepend, replace
+[WARNING] Last action wins: "replace"
+```
+
+---
+
+#### 8. Duplicate Sections
+
+**Condition**: The same section appears multiple times in the final merged document.
+
+**Error Type**: `DUPLICATE_SECTIONS`
+
+**Behavior**:
+```typescript
+// Detect duplicates in final document
+const sectionCounts = new Map<string, number>();
+
+for (const section of documentSections) {
+  sectionCounts.set(section, (sectionCounts.get(section) || 0) + 1);
+}
+
+for (const [section, count] of sectionCounts.entries()) {
+  if (count > 1) {
+    console.warn(`[WARNING] Duplicate Sections: "${section}" appears ${count} times`);
+    console.warn(`[WARNING] Merging duplicates into single occurrence`);
+    
+    // Merge duplicates
+    mergeDuplicateSections(section);
+  }
+}
+```
+
+**Example Scenario**:
+```markdown
+## Agent Roster
+| Phase | Agent | Responsibility |
+|-------|--------|---------------|
+| 0 | scaffolding-expert | Project setup |
+
+## Agent Roster  (Duplicate)
+| Phase | Agent | Responsibility |
+|-------|--------|---------------|
+| 1 | architect | Design |
+```
+
+**Warning Output**:
+```
+[WARNING] Duplicate Sections: "## Agent Roster" appears 2 times
+[WARNING] Merging duplicates into single occurrence
+```
+
+---
+
+### Warnings (Category 3)
+
+**Warnings are informational and don't affect functionality.**
+
+#### 9. Empty variant_sections
+
+**Condition**: The `variant_sections` array is empty or contains only empty strings.
+
+**Error Type**: `EMPTY_VARIANT_SECTIONS`
+
+**Behavior**:
+```typescript
+if (!variant_sections || variant_sections.length === 0) {
+  console.info(`[INFO] Empty variant_sections: No sections to customize`);
+  console.info(`[INFO] Using default L0 content without modifications`);
+  
+  return {
+    success: true,
+    warnings: ['Empty variant_sections, using default L0 content'],
+    data: useDefaultL0Content()
+  };
+}
+```
+
+**Example Scenario**:
+```yaml
+variant_overrides:
+  variant_sections: []  # Empty array
+```
+
+**Info Output**:
+```
+[INFO] Empty variant_sections: No sections to customize
+[INFO] Using default L0 content without modifications
+```
+
+---
+
+#### 10. File Permission Errors
+
+**Condition**: Cannot read or write files due to insufficient permissions.
+
+**Error Type**: `FILE_PERMISSION_ERROR`
+
+**Behavior**:
+```typescript
+try {
+  const content = fs.readFileSync(filePath, 'utf8');
+} catch (error) {
+  if (error.code === 'EACCES' || error.code === 'EPERM') {
+    throw new PMError({
+      type: 'FILE_PERMISSION_ERROR',
+      message: `Permission denied: Cannot read ${filePath}`,
+      recoverable: false,
+      suggestion: 'Check file permissions and run with appropriate privileges'
+    });
+  }
+  throw error;
+}
+```
+
+**Example Scenario**:
+```bash
+# Trying to scaffold project without read permissions
+chmod 000 templates/common/agents/pm.md
+./new-project.sh my-project
+```
+
+**Error Output**:
+```
+[FATAL] File Permission Error: Permission denied: Cannot read templates/common/agents/pm.md
+Suggestion: Check file permissions and run with appropriate privileges
+```
+
+---
+
+### Error Type Reference Table
+
+| Error Type | Category | Recoverable | Detection Stage | Fallback Strategy |
+|-----------|----------|-----------|-----------------|------------------|
+| `MISSING_L0_SECTION` | Fatal | ❌ No | Chain resolution | None (terminate) |
+| `CIRCULAR_EXTENDS` | Fatal | ❌ No | Chain resolution | None (terminate) |
+| `INVALID_ACTION` | Fatal | ❌ No | YAML validation | None (terminate) |
+| `DEEP_EXTENDS_CHAIN` | Fatal | ❌ No | Chain resolution | None (terminate) |
+| `INVALID_YAML_SYNTAX` | Fatal | ❌ No | YAML parsing | None (terminate) |
+| `MISSING_EXTENDS` | Recoverable | ✅ Yes | Frontmatter parsing | Use default L0 path |
+| `CONFLICTING_VARIANT_SECTIONS` | Recoverable | ✅ Yes | Section merging | Last action wins |
+| `DUPLICATE_SECTIONS` | Recoverable | ✅ Yes | Document assembly | Merge duplicates |
+| `EMPTY_VARIANT_SECTIONS` | Warning | ✅ Yes | Configuration validation | Use default L0 |
+| `FILE_PERMISSION_ERROR` | Fatal | ❌ No | File I/O | None (terminate) |
+
+---
+
+### Testing Requirements (v1.3.0+)
+
+Per ADR-0034 Phase 2, all 10 edge cases must have corresponding test cases:
+
+```typescript
+// Test file: tests/pm-md-edge-cases.test.ts
+describe('PM.md Edge Cases', () => {
+  
+  describe('Fatal Errors', () => {
+    test('should throw MISSING_L0_SECTION for non-existent section', () => {
+      // Test implementation
+    });
+    
+    test('should throw CIRCULAR_EXTENDS for circular references', () => {
+      // Test implementation
+    });
+    
+    test('should throw INVALID_ACTION for unsupported actions', () => {
+      // Test implementation
+    });
+    
+    test('should throw DEEP_EXTENDS_CHAIN for chains > 10 levels', () => {
+      // Test implementation
+    });
+    
+    test('should throw INVALID_YAML_SYNTAX for malformed YAML', () => {
+      // Test implementation
+    });
+  });
+  
+  describe('Recoverable Errors', () => {
+    test('should use default L0 when extends is missing', () => {
+      // Test implementation
+    });
+    
+    test('should resolve conflicting variant_sections with last-action-wins', () => {
+      // Test implementation
+    });
+    
+    test('should merge duplicate sections with warning', () => {
+      // Test implementation
+    });
+  });
+  
+  describe('Warnings', () => {
+    test('should handle empty variant_sections gracefully', () => {
+      // Test implementation
+    });
+  });
+  
+  describe('File I/O', () => {
+    test('should throw FILE_PERMISSION_ERROR for unreadable files', () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+---
+
+### Implementation Status (v1.3.0+)
+
+| Edge Case | Status | Implementation Date | Test Coverage |
+|-----------|--------|---------------------|----------------|
+| 1. Missing L0 Section | 📋 Proposed | - | 0% |
+| 2. Circular Extends | ✅ Partially Implemented | v1.0.0 | 50% (basic detection exists) |
+| 3. Conflicting variant_sections | 📋 Proposed | - | 0% |
+| 4. Empty variant_sections | ✅ Implemented | v1.0.0 | 100% (no-op handling exists) |
+| 5. Invalid action | 📋 Proposed | - | 0% |
+| 6. Missing extends | 📋 Proposed | - | 0% |
+| 7. Deep extends chain (>10) | ✅ Partially Implemented | v1.0.0 | 50% (basic depth limit exists) |
+| 8. Duplicate sections | 📋 Proposed | - | 0% |
+| 9. Invalid YAML syntax | 📋 Proposed | - | 0% |
+| 10. File permission errors | 📋 Proposed | - | 0% |
+
+**Overall Progress**: 20% (2/10 fully or partially implemented)
+
+**Next Priority** (Phase 1+ v1.3.0):
+1. Implement structured error types (`PMError` class)
+2. Add remaining 8 edge case handlers
+3. Create comprehensive test suite (100% coverage target)
+
+---
+
 ## Appendix: Meeting References
 
 ### June 7, 2026 Meetings
@@ -1115,6 +1625,7 @@ function getLocalizedMessage(key: string, params: Record<string, string>, locale
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4.0 | 2026-06-08 | **Phase 2 Complete**: Added comprehensive "Edge Cases and Error Handling" section documenting all 10 edge cases with error types, behaviors, examples, and testing requirements per ADR-0034 Phase 2 |
 | 1.3.0 | 2026-06-08 | Added Long-term Roadmap (v2.0.0+) section with Phase 3/4 strategic plans |
 | 1.2.0 | 2026-06-08 | Renamed `remove_sections` → `variant_sections` for positive semantics ("customization" not "removal") |
 | 1.1.0 | 2026-06-08 | Unified `remove_sections` under `variant_overrides` for consistent schema |
