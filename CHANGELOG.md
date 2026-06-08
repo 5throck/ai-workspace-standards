@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ### Fixed
+- **[2026-06-08]**: fix: Windows project folder deletion permissions — enhanced Windows permission handling in `scripts/new-project.ps1` (v1.6.9) with three improvements: (1) robocopy now uses `/COPY:DT` to copy only data/timestamps, NOT security permissions (ACLs); (2) added icacls commands to reset ACL inheritance and grant current user full control; (3) removed hidden/system attributes; projects can now be deleted without admin rights
+- **[2026-06-08]**: fix: skip memory folder check in new-project post-scaffold audit — added `--skip-memory` flag to `scripts/audit.ts` (v2.6.4) and updated `scripts/new-project.sh` (v1.5.0) and `scripts/new-project.ps1` (v1.6.8) to skip workspace memory folder validation during project creation; new projects start with empty memory folder, so workspace root memory check is unnecessary and creates confusion
+- **[2026-06-08]**: fix: Windows project folder permission issues — skip `git update-index --chmod=+x` on Windows in `scripts/new-project.ps1` (v1.6.7) to prevent permission problems that require admin rights for deletion; added Windows-specific permission cleanup to remove hidden/system attributes from project files; Linux/macOS versions remain unchanged with proper chmod handling
+- **[2026-06-08]**: fix: optimize extends resolution progress display in new-project scripts — added progress counter and periodic status updates during extends resolution phase in `scripts/new-project.sh` (v1.4.9) and `scripts/new-project.ps1` (v1.6.6); displays "Processing extends: X/Y files..." every 10 files to show user that work is progressing; resolves user perception of script hanging during silent extends processing of hundreds of markdown files
+- **[2026-06-08]**: fix: auto-install dependencies in new-project scripts — added automatic dependency check and `bun install` execution to `scripts/new-project.sh` (v1.4.8) and `scripts/new-project.ps1` (v1.6.5); prevents "Cannot find package 'js-yaml'" errors on fresh workspaces or when node_modules is missing; checks for `node_modules/js-yaml` before running scaffold and runs `bun install` if needed
 - **[2026-06-08]**: fix: inject variant-specific sections from `variant_overrides` in `merge-frontmatter.ts` (v1.3.0) — `## Updated Role`, `## Governance Workflow`, `## Agent Roster`, `## Dispatch Protocol` sections are now generated from the variant's `variant_overrides` YAML and appended to the body after L0 section removal, ensuring generated `pm.md` reflects the correct variant characteristics instead of L0 workspace root values
 - **[2026-06-08]**: fix: implement `remove_sections` support in `merge-frontmatter.ts` (v1.2.0) — variant `pm.md` files now correctly strip L0-specific sections (e.g. `## Governance Workflow`, `## Updated Role`, `## Agent Roster`, `## Dispatch Protocol`, `### Phase Determination`) from the body when scaffolding new projects; prefix-based heading matching handles headings with suffixes (e.g. `## Updated Role (Phase 0/1-2/5/6 Only)`); `remove_sections` key no longer emitted in final output frontmatter
 - **[2026-06-08]**: Indented the yaml code block in `templates/common/docs/variant-pm-spec.md` to prevent extends validator false positives during scaffolding audit.
@@ -682,7 +687,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-05*
+*Last Updated: 2026-06-08*
 
 
 
