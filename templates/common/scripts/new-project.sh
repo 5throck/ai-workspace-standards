@@ -739,13 +739,13 @@ if [ "$IS_WINDOWS" = true ]; then
   # Get current username
   CURRENT_USER="${USER:-$(whoami 2>/dev/null || echo $USERNAME)}"
 
-  echo "  [Step 1/7] Removing hidden/system attributes..."
+  echo "  [Step 1/5] Removing hidden/system attributes..."
   # Remove hidden/system attributes using attrib command
   find "$PROJECT_DIR" -type f -exec attrib -R -S -H {} \; 2>/dev/null || true
   find "$PROJECT_DIR" -type d -exec attrib -R -S -H {} \; 2>/dev/null || true
   echo "  [OK] Attributes cleared"
 
-  echo "  [Step 2/7] Disabling inheritance and clearing ACLs..."
+  echo "  [Step 2/5] Disabling inheritance and clearing ACLs..."
   # Disable inheritance and clear existing ACLs
   icacls "$PROJECT_DIR" /inheritance:r 2>&1 | grep -i "processed" || true
   echo "  [OK] ACL inheritance disabled"
@@ -755,10 +755,9 @@ if [ "$IS_WINDOWS" = true ]; then
   icacls "$PROJECT_DIR" /grant "${CURRENT_USER}:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
   echo "  [OK] Current user full control granted"
 
-  echo "  [Step 4/5] Re-enabling inheritance..."
-  # Re-enable inheritance
-  icacls "$PROJECT_DIR" /inheritance:e 2>&1 | grep -i "processed" || true
-  echo "  [OK] Inheritance re-enabled"
+  echo "  [Step 4/5] Keeping inheritance disabled..."
+  # Do NOT re-enable inheritance - this prevents Administrators/Users groups from being inherited
+  echo "  [OK] Inheritance remains disabled (current user only)"
 
   echo "  [Step 5/5] Verifying permissions..."
   # Count access rules (approximate verification)
