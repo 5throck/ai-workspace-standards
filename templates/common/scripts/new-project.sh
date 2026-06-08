@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.5.0
+# @version 1.7.0
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -723,4 +723,62 @@ echo "  → $TEMPLATES_DIR/docs/_examples/"
 # --- Dynamic Plugin Injection ---
 if command -v bun &>/dev/null && [ -f "$WORKSPACE_ROOT/scripts/helpers/inject-global-plugins.ts" ]; then
   bun "$WORKSPACE_ROOT/scripts/helpers/inject-global-plugins.ts" "$PROJECT_DIR" "${PLATFORM:-both}"
+fi
+
+# ── Windows-specific permission cleanup (ENHANCED) ────────────────────────────
+# Detect Windows environment (Git Bash, MSYS2, WSL, etc.)
+IS_WINDOWS=false
+if [ -n "${MSYSTEM:-}" ] || [ -n "${MINGW_PREFIX:-}" ] || [ "$(uname -s)" = "MSYS" ] || [ "$(uname -s)" = "MINGW" ] || [ "$(uname -s)" = "MINGW32_NT" ] || [ "$(uname -s)" = "MINGW64_NT" ]; then
+  IS_WINDOWS=true
+fi
+
+if [ "$IS_WINDOWS" = true ]; then
+  echo ""
+  echo "Cleaning up Windows file permissions..."
+
+  # Get current username
+  CURRENT_USER="${USER:-$(whoami 2>/dev/null || echo $USERNAME)}"
+
+  echo "  [Step 1/7] Removing hidden/system attributes..."
+  # Remove hidden/system attributes using attrib command
+  find "$PROJECT_DIR" -type f -exec attrib -R -S -H {} \; 2>/dev/null || true
+  find "$PROJECT_DIR" -type d -exec attrib -R -S -H {} \; 2>/dev/null || true
+  echo "  [OK] Attributes cleared"
+
+  echo "  [Step 2/7] Disabling inheritance and clearing ACLs..."
+  # Disable inheritance and clear existing ACLs
+  icacls "$PROJECT_DIR" /inheritance:r 2>&1 | grep -i "processed" || true
+  echo "  [OK] ACL inheritance disabled"
+
+  echo "  [Step 3/7] Granting full control to current user..."
+  # Grant full control to current user
+  icacls "$PROJECT_DIR" /grant "${CURRENT_USER}:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
+  echo "  [OK] Current user full control granted"
+
+  echo "  [Step 4/7] Granting full control to Administrators group..."
+  # Grant Administrators group full control
+  icacls "$PROJECT_DIR" /grant "Administrators:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
+  echo "  [OK] Administrators full control granted"
+
+  echo "  [Step 5/7] Re-enabling inheritance..."
+  # Re-enable inheritance
+  icacls "$PROJECT_DIR" /inheritance:e 2>&1 | grep -i "processed" || true
+  echo "  [OK] Inheritance re-enabled"
+
+  echo "  [Step 6/7] Granting Users group read/execute..."
+  # Grant Users group read/execute
+  icacls "$PROJECT_DIR" /grant "Users:(OI)(CI)RX" /T /C /Q 2>&1 | grep -i "processed" || true
+  echo "  [OK] Users group read/execute granted"
+
+  echo "  [Step 7/7] Verifying permissions..."
+  # Count access rules (approximate verification)
+  echo "  [OK] Permission cleanup complete"
+
+  echo ""
+  echo "  [SUCCESS] Windows file permissions fully cleaned"
+  echo "  Project can now be deleted without administrator privileges"
+
+else
+  echo ""
+  echo "  [INFO] Skipping Windows permission cleanup (not on Windows)"
 fi

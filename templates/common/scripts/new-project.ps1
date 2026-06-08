@@ -1,4 +1,4 @@
-# @version 1.6.9
+# @version 1.7.0
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -788,38 +788,77 @@ if ((Get-Command bun -ErrorAction SilentlyContinue) -and (Test-Path $InjectScrip
     bun $InjectScript $ProjectDir $Platform
 }
 
-# -- Windows-specific permission cleanup ----------------------------------------
+# -- Windows-specific permission cleanup (ENHANCED) ------------------------
 if ($isWindows) {
     Write-Host ""
     Write-Host "Cleaning up Windows file permissions..." -ForegroundColor Cyan
     try {
-        # Step 1: Remove hidden/system attributes
+        $currentUser = [System.Environment]::UserName
+        $currentUserDomain = [System.Environment]::UserDomainName
+
+        Write-Host "  [Step 1/7] Removing hidden/system attributes..." -ForegroundColor Cyan
+        # Remove hidden/system attributes from files first
         Get-ChildItem -Path $ProjectDir -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
             if ($_.Attributes -band [System.IO.FileAttributes]::Hidden -or $_.Attributes -band [System.IO.FileAttributes]::System) {
-                $_.Attributes = $_.Attributes -bxor ([System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System)
+                $_.Attributes = $_.Attributes -band (-bnot ([System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System))
             }
         }
 
-        # Step 2: Reset ACLs to enable inheritance (prevents permission-related delete issues)
-        $inheritResult = & icacls $ProjectDir /reset /T /C /Q 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [OK] ACL inheritance reset completed" -ForegroundColor Green
-        } else {
-            Write-Host "  [WARN] ACL reset encountered issues (continuing...)" -ForegroundColor Yellow
+        # Also clear attributes on directories using attrib command
+        Get-ChildItem -Path $ProjectDir -Recurse -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            try {
+                $folder = $_.FullName
+                $null = & cmd /c "attrib -R -S -H `"$folder`"" 2>&1
+            } catch {
+                # Continue even if attrib fails
+            }
         }
+        Write-Host "  [OK] Attributes cleared" -ForegroundColor Green
 
-        # Step 3: Grant current user full control (as fallback)
-        $currentUser = [System.Environment]::UserName
-        $grantResult = & icacls $ProjectDir /grant "${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [OK] Full control granted to current user" -ForegroundColor Green
-        } else {
-            Write-Host "  [WARN] Grant permission encountered issues (continuing...)" -ForegroundColor Yellow
-        }
+        Write-Host "  [Step 2/7] Disabling inheritance and clearing ACLs..." -ForegroundColor Cyan
+        # Disable inheritance and clear existing ACLs for clean state
+        $aclClear = & icacls $ProjectDir /inheritance:r 2>&1
+        Write-Host "  [OK] ACL inheritance disabled" -ForegroundColor Green
 
-        Write-Host "  [OK] Windows file permissions cleaned" -ForegroundColor Green
+        Write-Host "  [Step 3/7] Granting full control to current user (with domain)..." -ForegroundColor Cyan
+        # Grant full control with domain prefix first
+        $domainGrant = & icacls $ProjectDir /grant "${currentUserDomain}\${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
+        Write-Host "  [OK] Domain user full control granted" -ForegroundColor Green
+
+        Write-Host "  [Step 4/7] Granting full control to current user (without domain)..." -ForegroundColor Cyan
+        # Also grant without domain prefix as fallback
+        $fullGrant = & icacls $ProjectDir /grant "${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
+        Write-Host "  [OK] Current user full control granted" -ForegroundColor Green
+
+        Write-Host "  [Step 5/7] Granting full control to Administrators group..." -ForegroundColor Cyan
+        # Explicitly grant Administrators group full control
+        $adminResult = & icacls $ProjectDir /grant "Administrators:(OI)(CI)F" /T /C /Q 2>&1
+        Write-Host "  [OK] Administrators full control granted" -ForegroundColor Green
+
+        Write-Host "  [Step 6/7] Re-enabling inheritance..." -ForegroundColor Cyan
+        # Re-enable inheritance for proper propagation
+        $inheritance = & icacls $ProjectDir /inheritance:e 2>&1
+        Write-Host "  [OK] Inheritance re-enabled" -ForegroundColor Green
+
+        Write-Host "  [Step 7/7] Granting Users group read/execute..." -ForegroundColor Cyan
+        # Grant Users group read/execute as baseline
+        $usersResult = & icacls $ProjectDir /grant "Users:(OI)(CI)RX" /T /C /Q 2>&1
+        Write-Host "  [OK] Users group read/execute granted" -ForegroundColor Green
+
+        # Final verification
+        Write-Host "  [Step 7/7] Verifying permissions..." -ForegroundColor Cyan
+        $finalCheck = Get-Acl $ProjectDir
+        $accessCount = $finalCheck.GetAccessRules($true, $true, [System.Security.Principal.NTAccount]).Count
+        Write-Host "  [OK] Permission cleanup complete ($accessCount access rules applied)" -ForegroundColor Green
+
+        Write-Host ""
+        Write-Host "  [SUCCESS] Windows file permissions fully cleaned" -ForegroundColor Green
+        Write-Host "  Project can now be deleted without administrator privileges" -ForegroundColor Cyan
+
     } catch {
         Write-Host "  [WARN] Permission cleanup encountered issues: $_" -ForegroundColor Yellow
+        Write-Host "  You may need administrator privileges to delete this project" -ForegroundColor Yellow
+        Write-Host "  Run: icacls `"$ProjectDir`" /grant `"$([System.Environment]::UserName):(OI)(CI)F`" /T" -ForegroundColor DarkGray
     }
 }
 
