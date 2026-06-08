@@ -750,27 +750,17 @@ if [ "$IS_WINDOWS" = true ]; then
   icacls "$PROJECT_DIR" /inheritance:r 2>&1 | grep -i "processed" || true
   echo "  [OK] ACL inheritance disabled"
 
-  echo "  [Step 3/7] Granting full control to current user..."
+  echo "  [Step 3/5] Granting full control to current user..."
   # Grant full control to current user
   icacls "$PROJECT_DIR" /grant "${CURRENT_USER}:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
   echo "  [OK] Current user full control granted"
 
-  echo "  [Step 4/7] Granting full control to Administrators group..."
-  # Grant Administrators group full control
-  icacls "$PROJECT_DIR" /grant "Administrators:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
-  echo "  [OK] Administrators full control granted"
-
-  echo "  [Step 5/7] Re-enabling inheritance..."
+  echo "  [Step 4/5] Re-enabling inheritance..."
   # Re-enable inheritance
   icacls "$PROJECT_DIR" /inheritance:e 2>&1 | grep -i "processed" || true
   echo "  [OK] Inheritance re-enabled"
 
-  echo "  [Step 6/7] Granting Users group read/execute..."
-  # Grant Users group read/execute
-  icacls "$PROJECT_DIR" /grant "Users:(OI)(CI)RX" /T /C /Q 2>&1 | grep -i "processed" || true
-  echo "  [OK] Users group read/execute granted"
-
-  echo "  [Step 7/7] Verifying permissions..."
+  echo "  [Step 5/5] Verifying permissions..."
   # Count access rules (approximate verification)
   echo "  [OK] Permission cleanup complete"
 
