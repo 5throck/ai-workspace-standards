@@ -1,0 +1,1134 @@
+# PM.md Operations Design Guide
+
+## Part 1: Quick Start & Status (NEW - 최상단)
+
+### Quick Start Guide
+
+This section provides immediate guidance for different user personas and current implementation status.
+
+#### 🟢 Stable Path (v1.0.0 ONLY)
+**Target Audience**: First-time users, production environments
+**Availability**: Immediately usable, fully verified
+
+**New L2 Variant? 3-Step Quick Start (v1.0.0)**
+1. Create L2 template: `templates/co-new/agents/pm.md`
+2. Configure YAML (currently use `remove_sections`)
+3. Run `new-project.sh` to test scaffolding
+
+**L0 Role Leakage? 1-Minute Fix**
+- Check: Does generated pm.md contain "ai-workspace-standards"?
+- Fix: Add "## Role" to L1 `variant_overrides.remove_sections`
+
+#### 🟡 Experimental Path (v1.2.0 - v1.5.0+)
+**Target Audience**: Developers, experimental feature testing
+**Warning**: Includes unimplemented features, requires manual implementation
+
+**variant_sections Architecture (v1.2.0)**
+- **Status**: 📋 PROPOSED - Design complete, not implemented
+- **Effort**: Low (~30 minutes)
+- **Prerequisites**: None
+- **Note**: Remove implementation pending Phase 1+ completion
+
+**Layout Reconstruction (v1.5.0+)**
+- **Status**: 📋 PROPOSED - Architecture defined, not implemented
+- **Effort**: Medium (requires rewrite)
+- **Prerequisites**: v1.2.0 implementation complete
+
+#### 🔧 For Maintainers
+**Target Audience**: Documentation maintainers
+**Update Procedure**: See [Implementation Status Matrix](#implementation-status-matrix) below
+
+---
+
+### Implementation Status Matrix
+
+| Feature | Version | Status | Verified | Notes |
+|---------|---------|--------|----------|-------|
+| Three-Layer Architecture | 1.0.0 | ✅ Implemented | 2026-06-08 | All variants scaffolding correctly |
+| YAML Frontmatter | 1.0.0 | ✅ Implemented | 2026-06-08 | L1/L2 templates working |
+| L0→L1→L2 Extends Chain | 1.0.0 | ✅ Implemented | 2026-06-08 | Chain resolution functional |
+| Basic Extends Validation | 1.0.0 | ✅ Implemented | 2026-06-08 | Circular reference protection exists |
+| variant_sections Rename | 1.2.0 | 📋 Proposed | - | Low complexity, awaiting implementation |
+| Layout Reconstruction | 1.5.0+ | 📋 Proposed | - | Medium complexity, requires rewrite |
+| YAML Injection Security | 1.3.0 | 📋 Proposed | - | P0 priority, awaiting implementation |
+| Error Recovery Strategy | 1.3.0 | 📋 Proposed | - | P1 priority, awaiting implementation |
+| Edge Case Handling | 1.3.0 | 📋 Proposed | - | 10 cases documented, awaiting testing |
+
+---
+
+### Version Stability Guide
+
+| Version | Stability | Implementation Status | Production Ready | Notes |
+|---------|-----------|----------------------|------------------|-------|
+| v1.0.0 | 🟢 Stable | ✅ Fully Implemented | ✅ Yes | All features working |
+| v1.1.0 | 🟡 Partial | ✅ Basic extends | ⚠️ Limited | Basic chain resolution only |
+| v1.2.0 | 🔴 Proposed | 📋 Design Only | ❌ No | variant_sections not implemented |
+| v1.3.0 | 🔴 Proposed | 📋 Design Only | ❌ No | Security & error recovery not implemented |
+| v1.5.0+ | 🔴 Proposed | 📋 Architecture Only | ❌ No | Layout reconstruction not implemented |
+| v2.0.0+ | 🔴 Future | 📋 Roadmap Only | ❌ No | Long-term improvements (caching, observability) |
+
+---
+
+### User Intent-Based Navigation
+
+**"I want to add a new L2 variant"**
+→ 🟢 Stable Path → See [Layer Responsibilities](#layer-responsibilities) → Create L2 template with YAML config
+
+**"I want to upgrade existing variant to variant_sections"**
+→ 🟡 Experimental Path → See [YAML Frontmatter Schema](#yaml-frontmatter-schema) → Note: v1.2.0 not yet implemented
+
+**"I have L0 leakage problems"**
+→ 🟢 Stable Path → See [Common Pitfalls & Solutions](#common-pitfalls--solutions) → [Pitfall 1: L0 Role Leakage](#pitfall-1-l0-role-leakage)
+
+**"I want to understand the architecture"**
+→ See [Architecture Overview](#architecture-overview) → [ADR-0033](docs/adr/0033-l0-l1-l2-hierarchy.md)
+
+**"I'm implementing variant_sections"**
+→ 🟡 Experimental Path → See [ADR-0034](docs/adr/0034-pm-md-architecture-evolution.md) → Phase 1 implementation guide
+
+---
+
+## Part 2: Core Design Content
+
+## Document Information
+
+- **Status**: Final
+- **Version**: 1.2.0
+- **Last Updated**: 2026-06-08
+- **Authors**: Architect, Automation Engineer, Auditor (Joint Review)
+- **Related ADRs**: ADR-0031 (L1-L2 Fork Model), ADR-0033 (L0-L1-L2 Hierarchy)
+
+## Executive Summary
+
+This document provides comprehensive design guidelines for operating PM (Project Manager) agent configuration files (`pm.md`) across the three-layer template architecture (L0 workspace root → L1 common template → L2 variant templates). It addresses critical issues discovered during June 7-8, 2026, including L0 leakage, section duplication, and variant characteristic injection failures.
+
+## Table of Contents
+
+1. [Architecture Overview](#architecture-overview)
+2. [Layer Responsibilities](#layer-responsibilities)
+3. [YAML Frontmatter Schema](#yaml-frontmatter-schema)
+4. [Layout Reconstruction Process](#layout-reconstruction-process)
+5. [Scaffolding Integration](#scaffolding-integration)
+6. [Validation & QA Gates](#validation--qa-gates)
+7. [Common Pitfalls & Solutions](#common-pitfalls--solutions)
+
+---
+
+## Architecture Overview
+
+### Three-Layer Hierarchy
+
+The PM.md file structure follows ADR-0033's L0→L1→L2 extends chain:
+
+```
+L0 (Workspace Root)
+  ↓ extends
+L1 (Common Template)
+  ↓ extends
+L2 (Variant Template)
+  ↓ scaffolding
+Generated PM.md in New Project
+```
+
+**Key Principles**:
+
+1. **L0 (Workspace Root)**: Single source of truth for workspace governance, defines base PM orchestration rules for `ai-workspace-standards` repository maintenance
+2. **L1 (Common Template)**: Pure template with only extends directive and variant overrides, acts as intermediary between L0 and L2
+3. **L2 (Variant Template)**: YAML-only config file defining variant-specific characteristics, injected into generated projects via scaffolding
+
+### L1-L2 Fork Model (ADR-0031)
+
+After L2 scaffold creation from L1:
+- The L1→L2 relationship **ends**
+- L2 evolves independently
+- L1 changes do **not** auto-propagate to L2
+- To promote L2 changes back to template: explicit `l2-to-variant-pipeline.ts` execution
+
+---
+
+## Layer Responsibilities
+
+### L0: Workspace Root PM (`agents/pm.md`)
+
+**Purpose**: Define PM agent role for workspace standards repository maintenance
+
+**Content Structure**:
+```markdown
+---
+# Standard PM frontmatter (description, examples, etc.)
+---
+
+## Role
+You are the PM orchestrator for the **ai-workspace-standards repository**...
+
+## ⚠️ ROLE CLARIFICATION
+Your domain is maintaining cross-platform template scripts...
+
+## Agent Roster
+| Phase | Agent | Responsibility |
+|-------|--------|---------------|
+| 0 | scaffolding-expert | Project scaffolding |
+...
+
+## Governance Workflow
+Workspace-specific governance rules...
+
+## Dispatch Protocol
+Workspace dispatch rules...
+
+### Phase Determination (Deliverable-Type Gate)
+| Deliverable Type | → Phase | → Required Agent |
+...
+
+[Generic PM Rules]
+## Consensus-Driven Facilitation Model
+## Permission Denial Protocol
+## Execution Plan Boilerplate Policy
+...
+```
+
+**Key Sections**:
+- **L0-Specific Sections** (must be stripped in variants):
+  - `## Role`: References "ai-workspace-standards repository"
+  - `## ⚠️ ROLE CLARIFICATION`: Mentions "cross-platform template scripts"
+  - `## 🚨 YOU ARE THE SINGLE ENTRY POINT`: Domain-specific constraints
+  - `## Agent Roster`: L0-specific agents (automation-engineer, docs-writer, etc.)
+  - `## Governance Workflow`: Workspace-specific rules
+  - `## Dispatch Protocol`: Workspace dispatch logic
+  - `### Phase Determination (Deliverable-Type Gate)`: L0 agent mappings
+
+- **Generic Sections** (retained in variants with agent substitution):
+  - Consensus-Driven Facilitation Model
+  - Permission Denial Protocol
+  - Execution Plan Boilerplate Policy
+  - Task Tracking vs Execution
+  - User Communication
+
+### L1: Common Template (`templates/common/agents/pm.md`)
+
+**Purpose**: Pure extends file with variant override defaults
+
+**Structure**:
+```yaml
+---
+extends: ../../../agents/pm.md
+formal_name: Project Manager (PM) Agent
+variant_overrides:
+  # Sections to update with variant-specific characteristics
+  variant_sections:
+    - "## Governance Workflow"
+    - "## Updated Role"
+    - "## Agent Roster"
+    - "## Dispatch Protocol"
+    - "### Phase Determination (Deliverable-Type Gate)"
+  
+  # Default role definition (inherited by L2 variants)
+  role:
+    description: "You are the PM orchestrator for this project. You own the end-to-end workflow from triage to PR creation..."
+    scope: "Classify requests, dispatch specialist agents, synthesize findings, enforce quality gates"
+---
+```
+
+**Key Fields**:
+- `extends`: Path to L0 pm.md relative to template location
+- `variant_overrides.variant_sections`: List of L0 sections to update with variant-specific content
+- `variant_overrides.role`: Default role definition inherited by L2 variants
+
+**Body Content**: **EMPTY** (pure config file)
+
+### L2: Variant Template (`templates/co-*/agents/pm.md`)
+
+**Purpose**: Define variant-specific PM characteristics
+
+**Structure**:
+```yaml
+---
+extends: ../../common/agents/pm.md
+formal_name: Project Manager (PM) Agent
+variant_overrides:
+  # Sections to update with variant-specific characteristics
+  variant_sections:
+    - "## Governance Workflow"
+    - "## Updated Role"
+    - "## Agent Roster"
+    - "## Dispatch Protocol"
+    - "### Phase Determination (Deliverable-Type Gate)"
+  
+  # Variant-specific role definition
+  role:
+    description: "You are the PM orchestrator for this project..."
+    scope: "Classify requests, dispatch specialist agents..."
+  
+  # Agent roster (variant-specific agents)
+  agent_roster:
+    - phase: Triage
+      group: Strategy
+      agents:
+        - name: engagement-leader
+          file: agents/engagement-leader.md
+          responsibility: "Initial client assessment"
+    - phase: Analysis
+      group: Research
+      agents:
+        - name: industry-expert
+          responsibility: "Domain knowledge consultation"
+  
+  # Governance workflow (variant-specific rules)
+  governance_workflow:
+    phases: [0, 1, 2, 4, 5, 6]
+    client_approval_required: true
+  
+  # Dispatch protocol (variant-specific dispatch rules)
+  dispatch_protocol:
+    can_lead_phases: [0, 2, 6]
+    auto_dispatch_to: [engagement-leader, solutions-architect]
+---
+```
+
+**Body Content**: **EMPTY** (pure config file)
+
+**Override Fields**:
+- `variant_sections`: List of L0 sections to update with variant-specific content
+- `role`: Variant-specific role description and scope
+- `agent_roster`: Structured list of variant agents with phases, groups, responsibilities
+- `governance_workflow`: Variant-specific governance rules
+- `dispatch_protocol`: Variant dispatch rules
+
+---
+
+## YAML Frontmatter Schema
+
+### Base Schema (All Layers)
+
+```yaml
+---
+extends: string              # Path to parent pm.md file
+formal_name: string          # Display name
+description: string          # Short description
+examples: array             # Usage examples
+---
+```
+
+### L1/L2 Extended Schema (v1.2.0+)
+
+```yaml
+---
+variant_overrides:
+  # Sections to update with variant-specific content (v1.2.0+)
+  variant_sections:
+    - string              # Heading names to customize with variant content
+  
+  # Role definition
+  role:
+    description: string     # Variant-specific role description
+    scope: string          # Variant-specific scope
+  
+  # Agent roster (NEW in v1.5.0)
+  agent_roster:
+    - phase: string
+      group: string
+      agents:
+        - name: string
+          file?: string    # Default: agents/${name}.md
+          responsibility?: string
+  
+  # Governance rules
+  governance_workflow:
+    phases: array          # Active phase numbers
+    client_approval_required: boolean
+  
+  # Dispatch protocol
+  dispatch_protocol:
+    can_lead_phases: array
+    auto_dispatch_to: array
+  
+  # Frontmatter overrides (v1.4.0+)
+  frontmatter_overrides:
+    description: string
+    examples: array
+    # ... any top-level frontmatter key
+---
+```
+
+---
+
+## Layout Reconstruction Process
+
+### Problem Statement
+
+Prior to v1.5.0, the merge process had critical failures:
+1. **L0 Role Leakage**: L0 `## Role` section remained in variants, describing "ai-workspace-standards repository"
+2. **Agent Name Leakage**: L0 agent names (automation-engineer, docs-writer) appeared in variant constraints
+3. **Section Duplication**: `## Agent Roster`, `## Governance Workflow` appeared twice
+4. **Roster Format Issues**: No standard schema, inconsistent presentation
+
+### Solution: Layout Reconstruction (v1.5.0+)
+
+**Process Flow** (`merge-frontmatter.ts`):
+
+1. **Parse L0 Base Body**: Read L0 `agents/pm.md` content
+2. **Update L0 Custom Sections**: Replace variant-customizable sections with variant-specific content
+3. **Generate Variant Sections**: Dynamically build variant-specific content
+4. **Apply Agent Substitution**: Replace L0 agent names with variant equivalents in generic sections
+5. **Assemble Layout**: Reconstruct document in strict order
+
+### Update List
+
+These L0 sections are **always** updated with variant-specific content during PM.md merge:
+
+```typescript
+const PM_CUSTOM_SECTIONS = [
+  "## Role",
+  "## ⚠️ ROLE CLARIFICATION",
+  "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
+  "## Updated Role",
+  "## Governance Workflow",
+  "## Agent Roster",
+  "## Dispatch Protocol",
+  "## ⚠️ CRITICAL: PM Direct Execution Constraints",
+  "### Phase Determination (Deliverable-Type Gate)"
+];
+```
+
+### Generated Variant Sections
+
+**1. ## Role** (Prepend)
+```markdown
+## Role
+
+<variant_overrides.role.description>
+
+**Scope**: <variant_overrides.role.scope>
+```
+
+**2. ## ⚠️ ROLE CLARIFICATION** (Prepend, with agent substitution)
+```markdown
+## ⚠️ ROLE CLARIFICATION
+
+You are the PM orchestrator for this project. Your domain is [variant-specific domain].
+
+All file modifications MUST be dispatched to:
+- **[mapped design agent]** (design)
+- **[mapped execution agent]** (implementation)
+- **[mapped QA agent]** (testing)
+```
+
+**3. ## 🚨 YOU ARE THE SINGLE ENTRY POINT** (Prepend, with agent substitution)
+```markdown
+## 🚨 YOU ARE THE SINGLE ENTRY POINT
+
+Specialist agents ([mapped agents]) receive focused tasks via the Agent tool...
+```
+
+**4. ## Agent Roster** (Prepend, 4-column table)
+
+**Schema**:
+```typescript
+interface RosterEntry {
+  phase: string;          // Phase name
+  group: string;          // Agent group/category
+  name: string;           // Agent name
+  file?: string;          // Default: agents/${name}.md
+  responsibility?: string; // Default: ${group} specialist
+}
+```
+
+**Generated Table**:
+```markdown
+## Agent Roster
+
+| Phase | Group | Agent file | Responsibility |
+|-------|--------|------------|---------------|
+| Triage | Strategy | agents/engagement-leader.md | Initial client assessment |
+| Analysis | Research | agents/industry-expert.md | Domain knowledge |
+```
+
+**5. ## Governance Workflow** (Prepend)
+```markdown
+## Governance Workflow
+
+Active phases: <governance_workflow.phases>
+Client approval required: <governance_workflow.client_approval_required>
+```
+
+**6. ## ⚠️ CRITICAL: PM Direct Execution Constraints** (Prepend, with dynamic Phase Determination)
+
+**Phase Determination Table Generation**:
+```typescript
+const AGENT_TYPE_MAP = {
+  design: "mapped design agent from roster",
+  execution: "mapped execution agent from roster",
+  qa: "mapped QA agent from roster",
+  security: "mapped security agent from roster",
+  scaffolding: "mapped setup agent from roster"
+};
+```
+
+**Generated Table**:
+```markdown
+## ⚠️ CRITICAL: PM Direct Execution Constraints
+
+### Phase Determination (Deliverable-Type Gate)
+
+| Deliverable Type | → Phase | → Required Agent |
+|-----------------|---------|------------------|
+| New file design | Phase 1-2 | [mapped design agent] |
+| Script implementation | Phase 4 | [mapped execution agent] |
+| Testing | Phase 4 | [mapped QA agent] |
+```
+
+**7. ## Dispatch Protocol** (Prepend)
+```markdown
+## Dispatch Protocol
+
+Can lead phases: <dispatch_protocol.can_lead_phases>
+Auto-dispatch to: <dispatch_protocol.auto_dispatch_to>
+```
+
+**8. Retained Generic L0 Content** (with agent substitution)
+
+All remaining L0 sections (Consensus-Driven Facilitation, Denial Protocol, etc.) undergo **agent name substitution**:
+
+```typescript
+const AGENT_SUBSTITUTION_MAP = {
+  "automation-engineer": mappedExecutionAgent,
+  "docs-writer": mappedDocumentationAgent,
+  "architect": mappedDesignAgent,
+  "auditor": mappedQAAgent,
+  "security-expert": mappedSecurityAgent,
+  "scaffolding-expert": mappedSetupAgent
+};
+```
+
+### Final Layout Structure
+
+```markdown
+[FRONTMATTER]
+
+## Role (variant-specific)
+## ⚠️ ROLE CLARIFICATION (variant-specific, agent-substituted)
+## 🚨 YOU ARE THE SINGLE ENTRY POINT (variant-specific, agent-substituted)
+## Agent Roster (variant-specific, 4-column table)
+## Governance Workflow (variant-specific)
+## ⚠️ CRITICAL: PM Direct Execution Constraints (variant-specific, dynamic Phase Determination)
+## Dispatch Protocol (variant-specific)
+
+[Generic L0 Content with Agent Substitution]
+## Consensus-Driven Facilitation Model
+## Permission Denial Protocol
+## Execution Plan Boilerplate Policy
+...
+```
+
+---
+
+## Scaffolding Integration
+
+### Script Modifications (v1.5.0+)
+
+**Affected Scripts**:
+1. `scripts/helpers/merge-frontmatter.ts` (v1.5.0)
+2. `scripts/new-project.sh` (v1.4.7+)
+3. `scripts/create-l2-scaffold.ts`
+4. `scripts/l2-to-variant-pipeline.ts`
+5. `scripts/validate-templates.ts`
+
+### Key Changes
+
+**1. merge-frontmatter.ts v1.5.0**
+
+- **Force-Strip PM Custom Sections**: Automatically strip custom L0 sections for `agents/pm.md` files regardless of `remove_sections`
+- **Layout Reconstruction**: Assemble generated document in strict layout order
+- **Agent Substitution**: Replace L0 agent names in generic sections
+- **4-Column Roster Generation**: Standardized table format with Phase, Group, Agent file, Responsibility
+
+**2. new-project.sh v1.4.7+**
+
+```bash
+# Pass original template path for extends validation
+merge-frontmatter.ts "$src_file" "$target_file" "$src_file"
+```
+
+**3. validate-templates.ts Updates**
+
+- **L1 CLAUDE.md/GEMINI.md**: Removed from `forbiddenFiles` (consolidated in L1 per ADR-0033)
+- **L2 CLAUDE.md/GEMINI.md**: Not required (inherited from L1)
+- **PM.md Validation**: Check for L0 leakage and agent name contamination
+
+---
+
+## Validation & QA Gates
+
+### Automated Checks
+
+**1. L0 Leakage Detection** (`audit.ts`)
+
+```typescript
+// Check for L0-specific strings in generated pm.md
+const L0_INDICATORS = [
+  "ai-workspace-standards",
+  "workspace root",
+  "cross-platform template scripts"
+];
+```
+
+**2. Agent Name Validation**
+
+```typescript
+// L0 agent names should NOT appear in variant pm.md
+const L0_AGENTS = [
+  "automation-engineer",
+  "docs-writer",
+  "architect",
+  "auditor",
+  "security-expert",
+  "scaffolding-expert"
+];
+```
+
+**3. Roster Schema Validation**
+
+```typescript
+interface RosterValidation {
+  has_phase_column: boolean;
+  has_group_column: boolean;
+  has_agent_file_column: boolean;
+  has_responsibility_column: boolean;
+  no_duplicate_entries: boolean;
+  all_files_exist: boolean;
+}
+```
+
+### Manual Review Checklist
+
+- [ ] Generated `## Role` describes variant project, not "ai-workspace-standards repository"
+- [ ] `## Agent Roster` appears exactly once at document top
+- [ ] Roster has exactly 4 columns: Phase, Group, Agent file, Responsibility
+- [ ] Phase Determination table contains variant agent names only
+- [ ] No L0 agent names in any section
+- [ ] `variant_overrides` frontmatter is clean (not emitted to final file)
+- [ ] Document flows logically: Role → Roster → Workflow → Constraints → Protocol → Generic Rules
+
+---
+
+## ⚠️ Known Limitations
+
+This section documents current limitations in the PM.md operations implementation and design documentation. It distinguishes between **actually implemented features** and **proposed improvements**.
+
+### Current Implementation (v1.0.0 - v1.1.0)
+
+**Security**:
+- ❌ **No YAML injection protection**: Path traversal attacks (`../../../etc/passwd`) not blocked
+- ❌ **No external URL validation**: Malicious external extends (`https://evil.com/pm.md`) not blocked
+- ❌ **No agent path validation**: Agent file paths not validated against white-list
+- ⚠️ **Security validations pending**: Phase 1+ (v1.3.0) will implement YAML injection protection
+
+**Error Handling**:
+- ❌ **No structured error types**: Errors not classified as recoverable vs unrecoverable
+- ❌ **No fallback mechanism**: Missing files cause complete failure instead of graceful degradation
+- ❌ **Limited edge case handling**: Only basic extends resolution, 10 identified edge cases not covered
+- ❌ **No recovery suggestions**: Error messages don't include actionable recovery steps
+- ⚠️ **Error recovery pending**: Phase 1+ (v1.3.0) will implement comprehensive error recovery
+
+**Performance**:
+- ❌ **No caching mechanism**: Every extends resolution hits filesystem (performance bottleneck in large-scale scaffolding)
+- ❌ **No performance monitoring**: No metrics for cache hit rate, resolution time, or chain depth
+- ❌ **No observability**: No structured logging for debugging or performance analysis
+- ⚠️ **Caching pending**: Phase 3 (v2.0.0) will implement LRU cache with 50%+ performance improvement target
+
+**Validation**:
+- ✅ **Basic extends validation**: Circular reference detection exists (visited Set, depth limit)
+- ❌ **No comprehensive edge case testing**: 10 edge cases documented but not yet tested
+- ❌ **No security validation tests**: Path traversal and external URL attacks not tested
+- ⚠️ **Edge case testing pending**: Phase 1+ (v1.3.0) will achieve 100% edge case test coverage
+
+**Architecture**:
+- ⚠️ **Over-engineering in proposed v1.5.0+**: Layout Reconstruction Process proposes 8-step process (300-400 lines) when 3-step process (80-100 lines) is sufficient
+- ⚠️ **Schema redundancy**: 4-column Agent Roster schema when 3-column schema is simpler
+- ⚠️ **Variant_sections ambiguity**: "update" semantics not clearly defined (prepend vs replace vs append)
+- ⚠️ **Architecture simplification pending**: Phase 1+ (v1.3.0) will implement simplified architecture
+
+### Documentation Gaps
+
+**Version Status Confusion**:
+- ⚠️ **Document marked "Final" but describes unimplemented features**: v1.2.0 "Final" document describes v1.5.0+ features that don't exist
+- ⚠️ **Implementation Status Matrix shows clear reality**: This "Known Limitations" section addresses documentation-reality mismatch
+- ⚠️ **Version Stability Guide clarifies production readiness**: Only v1.0.0 is production-ready
+
+**Migration Notes**:
+- ⚠️ **v1.2.0 variant_sections documented but not implemented**: Feature appears in design but not in code
+- ⚠️ **v1.5.0+ Layout Reconstruction proposed but requires rewrite**: Not yet actionable
+- ⚠️ **Breaking changes deferred to v2.0.0**: Extensibility and internationalization require major version bump
+
+**Testing Coverage**:
+- ⚠️ **Current test coverage**: Unknown (audit.ts exists but coverage not measured)
+- ⚠️ **Target coverage**: Phase 1+ aims for 90%+ (80%+ base + 100% edge cases + 100% security)
+- ⚠️ **Integration testing gaps**: No comprehensive integration tests for all 5 variants
+
+### Roadmap Clarity
+
+**Phase 1+ (v1.3.0): Security & Stability** - **Priority: P0-P1**
+- **Timeline**: Immediate (7-9 hours estimated)
+- **Deliverables**: 
+  - YAML injection protection
+  - Circular reference protection enhancement
+  - variant_sections semantic definition
+  - Error recovery strategy
+  - Edge case documentation (10 cases)
+  - Comprehensive test suites
+- **Status**: 📋 Proposed, awaiting implementation
+
+**Phase 2+ (v1.6.0): Simplification** - **Priority: P2**
+- **Timeline**: Short-term (4-7 hours estimated)
+- **Deliverables**:
+  - Agent Roster schema simplification (4→3 columns)
+  - Layout reconstruction simplification (8→3 steps, 60-70% code reduction)
+  - Optional: Caching strategy
+  - Optional: Observability
+- **Status**: 📋 Proposed, awaiting Phase 1+ completion
+
+**Phase 3+ (v2.0.0): Performance & Operations** - **Priority: P2**
+- **Timeline**: Long-term (6-12 months)
+- **Status**: Documented in [Long-term Roadmap (v2.0.0+)](#long-term-roadmap-v200-long-term)
+
+**Phase 4+ (v2.5.0+): Extensibility & i18n** - **Priority: P3**
+- **Timeline**: Long-term (12-18 months)
+- **Status**: Documented in [Long-term Roadmap (v2.0.0+)](#long-term-roadmap-v200-long-term)
+
+---
+
+## Common Pitfalls & Solutions
+
+### Pitfall 1: L0 Role Leakage
+
+**Problem**: Generated pm.md still says "You are the PM orchestrator for the **ai-workspace-standards repository**"
+
+**Root Cause**: `## Role` section not in `variant_overrides.variant_sections`
+
+**Solution**: 
+- Ensure L1 `templates/common/agents/pm.md` includes `## Role` in `variant_overrides.variant_sections`
+- Verify `merge-frontmatter.ts` updates custom PM sections with variant content
+
+### Pitfall 2: Agent Name Duplication
+
+**Problem**: `## Agent Roster` appears twice, or L0 agent names appear in variant constraints
+
+**Root Cause**: 
+- L0 sections not stripped before variant injection
+- Agent substitution not applied to generic sections
+
+**Solution**:
+- Use Layout Reconstruction (v1.5.0+) to completely rebuild custom sections
+- Apply agent substitution map to retained generic content
+
+### Pitfall 3: Phase Determination Table Leakage
+
+**Problem**: Table under Constraints still shows L0 agents (automation-engineer, docs-writer)
+
+**Root Cause**: Hard-coded L0 mappings in `### Phase Determination` section
+
+**Solution**:
+- Change L0 bullet `- **Phase Determination**:` to proper heading `### Phase Determination`
+- Dynamically generate table from variant `agent_roster` with agent type mapping
+
+### Pitfall 4: Variant Role Not Inherited
+
+**Problem**: L2 variants lack fallback role description
+
+**Root Cause**: L1 doesn't define default `variant_overrides.role`
+
+**Solution**:
+- Add default role block to L1 `templates/common/agents/pm.md`
+- L2 variants inherit by default, can override with own `variant_overrides.role`
+
+### Pitfall 5: Frontmatter Stagnation
+
+**Problem**: Top-level frontmatter (`description`, `examples`) not overridden in variants
+
+**Root Cause**: `variant_overrides` structure doesn't support top-level key override
+
+**Solution**:
+- Use `frontmatter_overrides` nested key (v1.4.0+):
+  ```yaml
+  variant_overrides:
+    frontmatter_overrides:
+      description: "Variant-specific description"
+      examples: ["variant-specific example"]
+  ```
+
+### Pitfall 6: Variant Sections Structure
+
+**Problem**: Confusion about the naming and purpose of section customization
+
+**Root Cause**: Historical terminology focused on "removal" rather than "customization"
+
+**Solution** (v1.2.0+):
+- **Positive terminology**: `variant_sections` instead of `remove_sections`
+- **Clear semantics**: Sections listed are "updated with variant characteristics," not "removed"
+- **Single source of truth**: `variant_overrides.variant_sections` for all section customization
+- **Backward compatibility**: Scripts support both `remove_sections` and `variant_sections` (legacy support)
+- **Documentation standard**: Use `variant_overrides.variant_sections` for clarity and consistency
+
+---
+
+## Appendix: Meeting References
+
+### June 7, 2026 Meetings
+
+1. **Template Structure & L1-L2 Redesign** (`meeting-2026-06-07-template-structure-l1-l2-variant-management-redesign.md`)
+   - Decision: L1 as pure extends file, L2 as YAML-only config
+   - File naming: Keep `pm.md`, not `variant.pm.md`
+
+2. **PM Variant File Naming Alternatives** (`meeting-2026-06-07-pm-variant-file-naming-alternatives.md`)
+   - Evaluated 7 alternative structures
+   - Final agreement: YAML frontmatter + empty body
+
+### June 8, 2026 Meetings
+
+1. **PM Variant Sections** (`meeting-2026-06-08-pm-variant-sections.md`)
+   - Root cause analysis: L0 sections not in `remove_sections`
+   - Solution: Expanded strip list, prepend variant sections
+
+2. **Joint Review** (`meeting-2026-06-08-pm-variant-joint-review.md`)
+   - 4-layer failure analysis
+   - Layout reconstruction architecture
+
+3. **Logic Review** (`meeting-2026-06-08-pm-logic-review.md`)
+   - Duplication resolution
+   - 4-column roster schema
+   - Agent substitution mapping
+
+---
+
+## Long-term Roadmap (v2.0.0+)
+
+This section outlines long-term improvement opportunities identified during June 8, 2026 design reviews. These items are **not part of immediate implementation (Phase 1+/2+)** but represent strategic directions for future evolution.
+
+### Phase 3: Performance & Operations (v2.0.0, Priority: P2)
+
+**Timeline**: 6-12 months after Phase 2+ completion
+**Expected Effort**: 2-3 weeks
+
+**A. Caching Strategy**
+
+**Objective**: Optimize performance for large-scale scaffolding operations
+
+**Proposed Implementation**:
+```typescript
+// LRU Cache for extends chain resolution
+const extendsCache = new LRUCache({ 
+  max: 100,
+  ttl: 1000 * 60 * 60  // 1 hour TTL
+});
+
+function resolveExtendsChainWithCache(filePath, useCache = true) {
+  if (useCache && extendsCache.has(filePath)) {
+    monitor.cacheHit++;
+    return extendsCache.get(filePath);
+  }
+  
+  monitor.cacheMiss++;
+  const result = resolveExtendsChain(filePath);
+  
+  if (useCache) {
+    extendsCache.set(filePath, result);
+  }
+  
+  return result;
+}
+```
+
+**Performance Targets**:
+- Cache hit rate: 50%+ for repeated scaffolding
+- Average resolution time: <10ms (cached) vs <100ms (uncached)
+- Memory overhead: <10MB for 100-entry cache
+
+**Activation Strategy**:
+- Development: Cache disabled by default (`CACHE=false`)
+- Production: Cache enabled by default
+- CLI flag: `--no-cache` to bypass when needed
+
+---
+
+**B. Observability & Monitoring**
+
+**Objective**: Enable operational monitoring and debugging
+
+**Proposed Implementation**:
+```typescript
+// Structured logging
+interface ResolutionLog {
+  timestamp: string;
+  level: "debug" | "info" | "warn" | "error";
+  event: string;
+  data: Record<string, unknown>;
+}
+
+class ExtendsResolver {
+  private logger: StructuredLogger;
+  
+  resolve(filePath: string) {
+    const startTime = performance.now();
+    
+    try {
+      const result = this.resolveInternal(filePath);
+      
+      this.logger.log({
+        timestamp: new Date().toISOString(),
+        level: "info",
+        event: "resolve_success",
+        data: {
+          path: filePath,
+          depth: this.currentDepth,
+          duration: performance.now() - startTime
+        }
+      });
+      
+      return result;
+    } catch (error) {
+      this.logger.log({
+        timestamp: new Date().toISOString(),
+        level: "error",
+        event: "resolve_error",
+        data: {
+          path: filePath,
+          error: error.message,
+          duration: performance.now() - startTime
+        }
+      });
+      
+      throw error;
+    }
+  }
+}
+```
+
+**Monitoring Metrics**:
+- Cache hit rate
+- Average resolution time
+- Max chain depth observed
+- Error rate by type
+
+**Activation Strategy**:
+- Development: `DEBUG=1` enables verbose logging
+- Production: Structured logs to file only on error
+- CLI flag: `--debug` for temporary activation
+
+---
+
+### Phase 4: Extensibility & Internationalization (v2.5.0+, Priority: P3)
+
+**Timeline**: 12-18 months after Phase 3 completion
+**Expected Effort**: 3-4 weeks
+
+**A. Extensibility Design**
+
+**Objective**: Enable plugin-like extension for custom section processors
+
+**Proposed Architecture**:
+```typescript
+interface SectionProcessor {
+  type: string;
+  priority: number;
+  process(content: string, config: any, context: ProcessingContext): string;
+}
+
+class SectionProcessorRegistry {
+  private processors: Map<string, SectionProcessor> = new Map();
+  
+  register(processor: SectionProcessor) {
+    this.processors.set(processor.type, processor);
+  }
+  
+  apply(content: string, config: any, context: ProcessingContext): string {
+    const sorted = Array.from(this.processors.values())
+      .sort((a, b) => a.priority - b.priority);
+    
+    let result = content;
+    for (const processor of sorted) {
+      if (config[processor.type]) {
+        result = processor.process(result, config[processor.type], context);
+      }
+    }
+    
+    return result;
+  }
+}
+
+// Built-in processors
+registry.register({
+  type: "variant_sections",
+  priority: 100,
+  process: processVariantSections
+});
+
+// Future custom processors (example)
+registry.register({
+  type: "section_append",
+  priority: 200,
+  process: processSectionAppend
+});
+
+registry.register({
+  type: "section_wrap",
+  priority: 300,
+  process: processSectionWrap
+});
+```
+
+**Extension Points**:
+1. Custom section types beyond `variant_sections`
+2. Custom content transformations
+3. Custom validation rules
+4. Custom merge strategies
+
+---
+
+**B. Internationalization (i18n) Support**
+
+**Objective**: Enable multi-language YAML field names and error messages
+
+**Proposed Implementation**:
+```typescript
+// Locale configuration
+interface LocaleConfig {
+  code: string;
+  fieldNames: {
+    variant_sections: string;
+    section: string;
+    action: string;
+    agent_roster: string;
+  };
+  errorMessages: Record<string, string>;
+}
+
+const LOCALES: Record<string, LocaleConfig> = {
+  'en': {
+    code: 'en',
+    fieldNames: {
+      variant_sections: 'variant_sections',
+      section: 'section',
+      action: 'action',
+      agent_roster: 'agent_roster'
+    },
+    errorMessages: {
+      CIRCULAR_REFERENCE: "Circular reference detected: {path}",
+      MISSING_FILE: "File not found: {path}"
+    }
+  },
+  
+  'ko': {
+    code: 'ko',
+    fieldNames: {
+      variant_sections: 'variant_섹션',
+      section: '섹션',
+      action: '동작',
+      agent_roster: '에이전트_명단'
+    },
+    errorMessages: {
+      CIRCULAR_REFERENCE: "순환 참조가 감지되었습니다: {path}",
+      MISSING_FILE: "파일을 찾을 수 없습니다: {path}"
+    }
+  },
+  
+  'ja': {
+    code: 'ja',
+    fieldNames: {
+      variant_sections: 'variant_セクション',
+      section: 'セクション',
+      action: 'アクション',
+      agent_roster: 'エージェント_名簿'
+    },
+    errorMessages: {
+      CIRCULAR_REFERENCE: "循環参照が検出されました: {path}",
+      MISSING_FILE: "ファイルが見つかりません: {path}"
+    }
+  }
+};
+
+// Locale-aware parsing
+function parseLocalizedYAML(content: string, locale: string = 'en') {
+  const config = LOCALES[locale] || LOCALES['en'];
+  
+  // Parse with localized field names
+  const parsed = parseYAML(content);
+  
+  // Map localized fields to canonical names
+  return {
+    variant_sections: parsed[config.fieldNames.variant_sections] || 
+                       parsed.variant_sections,
+    // ... other field mappings
+  };
+}
+
+// Localized error messages
+function getLocalizedMessage(key: string, params: Record<string, string>, locale: string = 'en') {
+  const config = LOCALES[locale] || LOCALES['en'];
+  let message = config.errorMessages[key] || key;
+  
+  // Replace placeholders
+  for (const [param, value] of Object.entries(params)) {
+    message = message.replace(`{${param}}`, value);
+  }
+  
+  return message;
+}
+```
+
+**Activation Strategy**:
+- Default: English (en)
+- Config: `locale: 'ko'` in workspace config
+- CLI flag: `--locale ja` for temporary override
+- Detection: Auto-detect from system locale if not specified
+
+**Translation Requirements**:
+- Field names: Translate YAML keys
+- Error messages: Translate all user-facing messages
+- Documentation: Provide translated guides for major languages
+
+---
+
+### Strategic Considerations
+
+**Trade-offs**:
+
+| Area | Benefit | Cost | Recommendation |
+|------|---------|------|----------------|
+| Caching | 50%+ performance improvement | Memory overhead (~10MB) | **Implement** with configurable limits |
+| Observability | Better debugging | Logging overhead | **Implement** with DEBUG-only activation |
+| Extensibility | Plugin ecosystem | Complexity increase | **Defer** until explicit demand |
+| Internationalization | Multi-language support | Translation maintenance | **Defer** until non-English adoption |
+
+**Dependency Management**:
+- Caching → Requires no breaking changes
+- Observability → Requires no breaking changes
+- Extensibility → **Breaking change**: v1.x → v2.0
+- Internationalization → **Breaking change**: v1.x → v2.0
+
+**Recommendation**:
+- Phase 3 (P2): Implement progressively with backward compatibility
+- Phase 4 (P3): Major version bump (v2.0.0) with migration guide
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.3.0 | 2026-06-08 | Added Long-term Roadmap (v2.0.0+) section with Phase 3/4 strategic plans |
+| 1.2.0 | 2026-06-08 | Renamed `remove_sections` → `variant_sections` for positive semantics ("customization" not "removal") |
+| 1.1.0 | 2026-06-08 | Unified `remove_sections` under `variant_overrides` for consistent schema |
+| 1.0.0 | 2026-06-08 | Initial release based on June 7-8 meeting resolutions |
+
+---
+
+## Related Documents
+
+- **ADR-0031**: L1-L2 Fork Model
+- **ADR-0033**: L0-L1-L2 Hierarchy and Extends
+- **CONSTITUTION.md §5**: Multi-Agent Architecture
+- **AGENTS.md**: PM Agent Architecture Section
+
+---
+
+*End of Document*

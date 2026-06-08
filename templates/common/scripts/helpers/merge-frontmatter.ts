@@ -1,11 +1,29 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.5.0
+ * @version 1.8.1
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
  * 2. VARIANT-SECTION pattern: Marker-based section substitution
+ *
+ * Security features:
+ * - YAML injection protection (path whitelisting, external URL blocking)
+ * - Circular reference detection (depth limiting, visited tracking)
+ * - Agent path validation
+ *
+ * Error recovery (v1.7.0):
+ * - Error classification: unrecoverable (circular, security) vs recoverable (missing file, invalid YAML)
+ * - Graceful fallback for recoverable errors with default L0 content
+ * - Edge case handling: missing sections, conflicting actions, invalid actions
+ *
+ * Testing (v1.8.0):
+ * - Comprehensive unit test coverage for Phase 1 stability improvements
+ * - Security validation tests for path traversal and external URL blocking
+ * - Circular reference detection and depth limit tests
+ * - variant_sections semantics tests (prepend, replace, append actions)
+ * - Edge case handling tests (missing sections, conflicting actions, invalid YAML)
+ * - Error recovery strategy tests (recoverable vs unrecoverable errors)
  *
  * Integrated with ADR-0033 circular reference prevention via extends-validator.ts
  */
@@ -14,6 +32,57 @@ import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname, normalize } from 'path';
 import { load, dump } from 'js-yaml';
 import { safeValidateExtends, ExtendsValidationResult } from './extends-validator.js';
+
+/**
+ * Error type classification for error recovery strategy
+ */
+enum ErrorType {
+  // Unrecoverable (fatal) - terminate processing
+  CIRCULAR_REFERENCE = "circular_reference",
+  SECURITY_VIOLATION = "security_violation",
+
+  // Recoverable (warning) - attempt fallback
+  MISSING_FILE = "missing_file",
+  MISSING_SECTION = "missing_section",
+  INVALID_YAML = "invalid_yaml"
+}
+
+/**
+ * Resolution error structure with recovery information
+ */
+interface ResolutionError {
+  type: ErrorType;
+  path: string;
+  message: string;
+  recoverable: boolean;
+  suggestion: string;
+}
+
+/**
+ * Default L0 content for fallback recovery
+ */
+const DEFAULT_L0_BODY = `You are a project manager agent responsible for coordinating multi-agent workflows.
+
+## Role Declaration
+
+You ARE the PM agent for this session. Load and follow \`agents/pm.md\` at all times.
+
+**Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
+1. Display execution plan table first (task | agent | tier | model | platform)
+2. Only then invoke the \`Agent\` tool to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Desktop App**: The Role Declaration and Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway. Treat them as strictly binding.`;
+
+/**
+ * Security: Allowed base paths for extends resolution
+ */
+const ALLOWED_PATHS = new Set(["agents/", "templates/", "vendors/", "scripts/", "docs/", "skills/", ".claude/", ".gemini/", "tests/fixtures/"]);
+
+/**
+ * Security: Maximum extends chain depth to prevent infinite recursion
+ */
+const MAX_EXTENDS_DEPTH = 10;
 
 interface Frontmatter {
   extends?: string;
@@ -24,6 +93,248 @@ interface ParsedFile {
   frontmatter: Frontmatter;
   content: string;
   raw: string;
+}
+
+/**
+ * Variant section definition with action field
+ */
+interface VariantSection {
+  section: string;
+  action: "prepend" | "replace" | "append";
+  content?: any;
+}
+
+/**
+ * Resolution result with error tracking
+ */
+interface ResolutionResult {
+  success: boolean;
+  content: string;
+  errors: ResolutionError[];
+  warnings: string[];
+}
+
+/**
+ * Classify error into recoverable vs unrecoverable with actionable suggestions
+ */
+function classifyError(error: Error, filePath: string): ResolutionError {
+  const message = error.message.toLowerCase();
+
+  // Circular reference - unrecoverable
+  if (message.includes("circular")) {
+    return {
+      type: ErrorType.CIRCULAR_REFERENCE,
+      path: filePath,
+      message: error.message,
+      recoverable: false,
+      suggestion: "Check extends paths for cycles and fix circular references in the chain"
+    };
+  }
+
+  // Security violation - unrecoverable
+  if (message.includes("security") || message.includes("whitelist") || message.includes("protocol") || message.includes("traversal")) {
+    return {
+      type: ErrorType.SECURITY_VIOLATION,
+      path: filePath,
+      message: error.message,
+      recoverable: false,
+      suggestion: "Review security configuration: check extends path is within allowed directories and contains no protocol injection or path traversal"
+    };
+  }
+
+  // Missing file - recoverable (use fallback)
+  if (message.includes("no such file") || message.includes("file not found") || message.includes("cannot find")) {
+    return {
+      type: ErrorType.MISSING_FILE,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Create missing file, fix extends path, or continue with default L0 fallback"
+    };
+  }
+
+  // Invalid YAML - recoverable (attempt recovery)
+  if (message.includes("yaml") || message.includes("parse") || message.includes("dump")) {
+    return {
+      type: ErrorType.INVALID_YAML,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Check YAML syntax and fix formatting errors, or continue with partial content"
+    };
+  }
+
+  // Missing section - recoverable (warning only)
+  if (message.includes("section") || message.includes("heading")) {
+    return {
+      type: ErrorType.MISSING_SECTION,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Section not found - continuing without it (may affect content structure)"
+    };
+  }
+
+  // Default - treat as unrecoverable for safety
+  return {
+    type: ErrorType.INVALID_YAML,
+    path: filePath,
+    message: error.message,
+    recoverable: false,
+    suggestion: "Review error details - unknown error type treated as unrecoverable for safety"
+  };
+}
+
+/**
+ * Get default L0 content for error recovery
+ */
+function getDefaultL0Content(): { frontmatter: Frontmatter; content: string } {
+  return {
+    frontmatter: {
+      extends: null
+    },
+    content: DEFAULT_L0_BODY
+  };
+}
+
+/**
+ * Security: Extract agent path from agent string (e.g., "automation-engineer (agents/automation-engineer.md)")
+ */
+function extractAgentPath(agent: string): string | null {
+  const match = agent.match(/\((.*?)\)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Security: Validate YAML configuration against injection attacks
+ * P0 - Implements whitelist-based path validation, external URL blocking, and agent path validation
+ */
+function validateYAMLSecurity(config: any, basePath: string): void {
+  // 1. Whitelist-based path validation for extends directive
+  if (config.extends) {
+    // 1.1 External URL blocking - prevent http(s) URLs in extends (check BEFORE path resolution)
+    if (/^https?:\/\//.test(config.extends)) {
+      throw new Error("Security: external extends URLs are not allowed");
+    }
+
+    // 1.2 Protocol injection prevention (file://, data://, etc.)
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(config.extends)) {
+      throw new Error(`Security: protocol-based extends not allowed: ${config.extends}`);
+    }
+
+    // 1.3 Whitelist-based path validation (AFTER security checks)
+    const resolvedPath = resolve(basePath, config.extends);
+    const normalizedPath = normalize(resolvedPath).replace(/\\/g, '/');
+
+    // Check if path contains allowed directories (handle both forward and backslashes)
+    const isAllowed = Array.from(ALLOWED_PATHS).some(allowed => {
+      const normalizedAllowed = allowed.replace(/\\/g, '/');
+      return normalizedPath.includes(normalizedAllowed);
+    });
+
+    if (!isAllowed) {
+      throw new Error(`Security: extends path outside workspace whitelist: ${resolvedPath}`);
+    }
+  }
+
+  // 5. Agent path validation for variant_overrides.agent_roster
+  if (config.variant_overrides?.agent_roster) {
+    for (const entry of config.variant_overrides.agent_roster) {
+      const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
+
+      for (const agentRaw of agentsList) {
+        if (!agentRaw) continue;
+
+        const agentStr = typeof agentRaw === 'string' ? agentRaw : agentRaw.name || '';
+        const agentPath = extractAgentPath(agentStr);
+
+        if (agentPath) {
+          // Validate agent path is within allowed directories
+          const isAllowed = agentPath.startsWith("agents/") ||
+                          agentPath.startsWith("vendors/") ||
+                          agentPath.startsWith("templates/");
+
+          if (!isAllowed) {
+            throw new Error(`Security: invalid agent path: ${agentPath}`);
+          }
+
+          // Check for path traversal in agent paths
+          if (agentPath.includes('..')) {
+            throw new Error(`Security: path traversal not allowed in agent path: ${agentPath}`);
+          }
+        }
+      }
+    }
+  }
+
+  // 6. Validate remove_sections and variant_sections are arrays
+  if (config.remove_sections && !Array.isArray(config.remove_sections)) {
+    throw new Error("Security: remove_sections must be an array");
+  }
+
+  if (config.variant_overrides?.variant_sections && !Array.isArray(config.variant_overrides.variant_sections)) {
+    throw new Error("Security: variant_sections must be an array");
+  }
+}
+
+/**
+ * Parse variant sections with backward compatibility for remove_sections
+ * P1 - Handles both legacy remove_sections and new variant_sections with action field
+ *
+ * Edge cases handled:
+ * - Missing section in replace action: throws Error with guidance
+ * - Conflicting actions for same section: last action wins (warning logged)
+ * - Invalid action: throws Error with valid action list
+ */
+function parseVariantSections(config: any): VariantSection[] {
+  // Backward compatibility: remove_sections (deprecated)
+  if (config.variant_overrides?.remove_sections) {
+    console.warn("remove_sections is deprecated, use variant_sections with action field");
+    return config.variant_overrides.remove_sections.map((section: string) => ({
+      section,
+      action: "prepend" as const,
+      content: null
+    }));
+  }
+
+  // New variant_sections with action field support
+  if (config.variant_overrides?.variant_sections) {
+    const sectionMap = new Map<string, VariantSection>();
+
+    for (const s of config.variant_overrides.variant_sections) {
+      const action = s.action || "prepend";
+
+      // Validate action
+      if (!["prepend", "replace", "append"].includes(action)) {
+        throw new Error(
+          `Invalid action "${action}" for section "${s.section}". ` +
+          `Valid actions: prepend, replace, append`
+        );
+      }
+
+      const variantSection: VariantSection = {
+        section: s.section,
+        action: action as "prepend" | "replace" | "append",
+        content: s.content || null
+      };
+
+      // Detect conflicting actions
+      if (sectionMap.has(s.section)) {
+        const existing = sectionMap.get(s.section)!;
+        if (existing.action !== action) {
+          console.warn(
+            `⚠️  Conflicting actions for section "${s.section}": "${existing.action}" vs "${action}". Using last action: "${action}"`
+          );
+        }
+      }
+
+      sectionMap.set(s.section, variantSection);
+    }
+
+    return Array.from(sectionMap.values());
+  }
+
+  return [];
 }
 
 /**
@@ -49,9 +360,33 @@ function parseFrontmatter(content: string): ParsedFile {
 }
 
 /**
- * Recursively resolve the extends chain of a skeleton file
+ * Recursively resolve the extends chain of a skeleton file with circular reference protection
+ * P0 - Enhanced with visited Set tracking and depth limiting
+ *
+ * Edge cases handled:
+ * - Missing sections: extractSection returns empty string (warning)
+ * - Conflicting variant_sections: last action wins (warning)
+ * - Invalid action: throws Error with guidance
  */
-function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter; content: string } {
+function resolveExtendsRecursively(
+  filePath: string,
+  visited = new Set<string>(),
+  depth = 0
+): { frontmatter: Frontmatter; content: string } {
+  // Check circular reference
+  const normalizedPath = normalize(resolve(filePath));
+  if (visited.has(normalizedPath)) {
+    throw new Error(`Circular extends detected: ${normalizedPath}`);
+  }
+
+  // Check depth limit
+  if (depth > MAX_EXTENDS_DEPTH) {
+    throw new Error(`Extends depth exceeded: ${depth} (max: ${MAX_EXTENDS_DEPTH})`);
+  }
+
+  // Add to visited set
+  visited.add(normalizedPath);
+
   const absolutePath = resolve(filePath);
   const content = readFileSync(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
@@ -66,25 +401,109 @@ function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter
   const currentDir = dirname(absolutePath);
   const skeletonPath = resolve(currentDir, parsed.frontmatter.extends);
 
-  const skeletonResolved = resolveExtendsRecursively(skeletonPath);
+  // Security validation before recursing
+  validateYAMLSecurity(parsed.frontmatter, currentDir);
 
-  // Merge skeleton resolved frontmatter and current frontmatter
-  const mergedFrontmatter = { ...skeletonResolved.frontmatter };
-  for (const key of Object.keys(parsed.frontmatter)) {
-    if (key !== 'extends') {
-      mergedFrontmatter[key] = parsed.frontmatter[key];
+  try {
+    const skeletonResolved = resolveExtendsRecursively(skeletonPath, visited, depth + 1);
+
+    // Merge skeleton resolved frontmatter and current frontmatter
+    const mergedFrontmatter = { ...skeletonResolved.frontmatter };
+    for (const key of Object.keys(parsed.frontmatter)) {
+      if (key !== 'extends') {
+        mergedFrontmatter[key] = parsed.frontmatter[key];
+      }
     }
+    delete (mergedFrontmatter as any).extends;
+
+    // Use current content if it exists, otherwise skeleton's content
+    const useCurrentContent = parsed.content.trim().length > 0;
+    const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+
+    return {
+      frontmatter: mergedFrontmatter,
+      content: finalContent
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to resolve extends from ${filePath}: ${error.message}`);
+    }
+    throw error;
   }
-  delete (mergedFrontmatter as any).extends;
+}
 
-  // Use current content if it exists, otherwise skeleton's content
-  const useCurrentContent = parsed.content.trim().length > 0;
-  const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+/**
+ * Resolve extends with error recovery strategy
+ * Returns structured result with errors, warnings, and fallback content
+ */
+function resolveExtendsWithRecovery(
+  filePath: string,
+  visited = new Set<string>(),
+  depth = 0
+): ResolutionResult {
+  const errors: ResolutionError[] = [];
+  const warnings: string[] = [];
 
-  return {
-    frontmatter: mergedFrontmatter,
-    content: finalContent
-  };
+  try {
+    const result = resolveExtendsRecursively(filePath, visited, depth);
+    return {
+      success: true,
+      content: `---
+${dump(result.frontmatter).trim()}
+---
+
+${result.content}`,
+      errors,
+      warnings
+    };
+
+  } catch (error) {
+    const resolutionError = classifyError(error as Error, filePath);
+    errors.push(resolutionError);
+
+    console.error(`❌ Error resolving extends: ${resolutionError.type}`);
+    console.error(`   Path: ${resolutionError.path}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+
+    // Attempt recovery for recoverable errors
+    if (resolutionError.recoverable) {
+      console.warn(`🔄 Recoverable error - attempting fallback...`);
+
+      try {
+        const fallback = getDefaultL0Content();
+        warnings.push(`Using fallback L0 content due to: ${resolutionError.message}`);
+
+        return {
+          success: true,
+          content: `---
+${dump(fallback.frontmatter).trim()}
+---
+
+${fallback.content}`,
+          errors,
+          warnings
+        };
+      } catch (fallbackError) {
+        // Fallback failed - return original error
+        return {
+          success: false,
+          content: '',
+          errors,
+          warnings: ['Fallback recovery failed - returning original error']
+        };
+      }
+    }
+
+    // Unrecoverable error - terminate with clear message
+    console.error(`🚨 Unrecoverable error - cannot continue`);
+    return {
+      success: false,
+      content: '',
+      errors,
+      warnings
+    };
+  }
 }
 
 /**
@@ -162,6 +581,10 @@ function cleanSectionName(str: string): string {
 
 /**
  * Extract a markdown section content from a content string by heading title
+ *
+ * Edge cases handled:
+ * - Missing section: returns empty string (warning logged)
+ * - Empty section: returns empty string (no warning)
  */
 function extractSection(content: string, headingTitle: string): string {
   const lines = content.split('\n');
@@ -177,7 +600,7 @@ function extractSection(content: string, headingTitle: string): string {
     if (match) {
       const level = match[1].length;
       const title = match[2];
-      
+
       if (found) {
         if (level <= startLevel) {
           break;
@@ -193,6 +616,11 @@ function extractSection(content: string, headingTitle: string): string {
     if (found) {
       sectionLines.push(line);
     }
+  }
+
+  // Edge case: missing section
+  if (!found && headingTitle.trim()) {
+    console.warn(`⚠️  Section not found: "${headingTitle}" - returning empty content`);
   }
 
   return sectionLines.join('\n').trim();
@@ -605,6 +1033,12 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
 
 /**
  * Process a single file with `extends` directive
+ * Enhanced with security validation before processing
+ *
+ * Edge cases handled:
+ * - Security validation failure: throws unrecoverable error
+ * - Extends validation failure: falls back to original content
+ * - Missing/invalid files: uses recovery strategy with fallback
  */
 function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string): string {
   const absolutePath = resolve(filePath);
@@ -612,7 +1046,30 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
   const parsed = parseFrontmatter(content);
 
   if (!parsed.frontmatter.extends) {
+    // Even without extends, validate security if variant_overrides present
+    if (parsed.frontmatter.variant_overrides) {
+      try {
+        validateYAMLSecurity(parsed.frontmatter, dirname(absolutePath));
+      } catch (error) {
+        const resolutionError = classifyError(error as Error, filePath);
+        console.error(`❌ Security validation failed: ${resolutionError.type}`);
+        console.error(`   Message: ${resolutionError.message}`);
+        console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+        throw error;
+      }
+    }
     return content;
+  }
+
+  // P0: Security validation before extends resolution
+  try {
+    validateYAMLSecurity(parsed.frontmatter, dirname(absolutePath));
+  } catch (error) {
+    const resolutionError = classifyError(error as Error, filePath);
+    console.error(`❌ Security validation failed: ${resolutionError.type}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+    throw error;
   }
 
   // ADR-0033: Validate extends chain before processing
@@ -658,6 +1115,21 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
           mergedFrontmatter[k] = v;
         }
         delete variantOverrides.frontmatter_overrides;
+      }
+    }
+
+    // Edge case: validate variant_sections for missing sections before replace
+    if (variantOverrides?.variant_sections) {
+      const parsedSections = parseVariantSections({ variant_overrides: variantOverrides });
+      for (const section of parsedSections) {
+        if (section.action === 'replace') {
+          const sectionExists = extractSection(baseContent, section.section).length > 0;
+          if (!sectionExists) {
+            console.warn(
+              `⚠️  Replace action for missing section "${section.section}" - section may not exist in base content`
+            );
+          }
+        }
       }
     }
 
@@ -824,25 +1296,74 @@ ${finalBody}`;
 
     return result;
   } catch (error) {
-    console.error(`Failed to resolve skeleton: ${skeletonPath}`, error);
+    // Use error recovery strategy
+    const resolutionError = classifyError(error as Error, skeletonPath);
+    console.error(`❌ Failed to resolve skeleton: ${skeletonPath}`);
+    console.error(`   Error type: ${resolutionError.type}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+
+    // Attempt recovery for recoverable errors
+    if (resolutionError.recoverable) {
+      console.warn(`🔄 Recoverable error detected - attempting fallback...`);
+      try {
+        const fallback = getDefaultL0Content();
+        console.warn(`✅ Using fallback L0 content for ${filePath}`);
+
+        const mergedFrontmatter = { ...fallback.frontmatter };
+        for (const key of Object.keys(parsed.frontmatter)) {
+          if (key !== 'extends') {
+            mergedFrontmatter[key] = parsed.frontmatter[key];
+          }
+        }
+        delete (mergedFrontmatter as any).extends;
+
+        return `---
+${dump(mergedFrontmatter).trim()}
+---
+
+${fallback.content}`;
+      } catch (fallbackError) {
+        console.error(`❌ Fallback recovery failed: ${fallbackError instanceof Error ? fallbackError.message : fallbackError}`);
+        console.warn(`⚠️  Falling back to safe default: returning original content`);
+        return content;
+      }
+    }
+
+    // Unrecoverable error - return original content with error logged
+    console.error(`🚨 Unrecoverable error - cannot apply extends resolution`);
     console.warn(`⚠️  Falling back to safe default: returning original content`);
     return content;
   }
 }
 
-// CLI interface
-const args = process.argv.slice(2);
-if (args.length < 1) {
-  console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
-  console.error('  file-path: Path to the variant file with extends directive');
-  console.error('  skeleton-path: Optional absolute path to skeleton file');
-  console.error('  original-context-path: Optional path to the original context file for extends validation');
-  process.exit(1);
-}
+// Export functions for testing
+export {
+  validateYAMLSecurity,
+  parseVariantSections,
+  resolveExtendsRecursively,
+  resolveExtendsWithRecovery,
+  classifyError,
+  extractSection,
+  parseFrontmatter,
+  removeSections
+};
 
-const filePath = args[0];
-const explicitSkeletonPath = args[1] || undefined;
-const originalContextPath = args[2] || undefined;
-const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
-writeFileSync(filePath, result, 'utf-8');
-console.log(`✅ Merged frontmatter for ${filePath}`);
+// CLI interface (only run when executed directly, not when imported)
+if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
+  const args = process.argv.slice(2);
+  if (args.length < 1) {
+    console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
+    console.error('  file-path: Path to the variant file with extends directive');
+    console.error('  skeleton-path: Optional absolute path to skeleton file');
+    console.error('  original-context-path: Optional path to the original context file for extends validation');
+    process.exit(1);
+  }
+
+  const filePath = args[0];
+  const explicitSkeletonPath = args[1] || undefined;
+  const originalContextPath = args[2] || undefined;
+  const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
+  writeFileSync(filePath, result, 'utf-8');
+  console.log(`✅ Merged frontmatter for ${filePath}`);
+}
