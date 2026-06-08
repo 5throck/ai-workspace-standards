@@ -122,14 +122,7 @@
       ".antigravitycli",
       ".codegraph",
       ".codex",
-      ".github",
-      ".opencode",
-      ".openchrome",
-      ".pipeline-state",
-      ".playwright-mcp",
-      ".understand-anything",
-      "co-consult",
-      "Projects"
+      ".github"
     ]
   }
 }
