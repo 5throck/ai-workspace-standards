@@ -181,7 +181,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
    - skills/*/SKILL.md modifications → Requires AGENTS.md update
    - scripts/*.ts modifications → Requires SCRIPTS.md update
    - docs/adr/*.md modifications → Requires ADR index update
-5. **Root Configuration Changes** (NEW):
+5. **Configuration Changes** (NEW):
    - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
    - README.md, CHANGELOG.md
 
@@ -280,6 +280,8 @@ For automated execution in Antigravity, configure `.gemini/settings.json`:
 - **"Auto-Accept"** (not recommended): Full automation but vulnerable to silent code corruption
 - **"Request Review"** (recommended): Balanced approach — automated agent orchestration with human supervision for file changes
 - MCP tool auto-approval poses significant security risk → manual approval maintained regardless of artifact policy
+
+> **Claude Code Note**: For Claude Code, the native Agent tool provides equivalent automated specialist dispatch functionality without requiring Auto-Mode infrastructure.
 
 #### Phase Determination Checklist
 
@@ -478,7 +480,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-08 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

@@ -2,6 +2,7 @@
 
 **Status**: Accepted
 **Date**: 2026-06-05
+**Last Updated**: 2026-06-08
 **Deciders**: PM, architect, automation-engineer, auditor
 **Supersedes**: Partially supersedes ADR-0026 §5 (manual variant registration requirement)
 
@@ -31,6 +32,13 @@ The workspace adopts the **Fork Model** for the L1→L2 relationship, governed b
 ### Principle 1 — Scaffold-time delivery only
 
 L1 delivers common infrastructure to a new L2 variant exactly once, at scaffold time, via `create-l2-scaffold.ts`. After the scaffold completes, the L1→L2 relationship ends. L1 is a starting point, not an ongoing parent.
+
+**L0→L1→L2 Content Propagation Rules** (added 2026-06-08):
+- **L0** provides skeleton structure only (not full content duplication)
+- **L1** acts as base template that defines the extends chain
+- **L2** generates variant-specific content from scratch (Layout Reconstruction)
+- Layout Reconstruction triggers at L2 generation time and project scaffold time
+- L2 pm.md target size: ~50-100 lines (not 384 lines like L0)
 
 ### Principle 2 — Independent evolution after fork
 
@@ -64,6 +72,76 @@ L2 (Projects/co-<name> or templates/co-<name>)
 templates/co-<name>/ (official template)
 ```
 
+## Layout Reconstruction Trigger Points (added 2026-06-08)
+
+Layout Reconstruction is the process that generates L2 variant-specific content from L0 skeleton structure. This ensures L2 pm.md files contain only variant-specific content (~50-100 lines) rather than duplicating L0 content (384 lines).
+
+### Trigger Point 1: L2 Template Generation
+
+**When**: `create-l2-scaffold.ts` executes to create a new L2 variant template
+
+**Where**: `merge-frontmatter.ts` extends chain processing (lines 882-1632)
+
+**Input**: L1 pm.md + variant_overrides YAML frontmatter
+
+**Output**: L2 pm.md with variant-specific content only
+
+**Trigger Condition**:
+```typescript
+const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
+const hasVariantOverrides = !!yaml.variant_overrides;
+
+if (isPMFile && hasVariantOverrides && variantLevel === 'L2') {
+  return reconstructPMLayout(yaml, baseContent, variantLevel);
+}
+```
+
+### Trigger Point 2: Project Scaffold from L2 Template
+
+**When**: `new-project.ps1` / `new-project.sh` executes to create a live project
+
+**Where**: `merge-frontmatter.ts` extends chain processing
+
+**Input**: L2 pm.md template + project-specific overrides (if any)
+
+**Output**: Project pm.md with variant-specific content
+
+### Content Generation Strategy
+
+**Strategy 1: Complete Reconstruction (Preferred)**
+- Do NOT copy L0 body content to L2
+- Generate ALL L2 content from scratch using variant_overrides
+- Result: L2 contains only variant-specific content
+
+**Strategy 2: Copy + Remove (Fallback)**
+- Copy L0 body content to L2
+- Apply remove_sections filter
+- Apply removeL0OnlyContent() cleanup
+- Result: L2 contains L0 content with L0-specific sections removed
+
+**Design Decision**: Use Strategy 1 (Complete Reconstruction)
+
+### Layout Reconstruction Components
+
+The Layout Reconstruction architecture consists of 6 components (detailed in ADR-0033):
+
+1. **Agent Type Extraction** — Extract agent types from variant_overrides.agent_roster using Group → Type mapping
+2. **Group → Type Mapping** — Define comprehensive Group → Type mapping for all 5 variants
+3. **Agent Roster Table Generation** — Generate 4-column table: Phase | Group | Agent file | Responsibility
+4. **Phase Determination Table Generation** — Generate variant-specific agent mapping (no L0 agents)
+5. **L0-Only Content Removal** — Remove Platform Note, replace CONSTITUTION.md references
+6. **MANDATORY Dispatch List Generation** — Generate variant-specific dispatch list
+
+### Acceptance Criteria
+
+- **AC-01**: No L0 agent names in Phase Determination table
+- **AC-02**: All roster entries have non-empty responsibility field
+- **AC-03**: Platform Note removed from L2 variants
+- **AC-04**: MANDATORY Dispatch List contains only variant agents
+- **AC-05**: L2 pm.md file size under 150 lines (target: ~50-100 lines)
+
+For detailed implementation specifications, see [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md).
+
 ## Reconcile Boundary
 
 When `l2-to-variant-pipeline.ts` promotes an L2 variant to an official template, the reconcile step strips files from L2 that are byte-for-byte identical to their L0 counterparts. This keeps official templates lean and avoids redundant copies of workspace-root files.
@@ -87,6 +165,8 @@ Intentional L2 customizations to these files are preserved during reconcile beca
 - The `new-project.sh` / `new-project.ps1` variant allowlist is now dynamic, resolved at runtime from the `templates/` directory listing. No script changes are required when a new variant is added.
 - The distinction between intentional and accidental drift is explicit: drift is always intentional after fork, because propagation never happens automatically.
 - Reconcile keeps official templates lean without losing variant-specific customizations.
+- **L2 variants contain only variant-specific content** (not L0 duplicates) — Layout Reconstruction ensures proper content generation (added 2026-06-08).
+- **L0→L1→L2 content propagation is clear and deterministic** — skeleton delivery at L0→L1, variant-specific generation at L2 (added 2026-06-08).
 
 #### Known Exception: Governance Doc Injection Target List
 
@@ -134,16 +214,19 @@ The `governance-*` domains in `propagation-map.json` use an explicit `target_var
 ## References
 
 **Related Documentation**:
-- [CONSTITUTION.md §5 - Multi-Agent Architecture](../../CONSTITUTION.md#5-multi-agent-architecture)
-- [CONSTITUTION.md §10 - Platform Documentation Parity](../../CONSTITUTION.md)
+- [CONSTITUTION.md §5 - Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)
+- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](0033-l0-l1-l2-hierarchy-and-extends.md)
 - [CLAUDE.md §10 - Lifecycle Management Rules](../../CLAUDE.md#10-lifecycle-management-rules)
+- [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)
 
 **Implementation Files**:
-- `scripts/create-l2-scaffold.ts` — scaffold-time L1→L2 delivery
+- `scripts/create-l2-scaffold.ts` — scaffold-time L1→L2 delivery with Layout Reconstruction
+- `scripts/helpers/merge-frontmatter.ts` — Layout Reconstruction implementation (lines 882-1632)
 - `scripts/publish-to-template.ts` — L0→L1 continuous publishing and `--check-drift` audit
 - `scripts/l2-to-variant-pipeline.ts` — explicit L2→official-template promotion with reconcile
 - `scripts/dev-sync.ts` — continuous sync pipeline (integrates L0→L1 publish)
 
 **Related ADRs**:
 - [ADR-0026: Variant Creation Procedure](0026-variant-creation-procedure.md) — partially superseded; §5 manual allowlist replaced by dynamic directory resolution
+- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](0033-l0-l1-l2-hierarchy-and-extends.md) — defines extends chain and Layout Reconstruction
 - [ADR-0030: Auto-Mode for Antigravity Platform](0030-auto-mode-architecture.md) — parallel ADR for platform dispatcher pattern

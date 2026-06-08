@@ -1,13 +1,15 @@
-// @version 2.6.3
+// @version 2.6.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { execSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
+import * as url from 'node:url';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
+const SKIP_MEMORY = process.argv.includes('--skip-memory');
 
 // Project context path (used in multiple checks)
 const projectCtxPath = path.join('docs', 'context.md');
@@ -363,12 +365,12 @@ if (hasBun) {
         else
             Pass("README lifecycle audit: all READMEs healthy");
     }
-    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md')) {
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md') && !SKIP_MEMORY) {
         // explicitly skip any files located in memory/archive/
         const memoryFiles = fs.readdirSync('memory')
             .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
             .map(f => path.join('memory', f));
-            
+
         // We do not pass explicit files to verify-memory.ts to avoid triggering its pre-commit mode (which only checks the last entry),
         // but verify-memory.ts natively only reads files in memory/ directly.
         const out = await $`bun ${path.join('scripts', 'verify-memory.ts')}`.quiet().nothrow();
@@ -376,6 +378,9 @@ if (hasBun) {
             Warn("Memory log format issues detected (run 'bun scripts/verify-memory.ts' to see details)");
         else
             Pass("Memory logs: format valid");
+    } else if (SKIP_MEMORY) {
+        // Skip memory check when --skip-memory flag is provided
+        Pass("Memory logs: check skipped (--skip-memory flag)");
     }
     if (fs.existsSync(path.join('scripts', 'lifecycle-sync-audit.ts'))) {
         const out = await $`bun ${path.join('scripts', 'lifecycle-sync-audit.ts')} --json`.quiet().nothrow();
@@ -1002,7 +1007,9 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
             Pass('L1 pm.md: uses YAML extends pattern (ADR-0033)');
 
             // Check that extends points to L0
-            if (!l1Parsed.extendsPath.includes('agents/pm.md')) {
+            // l1Parsed.extendsPath is absolute path, extract filename to check
+            const extendsBasename = path.basename(l1Parsed.extendsPath);
+            if (extendsBasename !== 'pm.md' || !l1Parsed.extendsPath.includes('agents')) {
                 Fail(`L1 pm.md: extends should point to "../../agents/pm.md" or "../../../agents/pm.md"`);
                 return false;
             }

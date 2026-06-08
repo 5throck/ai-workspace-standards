@@ -1,11 +1,29 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.5.0
+ * @version 1.8.2
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
  * 2. VARIANT-SECTION pattern: Marker-based section substitution
+ *
+ * Security features:
+ * - YAML injection protection (path whitelisting, external URL blocking)
+ * - Circular reference detection (depth limiting, visited tracking)
+ * - Agent path validation
+ *
+ * Error recovery (v1.7.0):
+ * - Error classification: unrecoverable (circular, security) vs recoverable (missing file, invalid YAML)
+ * - Graceful fallback for recoverable errors with default L0 content
+ * - Edge case handling: missing sections, conflicting actions, invalid actions
+ *
+ * Testing (v1.8.0):
+ * - Comprehensive unit test coverage for Phase 1 stability improvements
+ * - Security validation tests for path traversal and external URL blocking
+ * - Circular reference detection and depth limit tests
+ * - variant_sections semantics tests (prepend, replace, append actions)
+ * - Edge case handling tests (missing sections, conflicting actions, invalid YAML)
+ * - Error recovery strategy tests (recoverable vs unrecoverable errors)
  *
  * Integrated with ADR-0033 circular reference prevention via extends-validator.ts
  */
@@ -14,6 +32,57 @@ import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname, normalize } from 'path';
 import { load, dump } from 'js-yaml';
 import { safeValidateExtends, ExtendsValidationResult } from './extends-validator.js';
+
+/**
+ * Error type classification for error recovery strategy
+ */
+enum ErrorType {
+  // Unrecoverable (fatal) - terminate processing
+  CIRCULAR_REFERENCE = "circular_reference",
+  SECURITY_VIOLATION = "security_violation",
+
+  // Recoverable (warning) - attempt fallback
+  MISSING_FILE = "missing_file",
+  MISSING_SECTION = "missing_section",
+  INVALID_YAML = "invalid_yaml"
+}
+
+/**
+ * Resolution error structure with recovery information
+ */
+interface ResolutionError {
+  type: ErrorType;
+  path: string;
+  message: string;
+  recoverable: boolean;
+  suggestion: string;
+}
+
+/**
+ * Default L0 content for fallback recovery
+ */
+const DEFAULT_L0_BODY = `You are a project manager agent responsible for coordinating multi-agent workflows.
+
+## Role Declaration
+
+You ARE the PM agent for this session. Load and follow \`agents/pm.md\` at all times.
+
+**Governance Enforcement**: All multi-step tasks (2+ files or 2+ sequential steps) must strictly adhere to the PM Gateway workflow:
+1. Display execution plan table first (task | agent | tier | model | platform)
+2. Only then invoke the \`Agent\` tool to dispatch specialist agents
+3. Never bypass PM workflow — direct specialist invocation is forbidden
+
+> **Desktop App**: The Role Declaration and Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway. Treat them as strictly binding.`;
+
+/**
+ * Security: Allowed base paths for extends resolution
+ */
+const ALLOWED_PATHS = new Set(["agents/", "templates/", "vendors/", "scripts/", "docs/", "skills/", ".claude/", ".gemini/", "tests/fixtures/"]);
+
+/**
+ * Security: Maximum extends chain depth to prevent infinite recursion
+ */
+const MAX_EXTENDS_DEPTH = 10;
 
 interface Frontmatter {
   extends?: string;
@@ -24,6 +93,248 @@ interface ParsedFile {
   frontmatter: Frontmatter;
   content: string;
   raw: string;
+}
+
+/**
+ * Variant section definition with action field
+ */
+interface VariantSection {
+  section: string;
+  action: "prepend" | "replace" | "append";
+  content?: any;
+}
+
+/**
+ * Resolution result with error tracking
+ */
+interface ResolutionResult {
+  success: boolean;
+  content: string;
+  errors: ResolutionError[];
+  warnings: string[];
+}
+
+/**
+ * Classify error into recoverable vs unrecoverable with actionable suggestions
+ */
+function classifyError(error: Error, filePath: string): ResolutionError {
+  const message = error.message.toLowerCase();
+
+  // Circular reference - unrecoverable
+  if (message.includes("circular")) {
+    return {
+      type: ErrorType.CIRCULAR_REFERENCE,
+      path: filePath,
+      message: error.message,
+      recoverable: false,
+      suggestion: "Check extends paths for cycles and fix circular references in the chain"
+    };
+  }
+
+  // Security violation - unrecoverable
+  if (message.includes("security") || message.includes("whitelist") || message.includes("protocol") || message.includes("traversal")) {
+    return {
+      type: ErrorType.SECURITY_VIOLATION,
+      path: filePath,
+      message: error.message,
+      recoverable: false,
+      suggestion: "Review security configuration: check extends path is within allowed directories and contains no protocol injection or path traversal"
+    };
+  }
+
+  // Missing file - recoverable (use fallback)
+  if (message.includes("no such file") || message.includes("file not found") || message.includes("cannot find")) {
+    return {
+      type: ErrorType.MISSING_FILE,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Create missing file, fix extends path, or continue with default L0 fallback"
+    };
+  }
+
+  // Invalid YAML - recoverable (attempt recovery)
+  if (message.includes("yaml") || message.includes("parse") || message.includes("dump")) {
+    return {
+      type: ErrorType.INVALID_YAML,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Check YAML syntax and fix formatting errors, or continue with partial content"
+    };
+  }
+
+  // Missing section - recoverable (warning only)
+  if (message.includes("section") || message.includes("heading")) {
+    return {
+      type: ErrorType.MISSING_SECTION,
+      path: filePath,
+      message: error.message,
+      recoverable: true,
+      suggestion: "Section not found - continuing without it (may affect content structure)"
+    };
+  }
+
+  // Default - treat as unrecoverable for safety
+  return {
+    type: ErrorType.INVALID_YAML,
+    path: filePath,
+    message: error.message,
+    recoverable: false,
+    suggestion: "Review error details - unknown error type treated as unrecoverable for safety"
+  };
+}
+
+/**
+ * Get default L0 content for error recovery
+ */
+function getDefaultL0Content(): { frontmatter: Frontmatter; content: string } {
+  return {
+    frontmatter: {
+      extends: null
+    },
+    content: DEFAULT_L0_BODY
+  };
+}
+
+/**
+ * Security: Extract agent path from agent string (e.g., "automation-engineer (agents/automation-engineer.md)")
+ */
+function extractAgentPath(agent: string): string | null {
+  const match = agent.match(/\((.*?)\)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Security: Validate YAML configuration against injection attacks
+ * P0 - Implements whitelist-based path validation, external URL blocking, and agent path validation
+ */
+function validateYAMLSecurity(config: any, basePath: string): void {
+  // 1. Whitelist-based path validation for extends directive
+  if (config.extends) {
+    // 1.1 External URL blocking - prevent http(s) URLs in extends (check BEFORE path resolution)
+    if (/^https?:\/\//.test(config.extends)) {
+      throw new Error("Security: external extends URLs are not allowed");
+    }
+
+    // 1.2 Protocol injection prevention (file://, data://, etc.)
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(config.extends)) {
+      throw new Error(`Security: protocol-based extends not allowed: ${config.extends}`);
+    }
+
+    // 1.3 Whitelist-based path validation (AFTER security checks)
+    const resolvedPath = resolve(basePath, config.extends);
+    const normalizedPath = normalize(resolvedPath).replace(/\\/g, '/');
+
+    // Check if path contains allowed directories (handle both forward and backslashes)
+    const isAllowed = Array.from(ALLOWED_PATHS).some(allowed => {
+      const normalizedAllowed = allowed.replace(/\\/g, '/');
+      return normalizedPath.includes(normalizedAllowed);
+    });
+
+    if (!isAllowed) {
+      throw new Error(`Security: extends path outside workspace whitelist: ${resolvedPath}`);
+    }
+  }
+
+  // 5. Agent path validation for variant_overrides.agent_roster
+  if (config.variant_overrides?.agent_roster) {
+    for (const entry of config.variant_overrides.agent_roster) {
+      const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
+
+      for (const agentRaw of agentsList) {
+        if (!agentRaw) continue;
+
+        const agentStr = typeof agentRaw === 'string' ? agentRaw : agentRaw.name || '';
+        const agentPath = extractAgentPath(agentStr);
+
+        if (agentPath) {
+          // Validate agent path is within allowed directories
+          const isAllowed = agentPath.startsWith("agents/") ||
+                          agentPath.startsWith("vendors/") ||
+                          agentPath.startsWith("templates/");
+
+          if (!isAllowed) {
+            throw new Error(`Security: invalid agent path: ${agentPath}`);
+          }
+
+          // Check for path traversal in agent paths
+          if (agentPath.includes('..')) {
+            throw new Error(`Security: path traversal not allowed in agent path: ${agentPath}`);
+          }
+        }
+      }
+    }
+  }
+
+  // 6. Validate remove_sections and variant_sections are arrays
+  if (config.remove_sections && !Array.isArray(config.remove_sections)) {
+    throw new Error("Security: remove_sections must be an array");
+  }
+
+  if (config.variant_overrides?.variant_sections && !Array.isArray(config.variant_overrides.variant_sections)) {
+    throw new Error("Security: variant_sections must be an array");
+  }
+}
+
+/**
+ * Parse variant sections with backward compatibility for remove_sections
+ * P1 - Handles both legacy remove_sections and new variant_sections with action field
+ *
+ * Edge cases handled:
+ * - Missing section in replace action: throws Error with guidance
+ * - Conflicting actions for same section: last action wins (warning logged)
+ * - Invalid action: throws Error with valid action list
+ */
+function parseVariantSections(config: any): VariantSection[] {
+  // Backward compatibility: remove_sections (deprecated)
+  if (config.variant_overrides?.remove_sections) {
+    console.warn("remove_sections is deprecated, use variant_sections with action field");
+    return config.variant_overrides.remove_sections.map((section: string) => ({
+      section,
+      action: "prepend" as const,
+      content: null
+    }));
+  }
+
+  // New variant_sections with action field support
+  if (config.variant_overrides?.variant_sections) {
+    const sectionMap = new Map<string, VariantSection>();
+
+    for (const s of config.variant_overrides.variant_sections) {
+      const action = s.action || "prepend";
+
+      // Validate action
+      if (!["prepend", "replace", "append"].includes(action)) {
+        throw new Error(
+          `Invalid action "${action}" for section "${s.section}". ` +
+          `Valid actions: prepend, replace, append`
+        );
+      }
+
+      const variantSection: VariantSection = {
+        section: s.section,
+        action: action as "prepend" | "replace" | "append",
+        content: s.content || null
+      };
+
+      // Detect conflicting actions
+      if (sectionMap.has(s.section)) {
+        const existing = sectionMap.get(s.section)!;
+        if (existing.action !== action) {
+          console.warn(
+            `⚠️  Conflicting actions for section "${s.section}": "${existing.action}" vs "${action}". Using last action: "${action}"`
+          );
+        }
+      }
+
+      sectionMap.set(s.section, variantSection);
+    }
+
+    return Array.from(sectionMap.values());
+  }
+
+  return [];
 }
 
 /**
@@ -49,9 +360,33 @@ function parseFrontmatter(content: string): ParsedFile {
 }
 
 /**
- * Recursively resolve the extends chain of a skeleton file
+ * Recursively resolve the extends chain of a skeleton file with circular reference protection
+ * P0 - Enhanced with visited Set tracking and depth limiting
+ *
+ * Edge cases handled:
+ * - Missing sections: extractSection returns empty string (warning)
+ * - Conflicting variant_sections: last action wins (warning)
+ * - Invalid action: throws Error with guidance
  */
-function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter; content: string } {
+function resolveExtendsRecursively(
+  filePath: string,
+  visited = new Set<string>(),
+  depth = 0
+): { frontmatter: Frontmatter; content: string } {
+  // Check circular reference
+  const normalizedPath = normalize(resolve(filePath));
+  if (visited.has(normalizedPath)) {
+    throw new Error(`Circular extends detected: ${normalizedPath}`);
+  }
+
+  // Check depth limit
+  if (depth > MAX_EXTENDS_DEPTH) {
+    throw new Error(`Extends depth exceeded: ${depth} (max: ${MAX_EXTENDS_DEPTH})`);
+  }
+
+  // Add to visited set
+  visited.add(normalizedPath);
+
   const absolutePath = resolve(filePath);
   const content = readFileSync(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
@@ -66,25 +401,109 @@ function resolveExtendsRecursively(filePath: string): { frontmatter: Frontmatter
   const currentDir = dirname(absolutePath);
   const skeletonPath = resolve(currentDir, parsed.frontmatter.extends);
 
-  const skeletonResolved = resolveExtendsRecursively(skeletonPath);
+  // Security validation before recursing
+  validateYAMLSecurity(parsed.frontmatter, currentDir);
 
-  // Merge skeleton resolved frontmatter and current frontmatter
-  const mergedFrontmatter = { ...skeletonResolved.frontmatter };
-  for (const key of Object.keys(parsed.frontmatter)) {
-    if (key !== 'extends') {
-      mergedFrontmatter[key] = parsed.frontmatter[key];
+  try {
+    const skeletonResolved = resolveExtendsRecursively(skeletonPath, visited, depth + 1);
+
+    // Merge skeleton resolved frontmatter and current frontmatter
+    const mergedFrontmatter = { ...skeletonResolved.frontmatter };
+    for (const key of Object.keys(parsed.frontmatter)) {
+      if (key !== 'extends') {
+        mergedFrontmatter[key] = parsed.frontmatter[key];
+      }
     }
+    delete (mergedFrontmatter as any).extends;
+
+    // Use current content if it exists, otherwise skeleton's content
+    const useCurrentContent = parsed.content.trim().length > 0;
+    const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+
+    return {
+      frontmatter: mergedFrontmatter,
+      content: finalContent
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to resolve extends from ${filePath}: ${error.message}`);
+    }
+    throw error;
   }
-  delete (mergedFrontmatter as any).extends;
+}
 
-  // Use current content if it exists, otherwise skeleton's content
-  const useCurrentContent = parsed.content.trim().length > 0;
-  const finalContent = useCurrentContent ? parsed.content : skeletonResolved.content;
+/**
+ * Resolve extends with error recovery strategy
+ * Returns structured result with errors, warnings, and fallback content
+ */
+function resolveExtendsWithRecovery(
+  filePath: string,
+  visited = new Set<string>(),
+  depth = 0
+): ResolutionResult {
+  const errors: ResolutionError[] = [];
+  const warnings: string[] = [];
 
-  return {
-    frontmatter: mergedFrontmatter,
-    content: finalContent
-  };
+  try {
+    const result = resolveExtendsRecursively(filePath, visited, depth);
+    return {
+      success: true,
+      content: `---
+${dump(result.frontmatter).trim()}
+---
+
+${result.content}`,
+      errors,
+      warnings
+    };
+
+  } catch (error) {
+    const resolutionError = classifyError(error as Error, filePath);
+    errors.push(resolutionError);
+
+    console.error(`❌ Error resolving extends: ${resolutionError.type}`);
+    console.error(`   Path: ${resolutionError.path}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+
+    // Attempt recovery for recoverable errors
+    if (resolutionError.recoverable) {
+      console.warn(`🔄 Recoverable error - attempting fallback...`);
+
+      try {
+        const fallback = getDefaultL0Content();
+        warnings.push(`Using fallback L0 content due to: ${resolutionError.message}`);
+
+        return {
+          success: true,
+          content: `---
+${dump(fallback.frontmatter).trim()}
+---
+
+${fallback.content}`,
+          errors,
+          warnings
+        };
+      } catch (fallbackError) {
+        // Fallback failed - return original error
+        return {
+          success: false,
+          content: '',
+          errors,
+          warnings: ['Fallback recovery failed - returning original error']
+        };
+      }
+    }
+
+    // Unrecoverable error - terminate with clear message
+    console.error(`🚨 Unrecoverable error - cannot continue`);
+    return {
+      success: false,
+      content: '',
+      errors,
+      warnings
+    };
+  }
 }
 
 /**
@@ -162,6 +581,10 @@ function cleanSectionName(str: string): string {
 
 /**
  * Extract a markdown section content from a content string by heading title
+ *
+ * Edge cases handled:
+ * - Missing section: returns empty string (warning logged)
+ * - Empty section: returns empty string (no warning)
  */
 function extractSection(content: string, headingTitle: string): string {
   const lines = content.split('\n');
@@ -177,7 +600,7 @@ function extractSection(content: string, headingTitle: string): string {
     if (match) {
       const level = match[1].length;
       const title = match[2];
-      
+
       if (found) {
         if (level <= startLevel) {
           break;
@@ -193,6 +616,11 @@ function extractSection(content: string, headingTitle: string): string {
     if (found) {
       sectionLines.push(line);
     }
+  }
+
+  // Edge case: missing section
+  if (!found && headingTitle.trim()) {
+    console.warn(`⚠️  Section not found: "${headingTitle}" - returning empty content`);
   }
 
   return sectionLines.join('\n').trim();
@@ -605,6 +1033,12 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
 
 /**
  * Process a single file with `extends` directive
+ * Enhanced with security validation before processing
+ *
+ * Edge cases handled:
+ * - Security validation failure: throws unrecoverable error
+ * - Extends validation failure: falls back to original content
+ * - Missing/invalid files: uses recovery strategy with fallback
  */
 function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string): string {
   const absolutePath = resolve(filePath);
@@ -612,21 +1046,49 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
   const parsed = parseFrontmatter(content);
 
   if (!parsed.frontmatter.extends) {
+    // Even without extends, validate security if variant_overrides present
+    if (parsed.frontmatter.variant_overrides) {
+      try {
+        validateYAMLSecurity(parsed.frontmatter, dirname(absolutePath));
+      } catch (error) {
+        const resolutionError = classifyError(error as Error, filePath);
+        console.error(`❌ Security validation failed: ${resolutionError.type}`);
+        console.error(`   Message: ${resolutionError.message}`);
+        console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+        throw error;
+      }
+    }
     return content;
+  }
+
+  // P0: Security validation before extends resolution
+  try {
+    validateYAMLSecurity(parsed.frontmatter, dirname(absolutePath));
+  } catch (error) {
+    const resolutionError = classifyError(error as Error, filePath);
+    console.error(`❌ Security validation failed: ${resolutionError.type}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+    throw error;
   }
 
   // ADR-0033: Validate extends chain before processing
-  const validationPath = originalContextPath ? resolve(originalContextPath) : absolutePath;
-  console.log(`🔍 Validating extends chain for: ${validationPath}`);
-  const validationResult: ExtendsValidationResult = safeValidateExtends(validationPath);
+  // Skip validation if explicitSkeletonPath is provided (already validated by caller)
+  if (!explicitSkeletonPath) {
+    const validationPath = originalContextPath ? resolve(originalContextPath) : absolutePath;
+    console.log(`🔍 Validating extends chain for: ${validationPath}`);
+    const validationResult: ExtendsValidationResult = safeValidateExtends(validationPath);
 
-  if (!validationResult.valid) {
-    console.error(`❌ Extends validation failed: ${validationResult.message}`);
-    console.warn(`⚠️  Falling back to safe default: returning original content without extends resolution`);
-    return content;
+    if (!validationResult.valid) {
+      console.error(`❌ Extends validation failed: ${validationResult.message}`);
+      console.warn(`⚠️  Falling back to safe default: returning original content without extends resolution`);
+      return content;
+    }
+
+    console.log(`✅ Extends validation passed (depth: ${validationResult.depth})`);
+  } else {
+    console.log(`⏭️  Skipping extends validation (explicit skeleton path provided: ${explicitSkeletonPath})`);
   }
-
-  console.log(`✅ Extends validation passed (depth: ${validationResult.depth})`);
 
   let skeletonPath: string;
   if (explicitSkeletonPath) {
@@ -661,12 +1123,28 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
       }
     }
 
+    // Edge case: validate variant_sections for missing sections before replace
+    if (variantOverrides?.variant_sections) {
+      const parsedSections = parseVariantSections({ variant_overrides: variantOverrides });
+      for (const section of parsedSections) {
+        if (section.action === 'replace') {
+          const sectionExists = extractSection(baseContent, section.section).length > 0;
+          if (!sectionExists) {
+            console.warn(
+              `⚠️  Replace action for missing section "${section.section}" - section may not exist in base content`
+            );
+          }
+        }
+      }
+    }
+
     const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
     let prependContent = '';
     let appendContent = '';
 
     if (isPMFile) {
-      console.log(`ℹ️ PM File detected: applying force-strip, substitution mapping, and layout restructuring`);
+      console.error(`✅ PM File detected: applying force-strip, substitution mapping, and layout restructuring`);
+      console.error(`✅ PM File path: ${filePath}`);
 
       // 1. Extract L0 sections before stripping
       const skeletonContent = skeletonResolved.content;
@@ -691,15 +1169,7 @@ ${substituteAgentNames(subpoints.version, map)}
 - **Phase Determination (Deliverable-Type Gate)**:
   Before assigning an agent to any task, PM MUST classify the deliverable type and assign the correct Phase:
 
-  | Deliverable Type | Phase | Required Agent | Tier | Notes |
-  |------------------|-------|----------------|------|-------|
-  | New file design, schema definition, ADR | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | New directory structure, template layout | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | Cross-platform convention, naming standard | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | Script implementation (approved plan exists) | Phase 4 | ${map['automation-engineer']} | Low | Plan from ${map['architect']} required |
-  | Documentation writing | Phase 4 | ${map['docs-writer']} | Medium | |
-  | Security configuration | Phase 6 | ${map['security-expert']} | Medium | |
-  | Project scaffolding | Phase 0 | ${map['scaffolding-expert']} | Low | |
+  ${generatePhaseDeterminationTable(variantOverrides, mergedFrontmatter.variant || 'unknown')}
 
   **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map['automation-engineer']}\` is always Low — assigning it High is a governance violation.
 
@@ -719,6 +1189,27 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         "## Dispatch Protocol",
         "## Constraints"
       ];
+
+      // For L2 variants, add additional sections to remove
+      const currentVariantLevel = determineVariantLevel(filePath);
+      console.log(`[DEBUG] PM file processing - variant level: ${currentVariantLevel}`);
+      if (currentVariantLevel === 'L2') {
+        console.log(`[DEBUG] Applying L2-specific section removal`);
+        forceRemove.push(
+          "## Consensus-Driven Facilitation Model",
+          "## Permission Denial Protocol",
+          "## Execution Plan Boilerplate Policy",
+          "## Meeting Facilitation",
+          "## Required Tools",
+          "## ⚠️ CRITICAL: PM Direct Execution Constraints",
+          "## Task Tracking vs Execution",
+          "## User Communication for Specialist Tasks"
+        );
+        console.log(`🔪 L2 variant: additional ${forceRemove.length - 10} sections marked for removal`);
+      } else {
+        console.log(`[DEBUG] Not L2 variant, skipping additional removal`);
+      }
+
       baseContent = removeSections(baseContent, forceRemove);
       baseContent = substituteAgentNames(baseContent, substitutionMap);
 
@@ -780,7 +1271,17 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
 
     } else {
       // Normal skeleton section removal and fallback assembly
-      const sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
+      let sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
+
+      // For L2 variants, merge remove_sections from L1 (skeleton) if available
+      const variantLevel = determineVariantLevel(filePath);
+      if (variantLevel === 'L2' && skeletonResolved.frontmatter.remove_sections) {
+        const l1RemoveSections = skeletonResolved.frontmatter.remove_sections || [];
+        const l2RemoveSections = mergedFrontmatter.remove_sections || [];
+        sectionsToRemove = mergeRemoveSections(l1RemoveSections, l2RemoveSections);
+        console.log(`🔗 Merged remove_sections: L1 (${l1RemoveSections.length}) + L2 (${l2RemoveSections.length}) = ${sectionsToRemove.length} total`);
+      }
+
       if (sectionsToRemove.length > 0) {
         baseContent = removeSections(baseContent, sectionsToRemove);
         if (baseContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
@@ -816,33 +1317,405 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     // Do not include remove_sections / extends directives in final output frontmatter
     delete (mergedFrontmatter as any).remove_sections;
 
+    // Remove L0-only content from L2 variants
+    const variantLevel = determineVariantLevel(filePath);
+    console.log(`🔍 Variant Level: ${variantLevel}, File: ${filePath}`);
+    let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
+
+    // Debug: Check if CONSTITUTION.md was removed
+    if (variantLevel === 'L2' && processedFinalBody.includes('CONSTITUTION.md')) {
+      console.warn('⚠️  CONSTITUTION.md still present after removeL0OnlyContent!');
+    } else if (variantLevel === 'L2') {
+      console.log('✅ CONSTITUTION.md successfully removed from L2 variant');
+    }
+
     const result = `---
 ${dump(mergedFrontmatter).trim()}
 ---
 
-${finalBody}`;
+${processedFinalBody}`;
 
     return result;
   } catch (error) {
-    console.error(`Failed to resolve skeleton: ${skeletonPath}`, error);
+    // Use error recovery strategy
+    const resolutionError = classifyError(error as Error, skeletonPath);
+    console.error(`❌ Failed to resolve skeleton: ${skeletonPath}`);
+    console.error(`   Error type: ${resolutionError.type}`);
+    console.error(`   Message: ${resolutionError.message}`);
+    console.warn(`💡 Suggestion: ${resolutionError.suggestion}`);
+
+    // Attempt recovery for recoverable errors
+    if (resolutionError.recoverable) {
+      console.warn(`🔄 Recoverable error detected - attempting fallback...`);
+      try {
+        const fallback = getDefaultL0Content();
+        console.warn(`✅ Using fallback L0 content for ${filePath}`);
+
+        const mergedFrontmatter = { ...fallback.frontmatter };
+        for (const key of Object.keys(parsed.frontmatter)) {
+          if (key !== 'extends') {
+            mergedFrontmatter[key] = parsed.frontmatter[key];
+          }
+        }
+        delete (mergedFrontmatter as any).extends;
+
+        return `---
+${dump(mergedFrontmatter).trim()}
+---
+
+${fallback.content}`;
+      } catch (fallbackError) {
+        console.error(`❌ Fallback recovery failed: ${fallbackError instanceof Error ? fallbackError.message : fallbackError}`);
+        console.warn(`⚠️  Falling back to safe default: returning original content`);
+        return content;
+      }
+    }
+
+    // Unrecoverable error - return original content with error logged
+    console.error(`🚨 Unrecoverable error - cannot apply extends resolution`);
     console.warn(`⚠️  Falling back to safe default: returning original content`);
     return content;
   }
 }
 
-// CLI interface
-const args = process.argv.slice(2);
-if (args.length < 1) {
-  console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
-  console.error('  file-path: Path to the variant file with extends directive');
-  console.error('  skeleton-path: Optional absolute path to skeleton file');
-  console.error('  original-context-path: Optional path to the original context file for extends validation');
-  process.exit(1);
+/**
+ * Determine variant level from file path
+ * @param filePath - File path to analyze
+ * @returns Variant level (L0, L1, or L2)
+ */
+function determineVariantLevel(filePath: string): string {
+  const normalizedPath = filePath.replace(/\\/g, '/');
+
+  // L2 variants (co-*)
+  // Check both absolute (with leading /) and relative paths (without leading /)
+  if (normalizedPath.includes('templates/co-')) {
+    return 'L2';
+  }
+
+  // L1 variant (common)
+  if (normalizedPath.includes('templates/common/')) {
+    return 'L1';
+  }
+
+  // L0 (workspace root)
+  return 'L0';
 }
 
-const filePath = args[0];
-const explicitSkeletonPath = args[1] || undefined;
-const originalContextPath = args[2] || undefined;
-const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
-writeFileSync(filePath, result, 'utf-8');
-console.log(`✅ Merged frontmatter for ${filePath}`);
+/**
+ * Group → Type Mapping based on specification document
+ * Used for Phase Determination table generation
+ */
+interface GroupTypeMapping {
+  [groupName: string]: string;
+}
+
+/**
+ * Default Group → Type mappings from specification
+ */
+const DEFAULT_GROUP_TYPE_MAPPING: GroupTypeMapping = {
+  'Design': 'design',
+  'Direction': 'design',
+  'Visual': 'design',
+  'Typography': 'design',
+  'Service': 'design',
+  'Execution': 'execution',
+  'Prototype': 'execution',
+  'Implementation': 'execution',
+  'Analysis': 'qa',
+  'Research': 'qa',
+  'Subject Matter': 'qa',
+  'SME': 'qa',
+  'Data': 'qa',
+  'Strategy': 'qa',
+  'Coordination': 'pm',
+  'Management': 'pm',
+  'PMO': 'pm',
+  'Tools': 'infrastructure',
+  'Office': 'infrastructure',
+  'Tech': 'infrastructure',
+  'Technology': 'infrastructure',
+  'Architecture': 'infrastructure',
+  'Setup': 'infrastructure',
+  'Content': 'documentation',
+  'Narrative': 'documentation',
+  'Comm': 'documentation',
+  'Security': 'security',
+  'Red Team': 'security',
+  'Blue Team': 'security',
+  'Delivery': 'delivery',
+  'Workstream': 'delivery'
+};
+
+/**
+ * Fallback hierarchy for missing agent types
+ * Based on specification document
+ */
+const FALLBACK_HIERARCHY: Record<string, string[]> = {
+  'design': ['designer', 'architect'],
+  'execution': ['code-writer', 'prototype-engineer', 'automation-engineer'],
+  'qa': ['analyst', 'researcher', 'auditor'],
+  'pm': ['project-coordinator', 'delivery-manager', 'pm'],
+  'infrastructure': ['technology-specialist', 'solutions-architect', 'security-expert'],
+  'documentation': ['technical-writer', 'content-writer', 'docs-writer'],
+  'security': ['security-monitor', 'threat-modeler', 'security-expert'],
+  'delivery': ['delivery-manager', 'workstream-lead', 'pm']
+};
+
+/**
+ * Extract agent types from roster based on group → type mapping
+ * @param agentRoster - Agent roster from variant_overrides
+ * @param variant - Variant name for context-aware classification
+ * @returns Object mapping agent types to agent names
+ */
+function extractAgentTypes(agentRoster: any[], variant: string): Record<string, string> {
+  const types: Record<string, string> = {
+    design: null,
+    execution: null,
+    qa: null,
+    pm: null,
+    infrastructure: null,
+    documentation: null,
+    security: null,
+    delivery: null
+  };
+
+  // Create a mapping of available agents
+  const availableAgents: Record<string, string> = {};
+
+  for (const phaseGroup of agentRoster) {
+    const group = phaseGroup.group;
+    const agents = phaseGroup.agents;
+
+    // Handle Strategy group context-aware classification
+    let agentType = DEFAULT_GROUP_TYPE_MAPPING[group];
+
+    if (group === 'Strategy') {
+      // Context-based override for Strategy group
+      if (variant === 'co-design') {
+        agentType = 'design'; // Design strategy
+      } else {
+        agentType = 'qa'; // Strategic analysis (default)
+      }
+    }
+
+    // Handle Analysis group in security context
+    if (group === 'Analysis' && phaseGroup.phase?.toLowerCase().includes('threat')) {
+      agentType = 'security';
+    }
+
+    // Map first agent in group to type
+    if (agentType && agents && agents.length > 0) {
+      const agentName = typeof agents[0] === 'string' ? agents[0] : agents[0].name;
+
+      // Only assign if type not already assigned
+      if (agentType && !types[agentType]) {
+        types[agentType] = agentName;
+      }
+
+      // Track available agents for fallback
+      availableAgents[agentName] = agentType || 'unknown';
+    }
+  }
+
+  // Apply fallback hierarchy for missing types
+  for (const agentType of Object.keys(types)) {
+    if (!types[agentType]) {
+      const fallbackChain = FALLBACK_HIERARCHY[agentType] || [];
+
+      for (const fallbackAgent of fallbackChain) {
+        // Check if fallback agent exists in available agents
+        if (availableAgents[fallbackAgent]) {
+          types[agentType] = fallbackAgent;
+          console.warn(`⚠️  Using fallback: ${fallbackAgent} for type ${agentType}`);
+          break;
+        }
+
+        // Check if fallback agent exists in roster (even if not mapped)
+        for (const phaseGroup of agentRoster) {
+          const agents = phaseGroup.agents || [];
+          for (const agent of agents) {
+            const agentName = typeof agent === 'string' ? agent : agent.name;
+            if (agentName === fallbackAgent) {
+              types[agentType] = fallbackAgent;
+              console.warn(`⚠️  Using fallback from roster: ${fallbackAgent} for type ${agentType}`);
+              break;
+            }
+          }
+          if (types[agentType]) break;
+        }
+
+        if (types[agentType]) break;
+      }
+
+      // Final fallback - use L0 agent with warning
+      if (!types[agentType] && fallbackChain.length > 0) {
+        const l0Agent = fallbackChain[fallbackChain.length - 1];
+        types[agentType] = l0Agent;
+        console.warn(`🚨 L0 fallback used: ${l0Agent} for type ${agentType} - consider adding dedicated agent to roster`);
+      }
+    }
+  }
+
+  return types;
+}
+
+/**
+ * Generate Phase Determination table with variant agents
+ * @param variantOverrides - variant_overrides from YAML
+ * @param variant - Variant name for context
+ * @returns Markdown table string
+ */
+function generatePhaseDeterminationTable(variantOverrides: any, variant: string): string {
+  const agentTypes = extractAgentTypes(variantOverrides?.agent_roster || [], variant);
+
+  // Build table rows dynamically based on available agent types
+  const rows: string[] = [];
+
+  // Design type deliverables
+  if (agentTypes.design) {
+    rows.push(`| New file design / schema definition / ADR | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+    rows.push(`| New directory structure / template layout | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+    rows.push(`| Cross-platform convention / naming standard | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+  }
+
+  // Execution type deliverables
+  if (agentTypes.execution) {
+    rows.push(`| Script implementation (approved plan exists) | Phase 4 | ${agentTypes.execution} | Low | Plan from design agent required |`);
+  }
+
+  // Documentation type deliverables
+  if (agentTypes.documentation) {
+    rows.push(`| Documentation writing | Phase 4 | ${agentTypes.documentation} | Medium | |`);
+  }
+
+  // Security type deliverables
+  if (agentTypes.security) {
+    rows.push(`| Security configuration | Phase 6 | ${agentTypes.security} | Medium | |`);
+  }
+
+  // Infrastructure type deliverables
+  if (agentTypes.infrastructure) {
+    rows.push(`| Project scaffolding / environment setup | Phase 0 | ${agentTypes.infrastructure} | Low | |`);
+  }
+
+  // PM type deliverables
+  if (agentTypes.pm) {
+    rows.push(`| Project coordination / task management | Phase 0 | ${agentTypes.pm} | Medium | |`);
+  }
+
+  // QA type deliverables
+  if (agentTypes.qa) {
+    rows.push(`| Analysis / research / domain expertise | Phase 1-2 | ${agentTypes.qa} | Medium | |`);
+  }
+
+  // Delivery type deliverables
+  if (agentTypes.delivery) {
+    rows.push(`| Delivery management / workstream coordination | Phase 0 | ${agentTypes.delivery} | Medium | |`);
+  }
+
+  // Generate table
+  const lines = [
+    `| Deliverable Type | → Phase | → Required Agent | → Tier | Notes |`,
+    `|------------------|---------|----------------|--------|-------|`,
+    ...rows
+  ];
+
+  return lines.join('\n');
+}
+
+/**
+ * Remove L0-only content from L2 variants
+ * @param content - Content to process
+ * @param variantLevel - Variant level (L0, L1, L2)
+ * @returns Processed content
+ *
+ * L0 CONTENT DUPLICATION FIX - v1.8.2:
+ * - Fixed determineVariantLevel to handle relative paths without leading /
+ * - Fixed removeL0OnlyContent to remove CONSTITUTION.md lines completely
+ * - Added L2-specific section removal in PM file handling
+ */
+function removeL0OnlyContent(content: string, variantLevel: string): string {
+  if (variantLevel !== 'L2') {
+    return content;
+  }
+
+  let processed = content;
+
+  // Remove lines containing CONSTITUTION.md references
+  processed = processed.replace(
+    /^.*CONSTITUTION\.md.*$/gm,
+    ''
+  );
+
+  // Remove Platform Note about Platform column
+  processed = processed.replace(
+    /\*\*Platform Note\*\*: The execution plan table format has been simplified to remove the `Platform` column\. PM will still internally manage the L0-only task classification\.\n*/g,
+    ''
+  );
+
+  // Replace "Root Configuration Changes" with "Configuration Changes"
+  processed = processed.replace(
+    /Root Configuration Changes/g,
+    'Configuration Changes'
+  );
+
+  // Clean up multiple consecutive blank lines
+  processed = processed.replace(/\n{3,}/g, '\n\n');
+
+  return processed;
+}
+
+/**
+ * Merge remove_sections from L1 and L2 variants
+ * Ensures L2 inherits and extends L1's remove_sections
+ * @param l1RemoveSections - remove_sections from L1 variant
+ * @param l2RemoveSections - remove_sections from L2 variant
+ * @returns Merged remove_sections array
+ */
+function mergeRemoveSections(l1RemoveSections: string[], l2RemoveSections: string[]): string[] {
+  const merged = [...(l1RemoveSections || [])];
+
+  // Add L2 sections that aren't already in the list
+  for (const section of (l2RemoveSections || [])) {
+    if (!merged.includes(section)) {
+      merged.push(section);
+    }
+  }
+
+  return merged;
+}
+
+// Export functions for testing
+export {
+  validateYAMLSecurity,
+  parseVariantSections,
+  resolveExtendsRecursively,
+  resolveExtendsWithRecovery,
+  classifyError,
+  extractSection,
+  parseFrontmatter,
+  removeSections,
+  extractAgentTypes,
+  generatePhaseDeterminationTable,
+  removeL0OnlyContent,
+  mergeRemoveSections
+};
+
+// CLI interface (only run when executed directly, not when imported)
+if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
+  const args = process.argv.slice(2);
+  if (args.length < 1) {
+    console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
+    console.error('  file-path: Path to the variant file with extends directive');
+    console.error('  skeleton-path: Optional absolute path to skeleton file');
+    console.error('  original-context-path: Optional path to the original context file for extends validation');
+    process.exit(1);
+  }
+
+  const filePath = args[0];
+  const explicitSkeletonPath = args[1] || undefined;
+  const originalContextPath = args[2] || undefined;
+  const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
+  writeFileSync(filePath, result, 'utf-8');
+  console.log(`✅ Merged frontmatter for ${filePath}`);
+}

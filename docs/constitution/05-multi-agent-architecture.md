@@ -91,7 +91,44 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   PM runs /sync "type: description" → PR opened
 ```
 
-#### 5.5 3-Tier Cost Optimization Model
+#### 5.5 L0→L1→L2 PM.md Variant Handling (added 2026-06-08)
+
+The workspace supports variant-specific PM agents for different project types (co-consult, co-design, co-develop, co-security, co-work). These variants use the **Layout Reconstruction** architecture to ensure L2 pm.md files contain only variant-specific content.
+
+**L0→L1→L2 Content Propagation Rules**:
+- **L0** (workspace root/agents/pm.md) provides skeleton structure only (not full content duplication)
+- **L1** (templates/common/agents/pm.md) acts as base template that defines extends chain
+- **L2** (templates/co-*/agents/pm.md) generates variant-specific content from scratch
+- Layout Reconstruction triggers at L2 generation time and project scaffold time
+- L2 pm.md target size: ~50-100 lines (not 384 lines like L0)
+
+**Layout Reconstruction Architecture** (6 components):
+1. **Agent Type Extraction** — Extract agent types from variant_overrides.agent_roster using Group → Type mapping
+2. **Group → Type Mapping** — Define comprehensive Group → Type mapping for all 5 variants
+3. **Agent Roster Table Generation** — Generate 4-column table: Phase | Group | Agent file | Responsibility
+4. **Phase Determination Table Generation** — Generate variant-specific agent mapping (no L0 agents)
+5. **L0-Only Content Removal** — Remove Platform Note, replace CONSTITUTION.md references
+6. **MANDATORY Dispatch List Generation** — Generate variant-specific dispatch list
+
+**CONSTITUTION.md Reference Handling**:
+- **L0 references**: "CONSTITUTION.md" → "context.md and <variant>.context.md"
+- **Platform Notes**: Removed from L2 variants
+- **Configuration Changes**: "Root Configuration Changes" → "Configuration Changes"
+- **L0-specific terminology**: Removed (e.g., "workspace root", "ai-workspace-standards")
+
+**Acceptance Criteria**:
+- **AC-01**: No L0 agent names in Phase Determination table (automation-engineer, docs-writer, architect, auditor, security-expert, scaffolding-expert)
+- **AC-02**: All roster entries have non-empty responsibility field
+- **AC-03**: Platform Note removed from L2 variants
+- **AC-04**: MANDATORY Dispatch List contains only variant agents
+- **AC-05**: L2 pm.md file size under 150 lines (target: ~50-100 lines)
+
+**Related Documentation**:
+- [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md) — Layout Reconstruction trigger points
+- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](../adr/0033-l0-l1-l2-hierarchy-and-extends.md) — Layout Reconstruction architecture
+- [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md) — Complete design specification
+
+#### 5.6 3-Tier Cost Optimization Model
 
 The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
