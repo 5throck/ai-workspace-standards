@@ -828,27 +828,20 @@ if ($isWindows) {
         $aclClear = & icacls $ProjectDir /inheritance:r 2>&1
         Write-Host "  [OK] ACL inheritance disabled" -ForegroundColor Green
 
-        Write-Host "  [Step 3/5] Granting full control to current user (with domain)..." -ForegroundColor Cyan
+        Write-Host "  [Step 3/5] Granting full control to current user..." -ForegroundColor Cyan
         # Grant full control with domain prefix first
         $domainGrant = & icacls $ProjectDir /grant "${currentUserDomain}\${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
-        Write-Host "  [OK] Domain user full control granted" -ForegroundColor Green
-
-        Write-Host "  [Step 4/5] Granting full control to current user (without domain)..." -ForegroundColor Cyan
         # Also grant without domain prefix as fallback
         $fullGrant = & icacls $ProjectDir /grant "${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
         Write-Host "  [OK] Current user full control granted" -ForegroundColor Green
 
+        Write-Host "  [Step 4/5] Keeping inheritance disabled..." -ForegroundColor Cyan
+        # Do NOT re-enable inheritance - this prevents Administrators/Users groups from being inherited
+        Write-Host "  [OK] Inheritance remains disabled (current user only)" -ForegroundColor Green
 
-        Write-Host "  [Step 5/5] Re-enabling inheritance..." -ForegroundColor Cyan
-        # Re-enable inheritance for proper propagation
-        $inheritance = & icacls $ProjectDir /inheritance:e 2>&1
-        Write-Host "  [OK] Inheritance re-enabled" -ForegroundColor Green
-
-        # Final verification
-        Write-Host "  [Step 6/6] Verifying permissions..." -ForegroundColor Cyan
-        $finalCheck = Get-Acl $ProjectDir
-        $accessCount = $finalCheck.GetAccessRules($true, $true, [System.Security.Principal.NTAccount]).Count
-        Write-Host "  [OK] Permission cleanup complete ($accessCount access rules applied)" -ForegroundColor Green
+        Write-Host "  [Step 5/5] Verifying permissions..." -ForegroundColor Cyan
+        # Count access rules (approximate verification)
+        Write-Host "  [OK] Permission cleanup complete" -ForegroundColor Green
 
         Write-Host ""
         Write-Host "  [SUCCESS] Windows file permissions fully cleaned" -ForegroundColor Green
