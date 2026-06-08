@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-09](2026-06-09.md) | fix: resolve Agent Roster table rendering bug in merge-frontmatter.ts |
 | [2026-06-08](2026-06-08.md) | Fix variant scaffolding validation failure |
 | [2026-06-07](2026-06-07.md) | bash 3.2 compatibility mapfile fix meeting |
 | [2026-06-06](2026-06-06.md) | chore: update |
