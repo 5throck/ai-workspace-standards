@@ -73,6 +73,11 @@ __pycache__/
 !docs/superpowers/
 !skills/
 !templates/common/
+!templates/co-consult/
+!templates/co-design/
+!templates/co-develop/
+!templates/co-security/
+!templates/co-work/
 
 # --- CodeGraph Index ---
 .codegraph/

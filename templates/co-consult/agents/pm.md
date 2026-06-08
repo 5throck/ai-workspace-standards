@@ -15,48 +15,60 @@ variant_overrides:
     - phase: Triage / Analysis
       group: Analysis
       agents:
-        - auditor
+        - name: auditor
+          responsibility: Quality assurance and compliance validation
     - phase: Consulting
       group: Client
       agents:
-        - engagement-leader
+        - name: engagement-leader
+          responsibility: Client relationship management and engagement coordination
     - phase: Consulting
       group: Strategy
       agents:
-        - strategy-analyst
+        - name: strategy-analyst
+          responsibility: Strategic analysis and planning
     - phase: Consulting
       group: Domain
       agents:
-        - industry-expert
+        - name: industry-expert
+          responsibility: Domain expertise and business analysis
     - phase: Consulting
       group: Change
       agents:
-        - change-management-partner
+        - name: change-management-partner
+          responsibility: Change management and organizational transformation
     - phase: Consulting
       group: Comm
       agents:
-        - communications-lead
+        - name: communications-lead
+          responsibility: Communication strategy and stakeholder engagement
     - phase: Technology
       group: Architecture
       agents:
-        - solutions-architect
+        - name: solutions-architect
+          responsibility: Technical architecture and solution design
     - phase: Delivery
       group: PMO
       agents:
-        - workstream-lead
-        - delivery-manager
+        - name: workstream-lead
+          responsibility: Project management and workstream coordination
+        - name: delivery-manager
+          responsibility: Delivery management and project execution
     - phase: Subject Matter
       group: SME
       agents:
-        - sme
+        - name: sme
+          responsibility: Subject matter expertise and consultation
     - phase: Analysis
       group: Data
       agents:
-        - data-analyst
+        - name: data-analyst
+          responsibility: Data analysis and business intelligence
     - phase: Technology
       group: Tech
       agents:
-        - technology-specialist
+        - name: technology-specialist
+          responsibility: Technology consulting and technical guidance
   dispatch_protocol:
     can_lead_phases:
       - 0

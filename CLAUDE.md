@@ -195,7 +195,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
    - skills/*/SKILL.md modifications → Requires AGENTS.md update
    - scripts/*.ts modifications → Requires SCRIPTS.md update
    - docs/adr/*.md modifications → Requires ADR index update
-5. **Root Configuration Changes** (NEW):
+5. **Configuration Changes** (NEW):
    - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
    - README.md, CHANGELOG.md
 
@@ -210,8 +210,6 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
 *Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
 *Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct".*
-
-**Platform Column Description**: Note: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification.
 
 <!-- COMMON-CLAUDE:START -->
 ## Execution Plan Boilerplate
@@ -318,8 +316,6 @@ Before writing the execution plan table, PM MUST classify each task's deliverabl
 | Project scaffolding | Phase 0 | scaffolding-expert | Low |
 
 **Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
-
-**Platform Note**: PM will internally manage the L0-only task classification, though it is no longer required in the table.
 
 #### PM Gateway Enforcement Summary
 
@@ -492,7 +488,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-08 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

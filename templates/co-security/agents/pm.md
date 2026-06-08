@@ -13,23 +13,28 @@ variant_overrides:
     - phase: Threat Modeling
       group: Red Team
       agents:
-        - red-team-lead
+        - name: red-team-lead
+          responsibility: Red team operations and adversarial simulation
     - phase: Penetration Testing
       group: Red Team
       agents:
-        - pentester
+        - name: pentester
+          responsibility: Penetration testing and vulnerability exploitation
     - phase: Threat Analysis
       group: Analysis
       agents:
-        - threat-modeler
+        - name: threat-modeler
+          responsibility: Threat modeling and risk assessment
     - phase: Remediation
       group: Blue Team
       agents:
-        - patch-engineer
+        - name: patch-engineer
+          responsibility: Vulnerability remediation and patch deployment
     - phase: Reporting
       group: Documentation
       agents:
-        - report-writer
+        - name: report-writer
+          responsibility: Security reporting and documentation
   dispatch_protocol:
     can_lead_phases:
       - 0

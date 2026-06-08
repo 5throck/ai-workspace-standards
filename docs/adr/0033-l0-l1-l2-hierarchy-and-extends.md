@@ -1,8 +1,9 @@
 # ADR-0033: L0→L1→L2 Hierarchy and Extends Implementation
 
-**Status**: Implemented  
-**Date**: 2026-06-07  
-**Author**: architect  
+**Status**: Implemented
+**Date**: 2026-06-07
+**Last Updated**: 2026-06-08
+**Author**: architect
 **Related ADRs**: 0032 (Auto-Mode Deprecation), 0031 (L1-L2 Fork Model)
 
 ## Executive Summary
@@ -81,9 +82,16 @@ L2 co-security/agents/pm.md
 L1 common/agents/pm.md (YAML: remove_sections)
   ↓ (explicit extends: ../../../agents/pm.md)
 L0 agents/pm.md (full content)
-  ↓ (after remove_sections filtering)
-L2 inherits cleaned L0 + adds variant sections
+  ↓ (after remove_sections filtering + Layout Reconstruction)
+L2 inherits cleaned L0 + adds variant-specific generated content
 ```
+
+**Layout Reconstruction** (added 2026-06-08):
+- L2 pm.md does NOT simply copy L0 content with sections removed
+- Layout Reconstruction generates variant-specific content from scratch
+- Ensures L2 pm.md files are ~50-100 lines (not 384 lines like L0)
+- Triggered during L2 template generation and project scaffold
+- See "Layout Reconstruction Architecture" section below for details
 
 ### Extends Implementation Approach
 **Approach**: Frontmatter-only with explicit extends field
@@ -250,6 +258,146 @@ L0 (agents/pm.md)
 **Schema Version**: 1.0.0 (2026-06-07)
 
 **Validation**: Scaffold scripts validate YAML syntax before creating L2 variants.
+
+### 4.1.5 Layout Reconstruction Architecture (added 2026-06-08)
+
+**Purpose**: Generate L2 variant-specific content without duplicating L0 content
+
+**Problem Solved**: L2 pm.md files were duplicating L0 content (384 lines) instead of containing variant-specific content only (~50-100 lines)
+
+**Implementation Location**: `scripts/helpers/merge-frontmatter.ts` lines 882-1632
+
+**Trigger Points**:
+1. **L2 Template Generation**: When `create-l2-scaffold.ts` creates a new L2 variant template
+2. **Project Scaffold**: When `new-project.ps1` / `new-project.sh` creates a live project from L2 template
+
+**Trigger Condition**:
+```typescript
+const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
+const hasVariantOverrides = !!yaml.variant_overrides;
+
+if (isPMFile && hasVariantOverrides && variantLevel === 'L2') {
+  return reconstructPMLayout(yaml, baseContent, variantLevel);
+}
+```
+
+**Content Generation Strategy**:
+
+**Strategy 1: Complete Reconstruction (Preferred)**
+- Do NOT copy L0 body content to L2
+- Generate ALL L2 content from scratch using variant_overrides
+- Result: L2 contains only variant-specific content
+
+**Strategy 2: Copy + Remove (Fallback)**
+- Copy L0 body content to L2
+- Apply remove_sections filter
+- Apply removeL0OnlyContent() cleanup
+- Result: L2 contains L0 content with L0-specific sections removed
+
+**Design Decision**: Use Strategy 1 (Complete Reconstruction)
+
+**Rationale**:
+- Prevents L0 content leakage completely
+- Eliminates need for complex remove_sections logic
+- Ensures L2 variants are truly independent
+- Aligns with ADR-0031 Fork Model principles
+
+**6-Component Architecture**:
+
+1. **Agent Type Extraction**
+   - Extract agent types from variant_overrides.agent_roster using Group → Type mapping
+   - Apply fallback hierarchy for missing agent types
+   - Handle special cases (e.g., Strategy group context-based mapping)
+
+2. **Group → Type Mapping**
+   - Define comprehensive Group → Type mapping for all 5 variants
+   - Support variant-specific overrides
+   - Support phase-based context rules
+   - Centralized in single configuration
+
+3. **Agent Roster Table Generation**
+   - Generate 4-column table: Phase | Group | Agent file | Responsibility
+   - Handle missing responsibility with fallback: `${group} specialist`
+   - Parse agent entries from string or object format
+
+4. **Phase Determination Table Generation**
+   - Generate variant-specific agent mapping
+   - Validate NO L0 agent names (automation-engineer, docs-writer, architect, auditor, security-expert, scaffolding-expert)
+   - Extract agent types from variant_overrides.agent_roster
+   - Apply fallback hierarchy with WARNING logs
+
+5. **L0-Only Content Removal**
+   - Remove "Platform Note" section from L2 variants
+   - Replace "CONSTITUTION.md" references with "context.md and <variant>.context.md"
+   - Remove L0-specific terminology (e.g., "workspace root", "ai-workspace-standards")
+   - Remove "YOU ARE THE SINGLE ENTRY POINT" section (L0-specific)
+
+6. **MANDATORY Dispatch List Generation**
+   - Generate variant-specific dispatch list
+   - Extract unique agent names from variant_overrides.agent_roster
+   - Format as markdown list with agent file references
+
+**L0 Content Duplication Prevention**:
+
+**Prevention Strategy**:
+- L0 provides skeleton structure only (not full content)
+- L1 acts as base template that defines extends chain
+- L2 generates variant-specific content from scratch
+- No copy-paste of L0 body content to L2
+
+**Validation Rules**:
+```typescript
+const L0_AGENT_NAMES = [
+  'automation-engineer',
+  'docs-writer',
+  'architect',
+  'auditor',
+  'security-expert',
+  'scaffolding-expert'
+];
+
+function validateNoL0Leakage(generatedTable: string): ValidationResult {
+  const violations = L0_AGENT_NAMES.filter(agent =>
+    generatedTable.toLowerCase().includes(agent.toLowerCase())
+  );
+
+  return {
+    valid: violations.length === 0,
+    violations,
+    message: violations.length > 0
+      ? `L0 leakage detected: ${violations.join(', ')}`
+      : 'No L0 leakage'
+  };
+}
+```
+
+**remove_sections Chain Propagation**:
+
+**Propagation Rules**:
+1. L1 defines base remove_sections (L0-specific sections to remove)
+2. L2 can define additional remove_sections (variant-specific sections to remove)
+3. merge-frontmatter.ts merges both lists before processing
+4. Merged list applied to L0 content before L2 variant generation
+
+**Implementation**:
+```typescript
+const inheritedRemoveSections = [
+  ...(l1RemoveSections || []),
+  ...(l2RemoveSections || [])
+];
+```
+
+**Validation**: ensure remove_sections are properly inherited from L1 to L2 during reconstruction
+
+**Acceptance Criteria**:
+- **AC-01**: No L0 agent names in Phase Determination table
+- **AC-02**: All roster entries have non-empty responsibility field
+- **AC-03**: Platform Note removed from L2 variants
+- **AC-04**: MANDATORY Dispatch List contains only variant agents
+- **AC-05**: remove_sections properly inherited from L1 to L2
+- **AC-06**: L2 pm.md file size under 150 lines (target: ~50-100 lines)
+
+For detailed design specifications, see [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md).
 
 ### 4.2 Legacy Frontmatter Structure (Original Design)
 
@@ -697,8 +845,9 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 ## Related Documentation
 
 ### Primary References
+- **[PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)**: Complete Layout Reconstruction architecture
 - **[L2 PM YAML Schema](../variant/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
-- **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles
+- **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles + Layout Reconstruction trigger points
 - **[ADR-0032: Auto-Mode Deprecation](0032-deprecate-auto-mode.md)**: Auto-Mode removal from L0
 
 ### Supporting Documentation
