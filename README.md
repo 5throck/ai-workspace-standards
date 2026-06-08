@@ -280,6 +280,10 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 
 ---
 
+**Windows Projects**: The `new-project.ps1` script (v1.7.0+) automatically configures proper user permissions, allowing you to create and delete projects without requiring administrator privileges.
+
+---
+
 ## Contributing
 
 This is a **public repository**. Contributions are welcome via pull requests.
@@ -298,4 +302,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-05*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-08*
