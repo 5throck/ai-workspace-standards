@@ -49,7 +49,7 @@ This section provides immediate guidance for different user personas and current
 | L0→L1→L2 Extends Chain | 1.0.0 | ✅ Implemented | 2026-06-08 | Chain resolution functional |
 | Basic Extends Validation | 1.0.0 | ✅ Implemented | 2026-06-08 | Circular reference protection exists |
 | variant_sections Rename | 1.2.0 | ✅ Documented | 2026-06-08 | Terminology standardized in design doc |
-| Layout Reconstruction | 1.5.0+ | 📋 Proposed | - | Medium complexity, requires rewrite |
+| Layout Reconstruction | 1.5.0+ | ✅ Designed | 2026-06-08 | **Comprehensive spec complete**: 6-component architecture with 5-phase implementation plan |
 | YAML Injection Security | 1.3.0 | 📋 Proposed | - | P0 priority, awaiting implementation |
 | Error Recovery Strategy | 1.3.0 | 📋 Proposed | - | P1 priority, awaiting implementation |
 | Edge Case Handling | 1.4.0 | ✅ Documented | 2026-06-08 | **Phase 2 Complete**: All 10 cases documented with error types, behaviors, examples, and testing requirements |
@@ -361,18 +361,332 @@ Prior to v1.5.0, the merge process had critical failures:
 2. **Agent Name Leakage**: L0 agent names (automation-engineer, docs-writer) appeared in variant constraints
 3. **Section Duplication**: `## Agent Roster`, `## Governance Workflow` appeared twice
 4. **Roster Format Issues**: No standard schema, inconsistent presentation
+5. **L0 Content Duplication**: L2 variants contained 384 lines (full L0 content) instead of ~50-100 lines variant-specific content
+6. **Phase Determination Table Leakage**: Table showed L0 agents instead of variant-specific agents
 
-### Solution: Layout Reconstruction (v1.5.0+)
+### Solution: Complete Layout Reconstruction (v1.5.0+)
 
-**Process Flow** (`merge-frontmatter.ts`):
+**Design Strategy**: Complete reconstruction (not copy + remove)
 
-1. **Parse L0 Base Body**: Read L0 `agents/pm.md` content
-2. **Update L0 Custom Sections**: Replace variant-customizable sections with variant-specific content
-3. **Generate Variant Sections**: Dynamically build variant-specific content
-4. **Apply Agent Substitution**: Replace L0 agent names with variant equivalents in generic sections
-5. **Assemble Layout**: Reconstruct document in strict order
+**Key Architectural Changes**:
 
-### Update List
+1. **L0→L1→L2 Content Propagation**:
+   - L0: Single source of truth for workspace governance (384 lines)
+   - L1: Byte-for-byte copy of L0 (YAML + body)
+   - L2: Complete reconstruction from scratch (~50-100 lines variant-specific only)
+
+2. **Trigger Points**:
+   - **Trigger 1**: L2 template generation (create-l2-scaffold.ts)
+   - **Trigger 2**: Project scaffold from L2 template (new-project.ps1/sh)
+
+3. **Process Flow** (`merge-frontmatter.ts`):
+   ```typescript
+   const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
+   const hasVariantOverrides = !!yaml.variant_overrides;
+   
+   if (isPMFile && hasVariantOverrides && variantLevel === 'L2') {
+     // Apply Complete Layout Reconstruction
+     return reconstructPMLayout(yaml, baseContent, variantLevel);
+   }
+   ```
+
+**6-Component Architecture**:
+
+| Component | Purpose | Input | Output |
+|-----------|---------|-------|--------|
+| **Component 1**: Agent Type Extraction | Extract agent types from roster using Group → Type mapping | variant_overrides.agent_roster | Record<AgentType, string> |
+| **Component 2**: Group → Type Mapping | Define comprehensive mapping for all 5 variants | groupName, variant, context | AgentType |
+| **Component 3**: Agent Roster Table Generation | Generate 4-column table with responsibility field | variant_overrides.agent_roster | Markdown table |
+| **Component 4**: Phase Determination Table Generation | Generate variant-specific agent mapping (no L0 agents) | agent_roster, variant | Markdown table |
+| **Component 5**: L0-Only Content Removal | Remove L0-specific sections and terminology | L0 body content, variant | Cleaned content |
+| **Component 6**: MANDATORY Dispatch List Generation | Generate variant-specific dispatch list | variant_overrides.agent_roster | Markdown list |
+
+### Component 1: Agent Type Extraction with Group → Type Mapping
+
+**Purpose**: Extract agent types from variant_overrides.agent_roster using comprehensive Group → Type mapping
+
+**Algorithm**:
+```typescript
+function extractAgentTypes(roster: AgentRosterEntry[], variant: string): Record<AgentType, string> {
+  const typeMap: Record<AgentType, string> = {};
+  
+  for (const entry of roster) {
+    const agentType = mapGroupToType(entry.group, variant);
+    const agentName = Array.isArray(entry.agents) ? entry.agents[0] : entry.agents;
+    
+    if (!typeMap[agentType]) {
+      typeMap[agentType] = agentName;
+    }
+  }
+  
+  return typeMap;
+}
+```
+
+**Fallback Hierarchy** (prevents L0 agent leakage):
+```
+design: designer → architect → ERROR
+execution: code-writer → prototype-engineer → automation-engineer (L0, WARNING)
+qa: analyst → researcher → auditor (L0, WARNING)
+pm: project-coordinator → delivery-manager → pm (L0, WARNING)
+infrastructure: technology-specialist → solutions-architect → security-expert (L0, WARNING)
+documentation: technical-writer → content-writer → docs-writer (L0, WARNING)
+security: security-monitor → threat-modeler → security-expert (L0, WARNING)
+```
+
+### Component 2: Group → Type Mapping Configuration
+
+**Purpose**: Define comprehensive Group → Type mapping for all 5 variants with context-aware resolution
+
+**Configuration Structure**:
+```typescript
+interface GroupTypeMapping {
+  groupName: string;
+  defaultType: AgentType;
+  variantOverrides?: {
+    [variant: string]: AgentType;
+  };
+  contextRules?: {
+    phase: string;
+    type: AgentType;
+  }[];
+}
+```
+
+**Ambiguity Resolution Priority**:
+1. Check variant-specific override first
+2. Check context-based rules (phase + group)
+3. Use default type
+4. Log warning if ambiguous mapping detected
+
+**Example Mappings**:
+- `Design` group → `design` (all variants)
+- `Strategy` group → `qa` (co-consult, co-develop) or `design` (co-design)
+- `Analysis` group → `qa` (default) or `security` (Threat phase context)
+
+### Component 3: Agent Roster Table Generation
+
+**Purpose**: Generate 4-column table with responsibility field populated
+
+**Algorithm**:
+```typescript
+function generateAgentRosterTable(roster: AgentRosterEntry[]): string {
+  const lines = [
+    `## Agent Roster`,
+    ``,
+    `| Phase | Group | Agent file | Responsibility |`,
+    `|-------|--------|------------|----------------|`,
+  ];
+  
+  for (const entry of roster) {
+    const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
+    for (const agentRaw of agentsList) {
+      if (!agentRaw) continue;
+      
+      const agent = parseAgent(agentRaw);
+      const responsibility = agent.responsibility || generateResponsibilityFallback(entry.group);
+      
+      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | \`${agent.file}\` | ${responsibility} |`);
+    }
+  }
+  
+  return lines.join('\n');
+}
+
+function generateResponsibilityFallback(group: string): string {
+  return `${group} specialist`;  // "Analysis" → "Analysis specialist"
+}
+```
+
+### Component 4: Phase Determination Table Generation
+
+**Purpose**: Generate variant-specific Phase Determination table with NO L0 agents
+
+**Critical Requirement**: Table must NOT contain L0 agent names (automation-engineer, docs-writer, architect, auditor, security-expert, scaffolding-expert)
+
+**Algorithm**:
+```typescript
+function generatePhaseDeterminationTable(roster: AgentRosterEntry[], variant: string): string {
+  const agentTypes = extractAgentTypes(roster, variant);
+  
+  const lines = [
+    `## Phase Determination Checklist`,
+    ``,
+    `| Deliverable Type | → Phase | → Required Agent | → Tier |`,
+    `|-----------------|---------|-----------------|--------|`,
+  ];
+  
+  const deliverableMapping = [
+    { type: 'New file design / schema / ADR', phase: '1-2', agentType: 'design', tier: 'High' },
+    { type: 'Script or code implementation', phase: '4', agentType: 'execution', tier: 'Low' },
+    { type: 'Documentation update', phase: '4', agentType: 'documentation', tier: 'Medium' },
+  ];
+  
+  for (const mapping of deliverableMapping) {
+    const agent = agentTypes[mapping.agentType] || resolveFallback(mapping.agentType, variant);
+    lines.push(`| ${mapping.type} | Phase ${mapping.phase} | ${agent} | ${mapping.tier} |`);
+  }
+  
+  return lines.join('\n');
+}
+```
+
+**Validation**:
+```typescript
+const L0_AGENT_NAMES = [
+  'automation-engineer', 'docs-writer', 'architect', 'auditor', 
+  'security-expert', 'scaffolding-expert'
+];
+
+function validateNoL0Leakage(generatedTable: string): ValidationResult {
+  const violations = L0_AGENT_NAMES.filter(agent => 
+    generatedTable.toLowerCase().includes(agent.toLowerCase())
+  );
+  
+  return {
+    valid: violations.length === 0,
+    violations,
+    message: violations.length > 0 
+      ? `L0 leakage detected: ${violations.join(', ')}`
+      : 'No L0 leakage'
+  };
+}
+```
+
+### Component 5: L0-Only Content Removal
+
+**Purpose**: Remove L0-specific sections and terminology from L2 variants
+
+**Removal Rules**:
+1. Remove "Platform Note" section entirely
+2. Replace "CONSTITUTION.md" references with "context.md and <variant>.context.md"
+3. Remove L0-specific terminology (workspace root, ai-workspace-standards, cross-platform template scripts)
+4. Remove "YOU ARE THE SINGLE ENTRY POINT" section (L0-specific)
+
+**Algorithm**:
+```typescript
+function removeL0OnlyContent(content: string, variant: string): string {
+  let cleaned = content;
+  
+  // 1. Remove Platform Note section
+  cleaned = removeSection(cleaned, 'Platform Note');
+  
+  // 2. Replace CONSTITUTION.md references
+  cleaned = cleaned.replace(
+    /CONSTITUTION\.md/g,
+    `context.md and ${variant}.context.md`
+  );
+  
+  // 3. Remove L0-specific terminology
+  const l0Terms = [
+    'workspace root',
+    'ai-workspace-standards',
+    'cross-platform template scripts'
+  ];
+  
+  for (const term of l0Terms) {
+    cleaned = cleaned.replace(new RegExp(term, 'gi'), `this ${variant} project`);
+  }
+  
+  // 4. Remove L0-specific sections
+  cleaned = removeSection(cleaned, 'YOU ARE THE SINGLE ENTRY POINT');
+  
+  return cleaned;
+}
+```
+
+### Component 6: MANDATORY Dispatch List Generation
+
+**Purpose**: Generate variant-specific MANDATORY dispatch list
+
+**Algorithm**:
+```typescript
+function generateMandatoryDispatchList(roster: AgentRosterEntry[]): string {
+  const agentSet = new Set<string>();
+  
+  for (const entry of roster) {
+    const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
+    for (const agent of agentsList) {
+      const agentName = typeof agent === 'string' ? agent : agent.name;
+      agentSet.add(agentName);
+    }
+  }
+  
+  const lines = [
+    `**MANDATORY**: All file modifications MUST be dispatched to:`,
+    ``,
+  ];
+  
+  for (const agent of agentSet) {
+    lines.push(`- \`${agent}\` (variant-specific specialist)`);
+  }
+  
+  return lines.join('\n');
+}
+```
+
+---
+
+### Implementation Plan (5 Phases)
+
+**Phase 1: YAML Schema Extension** (Architect, 2 hours)
+- Update all 5 variant templates with responsibility field
+- For each agent in agent_roster, add: `responsibility: "Domain knowledge and business analysis"`
+- Fallback: `responsibility: "${group} specialist"`
+
+**Phase 2: Layout Reconstruction Implementation** (Automation-Engineer, 4 hours)
+- Implement all 6 component functions in merge-frontmatter.ts
+- Add reconstructPMLayout() orchestration function
+- Create unit tests for each component
+
+**Phase 3: remove_sections Chain Propagation** (Automation-Engineer, 30 minutes)
+- Implement L1→L2 remove_sections inheritance
+- Merge L1 and L2 remove_sections arrays
+- Apply inherited remove_sections to L2 content
+
+**Phase 4: Test Suite Creation** (Auditor, 2 hours)
+- Create comprehensive test suite: scripts/test/__tests__/pm-layout-reconstruction.test.ts
+- Implement critical tests for all 6 components
+- Target 95%+ coverage
+
+**Phase 5: Validation and QA** (Auditor, 2 hours)
+- Run audit.ts and verify all checks PASS
+- Generate test project and manually review pm.md
+- Validate all 5 variants
+
+---
+
+### Acceptance Criteria (6 Items)
+
+**AC-01: No L0 Agent Names in Phase Determination Table**
+- Verification: Table must NOT contain automation-engineer, docs-writer, architect, auditor, security-expert, scaffolding-expert
+- Manual check: Generated L2 pm.md files show only variant agents
+
+**AC-02: All Roster Entries Have Non-Empty Responsibility Field**
+- Verification: All rows in Agent Roster table have responsibility column populated
+- Fallback: Generate from group field if missing ("Analysis specialist")
+
+**AC-03: Platform Note Removed from L2 Variants**
+- Verification: "Platform Note" section is absent from generated L2 pm.md
+- Manual check: Search for "Platform Note" returns no results
+
+**AC-04: MANDATORY Dispatch List Contains Only Variant Agents**
+- Verification: Dispatch list shows only variant agents, no L0 agents
+- Manual check: List matches variant_overrides.agent_roster
+
+**AC-05: remove_sections Properly Inherited from L1 to L2**
+- Verification: L1 remove_sections applied to L2 content during reconstruction
+- Test: Merge L1 and L2 remove_sections arrays correctly
+
+**AC-06: L2 pm.md File Size Under 150 Lines**
+- Verification: All 5 variant pm.md files are under 150 lines (vs L0's 384 lines)
+- Expected: ~50-100 lines variant-specific only
+
+---
+
+### Update List (Legacy - Pre v1.5.0)
+
+**Note**: This section documents the pre-v1.5.0 behavior. After v1.5.0 implementation, complete reconstruction replaces this approach.
 
 These L0 sections are **always** updated with variant-specific content during PM.md merge:
 
@@ -643,10 +957,13 @@ This section documents current limitations in the PM.md operations implementatio
 - ⚠️ **Edge case testing pending**: Phase 1+ (v1.3.0) will achieve 100% edge case test coverage
 
 **Architecture**:
-- ⚠️ **Over-engineering in proposed v1.5.0+**: Layout Reconstruction Process proposes 8-step process (300-400 lines) when 3-step process (80-100 lines) is sufficient
-- ⚠️ **Schema redundancy**: 4-column Agent Roster schema when 3-column schema is simpler
-- ⚠️ **Variant_sections ambiguity**: "update" semantics not clearly defined (prepend vs replace vs append)
-- ⚠️ **Architecture simplification pending**: Phase 1+ (v1.3.0) will implement simplified architecture
+- ❌ **L0 Content Duplication Bug**: L2 variants contain 384 lines (full L0 content) instead of ~50-100 lines variant-specific content
+- ❌ **Layout Reconstruction Not Triggered**: merge-frontmatter.ts has reconstruction functions but doesn't call them
+- ❌ **removeL0OnlyContent() Failure**: Function doesn't remove CONSTITUTION.md references or Platform Note sections
+- ❌ **Agent Roster Responsibility Field Empty**: Template YAML has empty responsibility values, table generation fails
+- ❌ **Phase Determination Table Shows L0 Agents**: Table shows automation-engineer, docs-writer instead of variant agents
+- ⚠️ **Comprehensive design complete (v1.5.0+)**: 6-component architecture with 5-phase implementation plan ready
+- ⚠️ **Implementation pending**: Awaiting Phase 1-5 execution (10.5 hours estimated)
 
 ### Documentation Gaps
 
@@ -678,14 +995,26 @@ This section documents current limitations in the PM.md operations implementatio
   - Comprehensive test suites
 - **Status**: 📋 Proposed, awaiting implementation
 
-**Phase 2+ (v1.6.0): Simplification** - **Priority: P2**
+**Phase 2+ (v1.5.0): Layout Reconstruction Implementation** - **Priority: P0**
+- **Timeline**: Immediate (10.5 hours estimated)
+- **Deliverables**:
+  - Phase 1: YAML Schema Extension (2 hours)
+  - Phase 2: Layout Reconstruction Implementation (4 hours)
+  - Phase 3: remove_sections Chain Propagation (30 minutes)
+  - Phase 4: Test Suite Creation (2 hours)
+  - Phase 5: Validation and QA (2 hours)
+  - Complete 6-component architecture
+  - All 6 acceptance criteria met
+- **Status**: ✅ **Comprehensive design complete**, implementation pending
+
+**Phase 3+ (v1.6.0): Simplification** - **Priority: P2**
 - **Timeline**: Short-term (4-7 hours estimated)
 - **Deliverables**:
   - Agent Roster schema simplification (4→3 columns)
   - Layout reconstruction simplification (8→3 steps, 60-70% code reduction)
   - Optional: Caching strategy
   - Optional: Observability
-- **Status**: 📋 Proposed, awaiting Phase 1+ completion
+- **Status**: 📋 Proposed, awaiting Phase 1+ and Phase 2+ completion
 
 **Phase 3+ (v2.0.0): Performance & Operations** - **Priority: P2**
 - **Timeline**: Long-term (6-12 months)
@@ -768,6 +1097,55 @@ This section documents current limitations in the PM.md operations implementatio
 - **Single source of truth**: `variant_overrides.variant_sections` for all section customization
 - **Backward compatibility**: Scripts support both `remove_sections` and `variant_sections` (legacy support)
 - **Documentation standard**: Use `variant_overrides.variant_sections` for clarity and consistency
+
+### Pitfall 7: L0 Content Duplication
+
+**Problem**: L2 variants contain 384 lines (full L0 content) instead of ~50-100 lines variant-specific content
+
+**Root Cause**: 
+- merge-frontmatter.ts copies L0 body content to L2 without reconstruction
+- Layout Reconstruction functions exist but are not properly triggered
+- removeL0OnlyContent() doesn't remove all L0-specific sections
+
+**Solution** (v1.5.0+):
+- Use **Complete Reconstruction strategy** (not copy + remove)
+- Generate ALL L2 content from scratch using variant_overrides
+- Implement proper trigger condition in merge-frontmatter.ts:
+  ```typescript
+  if (isPMFile && hasVariantOverrides && variantLevel === 'L2') {
+    return reconstructPMLayout(yaml, baseContent, variantLevel);
+  }
+  ```
+- Verify L2 pm.md file size is under 150 lines
+
+**Verification**:
+```bash
+# Check line count
+wc -l templates/co-work/agents/pm.md
+# Expected: ~50-100 lines (not 384 lines)
+```
+
+### Pitfall 8: Layout Reconstruction Not Triggered
+
+**Problem**: Layout Reconstruction functions exist in merge-frontmatter.ts but L2 templates still show L0 content
+
+**Root Cause**:
+- isPMFile detection exists but reconstruction logic not called
+- hasVariantOverrides check missing
+- variantLevel not properly detected
+
+**Solution** (v1.5.0+):
+- Add proper trigger condition in merge-frontmatter.ts extends chain processing
+- Ensure reconstruction happens at both trigger points:
+  1. L2 template generation (create-l2-scaffold.ts)
+  2. Project scaffold from L2 template (new-project.ps1/sh)
+- Test with manual trigger validation
+
+**Manual Verification**:
+1. Generate L2 template: `bun scripts/create-l2-scaffold.ts co-work`
+2. Check output: `templates/co-work/agents/pm.md`
+3. Verify: No L0 agent names in Phase Determination table
+4. Verify: File size under 150 lines
 
 ---
 
@@ -1625,6 +2003,7 @@ function getLocalizedMessage(key: string, params: Record<string, string>, locale
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.5.0 | 2026-06-08 | **Comprehensive Design Integration**: Integrated complete PM.md Variant-Specific Content Injection design with 6-component architecture, 5-phase implementation plan, and 6 acceptance criteria. Updated Implementation Status Matrix, Layout Reconstruction Process, Known Limitations, and Common Pitfalls sections |
 | 1.4.0 | 2026-06-08 | **Phase 2 Complete**: Added comprehensive "Edge Cases and Error Handling" section documenting all 10 edge cases with error types, behaviors, examples, and testing requirements per ADR-0034 Phase 2 |
 | 1.3.0 | 2026-06-08 | Added Long-term Roadmap (v2.0.0+) section with Phase 3/4 strategic plans |
 | 1.2.0 | 2026-06-08 | Renamed `remove_sections` → `variant_sections` for positive semantics ("customization" not "removal") |

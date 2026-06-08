@@ -17,24 +17,30 @@ variant_overrides:
     - phase: Design
       group: Design
       agents:
-        - architect
-        - designer
+        - name: architect
+          responsibility: Software architecture and design
+        - name: designer
+          responsibility: Software design and technical specifications
     - phase: Implementation
       group: Execution
       agents:
-        - code-writer
+        - name: code-writer
+          responsibility: Code implementation and development
     - phase: QA / Verification
       group: Execution
       agents:
-        - test-runner
+        - name: test-runner
+          responsibility: Testing and quality assurance
     - phase: Setup (unknown stack)
       group: Setup
       agents:
-        - stack-setup
+        - name: stack-setup
+          responsibility: Development environment setup
     - phase: Triage / Security
       group: Security
       agents:
-        - security-monitor
+        - name: security-monitor
+          responsibility: Security monitoring and vulnerability triage
   dispatch_protocol:
     can_lead_phases:
       - 0

@@ -13,31 +13,38 @@ variant_overrides:
     - phase: Research
       group: Research
       agents:
-        - ux-researcher
+        - name: ux-researcher
+          responsibility: User research and UX analysis
     - phase: Direction
       group: Design
       agents:
-        - design-lead
+        - name: design-lead
+          responsibility: Design direction and creative leadership
     - phase: Visual
       group: Design
       agents:
-        - visual-designer
+        - name: visual-designer
+          responsibility: Visual design and UI/UX execution
     - phase: Prototype
       group: Execution
       agents:
-        - prototype-engineer
+        - name: prototype-engineer
+          responsibility: Prototyping and interactive mockups
     - phase: Service
       group: Design
       agents:
-        - service-designer
+        - name: service-designer
+          responsibility: Service design and experience strategy
     - phase: Typography
       group: Design
       agents:
-        - typography-expert
+        - name: typography-expert
+          responsibility: Typography and visual language systems
     - phase: Narrative
       group: Content
       agents:
-        - storyteller
+        - name: storyteller
+          responsibility: Narrative design and content strategy
   dispatch_protocol:
     can_lead_phases:
       - 0

@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.1
+ * @version 1.8.2
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -1073,17 +1073,22 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
   }
 
   // ADR-0033: Validate extends chain before processing
-  const validationPath = originalContextPath ? resolve(originalContextPath) : absolutePath;
-  console.log(`🔍 Validating extends chain for: ${validationPath}`);
-  const validationResult: ExtendsValidationResult = safeValidateExtends(validationPath);
+  // Skip validation if explicitSkeletonPath is provided (already validated by caller)
+  if (!explicitSkeletonPath) {
+    const validationPath = originalContextPath ? resolve(originalContextPath) : absolutePath;
+    console.log(`🔍 Validating extends chain for: ${validationPath}`);
+    const validationResult: ExtendsValidationResult = safeValidateExtends(validationPath);
 
-  if (!validationResult.valid) {
-    console.error(`❌ Extends validation failed: ${validationResult.message}`);
-    console.warn(`⚠️  Falling back to safe default: returning original content without extends resolution`);
-    return content;
+    if (!validationResult.valid) {
+      console.error(`❌ Extends validation failed: ${validationResult.message}`);
+      console.warn(`⚠️  Falling back to safe default: returning original content without extends resolution`);
+      return content;
+    }
+
+    console.log(`✅ Extends validation passed (depth: ${validationResult.depth})`);
+  } else {
+    console.log(`⏭️  Skipping extends validation (explicit skeleton path provided: ${explicitSkeletonPath})`);
   }
-
-  console.log(`✅ Extends validation passed (depth: ${validationResult.depth})`);
 
   let skeletonPath: string;
   if (explicitSkeletonPath) {
@@ -1138,7 +1143,8 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     let appendContent = '';
 
     if (isPMFile) {
-      console.log(`ℹ️ PM File detected: applying force-strip, substitution mapping, and layout restructuring`);
+      console.error(`✅ PM File detected: applying force-strip, substitution mapping, and layout restructuring`);
+      console.error(`✅ PM File path: ${filePath}`);
 
       // 1. Extract L0 sections before stripping
       const skeletonContent = skeletonResolved.content;
@@ -1163,15 +1169,7 @@ ${substituteAgentNames(subpoints.version, map)}
 - **Phase Determination (Deliverable-Type Gate)**:
   Before assigning an agent to any task, PM MUST classify the deliverable type and assign the correct Phase:
 
-  | Deliverable Type | Phase | Required Agent | Tier | Notes |
-  |------------------|-------|----------------|------|-------|
-  | New file design, schema definition, ADR | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | New directory structure, template layout | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | Cross-platform convention, naming standard | Phase 1-2 | ${map['architect']} | High | Must precede implementation |
-  | Script implementation (approved plan exists) | Phase 4 | ${map['automation-engineer']} | Low | Plan from ${map['architect']} required |
-  | Documentation writing | Phase 4 | ${map['docs-writer']} | Medium | |
-  | Security configuration | Phase 6 | ${map['security-expert']} | Medium | |
-  | Project scaffolding | Phase 0 | ${map['scaffolding-expert']} | Low | |
+  ${generatePhaseDeterminationTable(variantOverrides, mergedFrontmatter.variant || 'unknown')}
 
   **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map['automation-engineer']}\` is always Low — assigning it High is a governance violation.
 
@@ -1191,6 +1189,27 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         "## Dispatch Protocol",
         "## Constraints"
       ];
+
+      // For L2 variants, add additional sections to remove
+      const currentVariantLevel = determineVariantLevel(filePath);
+      console.log(`[DEBUG] PM file processing - variant level: ${currentVariantLevel}`);
+      if (currentVariantLevel === 'L2') {
+        console.log(`[DEBUG] Applying L2-specific section removal`);
+        forceRemove.push(
+          "## Consensus-Driven Facilitation Model",
+          "## Permission Denial Protocol",
+          "## Execution Plan Boilerplate Policy",
+          "## Meeting Facilitation",
+          "## Required Tools",
+          "## ⚠️ CRITICAL: PM Direct Execution Constraints",
+          "## Task Tracking vs Execution",
+          "## User Communication for Specialist Tasks"
+        );
+        console.log(`🔪 L2 variant: additional ${forceRemove.length - 10} sections marked for removal`);
+      } else {
+        console.log(`[DEBUG] Not L2 variant, skipping additional removal`);
+      }
+
       baseContent = removeSections(baseContent, forceRemove);
       baseContent = substituteAgentNames(baseContent, substitutionMap);
 
@@ -1252,7 +1271,17 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
 
     } else {
       // Normal skeleton section removal and fallback assembly
-      const sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
+      let sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
+
+      // For L2 variants, merge remove_sections from L1 (skeleton) if available
+      const variantLevel = determineVariantLevel(filePath);
+      if (variantLevel === 'L2' && skeletonResolved.frontmatter.remove_sections) {
+        const l1RemoveSections = skeletonResolved.frontmatter.remove_sections || [];
+        const l2RemoveSections = mergedFrontmatter.remove_sections || [];
+        sectionsToRemove = mergeRemoveSections(l1RemoveSections, l2RemoveSections);
+        console.log(`🔗 Merged remove_sections: L1 (${l1RemoveSections.length}) + L2 (${l2RemoveSections.length}) = ${sectionsToRemove.length} total`);
+      }
+
       if (sectionsToRemove.length > 0) {
         baseContent = removeSections(baseContent, sectionsToRemove);
         if (baseContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
@@ -1288,11 +1317,23 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     // Do not include remove_sections / extends directives in final output frontmatter
     delete (mergedFrontmatter as any).remove_sections;
 
+    // Remove L0-only content from L2 variants
+    const variantLevel = determineVariantLevel(filePath);
+    console.log(`🔍 Variant Level: ${variantLevel}, File: ${filePath}`);
+    let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
+
+    // Debug: Check if CONSTITUTION.md was removed
+    if (variantLevel === 'L2' && processedFinalBody.includes('CONSTITUTION.md')) {
+      console.warn('⚠️  CONSTITUTION.md still present after removeL0OnlyContent!');
+    } else if (variantLevel === 'L2') {
+      console.log('✅ CONSTITUTION.md successfully removed from L2 variant');
+    }
+
     const result = `---
 ${dump(mergedFrontmatter).trim()}
 ---
 
-${finalBody}`;
+${processedFinalBody}`;
 
     return result;
   } catch (error) {
@@ -1337,6 +1378,313 @@ ${fallback.content}`;
   }
 }
 
+/**
+ * Determine variant level from file path
+ * @param filePath - File path to analyze
+ * @returns Variant level (L0, L1, or L2)
+ */
+function determineVariantLevel(filePath: string): string {
+  const normalizedPath = filePath.replace(/\\/g, '/');
+
+  // L2 variants (co-*)
+  // Check both absolute (with leading /) and relative paths (without leading /)
+  if (normalizedPath.includes('templates/co-')) {
+    return 'L2';
+  }
+
+  // L1 variant (common)
+  if (normalizedPath.includes('templates/common/')) {
+    return 'L1';
+  }
+
+  // L0 (workspace root)
+  return 'L0';
+}
+
+/**
+ * Group → Type Mapping based on specification document
+ * Used for Phase Determination table generation
+ */
+interface GroupTypeMapping {
+  [groupName: string]: string;
+}
+
+/**
+ * Default Group → Type mappings from specification
+ */
+const DEFAULT_GROUP_TYPE_MAPPING: GroupTypeMapping = {
+  'Design': 'design',
+  'Direction': 'design',
+  'Visual': 'design',
+  'Typography': 'design',
+  'Service': 'design',
+  'Execution': 'execution',
+  'Prototype': 'execution',
+  'Implementation': 'execution',
+  'Analysis': 'qa',
+  'Research': 'qa',
+  'Subject Matter': 'qa',
+  'SME': 'qa',
+  'Data': 'qa',
+  'Strategy': 'qa',
+  'Coordination': 'pm',
+  'Management': 'pm',
+  'PMO': 'pm',
+  'Tools': 'infrastructure',
+  'Office': 'infrastructure',
+  'Tech': 'infrastructure',
+  'Technology': 'infrastructure',
+  'Architecture': 'infrastructure',
+  'Setup': 'infrastructure',
+  'Content': 'documentation',
+  'Narrative': 'documentation',
+  'Comm': 'documentation',
+  'Security': 'security',
+  'Red Team': 'security',
+  'Blue Team': 'security',
+  'Delivery': 'delivery',
+  'Workstream': 'delivery'
+};
+
+/**
+ * Fallback hierarchy for missing agent types
+ * Based on specification document
+ */
+const FALLBACK_HIERARCHY: Record<string, string[]> = {
+  'design': ['designer', 'architect'],
+  'execution': ['code-writer', 'prototype-engineer', 'automation-engineer'],
+  'qa': ['analyst', 'researcher', 'auditor'],
+  'pm': ['project-coordinator', 'delivery-manager', 'pm'],
+  'infrastructure': ['technology-specialist', 'solutions-architect', 'security-expert'],
+  'documentation': ['technical-writer', 'content-writer', 'docs-writer'],
+  'security': ['security-monitor', 'threat-modeler', 'security-expert'],
+  'delivery': ['delivery-manager', 'workstream-lead', 'pm']
+};
+
+/**
+ * Extract agent types from roster based on group → type mapping
+ * @param agentRoster - Agent roster from variant_overrides
+ * @param variant - Variant name for context-aware classification
+ * @returns Object mapping agent types to agent names
+ */
+function extractAgentTypes(agentRoster: any[], variant: string): Record<string, string> {
+  const types: Record<string, string> = {
+    design: null,
+    execution: null,
+    qa: null,
+    pm: null,
+    infrastructure: null,
+    documentation: null,
+    security: null,
+    delivery: null
+  };
+
+  // Create a mapping of available agents
+  const availableAgents: Record<string, string> = {};
+
+  for (const phaseGroup of agentRoster) {
+    const group = phaseGroup.group;
+    const agents = phaseGroup.agents;
+
+    // Handle Strategy group context-aware classification
+    let agentType = DEFAULT_GROUP_TYPE_MAPPING[group];
+
+    if (group === 'Strategy') {
+      // Context-based override for Strategy group
+      if (variant === 'co-design') {
+        agentType = 'design'; // Design strategy
+      } else {
+        agentType = 'qa'; // Strategic analysis (default)
+      }
+    }
+
+    // Handle Analysis group in security context
+    if (group === 'Analysis' && phaseGroup.phase?.toLowerCase().includes('threat')) {
+      agentType = 'security';
+    }
+
+    // Map first agent in group to type
+    if (agentType && agents && agents.length > 0) {
+      const agentName = typeof agents[0] === 'string' ? agents[0] : agents[0].name;
+
+      // Only assign if type not already assigned
+      if (agentType && !types[agentType]) {
+        types[agentType] = agentName;
+      }
+
+      // Track available agents for fallback
+      availableAgents[agentName] = agentType || 'unknown';
+    }
+  }
+
+  // Apply fallback hierarchy for missing types
+  for (const agentType of Object.keys(types)) {
+    if (!types[agentType]) {
+      const fallbackChain = FALLBACK_HIERARCHY[agentType] || [];
+
+      for (const fallbackAgent of fallbackChain) {
+        // Check if fallback agent exists in available agents
+        if (availableAgents[fallbackAgent]) {
+          types[agentType] = fallbackAgent;
+          console.warn(`⚠️  Using fallback: ${fallbackAgent} for type ${agentType}`);
+          break;
+        }
+
+        // Check if fallback agent exists in roster (even if not mapped)
+        for (const phaseGroup of agentRoster) {
+          const agents = phaseGroup.agents || [];
+          for (const agent of agents) {
+            const agentName = typeof agent === 'string' ? agent : agent.name;
+            if (agentName === fallbackAgent) {
+              types[agentType] = fallbackAgent;
+              console.warn(`⚠️  Using fallback from roster: ${fallbackAgent} for type ${agentType}`);
+              break;
+            }
+          }
+          if (types[agentType]) break;
+        }
+
+        if (types[agentType]) break;
+      }
+
+      // Final fallback - use L0 agent with warning
+      if (!types[agentType] && fallbackChain.length > 0) {
+        const l0Agent = fallbackChain[fallbackChain.length - 1];
+        types[agentType] = l0Agent;
+        console.warn(`🚨 L0 fallback used: ${l0Agent} for type ${agentType} - consider adding dedicated agent to roster`);
+      }
+    }
+  }
+
+  return types;
+}
+
+/**
+ * Generate Phase Determination table with variant agents
+ * @param variantOverrides - variant_overrides from YAML
+ * @param variant - Variant name for context
+ * @returns Markdown table string
+ */
+function generatePhaseDeterminationTable(variantOverrides: any, variant: string): string {
+  const agentTypes = extractAgentTypes(variantOverrides?.agent_roster || [], variant);
+
+  // Build table rows dynamically based on available agent types
+  const rows: string[] = [];
+
+  // Design type deliverables
+  if (agentTypes.design) {
+    rows.push(`| New file design / schema definition / ADR | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+    rows.push(`| New directory structure / template layout | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+    rows.push(`| Cross-platform convention / naming standard | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+  }
+
+  // Execution type deliverables
+  if (agentTypes.execution) {
+    rows.push(`| Script implementation (approved plan exists) | Phase 4 | ${agentTypes.execution} | Low | Plan from design agent required |`);
+  }
+
+  // Documentation type deliverables
+  if (agentTypes.documentation) {
+    rows.push(`| Documentation writing | Phase 4 | ${agentTypes.documentation} | Medium | |`);
+  }
+
+  // Security type deliverables
+  if (agentTypes.security) {
+    rows.push(`| Security configuration | Phase 6 | ${agentTypes.security} | Medium | |`);
+  }
+
+  // Infrastructure type deliverables
+  if (agentTypes.infrastructure) {
+    rows.push(`| Project scaffolding / environment setup | Phase 0 | ${agentTypes.infrastructure} | Low | |`);
+  }
+
+  // PM type deliverables
+  if (agentTypes.pm) {
+    rows.push(`| Project coordination / task management | Phase 0 | ${agentTypes.pm} | Medium | |`);
+  }
+
+  // QA type deliverables
+  if (agentTypes.qa) {
+    rows.push(`| Analysis / research / domain expertise | Phase 1-2 | ${agentTypes.qa} | Medium | |`);
+  }
+
+  // Delivery type deliverables
+  if (agentTypes.delivery) {
+    rows.push(`| Delivery management / workstream coordination | Phase 0 | ${agentTypes.delivery} | Medium | |`);
+  }
+
+  // Generate table
+  const lines = [
+    `| Deliverable Type | → Phase | → Required Agent | → Tier | Notes |`,
+    `|------------------|---------|----------------|--------|-------|`,
+    ...rows
+  ];
+
+  return lines.join('\n');
+}
+
+/**
+ * Remove L0-only content from L2 variants
+ * @param content - Content to process
+ * @param variantLevel - Variant level (L0, L1, L2)
+ * @returns Processed content
+ *
+ * L0 CONTENT DUPLICATION FIX - v1.8.2:
+ * - Fixed determineVariantLevel to handle relative paths without leading /
+ * - Fixed removeL0OnlyContent to remove CONSTITUTION.md lines completely
+ * - Added L2-specific section removal in PM file handling
+ */
+function removeL0OnlyContent(content: string, variantLevel: string): string {
+  if (variantLevel !== 'L2') {
+    return content;
+  }
+
+  let processed = content;
+
+  // Remove lines containing CONSTITUTION.md references
+  processed = processed.replace(
+    /^.*CONSTITUTION\.md.*$/gm,
+    ''
+  );
+
+  // Remove Platform Note about Platform column
+  processed = processed.replace(
+    /\*\*Platform Note\*\*: The execution plan table format has been simplified to remove the `Platform` column\. PM will still internally manage the L0-only task classification\.\n*/g,
+    ''
+  );
+
+  // Replace "Root Configuration Changes" with "Configuration Changes"
+  processed = processed.replace(
+    /Root Configuration Changes/g,
+    'Configuration Changes'
+  );
+
+  // Clean up multiple consecutive blank lines
+  processed = processed.replace(/\n{3,}/g, '\n\n');
+
+  return processed;
+}
+
+/**
+ * Merge remove_sections from L1 and L2 variants
+ * Ensures L2 inherits and extends L1's remove_sections
+ * @param l1RemoveSections - remove_sections from L1 variant
+ * @param l2RemoveSections - remove_sections from L2 variant
+ * @returns Merged remove_sections array
+ */
+function mergeRemoveSections(l1RemoveSections: string[], l2RemoveSections: string[]): string[] {
+  const merged = [...(l1RemoveSections || [])];
+
+  // Add L2 sections that aren't already in the list
+  for (const section of (l2RemoveSections || [])) {
+    if (!merged.includes(section)) {
+      merged.push(section);
+    }
+  }
+
+  return merged;
+}
+
 // Export functions for testing
 export {
   validateYAMLSecurity,
@@ -1346,7 +1694,11 @@ export {
   classifyError,
   extractSection,
   parseFrontmatter,
-  removeSections
+  removeSections,
+  extractAgentTypes,
+  generatePhaseDeterminationTable,
+  removeL0OnlyContent,
+  mergeRemoveSections
 };
 
 // CLI interface (only run when executed directly, not when imported)

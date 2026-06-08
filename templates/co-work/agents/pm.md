@@ -1,7 +1,7 @@
 ---
 extends: ../../common/agents/pm.md
 variant: co-work
-remove_sections: []
+formal_name: Project Manager (PM) Agent
 variant_overrides:
   governance_workflow:
     phases:
@@ -13,27 +13,33 @@ variant_overrides:
     - phase: Research
       group: Analysis
       agents:
-        - analyst
+        - name: analyst
+          responsibility: Business analysis and research
     - phase: Content
       group: Content
       agents:
-        - content-writer
+        - name: content-writer
+          responsibility: Content creation and copywriting
     - phase: Technical
       group: Documentation
       agents:
-        - technical-writer
+        - name: technical-writer
+          responsibility: Technical documentation and knowledge management
     - phase: Coordination
       group: Management
       agents:
-        - project-coordinator
+        - name: project-coordinator
+          responsibility: Project coordination and task management
     - phase: Office
       group: Tools
       agents:
-        - ms365-expert
+        - name: ms365-expert
+          responsibility: Microsoft 365 tooling and productivity support
     - phase: Narrative
       group: Content
       agents:
-        - storyteller
+        - name: storyteller
+          responsibility: Narrative design and storytelling
   dispatch_protocol:
     can_lead_phases:
       - 0
