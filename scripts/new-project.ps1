@@ -1,4 +1,4 @@
-# @version 1.7.1
+# @version 1.7.2
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -766,8 +766,12 @@ if ($LASTEXITCODE -eq 0) {
 Write-Host ""
 Write-Host "Running environment setup..." -ForegroundColor Cyan
 Set-Location $ProjectDir
-& ".\scripts\setup.ps1"
-$setupExit = $LASTEXITCODE
+try {
+    & ".\scripts\setup.ps1"
+    $setupExit = $LASTEXITCODE
+} catch {
+    $setupExit = 1
+}
 Set-Location $OriginalLocation
 if ($setupExit -ne 0) {
     Write-Host ""
@@ -841,17 +845,24 @@ if ($isWindows) {
         $fullGrant = & icacls $ProjectDir /grant "${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
         Write-Host "  [OK] Current user full control granted" -ForegroundColor Green
 
-        Write-Host "  [Step 4/5] Keeping inheritance disabled..." -ForegroundColor Cyan
-        # Do NOT re-enable inheritance - this prevents Administrators/Users groups from being inherited
-        Write-Host "  [OK] Inheritance remains disabled (current user only)" -ForegroundColor Green
+        Write-Host "  [Step 4/5] Transferring ownership to current user..." -ForegroundColor Cyan
+        # Root cause of Explorer admin prompt: Owner defaults to BUILTIN\Administrators after git init.
+        # takeown transfers ownership to the current user so Windows Explorer can delete without UAC.
+        try {
+            $null = & takeown /F $ProjectDir /R /D Y 2>&1
+            Write-Host "  [OK] Ownership transferred to ${currentUserDomain}\${currentUser}" -ForegroundColor Green
+        } catch {
+            Write-Host "  [WARN] takeown encountered issues (non-fatal): $_" -ForegroundColor Yellow
+        }
 
         Write-Host "  [Step 5/5] Verifying permissions..." -ForegroundColor Cyan
-        # Count access rules (approximate verification)
+        $finalOwner = (Get-Acl $ProjectDir -ErrorAction SilentlyContinue).Owner
+        Write-Host "  [OK] Owner: $finalOwner" -ForegroundColor Green
         Write-Host "  [OK] Permission cleanup complete" -ForegroundColor Green
 
         Write-Host ""
         Write-Host "  [SUCCESS] Windows file permissions fully cleaned" -ForegroundColor Green
-        Write-Host "  Project can now be deleted without administrator privileges" -ForegroundColor Cyan
+        Write-Host "  Project can now be deleted via Explorer or rd /s /q without administrator privileges" -ForegroundColor Cyan
 
     } catch {
         Write-Host "  [WARN] Permission cleanup encountered issues: $_" -ForegroundColor Yellow

@@ -101,7 +101,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ps1` | L0 | 1.7.1 | active | —| —| L0 | —|
+| `new-project.ps1` | L0 | 1.7.2 | active | —| —| L0 | —|
 | `new-project.sh` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
