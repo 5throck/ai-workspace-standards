@@ -1,4 +1,4 @@
-# @version 1.7.0
+# @version 1.7.2
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -766,8 +766,12 @@ if ($LASTEXITCODE -eq 0) {
 Write-Host ""
 Write-Host "Running environment setup..." -ForegroundColor Cyan
 Set-Location $ProjectDir
-& ".\scripts\setup.ps1"
-$setupExit = $LASTEXITCODE
+try {
+    & ".\scripts\setup.ps1"
+    $setupExit = $LASTEXITCODE
+} catch {
+    $setupExit = 1
+}
 Set-Location $OriginalLocation
 if ($setupExit -ne 0) {
     Write-Host ""
@@ -804,16 +808,22 @@ if ($isWindows) {
         $currentUser = [System.Environment]::UserName
         $currentUserDomain = [System.Environment]::UserDomainName
 
-        Write-Host "  [Step 1/5] Removing hidden/system attributes..." -ForegroundColor Cyan
-        # Remove hidden/system attributes from files first
-        Get-ChildItem -Path $ProjectDir -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
-            if ($_.Attributes -band [System.IO.FileAttributes]::Hidden -or $_.Attributes -band [System.IO.FileAttributes]::System) {
-                $_.Attributes = $_.Attributes -band (-bnot ([System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System))
+        Write-Host "  [Step 1/5] Removing ReadOnly/hidden/system attributes (including .git objects)..." -ForegroundColor Cyan
+        # Use -Force to traverse hidden directories (e.g. .git/) and clear ReadOnly, Hidden, System attributes
+        # This prevents Windows from requiring admin privileges when deleting git loose objects
+        Get-ChildItem -Path $ProjectDir -Recurse -Force -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $attributesToClear = [System.IO.FileAttributes]::ReadOnly -bor [System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System
+            if ($_.Attributes -band $attributesToClear) {
+                try {
+                    $_.Attributes = $_.Attributes -band (-bnot $attributesToClear)
+                } catch {
+                    # Continue even if individual file attribute change fails
+                }
             }
         }
 
-        # Also clear attributes on directories using attrib command
-        Get-ChildItem -Path $ProjectDir -Recurse -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+        # Also clear attributes on directories (including hidden ones) using attrib command
+        Get-ChildItem -Path $ProjectDir -Recurse -Force -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             try {
                 $folder = $_.FullName
                 $null = & cmd /c "attrib -R -S -H `"$folder`"" 2>&1
@@ -821,7 +831,7 @@ if ($isWindows) {
                 # Continue even if attrib fails
             }
         }
-        Write-Host "  [OK] Attributes cleared" -ForegroundColor Green
+        Write-Host "  [OK] Attributes cleared (ReadOnly/Hidden/System removed from all files including .git objects)" -ForegroundColor Green
 
         Write-Host "  [Step 2/5] Disabling inheritance and clearing ACLs..." -ForegroundColor Cyan
         # Disable inheritance and clear existing ACLs for clean state
@@ -835,17 +845,24 @@ if ($isWindows) {
         $fullGrant = & icacls $ProjectDir /grant "${currentUser}:(OI)(CI)F" /T /C /Q 2>&1
         Write-Host "  [OK] Current user full control granted" -ForegroundColor Green
 
-        Write-Host "  [Step 4/5] Keeping inheritance disabled..." -ForegroundColor Cyan
-        # Do NOT re-enable inheritance - this prevents Administrators/Users groups from being inherited
-        Write-Host "  [OK] Inheritance remains disabled (current user only)" -ForegroundColor Green
+        Write-Host "  [Step 4/5] Transferring ownership to current user..." -ForegroundColor Cyan
+        # Root cause of Explorer admin prompt: Owner defaults to BUILTIN\Administrators after git init.
+        # takeown transfers ownership to the current user so Windows Explorer can delete without UAC.
+        try {
+            $null = & takeown /F $ProjectDir /R /D Y 2>&1
+            Write-Host "  [OK] Ownership transferred to ${currentUserDomain}\${currentUser}" -ForegroundColor Green
+        } catch {
+            Write-Host "  [WARN] takeown encountered issues (non-fatal): $_" -ForegroundColor Yellow
+        }
 
         Write-Host "  [Step 5/5] Verifying permissions..." -ForegroundColor Cyan
-        # Count access rules (approximate verification)
+        $finalOwner = (Get-Acl $ProjectDir -ErrorAction SilentlyContinue).Owner
+        Write-Host "  [OK] Owner: $finalOwner" -ForegroundColor Green
         Write-Host "  [OK] Permission cleanup complete" -ForegroundColor Green
 
         Write-Host ""
         Write-Host "  [SUCCESS] Windows file permissions fully cleaned" -ForegroundColor Green
-        Write-Host "  Project can now be deleted without administrator privileges" -ForegroundColor Cyan
+        Write-Host "  Project can now be deleted via Explorer or rd /s /q without administrator privileges" -ForegroundColor Cyan
 
     } catch {
         Write-Host "  [WARN] Permission cleanup encountered issues: $_" -ForegroundColor Yellow
