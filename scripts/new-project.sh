@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @version 1.7.0
+# @version 1.7.1
 # new-project.sh - Scaffold a new project under the workspace root
 # Usage: bash scripts/new-project.sh "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 # Variants are auto-detected from templates/ directory (or git tag when --version is specified)
@@ -739,11 +739,15 @@ if [ "$IS_WINDOWS" = true ]; then
   # Get current username
   CURRENT_USER="${USER:-$(whoami 2>/dev/null || echo $USERNAME)}"
 
-  echo "  [Step 1/5] Removing hidden/system attributes..."
-  # Remove hidden/system attributes using attrib command
-  find "$PROJECT_DIR" -type f -exec attrib -R -S -H {} \; 2>/dev/null || true
-  find "$PROJECT_DIR" -type d -exec attrib -R -S -H {} \; 2>/dev/null || true
-  echo "  [OK] Attributes cleared"
+  echo "  [Step 1/5] Removing ReadOnly/hidden/system attributes (including .git objects)..."
+  # attrib default traversal skips hidden dirs like .git — iterate explicitly via find
+  find "$PROJECT_DIR" -type f 2>/dev/null | while IFS= read -r f; do
+    attrib -R -S -H "$f" 2>/dev/null || true
+  done
+  find "$PROJECT_DIR" -type d 2>/dev/null | while IFS= read -r d; do
+    attrib -R -S -H "$d" 2>/dev/null || true
+  done
+  echo "  [OK] Attributes cleared (ReadOnly/Hidden/System removed from all files including .git objects)"
 
   echo "  [Step 2/5] Disabling inheritance and clearing ACLs..."
   # Disable inheritance and clear existing ACLs
@@ -755,17 +759,18 @@ if [ "$IS_WINDOWS" = true ]; then
   icacls "$PROJECT_DIR" /grant "${CURRENT_USER}:(OI)(CI)F" /T /C /Q 2>&1 | grep -i "processed" || true
   echo "  [OK] Current user full control granted"
 
-  echo "  [Step 4/5] Keeping inheritance disabled..."
-  # Do NOT re-enable inheritance - this prevents Administrators/Users groups from being inherited
-  echo "  [OK] Inheritance remains disabled (current user only)"
+  echo "  [Step 4/5] Transferring ownership to current user..."
+  # Root cause of Explorer admin prompt: Owner defaults to BUILTIN\Administrators after git init.
+  # takeown transfers ownership to the current user so Windows Explorer can delete without UAC.
+  takeown /F "$PROJECT_DIR" /R /D Y 2>/dev/null || true
+  echo "  [OK] Ownership transferred to ${CURRENT_USER}"
 
   echo "  [Step 5/5] Verifying permissions..."
-  # Count access rules (approximate verification)
   echo "  [OK] Permission cleanup complete"
 
   echo ""
   echo "  [SUCCESS] Windows file permissions fully cleaned"
-  echo "  Project can now be deleted without administrator privileges"
+  echo "  Project can now be deleted via Explorer or rd /s /q without administrator privileges"
 
 else
   echo ""
