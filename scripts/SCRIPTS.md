@@ -103,8 +103,10 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ps1` | L0 | 1.7.0 | active | —| —| L0 | —|
+| `new-project.ps1` | L0 | 1.7.1 | active | —| —| L0 | —|
 | `new-project.sh` | L0 | 1.7.0 | active | —| —| L0 | —|
+| `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
@@ -286,6 +288,17 @@ and an optional variant, substitutes `[Project Name]` placeholders, initializes 
 hooks, sets executable bits, and runs the post-scaffold audit.
 **Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
+
+#### `remove-project.ps1` / `remove-project.sh`
+**Purpose**: Safely deletes a project directory without requiring administrator
+privileges. PowerShell version (`remove-project.ps1`) clears ReadOnly/Hidden/System
+file attributes (including `.git/` loose objects), resets NTFS ACLs, takes ownership,
+detects running Claude Code / Antigravity processes with user confirmation, and uses
+a robocopy mirror fallback if Remove-Item fails. Bash version (`remove-project.sh`)
+delegates to the PowerShell script on Windows and performs `rm -rf` on Linux/macOS.
+**Usage (PowerShell)**: `.\scripts\remove-project.ps1 "my-project"`
+**Usage (Bash)**: `bash scripts/remove-project.sh "my-project"`
+**Note**: L0 script. `remove-project.ps1` is Windows-specific; `remove-project.sh` is cross-platform.
 
 #### `sync-skills.ts`
 **Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations

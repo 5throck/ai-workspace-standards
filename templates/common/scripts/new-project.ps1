@@ -1,4 +1,4 @@
-# @version 1.7.0
+# @version 1.7.1
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -804,16 +804,22 @@ if ($isWindows) {
         $currentUser = [System.Environment]::UserName
         $currentUserDomain = [System.Environment]::UserDomainName
 
-        Write-Host "  [Step 1/5] Removing hidden/system attributes..." -ForegroundColor Cyan
-        # Remove hidden/system attributes from files first
-        Get-ChildItem -Path $ProjectDir -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
-            if ($_.Attributes -band [System.IO.FileAttributes]::Hidden -or $_.Attributes -band [System.IO.FileAttributes]::System) {
-                $_.Attributes = $_.Attributes -band (-bnot ([System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System))
+        Write-Host "  [Step 1/5] Removing ReadOnly/hidden/system attributes (including .git objects)..." -ForegroundColor Cyan
+        # Use -Force to traverse hidden directories (e.g. .git/) and clear ReadOnly, Hidden, System attributes
+        # This prevents Windows from requiring admin privileges when deleting git loose objects
+        Get-ChildItem -Path $ProjectDir -Recurse -Force -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $attributesToClear = [System.IO.FileAttributes]::ReadOnly -bor [System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System
+            if ($_.Attributes -band $attributesToClear) {
+                try {
+                    $_.Attributes = $_.Attributes -band (-bnot $attributesToClear)
+                } catch {
+                    # Continue even if individual file attribute change fails
+                }
             }
         }
 
-        # Also clear attributes on directories using attrib command
-        Get-ChildItem -Path $ProjectDir -Recurse -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+        # Also clear attributes on directories (including hidden ones) using attrib command
+        Get-ChildItem -Path $ProjectDir -Recurse -Force -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             try {
                 $folder = $_.FullName
                 $null = & cmd /c "attrib -R -S -H `"$folder`"" 2>&1
@@ -821,7 +827,7 @@ if ($isWindows) {
                 # Continue even if attrib fails
             }
         }
-        Write-Host "  [OK] Attributes cleared" -ForegroundColor Green
+        Write-Host "  [OK] Attributes cleared (ReadOnly/Hidden/System removed from all files including .git objects)" -ForegroundColor Green
 
         Write-Host "  [Step 2/5] Disabling inheritance and clearing ACLs..." -ForegroundColor Cyan
         # Disable inheritance and clear existing ACLs for clean state

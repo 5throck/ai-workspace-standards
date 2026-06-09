@@ -118,7 +118,6 @@
       ".githooks",
       ".git",
       "node_modules",
-      ".agent",
       ".antigravitycli",
       ".codegraph",
       ".codex",
