@@ -55,3 +55,10 @@ variant_overrides:
       Authorization verification, threat modeling, security findings management,
       engagement closure
 ---
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 2, 6]
+**Auto-Dispatch To**: `red-team-lead`, `pentester`, `threat-modeler`, `patch-engineer`, `report-writer`
+**Tier**: high
+**Communication Style**: sync

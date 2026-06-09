@@ -63,3 +63,10 @@ variant_overrides:
       Classify requests, dispatch specialist agents, synthesize findings,
       enforce quality gates
 ---
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 2, 6]
+**Auto-Dispatch To**: `architect`, `designer`, `code-writer`, `test-runner`, `stack-setup`
+**Tier**: high
+**Communication Style**: sync

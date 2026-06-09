@@ -61,6 +61,37 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 ---
 
+## Terminology Definition
+
+This section clearly defines hierarchy and distribution-related terms used in this document.
+
+**Layer Structure** - Based on ADR-0031:
+
+| Term | Definition | Description |
+|------|------------|-------------|
+| **L1** | templates/common | Common infrastructure layer - templates shared by all variants |
+| **L2** | templates/co-* | Variant-specific layer - co-work, co-design, etc. |
+| **L3** | Projects/* | Actual project layer - result of new project creation |
+
+**Source and Distribution**:
+
+| Term | Definition | Description |
+|------|------------|-------------|
+| **L0 Source** | workspace root | scripts/, agents/ reference point - original source code location |
+| **Distribution Path** | workspace root → templates/common → templates/co-* | Path where L0 source is distributed to L1 and L2 |
+| **Scaffolding** | templates/co-* → Projects/* | Copied from L2 to L3 for project creation |
+| **workspace root** | Root directory containing L0 source | Git repository top-level directory |
+
+**Reference Documents**:
+- **ADR-0031 (L1-L2 Fork Model)**: L1 independent evolution, L2 scaffold-time delivery
+- **ADR-0033 (YAML Extends Pattern)**: Extends chain processing, L1→L2 inheritance
+
+**Notes**:
+- The "L0 → L1 → L2" expression refers to the **distribution path**, not the **layer structure**.
+- The layer structure forms a static hierarchy as "L1 → L2 → L3".
+
+---
+
 ### 1. Standard Folder Structure → [Full details](docs/constitution/01-folder-structure.md)
 
 Every project follows a standard layout with `src/`, `docs/`, `scripts/`, `memory/`, `agents/`, `skills/`, `.github/`, `.claude/`, and `.gemini/` directories. Key rules: `docs/context.md` is mandatory for all projects, `scripts/` must be divided into Tier 1 (Shell) and Tier 2 (Bun/TS) according to their purpose, and ADRs use sequential 4-digit prefix naming (`0001-slug.md`) with mandatory Context/Decision/Consequences sections.
@@ -174,13 +205,15 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 ### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)
 
-Scripts are managed across three ownership layers: L0 (`templates/common/scripts/`, templates team, SSOT), L1 (`scripts/` workspace root), L2 (`<project>/scripts/`, independent snapshot). 
+**Script 배포 경로**:
+- **Source**: workspace root/scripts/ (L0 소스)
+- **Stage 1**: templates/common/scripts/ (자동 동기화됨 via dev-sync)
+- **Stage 2**: templates/co-*/scripts/ (variant 전용 scripts)
+- **Target**: Projects/*/scripts/ (스케폴딩 시 복사)
 
-**Understanding the Layers:**
-- **L0 (Templates)** is the "Upstream Standard" and the Single Source of Truth for scripts. It is the foundational blueprint.
-- **L1 (Workspace Root)** is the "Local Workspace Realization". Although this is often the first layer you interact with, it is downstream of L0. 
+**계층 구조 참고**: L1(templates/common) → L2(templates/co-*) → L3(Projects/*)
 
-Changes flow L0 → L1 → L2 at project creation time only—no automatic back-propagation. Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
+Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
 
 ---
 
@@ -445,5 +478,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-02*
+*Last Updated: 2026-06-09*
 

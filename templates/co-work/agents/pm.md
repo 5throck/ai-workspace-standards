@@ -61,3 +61,10 @@ variant_overrides:
       Starting multi-step tasks, coordinating parallel agents, reviewing feature
       requests, finalizing implementation
 ---
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 2, 6]
+**Auto-Dispatch To**: `analyst`, `content-writer`, `technical-writer`, `project-coordinator`, `ms365-expert`, `storyteller`
+**Tier**: high
+**Communication Style**: sync

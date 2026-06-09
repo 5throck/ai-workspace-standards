@@ -1134,6 +1134,11 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     // Use explicit variant level if provided, otherwise determine from path
     const currentVariantLevel = determineVariantLevel(filePath, explicitVariantLevel);
 
+    console.error(`[DEBUG 1135] filePath: ${filePath}`);
+    console.error(`[DEBUG 1135] explicitVariantLevel: ${explicitVariantLevel}`);
+    console.error(`[DEBUG 1135] currentVariantLevel: ${currentVariantLevel}`);
+    console.error(`[DEBUG 1135] isPMFile: ${isPMFile}`);
+
     if (isPMFile && currentVariantLevel === 'L2') {
       // For L2 PM files, use reconstructPMLayout to remove L0 content
       return reconstructPMLayout(mergedFrontmatter, baseContent, currentVariantLevel);
@@ -1754,6 +1759,12 @@ if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
   const explicitSkeletonPath = args[1] || undefined;
   const originalContextPath = args[2] || undefined;
   const explicitVariantLevel = args[3] || undefined;
+
+  console.error(`[CLI DEBUG] filePath: ${filePath}`);
+  console.error(`[CLI DEBUG] explicitSkeletonPath: ${explicitSkeletonPath}`);
+  console.error(`[CLI DEBUG] originalContextPath: ${originalContextPath}`);
+  console.error(`[CLI DEBUG] explicitVariantLevel: ${explicitVariantLevel}`);
+
   const result = processFile(filePath, explicitSkeletonPath, originalContextPath, explicitVariantLevel);
   writeFileSync(filePath, result, 'utf-8');
   console.log(`✅ Merged frontmatter for ${filePath}`);

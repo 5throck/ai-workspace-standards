@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-// publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. L1→L2 auto-propagation is forbidden per ADR-0031.
-// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift]
-// @version 1.5.0
+// publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. Use --governance-l1 for L0→L1 governance file deployment with reference transformation. L1→L2 auto-propagation is forbidden per ADR-0031.
+// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift] [--governance-l1]
+// @version 1.6.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -61,6 +61,7 @@ const RESET    = '\x1b[0m';
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const checkDrift = args.includes('--check-drift');
+const governanceL1 = args.includes('--governance-l1');
 const domainIdx = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
 
@@ -575,4 +576,170 @@ function publishDocs(isDryRun: boolean): void {
 
 if (args.includes('--docs')) {
   publishDocs(dryRun);
+}
+
+// ============================================================================
+// ── --governance-l1: L0 → L1 governance file deployment ─────────────────────
+// Copies CLAUDE.md, GEMINI.md, AGENTS.md from workspace root to
+// templates/common/, transforming CONSTITUTION.md references to docs/context.md.
+// agents/pm.md is intentionally skipped — L1 version has extends: frontmatter
+// and L1-specific content that must not be overwritten blindly.
+// ============================================================================
+
+const GOVERNANCE_L1_FILES = [
+  { src: 'CLAUDE.md',  dst: 'templates/common/CLAUDE.md'  },
+  { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
+  { src: 'AGENTS.md',  dst: 'templates/common/AGENTS.md'  },
+];
+
+// Reference transformation rules: CONSTITUTION.md → docs/context.md
+function applyGovernanceTransforms(content: string, filename: string): string {
+  // ── Phase A: CONSTITUTION.md reference replacement ───────────────────────
+
+  // A-1. Header line — must run first, before general replacements destroy the match pattern.
+  //      Handles both backtick and plain variants; removes "Required Reading" clause.
+  content = content.replace(
+    /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
+    '> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**'
+  );
+
+  // A-2. Full markdown links where the link text mentions CONSTITUTION.md:
+  //      [CONSTITUTION.md ...](any-href) → [docs/context.md](docs/context.md)
+  //      Catches cases where href is docs/constitution/... rather than CONSTITUTION.md directly.
+  content = content.replace(
+    /\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g,
+    '[docs/context.md](docs/context.md)'
+  );
+
+  // A-3. Remaining markdown link targets that still point at CONSTITUTION.md:
+  //      ](CONSTITUTION.md...) → ](docs/context.md)
+  content = content.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
+
+  // A-4. Plain-text mentions in lists/sentences (after markdown links handled):
+  //      CONSTITUTION.md → context.md
+  content = content.replace(/CONSTITUTION\.md/g, 'context.md');
+
+  // ── Phase B: workspace root-specific content removal / replacement ────────
+  // These transforms apply to CLAUDE.md and GEMINI.md only (not AGENTS.md).
+  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md') {
+
+    // B-1. Boilerplate table: "lifecycle-manager (workspace) / pm (variant)" → "pm"
+    content = content.replace(/lifecycle-manager \(workspace\) \/ pm \(variant\)/g, 'pm');
+
+    // B-2. Boilerplate table: "auditor (workspace) / pm (variant)" → "pm"
+    content = content.replace(/auditor \(workspace\) \/ pm \(variant\)/g, 'pm');
+
+    // B-3. Rule line: "At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N"
+    content = content.replace(/^- At \*\*workspace root\*\*,.*\n/m, '');
+
+    // B-4. Rule line: "In **variant projects**, PM handles both directly"
+    content = content.replace(/^- In \*\*variant projects\*\*, PM handles both directly\n/m, '');
+
+    // B-5. Rule line: dual-context declaration → L1-only variant declaration
+    content = content.replace(
+      /^- Always declare context above the execution plan table:.*\n/m,
+      '- Always declare context above the execution plan table: "**Context**: variant project — pm direct"\n'
+    );
+
+    // B-6. Platform Note line containing "L0-only task classification"
+    content = content.replace(/^\*\*Platform Note\*\*:.*L0-only task classification.*\n/m, '');
+
+    // B-7. Workspace & Template Boundary Policy section.
+    //      CLAUDE.md: section is wrapped in COMMON-CLAUDE:START/END markers (§9).
+    //      GEMINI.md: section has an orphan COMMON-GEMINI:END with no START (§6),
+    //                 preceded by a --- separator.
+    if (filename === 'CLAUDE.md') {
+      const boundaryStart = `<!-- COMMON-CLAUDE:START -->`;
+      const boundaryEnd   = `<!-- COMMON-CLAUDE:END -->`;
+      const boundaryPattern = new RegExp(
+        `${boundaryStart}\\s*###\\s*9\\.\\s*Workspace & Template Boundary Policy[\\s\\S]*?${boundaryEnd}`,
+        'g'
+      );
+      const l1BoundaryReplacement =
+        `${boundaryStart}\n` +
+        `### 9. Project Boundary Policy\n\n` +
+        `- **Strict Scope**: Work only within the current project directory.\n` +
+        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
+        `${boundaryEnd}`;
+      content = content.replace(boundaryPattern, l1BoundaryReplacement);
+    } else if (filename === 'GEMINI.md') {
+      // Orphan END marker — match from the --- separator before the section heading.
+      const geminiBoundaryPattern = /---\n\n### \d+\. Workspace & Template Boundary Policy[\s\S]*?<!-- COMMON-GEMINI:END -->/;
+      const geminiBoundaryReplacement =
+        `---\n\n### 6. Project Boundary Policy\n\n` +
+        `- **Strict Scope**: Work only within the current project directory.\n` +
+        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
+        `<!-- COMMON-GEMINI:END -->`;
+      content = content.replace(geminiBoundaryPattern, geminiBoundaryReplacement);
+    }
+  }
+
+  // ── Phase C: CLAUDE.md-only transforms ───────────────────────────────────
+  if (filename === 'CLAUDE.md') {
+    // C-1. Remove the /new-project slash command row from the commands table.
+    content = content.replace(/^\| `\/new-project[^|]*\|[^|]*\|[^\n]*\n/m, '');
+
+    // C-2. Update command count: "All 5 commands above" → "All 4 commands above"
+    content = content.replace(/All 5 commands above/g, 'All 4 commands above');
+  }
+
+  return content;
+}
+
+function publishGovernanceL1(isDryRun: boolean): void {
+  console.log(`\n${CYAN}=== L0 → L1 governance file deployment (--governance-l1) ===${RESET}`);
+  if (isDryRun) console.log(`${DARKGRAY}(dry-run mode — no files will be written)${RESET}`);
+
+  let updated = 0;
+  let skipped = 0;
+
+  for (const { src, dst } of GOVERNANCE_L1_FILES) {
+    const srcPath = path.join(workspaceRoot, src);
+    const dstPath = path.join(workspaceRoot, dst);
+
+    if (!fs.existsSync(srcPath)) {
+      console.log(`  ${YELLOW}⚠️  ${src} not found at workspace root, skipping${RESET}`);
+      continue;
+    }
+
+    const original = fs.readFileSync(srcPath, 'utf-8');
+    const transformed = applyGovernanceTransforms(original, src);
+
+    if (isDryRun) {
+      const l0Refs = (original.match(/CONSTITUTION\.md/g) ?? []).length;
+      if (l0Refs > 0) {
+        console.log(`  ${CYAN}~  ${src} → ${dst}${RESET} ${DARKGRAY}(${l0Refs} CONSTITUTION.md refs → docs/context.md)${RESET}`);
+      } else {
+        console.log(`  ${DARKGRAY}—  ${src} already has no CONSTITUTION.md references${RESET}`);
+      }
+      updated++;
+      continue;
+    }
+
+    const existingDst = fs.existsSync(dstPath) ? fs.readFileSync(dstPath, 'utf-8') : '';
+    if (existingDst === transformed) {
+      console.log(`  ${DARKGRAY}—  ${dst} already in sync${RESET}`);
+      skipped++;
+      continue;
+    }
+
+    fs.writeFileSync(dstPath, transformed, 'utf-8');
+    const refCount = (original.match(/CONSTITUTION\.md/g) ?? []).length;
+    console.log(`  ${GREEN}✅ ${dst} updated${RESET} ${DARKGRAY}(${refCount} refs transformed)${RESET}`);
+    updated++;
+  }
+
+  console.log('');
+  if (isDryRun) {
+    console.log(`${CYAN}Dry-run complete.${RESET} Would update: ${updated} file(s)`);
+  } else {
+    console.log(`${GREEN}Governance L1 sync complete.${RESET} Updated: ${updated}, Already in sync: ${skipped}`);
+    console.log(`${DARKGRAY}Note: templates/common/agents/pm.md skipped — L1 version uses extends: frontmatter and must not be overwritten.${RESET}`);
+  }
+}
+
+if (governanceL1) {
+  publishGovernanceL1(dryRun);
 }

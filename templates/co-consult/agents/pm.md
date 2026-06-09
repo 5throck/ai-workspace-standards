@@ -84,3 +84,9 @@ variant_overrides:
     description: Orchestrates Phases 0, 2, 5, 6. Enforces quality gates.
     scope: Managing workflow, coordinating multi-phase tasks, PM orchestration
 ---
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 1, 2, 5, 6]
+**Tier**: high
+**Communication Style**: sync

@@ -352,7 +352,7 @@ $allMdFiles | ForEach-Object {
             $destDir = Split-Path $destFile
             if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
             Copy-Item $srcFile $destFile -Force
-            $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath 2>&1
+            $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath $null "L2" 2>&1
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "[WARN]  Extends merge failed: $relPath" -ForegroundColor Yellow
             }

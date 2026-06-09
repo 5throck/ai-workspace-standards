@@ -67,3 +67,10 @@ variant_overrides:
       Multi-step task coordination, parallel agent dispatch, feature request
       review, implementation finalization
 ---
+
+## Dispatch Protocol
+
+**Can Lead Phases**: [0, 2, 6]
+**Auto-Dispatch To**: `ux-researcher`, `design-lead`, `visual-designer`, `prototype-engineer`, `service-designer`, `typography-expert`, `storyteller`
+**Tier**: high
+**Communication Style**: sync

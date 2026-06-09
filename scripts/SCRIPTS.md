@@ -107,7 +107,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `new-project.sh` | L0 | 1.7.1 | active | —| —| L0 | —|
 | `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `publish-to-template.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
+| `publish-to-template.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -314,6 +314,7 @@ delegates to the PowerShell script on Windows and performs `rm -rf` on Linux/mac
 **Purpose**: A consolidated tool handling both L0->L1 publishing and L1->L2 propagation. Publishes L0 scripts (workspace `scripts/`) to the L1 template snapshot (`templates/common/scripts/`) and propagates updates to L2 project directories. Copies all scripts labeled `L0` in the Registry plus `SCRIPTS.md` itself. Also copies compiled command files from `.claude/commands/` and `.gemini/commands/` to `templates/common/`.
 **Usage**: `bun run publish-to-template`
 **Dry-run**: `bun run publish-to-template -- --dry-run`
+**Governance L1**: `bun run publish-to-template -- --governance-l1` — deploys CLAUDE.md, GEMINI.md, AGENTS.md from L0 to `templates/common/`, replacing L0 governance references with `docs/context.md`. `agents/pm.md` is intentionally skipped (L1 version has `extends:` frontmatter).
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
 #### `verify-memory.ts`

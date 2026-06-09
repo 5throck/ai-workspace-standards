@@ -337,8 +337,8 @@ find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
       cp "$src_file" "$dest_file"
       chmod u+w "$dest_file" 2>/dev/null || true
 
-      # Merge with explicit skeleton path
-      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" "$src_file" 2>/dev/null || {
+      # Merge with explicit skeleton path and variant level
+      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" "" "L2" 2>/dev/null || {
         echo "⚠️  Extends merge failed: $rel_path"
       }
     fi

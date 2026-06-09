@@ -1,8 +1,9 @@
 # PM.md Variant-Specific Content Injection - Comprehensive Design
 
-**Document Version**: 1.1.0  
+**Document Version**: 1.2.0 (Deprecated)  
 **Last Updated**: 2026-06-09  
-**Status**: Design Specification (Implementation Complete)  
+**Status**: Design Specification (Deprecated)  
+**Current Standard**: v2.0.0 - 2-Phase Pre-Build Strategy  
 **Author**: architect agent  
 **Related ADRs**: ADR-0031 (L1-L2 Fork Model), ADR-0033 (YAML Extends Pattern)  
 
@@ -19,6 +20,22 @@ This document defines the comprehensive design for **PM.md variant-specific cont
 - Phase Determination tables show L0 agents instead of variant-specific agents
 
 **Design Solution**: Implement proper L0→L1→L2 content propagation with Layout Reconstruction at the appropriate layer, ensuring L2 variants contain only variant-specific content.
+
+---
+
+## Deprecation Notice (v1.2.0)
+
+**Status**: Deprecated - See "Recommended Approach: 2-Phase Pre-Build Strategy v2.0.0" below
+
+**Deprecation Reason**:
+- merge-frontmatter.ts implementation proved overly complex
+- Runtime Layout Reconstruction had platform compatibility issues
+- Difficult to maintain across multiple platforms (Claude, Antigravity, Gemini CLI)
+
+**Preservation**: This design is kept for:
+- Historical record of merge-frontmatter.ts approach
+- Understanding ADR-0033 YAML Extends Pattern implementation
+- Comparison with recommended approach
 
 ---
 
@@ -1085,6 +1102,133 @@ The design specifications in this document were **correct and comprehensive**. T
 |---------|------|---------|
 | 1.0.0 | 2026-06-08 | Initial comprehensive design specification with 6-component architecture |
 | 1.1.0 | 2026-06-09 | **Implementation Status & Validation**: Added comprehensive design-implementation gap analysis, validation of all design components, acceptance criteria verification, and lessons learned. Design status updated to "Implementation Complete" |
+| 1.2.0 | 2026-06-09 | **Deprecated**: merge-frontmatter.ts complexity issues led to deprecation in favor of v2.0.0 pre-build strategy |
+
+---
+
+# Recommended Approach: 2-Phase Pre-Build Strategy
+
+**Version**: 2.0.0
+**Status**: Current Standard
+**Last Updated**: 2026-06-09
+**Supersedes**: v1.1.0 (merge-frontmatter.ts runtime approach)
+
+## Overview
+
+This approach separates PM.md generation into two distinct phases:
+
+**Phase 1 (L0 → L1)**: Create variant-neutral L1 at `templates/common/agents/pm.md`
+- Remove L0-specific content from workspace root/agents/pm.md
+- Extract variant-neutral PM framework content
+- Generate L1 with only generic PM orchestration content
+
+**Phase 2 (L1 → L2)**: Pre-build variant-specific L2 files
+- L1 + variant_overrides → L2 (templates/co-*/agents/pm.md)
+- One-time generation per variant
+- No runtime Layout Reconstruction required
+
+**Phase 3 (L2 → L3)**: Simple copy during project scaffolding
+- new-project.ps1/sh copies pre-built L2 file
+- No merge-frontmatter.ts processing
+- Platform-neutral
+
+## Architecture
+
+```
+L0 (workspace root/agents/pm.md)
+  ↓ Manual extraction
+L1 (templates/common/agents/pm.md) - Variant-neutral PM framework
+  ↓ Pre-build (1× per variant)
+L2 (templates/co-*/agents/pm.md) - Variant-specific with agent roster
+  ↓ Simple copy
+L3 (Projects/co-*/agents/pm.md) - Working project
+```
+
+## Advantages Over v1.1.0
+
+| Aspect | v1.1.0 (Runtime) | v2.0.0 (Pre-Build) |
+|--------|-----------------|-------------------|
+| Complexity | High (merge-frontmatter.ts Layout Reconstruction) | Low (simple file copy) |
+| Platform Neutrality | Difficult (platform-specific TS execution) | Excellent (static files only) |
+| Debugging | Hard (runtime logic in TS) | Easy (inspect pre-built files) |
+| Maintenance | Complex (TS code + YAML) | Simple (YAML only) |
+| Performance | Runtime overhead | Zero overhead (static copy) |
+
+## Implementation
+
+### Phase 1: L1 Generation
+
+**Input**: workspace root/agents/pm.md (350 lines)
+**Output**: templates/common/agents/pm.md (~200-250 lines)
+
+**Content to Remove**:
+- "ai-workspace-standards repository" specific references
+- Governance Workflow (workspace-specific phases)
+- Workspace Agent Roster (architect, automation-engineer, etc.)
+- Platform-specific dispatch settings
+
+**Content to Keep**:
+- Core PM role definitions
+- ROLE CLARIFICATION
+- YOU ARE THE SINGLE ENTRY POINT
+- Consensus-Driven Facilitation Model
+- Permission Denial Protocol
+- Execution Plan Boilerplate Policy
+- Meeting Facilitation
+- Required Tools
+- Direct Execution Constraints
+
+### Phase 2: L2 Generation
+
+**Input**:
+- L1 (templates/common/agents/pm.md)
+- Variant configuration (variant_overrides from templates/co-*/agents/pm.md)
+
+**Output**: templates/co-*/agents/pm.md (~50-80 lines YAML + body)
+
+**Process**:
+1. Start with L1 YAML frontmatter
+2. Add variant_overrides (agent roster, dispatch protocol, role customization)
+3. Optional: Add variant-specific body sections if needed
+
+**Result**: Each L2 file is complete, ready-to-use PM configuration
+
+### Phase 3: Project Scaffolding
+
+**Current**: merge-frontmatter.ts processing during new-project.ps1/sh
+**New**: Simple file copy
+
+```powershell
+# Before (complex):
+Copy-Item $srcFile $destFile
+& bun merge-frontmatter.ts $destFile $skeletonAbsPath $null "L2"
+
+# After (simple):
+Copy-Item $srcFile $destFile
+```
+
+## ADR-0033 Compatibility
+
+This approach is **fully compatible** with ADR-0033 (YAML Extends Pattern):
+
+- v1.1.0: Runtime extends resolution (merge-frontmatter.ts)
+- v2.0.0: Pre-build time resolution (manual/automated during L1→L2 generation)
+
+Both approaches satisfy ADR-0033's core principle: **YAML frontmatter as single source of truth**.
+
+## Migration Guide
+
+For existing projects using v1.1.0 approach:
+
+1. No breaking changes - existing projects continue working
+2. New projects default to v2.0.0 approach
+3. Optional: Regenerate L2 files using v2.0.0 for consistency
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0.0 | 2026-06-09 | **Current Standard**: 2-Phase Pre-Build Strategy adopted as recommended approach |
 
 ---
 
