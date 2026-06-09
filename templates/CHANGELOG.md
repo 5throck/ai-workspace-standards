@@ -6,6 +6,9 @@ All notable changes to the template variants are documented here.
 ### Changed
 - **[2026-06-01]**: `co-security` variant: Redesigned workflow by merging Phase 1 and 2 into "Recon & Threat Modeling"
 - **[2026-06-01]**: `co-security` variant: Fixed PM-ONLY Agent Roster in `AGENTS.md` and `docs/co-security.context.md`
+
+### Fixed
+- **[2026-06-09]**: fix: Windows project folder deletion permissions — enhanced Windows permission handling in `new-project.sh` (v1.7.1) and `new-project.ps1` (v1.7.2) to recursively remove hidden/system/readonly attributes (including inside `.git/`) and transfer ownership to the current user (`takeown`), preventing Windows Explorer administrator prompts during deletion.
 ## [0.5.0] - 2026-05-27
 ### Added
 - `.github/pull_request_template.md` with Summary/Changes/Test Plan/Security Checklist sections (#92)
