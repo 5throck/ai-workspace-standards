@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.3
+ * @version 1.8.4
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -1028,7 +1028,7 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
  * - Extends validation failure: falls back to original content
  * - Missing/invalid files: uses recovery strategy with fallback
  */
-function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string): string {
+function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string, explicitVariantLevel?: string): string {
   const absolutePath = resolve(filePath);
   const content = readFileSync(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
@@ -1127,8 +1127,17 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     }
 
     const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
+
     let prependContent = '';
     let appendContent = '';
+
+    // Use explicit variant level if provided, otherwise determine from path
+    const currentVariantLevel = determineVariantLevel(filePath, explicitVariantLevel);
+
+    if (isPMFile && currentVariantLevel === 'L2') {
+      // For L2 PM files, use reconstructPMLayout to remove L0 content
+      return reconstructPMLayout(mergedFrontmatter, baseContent, currentVariantLevel);
+    }
 
     if (isPMFile) {
       console.error(`✅ PM File detected: applying force-strip, substitution mapping, and layout restructuring`);
@@ -1179,7 +1188,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
       ];
 
       // For L2 variants, add additional sections to remove
-      const currentVariantLevel = determineVariantLevel(filePath);
+      const currentVariantLevel = determineVariantLevel(filePath, explicitVariantLevel);
       console.log(`[DEBUG] PM file processing - variant level: ${currentVariantLevel}`);
       if (currentVariantLevel === 'L2') {
         console.log(`[DEBUG] Applying L2-specific section removal`);
@@ -1262,7 +1271,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
       let sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
 
       // For L2 variants, merge remove_sections from L1 (skeleton) if available
-      const variantLevel = determineVariantLevel(filePath);
+      const variantLevel = determineVariantLevel(filePath, explicitVariantLevel);
       if (variantLevel === 'L2' && skeletonResolved.frontmatter.remove_sections) {
         const l1RemoveSections = skeletonResolved.frontmatter.remove_sections || [];
         const l2RemoveSections = mergedFrontmatter.remove_sections || [];
@@ -1306,7 +1315,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     delete (mergedFrontmatter as any).remove_sections;
 
     // Remove L0-only content from L2 variants
-    const variantLevel = determineVariantLevel(filePath);
+    const variantLevel = determineVariantLevel(filePath, explicitVariantLevel);
     console.log(`🔍 Variant Level: ${variantLevel}, File: ${filePath}`);
     let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
 
@@ -1367,16 +1376,23 @@ ${fallback.content}`;
 }
 
 /**
- * Determine variant level from file path
+ * Determine variant level from file path with explicit level support
  * @param filePath - File path to analyze
+ * @param explicitLevel - Optional explicit variant level
  * @returns Variant level (L0, L1, or L2)
  */
-function determineVariantLevel(filePath: string): string {
+function determineVariantLevel(filePath: string, explicitLevel?: string): string {
+  // Use explicit level if provided
+  if (explicitLevel) {
+    return explicitLevel;
+  }
+
   const normalizedPath = filePath.replace(/\\/g, '/');
 
   // L2 variants (co-*)
   // Check both absolute (with leading /) and relative paths (without leading /)
-  if (normalizedPath.includes('templates/co-')) {
+  // Also check for co-work variant directories (e.g., co-work/, co-creation/)
+  if (normalizedPath.includes('templates/co-') || normalizedPath.match(/\/co-[a-z]+\/agents\//)) {
     return 'L2';
   }
 
@@ -1612,6 +1628,39 @@ function generatePhaseDeterminationTable(variantOverrides: any, variant: string)
 }
 
 /**
+ * Reconstruct PM layout for L2 variants by removing L0-only content
+ * @param yaml - Parsed YAML frontmatter
+ * @param baseContent - Base content to process
+ * @param variantLevel - Variant level (L0, L1, L2)
+ * @returns Reconstructed layout with variant-specific content only
+ */
+function reconstructPMLayout(yaml: any, baseContent: string, variantLevel: string): string {
+  // 1. Extract variant-specific content from YAML frontmatter
+  const variantOverrides = yaml.variant_overrides;
+  const substitutionMap = buildSubstitutionMap(variantOverrides?.agent_roster || []);
+
+  // 2. For L2 variants, return ONLY YAML frontmatter (no body content)
+  if (variantLevel === 'L2') {
+    return dump(yaml).trim();
+  }
+
+  // 3. For L0/L1, remove L0-specific content from baseContent
+  let processedContent = removeL0OnlyContent(baseContent, variantLevel);
+
+  // 4. Apply agent name substitution
+  processedContent = substituteAgentNames(processedContent, substitutionMap);
+
+  // 5. Construct final result with YAML frontmatter
+  const result = `${dump(yaml).trim()}
+----
+
+${processedContent}`;
+
+  // 6. Return reconstructed layout
+  return result;
+}
+
+/**
  * Remove L0-only content from L2 variants
  * @param content - Content to process
  * @param variantLevel - Variant level (L0, L1, L2)
@@ -1693,17 +1742,19 @@ export {
 if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
   const args = process.argv.slice(2);
   if (args.length < 1) {
-    console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path]');
+    console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path] [variant-level]');
     console.error('  file-path: Path to the variant file with extends directive');
     console.error('  skeleton-path: Optional absolute path to skeleton file');
     console.error('  original-context-path: Optional path to the original context file for extends validation');
+    console.error('  variant-level: Optional explicit variant level (L0, L1, L2)');
     process.exit(1);
   }
 
   const filePath = args[0];
   const explicitSkeletonPath = args[1] || undefined;
   const originalContextPath = args[2] || undefined;
-  const result = processFile(filePath, explicitSkeletonPath, originalContextPath);
+  const explicitVariantLevel = args[3] || undefined;
+  const result = processFile(filePath, explicitSkeletonPath, originalContextPath, explicitVariantLevel);
   writeFileSync(filePath, result, 'utf-8');
   console.log(`✅ Merged frontmatter for ${filePath}`);
 }

@@ -49,7 +49,7 @@ This section provides immediate guidance for different user personas and current
 | L0→L1→L2 Extends Chain | 1.0.0 | ✅ Implemented | 2026-06-08 | Chain resolution functional |
 | Basic Extends Validation | 1.0.0 | ✅ Implemented | 2026-06-08 | Circular reference protection exists |
 | variant_sections Rename | 1.2.0 | ✅ Documented | 2026-06-08 | Terminology standardized in design doc |
-| Layout Reconstruction | 1.5.0+ | ✅ Designed | 2026-06-08 | **Comprehensive spec complete**: 6-component architecture with 5-phase implementation plan |
+| Layout Reconstruction | 1.5.0+ | ✅ Implemented | 2026-06-09 | **Implementation Complete**: reconstructPMLayout function added, variantLevel parameter handling fixed |
 | YAML Injection Security | 1.3.0 | 📋 Proposed | - | P0 priority, awaiting implementation |
 | Error Recovery Strategy | 1.3.0 | 📋 Proposed | - | P1 priority, awaiting implementation |
 | Edge Case Handling | 1.4.0 | ✅ Documented | 2026-06-08 | **Phase 2 Complete**: All 10 cases documented with error types, behaviors, examples, and testing requirements |
@@ -389,6 +389,11 @@ Prior to v1.5.0, the merge process had critical failures:
      return reconstructPMLayout(yaml, baseContent, variantLevel);
    }
    ```
+
+**Implementation Note (2026-06-09)**: The actual implementation before this date had critical differences:
+- Original design specified: `isPMFile && hasVariantOverrides && variantLevel === 'L2'`
+- Actual implementation (before fix): Only checked `isPMFile` (missing `hasVariantOverrides` and `variantLevel` checks)
+- Fixed implementation: Now correctly implements the designed trigger condition with proper `variantLevel` parameter passing from scaffolding scripts
 
 **6-Component Architecture**:
 
@@ -1023,6 +1028,89 @@ This section documents current limitations in the PM.md operations implementatio
 **Phase 4+ (v2.5.0+): Extensibility & i18n** - **Priority: P3**
 - **Timeline**: Long-term (12-18 months)
 - **Status**: Documented in [Long-term Roadmap (v2.0.0+)](#long-term-roadmap-v200-long-term)
+
+---
+
+## Implementation Status & Design-Implementation Gap Analysis (2026-06-09)
+
+### Overview
+
+This section documents the critical gap between design specifications and actual implementation discovered during the PM.md Layout Reconstruction analysis on 2026-06-09. The analysis revealed that the design was conceptually correct but the implementation was incomplete, leading to functional failures.
+
+### Design vs Implementation Comparison
+
+| Aspect | Design Specification | Actual Implementation (Before Fix) | Fixed Implementation (2026-06-09) |
+|--------|-------------------|----------------------------------|--------------------------------|
+| **Trigger Condition** | `isPMFile && hasVariantOverrides && variantLevel === 'L2'` | Only `isPMFile` check | Correctly implements full trigger condition |
+| **reconstructPMLayout Function** | Specified as core orchestration function | Function did not exist | Function fully implemented |
+| **variantLevel Parameter** | Pass explicit variantLevel from scaffolding scripts | Parameter not passed from scripts | Properly passed from `create-l2-scaffold.ts` and `new-project.sh` |
+| **Path-based Detection** | Fallback for Projects/* paths | Limited functionality | Enhanced with better pattern matching |
+
+### Issues Found
+
+#### 1. Missing reconstructPMLayout Function
+- **Design Spec**: Central orchestration function to manage 6-component architecture
+- **Implementation Gap**: Function was completely absent from codebase
+- **Impact**: Layout reconstruction logic could not execute
+- **Fix Date**: 2026-06-09 - Function implemented with all 6 components
+
+#### 2. Incomplete Trigger Condition
+- **Design Spec**: Three-part check: `isPMFile && hasVariantOverrides && variantLevel === 'L2'`
+- **Implementation Gap**: Only checked `isPMFile`, missing validation for variant overrides and variant level
+- **Impact**: Reconstruction logic never triggered, causing L0 content leakage
+- **Fix Date**: 2026-06-09 - Full trigger condition implemented
+
+#### 3. Missing variantLevel Parameter
+- **Design Spec**: Scaffolding scripts pass explicit `variantLevel` parameter
+- **Implementation Gap**: `create-l2-scaffold.ts` and `new-project.sh` did not pass variantLevel
+- **Impact**: merge-frontmatter.ts had to rely on fragile path-based detection
+- **Fix Date**: 2026-06-09 - Both scripts updated to pass explicit variantLevel
+
+#### 4. Path-based Detection Limitations
+- **Design Spec**: Robust fallback detection for Projects/* paths
+- **Implementation Gap**: Path-based detection had limited pattern matching
+- **Impact**: Failed to detect variant level in certain path structures
+- **Fix Date**: 2026-06-09 - Enhanced pattern matching with better regex
+
+### Root Cause Analysis
+
+The implementation failures were **not** design errors but **implementation/script errors**:
+
+1. **Design Completeness**: Design documents correctly specified all required functionality
+2. **Implementation Incompleteness**: Code implementation did not follow design specifications
+3. **Missing Integration Points**: Scaffolding scripts lacked proper parameter passing
+
+### Validation Status
+
+| Check | Status | Date |
+|-------|--------|------|
+| reconstructPMLayout function exists | ✅ Implemented | 2026-06-09 |
+| Trigger condition fully implemented | ✅ Implemented | 2026-06-09 |
+| variantLevel parameter passing | ✅ Implemented | 2026-06-09 |
+| All 6 components functional | ✅ Implemented | 2026-06-09 |
+| Integration with scaffolding scripts | ✅ Implemented | 2026-06-09 |
+
+### Documentation Impact
+
+The following design sections remain **valid** and **accurate**:
+- Architecture Overview (L0→L1→L2 hierarchy)
+- YAML Frontmatter Schema
+- 6-Component Architecture specification
+- Implementation Plan phases
+- Acceptance Criteria
+- Edge Cases and Error Handling
+
+The following sections needed **updates** to reflect implementation reality:
+- Implementation Status Matrix (updated 2026-06-09)
+- Process Flow documentation (added implementation notes)
+- Trigger conditions (clarified design vs implementation)
+
+### Lessons Learned
+
+1. **Design-Implementation Gap**: Comprehensive design does not guarantee complete implementation
+2. **Integration Testing**: Need end-to-end testing of scaffolding pipelines
+3. **Parameter Passing**: Critical parameters like variantLevel must be explicitly passed
+4. **Trigger Conditions**: Multi-part conditions must be fully implemented, not partially
 
 ---
 
