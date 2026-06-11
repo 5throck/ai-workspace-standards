@@ -274,7 +274,12 @@ robocopy $CommonDir $ProjectDir /E /COPY:DT /NFL /NDL /NJH /NJS | Out-Null
 # package.json at the root is a workspace management artifact (bun scripts for
 # audit, dev-sync, agent:verify, etc.) - not an app dependency manifest.
 # New projects that genuinely need Node.js should create their own package.json.
-$workspaceFilesToRemove = @("package.json", "package-lock.json", "bun.lock", "bun.lockb")
+# Workspace-only files: must NOT be copied into new projects
+$workspaceFilesToRemove = @(
+    "package.json", "package-lock.json", "bun.lock", "bun.lockb",
+    "propagation-map.json",
+    "variant.json"
+)
 foreach ($file in $workspaceFilesToRemove) {
     $filePath = Join-Path $ProjectDir $file
     if (Test-Path $filePath) {
@@ -284,7 +289,11 @@ foreach ($file in $workspaceFilesToRemove) {
 }
 
 # Remove L1-only agent files that must NOT be copied into new projects.
-$l1OnlyAgents = @("agents\lifecycle-manager.md")
+$l1OnlyAgents = @(
+    "agents\lifecycle-manager.md",
+    "agents\_COMMON.md",
+    "agents\pm.md.backup"
+)
 foreach ($agent in $l1OnlyAgents) {
     $agentPath = Join-Path $ProjectDir $agent
     if (Test-Path $agentPath) {
@@ -293,31 +302,21 @@ foreach ($agent in $l1OnlyAgents) {
     }
 }
 
-
-
-# Remove memory/MEMORY.md if it exists (new projects should start with empty memory folder)
-$memoryIndexPath = Join-Path $ProjectDir "memory\MEMORY.md"
-if (Test-Path $memoryIndexPath) {
-    Remove-Item $memoryIndexPath -Force
-    Write-Host "  [SKIP] Removed memory/MEMORY.md (new projects start with empty memory folder)"
+# Clear all memory log files (new projects start with empty memory/)
+$memoryDir = Join-Path $ProjectDir "memory"
+if (Test-Path $memoryDir) {
+    Get-ChildItem -Path $memoryDir -Filter "*.md" | Remove-Item -Force
+    Write-Host "  [SKIP] Cleared memory/*.md (new projects start with empty memory/)"
 }
 
 # Exclude L1-only template directories that must NOT be copied into new projects.
-$l1OnlyDirs = @("docs\_templates", "docs\_examples", "docs\adr")
+$l1OnlyDirs = @("docs\_templates", "docs\_examples", "docs\adr", "docs\specs", "docs\variants")
 foreach ($dir in $l1OnlyDirs) {
     $dirPath = Join-Path $ProjectDir $dir
     if (Test-Path $dirPath) {
         Remove-Item $dirPath -Recurse -Force
         Write-Host "  [SKIP] Excluded L1-only directory: $dir"
     }
-}
-
-# Ensure docs/_common/ files are copied (already copied by robocopy, just verify)
-$commonDocsDir = Join-Path $ProjectDir "docs\_common"
-if (Test-Path $commonDocsDir) {
-    Write-Host "  [OK] docs/_common/ files present in new project"
-} else {
-    Write-Host "  [WARN] docs/_common/ not found - docs files may be missing" -ForegroundColor Yellow
 }
 
 # -- 2. Overlay variant/ on top (variant-specific files override common) ------ # TEST: Test 1, Test 7
@@ -343,7 +342,46 @@ Get-ChildItem -Path $ProjectDir -Recurse -File | ForEach-Object {
 }
 Write-Host "  [OK] Variant templates copied" -ForegroundColor Green
 
-# -- 2.6. Apply platform profile -----------------------------------------------  # TEST: Test 8
+# -- 2.5. Strip L1-B metadata from agents/pm.md --------------------------------
+$pmMdPath = Join-Path $ProjectDir "agents\pm.md"
+if ((Test-Path $pmMdPath) -and (Get-Command bun -ErrorAction SilentlyContinue)) {
+    $pmScript = @'
+    const fs = require('fs');
+    const yaml = require('js-yaml');
+    const pmPath = process.argv[2];
+    let content = fs.readFileSync(pmPath, 'utf8');
+    content = content.replace(/^# @resolved-from:.*\n/, '');
+    const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (match) {
+      const fm = yaml.load(match[1]) || {};
+      delete fm.lifecycle; delete fm.formal_name; delete fm.variant;
+      const newFm = '---\n' + yaml.dump(fm).trimEnd() + '\n---\n';
+      content = newFm + content.slice(match[0].length);
+    }
+    fs.writeFileSync(pmPath, content, 'utf8');
+    console.log('  [OK] agents/pm.md: stripped L1-B metadata');
+'@
+    $pmScript | bun - $pmMdPath
+}
+
+# -- 2.6. Flatten docs/_common/ → docs/ ----------------------------------------
+$commonDocsDir = Join-Path $ProjectDir "docs\_common"
+if (Test-Path $commonDocsDir) {
+    Get-ChildItem -Path $commonDocsDir | Copy-Item -Destination (Join-Path $ProjectDir "docs") -Recurse -Force
+    Remove-Item $commonDocsDir -Recurse -Force
+    Write-Host "  [OK] docs/_common/ -> docs/ (flattened)" -ForegroundColor Green
+}
+
+# -- 2.6b. Remove template-only docs/ subdirs (may be re-added by variant overlay)
+foreach ($dir in @("docs\adr", "docs\specs", "docs\variants", "docs\_templates", "docs\_examples")) {
+    $dirPath = Join-Path $ProjectDir $dir
+    if (Test-Path $dirPath) {
+        Remove-Item $dirPath -Recurse -Force
+        Write-Host "  [SKIP] Removed template-only dir: $dir"
+    }
+}
+
+# -- 2.7. Apply platform profile -----------------------------------------------  # TEST: Test 8
 if ($Platform -eq "claude") {
     $geminiFile = Join-Path $ProjectDir "GEMINI.md"
     if (Test-Path $geminiFile) { Remove-Item $geminiFile -Force }
@@ -355,9 +393,7 @@ if ($Platform -eq "claude") {
 # -- 2.7. Remove any accidentally copied .cmd files ---------------------------  # TEST: Test 17
 Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.cmd" | Remove-Item -Force
 
-# -- 3. Remove docs/_examples (reference-only - not part of a real project) --  # TEST: Test 14
-$examplesDir = Join-Path $ProjectDir "docs\_examples"
-if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
+# docs/_examples already removed in L1_ONLY_DIRS step above
 
 # -- 3.5. Enforce .sh / .ps1 script pairs --------------------------------------  # TEST: Test 18
 $scriptsDir = Join-Path $ProjectDir "scripts"
@@ -574,6 +610,16 @@ foreach ($script in $l0Scripts) {
     $filePath = Join-Path $ProjectDir "scripts\$script"
     if (Test-Path $filePath) { Remove-Item $filePath -Force }
 }
+
+# Remove workspace-only JSON artifacts from scripts/ and project root
+$propMapPath = Join-Path $ProjectDir "scripts\propagation-map.json"
+if (Test-Path $propMapPath) { Remove-Item $propMapPath -Force }
+# variant.json is a template registry file; remove from project
+$variantJsonPath = Join-Path $ProjectDir "variant.json"
+if (Test-Path $variantJsonPath) { Remove-Item $variantJsonPath -Force }
+# pm.md.backup is a template internal artifact; remove from project
+$pmBackupPath = Join-Path $ProjectDir "agents\pm.md.backup"
+if (Test-Path $pmBackupPath) { Remove-Item $pmBackupPath -Force }
 
 $l0Skills = @("simulate-project-creation")
 foreach ($skill in $l0Skills) {

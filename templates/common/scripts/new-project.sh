@@ -244,7 +244,12 @@ mkdir -p "$PROJECT_DIR"
 # package.json at the root is a workspace management artifact (bun scripts for
 # audit, dev-sync, agent:verify, etc.) — not an app dependency manifest.
 # New projects that genuinely need Node.js should create their own package.json.
-WORKSPACE_ONLY_FILES=("package.json" "package-lock.json" "bun.lock" "bun.lockb")
+# Workspace-only files: must NOT be copied into new projects
+WORKSPACE_ONLY_FILES=(
+  "package.json" "package-lock.json" "bun.lock" "bun.lockb"
+  "propagation-map.json"
+  "variant.json"
+)
 cp -r "$COMMON_DIR/." "$PROJECT_DIR/"
 for f in "${WORKSPACE_ONLY_FILES[@]}"; do
   if [ -f "$PROJECT_DIR/$f" ]; then
@@ -254,7 +259,11 @@ for f in "${WORKSPACE_ONLY_FILES[@]}"; do
 done
 
 # Remove L1-only agent files that must NOT be copied into new projects.
-L1_ONLY_AGENTS=("agents/lifecycle-manager.md")
+L1_ONLY_AGENTS=(
+  "agents/lifecycle-manager.md"
+  "agents/_COMMON.md"
+  "agents/pm.md.backup"
+)
 for agent in "${L1_ONLY_AGENTS[@]}"; do
   if [ -f "$PROJECT_DIR/$agent" ]; then
     rm -f "$PROJECT_DIR/$agent"
@@ -262,9 +271,8 @@ for agent in "${L1_ONLY_AGENTS[@]}"; do
   fi
 done
 
-
 # Exclude L1-only template directories that must NOT be copied into new projects.
-L1_ONLY_DIRS=("docs/_templates" "docs/_examples" "docs/adr")
+L1_ONLY_DIRS=("docs/_templates" "docs/_examples" "docs/adr" "docs/specs" "docs/variants")
 for dir in "${L1_ONLY_DIRS[@]}"; do
   if [ -d "$PROJECT_DIR/$dir" ]; then
     rm -rf "$PROJECT_DIR/$dir"
@@ -272,19 +280,10 @@ for dir in "${L1_ONLY_DIRS[@]}"; do
   fi
 done
 
-# Remove memory/MEMORY.md if it exists (new projects should start with empty memory folder)
-MEMORY_INDEX="$PROJECT_DIR/memory/MEMORY.md"
-if [ -f "$MEMORY_INDEX" ]; then
-  rm -f "$MEMORY_INDEX"
-  echo "  🗑️  Removed memory/MEMORY.md (new projects start with empty memory folder)"
-fi
-
-# Ensure docs/_common/ files are copied (already copied by cp -r, just verify)
-COMMON_DOCS_DIR="$PROJECT_DIR/docs/_common"
-if [ -d "$COMMON_DOCS_DIR" ]; then
-  echo "  ✅ docs/_common/ files present in new project"
-else
-  echo "  ⚠️  docs/_common/ not found - docs files may be missing"
+# Clear all memory log files (new projects start with empty memory/)
+if [ -d "$PROJECT_DIR/memory" ]; then
+  find "$PROJECT_DIR/memory" -name "*.md" -delete
+  echo "  🗑️  Cleared memory/*.md (new projects start with empty memory/)"
 fi
 
 # Make all copied files writable so that subsequent scripts and edits can write to them
@@ -308,7 +307,48 @@ find "$TEMPLATES_DIR" -type f | while read -r src_file; do
 done
 echo "  ✅ Variant templates copied"
 
-# ── 2.6. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
+# ── 2.5. Strip L1-B metadata from agents/pm.md ──────────────────────────────
+PM_MD="$PROJECT_DIR/agents/pm.md"
+if [ -f "$PM_MD" ] && command -v bun &>/dev/null; then
+  bun - "$PM_MD" <<'BUNSCRIPT'
+    const fs = require('fs');
+    const yaml = require('js-yaml');
+    const pmPath = process.argv[2];
+    let content = fs.readFileSync(pmPath, 'utf8');
+    // Remove @resolved-from header line
+    content = content.replace(/^# @resolved-from:.*\n/, '');
+    // Strip template registry fields from frontmatter
+    const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (match) {
+      const fm = yaml.load(match[1]) || {};
+      delete fm.lifecycle;
+      delete fm.formal_name;
+      delete fm.variant;
+      const newFm = '---\n' + yaml.dump(fm).trimEnd() + '\n---\n';
+      content = newFm + content.slice(match[0].length);
+    }
+    fs.writeFileSync(pmPath, content, 'utf8');
+    console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, lifecycle, formal_name, variant)');
+BUNSCRIPT
+fi
+
+# ── 2.6. Flatten docs/_common/ → docs/ ──────────────────────────────────────
+COMMON_DOCS="$PROJECT_DIR/docs/_common"
+if [ -d "$COMMON_DOCS" ]; then
+  cp -r "$COMMON_DOCS/." "$PROJECT_DIR/docs/"
+  rm -rf "$COMMON_DOCS"
+  echo "  ✅ docs/_common/ → docs/ (flattened)"
+fi
+
+# ── 2.6b. Remove template-only docs/ subdirs (may be re-added by variant overlay)
+for dir in docs/adr docs/specs docs/variants docs/_templates docs/_examples; do
+  if [ -d "$PROJECT_DIR/$dir" ]; then
+    rm -rf "$PROJECT_DIR/$dir"
+    echo "  🗑️  Removed template-only dir: $dir"
+  fi
+done
+
+# ── 2.7. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
 if [ "$PLATFORM" = "claude" ]; then
   rm -f "$PROJECT_DIR/GEMINI.md"
 elif [ "$PLATFORM" = "antigravity" ]; then
@@ -529,6 +569,13 @@ for script in "${L0_SCRIPTS[@]}"; do
 done
 # Always remove helpers/ directory (L0 pipeline internals — never needed in L2 projects)
 rm -rf "$PROJECT_DIR/scripts/helpers/"
+
+# Remove workspace-only JSON artifacts from scripts/ and project root
+rm -f "$PROJECT_DIR/scripts/propagation-map.json"
+# variant.json is a template registry file (re-created by variant overlay); remove from project
+rm -f "$PROJECT_DIR/variant.json"
+# pm.md.backup is a template internal artifact; remove from project
+rm -f "$PROJECT_DIR/agents/pm.md.backup"
 
 L0_SKILLS=("simulate-project-creation")
 for skill in "${L0_SKILLS[@]}"; do

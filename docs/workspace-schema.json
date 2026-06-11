@@ -124,7 +124,11 @@
       ".github",
       "Projects",
       ".pipeline-state",
-      "test-project"
+      "test-project",
+      "test-cleanup",
+      "test-proj2",
+      "test-proj3",
+      "co-develop"
     ]
   }
 }
