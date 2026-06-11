@@ -153,7 +153,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 - Code comments — English (unless documenting locale-specific logic)
 <!-- COMMON-CLAUDE:END -->
 
-### Skill Resolution Priority
+### 4.5 Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
 
@@ -179,69 +179,18 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
 
-#### Mandatory Execution Plan Display
+#### Claude Code-Specific Dispatch
 
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool.
-
-**Mandatory Criteria** (Boilerplate always required when ANY applies):
-
-1. **Multi-agent Dispatch**: 2 or more specialists involved
-2. **Breaking Changes**: Modifications that break existing functionality
-3. **Platform Parity Changes**: Changes to CLAUDE.md/GEMINI.md sync
-4. **Lifecycle-Related Items**:
-   - agents/*.md modifications → Requires AGENTS.md update
-   - skills/*/SKILL.md modifications → Requires AGENTS.md update
-   - scripts/*.ts modifications → Requires SCRIPTS.md update
-   - docs/adr/*.md modifications → Requires ADR index update
-5. **Configuration Changes**:
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
-   - README.md, CHANGELOG.md
-
-**Boilerplate Format**:
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
-
-**Required Columns**:
-- `#`: Sequential step number
-- `Task`: Brief task description
-- `Agent`: Specialist agent name
-- `Tier`: High/Medium/Low (mandatory)
-- `Model`: Model override (optional)
-
-**Rules**:
-- Always include N-1 (Lifecycle Update) and N (Final QA Audit) as final two steps
-- State parallel vs sequential order below the table
-- Tier column is MANDATORY
-- Do NOT use "pm (direct)" - PM never executes directly
-- At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N
-- In **variant projects**, PM handles both directly
-- Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct"
-
-**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
-
-**Platform Note**: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification, though it is no longer required in the table.
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table prior to invoking the `Agent` tool.
 
 <!-- COMMON-CLAUDE:START -->
 ## Execution Plan Boilerplate
 
-Before dispatching 2+ agents, PM MUST create an execution plan. For the complete PM Gateway workflow, execution plan templates, and phase determination guidelines, see **AGENTS.md**:
+For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
-- **§3**: PM Gateway Workflow - Mandatory execution plan display, phase determination, boilerplate policy, 3-tier strategy, meeting facilitation
-- **§5**: Execution Plan Templates - Standard templates with examples
-
-### Platform-Specific Execution
-
-For **Claude Code** execution:
-- Use the native `Agent` tool for specialist dispatch
-- See CLAUDE.md §20 (Native Sub-agents) for Claude Code-specific subagent usage
-- Follow CLAUDE.md §7 (Native Plan Mode) for implementation planning workflow
-
+**Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
 <!-- COMMON-CLAUDE:END -->
 
 ### 6. Native Sub-agents (`Agent` Tool)
@@ -317,7 +266,7 @@ If a custom slash command or background script returns a non-zero exit code:
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
-### 12. Windows Platform Requirement
+### 11. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
@@ -336,7 +285,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-09 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

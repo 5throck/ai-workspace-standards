@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-09T16:39:38.301Z
+**Generated**: 2026-06-11T00:47:57.149Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -102,7 +102,7 @@
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
 | propagate-to-templates.ts | N/A | scripts/propagate-to-templates.ts | N/A |
-| publish-to-template.ts | 1.6.0 | scripts/publish-to-template.ts | N/A |
+| publish-to-template.ts | 1.7.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

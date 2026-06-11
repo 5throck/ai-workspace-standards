@@ -15,66 +15,25 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 ### 🎯 Agent Roster (Roles Overview)
 
-#### 🛠️ Orchestration & Audit
-
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
-| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
-### 📐 Design
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
-
-### ⚙️ Execution
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
-| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
-
-### 🛡️ Security
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
-
+<!-- VARIANT-AGENTS-START -->
+<!-- Define project-specific specialist agents here.
+     Each row: | Agent Name | [`agents/name.md`](agents/name.md) | Tier | Role description |
+     See docs/context.md for agent frontmatter specification. -->
+<!-- VARIANT-AGENTS-END -->
 ---
 
 ## §2: Individual Agent Definitions
 
-### 🛠️ Orchestration & Audit Agents
+See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
-| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
-
-### 📐 Design Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
-
-### ⚙️ Execution Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
-| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
-
-### 🛡️ Security Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
-
+<!-- VARIANT-AGENT-DETAILS-START -->
+<!-- Add project-specific agent detail definitions here.
+     One subsection per agent: ### Agent Name, then a description table or prose. -->
+<!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
 ## §3: PM Gateway Workflow
@@ -88,14 +47,14 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 #### §3.1.1 PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to project specialists. See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
 | Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
+| Forbidden | Write, Edit (all other paths) | Must delegate to project specialist |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
@@ -114,13 +73,13 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 **What PM Does NOT Do**:
 - Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
 - Implement code or scripts
-- Perform documentation updates (delegate to docs-writer)
-- Perform design work (delegate to architect)
+- Perform documentation updates (delegate to `[docs specialist]`)
+- Perform design work (delegate to `[design specialist]`)
 
 **Task Owner vs Executor Distinction**:
 - **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
 - **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
+- PM creates tasks (owner: pm), dispatches project specialists (executor: `[specialist agent]`), and updates task status upon completion
 
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
@@ -151,67 +110,16 @@ User Request → PM Triage → Design Approval → Specialist Dispatch → QA Ga
 
 All specialist agents below are dispatched ONLY through PM:
 
-| Agent | Phase | Dispatch Trigger |
-|-------|-------|-------------------|
-| **scaffolding-expert** | 0 | "Creating new projects", "Template validation", "Scaffolding tasks" |
-| **architect** | 1-2 | "Architecture design needed", "Project structure planning", "Technical decision making" |
-| **automation-engineer** | 4 | "Creating scripts", "Cross-platform automation", "Implementation tasks" |
-| **docs-writer** | 4 | "Updating documentation", "README creation", "CHANGELOG updates" |
-| **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
-| **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync", "N-1 step after any agent/skill/script/variant change" (**Workspace root only — L0-only agent, NOT available in variant templates**) |
-| **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
-
+<!-- VARIANT-DISPATCH-TRIGGERS-START -->
+<!-- Define project-specific agent dispatch triggers here. Format:
+     | Agent | Phase | Dispatch Trigger |
+     |-------|-------|------------------|
+     | `[agent-name]` | [phase] | "trigger keyword 1", "trigger keyword 2" |
+     See §1 for available agents. -->
+<!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-### §3.2 PM Gateway Overview
-
-The PM Gateway is the mandatory orchestration layer for all multi-step tasks. It ensures proper task classification, specialist dispatch, and quality gate enforcement.
-
-**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
-All specialist agents require PM dispatch - enforced at 4 levels.
-
-### §3.3 PM Direct Execution Scope
-
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor).
-
-| Category | Tools | Scope |
-|----------|-------|-------|
-| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
-| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
-| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
-
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.
-
-### 3.3 PM Role Boundaries
-
-**What PM Does**:
-- Orchestrate multi-agent workflows
-- Create execution plans
-- Dispatch specialist agents
-- Enforce quality gates
-- Track progress
-
-**What PM Does NOT Do**:
-- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
-- Implement code or scripts
-- Perform documentation updates (delegate to docs-writer)
-- Perform design work (delegate to architect)
-
-**Task Owner vs Executor Distinction**:
-- **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
-- **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
-
-### 3.4 Enforcement Layers
-
-1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
-2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
-3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
-
-> **Mandatory Execution Plan Display**: For detailed execution plan format, mandatory criteria, and boilerplate rules, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -219,18 +127,24 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 | Deliverable Type | Phase | Required Agent | Tier | Notes |
 |------------------|-------|----------------|------|-------|
-| New file design, schema definition, ADR | Phase 1-2 | architect | High | Must precede implementation |
-| New directory structure, template layout | Phase 1-2 | architect | High | Must precede implementation |
-| Cross-platform convention, naming standard | Phase 1-2 | architect | High | Must precede implementation |
-| Script implementation (approved plan exists) | Phase 4 | automation-engineer | Low | Plan from architect required |
-| Documentation update | Phase 4 | docs-writer | Medium | |
-| Documentation writing | Phase 4 | docs-writer | Medium | |
-| Security configuration | Phase 6 | security-expert | Medium | |
-| Project scaffolding | Phase 0 | scaffolding-expert | Low | |
+| New file design, schema definition, ADR | Phase 1-2 | `[design specialist]` | High | Must precede implementation |
+| New directory structure, template layout | Phase 1-2 | `[design specialist]` | High | Must precede implementation |
+| Cross-platform convention, naming standard | Phase 1-2 | `[design specialist]` | High | Must precede implementation |
+| Script/tool implementation (approved plan exists) | Phase 4 | `[implementation specialist]` | Low–Medium | Plan from design specialist required |
+| Documentation update | Phase 4 | `[docs specialist]` | Medium | |
+| Documentation writing | Phase 4 | `[docs specialist]` | Medium | |
+| Security configuration | Phase 6 | `[security specialist]` | Medium | |
+| Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
-**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
+<!-- VARIANT-PHASE-GATE-START -->
+<!-- Map deliverable types to your project-specific agents from §1.
+     Example: | Feature implementation | Phase 4 | `engineer` | Low | | -->
+<!-- VARIANT-PHASE-GATE-END -->
 
-> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
+
+> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.
+
 
 ### §3.6 3-Tier Strategy
 
@@ -301,12 +215,7 @@ The PM agent follows a three-level inheritance model: **L0 (workspace root)** �
 
 > **For PM Agent Architecture**: See [docs/context.md](docs/context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
 
----
-
-
-## PM Subagent Dispatch Protocol
-
-### Dispatch Decision
+#### Dispatch Decision
 
 ```
 Request received
@@ -321,7 +230,7 @@ Request received
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
 > Always wait for a write agent to complete before dispatching the next.
 
-### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 
 The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
 
@@ -339,27 +248,26 @@ The PM agent MUST leverage the **`superpowers`** plugin for harness engineering 
 
 The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
 
-### Dispatch Rules
+#### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
 2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
-3. **Independent QA Gate** - Auditor owns Phase 6 QA gate autonomously using bun scripts/qa-gate.ts
+3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)
 4. **Parallel Agent Dispatch** - all parallel agents must be dispatched in one turn for research/analysis phases
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
 
-### Subagent Roster
+#### Subagent Roster
 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
-| Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
-| Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | N-1 finalization step | Governance docs only (Workspace root only — L0-only agent) |
-| Template Architect | `agents/architect.md` | High | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Tier 1 shell scripts (.sh/.ps1) and Tier 2 automation (.ts / package.json) |
-| Documentation Writer | `agents/docs-writer.md` | **Medium** | After design | .md files only |
-| Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
-| Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
+
+<!-- VARIANT-SUBAGENT-ROSTER-START -->
+<!-- Add project-specific specialist agents here. Format:
+     | Agent Name | `agents/name.md` | High/Medium/Low | parallel conditions | write scope |
+     See §1 for the agent roster and docs/context.md for frontmatter specification. -->
+<!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
 
@@ -386,17 +294,16 @@ Phase 3 - Design Handoff (variant-specific)
   Agents can dispatch each other directly for routine handoffs
 
 Phase 4 - Execution (specialist-autonomous)
-  Automation Engineer implements per approved plan
-  Documentation Writer updates docs as needed
+  `[implementation specialist]` implements per approved plan
+  `[docs specialist]` updates docs as needed
   Agents can dispatch each other directly for routine handoffs
 
 Phase 5 - Lifecycle Finalization (PM-owned)
   PM updates governance records for any changed artifacts
   PM logs decisions to memory/YYYY-MM-DD.md
 
-Phase 6 - Quality Assurance & Finalization (specialist-autonomous in workspace, PM in variants)
-  Auditor (workspace) executes bun scripts/qa-gate.ts autonomously
-  PM (variants) executes qa scripts
+Phase 6 - Quality Assurance & Finalization (PM-owned)
+  PM executes bun scripts/qa-gate.ts
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
   PM runs /sync "type: description" → PR opened
@@ -410,13 +317,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
-| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
-| Write or modify Tier 1 scripts (.sh, .ps1) or Tier 2 scripts (.ts, package.json) | `automation-engineer` | `architect` |
-| Update documentation files | `docs-writer` | `architect` |
-| Create new project from template | `scaffolding-expert` | `automation-engineer` |
-| Security review, Git hooks configuration | `security-expert` | `architect` |
-| Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
+
+<!-- VARIANT-ROLE-BOUNDARY-START -->
+<!-- Add project-specific role boundary rules here. Example:
+     | Design implementation approach | `[design specialist]` | `[implementation specialist]` |
+     | Write or modify documentation | `[docs specialist]` | `[design specialist]` | -->
+<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 
@@ -427,8 +334,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [model] |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm | Medium | [model] |
+| N | Final QA Audit (bun scripts/audit.ts) | pm | Medium | [model] |
 
 **Execution Order**: [Parallel | Sequential]
 
@@ -445,8 +352,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | # | Task | Agent | Tier | Model | Platform |
 |---|------|-------|------|---------|----------|
 | 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N-1 | Lifecycle Update | lifecycle-manager | Medium | [model] | Both |
-| N | Final QA | auditor | Medium | [model] | Both |
+| N-1 | Lifecycle Update | pm | Medium | [model] | Both |
+| N | Final QA | pm | Medium | [model] | Both |
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 
@@ -458,12 +365,12 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 |
-| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 |
+| 1 | Update agents/pm.md | `[docs specialist]` | Medium | claude-sonnet-4-6 |
+| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | claude-haiku-4-5 |
+| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
+| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm | Medium | claude-sonnet-4-6 |
+| 6 | Final QA Audit (bun scripts/audit.ts) | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
@@ -471,9 +378,9 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | Update project README introduction | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | Lifecycle Update (if needed) | lifecycle-manager | Medium | claude-sonnet-4-6 |
-| 3 | Final QA Audit | auditor | Medium | claude-sonnet-4-6 |
+| 1 | Update project README introduction | `[docs specialist]` | Medium | claude-sonnet-4-6 |
+| 2 | Lifecycle Update (if needed) | pm | Medium | claude-sonnet-4-6 |
+| 3 | Final QA Audit | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential
 
@@ -588,7 +495,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 ## §10: Periodic Skill Review Schedule
 
 **Frequency**: Quarterly (every 3 months)  
-**Owner**: lifecycle-manager  
+**Owner**: pm  
 **Tool**: `bun scripts/skill-dependency-analysis.ts --report`
 
 ### Review Cadence

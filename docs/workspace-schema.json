@@ -122,7 +122,9 @@
       ".codegraph",
       ".codex",
       ".github",
-      "Projects"
+      "Projects",
+      ".pipeline-state",
+      "test-project"
     ]
   }
 }

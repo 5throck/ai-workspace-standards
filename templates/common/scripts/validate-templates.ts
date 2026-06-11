@@ -531,12 +531,16 @@ function checkAgents(variant: string): void {
       : '';
 
     const fullResolvedContent = getResolvedContent(filePath);
-    
+
+    // Detect pure YAML-skeleton pm.md (extends: pattern, no body content — ADR-0033)
+    // In this pattern, Dispatch Protocol lives in AGENTS.md §3, so section checks are exempt.
+    const isYamlSkeletonPm = file === 'pm.md' && rawContent.trim().match(/^---[\s\S]*?---\s*$/) !== null;
+
     // Section is "present" if in variant file OR (additive override AND in skeleton) OR recursively inherited via extends
-    const hasMeetingSection = MEETING_SECTIONS.some(s =>
+    const hasMeetingSection = isYamlSkeletonPm || MEETING_SECTIONS.some(s =>
       content.includes(s) || (agentOverrideType === 'additive' && commonAgentContent.includes(s)) || fullResolvedContent.includes(s)
     );
-    const hasDispatchSection = content.includes(DISPATCH_SECTION) ||
+    const hasDispatchSection = isYamlSkeletonPm || content.includes(DISPATCH_SECTION) ||
       (agentOverrideType === 'additive' && commonAgentContent.includes(DISPATCH_SECTION)) || fullResolvedContent.includes(DISPATCH_SECTION);
     const missingSections: string[] = [];
     if (!hasMeetingSection) missingSections.push('## Meeting Participation (or ## Meeting Facilitation)');
@@ -966,7 +970,11 @@ function checkPlatformDocumentationParity(): void {
     'Agent Teams vs. Antigravity Agent Manager',
     'Antigravity Agent Manager',
     'Antigravity Parallel Agent Workflow',
-    'GEMINI.md Equivalent Settings'
+    'GEMINI.md Equivalent Settings',
+    'Antigravity-Specific Dispatch',
+    'Skill Resolution Priority',
+    'Claude Code-Specific Dispatch',
+    'Workspace & Template Boundary Policy'
   ];
   
   const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));

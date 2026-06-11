@@ -165,70 +165,20 @@ All `.md` files you create or modify MUST be in English, except when working in 
 
 ### 5. Agent Dispatch Rules
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-#### Mandatory Execution Plan Display
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
 
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool.
+#### Antigravity-Specific Dispatch
 
-**Mandatory Criteria** (Boilerplate always required when ANY applies):
-
-1. **Multi-agent Dispatch**: 2 or more specialists involved
-2. **Breaking Changes**: Modifications that break existing functionality
-3. **Platform Parity Changes**: Changes to CLAUDE.md/GEMINI.md sync
-4. **Lifecycle-Related Items**:
-   - agents/*.md modifications → Requires AGENTS.md update
-   - skills/*/SKILL.md modifications → Requires AGENTS.md update
-   - scripts/*.ts modifications → Requires SCRIPTS.md update
-   - docs/adr/*.md modifications → Requires ADR index update
-5. **Configuration Changes**:
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
-   - README.md, CHANGELOG.md
-
-**Boilerplate Format**:
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task] | [agent] | High/Medium/Low | high/medium/low |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
-
-**Required Columns**:
-- `#`: Sequential step number
-- `Task`: Brief task description
-- `Agent`: Specialist agent name
-- `Tier`: High/Medium/Low (mandatory)
-- `Model`: Model override (optional)
-
-**Rules**:
-- Always include N-1 (Lifecycle Update) and N (Final QA Audit) as final two steps
-- State parallel vs sequential order below the table
-- Tier column is MANDATORY
-- Do NOT use "pm (direct)" - PM never executes directly
-- At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N
-- In **variant projects**, PM handles both directly
-- Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct"
-
-**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
-
-**Platform Note**: The execution plan table format has been simplified to remove the `Platform` column. PM will still internally manage the L0-only task classification, though it is no longer required in the table.
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table prior to invoking the agent orchestration tool.
 
 <!-- COMMON-GEMINI:START -->
 ## Execution Plan Boilerplate
 
-Before dispatching 2+ agents, PM MUST create an execution plan. For the complete PM Gateway workflow, execution plan templates, and phase determination guidelines, see **AGENTS.md**:
+For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
-- **§3**: PM Gateway Workflow - Mandatory execution plan display, phase determination, boilerplate policy, 3-tier strategy, meeting facilitation
-- **§5**: Execution Plan Templates - Standard templates with examples
-
-### Platform-Specific Execution
-
-For **Antigravity** execution:
-- Agent Teams are enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`
-- See GEMINI.md §20 (Agent Teams) for configuration and workflow
-- See GEMINI.md §21 (teammateMode) for parallel execution mode configuration
-
-> **Note**: The native Agent tool in Claude Code provides equivalent functionality. See CLAUDE.md §20 for details.
+**Antigravity execution**: Use `invoke_subagent` for specialist dispatch. See §3 (Subagent Instantiation & Async Orchestration) in this file.
 <!-- COMMON-GEMINI:END -->
 
 #### Skill Resolution Priority
@@ -331,7 +281,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-09 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

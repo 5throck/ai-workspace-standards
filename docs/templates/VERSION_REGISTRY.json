@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-06-02",
+  "last_updated": "2026-06-09",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
-      "latest": "1.0.0",
+      "latest": "0.1.0",
       "released": "2026-05-28",
-      "status": "stable",
+      "status": "beta",
       "security_advisories": [],
       "migration_guides": []
     },

@@ -163,55 +163,7 @@ All specialist agents below are dispatched ONLY through PM:
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-### §3.2 PM Gateway Overview
-
-The PM Gateway is the mandatory orchestration layer for all multi-step tasks. It ensures proper task classification, specialist dispatch, and quality gate enforcement.
-
-**Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
-All specialist agents require PM dispatch - enforced at 4 levels.
-
-### §3.3 PM Direct Execution Scope
-
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor).
-
-| Category | Tools | Scope |
-|----------|-------|-------|
-| Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
-| Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
-| Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
-| Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
-
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.
-
-### 3.3 PM Role Boundaries
-
-**What PM Does**:
-- Orchestrate multi-agent workflows
-- Create execution plans
-- Dispatch specialist agents
-- Enforce quality gates
-- Track progress
-
-**What PM Does NOT Do**:
-- Directly Edit/Write files (except `memory/*.md`, `CHANGELOG.md`)
-- Implement code or scripts
-- Perform documentation updates (delegate to docs-writer)
-- Perform design work (delegate to architect)
-
-**Task Owner vs Executor Distinction**:
-- **Task owner (PM)**: "Buck stops here" responsible person for tracking progress
-- **Task executor (specialist)**: Agent who performs the actual work
-- PM creates tasks (owner: pm), dispatches specialists (executor: docs-writer/architect/automation-engineer), and updates task status upon completion
-
-### 3.4 Enforcement Layers
-
-1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
-2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
-3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
-4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
-
-> **Mandatory Execution Plan Display**: For detailed execution plan format, mandatory criteria, and boilerplate rules, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -301,12 +253,7 @@ The PM agent follows a three-level inheritance model: **L0 (workspace root)** �
 
 > **For PM Agent Architecture**: See [CONSTITUTION.md §5.5 - PM Gateway Workflow](CONSTITUTION.md#55-pm-gateway-workflow) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
 
----
-
-
-## PM Subagent Dispatch Protocol
-
-### Dispatch Decision
+#### Dispatch Decision
 
 ```
 Request received
@@ -321,7 +268,7 @@ Request received
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
 > Always wait for a write agent to complete before dispatching the next.
 
-### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 
 The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
 
@@ -339,7 +286,7 @@ The PM agent MUST leverage the **`superpowers`** plugin for harness engineering 
 
 The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
 
-### Dispatch Rules
+#### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
 2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
@@ -348,7 +295,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
 
-### Subagent Roster
+#### Subagent Roster
 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|

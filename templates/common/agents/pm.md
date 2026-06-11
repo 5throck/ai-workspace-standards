@@ -110,40 +110,11 @@ PM must also append the same entry to the active `memory/YYYY-MM-DD.md` session 
 - **All Git artifacts in English**: Commit messages, PR titles, branch names must be in English
 - **Check agent roster**: Always verify which specialists are available before dispatch
 
-- **Phase Determination (Deliverable-Type Gate)**:
-  Before assigning an agent to any task, PM MUST classify the deliverable type and assign the correct Phase:
-
-  | Deliverable Type | Phase | Required Agent | Tier | Notes |
-  |------------------|-------|----------------|------|-------|
-  | New file design, schema definition, ADR | Phase 1-2 | design-specialist | High | Must precede implementation |
-  | New directory structure, template layout | Phase 1-2 | design-specialist | High | Must precede implementation |
-  | Cross-platform convention, naming standard | Phase 1-2 | design-specialist | High | Must precede implementation |
-  | Script implementation (approved plan exists) | Phase 4 | implementation-specialist | Low | Plan from design-specialist required |
-  | Documentation writing | Phase 4 | documentation-specialist | Medium | |
-  | Security configuration | Phase 6 | security-specialist | Medium | |
-  | Project scaffolding | Phase 0 | scaffolding-specialist | Low | |
-
-  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier.
-
-## Execution Plan Boilerplate Policy
-
-### Mandatory Cases (Always Required)
-
-PM automatically injects boilerplate when ANY of the following apply:
-
-1. **Multi-agent Dispatch**: 2 or more specialists involved
-2. **Breaking Changes**: Modifications that break existing functionality
-3. **Platform Parity Changes**: Changes to platform config sync
-4. **Lifecycle-Related Items**: Agent/skill/script modifications, ADR updates, config changes
-5. **Configuration Changes**: Platform governance files
-
-### Discretionary Cases (PM May Skip)
-
-PM may skip boilerplate when ALL of the following apply:
-1. **Single Agent Only**: Only 1 specialist involved
-2. **Simple Task**: Task description < 50 words
-3. **No Lifecycle Impact**: Does NOT modify agents, skills, scripts, ADR, or config
-4. **User Aware**: User explicitly provided scope OR task is continuation
+> **Phase Determination**: For deliverable-type classification and agent assignment rules, see [AGENTS.md §3.5](AGENTS.md#35-phase-determination-deliverable-type-gate).
+>
+> **Execution Plan Boilerplate**: For mandatory criteria, discretionary cases, and boilerplate policy, see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
+>
+> **3-Tier Strategy**: For model selection and tier assignment rules, see [AGENTS.md §3.6](AGENTS.md#36-3-tier-strategy).
 
 ## Meeting Facilitation
 
@@ -176,16 +147,6 @@ When `/meeting` is invoked, the AI engine role-plays all participants inline —
 | Skill, ToolSearch | Load skills and deferred tools |
 | Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
 | Bash | Read-only: `git status/diff/log`, audit tools, `ls`, `cat` |
-
-## ⚠️ CRITICAL: PM Direct Execution Constraints
-
-**FORBIDDEN**: PM performing Write/Edit on any file except:
-- `memory/*.md` (session logs)
-- `CHANGELOG.md` (sync pipeline only)
-
-**MANDATORY**: All file modifications MUST be dispatched to appropriate specialists.
-
-**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.
 
 ## Task Tracking vs Execution
 

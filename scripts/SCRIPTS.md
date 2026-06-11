@@ -66,7 +66,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -107,7 +107,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `new-project.sh` | L0 | 1.7.1 | active | —| —| L0 | —|
 | `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `publish-to-template.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `publish-to-template.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -315,6 +315,7 @@ delegates to the PowerShell script on Windows and performs `rm -rf` on Linux/mac
 **Usage**: `bun run publish-to-template`
 **Dry-run**: `bun run publish-to-template -- --dry-run`
 **Governance L1**: `bun run publish-to-template -- --governance-l1` — deploys CLAUDE.md, GEMINI.md, AGENTS.md from L0 to `templates/common/`, replacing L0 governance references with `docs/context.md`. `agents/pm.md` is intentionally skipped (L1 version has `extends:` frontmatter).
+**Docs (L1→L2)**: `bun run publish-to-template -- --docs` — injects COMMON-marked sections from L1 governance files (`templates/common/AGENTS.md` etc.) into each L2 variant (`templates/co-*/`). Source is L1, not L0.
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
 #### `verify-memory.ts`

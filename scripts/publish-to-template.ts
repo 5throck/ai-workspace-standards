@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. Use --governance-l1 for L0→L1 governance file deployment with reference transformation. L1→L2 auto-propagation is forbidden per ADR-0031.
 // Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift] [--governance-l1]
-// @version 1.6.0
+// @version 1.7.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -499,7 +499,7 @@ function replaceCommonSection(
 }
 
 function publishDocs(isDryRun: boolean): void {
-  console.log(`\n${CYAN}=== L0 → L2 publish: governance docs (CLAUDE.md, GEMINI.md) → templates/co-*/ ===${RESET}`);
+  console.log(`\n${CYAN}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${RESET}`);
   if (isDryRun) console.log(`${DARKGRAY}(dry-run mode)${RESET}`);
 
   // Read governance-* domains from propagation-map.json
@@ -509,7 +509,7 @@ function publishDocs(isDryRun: boolean): void {
   const govDomains = Object.entries(map.domains)
     .filter(([_, d]: any) => d.mode === 'marker-inject')
     .map(([_, d]: any) => ({
-      root: d.source_file as string,
+      sourceFile: d.source_file as string,   // relative to workspaceRoot (L1 path)
       marker: d.marker as string,
       variants: d.target_variants as string[],
     }));
@@ -517,27 +517,29 @@ function publishDocs(isDryRun: boolean): void {
   let totalUpdated = 0;
   let totalSkipped = 0;
 
-  for (const { root, marker, variants } of govDomains) {
-    const rootPath = path.join(workspaceRoot, root);
-    if (!fs.existsSync(rootPath)) {
-      console.log(`  ${YELLOW}⚠️  ${root} not found at workspace root, skipping${RESET}`);
+  for (const { sourceFile, marker, variants } of govDomains) {
+    const sourcePath = path.join(workspaceRoot, sourceFile);
+    if (!fs.existsSync(sourcePath)) {
+      console.log(`  ${YELLOW}⚠️  ${sourceFile} not found, skipping${RESET}`);
       continue;
     }
 
-    const rootContent = fs.readFileSync(rootPath, 'utf-8');
-    const sections = extractCommonSections(rootContent, marker);
+    const sourceContent = fs.readFileSync(sourcePath, 'utf-8');
+    const sections = extractCommonSections(sourceContent, marker);
 
     if (sections.length === 0) {
-      console.log(`  ${YELLOW}⚠️  No <!-- ${marker}:START/END --> markers found in ${root}, skipping${RESET}`);
+      console.log(`  ${YELLOW}⚠️  No <!-- ${marker}:START/END --> markers found in ${sourceFile}, skipping${RESET}`);
       continue;
     }
 
-    console.log(`\n  ${CYAN}${root}${RESET} — ${sections.length} common section(s) found`);
+    // Derive the target filename (basename of source_file, e.g. "AGENTS.md")
+    const targetFilename = path.basename(sourceFile);
+    console.log(`\n  ${CYAN}${sourceFile}${RESET} — ${sections.length} common section(s) found`);
 
     for (const variant of variants) {
-      const variantPath = path.join(workspaceRoot, 'templates', variant, root);
+      const variantPath = path.join(workspaceRoot, 'templates', variant, targetFilename);
       if (!fs.existsSync(variantPath)) {
-        console.log(`    ${YELLOW}⚠️  templates/${variant}/${root} not found, skipping${RESET}`);
+        console.log(`    ${YELLOW}⚠️  templates/${variant}/${targetFilename} not found, skipping${RESET}`);
         continue;
       }
 
@@ -561,10 +563,10 @@ function publishDocs(isDryRun: boolean): void {
         if (!isDryRun) {
           fs.writeFileSync(variantPath, variantContent, 'utf-8');
         }
-        console.log(`    ${GREEN}✅ templates/${variant}/${root}${isDryRun ? ' [dry-run]' : ' updated'}${RESET}`);
+        console.log(`    ${GREEN}✅ templates/${variant}/${targetFilename}${isDryRun ? ' [dry-run]' : ' updated'}${RESET}`);
         totalUpdated++;
       } else {
-        console.log(`    ${DARKGRAY}—  templates/${variant}/${root} already in sync${RESET}`);
+        console.log(`    ${DARKGRAY}—  templates/${variant}/${targetFilename} already in sync${RESET}`);
         totalSkipped++;
       }
     }
@@ -620,7 +622,6 @@ function applyGovernanceTransforms(content: string, filename: string): string {
   content = content.replace(/CONSTITUTION\.md/g, 'context.md');
 
   // ── Phase B: workspace root-specific content removal / replacement ────────
-  // These transforms apply to CLAUDE.md and GEMINI.md only (not AGENTS.md).
   if (filename === 'CLAUDE.md' || filename === 'GEMINI.md') {
 
     // B-1. Boilerplate table: "lifecycle-manager (workspace) / pm (variant)" → "pm"
@@ -674,6 +675,196 @@ function applyGovernanceTransforms(content: string, filename: string): string {
         `<!-- COMMON-GEMINI:END -->`;
       content = content.replace(geminiBoundaryPattern, geminiBoundaryReplacement);
     }
+  }
+
+  // ── Phase B-AGENTS: AGENTS.md workspace roster replacement ──────────────
+  if (filename === 'AGENTS.md') {
+    // B-A1. Replace §1 workspace agent roster (L0-specific agents: auditor, lifecycle-manager,
+    //       architect, automation-engineer, etc.) with PM-only row + variant placeholder zone.
+    const s1Pattern = /## §1: Agent Ecosystem Overview[\s\S]*?(?=\n---\n\n## §2:)/;
+    const s1Replacement =
+      `## §1: Agent Ecosystem Overview\n\n` +
+      `### 🎯 Agent Roster (Roles Overview)\n\n` +
+      `| Agent | File | Tier | Role |\n` +
+      `|-------|------|------|------|\n` +
+      `| **Project Manager (PM) Agent** | [\`agents/pm.md\`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |\n\n` +
+      `<!-- VARIANT-AGENTS-START -->\n` +
+      `<!-- Define project-specific specialist agents here.\n` +
+      `     Each row: | Agent Name | [\`agents/name.md\`](agents/name.md) | Tier | Role description |\n` +
+      `     See docs/context.md for agent frontmatter specification. -->\n` +
+      `<!-- VARIANT-AGENTS-END -->`;
+    content = content.replace(s1Pattern, s1Replacement);
+
+    // B-A2. Replace §2 Individual Agent Definitions (workspace-specific detail tables)
+    //       with PM reference + variant placeholder zone.
+    const s2Pattern = /## §2: Individual Agent Definitions[\s\S]*?(?=\n---\n\n## §3:)/;
+    const s2Replacement =
+      `## §2: Individual Agent Definitions\n\n` +
+      `See [\`agents/pm.md\`](agents/pm.md) for the PM Agent full definition.\n\n` +
+      `<!-- VARIANT-AGENT-DETAILS-START -->\n` +
+      `<!-- Add project-specific agent detail definitions here.\n` +
+      `     One subsection per agent: ### Agent Name, then a description table or prose. -->\n` +
+      `<!-- VARIANT-AGENT-DETAILS-END -->`;
+    content = content.replace(s2Pattern, s2Replacement);
+
+    // B-A3. Remove workspace-only agent rows from §3 3-tier dispatch table
+    //       (lifecycle-manager, auditor are L0-only; variants route these phases through PM).
+    content = content.replace(/^\| \*\*lifecycle-manager\*\*[^\n]*\n/mg, '');
+    content = content.replace(/^\| \*\*auditor\*\*[^\n]*\n/mg, '');
+
+    // B-A4-sub. Remove L0-only agent rows from §4 Subagent Roster.
+    content = content.replace(/^\| Lifecycle Manager[^\n]*\n/mg, '');
+    content = content.replace(/^\| Consistency Auditor[^\n]*\n/mg, '');
+
+    // B-A5. Execution plan tables §5: lifecycle-manager/auditor → pm throughout.
+    //       Variant projects route N-1 and N through PM directly (per CLAUDE.md B-1/B-2).
+    content = content.replace(/(\|[^|]+\|) lifecycle-manager (\|)/g, '$1 pm $2');
+    content = content.replace(/(\|[^|]+\|) auditor (\|)/g, '$1 pm $2');
+
+    // B-A5b. Prose owner lines: lifecycle-manager → pm.
+    content = content.replace(/\*\*Owner\*\*: lifecycle-manager/g, '**Owner**: pm');
+
+    // B-A6. L0→L1→L2 architecture description in PM row → simplified L1 description.
+    content = content.replace(
+      /\[`agents\/pm\.md`\]\(agents\/pm\.md\) \(L0\) → \[`templates\/common\/agents\/pm\.md`\]\(templates\/common\/agents\/pm\.md\) \(L1\) → \[`templates\/<variant>\/agents\/pm\.md`\]\(templates\/co-design\/agents\/pm\.md\) \(L2\)/g,
+      '[`agents/pm.md`](agents/pm.md)'
+    );
+    content = content.replace(
+      /Three-level inheritance architecture: L0 \(workspace root base\) → L1 \(common template pure-extends\) → L2 \(variant YAML overrides\)\. Orchestrates/g,
+      'Orchestrates'
+    );
+    content = content.replace(/See \[L0→L1→L2 PM Agent Architecture\][^\n]*/g, '');
+
+    // B-A12. §5.3 Example Execution Plans: replace workspace agent names with generic roles.
+    //        These are illustrative examples — variant projects should substitute their own agents.
+    content = content.replace(
+      /\| 1 \| Update agents\/pm\.md \| docs-writer \|/g,
+      '| 1 | Update agents/pm.md | `[docs specialist]` |'
+    );
+    content = content.replace(
+      /\| 2 \| Update scripts\/audit\.ts \| automation-engineer \|/g,
+      '| 2 | Update scripts/audit.ts | `[implementation specialist]` |'
+    );
+    content = content.replace(
+      /\| 3 \| Update CLAUDE\.md §5 \| docs-writer \|/g,
+      '| 3 | Update CLAUDE.md §5 | `[docs specialist]` |'
+    );
+    content = content.replace(
+      /\| 4 \| Update GEMINI\.md §5 \| docs-writer \|/g,
+      '| 4 | Update GEMINI.md §5 | `[docs specialist]` |'
+    );
+    content = content.replace(
+      /\| 1 \| Update project README introduction \| docs-writer \|/g,
+      '| 1 | Update project README introduction | `[docs specialist]` |'
+    );
+
+    // B-A7. §3.1 PM Direct Execution Scope prose: hardcoded workspace agent names → generic.
+    content = content.replace(
+      /dispatched to specialists \(docs-writer, architect, automation-engineer, auditor\)/g,
+      'dispatched to project specialists'
+    );
+    content = content.replace(
+      /Must delegate to specialist \(docs-writer, architect, automation-engineer, auditor\)/g,
+      'Must delegate to project specialist'
+    );
+    content = content.replace(
+      /- Perform documentation updates \(delegate to docs-writer\)/g,
+      '- Perform documentation updates (delegate to `[docs specialist]`)'
+    );
+    content = content.replace(
+      /- Perform design work \(delegate to architect\)/g,
+      '- Perform design work (delegate to `[design specialist]`)'
+    );
+    content = content.replace(
+      /dispatches specialists \(executor: docs-writer\/architect\/automation-engineer\)/g,
+      'dispatches project specialists (executor: `[specialist agent]`)'
+    );
+
+    // B-A8. §3.1.5 Specialist Agent Roster: replace workspace-specific agent dispatch table
+    //       with variant placeholder. Variant projects define their own dispatch triggers in §1.
+    const specialistRosterPattern = /#### §3\.1\.5 Specialist Agent Roster \(PM-ONLY INVOCATION\)[\s\S]*?(?=\n\*\*⚠️ IMPORTANT\*\*: Do NOT invoke)/;
+    const specialistRosterReplacement =
+      `#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)\n\n` +
+      `All specialist agents below are dispatched ONLY through PM:\n\n` +
+      `<!-- VARIANT-DISPATCH-TRIGGERS-START -->\n` +
+      `<!-- Define project-specific agent dispatch triggers here. Format:\n` +
+      `     | Agent | Phase | Dispatch Trigger |\n` +
+      `     |-------|-------|------------------|\n` +
+      `     | \`[agent-name]\` | [phase] | "trigger keyword 1", "trigger keyword 2" |\n` +
+      `     See §1 for available agents. -->\n` +
+      `<!-- VARIANT-DISPATCH-TRIGGERS-END -->`;
+    content = content.replace(specialistRosterPattern, specialistRosterReplacement);
+
+    // B-A9. Dispatch Rules #3: "Auditor owns Phase 6 QA gate" → PM-owned in variant context.
+    content = content.replace(
+      /3\. \*\*Independent QA Gate\*\* - Auditor owns Phase 6 QA gate autonomously[^\n]*/,
+      '3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)'
+    );
+
+    // B-A8. Subagent Roster: replace workspace-specific agent rows with variant placeholder.
+    const rosterPattern = /### Subagent Roster\n\n\| Agent \| File \|[\s\S]*?(?=\n\n> \*\*Agent frontmatter)/;
+    const rosterReplacement =
+      `### Subagent Roster\n\n` +
+      `| Agent | File | Tier | Parallelizable | Write Allowed? |\n` +
+      `|-------|------|------|:--------------:|:--------------:|\n` +
+      `| PM Orchestrator | \`agents/pm.md\` | High | - | orchestrates only |\n\n` +
+      `<!-- VARIANT-SUBAGENT-ROSTER-START -->\n` +
+      `<!-- Add project-specific specialist agents here. Format:\n` +
+      `     | Agent Name | \`agents/name.md\` | High/Medium/Low | parallel conditions | write scope |\n` +
+      `     See §1 for the agent roster and docs/context.md for frontmatter specification. -->\n` +
+      `<!-- VARIANT-SUBAGENT-ROSTER-END -->`;
+    content = content.replace(rosterPattern, rosterReplacement);
+
+    // B-A9. §4.2 Harness Engineering Workflow: replace workspace agent names in phase descriptions.
+    content = content.replace(
+      /Phase 6 - Quality Assurance & Finalization \(specialist-autonomous in workspace, PM in variants\)\n  Auditor \(workspace\) executes bun scripts\/qa-gate\.ts autonomously\n  PM \(variants\) executes qa scripts/,
+      'Phase 6 - Quality Assurance & Finalization (PM-owned)\n  PM executes bun scripts/qa-gate.ts'
+    );
+    content = content.replace(
+      /  Automation Engineer implements per approved plan\n  Documentation Writer updates docs as needed/,
+      '  `[implementation specialist]` implements per approved plan\n  `[docs specialist]` updates docs as needed'
+    );
+
+    // B-A10. §4.3 Role Boundary Matrix: replace workspace-specific agent rows with
+    //        generic placeholder; keep only the PM orchestration row (universally applicable).
+    const rbmPattern = /### 4\.3 Role Boundary Matrix\n\nUse this[\s\S]*?(?=\n---\n\n## §5:)/;
+    const rbmReplacement =
+      `### 4.3 Role Boundary Matrix\n\n` +
+      `Use this to resolve ambiguity when multiple agents could handle a request.\n\n` +
+      `| Scenario | Use | Do NOT use |\n` +
+      `|----------|-----|------------|\n` +
+      `| Orchestrate multi-step task across agents | \`pm\` | any execution agent |\n\n` +
+      `<!-- VARIANT-ROLE-BOUNDARY-START -->\n` +
+      `<!-- Add project-specific role boundary rules here. Example:\n` +
+      `     | Design implementation approach | \`[design specialist]\` | \`[implementation specialist]\` |\n` +
+      `     | Write or modify documentation | \`[docs specialist]\` | \`[design specialist]\` | -->\n` +
+      `<!-- VARIANT-ROLE-BOUNDARY-END -->\n`;
+    content = content.replace(rbmPattern, rbmReplacement);
+
+    // B-A11. §3.5 Phase Determination table: replace workspace-specific agent names
+    //       with generic role placeholders. Variant projects define actual agents in §1.
+    //       The table structure (deliverable types + phases) is generic and kept as-is.
+    const s35Pattern = /### §3\.5 Phase Determination \(Deliverable-Type Gate\)[\s\S]*?(?=\n###\s)/;
+    const s35Replacement =
+      `### §3.5 Phase Determination (Deliverable-Type Gate)\n\n` +
+      `Before assigning an agent to any task, PM MUST classify the deliverable type:\n\n` +
+      `| Deliverable Type | Phase | Required Agent | Tier | Notes |\n` +
+      `|------------------|-------|----------------|------|-------|\n` +
+      `| New file design, schema definition, ADR | Phase 1-2 | \`[design specialist]\` | High | Must precede implementation |\n` +
+      `| New directory structure, template layout | Phase 1-2 | \`[design specialist]\` | High | Must precede implementation |\n` +
+      `| Cross-platform convention, naming standard | Phase 1-2 | \`[design specialist]\` | High | Must precede implementation |\n` +
+      `| Script/tool implementation (approved plan exists) | Phase 4 | \`[implementation specialist]\` | Low–Medium | Plan from design specialist required |\n` +
+      `| Documentation update | Phase 4 | \`[docs specialist]\` | Medium | |\n` +
+      `| Documentation writing | Phase 4 | \`[docs specialist]\` | Medium | |\n` +
+      `| Security configuration | Phase 6 | \`[security specialist]\` | Medium | |\n` +
+      `| Project setup | Phase 0 | pm | Low | PM handles initial setup directly |\n\n` +
+      `<!-- VARIANT-PHASE-GATE-START -->\n` +
+      `<!-- Map deliverable types to your project-specific agents from §1.\n` +
+      `     Example: | Feature implementation | Phase 4 | \`engineer\` | Low | | -->\n` +
+      `<!-- VARIANT-PHASE-GATE-END -->\n\n` +
+      `**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.\n\n` +
+      `> **Execution Plan Boilerplate Policy**: For mandatory and discretionary boilerplate cases, see [§3 (PM Gateway Workflow)](AGENTS.md#§3-pm-gateway-workflow) above.\n\n`;
+    content = content.replace(s35Pattern, s35Replacement);
   }
 
   // ── Phase C: CLAUDE.md-only transforms ───────────────────────────────────
