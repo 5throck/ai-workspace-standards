@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-11T01:53:24.002Z
+**Generated**: 2026-06-11T02:12:17.329Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 88
+- **Scripts**: 92
 - **Commands**: 6
 
 ---
@@ -69,6 +69,7 @@
 | audit.ts | 2.6.5 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
+| cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | N/A | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.5.0 | scripts/create-l2-scaffold.ts | child_process, fs, path |
 | dev-sync.ts | 1.2.2 | scripts/dev-sync.ts | bun |
@@ -95,6 +96,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
+| new-project.ts | 1.0.0 | scripts/new-project.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | N/A | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
@@ -106,6 +108,7 @@
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
+| remove-project.ts | 1.0.0 | scripts/remove-project.ts | N/A |
 | resolve-variants.ts | N/A | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
 | scan-l2-project.ts | N/A | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
@@ -128,6 +131,7 @@
 | test-runner.ts | N/A | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | N/A | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | N/A | scripts/helpers/update-variant-lifecycle.ts | N/A |
+| upgrade-project.ts | 1.0.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | N/A | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | N/A | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.3.0 | scripts/validate-md-language.ts | fs |

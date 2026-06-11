@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 
+### Breaking Changes
+- **[2026-06-11]**: [Breaking] scripts: migrate all sh/ps1 scripts to TypeScript (ADR-0036) — `bash scripts/new-project.sh` → `bun scripts/new-project.ts`, `bash scripts/upgrade-project.sh` → `bun scripts/upgrade-project.ts`, `bash scripts/remove-project.sh` → `bun scripts/remove-project.ts`, `bash scripts/cleanup-completed-md.sh` → `bun scripts/cleanup-completed-md.ts`; `install-bun.sh/ps1` deleted (bun is a workspace prerequisite); all file permission-setting code (chmod/chown/icacls/attrib/takeown) removed
+
 ### Added
 - **[2026-06-09]**: docs: restructure AGENTS.md as SSOT for agent ecosystem and PM Gateway workflow — AGENTS.md v2.0.0 restructured as Single Source of Truth; integrated PM Gateway workflow (§3), execution plan templates (§5), and agent ecosystem overview; eliminated 229 lines of duplicate content across pm.md, CLAUDE.md §5, and GEMINI.md §5
 - **[2026-06-09]**: docs: simplify pm.md — removed duplicate Agent Roster table (11 lines), added AGENTS.md reference section; pm.md now focuses only on PM-specific roles while deferring agent ecosystem information to AGENTS.md
@@ -696,7 +699,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-09*
+*Last Updated: 2026-06-11*
 
 
 

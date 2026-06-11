@@ -9,21 +9,25 @@
 
 ---
 
-## Architecture: Tier 1 vs Tier 2 Scripts
+## Architecture: TypeScript-Only Policy (ADR-0036)
 
-All scripts in this workspace follow a Hybrid Scripting Architecture divided into two tiers. When creating a new script, you must determine its tier based on the following criteria:
+> **Policy change (2026-06-11)**: All scripts are TypeScript executed via Bun. The former Tier 1 sh/ps1 bootstrap tier has been abolished. See [ADR-0036](../docs/adr/0036-script-ts-migration.md) for rationale.
 
-### Tier 1: Bootstrap & Native Scripts (Native Shell)
-*   **Purpose**: Initial project setup, bootstrapping, or scenarios where no external runtime (like Node.js or Bun) is guaranteed to exist.
-*   **Implementation**: Must be written as pure shell scripts (providing both `.sh` and `.ps1` pairs).
-*   **Execution**: Run directly via native shell (`bash scripts/name.sh` or `.\scripts\name.ps1`).
-*   **Examples**: `new-project.sh/.ps1`, `install-bun.sh/.ps1`, `upgrade-project.sh/.ps1`.
+All scripts in this workspace are written in TypeScript and executed via `bun`. There is no longer a distinction between "bootstrap" and "ops" tiers — Bun is a hard prerequisite for the workspace and is assumed to be installed before any script runs.
 
-### Tier 2: Ops & Automation Scripts (Bun/TS + package.json)
-*   **Purpose**: Everyday pipeline tasks, code generation, linting, syncing, and lifecycle audits.
-*   **Implementation**: Written in TypeScript (`.ts`) and executed via the Bun runtime. Wrapper shell scripts (`.sh`/`.ps1`) are **deprecated** for Tier 2.
-*   **Execution**: Must be registered in and run via `package.json` scripts (e.g., `bun run audit`, `bun run dev-sync`).
-*   **Examples**: `audit.ts`, `dev-sync.ts`, `gen-pr-body.ts`, `publish-to-template.ts`.
+**Single rule**: every new script must be a `.ts` file. No `.sh` or `.ps1` files will be accepted.
+
+**Invocation pattern**:
+```bash
+bun scripts/<name>.ts [args]       # direct
+bun run <alias>                     # via package.json alias (preferred for CI)
+```
+
+### Ops & Automation Scripts (Bun/TypeScript)
+*   **Purpose**: All scripting tasks — project scaffolding, pipeline, code generation, linting, syncing, lifecycle audits.
+*   **Implementation**: Written in TypeScript (`.ts`), executed via the Bun runtime.
+*   **Execution**: `bun scripts/<name>.ts` or via `package.json` alias.
+*   **Examples**: `new-project.ts`, `audit.ts`, `dev-sync.ts`, `publish-to-template.ts`.
 
 ---
 
@@ -53,8 +57,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.6.5 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.0 | deprecated | 2026-11-30 | —| L0+L1 | —|
-| `cleanup-completed-md.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `cleanup-completed-md.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
@@ -94,8 +97,6 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `hooks/pre-push.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `install-bun.ps1` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `install-bun.sh` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -103,10 +104,8 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ps1` | L0 | 1.7.2 | active | —| —| L0 | —|
-| `new-project.sh` | L0 | 1.7.1 | active | —| —| L0 | —|
-| `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -127,8 +126,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ps1` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.sh` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -223,12 +221,9 @@ agent frontmatter, skill health, and template lifecycle validation.
 
 ---
 
-### Installation Scripts
+### Installation
 
-#### `install-bun.sh` / `install-bun.ps1`
-**Purpose**: Installs Bun runtime required for TypeScript scripts (`.ts`).
-**Usage**: `bash scripts/install-bun.sh` / `.\scripts\install-bun.ps1`
-**When needed**: Before running any `.ts` script for the first time.
+> **Bun is a workspace prerequisite.** Install it once via the [official installer](https://bun.sh/docs/installation) before using any script. `install-bun.sh/ps1` have been deleted (ADR-0036).
 
 ---
 
@@ -283,23 +278,20 @@ skill files on disk. Detects missing or orphaned skill references.
 **Purpose**: Synchronizes skill status between SKILL.md and registry tables.
 **Usage**: `bun scripts/sync-skill-status.ts`
 
-#### `new-project.sh` / `new-project.ps1`
+#### `new-project.ts`
 **Purpose**: Scaffolds a new project under the workspace root. Copies `templates/common/`
-and an optional variant, substitutes `[Project Name]` placeholders, initializes git with
-hooks, sets executable bits, and runs the post-scaffold audit.
-**Usage**: `bash scripts/new-project.sh "Project Name"` / `.\scripts\new-project.ps1 "Project Name"`
+and an optional variant, substitutes `[Project Name]` placeholders, strips L1-B metadata
+from `agents/pm.md`, flattens `docs/_common/`, and runs the post-scaffold audit.
+**Usage**: `bun scripts/new-project.ts <name> <variant>`
+**Breaking change from**: `bash scripts/new-project.sh` / `.\scripts\new-project.ps1` (removed 2026-06-11, ADR-0036)
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
-#### `remove-project.ps1` / `remove-project.sh`
-**Purpose**: Safely deletes a project directory without requiring administrator
-privileges. PowerShell version (`remove-project.ps1`) clears ReadOnly/Hidden/System
-file attributes (including `.git/` loose objects), resets NTFS ACLs, takes ownership,
-detects running Claude Code / Antigravity processes with user confirmation, and uses
-a robocopy mirror fallback if Remove-Item fails. Bash version (`remove-project.sh`)
-delegates to the PowerShell script on Windows and performs `rm -rf` on Linux/macOS.
-**Usage (PowerShell)**: `.\scripts\remove-project.ps1 "my-project"`
-**Usage (Bash)**: `bash scripts/remove-project.sh "my-project"`
-**Note**: L0 script. `remove-project.ps1` is Windows-specific; `remove-project.sh` is cross-platform.
+#### `remove-project.ts`
+**Purpose**: Safely deletes a project directory without requiring administrator privileges.
+Detects running Claude Code / Antigravity processes with user confirmation before removal.
+**Usage**: `bun scripts/remove-project.ts <project-name>`
+**Breaking change from**: `.\scripts\remove-project.ps1` / `bash scripts/remove-project.sh` (removed 2026-06-11, ADR-0036)
+**Note**: L0 script.
 
 #### `sync-skills.ts`
 **Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
@@ -399,4 +391,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-07 — bumped new-project.sh to 1.4.6 and upgrade-project.sh to 1.1.1 for permission denied bug fix*
+*Last updated: 2026-06-11 — ADR-0036: all sh/ps1 scripts migrated to TypeScript (Bun). `install-bun.*` deleted. File permission-setting code removed.*
