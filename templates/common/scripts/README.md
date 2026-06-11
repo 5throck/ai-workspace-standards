@@ -25,7 +25,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 *   **Purpose**: All scripting tasks — project scaffolding, pipeline, code generation, linting, syncing, lifecycle audits.
 *   **Implementation**: Written in TypeScript (`.ts`), executed via the Bun runtime.
 *   **Execution**: `bun scripts/<name>.ts` or via `package.json` alias.
-*   **Examples**: `new-project.ts`, `audit.ts`, `dev-sync.ts`, `publish-to-template.ts`.
+*   **Examples**: `upgrade-project.ts`, `cleanup-completed-md.ts`, `audit.ts`, `dev-sync.ts`.
 
 ---
 
@@ -41,7 +41,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
   L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
-<!-- pair: <script-name> (.sh declares its .ps1 pair; enables horizontal sync check) or ??-->
+<!-- pair: reserved field (was used for sh/ps1 pair tracking — abolished per ADR-0036) -->
 <!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment ??whether file content actually reflects version history ??is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
@@ -149,7 +149,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 | Layer | Description | Publish | Example |
 |-------|-------------|---------|---------|
-| L0 | Workspace infrastructure only | No | new-project.sh, publish-to-template.ts, propagate-to-templates.ts |
+| L0 | Workspace infrastructure only | No | new-project.ts, remove-project.ts, publish-to-template.ts, propagate-to-templates.ts |
 | L0+L1 | Workspace + Template snapshot | Yes, to templates/common/ | audit.ts, hooks/pre-commit.ts |
 | L0+L1+L2 | Reserved for future use | Not used (Fork Model) | N/A |
 
@@ -310,7 +310,7 @@ Detects running Claude Code / Antigravity processes with user confirmation befor
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
 
 #### `resolve-variants.ts`
-**Purpose**: L1-B Phase script that pre-resolves `extends:` skeleton references in each `templates/co-*/` variant. Writes fully-merged files in-place so that audit can validate complete content before `new-project` runs. After resolution, `new-project.sh` only needs a simple `cp` — no `merge-frontmatter` step required.
+**Purpose**: L1-B Phase script that pre-resolves `extends:` skeleton references in each `templates/co-*/` variant. Writes fully-merged files in-place so that audit can validate complete content before `new-project` runs. After resolution, `new-project.ts` only needs a simple file copy — no `merge-frontmatter` step required.
 **Usage**: `bun scripts/resolve-variants.ts [--force] [--variant co-develop]`
 **Idempotency**: files already marked `# @resolved-from:` are skipped unless `--force` is passed.
 **Note**: L0 script (workspace infrastructure only). Not copied to `templates/common/scripts/`.

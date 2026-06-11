@@ -225,7 +225,7 @@ if [ "$SKIP_INSTALL" = false ]; then
 
   # ── Bun Agent Orchestration ────────────────────────────────────────────────
   if [ -f "scripts/package.json" ]; then
-    if require bun "install Bun using bash scripts/install-bun.sh"; then
+    if require bun "install Bun from https://bun.sh"; then
       info "Agent orchestration (Bun) detected - running bun install in scripts/"
       (cd scripts && bun install)
       pass "bun install complete"

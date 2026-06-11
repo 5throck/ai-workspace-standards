@@ -178,7 +178,7 @@ if (-not $SkipInstall) {
 
     # ?? Bun Agent Orchestration ???????????????????????????????????????????????
     if (Test-Path "scripts\package.json") {
-        if (Require "bun" "install Bun using .\scripts\install-bun.ps1") {
+        if (Require "bun" "install Bun from https://bun.sh") {
             Info "Agent orchestration (Bun) detected ?? running bun install in scripts/"
             Push-Location scripts
             bun install

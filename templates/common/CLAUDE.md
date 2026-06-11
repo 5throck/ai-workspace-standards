@@ -271,7 +271,7 @@ If a custom slash command or background script returns a non-zero exit code:
 
 - Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
 - Verify: `git config core.hooksPath` should point to `.githooks/`
-- `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
+- All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 <!-- COMMON-CLAUDE:END -->
 

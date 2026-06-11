@@ -7,7 +7,7 @@
 
 import {
   existsSync, mkdirSync, rmSync, readdirSync, statSync,
-  readFileSync, writeFileSync, copyFileSync, appendFileSync,
+  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync, execSync } from 'node:child_process';
@@ -211,6 +211,20 @@ function copyDir(src: string, dest: string): void {
   }
 }
 
+// ── Helper: make all files in directory user-writable ─────────────────────────
+// Template files may have read-only bits set (e.g. scripts/README.md).
+// This ensures subsequent write steps (merge-package-scripts, write-scripts-snapshot)
+// can open them without EPERM. This is NOT security permission manipulation —
+// it only restores the default user-writable state that OS-created files have.
+function makeWritable(dir: string): void {
+  for (const f of walkFiles(dir)) {
+    try {
+      const mode = statSync(f).mode;
+      if (!(mode & 0o200)) chmodSync(f, mode | 0o200);
+    } catch { /* best-effort */ }
+  }
+}
+
 // ── Helper: walk all files in a directory ─────────────────────────────────────
 function* walkFiles(dir: string): Generator<string> {
   for (const entry of readdirSync(dir)) {
@@ -232,6 +246,8 @@ mkdirSync(projectDir, { recursive: true });
 // Workspace-only files that must NOT be copied into new projects
 const WORKSPACE_ONLY_FILES = ['package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'propagation-map.json', 'variant.json'];
 copyDir(commonDir, projectDir);
+// Ensure all copied files are user-writable (template storage may set read-only bits)
+makeWritable(projectDir);
 for (const f of WORKSPACE_ONLY_FILES) {
   const fp = join(projectDir, f);
   if (existsSync(fp)) { rmSync(fp); console.log(`  🗑️  Excluded workspace-only file: ${f}`); }
@@ -273,6 +289,8 @@ for (const srcFile of walkFiles(templatesDir)) {
   mkdirSync(dirname(destFile), { recursive: true });
   copyFileSync(srcFile, destFile);
 }
+// Ensure variant-overlaid files are also writable
+makeWritable(projectDir);
 console.log('  ✅ Variant templates copied');
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
@@ -552,7 +570,8 @@ if (existsSync(setupTs)) {
   const result = spawnSync('bun', [setupTs], { stdio: 'inherit', cwd: projectDir });
   if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bun scripts/setup.ts' manually to retry.");
 } else if (existsSync(setupSh)) {
-  const result = spawnSync('bash', [setupSh], { stdio: 'inherit', cwd: projectDir });
+  // Pass relative path to bash to avoid Windows path separator issues
+  const result = spawnSync('bash', ['scripts/setup.sh'], { stdio: 'inherit', cwd: projectDir });
   if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry.");
 }
 
