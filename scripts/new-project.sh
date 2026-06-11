@@ -297,85 +297,16 @@ if [ ! -d "$TEMPLATES_DIR" ]; then
   exit 1
 fi
 
-# Copy with extends resolution - process files BEFORE losing template context
-echo "📝 Copying variant templates with extends resolution..."
-total_md_files=$(find "$TEMPLATES_DIR" -type f -name "*.md" | wc -l)
-processed_count=0
-extends_count=0
-
-find "$TEMPLATES_DIR" -type f -name "*.md" | while read -r src_file; do
-  processed_count=$((processed_count + 1))
-  rel_path="${src_file#$TEMPLATES_DIR/}"
-  dest_file="$PROJECT_DIR/$rel_path"
-
-  # Check if file has extends field
-  if grep -q "^extends:" "$src_file" 2>/dev/null; then
-    extends_count=$((extends_count + 1))
-    if [ "$extends_count" -eq 1 ] || [ $((extends_count % 10)) -eq 0 ]; then
-      echo "  Processing extends: $extends_count/$total_md_files files..."
-    fi
-
-    # Read skeleton path from extends field
-    extends_path=$(grep "^extends:" "$src_file" | sed 's/^extends: *//')
-
-    # Resolve skeleton absolute path (relative to template storage)
-    src_dir=$(dirname "$src_file")
-    skeleton_abs_path=$(cd "$src_dir" && realpath "$extends_path" 2>/dev/null || echo "")
-
-    # Verify skeleton exists
-    if [ -z "$skeleton_abs_path" ] || [ ! -f "$skeleton_abs_path" ]; then
-      echo "⚠️  Skeleton not found for $rel_path (extends: $extends_path)"
-      # Copy as-is
-      mkdir -p "$(dirname "$dest_file")"
-      cp "$src_file" "$dest_file"
-      chmod u+w "$dest_file" 2>/dev/null || true
-    else
-      # Create destination directory
-      mkdir -p "$(dirname "$dest_file")"
-
-      # Copy file to destination
-      cp "$src_file" "$dest_file"
-      chmod u+w "$dest_file" 2>/dev/null || true
-
-      # Merge with explicit skeleton path and variant level
-      bun scripts/helpers/merge-frontmatter.ts "$dest_file" "$skeleton_abs_path" "" "L2" 2>/dev/null || {
-        echo "⚠️  Extends merge failed: $rel_path"
-      }
-    fi
-  else
-    # Normal copy
-    mkdir -p "$(dirname "$dest_file")"
-    cp "$src_file" "$dest_file"
-    chmod u+w "$dest_file" 2>/dev/null || true
-  fi
-done
-
-if [ "$extends_count" -gt 0 ]; then
-  echo "  ✅ Extends resolution complete: $extends_count files processed"
-fi
-
-# Copy all non-.md files normally
-find "$TEMPLATES_DIR" -type f ! -name "*.md" | while read -r src_file; do
+# Copy all variant template files (extends: is pre-resolved by L1-B: resolve-variants.ts)
+echo "📝 Copying variant templates..."
+find "$TEMPLATES_DIR" -type f | while read -r src_file; do
   rel_path="${src_file#$TEMPLATES_DIR/}"
   dest_file="$PROJECT_DIR/$rel_path"
   mkdir -p "$(dirname "$dest_file")"
   cp "$src_file" "$dest_file"
   chmod u+w "$dest_file" 2>/dev/null || true
 done
-
-
-# ── 2.5. Verify extends resolution (post-copy validation) ────────────────────  # TEST: Test 18
-echo "📝 Verifying extends resolution..."
-extends_count=$(find "$PROJECT_DIR" -type f -name "*.md" -exec grep -l "^extends:" {} \; | wc -l)
-if [ "$extends_count" -gt 0 ]; then
-  echo "⚠️  Found $extends_count files with unresolved extends field:"
-  find "$PROJECT_DIR" -type f -name "*.md" -exec grep -l "^extends:" {} \; | while read -r file; do
-    echo "   - $file"
-  done
-  echo "   This should not happen - extends fields should be resolved during copy."
-else
-  echo "  ✅ All extends fields resolved"
-fi
+echo "  ✅ Variant templates copied"
 
 # ── 2.6. Apply platform profile ───────────────────────────────────────────────  # TEST: Test 8
 if [ "$PLATFORM" = "claude" ]; then

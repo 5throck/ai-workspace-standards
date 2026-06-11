@@ -11,6 +11,31 @@
     "lastTransition": "initial → beta on 2026-06-09",
     "stablePromotedOn": null
   },
-  "agents": [],
+  "agents": [
+    {
+      "name": "architect",
+      "file": "agents/architect.md"
+    },
+    {
+      "name": "code-writer",
+      "file": "agents/code-writer.md"
+    },
+    {
+      "name": "designer",
+      "file": "agents/designer.md"
+    },
+    {
+      "name": "security-monitor",
+      "file": "agents/security-monitor.md"
+    },
+    {
+      "name": "stack-setup",
+      "file": "agents/stack-setup.md"
+    },
+    {
+      "name": "test-runner",
+      "file": "agents/test-runner.md"
+    }
+  ],
   "skills": []
 }

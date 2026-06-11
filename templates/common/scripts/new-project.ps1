@@ -326,55 +326,9 @@ if (-not (Test-Path $TemplatesDir)) {
     exit 1
 }
 
-# Copy with extends resolution - process files BEFORE losing template context
-Write-Host " Copying variant templates with extends resolution..."
-$allMdFiles = Get-ChildItem -Path $TemplatesDir -Recurse -Filter "*.md"
-$totalMdFiles = $allMdFiles.Count
-$processedCount = 0
-$extendsCount = 0
-
-$allMdFiles | ForEach-Object {
-    $processedCount++
-    $srcFile = $_.FullName
-    $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
-    $destFile = Join-Path $ProjectDir $relPath
-
-    if (Select-String -Path $srcFile -Pattern '^extends:' -Quiet) {
-        $extendsCount++
-        if ($extendsCount -eq 1 -or ($extendsCount % 10) -eq 0) {
-            Write-Host "  Processing extends: $extendsCount/$totalMdFiles files..." -ForegroundColor Cyan
-        }
-        $extendsLine = Select-String -Path $srcFile -Pattern '^extends:' | Select-Object -First 1
-        $extendsPath = $extendsLine.Line.Replace("extends:", "").Trim()
-        $srcDir = Split-Path $srcFile
-        try {
-            $skeletonAbsPath = (Join-Path $srcDir $extendsPath | Resolve-Path -ErrorAction Stop).Path
-            $destDir = Split-Path $destFile
-            if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
-            Copy-Item $srcFile $destFile -Force
-            $mergeResult = & bun "scripts/helpers/merge-frontmatter.ts" $destFile $skeletonAbsPath $null "L2" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "[WARN]  Extends merge failed: $relPath" -ForegroundColor Yellow
-            }
-        } catch {
-            Write-Host "[WARN]  Skeleton not found for $relPath (extends: $extendsPath)" -ForegroundColor Yellow
-            $destDir = Split-Path $destFile
-            if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
-            Copy-Item $srcFile $destFile -Force
-        }
-    } else {
-        $destDir = Split-Path $destFile
-        if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
-        Copy-Item $srcFile $destFile -Force
-    }
-}
-
-if ($extendsCount -gt 0) {
-    Write-Host "  Extends resolution complete: $extendsCount files processed" -ForegroundColor Green
-}
-
-# Copy all non-.md files normally
-Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -ne ".md" } | ForEach-Object {
+# Copy all variant template files (extends: is pre-resolved by L1-B: resolve-variants.ts)
+Write-Host " Copying variant templates..."
+Get-ChildItem -Path $TemplatesDir -Recurse -File | ForEach-Object {
     $srcFile = $_.FullName
     $relPath = $srcFile.Substring($TemplatesDir.Length + 1)
     $destFile = Join-Path $ProjectDir $relPath
@@ -387,19 +341,7 @@ Get-ChildItem -Path $TemplatesDir -Recurse -File | Where-Object { $_.Extension -
 Get-ChildItem -Path $ProjectDir -Recurse -File | ForEach-Object {
     if ($_.IsReadOnly) { $_.IsReadOnly = $false }
 }
-
-# -- 2.5. Verify extends resolution (post-copy validation) --------------------  # TEST: Test 18
-Write-Host " Verifying extends resolution..."
-$extendsFiles = Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.md" | Where-Object {
-    Select-String -Path $_.FullName -Pattern '^extends:' -Quiet
-}
-if ($extendsFiles.Count -gt 0) {
-    Write-Host "[WARN]  Found $($extendsFiles.Count) files with unresolved extends field:" -ForegroundColor Yellow
-    $extendsFiles | ForEach-Object { Write-Host "   - $($_.FullName)" -ForegroundColor Yellow }
-    Write-Host "   This should not happen - extends fields should be resolved during copy." -ForegroundColor Yellow
-} else {
-    Write-Host "  [OK] All extends fields resolved" -ForegroundColor Green
-}
+Write-Host "  [OK] Variant templates copied" -ForegroundColor Green
 
 # -- 2.6. Apply platform profile -----------------------------------------------  # TEST: Test 8
 if ($Platform -eq "claude") {

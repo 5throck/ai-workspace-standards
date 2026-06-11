@@ -6,7 +6,11 @@
       "reason": "co-security provides variant-specific Agent Roster (red-team-lead, threat-modeler, pentester, patch-engineer, report-writer) and Phase 1-2 merged Governance Workflow",
       "since": "2026-05-31",
       "reviewed_by": "lifecycle-manager",
-      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
     }
   },
   "phases": {
@@ -19,8 +23,14 @@
         "layer": "platform",
         "type": "override",
         "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": ["pm"],
-        "phases": [0, 5, 6],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          0,
+          5,
+          6
+        ],
         "platform_parity": "required"
       }
     ],
@@ -66,5 +76,32 @@
     "red_trigger": "technical defect found",
     "current_status": "green",
     "note": "Promoted to stable on 2026-06-01 — criteria met via governance review"
-  }
+  },
+  "agents": [
+    {
+      "name": "patch-engineer",
+      "file": "agents/patch-engineer.md"
+    },
+    {
+      "name": "pentester",
+      "file": "agents/pentester.md"
+    },
+    {
+      "name": "red-team-lead",
+      "file": "agents/red-team-lead.md"
+    },
+    {
+      "name": "report-writer",
+      "file": "agents/report-writer.md"
+    },
+    {
+      "name": "threat-modeler",
+      "file": "agents/threat-modeler.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "verify-authorization"
+    }
+  ]
 }

@@ -617,7 +617,8 @@ function checkL2VariantIntegrity() {
       const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
       const hasVariantOverrides = pmContent.includes('variant_overrides:');
       const hasExtendsPattern = pmContent.includes('extends:');
-      if (!hasVariantOverrides && !hasExtendsPattern && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+      const isResolved = pmContent.startsWith('# @resolved-from:');
+      if (!hasVariantOverrides && !hasExtendsPattern && !isResolved && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
@@ -1045,7 +1046,8 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
 
                 const hasVariantOverrides = l2Content.includes('variant_overrides:');
                 const hasExtendsPattern = l2Content.includes('extends:');
-                if (!hasVariantOverrides && !hasExtendsPattern) {
+                const isResolved = l2Content.startsWith('# @resolved-from:');
+                if (!hasVariantOverrides && !hasExtendsPattern && !isResolved) {
                     // L2 should have VARIANT-SECTION markers (if not using extends: skeleton)
                     for (const section of requiredVariantSections) {
                         const marker = `<!-- VARIANT-SECTION: ${section} -->`;

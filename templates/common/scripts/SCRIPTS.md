@@ -108,6 +108,7 @@ All scripts in this workspace follow a Hybrid Scripting Architecture divided int
 | `remove-project.ps1` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `remove-project.sh` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `publish-to-template.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
+| `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -317,6 +318,12 @@ delegates to the PowerShell script on Windows and performs `rm -rf` on Linux/mac
 **Governance L1**: `bun run publish-to-template -- --governance-l1` — deploys CLAUDE.md, GEMINI.md, AGENTS.md from L0 to `templates/common/`, replacing L0 governance references with `docs/context.md`. `agents/pm.md` is intentionally skipped (L1 version has `extends:` frontmatter).
 **Docs (L1→L2)**: `bun run publish-to-template -- --docs` — injects COMMON-marked sections from L1 governance files (`templates/common/AGENTS.md` etc.) into each L2 variant (`templates/co-*/`). Source is L1, not L0.
 **Note**: L0 script (workspace infrastructure only). Changes must be versioned in SCRIPTS.md.
+
+#### `resolve-variants.ts`
+**Purpose**: L1-B Phase script that pre-resolves `extends:` skeleton references in each `templates/co-*/` variant. Writes fully-merged files in-place so that audit can validate complete content before `new-project` runs. After resolution, `new-project.sh` only needs a simple `cp` — no `merge-frontmatter` step required.
+**Usage**: `bun scripts/resolve-variants.ts [--force] [--variant co-develop]`
+**Idempotency**: files already marked `# @resolved-from:` are skipped unless `--force` is passed.
+**Note**: L0 script (workspace infrastructure only). Not copied to `templates/common/scripts/`.
 
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance

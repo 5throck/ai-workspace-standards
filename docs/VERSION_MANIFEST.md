@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-11T00:47:57.149Z
+**Generated**: 2026-06-11T01:16:27.249Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 87
+- **Scripts**: 88
 - **Commands**: 6
 
 ---
@@ -106,6 +106,7 @@
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
+| resolve-variants.ts | N/A | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | N/A | scripts/retry-handler.ts | N/A |
 | scan-l2-project.ts | N/A | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
 | security-validator.test.ts | N/A | scripts/helpers/security-validator.test.ts | bun:test |
