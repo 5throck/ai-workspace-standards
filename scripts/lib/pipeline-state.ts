@@ -244,7 +244,7 @@ export async function executeRollback(): Promise<boolean> {
     rollbackPipeline();
     console.log('\n??Rollback complete');
   } else {
-    console.log('\n?�️  Rollback completed with errors');
+    console.log('\n⚠️  Rollback completed with errors');
   }
 
   return success;
@@ -275,16 +275,16 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
 
     case 'modify_file':
       // Restore from backup (would need backup mechanism)
-      console.warn(`?�️  Cannot restore file without backup: ${target}`);
+      console.warn(`⚠️  Cannot restore file without backup: ${target}`);
       break;
 
     case 'update_registry':
       // Restore registry from backup
-      console.warn(`?�️  Cannot restore registry without backup: ${target}`);
+      console.warn(`⚠️  Cannot restore registry without backup: ${target}`);
       break;
 
     default:
-      console.warn(`?�️  Unknown rollback action: ${actionType} on ${target}`);
+      console.warn(`⚠️  Unknown rollback action: ${actionType} on ${target}`);
   }
 }
 

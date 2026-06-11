@@ -101,6 +101,9 @@
 
 > See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
+### Hybrid Scripting
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
+
 ---
 
 ## Development Workflow
@@ -179,6 +182,24 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 3. Archive source materials alongside final artifacts.
 4. Use consistent templates and formatting for all client-facing deliverables.
 5. All PR titles, bodies, and branch names must be in **English**.
+
+---
+
+## Git / PR Workflow
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+
+```
+/sync "feat: description"
+  — 1. memory log (memlog)
+  — 2. MEMORY.md index update (sync-md)
+  — 3. CHANGELOG.md [Unreleased] auto-add
+  — 4. audit.ts  (must exit 0)
+  — 5. git checkout -b pr/<date>-<slug>
+  — 6. git commit + push
+  — 7. gh pr create
+```
+
+> All PR titles, bodies, and review comments must be in **English**.
 
 ---
 

@@ -42,7 +42,7 @@ Standard directory layout for all projects in this workspace:
 <project-root>/
 ├── src/          # Source code
 ├── docs/         # context.md (this file) + <variant>.context.md + ADRs
-├── scripts/      # Automation scripts (.sh + .ps1 pairs)
+├── scripts/      # Automation scripts (TypeScript, .ts via bun)
 ├── memory/       # Session logs (MEMORY.md index + daily logs)
 ├── agents/       # Role-based agent definitions
 ├── skills/       # Reusable workflow skills
@@ -60,8 +60,8 @@ Standard directory layout for all projects in this workspace:
 | `CLAUDE.md` | Claude Code session behavior and slash commands |
 | `GEMINI.md` | Gemini CLI / Antigravity session behavior |
 | `AGENTS.md` | Canonical agent index (auto-loaded by Claude Code) |
-| `scripts/audit.sh` / `.ps1` | Documentation audit (enforced on pre-commit) |
-| `scripts/dev-sync.sh` / `.ps1` | Full sync pipeline (memlog → audit → commit → PR) |
+| `scripts/audit.ts` | Documentation audit (enforced on pre-commit) |
+| `scripts/dev-sync.ts` | Full sync pipeline (memlog → audit → commit → PR) |
 | `memory/MEMORY.md` | Development log index |
 | `CHANGELOG.md` | User-visible change history |
 

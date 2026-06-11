@@ -1,11 +1,11 @@
-# [Project Name] ??co-design Configuration
+# [Project Name] —co-design Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
-> context.md is IMMUTABLE ??all project-specific changes belong here.
+> context.md is IMMUTABLE —all project-specific changes belong here.
 >
 > Read order for all AI tools:
->   1. docs/context.md             ??immutable project identity (architecture, standards)
->   2. docs/co-design.context.md   ??THIS FILE ??design stack, agents, skills, workflow
+>   1. docs/context.md             —immutable project identity (architecture, standards)
+>   2. docs/co-design.context.md   —THIS FILE —design stack, agents, skills, workflow
 
 ---
 
@@ -78,13 +78,13 @@ Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.
 
 ```
 Design brief received
-  ??
+  —
 /sync "feat: description"
-  ??
-  1. audit.sh ??abort on failure
-  2. memory/YYYY-MM-DD.md ??session log (4-section format)
+  —
+  1. audit.ts —abort on failure
+  2. memory/YYYY-MM-DD.md —session log (4-section format)
   3. MEMORY.md index update
-  4. git add -A ??commit
+  4. git add -A —commit
   5. pr/<date>-<slug> branch created (if on main)
   6. git push + gh pr create
 ```
@@ -93,10 +93,10 @@ Design brief received
 
 ```
 Design PM
-  ??UX Researcher + Design Lead (parallel ??research + strategy)
-  ??Visual Designer ??Prototype Engineer (sequential ??design + prototype)
-  ??UX Researcher (validation loop ??continuous)
-  ??Design Lead + Visual Designer (system refinement + handoff)
+  —UX Researcher + Design Lead (parallel —research + strategy)
+  —Visual Designer —Prototype Engineer (sequential —design + prototype)
+  —UX Researcher (validation loop —continuous)
+  —Design Lead + Visual Designer (system refinement + handoff)
 ```
 
 ### Workflow Phases
@@ -106,7 +106,7 @@ Design PM
 | 0 | Team Assembly | PM creates specialized design agents/skills | Design PM |
 | 1 | Narrative & Ecosystem Mapping | Core user story, service touchpoints, problem space | Storyteller, UX Researcher |
 | 2 | Foundational Exploration | Typographic hierarchy, visual mood boards, layout frameworks | Typography Expert, Visual Designer |
-| 3 | Rapid Prototyping Loops | Continuous build/test low-fi ??high-fi prototypes | Prototype Engineer, Design Lead |
+| 3 | Rapid Prototyping Loops | Continuous build/test low-fi —high-fi prototypes | Prototype Engineer, Design Lead |
 | 4 | Continuous Validation | Parallel user testing and a11y validation | UX Researcher, Design Lead |
 | 5 | System Refinement & Handoff | Polish, finalize design system, dev handoff | Visual Designer, Prototype Engineer |
 
@@ -127,12 +127,30 @@ Design PM
 
 ### Rules
 
-1. Start every design task with research or existing insights ??document user needs before designing.
-2. Every design decision must consider the broader design system ??reuse before creating new.
-3. WCAG AA is the minimum accessibility bar ??aim higher when feasible.
+1. Start every design task with research or existing insights —document user needs before designing.
+2. Every design decision must consider the broader design system —reuse before creating new.
+3. WCAG AA is the minimum accessibility bar —aim higher when feasible.
 4. Create prototypes to validate decisions before finalizing.
 5. Explain design rationale and constraints explicitly, not just visual choices.
 6. All PR titles, bodies, and review comments must be in **English**.
+
+---
+
+## Git / PR Workflow
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+
+```
+/sync "feat: description"
+  — 1. memory log (memlog)
+  — 2. MEMORY.md index update (sync-md)
+  — 3. CHANGELOG.md [Unreleased] auto-add
+  — 4. audit.ts  (must exit 0)
+  — 5. git checkout -b pr/<date>-<slug>
+  — 6. git commit + push
+  — 7. gh pr create
+```
+
+> All PR titles, bodies, and review comments must be in **English**.
 
 ---
 
@@ -150,11 +168,11 @@ Design PM
 
 ## Domain Rules
 
-<!-- co-design variant specific rules ??edit after project creation -->
+<!-- co-design variant specific rules —edit after project creation -->
 1. Design tokens must be documented before implementation.
 2. All new components require design system review from Design Lead.
 3. User testing findings must be logged to memory/ before design decisions are finalized.
 
 ---
 
-*co-design.context.md version: 1.0 ??created by /new-project*
+*co-design.context.md version: 1.0 —created by /new-project*

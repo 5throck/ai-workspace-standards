@@ -1,4 +1,4 @@
-# SCRIPTS.md ??Script Lifecycle Registry
+# SCRIPTS.md —Script Lifecycle Registry
 
 > This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).
 > Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run publish-to-template`.
@@ -36,15 +36,15 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
 <!-- Required columns: script | source | version | status | removal-date | security-advisory | layer | pair -->
 <!-- status: active | deprecated | experimental -->
-<!-- removal-date: YYYY-MM-DD (required when status=deprecated) or ??-->
-<!-- security-advisory: CVE-XXXX or ??-->
+<!-- removal-date: YYYY-MM-DD (required when status=deprecated) or —-->
+<!-- security-advisory: CVE-XXXX or —-->
 <!-- Layer column values (ONLY 3 TYPES EXIST):
   L0           = workspace root only; must NOT be copied to templates/common/ or L2 projects
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
   L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
 <!-- pair: reserved field (was used for sh/ps1 pair tracking — abolished per ADR-0036) -->
-<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment ??whether file content actually reflects version history ??is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
+<!-- Check A (lifecycle-sync-audit.ts): verifies @version header == registry version (formal consistency only). Semantic content alignment —whether file content actually reflects version history —is NOT verified by tooling. Use git log to confirm content for Type-2 fixes. -->
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
@@ -85,7 +85,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/substitute-placeholders.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -106,7 +106,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `publish-to-template.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
+| `publish-to-template.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
@@ -163,9 +163,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
-| **L0 ??Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
-| **L1 ??Template snapshot** | `templates/common/scripts/` | publish: `bun run publish-to-template` | Explicit publish from L0 via consolidated tool |
-| **L2 ??Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `publish-to-template.ts` |
+| **L0 —Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
+| **L1 —Template snapshot** | `templates/common/scripts/` | publish: `bun run publish-to-template` | Explicit publish from L0 via consolidated tool |
+| **L2 —Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `publish-to-template.ts` |
 
 **Propagation rule**: L0 is the development SSOT. Publish L0?묹1 explicitly with `bun run publish-to-template`, which is now a consolidated tool that also handles L1->L2 propagation. L2 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L2.
 
@@ -193,7 +193,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 ## Guide
 
-### Everyday Development Scripts (Tier 2 ??`bun run <script>`)
+### Everyday Development Scripts (Tier 2 —`bun run <script>`)
 
 #### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, workspace standards, AGENTS.md,
@@ -202,7 +202,7 @@ agent frontmatter, skill health, and template lifecycle validation.
 **Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`
 
 #### `dev-sync.ts`
-**Purpose**: Full sync pipeline ??session log ??MEMORY.md index ??CHANGELOG auto-add ??audit gate ??sensitive file check ??branch creation ??commit ??push ??PR.
+**Purpose**: Full sync pipeline —session log —MEMORY.md index —CHANGELOG auto-add —audit gate —sensitive file check —branch creation —commit —push —PR.
 **Usage**: `bun run dev-sync "feat: description"`
 **Claude Code / Gemini**: `/sync "feat: description"`
 
@@ -246,7 +246,7 @@ agent frontmatter, skill health, and template lifecycle validation.
 **Usage**: `bun scripts/agent-verify.ts`
 
 #### `agent-lifecycle-audit.ts`
-**Purpose**: Full agent lifecycle audit ??frontmatter validation, AGENTS.md consistency,
+**Purpose**: Full agent lifecycle audit —frontmatter validation, AGENTS.md consistency,
 deprecated agent references, missing fields.
 **Usage**: `bun scripts/agent-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `agents/*.md` files are staged.
@@ -260,7 +260,7 @@ deprecated agent references, missing fields.
 ### Skill Lifecycle Scripts (Bun / TypeScript)
 
 #### `skill-lifecycle-audit.ts`
-**Purpose**: Full skill lifecycle audit ??owner validation, orphaned skills, deprecated
+**Purpose**: Full skill lifecycle audit —owner validation, orphaned skills, deprecated
 skills still being modified, dependency graph, circular dependencies.
 **Usage**: `bun scripts/skill-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `skills/**` files are staged.

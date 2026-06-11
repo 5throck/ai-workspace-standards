@@ -399,7 +399,7 @@ for (const f of walkFiles(projectDir)) {
 // ── 5. Substitute placeholders ────────────────────────────────────────────────
 const substitutePlaceholders = join(workspaceRoot, 'scripts', 'helpers', 'substitute-placeholders.ts');
 if (existsSync(substitutePlaceholders)) {
-  spawnSync('bun', [substitutePlaceholders, projectDir, projectName, 'A new project', ''], { stdio: 'inherit' });
+  spawnSync('bun', [substitutePlaceholders, projectDir, projectName, 'A new project', '', variant], { stdio: 'inherit' });
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
 }

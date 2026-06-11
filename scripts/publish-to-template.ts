@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. Use --governance-l1 for L0→L1 governance file deployment with reference transformation. L1→L2 auto-propagation is forbidden per ADR-0031.
-// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift] [--governance-l1]
-// @version 1.7.0
+// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift] [--governance-l1] [--skip-encoding-check]
+// @version 1.8.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -29,6 +29,76 @@ function safeCopyFile(src: string, dst: string) {
   }
   fs.copyFileSync(src, dst);
   setExecutableBit(dst);
+}
+
+// ── Encoding validation ────────────────────────────────────────────────────
+// Detects CP949/Windows code-page corruption in text files before publishing.
+// The most common artifact is '??' replacing em-dash (U+2014, UTF-8: E2 80 94)
+// when a file passes through a non-UTF-8 Windows terminal pipeline.
+const TEXT_EXTENSIONS = new Set(['.md', '.ts', '.sh', '.ps1', '.json', '.yaml', '.yml', '.toml', '.txt', '.sample']);
+
+// Known patterns that indicate CP949 encoding corruption.
+// NOTE: '??' is the TypeScript nullish-coalescing operator — only flag it in
+// documentation files (.md, .txt, .yaml, .toml) where it cannot be valid syntax.
+const DOC_ONLY_EXTENSIONS = new Set(['.md', '.txt', '.yaml', '.yml', '.toml', '.sample']);
+
+// U+FFFD constructed at runtime so the source file itself doesn't contain the literal byte.
+const REPLACEMENT_CHAR_RE = new RegExp(String.fromCodePoint(0xFFFD), 'g');
+
+const ENCODING_CORRUPTION_PATTERNS: Array<{ pattern: RegExp; description: string; docOnly?: boolean }> = [
+  { pattern: /\?\?/g,          description: 'corrupted em-dash (—) or other multibyte UTF-8 char → ??', docOnly: true },
+  { pattern: REPLACEMENT_CHAR_RE, description: 'Unicode replacement character (U+FFFD) — raw non-UTF-8 byte survived' },
+];
+
+interface EncodingViolation {
+  file: string;
+  pattern: string;
+  lineNumbers: number[];
+  count: number;
+}
+
+function checkFileEncoding(filePath: string): EncodingViolation[] {
+  const ext = path.extname(filePath).toLowerCase();
+  if (!TEXT_EXTENSIONS.has(ext)) return [];
+  const isDocFile = DOC_ONLY_EXTENSIONS.has(ext);
+  let content: string;
+  try {
+    content = fs.readFileSync(filePath, 'utf-8');
+  } catch {
+    return []; // binary or unreadable — skip
+  }
+  const violations: EncodingViolation[] = [];
+  const lines = content.split('\n');
+  for (const { pattern, description, docOnly } of ENCODING_CORRUPTION_PATTERNS) {
+    if (docOnly && !isDocFile) continue; // skip ?? check in .ts/.sh/.ps1 (nullish coalescing)
+    const lineNumbers: number[] = [];
+    let count = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes('encoding-check-ignore')) continue;
+      const matches = lines[i].match(pattern);
+      if (matches) {
+        lineNumbers.push(i + 1);
+        count += matches.length;
+      }
+    }
+    if (count > 0) {
+      violations.push({ file: filePath, pattern: description, lineNumbers, count });
+    }
+  }
+  return violations;
+}
+
+function walkFilesForEncoding(dir: string): string[] {
+  const results: string[] = [];
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, item.name);
+    if (item.isDirectory()) {
+      results.push(...walkFilesForEncoding(full));
+    } else if (item.isFile()) {
+      results.push(full);
+    }
+  }
+  return results;
 }
 
 // Helper to safely copy a directory
@@ -75,6 +145,39 @@ const scriptsMdPath = path.join(l0Dir, 'SCRIPTS.md');
 if (!fs.existsSync(scriptsMdPath)) {
   console.log(`${RED}❌ SCRIPTS.md not found at ${l0Dir}${RESET}`);
   process.exit(1);
+}
+
+// ── Pre-publish encoding gate ──────────────────────────────────────────────
+// Scan L0 source files for CP949/Windows encoding corruption before publishing.
+// If violations are found, print a report and abort (--skip-encoding-check to override).
+if (!args.includes('--skip-encoding-check')) {
+  const skipFlag = args.includes('--check-drift') || args.includes('--governance-l1');
+  if (!skipFlag) {
+    const scanDirs = [l0Dir, path.join(workspaceRoot, 'templates')];
+    const allViolations: EncodingViolation[] = [];
+
+    for (const scanDir of scanDirs) {
+      if (!fs.existsSync(scanDir)) continue;
+      for (const file of walkFilesForEncoding(scanDir)) {
+        allViolations.push(...checkFileEncoding(file));
+      }
+    }
+
+    if (allViolations.length > 0) {
+      console.log(`${RED}❌ Encoding corruption detected — ${allViolations.length} violation(s) found before publish:${RESET}`);
+      for (const v of allViolations) {
+        const rel = path.relative(workspaceRoot, v.file);
+        console.log(`   ${YELLOW}${rel}${RESET}  [${v.count}×] ${v.pattern}`);
+        console.log(`      Lines: ${v.lineNumbers.slice(0, 10).join(', ')}${v.lineNumbers.length > 10 ? ` … +${v.lineNumbers.length - 10} more` : ''}`);
+      }
+      console.log('');
+      console.log(`${YELLOW}Fix: replace '??' → '—' (em dash U+2014) in the affected files, then re-run.${RESET}`);
+      console.log(`${DARKGRAY}Bypass (not recommended): bun scripts/publish-to-template.ts --skip-encoding-check${RESET}`);
+      process.exit(1);
+    } else {
+      console.log(`${GREEN}✅ Encoding check passed — no CP949 corruption detected.${RESET}`);
+    }
+  }
 }
 
 console.log(`${CYAN}=== L0 → L1 publish: scripts/ & skills/ → templates/common/ ===${RESET}`);
