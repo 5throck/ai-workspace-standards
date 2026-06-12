@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-12](2026-06-12.md) | variant template section split strategy — Coding Guidelines migration, variant-specific area management |
 | [2026-06-11](2026-06-11.md) | GEMINI.md Claude-specific 콘텐츠 수정, L1 pm.md 중복 섹션 제거, generate-variant.ts Windows 경로 구분자 버그 수정, VARIANT-* 플레이스홀더 주입 정상화 |
 | [2026-06-10](2026-06-10.md) | chore: update |
 | [2026-06-09](2026-06-09.md) | fix: resolve Agent Roster table rendering bug in merge-frontmatter.ts |

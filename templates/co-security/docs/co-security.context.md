@@ -7,21 +7,25 @@
 >   1. docs/context.md              —immutable project identity (architecture, standards)
 >   2. docs/co-security.context.md  —THIS FILE —engagement scope, agents, workflow, tool stack
 
-## Scripts
+---
 
-<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
-<!-- Status: active | deprecated | experimental -->
+## Tool Stack
 
-| Script | Type | Entrypoint | Source Layer | Status |
-|--------|------|------------|-------------|--------|
-| `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
-| `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
-| `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
+> **Purple Team model**: Red Team (offense —pentest, threat modeling, PoC) +
+> Blue Team (defense —cross-platform patch automation via Ansible + SSH).
+> All offensive activity requires signed authorization before Phase 1.
 
-> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
-
-### Hybrid Scripting
-Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json
+| Category | Tool / Standard |
+|----------|----------------|
+| Vulnerability Scoring | CVSS v3.1 ([NVD Calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)) |
+| Threat Framework | MITRE ATT&CK Enterprise / Mobile / ICS |
+| Threat Modeling | STRIDE methodology |
+| Pentest Methodology | PTES (Penetration Testing Execution Standard) |
+| Patch Automation | Ansible (playbooks in `ansible/`) |
+| Target Connectivity | SSH (Linux, macOS, Windows) |
+| Windows Patching | PSWindowsUpdate module / `winget upgrade --all --silent` |
+| macOS Patching | `softwareupdate --install --recommended` + Homebrew |
+| Linux Patching | `apt-get upgrade` (Debian/Ubuntu) + `yum update` (RHEL/CentOS) |
 
 ---
 
@@ -42,22 +46,41 @@ Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.
 
 ---
 
-## Key Files
+## Skills
 
-| File / Directory | Purpose |
-|-----------------|---------|
-| `ansible/inventory.yml` | YAML static inventory of authorized target hosts (Linux, macOS, Windows) |
-| `ansible/patch-all.yml` | Master playbook —imports all OS-specific patch playbooks |
-| `ansible/patch-linux.yml` | Linux patching (apt security upgrades + yum security updates) |
-| `ansible/patch-macos.yml` | macOS patching (softwareupdate + homebrew) |
-| `ansible/patch-windows.yml` | Windows patching (PSWindowsUpdate / winget via SSH + PowerShell) |
-| `PATCH_LOG.md` | Audit log of all applied patches: date, CVE, group, hosts, outcome |
-| `memory/` | Session logs, engagement logs (`engagement-YYYY-MM-DD.md`), patch run logs |
-| `docs/findings/` | Finding tickets (`FIND-NNNN.md`), threat models, pentest reports |
-| `scripts/patch-apply.sh` | Bash wrapper: dry-run or apply Ansible patches with group filtering |
-| `scripts/patch-apply.ps1` | PowerShell equivalent of patch-apply.sh |
-| `scripts/inventory-check.sh` | Verify SSH connectivity to all inventory hosts before patching |
-| `scripts/inventory-check.ps1` | PowerShell equivalent of inventory-check.sh |
+<!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->
+
+<!-- DYNAMIC_SKILLS_START -->
+<!-- DYNAMIC_SKILLS_END -->
+
+### Skill Lifecycle Management
+
+For managing skills (create, modify, deprecate), run:
+```bash
+bun scripts/skill-lifecycle-audit.ts
+```
+
+See `skills/skill-lifecycle-manager/SKILL.md` for the full workflow.
+
+For managing agents, see `skills/agent-lifecycle-manager/SKILL.md`.
+
+---
+
+## Scripts
+
+<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
+<!-- Status: active | deprecated | experimental -->
+
+| Script | Type | Entrypoint | Source Layer | Status |
+|--------|------|------------|-------------|--------|
+| `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
+| `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
+| `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
+
+> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
+
+### Hybrid Scripting
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 
 ---
 
@@ -108,15 +131,26 @@ All specialist agents are dispatched by PM only. Direct invocation is refused.
 
 ---
 
-## Security Engagement Rules
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+## Security Guidelines
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
 
-These rules are automatically enforced by the PostToolUse hook in `.claude/settings.json` (see CLAUDE.md).
+### Core Principles
 
-1. **Authorization first** —No offensive work (recon, exploitation, PoC) begins without a signed authorization document.
-2. **Scope compliance** —All agents must refuse work targeting out-of-scope hosts without PM re-authorization.
-3. **Secret hygiene** —Credentials, API keys, and passwords discovered during engagements must NEVER be committed. Store in `docs/findings/FIND-NNNN.md` with values redacted.
-4. **Dry-run mandatory** —All Ansible playbooks must pass `--check` (dry-run) before live apply.
-5. **Engagement log** —All agent actions are logged to `memory/engagement-YYYY-MM-DD.md`.
+1. **Security by default** — no feature ships without security review.
+2. **Least privilege** — request only permissions required; document justification.
+3. **No hardcoded secrets** — always use env vars / `.env.sample`; gitleaks enforced.
+4. **Audit trail** — all security decisions logged to `memory/` with rationale.
+5. **PR required** — all changes via `/sync`; never direct push to main.
+
+### Threat Model
+
+Maintain a current threat model in `docs/threat-model.md`. Review after any architectural change.
+
+### Hybrid Scripting
+
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
+<!-- END VARIANT-INJECT -->
 
 ### Beta Usage Scope
 
@@ -143,49 +177,7 @@ co-security will be promoted to **stable** status when:
 
 Until stable status is achieved, co-security should only be used for learning and testing purposes, not for actual customer security engagements.
 
----
-
-## Skills
-
-<!-- Add/remove rows as skills are introduced or retired via lifecycle management. -->
-
-<!-- DYNAMIC_SKILLS_START -->
-<!-- DYNAMIC_SKILLS_END -->
-
-### Skill Lifecycle Management
-
-For managing skills (create, modify, deprecate), run:
-```bash
-bun scripts/skill-lifecycle-audit.ts
-```
-
-See `skills/skill-lifecycle-manager/SKILL.md` for the full workflow.
-
-For managing agents, see `skills/agent-lifecycle-manager/SKILL.md`.
-
----
-
-## Tool Stack
-
-> **Purple Team model**: Red Team (offense —pentest, threat modeling, PoC) +
-> Blue Team (defense —cross-platform patch automation via Ansible + SSH).
-> All offensive activity requires signed authorization before Phase 1.
-
-| Category | Tool / Standard |
-|----------|----------------|
-| Vulnerability Scoring | CVSS v3.1 ([NVD Calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)) |
-| Threat Framework | MITRE ATT&CK Enterprise / Mobile / ICS |
-| Threat Modeling | STRIDE methodology |
-| Pentest Methodology | PTES (Penetration Testing Execution Standard) |
-| Patch Automation | Ansible (playbooks in `ansible/`) |
-| Target Connectivity | SSH (Linux, macOS, Windows) |
-| Windows Patching | PSWindowsUpdate module / `winget upgrade --all --silent` |
-| macOS Patching | `softwareupdate --install --recommended` + Homebrew |
-| Linux Patching | `apt-get upgrade` (Debian/Ubuntu) + `yum update` (RHEL/CentOS) |
-
----
-
-## Session Start Checklist
+### Session Start Checklist
 
 Run this checklist at the start of every session:
 
@@ -197,9 +189,7 @@ Run this checklist at the start of every session:
 - [ ] **PATCH_LOG status**: Review `PATCH_LOG.md` for any entries with `Partial` or `Failed` outcomes that need follow-up.
 - [ ] **Engagement phase**: Confirm current phase (0—) with PM before dispatching any specialist agents.
 
----
-
-## Patch Deployment Quick Reference
+### Patch Deployment Quick Reference
 
 ```bash
 # Check connectivity to all hosts
@@ -258,6 +248,23 @@ bash scripts/patch-apply.sh   # all groups
 4. **Finding traceability**: Every remediation in PATCH_LOG.md must reference a `FIND-NNNN` ticket or CVE.
 5. **Executive summary**: Final reports must include a non-technical executive summary readable by C-level stakeholders.
 
+### Key Files
+
+| File / Directory | Purpose |
+|-----------------|---------|
+| `ansible/inventory.yml` | YAML static inventory of authorized target hosts (Linux, macOS, Windows) |
+| `ansible/patch-all.yml` | Master playbook —imports all OS-specific patch playbooks |
+| `ansible/patch-linux.yml` | Linux patching (apt security upgrades + yum security updates) |
+| `ansible/patch-macos.yml` | macOS patching (softwareupdate + homebrew) |
+| `ansible/patch-windows.yml` | Windows patching (PSWindowsUpdate / winget via SSH + PowerShell) |
+| `PATCH_LOG.md` | Audit log of all applied patches: date, CVE, group, hosts, outcome |
+| `memory/` | Session logs, engagement logs (`engagement-YYYY-MM-DD.md`), patch run logs |
+| `docs/findings/` | Finding tickets (`FIND-NNNN.md`), threat models, pentest reports |
+| `scripts/patch-apply.sh` | Bash wrapper: dry-run or apply Ansible patches with group filtering |
+| `scripts/patch-apply.ps1` | PowerShell equivalent of patch-apply.sh |
+| `scripts/inventory-check.sh` | Verify SSH connectivity to all inventory hosts before patching |
+| `scripts/inventory-check.ps1` | PowerShell equivalent of inventory-check.sh |
+
 ---
 
-*co-security.context.md version: 0.2.0 —created by /new-project*
+*co-security.context.md version: 1.1 — normalized to canonical template structure*

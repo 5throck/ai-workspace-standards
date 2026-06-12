@@ -1,11 +1,11 @@
-# co-consult — Variant Configuration
+# [Project Name] — co-consult Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
 > context.md is IMMUTABLE — all project-specific changes belong here.
 >
 > Read order for all AI tools:
 >   1. docs/context.md               — immutable project identity (architecture, standards)
->   2. docs/co-consult.context.md    — THIS FILE — tool stack, agents, skills, workflow
+>   2. docs/co-consult.context.md    — THIS FILE — tech stack, agents, skills, workflow
 
 ---
 
@@ -23,19 +23,22 @@
 
 ## Agents
 
-| Agent | File | Role | Tier | Status |
-|-------|------|------|------|--------|
-| **Engagement Leader** | `agents/pm.md` | Engagement orchestration, client interface, final decisions, QA | High | active |
-| **Change Management Partner** | `agents/change-management-partner.md` | Organizational transformation, culture strategy, stakeholder alignment | High | active |
-| **Strategy Analyst** | `agents/strategy-analyst.md` | Market analysis, competitive research, financial modeling | Medium | active |
-| **Industry Expert** | `agents/industry-expert.md` | Industry-specific insights, competitive dynamics, regulatory landscape | High | active |
-| **Subject Matter Expert** | `agents/sme.md` | Functional expertise (HR, Finance, Operations, Marketing) | Medium | active |
-| **Communications Lead** | `agents/communications-lead.md` | Client communications, presentations, strategic narratives | Medium | active |
-| **Solutions Architect** | `agents/solutions-architect.md` | Technical solution design, system architecture, implementation roadmaps | Medium | active |
-| **Workstream Lead** | `agents/workstream-lead.md` | Workstream management, team coordination, progress tracking | Medium | active |
-| **Delivery Manager** | `agents/delivery-manager.md` | Project delivery, operations coordination, resource allocation | Low | active |
-| **Technology Specialist** | `agents/technology-specialist.md` | Collaboration platforms, workflow automation, digital transformation | Low | active |
-| **Data Analyst** | `agents/data-analyst.md` | Statistical analysis, data modeling, visualization | Low | active |
+<!-- Add/remove rows as agents are introduced or retired via lifecycle management. -->
+<!-- Status: active | deprecated | experimental -->
+
+| Agent | File | Role | Status |
+|-------|------|------|--------|
+| **Engagement Leader** | `agents/pm.md` | Engagement orchestration, client interface, final decisions, QA | active |
+| **Change Management Partner** | `agents/change-management-partner.md` | Organizational transformation, culture strategy, stakeholder alignment | active |
+| **Strategy Analyst** | `agents/strategy-analyst.md` | Market analysis, competitive research, financial modeling | active |
+| **Industry Expert** | `agents/industry-expert.md` | Industry-specific insights, competitive dynamics, regulatory landscape | active |
+| **Subject Matter Expert** | `agents/sme.md` | Functional expertise (HR, Finance, Operations, Marketing) | active |
+| **Communications Lead** | `agents/communications-lead.md` | Client communications, presentations, strategic narratives | active |
+| **Solutions Architect** | `agents/solutions-architect.md` | Technical solution design, system architecture, implementation roadmaps | active |
+| **Workstream Lead** | `agents/workstream-lead.md` | Workstream management, team coordination, progress tracking | active |
+| **Delivery Manager** | `agents/delivery-manager.md` | Project delivery, operations coordination, resource allocation | active |
+| **Technology Specialist** | `agents/technology-specialist.md` | Collaboration platforms, workflow automation, digital transformation | active |
+| **Data Analyst** | `agents/data-analyst.md` | Statistical analysis, data modeling, visualization | active |
 
 > Lifecycle management: `bun scripts/agent-lifecycle-audit.ts`
 > After any agent change, update AGENTS.md and this table.
@@ -93,6 +96,9 @@
 
 ## Scripts
 
+<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
+<!-- Status: active | deprecated | experimental -->
+
 | Script | Type | Entrypoint | Source Layer | Status |
 |--------|------|------------|-------------|--------|
 | `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
@@ -106,13 +112,22 @@ All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterp
 
 ---
 
+## Environment Setup
+
+<!-- VARIANT-INJECT: environment-setup [REQUIRED] -->
+- Copy `.env.sample` → `.env` and fill in all required values.
+- Required env keys (see `.env.sample`): *(fill in after project creation)*
+<!-- END VARIANT-INJECT -->
+
+---
+
 ## Development Workflow
 
 ```
 Client brief / task received
-  ↓
+  —
 /sync "feat: description"
-  ↓
+  —
   1. audit.ts — abort on failure
   2. memory/YYYY-MM-DD.md — session log (4-section format)
   3. MEMORY.md index update
@@ -163,6 +178,7 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 ---
 
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Consulting Guidelines
 
 ### Core Principles
@@ -182,6 +198,8 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 3. Archive source materials alongside final artifacts.
 4. Use consistent templates and formatting for all client-facing deliverables.
 5. All PR titles, bodies, and branch names must be in **English**.
+
+<!-- END VARIANT-INJECT -->
 
 ---
 
@@ -205,6 +223,8 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 ## File Organization Policy
 
+### Recommended Folder Structure (co-consult)
+
 | Folder | Purpose |
 |--------|---------|
 | `docs/reports/` | Final deliverables, client-ready reports |
@@ -225,9 +245,4 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 ---
 
-*co-consult.context.md version: 2.0 — updated from co-work variant*
-
-## Template Provenance
-
-- **Template-Version**: 0.5.0
-- **Template-Variant**: co-consult
+*co-consult.context.md version: 2.1 — normalized to canonical template structure*

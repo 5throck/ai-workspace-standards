@@ -189,6 +189,13 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
+Every execution plan MUST end with these two fixed steps:
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | claude-sonnet-4-6 |
+| N | Final QA Audit (`bun scripts/audit.ts`) | auditor (workspace) / pm (variant) | Medium | claude-sonnet-4-6 |
+
 **Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
 <!-- COMMON-CLAUDE:END -->
 
@@ -284,7 +291,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-12 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

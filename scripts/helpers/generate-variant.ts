@@ -91,6 +91,8 @@ export interface GeneratedVariant {
   agentsMdPath: string;
   /** Generated README.md path */
   readmePath: string;
+  /** Generated <variant>.context.md path */
+  contextMdPath: string;
   /** Generation summary */
   summary: {
     totalFilesCreated: number;
@@ -198,11 +200,12 @@ function generateVariantJson(metadata: VariantMetadata): string {
 
 /**
  * Create variant directory structure
- * @version 1.1.0
+ * @version 1.2.0
  */
 function createDirectoryStructure(variantPath: string): string[] {
   const directories = [
     join(variantPath, 'agents'),
+    join(variantPath, 'docs'),
     join(variantPath, 'skills'),
     join(variantPath, '.claude'),
     join(variantPath, '.claude', 'agents'),
@@ -814,6 +817,43 @@ function getVariantTypeDescription(variantType: string): string {
 }
 
 // ============================================================================
+// CONTEXT.MD GENERATION — from canonical template
+// ============================================================================
+
+/**
+ * Generate <variant>.context.md from the canonical template at
+ * templates/common/docs/variant.context.template.md.
+ * Replaces {{VARIANT_NAME}}, {{VERSION}}, and {{PM_ROLE_DESCRIPTION}} placeholders.
+ *
+ * @version 1.0.0
+ */
+function generateContextMd(variantPath: string, metadata: VariantMetadata): string {
+  const templatePath = join(COMMON_TEMPLATE, 'docs', 'variant.context.template.md');
+
+  if (!existsSync(templatePath)) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'CONTEXT_TEMPLATE_NOT_FOUND',
+      `variant.context.template.md not found at: ${templatePath}`,
+      undefined,
+      'Ensure templates/common/docs/variant.context.template.md exists'
+    );
+  }
+
+  const templateContent = readUTF8File(templatePath);
+
+  const contextContent = templateContent
+    .replace(/\{\{VARIANT_NAME\}\}/g, metadata.name)
+    .replace(/\{\{VERSION\}\}/g, '1.0')
+    .replace(/\{\{PM_ROLE_DESCRIPTION\}\}/g, 'Workflow management, dispatch, quality gates');
+
+  const contextPath = join(variantPath, 'docs', `${metadata.name}.context.md`);
+  createDirectory(dirname(contextPath));
+  writeUTF8File(contextPath, contextContent);
+  return contextPath;
+}
+
+// ============================================================================
 // MAIN GENERATION FUNCTION
 // ============================================================================
 
@@ -878,6 +918,11 @@ export async function generateVariant(
   const readmePath = generateReadme(variantPath, metadata);
   console.log(`Created: ${readmePath}`);
 
+  // Generate <variant>.context.md from canonical template
+  console.log(`\n=== Generating ${metadata.name}.context.md ===`);
+  const contextMdPath = generateContextMd(variantPath, metadata);
+  console.log(`Created: ${contextMdPath}`);
+
   // Copy remaining files from manifest
   console.log(`\n=== Copying Remaining Files ===`);
   let filesCopied = 0;
@@ -908,7 +953,7 @@ export async function generateVariant(
 
   // Compute summary
   const summary = {
-    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 5, // +5 for json, claude.md, gemini.md, agents.md, readme.md
+    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, claude.md, gemini.md, agents.md, readme.md, context.md
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
@@ -931,6 +976,7 @@ export async function generateVariant(
     geminiMdPath,
     agentsMdPath,
     readmePath,
+    contextMdPath,
     summary,
   };
 }

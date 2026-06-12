@@ -1,16 +1,17 @@
-# [Project Name] —co-develop Configuration
+# [Project Name] — {{VARIANT_NAME}} Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
-> context.md is IMMUTABLE —all project-specific changes belong here.
+> context.md is IMMUTABLE — all project-specific changes belong here.
 >
 > Read order for all AI tools:
->   1. docs/context.md              —immutable project identity (architecture, standards)
->   2. docs/co-develop.context.md   —THIS FILE —tech stack, agents, skills, workflow
+>   1. docs/context.md                        — immutable project identity (architecture, standards)
+>   2. docs/{{VARIANT_NAME}}.context.md        — THIS FILE — tech stack, agents, skills, workflow
 
 ---
 
 ## Tech Stack
 
+<!-- VARIANT-INJECT: tech-stack -->
 | Layer | Technology |
 |-------|-----------|
 | **Language** | [e.g., TypeScript 5+ / Python 3.11+] |
@@ -19,6 +20,7 @@
 | **Key Libraries** | [e.g., react-query, zod, httpx] |
 | **Package Manager** | [e.g., pnpm / npm / uv] |
 | **Testing** | [e.g., Vitest + Playwright / pytest] |
+<!-- END VARIANT-INJECT -->
 
 ---
 
@@ -27,14 +29,11 @@
 <!-- Add/remove rows as agents are introduced or retired via lifecycle management. -->
 <!-- Status: active | deprecated | experimental -->
 
+<!-- VARIANT-INJECT: agents -->
 | Agent | File | Role | Status |
 |-------|------|------|--------|
-| PM (Orchestrator) | `agents/pm.md` | Workflow management, dispatch, quality gates | active |
-| Architect | `agents/architect.md` | System design, ADR production | active |
-| Code Writer | `agents/code-writer.md` | Implementation per approved plan | active |
-| Test Runner | `agents/test-runner.md` | Test authoring and execution | active |
-| Security Monitor | `agents/security-monitor.md` | Security review, hook enforcement | active |
-| Designer | `agents/designer.md` | UI/UX specs and component definitions | active |
+| PM (Orchestrator) | `agents/pm.md` | {{PM_ROLE_DESCRIPTION}} | active |
+<!-- END VARIANT-INJECT -->
 
 > Lifecycle management: `bun scripts/agent-lifecycle-audit.ts`
 > After any agent change, update AGENTS.md and this table.
@@ -50,8 +49,6 @@
 <!-- DYNAMIC_SKILLS_END -->
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`
-
-> **Lifecycle procedures**: See `templates/common/docs/context.md § Lifecycle Management`
 
 ---
 
@@ -69,41 +66,36 @@
 > See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
 ### Hybrid Scripting
+
 All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 
 ---
 
 ## Environment Setup
 
-- Copy `.env.sample` —`.env` and fill in all required values.
+<!-- VARIANT-INJECT: environment-setup -->
+- Copy `.env.sample` — `.env` and fill in all required values.
 - **Node.js**: `pnpm install` (or `npm install`)
 - **Python**: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 - Required env keys (see `.env.sample`): *(fill in after project creation)*
+<!-- END VARIANT-INJECT -->
 
 ---
 
 ## Development Workflow
 
+<!-- VARIANT-INJECT: development-workflow -->
 ```
 Edit code
   —
 /sync "feat: description"
   —
-  1. audit.ts —abort on failure
-  2. memory/YYYY-MM-DD.md —session log (4-section format)
+  1. audit.ts — abort on failure
+  2. memory/YYYY-MM-DD.md — session log (4-section format)
   3. MEMORY.md index update
-  4. git add -A —commit
+  4. git add -A — commit
   5. pr/<date>-<slug> branch created (if on main)
   6. git push + gh pr create
-```
-
-### Agent Dispatch Order (co-develop standard)
-
-```
-PM —Architect (design + ADR)
-   —Code Writer (implementation)
-   —Test Runner (QA gate)
-   —Security Monitor (review)
 ```
 
 ### Workflow Phases
@@ -114,42 +106,24 @@ PM —Architect (design + ADR)
 | 1 | Triage | PM classifies request; dispatches read-only agents in parallel |
 | 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
 | 3 | Design | Architect produces implementation plan + ADR |
-| 4 | Implementation | Code Writer —Test Runner —loop up to 3× on failures |
+| 4 | Implementation | Code Writer — Test Runner — loop up to 3× on failures |
 | 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
+<!-- END VARIANT-INJECT -->
 
 ---
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
-## Coding Guidelines
+## [Domain] Guidelines
+<!-- rename to match variant domain:
+     co-develop → ## Coding Guidelines
+     co-consult → ## Consulting Guidelines
+     co-security → ## Security Guidelines
+     co-design  → ## Design Guidelines
+     co-work    → ## Writing Guidelines -->
 <!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
 
-### Core Rules
-
-1. **Think before coding** —state assumptions; if uncertain, ask.
-2. **Simplicity first** —minimum code that solves the problem.
-3. **Surgical changes** —touch only what is necessary.
-4. **No hardcoded secrets** —always use env vars / `.env.sample`.
-5. **PR required** —all changes via `/sync`; never direct push to main.
-
-### Plan Mode
-
-Enter plan mode when: new feature, significant refactor, or change touches more than 2 files.
-
-### Subagent Pattern
-
-Each implementation task follows the Phase 4 execution loop:
-1. **code-writer** implements
-2. **test-runner** verifies acceptance criteria
-3. **audit script** validates compliance
-Maximum 3 iterations before escalating to user.
-
-### Hybrid Scripting
-All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
-
-### Package Policy
-
-Prefer OSI-approved licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC.
-Avoid: GPL-3.0, AGPL-3.0, SSPL, BSL unless explicitly justified.
+> Replace this placeholder with variant-specific guidelines.
+> This section is REQUIRED — audit.ts will flag its absence.
 
 <!-- END VARIANT-INJECT -->
 
@@ -175,23 +149,24 @@ Avoid: GPL-3.0, AGPL-3.0, SSPL, BSL unless explicitly justified.
 
 ## File Organization Policy
 
-### Recommended Folder Structure (co-develop)
+### Recommended Folder Structure ({{VARIANT_NAME}})
+
+<!-- VARIANT-INJECT: file-organization -->
 | Folder | Purpose |
 |--------|---------|
-| `docs/adr/` | Architecture Decision Records |
-| `docs/specs/` | Technical specifications |
-| `docs/api/` | API documentation |
 | `memory/` | Session logs, meeting transcripts |
+<!-- END VARIANT-INJECT -->
 
 ---
 
 ## Domain Rules
 
-<!-- co-develop variant specific rules —edit after project creation -->
-1. All implementation must have a corresponding test.
-2. Architecture changes require Architect agent ADR before implementation.
-3. Security Monitor must review before any PR targeting auth, secrets, or infra.
+<!-- VARIANT-INJECT: domain-rules -->
+<!-- Add variant-specific domain rules here after project creation. -->
+1. *(Add domain rule 1)*
+2. *(Add domain rule 2)*
+<!-- END VARIANT-INJECT -->
 
 ---
 
-*co-develop.context.md version: 1.1 — normalized to canonical template structure*
+*{{VARIANT_NAME}}.context.md version: {{VERSION}} — created by /new-project*

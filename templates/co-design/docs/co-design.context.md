@@ -70,7 +70,7 @@
 > See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
 ### Hybrid Scripting
-Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json.
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 
 ---
 
@@ -114,25 +114,26 @@ Design PM
 
 ---
 
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Design Guidelines
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
 
 ### Core Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **User-Centered** | All design decisions start from user needs; validated through research |
-| **Accessible by Default** | WCAG AA compliance is a baseline, not an add-on |
-| **System-Thinking** | Every design decision considers the broader design system |
-| **Iterative Validation** | Designs validated through prototypes and user feedback |
+1. **User-centered** — all design decisions grounded in user needs and research.
+2. **Consistency first** — follow the established design system; document exceptions.
+3. **Accessibility** — WCAG 2.1 AA compliance required for all UI components.
+4. **Simplicity** — prefer fewer, well-considered decisions over complex solutions.
+5. **PR required** — all design changes via `/sync`; never direct push to main.
 
-### Rules
+### Design System
 
-1. Start every design task with research or existing insights —document user needs before designing.
-2. Every design decision must consider the broader design system —reuse before creating new.
-3. WCAG AA is the minimum accessibility bar —aim higher when feasible.
-4. Create prototypes to validate decisions before finalizing.
-5. Explain design rationale and constraints explicitly, not just visual choices.
-6. All PR titles, bodies, and review comments must be in **English**.
+Maintain component library consistency: reuse existing components before creating new ones. Document any new components in `docs/design-system/`.
+
+### Hybrid Scripting
+
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
+<!-- END VARIANT-INJECT -->
 
 ---
 
@@ -175,4 +176,4 @@ Design PM
 
 ---
 
-*co-design.context.md version: 1.0 —created by /new-project*
+*co-design.context.md version: 1.1 — normalized to canonical template structure*
