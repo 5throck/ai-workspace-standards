@@ -258,8 +258,8 @@ function runCheckC(): SyncIssue[] {
       issues.push({
         level: 'warning',
         file: `skills/${skillName}/SKILL.md`,
-        message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md (run publish-to-template to sync)`,
-        fix: `Run 'bun run publish-to-template' to sync skills/${skillName}/SKILL.md to templates/common/skills/`,
+        message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md (run propagate:apply to sync)`,
+        fix: `Run 'bun run propagate:apply' to sync skills/${skillName}/SKILL.md to templates/common/skills/`,
       });
     }
   }
@@ -331,7 +331,7 @@ function runCheckB(): SyncIssue[] {
         level: 'error',
         file: 'scripts/SCRIPTS.md',
         message: `Check B: scripts/SCRIPTS.md version for ${filename} (${rootVersion}) differs from templates/common/scripts/SCRIPTS.md (${templateVersion})`,
-        fix: `Run 'bun run publish-to-template' to sync or manually align versions`,
+        fix: `Run 'bun run propagate:apply' to sync or manually align versions`,
       });
     }
   }

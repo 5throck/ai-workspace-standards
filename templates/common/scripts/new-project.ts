@@ -439,7 +439,7 @@ const templateVersion = templateVer || (existsSync(versionFile) ? readFileSync(v
 const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
 
 // Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
-const contextTemplatePath = join('templates', 'common', 'docs', 'variant.context.template.md');
+const contextTemplatePath = join(workspaceRoot, 'templates', 'common', 'docs', 'variant.context.template.md');
 if (existsSync(contextTemplatePath)) {
   applyContextTemplate(contextTemplatePath, variantContextMd, {
     variantName: variant,
@@ -490,7 +490,7 @@ if (existsSync(layerFilter)) {
     l0Scripts = result.stdout.split('\n').filter(Boolean);
   }
 } else {
-  l0Scripts = ['publish-to-template.ts', 'validate-templates.ts', 'create-l2-scaffold.ts', 'l2-to-variant-pipeline.ts', 'fix-script-versions.ts'];
+  l0Scripts = ['validate-templates.ts', 'create-l2-scaffold.ts', 'l2-to-variant-pipeline.ts', 'fix-script-versions.ts'];
 }
 for (const s of l0Scripts) {
   if (s.includes('/')) continue;

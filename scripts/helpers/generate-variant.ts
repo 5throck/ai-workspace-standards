@@ -17,7 +17,7 @@
  * - lib/platform-context.ts (Platform detection)
  */
 
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'fs';
 import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.js';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
@@ -242,6 +242,10 @@ function generateAgentOverrides(
     if (normalizedTarget.startsWith('agents/') && normalizedTarget.endsWith('.md')) {
       const agentName = normalizedTarget.replace('agents/', '').replace('.md', '');
       const overridePath = join(variantPath, file.targetPath);
+      // Guard against path traversal in manifest targetPath
+      if (!resolve(overridePath).startsWith(resolve(WORKSPACE_ROOT))) {
+        throw new Error(`Path traversal detected: ${file.targetPath} resolves outside workspace`);
+      }
 
       // Check if source exists (from L2 project)
       if (existsSync(file.sourcePath)) {
@@ -937,6 +941,10 @@ export async function generateVariant(
     }
 
     const targetPath = join(variantPath, file.targetPath);
+    // Guard against path traversal in manifest targetPath
+    if (!resolve(targetPath).startsWith(resolve(WORKSPACE_ROOT))) {
+      throw new Error(`Path traversal detected: ${file.targetPath} resolves outside workspace`);
+    }
     const targetDir = dirname(targetPath);
     createDirectory(targetDir);
 

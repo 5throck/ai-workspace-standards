@@ -30,7 +30,7 @@ Each project directory contains its own `docs/context.md` as the authoritative d
 
 #### Working with Projects
 
-Navigate to the project directory before starting work. Each project has its own build system (`package.json`, `pyproject.toml`, etc.), dependencies, testing framework, and development workflow (`scripts/dev-sync.sh`).
+Navigate to the project directory before starting work. Each project has its own build system (`package.json`, `pyproject.toml`, etc.), dependencies, testing framework, and development workflow (`bun scripts/dev-sync.ts`).
 
 **Session start checklist / Context Loading** (run in order at the beginning of every session):
 
@@ -158,7 +158,7 @@ Before dispatching any specialist agents (Level 2 tasks), PM **must** output an 
 #### Phase 2 (Planning & Architecture) Requirements
 
 **Cross-Modification Verification:**
-Before finalizing the work plan in Phase 2, the PM MUST verify cross-modification requirements. Specifically, when modifying any script, the PM must check `scripts/SCRIPTS.md` for the `pair:` attribute. If a target script has a paired counterpart (e.g., a `.sh` script paired with a `.ps1` script), both scripts MUST be included in the Execution Task Plan to guarantee simultaneous modification and maintain cross-platform parity.
+Before finalizing the work plan in Phase 2, the PM MUST verify cross-modification requirements. Specifically, when modifying any script, the PM must check `scripts/SCRIPTS.md` for the `depends_on:` attribute. If a target script has declared dependencies, all dependent scripts MUST be included in the Execution Task Plan to guarantee simultaneous modification and maintain consistency.
 
 #### Specialist Agent List
 
@@ -205,13 +205,13 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 ### 6.5 Script Lifecycle Management → [Full details](docs/constitution/06.5-script-lifecycle.md)
 
-**Script 배포 경로**:
-- **Source**: workspace root/scripts/ (L0 소스)
-- **Stage 1**: templates/common/scripts/ (자동 동기화됨 via dev-sync)
-- **Stage 2**: templates/co-*/scripts/ (variant 전용 scripts)
-- **Target**: Projects/*/scripts/ (스케폴딩 시 복사)
+**Script deployment path**:
+- **Source**: workspace root/scripts/ (L0 source)
+- **Stage 1**: templates/common/scripts/ (auto-synced via dev-sync)
+- **Stage 2**: templates/co-*/scripts/ (variant-specific scripts)
+- **Target**: Projects/*/scripts/ (copied at scaffolding time)
 
-**계층 구조 참고**: L1(templates/common) → L2(templates/co-*) → L3(Projects/*)
+**Layer reference**: L0 (workspace root) → L1 (templates/common) → L2 (templates/co-*) → L3 (Projects/*)
 
 Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
 
@@ -350,7 +350,7 @@ See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-sc
 
 ### 7. New Project Initialization → [Full details](docs/constitution/07-new-project.md)
 
-Every new project starts with `/new-project` (Claude Code), `bash scripts/new-project.sh` (macOS/Linux), or `.\scripts\new-project.ps1` (Windows). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
+Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
 
 ---
 
@@ -411,7 +411,7 @@ Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Codin
 
 ### 9. Operations Workflow → [Full details](docs/constitution/09-operations-workflow.md)
 
-Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `sync-agent-status.sh` and `sync-skill-status.sh` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
+Operational procedures for maintaining workspace health and lifecycle hygiene. **Post-Implementation QA (Mandatory)**: All tasks executed based on an `implementation_plan.md` or formal plan MUST undergo a QA validation step via testing or verification scripts before completion, regardless of the agentic tool used (Claude/Antigravity). **Weekly Health Check** (PM, every Friday): Run lifecycle audits (`agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`) and review deprecated items. **Monthly Lifecycle Review** (PM + Architect, first Friday): Review deprecated items >30 days, perform archive cleanup (move to `*_archive/` after 30 days, delete after 90), plan template synchronization, create action items. **Quarterly Template Sync** (Architect + PM, start of each quarter): Validate templates, propagate L0 changes to variants, update `templates/VERSION`. **On-Demand Synchronization**: Run `bun scripts/sync-agent-status.ts` and `bun scripts/sync-skill-status.ts` after agent/skill changes. **Operational Metrics**: Track agent/skill health (100% target), deprecated backlog (<5 items), archive age (<90 days), template sync lag (<7 days).
 
 ---
 
@@ -453,14 +453,14 @@ A pair of HTML comment markers used in MERGE-tier files to delimit sections mana
 ```
 
 Rules:
-- Content between these markers is automatically replaced by `upgrade-project.sh/.ps1` during upgrades.
+- Content between these markers is automatically replaced by `upgrade-project.ts` during upgrades.
 - Content outside the markers is user-owned and is never modified by upgrade scripts.
-- `audit.sh` verifies that these markers exist in expected files.
+- `bun scripts/audit.ts` verifies that these markers exist in expected files.
 - Do **not** remove or reorder these markers manually.
 
 #### File Upgrade Tiers (LOCKED / MERGE / PRESERVE)
 
-Used by `upgrade-project.sh/.ps1` to classify every project file during a template upgrade:
+Used by `upgrade-project.ts` to classify every project file during a template upgrade:
 
 | Tier | Behavior | Examples |
 |------|----------|---------|
@@ -469,10 +469,10 @@ Used by `upgrade-project.sh/.ps1` to classify every project file during a templa
 | **PRESERVE** | Never touched; listed in upgrade report only | `README.md`, `src/`, `docs/context.md`, project-specific files |
 
 #### Platform Documentation Parity
-The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`validate-templates.sh/.ps1`).
+The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`bun scripts/validate-templates.ts`).
 
 #### Script Parity Annotation
-A comment tag added to both `.sh` and `.ps1` versions of a script to declare that a specific security or behavioral check is implemented in both. Format: `# [parity:<tag>]`. Example: `# [parity:secret-scan]`. The `validate-templates.ts` script checks that tags present in `.sh` exist in the paired `.ps1` and vice versa.
+A comment tag added to TypeScript scripts to declare that a specific security or behavioral check is implemented. Format: `# [parity:<tag>]`. Example: `# [parity:secret-scan]`. The `validate-templates.ts` script checks that declared parity tags are consistently present across all scripts that share the same responsibility.
 
 #### Intentional Duplicate Annotation
 

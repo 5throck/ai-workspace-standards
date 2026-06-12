@@ -41,7 +41,7 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 
 1. **Ownership Layers**:
    - L0 (SSOT): `scripts/` (workspace root). All development and registry (`SCRIPTS.md`) live here.
-   - L1 (Template snapshot): `templates/common/scripts/`. Publish explicitly: `bun scripts/publish-to-template.ts`.
+   - L1 (Template snapshot): `templates/common/scripts/`. Publish explicitly: `bun run propagate:apply`.
    - L2 (Project): `<project>/scripts/`. Snapshot of L1 at `new-project` creation time.
    - Never edit L1 directly; edit L0 and publish.
 2. **State Management**:
@@ -65,7 +65,7 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 Implement the requested logic in the appropriate script file. If adding a new script, ensure both `.sh` and `.ps1` pairs are created (or use `.ts` for cross-platform). Apply the UTF-8 safeguard to `.ps1` files.
 
 ### Step 2: Update Registry
-Update the `scripts/SCRIPTS.md` registry (L0 SSOT) with the new version, status, and any dependencies. After making changes, run `bun scripts/publish-to-template.ts` to propagate to L1.
+Update the `scripts/SCRIPTS.md` registry (L0 SSOT) with the new version, status, and any dependencies. After making changes, run `bun run propagate:apply` to propagate to L1.
 
 ### Step 3: Auto-generate Documentation
 Run the `generate-scripts-readme.ts` script to ensure `README.md` is synchronized with `SCRIPTS.md`.

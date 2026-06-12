@@ -260,6 +260,8 @@ function collectDiffs(mapPath: string): FileDiff[] {
   const raw = readFileSync(mapPath, 'utf-8');
   const map: PropagationMap = JSON.parse(raw);
 
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+
   const diffs: FileDiff[] = [];
   const allDomains = DOMAIN_FILTER
     ? Object.fromEntries(
@@ -292,6 +294,27 @@ function collectDiffs(mapPath: string): FileDiff[] {
       if (domainName === 'skills') {
         const skillName = relPath.split('/')[0].split('\\')[0];
         if (!includeSkillInL1(skillName)) continue;
+      }
+
+      // Skip L0-only scripts — they must not propagate to L1
+      if (domainName === 'scripts' || domainName === 'scripts-helpers' || domainName === 'scripts-hooks' || domainName === 'scripts-lib') {
+        const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+        const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relPath}` : relPath;
+        if (!includeScriptInL1(scriptKey, scriptLayers)) continue;
+      }
+
+      // Skip workspace-scoped platform skills — they must not propagate to L1
+      if (domainName === 'claude-skills' || domainName === 'gemini-skills') {
+        const skillName = relPath.split('/')[0].split('\\')[0];
+        const skillMdPath = join(domain.source, skillName, 'SKILL.md');
+        if (existsSync(skillMdPath)) {
+          const content = readFileSync(skillMdPath, 'utf-8');
+          const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+          if (fmMatch) {
+            const scopeMatch = fmMatch[1].match(/^\s*scope\s*:\s*(.+)$/m);
+            if (scopeMatch && scopeMatch[1].trim().toLowerCase() === 'workspace') continue;
+          }
+        }
       }
 
       const sourcePath = join(domain.source, relPath);
