@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.2
+ * @version 1.3.3
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -350,8 +350,12 @@ function runCheckB(): SyncIssue[] {
  * Format: 'l1-script-base:l0-script-base'
  */
 const INTENTIONAL_CROSS_REFS = new Set([
-  'audit:tag-template',           // audit.ts: string mention in warning message only
-  'dev-sync:publish-to-template', // dev-sync.ts: called only inside isL0Context guard
+  'audit:tag-template',                         // audit.ts: string mention in warning message only
+  'dev-sync:propagate-to-templates',            // dev-sync.ts: called only inside isL0Context guard
+  'audit:propagate-to-templates',               // audit.ts: comment reference only (replaced checkScriptSync)
+  'create-l2-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
+  'list-template-versions:tag-template',        // L0-workflow coordination; reference only in L1 copy
+  'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
 ]);
 
 function runCheckX(): SyncIssue[] {
@@ -391,6 +395,8 @@ function runCheckX(): SyncIssue[] {
         if (pattern.test(content)) {
           const relFile = file.replace(ROOT + '\\', '').replace(ROOT + '/', '');
           const l1Base = basename(file).replace(/\.(ts|sh|ps1)$/, '');
+          // Self-reference: L1 copy of the same script referencing itself is expected
+          if (l1Base === scriptName) break;
           if (INTENTIONAL_CROSS_REFS.has(`${l1Base}:${scriptName}`)) break;
           issues.push({
             level: 'error',

@@ -1,34 +1,83 @@
 #!/usr/bin/env bun
-// publish-to-template.ts — Publishes L0 scripts/skills/commands to L1 (templates/common). Use --check-drift for L1↔L2 drift report. Use --docs for governance section injection. Use --governance-l1 for L0→L1 governance file deployment with reference transformation. L1→L2 auto-propagation is forbidden per ADR-0031.
-// Usage: bun run scripts/publish-to-template.ts [--dry-run] [--domain <name>] [--docs] [--check-drift] [--governance-l1] [--skip-encoding-check]
-// @version 1.8.0
+/**
+ * propagate-to-templates.ts — Unified L0→L1 sync tool
+ *
+ * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
+ * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
+ *
+ * @version 2.0.0
+ *
+ * Usage:
+ *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
+ *
+ * Flags:
+ *   --dry-run              Default: show diffs, exit 1 if out-of-sync (no writes)
+ *   --apply                Write changed files to L1
+ *   --force                With --apply: skip hash check, always overwrite
+ *   --domain <name>        Filter to one domain from propagation-map.json
+ *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md L0→L1 with ref transforms
+ *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
+ *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
+ *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
+ */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
+import { join, dirname, basename, extname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-
 import { execSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.js';
 
-// ── L0 → L1 Helper Functions ───────────────────────────────────────────────
+// ── ANSI colors ────────────────────────────────────────────────────────────────
+const C = {
+  green:  '\x1b[32m',
+  yellow: '\x1b[33m',
+  red:    '\x1b[31m',
+  cyan:   '\x1b[36m',
+  dim:    '\x1b[2m',
+  reset:  '\x1b[0m',
+};
 
-function setExecutableBit(filePath: string) {
-  if (filePath.endsWith('.ts') || filePath.endsWith('.sh') || filePath.endsWith('.ps1')) {
-    try {
-      execSync(`git update-index --chmod=+x "${filePath.replace(/\\/g, '/')}"`);
-    } catch (e) {
-      // Ignore if not tracked yet, dev-sync will handle it
-    }
-  }
+// ── CLI flags ──────────────────────────────────────────────────────────────────
+const args = process.argv.slice(2);
+const APPLY            = args.includes('--apply');
+const DRY_RUN          = args.includes('--dry-run') || !APPLY;
+const FORCE            = args.includes('--force');
+const SKIP_ENCODING    = args.includes('--skip-encoding-check');
+const GOVERNANCE_L1    = args.includes('--governance-l1');
+const DOCS             = args.includes('--docs');
+const CHECK_DRIFT      = args.includes('--check-drift');
+const domainIdx        = args.indexOf('--domain');
+const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
+const workspaceRoot    = process.cwd();
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+interface Domain {
+  description: string;
+  source: string;
+  target: string;
+  include_pattern: string;
+  recursive: boolean;
+  exclude: string[];
+  note?: string;
+  mode?: string;
+  source_file?: string;
+  marker?: string;
+  target_variants?: string[];
+  exclude_prefixes?: string[];
 }
 
-// Helper to safely copy a file
-function safeCopyFile(src: string, dst: string) {
-  if (fs.existsSync(dst)) {
-    fs.rmSync(dst, { force: true });
-  }
-  fs.copyFileSync(src, dst);
-  setExecutableBit(dst);
+interface PropagationMap {
+  _comment: string;
+  version: string;
+  domains: Record<string, Domain>;
+}
+
+interface FileDiff {
+  domain: string;
+  relativePath: string;
+  sourcePath: string;
+  targetPath: string;
+  status: 'in-sync' | 'differs' | 'missing';
 }
 
 // ── Encoding validation ────────────────────────────────────────────────────
@@ -58,12 +107,12 @@ interface EncodingViolation {
 }
 
 function checkFileEncoding(filePath: string): EncodingViolation[] {
-  const ext = path.extname(filePath).toLowerCase();
+  const ext = extname(filePath).toLowerCase();
   if (!TEXT_EXTENSIONS.has(ext)) return [];
   const isDocFile = DOC_ONLY_EXTENSIONS.has(ext);
   let content: string;
   try {
-    content = fs.readFileSync(filePath, 'utf-8');
+    content = readFileSync(filePath, 'utf-8');
   } catch {
     return []; // binary or unreadable — skip
   }
@@ -90,8 +139,8 @@ function checkFileEncoding(filePath: string): EncodingViolation[] {
 
 function walkFilesForEncoding(dir: string): string[] {
   const results: string[] = [];
-  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, item.name);
+  for (const item of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, item.name);
     if (item.isDirectory()) {
       results.push(...walkFilesForEncoding(full));
     } else if (item.isFile()) {
@@ -101,17 +150,37 @@ function walkFilesForEncoding(dir: string): string[] {
   return results;
 }
 
+// ── L0→L1 Helper Functions ─────────────────────────────────────────────────────
+function setExecutableBit(filePath: string) {
+  if (filePath.endsWith('.ts') || filePath.endsWith('.sh') || filePath.endsWith('.ps1')) {
+    try {
+      execSync(`git update-index --chmod=+x "${filePath.replace(/\\/g, '/')}"`);
+    } catch (e) {
+      // Ignore if not tracked yet, dev-sync will handle it
+    }
+  }
+}
+
+// Helper to safely copy a file
+function safeCopyFile(src: string, dst: string) {
+  if (existsSync(dst)) {
+    rmSync(dst, { force: true });
+  }
+  copyFileSync(src, dst);
+  setExecutableBit(dst);
+}
+
 // Helper to safely copy a directory
 function safeCopyDir(srcDir: string, dstDir: string) {
-  if (fs.existsSync(dstDir)) {
-    fs.rmSync(dstDir, { recursive: true, force: true });
+  if (existsSync(dstDir)) {
+    rmSync(dstDir, { recursive: true, force: true });
   }
-  fs.cpSync(srcDir, dstDir, { recursive: true });
+  cpSync(srcDir, dstDir, { recursive: true });
   
   const walk = (dir: string) => {
-    for (const item of fs.readdirSync(dir)) {
-      const itemPath = path.join(dir, item);
-      if (fs.statSync(itemPath).isDirectory()) {
+    for (const item of readdirSync(dir)) {
+      const itemPath = join(dir, item);
+      if (statSync(itemPath).isDirectory()) {
         walk(itemPath);
       } else {
         setExecutableBit(itemPath);
@@ -121,244 +190,7 @@ function safeCopyDir(srcDir: string, dstDir: string) {
   walk(dstDir);
 }
 
-const GREEN    = '\x1b[32m';
-const YELLOW   = '\x1b[33m';
-const DARKGRAY = '\x1b[90m';
-const CYAN     = '\x1b[36m';
-const RED      = '\x1b[31m';
-const RESET    = '\x1b[0m';
-
-const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const checkDrift = args.includes('--check-drift');
-const governanceL1 = args.includes('--governance-l1');
-const domainIdx = args.indexOf('--domain');
-const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
-
-// Resolve paths relative to this script's directory
-const scriptDir     = path.resolve(import.meta.dir);
-const workspaceRoot = path.resolve(scriptDir, '..');
-const l0Dir         = scriptDir;
-const l1Dir         = path.resolve(scriptDir, '..', 'templates', 'common', 'scripts');
-
-const scriptsMdPath = path.join(l0Dir, 'SCRIPTS.md');
-if (!fs.existsSync(scriptsMdPath)) {
-  console.log(`${RED}❌ SCRIPTS.md not found at ${l0Dir}${RESET}`);
-  process.exit(1);
-}
-
-// ── Pre-publish encoding gate ──────────────────────────────────────────────
-// Scan L0 source files for CP949/Windows encoding corruption before publishing.
-// If violations are found, print a report and abort (--skip-encoding-check to override).
-if (!args.includes('--skip-encoding-check')) {
-  const skipFlag = args.includes('--check-drift') || args.includes('--governance-l1');
-  if (!skipFlag) {
-    const scanDirs = [l0Dir, path.join(workspaceRoot, 'templates')];
-    const allViolations: EncodingViolation[] = [];
-
-    for (const scanDir of scanDirs) {
-      if (!fs.existsSync(scanDir)) continue;
-      for (const file of walkFilesForEncoding(scanDir)) {
-        allViolations.push(...checkFileEncoding(file));
-      }
-    }
-
-    if (allViolations.length > 0) {
-      console.log(`${RED}❌ Encoding corruption detected — ${allViolations.length} violation(s) found before publish:${RESET}`);
-      for (const v of allViolations) {
-        const rel = path.relative(workspaceRoot, v.file);
-        console.log(`   ${YELLOW}${rel}${RESET}  [${v.count}×] ${v.pattern}`);
-        console.log(`      Lines: ${v.lineNumbers.slice(0, 10).join(', ')}${v.lineNumbers.length > 10 ? ` … +${v.lineNumbers.length - 10} more` : ''}`);
-      }
-      console.log('');
-      console.log(`${YELLOW}Fix: replace '??' → '—' (em dash U+2014) in the affected files, then re-run.${RESET}`);
-      console.log(`${DARKGRAY}Bypass (not recommended): bun scripts/publish-to-template.ts --skip-encoding-check${RESET}`);
-      process.exit(1);
-    } else {
-      console.log(`${GREEN}✅ Encoding check passed — no CP949 corruption detected.${RESET}`);
-    }
-  }
-}
-
-console.log(`${CYAN}=== L0 → L1 publish: scripts/ & skills/ → templates/common/ ===${RESET}`);
-if (dryRun) console.log('(dry-run mode)');
-console.log('');
-
-let count = 0;
-
-// Parse SCRIPTS.md — lines matching `| \`scriptname\` |`
-const scriptsMd = fs.readFileSync(scriptsMdPath, 'utf-8');
-const registryLines = scriptsMd
-  .split('\n')
-  .filter(line => /^\| `[^`]+`/.test(line));
-
-for (const line of registryLines) {
-  const cols = line.split('|');
-  if (cols.length < 4) continue;
-  const script = cols[1].trim().replace(/`/g, '');
-  const source = cols[2].trim();
-  const layer  = cols.length >= 8 ? cols[7].trim() : '—';
-  if (source !== 'L0') continue;
-  if (layer === 'L0' || layer === 'L0-only') continue;
-  if (!script) continue;
-
-  const excludeScripts = [
-    'fix-script-versions.ts',
-    'l2-to-variant-pipeline.ts',
-    'validate-templates.ts',
-    'publish-to-template.ts',
-    'dev-sync.ts',
-    'audit.ts'
-  ];
-  if (excludeScripts.includes(script)) continue;
-
-  const src = path.join(l0Dir, script);
-  const dst = path.join(l1Dir, script);
-  if (!fs.existsSync(src)) continue;
-
-  // Ensure parent directory exists
-  const dstDir = path.dirname(dst);
-  if (!fs.existsSync(dstDir) && !dryRun) {
-    fs.mkdirSync(dstDir, { recursive: true });
-  }
-
-  if (dryRun) {
-    console.log(`  [dry-run] ${script}`);
-  } else {
-    safeCopyFile(src, dst);
-    console.log(`  ✅ ${script}`);
-    count++;
-  }
-}
-
-if (!dryRun) {
-  safeCopyFile(scriptsMdPath, path.join(l1Dir, 'SCRIPTS.md'));
-  console.log(`  ✅ SCRIPTS.md`);
-  count++;
-  console.log('');
-  console.log(`${GREEN}✅ Published ${count} files  L0 (scripts/) → L1 (templates/common/scripts/)${RESET}`);
-}
-
-// ── Skills: L0 (skills/) → L1 (templates/common/skills/) ───────────────────
-const l0Skills = path.join(workspaceRoot, 'skills');
-const l1Skills = path.join(workspaceRoot, 'templates', 'common', 'skills');
-
-console.log('');
-console.log('L0 → L1 publish: skills/ → templates/common/skills/');
-
-let skillCount = 0;
-
-if (fs.existsSync(l0Skills)) {
-  for (const item of fs.readdirSync(l0Skills)) {
-    const itemPath = path.join(l0Skills, item);
-    const stat = fs.statSync(itemPath);
-    if (stat.isDirectory()) {
-      // Skip local/ and external/ (variant-specific directories)
-      if (item === 'local' || item === 'external') {
-        continue;
-      }
-      
-      // Check layer-filter for skill inclusion in L1
-      if (!includeSkillInL1(item)) {
-        console.log(`  ⊘ Skipped (L0 only): ${item}/`);
-        continue;
-      }
-      if (dryRun) {
-        console.log(`  [dry-run] ${item}/`);
-      } else {
-        const dst = path.join(l1Skills, item);
-        safeCopyDir(itemPath, dst);
-        console.log(`  ✅ ${item}/`);
-        skillCount++;
-      }
-    } else if (stat.isFile()) {
-      if (dryRun) {
-        console.log(`  [dry-run] ${item}`);
-      } else {
-        safeCopyFile(itemPath, path.join(l1Skills, item));
-        console.log(`  ✅ ${item}`);
-        skillCount++;
-      }
-    }
-  }
-}
-
-if (!dryRun) {
-  console.log('');
-  console.log(`${GREEN}✅ Published ${skillCount} items  L0 (skills/) → L1 (templates/common/skills/)${RESET}`);
-}
-
-// ── Compiled Commands: L0 (.claude/commands, .gemini/commands) → L1 ───────
-console.log('');
-console.log('L0 → L1 publish: .claude/commands/ & .gemini/commands/ → templates/common/...');
-
-const platforms = ['.claude', '.gemini'];
-let cmdCount = 0;
-
-for (const platform of platforms) {
-  const srcDir = path.join(workspaceRoot, platform, 'commands');
-  const dstDir = path.join(workspaceRoot, 'templates', 'common', platform, 'commands');
-
-  if (fs.existsSync(srcDir)) {
-    if (!fs.existsSync(dstDir) && !dryRun) {
-      fs.mkdirSync(dstDir, { recursive: true });
-    }
-    
-    for (const item of fs.readdirSync(srcDir)) {
-      if (!item.endsWith('.md')) continue; // only copy markdown commands
-      
-      const itemPath = path.join(srcDir, item);
-      if (fs.statSync(itemPath).isFile()) {
-        if (dryRun) {
-          console.log(`  [dry-run] ${platform}/commands/${item}`);
-        } else {
-          safeCopyFile(itemPath, path.join(dstDir, item));
-          console.log(`  ✅ ${platform}/commands/${item}`);
-          cmdCount++;
-        }
-      }
-    }
-  }
-}
-
-if (!dryRun) {
-  console.log('');
-  console.log(`${GREEN}✅ Published ${cmdCount} command files to L1 (templates/common/)${RESET}`);
-} else {
-  console.log('');
-  console.log(`${DARKGRAY}(dry-run complete — no files written)${RESET}`);
-}
-
-
-// ============================================================================
-// ── L1 → L2 drift functions (collectDiffs / printTable) ─────────────────────
-// Used by --check-drift (read-only). L1→L2 auto-propagation is forbidden per ADR-0031.
-// ============================================================================
-
-interface Domain {
-  description: string;
-  source: string;
-  target: string;
-  include_pattern: string;
-  recursive: boolean;
-  exclude: string[];
-  note?: string;
-}
-
-interface PropagationMap {
-  _comment: string;
-  version: string;
-  domains: Record<string, Domain>;
-}
-
-interface FileDiff {
-  domain: string;
-  relativePath: string;
-  sourcePath: string;
-  targetPath: string;
-  status: 'in-sync' | 'differs' | 'missing';
-}
-
+// ── Core Helpers ─────────────────────────────────────────────────────────────────
 function sha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
@@ -367,28 +199,34 @@ function padEnd(s: string, n: number): string {
   return s.length >= n ? s : s + ' '.repeat(n - s.length);
 }
 
+/**
+ * Glob files in a directory matching a simple pattern.
+ * Supports patterns like "*.ts" and "* /SKILL.md" (recursive).
+ */
 function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
-  if (!fs.existsSync(dir)) return [];
+  if (!existsSync(dir)) return [];
 
   const results: string[] = [];
+
+  // Parse pattern: supports "*.ext" or "*/filename"
   const isRecursivePattern = pattern.includes('/');
-  const targetFilename = isRecursivePattern ? path.basename(pattern) : null;
-  const ext = !isRecursivePattern ? pattern.replace('*', '') : null;
+  const targetFilename = isRecursivePattern ? basename(pattern) : null;
+  const ext = !isRecursivePattern ? pattern.replace('*', '') : null; // e.g. ".ts"
 
   function walk(currentDir: string, relBase: string): void {
     let entries: string[];
     try {
-      entries = fs.readdirSync(currentDir);
+      entries = readdirSync(currentDir);
     } catch {
       return;
     }
 
     for (const entry of entries) {
-      const fullPath = path.join(currentDir, entry);
+      const fullPath = join(currentDir, entry);
       const relPath = relBase ? `${relBase}/${entry}` : entry;
       let stat;
       try {
-        stat = fs.statSync(fullPath);
+        stat = statSync(fullPath);
       } catch {
         continue;
       }
@@ -399,10 +237,12 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
         }
       } else if (stat.isFile()) {
         if (targetFilename !== null) {
+          // Recursive pattern like "*/SKILL.md"
           if (entry === targetFilename) {
             results.push(relPath);
           }
         } else if (ext !== null) {
+          // Extension pattern like "*.ts"
           if (entry.endsWith(ext)) {
             results.push(relPath);
           }
@@ -415,8 +255,67 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
   return results;
 }
 
+// ── Core logic ─────────────────────────────────────────────────────────────────
 function collectDiffs(mapPath: string): FileDiff[] {
-  const raw = fs.readFileSync(mapPath, 'utf-8');
+  const raw = readFileSync(mapPath, 'utf-8');
+  const map: PropagationMap = JSON.parse(raw);
+
+  const diffs: FileDiff[] = [];
+  const allDomains = DOMAIN_FILTER
+    ? Object.fromEntries(
+        Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
+      )
+    : map.domains;
+
+  // Exclude marker-inject domains — handled by publishDocs()
+  const domains = Object.fromEntries(
+    Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject')
+  );
+
+  if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
+    console.error(`${C.red}Error: domain "${DOMAIN_FILTER}" not found in propagation-map.json${C.reset}`);
+    process.exit(1);
+  }
+
+  for (const [domainName, domain] of Object.entries(domains)) {
+    const files = globFiles(domain.source, domain.include_pattern, domain.recursive);
+
+    for (const relPath of files) {
+      const fileBasename = basename(relPath);
+
+      // Check exclude list (matches on basename for flat patterns, full relPath for nested)
+      if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
+        continue;
+      }
+
+      // For skills domain: skip workspace-scoped skills (scope: workspace in frontmatter)
+      if (domainName === 'skills') {
+        const skillName = relPath.split('/')[0].split('\\')[0];
+        if (!includeSkillInL1(skillName)) continue;
+      }
+
+      const sourcePath = join(domain.source, relPath);
+      const targetPath = join(domain.target, relPath);
+
+      let status: FileDiff['status'];
+      if (!existsSync(targetPath)) {
+        status = 'missing';
+      } else {
+        const srcContent = readFileSync(sourcePath, 'utf-8');
+        const tgtContent = readFileSync(targetPath, 'utf-8');
+        status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
+      }
+
+      diffs.push({ domain: domainName, relativePath: relPath, sourcePath, targetPath, status });
+    }
+  }
+
+  return diffs;
+}
+
+// ── L1→L2 drift report (--check-drift) ──────────────────────────────────────────
+function collectDiffsL1L2(mapPath: string): FileDiff[] {
+  const raw = readFileSync(mapPath, 'utf-8');
   const map: PropagationMap = JSON.parse(raw);
 
   const diffs: FileDiff[] = [];
@@ -431,20 +330,20 @@ function collectDiffs(mapPath: string): FileDiff[] {
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
-    console.error(`${RED}Error: domain "${DOMAIN_FILTER}" not found in propagation-map.json${RESET}`);
+    console.error(`${C.red}Error: domain "${DOMAIN_FILTER}" not found in propagation-map.json${C.reset}`);
     process.exit(1);
   }
 
-  const templateVariants = fs.readdirSync(path.join(workspaceRoot, 'templates'))
-    .filter(d => d.startsWith('co-') && fs.statSync(path.join(workspaceRoot, 'templates', d)).isDirectory());
+  const templateVariants = readdirSync(join(workspaceRoot, 'templates'))
+    .filter(d => d.startsWith('co-') && statSync(join(workspaceRoot, 'templates', d)).isDirectory());
 
-  const scriptLayers = parseScriptLayers(path.join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
 
   for (const [domainName, domain] of Object.entries(domains)) {
     // For L1 -> L2, the source is L1 (domain.target)
-    const l1SourceDir = path.resolve(workspaceRoot, domain.target);
+    const l1SourceDir = resolve(workspaceRoot, domain.target);
 
-    if (!fs.existsSync(l1SourceDir)) continue;
+    if (!existsSync(l1SourceDir)) continue;
 
     // Derive the SCRIPTS.md key prefix from domain source (strip leading "scripts/" segment)
     const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
@@ -452,7 +351,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
     const files = globFiles(l1SourceDir, domain.include_pattern, domain.recursive);
 
     for (const relPath of files) {
-      const fileBasename = path.basename(relPath);
+      const fileBasename = basename(relPath);
 
       if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
         continue;
@@ -470,20 +369,20 @@ function collectDiffs(mapPath: string): FileDiff[] {
         continue;
       }
 
-      const l1SourcePath = path.join(l1SourceDir, relPath);
-      const srcContent = fs.readFileSync(l1SourcePath, 'utf-8');
+      const l1SourcePath = join(l1SourceDir, relPath);
+      const srcContent = readFileSync(l1SourcePath, 'utf-8');
       
       for (const variant of templateVariants) {
         // The L2 target replaces 'templates/common' with 'templates/{variant}'
         const variantTarget = domain.target.replace('templates/common', `templates/${variant}`);
-        const l2TargetDir = path.resolve(workspaceRoot, variantTarget);
-        const l2TargetPath = path.join(l2TargetDir, relPath);
+        const l2TargetDir = resolve(workspaceRoot, variantTarget);
+        const l2TargetPath = join(l2TargetDir, relPath);
 
         let status: FileDiff['status'];
-        if (!fs.existsSync(l2TargetPath)) {
+        if (!existsSync(l2TargetPath)) {
           status = 'missing';
         } else {
-          const tgtContent = fs.readFileSync(l2TargetPath, 'utf-8');
+          const tgtContent = readFileSync(l2TargetPath, 'utf-8');
           status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
         }
 
@@ -509,55 +408,50 @@ function printTable(diffs: FileDiff[]): void {
   const header = `${padEnd('Domain', COL1)}  ${padEnd('File', COL2)}  ${padEnd('Status', COL3)}`;
   const sep    = '-'.repeat(COL1 + COL2 + COL3 + 4);
 
-  console.log(`\n${CYAN}${header}${RESET}`);
-  console.log(`${DARKGRAY}${sep}${RESET}`);
+  console.log(`\n${C.cyan}${header}${C.reset}`);
+  console.log(`${C.dim}${sep}${C.reset}`);
 
   for (const d of diffs) {
     let statusStr: string;
     let color: string;
     if (d.status === 'in-sync') {
       statusStr = '✅ in sync';
-      color = GREEN;
+      color = C.green;
     } else if (d.status === 'differs') {
       statusStr = '⚠️  differs';
-      color = YELLOW;
+      color = C.yellow;
     } else {
       statusStr = '❌ missing';
-      color = RED;
+      color = C.red;
     }
 
     const domainCol = padEnd(d.domain, COL1);
     const fileCol   = padEnd(d.relativePath, COL2);
-    console.log(`${color}${domainCol}  ${fileCol}  ${statusStr}${RESET}`);
+    console.log(`${color}${domainCol}  ${fileCol}  ${statusStr}${C.reset}`);
   }
 
-  console.log(`${DARKGRAY}${sep}${RESET}\n`);
+  console.log(`${C.dim}${sep}${C.reset}\n`);
 }
 
-const MAP_PATH = path.join(workspaceRoot, 'scripts', 'propagation-map.json');
+function applyDiffs(diffs: FileDiff[]): number {
+  let copied = 0;
+  for (const d of diffs) {
+    if (d.status === 'in-sync' && !FORCE) continue;
 
-if (!fs.existsSync(MAP_PATH)) {
-  console.error(`${RED}Error: propagation-map.json not found at ${MAP_PATH}${RESET}`);
-  process.exit(1);
-}
+    const targetDir = dirname(d.targetPath);
+    if (!existsSync(targetDir)) {
+      mkdirSync(targetDir, { recursive: true });
+    }
 
-// ── --check-drift: L1 vs L2 drift report (read-only) ────────────────────────
-if (checkDrift) {
-  console.log(`\n${CYAN}=== --check-drift: L1 vs L2 drift report (read-only) ===${RESET}`);
-  const diffs = collectDiffs(MAP_PATH);
-  printTable(diffs);
-  const outOfSync = diffs.filter(d => d.status !== 'in-sync');
-  console.log(`Total checked: ${diffs.length}, Out of sync: ${outOfSync.length}`);
-  if (outOfSync.length > 0) {
-    console.log(`\nℹ️  L2 drift is expected under Fork Model (ADR-0031). Run create-l2-scaffold.ts to re-scaffold.`);
-    process.exitCode = 1;
+    const content = readFileSync(d.sourcePath, 'utf-8');
+    writeFileSync(d.targetPath, content, 'utf-8');
+    console.log(`${C.green}  copied${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
+    copied++;
   }
+  return copied;
 }
 
-// ============================================================================
-// ── --docs: L0 → L2 governance doc sync (CLAUDE.md, GEMINI.md) ─────────────
-// ============================================================================
-
+// ── --docs: L1→L2 governance doc sync ────────────────────────────────────────────
 function extractCommonSections(content: string, marker: string): Array<{heading: string, fullBlock: string}> {
   const sections: Array<{heading: string, fullBlock: string}> = [];
   const startTag = `<!-- ${marker}:START -->`;
@@ -602,11 +496,11 @@ function replaceCommonSection(
 }
 
 function publishDocs(isDryRun: boolean): void {
-  console.log(`\n${CYAN}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${RESET}`);
-  if (isDryRun) console.log(`${DARKGRAY}(dry-run mode)${RESET}`);
+  console.log(`\n${C.cyan}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${C.reset}`);
+  if (isDryRun) console.log(`${C.dim}(dry-run mode)${C.reset}`);
 
   // Read governance-* domains from propagation-map.json
-  const mapRaw = fs.readFileSync(MAP_PATH, 'utf-8');
+  const mapRaw = readFileSync(MAP_PATH, 'utf-8');
   const map = JSON.parse(mapRaw);
 
   const govDomains = Object.entries(map.domains)
@@ -621,32 +515,32 @@ function publishDocs(isDryRun: boolean): void {
   let totalSkipped = 0;
 
   for (const { sourceFile, marker, variants } of govDomains) {
-    const sourcePath = path.join(workspaceRoot, sourceFile);
-    if (!fs.existsSync(sourcePath)) {
-      console.log(`  ${YELLOW}⚠️  ${sourceFile} not found, skipping${RESET}`);
+    const sourcePath = join(workspaceRoot, sourceFile);
+    if (!existsSync(sourcePath)) {
+      console.log(`  ${C.yellow}⚠️  ${sourceFile} not found, skipping${C.reset}`);
       continue;
     }
 
-    const sourceContent = fs.readFileSync(sourcePath, 'utf-8');
+    const sourceContent = readFileSync(sourcePath, 'utf-8');
     const sections = extractCommonSections(sourceContent, marker);
 
     if (sections.length === 0) {
-      console.log(`  ${YELLOW}⚠️  No <!-- ${marker}:START/END --> markers found in ${sourceFile}, skipping${RESET}`);
+      console.log(`  ${C.yellow}⚠️  No <!-- ${marker}:START/END --> markers found in ${sourceFile}, skipping${C.reset}`);
       continue;
     }
 
     // Derive the target filename (basename of source_file, e.g. "AGENTS.md")
-    const targetFilename = path.basename(sourceFile);
-    console.log(`\n  ${CYAN}${sourceFile}${RESET} — ${sections.length} common section(s) found`);
+    const targetFilename = basename(sourceFile);
+    console.log(`\n  ${C.cyan}${sourceFile}${C.reset} — ${sections.length} common section(s) found`);
 
     for (const variant of variants) {
-      const variantPath = path.join(workspaceRoot, 'templates', variant, targetFilename);
-      if (!fs.existsSync(variantPath)) {
-        console.log(`    ${YELLOW}⚠️  templates/${variant}/${targetFilename} not found, skipping${RESET}`);
+      const variantPath = join(workspaceRoot, 'templates', variant, targetFilename);
+      if (!existsSync(variantPath)) {
+        console.log(`    ${C.yellow}⚠️  templates/${variant}/${targetFilename} not found, skipping${C.reset}`);
         continue;
       }
 
-      let variantContent = fs.readFileSync(variantPath, 'utf-8');
+      let variantContent = readFileSync(variantPath, 'utf-8');
       let fileUpdated = false;
 
       for (const section of sections) {
@@ -664,33 +558,22 @@ function publishDocs(isDryRun: boolean): void {
 
       if (fileUpdated) {
         if (!isDryRun) {
-          fs.writeFileSync(variantPath, variantContent, 'utf-8');
+          writeFileSync(variantPath, variantContent, 'utf-8');
         }
-        console.log(`    ${GREEN}✅ templates/${variant}/${targetFilename}${isDryRun ? ' [dry-run]' : ' updated'}${RESET}`);
+        console.log(`    ${C.green}✅ templates/${variant}/${targetFilename}${isDryRun ? ' [dry-run]' : ' updated'}${C.reset}`);
         totalUpdated++;
       } else {
-        console.log(`    ${DARKGRAY}—  templates/${variant}/${targetFilename} already in sync${RESET}`);
+        console.log(`    ${C.dim}—  templates/${variant}/${targetFilename} already in sync${C.reset}`);
         totalSkipped++;
       }
     }
   }
 
   console.log('');
-  console.log(`${GREEN}Docs sync complete.${RESET} Updated: ${totalUpdated}, Already in sync: ${totalSkipped}`);
+  console.log(`${C.green}Docs sync complete.${C.reset} Updated: ${totalUpdated}, Already in sync: ${totalSkipped}`);
 }
 
-if (args.includes('--docs')) {
-  publishDocs(dryRun);
-}
-
-// ============================================================================
-// ── --governance-l1: L0 → L1 governance file deployment ─────────────────────
-// Copies CLAUDE.md, GEMINI.md, AGENTS.md from workspace root to
-// templates/common/, transforming CONSTITUTION.md references to docs/context.md.
-// agents/pm.md is intentionally skipped — L1 version has extends: frontmatter
-// and L1-specific content that must not be overwritten blindly.
-// ============================================================================
-
+// ── --governance-l1: L0→L1 governance file deployment ────────────────────────────
 const GOVERNANCE_L1_FILES = [
   { src: 'CLAUDE.md',  dst: 'templates/common/CLAUDE.md'  },
   { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
@@ -983,57 +866,135 @@ function applyGovernanceTransforms(content: string, filename: string): string {
 }
 
 function publishGovernanceL1(isDryRun: boolean): void {
-  console.log(`\n${CYAN}=== L0 → L1 governance file deployment (--governance-l1) ===${RESET}`);
-  if (isDryRun) console.log(`${DARKGRAY}(dry-run mode — no files will be written)${RESET}`);
+  console.log(`\n${C.cyan}=== L0 → L1 governance file deployment (--governance-l1) ===${C.reset}`);
+  if (isDryRun) console.log(`${C.dim}(dry-run mode — no files will be written)${C.reset}`);
 
   let updated = 0;
   let skipped = 0;
 
   for (const { src, dst } of GOVERNANCE_L1_FILES) {
-    const srcPath = path.join(workspaceRoot, src);
-    const dstPath = path.join(workspaceRoot, dst);
+    const srcPath = join(workspaceRoot, src);
+    const dstPath = join(workspaceRoot, dst);
 
-    if (!fs.existsSync(srcPath)) {
-      console.log(`  ${YELLOW}⚠️  ${src} not found at workspace root, skipping${RESET}`);
+    if (!existsSync(srcPath)) {
+      console.log(`  ${C.yellow}⚠️  ${src} not found at workspace root, skipping${C.reset}`);
       continue;
     }
 
-    const original = fs.readFileSync(srcPath, 'utf-8');
+    const original = readFileSync(srcPath, 'utf-8');
     const transformed = applyGovernanceTransforms(original, src);
 
     if (isDryRun) {
       const l0Refs = (original.match(/CONSTITUTION\.md/g) ?? []).length;
       if (l0Refs > 0) {
-        console.log(`  ${CYAN}~  ${src} → ${dst}${RESET} ${DARKGRAY}(${l0Refs} CONSTITUTION.md refs → docs/context.md)${RESET}`);
+        console.log(`  ${C.cyan}~  ${src} → ${dst}${C.reset} ${C.dim}(${l0Refs} CONSTITUTION.md refs → docs/context.md)${C.reset}`);
       } else {
-        console.log(`  ${DARKGRAY}—  ${src} already has no CONSTITUTION.md references${RESET}`);
+        console.log(`  ${C.dim}—  ${src} already has no CONSTITUTION.md references${C.reset}`);
       }
       updated++;
       continue;
     }
 
-    const existingDst = fs.existsSync(dstPath) ? fs.readFileSync(dstPath, 'utf-8') : '';
+    const existingDst = existsSync(dstPath) ? readFileSync(dstPath, 'utf-8') : '';
     if (existingDst === transformed) {
-      console.log(`  ${DARKGRAY}—  ${dst} already in sync${RESET}`);
+      console.log(`  ${C.dim}—  ${dst} already in sync${C.reset}`);
       skipped++;
       continue;
     }
 
-    fs.writeFileSync(dstPath, transformed, 'utf-8');
+    writeFileSync(dstPath, transformed, 'utf-8');
     const refCount = (original.match(/CONSTITUTION\.md/g) ?? []).length;
-    console.log(`  ${GREEN}✅ ${dst} updated${RESET} ${DARKGRAY}(${refCount} refs transformed)${RESET}`);
+    console.log(`  ${C.green}✅ ${dst} updated${C.reset} ${C.dim}(${refCount} refs transformed)${C.reset}`);
     updated++;
   }
 
   console.log('');
   if (isDryRun) {
-    console.log(`${CYAN}Dry-run complete.${RESET} Would update: ${updated} file(s)`);
+    console.log(`${C.cyan}Dry-run complete.${C.reset} Would update: ${updated} file(s)`);
   } else {
-    console.log(`${GREEN}Governance L1 sync complete.${RESET} Updated: ${updated}, Already in sync: ${skipped}`);
-    console.log(`${DARKGRAY}Note: templates/common/agents/pm.md skipped — L1 version uses extends: frontmatter and must not be overwritten.${RESET}`);
+    console.log(`${C.green}Governance L1 sync complete.${C.reset} Updated: ${updated}, Already in sync: ${skipped}`);
+    console.log(`${C.dim}Note: templates/common/agents/pm.md skipped — L1 version uses extends: frontmatter and must not be overwritten.${C.reset}`);
   }
 }
 
-if (governanceL1) {
-  publishGovernanceL1(dryRun);
+// ── Main ───────────────────────────────────────────────────────────────────────
+const MAP_PATH = join('scripts', 'propagation-map.json');
+
+if (!existsSync(MAP_PATH)) {
+  console.error(`${C.red}Error: propagation-map.json not found at ${MAP_PATH}${C.reset}`);
+  process.exit(1);
+}
+
+// Encoding gate — only on --apply (not dry-run or governance/docs modes)
+if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
+  const scanDirs = ['.', join('templates')];
+  const allViolations: EncodingViolation[] = [];
+  for (const scanDir of scanDirs) {
+    if (existsSync(scanDir)) {
+      for (const file of walkFilesForEncoding(scanDir)) {
+        allViolations.push(...checkFileEncoding(file));
+      }
+    }
+  }
+  if (allViolations.length > 0) {
+    console.error(`${C.red}❌ Encoding corruption — ${allViolations.length} violation(s). Fix before publishing.${C.reset}`);
+    for (const v of allViolations) {
+      console.log(`   ${v.file}  [${v.count}×] ${v.pattern}`);
+    }
+    process.exit(1);
+  }
+}
+
+console.log(`${C.cyan}=== propagate-to-templates.ts — L0→L1 sync ===${C.reset}`);
+if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+console.log(`${C.dim}Mode: ${APPLY ? 'apply' : 'dry-run'}${FORCE ? ' (--force)' : ''}${C.reset}`);
+
+const diffs = collectDiffs(MAP_PATH);
+printTable(diffs);
+
+const outOfSync = diffs.filter(d => d.status !== 'in-sync');
+const inSync    = diffs.filter(d => d.status === 'in-sync');
+
+console.log(`Total files checked : ${diffs.length}`);
+console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
+console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
+
+if (APPLY) {
+  if (outOfSync.length === 0 && !FORCE) {
+    console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
+  } else {
+    const toApply = FORCE ? diffs : outOfSync;
+    console.log(`\n${C.cyan}Applying ${toApply.length} file(s)...${C.reset}`);
+    const copied = applyDiffs(diffs);
+    console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
+  }
+  process.exit(0);
+} else {
+  // dry-run mode
+  if (outOfSync.length > 0) {
+    console.log(`\n${C.yellow}Run with --apply to sync these files.${C.reset}`);
+    process.exitCode = 1;
+  } else {
+    console.log(`\n${C.green}All files in sync.${C.reset}`);
+  }
+}
+
+if (GOVERNANCE_L1) {
+  publishGovernanceL1(DRY_RUN);
+}
+
+if (DOCS) {
+  publishDocs(DRY_RUN);
+}
+
+if (CHECK_DRIFT) {
+  console.log(`\n${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+  const drifts = collectDiffsL1L2(MAP_PATH);
+  printTable(drifts);
+  const outOfSyncDrift = drifts.filter(d => d.status !== 'in-sync');
+  console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSyncDrift.length}`);
+  if (outOfSyncDrift.length > 0) {
+    console.log(`\nℹ️  L2 drift is expected under Fork Model (ADR-0031). Run create-l2-scaffold.ts to re-scaffold.`);
+    process.exitCode = 1;
+  }
 }
