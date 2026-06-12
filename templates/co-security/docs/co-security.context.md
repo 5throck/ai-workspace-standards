@@ -31,6 +31,8 @@
 
 ## Agents
 
+<!-- context-proximity: agent roles summarized here for AI context window efficiency; authoritative definitions in agents/*.md -->
+
 <!-- Status: active | deprecated | experimental -->
 
 | Agent | File | Role | Status |

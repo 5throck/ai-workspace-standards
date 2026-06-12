@@ -430,6 +430,19 @@ Controls which AI-platform-specific configuration files are included in a projec
 
 Recorded in `.claude/template-version.txt` as `platform=<value>`.
 
+#### context.md vs variant.context.template.md
+
+Two template files serve distinct roles in the documentation layer:
+
+| File | Layer | Role |
+|------|-------|------|
+| `templates/common/docs/_common/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied to `docs/context.md` in every new L2 project. Do NOT modify after project creation. |
+| `templates/common/docs/variant.context.template.md` | L1 | **Variant overlay template** — customization layer rendered into `docs/<variant>.context.md`. Contains VARIANT-INJECT markers for variant-specific sections. |
+
+**Read order for AI tools in any L2 project:**
+1. `docs/context.md` — immutable project identity
+2. `docs/<variant>.context.md` — THIS FILE — variant-specific tech stack, agents, skills, workflow
+
 #### WORKSPACE-MANAGED Marker
 A pair of HTML comment markers used in MERGE-tier files to delimit sections managed by the workspace template system:
 
@@ -478,5 +491,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-09*
+*Last Updated: 2026-06-12*
 

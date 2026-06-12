@@ -22,6 +22,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from
 import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.js';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
 import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.js';
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.js';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -840,17 +841,13 @@ function generateContextMd(variantPath: string, metadata: VariantMetadata): stri
     );
   }
 
-  const templateContent = readUTF8File(templatePath);
-
-  const contextContent = templateContent
-    .replace(/\{\{VARIANT_NAME\}\}/g, metadata.name)
-    .replace(/\{\{VERSION\}\}/g, '1.0')
-    .replace(/\{\{PM_ROLE_DESCRIPTION\}\}/g, 'Workflow management, dispatch, quality gates');
-
   const contextPath = join(variantPath, 'docs', `${metadata.name}.context.md`);
-  createDirectory(dirname(contextPath));
-  writeUTF8File(contextPath, contextContent);
-  return contextPath;
+
+  return applyContextTemplate(templatePath, contextPath, {
+    variantName: metadata.name,
+    version: metadata.version,
+    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[metadata.name] ?? 'Workflow management, dispatch, quality gates',
+  });
 }
 
 // ============================================================================
@@ -1017,6 +1014,6 @@ async function main() {
 }
 
 // Run main if executed directly
-if (import.meta.url === process.argv[1]) {
+if (import.meta.main) {
   main().catch(console.error);
 }

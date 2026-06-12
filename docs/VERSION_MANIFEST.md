@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-12T05:50:46.589Z
+**Generated**: 2026-06-12T09:39:18.218Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 92
+- **Scripts**: 93
 - **Commands**: 6
 
 ---
@@ -124,6 +124,7 @@
 | sync-skills.ts | N/A | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | N/A | scripts/team-builder.ts | fs, path |
+| template-utils.ts | N/A | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | N/A | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | N/A | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | N/A | scripts/test-new-project.ts | bun |

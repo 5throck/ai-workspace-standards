@@ -23,6 +23,8 @@
 
 ## Agents
 
+<!-- context-proximity: agent roles summarized here for AI context window efficiency; authoritative definitions in agents/*.md -->
+
 <!-- Add/remove rows as agents are introduced or retired via lifecycle management. -->
 <!-- Status: active | deprecated | experimental -->
 

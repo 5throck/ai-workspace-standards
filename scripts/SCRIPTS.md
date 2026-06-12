@@ -86,6 +86,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/template-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
