@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.0.1
+ * @version 1.0.2
  */
 import { spawnSync } from 'child_process';
 import { readdirSync } from 'fs';

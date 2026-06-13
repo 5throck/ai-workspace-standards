@@ -336,6 +336,16 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
+### Platform Skills (shared infrastructure)
+
+| Skill | File | Trigger condition |
+|-------|------|-------------------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM managing agent lifecycle — creating, versioning, deprecating agents |
+| **Platform Skill Lifecycle Manager** | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle and propagation |
+| **Platform Command Lifecycle Manager** | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle and parity |
+| **Finishing a Development Branch** | `.claude/skills/finishing-a-development-branch/SKILL.md` | Redirects branch completion to `/sync` pipeline |
+| **Simulate Project Creation** | `.claude/skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding in temporary directory |
+
 ### Skill Registry
 
 | Skill | File | Trigger condition |

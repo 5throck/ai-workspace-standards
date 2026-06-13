@@ -9,7 +9,7 @@
   "lifecycle": {
     "statusSince": "2026-06-13",
     "lastTransition": "0.3.0 → 1.0.0 on 2026-06-13",
-    "stablePromotedOn": "2026-06-01"
+    "stablePromotedOn": "2026-06-13"
   },
   "agents": [
     {

@@ -5,6 +5,7 @@ description: >
   resistance analysis, influence-interest prioritization, and communication
   strategy development for consulting engagements.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none

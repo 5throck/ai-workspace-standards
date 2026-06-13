@@ -128,7 +128,29 @@
       "test-cleanup",
       "test-proj2",
       "test-proj3",
-      "co-develop"
+      "co-develop",
+      ".agent",
+      ".opencode",
+      ".playwright-mcp",
+      ".understand-anything",
+      "abap_coding_mig",
+      "abap_vibe_coding",
+      "abap_vibe_coding_mig",
+      "abap_vibe_coding_plugin",
+      "ai_workspace",
+      "artifacts",
+      "Crypto-Agent",
+      "daniel-lightrag-mcp",
+      "dart-mcp",
+      "demo",
+      "mcp-server-datahub",
+      "notebooklm-mcp-cli",
+      "PDF-Viewer",
+      "Pricing-Mgmt-Simulation",
+      "Product-Planning",
+      "quickdl",
+      "scratch",
+      "vibing-steampunk"
     ]
   }
 }
