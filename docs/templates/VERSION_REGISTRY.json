@@ -25,7 +25,7 @@
       "migration_guides": []
     },
     "co-security": {
-      "latest": "0.3.0",
+      "latest": "1.0.0",
       "released": "2026-06-01",
       "status": "stable",
       "security_advisories": [],
