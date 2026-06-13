@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T00:35:31.228Z
+**Generated**: 2026-06-13T00:42:34.473Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 93
+- **Scripts**: 92
 - **Commands**: 6
 
 ---
@@ -66,7 +66,7 @@
 | agent-verify.ts | N/A | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | N/A | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.6.6 | scripts/audit.ts | bun |
+| audit.ts | 2.7.0 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | N/A | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | N/A | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -104,7 +104,6 @@
 | pre-commit.ts | N/A | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | N/A | scripts/hooks/pre-push.ts | bun |
 | propagate-to-templates.ts | N/A | scripts/propagate-to-templates.ts | N/A |
-| publish-to-template.ts | 1.8.0 | scripts/publish-to-template.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | N/A | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | N/A | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

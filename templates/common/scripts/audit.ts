@@ -1,4 +1,4 @@
-// @version 2.6.6
+// @version 2.7.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -546,41 +546,6 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
     }
 }
 
-// Script sync check: workspace root scripts/ vs templates/common/scripts/
-function checkScriptSync() {
-    const rootScriptsDir = 'scripts';
-    const templateScriptsDir = path.join('templates', 'common', 'scripts');
-
-    if (!fs.existsSync(rootScriptsDir) || !fs.existsSync(templateScriptsDir)) {
-        return; // Not applicable in this context
-    }
-
-    const rootFiles = new Set(
-        fs.readdirSync(rootScriptsDir).filter(f => f.endsWith('.ts'))
-    );
-    const templateFiles = new Set(
-        fs.readdirSync(templateScriptsDir).filter(f => f.endsWith('.ts'))
-    );
-
-    const sharedFiles = [...rootFiles].filter(f => templateFiles.has(f));
-
-    let divergentCount = 0;
-    for (const file of sharedFiles) {
-        const rootContent = fs.readFileSync(path.join(rootScriptsDir, file));
-        const templateContent = fs.readFileSync(path.join(templateScriptsDir, file));
-        const rootHash = crypto.createHash('sha256').update(rootContent).digest('hex');
-        const templateHash = crypto.createHash('sha256').update(templateContent).digest('hex');
-        if (rootHash !== templateHash) {
-            Fail(`Script sync: scripts/${file} differs from templates/common/scripts/${file}`);
-            divergentCount++;
-        }
-    }
-
-    if (divergentCount === 0) {
-        Pass(`Script sync: workspace root and templates/common/scripts/ are in sync (${sharedFiles.length} shared files)`);
-    }
-}
-
 // L2 variant structural integrity check
 function checkL2VariantIntegrity() {
   const templatesDir = 'templates';
@@ -731,7 +696,7 @@ function checkStaleShellReferences() {
     }
 }
 checkStaleShellReferences();
-checkScriptSync();
+// Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
 checkL2VariantIntegrity();
 checkVariantContextGuidelinesSection();
 }

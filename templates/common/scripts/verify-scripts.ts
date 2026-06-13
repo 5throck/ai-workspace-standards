@@ -187,7 +187,7 @@ function checkDriftReport(): void {
       const sign = diff >= 0 ? "+" : "";
       console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
     }
-    console.log("\n   Fix: edit L0 (workspace scripts/) then run publish-to-template.sh to push to L1.\n");
+    console.log("\n   Fix: edit L0 (workspace scripts/) then run bun run propagate:apply to push to L1.\n");
   }
 
   if (clean.length > 0) {

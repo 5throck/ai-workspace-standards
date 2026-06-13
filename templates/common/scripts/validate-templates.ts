@@ -2103,9 +2103,9 @@ function checkDocumentCommonSections(variant: string): void {
       const variantSection = variantSections.find(s => s.heading === heading);
 
       if (!variantSection) {
-        warn(variant, 'VA-05', `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run publish-to-template -- --docs' to sync`, `bun run publish-to-template -- --docs`);
+        warn(variant, 'VA-05', `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run propagate:docs' to sync`, `bun run propagate:docs`);
       } else if (variantSection.content !== rootBlock) {
-        warn(variant, 'VA-05', `${docFile}: common section "${heading}" differs from root — run 'bun run publish-to-template -- --docs' to sync`, `bun run publish-to-template -- --docs`);
+        warn(variant, 'VA-05', `${docFile}: common section "${heading}" differs from root — run 'bun run propagate:docs' to sync`, `bun run propagate:docs`);
       } else {
         pass(`VA-05: ${variant} ${docFile} common section "${heading}" in sync`);
       }

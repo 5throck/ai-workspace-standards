@@ -15,7 +15,8 @@
       "source": "scripts/hooks",
       "target": "templates/common/scripts/hooks",
       "include_pattern": "*.ts",
-      "recursive": false
+      "recursive": false,
+      "exclude": ["pre-commit.ts", "pre-push.ts"]
     },
     "scripts-helpers": {
       "description": "Helper/utility scripts used by scaffolding",
@@ -88,6 +89,30 @@
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
       "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+    },
+    "skills": {
+      "description": "L0 skills/ → L1 templates/common/skills/",
+      "source": "skills",
+      "target": "templates/common/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": ["local", "external"]
+    },
+    "claude-commands": {
+      "description": "L0 .claude/commands/ → L1 templates/common/.claude/commands/",
+      "source": ".claude/commands",
+      "target": "templates/common/.claude/commands",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "exclude": []
+    },
+    "gemini-commands": {
+      "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",
+      "source": ".gemini/commands",
+      "target": "templates/common/.gemini/commands",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "exclude": []
     }
   }
 }

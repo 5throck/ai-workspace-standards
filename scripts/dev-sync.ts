@@ -139,7 +139,7 @@ const isL0Context = fs.existsSync('CONSTITUTION.md');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
     try {
-        const publishRes = await $`bun scripts/publish-to-template.ts`.nothrow();
+        const publishRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
         if (publishRes.exitCode !== 0) {
             if (isL0Context) {
                 console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);

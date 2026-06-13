@@ -8,8 +8,7 @@
 **Every new project starts with a project scaffolding command:**
 
 - **Claude Code**: `/new-project` (slash command in `.claude/commands/`)
-- **macOS / Linux**: `bash scripts/new-project.sh "<project-name>"`
-- **Windows**: `.\scripts\new-project.ps1 "<project-name>"`
+- **CLI (cross-platform)**: `bun scripts/new-project.ts "<project-name>"`
 
 The script copies [`templates/`](templates/) directly into the new project directory,
 substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
@@ -29,7 +28,7 @@ live there as **real, editable files** (not embedded strings).
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
-| `scripts/` | audit, dev-sync, sync-md (.sh + .ps1) | Ready to use |
+| `scripts/` | audit, dev-sync, sync-md (.ts) | Ready to use |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
 | `CHANGELOG.md` | User-visible change history | Ready to use |
 | `README.md` | GitHub landing page | Fill in project description |
@@ -59,8 +58,7 @@ live there as **real, editable files** (not embedded strings).
 □ README.md - project description filled in
 
 □ Final validation
-    □ macOS/Linux : bash scripts/audit.sh    → must exit 0
-      Windows     : .\scripts\audit.ps1   → must exit 0
+    □ bun scripts/audit.ts    → must exit 0
     □ git config core.hooksPath .githooks    (already set by script - verify it stuck)
 
 ---
