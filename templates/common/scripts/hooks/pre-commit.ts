@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.4
+ * @version 1.5.5
  */
 
 import { $ } from "bun";
@@ -138,7 +138,7 @@ async function main() {
   }
 
   const templateStaged = staged.filter(f => /^templates\//.test(f.replace(/\\/g, '/')));
-  if (templateStaged.length > 0) {
+  if (templateStaged.length > 0 && existsSync('scripts/validate-templates.ts')) {
     console.log("\n=== Template Lifecycle Validation ===");
     try {
       await $`bun scripts/validate-templates.ts`;
@@ -210,7 +210,7 @@ async function main() {
           const fd = err.fixData;
           if (fd) {
             console.error(`[FAIL] ${err.file}: @version ${fd.fileVersion} does not match SCRIPTS.md entry ${fd.registryVersion}`);
-            console.error(`  → Fix: bun scripts/fix-script-versions.ts --script ${fd.scriptName}`);
+            console.error(`  → Fix: ${existsSync('scripts/fix-script-versions.ts') ? `bun scripts/fix-script-versions.ts --script ${fd.scriptName}` : `update the @version header in ${fd.scriptName} to match SCRIPTS.md`}`);
           } else {
             console.error(`[FAIL] ${err.file}: ${err.message}`);
           }
@@ -271,7 +271,9 @@ async function main() {
         /(password|passwd|secret|api_key|apikey|access_token|auth_token)\s*=\s*['"][^'"]{8,}['"]/i,
         /AKIA[0-9A-Z]{16}/,
         /ghp_[0-9a-zA-Z]{36}/,
-        /sk-[0-9a-zA-Z]{48}/
+        /sk-[0-9a-zA-Z]{48}/,
+        /sk-ant-[a-zA-Z0-9\-_]{95,}/,    // H-07: Anthropic API keys (sk-ant-api03-...)
+        /sk-proj-[a-zA-Z0-9\-_]{48,}/,   // H-07: Anthropic project keys
       ];
       for (const p of patterns) {
         if (p.test(added)) {

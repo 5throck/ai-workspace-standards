@@ -440,10 +440,10 @@ const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
 
 // Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
 const contextTemplatePath = join(workspaceRoot, 'templates', 'common', 'docs', 'variant.context.template.md');
-if (existsSync(contextTemplatePath)) {
+if (existsSync(contextTemplatePath) && !existsSync(variantContextMd)) {
   applyContextTemplate(contextTemplatePath, variantContextMd, {
     variantName: variant,
-    version: '1.0',
+    version: templateVersion,
     pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? 'Workflow management, dispatch, quality gates',
   });
   console.log(`  ✅ context.md generated from canonical template`);

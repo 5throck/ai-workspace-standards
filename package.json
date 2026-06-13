@@ -35,6 +35,7 @@
     "propagate:governance": "bun scripts/propagate-to-templates.ts --governance-l1 --apply",
     "propagate:docs": "bun scripts/propagate-to-templates.ts --docs --apply",
     "propagate:drift": "bun scripts/propagate-to-templates.ts --check-drift",
+    "propagate:prune": "bun scripts/propagate-to-templates.ts --prune --apply",
     "validate-templates": "bun scripts/validate-templates.ts",
     "version-manifest": "bun scripts/generate-version-manifest.ts",
     "translate-readme": "bun scripts/translate-readme.ts",
