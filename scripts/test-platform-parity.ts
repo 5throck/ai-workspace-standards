@@ -5,7 +5,7 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @author automation-engineer
  * @license MIT
  *
@@ -506,8 +506,9 @@ function checkParity(
   tier: 'L0→L1' | 'L0→L2'
 ): ParityCheckResult {
   // Extract filename from path (e.g., 'agents/pm.md' from '/path/to/agents/pm.md')
-  const filename = sourceFile.split('/').slice(-2).join('/');
-  const rules = PARITY_RULES[filename] || PARITY_RULES[sourceFile.split('/').pop() || ''];
+  const normalizedSourceFile = sourceFile.replace(/\\/g, '/');
+  const filename = normalizedSourceFile.split('/').slice(-2).join('/');
+  const rules = PARITY_RULES[filename] || PARITY_RULES[normalizedSourceFile.split('/').pop() || ''];
 
   if (!rules) {
     return {

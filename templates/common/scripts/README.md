@@ -117,7 +117,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `test-platform-parity.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
+| `test-platform-parity.ts` | L0 | 0.2.2 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
