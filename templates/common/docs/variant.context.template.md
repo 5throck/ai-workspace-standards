@@ -29,6 +29,10 @@
 <!-- Add/remove rows as agents are introduced or retired via lifecycle management. -->
 <!-- Status: active | deprecated | experimental -->
 
+<!-- context-proximity: This table intentionally mirrors AGENTS.md for AI context window efficiency.
+     AI tools can read the full agent roster without loading AGENTS.md separately.
+     Authoritative definitions: agents/*.md (full role specs) | AGENTS.md (roster + dispatch rules)
+     Keep in sync with AGENTS.md when adding/removing agents. -->
 <!-- VARIANT-INJECT: agents -->
 | Agent | File | Role | Status |
 |-------|------|------|--------|

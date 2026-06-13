@@ -67,7 +67,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -368,6 +368,37 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
   - `bun scripts/validate-pm-extends.ts` (validate all pm.md files)
   - `bun scripts/validate-pm-extends.ts agents/pm.md` (validate specific file)
   - `bun scripts/validate-pm-extends.ts --json` (CI/CD friendly output)
+
+---
+
+### Propagation Scripts (Bun / TypeScript)
+
+#### `propagate-to-templates.ts`
+**Purpose**: Publishes L0 workspace scripts and governance docs to L1 (`templates/common/`) and propagates L1 changes to L2 variant projects. This is the consolidated propagation tool invoked via `bun run propagate:apply`.
+**Usage**: `bun scripts/propagate-to-templates.ts [flags]`
+**Layer**: L0 (workspace infrastructure only — not copied to templates/common/ or L2 projects)
+**Aliases**: `bun run propagate:apply` (--apply), `bun run propagate:dry-run` (--dry-run)
+
+**Flag → Layer/Phase Mapping**:
+
+| Flag | Layer Operation | Phase Context |
+|------|----------------|---------------|
+| `--apply` | L0 → L1(common) sync | Phase A: install scripts into common template |
+| `--dry-run` | L0 → L1(common) diff | Any phase: preview changes before applying |
+| `--governance-l1` | L0 governance → L1(common) | Phase A: deploy CLAUDE.md/GEMINI.md/AGENTS.md to L1 |
+| `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
+| `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
+| `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
+
+**Typical workflow**:
+```bash
+bun scripts/propagate-to-templates.ts --dry-run          # preview L0→L1 changes
+bun scripts/propagate-to-templates.ts --apply            # publish scripts L0→L1
+bun scripts/propagate-to-templates.ts --governance-l1    # publish governance docs L0→L1
+bun scripts/propagate-to-templates.ts --docs             # inject COMMON markers into variants (Phase B)
+bun scripts/propagate-to-templates.ts --prune            # remove orphan files from L1
+bun scripts/propagate-to-templates.ts --check-drift      # report L1 vs L2 drift
+```
 
 ---
 

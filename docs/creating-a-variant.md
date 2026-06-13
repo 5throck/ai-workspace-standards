@@ -7,6 +7,17 @@ This guide walks you through creating a new variant under `templates/`. Follow e
 - Understand the existing variants: `co-work`, `co-design`, `co-develop`, `co-security`
 - Read `docs/templates/common-contract.json` to know which agents and skills are inherited automatically
 
+> **Naming constraint** (enforced by `l2-to-variant-pipeline.ts` since Wave 1, security fix C-09):
+> All variant names MUST match the regex `^co-[a-z][a-z0-9-]{1,30}$` — that is, start with `co-`
+> followed by a lowercase letter and 1–30 lowercase alphanumeric/hyphen characters.
+> Valid examples: `co-develop`, `co-safety`, `co-design`.
+> Invalid: `my-variant`, `codevelop`, `co_develop`.
+
+> **Conditional context.md generation** (introduced in Wave 1, fix C-03):
+> When `new-project.ts` runs, it creates `<variant>.context.md` **only if the file does not already exist**.
+> An existing file is preserved unchanged. To force regeneration from the canonical template, delete
+> the existing file first: `rm docs/<variant>.context.md && bun scripts/new-project.ts <name> <variant>`
+
 ---
 
 ## Step 1 — Scaffold from the common template

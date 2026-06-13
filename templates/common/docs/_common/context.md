@@ -141,8 +141,8 @@ All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 This project follows the workspace coding standards defined in [`workspace standards §8`](../../docs/constitution/08-coding-guidelines.md).
 
 Key rules:
-- All scripts must be provided as `.sh` / `.ps1` pairs
-- PowerShell scripts: `param()` block must be the first executable statement; `$OutputEncoding` follows after
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
 - All text files saved as **UTF-8 (without BOM)**
 - Commit messages and PR artifacts in **English only**
 
