@@ -350,57 +350,10 @@ for (const f of walkFiles(projectDir)) {
 
 // ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ──────────────────
 if (existsSync(variantJsonPath)) {
-  spawnSync('bun', ['-', commonDir, templatesDir, projectDir], {
+  const agentOverrideMerge = join(workspaceRoot, 'scripts', 'lib', 'agent-override-merge.ts');
+  spawnSync('bun', [agentOverrideMerge, commonDir, templatesDir, projectDir], {
     encoding: 'utf8',
     stdio: 'inherit',
-    input: `
-const fs = require('fs');
-const path = require('path');
-const [,, commonDir, variantDir, projectDir] = process.argv;
-const variantJsonPath = path.join(variantDir, 'variant.json');
-if (!fs.existsSync(variantJsonPath)) process.exit(0);
-const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
-const overrides = variant.agent_overrides || {};
-for (const [agentName, override] of Object.entries(overrides)) {
-  if (override.type !== 'additive') continue;
-  const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
-  const variantFile = path.join(variantDir, 'agents', agentName + '.md');
-  const outFile = path.join(projectDir, 'agents', agentName + '.md');
-  if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile) || !fs.existsSync(outFile)) continue;
-  const variantContent = fs.readFileSync(variantFile, 'utf8');
-  if (variantContent.match(/^---\\n[\\s\\S]*?^extends:/m)) {
-    console.log('  [SKIP-ADDITIVE] agents/' + agentName + '.md (uses extends pattern)');
-    continue;
-  }
-  let skeleton = fs.readFileSync(skeletonFile, 'utf8');
-  const yaml = require('js-yaml');
-  function parseFrontmatter(content) {
-    const match = content.match(/^---\\n([\\s\\S]*?)\\n---\\n?/);
-    if (!match) return { fm: {}, body: content };
-    try { return { fm: yaml.load(match[1]) || {}, body: content.slice(match[0].length) }; }
-    catch { return { fm: {}, body: content }; }
-  }
-  const { fm: skelFm, body: skelBody } = parseFrontmatter(skeleton);
-  const { fm: varFm, body: varBody } = parseFrontmatter(variantContent);
-  const mergedFm = { ...skelFm, ...varFm };
-  const hasFm = Object.keys(mergedFm).length > 0;
-  const fmStr = hasFm ? '---\\n' + yaml.dump(mergedFm).trimEnd() + '\\n---\\n' : '';
-  skeleton = fmStr + skelBody;
-  const allSections = {};
-  const lines = varBody.split('\\n');
-  let cur = null, curLines = [];
-  for (const line of lines) {
-    if (line.startsWith('## ')) { if (cur) allSections[cur] = curLines.join('\\n'); cur = line.slice(3).trim(); curLines = [line]; } else if (cur) curLines.push(line);
-  }
-  if (cur) allSections[cur] = curLines.join('\\n');
-  const headingMap = { 'agent-roster': 'Agent Roster', 'governance-workflow': 'Governance Workflow', 'dispatch-protocol': 'Dispatch Protocol' };
-  skeleton = skeleton.replace(/<!-- VARIANT-SECTION: ([\\w-]+) -->([\\s\\S]*?)<!-- END VARIANT-SECTION -->/g, (m, id) => {
-    const h = headingMap[id]; return (h && allSections[h]) ? allSections[h] : '';
-  });
-  fs.writeFileSync(outFile, skeleton, 'utf8');
-  console.log('  [SECTION-MERGE] agents/' + agentName + '.md');
-}
-`,
   });
 }
 

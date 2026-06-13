@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T21:10:18.488Z
+**Generated**: 2026-06-13T21:23:16.719Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 92
+- **Scripts**: 94
 - **Commands**: 6
 
 ---
@@ -63,6 +63,7 @@
 | agent-delete.ts | 1.0.0 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.2 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
+| agent-override-merge.ts | 1.0.0 | scripts/lib/agent-override-merge.ts | js-yaml |
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
@@ -104,6 +105,7 @@
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
 | propagate-to-templates.ts | 2.0.6 | scripts/propagate-to-templates.ts | N/A |
+| propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.1.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
@@ -138,9 +140,9 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | 1.0.0 | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |
-| validate-pm-extends.ts | 0.2.0 | scripts/validate-pm-extends.ts | N/A |
+| validate-pm-extends.ts | 0.2.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.5 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.6 | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | 1.1.0 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.0 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.0 | scripts/verify-memory.ts | fs, path |

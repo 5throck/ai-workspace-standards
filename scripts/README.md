@@ -96,10 +96,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `lib/agent-override-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.1.3 | active | —| —| L0 | —|
@@ -129,7 +131,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.5 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.6 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -138,7 +140,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validate-pm-extends.ts` | L0 | 0.2.0 | active | —| —| L0+L1 | —|
+| `validate-pm-extends.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
 
 ---
 

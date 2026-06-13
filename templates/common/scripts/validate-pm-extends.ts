@@ -7,7 +7,7 @@
  * Validates pm.md extends chains for correctness and compliance.
  * Implements validation rules from ADR-0033.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @author automation-engineer
  *
  * Usage:
@@ -37,6 +37,20 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
+
+/**
+ * Returns true if the file was pre-resolved by resolve-variants.ts.
+ * Pre-resolved files have a `# @resolved-from:` header as their first line.
+ * These are valid chain endpoints — parity is satisfied by construction.
+ */
+function isResolvedFile(filePath: string): boolean {
+  try {
+    const firstLine = readFileSync(filePath, 'utf-8').split('\n')[0];
+    return firstLine.startsWith('# @resolved-from:');
+  } catch {
+    return false;
+  }
+}
 
 interface ValidationResult {
   file: string;
@@ -164,6 +178,14 @@ function buildExtendsChain(
   }
 
   visited.add(filePath);
+
+  // Pre-resolved files (# @resolved-from: header) are valid chain endpoints.
+  // The extends chain was already baked by resolve-variants.ts — no further traversal needed.
+  if (isResolvedFile(filePath)) {
+    chain.push(filePath);
+    visited.delete(filePath);
+    return { chain, errors, depth };
+  }
 
   // Check file existence
   if (!existsSync(filePath)) {
