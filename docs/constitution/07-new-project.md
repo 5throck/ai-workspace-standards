@@ -62,4 +62,34 @@ live there as **real, editable files** (not embedded strings).
     □ macOS/Linux : bash scripts/audit.sh    → must exit 0
       Windows     : .\scripts\audit.ps1   → must exit 0
     □ git config core.hooksPath .githooks    (already set by script - verify it stuck)
+
+---
+
+## Variant Context Template (SSOT)
+
+The canonical template for all variant `<variant>.context.md` files is:
+
+```
+templates/common/docs/variant.context.template.md
+```
+
+### VARIANT-INJECT Governance
+
+Variant-specific sections are marked with inject markers:
+
+```
+<!-- VARIANT-INJECT: <key> [REQUIRED|OPTIONAL] -->
+...content...
+<!-- END VARIANT-INJECT -->
+```
+
+| Classification | Meaning | Enforcement |
+|----------------|---------|-------------|
+| `REQUIRED` | Every variant must implement this section | `audit.ts` flags absence |
+| `OPTIONAL` | Variant may include between standard sections | No enforcement |
+
+**Required inject blocks** (every variant must have):
+- `guidelines [REQUIRED]` — domain-specific rules section (Coding / Consulting / Security / Design / Writing)
+
+**Generation**: `new-project.ts` and `generate-variant.ts` both call `applyContextTemplate()` from `scripts/helpers/template-utils.ts` to render `<variant>.context.md` from this template.
 ```

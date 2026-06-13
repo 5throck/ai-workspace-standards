@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-12T05:50:46.589Z
+**Generated**: 2026-06-13T00:35:31.228Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 92
+- **Scripts**: 93
 - **Commands**: 6
 
 ---
@@ -96,7 +96,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.0.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.1.0 | scripts/new-project.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | N/A | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
@@ -124,6 +124,7 @@
 | sync-skills.ts | N/A | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | N/A | scripts/team-builder.ts | fs, path |
+| template-utils.ts | N/A | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | N/A | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | N/A | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | N/A | scripts/test-new-project.ts | bun |

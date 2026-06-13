@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -11,6 +11,7 @@ import {
 } from 'node:fs';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync, execSync } from 'node:child_process';
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.js';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -436,6 +437,19 @@ if (existsSync(pkgJson)) {
 const versionFile = join(workspaceRoot, 'templates', 'VERSION');
 const templateVersion = templateVer || (existsSync(versionFile) ? readFileSync(versionFile, 'utf8').trim() : 'unknown');
 const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
+
+// Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
+const contextTemplatePath = join('templates', 'common', 'docs', 'variant.context.template.md');
+if (existsSync(contextTemplatePath)) {
+  applyContextTemplate(contextTemplatePath, variantContextMd, {
+    variantName: variant,
+    version: '1.0',
+    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? 'Workflow management, dispatch, quality gates',
+  });
+  console.log(`  ✅ context.md generated from canonical template`);
+}
+
+
 if (existsSync(variantContextMd)) {
   const ctx = readFileSync(variantContextMd, 'utf8');
   if (!ctx.includes('Template-Version:')) {
