@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0039: L0→L1→L2 Hierarchy and Extends Implementation
 
 **Status**: Implemented

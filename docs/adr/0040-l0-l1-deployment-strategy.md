@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0040: L0→L1 Deployment Strategy
 
 ## Metadata

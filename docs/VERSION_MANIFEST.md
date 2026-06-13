@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T08:00:48.720Z
+**Generated**: 2026-06-13T08:17:09.005Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-06-05 |
-| auditor | agents/auditor.md | medium | inherit | 2026-06-01 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-01 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-01 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-06 |
+| architect | agents/architect.md | high | inherit | 2026-06-13 |
+| auditor | agents/auditor.md | medium | inherit | 2026-06-13 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-13 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
 | pm | agents/pm.md | high | inherit | 2026-06-13 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-06-01 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
 ---
 
@@ -103,7 +103,7 @@
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.5 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.1 | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | 2.0.3 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.4 | scripts/propagate-to-templates.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.1.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

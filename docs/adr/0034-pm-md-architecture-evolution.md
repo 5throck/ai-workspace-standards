@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0034: PM.md Architecture Evolution (v1.0 → v2.0)
 
 **Status**: Proposed

@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0035: AGENTS.md Structural Redesign
 
 ## Status
