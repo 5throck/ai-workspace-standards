@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T03:54:56.335Z
+**Generated**: 2026-06-13T08:00:48.720Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -66,7 +66,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.7.0 | scripts/audit.ts | bun |
+| audit.ts | 2.7.1 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -96,14 +96,14 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.1.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.1.1 | scripts/new-project.ts | N/A |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.5 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.0 | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | 2.0.2 | scripts/propagate-to-templates.ts | N/A |
+| pre-push.ts | 1.2.1 | scripts/hooks/pre-push.ts | bun |
+| propagate-to-templates.ts | 2.0.3 | scripts/propagate-to-templates.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.1.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |

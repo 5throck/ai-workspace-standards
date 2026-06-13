@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.0
+ * @version 1.2.1
  */
 
 import { $ } from "bun";
@@ -26,6 +26,21 @@ async function isTagOnlyPush(): Promise<boolean> {
 
 async function main() {
   console.log("=== pre-push audit ===");
+
+  // Secret scan (gitleaks) — skip if not installed
+  try {
+    await $`which gitleaks`;
+    try {
+      await $`gitleaks detect --source . --no-git --redact`;
+      console.log("  ✅ Secret scan passed");
+    } catch {
+      console.error("\n\x1b[31m❌ Secret scan failed — push blocked. Run 'gitleaks detect' to see detected secrets.\x1b[0m");
+      process.exit(1);
+    }
+  } catch {
+    // gitleaks not installed — skip silently
+  }
+
   try {
     await $`bun scripts/audit.ts`;
   } catch {

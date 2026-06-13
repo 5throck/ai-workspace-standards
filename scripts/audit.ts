@@ -1,9 +1,9 @@
-// @version 2.7.0
+// @version 2.7.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 import * as url from 'node:url';
 
@@ -867,7 +867,7 @@ if (fs.existsSync('templates')) {
             } else if (stat.isFile()) {
                 if (item.endsWith('.sh') || item.endsWith('.ps1')) {
                     try {
-                        const out = execSync(`git ls-files --stage "${itemPath.replace(/\\/g, '/')}"`, { encoding: 'utf-8' });
+                        const out = execFileSync('git', ['ls-files', '--stage', itemPath.replace(/\\/g, '/')], { encoding: 'utf-8' });
                         if (out.startsWith('100644')) {
                             Fail(`Template script lost executable bit: ${itemPath}`);
                             executableErrors++;
@@ -891,7 +891,7 @@ if (fs.existsSync('templates')) {
     if (fs.existsSync(versionFile)) {
         try {
             const version = fs.readFileSync(versionFile, 'utf-8').trim();
-            const tagOut = execSync(`git tag -l "template-v${version}"`, { encoding: 'utf-8' }).trim();
+            const tagOut = execFileSync('git', ['tag', '-l', `template-v${version}`], { encoding: 'utf-8' }).trim();
             if (tagOut === '') {
                 Warn(`Template version ${version} in templates/VERSION has no corresponding git tag. Run: bun scripts/tag-template.ts`);
             } else {
@@ -910,12 +910,12 @@ if (fs.existsSync('templates')) {
         : [];
     if (shFiles.length > 0) {
         try {
-            execSync('which shellcheck', { stdio: 'ignore' });
+            execFileSync('which', ['shellcheck'], { stdio: 'ignore' });
             // shellcheck available
             let scErrors = 0;
             for (const shFile of shFiles) {
                 try {
-                    execSync(`shellcheck --shell=bash "${shFile}"`, { encoding: 'utf-8', stdio: 'pipe' });
+                    execFileSync('shellcheck', ['--shell=bash', shFile], { encoding: 'utf-8', stdio: 'pipe' });
                 } catch (e: any) {
                     Fail(`shellcheck: ${shFile}\n${e.stdout || e.message}`);
                     scErrors++;
