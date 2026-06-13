@@ -7,7 +7,7 @@ status: "Accepted"
 **Status**: Proposed
 **Date**: 2026-06-08
 **Context**: PM.md operations design improvements (June 7-8, 2026 meetings)
-**Related ADRs**: ADR-0031 (L1-L2 Fork Model), ADR-0033 (L0-L1-L2 Hierarchy)
+**Related ADRs**: ADR-0031 (L1-L2 Fork Model), ADR-0039 (L0-L1-L2 Hierarchy and Extends)
 
 ---
 
@@ -412,7 +412,7 @@ const LOCALES = {
 - **Meeting 1**: pm-md-operations-guide design content review (2026-06-08)
 - **Meeting 2**: pm-md-operations-guide additional improvements review (2026-06-08)
 - **Design Document**: docs/designs/pm-md-operations-guide.md
-- **Related ADRs**: ADR-0031, ADR-0033
+- **Related ADRs**: ADR-0031, ADR-0039
 
 ---
 
