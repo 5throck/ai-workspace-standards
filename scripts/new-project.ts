@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.1.2
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -277,6 +277,14 @@ if (existsSync(memoryDir)) {
   console.log('  🗑️  Cleared memory/*.md (new projects start with empty memory/)');
 }
 
+// ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
+const commonDocs = join(projectDir, 'docs', '_common');
+if (existsSync(commonDocs)) {
+  copyDir(commonDocs, join(projectDir, 'docs'));
+  rmSync(commonDocs, { recursive: true });
+  console.log('  ✅ docs/_common/ → docs/ (flattened)');
+}
+
 // ── 2. Overlay variant/ on top ────────────────────────────────────────────────
 if (!existsSync(templatesDir)) {
   console.error(`❌ Variant templates directory not found: ${templatesDir}`);
@@ -299,7 +307,7 @@ const pmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(pmMd)) {
   const yaml = require('js-yaml');
   let content = readFileSync(pmMd, 'utf8');
-  content = content.replace(/^# @resolved-from:.*\n/, '');
+  content = content.replace(/^# @resolved-from:.*\n/m, '');
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
     const fm: Record<string, unknown> = yaml.load(match[1]) || {};
@@ -313,15 +321,7 @@ if (existsSync(pmMd)) {
   console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, lifecycle, formal_name, variant)');
 }
 
-// ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
-const commonDocs = join(projectDir, 'docs', '_common');
-if (existsSync(commonDocs)) {
-  copyDir(commonDocs, join(projectDir, 'docs'));
-  rmSync(commonDocs, { recursive: true });
-  console.log('  ✅ docs/_common/ → docs/ (flattened)');
-}
-
-// ── 2.6b. Remove template-only docs/ subdirs (may be re-added by variant overlay)
+// ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
 for (const d of ['docs/adr', 'docs/specs', 'docs/variants', 'docs/_templates', 'docs/_examples']) {
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Removed template-only dir: ${d}`); }
@@ -565,9 +565,11 @@ console.log('  ✅ All security bootstrap checks passed');
 
 // ── 8. Post-scaffold audit ────────────────────────────────────────────────────
 console.log('\nRunning post-scaffold audit…');
-process.chdir(workspaceRoot);
-const auditResult = spawnSync('bun', [join(workspaceRoot, 'scripts', 'audit.ts'), '--skip-memory'], { stdio: 'inherit' });
-process.chdir(projectDir);
+// Run the new project's own audit to validate the scaffold result
+const projectAuditScript = join(projectDir, 'scripts', 'audit.ts');
+const workspaceAuditScript = join(workspaceRoot, 'scripts', 'audit.ts');
+const auditScript = existsSync(projectAuditScript) ? projectAuditScript : workspaceAuditScript;
+const auditResult = spawnSync('bun', [auditScript, '--skip-memory'], { stdio: 'inherit', cwd: projectDir });
 
 if (auditResult.status === 0) {
   console.log(`\n✅ Project '${projectName}' scaffolded and verified at: ${projectDir}`);
