@@ -1,8 +1,8 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.0.0
+ * @version 1.0.1
  */
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 
@@ -56,10 +56,11 @@ export async function runTests(suiteName: string): Promise<boolean> {
   try {
     for (const file of files) {
       console.log(`  Running: ${file}`);
-      execSync('bun', ['test', file], {
+      const result = spawnSync('bun', ['test', file], {
         stdio: 'inherit',
         timeout: suite.timeout
       });
+      if (result.status !== 0) throw new Error(`Test failed: ${file}`);
     }
     console.log(`✓ ${suiteName} suite passed`);
     return true;

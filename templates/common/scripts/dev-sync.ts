@@ -1,4 +1,4 @@
-// @version 1.2.2
+// @version 1.2.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -208,7 +208,7 @@ try {
     process.exit(1);
 }
 
-const syncContext = Date.now().toString();
+const syncContext = crypto.randomUUID();
 process.env.SYNC_ACTIVE = "1";
 process.env.DEV_SYNC_CONTEXT = syncContext;
 fs.writeFileSync('.sync_context.tmp', syncContext);

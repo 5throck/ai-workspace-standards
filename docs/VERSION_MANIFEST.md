@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T08:34:08.135Z
+**Generated**: 2026-06-13T09:04:40.433Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -64,7 +64,7 @@
 | agent-lifecycle-audit.ts | 1.1.2 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
-| analyze-git-history.ts | 1.0.0 | scripts/analyze-git-history.ts | child_process |
+| analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.7.1 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
@@ -72,7 +72,7 @@
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.5.0 | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.2 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.3 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -84,7 +84,7 @@
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.2.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
-| ingest-external-skills.ts | 1.0.0 | scripts/ingest-external-skills.ts | N/A |
+| ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.0 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
@@ -102,7 +102,7 @@
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.5 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.1 | scripts/hooks/pre-push.ts | bun |
+| pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
 | propagate-to-templates.ts | 2.0.4 | scripts/propagate-to-templates.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
@@ -128,7 +128,7 @@
 | test-extends-validator.ts | 1.0.0 | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | 1.0.3 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.2 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.0.0 | scripts/test-runner.ts | child_process, fs, path |
+| test-runner.ts | 1.0.1 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
 | upgrade-project.ts | 1.0.0 | scripts/upgrade-project.ts | N/A |

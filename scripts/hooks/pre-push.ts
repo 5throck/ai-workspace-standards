@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.1
+ * @version 1.2.2
  */
 
 import { $ } from "bun";
@@ -38,7 +38,16 @@ async function main() {
       process.exit(1);
     }
   } catch {
-    // gitleaks not installed — skip silently
+    // gitleaks not installed — run minimal regex fallback
+    console.warn("  ⚠️  gitleaks not installed — running regex secret scan fallback");
+    const { stdout } = await $`git grep -rn -E "sk-ant-api03-[A-Za-z0-9_-]{93}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-proj-[A-Za-z0-9_-]+" -- "*.ts" "*.json"`.nothrow();
+    const matches = stdout.toString().trim();
+    if (matches) {
+      console.error("\n\x1b[31m❌ Potential secrets found — push blocked. Install gitleaks for full coverage.\x1b[0m");
+      console.error(matches.split('\n').slice(0, 5).join('\n'));
+      process.exit(1);
+    }
+    console.log("  ✅ Regex secret scan passed (install gitleaks for full coverage)");
   }
 
   try {

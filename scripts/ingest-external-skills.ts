@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // ingest-external-skills.ts - Phase 4 variant-specific external skills ingestion
-// @version 1.0.0
+// @version 1.0.1
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -14,11 +14,19 @@ const RESET  = '\x1b[0m';
 console.log(`${CYAN}🚀 Ingesting External Skills & Scripts...${RESET}`);
 
 const workspaceRoot = path.resolve(import.meta.dir, '..');
-const templatesDir = path.join(workspaceRoot, 'templates');
+const templatesDir = path.resolve(path.join(workspaceRoot, 'templates'));
 
 if (!fs.existsSync(templatesDir)) {
   console.log(`${RED}templates directory not found.${RESET}`);
   process.exit(1);
+}
+
+function safeResolvePath(base: string, variant: string, ingestPath: string): string {
+  const resolved = path.resolve(path.join(base, variant, ingestPath));
+  if (!resolved.startsWith(templatesDir + path.sep) && resolved !== templatesDir) {
+    throw new Error(`Path traversal blocked: "${ingestPath}" resolves outside templates/`);
+  }
+  return resolved;
 }
 
 const variants = fs.readdirSync(templatesDir).filter(dir => dir.startsWith('co-'));
@@ -41,7 +49,7 @@ async function ingest() {
           continue;
         }
         const content = await response.text();
-        const targetPath = path.join(templatesDir, variant, skill.ingest_path);
+        const targetPath = safeResolvePath(templatesDir, variant, skill.ingest_path);
         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
         fs.writeFileSync(targetPath, content, 'utf-8');
         console.log(`${GREEN}Successfully ingested ${skill.name} -> ${skill.ingest_path}${RESET}`);
@@ -59,7 +67,7 @@ async function ingest() {
           continue;
         }
         const content = await response.text();
-        const targetPath = path.join(templatesDir, variant, script.ingest_path);
+        const targetPath = safeResolvePath(templatesDir, variant, script.ingest_path);
         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
         fs.writeFileSync(targetPath, content, 'utf-8');
         console.log(`${GREEN}Successfully ingested ${script.name} -> ${script.ingest_path}${RESET}`);
