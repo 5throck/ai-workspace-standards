@@ -68,6 +68,10 @@ jobs:
 
           Write-Host "✅ Tier 3 Auditor: All lifecycle checks passed" -ForegroundColor Green
 
+      - name: L0→L1 drift check (propagation-map integrity)
+        shell: bash
+        run: bun scripts/propagate-to-templates.ts --check-drift
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
