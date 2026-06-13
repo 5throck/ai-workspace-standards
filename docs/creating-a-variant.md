@@ -1,5 +1,7 @@
 # Creating a New Variant
 
+> **Governance workflow**: For the full 3-Phase PM governance process (Prototype → Refinement → Promotion), see [`variant-creation-workflow.md`](variant-creation-workflow.md).
+
 This guide walks you through creating a new variant under `templates/`. Follow every step — the post-scaffolding validator (`validate-templates.ts`) will catch omissions.
 
 ## Prerequisites

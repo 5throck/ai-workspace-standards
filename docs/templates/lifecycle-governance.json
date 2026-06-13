@@ -1,35 +1,67 @@
 {
-  "version": "1.0.0",
+  "version": "1.2.0",
+  "lastUpdated": "2026-06-13",
+  "status": "stable",
+  "description": "Lifecycle governance for the workspace — covers all layers (workspace-root, templates-common, templates-variants, l2-projects). SSOT referenced by validate-templates.ts and audit.ts.",
   "layers": {
-    "templates-variants": {
-      "orchestrator": null,
+    "workspace-root": {
+      "orchestrator": "scripts/audit.ts",
       "domains": {
-        "variant": {
-          "applicable": true,
-          "mandatory": true
-        },
-        "agent": {
-          "applicable": true,
-          "mandatory": true
-        },
-        "skill": {
-          "applicable": true,
-          "mandatory": true
-        },
-        "lifecycle": {
-          "applicable": true,
-          "mandatory": false
-        }
+        "variant": { "applicable": false },
+        "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
+        "skill": { "applicable": true, "tool": "scripts/skill-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": true, "currentStatus": "active" },
+        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" }
+      }
+    },
+    "templates-common": {
+      "orchestrator": "scripts/validate-templates.ts (checkGovernance)",
+      "domains": {
+        "variant": { "applicable": true, "tool": "common.lifecycle.json", "mandatory": true, "currentStatus": "active" },
+        "agent": { "applicable": false },
+        "skill": { "applicable": false },
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts (L0/L1 drift)", "mandatory": true, "currentStatus": "active" },
+        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" }
+      }
+    },
+    "templates-variants": {
+      "orchestrator": "scripts/validate-templates.ts",
+      "domains": {
+        "variant": { "applicable": true, "tool": "scripts/validate-templates.ts (checkVariantManifests)", "mandatory": true, "currentStatus": "active" },
+        "agent": { "applicable": true, "tool": "scripts/validate-templates.ts (checkAgents, checkAgentsRoster)", "mandatory": true, "currentStatus": "active" },
+        "skill": { "applicable": true, "tool": "scripts/validate-templates.ts (checkVariantSkills)", "mandatory": true, "currentStatus": "active" },
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": false, "currentStatus": "partial" },
+        "readme": { "applicable": true, "tool": "scripts/validate-templates.ts (checkReadmePresence)", "mandatory": true, "currentStatus": "active" }
+      }
+    },
+    "l2-projects": {
+      "orchestrator": "scripts/audit.ts (project copy)",
+      "domains": {
+        "variant": { "applicable": false },
+        "agent": { "applicable": true, "tool": "scripts/agent-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
+        "skill": { "applicable": true, "tool": "scripts/skill-lifecycle-audit.ts", "mandatory": true, "currentStatus": "active" },
+        "script": { "applicable": true, "tool": "scripts/verify-scripts.ts", "mandatory": false, "currentStatus": "gap" },
+        "readme": { "applicable": true, "tool": "scripts/readme-lifecycle-audit.ts", "mandatory": false, "currentStatus": "gap" }
       }
     }
   },
   "variantValidationPolicy": {
+    "description": "Which domain checks are mandatory for new-project.ts to allow project creation",
     "mandatoryBeforeProjectCreation": ["variant", "agent", "skill"],
-    "warningOnly": ["lifecycle"]
+    "warningOnly": ["script", "readme"]
   },
-  "status": "stable",
-  "lastUpdated": "2026-06-03",
-  "description": "Lifecycle governance for templates/common — L1 base layer propagated to all co-* variants",
+  "newVariantChecklist": [
+    "Create variant directory under templates/",
+    "Create variant.json with name, description, status, version, lifecycle.statusSince, lifecycle.lastTransition",
+    "Create agents/ directory with at least pm.md",
+    "Create AGENTS.md roster",
+    "Create skills/ directory with at least agent-lifecycle-manager",
+    "Create .claude/commands/meeting.md (copy from templates/common)",
+    "Create .gemini/commands/meeting.md (copy from templates/common)",
+    "Create docs/<variant>.context.md",
+    "Create README.md and README_ko.md",
+    "Run validate-templates.ts --variant <name> to verify all checks pass"
+  ],
   "history": [
     {
       "date": "2026-05-28",
@@ -44,37 +76,17 @@
     {
       "date": "2026-06-02",
       "event": "governance-tool-expansion",
-      "note": "validate-templates.ts v1.4.0: 4 new check functions added (VA-01, VA-02, VA-03, WS-03); new-project scripts v1.3.6/v1.5.8 now invoke post-scaffolding variant validation"
-    },
-    {
-      "date": "2026-06-02",
-      "event": "agent-teams-propagation",
-      "note": "Agent Teams (Experimental) section propagated to all 4 variant CLAUDE.md files; Agent Teams vs. Antigravity Agent Manager section propagated to all 4 variant GEMINI.md files. Reflects new hooks: TeammateIdle, TaskCompleted added to .claude/settings.json and templates/common/.claude/settings.json"
-    },
-    {
-      "date": "2026-06-02",
-      "event": "platform-settings-governance",
-      "note": "common-contract.json v1.1.0: added platform_settings section (SSOT for settings parity). All 8 variant .claude/settings.json and .gemini/settings.json updated with shared hooks (SessionStart, PostToolUse). CLAUDE.md + GEMINI.md §10 lifecycle tables updated. validate-templates.ts v1.4.2: added VA-04 check + getNestedKey helper."
-    },
-    {
-      "date": "2026-06-02",
-      "event": "gemini-settings-common-layer",
-      "note": "templates/common/.gemini/settings.json created (shared items: mcpServers, SessionStart, PostToolUse hooks). propagation-map.json: added gemini-settings domain. publish-to-template.ts v1.3.0: added --docs flag + publishDocs() + extractCommonSections() + replaceCommonSection(). validate-templates.ts v1.4.2: added VA-05 checkDocumentCommonSections + extractMarkedSections helper. .claude/settings.json (root + common + 4 variants): added asyncRewake, effortLevel, permissions.deny, WorktreeCreate hook; root also got worktree.bgIsolation. CLAUDE.md + GEMINI.md (root + 4 variants each): added COMMON-CLAUDE:START/END and COMMON-GEMINI:START/END markers."
+      "note": "validate-templates.ts v1.4.0: 4 new check functions added (VA-01, VA-02, VA-03, WS-03); new-project scripts now invoke post-scaffolding variant validation"
     },
     {
       "date": "2026-06-03",
       "event": "co-consult-variant-added",
-      "note": "co-consult variant (strategy consulting) added at v1.0.0 stable. 13 variant-specific skills created in templates/co-consult/.claude/skills/ and .gemini/skills/: competitive-intelligence, financial-modeling, insight-synthesis, stakeholder-alignment, org-readiness-assessment, change-impact-assessment, narrative-framework, consulting-report-writing, executive-presentation, solution-design, technical-feasibility, project-delivery, stakeholder-review-management. VERSION_REGISTRY.json: co-consult entry confirmed stable 1.0.0."
+      "note": "co-consult variant added at v1.0.0 stable. 13 variant-specific skills created."
     },
     {
-      "date": "2026-06-03",
-      "event": "wave-1-critical-fixes",
-      "note": "Wave 1 Critical fixes completed (A-01 through A-05): A-01 co-consult .gitignore updated (added .git/ entry); A-02 Mojibake fixed in 11 variant CLAUDE.md/GEMINI.md files (all 5 variants + 4 agent pm.md files + co-develop README.md); A-03 co-consult AGENTS.md PM Dispatch + Skills tables fixed; A-04 co-consult CLAUDE.md §5 Specialist Agent List fixed; A-05 co-develop README.md agent table fixed. All fixes were documentation corrections (encoding, formatting) - no version bump required."
-    },
-    {
-      "date": "2026-06-03",
-      "event": "wave-2-high-priority-fixes",
-      "note": "Wave 2 High Priority fixes completed (H-04+H-05, H-09): H-04+H-05 added TaskCompleted hook and timeout=60 to 6 template .claude/settings.json files (templates/common/, co-design/, co-develop/, co-work/, co-security/, co-consult/); H-09 pinned @colbymchenry/codegraph to version @0.9.7 and removed -y flag across 16 .claude/settings.json files and 4 setup scripts. Both fixes improve security posture - no version bump required (structural + supply-chain security fixes)."
+      "date": "2026-06-13",
+      "event": "ssot-consolidation",
+      "note": "Merged docs/governance/lifecycle-governance.json (v1.2.0) into this SSOT. Added workspace-root, templates-common, l2-projects layer definitions. docs/governance/ version deleted."
     }
   ]
 }
