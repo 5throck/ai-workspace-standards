@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -10,7 +10,7 @@ import {
   readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, relative } from 'node:path';
-import { spawnSync, execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.js';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────

@@ -8,6 +8,8 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+version: "1.0.0"
+last_reviewed: "2026-06-13"
 color: cyan
 description: 'Workspace-root-only cross-domain consistency auditor. Detects structural inconsistencies that automated scripts miss: agent-AGENTS.md roster sync, skill owner logic coherence, CLAUDE.md/GEMINI.md drift. NOT dispatched in variant projects.'
 examples:

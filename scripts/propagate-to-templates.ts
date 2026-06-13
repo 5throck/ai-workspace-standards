@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.2
+ * @version 2.0.3
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -25,7 +25,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
 import { join, dirname, basename, extname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.js';
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ function walkFilesForEncoding(dir: string): string[] {
 function setExecutableBit(filePath: string) {
   if (filePath.endsWith('.ts') || filePath.endsWith('.sh') || filePath.endsWith('.ps1')) {
     try {
-      execSync(`git update-index --chmod=+x "${filePath.replace(/\\/g, '/')}"`);
+      execFileSync('git', ['update-index', '--chmod=+x', filePath.replace(/\\/g, '/')]);
     } catch (e) {
       // Ignore if not tracked yet, dev-sync will handle it
     }

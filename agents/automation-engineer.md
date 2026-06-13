@@ -8,6 +8,8 @@ tier:
   antigravity: low
   gemini-cli: low
 model: inherit
+version: "1.0.0"
+last_reviewed: "2026-06-13"
 color: green
 description: 'Scripting and tools expert. Phase 4 Lead Agent. Use when: "Creating scripts", "Cross-platform automation", "Implementation tasks"'
 examples:

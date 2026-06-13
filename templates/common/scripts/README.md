@@ -53,7 +53,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.7.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.7.1 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -91,7 +91,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.5 | active | —| —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
@@ -101,10 +101,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.2 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.0.3 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
