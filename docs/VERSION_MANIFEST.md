@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T02:37:09.043Z
+**Generated**: 2026-06-13T03:10:50.383Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -127,7 +127,7 @@
 | template-validation.ts | 1.0.1 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.0 | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | 1.0.3 | scripts/test-new-project.ts | bun |
-| test-platform-parity.ts | 0.2.1 | scripts/test-platform-parity.ts | fs, path |
+| test-platform-parity.ts | 0.2.2 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.0.0 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
