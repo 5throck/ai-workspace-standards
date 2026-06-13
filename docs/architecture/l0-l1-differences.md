@@ -16,8 +16,8 @@ This document explains the structural and functional differences between the L0 
 This document assumes familiarity with the L0→L1→L2 hierarchy defined in:
 
 - **[ADR-0031: L1-L2 Fork Model](./adr/0031-l1-l2-fork-model.md)** — L1→L2 relationship ends at scaffold time
-- **[ADR-0033: L0-L1-L2 Hierarchy](./adr/0033-l0-l1-l2-hierarchy.md)** — L0→L1→L2 inheritance and governance
-- **[ADR-0034: Auto-Mode Removal](./adr/0034-auto-mode-removal.md)** — Automation infrastructure simplification
+- **[ADR-0039: L0→L1→L2 Hierarchy and Extends](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)** — L0→L1→L2 inheritance and governance
+- **[ADR-0034: PM.md Architecture Evolution](../adr/0034-pm-md-architecture-evolution.md)** — Automation infrastructure simplification
 
 **Quick Reference**:
 
@@ -276,8 +276,8 @@ bun scripts/create-l2-scaffold.ts --variant co-design --force
 ## References
 
 - **[ADR-0031: L1-L2 Fork Model](./adr/0031-l1-l2-fork-model.md)** — L1→L2 scaffold-time relationship
-- **[ADR-0033: L0-L1-L2 Hierarchy](./adr/0033-l0-l1-l2-hierarchy.md)** — Full governance inheritance model
-- **[ADR-0034: Auto-Mode Removal](./adr/0034-auto-mode-removal.md)** — Infrastructure simplification details
+- **[ADR-0039: L0→L1→L2 Hierarchy and Extends](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)** — Full governance inheritance model
+- **[ADR-0034: PM.md Architecture Evolution](../adr/0034-pm-md-architecture-evolution.md)** — Infrastructure simplification details
 - **[CONSTITUTION.md §5: Multi-Agent Architecture](../CONSTITUTION.md#5-multi-agent-architecture)** — PM Gateway enforcement
 - **[agents/pm.md](../agents/pm.md)** — L0 production PM agent definition
 - **[templates/common/agents/pm.md](../templates/common/agents/pm.md)** — L1 template PM agent definition

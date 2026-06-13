@@ -91,6 +91,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/validate-output.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.5 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|

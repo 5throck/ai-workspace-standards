@@ -84,7 +84,7 @@ This section clearly defines hierarchy and distribution-related terms used in th
 
 **Reference Documents**:
 - **ADR-0031 (L1-L2 Fork Model)**: L1 independent evolution, L2 scaffold-time delivery
-- **ADR-0033 (YAML Extends Pattern)**: Extends chain processing, L1→L2 inheritance
+- **ADR-0039 (L0→L1→L2 Hierarchy and Extends)**: Extends chain processing, L0→L1→L2 inheritance and governance
 
 **Notes**:
 - The "L0 → L1 → L2" expression refers to the **distribution path**, not the **layer structure**.

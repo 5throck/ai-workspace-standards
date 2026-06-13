@@ -33,7 +33,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
 | Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
@@ -65,7 +65,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
 | Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
@@ -303,7 +303,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
 | Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | N-1 finalization step | Governance docs only (Workspace root only — L0-only agent) |
 | Template Architect | `agents/architect.md` | High | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | Tier 1 shell scripts (.sh/.ps1) and Tier 2 automation (.ts / package.json) |
+| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | TypeScript (.ts) automation scripts per ADR-0036 |
 | Documentation Writer | `agents/docs-writer.md` | **Medium** | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
@@ -358,7 +358,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
 | Design the implementation approach and folder structure | `architect` | `automation-engineer` |
-| Write or modify Tier 1 scripts (.sh, .ps1) or Tier 2 scripts (.ts, package.json) | `automation-engineer` | `architect` |
+| Write or modify automation scripts (.ts, package.json) per ADR-0036 | `automation-engineer` | `architect` |
 | Update documentation files | `docs-writer` | `architect` |
 | Create new project from template | `scaffolding-expert` | `automation-engineer` |
 | Security review, Git hooks configuration | `security-expert` | `architect` |

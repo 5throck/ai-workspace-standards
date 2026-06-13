@@ -300,12 +300,5 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-11*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-13*
 
-## Variant: co-develop
-
-**Type**: development
-**Status**: beta (v0.1.0)
-**Inherits**: templates/common
-
-Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
