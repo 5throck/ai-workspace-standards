@@ -3,7 +3,7 @@
  * gen-pr-body.ts - Generate a structured PR body from commit message + diff
  * Usage: bun run scripts/gen-pr-body.ts "<commit message>"
  * Output: PR body markdown (stdout)
- * @version 1.1.0
+ * @version 1.1.1
  *
  * Behaviour:
  *   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
@@ -76,7 +76,12 @@ function sanitizeForPrompt(text: string): string {
     .filter(line => {
       const trimmed = line.trimStart();
       // Drop lines that look like injected prompt roles
-      return !/^(Human|Assistant|System)\s*:/i.test(trimmed);
+      if (/^(Human|Assistant|System)\s*:/i.test(trimmed)) return false;
+      // Drop instruction-injection patterns (e.g., "ignore previous instructions")
+      if (/ignore\s+(all\s+)?(previous|prior|above)\s+(instructions?|context|prompts?)/i.test(trimmed)) return false;
+      // Drop XML-style role tags that Claude XML-tag parsers may interpret
+      if (/^<\s*(system|human|assistant|instruction)\s*[\/>]/i.test(trimmed)) return false;
+      return true;
     })
     .map(line =>
       line
@@ -93,11 +98,12 @@ const hasClaudeRes = await $`claude --version`.quiet().nothrow();
 if (hasClaudeRes.exitCode === 0) {
   const safeFiles = sanitizeForPrompt(filesRaw);
   const safeDiffStat = sanitizeForPrompt(diffStat);
+  const safeCommitMsg = sanitizeForPrompt(commitMsg);
 
   const prompt = `Generate a GitHub Pull Request body for the following change.
 Output ONLY the PR body in markdown - no explanation, no code fences around the whole output.
 
-Commit message : ${commitMsg}
+Commit message : ${safeCommitMsg}
 Date           : ${today}
 
 <file-list>

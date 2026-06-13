@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T13:33:13.966Z
+**Generated**: 2026-06-13T21:10:18.488Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -80,7 +80,7 @@
 | error-handling.ts | 1.1.0 | scripts/lib/error-handling.ts | N/A |
 | extends-validator.ts | 1.0.0 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
-| gen-pr-body.ts | 1.1.0 | scripts/gen-pr-body.ts | bun |
+| gen-pr-body.ts | 1.1.1 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.2.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
@@ -96,7 +96,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.1.2 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.1.3 | scripts/new-project.ts | N/A |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
@@ -127,7 +127,7 @@
 | template-validation.ts | 1.0.1 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.0 | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | 1.0.3 | scripts/test-new-project.ts | bun |
-| test-platform-parity.ts | 0.2.2 | scripts/test-platform-parity.ts | fs, path |
+| test-platform-parity.ts | 0.2.3 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |

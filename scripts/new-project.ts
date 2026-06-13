@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.2
+// @version 1.1.3
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -22,7 +22,15 @@ let platform = 'both';
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
-  if (args[i] === '--version' && args[i + 1]) { templateVer = args[++i]; continue; }
+  if (args[i] === '--version' && args[i + 1]) {
+    templateVer = args[++i];
+    // Strict allowlist: only alphanumeric, dots, hyphens, underscores — no shell metacharacters
+    if (!/^[a-zA-Z0-9._-]+$/.test(templateVer)) {
+      console.error(`❌ Invalid --version value: '${templateVer}'. Only letters, numbers, dots, hyphens, underscores allowed.`);
+      process.exit(1);
+    }
+    continue;
+  }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
   if (!projectName && !args[i].startsWith('--')) { projectName = args[i]; continue; }
   if (projectName && !variant && !args[i].startsWith('--')) { variant = args[i]; continue; }
@@ -106,13 +114,17 @@ if (tag) {
     console.error('   Run: bun scripts/list-template-versions.ts');
     process.exit(1);
   }
-  // Extract from tag into temp dir
+  // Extract from tag into temp dir (shell-free: no bash -c interpolation)
   const mktemp = spawnSync('mktemp', ['-d'], { encoding: 'utf8' });
   tempDir = mktemp.stdout.trim();
-  const extract = spawnSync(
-    'bash', ['-c', `git -C "${workspaceRoot}" archive "${tag}" "templates/common/" "templates/${variant}/" | tar -x -C "${tempDir}"`],
+  const archivePath = join(tempDir, '_archive.tar');
+  const archiveRes = spawnSync(
+    'git', ['-C', workspaceRoot, 'archive', '--output', archivePath, tag, 'templates/common/', `templates/${variant}/`],
     { encoding: 'utf8' }
   );
+  const extract = archiveRes.status === 0
+    ? spawnSync('tar', ['-x', '-C', tempDir, '-f', archivePath], { encoding: 'utf8' })
+    : archiveRes;
   if (extract.status !== 0) {
     console.error(`❌ Failed to extract template version ${tag}`);
     if (tempDir) rmSync(tempDir, { recursive: true, force: true });

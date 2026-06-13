@@ -69,20 +69,6 @@
       "exclude_prefixes": ["templates/"],
       "note": "Propagates all markdown files from docs/ to templates/common/docs/. Excludes docs/templates/ subdirectory to avoid duplicate templates/ path."
     },
-    "governance-claude": {
-      "description": "L1 CLAUDE.md COMMON-CLAUDE section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
-      "mode": "marker-inject",
-      "source_file": "templates/common/CLAUDE.md",
-      "marker": "COMMON-CLAUDE",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
-    },
-    "governance-gemini": {
-      "description": "L1 GEMINI.md COMMON-GEMINI section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
-      "mode": "marker-inject",
-      "source_file": "templates/common/GEMINI.md",
-      "marker": "COMMON-GEMINI",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
-    },
     "governance-agents": {
       "description": "L1 AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
       "mode": "marker-inject",

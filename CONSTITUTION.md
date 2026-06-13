@@ -120,7 +120,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 
 ### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows 6-phase governance workflow (Team Assembly → Triage → Design → Implementation → Finalization → QA). See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Quality Assurance → Phase 6: Lifecycle Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 

@@ -65,7 +65,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `gen-pr-body.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `gen-pr-body.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -104,7 +104,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.2 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.1.3 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.0.6 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
@@ -120,7 +120,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `test-platform-parity.ts` | L0 | 0.2.2 | active | —| —| L0+L1 | —|
+| `test-platform-parity.ts` | L0 | 0.2.3 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
