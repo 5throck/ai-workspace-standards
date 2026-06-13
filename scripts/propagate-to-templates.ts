@@ -298,6 +298,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
         continue;
       }
 
+
       // For skills domain: skip workspace-scoped skills (scope: workspace in frontmatter)
       if (domainName === 'skills') {
         const skillName = relPath.split('/')[0].split('\\')[0];
@@ -1026,6 +1027,7 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
     console.log(`${C.green}Prune complete.${C.reset} Removed: ${pruned}, Kept: ${kept}`);
   }
 }
+
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 const MAP_PATH = join('scripts', 'propagation-map.json');
