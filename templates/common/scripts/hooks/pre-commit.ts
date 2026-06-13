@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.5
+ * @version 1.5.6
  */
 
 import { $ } from "bun";

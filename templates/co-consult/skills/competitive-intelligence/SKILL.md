@@ -6,6 +6,7 @@ description: >
   framework selection (Porter's Five Forces, SWOT, PESTEL, etc.), competitor
   profiling, market sizing, and opportunity assessment.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none

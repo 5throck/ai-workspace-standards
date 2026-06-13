@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T09:16:13.504Z
+**Generated**: 2026-06-13T13:08:03.620Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -25,7 +25,7 @@
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
 | pm | agents/pm.md | high | inherit | 2026-06-13 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-01 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-13 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
 ---
@@ -66,7 +66,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.7.1 | scripts/audit.ts | bun |
+| audit.ts | 2.7.2 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -101,9 +101,9 @@
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
-| pre-commit.ts | 1.5.5 | scripts/hooks/pre-commit.ts | bun |
+| pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | 2.0.4 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.5 | scripts/propagate-to-templates.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.1.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
@@ -128,7 +128,7 @@
 | test-extends-validator.ts | 1.0.0 | scripts/test-extends-validator.ts | fs, path |
 | test-new-project.ts | 1.0.3 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.2 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.0.1 | scripts/test-runner.ts | child_process, fs, path |
+| test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
 | upgrade-project.ts | 1.0.0 | scripts/upgrade-project.ts | N/A |
@@ -140,7 +140,7 @@
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.2.0 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.4 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.5 | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | 1.1.0 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.0 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.0 | scripts/verify-memory.ts | fs, path |

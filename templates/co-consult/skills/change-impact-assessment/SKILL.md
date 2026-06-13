@@ -6,6 +6,7 @@ description: >
   individuals. Produces layer-by-layer impact maps that feed directly into
   communications-lead's stakeholder messaging strategy.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: org-readiness-assessment

@@ -5,6 +5,7 @@ description: >
   before allowing any Phase 1+ (recon, exploitation, patching) activity to proceed.
   BLOCKS work if authorization is missing or incomplete.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: pm
 prerequisites: engagement-scoping must have been run (docs/scope.md must exist)

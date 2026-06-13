@@ -7,6 +7,7 @@ description: >
   dependency mapping and risk levels. Mandatory output includes dependency map
   and risk register for handoff to delivery-manager.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none

@@ -7,6 +7,7 @@ description: >
   using proven storytelling frameworks. Shared skill between
   communications-lead and solutions-architect.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: none

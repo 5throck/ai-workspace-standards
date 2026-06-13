@@ -6,6 +6,7 @@ description: >
   gap analysis, and change management cost estimates that feed into
   financial-modeling.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none

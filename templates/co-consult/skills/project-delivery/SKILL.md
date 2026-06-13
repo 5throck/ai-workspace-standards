@@ -6,6 +6,7 @@ description: >
   status reporting for all co-consult engagements. Converts solution-design
   roadmap and dependency map into an actionable execution plan.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: solution-design
