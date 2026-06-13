@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.0
+ * @version 2.0.1
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -18,6 +18,7 @@
  *   --governance-l1        Deploy CLAUDE.md, GEMINI.md, AGENTS.md L0→L1 with ref transforms
  *   --docs                 Inject COMMON markers from L1 governance into templates/co-* variants
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
+ *   --prune                Remove L0-only orphan scripts from templates/common/scripts/ tree
  *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
  */
 
@@ -46,6 +47,7 @@ const SKIP_ENCODING    = args.includes('--skip-encoding-check');
 const GOVERNANCE_L1    = args.includes('--governance-l1');
 const DOCS             = args.includes('--docs');
 const CHECK_DRIFT      = args.includes('--check-drift');
+const PRUNE            = args.includes('--prune');
 const domainIdx        = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
 const workspaceRoot    = process.cwd();
@@ -289,6 +291,13 @@ function collectDiffs(mapPath: string): FileDiff[] {
       if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
         continue;
       }
+
+      // Apply exclude_prefixes — skip files whose relative path starts with any excluded prefix
+      const excludePrefixes = domain.exclude_prefixes ?? [];
+      if (excludePrefixes.some((prefix: string) => relPath.startsWith(prefix))) {
+        continue;
+      }
+
 
       // For skills domain: skip workspace-scoped skills (scope: workspace in frontmatter)
       if (domainName === 'skills') {
@@ -940,6 +949,86 @@ function publishGovernanceL1(isDryRun: boolean): void {
   }
 }
 
+// ── --prune: remove L0-only orphans from L1 script directories ────────────────
+/**
+ * Walk a directory recursively and return all file paths (absolute).
+ */
+function walkAllFiles(dir: string): string[] {
+  const results: string[] = [];
+  if (!existsSync(dir)) return results;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...walkAllFiles(full));
+    } else if (entry.isFile()) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+/**
+ * Prune L0-only scripts from L1 (templates/common/scripts/**).
+ *
+ * A file in the L1 scripts tree is removed when:
+ *   1. Its basename/relative key maps to an L0-only layer in SCRIPTS.md, AND
+ *   2. includeScriptInL1() returns false for that key.
+ *
+ * Operates on the four script domains: scripts, scripts-helpers, scripts-hooks, scripts-lib.
+ */
+function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
+  console.log(`\n${C.cyan}=== --prune: removing L0-only orphans from L1 script directories ===${C.reset}`);
+  if (isDryRun) console.log(`${C.dim}(dry-run mode — no files will be deleted)${C.reset}`);
+
+  const raw = readFileSync(mapPath, 'utf-8');
+  const map: PropagationMap = JSON.parse(raw);
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+
+  const scriptDomains = ['scripts', 'scripts-helpers', 'scripts-hooks', 'scripts-lib'];
+
+  let pruned = 0;
+  let kept = 0;
+
+  for (const domainName of scriptDomains) {
+    const domain = map.domains[domainName];
+    if (!domain) continue;
+
+    const targetDir = resolve(workspaceRoot, domain.target);
+    if (!existsSync(targetDir)) continue;
+
+    const allFiles = walkAllFiles(targetDir);
+
+    for (const absPath of allFiles) {
+      // Compute relative path from the target dir
+      const relFromTarget = absPath.slice(targetDir.length).replace(/^[\\/]/, '').replace(/\\/g, '/');
+
+      // Build the script key as used in SCRIPTS.md (same logic as collectDiffs)
+      const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+      const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relFromTarget}` : relFromTarget;
+
+      if (!includeScriptInL1(scriptKey, scriptLayers)) {
+        if (isDryRun) {
+          console.log(`  ${C.yellow}would remove${C.reset}  ${absPath}`);
+        } else {
+          rmSync(absPath, { force: true });
+          console.log(`  ${C.red}removed${C.reset}  ${absPath}`);
+        }
+        pruned++;
+      } else {
+        kept++;
+      }
+    }
+  }
+
+  console.log('');
+  if (isDryRun) {
+    console.log(`${C.cyan}Prune dry-run complete.${C.reset} Would remove: ${pruned}, Would keep: ${kept}`);
+  } else {
+    console.log(`${C.green}Prune complete.${C.reset} Removed: ${pruned}, Kept: ${kept}`);
+  }
+}
+
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 const MAP_PATH = join('scripts', 'propagation-map.json');
 
@@ -991,7 +1080,6 @@ if (APPLY) {
     const copied = applyDiffs(diffs);
     console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
   }
-  process.exit(0);
 } else {
   // dry-run mode
   if (outOfSync.length > 0) {
@@ -1020,4 +1108,8 @@ if (CHECK_DRIFT) {
     console.log(`\nℹ️  L2 drift is expected under Fork Model (ADR-0031). Run create-l2-scaffold.ts to re-scaffold.`);
     process.exitCode = 1;
   }
+}
+
+if (PRUNE) {
+  pruneL1Scripts(MAP_PATH, DRY_RUN);
 }

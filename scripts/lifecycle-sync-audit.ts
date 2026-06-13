@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.3
+ * @version 1.3.4
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -356,6 +356,8 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'create-l2-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
   'list-template-versions:tag-template',        // L0-workflow coordination; reference only in L1 copy
   'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
+  'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
+  'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
 ]);
 
 function runCheckX(): SyncIssue[] {
@@ -379,17 +381,35 @@ function runCheckX(): SyncIssue[] {
   const templateScriptsDir = join(ROOT, 'templates', 'common', 'scripts');
   if (!existsSync(templateScriptsDir)) return issues;
 
-  const tsFiles = readdirSync(templateScriptsDir)
-    .filter((f) => f.endsWith('.ts'))
-    .map((f) => join(templateScriptsDir, f));
+  // Recursively collect all .ts files under templateScriptsDir (including helpers/, hooks/, lib/, etc.)
+  function collectTsFiles(dir: string): string[] {
+    const result: string[] = [];
+    let entries: ReturnType<typeof readdirSync>;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return result;
+    }
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        result.push(...collectTsFiles(fullPath));
+      } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+        result.push(fullPath);
+      }
+    }
+    return result;
+  }
+
+  const tsFiles = collectTsFiles(templateScriptsDir);
 
   for (const file of tsFiles) {
     const content = readFileSync(file, 'utf-8');
     for (const scriptName of l0OnlyScripts) {
-      // Match: bun run scripts/<name>, bun scripts/<name>, import from '.../<name>'
+      // Match: bun run scripts/<name>, bun scripts/<name>, import from '.../<name>' or '.../<name>.js'
       const patterns = [
         new RegExp(`bun\\s+(?:run\\s+)?scripts\\/${scriptName}`, 'g'),
-        new RegExp(`import.*from\\s+['"].*\\/${scriptName}['"]`, 'g'),
+        new RegExp(`import.*from\\s+['"].*\\/${scriptName}(?:\\.js)?['"]`, 'g'),
       ];
       for (const pattern of patterns) {
         if (pattern.test(content)) {

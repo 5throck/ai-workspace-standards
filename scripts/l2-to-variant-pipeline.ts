@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -483,9 +483,15 @@ async function main() {
     process.exit(1);
   }
 
+  // C-09: Validate --name= CLI arg before use in path construction
+  const variantNameRaw = nameArg.split('=')[1];
+  if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(variantNameRaw)) {
+    throw new Error(`Invalid variant name: '${variantNameRaw}'. Must match co-[a-z][a-z0-9-]{1,30}`);
+  }
+
   const config: PipelineConfig = {
     l2ProjectPath: l2PathArg.split('=')[1],
-    variantName: nameArg.split('=')[1],
+    variantName: variantNameRaw,
     variantType: typeArg.split('=')[1] as any,
     variantDescription: descArg.split('=')[1],
     skipParityValidation: skipParityArg,

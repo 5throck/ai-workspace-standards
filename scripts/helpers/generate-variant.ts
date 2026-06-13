@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -874,6 +874,13 @@ export async function generateVariant(
 
   // Determine output path
   const variantPath = outputPath || join(TEMPLATES_DIR, metadata.name);
+
+  // C-08: Validate variant path stays within workspace root (prevent path traversal)
+  const resolvedVariantPath = resolve(variantPath);
+  if (!resolvedVariantPath.startsWith(resolve(WORKSPACE_ROOT))) {
+    throw new Error(`Security: variant path '${resolvedVariantPath}' escapes workspace root`);
+  }
+
   const variantJsonPath = join(variantPath, 'variant.json');
 
   console.log(`Output path: ${variantPath}`);
