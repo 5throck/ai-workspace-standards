@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0031: L1–L2 Fork Model
 
 **Status**: Accepted

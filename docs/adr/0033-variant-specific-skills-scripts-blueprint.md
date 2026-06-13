@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0033: Variant-Specific Skills & Scripts Blueprint
 
 ## Status

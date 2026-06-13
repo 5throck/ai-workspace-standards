@@ -1,3 +1,7 @@
+---
+status: "Accepted"
+---
+
 # ADR-0037: Consolidate publish-to-template.ts into propagate-to-templates.ts v2.0.0
 
 **Status**: Accepted  

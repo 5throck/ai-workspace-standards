@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.3
+ * @version 2.0.4
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -1107,7 +1107,15 @@ if (CHECK_DRIFT) {
   const outOfSyncDrift = drifts.filter(d => d.status !== 'in-sync');
   console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSyncDrift.length}`);
   if (outOfSyncDrift.length > 0) {
-    console.log(`\nℹ️  L2 drift is expected under Fork Model (ADR-0031). Run create-l2-scaffold.ts to re-scaffold.`);
+    // Distinguish L1-variant drift (templates/co-*) from true L2 project drift
+    const variantDrifts = outOfSyncDrift.filter(d => d.targetPath.includes('/templates/co-'));
+    const l2ProjectDrifts = outOfSyncDrift.filter(d => !d.targetPath.includes('/templates/co-'));
+    if (variantDrifts.length > 0) {
+      console.log(`\nℹ️  L1 variant drift may be intentional (variant-specific overrides). Review above before applying.`);
+    }
+    if (l2ProjectDrifts.length > 0) {
+      console.log(`\nℹ️  L2 project drift is expected under Fork Model (ADR-0031) — L2 projects are independent after creation.`);
+    }
     process.exitCode = 1;
   }
 }

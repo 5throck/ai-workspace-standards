@@ -117,6 +117,7 @@ Edit code
 ---
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+<!-- INSTRUCTION: Replace [Domain] with your variant's domain name (e.g., "Consulting", "Security", "Design"). Fill in the guidelines section with variant-specific standards. -->
 ## [Domain] Guidelines
 <!-- rename to match variant domain:
      co-develop → ## Coding Guidelines

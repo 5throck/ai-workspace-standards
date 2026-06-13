@@ -10,6 +10,8 @@
 - **Claude Code**: `/new-project` (slash command in `.claude/commands/`)
 - **CLI (cross-platform)**: `bun scripts/new-project.ts "<project-name>"`
 
+> **Note**: `new-project.ts` is an L0-only script — it exists only in `scripts/` at the workspace root and is not propagated to `templates/common/scripts/` (L1). This is intentional: project scaffolding must run from the workspace, not from inside a generated project.
+
 The script copies [`templates/`](templates/) directly into the new project directory,
 substitutes the `[Project Name]` placeholder in all text files, removes `_examples/`,
 and initializes git with hooks active.

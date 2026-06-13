@@ -1,5 +1,5 @@
 ---
-status: Accepted (P1); Proposed (P2)
+status: Accepted (P1); Deferred (P2 — shared includes architecture not implemented)
 date: 2026-06-02
 author: PM + Architect + Auditor
 ---
