@@ -453,6 +453,12 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 ## §6: Skills
 
+### Platform Skills (Priority 2)
+
+| Skill | File | Trigger condition |
+|-------|------|-------------------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
+
 > **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
 >
 > All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).

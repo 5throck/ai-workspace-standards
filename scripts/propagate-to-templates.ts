@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.1
+ * @version 2.0.2
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -287,8 +287,10 @@ function collectDiffs(mapPath: string): FileDiff[] {
     for (const relPath of files) {
       const fileBasename = basename(relPath);
 
-      // Check exclude list (matches on basename for flat patterns, full relPath for nested)
-      if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath)) {
+      // Check exclude list (matches on basename for flat patterns, full relPath for nested,
+      // and first directory segment for recursive skills patterns like "local/my-skill/SKILL.md")
+      const skillDirSegment = relPath.split('/')[0].split('\\')[0];
+      if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath) || (domain.exclude ?? []).includes(skillDirSegment)) {
         continue;
       }
 

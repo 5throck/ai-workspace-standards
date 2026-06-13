@@ -2,14 +2,14 @@
   "name": "co-develop",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
   "variant_type": "development",
-  "status": "beta",
-  "version": "0.1.0",
+  "status": "stable",
+  "version": "1.0.0",
   "inherits_common": "templates/common",
   "created_at": "2026-06-09T18:35:54.011Z",
   "lifecycle": {
-    "statusSince": "2026-06-09",
-    "lastTransition": "initial → beta on 2026-06-09",
-    "stablePromotedOn": null
+    "statusSince": "2026-06-13",
+    "lastTransition": "beta → stable on 2026-06-13",
+    "stablePromotedOn": "2026-06-13"
   },
   "agents": [
     {

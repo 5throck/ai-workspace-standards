@@ -54,7 +54,7 @@ All existing `helpers/*.ts` and `lib/*.ts` entries receive `library`. All other 
 - [ ] Update `lifecycle-sync-audit.ts` Check A to read `type` column from registry and apply different enforcement
 - [ ] Update `verify-scripts.ts` parser to validate `type` column values
 - [ ] Update SCRIPTS.md column documentation comment
-- [ ] Publish updated SCRIPTS.md and lifecycle-sync-audit.ts to L1 via `bun run publish-to-template`
+- [ ] Publish updated SCRIPTS.md and lifecycle-sync-audit.ts to L1 via `bun run propagate:apply`
 
 ## Classification of Existing helpers/
 

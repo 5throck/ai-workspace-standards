@@ -1,4 +1,4 @@
-# ADR-0032: Deprecate Auto-Mode from PM Agents
+# ADR-0038: Deprecate Auto-Mode from PM Agents
 
 ## 1. Status
 
@@ -83,7 +83,7 @@ The Auto-Mode section was originally included in PM agent definitions to provide
 
 ## 8. Related Decisions
 
-- **References ADR-0033**: L0→L1→L2 hierarchy governance
+- **References ADR-0039**: L0→L1→L2 hierarchy governance
 - **Enables A-13**: Document L0/L1 differences clearly
 - **Supports**: Template structure simplification initiative
 - **Aligns with**: Platform documentation parity requirements (CONSTITUTION.md §10)

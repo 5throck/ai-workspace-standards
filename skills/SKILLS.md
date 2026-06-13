@@ -1,7 +1,7 @@
 # SKILLS.md — Skill Lifecycle Registry
 
 > Single Source of Truth for all project skills in `skills/`.  
-> The `layer` column drives `publish-to-template.ts` (L1 sync) and `create-l2-scaffold.ts` (L2 scaffold).  
+> The `layer` column drives `propagate-to-templates.ts` (L1 sync) and `create-l2-scaffold.ts` (L2 scaffold).  
 > Platform skills (`.claude/skills/`, `.gemini/skills/`) are tracked by `verify-platform-lifecycle.ts` — not here.  
 > Machine parsing: `layer-filter.ts` reads the `## Registry` section only.  
 > **L0+L1+L2 skills** are variant-specific overrides living in `templates/co-*/skills/` — NOT published to `templates/common/skills/`.

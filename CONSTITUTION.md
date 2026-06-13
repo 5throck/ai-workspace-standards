@@ -352,6 +352,8 @@ See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-sc
 
 Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
 
+> **Layer × Stage model**: workspace lifecycle spans three layers (L0 workspace root / L1 templates / L2 generated projects) and three phases (Phase A Scaffold / Phase B Refinement / Phase C Promotion). See [§7.4 Layer × Stage Reference Matrix](docs/constitution/07-new-project.md) for the full cross-reference.
+
 ---
 
 ### 7.5 Common Layer Governance (`templates/common/`)
@@ -491,5 +493,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-12*
+*Last Updated: 2026-06-13*
 

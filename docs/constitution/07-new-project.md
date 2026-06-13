@@ -90,4 +90,31 @@ Variant-specific sections are marked with inject markers:
 - `guidelines [REQUIRED]` — domain-specific rules section (Coding / Consulting / Security / Design / Writing)
 
 **Generation**: `new-project.ts` and `generate-variant.ts` both call `applyContextTemplate()` from `scripts/helpers/template-utils.ts` to render `<variant>.context.md` from this template.
+
+> **Conditional generation (Wave 1, fix C-03)**: `new-project.ts` creates `<variant>.context.md` only
+> if the file is absent. An existing file is never overwritten. To force regeneration:
+> `rm docs/<variant>.context.md && bun scripts/new-project.ts <name> <variant>`
+>
+> **Variant naming convention**: All variant names must follow the `co-` prefix convention enforced
+> by `l2-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
 ```
+
+#### 7.4 Layer × Stage Reference Matrix
+
+Two independent dimensions govern the workspace lifecycle:
+
+- **Layer**: Physical file location — L0 (workspace root) / L1 (templates/) / L2 (generated projects)
+- **Stage**: Development phase — Phase A (Scaffold) / Phase B (Refinement & Reconcile) / Phase C (Template Promotion)
+
+| | Phase A — Scaffold | Phase B — Refinement | Phase C — Promotion |
+|---|---|---|---|
+| **L0** (workspace root) | `create-l2-scaffold.ts` (new L1 variant) <br> `new-project.ts` (new L2 project) | No L0 changes | `bun run propagate:apply` syncs L0→L1 |
+| **L1 common** (`templates/common/`) | `propagate:apply` installs scripts | `propagate:docs` injects COMMON markers | — |
+| **L1 variant** (`templates/co-*/`) | Scaffold output created by `create-l2-scaffold.ts` | Manual reconcile — insert variant-specific content | — |
+| **L2** (generated project) | `new-project.ts` output | Developer customization | `l2-to-variant-pipeline.ts` promotes to L1 |
+
+> **Key script roles**:
+> - `new-project.ts` — creates a new L2 project from a variant template
+> - `create-l2-scaffold.ts` — creates a new L1 variant scaffold from scratch
+> - `l2-to-variant-pipeline.ts` — promotes an existing L2 project to an L1 variant template
+> - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L1(variants)

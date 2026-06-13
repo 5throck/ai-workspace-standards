@@ -123,7 +123,7 @@ if (isPMFile && hasVariantOverrides && variantLevel === 'L2') {
 
 ### Layout Reconstruction Components
 
-The Layout Reconstruction architecture consists of 6 components (detailed in ADR-0033):
+The Layout Reconstruction architecture consists of 6 components (detailed in ADR-0039):
 
 1. **Agent Type Extraction** — Extract agent types from variant_overrides.agent_roster using Group → Type mapping
 2. **Group → Type Mapping** — Define comprehensive Group → Type mapping for all 5 variants
@@ -215,7 +215,7 @@ The `governance-*` domains in `propagation-map.json` use an explicit `target_var
 
 **Related Documentation**:
 - [CONSTITUTION.md §5 - Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)
-- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](0033-l0-l1-l2-hierarchy-and-extends.md)
+- [ADR-0039: L0→L1→L2 Hierarchy and Extends Pattern](0039-l0-l1-l2-hierarchy-and-extends.md)
 - [CLAUDE.md §10 - Lifecycle Management Rules](../../CLAUDE.md#10-lifecycle-management-rules)
 - [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)
 
@@ -228,5 +228,5 @@ The `governance-*` domains in `propagation-map.json` use an explicit `target_var
 
 **Related ADRs**:
 - [ADR-0026: Variant Creation Procedure](0026-variant-creation-procedure.md) — partially superseded; §5 manual allowlist replaced by dynamic directory resolution
-- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](0033-l0-l1-l2-hierarchy-and-extends.md) — defines extends chain and Layout Reconstruction
+- [ADR-0039: L0→L1→L2 Hierarchy and Extends Pattern](0039-l0-l1-l2-hierarchy-and-extends.md) — defines extends chain and Layout Reconstruction
 - [ADR-0030: Auto-Mode for Antigravity Platform](0030-auto-mode-architecture.md) — parallel ADR for platform dispatcher pattern
