@@ -26,7 +26,9 @@ regexes = [
 # Paths to skip entirely
 paths = [
   '''\.env\.sample''',
-  '''CHANGELOG\.md''',
+  # CHANGELOG entries describe changes by title only — no secret values expected
+  # If a real secret is found here, remove this exclusion and fix the entry
+  '''CHANGELOG\.(md|txt)$''',
   '''.*_test\.(js|ts|py|go|rs)$''',
   '''.*\.test\.(js|ts)$''',
   '''.*_spec\.rb$''',

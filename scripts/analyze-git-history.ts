@@ -1,23 +1,23 @@
-// @version 1.0.0
-import { execSync } from 'child_process';
+// @version 1.0.1
+import { execFileSync } from 'child_process';
 
 const NUM_COMMITS = parseInt(process.argv[2], 10) || 50;
 
-function run(cmd: string): string {
+function runGit(args: string[]): string {
   try {
-    return execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    return execFileSync('git', args, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
   } catch (e) {
     return '';
   }
 }
 
 function analyze() {
-  const hashes = run(`git log -n ${NUM_COMMITS} --format="%H"`).split('\n').filter(Boolean);
+  const hashes = runGit(['log', `-n${NUM_COMMITS}`, '--format=%H']).split('\n').filter(Boolean);
   let violations = 0;
 
   for (const hash of hashes) {
-    const subject = run(`git log -1 --format="%s" ${hash}`);
-    const files = run(`git diff-tree --no-commit-id --name-only -r ${hash}`).split('\n').filter(Boolean);
+    const subject = runGit(['log', '-1', '--format=%s', hash]);
+    const files = runGit(['diff-tree', '--no-commit-id', '--name-only', '-r', hash]).split('\n').filter(Boolean);
 
     const hasScripts = files.some(f => f.startsWith('scripts/') && f.endsWith('.ts') && f !== 'scripts/SCRIPTS.md' && !f.endsWith('analyze-git-history.ts'));
     const hasScriptsMd = files.some(f => f === 'scripts/SCRIPTS.md');
