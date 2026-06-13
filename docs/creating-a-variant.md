@@ -23,7 +23,7 @@ This guide walks you through creating a new variant under `templates/`. Follow e
 ## Step 1 — Scaffold from the common template
 
 ```bash
-bash scripts/new-project.sh "my-variant" --variant <closest-existing-variant>
+bun scripts/new-project.ts "my-variant" <closest-existing-variant>
 ```
 
 This copies `templates/common/` as a base and the chosen variant's overrides on top.

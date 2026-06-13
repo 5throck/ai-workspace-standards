@@ -202,7 +202,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 **Variant Management**
 - L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](docs/adr/0031-l1-l2-fork-model.md)**
 - YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)**
-- PM variant overrides: **[`docs/variant/pm-yaml-schema.md`](docs/variant/pm-yaml-schema.md)**
+- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)**
 
 #### Content Removal (from current AGENTS.md)
 
@@ -300,16 +300,16 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 #### 7. PM Subagent Dispatch Protocol (Lines ~300-542)
 
 **Remove completely**:
-- Architecture Overview → Reference docs/variant/pm-yaml-schema.md
+- Architecture Overview → Reference templates/common/docs/variants/pm-yaml-schema.md
 - L1 Structure → Reference docs/adr/0033-*
-- L2 Structure → Reference docs/variant/pm-yaml-schema.md
+- L2 Structure → Reference templates/common/docs/variants/pm-yaml-schema.md
 - Extends Chain Resolution → Reference docs/adr/0033-*
 - Schema Reference → Keep link
 - ADR Reference → Keep reference
 - Fork Model Relationship → Reference docs/adr/0031-*
 - Validation Checklist → Reference scripts/validate-templates.ts
 
-**Target destination**: docs/variant/pm-yaml-schema.md, docs/adr/0033-*
+**Target destination**: templates/common/docs/variants/pm-yaml-schema.md, docs/adr/0033-*
 
 #### 8. Other Workflows (§4, Lines ~483-597)
 
@@ -452,7 +452,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 - Validation: Must include blueprint details
 
 **pm-yaml-schema.md**:
-- Link target: [`docs/variant/pm-yaml-schema.md`](docs/variant/pm-yaml-schema.md)
+- Link target: [`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)
 - Content: YAML frontmatter schema for variant PM agents
 - Validation: Must include complete schema specification
 
@@ -712,7 +712,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 ### Variant Management
 - L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](docs/adr/0031-l1-l2-fork-model.md)**
 - YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)**
-- PM variant overrides: **[`docs/variant/pm-yaml-schema.md`](docs/variant/pm-yaml-schema.md)**
+- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)**
 ```
 
 ---
@@ -754,7 +754,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 | Skill list and versions | §6 Skills | docs/VERSION_MANIFEST.md |
 | Agent lifecycle processes | §8 Lifecycle Management | CONSTITUTION.md §5.6, agents/lifecycle-manager.md |
 | Platform-specific behavior | Throughout | CLAUDE.md, GEMINI.md (platform docs) |
-| Variant management | §4 PM Subagent Dispatch | docs/adr/0031-*, docs/variant/pm-yaml-schema.md |
+| Variant management | §4 PM Subagent Dispatch | docs/adr/0031-*, templates/common/docs/variants/pm-yaml-schema.md |
 
 #### New Reading Patterns
 

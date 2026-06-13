@@ -3,12 +3,12 @@
   "description": "Security review and engineering workflow variant for Red Team operations, threat modeling, penetration testing, and cross-platform patch automation. Includes specialized security agents covering red team leadership, threat modeling, pentesting, patch engineering, and report writing.",
   "variant_type": "security",
   "status": "stable",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "inherits_common": "templates/common",
   "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
-    "statusSince": "2026-06-01",
-    "lastTransition": "beta → stable on 2026-06-01",
+    "statusSince": "2026-06-13",
+    "lastTransition": "0.3.0 → 1.0.0 on 2026-06-13",
     "stablePromotedOn": "2026-06-01"
   },
   "agents": [

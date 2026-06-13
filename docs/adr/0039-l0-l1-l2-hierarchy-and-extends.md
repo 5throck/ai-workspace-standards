@@ -245,7 +245,7 @@ L0 (agents/pm.md)
 
 #### YAML Schema Reference
 
-**Complete Schema**: See `docs/variant/pm-yaml-schema.md` for the full YAML frontmatter specification for L2 variants.
+**Complete Schema**: See `templates/common/docs/variants/pm-yaml-schema.md` for the full YAML frontmatter specification for L2 variants.
 
 **Schema Sections**:
 1. Root-Level Fields (`extends`, `variant`, `variant_overrides`)
@@ -579,7 +579,7 @@ function testPlatformParity(variant: string): void {
 5. **IDE Friendly**: YAML frontmatter visible and editable in development tools
 6. **Automated Validation**: Audit script can check extends chain consistency
 7. **Nested Section Removal**: Precise filtering of L0 content (e.g., "### Phase Determination")
-8. **Schema Documentation**: Complete YAML schema documented in `docs/variant/pm-yaml-schema.md`
+8. **Schema Documentation**: Complete YAML schema documented in `templates/common/docs/variants/pm-yaml-schema.md`
 
 ### Negative Consequences
 1. **Mixed Implementation**: Current system uses both YAML frontmatter and HTML markers
@@ -662,7 +662,7 @@ function testPlatformParity(variant: string): void {
 | AC-02 | L1 pure extends implemented | templates/common/agents/pm.md has YAML only, empty body |
 | AC-03 | L1 remove_sections mechanism | L1 YAML includes remove_sections array |
 | AC-04 | L2 YAML frontmatter implemented | templates/co-*/agents/pm.md have valid YAML frontmatter |
-| AC-05 | YAML schema documented | docs/variant/pm-yaml-schema.md exists and is complete |
+| AC-05 | YAML schema documented | templates/common/docs/variants/pm-yaml-schema.md exists and is complete |
 | AC-06 | Extends chain resolution documented | ADR-0033 §4.1.4 documents resolution process |
 | AC-07 | Nested section removal documented | ADR-0033 documents "### Phase Determination" removal |
 | AC-08 | L2 variant sections functional | L2 variants define variant-specific sections in markers |
@@ -861,7 +861,7 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 
 ### Primary References
 - **[PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)**: Complete Layout Reconstruction architecture
-- **[L2 PM YAML Schema](../variant/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
+- **[L2 PM YAML Schema](../common/docs/variants/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
 - **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles + Layout Reconstruction trigger points
 - **[ADR-0038: Auto-Mode Deprecation](0038-deprecate-auto-mode.md)**: Auto-Mode removal from L0
 
@@ -872,7 +872,7 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 - **[Agent Lifecycle](../../constitution/05.6-agent-lifecycle.md)**: Agent management lifecycle
 
 ### Schema Documentation
-- **[docs/variant/pm-yaml-schema.md](../variant/pm-yaml-schema.md)**: Complete YAML schema with:
+- **[templates/common/docs/variants/pm-yaml-schema.md](../common/docs/variants/pm-yaml-schema.md)**: Complete YAML schema with:
   - Root-level fields (`extends`, `variant`, `variant_overrides`)
   - `variant_overrides` structure (5 override types)
   - Validation rules and examples
