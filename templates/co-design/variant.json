@@ -1,92 +1,15 @@
 {
-  "inherits_common": "1.0.0",
-  "agent_overrides": {
-    "pm": {
-      "type": "additive",
-      "reason": "co-design provides variant-specific Agent Roster (designer, design-critic, design-system-builder, prototyper, handoff-specialist), Governance Workflow (Phase 3 = Design Handoff with parallel design artifacts), and Dispatch Protocol",
-      "since": "2026-05-30",
-      "reviewed_by": "lifecycle-manager",
-      "overrides": [
-        "agent-roster",
-        "governance-workflow",
-        "dispatch-protocol"
-      ]
-    }
-  },
-  "phases": {
-    "phase3_name": "Design Handoff"
-  },
-  "skill_manifest": {
-    "variant_specific": [
-      {
-        "name": "service-design",
-        "layer": "platform",
-        "used_by_agents": [
-          "service-designer",
-          "design-lead"
-        ],
-        "phases": [
-          2,
-          3
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "ui-ux-design-intelligence",
-        "layer": "platform",
-        "used_by_agents": [
-          "design-lead",
-          "visual-designer"
-        ],
-        "phases": [
-          2,
-          3
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "agent-lifecycle-manager",
-        "layer": "platform",
-        "type": "override",
-        "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": [
-          "pm"
-        ],
-        "phases": [
-          0,
-          5,
-          6
-        ],
-        "platform_parity": "required"
-      }
-    ],
-    "external": [
-      {
-        "name": "awesome-design-md",
-        "source_url": "https://raw.githubusercontent.com/user/awesome-design-md/main/SKILL.md",
-        "ingest_path": "skills/external/awesome-design-md/SKILL.md",
-        "version_tag": "v1.2.0"
-      }
-    ]
-  },
   "name": "co-design",
-  "description": "Design-focused variant for UI/UX, design systems, and prototyping projects. Includes 5 specialized design agents.",
+  "description": "Design and UX workflow variant for UI/UX design, design systems, prototyping, and design handoff. Includes specialized design agents covering visual design, service design, UX research, and prototyping.",
+  "variant_type": "design",
   "status": "stable",
   "version": "1.0.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
     "statusSince": "2026-05-28",
     "lastTransition": "initial → stable on 2026-05-28",
     "stablePromotedOn": "2026-05-28"
-  },
-  "script_manifest": {
-    "external": [
-      {
-        "name": "agency-agents-generator",
-        "source_url": "https://raw.githubusercontent.com/user/agency-agents/main/generator.ts",
-        "ingest_path": "scripts/external/agency-agents-generator.ts",
-        "version_tag": "latest"
-      }
-    ]
   },
   "agents": [
     {

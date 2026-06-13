@@ -1,78 +1,11 @@
 {
-  "inherits_common": "1.0.0",
-  "agent_overrides": {
-    "pm": {
-      "type": "additive",
-      "reason": "co-work provides variant-specific Agent Roster (researcher, doc-writer, stakeholder-liaison, coordinator), Governance Workflow (Phase 3 = Stakeholder Alignment), and Dispatch Protocol",
-      "since": "2026-05-30",
-      "reviewed_by": "lifecycle-manager",
-      "overrides": [
-        "agent-roster",
-        "governance-workflow",
-        "dispatch-protocol"
-      ]
-    }
-  },
-  "phases": {
-    "phase3_name": "Stakeholder Alignment"
-  },
-  "skill_manifest": {
-    "variant_specific": [
-      {
-        "name": "research-analysis",
-        "layer": "platform",
-        "used_by_agents": [
-          "analyst"
-        ],
-        "phases": [
-          1
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "documentation-writing",
-        "layer": "platform",
-        "used_by_agents": [
-          "content-writer",
-          "technical-writer"
-        ],
-        "phases": [
-          3
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "api-documentation",
-        "layer": "platform",
-        "used_by_agents": [
-          "technical-writer"
-        ],
-        "phases": [
-          3
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "agent-lifecycle-manager",
-        "layer": "platform",
-        "type": "override",
-        "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": [
-          "pm"
-        ],
-        "phases": [
-          0,
-          5,
-          6
-        ],
-        "platform_parity": "required"
-      }
-    ]
-  },
   "name": "co-work",
-  "description": "Collaboration-focused variant for research, documentation, and project coordination. Includes 4 specialized collaboration agents.",
+  "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration.",
+  "variant_type": "collaboration",
   "status": "stable",
   "version": "1.0.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
     "statusSince": "2026-05-28",
     "lastTransition": "initial → stable on 2026-05-28",

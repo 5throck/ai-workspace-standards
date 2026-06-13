@@ -14,7 +14,7 @@ Every project follows this layout. Omit folders that don't apply to the project 
 │   ├── context.md    # Project knowledge - shared by all AI tools (required)
 │   └── adr/          # Architecture Decision Records (ADRs)
 │       └── NNNN-slug.md  # e.g., 0001-use-mcp-server.md
-├── scripts/      # Automation scripts (.sh + .ps1 pairs, cross-platform)
+├── scripts/      # Automation scripts (TypeScript .ts, cross-platform via bun — ADR-0036)
 │   └── temp/     # Temporary scratch scripts (git-ignored)
 ├── locales/      # i18n translation files (UI projects only)
 ├── memory/       # session logs (shared by all AI tools)

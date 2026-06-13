@@ -1,10 +1,10 @@
-# ADR-0033: L0→L1→L2 Hierarchy and Extends Implementation
+# ADR-0039: L0→L1→L2 Hierarchy and Extends Implementation
 
 **Status**: Implemented
 **Date**: 2026-06-07
 **Last Updated**: 2026-06-08
 **Author**: architect
-**Related ADRs**: 0032 (Auto-Mode Deprecation), 0031 (L1-L2 Fork Model)
+**Related ADRs**: 0038 (Auto-Mode Deprecation), 0031 (L1-L2 Fork Model)
 
 ## Executive Summary
 
@@ -618,8 +618,8 @@ function testPlatformParity(variant: string): void {
 
 ## Related Decisions
 
-### ADR-0032: Auto-Mode Deprecation
-- **Relationship**: ADR-0033 removes Auto-Mode from workspace pm.md
+### ADR-0038: Auto-Mode Deprecation
+- **Relationship**: ADR-0039 removes Auto-Mode from workspace pm.md
 - **Impact**: L1 and L2 inherit clean version without platform details
 
 ### ADR-0031: L1-L2 Fork Model
@@ -658,7 +658,7 @@ function testPlatformParity(variant: string): void {
 
 | # | Criterion | Verification Method |
 |---|-----------|-------------------|
-| AC-01 | L0→L1→L2 hierarchy documented | docs/adr/0033-l0-l1-l2-hierarchy-and-extends.md exists |
+| AC-01 | L0→L1→L2 hierarchy documented | docs/adr/0039-l0-l1-l2-hierarchy-and-extends.md exists |
 | AC-02 | L1 pure extends implemented | templates/common/agents/pm.md has YAML only, empty body |
 | AC-03 | L1 remove_sections mechanism | L1 YAML includes remove_sections array |
 | AC-04 | L2 YAML frontmatter implemented | templates/co-*/agents/pm.md have valid YAML frontmatter |
@@ -863,7 +863,7 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 - **[PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)**: Complete Layout Reconstruction architecture
 - **[L2 PM YAML Schema](../variant/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
 - **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles + Layout Reconstruction trigger points
-- **[ADR-0032: Auto-Mode Deprecation](0032-deprecate-auto-mode.md)**: Auto-Mode removal from L0
+- **[ADR-0038: Auto-Mode Deprecation](0038-deprecate-auto-mode.md)**: Auto-Mode removal from L0
 
 ### Supporting Documentation
 - **[Variant Creation Workflow](../variant-creation-workflow.md)**: End-to-end variant creation process

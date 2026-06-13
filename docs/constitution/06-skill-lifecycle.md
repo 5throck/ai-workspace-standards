@@ -11,11 +11,11 @@ Skills follow the same L0/L1/L2 model as scripts:
 
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
-| **L0 — Workspace SSOT** | `skills/` (workspace root) | workspace maintainer | Edit directly; distribute via `sync-skills.sh` |
-| **L1 — Template snapshot** | `templates/common/skills/` | publish: `bash scripts/publish-to-template.sh` | Explicit publish from L0 |
+| **L0 — Workspace SSOT** | `skills/` (workspace root) | workspace maintainer | Edit directly; distribute via `bun run propagate:apply` |
+| **L1 — Template snapshot** | `templates/common/skills/` | publish: `bun run propagate:apply` | Explicit publish from L0 |
 | **L2 — Project** | `<project>/skills/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: Develop at L0 (`skills/`). Run `bash scripts/sync-skills.sh` to distribute to `.claude/skills/` and `.gemini/skills/`. Run `bash scripts/publish-to-template.sh` to publish to the L1 template snapshot. L2 projects snapshot L1 at creation time — no automatic back-propagation.
+**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. L2 projects snapshot L1 at creation time — no automatic back-propagation.
 
 > **Workspace Root vs. Individual Projects**:
 > - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `ui-ux-pro-max`, `simulate-project-creation`, `security-scan`, `audit-workspace`).

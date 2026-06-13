@@ -31,6 +31,7 @@
     "readme-lifecycle-audit": "bun scripts/readme-lifecycle-audit.ts",
     "lifecycle-sync": "bun scripts/lifecycle-sync-audit.ts",
     "propagate": "bun scripts/propagate-to-templates.ts",
+    "propagate:dry-run": "bun scripts/propagate-to-templates.ts --dry-run",
     "propagate:apply": "bun scripts/propagate-to-templates.ts --apply",
     "propagate:governance": "bun scripts/propagate-to-templates.ts --governance-l1 --apply",
     "propagate:docs": "bun scripts/propagate-to-templates.ts --docs --apply",

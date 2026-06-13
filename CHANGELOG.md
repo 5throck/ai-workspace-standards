@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-06-13]**: feat: introduce variant.context.template.md SSOT, VARIANT-INJECT guidelines taxonomy, and execution plan boilerplate enforcement — establishes variant.context.template.md as the single source of truth for variant-specific context injection; defines VARIANT-INJECT taxonomy for guidelines classification; enforces execution plan boilerplate in all multi-agent dispatch workflows (PR #256)
+- **[2026-06-13]**: feat: A-01~A-05 — template-utils.ts SSOT, generateContextMd refactor, new-project.ts context.md integration — centralizes context.md generation logic in template-utils.ts; refactors generateContextMd to use SSOT helpers; integrates context.md scaffolding into new-project.ts pipeline (PR #257)
+
+### Fixed
+- **[2026-06-12]**: fix: resolve PM.md Layout Reconstruction — implement reconstructPMLayout function and regenerate 4 project pm.md files (PR #255)
+
+### Changed
+- **[2026-06-13]**: refactor: remove variant-specific CLAUDE.md/GEMINI.md — fallback to templates/common/ — eliminates redundant per-variant CLAUDE.md and GEMINI.md files; all variants now inherit platform docs from templates/common/ reducing maintenance surface (PR #259)
+
+### Security
+- **[2026-06-13]**: feat: Wave 1 critical fixes — prune L0-only orphans, security guards, Check X regex, variant CLAUDE/GEMINI files — removes L0-only orphan scripts from L1 via --prune flag; adds security guards against unauthorized propagation; fixes Check X regex pattern matching; cleans up variant platform doc overrides (PR #258)
 
 ### Breaking Changes
 - **[2026-06-11]**: [Breaking] scripts: migrate all sh/ps1 scripts to TypeScript (ADR-0036) — `bash scripts/new-project.sh` → `bun scripts/new-project.ts`, `bash scripts/upgrade-project.sh` → `bun scripts/upgrade-project.ts`, `bash scripts/remove-project.sh` → `bun scripts/remove-project.ts`, `bash scripts/cleanup-completed-md.sh` → `bun scripts/cleanup-completed-md.ts`; `install-bun.sh/ps1` deleted (bun is a workspace prerequisite); all file permission-setting code (chmod/chown/icacls/attrib/takeown) removed
@@ -699,7 +711,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-11*
+*Last Updated: 2026-06-13*
 
 
 

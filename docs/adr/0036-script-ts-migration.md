@@ -122,5 +122,5 @@ This applies to:
 ## References
 
 - Meeting transcript: `memory/meeting-2026-06-11-script-ts-migration.md`
-- Predecessor: ADR-0034 (L0/L1 deployment strategy)
+- Predecessor: ADR-0040 (L0/L1 deployment strategy)
 - Affected scripts: `SCRIPTS.md` registry

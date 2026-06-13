@@ -1,81 +1,15 @@
 {
-  "inherits_common": "1.0.0",
-  "agent_overrides": {
-    "pm": {
-      "type": "additive",
-      "reason": "co-security provides variant-specific Agent Roster (red-team-lead, threat-modeler, pentester, patch-engineer, report-writer) and Phase 1-2 merged Governance Workflow",
-      "since": "2026-05-31",
-      "reviewed_by": "lifecycle-manager",
-      "overrides": [
-        "agent-roster",
-        "governance-workflow",
-        "dispatch-protocol"
-      ]
-    }
-  },
-  "phases": {
-    "phase1_2_name": "Recon & Threat Modeling"
-  },
-  "skill_manifest": {
-    "variant_specific": [
-      {
-        "name": "agent-lifecycle-manager",
-        "layer": "platform",
-        "type": "override",
-        "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": [
-          "pm"
-        ],
-        "phases": [
-          0,
-          5,
-          6
-        ],
-        "platform_parity": "required"
-      }
-    ],
-    "external": []
-  },
-  "script_manifest": {
-    "local": [],
-    "external": [
-      {
-        "name": "agency-agents-generator",
-        "source_url": "https://raw.githubusercontent.com/user/agency-agents/main/generator.ts",
-        "ingest_path": "scripts/external/agency-agents-generator.ts",
-        "version_tag": "latest"
-      }
-    ]
-  },
-  "security_manifest": {
-    "external": [
-      {
-        "name": "owasp-top-10",
-        "source_url": "https://raw.githubusercontent.com/OWASP/Top10/master/README.md",
-        "ingest_path": "resources/owasp-top-10.md",
-        "version_tag": "latest"
-      }
-    ]
-  },
   "name": "co-security",
-  "description": "Security engineering workflow — Red Team operations, threat modeling, and cross-platform patch automation (Windows/macOS/Linux via SSH + Ansible)",
+  "description": "Security review and engineering workflow variant for Red Team operations, threat modeling, penetration testing, and cross-platform patch automation. Includes specialized security agents covering red team leadership, threat modeling, pentesting, patch engineering, and report writing.",
+  "variant_type": "security",
   "status": "stable",
   "version": "0.3.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
     "statusSince": "2026-06-01",
     "lastTransition": "beta → stable on 2026-06-01",
-    "betaPromotedOn": "2026-05-28",
-    "stablePromotedOn": "2026-06-01",
-    "betaEngagements": 0
-  },
-  "engagement_criteria": {
-    "evaluation_start": "2026-06-03",
-    "evaluation_period_days": 14,
-    "green_threshold": "1+ projects scaffolded",
-    "yellow_action": "promotion activities or stable demotion",
-    "red_trigger": "technical defect found",
-    "current_status": "green",
-    "note": "Promoted to stable on 2026-06-01 — criteria met via governance review"
+    "stablePromotedOn": "2026-06-01"
   },
   "agents": [
     {

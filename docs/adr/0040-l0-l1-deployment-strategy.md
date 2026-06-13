@@ -1,4 +1,4 @@
-# ADR-0034: L0→L1 Deployment Strategy
+# ADR-0040: L0→L1 Deployment Strategy
 
 ## Metadata
 
