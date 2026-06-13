@@ -18,8 +18,6 @@
 | [2026-06-02](archive/2026-06-02.md) | fix: Limit changes to workspace root and templates to fix L0/L1 and phase definitions |
 | [2026-06-01](archive/2026-06-01.md) | fix: create tests/.temp scratchpad and cleanup root stray files |
 | [2026-05-31](archive/improvement-plan-2026-05-31.md) | Comprehensive workspace improvement plan — 28 Critical, 43 High, 46 Moderate issues identified across 3 phases |
-| [2026-05-31](2026-05-31.md) | fix: align variant workflows, fix scaffolding defaults, and add cross-variant parity checks |
-| [2026-05-30](2026-05-30.md) | fix: Phase 1 — eliminate all stale .sh script references (C-01~C-05) |
 | [2026-05-29](archive/2026-05-29.md) | fix: UTF-8 BOM for ps1 emoji scripts, validate-templates workspace guard, register new ts scripts in SCRIPTS.md |
 | [2026-05-28](archive/2026-05-28.md) | PM-led 3-tier parallel agent execution: platform parity, upgrade-project, docs-writer promotion, Security Bootstrap, CONSTITUTION §10 Terminology |
 | [2026-05-23](archive/2026-05-23.md) | feat: align markdown files with CONSTITUTION.md standards |
@@ -92,10 +90,10 @@
 | 2026-06-05 | Tier governance L0→L1→L2 propagation strategy — principles vs specialist-list separation | [meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md](archive/meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md) |
 | 2026-06-05 | Antigravity parity gap root cause — PM execution plan table missing Platform column | [meeting-2026-06-05-antigravity-parity-gap-root-cause.md](archive/meeting-2026-06-05-antigravity-parity-gap-root-cause.md) |
 | 2026-06-05 | Action item completeness review — C-01 L0→L1→L2 scope, A-00 and D-01 added | [meeting-2026-06-05-action-item-completeness-review.md](archive/meeting-2026-06-05-action-item-completeness-review.md) |
-| 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | [2026-05-24-multi-agent-meeting-summary.md](2026-05-24-multi-agent-meeting-summary.md) |
+| 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | *(archived — file not preserved)* |
 
 ## ADRs
 
 | ID | Title | Status | File |
 |----|-------|--------|------|
-| ADR-0001 | Document Format Single Source of Truth | Accepted | [adr-0001-document-format-single-source-of-truth.md](adr-0001-document-format-single-source-of-truth.md) |
+| ADR-0001 | Document Format Single Source of Truth | Accepted | [adr-0001-document-format-single-source-of-truth.md](archive/adr-0001-document-format-single-source-of-truth.md) |

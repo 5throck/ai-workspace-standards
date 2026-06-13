@@ -3,7 +3,7 @@
 **Status**: Active  
 **Version**: 1.0.0  
 **Last Updated**: 2026-06-07  
-**Related ADR**: [ADR-0033](../adr/0033-l0-l1-l2-hierarchy-and-extends.md)
+**Related ADR**: [ADR-0039](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)
 
 ## Executive Summary
 
@@ -831,7 +831,7 @@ git cherry-pick <phase-2-commit-hash>
 
 ## Related Documentation
 
-- [ADR-0033: L0→L1→L2 Hierarchy and Extends Implementation](../adr/0033-l0-l1-l2-hierarchy-and-extends.md)
+- [ADR-0039: L0→L1→L2 Hierarchy and Extends Implementation](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)
 - [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md)
 - [Variant PM Specification](../templates/variant-pm-spec.md)
 - [Scaffold Script Documentation](../scripts/create-l2-scaffold.ts)

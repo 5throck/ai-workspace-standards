@@ -125,7 +125,7 @@ The workspace supports variant-specific PM agents for different project types (c
 
 **Related Documentation**:
 - [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md) — Layout Reconstruction trigger points
-- [ADR-0033: L0→L1→L2 Hierarchy and Extends Pattern](../adr/0033-l0-l1-l2-hierarchy-and-extends.md) — Layout Reconstruction architecture
+- [ADR-0039: L0→L1→L2 Hierarchy and Extends Pattern](../adr/0039-l0-l1-l2-hierarchy-and-extends.md) — Layout Reconstruction architecture
 - [PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md) — Complete design specification
 
 #### 5.6 3-Tier Cost Optimization Model

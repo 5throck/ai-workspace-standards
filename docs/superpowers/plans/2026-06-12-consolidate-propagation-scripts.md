@@ -1,5 +1,7 @@
 # Consolidate propagate-to-templates.ts + publish-to-template.ts
 
+> **Status**: SUPERSEDED — `publish-to-template.ts` was removed; `propagate-to-templates.ts` v2.0.4 is now the single L0→L1 sync tool. This plan is archived for reference only.
+
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Merge `publish-to-template.ts` (1039 lines) into `propagate-to-templates.ts` (300 lines), producing a single authoritative L0→L1 sync tool and eliminating duplicate logic across both scripts.
