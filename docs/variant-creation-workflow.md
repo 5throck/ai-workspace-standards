@@ -1,5 +1,7 @@
 # Variant Creation Workflow
 
+> **Developer guide**: For step-by-step CLI instructions and the post-scaffolding checklist, see [`creating-a-variant.md`](creating-a-variant.md).
+
 **Version**: 1.1.0
 **Last Updated**: 2026-06-05
 **Status**: Active

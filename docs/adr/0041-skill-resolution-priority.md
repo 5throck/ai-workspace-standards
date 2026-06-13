@@ -1,4 +1,4 @@
-# 1. Skill Resolution Priority
+# ADR-0041: Skill Resolution Priority
 
 Date: 2026-05-31
 Status: Accepted
