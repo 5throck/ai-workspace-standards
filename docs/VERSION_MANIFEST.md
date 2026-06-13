@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-12T17:39:30.778Z
+**Generated**: 2026-06-13T00:42:34.473Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -96,7 +96,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | N/A | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | N/A | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.0.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.1.0 | scripts/new-project.ts | N/A |
 | pipeline-state.ts | N/A | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | N/A | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | N/A | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
