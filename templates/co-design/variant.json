@@ -87,5 +87,36 @@
         "version_tag": "latest"
       }
     ]
-  }
+  },
+  "agents": [
+    {
+      "name": "design-lead",
+      "file": "agents/design-lead.md"
+    },
+    {
+      "name": "prototype-engineer",
+      "file": "agents/prototype-engineer.md"
+    },
+    {
+      "name": "service-designer",
+      "file": "agents/service-designer.md"
+    },
+    {
+      "name": "storyteller",
+      "file": "agents/storyteller.md"
+    },
+    {
+      "name": "typography-expert",
+      "file": "agents/typography-expert.md"
+    },
+    {
+      "name": "ux-researcher",
+      "file": "agents/ux-researcher.md"
+    },
+    {
+      "name": "visual-designer",
+      "file": "agents/visual-designer.md"
+    }
+  ],
+  "skills": []
 }

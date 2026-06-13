@@ -22,92 +22,148 @@
       {
         "name": "competitive-intelligence",
         "layer": "platform",
-        "used_by_agents": ["strategy-analyst"],
-        "phases": [1],
+        "used_by_agents": [
+          "strategy-analyst"
+        ],
+        "phases": [
+          1
+        ],
         "platform_parity": "required"
       },
       {
         "name": "financial-modeling",
         "layer": "platform",
-        "used_by_agents": ["strategy-analyst"],
-        "phases": [1],
+        "used_by_agents": [
+          "strategy-analyst"
+        ],
+        "phases": [
+          1
+        ],
         "platform_parity": "required"
       },
       {
         "name": "insight-synthesis",
         "layer": "platform",
-        "used_by_agents": ["strategy-analyst"],
-        "phases": [1, 3],
+        "used_by_agents": [
+          "strategy-analyst"
+        ],
+        "phases": [
+          1,
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "stakeholder-alignment",
         "layer": "platform",
-        "used_by_agents": ["change-management-partner"],
-        "phases": [1, 2],
+        "used_by_agents": [
+          "change-management-partner"
+        ],
+        "phases": [
+          1,
+          2
+        ],
         "platform_parity": "required"
       },
       {
         "name": "org-readiness-assessment",
         "layer": "platform",
-        "used_by_agents": ["change-management-partner"],
-        "phases": [1],
+        "used_by_agents": [
+          "change-management-partner"
+        ],
+        "phases": [
+          1
+        ],
         "platform_parity": "required"
       },
       {
         "name": "change-impact-assessment",
         "layer": "platform",
-        "used_by_agents": ["change-management-partner"],
-        "phases": [3],
+        "used_by_agents": [
+          "change-management-partner"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "narrative-framework",
         "layer": "platform",
-        "used_by_agents": ["communications-lead"],
-        "phases": [3],
+        "used_by_agents": [
+          "communications-lead"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "consulting-report-writing",
         "layer": "platform",
-        "used_by_agents": ["communications-lead"],
-        "phases": [3],
+        "used_by_agents": [
+          "communications-lead"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "executive-presentation",
         "layer": "platform",
-        "used_by_agents": ["communications-lead"],
-        "phases": [3, 4],
+        "used_by_agents": [
+          "communications-lead"
+        ],
+        "phases": [
+          3,
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "solution-design",
         "layer": "platform",
-        "used_by_agents": ["solutions-architect"],
-        "phases": [3],
+        "used_by_agents": [
+          "solutions-architect"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "technical-feasibility",
         "layer": "platform",
-        "used_by_agents": ["solutions-architect"],
-        "phases": [2, 3],
+        "used_by_agents": [
+          "solutions-architect"
+        ],
+        "phases": [
+          2,
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "project-delivery",
         "layer": "platform",
-        "used_by_agents": ["delivery-manager"],
-        "phases": [4],
+        "used_by_agents": [
+          "delivery-manager"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "stakeholder-review-management",
         "layer": "platform",
-        "used_by_agents": ["delivery-manager"],
-        "phases": [4],
+        "used_by_agents": [
+          "delivery-manager"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
@@ -115,8 +171,14 @@
         "layer": "platform",
         "type": "override",
         "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": ["pm"],
-        "phases": [0, 5, 6],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          0,
+          5,
+          6
+        ],
         "platform_parity": "required"
       }
     ]
@@ -129,5 +191,88 @@
     "statusSince": "2026-06-03",
     "lastTransition": "initial → stable on 2026-06-03",
     "stablePromotedOn": "2026-06-03"
-  }
+  },
+  "agents": [
+    {
+      "name": "change-management-partner",
+      "file": "agents/change-management-partner.md"
+    },
+    {
+      "name": "communications-lead",
+      "file": "agents/communications-lead.md"
+    },
+    {
+      "name": "data-analyst",
+      "file": "agents/data-analyst.md"
+    },
+    {
+      "name": "delivery-manager",
+      "file": "agents/delivery-manager.md"
+    },
+    {
+      "name": "industry-expert",
+      "file": "agents/industry-expert.md"
+    },
+    {
+      "name": "sme",
+      "file": "agents/sme.md"
+    },
+    {
+      "name": "solutions-architect",
+      "file": "agents/solutions-architect.md"
+    },
+    {
+      "name": "strategy-analyst",
+      "file": "agents/strategy-analyst.md"
+    },
+    {
+      "name": "technology-specialist",
+      "file": "agents/technology-specialist.md"
+    },
+    {
+      "name": "workstream-lead",
+      "file": "agents/workstream-lead.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "change-impact-assessment"
+    },
+    {
+      "name": "competitive-intelligence"
+    },
+    {
+      "name": "consulting-report-writing"
+    },
+    {
+      "name": "executive-presentation"
+    },
+    {
+      "name": "financial-modeling"
+    },
+    {
+      "name": "insight-synthesis"
+    },
+    {
+      "name": "narrative-framework"
+    },
+    {
+      "name": "org-readiness-assessment"
+    },
+    {
+      "name": "project-delivery"
+    },
+    {
+      "name": "solution-design"
+    },
+    {
+      "name": "stakeholder-alignment"
+    },
+    {
+      "name": "stakeholder-review-management"
+    },
+    {
+      "name": "technical-feasibility"
+    }
+  ]
 }

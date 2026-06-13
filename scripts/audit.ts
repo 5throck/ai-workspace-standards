@@ -1,4 +1,4 @@
-// @version 2.6.5
+// @version 2.6.6
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -616,7 +616,9 @@ function checkL2VariantIntegrity() {
     if (fs.existsSync(pmMdPath)) {
       const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
       const hasVariantOverrides = pmContent.includes('variant_overrides:');
-      if (!hasVariantOverrides && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+      const hasExtendsPattern = pmContent.includes('extends:');
+      const isResolved = pmContent.startsWith('# @resolved-from:');
+      if (!hasVariantOverrides && !hasExtendsPattern && !isResolved && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
@@ -630,6 +632,42 @@ function checkL2VariantIntegrity() {
 
   if (missingCount === 0) {
     Pass(`L2 variant integrity: all ${variants.length} variants have required structure`);
+  }
+}
+
+// Check: Variant context.md guidelines section
+function checkVariantContextGuidelinesSection() {
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const missing: string[] = [];
+  for (const variant of variants) {
+    const docsDir = path.join(templatesDir, variant, 'docs');
+    if (!fs.existsSync(docsDir)) continue;
+    for (const file of fs.readdirSync(docsDir)) {
+      if (!file.endsWith('.context.md')) continue;
+      const filePath = path.join(docsDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      if (!content.includes('VARIANT-INJECT: guidelines [REQUIRED]')) {
+        missing.push(`templates/${variant}/docs/${file}`);
+      }
+    }
+  }
+
+  if (missing.length === 0) {
+    const total = variants.reduce((count, variant) => {
+      const docsDir = path.join(templatesDir, variant, 'docs');
+      if (!fs.existsSync(docsDir)) return count;
+      return count + fs.readdirSync(docsDir).filter(f => f.endsWith('.context.md')).length;
+    }, 0);
+    Pass(`Variant guidelines section: all ${total} variant context.md files have VARIANT-INJECT: guidelines [REQUIRED]`);
+  } else {
+    Fail(`Variant guidelines section: missing VARIANT-INJECT: guidelines [REQUIRED] in:\n${missing.map(f => `  - ${f}`).join('\n')}`);
   }
 }
 
@@ -695,6 +733,7 @@ function checkStaleShellReferences() {
 checkStaleShellReferences();
 checkScriptSync();
 checkL2VariantIntegrity();
+checkVariantContextGuidelinesSection();
 }
 
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
@@ -1043,8 +1082,10 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                 const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
 
                 const hasVariantOverrides = l2Content.includes('variant_overrides:');
-                if (!hasVariantOverrides) {
-                    // L2 should have VARIANT-SECTION markers
+                const hasExtendsPattern = l2Content.includes('extends:');
+                const isResolved = l2Content.startsWith('# @resolved-from:');
+                if (!hasVariantOverrides && !hasExtendsPattern && !isResolved) {
+                    // L2 should have VARIANT-SECTION markers (if not using extends: skeleton)
                     for (const section of requiredVariantSections) {
                         const marker = `<!-- VARIANT-SECTION: ${section} -->`;
                         if (!l2Content.includes(marker)) {

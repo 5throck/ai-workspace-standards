@@ -1,11 +1,11 @@
-# [Project Name] ??co-work Configuration
+# [Project Name] —co-work Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
-> context.md is IMMUTABLE ??all project-specific changes belong here.
+> context.md is IMMUTABLE —all project-specific changes belong here.
 >
 > Read order for all AI tools:
->   1. docs/context.md            ??immutable project identity (architecture, standards)
->   2. docs/co-work.context.md    ??THIS FILE ??tool stack, agents, skills, workflow
+>   1. docs/context.md            —immutable project identity (architecture, standards)
+>   2. docs/co-work.context.md    —THIS FILE —tool stack, agents, skills, workflow
 
 ---
 
@@ -69,7 +69,7 @@
 > See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
 ### Hybrid Scripting
-Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json.
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 
 ---
 
@@ -77,13 +77,13 @@ Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.
 
 ```
 Brief / task received
-  ??
+  —
 /sync "feat: description"
-  ??
-  1. audit.sh ??abort on failure
-  2. memory/YYYY-MM-DD.md ??session log (4-section format)
+  —
+  1. audit.ts —abort on failure
+  2. memory/YYYY-MM-DD.md —session log (4-section format)
   3. MEMORY.md index update
-  4. git add -A ??commit
+  4. git add -A —commit
   5. pr/<date>-<slug> branch created (if on main)
   6. git push + gh pr create
 ```
@@ -92,12 +92,12 @@ Brief / task received
 
 ```
 Collaboration PM
-  ??Analyst (research ??async)
-  ??Storyteller (narrative framework)
-  ??Content Writer + Technical Writer (parallel drafting)
-  ??Project Coordinator (stakeholder review loop)
-  ??Content Writer + Storyteller (polish)
-  ??MS365 Expert (publication)
+  —Analyst (research —async)
+  —Storyteller (narrative framework)
+  —Content Writer + Technical Writer (parallel drafting)
+  —Project Coordinator (stakeholder review loop)
+  —Content Writer + Storyteller (polish)
+  —MS365 Expert (publication)
 ```
 
 ### Workflow Phases
@@ -114,24 +114,44 @@ Collaboration PM
 
 ---
 
-## Collaboration Guidelines
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+## Writing Guidelines
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
 
 ### Core Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Research-Driven** | All decisions start from evidence, validated through analysis |
-| **Clear Communication** | Complex information synthesized for diverse audiences |
-| **Stakeholder Alignment** | Inclusive communication and structured review processes |
-| **Knowledge Management** | Organized archives and consistent documentation standards |
+1. **Audience-first** — write for the reader; tailor tone, depth, and format to their context.
+2. **Clarity over cleverness** — plain language preferred; no jargon without definition.
+3. **Evidence-based** — all claims supported by sources or data; cite inline.
+4. **Consistent voice** — follow the established style guide for tone and terminology.
+5. **PR required** — all content changes via `/sync`; never direct push to main.
 
-### Rules
+### Content Review Process
 
-1. Start every task with research or existing data ??document sources before drafting.
-2. All content must be reviewed by at least one stakeholder before publication.
-3. Archive source materials alongside final artifacts.
-4. Use templates and consistent formatting for all deliverables.
-5. All PR titles, bodies, and review comments must be in **English**.
+All content must pass a peer review before publication. Use the content review checklist in `docs/content-review-checklist.md`.
+
+### Hybrid Scripting
+
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
+<!-- END VARIANT-INJECT -->
+
+---
+
+## Git / PR Workflow
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+
+```
+/sync "feat: description"
+  — 1. memory log (memlog)
+  — 2. MEMORY.md index update (sync-md)
+  — 3. CHANGELOG.md [Unreleased] auto-add
+  — 4. audit.ts  (must exit 0)
+  — 5. git checkout -b pr/<date>-<slug>
+  — 6. git commit + push
+  — 7. gh pr create
+```
+
+> All PR titles, bodies, and review comments must be in **English**.
 
 ---
 
@@ -149,11 +169,11 @@ Collaboration PM
 
 ## Domain Rules
 
-<!-- co-work variant specific rules ??edit after project creation -->
+<!-- co-work variant specific rules —edit after project creation -->
 1. All research findings must be logged to memory/ with source citations.
 2. Stakeholder review comments must be tracked in the project coordination log.
 3. Publication artifacts must be version-controlled before distribution.
 
 ---
 
-*co-work.context.md version: 1.0 ??created by /new-project*
+*co-work.context.md version: 1.1 — normalized to canonical template structure*

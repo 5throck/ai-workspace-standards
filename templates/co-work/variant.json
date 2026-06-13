@@ -6,7 +6,11 @@
       "reason": "co-work provides variant-specific Agent Roster (researcher, doc-writer, stakeholder-liaison, coordinator), Governance Workflow (Phase 3 = Stakeholder Alignment), and Dispatch Protocol",
       "since": "2026-05-30",
       "reviewed_by": "lifecycle-manager",
-      "overrides": ["agent-roster", "governance-workflow", "dispatch-protocol"]
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
     }
   },
   "phases": {
@@ -17,22 +21,35 @@
       {
         "name": "research-analysis",
         "layer": "platform",
-        "used_by_agents": ["analyst"],
-        "phases": [1],
+        "used_by_agents": [
+          "analyst"
+        ],
+        "phases": [
+          1
+        ],
         "platform_parity": "required"
       },
       {
         "name": "documentation-writing",
         "layer": "platform",
-        "used_by_agents": ["content-writer", "technical-writer"],
-        "phases": [3],
+        "used_by_agents": [
+          "content-writer",
+          "technical-writer"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "api-documentation",
         "layer": "platform",
-        "used_by_agents": ["technical-writer"],
-        "phases": [3],
+        "used_by_agents": [
+          "technical-writer"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
@@ -40,8 +57,14 @@
         "layer": "platform",
         "type": "override",
         "override_reason": "Variant-specific agent lifecycle guidance tailored to this variant's agent roster",
-        "used_by_agents": ["pm"],
-        "phases": [0, 5, 6],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          0,
+          5,
+          6
+        ],
         "platform_parity": "required"
       }
     ]
@@ -54,5 +77,32 @@
     "statusSince": "2026-05-28",
     "lastTransition": "initial → stable on 2026-05-28",
     "stablePromotedOn": "2026-05-28"
-  }
+  },
+  "agents": [
+    {
+      "name": "analyst",
+      "file": "agents/analyst.md"
+    },
+    {
+      "name": "content-writer",
+      "file": "agents/content-writer.md"
+    },
+    {
+      "name": "ms365-expert",
+      "file": "agents/ms365-expert.md"
+    },
+    {
+      "name": "project-coordinator",
+      "file": "agents/project-coordinator.md"
+    },
+    {
+      "name": "storyteller",
+      "file": "agents/storyteller.md"
+    },
+    {
+      "name": "technical-writer",
+      "file": "agents/technical-writer.md"
+    }
+  ],
+  "skills": []
 }

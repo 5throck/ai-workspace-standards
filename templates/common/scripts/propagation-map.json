@@ -1,6 +1,6 @@
 {
-  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/). Edit this file to add/remove sync domains.",
-  "version": "1.1.0",
+  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode.",
+  "version": "1.2.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -69,23 +69,23 @@
       "note": "Propagates all markdown files from docs/ to templates/common/docs/. Excludes docs/templates/ subdirectory to avoid duplicate templates/ path."
     },
     "governance-claude": {
-      "description": "CLAUDE.md COMMON-CLAUDE section injection to all L2 variants (--docs mode only)",
+      "description": "L1 CLAUDE.md COMMON-CLAUDE section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
       "mode": "marker-inject",
-      "source_file": "CLAUDE.md",
+      "source_file": "templates/common/CLAUDE.md",
       "marker": "COMMON-CLAUDE",
       "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
     },
     "governance-gemini": {
-      "description": "GEMINI.md COMMON-GEMINI section injection to all L2 variants (--docs mode only)",
+      "description": "L1 GEMINI.md COMMON-GEMINI section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
       "mode": "marker-inject",
-      "source_file": "GEMINI.md",
+      "source_file": "templates/common/GEMINI.md",
       "marker": "COMMON-GEMINI",
       "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
     },
     "governance-agents": {
-      "description": "AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only)",
+      "description": "L1 AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
       "mode": "marker-inject",
-      "source_file": "AGENTS.md",
+      "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
       "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
     }

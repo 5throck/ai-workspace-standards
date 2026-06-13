@@ -128,7 +128,7 @@ Custom slash commands in `.claude/commands/` are natively recognized by Claude C
 | `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
 | `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
 | `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
-| `/new-project "name"` | Scaffold a new project | `.\scripts\new-project.ps1 "$ARGUMENTS"` |
+| `/new-project "name"` | Scaffold a new project | `bun scripts/new-project.ts "$ARGUMENTS"` |
 
 > **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
 > registered as a `<name>` Skill. All 5 commands above have corresponding files in `.claude/commands/`.
@@ -153,7 +153,7 @@ All `.md` files you create or modify MUST be in English, except when working in 
 - Code comments — English (unless documenting locale-specific logic)
 <!-- COMMON-CLAUDE:END -->
 
-### Skill Resolution Priority
+### 4.5 Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
 
@@ -179,170 +179,26 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-See [CONSTITUTION.md §5](docs/constitution/05-multi-agent-architecture.md) for the 4-level enforcement model and governance rules.
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
 
-#### Mandatory Execution Plan Display
+#### Claude Code-Specific Dispatch
 
-Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table in the user's active language prior to invoking the Agent tool.
-
-**Mandatory Criteria** (Boilerplate always required when ANY applies):
-
-1. **Multi-agent Dispatch**: 2 or more specialists involved
-2. **Breaking Changes**: Modifications that break existing functionality
-3. **Platform Parity Changes**: Changes to CLAUDE.md/GEMINI.md sync
-4. **Lifecycle-Related Items** (NEW):
-   - agents/*.md modifications → Requires AGENTS.md update
-   - skills/*/SKILL.md modifications → Requires AGENTS.md update
-   - scripts/*.ts modifications → Requires SCRIPTS.md update
-   - docs/adr/*.md modifications → Requires ADR index update
-5. **Configuration Changes** (NEW):
-   - CLAUDE.md, GEMINI.md, AGENTS.md, CONSTITUTION.md
-   - README.md, CHANGELOG.md
-
-**Boilerplate Format**:
-
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task] | [agent] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model String] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model String] |
-
-State parallel vs sequential order below the table. The Agent tool must not be called until this table is visible to the user.
-*Rule: You MUST always include the Lifecycle Update followed by the Final QA Audit as the final two steps of the plan.*
-*Context rule: At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N. In **variant projects**, PM handles both directly. Always declare context above the execution plan table: "**Context**: workspace root — specialist dispatch" or "**Context**: variant project — pm direct".*
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table prior to invoking the `Agent` tool.
 
 <!-- COMMON-CLAUDE:START -->
 ## Execution Plan Boilerplate
 
-Before dispatching 2+ agents, copy this exact format:
+For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
+
+Every execution plan MUST end with these two fixed steps:
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 |
-| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | claude-sonnet-4-6 |
+| N | Final QA Audit (`bun scripts/audit.ts`) | auditor (workspace) / pm (variant) | Medium | claude-sonnet-4-6 |
 
-**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
-
-**Key points**:
-- Tier column is MANDATORY (High/Medium/Low)
-- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
-- State parallel vs sequential order below the table
-
-#### Execution Plan Table Format Guidelines
-
-**WRONG** (Do NOT use):
-| # | Task | Agent |
-| 1 | Update agents/pm.md | pm (direct) |
-
-**CORRECT** (Use this format):
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | Update agents/pm.md | docs-writer | Medium | gemini-3.5-flash |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | gemini-3.5-flash |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | gemini-3.5-flash |
-
-**Key points**:
-- "pm (direct)" is FORBIDDEN - PM never executes directly
-- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
-
-
-#### Antigravity Security Configuration
-
-For automated execution in Antigravity, configure `.gemini/settings.json`:
-
-```json
-{
-  "terminal.executionPolicy": "Auto",
-  "artifact.reviewPolicy": "Request Review",
-  "mcp.toolApproval": "Manual",
-  "terminal.denyList": [
-    "rm -rf",
-    "rm -r /",
-    "chmod -R 777",
-    "git push --force",
-    "git reset --hard",
-    "reboot",
-    "shutdown",
-    "format",
-    "fdisk",
-    "mkfs"
-  ]
-}
-```
-
-**Field Descriptions**:
-- `terminal.executionPolicy: "Auto"` - Auto-approve agent spawns and safe commands
-- `artifact.reviewPolicy: "Request Review"` - **Require review for file edits (recommended security setting)**
-- `mcp.toolApproval: "Manual"` - Manual approval for MCP tools (security)
-- `terminal.denyList` - Dangerous commands that must never auto-execute
-
-**Security Rationale for "Request Review"**:
-- ✅ **Prevents silent code corruption** - All file edits require explicit user approval before applying
-- ✅ **Mitigates prompt injection attacks** - Human review layer blocks automated malicious edits
-- ✅ **Maintains audit trail** - User acknowledges each change, creating clear accountability
-- ✅ **Balances automation with oversight** - Agent spawning still automated, but file modifications supervised
-
-**Security Notes**:
-- ✅ Agent Spawn auto-approved (productivity)
-- ✅ File edits require manual review (security)
-- ✅ MCP Tools remain manual (external MCP server security)
-- ⚠️ Terminal Auto mode still vulnerable to prompt injection (mitigated by denyList + artifact review)
-- ⚠️ Recommend periodic Git commits (rollback capability)
-
-**Trade-off**: Productivity vs Security
-- **"Auto-Accept"** (not recommended): Full automation but vulnerable to silent code corruption
-- **"Request Review"** (recommended): Balanced approach — automated agent orchestration with human supervision for file changes
-- MCP tool auto-approval poses significant security risk → manual approval maintained regardless of artifact policy
-
-> **Claude Code Note**: For Claude Code, the native Agent tool provides equivalent automated specialist dispatch functionality without requiring Auto-Mode infrastructure.
+**Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
 <!-- COMMON-CLAUDE:END -->
-
-#### Phase Determination Checklist
-
-Before writing the execution plan table, PM MUST classify each task's deliverable type:
-
-| Deliverable Type | → Phase | → Required Agent | → Tier |
-|-----------------|---------|-----------------|--------|
-| New file design / schema / ADR | Phase 1-2 | architect | High |
-| New directory or template layout | Phase 1-2 | architect | High |
-| Cross-platform convention / naming standard | Phase 1-2 | architect | High |
-| Script or code implementation (plan approved) | Phase 4 | automation-engineer | Low |
-| Documentation update | Phase 4 | docs-writer | Medium |
-| Security configuration | Phase 6 | security-expert | Medium |
-| Project scaffolding | Phase 0 | scaffolding-expert | Low |
-
-**Tier ceiling**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a critical governance violation.
-
-#### PM Gateway Enforcement Summary
-
-Pre-dispatch validation (run mentally before every execution plan):
-1. ✅ Is each deliverable type correctly mapped to a Phase?
-2. ✅ Does each task have the correct tier agent (no tier ceiling violations)?
-3. ✅ Are Claude-only items paired with Antigravity equivalents, or marked `Claude` with justification?
-4. ✅ Does the plan end with Lifecycle Update (N-1) and QA Audit (N)?
-
-#### Specialist Agent List
-All agents below require PM dispatch:
-- architect (Phase 1-2)
-- automation-engineer (Phase 4)
-- docs-writer (Phase 4)
-- scaffolding-expert (Phase 0)
-- security-expert (Phase 6)
-
-#### Permission Denial Protocol
-
-When a specialist agent's required tool is denied by the user, PM must **not** substitute for the specialist. Instead:
-
-1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
-2. Output the Escalation Template immediately
-3. Log the denial to `memory/YYYY-MM-DD.md`
-4. Halt the blocked task — do not proceed without the required tool
-
-See [`agents/pm.md` — Permission Denial Protocol](agents/pm.md#permission-denial-protocol) for the full Type classification table and Escalation Template.
 
 ### 6. Native Sub-agents (`Agent` Tool)
 Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
@@ -403,63 +259,11 @@ When working in a plan-mode session:
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
 
-### L1-L2 Fork Model
-
-After a variant (L2) is scaffolded from `templates/common` (L1) via `create-l2-scaffold.ts`, the L1→L2 relationship **ends**. L2 evolves independently.
-
-**5 Fork Model Principles** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
-1. L1 delivers common infrastructure to L2 at scaffold time — relationship ends after that.
-2. L1 changes do **not** auto-propagate to L2 after fork.
-3. To reflect L2 changes as an official template, run `l2-to-variant-pipeline.ts` explicitly.
-4. L0→L1 publish runs automatically via `dev-sync.ts` (continuous pipeline).
-5. L1 vs L2 drift can be reported with `publish-to-template.ts --check-drift` (read-only).
-
-**`--docs` flag**: `bun scripts/publish-to-template.ts --docs` is an **explicit opt-in** tool that injects `COMMON-*` marked sections from L0 governance docs into L2 variants. It does not violate Fork Model independence because it requires deliberate invocation.
-
-| Action | Command | Auto? |
-|--------|---------|-------|
-| L0→L1 publish | `bun scripts/publish-to-template.ts` | ✅ via dev-sync |
-| L1→L2 scaffold (1×) | `bun scripts/create-l2-scaffold.ts` | Manual |
-| L2→template promote | `bun scripts/l2-to-variant-pipeline.ts` | Manual |
-| L1 vs L2 drift report | `bun scripts/publish-to-template.ts --check-drift` | Manual |
-| L0 governance inject | `bun scripts/publish-to-template.ts --docs` | Manual (opt-in) |
+> For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](CONSTITUTION.md#9-workspace--template-boundary-policy) and [CONSTITUTION.md §10](CONSTITUTION.md#10-lifecycle-management-rules).
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
-### 10. Lifecycle Management Rules
-
-> ⚠️ If unsure whether a change requires lifecycle updates, run `bun scripts/audit.ts` before committing. Do NOT skip this step.
-
-When modifying files, apply the following rules **before** running `/sync` or committing:
-
-| Modified file(s) | Required follow-up actions |
-|-----------------|---------------------------|
-| `scripts/*.ts` | 1. Bump `@version` in file header  2. Update version in `scripts/SCRIPTS.md`  3. Copy file to `templates/common/scripts/` and update `templates/common/scripts/SCRIPTS.md` |
-| `templates/` (any file) | Run `bun scripts/tag-template.ts` to publish a new `template-v{VERSION}` git tag — only after all template changes are committed and verified via `bun scripts/audit.ts` |
-| `agents/*.md` | Update `AGENTS.md` roster table — run `bun run agent:verify` to check |
-| `templates/common/agents/*.md` | Sync identical file to ALL `templates/co-*/agents/` variants — run `bun run agent:verify` to confirm |
-| `AGENTS.md` | Update `templates/co-*/AGENTS.md` if variant contains `pm` agent entry — run `bun run agent:verify` to check |
-| `skills/*/SKILL.md` or `.claude/skills/*/SKILL.md` | Update `AGENTS.md § Skills` table — run `bun scripts/skill-lifecycle-audit.ts` to check |
-| `templates/common/scripts/*.ts` | Update version entry in `templates/common/scripts/SCRIPTS.md` |
-| `CLAUDE.md` or `GEMINI.md` | 1. Apply identical change to the counterpart file (Platform Documentation Parity — CONSTITUTION.md §10)  2. Manually propagate to all `templates/*/CLAUDE.md` and `templates/*/GEMINI.md`  3. Run `bun scripts/validate-templates.ts` — must pass P-01 platform parity check |
-| `.claude/settings.json` | 1. Apply **shared** tier changes (mcpServers, hooks.SessionStart, hooks.PostToolUse) to `.gemini/settings.json`  2. **claude_only** tier changes (permissions, env, teammateMode, hooks.TeammateIdle/TaskCreated/TaskCompleted) do NOT require `.gemini/settings.json` update  3. Propagate to `templates/common/.claude/settings.json`  4. Propagate to all 4 variant `templates/<variant>/.claude/settings.json`  5. See `docs/templates/common-contract.json § platform_settings` for tier classification |
-| `.gemini/settings.json` | 1. Apply **shared** tier changes to `.claude/settings.json`  2. **gemini_only** tier changes do NOT require `.claude/settings.json` update  3. Propagate to all 4 variant `templates/<variant>/.gemini/settings.json` |
-| `.claude/commands/*.md` | 1. Add identical file to `templates/common/.claude/commands/`  2. If not `gemini-parity: skip`, also add to `.gemini/commands/` and `templates/common/.gemini/commands/` |
-| `.claude/skills/*/SKILL.md` | 1. Add identical file to `templates/common/.claude/skills/`  2. If not `gemini-parity: skip`, also add to `.gemini/skills/` and `templates/common/.gemini/skills/` |
-| `.gemini/commands/*.md` | Add identical file to `templates/common/.gemini/commands/` |
-| `.gemini/skills/*/SKILL.md` | Add identical file to `templates/common/.gemini/skills/` |
-
-**Verification** (run after any of the above):
-```bash
-bun scripts/audit.ts                  # full workspace audit including lifecycle sync
-bun scripts/lifecycle-sync-audit.ts   # layer sync check (scripts + SCRIPTS.md versions)
-```
-
-> Full rules: [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) → [§6 Skill Lifecycle](docs/constitution/06-skill-lifecycle.md) → [§6.5 Script Lifecycle](docs/constitution/06.5-script-lifecycle.md)
-<!-- COMMON-CLAUDE:END -->
-
-<!-- COMMON-CLAUDE:START -->
-### 11. Custom Command Error Recovery
+### 10. Custom Command Error Recovery
 If a custom slash command or background script returns a non-zero exit code:
 * **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
@@ -469,13 +273,13 @@ If a custom slash command or background script returns a non-zero exit code:
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
-### 12. Windows Platform Requirement
+### 11. Windows Platform Requirement
 
 **Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
 
 - Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
 - Verify: `git config core.hooksPath` should point to `.githooks/`
-- `.ps1` counterparts are provided for `scripts/` Tier 1 scripts but **not** for all `.githooks/` hooks.
+- All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
 - If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 <!-- COMMON-CLAUDE:END -->
 
@@ -488,7 +292,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-08 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-12 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

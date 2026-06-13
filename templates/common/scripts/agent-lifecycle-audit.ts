@@ -226,7 +226,14 @@ function findSkillFiles(dir: string): string[] {
 
   if (!existsSync(dir)) return skills;
 
-  const entries = readdirSync(dir, { withFileTypes: true });
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'EPERM' || code === 'EACCES') return skills; // skip inaccessible dirs (e.g. test scaffolds)
+    throw err;
+  }
 
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);

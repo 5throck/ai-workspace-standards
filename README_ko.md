@@ -45,19 +45,17 @@ git clone https://github.com/5throck/ai-workspace-standards.git ~/git
 ### 2. 첫 번째 프로젝트 생성
 
 ```bash
-# 기본값 (최신 템플릿, co-develop variant)
-bash scripts/new-project.sh "my-project-name"
+# 기본값 (최신 템플릿, co-develop variant) — 모든 플랫폼 동일
+bun scripts/new-project.ts "my-project-name"
 
 # variant 지정
-bash scripts/new-project.sh "my-project-name" --variant co-develop
+bun scripts/new-project.ts "my-project-name" --variant co-develop
 
 # 특정 템플릿 버전 사용 (목록 확인: bun scripts/list-template-versions.ts)
-bash scripts/new-project.sh "my-project-name" --version 0.5.0
-
-# Windows PowerShell
-.\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -variant co-develop -version 0.5.0
+bun scripts/new-project.ts "my-project-name" --version 0.5.0
 ```
+
+> **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` 및 `.\scripts\new-project.ps1`은 `bun scripts/new-project.ts`로 대체되었습니다 (ADR-0036). 기존 alias나 CI 파이프라인을 업데이트하세요.
 
 > **AI 도구 단축키**: Claude Code에서는 스크립트를 직접 실행하는 대신 `/new-project "my-project-name"`을 사용할 수 있습니다.
 
@@ -192,13 +190,13 @@ C:\git\
 bun scripts/list-template-versions.ts
 
 # 최신 template 사용 (기본값)
-bash scripts/new-project.sh my-project
+bun scripts/new-project.ts my-project
 
 # 특정 버전 지정
-bash scripts/new-project.sh my-project --version 0.5.0
+bun scripts/new-project.ts my-project --version 0.5.0
 
 # 특정 variant 지정
-bash scripts/new-project.sh my-project --variant co-develop
+bun scripts/new-project.ts my-project --variant co-develop
 ```
 
 ### Template 검증
@@ -209,7 +207,7 @@ Template 파일을 수정할 때는 라이프사이클 검증기를 실행하여
 bun scripts/validate-templates.ts
 ```
 
-검증 항목: 에이전트 frontmatter 완결성, 필수 섹션(`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md 명단 일치, 스크립트 `.sh`/`.ps1` 패리티, 공유 파일 동기화 경고. `templates/` 파일이 스테이징될 때 pre-commit을 통해 자동으로 실행됩니다.
+검증 항목: 에이전트 frontmatter 완결성, 필수 섹션(`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md 명단 일치, 공유 파일 동기화 경고. `templates/` 파일이 스테이징될 때 pre-commit을 통해 자동으로 실행됩니다.
 
 ---
 
@@ -219,8 +217,8 @@ bun scripts/validate-templates.ts
 - **`CLAUDE.md` / `GEMINI.md` (프로젝트 레벨)는 플랫폼 특화 오버라이드만 포함합니다.**
 - **PR 전용 워크플로** - 모든 변경 사항은 Pull Request를 통해 `main` 브랜치에 도달합니다. 직접 push는 `.githooks/pre-push`에 의해 차단됩니다.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **크로스 플랫폼 스크립트** - 모든 `.sh` 파일은 동일한 동작을 하는 `.ps1` 파일과 짝을 이룹니다.
-- **코딩 가이드라인 감사** - `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.sh`가 빌드를 실패 처리합니다.
+- **TypeScript 전용 스크립트** - 모든 `scripts/`는 `bun`으로 실행되는 `.ts` 파일입니다 (ADR-0036). `.sh/.ps1` 파일 없음.
+- **코딩 가이드라인 감사** - `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.ts`가 빌드를 실패 처리합니다.
 - **보안 중심 스캐폴드** - 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
 
 ---
@@ -243,4 +241,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-05*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-11*

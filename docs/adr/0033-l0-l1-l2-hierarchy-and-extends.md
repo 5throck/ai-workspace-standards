@@ -259,6 +259,21 @@ L0 (agents/pm.md)
 
 **Validation**: Scaffold scripts validate YAML syntax before creating L2 variants.
 
+### PM.md Multiple Implementation Approaches
+
+**Note**: PM.md files support multiple implementation approaches while maintaining ADR-0033 compliance:
+
+- **v1.1.0 (Deprecated)**: Runtime extends resolution via `merge-frontmatter.ts`
+- **v2.0.0 (Current Standard)**: Pre-build time resolution (2-Phase Pre-Build Strategy)
+
+Both approaches:
+- Use YAML frontmatter as single source of truth ✓
+- Support variant-specific content via `variant_overrides` ✓
+- Maintain L0 → L1 → L2 hierarchy ✓
+- Satisfy ADR-0033 core principles ✓
+
+See `docs/designs/pm-md-variant-specific-content-injection-design.md` for detailed comparison.
+
 ### 4.1.5 Layout Reconstruction Architecture (added 2026-06-08)
 
 **Purpose**: Generate L2 variant-specific content without duplicating L0 content

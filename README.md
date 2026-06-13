@@ -68,14 +68,16 @@ bun --version    # Should show 1.x.x
 ### 0. Install prerequisites (if not already installed)
 
 ```bash
-# Install Bun (REQUIRED)
-bash scripts/install-bun.sh      # Unix/Linux/macOS
-pwsh scripts/install-bun.ps1      # Windows
+# Install Bun (REQUIRED) — https://bun.sh/docs/installation
+curl -fsSL https://bun.sh/install | bash   # Unix/Linux/macOS
+powershell -c "irm bun.sh/install.ps1 | iex"  # Windows
 
 # Verify installation
 git --version
 bun --version
 ```
+
+> **Note**: `scripts/install-bun.sh` and `install-bun.ps1` have been removed. Install Bun directly from [bun.sh](https://bun.sh) before using any workspace script.
 
 ### 1. Clone as workspace root
 
@@ -98,19 +100,17 @@ claude
 ### 3. Create your first project
 
 ```bash
-# Default (latest template, co-develop variant)
-bash scripts/new-project.sh "my-project-name"
+# Default (latest template, co-develop variant) — all platforms
+bun scripts/new-project.ts "my-project-name"
 
 # Specify a variant
-bash scripts/new-project.sh "my-project-name" --variant co-develop
+bun scripts/new-project.ts "my-project-name" --variant co-develop
 
 # Use a specific template version (see available: bun scripts/list-template-versions.ts)
-bash scripts/new-project.sh "my-project-name" --version 0.5.0
-
-# Windows PowerShell
-.\scripts\new-project.ps1 "my-project-name"
-.\scripts\new-project.ps1 "my-project-name" -variant co-develop -version 0.5.0
+bun scripts/new-project.ts "my-project-name" --version 0.5.0
 ```
+
+> **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` and `.\scripts\new-project.ps1` have been replaced by `bun scripts/new-project.ts` (ADR-0036). Update any aliases or CI pipelines accordingly.
 
 > **AI tool shortcut**: In Claude Code, use `/new-project "my-project-name"` instead of running the script directly.
 
@@ -247,13 +247,13 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 bun scripts/list-template-versions.ts
 
 # Use latest template (default)
-bash scripts/new-project.sh my-project
+bun scripts/new-project.ts my-project
 
 # Use a specific version
-bash scripts/new-project.sh my-project --version 0.5.0
+bun scripts/new-project.ts my-project --version 0.5.0
 
 # Use a specific variant
-bash scripts/new-project.sh my-project --variant co-develop
+bun scripts/new-project.ts my-project --variant co-develop
 ```
 
 ### Validating templates
@@ -264,7 +264,7 @@ When modifying template files, run the lifecycle validator to catch structural i
 bun scripts/validate-templates.ts
 ```
 
-Checks: agent frontmatter completeness, required sections (`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md roster parity, script `.sh`/`.ps1` parity, and shared file sync warnings. Also runs automatically via pre-commit when `templates/` files are staged.
+Checks: agent frontmatter completeness, required sections (`## Meeting Participation`, `## Dispatch Protocol`), AGENTS.md roster parity, and shared file sync warnings. Also runs automatically via pre-commit when `templates/` files are staged.
 
 ---
 
@@ -274,13 +274,11 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 - **`CLAUDE.md` / `GEMINI.md` (project-level) contain only platform-specific overrides.**
 - **PR-only workflow** - all changes reach `main` via Pull Request. Direct push is blocked by `.githooks/pre-push`.
 - **Conventional Commits** - `feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:` / `perf:` / `ci:` / `style:` / `revert:`
-- **Cross-platform scripts** - every `.sh` has a `.ps1` pair with identical behavior.
+- **TypeScript-only scripts** - all `scripts/` are `.ts` files executed via `bun` (ADR-0036). No `.sh/.ps1` pairs.
 - **Coding Guidelines are audited** - `audit.ts` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 - **Security-First Scaffold** - Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
 
 ---
-
-**Windows Projects**: The `new-project.ps1` script (v1.7.0+) automatically configures proper user permissions, allowing you to create and delete projects without requiring administrator privileges.
 
 ---
 
@@ -302,4 +300,12 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-08*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-11*
+
+## Variant: co-develop
+
+**Type**: development
+**Status**: beta (v0.1.0)
+**Inherits**: templates/common
+
+Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor

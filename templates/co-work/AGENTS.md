@@ -168,7 +168,7 @@ All agents, regardless of their role, must adhere to the following:
 
 ### English Documentation Requirement
 - All `.md` files outside `ko/` and `locales/ko/` directories MUST be in English
-- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, workspace standards, CHANGELOG.md, all documentation in docs/, agents/, skills/
+- Applies to: README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md, all documentation in docs/, agents/, skills/
 - Rationale: English documentation ensures global accessibility and cross-team collaboration
 
 ### Translation Zones (Locale Exceptions)

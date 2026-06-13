@@ -13,11 +13,11 @@ When multiple skills overlap in intent or trigger phrases (e.g., a local `meetin
 We enforce a strict 3-tier priority system for skill resolution across all sessions and platforms:
 
 1. **Priority 1 (Highest): Local project skills**
-   - Location: `skills/<name>/SKILL.md` in the current working directory.
+	   - Location: `skills/<name>/SKILL.md` in the current working directory.
 2. **Priority 2: Platform config skills**
-   - Location: `.gemini/skills/` or `.claude/skills/` in the project root.
+	   - Location: `.gemini/skills/` or `.claude/skills/` in the project root.
 3. **Priority 3 (Lowest): Global plugin skills**
-   - Location: e.g., `superpowers/brainstorming`, `superpowers/writing-plans`.
+	   - Location: e.g., global plugin repositories or extension marketplaces.
 
 **Rule**: If a local skill's `metadata.triggers` matches the user request, it must be used. Fallthrough to a global plugin with overlapping intent is prohibited.
 

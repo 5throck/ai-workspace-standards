@@ -203,12 +203,12 @@ export async function executeRecoveryAction(
       return false;
 
     case 'skip':
-      console.warn(`?�️  Warning: ${action.reason}`);
+      console.warn(`⚠️  Warning: ${action.reason}`);
       console.warn('Continuing execution...');
       return true;
 
     case 'retry':
-      console.info(`?�️  Retry: ${action.reason}`);
+      console.info(`ℹ️  Retry: ${action.reason}`);
       console.info('\nRetry steps:');
       for (const step of action.steps) {
         console.info(`  ${step}`);
@@ -304,14 +304,14 @@ export function logErrors(errors: PipelineError[]): void {
   }
 
   if (grouped.warning.length > 0) {
-    console.warn(`\n?�️  Warnings (${grouped.warning.length}):`);
+    console.warn(`\n⚠️  Warnings (${grouped.warning.length}):`);
     for (const error of grouped.warning) {
       logError(error);
     }
   }
 
   if (grouped.info.length > 0) {
-    console.info(`\n?�️  Info (${grouped.info.length}):`);
+    console.info(`\nℹ️  Info (${grouped.info.length}):`);
     for (const error of grouped.info) {
       logError(error);
     }

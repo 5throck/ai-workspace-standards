@@ -1,16 +1,18 @@
 #!/usr/bin/env bun
 /**
  * substitute-placeholders.ts — Replace placeholders in all text files
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Usage:
- *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics]
+ *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]
  *
  * Replaces:
  *   [Project Name] → <project-name>
  *   {{PROJECT_NAME}} → <project-name>
  *   {{PROJECT_DESCRIPTION}} → "A new project" (or custom)
  *   {{PROJECT_CHARACTERISTICS}} → "" (or custom)
+ *   <variant-name> → <variant> (in docs/context.md)
+ *   <variant> → <variant> (in docs/context.md, within backtick paths only)
  */
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -21,9 +23,10 @@ const projectDir = args[0];
 const projectName = args[1] || '';
 const description = args[2] || 'A new project';
 const characteristics = args[3] || '';
+const variantName = args[4] || projectName;
 
 if (!projectDir || !projectName) {
-  console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics]');
+  console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]');
   process.exit(1);
 }
 
@@ -62,6 +65,10 @@ try {
     modified = modified.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
     modified = modified.replace(/\{\{PROJECT_DESCRIPTION\}\}/g, description);
     modified = modified.replace(/\{\{PROJECT_CHARACTERISTICS\}\}/g, characteristics);
+    // Replace variant placeholders in docs/context.md
+    modified = modified.replace(/<variant-name>/g, variantName);
+    // Replace <variant> only inside backtick paths (e.g. `docs/<variant>.context.md`)
+    modified = modified.replace(/`([^`]*)<variant>([^`]*)`/g, `\`$1${variantName}$2\``);
 
     if (modified !== content) {
       writeFileSync(fullPath, modified, 'utf-8');

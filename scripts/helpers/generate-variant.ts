@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -55,6 +55,12 @@ export interface AgentDefinition {
   model: string;
   /** Agent description */
   description?: string;
+  /** Phases this agent works in */
+  phases?: number[];
+  /** Agents this agent hands off to */
+  handoffTo?: string[];
+  /** Agents that hand off to this agent */
+  handoffFrom?: string[];
 }
 
 export interface SkillDefinition {
@@ -81,8 +87,12 @@ export interface GeneratedVariant {
   claudeMdPath: string;
   /** Generated GEMINI.md path */
   geminiMdPath: string;
+  /** Generated AGENTS.md path */
+  agentsMdPath: string;
   /** Generated README.md path */
   readmePath: string;
+  /** Generated <variant>.context.md path */
+  contextMdPath: string;
   /** Generation summary */
   summary: {
     totalFilesCreated: number;
@@ -190,11 +200,12 @@ function generateVariantJson(metadata: VariantMetadata): string {
 
 /**
  * Create variant directory structure
- * @version 1.1.0
+ * @version 1.2.0
  */
 function createDirectoryStructure(variantPath: string): string[] {
   const directories = [
     join(variantPath, 'agents'),
+    join(variantPath, 'docs'),
     join(variantPath, 'skills'),
     join(variantPath, '.claude'),
     join(variantPath, '.claude', 'agents'),
@@ -226,8 +237,9 @@ function generateAgentOverrides(
 
   // Process agent files from manifest
   for (const file of manifest.keepInVariant) {
-    if (file.targetPath.startsWith('agents/') && file.targetPath.endsWith('.md')) {
-      const agentName = file.targetPath.replace('agents/', '').replace('.md', '');
+    const normalizedTarget = file.targetPath.replace(/\\/g, '/');
+    if (normalizedTarget.startsWith('agents/') && normalizedTarget.endsWith('.md')) {
+      const agentName = normalizedTarget.replace('agents/', '').replace('.md', '');
       const overridePath = join(variantPath, file.targetPath);
 
       // Check if source exists (from L2 project)
@@ -310,6 +322,302 @@ function generateSkillDirectories(
   }
 
   return skillDirectories;
+}
+
+// ============================================================================
+// AGENTS.md GENERATION — placeholder injection
+// ============================================================================
+
+/**
+ * Parse YAML frontmatter from agent .md file content.
+ * Handles: scalars, inline arrays, list items, nested objects, block scalars (> and |).
+ */
+function parseAgentFrontmatter(content: string): Record<string, unknown> {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+  const lines = match[1].split(/\r?\n/);
+  const result: Record<string, unknown> = {};
+  let currentKey = '';
+  let blockScalar = false;
+  let blockLines: string[] = [];
+
+  function flushBlock() {
+    if (blockScalar && currentKey) {
+      result[currentKey] = blockLines.join(' ').trim();
+      blockLines = [];
+      blockScalar = false;
+    }
+  }
+
+  for (const line of lines) {
+    // Top-level key (no leading whitespace)
+    const topMatch = line.match(/^([\w][\w-]*):\s*(.*)/);
+    if (topMatch) {
+      flushBlock();
+      currentKey = topMatch[1];
+      const val = topMatch[2].trim();
+      if (val === '>' || val === '|') {
+        blockScalar = true;
+        blockLines = [];
+      } else if (val === '') {
+        // Will be populated by nested lines
+        result[currentKey] = {};
+      } else if (val.startsWith('[')) {
+        result[currentKey] = val
+          .replace(/[\[\]]/g, '').split(',')
+          .map(s => s.trim()).filter(Boolean)
+          .map(s => (isNaN(Number(s)) ? s : Number(s)));
+      } else {
+        result[currentKey] = val.replace(/^['"]|['"]$/g, '');
+      }
+      continue;
+    }
+
+    // Block scalar continuation (2-space indent)
+    if (blockScalar && line.startsWith('  ')) {
+      blockLines.push(line.trim());
+      continue;
+    }
+
+    // Nested key: value (2-space indent, e.g. "  claude: high")
+    const nestedKV = line.match(/^  ([\w][\w-]*):\s*(.*)/);
+    if (nestedKV && !blockScalar) {
+      flushBlock();
+      const parentVal = result[currentKey];
+      if (typeof parentVal === 'object' && parentVal !== null && !Array.isArray(parentVal)) {
+        (parentVal as Record<string, unknown>)[nestedKV[1]] = nestedKV[2].trim().replace(/^['"]|['"]$/g, '');
+      }
+      continue;
+    }
+
+    // List item (2-space indent + dash)
+    const listItem = line.match(/^  - (.*)/);
+    if (listItem && !blockScalar) {
+      const item = listItem[1].trim().replace(/^['"]|['"]$/g, '');
+      if (!Array.isArray(result[currentKey])) result[currentKey] = [];
+      (result[currentKey] as unknown[]).push(isNaN(Number(item)) ? item : Number(item));
+      continue;
+    }
+
+    // Blank line ends block scalar
+    if (blockScalar && line.trim() === '') {
+      flushBlock();
+    }
+  }
+  flushBlock();
+  return result;
+}
+
+/**
+ * Extract AgentDefinition from an agent .md file.
+ * Reads name, tier (claude platform), model, description, phases, handoffTo, handoffFrom.
+ */
+function parseAgentFile(filePath: string): AgentDefinition | null {
+  if (!existsSync(filePath)) return null;
+  const content = readUTF8File(filePath);
+  const fm = parseAgentFrontmatter(content);
+  const name = fm['name'] as string;
+  if (!name || name === 'pm') return null; // skip pm
+
+  // tier: may be nested (tier.claude) or flat
+  let tier: 'high' | 'medium' | 'low' = 'medium';
+  if (typeof fm['tier'] === 'object' && fm['tier'] !== null) {
+    const t = (fm['tier'] as Record<string, string>)['claude'];
+    if (t === 'high' || t === 'medium' || t === 'low') tier = t;
+  } else if (fm['tier'] === 'high' || fm['tier'] === 'medium' || fm['tier'] === 'low') {
+    tier = fm['tier'] as 'high' | 'medium' | 'low';
+  }
+
+  const model = (fm['model'] as string) ?? 'inherit';
+  const description = (fm['description'] as string) ?? (fm['role'] as string) ?? '';
+  const phases = Array.isArray(fm['phases'])
+    ? (fm['phases'] as number[]).filter(p => typeof p === 'number')
+    : [];
+  const handoffTo = Array.isArray(fm['handoff_to'])
+    ? (fm['handoff_to'] as string[])
+    : [];
+  const handoffFrom = Array.isArray(fm['handoff_from'])
+    ? (fm['handoff_from'] as string[])
+    : [];
+
+  return { name, tier, model, description, phases, handoffTo, handoffFrom };
+}
+
+/**
+ * Scan agent files from the manifest and build AgentDefinition[].
+ * Reads YAML frontmatter directly from agent .md source files.
+ */
+function readAgentRosterFromManifest(manifest: ReconciledManifest): AgentDefinition[] {
+  const agents: AgentDefinition[] = [];
+  for (const file of manifest.keepInVariant) {
+    const normalizedTarget = file.targetPath.replace(/\\/g, '/');
+    if (
+      normalizedTarget.startsWith('agents/') &&
+      normalizedTarget.endsWith('.md') &&
+      normalizedTarget !== 'agents/pm.md' &&
+      !normalizedTarget.includes('README') &&
+      !normalizedTarget.includes('handoff-spec')
+    ) {
+      const agent = parseAgentFile(file.sourcePath);
+      if (agent) agents.push(agent);
+    }
+  }
+  return agents;
+}
+
+// ── PlaceholderGenerator map ──────────────────────────────────────────────────
+
+function generateAgentRosterRows(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      const desc = a.description
+        ? a.description.replace(/\n/g, ' ').substring(0, 120)
+        : `${a.name} specialist`;
+      return `| **${a.name}** | [\`agents/${a.name}.md\`](agents/${a.name}.md) | ${a.tier.charAt(0).toUpperCase() + a.tier.slice(1)} | ${desc} |`;
+    })
+    .join('\n');
+}
+
+function generateAgentDetailSections(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      const desc = a.description
+        ? a.description.replace(/\n/g, ' ').trim()
+        : `${a.name} specialist`;
+      const phases = a.phases && a.phases.length > 0 ? a.phases.join(', ') : '—';
+      return (
+        `### ${a.name}\n\n` +
+        `| Field | Value |\n` +
+        `|-------|-------|\n` +
+        `| **File** | [\`agents/${a.name}.md\`](agents/${a.name}.md) |\n` +
+        `| **Tier** | ${a.tier} |\n` +
+        `| **Phases** | ${phases} |\n` +
+        `| **Role** | ${desc} |`
+      );
+    })
+    .join('\n\n');
+}
+
+function generateDispatchTriggerRows(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      const phases =
+        a.phases && a.phases.length > 0
+          ? a.phases.map(p => `Phase ${p}`).join(', ')
+          : '—';
+      const trigger = `"${a.name} task needed", "${a.name} work required"`;
+      return `| \`${a.name}\` | ${phases} | ${trigger} |`;
+    })
+    .join('\n');
+}
+
+function generatePhaseGateRows(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      const phase =
+        a.phases && a.phases.length > 0 ? `Phase ${a.phases[0]}` : 'Phase 4';
+      return `| <!-- TODO: deliverable type --> | ${phase} | \`${a.name}\` | ${a.tier} | |`;
+    })
+    .join('\n');
+}
+
+function generateSubagentRosterRows(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      const parallel = a.tier === 'low' ? '✅' : '⚠️ sequential preferred';
+      const writeScope = a.tier === 'high' ? 'orchestrates only' : 'project files';
+      return `| ${a.name} | \`agents/${a.name}.md\` | ${a.tier.charAt(0).toUpperCase() + a.tier.slice(1)} | ${parallel} | ${writeScope} |`;
+    })
+    .join('\n');
+}
+
+function generateRoleBoundaryRows(agents: AgentDefinition[]): string {
+  if (agents.length === 0) return '';
+  return agents
+    .map(a => {
+      return `| <!-- TODO: scenario for ${a.name} --> | \`${a.name}\` | \`pm\` |`;
+    })
+    .join('\n');
+}
+
+type PlaceholderGeneratorFn = (agents: AgentDefinition[]) => string;
+
+const PLACEHOLDER_GENERATORS: Record<string, PlaceholderGeneratorFn> = {
+  'VARIANT-AGENTS': generateAgentRosterRows,
+  'VARIANT-AGENT-DETAILS': generateAgentDetailSections,
+  'VARIANT-DISPATCH-TRIGGERS': generateDispatchTriggerRows,
+  'VARIANT-PHASE-GATE': generatePhaseGateRows,
+  'VARIANT-SUBAGENT-ROSTER': generateSubagentRosterRows,
+  'VARIANT-ROLE-BOUNDARY': generateRoleBoundaryRows,
+};
+
+/**
+ * Inject variant-specific content into all VARIANT-*-START/END placeholder blocks.
+ * If agents array is empty, leaves placeholder comments intact (no-op per design).
+ */
+function injectVariantPlaceholders(content: string, agents: AgentDefinition[]): string {
+  if (agents.length === 0) return content;
+
+  let result = content;
+  for (const [key, generator] of Object.entries(PLACEHOLDER_GENERATORS)) {
+    const startTag = `<!-- ${key}-START -->`;
+    const endTag = `<!-- ${key}-END -->`;
+    const startIdx = result.indexOf(startTag);
+    const endIdx = result.indexOf(endTag);
+    if (startIdx === -1 || endIdx === -1) continue;
+
+    const generated = generator(agents);
+    if (!generated) continue;
+
+    // Replace everything between START and END (exclusive of tags) with generated content
+    const before = result.substring(0, startIdx + startTag.length);
+    const after = result.substring(endIdx);
+    result = `${before}\n${generated}\n${after}`;
+  }
+  return result;
+}
+
+/**
+ * Generate AGENTS.md from L1 template with variant placeholder injection.
+ * Reads agent files from manifest, fills VARIANT-* blocks, writes to variantPath/AGENTS.md.
+ *
+ * @version 1.2.0
+ */
+function generateAgentsMd(
+  variantPath: string,
+  metadata: VariantMetadata,
+  manifest: ReconciledManifest
+): string {
+  const l1AgentsMd = join(COMMON_TEMPLATE, 'AGENTS.md');
+  if (!existsSync(l1AgentsMd)) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'L1_AGENTS_MD_NOT_FOUND',
+      `L1 AGENTS.md not found at: ${l1AgentsMd}`,
+      undefined,
+      'Run --governance-l1 to publish AGENTS.md to templates/common/'
+    );
+  }
+
+  let content = readUTF8File(l1AgentsMd);
+
+  // Build agent roster from manifest agent files (preferred) or metadata.agentRoster
+  const agents =
+    manifest.keepInVariant.length > 0
+      ? readAgentRosterFromManifest(manifest)
+      : metadata.agentRoster;
+
+  content = injectVariantPlaceholders(content, agents);
+
+  const outputPath = join(variantPath, 'AGENTS.md');
+  createDirectory(dirname(outputPath));
+  writeUTF8File(outputPath, content);
+  return outputPath;
 }
 
 /**
@@ -509,6 +817,43 @@ function getVariantTypeDescription(variantType: string): string {
 }
 
 // ============================================================================
+// CONTEXT.MD GENERATION — from canonical template
+// ============================================================================
+
+/**
+ * Generate <variant>.context.md from the canonical template at
+ * templates/common/docs/variant.context.template.md.
+ * Replaces {{VARIANT_NAME}}, {{VERSION}}, and {{PM_ROLE_DESCRIPTION}} placeholders.
+ *
+ * @version 1.0.0
+ */
+function generateContextMd(variantPath: string, metadata: VariantMetadata): string {
+  const templatePath = join(COMMON_TEMPLATE, 'docs', 'variant.context.template.md');
+
+  if (!existsSync(templatePath)) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'CONTEXT_TEMPLATE_NOT_FOUND',
+      `variant.context.template.md not found at: ${templatePath}`,
+      undefined,
+      'Ensure templates/common/docs/variant.context.template.md exists'
+    );
+  }
+
+  const templateContent = readUTF8File(templatePath);
+
+  const contextContent = templateContent
+    .replace(/\{\{VARIANT_NAME\}\}/g, metadata.name)
+    .replace(/\{\{VERSION\}\}/g, '1.0')
+    .replace(/\{\{PM_ROLE_DESCRIPTION\}\}/g, 'Workflow management, dispatch, quality gates');
+
+  const contextPath = join(variantPath, 'docs', `${metadata.name}.context.md`);
+  createDirectory(dirname(contextPath));
+  writeUTF8File(contextPath, contextContent);
+  return contextPath;
+}
+
+// ============================================================================
 // MAIN GENERATION FUNCTION
 // ============================================================================
 
@@ -563,10 +908,20 @@ export async function generateVariant(
   const geminiMdPath = generateGeminiMd(variantPath, metadata, manifest);
   console.log(`Created: ${geminiMdPath}`);
 
+  // Generate AGENTS.md
+  console.log(`\n=== Generating AGENTS.md ===`);
+  const agentsMdPath = generateAgentsMd(variantPath, metadata, manifest);
+  console.log(`Created: ${agentsMdPath}`);
+
   // Generate README.md
   console.log(`\n=== Generating README.md ===`);
   const readmePath = generateReadme(variantPath, metadata);
   console.log(`Created: ${readmePath}`);
+
+  // Generate <variant>.context.md from canonical template
+  console.log(`\n=== Generating ${metadata.name}.context.md ===`);
+  const contextMdPath = generateContextMd(variantPath, metadata);
+  console.log(`Created: ${contextMdPath}`);
 
   // Copy remaining files from manifest
   console.log(`\n=== Copying Remaining Files ===`);
@@ -578,6 +933,7 @@ export async function generateVariant(
         file.targetPath.includes('skills/') ||
         file.targetPath === 'CLAUDE.md' ||
         file.targetPath === 'GEMINI.md' ||
+        file.targetPath === 'AGENTS.md' ||
         file.targetPath === 'README.md' ||
         file.targetPath === 'variant.json') {
       continue;
@@ -597,7 +953,7 @@ export async function generateVariant(
 
   // Compute summary
   const summary = {
-    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 4, // +4 for json, claude.md, gemini.md, readme.md
+    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, claude.md, gemini.md, agents.md, readme.md, context.md
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
@@ -618,7 +974,9 @@ export async function generateVariant(
     skillDirectories,
     claudeMdPath,
     geminiMdPath,
+    agentsMdPath,
     readmePath,
+    contextMdPath,
     summary,
   };
 }

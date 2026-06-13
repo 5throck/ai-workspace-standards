@@ -325,9 +325,11 @@ function normalizeContent(raw: string): string {
   return raw.replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-// Parse frontmatter fields from markdown (handles BOM, CRLF, multi-line values, YAML blocks)
+// Parse frontmatter fields from markdown (handles BOM, CRLF, multi-line values, YAML blocks, @resolved-from: header)
 function parseFrontmatter(rawContent: string): Record<string, true> {
-  const content = normalizeContent(rawContent);
+  // Strip @resolved-from: comment line (L1-B Phase marker) before parsing
+  const strippedContent = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const content = normalizeContent(strippedContent);
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const fields: Record<string, true> = {};
@@ -352,8 +354,9 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
 function getResolvedContent(filePath: string): string {
   const rawContent = readFileSync(filePath, 'utf-8');
   let fullContent = rawContent;
-  
-  const match = rawContent.match(/^---\n([\s\S]*?)\n---/);
+  // Strip @resolved-from: comment line before matching frontmatter
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const match = stripped.match(/^---\n([\s\S]*?)\n---/);
   if (match) {
     try {
       const yamlObj = load(match[1]) as Record<string, unknown>;
@@ -372,7 +375,9 @@ function getResolvedContent(filePath: string): string {
 
 function getResolvedYaml(filePath: string): Record<string, unknown> {
   const rawContent = readFileSync(filePath, 'utf-8');
-  const match = rawContent.match(/^---\n([\s\S]*?)\n---/);
+  // Strip @resolved-from: comment line before matching frontmatter
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const match = stripped.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   try {
     const yamlObj = load(match[1]) as Record<string, unknown>;
@@ -531,12 +536,19 @@ function checkAgents(variant: string): void {
       : '';
 
     const fullResolvedContent = getResolvedContent(filePath);
-    
+
+    // Detect pure YAML-skeleton pm.md (extends: pattern, no body content — ADR-0033)
+    // In this pattern, Dispatch Protocol lives in AGENTS.md §3, so section checks are exempt.
+    const isYamlSkeletonPm = file === 'pm.md' && rawContent.trim().match(/^---[\s\S]*?---\s*$/) !== null;
+    // Detect resolved pm.md (pre-resolved by resolve-variants.ts L1-B Phase)
+    // Resolved files also have Dispatch Protocol in AGENTS.md §3, so section checks are exempt.
+    const isResolvedPm = file === 'pm.md' && rawContent.startsWith('# @resolved-from:');
+
     // Section is "present" if in variant file OR (additive override AND in skeleton) OR recursively inherited via extends
-    const hasMeetingSection = MEETING_SECTIONS.some(s =>
+    const hasMeetingSection = isYamlSkeletonPm || isResolvedPm || MEETING_SECTIONS.some(s =>
       content.includes(s) || (agentOverrideType === 'additive' && commonAgentContent.includes(s)) || fullResolvedContent.includes(s)
     );
-    const hasDispatchSection = content.includes(DISPATCH_SECTION) ||
+    const hasDispatchSection = isYamlSkeletonPm || isResolvedPm || content.includes(DISPATCH_SECTION) ||
       (agentOverrideType === 'additive' && commonAgentContent.includes(DISPATCH_SECTION)) || fullResolvedContent.includes(DISPATCH_SECTION);
     const missingSections: string[] = [];
     if (!hasMeetingSection) missingSections.push('## Meeting Participation (or ## Meeting Facilitation)');
@@ -966,7 +978,11 @@ function checkPlatformDocumentationParity(): void {
     'Agent Teams vs. Antigravity Agent Manager',
     'Antigravity Agent Manager',
     'Antigravity Parallel Agent Workflow',
-    'GEMINI.md Equivalent Settings'
+    'GEMINI.md Equivalent Settings',
+    'Antigravity-Specific Dispatch',
+    'Skill Resolution Priority',
+    'Claude Code-Specific Dispatch',
+    'Workspace & Template Boundary Policy'
   ];
   
   const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));

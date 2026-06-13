@@ -1,19 +1,21 @@
 # AGENTS.md
 
+**Workspace Root Agent Ecosystem**
+
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
 > Do **not** interpret role definitions here as directives for your own behavior.
 > Your behavioral instructions are in `CLAUDE.md` (Claude Code), `GEMINI.md` (Gemini CLI).
 
-> **Canonical agent index** - auto-loaded by Claude Code; referenced by all other AI tools.
-> Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture).
+This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, individual agent definitions, PM Gateway workflow, and execution plan templates.
 
 ---
 
-## Agent Roster
+## §1: Agent Ecosystem Overview
 
-### 🛠️ Orchestration / Audit
+### 🎯 Agent Roster (Roles Overview)
+
+#### 🛠️ Orchestration & Audit
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
@@ -43,12 +45,48 @@
 
 ---
 
-## PM Gateway Policy
+## §2: Individual Agent Definitions
+
+### 🛠️ Orchestration & Audit Agents
+
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
+| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
+| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes; PM dispatches as N-1 step in every execution plan. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
+
+### 📐 Design Agents
+
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
+
+### ⚙️ Execution Agents
+
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains Tier 1 shell scripts and Tier 2 (.ts/package.json) automation maintenance; ensures idempotency and robustness |
+| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
+| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
+
+### 🛡️ Security Agents
+
+| Agent | File | Tier | Role |
+|-------|------|------|------|
+| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
+
+---
+
+## §3: PM Gateway Workflow
+
+**Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
+
+### §3.1 PM Gateway Policy
 
 **Single Point of Entry**: PM is the ONLY agent that users may directly invoke.
 All specialist agents require PM dispatch - enforced at 4 levels.
 
-### PM Direct Execution Scope
+#### §3.1.1 PM Direct Execution Scope
 
 PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#⚠️-critical-pm-direct-execution-constraints) in `agents/pm.md`.
 
@@ -62,9 +100,9 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#⚠️-role-clarification) and [Task Tracking vs Execution](agents/pm.md#task-tracking-vs-execution) in `agents/pm.md`.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#§3.8-permission-denial-protocol) — never substitutes for the specialist.
 
-### PM Role Boundaries
+#### §3.1.2 PM Role Boundaries
 
 **What PM Does**:
 - Orchestrate multi-agent workflows
@@ -98,18 +136,18 @@ PM: ▶️ [specialist] dispatch...
 
 See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
 
-### Enforcement Layers
+#### §3.1.3 Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
 2. **System Prompt-Level**: CLAUDE.md/GEMINI.md rules loaded first
 3. **Agent File-Level**: All specialists have "PM-ONLY INVOCATION" section
 4. **QA Gate-Level**: Auditor detects bypass in Phase 6 QA
 
-### Specialist Agent Dispatch Flow
+#### §3.1.4 Specialist Agent Dispatch Flow
 ```
 User Request → PM Triage → Design Approval → Specialist Dispatch → QA Gate → Finalization
 ```
 
-### Specialist Agent Roster (PM-ONLY INVOCATION)
+#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)
 
 All specialist agents below are dispatched ONLY through PM:
 
@@ -124,6 +162,54 @@ All specialist agents below are dispatched ONLY through PM:
 | **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+
+### §3.5 Phase Determination (Deliverable-Type Gate)
+
+Before assigning an agent to any task, PM MUST classify the deliverable type:
+
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| New file design, schema definition, ADR | Phase 1-2 | architect | High | Must precede implementation |
+| New directory structure, template layout | Phase 1-2 | architect | High | Must precede implementation |
+| Cross-platform convention, naming standard | Phase 1-2 | architect | High | Must precede implementation |
+| Script implementation (approved plan exists) | Phase 4 | automation-engineer | Low | Plan from architect required |
+| Documentation update | Phase 4 | docs-writer | Medium | |
+| Documentation writing | Phase 4 | docs-writer | Medium | |
+| Security configuration | Phase 6 | security-expert | Medium | |
+| Project scaffolding | Phase 0 | scaffolding-expert | Low | |
+
+**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
+
+> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+
+### §3.6 3-Tier Strategy
+
+When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
+
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-4-7 / gemini-3.1-pro)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4.6 / gemini-3.5-flash)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.5-flash)
+
+### §3.7 Meeting Facilitation
+
+When `/meeting` is invoked, the PM orchestrates structured multi-agent discussions.
+
+**Meeting Process**:
+1. **Open meeting**: Set agenda and objectives
+2. **Facilitate dialogue**: Ensure all specialists contribute
+3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
+4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
+
+### §3.8 Permission Denial Protocol
+
+When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:
+
+1. Identify the denial Type (A/B/C/D) using the classification in [`agents/pm.md`](agents/pm.md#permission-denial-protocol)
+2. Output the Escalation Template immediately
+3. Log the denial to `memory/YYYY-MM-DD.md`
+4. Halt the blocked task — do not proceed without the required tool
 
 ---
 
@@ -159,192 +245,15 @@ All specialist agents below are dispatched ONLY through PM:
 
 ---
 
-## L0→L1→L2 PM Agent Architecture
+## §4: Other Workflows
+
+### 4.1 PM Subagent Dispatch Protocol
 
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
-### Architecture Overview
+> **For PM Agent Architecture**: See [CONSTITUTION.md §5.5 - PM Gateway Workflow](CONSTITUTION.md#55-pm-gateway-workflow) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
 
-```
-L0: agents/pm.md (workspace root)
-    ↓ extends
-L1: templates/common/agents/pm.md (pure YAML extends file)
-    ↓ extends
-L2: templates/<variant>/agents/pm.md (YAML variant_overrides)
-```
-
-**Key Principles**:
-- **L0**: Base PM agent with full governance workflow and orchestration logic
-- **L1**: Pure extends file (YAML frontmatter only) that removes L0-specific sections
-- **L2**: Variant-specific configuration via YAML `variant_overrides`
-- **Extends Chain Resolution**: L2 → L1 → L0 (L2 inherits from L1, which inherits from L0)
-
-### L1 Structure (Pure Extends File)
-
-L1 is a **YAML-only file** that extends L0 and removes workspace-specific sections:
-
-```yaml
----
-extends: ../../../agents/pm.md
-formal_name: Project Manager (PM) Agent
-remove_sections:
-  - "## Governance Workflow"
-  - "## Updated Role"
-  - "## Agent Roster"
-  - "## Dispatch Protocol"
-  - "### Phase Determination (Deliverable-Type Gate)"
----
-```
-
-**Key Points**:
-- L1 has **no markdown content** — only YAML frontmatter
-- `remove_sections` array lists L0 sections to exclude (workspace-specific governance)
-- L1 serves as a clean template base for L2 variants
-
-### L2 Structure (YAML variant_overrides)
-
-L2 variants use structured YAML frontmatter to override default behavior:
-
-```yaml
----
-extends: ../../common/agents/pm.md
-variant: <variant-name>
-variant_overrides:
-  updated_role:
-    description: <string>
-    scope: <string>
-  governance_workflow:
-    phases: <array[number]>
-    triage_required: <boolean>
-  agent_roster:
-    - phase: <string>
-      group: <string>
-      agents: <array[string]>
-  dispatch_protocol:
-    can_lead_phases: <array[number]>
-    can_support_in: <array[number]>
-    auto_dispatch_to: <array[string]>
-    tier: <string>
-    communication_style: <string>
-  constraints:
-    phase_determination:
-      deliverable_types:
-        - type: <string>
-          phase: <string>
-          required_agent: <string>
-          tier: <string>
----
-```
-
-**variant_overrides Sections**:
-
-| Section | Purpose | Required |
-|---------|---------|----------|
-| `updated_role` | Variant-specific role description and scope | No |
-| `governance_workflow` | Phase orchestration configuration | No |
-| `agent_roster` | Variant-specific specialist agents | No |
-| `dispatch_protocol` | Agent dispatch behavior and tier | No |
-| `constraints.phase_determination` | Deliverable-type classification rules | No |
-
-**Example - co-design Variant**:
-
-```yaml
----
-extends: ../../common/agents/pm.md
-variant: co-design
-variant_overrides:
-  updated_role:
-    description: "PM orchestrator for design system projects — owns team assembly, design validation, and system finalization"
-    scope: "Design system governance, component lifecycle, design token management, design ops coordination"
-  governance_workflow:
-    phases: [0, 2, 6]
-    triage_required: false
-  agent_roster:
-    - phase: "Research"
-      group: "Research"
-      agents: ["ux-researcher"]
-    - phase: "Direction"
-      group: "Design"
-      agents: ["design-lead"]
-  dispatch_protocol:
-    can_lead_phases: [0, 2, 6]
-    auto_dispatch_to: [ux-researcher, design-lead, visual-designer]
-    tier: high
-    communication_style: sync
----
-```
-
-### Extends Chain Resolution
-
-When an L2 variant PM agent loads:
-
-1. **Load L2** (`templates/<variant>/agents/pm.md`)
-   - Parse YAML `variant_overrides`
-   - Store variant-specific configuration
-
-2. **Extend L1** (`templates/common/agents/pm.md`)
-   - Apply `remove_sections` from L1 YAML
-   - Removes L0 workspace-specific sections
-
-3. **Extend L0** (`agents/pm.md`)
-   - Load base PM agent content
-   - Apply L1 `remove_sections`
-   - Merge L2 `variant_overrides`
-
-4. **Final Output**
-   - L0 base content minus removed sections
-   - Plus L2 variant-specific overrides
-   - Ready for variant project use
-
-### Schema Reference
-
-Complete YAML schema specification: **[`docs/variant/pm-yaml-schema.md`](docs/variant/pm-yaml-schema.md)**
-
-**Schema Coverage**:
-- Root-level fields (`extends`, `variant`, `variant_overrides`)
-- All `variant_overrides` sections with field specifications
-- Validation rules and examples
-- Scaffolding integration
-
-### ADR Reference
-
-**ADR-0033: Variant-Specific Skills & Scripts Blueprint** — [`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)
-
-**Relevant Content**:
-- Variant directory blueprint (`skills/local/`, `skills/external/`, `scripts/local/`, `scripts/external/`)
-- `variant.json` metadata schema extension for local/external dependencies
-- Ingestion workflow for external skills and scripts
-
-### Fork Model Relationship
-
-This architecture respects the **L1-L2 Fork Model** (see [ADR-0031](docs/adr/0031-l1-l2-fork-model.md)):
-
-- **L1 → L2 scaffold**: One-time inheritance via `create-l2-scaffold.ts`
-- **L2 independence**: After scaffolding, L2 evolves independently
-- **No auto-propagation**: L1 changes do not automatically flow to L2
-- **Explicit promotion**: Use `l2-to-variant-pipeline.ts` to promote L2 changes back to templates
-
-### Validation Checklist
-
-Before committing L2 variant pm.md changes:
-
-- [ ] YAML frontmatter is valid (no syntax errors)
-- [ ] `extends` path is correct: `../../common/agents/pm.md`
-- [ ] `variant` matches directory name
-- [ ] All `agent_roster` agents have corresponding `.md` files
-- [ ] All `auto_dispatch_to` agents exist in `agent_roster`
-- [ ] `tier` values are valid (high/medium/low)
-- [ ] `communication_style` is valid (sync/async)
-- [ ] Phase numbers are in range 0-6
-- [ ] No duplicate `type` entries in `constraints.phase_determination`
-
-Run validation: `bun scripts/validate-templates.ts`
-
----
-
-## PM Subagent Dispatch Protocol
-
-### Dispatch Decision
+#### Dispatch Decision
 
 ```
 Request received
@@ -359,7 +268,7 @@ Request received
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
 > Always wait for a write agent to complete before dispatching the next.
 
-### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
 
 The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
 
@@ -377,7 +286,7 @@ The PM agent MUST leverage the **`superpowers`** plugin for harness engineering 
 
 The PM agent delegates execution to the Low-tier and delegates review to the Medium-tier before finalizing.
 
-### Dispatch Rules
+#### Dispatch Rules
 
 1. **Autonomous Agent Handoffs** - Agents can dispatch each other directly via JSON contracts without PM intervention for routine workflows
 2. **PM Orchestration Phases** - PM only orchestrates Phases 0 (Team Assembly), 2 (Design Validation), and 5 (Lifecycle Finalization)
@@ -386,7 +295,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 5. **Error handling** - if any parallel agent fails, responsible agent resolves failure before proceeding. Do not skip.
 6. **Max QA iterations** - 2 per review cycle before escalating to PM for intervention
 
-### Subagent Roster
+#### Subagent Roster
 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
@@ -403,7 +312,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ---
 
-## Harness Engineering Workflow
+### 4.2 Harness Engineering Workflow
 
 Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-7-phases):
 
@@ -442,7 +351,7 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous in workspace, 
 
 ---
 
-## Role Boundary Matrix
+### 4.3 Role Boundary Matrix
 
 Use this to resolve ambiguity when multiple agents could handle a request.
 
@@ -458,7 +367,66 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ---
 
-## Skills
+## §5: Execution Plan Templates
+
+### 5.1 Standard Execution Plan Template
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] |
+| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [model] |
+| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [model] |
+
+**Execution Order**: [Parallel | Sequential]
+
+**Key points**:
+- Tier column is MANDATORY (High/Medium/Low)
+- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- State parallel vs sequential order below the table
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+
+### 5.2 Platform Parity Considerations
+
+When modifying files that affect both CLAUDE.md and GEMINI.md:
+
+| # | Task | Agent | Tier | Model | Platform |
+|---|------|-------|------|---------|----------|
+| 1 | [task] | [specialist] | [tier] | [model] | Both |
+| N-1 | Lifecycle Update | lifecycle-manager | Medium | [model] | Both |
+| N | Final QA | auditor | Medium | [model] | Both |
+
+**Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
+
+**Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
+
+### 5.3 Example Execution Plans
+
+#### Example 1: Multi-Agent Platform Parity Update
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
+| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 |
+| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 |
+
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
+
+#### Example 2: Single Specialist Task
+
+| # | Task | Agent | Tier | Model |
+|---|------|-------|------|-------|
+| 1 | Update project README introduction | docs-writer | Medium | claude-sonnet-4-6 |
+| 2 | Lifecycle Update (if needed) | lifecycle-manager | Medium | claude-sonnet-4-6 |
+| 3 | Final QA Audit | auditor | Medium | claude-sonnet-4-6 |
+
+**Execution Order**: Sequential
+
+---
+
+## §6: Skills
 
 > **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
 >
@@ -498,39 +466,8 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
-### Skill Registry
 
-| Skill | File | Trigger condition |
-|-------|------|-------------------|
-| UI/UX Design Intelligence | `skills/ui-ux-pro-max/SKILL.md` | Building web components, pages, or applications; UI/UX design tasks |
-| Skill Lifecycle Manager | `skills/skill-lifecycle-manager/SKILL.md` | PM agent managing skill lifecycle after agent configuration changes; checking skill health, orphaned/deprecated skills |
-| Script Lifecycle Manager | `skills/script-lifecycle-manager/SKILL.md` | PM agent managing script lifecycle; creating scripts, managing versions and dependencies in SCRIPTS.md |
-| Agent Lifecycle Manager | `skills/agent-lifecycle-manager/SKILL.md` | PM agent managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |
-| Platform Skill Lifecycle Manager | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle — creation, versioning, propagation for .claude/skills/ and .gemini/skills/ |
-| Platform Command Lifecycle Manager | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` · `.gemini/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle — creation, parity, propagation for .claude/commands/ and .gemini/commands/ |
-| Simulate Project Creation | `skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding logic in temporary directory |
-| Create Variant | `skills/create-variant/SKILL.md` | Phase A guided process for creating a new workspace variant prototype in Projects/ |
-| Promote Variant | `skills/promote-variant/SKILL.md` | Phase B guided process for promoting a completed Phase A prototype to templates/co-<name>/ |
-| Security Scan | `skills/security-scan/SKILL.md` | Running vulnerability scans, checking advisories, secret detection |
-| Audit Workspace | `skills/audit-workspace/SKILL.md` | Validating workspace standards compliance, documentation consistency |
-| Validate Docs Links | `skills/validate-docs-links/SKILL.md` | Checking all markdown links point to existing files |
-| Meeting Facilitation | `skills/meeting-facilitation/SKILL.md` | Running an interactive meeting where agents read each other's contributions and respond in dialogue |
-| Validate Templates | `scripts/validate-templates.sh` | Validating template variant structure, agent frontmatter, AGENTS.md roster, and shared file sync; run manually or triggered by pre-commit on templates/ changes |
-| project-review | `skills/project-review/SKILL.md` | Comprehensive parallel review of the current project by all available agents. Produces a prioritized improvement plan. Triggered by user request, PM structural change detection (T-02), or QA escalation (T-03). |
-| Finishing a Development Branch | `.claude/skills/finishing-a-development-branch/SKILL.md` · `.gemini/skills/finishing-a-development-branch/SKILL.md` | Workspace override — redirects branch completion to `/sync` pipeline; enforces CHANGELOG, memlog, audit, and PR creation gates. Available on both Claude Code and Gemini CLI. |
-| Team Builder | `skills/team-builder/SKILL.md` | Guides PM through building a new AI agent team — requirements interview, benchmarking, current team diagnosis, proposal generation, approval gate, and execution via `scripts/team-builder.ts`. Triggered by: "새 팀 구성", "에이전트팀 변경", "build new agent team". |
-
-> **📌 VERSION_MANIFEST Reference**: For the complete, up-to-date list of all skill versions, status (active/deprecated), and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md). That file is the authoritative source — this table serves only as a quick reference for skill names and locations.
-
-> **Note:** This is the workspace root - skills here focus on template maintenance and scaffolding validation.
-> Individual projects may define their own project-specific skills.
->
-> **Platform Support:** Skills are compatible with both Claude Code and Antigravity (Gemini CLI).
-> Lifecycle audit scripts use Bun (`.ts`) for cross-platform support.
-
----
-
-## Universal Baseline Behaviors
+## §7: Universal Baseline Behaviors
 
 All agents, regardless of their role, must adhere to the following:
 
@@ -547,7 +484,7 @@ All agents, regardless of their role, must adhere to the following:
 
 ---
 
-## Lifecycle Management
+## §8: Lifecycle Management
 
 ### Phase 5 Lifecycle Finalization
 
@@ -571,71 +508,12 @@ PM will produce either a **"no drift" confirmation** or a **drift report + gover
 
 PM does NOT execute finalization updates for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
 
----
-
-Use the dedicated lifecycle manager skills whenever creating, modifying, or retiring agents and skills. These skills are located in `.claude/skills/` and are loaded automatically by Claude Code.
-
-### Agent Lifecycle
-
-| Event | Skill to Use | Action |
-|-------|-------------|--------|
-| Create new agent | `agent-lifecycle-manager` | Draft frontmatter → write content → register in AGENTS.md → validate |
-| Update agent role/tier | `agent-lifecycle-manager` | Update frontmatter → bump version → re-validate |
-| Deprecate agent | `agent-lifecycle-manager` | Set `status: deprecated` → reassign owned skills → update AGENTS.md |
-
-**Trigger**: Invoke the `agent-lifecycle-manager` skill from Claude Code when any of the above events occur.
-
-```
-Skill("agent-lifecycle-manager")
-```
-
-### Skill Lifecycle
-
-| Event | Skill to Use | Action |
-|-------|-------------|--------|
-| Create new skill | `skill-lifecycle-manager` | Create `skills/<name>/SKILL.md` → write frontmatter → update AGENTS.md Skills table |
-| Update skill metadata | `skill-lifecycle-manager` | Update frontmatter → bump version → re-validate |
-| Deprecate skill | `skill-lifecycle-manager` | Set `status: deprecated` → archive after 30 days → update AGENTS.md |
-
-**Trigger**: Invoke the `skill-lifecycle-manager` skill from Claude Code when any of the above events occur.
-
-```
-Skill("skill-lifecycle-manager")
-```
-
-### Script Lifecycle
-
-| Event | Skill to Use | Action |
-|-------|-------------|--------|
-| Create new script | `script-lifecycle-manager` | Create script → update SCRIPTS.md → write documentation |
-| Update script | `script-lifecycle-manager` | Modify script → bump version in SCRIPTS.md → validate |
-| Deprecate script | `script-lifecycle-manager` | Set `status: deprecated` and `removal-date` → update SCRIPTS.md |
-
-**Trigger**: Invoke the `script-lifecycle-manager` skill from Claude Code/Antigravity when any of the above events occur.
-
-```
-Skill("script-lifecycle-manager")
-```
-
-### Skills Location Reference
-
-| Location | Purpose |
-|----------|---------|
-| `skills/` | Workspace-level skills (single source of truth) |
-| `.claude/skills/` | Platform-specific skills for Claude Code only |
-| `.gemini/skills/` | Platform-specific skills for Gemini CLI only |
-
-> **Sync rule**: Workspace-level skills in `skills/` are the single source of truth. Do not duplicate them in `.claude/skills/` or `.gemini/skills/`. Platform-specific skills may exist in both `.claude/skills/` and `.gemini/skills/` when they serve platform-specific purposes.
-
-> **Schema propagation**: `docs/workspace-schema.json` is the SSOT for workflow phases, agent tiers, and model assignments.
-> Validated automatically by `scripts/validate-model-registry.ts` and `scripts/validate-templates.ts`.
-
-> **Workspace-level skills**: All workspace-level skills reside in `skills/` folder only.
-> Platform-specific skills in `.claude/skills/` and `.gemini/skills/` must be annotated with `gemini-parity: skip` or `claude-parity: skip` in their SKILL.md frontmatter to indicate platform-specific implementation.
+> **For Agent Lifecycle procedures**: See [CONSTITUTION.md §5.6 - Agent Lifecycle Management](CONSTITUTION.md#56-agent-lifecycle-management) for detailed lifecycle procedures.
 
 ---
 
-## Maintenance Rule
+
+## §9: Maintenance Rule
 
 When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
 1. Use the `agent-lifecycle-manager` skill to guide the process.
@@ -654,7 +532,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
 
 ---
 
-## Periodic Skill Review Schedule
+## §10: Periodic Skill Review Schedule
 
 **Frequency**: Quarterly (every 3 months)  
 **Owner**: lifecycle-manager  
@@ -696,3 +574,10 @@ A skill health check should also be run outside the quarterly schedule when:
 - A tool, agent, or script referenced by any skill is renamed or removed
 - A new skill is added that may introduce dependency cycles
 - CI reports skill validation failures on any branch
+
+---
+
+## Version History
+
+- **v2.0.0 (2026-06-09)**: Restructured as SSOT - Integrated PM Gateway workflow (§3), execution plan templates (§5), and renumbered existing sections. Consolidated duplicate content from pm.md, CLAUDE.md §5, GEMINI.md §5 into single source of truth.
+- **v1.x**: Previous versions maintained agent roster and individual definitions without PM Gateway integration

@@ -142,7 +142,7 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 **Tier Enforcement Rules:**
 - All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)
-- PM agent MUST leverage superpowers plugin for 3-tier enforcement
+- PM agent MUST leverage platform-appropriate agent dispatch mechanisms for 3-tier enforcement
 - Audit scripts validate tier compliance on every run
 
 ---

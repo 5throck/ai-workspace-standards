@@ -198,7 +198,7 @@ try {
   console.log('\nTest 2: UTF-8 Integrity');
   try {
     const content = readText('README.md');
-    if (content.includes('�')) {
+    if (content.includes('�')) {  // encoding-check-ignore
       fail('Test 2', 'UTF-8 replacement char (U+FFFD) found — encoding corruption');
     } else {
       pass('Test 2 PASSED: No encoding corruption in README.md');
