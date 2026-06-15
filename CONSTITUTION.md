@@ -493,5 +493,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-13*
+*Last Updated: 2026-06-15*
 

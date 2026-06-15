@@ -15,7 +15,8 @@
       "source": "scripts/hooks",
       "target": "templates/common/scripts/hooks",
       "include_pattern": "*.ts",
-      "recursive": false
+      "recursive": false,
+      "exclude": []
     },
     "scripts-helpers": {
       "description": "Helper/utility scripts used by scaffolding",
@@ -39,7 +40,8 @@
       "target": "templates/common/.claude/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": []
+      "exclude": [],
+      "l0_exclude": ["simulate-project-creation"]
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -47,7 +49,8 @@
       "target": "templates/common/.gemini/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": []
+      "exclude": [],
+      "l0_exclude": ["simulate-project-creation"]
     },
     "gemini-settings": {
       "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
@@ -88,6 +91,33 @@
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
       "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+    },
+    "skills": {
+      "description": "L0 skills/ → L1 templates/common/skills/",
+      "source": "skills",
+      "target": "templates/common/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": ["local", "external"],
+      "override_only": true
+    },
+    "claude-commands": {
+      "description": "L0 .claude/commands/ → L1 templates/common/.claude/commands/",
+      "source": ".claude/commands",
+      "target": "templates/common/.claude/commands",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "exclude": [],
+      "override_only": true
+    },
+    "gemini-commands": {
+      "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",
+      "source": ".gemini/commands",
+      "target": "templates/common/.gemini/commands",
+      "include_pattern": "*.md",
+      "recursive": false,
+      "exclude": [],
+      "override_only": true
     }
   }
 }

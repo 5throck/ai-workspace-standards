@@ -88,7 +88,7 @@ git diff templates/common/ templates/co-work/
 # Manual review and propagation of:
 # - .claude/settings.json
 # - .claude/commands/
-# - scripts/audit.sh, dev-sync.sh, etc.
+# - scripts/audit.ts, dev-sync.ts, etc.
 # - AGENTS.md structure
 ```
 

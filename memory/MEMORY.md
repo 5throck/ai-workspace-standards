@@ -4,7 +4,7 @@
 
 | Date | Summary |
 |------|---------|
-| [2026-06-14](2026-06-14.md) | fix: Wave 1 security — shell injection in new-project.ts, prompt injection hardening in gen-pr-body.ts |
+| [2026-06-15](2026-06-15.md) | Meeting skill propagation fix |
 | [2026-06-13](2026-06-13.md) | fix: Wave 1 — co-develop CLAUDE.md ADR-0036 fix, L1 sh/ps1 removal, publish-to-template ghost refs, collectDiffs L0-only filter, path traversal guard, CONSTITUTION.md lang fix |
 | [2026-06-12](2026-06-12.md) | variant template section split strategy — Coding Guidelines migration, variant-specific area management |
 | [2026-06-11](2026-06-11.md) | GEMINI.md Claude-specific 콘텐츠 수정, L1 pm.md 중복 섹션 제거, generate-variant.ts Windows 경로 구분자 버그 수정, VARIANT-* 플레이스홀더 주입 정상화 |

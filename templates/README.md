@@ -51,7 +51,7 @@ Some files are shared between the workspace and templates:
 When the workspace version changes, manually sync to the template variant:
 ```bash
 cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
-bash scripts/validate-templates.sh  # confirm no drift
+bun scripts/validate-templates.ts  # confirm no drift
 ```
 
 ## Version Policy
@@ -62,4 +62,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-06-03*
+*Last Updated: 2026-06-15*

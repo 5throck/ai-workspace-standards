@@ -49,7 +49,7 @@ bash scripts/new-project.sh my-project --variant co-develop
 워크스페이스 버전이 변경되면 템플릿 variant에 수동으로 동기화합니다:
 ```bash
 cp .claude/commands/meeting.md templates/co-develop/.claude/commands/meeting.md
-bash scripts/validate-templates.sh  # 드리프트 없음 확인
+bun scripts/validate-templates.ts  # 드리프트 없음 확인
 ```
 
 ## 버전 정책
@@ -60,4 +60,4 @@ bash scripts/validate-templates.sh  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 업데이트
 
-*Last Updated: 2026-05-28*
+*Last Updated: 2026-06-15*

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-13T21:23:16.719Z
+**Generated**: 2026-06-15T09:37:59.917Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,13 +19,13 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-06-13 |
-| auditor | agents/auditor.md | medium | inherit | 2026-06-13 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-13 |
+| architect | agents/architect.md | high | inherit | 2026-06-15 |
+| auditor | agents/auditor.md | medium | inherit | 2026-06-15 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-15 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
-| pm | agents/pm.md | high | inherit | 2026-06-13 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-13 |
+| pm | agents/pm.md | high | inherit | 2026-06-15 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-15 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
 ---

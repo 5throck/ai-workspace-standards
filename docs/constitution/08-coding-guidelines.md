@@ -90,9 +90,10 @@ When adding or recommending dependencies:
 - When generating files programmatically (e.g. PowerShell scripts), explicitly use `-Encoding UTF8` (or `[System.Text.UTF8Encoding]::new($false)`) to prevent fallback to localized ANSI (CP949) encodings.
 - Git configuration (`core.quotepath false` and `i18n.commitencoding utf-8`) helps, but the source files themselves must be strictly UTF-8 encoded to prevent character corruption.
 
-#### 8.8 Hybrid Scripting & Cross-Platform Rule
-- **Hybrid Approach**: The project uses a hybrid scripting model. Complex multi-agent orchestration (e.g., `dispatch.ts`, `retry-handler.ts`, `verify-skills.ts`) is implemented in **Bun (.ts)**. Everyday development utilities (e.g., `dev-sync`, `audit`) use native shell scripts.
-- **Utility Script Pairing**: All utility shell scripts must be cross-platform compatible. Any creation, modification, or deletion of a PowerShell utility script (`.ps1`) MUST be accompanied by the exact same operation on its corresponding Bash script counterpart (`.sh`), and vice versa. They must always be kept in sync as a pair (e.g., `dev-sync.ps1` and `dev-sync.sh`).
+#### 8.8 TypeScript-First Scripting Rule (ADR-0036)
+- **Single implementation**: All operational scripts in `scripts/` are TypeScript (`.ts`) executed via Bun (`bun scripts/<name>.ts`). There are no `.sh` or `.ps1` operational script counterparts — ADR-0036 retired the dual-file model.
+- **No pairing required**: Creating, modifying, or deleting a script requires changes to exactly one `.ts` file. Script parity checks between `.sh` and `.ps1` no longer apply.
+- **Registry enforcement**: Every `.ts` script must have a matching entry in `scripts/SCRIPTS.md` with correct `@version`. Adding a new script without updating the registry is a governance violation caught by `bun scripts/audit.ts`.
 
 #### 8.9 Bilingual Documentation Rule
 - **README Pairing Requirement**: For any `README.md` file created in the `templates/` directory, a corresponding Korean version `README_ko.md` MUST also be created and maintained.
@@ -103,4 +104,4 @@ When adding or recommending dependencies:
   ├── README.md      # English version
   └── README_ko.md   # Korean version (translation of README.md)
   ```
-- **Verification**: The `audit.sh` / `audit.ps1` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
+- **Verification**: The `audit.ts` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.

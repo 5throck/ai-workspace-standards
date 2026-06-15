@@ -47,3 +47,5 @@ No variant-specific skills. Uses shared skills from `templates/common/skills/`.
 
 **Promoted to Stable**: 2026-06-13
 **Template Version**: 1.0.0
+
+*Last Updated: 2026-06-15*

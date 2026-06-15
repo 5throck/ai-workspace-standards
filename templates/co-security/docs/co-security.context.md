@@ -154,30 +154,18 @@ Maintain a current threat model in `docs/threat-model.md`. Review after any arch
 All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
 <!-- END VARIANT-INJECT -->
 
-### Beta Usage Scope
+### Usage Scope
 
-**Current Status**: co-security is in **beta** status.
+**Current Status**: co-security is in **stable** status (promoted from beta on 2026-06-13).
 
-**Allowed Activities** (Beta Phase):
-- —Test environment engagements only (sandbox, isolated lab, staging)
-- —Learning and evaluation of co-security template workflow
-- —Practice engagements with synthetic targets
-- —Testing verify-authorization skill and security features
+**Supported Activities**:
+- Controlled penetration testing engagements with proper authorization
+- Security audit and vulnerability assessment workflows
+- Real-world credential handling with proper key management
+- Customer environment engagements with explicit authorization documentation
 
-**Prohibited Activities** (Beta Phase):
-- —Actual customer environment engagements
-- —Production data access or processing
-- —Real-world credential handling
-- —Live penetration testing on customer infrastructure
-
-**Beta Exit Criteria**:
-co-security will be promoted to **stable** status when:
-1. Three successful sandbox test engagements are completed
-2. Zero critical bugs are reported in workflow or skills
-3. All A-04 verification items pass (full validation suite)
-4. Minimum 3 months of beta testing elapsed
-
-Until stable status is achieved, co-security should only be used for learning and testing purposes, not for actual customer security engagements.
+**Authorization Requirement**:
+All engagements must pass the `verify-authorization` skill gate before any active testing begins. The PM enforces this gate on every security workflow dispatch — no exceptions.
 
 ### Session Start Checklist
 

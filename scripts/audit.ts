@@ -448,7 +448,7 @@ function verifyScriptRegistryConsistency(): boolean {
         return true; // Not applicable
     }
 
-    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts') && f !== 'test-');
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts') && !f.startsWith('test-'));
     const scriptsMdContent = fs.readFileSync(scriptsMdPath, 'utf-8');
 
     for (const script of scripts) {
