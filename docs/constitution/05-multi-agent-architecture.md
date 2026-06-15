@@ -59,7 +59,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 
 - **Tool Abstraction**: The PM spawns child agent processes using the host tool's native subagent dispatching mechanism. The underlying tool handles process lifecycle and workspace sandboxing.
 
-#### 5.4 PM Governance Workflow (7 Phases)
+#### 5.4 PM Governance Workflow (6 Phases)
 
 ```
 Phase 0 - Project Initiation (PM-owned)

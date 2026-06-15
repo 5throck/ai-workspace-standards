@@ -6,6 +6,7 @@ description: >
   conflict resolution, and change history tracking. Accounts for 30-40% of
   Phase 4 schedule and must be planned accordingly.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: stakeholder-alignment, consulting-report-writing

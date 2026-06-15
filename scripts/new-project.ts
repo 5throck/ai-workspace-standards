@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.2
+// @version 1.1.3
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -22,7 +22,15 @@ let platform = 'both';
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
-  if (args[i] === '--version' && args[i + 1]) { templateVer = args[++i]; continue; }
+  if (args[i] === '--version' && args[i + 1]) {
+    templateVer = args[++i];
+    // Strict allowlist: only alphanumeric, dots, hyphens, underscores — no shell metacharacters
+    if (!/^[a-zA-Z0-9._-]+$/.test(templateVer)) {
+      console.error(`❌ Invalid --version value: '${templateVer}'. Only letters, numbers, dots, hyphens, underscores allowed.`);
+      process.exit(1);
+    }
+    continue;
+  }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
   if (!projectName && !args[i].startsWith('--')) { projectName = args[i]; continue; }
   if (projectName && !variant && !args[i].startsWith('--')) { variant = args[i]; continue; }
@@ -106,13 +114,17 @@ if (tag) {
     console.error('   Run: bun scripts/list-template-versions.ts');
     process.exit(1);
   }
-  // Extract from tag into temp dir
+  // Extract from tag into temp dir (shell-free: no bash -c interpolation)
   const mktemp = spawnSync('mktemp', ['-d'], { encoding: 'utf8' });
   tempDir = mktemp.stdout.trim();
-  const extract = spawnSync(
-    'bash', ['-c', `git -C "${workspaceRoot}" archive "${tag}" "templates/common/" "templates/${variant}/" | tar -x -C "${tempDir}"`],
+  const archivePath = join(tempDir, '_archive.tar');
+  const archiveRes = spawnSync(
+    'git', ['-C', workspaceRoot, 'archive', '--output', archivePath, tag, 'templates/common/', `templates/${variant}/`],
     { encoding: 'utf8' }
   );
+  const extract = archiveRes.status === 0
+    ? spawnSync('tar', ['-x', '-C', tempDir, '-f', archivePath], { encoding: 'utf8' })
+    : archiveRes;
   if (extract.status !== 0) {
     console.error(`❌ Failed to extract template version ${tag}`);
     if (tempDir) rmSync(tempDir, { recursive: true, force: true });
@@ -143,23 +155,6 @@ if (!existsSync(templatesDir)) {
   console.error(`❌ Template variant not found: ${templatesDir}`);
   console.error(`   Available variants: ${validVariants.join(' ')}`);
   process.exit(1);
-}
-
-// L0-only skill contamination pre-check — warn if variant template source contains skills
-// that must not ship to projects (they are removed post-copy, but presence in source is a template hygiene issue)
-const L0_SKILLS_CHECK = ['simulate-project-creation'];
-const l0Contaminated: string[] = [];
-for (const skill of L0_SKILLS_CHECK) {
-  for (const base of ['.claude/skills', '.gemini/skills']) {
-    const p = join(templatesDir, base, skill);
-    if (existsSync(p)) l0Contaminated.push(`${variant}/${base}/${skill}`);
-  }
-}
-if (l0Contaminated.length > 0) {
-  console.warn(`\n⚠️  L0-only skill(s) detected in variant template source (template hygiene issue):`);
-  for (const c of l0Contaminated) console.warn(`   ${c}`);
-  console.warn('   These will be removed from the generated project, but should be cleaned from the template.');
-  console.warn('   Run: bun scripts/propagate-to-templates.ts --check-drift to review\n');
 }
 
 // Variant status check
@@ -294,6 +289,14 @@ if (existsSync(memoryDir)) {
   console.log('  🗑️  Cleared memory/*.md (new projects start with empty memory/)');
 }
 
+// ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
+const commonDocs = join(projectDir, 'docs', '_common');
+if (existsSync(commonDocs)) {
+  copyDir(commonDocs, join(projectDir, 'docs'));
+  rmSync(commonDocs, { recursive: true });
+  console.log('  ✅ docs/_common/ → docs/ (flattened)');
+}
+
 // ── 2. Overlay variant/ on top ────────────────────────────────────────────────
 if (!existsSync(templatesDir)) {
   console.error(`❌ Variant templates directory not found: ${templatesDir}`);
@@ -316,7 +319,7 @@ const pmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(pmMd)) {
   const yaml = require('js-yaml');
   let content = readFileSync(pmMd, 'utf8');
-  content = content.replace(/^# @resolved-from:.*\n/, '');
+  content = content.replace(/^# @resolved-from:.*\n/m, '');
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
     const fm: Record<string, unknown> = yaml.load(match[1]) || {};
@@ -330,15 +333,7 @@ if (existsSync(pmMd)) {
   console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, lifecycle, formal_name, variant)');
 }
 
-// ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
-const commonDocs = join(projectDir, 'docs', '_common');
-if (existsSync(commonDocs)) {
-  copyDir(commonDocs, join(projectDir, 'docs'));
-  rmSync(commonDocs, { recursive: true });
-  console.log('  ✅ docs/_common/ → docs/ (flattened)');
-}
-
-// ── 2.6b. Remove template-only docs/ subdirs (may be re-added by variant overlay)
+// ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
 for (const d of ['docs/adr', 'docs/specs', 'docs/variants', 'docs/_templates', 'docs/_examples']) {
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Removed template-only dir: ${d}`); }
@@ -355,57 +350,10 @@ for (const f of walkFiles(projectDir)) {
 
 // ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ──────────────────
 if (existsSync(variantJsonPath)) {
-  spawnSync('bun', ['-', commonDir, templatesDir, projectDir], {
+  const agentOverrideMerge = join(workspaceRoot, 'scripts', 'lib', 'agent-override-merge.ts');
+  spawnSync('bun', [agentOverrideMerge, commonDir, templatesDir, projectDir], {
     encoding: 'utf8',
     stdio: 'inherit',
-    input: `
-const fs = require('fs');
-const path = require('path');
-const [,, commonDir, variantDir, projectDir] = process.argv;
-const variantJsonPath = path.join(variantDir, 'variant.json');
-if (!fs.existsSync(variantJsonPath)) process.exit(0);
-const variant = JSON.parse(fs.readFileSync(variantJsonPath, 'utf8'));
-const overrides = variant.agent_overrides || {};
-for (const [agentName, override] of Object.entries(overrides)) {
-  if (override.type !== 'additive') continue;
-  const skeletonFile = path.join(commonDir, 'agents', agentName + '.md');
-  const variantFile = path.join(variantDir, 'agents', agentName + '.md');
-  const outFile = path.join(projectDir, 'agents', agentName + '.md');
-  if (!fs.existsSync(skeletonFile) || !fs.existsSync(variantFile) || !fs.existsSync(outFile)) continue;
-  const variantContent = fs.readFileSync(variantFile, 'utf8');
-  if (variantContent.match(/^---\\n[\\s\\S]*?^extends:/m)) {
-    console.log('  [SKIP-ADDITIVE] agents/' + agentName + '.md (uses extends pattern)');
-    continue;
-  }
-  let skeleton = fs.readFileSync(skeletonFile, 'utf8');
-  const yaml = require('js-yaml');
-  function parseFrontmatter(content) {
-    const match = content.match(/^---\\n([\\s\\S]*?)\\n---\\n?/);
-    if (!match) return { fm: {}, body: content };
-    try { return { fm: yaml.load(match[1]) || {}, body: content.slice(match[0].length) }; }
-    catch { return { fm: {}, body: content }; }
-  }
-  const { fm: skelFm, body: skelBody } = parseFrontmatter(skeleton);
-  const { fm: varFm, body: varBody } = parseFrontmatter(variantContent);
-  const mergedFm = { ...skelFm, ...varFm };
-  const hasFm = Object.keys(mergedFm).length > 0;
-  const fmStr = hasFm ? '---\\n' + yaml.dump(mergedFm).trimEnd() + '\\n---\\n' : '';
-  skeleton = fmStr + skelBody;
-  const allSections = {};
-  const lines = varBody.split('\\n');
-  let cur = null, curLines = [];
-  for (const line of lines) {
-    if (line.startsWith('## ')) { if (cur) allSections[cur] = curLines.join('\\n'); cur = line.slice(3).trim(); curLines = [line]; } else if (cur) curLines.push(line);
-  }
-  if (cur) allSections[cur] = curLines.join('\\n');
-  const headingMap = { 'agent-roster': 'Agent Roster', 'governance-workflow': 'Governance Workflow', 'dispatch-protocol': 'Dispatch Protocol' };
-  skeleton = skeleton.replace(/<!-- VARIANT-SECTION: ([\\w-]+) -->([\\s\\S]*?)<!-- END VARIANT-SECTION -->/g, (m, id) => {
-    const h = headingMap[id]; return (h && allSections[h]) ? allSections[h] : '';
-  });
-  fs.writeFileSync(outFile, skeleton, 'utf8');
-  console.log('  [SECTION-MERGE] agents/' + agentName + '.md');
-}
-`,
   });
 }
 
@@ -582,9 +530,11 @@ console.log('  ✅ All security bootstrap checks passed');
 
 // ── 8. Post-scaffold audit ────────────────────────────────────────────────────
 console.log('\nRunning post-scaffold audit…');
-process.chdir(workspaceRoot);
-const auditResult = spawnSync('bun', [join(workspaceRoot, 'scripts', 'audit.ts'), '--skip-memory'], { stdio: 'inherit' });
-process.chdir(projectDir);
+// Run the new project's own audit to validate the scaffold result
+const projectAuditScript = join(projectDir, 'scripts', 'audit.ts');
+const workspaceAuditScript = join(workspaceRoot, 'scripts', 'audit.ts');
+const auditScript = existsSync(projectAuditScript) ? projectAuditScript : workspaceAuditScript;
+const auditResult = spawnSync('bun', [auditScript, '--skip-memory'], { stdio: 'inherit', cwd: projectDir });
 
 if (auditResult.status === 0) {
   console.log(`\n✅ Project '${projectName}' scaffolded and verified at: ${projectDir}`);

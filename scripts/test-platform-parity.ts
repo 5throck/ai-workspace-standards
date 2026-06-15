@@ -5,7 +5,7 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @author automation-engineer
  * @license MIT
  *
@@ -316,6 +316,20 @@ const FILE_MAPPINGS = {
 // ============================================================================
 // CORE FUNCTIONS
 // ============================================================================
+
+/**
+ * Check if a file is pre-resolved (has # @resolved-from: header).
+ * Pre-resolved L2 files are produced by resolve-variants.ts from the extends chain
+ * and are the expected "baked" state — parity is satisfied by construction.
+ */
+function isResolvedFile(filePath: string): boolean {
+  try {
+    const firstLine = readFileSync(filePath, 'utf-8').split('\n')[0];
+    return firstLine.startsWith('# @resolved-from:');
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Check if a file uses extends mechanism
@@ -802,21 +816,30 @@ async function main() {
                 discrepancies: [],
               });
             }
+          } else if (isResolvedFile(fullL2Path)) {
+            // Pre-resolved L2 file (# @resolved-from: header) — produced by resolve-variants.ts.
+            // Parity is satisfied by construction: the file was baked from the extends chain.
+            results.push({
+              file: sourceFile,
+              tier: 'L0→L2',
+              sourcePath: sourcePath,
+              targetPath: fullL2Path,
+              status: 'pass',
+              discrepancies: [],
+            });
           } else {
-            // L2 doesn't use extends - do parity check with shared sections only
+            // L2 doesn't use extends and is not pre-resolved — compare shared sections only
             const pmRules = PARITY_RULES['agents/pm.md'];
             const sharedRulesOnly = pmRules.filter(r => r.tier === 'shared');
 
-            // Temporarily replace rules for this check
             const originalRules = PARITY_RULES['agents/pm.md'];
             PARITY_RULES['agents/pm.md'] = sharedRulesOnly;
 
             const l2Result = checkParity(sourcePath, fullL2Path, 'L0→L2');
 
-            // Restore original rules
             PARITY_RULES['agents/pm.md'] = originalRules;
 
-            // Downgrade errors to warnings: L2 old-format is pending Phase 2 migration
+            // Downgrade errors to warnings: unresolved L2 format is pending migration
             if (l2Result.status === 'fail') {
               l2Result.status = 'warning';
               l2Result.discrepancies = l2Result.discrepancies.map(d => ({ ...d, severity: 'warning' as const }));

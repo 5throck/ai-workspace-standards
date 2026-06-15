@@ -7,6 +7,7 @@ description: >
   iterate with financial-modeling (max 2 loops). Does NOT perform precise
   financial calculations — provides risk-grade cost range percentages only.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none

@@ -34,4 +34,23 @@ paths = [
   '''.*_spec\.rb$''',
   # co-security agent docs legitimately discuss credentials/secrets as subject matter
   '''templates/co-security/agents/.*\.md$''',
+  # Other projects in workspace root — not part of this repo's audit scope
+  '''abap_coding_mig/''',
+  '''abap_vibe_coding/''',
+  '''abap_vibe_coding_mig/''',
+  '''abap_vibe_coding_plugin/''',
+  '''ai_workspace/''',
+  '''artifacts/''',
+  '''Crypto-Agent/''',
+  '''daniel-lightrag-mcp/''',
+  '''dart-mcp/''',
+  '''demo/''',
+  '''mcp-server-datahub/''',
+  '''notebooklm-mcp-cli/''',
+  '''PDF-Viewer/''',
+  '''Pricing-Mgmt-Simulation/''',
+  '''Product-Planning/''',
+  '''quickdl/''',
+  '''scratch/''',
+  '''vibing-steampunk/''',
 ]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.5
+ * @version 1.5.6
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -17,6 +17,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
+import { validatePropagationMap } from './lib/propagation-map-schema.js';
 
 interface VariantManifest {
   name: string;
@@ -107,16 +108,11 @@ interface GovernanceLayer {
 }
 interface GovernancePolicy {
   version: string;
-  lastUpdated?: string;
-  status?: string;
-  description?: string;
   layers: Record<string, GovernanceLayer>;
   variantValidationPolicy: {
     mandatoryBeforeProjectCreation: string[];
     warningOnly: string[];
   };
-  newVariantChecklist?: string[];
-  history?: Array<{ version: string; date: string; changes: string[] }>;
 }
 
 let governance: GovernancePolicy | null = null;
@@ -2181,6 +2177,31 @@ function checkVariantSkillsLayer(variant: string, skillLayerMap: Map<string, imp
 }
 
 // Main
+// A-10: propagation-map.json schema validation
+function checkPropagationMapSchema(): void {
+  if (!JSON_MODE) console.log('\n=== Check PM-01: propagation-map.json schema ===');
+  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  if (!existsSync(mapPath)) {
+    warn('root', 'propagation-map-missing', 'scripts/propagation-map.json not found');
+    return;
+  }
+  let map: unknown;
+  try {
+    map = JSON.parse(readFileSync(mapPath, 'utf-8'));
+  } catch {
+    fail('root', 'propagation-map-invalid-json', 'scripts/propagation-map.json is not valid JSON');
+    return;
+  }
+  const errors = validatePropagationMap(map);
+  if (errors.length > 0) {
+    for (const e of errors) {
+      fail('root', `propagation-map-schema:${e.domain}.${e.field}`, `propagation-map.json domain [${e.domain}].${e.field}: ${e.message}`);
+    }
+  } else {
+    pass('propagation-map.json schema valid');
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
@@ -2246,6 +2267,7 @@ function main() {
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
+  checkPropagationMapSchema();
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

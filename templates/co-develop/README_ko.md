@@ -3,51 +3,47 @@ translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# {{PROJECT_NAME}}
+# co-develop
 
-여러분의 전담 개발 파트너, **Co-Develop** 워크스페이스에 오신 것을 환영합니다! Claude와 Gemini AI 어시스턴트의 멀티 에이전트 아키텍처를 활용하여, 프로젝트 첫날부터 설계, 구현, 테스트, 문서화를 전담할 AI 팀이 준비되어 있습니다.
+> **상태**: 안정화 (v1.0.0)
 
-## 1. 팀 미션 (Team Mission)
+---
 
-**미션:** 포괄적이고 전문적인 멀티 에이전트 소프트웨어 개발 파트너십 제공.
+소프트웨어 개발 워크플로우 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor로 구성된 전체 에이전트 팀.
 
-저희 팀은 특정 작업 단계를 전문 에이전트에게 위임하여 단일 세션의 컨텍스트 과부하를 줄이도록 설계되었습니다. 단일 AI와 대화하는 대신, 여러분은 테크 리드(Tech Lead)가 되어 전체 제품 팀과 협업하게 됩니다. 여러분이 비전을 제시하면, 저희가 스캐폴딩, 아키텍처, 구현, 문서화 및 품질 보증을 책임집니다.
+## 빠른 시작
 
-## 2. AI 팀 소개 (Meet the AI Team)
+이 variant는 `templates/common`을 상속하며 소프트웨어 개발을 위한 6단계 선형 거버넌스 파이프라인을 제공합니다.
 
-여러분의 개발 파트너는 각자 고유한 역할을 가진 전문 에이전트들로 구성되어 있습니다. **PM(프로젝트 매니저)**이 여러분의 단일 진입점이 되어 전체 팀을 조율합니다.
+### Claude Code 사용자:
 
-| 에이전트 | 역할 및 역량 |
-|---------|-------------|
-| **PM (Project Manager)** | 메인 담당자입니다. 팀 구성을 조율하고, 설계를 검증하며, 품질 게이트를 강제하고, 전문 에이전트를 적재적소에 디스패치합니다. |
-| **Architect** | 시스템 설계 전문가입니다. 구현 계획, 폴더 계층 구조 및 아키텍처 결정(ADRs)을 담당합니다. |
-| **Automation Engineer** | 코딩 및 스크립트 작성 전문가입니다. 승인된 계획을 구현하고 자동화 스크립트를 작성하여 견고한 동작을 보장합니다. |
-| **Docs Writer** | 문서화 전문가입니다. 일관된 용어를 사용하여 README, CHANGELOG 및 기술 문서를 작성하고 유지 관리합니다. |
-| **Scaffolding Expert** | 프로젝트 설정 전문가입니다. 새 프로젝트 생성, 템플릿 검증 및 폴더 동기화를 처리합니다. |
-| **Auditor** | 품질 보증 검사관입니다. 워크스페이스 구조적 일관성을 교차 검증하고 구조적 오류를 탐지합니다. |
-| **Lifecycle Manager** | 거버넌스 기록 관리자입니다. 상태 변경을 모니터링하고 거버넌스 문서를 동기화하며, 작업의 최종 단계를 마무리합니다. |
-| **Security Expert** | 보안 및 위협 모델러입니다. Git Hooks를 강제하고, 자격 증명을 관리하며, 안전한 의존성 처리를 보장합니다. |
+`CLAUDE.md`에서 상세 안내를 확인하세요.
 
-## 3. 협업 방법 (How to Collaborate)
+### Gemini Code 사용자:
 
-저희와의 협업은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 다음은 기본 워크플로우입니다:
+`GEMINI.md`에서 상세 안내를 확인하세요.
 
-### A. PM 게이트웨이
-모든 요청은 항상 **PM**에게 먼저 전달해 주세요. 전문 에이전트를 직접 호출해서는 안 됩니다. PM이 요청을 분석하고 적절한 전문가를 투입합니다.
+## Variant 유형
 
-### B. 표준 워크플로우 단계
-1. **설계 및 계획 (Design & Planning):** PM이 **Architect**를 호출하여 구현 계획과 설계를 제안합니다.
-2. **검토 (Review):** 여러분이 제안된 계획을 검토합니다. 승인하면 PM이 실행 팀을 투입합니다.
-3. **실행 (Execution):** **Automation Engineer**가 코드를 작성하고, **Docs Writer**가 문서를 업데이트합니다 (충돌 방지를 위해 쓰기 작업은 순차적으로 진행됩니다).
-4. **품질 보증 (QA):** **Auditor** 또는 **Security Expert**가 검사(예: `bun scripts/audit.ts`)를 수행합니다.
-5. **마무리 (Finalization):** **Lifecycle Manager**가 필요한 거버넌스 기록을 업데이트합니다.
-6. **동기화 (Sync):** `/sync "commit message"` 커맨드를 사용하여 안전하게 커밋하고 PR을 엽니다.
+**유형**: development
 
-### C. 사용 가능한 커맨드 (Available Commands)
-일상적인 작업은 슬래시 커맨드로 구동됩니다:
-- `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
-- `/changelog "..."` — `CHANGELOG.md`에 항목을 추가합니다.
-- `/memlog "summary"` — 오늘의 세션 로그에 요약을 추가합니다.
-- `/meeting` — 구조화된 멀티 에이전트 인라인 미팅을 진행합니다.
+이 variant는 소프트웨어 개발 워크플로우, 기능 구현 및 통합 테스트에 중점을 둡니다.
 
-멋진 프로젝트를 함께 만들어 봅시다!
+## 에이전트 구성
+
+| 에이전트 | 역할 | 티어 |
+|---------|------|------|
+| architect | 시스템 설계 및 아키텍처 계획 | Medium |
+| code-writer | 기능 구현 | Low |
+| designer | UI/UX 및 컴포넌트 설계 | Low |
+| security-monitor | 보안 검토 및 컴플라이언스 | Medium |
+| test-runner | 테스트 및 QA 검증 | Low |
+
+## 스킬
+
+Variant 전용 스킬 없음. `templates/common/skills/`의 공유 스킬을 사용합니다.
+
+---
+
+**안정화 승격일**: 2026-06-13
+**템플릿 버전**: 1.0.0

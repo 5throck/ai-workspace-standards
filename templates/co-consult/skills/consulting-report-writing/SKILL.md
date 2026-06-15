@@ -6,6 +6,7 @@ description: >
   design logic, and recommendation framing with impact-feasibility assessment.
   Sets the quality floor for all client-facing deliverables.
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: narrative-framework

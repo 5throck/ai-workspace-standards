@@ -6,6 +6,7 @@ description: >
   scenario sensitivity analysis, and explicitly includes change management cost
   category. Designed to work iteratively with technical-feasibility (max 2 loops).
 version: 1.0.0
+last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: technical-feasibility, org-readiness-assessment

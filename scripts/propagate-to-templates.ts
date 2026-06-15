@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.5
+ * @version 2.0.6
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -403,17 +403,9 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
         continue;
       }
 
-      // Skip L0-only entries that must not appear in L2 variant templates
-      const l0Exclude: string[] = (domain as any).l0_exclude ?? [];
-      const firstSegment = relPath.split('/')[0].split('\\')[0];
-      if (l0Exclude.includes(firstSegment) || l0Exclude.includes(relPath)) continue;
-
       const l1SourcePath = join(l1SourceDir, relPath);
       const srcContent = readFileSync(l1SourcePath, 'utf-8');
-
-      // override_only domains: variants may omit files (they are override/extension spaces, not mirrors)
-      const overrideOnly: boolean = (domain as any).override_only === true;
-
+      
       for (const variant of templateVariants) {
         // The L2 target replaces 'templates/common' with 'templates/{variant}'
         const variantTarget = domain.target.replace('templates/common', `templates/${variant}`);
@@ -422,8 +414,6 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
 
         let status: FileDiff['status'];
         if (!existsSync(l2TargetPath)) {
-          // override_only: absent in variant is intentional — skip rather than flag missing
-          if (overrideOnly) continue;
           status = 'missing';
         } else {
           const tgtContent = readFileSync(l2TargetPath, 'utf-8');
@@ -1117,18 +1107,14 @@ if (CHECK_DRIFT) {
   const outOfSyncDrift = drifts.filter(d => d.status !== 'in-sync');
   console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSyncDrift.length}`);
   if (outOfSyncDrift.length > 0) {
-    // Distinguish L1-variant drift (templates/co-*) from true L2 project drift
-    const variantDrifts = outOfSyncDrift.filter(d => d.targetPath.includes('/templates/co-'));
-    const l2ProjectDrifts = outOfSyncDrift.filter(d => !d.targetPath.includes('/templates/co-'));
+    const variantDrifts = outOfSyncDrift.filter(d => /\/templates\/co-[^/]+\//.test(d.targetPath));
+    const l2ProjectDrifts = outOfSyncDrift.filter(d => !/\/templates\/co-[^/]+\//.test(d.targetPath));
     if (variantDrifts.length > 0) {
       console.log(`\nℹ️  L1 variant drift may be intentional (variant-specific overrides). Review above before applying.`);
+      process.exitCode = 1;
     }
     if (l2ProjectDrifts.length > 0) {
       console.log(`\nℹ️  L2 project drift is expected under Fork Model (ADR-0031) — L2 projects are independent after creation.`);
-    }
-    // Only set exit code 1 for L1 variant drifts; L2 project drift is exempt under Fork Model (ADR-0031)
-    if (variantDrifts.length > 0) {
-      process.exitCode = 1;
     }
   }
 }
