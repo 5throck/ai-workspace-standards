@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.3
+// @version 1.1.4
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -458,15 +458,9 @@ if (existsSync(layerFilter)) {
   l0Scripts = ['validate-templates.ts', 'create-l2-scaffold.ts', 'l2-to-variant-pipeline.ts', 'fix-script-versions.ts'];
 }
 for (const s of l0Scripts) {
-  if (s.includes('/')) continue;
-  const f1 = join(projectDir, 'scripts', s);
-  const f2 = join(projectDir, 'scripts', 'helpers', s);
-  if (existsSync(f1)) rmSync(f1);
-  if (existsSync(f2)) rmSync(f2);
+  const fp = join(projectDir, 'scripts', s);
+  if (existsSync(fp)) rmSync(fp, { recursive: true, force: true });
 }
-// Always remove helpers/ (L0 pipeline internals)
-const helpersDir = join(projectDir, 'scripts', 'helpers');
-if (existsSync(helpersDir)) rmSync(helpersDir, { recursive: true });
 
 // Remove workspace-only artifacts
 const cleanupFiles = [

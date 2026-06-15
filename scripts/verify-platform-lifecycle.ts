@@ -10,7 +10,7 @@
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -21,7 +21,7 @@ const JSON_MODE = args.includes('--json');
 const ROOT = process.cwd();
 
 // Auto-detect Tier 1 vs Tier 3
-const IS_TIER3 = existsSync(join(ROOT, 'variant.json'));
+const IS_TIER3 = existsSync(join(ROOT, 'variant.json')) || !existsSync(join(ROOT, 'templates'));
 const LEVEL = IS_TIER3 ? 'Tier 3' : 'Tier 1 SSOT';
 
 const issues: Array<{ level: 'error' | 'warning'; check: string; message: string; fix?: string }> = [];
