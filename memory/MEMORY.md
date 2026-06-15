@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-16](2026-06-16.md) | feat(mcp): implement 3 Korean EHS MCP servers - k_skill, legalize_kr, mcp_kr_legislation |
 | [2026-06-15](2026-06-15.md) | Meeting skill propagation fix |
 | [2026-06-13](2026-06-13.md) | fix: Wave 1 — co-develop CLAUDE.md ADR-0036 fix, L1 sh/ps1 removal, publish-to-template ghost refs, collectDiffs L0-only filter, path traversal guard, CONSTITUTION.md lang fix |
 | [2026-06-12](2026-06-12.md) | variant template section split strategy — Coding Guidelines migration, variant-specific area management |
