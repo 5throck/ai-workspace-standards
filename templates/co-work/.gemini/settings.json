@@ -1,5 +1,5 @@
 {
-  "_comment": "Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. Intentionally minimal — terminal.executionPolicy, mcp.toolApproval, and terminal.denyList are omitted to rely on Gemini CLI defaults for co-work projects.",
+  "_comment": "Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. Security policies (terminal.executionPolicy, mcp.toolApproval, terminal.denyList) explicitly set for co-work projects.",
   "mcpServers": {
     "codegraph": {
       "command": "npx",
@@ -31,5 +31,19 @@
       }
     ]
   },
-  "artifact.reviewPolicy": "Auto"
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Auto",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "rm -rf",
+    "rm -r /",
+    "chmod -R 777",
+    "git push --force",
+    "git reset --hard",
+    "reboot",
+    "shutdown",
+    "format",
+    "fdisk",
+    "mkfs"
+  ]
 }

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-13]**: feat: A-01~A-05 — template-utils.ts SSOT, generateContextMd refactor, new-project.ts context.md integration — centralizes context.md generation logic in template-utils.ts; refactors generateContextMd to use SSOT helpers; integrates context.md scaffolding into new-project.ts pipeline (PR #257)
 
 ### Fixed
+- **[2026-06-15]**: fix: update `templates/co-work/.gemini/settings.json` to explicitly include security policies (`terminal.executionPolicy`, `mcp.toolApproval`, `terminal.denyList`) and correct stale `_comment` field
 - **[2026-06-15]**: fix: Fix `new-project.ts` to correctly preserve L0+L1 helper scripts in scaffolded projects by cleaning up L0 scripts by explicit relative paths and removing unconditional helpers/ directory deletion.
 - **[2026-06-15]**: fix: Fix Tier 3 detection in `verify-platform-lifecycle.ts` by falling back to checking templates/ directory existence since `variant.json` is cleaned up in scaffolded projects.
 - **[2026-06-15]**: fix: replace `validate-templates.sh` with `bun scripts/validate-templates.ts` and remove obsolete `.sh`/`.ps1` script parity rule — update `templates/README.md`, `templates/README_ko.md`, `templates/co-design/AGENTS.md`, `memory/ai-workspace-standards-architecture-analysis_ko.md`; replace §8.8 Hybrid Scripting Pairing rule in `docs/constitution/08-coding-guidelines.md` with TypeScript-first rule per ADR-0036; update `qa-gate.sh/.ps1` → `qa-gate.ts` in `docs/constitution/05-multi-agent-architecture.md`
