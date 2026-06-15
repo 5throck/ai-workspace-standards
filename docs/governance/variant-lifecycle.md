@@ -43,19 +43,16 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 - Verify-authorization skill implemented (for security variants)
 - Ready for controlled testing engagements
 
-**Beta Usage Scope (per variant):**
+**Historical Beta Variants (all promoted to stable as of 2026-06-15):**
 
-| Variant | Beta Scope | Usage Notes |
-|---------|------------|--------------|
-| co-security | **Single engagement trial** | One designated security project for real-world testing. Requires explicit user acknowledgment of beta status. |
-| co-develop | **Full access** | Standard development workflow beta testing |
-| co-work | **Full access** | Collaboration workflow beta testing |
-| co-design | **Full access** | Design workflow beta testing |
+| Variant | Promoted | Notes |
+|---------|----------|-------|
+| co-security | 2026-06-15 | Authorization gate enforced on all engagements |
+| co-develop | 2026-06-13 | Full access |
+| co-work | 2026-06-15 | Full access |
+| co-design | 2026-06-15 | Full access |
 
-**Restrictions:**
-- Must display beta warning on project creation
-- No production SLA or uptime guarantees
-- Feature changes may occur without notice
+> All five variants (`co-consult`, `co-design`, `co-develop`, `co-security`, `co-work`) are currently in **stable** status.
 
 ---
 
