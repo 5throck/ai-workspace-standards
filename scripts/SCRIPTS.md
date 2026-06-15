@@ -106,7 +106,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.3 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.1.4 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.0.6 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
@@ -137,7 +137,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `verify-platform-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `verify-platform-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
