@@ -35,7 +35,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
+import { join, relative, dirname, resolve } from 'node:path';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 /**
@@ -685,7 +685,7 @@ function parseArgs(args: string[]): ValidateOptions {
  * Main entry point
  */
 async function main() {
-  const workspaceRoot = process.cwd();
+  const workspaceRoot = resolve(import.meta.dir, '..');
   const options = parseArgs(process.argv.slice(2));
 
   const results = validate(workspaceRoot, options);

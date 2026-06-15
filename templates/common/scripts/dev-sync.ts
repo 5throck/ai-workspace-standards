@@ -1,7 +1,8 @@
-// @version 1.2.3
+// @version 1.2.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { resolve } from 'node:path';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 
 const GREEN = '\x1b[32m';
@@ -9,6 +10,18 @@ const RED = '\x1b[31m';
 const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
+
+// Workspace root guard — dev-sync must run from the workspace root it belongs to.
+// Using import.meta.dir (script location) prevents CWD mismatches when two clones exist.
+const expectedRoot = resolve(import.meta.dir, '..');
+const actualCwd = process.cwd();
+if (path.resolve(actualCwd) !== expectedRoot) {
+    console.error(`${RED}❌ dev-sync: CWD mismatch.${RESET}`);
+    console.error(`   Expected: ${expectedRoot}`);
+    console.error(`   Current:  ${actualCwd}`);
+    console.error(`   Run from the workspace root: cd ${expectedRoot}`);
+    process.exit(1);
+}
 
 const msg = process.argv.slice(2).join(' ') || "chore: update";
 const dateObj = new Date();

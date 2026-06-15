@@ -25,7 +25,7 @@ import { readUTF8File, writeUTF8File } from './lib/encoding-utils.js';
 // CONSTANTS
 // ============================================================================
 
-const WORKSPACE_ROOT = process.cwd();
+const WORKSPACE_ROOT = resolvePath(import.meta.dir, '..');
 const TEMPLATES_DIR = join(WORKSPACE_ROOT, 'templates');
 const COMMON_DIR = join(TEMPLATES_DIR, 'common');
 const RESOLVED_MARKER = '# @resolved-from:';
