@@ -320,7 +320,7 @@ When promoting from `Projects/${variant}/` to `templates/co-${variant}/`:
 1. Copy variant-specific `agents/`, `skills/`, and domain doc folders.
 2. ${domain ? `Copy domain-specific assets (workflows/, regulations/, evidence-models/) if present.` : `Copy any domain-specific document folders created under docs/.`}
 3. Verify CLAUDE.md / GEMINI.md / AGENTS.md diverge from L0 (reconcile survival).
-4. From workspace root (C:/git): run the template parity check script (L0-only — see workspace scripts/SCRIPTS.md).
+4. From workspace root: run the template parity check script (L0-only — see workspace scripts/SCRIPTS.md).
 5. Run `bun scripts/audit.ts` — must pass with 0 errors.
 
 ## Common Skills Sync Note

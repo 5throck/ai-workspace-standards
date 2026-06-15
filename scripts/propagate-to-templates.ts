@@ -50,7 +50,7 @@ const CHECK_DRIFT      = args.includes('--check-drift');
 const PRUNE            = args.includes('--prune');
 const domainIdx        = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
-const workspaceRoot    = process.cwd();
+const workspaceRoot    = resolve(import.meta.dir, '..');
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Domain {

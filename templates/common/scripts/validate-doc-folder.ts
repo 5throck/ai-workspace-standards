@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { resolve } from 'node:path';
 
 interface ValidationResult {
   success: boolean;
@@ -68,7 +69,7 @@ function validateDocsFolder(docsPath: string): ValidationResult {
 }
 
 function main(): void {
-  const workspaceRoot = process.cwd();
+  const workspaceRoot = resolve(import.meta.dir, '..');
   const docsPath = path.join(workspaceRoot, 'docs');
 
   console.log('🔍 Validating docs/ folder structure...');
