@@ -120,7 +120,7 @@ Harness Engineering은 개발자가 루프 안에 머무는 방식이다. AI 도
 모든 `.sh` 스크립트는 `.ps1`(Windows PowerShell) 쌍을 가진다. 단, ADR-0036에 의해 운영 스크립트는 TypeScript(Bun)로 단일화하고 `.sh`/`.ps1` 이중 관리를 폐지했다.
 
 **원칙 5: 코딩 가이드라인 감사 강제**  
-`audit.sh`/`audit.ts`는 `docs/context.md`에 `## Coding Guidelines` 섹션이 없으면 빌드를 실패시킨다. 코딩 표준은 선언이 아닌 실행 시점 검증으로 강제된다.
+`audit.ts`는 `docs/context.md`에 `## Coding Guidelines` 섹션이 없으면 빌드를 실패시킨다. 코딩 표준은 선언이 아닌 실행 시점 검증으로 강제된다. (`audit.sh`는 ADR-0036에 의해 폐기됨)
 
 **원칙 6: Security-First 스캐폴딩**  
 모든 신규 프로젝트는 자동으로 `.gitleaks.toml`(크리덴셜 탐지), `SECURITY.md`(취약점 보고 정책), 보안 pre-commit 훅을 갖추고 시작한다.

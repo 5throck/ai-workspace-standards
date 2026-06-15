@@ -2,7 +2,7 @@
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-06-01
+> Last Updated: 2026-06-15
 
 ---
 
@@ -18,9 +18,9 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 5. **README** — structural completeness, i18n consistency, and freshness
 
 **3 Layers:**
-- **Layer 0 — Workspace Root** (repo root — `git rev-parse --show-toplevel`): the workspace itself, orchestrated by `audit.sh`
+- **Layer 0 — Workspace Root** (repo root — `git rev-parse --show-toplevel`): the workspace itself, orchestrated by `audit.ts`
 - **Layer 1 — Templates** (`templates/` relative to repo root): split into `common/` (shared base) and `co-*/` (variant instances)
-- **Layer 2 — L2 Projects**: scaffolded from L1 via `new-project.sh`, each carrying a project copy of `audit.sh`
+- **Layer 2 — L2 Projects**: scaffolded from L1 via `bun scripts/new-project.ts`, each carrying a project copy of `audit.ts`
 
 ---
 
@@ -37,7 +37,7 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 **Legend:**
 - ✅ `active` — check is wired into the orchestrator and passing
 - ⚠️ `partial` — check exists but coverage is incomplete (see domain sections)
-- ❌ `gap` — check is not wired in; audit.sh or validate-templates.ts does not call it
+- ❌ `gap` — check is not wired in; audit.ts or validate-templates.ts does not call it
 - N/A — domain is not applicable at this layer
 
 **Target state (all cells):** ✅ active or N/A
@@ -121,7 +121,7 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 **Applicable layers:** L0 (primary), L1b (drift detection between L0 and variant script copies), L2 (optional, non-mandatory).
 
 **Current gaps:**
-- `audit.sh` at L0 does not call `verify-scripts.ts`. This is the most critical gap: new scripts can be added without registry entries going undetected until manual audit.
+- `audit.ts` at L0 does not call `verify-scripts.ts`. This is the most critical gap: new scripts can be added without registry entries going undetected until manual audit.
 - L1b `validate-templates.ts` does not check variant script registries.
 
 ---
@@ -142,9 +142,9 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 **Applicable layers:** L0, L1a (partial), L1b, L2.
 
 **Current gaps:**
-- `audit.sh` at L0 does not call `readme-lifecycle-audit.ts`.
+- `audit.ts` at L0 does not call `readme-lifecycle-audit.ts`.
 - `templates/co-*/README.md` files are explicitly excluded from the current audit scope in `readme-lifecycle-audit.ts`.
-- L2 projects do not have `readme-lifecycle-audit.ts` wired into their local `audit.sh` copies.
+- L2 projects do not have `readme-lifecycle-audit.ts` wired into their local `audit.ts` copies.
 
 ---
 
@@ -152,14 +152,14 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 
 | Orchestrator | Layer | Domains Currently Enforced | Domains Missing |
 |---|---|---|---|
-| `scripts/audit.sh` | L0 Workspace Root | agent, skill, memory | script, readme |
+| `scripts/audit.ts` | L0 Workspace Root | agent, skill, memory | script, readme |
 | `scripts/validate-templates.ts` | L1b co-* Variants | variant (partial) | agent, skill, script, readme |
-| `scripts/audit.sh` (project copy) | L2 Projects | agent, skill | script (optional), readme (optional) |
+| `scripts/audit.ts` (project copy) | L2 Projects | agent, skill | script (optional), readme (optional) |
 | *(none)* | L1a templates/common | *(none)* | variant, script, readme |
 
 ### Remediation Priority
 
-1. **High — add `verify-scripts.ts` to `audit.sh` (L0):** Prevents undocumented scripts from accumulating. One-line addition to `audit.sh`.
+1. **High — add `verify-scripts.ts` to `audit.ts` (L0):** Prevents undocumented scripts from accumulating. One-line addition to `audit.ts`.
 2. **High — remove README exclusion in `readme-lifecycle-audit.ts` for L1b:** Template READMEs are the most widely copied — staleness there propagates to all derived projects.
 3. **Medium — wire agent + skill audits into `validate-templates.ts`:** Run per-variant subdirectory scans before approving a variant as `active`.
 4. **Medium — add script registry to `validate-templates.ts`:** Variants with scripts not listed in any registry are a drift source.
@@ -188,7 +188,7 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 - [ ] Promote `variant.json` `status` from `"draft"` to `"beta"` once validation passes
 - [ ] Submit PR; `validate-templates.ts` runs in CI as a required check
 
-> See `lifecycle-governance.json` → `variantValidationPolicy` for which checks are mandatory vs. warning-only before `new-project.sh` allows project creation from this variant.
+> See `lifecycle-governance.json` → `variantValidationPolicy` for which checks are mandatory vs. warning-only before `new-project.ts` allows project creation from this variant.
 
 ---
 
@@ -201,7 +201,7 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 | [`VARIANT_LIFECYCLE_INTEGRATION.md`](VARIANT_LIFECYCLE_INTEGRATION.md) | Integration guide for embedding lifecycle checks in CI/CD |
 | [`VERSION_REGISTRY.json`](VERSION_REGISTRY.json) | Canonical version registry for all tracked variants |
 | [`VERSION_REGISTRY_SCHEMA.md`](VERSION_REGISTRY_SCHEMA.md) | Schema documentation for VERSION_REGISTRY.json |
-| `../../scripts/audit.sh` | L0 orchestrator — workspace-level audit pipeline |
+| `../../scripts/audit.ts` | L0 orchestrator — workspace-level audit pipeline |
 | `../../scripts/validate-templates.ts` | L1b orchestrator — template variant validation |
 | `../../scripts/agent-lifecycle-audit.ts` | Agent domain validator |
 | `../../scripts/skill-lifecycle-audit.ts` | Skill domain validator |

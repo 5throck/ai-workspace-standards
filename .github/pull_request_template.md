@@ -13,7 +13,7 @@
 ## Test Plan
 
 <!-- How was this verified? Check all that apply and describe manual steps -->
-- [ ] `bash scripts/audit.sh` passes
+- [ ] `bun scripts/audit.ts` passes
 - [ ] CHANGELOG.md `[Unreleased]` section updated with `(#PR)` reference
 - [ ] Agent/skill lifecycle audit passes (if agents/ or skills/ modified)
 - [ ] Manual test: <!-- describe what you tested and the result -->

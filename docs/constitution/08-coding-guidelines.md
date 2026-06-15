@@ -103,4 +103,4 @@ When adding or recommending dependencies:
   ├── README.md      # English version
   └── README_ko.md   # Korean version (translation of README.md)
   ```
-- **Verification**: The `audit.sh` / `audit.ps1` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
+- **Verification**: The `audit.ts` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.

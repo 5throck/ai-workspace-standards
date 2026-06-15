@@ -85,7 +85,7 @@ When reporting audit findings:
 ### Findings
 - [ ] templates/CLAUDE.md - contradicts CONSTITUTION.md §3
 - [x] agents/pm.md - properly documented in AGENTS.md
-- [ ] scripts/new-project.sh - missing UTF-8 handling
+- [ ] scripts/new-project.ts - missing UTF-8 handling
 
 ### Contradictions Detected
 1. **CLAUDE.md §Git** says "commit messages must be English"
@@ -98,7 +98,7 @@ When reporting audit findings:
 
 ### Recommendations
 1. Update CLAUDE.md to match CONSTITUTION.md terminology
-2. Add UTF-8 handling to new-project.sh
+2. Add UTF-8 handling to new-project.ts
 
 ### Approval Status
 [READY ✅ | REQUIRES CHANGES ❌]

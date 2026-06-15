@@ -47,10 +47,8 @@ Every project follows this layout. Omit folders that don't apply to the project 
 > **Note**: `.gemini/` and `.claude/` both exist in every project - they coexist and each AI tool reads only its own directory.
 
 #### 1.2 Rules
-- **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §8. The `audit.sh` / `audit.ps1` script must verify this heading exists and abort with a non-zero exit code if it is missing.
-- **Hybrid Scripting & Cross-Platform Parity**: The workspace follows a hybrid scripting model:
-  1. **Utility Scripts** (e.g., `dev-sync`, `audit`) are implemented in pure PowerShell (`.ps1`) and Bash (`.sh`). `scripts/` must always provide both `.sh` and `.ps1` pairs. Both files must accept the exact same parameters and perform identical side-effects.
-  2. **Agent Orchestration** (e.g., `dispatch`, `verify-skills`) and complex workflows are implemented in TypeScript (`.ts`) executed via Bun. These `.ts` files do not require PS1/SH pairs.
+- **Coding Guidelines in context.md**: `docs/context.md` must contain a `## Coding Guidelines` section with the mandatory template from §8. The `audit.ts` script must verify this heading exists and abort with a non-zero exit code if it is missing.
+- **TypeScript-first Scripting (ADR-0036)**: All operational scripts in `scripts/` are implemented in TypeScript (`.ts`) and executed via Bun (`bun scripts/<name>.ts`). No `.sh`/`.ps1` operational script counterparts exist — ADR-0036 unified the dual `.sh`/`.ps1` model into a single `.ts` implementation.
 - **ADR Format Standard**: ADRs in `docs/adr/` must follow sequential 4-digit prefix naming (`0001-slug.md`). Every ADR must consist of three mandatory sections:
   1. **Context**: What is the problem or architectural background context?
   2. **Decision**: What choice was made and why?

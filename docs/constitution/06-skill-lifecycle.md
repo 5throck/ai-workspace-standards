@@ -204,7 +204,7 @@ If audit fails:
 
 Any command file added or modified under `.claude/commands/` **MUST** have a corresponding file under `.gemini/commands/` at the same directory level. This rule applies at both the workspace root and template variant levels.
 
-**Enforcement**: `audit.sh` runs `check_command_parity()` on every commit and warns on any `.claude/commands/` file that lacks a matching `.gemini/commands/` file.
+**Enforcement**: `audit.ts` runs `check_command_parity()` on every commit and warns on any `.claude/commands/` file that lacks a matching `.gemini/commands/` file.
 
 **Intentional exceptions**: If a command is genuinely Claude Code-only (e.g., it relies on Claude-native tool dispatch with no Gemini equivalent), add the following to the file's frontmatter to suppress the parity warning:
 

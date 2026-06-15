@@ -14,7 +14,7 @@ color: green
 description: 'Scripting and tools expert. Phase 4 Lead Agent. Use when: "Creating scripts", "Cross-platform automation", "Implementation tasks"'
 examples:
   - user: "Create a deployment script"
-    assistant: "I'll implement the deployment script with cross-platform support (.sh + .ps1)"
+    assistant: "I'll implement the deployment script as a TypeScript module (bun scripts/)"
 lifecycle:
   phase: production
   created: 2026-05-29
@@ -61,7 +61,7 @@ This ensures no code is written without proper design review and approval.
 
 ## Scripting Rules
 
-1. **Cross-platform first**: Always provide both `.sh` (Unix) and `.ps1` (Windows) versions.
+1. **TypeScript-first (ADR-0036)**: All operational scripts are TypeScript (`.ts`) executed via Bun. No `.sh`/`.ps1` operational script counterparts — `bun scripts/<name>.ts` is the single implementation.
 2. **Idempotency**: Scripts should be safe to run multiple times.
 3. **UTF-8 enforcement**: Ensure scripts handle Unicode properly (especially on Windows).
 4. **Error handling**: Always include proper error handling and exit codes.
@@ -71,9 +71,9 @@ This ensures no code is written without proper design review and approval.
 
 For each file changed, report:
 ```
-✅ scripts/new-project.sh - created: scaffolding script with validation and template copy
-✅ scripts/audit.sh - modified: added UTF-8 validation check
-⚠️  scripts/setup.ps1  - requires PowerShell 7+ for proper UTF-8 handling
+✅ scripts/new-project.ts - created: scaffolding script with validation and template copy
+✅ scripts/audit.ts - modified: added UTF-8 validation check
+⚠️  scripts/setup.ts  - requires UTF-8 output encoding set explicitly via Bun
 ```
 
 ## Constraints

@@ -72,7 +72,7 @@ One paragraph describing what will be built and why this approach was chosen.
 | File | Action | Description |
 |------|--------|-------------|
 | templates/.gitignore | modify | Add new ignore patterns for [X] |
-| scripts/new-project.sh | create | Scaffolding script for new project type |
+| scripts/new-project.ts | create | Scaffolding script for new project type |
 
 ### Directory structure
 [Proposed folder hierarchy, template organization]
