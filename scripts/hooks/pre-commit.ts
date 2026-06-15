@@ -128,13 +128,17 @@ async function main() {
   }
 
   // 4. Audits (only if lifecycle check passed)
-  if (!memoryOnly && lifecycleOk) {
+  // When running via /sync (SYNC_ACTIVE=1), dev-sync.ts already ran full audit before commit — skip here to avoid triple execution.
+  const auditAlreadyRan = process.env.SYNC_ACTIVE === "1";
+  if (!memoryOnly && lifecycleOk && !auditAlreadyRan) {
     console.log("\n=== Workspace Audit ===");
     try {
       await $`bun scripts/audit.ts`;
     } catch {
       process.exit(1);
     }
+  } else if (auditAlreadyRan) {
+    console.log("\n=== Workspace Audit === [skipped — already ran in dev-sync pipeline]");
   }
 
   const templateStaged = staged.filter(f => /^templates\//.test(f.replace(/\\/g, '/')));

@@ -168,6 +168,18 @@ If `verify-authorization` returns BLOCKED ❌, **do not dispatch any specialist 
 
 ## Skills
 
+### Platform Skills (shared infrastructure)
+
+| Skill | File | Trigger condition |
+|-------|------|-------------------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM managing agent lifecycle — creating, versioning, deprecating agents |
+| **Platform Skill Lifecycle Manager** | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` | PM managing platform skill lifecycle and propagation |
+| **Platform Command Lifecycle Manager** | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` | PM managing platform command lifecycle and parity |
+| **Finishing a Development Branch** | `.claude/skills/finishing-a-development-branch/SKILL.md` | Redirects branch completion to `/sync` pipeline |
+| **Simulate Project Creation** | `.claude/skills/simulate-project-creation/SKILL.md` | Testing new-project scaffolding in temporary directory |
+
+### Domain Skills
+
 | Skill | Path | Description |
 |-------|------|-------------|
 | **Agent Lifecycle Manager** | `skills/agent-lifecycle-manager/SKILL.md` | Security PM managing agent lifecycle; creating new agents, updating frontmatter, validating agent status and tiers |

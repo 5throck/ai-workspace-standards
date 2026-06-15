@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-13]**: feat: A-01~A-05 — template-utils.ts SSOT, generateContextMd refactor, new-project.ts context.md integration — centralizes context.md generation logic in template-utils.ts; refactors generateContextMd to use SSOT helpers; integrates context.md scaffolding into new-project.ts pipeline (PR #257)
 
 ### Fixed
+- **[2026-06-15]**: fix: repair meeting skill propagation gaps across all variant templates — remove `simulate-project-creation` L0 contamination from 10 variant template locations; sync `templates/common/.gemini/commands/meeting.md` to v1.4.0; copy 7 missing `.gemini/skills/` entries across co-consult, co-design, co-develop, co-work; add `claude-commands`/`gemini-commands` `override_only` domains to `scripts/propagation-map.json`; add `l0_exclude` filter for `simulate-project-creation` in drift-check; add L0 contamination pre-check warning to `scripts/new-project.ts`
 - **[2026-06-12]**: fix: resolve PM.md Layout Reconstruction — implement reconstructPMLayout function and regenerate 4 project pm.md files (PR #255)
 
 ### Changed
@@ -711,7 +712,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-13*
+*Last Updated: 2026-06-15*
 
 
 

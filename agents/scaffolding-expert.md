@@ -13,10 +13,12 @@ description: 'New Project & Template Specialist. Use when: "Creating new project
 examples:
   - user: "Create a new project"
     assistant: "I'll scaffold a new project following workspace standards"
+version: 1.0.0
+last_reviewed: 2026-06-13
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-05-31
+  last_updated: 2026-06-13
   governance: docs/lifecycle/agents/scaffolding-expert.md
 ---
 

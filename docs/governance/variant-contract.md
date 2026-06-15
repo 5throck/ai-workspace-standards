@@ -10,7 +10,7 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
 
 | File / Path | Notes |
 |-------------|-------|
-| `variant.json` | Must include: name, description, status, version |
+| `variant.json` | Must include: name, description, status, version. **Note**: `agents/pm.md` is implicitly excluded from `variant.json agents[]` — pm is required in every variant via Required Files but is treated as infrastructure, not a specialist agent. Only specialist agents (architect, code-writer, etc.) are listed in `agents[]`. |
 | `CLAUDE.md` | Claude Code session config; context load order + slash command table |
 | `GEMINI.md` | Antigravity / Gemini CLI config; same content adapted for Gemini tool names |
 | `AGENTS.md` | Canonical agent roster with phases, tiers, and skill references |

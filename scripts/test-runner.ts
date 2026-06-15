@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.0.1
+ * @version 1.0.2
  */
 import { spawnSync } from 'child_process';
 import { readdirSync } from 'fs';
@@ -17,7 +17,8 @@ interface TestSuite {
 const suites: TestSuite[] = [
   { name: 'unit', pattern: '*.test.ts', timeout: 30000, dir: 'tests/unit', ext: '.test.ts' },
   { name: 'integration', pattern: '*.test.ts', timeout: 120000, dir: 'tests', ext: '.test.ts' },
-  { name: 'scenarios', pattern: '*', timeout: 300000, dir: 'tests/scenarios', ext: '' }
+  { name: 'scenarios', pattern: '*', timeout: 300000, dir: 'tests/scenarios', ext: '' },
+  { name: 'scripts', pattern: 'test-*.ts', timeout: 120000, dir: 'scripts', ext: '.ts' }
 ];
 
 function getTestFiles(suite: TestSuite): string[] {
@@ -25,7 +26,10 @@ function getTestFiles(suite: TestSuite): string[] {
   try {
     const entries = readdirSync(suite.dir, { withFileTypes: true });
     for (const entry of entries) {
-      if (entry.isFile() && (suite.ext === '' || entry.name.endsWith(suite.ext))) {
+      if (!entry.isFile()) continue;
+      const matchesExt = suite.ext === '' || entry.name.endsWith(suite.ext);
+      const matchesPattern = suite.name !== 'scripts' || entry.name.startsWith('test-');
+      if (matchesExt && matchesPattern) {
         files.push(join(suite.dir, entry.name));
       }
     }

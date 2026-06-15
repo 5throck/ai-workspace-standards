@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.4
+ * @version 1.5.5
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -107,11 +107,16 @@ interface GovernanceLayer {
 }
 interface GovernancePolicy {
   version: string;
+  lastUpdated?: string;
+  status?: string;
+  description?: string;
   layers: Record<string, GovernanceLayer>;
   variantValidationPolicy: {
     mandatoryBeforeProjectCreation: string[];
     warningOnly: string[];
   };
+  newVariantChecklist?: string[];
+  history?: Array<{ version: string; date: string; changes: string[] }>;
 }
 
 let governance: GovernancePolicy | null = null;

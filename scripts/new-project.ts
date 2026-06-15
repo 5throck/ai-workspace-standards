@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.1.2
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -143,6 +143,23 @@ if (!existsSync(templatesDir)) {
   console.error(`❌ Template variant not found: ${templatesDir}`);
   console.error(`   Available variants: ${validVariants.join(' ')}`);
   process.exit(1);
+}
+
+// L0-only skill contamination pre-check — warn if variant template source contains skills
+// that must not ship to projects (they are removed post-copy, but presence in source is a template hygiene issue)
+const L0_SKILLS_CHECK = ['simulate-project-creation'];
+const l0Contaminated: string[] = [];
+for (const skill of L0_SKILLS_CHECK) {
+  for (const base of ['.claude/skills', '.gemini/skills']) {
+    const p = join(templatesDir, base, skill);
+    if (existsSync(p)) l0Contaminated.push(`${variant}/${base}/${skill}`);
+  }
+}
+if (l0Contaminated.length > 0) {
+  console.warn(`\n⚠️  L0-only skill(s) detected in variant template source (template hygiene issue):`);
+  for (const c of l0Contaminated) console.warn(`   ${c}`);
+  console.warn('   These will be removed from the generated project, but should be cleaned from the template.');
+  console.warn('   Run: bun scripts/propagate-to-templates.ts --check-drift to review\n');
 }
 
 // Variant status check

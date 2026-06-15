@@ -102,10 +102,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.1.2 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.4 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.0.5 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -121,7 +121,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-platform-parity.ts` | L0 | 0.2.2 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -129,7 +129,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.4 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.5 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -452,4 +452,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-13*
+*Last Updated: 2026-06-15*
