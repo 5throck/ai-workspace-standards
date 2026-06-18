@@ -124,7 +124,7 @@ const TEXT_EXTENSIONS = new Set(['.md', '.ts', '.sh', '.ps1', '.json', '.yaml', 
 const DOC_ONLY_EXTENSIONS = new Set(['.md', '.txt', '.yaml', '.yml', '.toml', '.sample']);
 const REPLACEMENT_CHAR_RE = new RegExp(String.fromCodePoint(0xFFFD), 'g');
 const ENCODING_CORRUPTION_PATTERNS: Array<{ pattern: RegExp; description: string; docOnly?: boolean }> = [
-  { pattern: /\?\?/g, description: 'corrupted em-dash (—) or other multibyte UTF-8 char → ??', docOnly: true },
+  { pattern: /\?\?/g, description: 'corrupted em-dash (—) or other multibyte UTF-8 char → ??', docOnly: true }, // encoding-check-ignore
   { pattern: REPLACEMENT_CHAR_RE, description: 'Unicode replacement character (U+FFFD) — raw non-UTF-8 byte survived' },
 ];
 interface EncodingViolation { file: string; pattern: string; lineNumbers: number[]; count: number; }

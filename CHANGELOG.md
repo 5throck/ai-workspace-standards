@@ -515,7 +515,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: `scripts/audit.sh` (workspace): synced with template -now runs all 8 checks
 
 ### Fixed -MD file comparison (workspace + templates)
-- **[2026-05-23]**: `templates/agents/architect.md`: Unicode corruption on line 60 -`Context ?? Decision` -`Context ??Decision` (arrow was mangled to replacement characters)
+- **[2026-05-23]**: `templates/agents/architect.md`: Unicode corruption on line 60 -`Context → Decision` -`Context →Decision` (arrow was mangled to replacement characters)
 - **[2026-05-23]**: `templates/agents/pm.md`: Phase 6 Finalization -added Co-Authored-By commit signature requirement
 - **[2026-05-23]**: `templates/agents/code-writer.md`: added rule 5 -update `CHANGELOG.md [Unreleased]` after every change
 - **[2026-05-23]**: `templates/CLAUDE.md`: added `### Custom Command Error Recovery` section (error handling for `/sync` failures, hook bypass prohibition)
@@ -594,8 +594,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: Audit is now enforced exclusively via pre-commit hook and `dev-sync.sh` pipeline
 
 ### Changed -`templates/scripts/dev-sync.sh` + `dev-sync.ps1`
-- **[2026-05-23]**: Reordered pipeline: `memlog ??sync-md ??changelog ??audit ??commit ??PR`
-  (was: `audit ??memlog ??sync-md ??commit`)
+- **[2026-05-23]**: Reordered pipeline: `memlog → sync-md → changelog → audit → commit → PR`
+  (was: `audit → memlog → sync-md → commit`)
 - **[2026-05-23]**: Added auto-changelog step: if `[Unreleased]` section has no entries, inserts the commit message automatically
 - **[2026-05-23]**: Audit now runs after memory and changelog are updated -logically correct order
 
@@ -662,7 +662,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: Generated `CLAUDE.md` / `GEMINI.md`: fixed path references (`../../` -`../`)
 - **[2026-05-23]**: Added `README.md` generation (was missing -checklist required it but script never created it)
 - **[2026-05-23]**: Added `.gemini/settings.json` generation (`{}`)
-- **[2026-05-23]**: `dev-sync.sh` memlog line: changed `echo "Session synced: $MSG"` to `echo "## Session ??$MSG"` (matches §7 template)
+- **[2026-05-23]**: `dev-sync.sh` memlog line: changed `echo "Session synced: $MSG"` to `echo "## Session → $MSG"` (matches §7 template)
 
 ### Fixed/Added -`scripts/new-project.ps1`
 - **[2026-05-23]**: Full rewrite for feature parity with `new-project.sh`:
@@ -674,7 +674,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-23]**: `README.md` scaffold template: changed outer fence from ` ```markdown ` to `~~~~markdown` to fix nested code block rendering (same fix applied earlier to `docs/context.md` and `GEMINI.md`)
 - **[2026-05-23]**: `scripts/dev-sync.sh` scaffold: fixed git workflow order -`git checkout -b "$BRANCH"` now runs **before** `git add -A && git commit` to prevent commits landing on `main` before the PR branch is created
 - **[2026-05-23]**: `agents/pm.md` scaffold header: added 🚨 stub-replacement warning (consistent with architect, code-writer, test-runner)
-- **[2026-05-23]**: Post-scaffold checklist: added `agents/pm.md ??full template used (not a stub)` check (script stubs all 4 agents, not 3)
+- **[2026-05-23]**: Post-scaffold checklist: added `agents/pm.md → full template used (not a stub)` check (script stubs all 4 agents, not 3)
 - **[2026-05-23]**: §7 intro: expanded generated-files list to include all 4 agent files (`agents/pm.md`, `agents/architect.md`, `agents/code-writer.md`, `agents/test-runner.md`)
 
 ## [2026-05-22]

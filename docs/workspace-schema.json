@@ -131,6 +131,7 @@
       "co-develop",
       ".agent",
       ".opencode",
+      ".openchrome",
       ".playwright-mcp",
       ".understand-anything",
       "abap_coding_mig",
