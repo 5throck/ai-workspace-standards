@@ -491,7 +491,7 @@ function generateAgentRosterTable(roster: AgentRosterEntry[]): string {
       const agent = parseAgent(agentRaw);
       const responsibility = agent.responsibility || generateResponsibilityFallback(entry.group);
       
-      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | \`${agent.file}\` | ${responsibility} |`);
+      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | \`${agent.file}\` | ${responsibility} |`); // encoding-check-ignore
     }
   }
   

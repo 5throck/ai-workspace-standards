@@ -1,7 +1,6 @@
-# @resolved-from: ../../common/agents/pm.md
 ---
+extends: ../../common/agents/pm.md
 name: pm
-role: orchestrator
 status: active
 tier:
   claude: high
@@ -16,11 +15,6 @@ description: >-
 examples:
   - user: Start a new feature implementation
     assistant: I'll orchestrate Phase 0 (Team Assembly) and Phase 2 (Design approval)
-lifecycle:
-  phase: production
-  created: 2026-05-29T00:00:00.000Z
-  last_updated: 2026-06-08T00:00:00.000Z
-  governance: docs/lifecycle/agents/pm.md
 formal_name: Project Manager (PM) Agent
 variant: co-consult
 ---

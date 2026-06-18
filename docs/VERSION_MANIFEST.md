@@ -1,8 +1,8 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-15T11:08:07.761Z
+**Generated**: 2026-06-18T22:24:01.389Z
 **Manifest Version**: 1.0
-**Location**: docs\VERSION_MANIFEST.md
+**Location**: docs/VERSION_MANIFEST.md
 
 ---
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-15 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
-| pm | agents/pm.md | high | inherit | 2026-06-15 |
+| pm | agents/pm.md | high | inherit | 2026-06-13 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-15 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
@@ -104,7 +104,7 @@
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | 2.0.6 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.7 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |

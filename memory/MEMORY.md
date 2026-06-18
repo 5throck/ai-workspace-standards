@@ -4,6 +4,8 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-18](2026-06-18.md) | refactor(templates): migrate L2 variant pm.md files to extends chain format (B-04) |
+| [2026-06-17](2026-06-17.md) | chore: update |
 | [2026-06-15](2026-06-15.md) | Meeting skill propagation fix |
 | [2026-06-13](2026-06-13.md) | fix: Wave 1 — co-develop CLAUDE.md ADR-0036 fix, L1 sh/ps1 removal, publish-to-template ghost refs, collectDiffs L0-only filter, path traversal guard, CONSTITUTION.md lang fix |
 | [2026-06-12](2026-06-12.md) | variant template section split strategy — Coding Guidelines migration, variant-specific area management |
