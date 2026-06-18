@@ -300,5 +300,13 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-13*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-18*
 
+
+## Variant: co-deck
+
+**Type**: design
+**Status**: beta (v0.1.0)
+**Inherits**: templates/common
+
+Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 8 specialized agents covering research, content, design, HTML build, layout measurement, and PDF export.

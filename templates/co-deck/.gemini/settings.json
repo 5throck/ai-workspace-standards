@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "git config core.hooksPath .githooks",
+        "statusMessage": "Configuring git hooks..."
+      }
+    ]
+  },
+  "terminal.executionPolicy": "Auto",
+  "artifact.reviewPolicy": "Auto",
+  "terminal.denyList": [
+    "rm -rf",
+    "git push --force",
+    "git reset --hard"
+  ]
+}

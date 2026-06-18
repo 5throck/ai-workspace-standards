@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.2.1
+ * @version 1.3.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -84,14 +84,14 @@ export interface GeneratedVariant {
   agentOverrides: string[];
   /** Generated skill directories */
   skillDirectories: string[];
-  /** Generated CLAUDE.md path */
-  claudeMdPath: string;
-  /** Generated GEMINI.md path */
-  geminiMdPath: string;
   /** Generated AGENTS.md path */
   agentsMdPath: string;
   /** Generated README.md path */
   readmePath: string;
+  /** Generated README_ko.md path */
+  readmeKoPath: string;
+  /** Generated skills/SKILLS.md path */
+  skillsIndexPath: string;
   /** Generated <variant>.context.md path */
   contextMdPath: string;
   /** Generation summary */
@@ -185,14 +185,10 @@ function generateVariantJson(metadata: VariantMetadata): string {
     created_at: new Date().toISOString(),
     agents: metadata.agentRoster.map(agent => ({
       name: agent.name,
-      tier: agent.tier,
-      model: agent.model,
-      description: agent.description || '',
+      file: `agents/${agent.name}.md`,
     })),
     skills: metadata.skills.map(skill => ({
       name: skill.name,
-      description: skill.description || '',
-      triggers: skill.triggers || [],
     })),
   };
 
@@ -821,6 +817,129 @@ function getVariantTypeDescription(variantType: string): string {
   return descriptions[variantType] || 'custom workflows and capabilities';
 }
 
+/**
+ * Generate README_ko.md (Korean README) for the variant
+ * @version 1.0.0
+ */
+function generateReadmeKo(variantPath: string, metadata: VariantMetadata): string {
+  const readmeKoPath = join(variantPath, 'README_ko.md');
+
+  const agentTable = metadata.agentRoster
+    .map(a => `| **${a.name}** | \`agents/${a.name}.md\` | ${a.description || `${a.name} 전문 에이전트`} |`)
+    .join('\n');
+
+  const skillList = metadata.skills
+    .map(s => `- **${s.name}**: ${s.description || `${s.name} 스킬`}`)
+    .join('\n');
+
+  const content = `---
+sync_version: 1
+translated_from_hash: TBD
+---
+
+# ${metadata.name}
+
+> **Status**: 🔶 Beta — v${metadata.version}
+
+## 1. 팀 미션
+
+**미션:** ${metadata.description}
+
+## 2. AI 팀 소개
+
+| 에이전트 | 파일 | 역할 |
+|---------|------|------|
+${agentTable}
+
+## 3. 스킬
+
+${skillList}
+
+## 4. 의존성 설치
+
+\`\`\`bash
+bun --version   # audit.ts, dev-sync.ts 실행에 필요
+\`\`\`
+
+*Last Updated: ${new Date().toISOString().split('T')[0]} — ${metadata.name} variant template*
+`;
+
+  writeUTF8File(readmeKoPath, content);
+  return readmeKoPath;
+}
+
+/**
+ * Generate skills/SKILLS.md index for the variant
+ * @version 1.0.0
+ */
+function generateSkillsIndex(variantPath: string, metadata: VariantMetadata): string {
+  const skillsIndexPath = join(variantPath, 'skills', 'SKILLS.md');
+
+  const skillTable = metadata.skills
+    .map(s => `| ${s.name} | \`${s.name}/\` | ${s.description || `${s.name} skill`} |`)
+    .join('\n');
+
+  const content = `# Skills Index — ${metadata.name}
+
+This directory contains variant-specific skills for the \`${metadata.name}\` template.
+
+## Available Skills
+
+| Skill | Directory | Purpose |
+|-------|-----------|---------|
+${skillTable}
+
+## Usage
+
+Skills are invoked by the PM orchestrator or by individual agents using the trigger phrases defined in each \`SKILL.md\` file.
+
+See [\`agents/README.md\`](../agents/README.md) for the full workflow and agent handoff chain.
+
+---
+
+*Maintained by: ${metadata.name} variant team*
+`;
+
+  createDirectory(dirname(skillsIndexPath));
+  writeUTF8File(skillsIndexPath, content);
+  return skillsIndexPath;
+}
+
+/**
+ * Copy L0 common skills from templates/common into the variant's .claude/ and .gemini/ skill dirs.
+ * These 4 skills are required in every variant.
+ * @version 1.0.0
+ */
+function copyL0CommonSkills(variantPath: string): void {
+  const L0_COMMON_SKILLS = [
+    'agent-lifecycle-manager',
+    'finishing-a-development-branch',
+    'platform-command-lifecycle-manager',
+    'platform-skill-lifecycle-manager',
+  ];
+
+  const platforms = ['.claude', '.gemini'] as const;
+
+  for (const platform of platforms) {
+    for (const skillName of L0_COMMON_SKILLS) {
+      const srcSkillMd = join(COMMON_TEMPLATE, platform, 'skills', skillName, 'SKILL.md');
+      if (!existsSync(srcSkillMd)) {
+        // agent-lifecycle-manager lives in workspace skills/, not common template
+        const wsSkillMd = join(WORKSPACE_ROOT, 'skills', skillName, 'SKILL.md');
+        if (existsSync(wsSkillMd)) {
+          const destDir = join(variantPath, platform, 'skills', skillName);
+          createDirectory(destDir);
+          copyFileUTF8(wsSkillMd, join(destDir, 'SKILL.md'));
+        }
+        continue;
+      }
+      const destDir = join(variantPath, platform, 'skills', skillName);
+      createDirectory(destDir);
+      copyFileUTF8(srcSkillMd, join(destDir, 'SKILL.md'));
+    }
+  }
+}
+
 // ============================================================================
 // CONTEXT.MD GENERATION — from canonical template
 // ============================================================================
@@ -906,16 +1025,6 @@ export async function generateVariant(
   const skillDirectories = generateSkillDirectories(variantPath, metadata, manifest);
   console.log(`Created ${skillDirectories.length} skill directories`);
 
-  // Generate CLAUDE.md
-  console.log(`\n=== Generating CLAUDE.md ===`);
-  const claudeMdPath = generateClaudeMd(variantPath, metadata, manifest);
-  console.log(`Created: ${claudeMdPath}`);
-
-  // Generate GEMINI.md
-  console.log(`\n=== Generating GEMINI.md ===`);
-  const geminiMdPath = generateGeminiMd(variantPath, metadata, manifest);
-  console.log(`Created: ${geminiMdPath}`);
-
   // Generate AGENTS.md
   console.log(`\n=== Generating AGENTS.md ===`);
   const agentsMdPath = generateAgentsMd(variantPath, metadata, manifest);
@@ -926,6 +1035,21 @@ export async function generateVariant(
   const readmePath = generateReadme(variantPath, metadata);
   console.log(`Created: ${readmePath}`);
 
+  // Generate README_ko.md
+  console.log(`\n=== Generating README_ko.md ===`);
+  const readmeKoPath = generateReadmeKo(variantPath, metadata);
+  console.log(`Created: ${readmeKoPath}`);
+
+  // Generate skills/SKILLS.md index
+  console.log(`\n=== Generating skills/SKILLS.md ===`);
+  const skillsIndexPath = generateSkillsIndex(variantPath, metadata);
+  console.log(`Created: ${skillsIndexPath}`);
+
+  // Copy L0 common skills to .claude/ and .gemini/
+  console.log(`\n=== Copying L0 Common Skills ===`);
+  copyL0CommonSkills(variantPath);
+  console.log(`Copied L0 common skills to .claude/skills/ and .gemini/skills/`);
+
   // Generate <variant>.context.md from canonical template
   console.log(`\n=== Generating ${metadata.name}.context.md ===`);
   const contextMdPath = generateContextMd(variantPath, metadata);
@@ -935,15 +1059,29 @@ export async function generateVariant(
   console.log(`\n=== Copying Remaining Files ===`);
   let filesCopied = 0;
 
+  // Files generated separately or that don't belong in a variant template
+  const SKIP_IN_COPY = new Set([
+    'CLAUDE.md',
+    'GEMINI.md',
+    'CHANGELOG.md',
+    'AGENTS.md',
+    'README.md',
+    'README_ko.md',
+    'variant.json',
+    'skills/SKILLS.md',
+    // L2 migration artifacts — not part of the variant template contract
+    'docs/context.md',
+    'docs/ARCHITECTURE.md',
+    'docs/_ORIGIN.md',
+    'docs/_COMMON_VERSION.md',
+  ]);
+
   for (const file of manifest.keepInVariant) {
-    // Skip already handled files
+    // Skip already handled files and migration artifacts
     if (file.targetPath.startsWith('agents/') ||
+        file.targetPath.startsWith('scripts/') ||
         file.targetPath.includes('skills/') ||
-        file.targetPath === 'CLAUDE.md' ||
-        file.targetPath === 'GEMINI.md' ||
-        file.targetPath === 'AGENTS.md' ||
-        file.targetPath === 'README.md' ||
-        file.targetPath === 'variant.json') {
+        SKIP_IN_COPY.has(file.targetPath)) {
       continue;
     }
 
@@ -965,7 +1103,7 @@ export async function generateVariant(
 
   // Compute summary
   const summary = {
-    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, claude.md, gemini.md, agents.md, readme.md, context.md
+    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, agents.md, readme.md, readme_ko.md, skills/SKILLS.md, context.md
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
@@ -984,10 +1122,10 @@ export async function generateVariant(
     directories,
     agentOverrides,
     skillDirectories,
-    claudeMdPath,
-    geminiMdPath,
     agentsMdPath,
     readmePath,
+    readmeKoPath,
+    skillsIndexPath,
     contextMdPath,
     summary,
   };

@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.2.1
+ * @version 1.3.0
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -410,44 +410,47 @@ function buildFailureResult(
 }
 
 /**
- * Extract agent roster from L2 scan result
- * @version 1.2.0
+ * Extract agent roster from L2 scan result.
+ * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
+ * @version 1.3.0
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
-  // Find agent files in scan result
-  const agentFiles = scanResult.files.filter(f =>
-    f.relativePath.startsWith('agents/') && f.relativePath.endsWith('.md')
-  );
+  const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
 
-  return agentFiles.map(file => ({
-    name: file.relativePath.replace('agents/', '').replace('.md', ''),
-    tier: 'medium', // Default tier
-    model: 'claude-sonnet-4-6', // Default model
-    description: `Agent from L2 project: ${file.relativePath}`,
-  }));
+  const agentFiles = scanResult.files.filter(f => {
+    if (!f.relativePath.startsWith('agents/') || !f.relativePath.endsWith('.md')) return false;
+    const fileName = f.relativePath.split('/').pop() ?? '';
+    return !SKIP_AGENT_FILES.has(fileName) && !fileName.includes('handoff-spec');
+  });
+
+  return agentFiles.map(file => {
+    const name = file.relativePath.replace('agents/', '').replace('.md', '');
+    return {
+      name,
+      tier: 'medium' as const,
+      model: 'claude-sonnet-4-6',
+      description: `${name} specialist agent`,
+    };
+  });
 }
 
 /**
- * Extract skills from L2 scan result
- * @version 1.2.0
+ * Extract variant-specific skills from L2 scan result.
+ * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
+ * @version 1.3.0
  */
 function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
-  // Find skill files in scan result
   const skillFiles = scanResult.files.filter(f =>
-    f.relativePath.includes('skills/') && f.relativePath.endsWith('SKILL.md')
+    f.relativePath.startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
   );
 
   const skills: VariantMetadata['skills'] = [];
   const processedSkills = new Set<string>();
 
   for (const file of skillFiles) {
-    // Extract skill name from path
     const match = file.relativePath.match(/skills\/([^/]+)\//);
     if (match && !processedSkills.has(match[1])) {
-      skills.push({
-        name: match[1],
-        description: `Skill from L2 project: ${file.relativePath}`,
-      });
+      skills.push({ name: match[1] });
       processedSkills.add(match[1]);
     }
   }

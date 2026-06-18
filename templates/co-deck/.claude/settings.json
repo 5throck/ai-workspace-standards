@@ -1,0 +1,25 @@
+{
+  "effortLevel": "high",
+  "permissions": {
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(*--no-verify*)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "statusMessage": "Configuring git hooks..."
+          }
+        ]
+      }
+    ]
+  }
+}
