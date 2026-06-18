@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-19](2026-06-19.md) | feat(co-deck): complete variant template — fix all structural gaps vs other variants and update l2-to-variant-pipeline |
 | [2026-06-18](2026-06-18.md) | merge: integrate main into pr branch + add co-deck variant template (Phase A-C complete) |
 | [2026-06-16](2026-06-16.md) | feat(mcp): implement 3 Korean EHS MCP servers - k_skill, legalize_kr, mcp_kr_legislation |
 | [2026-06-15](2026-06-15.md) | Meeting skill propagation fix |
