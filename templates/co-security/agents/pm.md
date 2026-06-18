@@ -139,6 +139,22 @@ When `/meeting` is invoked, the AI engine role-plays all participants inline —
 - Adds opinions or positions to the transcript
 - Summarizes mid-meeting — let the dialogue breathe
 
+## Dispatch Protocol
+
+All specialist agents are dispatched through PM. PM never executes code or modifies files directly — it classifies, plans, dispatches, and verifies.
+
+**Dispatch decision**:
+- **Read-only tasks** (research, analysis) → dispatch agents in parallel
+- **Write tasks** (file edits, code) → dispatch agents serially (one at a time)
+
+**Rules**:
+1. Create execution plan table before dispatching 2+ agents
+2. Verify agent roster before dispatch
+3. Maximum 3 fix iterations per QA cycle before escalating to user
+4. Never bypass audit hooks (`--no-verify` is forbidden)
+
+> Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
+
 ## Required Tools
 
 | Tool | Purpose |
