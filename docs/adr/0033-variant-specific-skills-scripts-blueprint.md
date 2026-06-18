@@ -20,18 +20,18 @@ Variant-specific skills and scripts will be isolated into dedicated directories 
 
 ```text
 templates/co-<variant>/
-??? skills/
-?   ??? local/              # Custom skills specific to this variant
-?   ?   ??? <skill-name>/
-?   ?       ??? SKILL.md
-?   ??? external/           # Statically ingested external skills (read-only)
-?       ??? <skill-name>/
-?           ??? SKILL.md
-??? scripts/
-?   ??? local/              # Custom scripts specific to this variant
-?   ?   ??? <script-name>.ts
-?   ??? external/           # Statically ingested external scripts (read-only)
-?       ??? <script-name>.ts
+├── skills/
+│   ├── local/              # Custom skills specific to this variant
+│   │   └── <skill-name>/
+│   │       └── SKILL.md
+│   └── external/           # Statically ingested external skills (read-only)
+│       └── <skill-name>/
+│           └── SKILL.md
+└── scripts/
+    ├── local/              # Custom scripts specific to this variant
+    │   └── <script-name>.ts
+    └── external/           # Statically ingested external scripts (read-only)
+        └── <script-name>.ts
 ```
 
 *Note: The `external/` directory acts as a cache/mirror for external references. Developers should not manually edit files in `external/` as they will be overwritten by ingestion scripts.*

@@ -20,7 +20,7 @@ Meeting started. Current issues identified:
 4. L0 agent leakage: workspace root agents referenced in variants
 5. L0 content duplication: Phase Determination tables show L0 workflow
 6. Language inconsistency: Korean examples mixed in English documentation
-7. Spurious "??" characters: unnecessary "??" characters throughout documents
+7. Spurious "??" characters: unnecessary "??" characters throughout documents <!-- encoding-check-ignore -->
 8. Typo: "emplate" → "Template" correction needed
 
 **architect**:
