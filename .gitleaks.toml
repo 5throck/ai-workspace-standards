@@ -35,6 +35,10 @@ paths = [
   # co-security agent docs legitimately discuss credentials/secrets as subject matter
   '''templates/co-security/agents/.*\.md$''',
   # Other projects in workspace root — not part of this repo's audit scope
+  # .env files are gitignored; --no-git mode scans them anyway — exclude here
+  '''\.env$''',
+  # L2 Projects/ directory contains user engagements — outside audit scope
+  '''Projects/''',
   '''abap_coding_mig/''',
   '''abap_vibe_coding/''',
   '''abap_vibe_coding_mig/''',

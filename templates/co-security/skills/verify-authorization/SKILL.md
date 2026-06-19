@@ -20,6 +20,12 @@ This skill is the mandatory pre-flight gate for all offensive and remediation ac
 It is invoked automatically by the PM before dispatching any Phase 1+ agent.
 No PoC, recon, or patch activity may begin until this skill returns PASS.
 
+## When to Use
+
+- PM Agent dispatches automatically before any Phase 1+ agent (recon, exploitation, patching)
+- User attempts to start penetration testing activity without confirmed authorization
+- Re-check required after authorization documents are updated or engagement window changes
+
 ## Execution Steps
 
 1. **Check for authorization document**

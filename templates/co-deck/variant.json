@@ -1,0 +1,33 @@
+{
+  "name": "co-deck",
+  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 8 specialized agents covering research, content, design, HTML build, layout measurement, and PDF export.",
+  "variant_type": "lecture",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-06-17T08:35:00.906Z",
+  "lifecycle": {
+    "statusSince": "2026-06-17",
+    "lastTransition": "initial → beta on 2026-06-17",
+    "stablePromotedOn": null
+  },
+  "agents": [
+    { "name": "version", "file": "agents/version.md" },
+    { "name": "research", "file": "agents/research.md" },
+    { "name": "storyline", "file": "agents/storyline.md" },
+    { "name": "design", "file": "agents/design.md" },
+    { "name": "html-build", "file": "agents/html-build.md" },
+    { "name": "measure", "file": "agents/measure.md" },
+    { "name": "pdf-export", "file": "agents/pdf-export.md" }
+  ],
+  "skills": [
+    { "name": "lecture-pm" },
+    { "name": "lecture-version" },
+    { "name": "lecture-research" },
+    { "name": "lecture-storyline" },
+    { "name": "lecture-design" },
+    { "name": "lecture-html-build" },
+    { "name": "lecture-measure" },
+    { "name": "lecture-pdf-export" }
+  ]
+}

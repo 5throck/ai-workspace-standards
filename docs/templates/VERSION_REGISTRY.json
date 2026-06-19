@@ -39,6 +39,15 @@
       "released": "2026-06-02",
       "security_advisories": [],
       "migration_guides": []
+    },
+    "co-deck": {
+      "latest": "0.1.0",
+      "released": "2026-06-17",
+      "status": "beta",
+      "source_project": "Projects/co-deck_prototype",
+      "promoted_via": "l2-to-variant-pipeline.ts",
+      "security_advisories": [],
+      "migration_guides": []
     }
   },
   "schema_version": "1.0"

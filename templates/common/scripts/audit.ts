@@ -1,4 +1,4 @@
-// @version 2.7.2
+// @version 2.8.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -636,6 +636,112 @@ function checkVariantContextGuidelinesSection() {
   }
 }
 
+// Check: Variant specialist agent files have all 7 required Layer 1 sections
+function checkVariantAgentSections() {
+  const REQUIRED_SECTIONS = [
+    '## Role',
+    '## ⚠️ PM-ONLY INVOCATION',
+    '## Responsibilities',
+    '## Output Format',
+    '## Constraints',
+    '## Meeting Participation',
+    '## Dispatch Protocol',
+  ];
+
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const failures: string[] = [];
+  for (const variant of variants) {
+    const agentsDir = path.join(templatesDir, variant, 'agents');
+    if (!fs.existsSync(agentsDir)) continue;
+    const agentFiles = fs.readdirSync(agentsDir)
+      .filter(f => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('_') && !f.startsWith('README'));
+    for (const file of agentFiles) {
+      const filePath = path.join(agentsDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const missing = REQUIRED_SECTIONS.filter(s => !content.includes(s));
+      if (missing.length > 0) {
+        failures.push(`templates/${variant}/agents/${file}: missing ${missing.map(s => `"${s}"`).join(', ')}`);
+      }
+    }
+  }
+
+  if (failures.length === 0) {
+    Pass('Variant agent sections: all specialist agents have required Layer 1 sections');
+  } else {
+    // Warn (not Fail) until all variants complete migration to canonical agent structure
+    failures.forEach(f => Warn(`Variant agent sections: ${f}`));
+  }
+}
+
+// Check: Variant skill SKILL.md files have all 5 required sections and 7 required frontmatter fields
+function checkVariantSkillSections() {
+  const REQUIRED_SECTIONS = [
+    '## Context',
+    '## When to Use',
+    '## Execution Steps',
+    '## Output Format',
+    '## Related Skills',
+  ];
+  const REQUIRED_FRONTMATTER = ['name', 'description', 'version', 'status', 'owner', 'last_reviewed', 'prerequisites'];
+
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const sectionFailures: string[] = [];
+  const frontmatterFailures: string[] = [];
+
+  for (const variant of variants) {
+    const skillsDir = path.join(templatesDir, variant, 'skills');
+    if (!fs.existsSync(skillsDir)) continue;
+    const slugs = fs.readdirSync(skillsDir)
+      .filter(d => fs.statSync(path.join(skillsDir, d)).isDirectory());
+    for (const slug of slugs) {
+      const skillPath = path.join(skillsDir, slug, 'SKILL.md');
+      if (!fs.existsSync(skillPath)) continue;
+      const content = fs.readFileSync(skillPath, 'utf-8');
+
+      // Skip files marked with audit_exception (e.g., PM reference cards that use a different structure)
+      if (/^audit_exception:/m.test(content)) continue;
+
+      const missingSections = REQUIRED_SECTIONS.filter(s => !content.includes(s));
+      if (missingSections.length > 0) {
+        sectionFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: missing ${missingSections.map(s => `"${s}"`).join(', ')}`);
+      }
+
+      const fmMatch = content.match(/^---\n([\s\S]+?)\n---/);
+      if (fmMatch) {
+        const fm = fmMatch[1];
+        const missingFields = REQUIRED_FRONTMATTER.filter(f => !new RegExp(`^${f}:`, 'm').test(fm));
+        if (missingFields.length > 0) {
+          frontmatterFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: missing frontmatter fields: ${missingFields.join(', ')}`);
+        }
+      } else {
+        frontmatterFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: no YAML frontmatter found`);
+      }
+    }
+  }
+
+  const allFailures = [...sectionFailures, ...frontmatterFailures];
+  if (allFailures.length === 0) {
+    Pass('Variant skill sections: all skills have required sections and frontmatter');
+  } else {
+    allFailures.forEach(f => Fail(`Variant skill sections: ${f}`));
+    errors += allFailures.length;
+  }
+}
+
 // Stale shell/script reference check
 if (!LIFECYCLE_ONLY) {
 function checkStaleShellReferences() {
@@ -699,6 +805,8 @@ checkStaleShellReferences();
 // Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
 checkL2VariantIntegrity();
 checkVariantContextGuidelinesSection();
+checkVariantAgentSections();
+checkVariantSkillSections();
 }
 
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)

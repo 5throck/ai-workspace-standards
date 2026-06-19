@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.2.1
+ * @version 1.6.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -34,7 +34,7 @@ export interface VariantMetadata {
   /** Variant description */
   description: string;
   /** Variant type for governance rules */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
   /** Lifecycle status - always beta for MVP */
   status: 'beta';
   /** Version - always 0.1.0 for MVP */
@@ -84,14 +84,14 @@ export interface GeneratedVariant {
   agentOverrides: string[];
   /** Generated skill directories */
   skillDirectories: string[];
-  /** Generated CLAUDE.md path */
-  claudeMdPath: string;
-  /** Generated GEMINI.md path */
-  geminiMdPath: string;
   /** Generated AGENTS.md path */
   agentsMdPath: string;
   /** Generated README.md path */
   readmePath: string;
+  /** Generated README_ko.md path */
+  readmeKoPath: string;
+  /** Generated skills/SKILLS.md path */
+  skillsIndexPath: string;
   /** Generated <variant>.context.md path */
   contextMdPath: string;
   /** Generation summary */
@@ -123,6 +123,57 @@ function createDirectory(dirPath: string): void {
   if (!existsSync(dirPath)) {
     mkdirSync(dirPath, { recursive: true });
   }
+}
+
+/**
+ * Normalize agent frontmatter when copying from L2 source to variant template.
+ *
+ * Strips L2-only fields (lifecycle, formal_name, variant) that do not belong in
+ * standard variant agent files, and ensures all four tier platforms are present
+ * (claude, gemini, antigravity, gemini-cli) by inheriting the claude tier value.
+ *
+ * @version 1.0.0
+ */
+export function normalizeAgentFrontmatter(content: string): string {
+  const fmMatch = content.match(/^(---\n)([\s\S]*?)(\n---)([\s\S]*)$/);
+  if (!fmMatch) return content;
+
+  const [, open, fm, close, body] = fmMatch;
+
+  // Strip L2-only fields
+  const L2_ONLY_FIELDS = ['lifecycle', 'formal_name', 'variant'];
+  let normalized = fm;
+
+  for (const field of L2_ONLY_FIELDS) {
+    // Match single-line field: "field: value"
+    // Match block field: "field:\n  key: val\n  key2: val2" (indented sub-keys)
+    normalized = normalized.replace(
+      new RegExp(`^${field}:[ \\t]*.*(?:\\n[ \\t]+.*)*\\n?`, 'gm'),
+      ''
+    );
+  }
+
+  // Add missing tier platforms — inherit from claude tier if absent
+  const claudeTierMatch = normalized.match(/^(\s+)claude:\s*(high|medium|low)/m);
+  if (claudeTierMatch) {
+    const indent = claudeTierMatch[1];
+    const tier = claudeTierMatch[2];
+    const platforms = ['gemini', 'antigravity', 'gemini-cli'] as const;
+    for (const platform of platforms) {
+      if (!new RegExp(`^${indent}${platform}:`, 'm').test(normalized)) {
+        // Insert after the claude: line
+        normalized = normalized.replace(
+          new RegExp(`(^${indent}claude:\\s*${tier})`, 'm'),
+          `$1\n${indent}${platform}: ${tier}`
+        );
+      }
+    }
+  }
+
+  // Clean up consecutive blank lines left by removed fields
+  normalized = normalized.replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '').replace(/\n+$/, '');
+
+  return `${open}${normalized}${close}${body}`;
 }
 
 /**
@@ -175,6 +226,7 @@ function substitutePlaceholders(content: string, metadata: VariantMetadata): str
  * @version 1.1.0
  */
 function generateVariantJson(metadata: VariantMetadata): string {
+  const today = new Date().toISOString().split('T')[0];
   const variantJson = {
     name: metadata.name,
     description: metadata.description,
@@ -183,16 +235,17 @@ function generateVariantJson(metadata: VariantMetadata): string {
     version: metadata.version,
     inherits_common: metadata.inherits_common,
     created_at: new Date().toISOString(),
+    lifecycle: {
+      statusSince: today,
+      lastTransition: `initial → ${metadata.status} on ${today}`,
+      stablePromotedOn: metadata.status === 'stable' ? today : null,
+    },
     agents: metadata.agentRoster.map(agent => ({
       name: agent.name,
-      tier: agent.tier,
-      model: agent.model,
-      description: agent.description || '',
+      file: `agents/${agent.name}.md`,
     })),
     skills: metadata.skills.map(skill => ({
       name: skill.name,
-      description: skill.description || '',
-      triggers: skill.triggers || [],
     })),
   };
 
@@ -249,7 +302,16 @@ function generateAgentOverrides(
 
       // Check if source exists (from L2 project)
       if (existsSync(file.sourcePath)) {
-        copyFileUTF8(file.sourcePath, overridePath);
+        // Skip README files — normalize only specialist agent files
+        const isSpecialistAgent = !['README.md', 'README_ko.md', 'pm.md'].includes(
+          normalizedTarget.replace('agents/', '')
+        );
+        if (isSpecialistAgent) {
+          const raw = readUTF8File(file.sourcePath);
+          writeUTF8File(overridePath, normalizeAgentFrontmatter(raw));
+        } else {
+          copyFileUTF8(file.sourcePath, overridePath);
+        }
         agentOverrides.push(overridePath);
       } else {
         // Generate minimal override from common template
@@ -525,7 +587,10 @@ function generatePhaseGateRows(agents: AgentDefinition[]): string {
     .map(a => {
       const phase =
         a.phases && a.phases.length > 0 ? `Phase ${a.phases[0]}` : 'Phase 4';
-      return `| <!-- TODO: deliverable type --> | ${phase} | \`${a.name}\` | ${a.tier} | |`;
+      const deliverable = a.description
+        ? a.description.split('.')[0].trim().substring(0, 80)
+        : `${a.name} deliverable`;
+      return `| ${deliverable} | ${phase} | \`${a.name}\` | ${a.tier} | |`;
     })
     .join('\n');
 }
@@ -545,7 +610,10 @@ function generateRoleBoundaryRows(agents: AgentDefinition[]): string {
   if (agents.length === 0) return '';
   return agents
     .map(a => {
-      return `| <!-- TODO: scenario for ${a.name} --> | \`${a.name}\` | \`pm\` |`;
+      const scenario = a.description
+        ? a.description.split('.')[0].trim().substring(0, 80)
+        : `${a.name} task needed`;
+      return `| ${scenario} | \`${a.name}\` | \`pm\` |`;
     })
     .join('\n');
 }
@@ -719,7 +787,26 @@ function generateGeminiMd(variantPath: string, metadata: VariantMetadata, manife
 function generateReadme(variantPath: string, metadata: VariantMetadata): string {
   const readmePath = join(variantPath, 'README.md');
 
-  const content = `# ${metadata.name}
+  const agentRosterRows = metadata.agentRoster.map(agent => {
+    const role = agent.description
+      ? agent.description.split('.')[0].trim().substring(0, 80)
+      : `${agent.name} specialist`;
+    return `| ${agent.name} | ${role} | ${agent.tier} | ${agent.model} |`;
+  }).join('\n');
+
+  const skillsList = metadata.skills.length > 0
+    ? metadata.skills.map(skill => {
+        const desc = skill.description || (skill.triggers ? skill.triggers.join(', ') : '');
+        return `- **${skill.name}**: ${desc}`;
+      }).join('\n')
+    : '_(no variant-specific skills — see `.claude/skills/` for platform skills)_';
+
+  const content = `---
+content_hash: PLACEHOLDER
+sync_version: 1
+---
+
+# ${metadata.name}
 
 > **⚠️ BETA VARIANT** - Status: ${metadata.status} (v${metadata.version})
 > This variant is in active development and should not be used in production environments.
@@ -736,7 +823,7 @@ This is a beta variant of the workspace template. It inherits from \`${metadata.
 
 See \`CLAUDE.md\` for detailed instructions.
 
-### For Gemini Code users:
+### For Gemini CLI users:
 
 See \`GEMINI.md\` for detailed instructions.
 
@@ -758,13 +845,13 @@ This variant focuses on ${getVariantTypeDescription(metadata.variantType)}.
 
 ## Agent Roster
 
-| Agent | Tier | Model |
-|-------|------|-------|
-${metadata.agentRoster.map(agent => `| ${agent.name} | ${agent.tier} | ${agent.model} |`).join('\n')}
+| Agent | Role | Tier | Model |
+|-------|------|------|-------|
+${agentRosterRows}
 
 ## Skills
 
-${metadata.skills.map(skill => `- **${skill.name}**: ${skill.description || skill.triggers?.join(', ') || ''}`).join('\n')}
+${skillsList}
 
 ---
 
@@ -821,6 +908,129 @@ function getVariantTypeDescription(variantType: string): string {
   return descriptions[variantType] || 'custom workflows and capabilities';
 }
 
+/**
+ * Generate README_ko.md (Korean README) for the variant
+ * @version 1.0.0
+ */
+function generateReadmeKo(variantPath: string, metadata: VariantMetadata): string {
+  const readmeKoPath = join(variantPath, 'README_ko.md');
+
+  const agentTable = metadata.agentRoster
+    .map(a => `| **${a.name}** | \`agents/${a.name}.md\` | ${a.description || `${a.name} 전문 에이전트`} |`)
+    .join('\n');
+
+  const skillList = metadata.skills
+    .map(s => `- **${s.name}**: ${s.description || `${s.name} 스킬`}`)
+    .join('\n');
+
+  const content = `---
+sync_version: 1
+translated_from_hash: TBD
+---
+
+# ${metadata.name}
+
+> **Status**: 🔶 Beta — v${metadata.version}
+
+## 1. 팀 미션
+
+**미션:** ${metadata.description}
+
+## 2. AI 팀 소개
+
+| 에이전트 | 파일 | 역할 |
+|---------|------|------|
+${agentTable}
+
+## 3. 스킬
+
+${skillList}
+
+## 4. 의존성 설치
+
+\`\`\`bash
+bun --version   # audit.ts, dev-sync.ts 실행에 필요
+\`\`\`
+
+*Last Updated: ${new Date().toISOString().split('T')[0]} — ${metadata.name} variant template*
+`;
+
+  writeUTF8File(readmeKoPath, content);
+  return readmeKoPath;
+}
+
+/**
+ * Generate skills/SKILLS.md index for the variant
+ * @version 1.0.0
+ */
+function generateSkillsIndex(variantPath: string, metadata: VariantMetadata): string {
+  const skillsIndexPath = join(variantPath, 'skills', 'SKILLS.md');
+
+  const skillTable = metadata.skills
+    .map(s => `| ${s.name} | \`${s.name}/\` | ${s.description || `${s.name} skill`} |`)
+    .join('\n');
+
+  const content = `# Skills Index — ${metadata.name}
+
+This directory contains variant-specific skills for the \`${metadata.name}\` template.
+
+## Available Skills
+
+| Skill | Directory | Purpose |
+|-------|-----------|---------|
+${skillTable}
+
+## Usage
+
+Skills are invoked by the PM orchestrator or by individual agents using the trigger phrases defined in each \`SKILL.md\` file.
+
+See [\`agents/README.md\`](../agents/README.md) for the full workflow and agent handoff chain.
+
+---
+
+*Maintained by: ${metadata.name} variant team*
+`;
+
+  createDirectory(dirname(skillsIndexPath));
+  writeUTF8File(skillsIndexPath, content);
+  return skillsIndexPath;
+}
+
+/**
+ * Copy L0 common skills from templates/common into the variant's .claude/ and .gemini/ skill dirs.
+ * These 4 skills are required in every variant.
+ * @version 1.0.0
+ */
+function copyL0CommonSkills(variantPath: string): void {
+  const L0_COMMON_SKILLS = [
+    'agent-lifecycle-manager',
+    'finishing-a-development-branch',
+    'platform-command-lifecycle-manager',
+    'platform-skill-lifecycle-manager',
+  ];
+
+  const platforms = ['.claude', '.gemini'] as const;
+
+  for (const platform of platforms) {
+    for (const skillName of L0_COMMON_SKILLS) {
+      const srcSkillMd = join(COMMON_TEMPLATE, platform, 'skills', skillName, 'SKILL.md');
+      if (!existsSync(srcSkillMd)) {
+        // agent-lifecycle-manager lives in workspace skills/, not common template
+        const wsSkillMd = join(WORKSPACE_ROOT, 'skills', skillName, 'SKILL.md');
+        if (existsSync(wsSkillMd)) {
+          const destDir = join(variantPath, platform, 'skills', skillName);
+          createDirectory(destDir);
+          copyFileUTF8(wsSkillMd, join(destDir, 'SKILL.md'));
+        }
+        continue;
+      }
+      const destDir = join(variantPath, platform, 'skills', skillName);
+      createDirectory(destDir);
+      copyFileUTF8(srcSkillMd, join(destDir, 'SKILL.md'));
+    }
+  }
+}
+
 // ============================================================================
 // CONTEXT.MD GENERATION — from canonical template
 // ============================================================================
@@ -852,6 +1062,174 @@ function generateContextMd(variantPath: string, metadata: VariantMetadata): stri
     version: metadata.version,
     pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[metadata.name] ?? 'Workflow management, dispatch, quality gates',
   });
+}
+
+// ============================================================================
+// SETTINGS FILE GENERATION
+// ============================================================================
+
+/**
+ * Generate .claude/settings.json with full Agent Teams config, mcpServers, and all hooks.
+ * Produces the same structure as other stable variants (co-design, co-work, etc.).
+ * @version 1.0.0
+ */
+function generateClaudeSettings(variantPath: string): string {
+  const settingsPath = join(variantPath, '.claude', 'settings.json');
+  const settings = {
+    effortLevel: 'high',
+    permissions: {
+      deny: [
+        'Bash(git push --force*)',
+        'Bash(git push --force-with-lease*)',
+        'Bash(*--no-verify*)',
+        'Bash(rm -rf *)',
+      ],
+    },
+    env: {
+      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
+    },
+    teammateMode: 'auto',
+    mcpServers: {
+      codegraph: {
+        command: 'npx',
+        args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
+      },
+    },
+    hooks: {
+      SessionStart: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'git config core.hooksPath .githooks',
+              statusMessage: 'Configuring git hooks...',
+            },
+          ],
+        },
+      ],
+      PostToolUse: [
+        {
+          matcher: 'Write|Edit',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              async: true,
+              asyncRewake: true,
+              statusMessage: 'Running post-edit lifecycle check...',
+            },
+          ],
+          timeout: 60,
+        },
+      ],
+      TeammateIdle: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              async: true,
+              asyncRewake: true,
+              statusMessage: 'Running teammate idle lifecycle check...',
+            },
+          ],
+          timeout: 60,
+        },
+      ],
+      WorktreeCreate: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'git config core.hooksPath .githooks',
+              async: true,
+              statusMessage: 'Configuring git hooks in new worktree...',
+            },
+          ],
+        },
+      ],
+      TaskCompleted: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/audit.ts',
+              timeout: 60,
+              async: true,
+              statusMessage: 'Running QA audit on task completion...',
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  createDirectory(dirname(settingsPath));
+  writeUTF8File(settingsPath, JSON.stringify(settings, null, 2) + '\n');
+  return settingsPath;
+}
+
+/**
+ * Generate .gemini/settings.json with mcpServers, PostToolUse hook, and security policies.
+ * Produces the same structure as other stable variants.
+ * @version 1.0.0
+ */
+function generateGeminiSettings(variantPath: string): string {
+  const settingsPath = join(variantPath, '.gemini', 'settings.json');
+  const settings: Record<string, unknown> = {
+    _comment:
+      'Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. These are intentional L2 variant settings.',
+    mcpServers: {
+      codegraph: {
+        command: 'npx',
+        args: ['-y', '@colbymchenry/codegraph', 'serve'],
+      },
+    },
+    hooks: {
+      SessionStart: [
+        {
+          type: 'command',
+          command: 'git config core.hooksPath .githooks',
+          statusMessage: 'Configuring git hooks...',
+        },
+      ],
+      PostToolUse: [
+        {
+          matcher: 'Write|Edit',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              statusMessage: 'Running post-edit lifecycle check...',
+            },
+          ],
+        },
+      ],
+    },
+    'terminal.executionPolicy': 'Auto',
+    'artifact.reviewPolicy': 'Auto',
+    'mcp.toolApproval': 'Manual',
+    'terminal.denyList': [
+      'rm -rf',
+      'rm -r /',
+      'chmod -R 777',
+      'git push --force',
+      'git reset --hard',
+      'reboot',
+      'shutdown',
+      'format',
+      'fdisk',
+      'mkfs',
+    ],
+  };
+
+  createDirectory(dirname(settingsPath));
+  writeUTF8File(settingsPath, JSON.stringify(settings, null, 2) + '\n');
+  return settingsPath;
 }
 
 // ============================================================================
@@ -906,16 +1284,6 @@ export async function generateVariant(
   const skillDirectories = generateSkillDirectories(variantPath, metadata, manifest);
   console.log(`Created ${skillDirectories.length} skill directories`);
 
-  // Generate CLAUDE.md
-  console.log(`\n=== Generating CLAUDE.md ===`);
-  const claudeMdPath = generateClaudeMd(variantPath, metadata, manifest);
-  console.log(`Created: ${claudeMdPath}`);
-
-  // Generate GEMINI.md
-  console.log(`\n=== Generating GEMINI.md ===`);
-  const geminiMdPath = generateGeminiMd(variantPath, metadata, manifest);
-  console.log(`Created: ${geminiMdPath}`);
-
   // Generate AGENTS.md
   console.log(`\n=== Generating AGENTS.md ===`);
   const agentsMdPath = generateAgentsMd(variantPath, metadata, manifest);
@@ -926,6 +1294,28 @@ export async function generateVariant(
   const readmePath = generateReadme(variantPath, metadata);
   console.log(`Created: ${readmePath}`);
 
+  // Generate README_ko.md
+  console.log(`\n=== Generating README_ko.md ===`);
+  const readmeKoPath = generateReadmeKo(variantPath, metadata);
+  console.log(`Created: ${readmeKoPath}`);
+
+  // Generate skills/SKILLS.md index
+  console.log(`\n=== Generating skills/SKILLS.md ===`);
+  const skillsIndexPath = generateSkillsIndex(variantPath, metadata);
+  console.log(`Created: ${skillsIndexPath}`);
+
+  // Copy L0 common skills to .claude/ and .gemini/
+  console.log(`\n=== Copying L0 Common Skills ===`);
+  copyL0CommonSkills(variantPath);
+  console.log(`Copied L0 common skills to .claude/skills/ and .gemini/skills/`);
+
+  // Generate .claude/settings.json and .gemini/settings.json
+  console.log(`\n=== Generating Platform Settings ===`);
+  const claudeSettingsPath = generateClaudeSettings(variantPath);
+  console.log(`Created: ${claudeSettingsPath}`);
+  const geminiSettingsPath = generateGeminiSettings(variantPath);
+  console.log(`Created: ${geminiSettingsPath}`);
+
   // Generate <variant>.context.md from canonical template
   console.log(`\n=== Generating ${metadata.name}.context.md ===`);
   const contextMdPath = generateContextMd(variantPath, metadata);
@@ -935,15 +1325,29 @@ export async function generateVariant(
   console.log(`\n=== Copying Remaining Files ===`);
   let filesCopied = 0;
 
+  // Files generated separately or that don't belong in a variant template
+  const SKIP_IN_COPY = new Set([
+    'CLAUDE.md',
+    'GEMINI.md',
+    'CHANGELOG.md',
+    'AGENTS.md',
+    'README.md',
+    'README_ko.md',
+    'variant.json',
+    'skills/SKILLS.md',
+    // L2 migration artifacts — not part of the variant template contract
+    'docs/context.md',
+    'docs/ARCHITECTURE.md',
+    'docs/_ORIGIN.md',
+    'docs/_COMMON_VERSION.md',
+  ]);
+
   for (const file of manifest.keepInVariant) {
-    // Skip already handled files
+    // Skip already handled files and migration artifacts
     if (file.targetPath.startsWith('agents/') ||
+        file.targetPath.startsWith('scripts/') ||
         file.targetPath.includes('skills/') ||
-        file.targetPath === 'CLAUDE.md' ||
-        file.targetPath === 'GEMINI.md' ||
-        file.targetPath === 'AGENTS.md' ||
-        file.targetPath === 'README.md' ||
-        file.targetPath === 'variant.json') {
+        SKIP_IN_COPY.has(file.targetPath)) {
       continue;
     }
 
@@ -965,7 +1369,7 @@ export async function generateVariant(
 
   // Compute summary
   const summary = {
-    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, claude.md, gemini.md, agents.md, readme.md, context.md
+    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 8, // +8 for json, agents.md, readme.md, readme_ko.md, skills/SKILLS.md, context.md, .claude/settings.json, .gemini/settings.json
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
@@ -984,10 +1388,10 @@ export async function generateVariant(
     directories,
     agentOverrides,
     skillDirectories,
-    claudeMdPath,
-    geminiMdPath,
     agentsMdPath,
     readmePath,
+    readmeKoPath,
+    skillsIndexPath,
     contextMdPath,
     summary,
   };

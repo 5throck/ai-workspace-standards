@@ -53,7 +53,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.7.2 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.8.0 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -67,7 +67,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `helpers/golden-reference-loader.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -81,6 +82,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/normalize-agent-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -95,7 +97,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -107,7 +109,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `new-project.ts` | L0 | 1.1.4 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.7 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.0.8 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -454,4 +456,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-18*
+*Last Updated: 2026-06-19*

@@ -11,13 +11,36 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.2.1
+ * @version 1.7.0
  * @phase: Complete pipeline orchestration
+ *
+ * Pipeline Phases:
+ *   PHASE 1   — L2 project scan (scan-l2-project.ts)
+ *   PHASE 1.5 — Agent/skill normalization — NEW in v1.7.0 (normalize-agent-skills.ts)
+ *               · Detects skill content in agent bodies (HIGH/MEDIUM/LOW confidence)
+ *               · Extracts HIGH-confidence skill content → skills/<slug>/SKILL.md
+ *               · Normalizes skill frontmatter (adds status, owner, last_reviewed)
+ *               · Renames non-standard section headers (## Role → ## Context, etc.)
+ *   PHASE 2   — L0/L1 reconciliation (reconcile-with-l0-l1.ts)
+ *   PHASE 3   — Dependency validation
+ *   PHASE 4   — Variant generation + agent frontmatter normalization (generate-variant.ts)
+ *   PHASE 4.5 — Golden reference structural gap check — NEW in v1.7.0 (golden-reference-loader.ts)
+ *               · Layer 1: verifies 7 required agent sections + 5 required skill sections
+ *               · Layer 2: checks variantType-specific optional sections
+ *               · Writes _pipeline_report.md in variant root; does NOT fail pipeline
+ *   PHASE 4.6 — pm.md processing and context.md generation
+ *   PHASE 5   — Beta lifecycle initialization
+ *   PHASE 6   — Platform parity validation
+ *   PHASE 7   — Workspace integration
+ *
+ * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
+ * See: docs/designs/variant-specialist-agent-structure.md
+ * See: docs/designs/variant-specialist-skill-structure.md
  *
  * Dependencies:
  * - helpers/scan-l2-project.ts (L2 scanning)
  * - helpers/reconcile-with-l0-l1.ts (Reconciliation)
- * - helpers/generate-variant.ts (Variant generation)
+ * - helpers/generate-variant.ts (Variant generation + agent normalization)
  * - helpers/beta-lifecycle.ts (Lifecycle management)
  * - helpers/validate-platform-parity.ts (Parity validation)
  * - helpers/integration-helpers.ts (Workspace integration)
@@ -26,8 +49,20 @@
  */
 
 import { join, basename, dirname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.js';
+import {
+  normalizeAgentSkills,
+  formatNormalizationReport,
+  NormalizationResult,
+} from './helpers/normalize-agent-skills.js';
+import {
+  getAgentGoldenStructure,
+  getSkillGoldenStructure,
+  checkStructuralGaps,
+  formatGapReport,
+  StructuralGapReport,
+} from './helpers/golden-reference-loader.js';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.js';
 import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.js';
 import {
@@ -51,13 +86,17 @@ export interface PipelineConfig {
   /** Variant name */
   variantName: string;
   /** Variant type */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
   /** Variant description */
   variantDescription: string;
   /** Skip platform parity validation */
   skipParityValidation?: boolean;
   /** Skip workspace integration */
   skipIntegration?: boolean;
+  /** Skip Wave 1.5 agent/skill normalization (default: false) */
+  skipNormalization?: boolean;
+  /** Treat MEDIUM-confidence skill patterns as HIGH (auto-extract without approval gate) */
+  autoExtract?: boolean;
   /** Output path for variant (optional) */
   outputPath?: string;
 }
@@ -136,6 +175,40 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
   if (!phases.scan.success) {
     return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 1.5: AGENT/SKILL NORMALIZATION (Wave 1.5)
+  // ============================================================================
+
+  if (!config.skipNormalization) {
+    try {
+      console.log(`\n${'─'.repeat(60)}`);
+      console.log(`PHASE 1.5: Agent/Skill Normalization`);
+      console.log(`${'─'.repeat(60)}`);
+
+      const normResult: NormalizationResult = normalizeAgentSkills(
+        scanResult!,
+        config.l2ProjectPath,
+        { auto: config.autoExtract ?? false, dryRun: false },
+      );
+
+      const report = formatNormalizationReport(normResult);
+      console.log(report);
+
+      if (normResult.pendingApprovals.length > 0) {
+        console.warn(`⚠️  ${normResult.pendingApprovals.length} MEDIUM-confidence pattern(s) require review.`);
+        console.warn(`   Re-run with autoExtract: true to extract automatically.`);
+      }
+
+      console.log(`✅ PHASE 1.5 COMPLETE`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      // Non-fatal: log and continue
+      console.warn(`⚠️  PHASE 1.5 WARNING: ${errorMsg}`);
+    }
+  } else {
+    console.log(`\nPHASE 1.5: Skipped (skipNormalization=true)`);
   }
 
   // ============================================================================
@@ -230,12 +303,73 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
-  // PHASE 4.5: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // PHASE 4.5: GOLDEN REFERENCE STRUCTURAL GAP CHECK
   // ============================================================================
 
   try {
     console.log(`\n${'─'.repeat(60)}`);
-    console.log(`PHASE 4.5: Processing pm.md and Generating context.md`);
+    console.log(`PHASE 4.5: Golden Reference Structural Gap Check`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const gapReports: StructuralGapReport[] = [];
+    const variantPath = generatedVariant!.variantPath;
+    const agentGolden = getAgentGoldenStructure(config.variantType);
+    const skillGolden = getSkillGoldenStructure(config.variantType);
+
+    // Check agent files
+    const { readdirSync: rd, existsSync: ex } = await import('node:fs');
+    const { readUTF8File: ru } = await import('./lib/encoding-utils.js');
+    const { join: j } = await import('node:path');
+
+    const agentsDir = j(variantPath, 'agents');
+    if (ex(agentsDir)) {
+      for (const file of rd(agentsDir)) {
+        if (!file.endsWith('.md') || ['pm.md', 'README.md'].includes(file)) continue;
+        const filePath = j(agentsDir, file);
+        const content = ru(filePath);
+        gapReports.push(checkStructuralGaps(filePath, content, agentGolden, 'agent'));
+      }
+    }
+
+    // Check skill files
+    const skillsDir = j(variantPath, 'skills');
+    if (ex(skillsDir)) {
+      for (const skillDir of rd(skillsDir, { withFileTypes: true })) {
+        if (!skillDir.isDirectory()) continue;
+        const skillPath = j(skillsDir, skillDir.name, 'SKILL.md');
+        if (!ex(skillPath)) continue;
+        const content = ru(skillPath);
+        gapReports.push(checkStructuralGaps(skillPath, content, skillGolden, 'skill'));
+      }
+    }
+
+    const gapReport = formatGapReport(gapReports);
+    console.log(gapReport);
+
+    // Write pipeline report to variant root
+    const reportPath = j(variantPath, '_pipeline_report.md');
+    const { writeUTF8File: wu } = await import('./lib/encoding-utils.js');
+    wu(reportPath, `# Pipeline Report\n\nGenerated: ${new Date().toISOString()}\n\n\`\`\`\n${gapReport}\n\`\`\`\n`);
+
+    const failedCount = gapReports.filter(r => !r.passed).length;
+    if (failedCount > 0) {
+      console.warn(`⚠️  ${failedCount} file(s) have missing required sections. See _pipeline_report.md`);
+    }
+
+    console.log(`✅ PHASE 4.5 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    // Non-fatal: log and continue
+    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+  }
+
+  // ============================================================================
+  // PHASE 4.6: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4.6: Processing pm.md and Generating context.md`);
     console.log(`${'─'.repeat(60)}`);
 
     // Find pm.md in the generated variant
@@ -259,11 +393,11 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       console.log(`ℹ️  No pm.md found in variant, skipping context.md generation`);
     }
 
-    console.log(`✅ PHASE 4.5 COMPLETE`);
+    console.log(`✅ PHASE 4.6 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     // Don't fail the pipeline for context.md generation errors
-    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+    console.warn(`⚠️  PHASE 4.6 WARNING: ${errorMsg}`);
   }
 
   // ============================================================================
@@ -410,44 +544,82 @@ function buildFailureResult(
 }
 
 /**
- * Extract agent roster from L2 scan result
- * @version 1.2.0
+ * Extract agent roster from L2 scan result.
+ * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
+ * @version 1.3.0
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
-  // Find agent files in scan result
-  const agentFiles = scanResult.files.filter(f =>
-    f.relativePath.startsWith('agents/') && f.relativePath.endsWith('.md')
-  );
+  const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
+  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
 
-  return agentFiles.map(file => ({
-    name: file.relativePath.replace('agents/', '').replace('.md', ''),
-    tier: 'medium', // Default tier
-    model: 'claude-sonnet-4-6', // Default model
-    description: `Agent from L2 project: ${file.relativePath}`,
-  }));
+  const agentFiles = scanResult.files.filter(f => {
+    if (!f.relativePath.startsWith('agents/') || !f.relativePath.endsWith('.md')) return false;
+    const fileName = f.relativePath.split('/').pop() ?? '';
+    return !SKIP_AGENT_FILES.has(fileName) && !fileName.includes('handoff-spec');
+  });
+
+  return agentFiles.map(file => {
+    const name = file.relativePath.replace('agents/', '').replace('.md', '');
+    const absPath = join(l2ProjectPath, file.relativePath);
+
+    let tier: 'high' | 'medium' | 'low' = 'medium';
+    let model = 'inherit';
+    let description = `${name} specialist agent`;
+
+    if (existsSync(absPath)) {
+      try {
+        const content = readFileSync(absPath, 'utf-8');
+        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (fmMatch) {
+          const fm = fmMatch[1];
+          // Read tier.claude (nested) or flat tier
+          const tierClaudeMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
+          if (tierClaudeMatch) {
+            tier = tierClaudeMatch[1] as 'high' | 'medium' | 'low';
+          } else {
+            const tierFlatMatch = fm.match(/^tier:\s*(high|medium|low)/m);
+            if (tierFlatMatch) tier = tierFlatMatch[1] as 'high' | 'medium' | 'low';
+          }
+          // Read block-scalar description (>- form: next indented line)
+          const descBlockMatch = fm.match(/^description:\s*>-?\n\s+(.+)/m);
+          if (descBlockMatch) {
+            description = descBlockMatch[1].trim().substring(0, 120);
+          } else {
+            const descInlineMatch = fm.match(/^description:\s*(.+)/m);
+            if (descInlineMatch) description = descInlineMatch[1].trim().substring(0, 120);
+          }
+          // Read model (skip 'inherit' placeholder)
+          const modelMatch = fm.match(/^model:\s*(.+)/m);
+          if (modelMatch && modelMatch[1].trim() !== 'inherit') {
+            model = modelMatch[1].trim();
+          }
+        }
+      } catch {
+        // fallback to defaults already set above
+      }
+    }
+
+    return { name, tier, model, description };
+  });
 }
 
 /**
- * Extract skills from L2 scan result
- * @version 1.2.0
+ * Extract variant-specific skills from L2 scan result.
+ * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
+ * @version 1.3.0
  */
 function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
-  // Find skill files in scan result
   const skillFiles = scanResult.files.filter(f =>
-    f.relativePath.includes('skills/') && f.relativePath.endsWith('SKILL.md')
+    f.relativePath.startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
   );
 
   const skills: VariantMetadata['skills'] = [];
   const processedSkills = new Set<string>();
 
   for (const file of skillFiles) {
-    // Extract skill name from path
     const match = file.relativePath.match(/skills\/([^/]+)\//);
     if (match && !processedSkills.has(match[1])) {
-      skills.push({
-        name: match[1],
-        description: `Skill from L2 project: ${file.relativePath}`,
-      });
+      skills.push({ name: match[1] });
       processedSkills.add(match[1]);
     }
   }
@@ -475,7 +647,7 @@ async function main() {
     console.error('Usage: bun scripts/pipeline/l2-to-variant-pipeline.ts \\');
     console.error('  --l2-path=<path-to-l2-project> \\');
     console.error('  --name=<variant-name> \\');
-    console.error('  --type=<security|development|design|consulting|collaboration> \\');
+    console.error('  --type=<security|development|design|consulting|collaboration|lecture> \\');
     console.error('  --description=<variant-description> \\');
     console.error('  [--skip-parity] \\');
     console.error('  [--skip-integration] \\');

@@ -1,8 +1,8 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-18T22:30:02.389Z
+**Generated**: 2026-06-19T08:13:57.526Z
 **Manifest Version**: 1.0
-**Location**: docs/VERSION_MANIFEST.md
+**Location**: docs\VERSION_MANIFEST.md
 
 ---
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 94
+- **Scripts**: 96
 - **Commands**: 6
 
 ---
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-15 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
-| pm | agents/pm.md | high | inherit | 2026-06-13 |
+| pm | agents/pm.md | high | inherit | 2026-06-18 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-15 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
@@ -67,7 +67,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.7.2 | scripts/audit.ts | bun |
+| audit.ts | 2.8.0 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -83,14 +83,15 @@
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.1.1 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.2.1 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.6.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
+| golden-reference-loader.ts | 1.0.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.0 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.2.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.7.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.0.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.3.4 | scripts/lifecycle-sync-audit.ts | N/A |
@@ -98,13 +99,14 @@
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
 | new-project.ts | 1.1.4 | scripts/new-project.ts | N/A |
+| normalize-agent-skills.ts | 1.0.0 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
-| propagate-to-templates.ts | 2.0.7 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.8 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
