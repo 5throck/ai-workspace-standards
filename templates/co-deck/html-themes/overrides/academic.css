@@ -1,0 +1,99 @@
+/**
+ * academic.css — co-deck theme: Academic
+ *
+ * Dense 2-column layout with serif typography. Smaller font sizes,
+ * tighter spacing, cream background. Ideal for thesis presentations,
+ * research papers, and academic conferences.
+ *
+ * Font: Noto Serif KR (loaded via Google Fonts).
+ * Offline fallback: Georgia, serif.
+ */
+
+/* Google Fonts — Noto Serif KR (online environments) */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
+
+:root {
+  /* Surface — warm cream */
+  --slide-bg:            #f8f6f0;
+  --card-bg:             #f8f6f0;
+  --card-shadow:         none;
+  --card-padding:        1.75rem 2rem;
+  --card-border:         none;
+
+  /* Header — thin rule style */
+  --header-bg:           #f8f6f0;
+  --header-text:         #4a2020;
+  --header-height:       2.8rem;
+
+  /* Typography — serif, smaller, denser */
+  --font-family:         'Noto Serif KR', 'Georgia', 'Batang', serif;
+  --font-size-title:     1.65rem;
+  --font-size-subtitle:  1.15rem;
+  --font-size-body:      0.92rem;
+  --font-weight-title:   700;
+  --line-height-body:    1.7;
+
+  /* Colors — dark red academic accent */
+  --text-primary:        #1a1008;
+  --text-secondary:      #4a3828;
+  --text-muted:          #8a7868;
+  --accent:              #8b1a1a;
+  --accent-light:        #f5eded;
+  --accent-dark:         #5a0a0a;
+  --bullet-color:        #8b1a1a;
+  --bullet-marker:       "•";
+
+  /* Image panel — smaller, illustration style */
+  --image-panel-width:   30%;
+  --image-panel-min-width: 200px;
+
+  /* Section label — subdued */
+  --section-label-bg:    #8b1a1a;
+  --section-label-text:  #ffffff;
+
+  /* Divider */
+  --divider-bg:          #2a1008;
+  --divider-text:        #f8f6f0;
+  --divider-accent:      #c84040;
+
+  /* Cover */
+  --cover-bg:            #2a1008;
+  --cover-text:          #f8f6f0;
+  --cover-subtitle-text: rgba(248, 246, 240, 0.78);
+  --cover-meta-text:     rgba(248, 246, 240, 0.55);
+}
+
+/* Academic header: replace solid bar with bottom border rule */
+[data-theme="academic"] .slide-header {
+  background: var(--slide-bg);
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  font-variant: small-caps;
+}
+
+/* Tighter bullet spacing */
+[data-theme="academic"] .bullets-container {
+  gap: 0.4rem;
+}
+
+/* Footnote-style section label */
+[data-theme="academic"] .section-label {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  border-radius: 0.125rem;
+}
+
+/* Image panel with thin border frame */
+[data-theme="academic"] .right-panel {
+  border: 1px solid #c8bca8;
+  border-radius: 0.125rem;
+}
+
+/* Cover slide uses dark background with serif font */
+[data-theme="academic"] .slide[data-type="cover"] .slide-title {
+  font-size: 2rem;
+  letter-spacing: -0.01em;
+}

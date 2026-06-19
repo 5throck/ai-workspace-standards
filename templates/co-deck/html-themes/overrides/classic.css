@@ -1,0 +1,48 @@
+/**
+ * classic.css — co-deck theme: Classic
+ *
+ * Default theme. Text on the left, image panel on the right (45%).
+ * Clean navy header, professional blue accent.
+ * Mirrors the original co-deck lecture HTML style.
+ *
+ * This file re-declares base.css defaults explicitly so diffs are clear.
+ * No structural changes — CSS variables only.
+ */
+
+:root {
+  /* Surface */
+  --slide-bg:            #ffffff;
+  --card-bg:             #ffffff;
+  --card-shadow:         0 2px 12px rgba(0, 0, 0, 0.08);
+  --card-padding:        2rem 2.5rem;
+
+  /* Header */
+  --header-bg:           #1a1a2e;
+  --header-text:         #ffffff;
+  --header-height:       3.2rem;
+
+  /* Typography */
+  --font-family:         'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-size-title:     2rem;
+  --font-size-body:      1rem;
+  --font-weight-title:   700;
+  --line-height-body:    1.65;
+
+  /* Colors */
+  --text-primary:        #1a1a2e;
+  --text-secondary:      #4a4a6a;
+  --accent:              #4a90d9;
+  --accent-light:        #e8f0fb;
+  --bullet-color:        #4a90d9;
+
+  /* Layout */
+  --image-panel-width:   45%;
+  --image-panel-min-width: 280px;
+
+  /* Divider */
+  --divider-bg:          #1a1a2e;
+  --divider-accent:      #4a90d9;
+
+  /* Cover */
+  --cover-bg:            #1a1a2e;
+}

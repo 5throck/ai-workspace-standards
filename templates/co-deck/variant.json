@@ -12,23 +12,24 @@
     "stablePromotedOn": null
   },
   "agents": [
-    { "name": "version",       "file": "agents/version.md" },
-    { "name": "research",      "file": "agents/research.md" },
-    { "name": "storyline",     "file": "agents/storyline.md" },
-    { "name": "design",        "file": "agents/design.md" },
-    { "name": "image-curator", "file": "agents/image-curator.md" },
-    { "name": "html-build",    "file": "agents/html-build.md" },
-    { "name": "measure",       "file": "agents/measure.md" },
-    { "name": "pdf-export",    "file": "agents/pdf-export.md" }
+    { "name": "version",          "file": "agents/version.md" },
+    { "name": "research",         "file": "agents/research.md" },
+    { "name": "source-verifier",  "file": "agents/source-verifier.md" },
+    { "name": "storyline",        "file": "agents/storyline.md" },
+    { "name": "design",           "file": "agents/design.md" },
+    { "name": "image-curator",    "file": "agents/image-curator.md" },
+    { "name": "html-build",       "file": "agents/html-build.md" },
+    { "name": "measure",          "file": "agents/measure.md" },
+    { "name": "pdf-export",       "file": "agents/pdf-export.md" }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [
-      "version", "research", "storyline", "design", "image-curator",
-      "html-build", "measure", "pdf-export"
+      "version", "research", "source-verifier", "storyline", "design",
+      "image-curator", "html-build", "measure", "pdf-export"
     ],
-    "optional": ["image-curator"],
-    "notes": "image-curator is optional — skip if all slides use image_role: none or images are pre-supplied"
+    "optional": ["source-verifier", "image-curator"],
+    "notes": "source-verifier: skip with --skip-verify flag for draft iterations. image-curator: skip if all slides use image_role: none or images are pre-supplied."
   },
   "skills": [
     { "name": "lecture-pm" },
@@ -49,6 +50,14 @@
       { "name": "measure-layout", "path": "scripts/co-deck/measure-layout.ts" }
     ],
     "external": []
+  },
+  "theme_manifest": {
+    "themes_dir": "html-themes",
+    "base_css": "html-themes/base/base.css",
+    "available": ["classic", "minimal", "visual-heavy", "academic"],
+    "default": "classic",
+    "overrides_dir": "html-themes/overrides",
+    "notes": "CSS variable override themes. DOM structure is immutable across all themes. visual-heavy requires renderSlide() data-theme detection for background-image injection."
   },
   "lecture_profile": {
     "template_path": "presentations/lecture-profile.md",

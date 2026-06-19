@@ -1,0 +1,105 @@
+/**
+ * visual-heavy.css — co-deck theme: Visual Heavy
+ *
+ * Full-bleed background image with semi-transparent content overlay.
+ * Text overlaid on the image. Best for visual storytelling lectures,
+ * keynote-style presentations, or brand/design topics.
+ *
+ * Image injection: renderSlide() sets --slide-bg-image via inline style.
+ * Requires <html data-theme="visual-heavy"> to activate structural rules.
+ *
+ * DOM structure unchanged — image rendered via CSS background-image.
+ */
+
+:root {
+  /* Surface — transparent; image set via JS as CSS variable */
+  --slide-bg:            #0a0a1e;  /* fallback when no image */
+  --card-bg:             rgba(10, 10, 30, 0.72);
+  --card-shadow:         none;
+  --card-padding:        2.5rem 3rem;
+  --card-radius:         0;
+
+  /* Header — translucent overlay */
+  --header-bg:           rgba(0, 0, 0, 0.45);
+  --header-text:         rgba(255, 255, 255, 0.9);
+  --header-height:       3rem;
+
+  /* Typography — white text, larger for image contrast */
+  --font-family:         'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-size-title:     2.8rem;
+  --font-size-subtitle:  1.5rem;
+  --font-size-body:      1.05rem;
+  --font-weight-title:   700;
+  --line-height-body:    1.7;
+
+  /* Colors — white on dark */
+  --text-primary:        #ffffff;
+  --text-secondary:      rgba(255, 255, 255, 0.82);
+  --text-muted:          rgba(255, 255, 255, 0.55);
+  --accent:              #7ec8f0;
+  --accent-light:        rgba(126, 200, 240, 0.15);
+  --bullet-color:        #7ec8f0;
+  --bullet-marker:       "▸";
+
+  /* Image panel — hidden; background image used instead */
+  --image-panel-width:   0%;
+  --image-panel-min-width: 0px;
+
+  /* Section label */
+  --section-label-bg:    rgba(126, 200, 240, 0.25);
+  --section-label-text:  #ffffff;
+
+  /* Divider */
+  --divider-bg:          transparent;
+  --divider-text:        #ffffff;
+  --divider-accent:      #7ec8f0;
+
+  /* Cover */
+  --cover-bg:            transparent;
+  --cover-text:          #ffffff;
+  --cover-subtitle-text: rgba(255, 255, 255, 0.78);
+  --cover-meta-text:     rgba(255, 255, 255, 0.55);
+}
+
+/* Full-bleed background image on slide root */
+[data-theme="visual-heavy"] .slide {
+  background-image: var(--slide-bg-image, none);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Semi-transparent overlay on the entire card */
+[data-theme="visual-heavy"] .slide-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  align-items: center;
+}
+
+/* Hide right panel — image is the background, not a panel */
+[data-theme="visual-heavy"] .right-panel {
+  display: none !important;
+}
+
+/* Divider and cover slides also use background image */
+[data-theme="visual-heavy"] .slide[data-type="divider"],
+[data-theme="visual-heavy"] .slide[data-type="cover"] {
+  background-image: var(--slide-bg-image, none);
+  background-size: cover;
+  background-position: center;
+}
+
+[data-theme="visual-heavy"] .slide[data-type="divider"] .slide-card,
+[data-theme="visual-heavy"] .slide[data-type="cover"] .slide-card {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Text shadow for readability over images */
+[data-theme="visual-heavy"] .slide-title,
+[data-theme="visual-heavy"] .slide-subtitle {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="visual-heavy"] .bullet-item {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}

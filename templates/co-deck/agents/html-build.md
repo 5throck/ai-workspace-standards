@@ -59,6 +59,42 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 slideData object fields and image filename convention: see `skills/lecture-html-build/SKILL.md`.
 
+## Theme Integration — `data-theme` Rendering
+
+When generating `lecture_vN.html`, apply the theme from `lecture-profile.md`:
+
+**1. HTML root attribute** — set on `<html>` tag:
+```html
+<html lang="ko" data-theme="minimal">
+```
+
+**2. CSS link injection** — after the base stylesheet:
+```html
+<link rel="stylesheet" href="../../html-themes/base/base.css">
+<link rel="stylesheet" href="../../html-themes/overrides/minimal.css">
+```
+Use `lecture-profile.md` → `theme` value. Default: `classic`.
+
+**3. `visual-heavy` theme only** — add background-image injection to `renderSlide()`:
+```javascript
+function renderSlide(data) {
+  const theme = document.documentElement.dataset.theme;
+  if (theme === 'visual-heavy' && data.imagePath) {
+    document.querySelector('.slide').style.setProperty(
+      '--slide-bg-image', `url('${data.imagePath}')`
+    );
+  }
+  // rest of renderSlide logic unchanged
+}
+```
+
+**4. `data-type` attribute** — set on each `.slide` div for CSS type selectors:
+```html
+<div class="slide" data-type="standard">  <!-- cover | divider | standard | contact -->
+```
+
+Available themes: `classic` | `minimal` | `visual-heavy` | `academic`
+
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
@@ -68,7 +104,7 @@ slideData object fields and image filename convention: see `skills/lecture-html-
 - Slide balance rules: ≤5 bullets per slide, ≤3 consecutive slides without visuals, counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
-- Local preview: `python -m http.server 8080` → `http://localhost:8080`
+- Local preview: `bunx serve .` → `http://localhost:3000`
 
 ## Meeting Participation
 

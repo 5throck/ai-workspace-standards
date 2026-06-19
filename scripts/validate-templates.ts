@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.7
+ * @version 1.5.8
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -320,6 +320,33 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             fail(dir, 'script-manifest', `script_manifest.local "${entry.name}": path not found: ${entry.path}`, `Create the script at templates/${dir}/${entry.path} or remove the entry from variant.json`);
           } else {
             pass(`templates/${dir}/variant.json script_manifest.local["${entry.name}"] → ${entry.path} ✓`);
+          }
+        }
+      }
+
+      // B-04: theme_manifest CSS file existence check
+      const themeManifest = raw.theme_manifest as {
+        base_css?: string;
+        overrides_dir?: string;
+        available?: string[];
+      } | undefined;
+      if (themeManifest) {
+        if (themeManifest.base_css) {
+          const baseCssPath = join(TEMPLATES_DIR, dir, themeManifest.base_css);
+          if (!existsSync(baseCssPath)) {
+            fail(dir, 'theme-manifest', `theme_manifest.base_css not found: ${themeManifest.base_css}`, `Create the file at templates/${dir}/${themeManifest.base_css}`);
+          } else {
+            pass(`templates/${dir}/variant.json theme_manifest.base_css → ${themeManifest.base_css} ✓`);
+          }
+        }
+        if (themeManifest.overrides_dir && Array.isArray(themeManifest.available)) {
+          for (const theme of themeManifest.available) {
+            const themeCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, `${theme}.css`);
+            if (!existsSync(themeCssPath)) {
+              fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${themeManifest.overrides_dir}/${theme}.css`, `Create the file at templates/${dir}/${themeManifest.overrides_dir}/${theme}.css`);
+            } else {
+              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${themeManifest.overrides_dir}/${theme}.css ✓`);
+            }
           }
         }
       }

@@ -70,8 +70,10 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
       "image_role": "background",
       "image_query": "lecture hall professional",
       "file": "assets/images/slide-001-cover.jpg",
-      "source_url": "https://unsplash.com/photos/...",
-      "license": "Unsplash License (free for commercial use)",
+      "source_url": "https://pixabay.com/photos/...",
+      "license": "Pixabay License",
+      "commercial_use": true,
+      "attribution_required": false,
       "photographer": "Name",
       "status": "downloaded"
     }
@@ -85,14 +87,34 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 }
 ```
 
-## Image Source Priority
+## Image Source Strategy
 
-1. **Unsplash** (`source.unsplash.com`) — free for commercial use, no attribution required
-2. **Pexels** (`www.pexels.com`) — free for commercial use, no attribution required
-3. **Wikimedia Commons** — CC0 or CC-BY only, record attribution in manifest
-4. **Google Images** — only if explicit `license:creativecommons` filter applied
+All sources used are **commercial-use unlimited** — no watermarks, no attribution required (except Wikimedia CC-BY).
 
-**Never use:** stock photo sites with watermarks, images requiring paid licenses, screenshots of copyrighted content.
+### Keyless Default (no API key needed)
+
+| Priority | Source | Method | Rate Limit | License |
+|----------|--------|--------|-----------|---------|
+| 1 | **Pixabay** | `https://pixabay.com/api/?key=&q=<query>&image_type=photo&safesearch=true` | 100/hr keyless | Pixabay License (commercial free) |
+| 2 | **Unsplash URL** | `https://source.unsplash.com/1280x720/?<query>` | ~50/hr | Unsplash License (commercial free) |
+
+### With API Keys (higher limits, better search accuracy)
+
+| Source | Endpoint | Rate Limit (free tier) | License |
+|--------|----------|----------------------|---------|
+| **Unsplash API** | `https://api.unsplash.com/search/photos?query=<q>` | 50 req/hr | Unsplash License |
+| **Pexels API** | `https://api.pexels.com/v1/search?query=<q>` | 200 req/hr | Pexels License |
+| **Pixabay API** | `https://pixabay.com/api/?key=<k>&q=<q>` | 100 req/hr | Pixabay License |
+| **Wikimedia** | `https://commons.wikimedia.org/w/api.php` | Unlimited | CC0/CC-BY (record attribution for CC-BY) |
+
+### `source: auto` Resolution Order
+
+1. Check `lecture-profile.md` `image.api_keys` — if any key is present, use that API
+2. If no keys: try Pixabay keyless endpoint first
+3. If Pixabay keyless fails or returns no results: fall back to Unsplash URL method
+4. If both fail: mark slide as missing image (do not block pipeline)
+
+**Never use:** watermarked stock sites, images requiring paid license, screenshots of copyrighted UI, Google Images without explicit CC filter.
 
 ## Image Role Guidelines
 
