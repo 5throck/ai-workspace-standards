@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-19T13:31:10.801Z
+**Generated**: 2026-06-19T13:55:59.485Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.2.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.6 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.7 | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | 1.1.0 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.0 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.0 | scripts/verify-memory.ts | fs, path |

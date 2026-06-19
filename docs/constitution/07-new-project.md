@@ -101,6 +101,42 @@ Variant-specific sections are marked with inject markers:
 > by `l2-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
 ```
 
+#### 7.3.5 Variant Scaffolding — File Overlay Mechanics
+
+When `new-project.ts` creates a project from a variant template, it applies files in a specific order. Understanding this order is critical for variant template authors.
+
+**Scaffolding pipeline order**:
+
+```
+Step 1: Copy templates/common/ → <project>/        (L1 common files land first)
+Step 2: Delete WORKSPACE_ONLY_FILES from <project>/ (remove workspace-only files)
+Step 3: Copy templates/co-<variant>/ → <project>/  (variant overlay — replaces/adds files)
+Step 4: merge-package-scripts.ts                    (inject audit/dev-sync/sync-md into package.json)
+Step 5: write-scripts-snapshot.ts                   (create scripts-snapshot.json)
+```
+
+**`WORKSPACE_ONLY_FILES`** — files deleted in Step 2 (cannot exist in a generated project):
+```
+package.json, package-lock.json, bun.lock, bun.lockb,
+propagation-map.json, variant.json
+```
+These are workspace-management files that have no meaning inside a generated project.
+
+**Variant `package.json` survival mechanism**:
+
+The L1 `templates/common/package.json` is deleted in Step 2 as part of `WORKSPACE_ONLY_FILES`. The variant's `templates/co-<variant>/package.json` (if present) is then copied in Step 3. This is the project's root `package.json`, containing variant-specific `dependencies` (e.g., `pdf-lib`, `playwright`).
+
+Step 4 (`merge-package-scripts.ts`) then **injects** three npm script entries into that package.json:
+- `"audit"` → `bun scripts/audit.ts`
+- `"dev-sync"` → `bun scripts/dev-sync.ts`
+- `"sync-md"` → `bun scripts/sync-md.ts`
+
+This ensures every scaffolded project has the standard lifecycle scripts regardless of what the variant's `package.json` declares.
+
+**`scripts/SCRIPTS.md` preservation**: The L1 `templates/common/scripts/SCRIPTS.md` (30+ entries) lands in Step 1. A variant MUST NOT include `scripts/SCRIPTS.md` in its overlay (Step 3), or it will overwrite the L1 registry. Variant script registries belong at `scripts/<variant>/SCRIPTS.md`. See [§6.5 Variant-Specific Scripts](06.5-script-lifecycle.md#variant-specific-scripts-l2-layer).
+
+---
+
 #### 7.4 Layer × Stage Reference Matrix
 
 Two independent dimensions govern the workspace lifecycle:

@@ -95,6 +95,51 @@ Add a `skill_manifest` section to `templates/<variant>/variant.json`:
 
 ---
 
+## Step 3.5 — Add variant-specific scripts (optional)
+
+Skip this step if your variant does not need custom automation scripts.
+
+If your variant has unique workflow automation (e.g., PDF generation, font download, layout measurement), add TypeScript scripts following the placement rule:
+
+**Placement rule**: Scripts MUST go in `scripts/<variant>/`, NOT in `scripts/` top-level.
+
+```bash
+templates/co-<variant>/
+└── scripts/
+    └── <variant>/          ← your .ts files here
+        ├── SCRIPTS.md      ← variant script registry
+        └── my-script.ts
+```
+
+> **Why subdirectory?** The L1 `audit.ts` checks `scripts/` top-level `.ts` files against `scripts/SCRIPTS.md`. Placing variant scripts in a subdirectory keeps them out of that check. See [§6.5 Variant-Specific Scripts](constitution/06.5-script-lifecycle.md).
+
+**Declare in `variant.json`** — required for any variant with custom scripts:
+
+```json
+"script_manifest": {
+  "variant_scripts_dir": "scripts/<variant>",
+  "local": [
+    { "name": "my-script", "path": "scripts/<variant>/my-script.ts" }
+  ],
+  "external": []
+}
+```
+
+`bun scripts/validate-templates.ts` verifies each declared path exists (check B-03).
+
+**Add npm scripts to `package.json`** — create `templates/co-<variant>/package.json` with:
+```json
+{
+  "scripts": {
+    "my-script": "bun scripts/<variant>/my-script.ts"
+  },
+  "dependencies": { }
+}
+```
+`merge-package-scripts.ts` will inject `audit`/`dev-sync`/`sync-md` automatically at scaffold time.
+
+---
+
 ## Step 4 — Update AGENTS.md Phase Summary
 
 Replace the Phase Summary table in `templates/<variant>/AGENTS.md` with your variant's actual agents. The table must reference only agents that exist in `templates/<variant>/agents/`.
@@ -144,3 +189,6 @@ Before opening a PR for a new variant:
 - [ ] Variant-specific skills exist in both `.claude/skills/` and `.gemini/skills/`
 - [ ] `docs/phase-definitions.md` created for the variant
 - [ ] `bun scripts/validate-templates.ts --variant <name>` passes with 0 errors
+- [ ] *(if variant has custom scripts)* Scripts placed in `scripts/<variant>/`, NOT `scripts/` top-level
+- [ ] *(if variant has custom scripts)* `variant.json` declares `script_manifest.local` entries
+- [ ] *(if variant has custom scripts)* `templates/co-<variant>/package.json` created with npm script entries
