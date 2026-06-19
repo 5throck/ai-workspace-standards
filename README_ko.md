@@ -124,7 +124,8 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-design/           # ✅ Stable — 특화된 UI/UX 디자인 에이전트 팀
     ├── co-work/             # ✅ Stable — 범용 협업 및 문서화 에이전트 팀
     ├── co-security/         # ✅ Stable — 레드팀 및 위협 모델링 에이전트 팀
-    └── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
+    ├── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
+    └── co-deck/             # 🔶 Beta — 강연 자료 및 프레젠테이션 제작 에이전트 팀
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -163,6 +164,7 @@ C:\git\
 - **co-work**: 병렬 작성과 지속적인 이해관계자 리뷰에 초점을 맞춘 6단계 비동기(Asynchronous) 협업 워크플로
 - **co-security**: 레드팀 운영, 위협 모델링, Ansible 기반 패치 자동화를 포함하는 6단계 보안 인게이지먼트 워크플로
 - **co-consult**: 리서치, 분석, 산출물 작성, 고객 납품을 아우르는 7단계 전략 컨설팅 워크플로
+- **co-deck**: 리서치부터 인쇄 가능한 PDF까지의 11단계 강연 자료 제작 워크플로, 5개의 승인 게이트 포함
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -182,6 +184,7 @@ C:\git\
 | `co-work` | ✅ Stable | 범용 협업 워크플로 — PM, Analyst, Technical Writer, Content Writer, Project Coordinator, Storyteller, MS365 Expert |
 | `co-security` | ✅ Stable | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 | `co-consult` | ✅ Stable | 전략 컨설팅 워크플로 — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect 등 |
+| `co-deck` | 🔶 Beta | 강연 자료 제작 워크플로 — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 
 ### 버전 및 Variant 선택
 
@@ -241,4 +244,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-11*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-19*
