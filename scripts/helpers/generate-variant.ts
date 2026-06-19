@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.5.0
+ * @version 1.6.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -123,6 +123,57 @@ function createDirectory(dirPath: string): void {
   if (!existsSync(dirPath)) {
     mkdirSync(dirPath, { recursive: true });
   }
+}
+
+/**
+ * Normalize agent frontmatter when copying from L2 source to variant template.
+ *
+ * Strips L2-only fields (lifecycle, formal_name, variant) that do not belong in
+ * standard variant agent files, and ensures all four tier platforms are present
+ * (claude, gemini, antigravity, gemini-cli) by inheriting the claude tier value.
+ *
+ * @version 1.0.0
+ */
+export function normalizeAgentFrontmatter(content: string): string {
+  const fmMatch = content.match(/^(---\n)([\s\S]*?)(\n---)([\s\S]*)$/);
+  if (!fmMatch) return content;
+
+  const [, open, fm, close, body] = fmMatch;
+
+  // Strip L2-only fields
+  const L2_ONLY_FIELDS = ['lifecycle', 'formal_name', 'variant'];
+  let normalized = fm;
+
+  for (const field of L2_ONLY_FIELDS) {
+    // Match single-line field: "field: value"
+    // Match block field: "field:\n  key: val\n  key2: val2" (indented sub-keys)
+    normalized = normalized.replace(
+      new RegExp(`^${field}:[ \\t]*.*(?:\\n[ \\t]+.*)*\\n?`, 'gm'),
+      ''
+    );
+  }
+
+  // Add missing tier platforms — inherit from claude tier if absent
+  const claudeTierMatch = normalized.match(/^(\s+)claude:\s*(high|medium|low)/m);
+  if (claudeTierMatch) {
+    const indent = claudeTierMatch[1];
+    const tier = claudeTierMatch[2];
+    const platforms = ['gemini', 'antigravity', 'gemini-cli'] as const;
+    for (const platform of platforms) {
+      if (!new RegExp(`^${indent}${platform}:`, 'm').test(normalized)) {
+        // Insert after the claude: line
+        normalized = normalized.replace(
+          new RegExp(`(^${indent}claude:\\s*${tier})`, 'm'),
+          `$1\n${indent}${platform}: ${tier}`
+        );
+      }
+    }
+  }
+
+  // Clean up consecutive blank lines left by removed fields
+  normalized = normalized.replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '').replace(/\n+$/, '');
+
+  return `${open}${normalized}${close}${body}`;
 }
 
 /**
@@ -251,7 +302,16 @@ function generateAgentOverrides(
 
       // Check if source exists (from L2 project)
       if (existsSync(file.sourcePath)) {
-        copyFileUTF8(file.sourcePath, overridePath);
+        // Skip README files — normalize only specialist agent files
+        const isSpecialistAgent = !['README.md', 'README_ko.md', 'pm.md'].includes(
+          normalizedTarget.replace('agents/', '')
+        );
+        if (isSpecialistAgent) {
+          const raw = readUTF8File(file.sourcePath);
+          writeUTF8File(overridePath, normalizeAgentFrontmatter(raw));
+        } else {
+          copyFileUTF8(file.sourcePath, overridePath);
+        }
         agentOverrides.push(overridePath);
       } else {
         // Generate minimal override from common template

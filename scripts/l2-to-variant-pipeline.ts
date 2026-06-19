@@ -11,13 +11,25 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.5.0
+ * @version 1.6.0
  * @phase: Complete pipeline orchestration
+ *
+ * Agent Frontmatter Normalization (v1.6.0):
+ * During Wave 3 (generate-variant.ts), specialist agent files copied from the L2
+ * source are automatically normalized via normalizeAgentFrontmatter():
+ *   - Strips L2-only fields: lifecycle, formal_name, variant
+ *   - Adds missing tier platforms (antigravity, gemini-cli) inheriting the claude tier
+ * pm.md, README.md, README_ko.md are excluded from normalization.
+ *
+ * Expected agent file structure post-normalization:
+ *   ## Role → ## ⚠️ PM-ONLY INVOCATION → ## Responsibilities
+ *   → ## Output Format → ## Constraints → ## Meeting Participation
+ *   → ## Dispatch Protocol
  *
  * Dependencies:
  * - helpers/scan-l2-project.ts (L2 scanning)
  * - helpers/reconcile-with-l0-l1.ts (Reconciliation)
- * - helpers/generate-variant.ts (Variant generation)
+ * - helpers/generate-variant.ts (Variant generation + agent normalization)
  * - helpers/beta-lifecycle.ts (Lifecycle management)
  * - helpers/validate-platform-parity.ts (Parity validation)
  * - helpers/integration-helpers.ts (Workspace integration)

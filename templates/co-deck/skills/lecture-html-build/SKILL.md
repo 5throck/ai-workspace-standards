@@ -1,6 +1,6 @@
 ---
 name: lecture-html-build
-version: 1.0.0
+version: 1.1.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Matches/downloads
   images, inserts speaker intro and contact slides, checks balance. Responds to
@@ -8,11 +8,6 @@ description: >
   "HTML 만들어줘", "슬라이드 생성해줘", "이미지 넣어줘", "강연자 소개 추가해줘").
   Stages 5-8 of the lecture workflow.
 ---
-# Build Agent — HTML Slide Production
-
-**Stage**: Stages 5-8 (HTML generation + images + review + special pages)  
-**Output**: `presentations/<project>/lecture_vN.html`, `images/`  
-**Full instructions**: `agents/html-build.md`
 
 ## Role
 
@@ -27,37 +22,145 @@ Always call Version Agent before editing the HTML file.
 - User says "add images" / "이미지 넣어줘"
 - User wants to edit specific slides
 
-## Quick Reference
+---
 
-**Inputs**: `slide_deck.md`, `design_spec.md`
+## Stage 5: HTML Slide Generation
 
-**slideData field reference** (one object per slide):
+### File Structure
+
+Single HTML file (`lecture_[topic]_v1.html`) + `images/` folder.
+
+### slideData Structure
+
+Slide data lives in a JavaScript array, embedded as `const slideData = [...]` inside the HTML file.
+
+> Korean example — field keys stay in English; only the content values are Korean.
+
 ```javascript
 // Cover
-{ isTitleSlide: true, section, title, subtitle, meta, visualImage }
+{
+  isTitleSlide: true,
+  section: "",
+  title: "강연 제목",
+  subtitle: "부제목",
+  meta: "날짜 | 주최",
+  visualImage: "images/cover.jpg"
+}
 
 // Speaker intro
-{ isProfileSlide: true, section, title, speakerName, speakerTitle, speakerBio, visualImage }
+{
+  isProfileSlide: true,
+  section: "INTRODUCTION",
+  title: "강연자 소개",
+  speakerName: "이름",
+  speakerTitle: "직책 / 소속",
+  speakerBio: "약력 (2-3줄)",
+  visualImage: "images/speaker.jpg"
+}
 
 // Divider (part break)
-{ isDividerSlide: true, section, partNum, title, desc, visualImage }
+{
+  isDividerSlide: true,
+  section: "섹션명",
+  partNum: "PART 01",
+  title: "파트 제목",
+  desc: "이 파트에서 다룰 내용 한 줄 요약",
+  visualImage: "images/part1.jpg"
+}
 
 // Standard slide
-{ section, title, bullets: [...], visualImage }   // image panel
-{ section, title, bullets: [...], visualTitle, visualDisplay }  // text panel
+{
+  section: "섹션명",
+  title: "슬라이드 제목",
+  bullets: ["불릿 1", "불릿 2", "불릿 3"],
+  visualImage: "images/slide3.jpg"   // image panel
+  // or text panel:
+  // visualTitle: "오른쪽 패널 제목",
+  // visualDisplay: "패널 본문 내용"
+}
 
 // Contact (last slide)
-{ isContactSlide: true, section, title, contactEmail, contactLinkedIn, contactPhone }
+{
+  isContactSlide: true,
+  section: "CLOSING",
+  title: "감사합니다",
+  contactEmail: "email@example.com",
+  contactLinkedIn: "linkedin.com/in/...",
+  contactPhone: "010-XXXX-XXXX"
+}
 ```
 
-**Balance check** (self-review before handing off):
-- Total slide count matches plan?
-- Chapter counts balanced (±20%)?
-- No slide with more than 5 bullets?
-- No more than 3 consecutive slides without visuals?
+### CSS Writing
 
-**Local preview**: `python -m http.server 8080` → `http://localhost:8080/presentations/<project>/lecture_vN.html`
+Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
 
-**Next step**: Request user review (Gate 4 — optional). Then advance to Measure Agent (`agents/measure.md`).
+### Image Filename Convention
 
-→ Image matching options, CSS writing guide, special-page rules: see `agents/html-build.md`
+```
+images/
+├── cover.jpg          # Cover
+├── speaker.jpg        # Speaker intro
+├── part1.jpg          # PART 1 divider
+├── part2.jpg          # PART 2 divider
+├── slide_[n].jpg      # Standard slides
+└── contact.jpg        # Contact
+```
+
+---
+
+## Stage 6: Image Matching
+
+### Image Preparation Options
+
+**Option A — Web search + download**
+Use Claude in Chrome to search Unsplash, Pexels, etc. by keyword:
+- Convert slide title/content into English keywords
+- Pick license-free images
+- Save into `images/`
+
+**Option B — AI image generation**
+Use a canvas-design skill or image generation API.
+
+**Option C — Keyword placeholder**
+Skip images for now; substitute with `visualTitle` / `visualDisplay` text panels. Swap later.
+
+---
+
+## Stage 7: Balance Check
+
+Self-check after generating the HTML:
+
+- [ ] Total slide count matches the plan
+- [ ] Slide counts per chapter are balanced (within ±20%)
+- [ ] No slides with more than 5 bullets
+- [ ] No more than 3 consecutive slides without visuals
+- [ ] No overly long bullets (recommend under 40 chars/line)
+
+If any issue, split or merge slides.
+
+---
+
+## Stage 8: Special Pages
+
+- **Speaker intro**: right after the cover (slide 2)
+- **Contact**: last slide
+
+Insert if either is missing.
+
+---
+
+## Tools
+
+- `Write` (generate HTML)
+- Browser tool (image search/download)
+- `bash` (local server, image processing)
+- Always call Version Agent before editing files
+
+---
+
+## Next Step
+
+Share the completed HTML with the user and request review (Gate 4 — optional).
+After approval, advance to Measure Agent (`agents/measure.md`).
+
+> To open HTML locally: run `python -m http.server 8080` or `bun scripts/serve.mjs`, then open `http://localhost:8080` in a browser.
