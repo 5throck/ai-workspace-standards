@@ -1,4 +1,4 @@
-// @version 1.5.0
+// @version 1.6.0
 ```typescript
 #!/usr/bin/env bun
 /**
@@ -255,6 +255,28 @@ function generateStubs(
       lastTransition: `initial → beta on ${TODAY}`,
       stablePromotedOn: null,
     },
+    // Lecture-type extension fields
+    ...(variant === 'deck' ? {
+      agent_manifest: {
+        variant_agents_dir: "agents",
+        pipeline_order: ["version", "research", "source-verifier", "storyline", "design", "image-curator", "html-build", "measure", "pdf-export"],
+        optional: ["source-verifier", "image-curator"],
+        notes: "source-verifier: skip with --skip-verify. image-curator: skip if all slides use image_role: none."
+      },
+      theme_manifest: {
+        themes_dir: "html-themes",
+        base_css: "html-themes/base/base.css",
+        available: ["classic", "minimal", "visual-heavy", "academic"],
+        default: "classic",
+        overrides_dir: "html-themes/overrides",
+        notes: "CSS variable override themes. DOM structure immutable across themes."
+      },
+      lecture_profile: {
+        template_path: "presentations/lecture-profile.md",
+        required_fields: ["title", "audience", "level"],
+        notes: "Scaffolded on new-project creation. Agents load this file at stage start."
+      }
+    } : {}),
     createdAt: TODAY,
     phaseAComplete: false,
     promotionChecklist: "PROMOTION_CHECKLIST.md",
@@ -663,6 +685,24 @@ function printSummary(variant: string): void {
   );
 }
 
+function createLectureScaffold(projectDir: string): void {
+  log("🎨 Creating lecture-specific scaffold (html-themes/, presentations/)…");
+  // html-themes directory structure
+  for (const dir of [
+    "html-themes",
+    "html-themes/base",
+    "html-themes/overrides",
+    "presentations",
+  ]) {
+    ensureDir(path.join(projectDir, dir));
+  }
+  // presentations/.gitkeep so the folder is tracked
+  writeFile(path.join(projectDir, "presentations", ".gitkeep"), "");
+  log("    ├─ html-themes/base/");
+  log("    ├─ html-themes/overrides/");
+  log("    └─ presentations/");
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Main
 // ─────────────────────────────────────────────────────────────────────────────
@@ -721,6 +761,11 @@ function main(): void {
 
   // Step 6: domain docs + agents/
   createDomainDocs(projectDir, args.domain, args.variant);
+
+  // Step 6.5: lecture-type specific setup (html-themes + presentations/)
+  if (args.variant === 'deck') {
+    createLectureScaffold(projectDir);
+  }
 
   // Step 7: git init
   initGit(projectDir);
