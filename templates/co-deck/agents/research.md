@@ -18,7 +18,7 @@ examples:
 phases: [1]
 handoff_to: [storyline]
 handoff_from: [pm]
-required_skills: [lecture-research]
+required_skills: [research]
 ---
 
 ## Role

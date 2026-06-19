@@ -6,14 +6,13 @@ This directory contains variant-specific skills for the `co-deck` template.
 
 | Skill | Directory | Purpose |
 |-------|-----------|---------|
-| Lecture PM | `lecture-pm/` | Orchestrate the 11-stage lecture production pipeline |
-| Lecture Version | `lecture-version/` | Manage version snapshots before every file modification |
-| Lecture Research | `lecture-research/` | Web research and source collection for lecture topics |
-| Lecture Storyline | `lecture-storyline/` | Storyline design and slide deck composition |
-| Lecture Design | `lecture-design/` | Visual style locking — layout, color palette, fonts |
-| Lecture HTML Build | `lecture-html-build/` | HTML slide generation from slide_deck.md + design_spec.md |
-| Lecture Measure | `lecture-measure/` | Playwright layout measurement and font download |
-| Lecture PDF Export | `lecture-pdf-export/` | PDF generation from measured layout spec |
+| Version | `version/` | Manage version snapshots before every file modification |
+| Research | `research/` | Web research and source collection for lecture topics |
+| Storyline | `storyline/` | Storyline design and slide deck composition |
+| Design | `design/` | Visual style locking — layout, color palette, fonts |
+| HTML Build | `html-build/` | HTML slide generation from slide_deck.md + design_spec.md |
+| Measure | `measure/` | Playwright layout measurement and font download |
+| PDF Export | `pdf-export/` | PDF generation from measured layout spec |
 
 ## Usage
 

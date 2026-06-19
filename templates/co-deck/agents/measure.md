@@ -18,7 +18,7 @@ examples:
 phases: [4]
 handoff_to: [pdf-export]
 handoff_from: [html-build]
-required_skills: [lecture-measure]
+required_skills: [measure]
 ---
 
 ## Role
