@@ -112,7 +112,7 @@ Every slide entry in `slide_deck.md` MUST include these three image fields:
 - Good: `"abstract network nodes glowing blue"` | Bad: `"AI 기초 개요"`
 - Append lecture style context: `"professional"`, `"academic"`, `"minimalist"`
 
-Full templates and Korean examples: see `skills/lecture-storyline/SKILL.md`.
+Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 
 ## Constraints
 

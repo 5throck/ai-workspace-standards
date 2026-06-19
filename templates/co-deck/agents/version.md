@@ -50,7 +50,7 @@ This ensures all file modifications are safely snapshotted throughout the 11-sta
 - `presentations/<project>/_versions/<timestamp>_<agent>_<desc>/` — snapshot directory
 - `presentations/<project>/VERSIONS.md` — manifest with restore commands
 
-Snapshot commands, restore examples, storage layout, and collaboration pattern: see `skills/lecture-version/SKILL.md`.
+Snapshot commands, restore examples, storage layout, and collaboration pattern: see `skills/version/SKILL.md`.
 
 ## Constraints
 

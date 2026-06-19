@@ -55,9 +55,9 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 ## Output Format
 
 - `presentations/<project>/lecture_vN.html` — single HTML file with embedded slideData
-- `presentations/<project>/images/` — per-slide image files
+- `presentations/<project>/assets/images/` — per-slide image files (from image-curator manifest)
 
-slideData object fields and image filename convention: see `skills/lecture-html-build/SKILL.md`.
+slideData object fields and image filename convention: see `skills/html-build/SKILL.md`.
 
 ## Theme Integration — `data-theme` Rendering
 

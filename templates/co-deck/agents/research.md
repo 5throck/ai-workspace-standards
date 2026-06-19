@@ -79,7 +79,7 @@ At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
 - Case Studies
 - References
 
-Full template and Korean example: see `skills/lecture-research/SKILL.md`.
+Full template and Korean example: see `skills/research/SKILL.md`.
 
 ## Constraints
 

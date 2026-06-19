@@ -197,9 +197,11 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
 | `design` | Phase 3 | "lock design style", "pick colors and fonts", "create design_spec.md" |
 | `html-build` | Phase 4 | "generate HTML slides", "build presentation", "create lecture HTML" |
+| `image-curator` | Phase 3.5 | "find images for slides", "download slide images", "search Pixabay", "curate images" |
 | `measure` | Phase 4 | "measure slide layout", "prepare for PDF", "extract coordinates" |
 | `pdf-export` | Phase 4, Phase 5 | "generate PDF", "export to PDF", "create sample PDF" |
 | `research` | Phase 1 | "research the topic", "collect sources", "write research notes" |
+| `source-verifier` | Phase 1.5 | "verify sources", "check URLs", "validate research links", "run source check" |
 | `storyline` | Phase 2, Phase 3 | "create storyline", "compose slide deck", "structure chapters" |
 | `version` | Phase 0–6 | "snapshot before edit", "backup file", "restore prior version" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
@@ -225,9 +227,11 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- VARIANT-PHASE-GATE-START -->
 | design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
 | lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
+| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | optional: skip if no images needed |
 | pdf_layout_spec.md (pixel coordinates for PDF engine) | Phase 4 | `measure` | medium | |
 | <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |
 | research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |
+| source-verification.md (URL accessibility + Trust Score) | Phase 1.5 | `source-verifier` | medium | optional: --skip-verify |
 | storyline.md + slide_deck.md (narrative and per-slide content) | Phase 2 | `storyline` | medium | |
 | _versions/ snapshots (pre-edit backups of lecture files) | Phase 0–6 | `version` | low | cross-cutting |
 <!-- VARIANT-PHASE-GATE-END -->
@@ -357,9 +361,11 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 | design | `agents/design.md` | Medium | ⚠️ sequential preferred | project files |
 | html-build | `agents/html-build.md` | Medium | ⚠️ sequential preferred | project files |
+| image-curator | `agents/image-curator.md` | Medium | ⚠️ sequential preferred | project files |
 | measure | `agents/measure.md` | Medium | ⚠️ sequential preferred | project files |
 | pdf-export | `agents/pdf-export.md` | Medium | ⚠️ sequential preferred | project files |
 | research | `agents/research.md` | Medium | ⚠️ sequential preferred | project files |
+| source-verifier | `agents/source-verifier.md` | Medium | ⚠️ sequential preferred | project files |
 | storyline | `agents/storyline.md` | Medium | ⚠️ sequential preferred | project files |
 | version | `agents/version.md` | Low | ✅ | project files |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
@@ -367,6 +373,23 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
 
 ---
+
+### 4.1.5 Phase Summary
+
+| Phase | Name | PM Role | Specialist Agents |
+|-------|------|---------|-------------------|
+| 0 | Project Initiation | Owner — reads lecture-profile.md, initializes project_state.json | — |
+| 1 | Research | Observer — reviews research_notes.md at Gate 1 | `research` |
+| 1.5 | Source Verification | Gate 1.5 reviewer — checks Trust Score, holds if <60% | `source-verifier` (optional) |
+| 2-3 | Storyline | Gate 2 approver — reviews storyline.md and slide_deck.md | `storyline` |
+| 4 | Design | Gate 3 approver — locks design_spec.md | `design` |
+| 3.5 | Image Curation | Observer — reviews image-manifest.json | `image-curator` (optional) |
+| 5-8 | HTML Build | Gate 4 reviewer — optional HTML preview before measure | `html-build` |
+| 9-10 | Layout Measure | Observer — reviews pdf_layout_spec.md | `measure` |
+| 11 | PDF Export | Gate 5 approver — reviews sample PDF before full PDF | `pdf-export` |
+
+> Gates 2, 3, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
+> Gates 1, 1.5, 4 are **optional** — PM may auto-advance or prompt user.
 
 ### 4.2 Harness Engineering Workflow
 
@@ -417,9 +440,11 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 <!-- VARIANT-ROLE-BOUNDARY-START -->
 | Create or update design_spec.md (colors, fonts, layout) | `design` | `pm` |
 | Generate or update lecture_vN.html from slide_deck.md | `html-build` | `pm` |
+| Search and download images (Pixabay/Unsplash/Pexels) for slides | `image-curator` | `pm` |
 | Run Playwright measurement or download TTF fonts | `measure` | `pm` |
 | Generate sample PDF or full PDF output | `pdf-export` | `pm` |
 | Search web and write research_notes.md | `research` | `pm` |
+| Validate URLs and cross-check research sources | `source-verifier` | `pm` |
 | Write or revise storyline.md or slide_deck.md | `storyline` | `pm` |
 | Snapshot any lecture file before editing | `version` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->

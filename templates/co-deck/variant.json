@@ -1,6 +1,6 @@
 {
   "name": "co-deck",
-  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 8 specialized agents covering research, content, design, HTML build, layout measurement, and PDF export.",
+  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 9 specialized agents covering research, source verification, content, design, image curation, HTML build (4 themes), layout measurement, and PDF export.",
   "variant_type": "lecture",
   "status": "beta",
   "version": "0.1.0",
@@ -32,14 +32,13 @@
     "notes": "source-verifier: skip with --skip-verify flag for draft iterations. image-curator: skip if all slides use image_role: none or images are pre-supplied."
   },
   "skills": [
-    { "name": "lecture-pm" },
-    { "name": "lecture-version" },
-    { "name": "lecture-research" },
-    { "name": "lecture-storyline" },
-    { "name": "lecture-design" },
-    { "name": "lecture-html-build" },
-    { "name": "lecture-measure" },
-    { "name": "lecture-pdf-export" }
+    { "name": "version" },
+    { "name": "research" },
+    { "name": "storyline" },
+    { "name": "design" },
+    { "name": "html-build" },
+    { "name": "measure" },
+    { "name": "pdf-export" }
   ],
   "script_manifest": {
     "variant_scripts_dir": "scripts/co-deck",
