@@ -1,6 +1,6 @@
 ---
 name: version
-version: 1.2.0
+version: 1.3.0
 description: >
   Manages version snapshots of lecture files. Auto-backs up files before edits
   and restores prior versions on demand. Must be called before any file
@@ -9,7 +9,7 @@ description: >
   Cross-cutting — applies to all workflow stages.
 status: active
 owner: version
-last_reviewed: 2026-06-19
+last_reviewed: 2026-06-20
 prerequisites: none
 ---
 
@@ -34,25 +34,25 @@ Always create a snapshot **before** editing a file. `--workspace` is required.
 
 ```bash
 # Single file
-python scripts/snapshot.py slide_deck.md \
+bun scripts/co-deck/snapshot.ts slide_deck.md \
   --workspace presentations/<project> \
   --desc "shrink chapter 3 slide count" \
   --agent content
 
 # Multiple files
-python scripts/snapshot.py slide_deck.md storyline.md \
+bun scripts/co-deck/snapshot.ts slide_deck.md storyline.md \
   --workspace presentations/<project> \
   --desc "full chapter restructure" \
   --agent content
 
 # HTML file (large — snapshot only when layout changes)
-python scripts/snapshot.py lecture_v1.html \
+bun scripts/co-deck/snapshot.ts lecture_v1.html \
   --workspace presentations/<project> \
   --desc "backup before image swap" \
   --agent build
 
 # Entire folder
-python scripts/snapshot.py images/ \
+bun scripts/co-deck/snapshot.ts images/ \
   --workspace presentations/<project> \
   --desc "backup before image set swap" \
   --agent build
@@ -78,7 +78,7 @@ python scripts/snapshot.py images/ \
 ### Step 2: List Versions
 
 ```bash
-python scripts/snapshot.py --workspace presentations/<project> --list
+bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
 ```
 
 Example output:
@@ -99,12 +99,12 @@ Example output:
 
 ```bash
 # Full version ID
-python scripts/snapshot.py \
+bun scripts/co-deck/snapshot.ts \
   --workspace presentations/<project> \
   --restore 2026-06-17_14-30_content_chapter-adjust
 
 # Partial version ID (if uniquely matched)
-python scripts/snapshot.py \
+bun scripts/co-deck/snapshot.ts \
   --workspace presentations/<project> \
   --restore 2026-06-17_14-30
 ```
@@ -130,7 +130,7 @@ Each snapshot auto-appends an entry to `presentations/<project>/VERSIONS.md` wit
 **Caveats:**
 - Add `_versions/` to `.gitignore` — large folders make Git inefficient
 - HTML files are 100KB–several MB; snapshot only on layout changes
-- `fonts/` does not need snapshots — re-downloadable any time via `download_font.py`
+- `fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
 - Snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes (they become invalid if HTML changes)
 
 ## Related Skills
