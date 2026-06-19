@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-06-19]**: feat(wave-2a): introduce L1 agent layer — `templates/common/agents/` with `.gitkeep`, ADR-0043 (L1 agent layer and hybrid override mechanism), `docs/designs/l1-agent-format-spec.md` (TypeScript interfaces + governance rules), and `scripts/helpers/agent-similarity-analyzer.ts` v1.1.0 (Mode 1 cross-variant Jaccard similarity scan, Mode 2 L2 version drift detection; critical fixes: CRLF normalization, path traversal guard, missingL1 bucket, pm.md exclusion, SectionKey type, remove_reason field)
+- **[2026-06-19]**: feat(wave-2a): register `helpers/agent-promote.ts` (experimental stub, Wave 2b) and `helpers/agent-similarity-analyzer.ts` v1.1.0 in SCRIPTS.md (L0 and L1 template); add `co-deck` to `governance-agents.target_variants` in `scripts/propagation-map.json`
 - **[2026-06-17]**: feat: promote co-deck variant to templates/co-deck — 11-stage lecture material production system migrated from co-deck_prototype via 3-phase variant creation workflow (Phase A: agent frontmatter + docs; Phase B: workspace infra + audit pass; Phase C: l2-to-variant-pipeline promotion, 0 validate-templates errors, end-to-end scaffold verified)
 - **[2026-06-13]**: feat: introduce variant.context.template.md SSOT, VARIANT-INJECT guidelines taxonomy, and execution plan boilerplate enforcement — establishes variant.context.template.md as the single source of truth for variant-specific context injection; defines VARIANT-INJECT taxonomy for guidelines classification; enforces execution plan boilerplate in all multi-agent dispatch workflows (PR #256)
 - **[2026-06-13]**: feat: A-01~A-05 — template-utils.ts SSOT, generateContextMd refactor, new-project.ts context.md integration — centralizes context.md generation logic in template-utils.ts; refactors generateContextMd to use SSOT helpers; integrates context.md scaffolding into new-project.ts pipeline (PR #257)
@@ -721,7 +723,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-18*
+*Last Updated: 2026-06-19*
 
 
 

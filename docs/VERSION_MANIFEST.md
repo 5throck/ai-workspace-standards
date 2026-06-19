@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-19T08:30:32.201Z
+**Generated**: 2026-06-19T12:41:16.730Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 97
+- **Scripts**: 98
 - **Commands**: 6
 
 ---
@@ -64,7 +64,8 @@
 | agent-lifecycle-audit.ts | 1.1.2 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
 | agent-override-merge.ts | 1.0.0 | scripts/lib/agent-override-merge.ts | js-yaml |
-| agent-similarity-analyzer.ts | 1.0.0 | scripts/helpers/agent-similarity-analyzer.ts | fs, path |
+| agent-promote.ts | 0.1.0 | scripts/helpers/agent-promote.ts | N/A |
+| agent-similarity-analyzer.ts | 1.1.0 | scripts/helpers/agent-similarity-analyzer.ts | fs, path |
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |

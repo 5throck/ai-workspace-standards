@@ -4,7 +4,7 @@
 **Status**: Accepted
 **Deciders**: architect, automation-engineer, auditor
 **Supersedes**: —
-**Related**: ADR-0039 (L0/L1/L2 hierarchy), ADR-0042 (Wave 1.5 golden reference)
+**Related**: ADR-0039 (L0/L1/L2 hierarchy), ADR-0040 (L0→L1 Deployment Strategy), ADR-0042 (Wave 1.5 golden reference)
 
 ---
 
@@ -27,7 +27,7 @@ The `templates/common/` layer (L1) already holds shared scripts, skills, and pla
 
 ### 1. Introduce `templates/common/agents/` as the L1 Agent Layer
 
-L1 agents are variant-agnostic specialist definitions promoted from 2+ variants when their `## Role` + `## Responsibilities` sections achieve Jaccard similarity ≥ 80% across 3 or more variants.
+L1 agents are variant-agnostic specialist definitions promoted from 3 or more variants when their `## Role` + `## Responsibilities` sections achieve Jaccard similarity ≥ 80% across those variants.
 
 L1 agents follow the standard variant specialist format (`docs/designs/variant-specialist-agent-structure.md`) with two additions:
 - `source: L1` frontmatter field
