@@ -153,5 +153,25 @@
       "scratch",
       "vibing-steampunk"
     ]
+  },
+  "variant_extensions": {
+    "description": "Optional top-level keys allowed in variant.json beyond the base contract. Validated by validate-templates.ts.",
+    "co-deck": {
+      "agent_manifest": {
+        "description": "Pipeline order and optional flags for variant agents",
+        "required_fields": ["variant_agents_dir", "pipeline_order", "optional", "notes"],
+        "notes": "optional[] lists agent names that can be skipped. Used by PM to determine gate flow."
+      },
+      "theme_manifest": {
+        "description": "HTML theme definitions for lecture slides",
+        "required_fields": ["themes_dir", "base_css", "available", "default", "overrides_dir"],
+        "notes": "CSS variable override themes. DOM structure immutable across all themes."
+      },
+      "lecture_profile": {
+        "description": "Lecture profile template metadata",
+        "required_fields": ["template_path", "required_fields"],
+        "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
+      }
+    }
   }
 }

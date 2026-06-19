@@ -18,15 +18,20 @@
 | `competitive-intelligence` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `consulting-report-writing` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `create-variant` | 1.0.1 | active | L0 | pm | 2026-06-05 | — | Workspace operator only — not deployed to L2 |
+| `design` | 1.2.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `executive-presentation` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `financial-modeling` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `html-build` | 1.3.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `insight-synthesis` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `measure` | 1.3.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `meeting-facilitation` | 1.4.0 | active | L0+L1 | pm | 2026-06-05 | — | — |
 | `narrative-framework` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `org-readiness-assessment` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `project-delivery` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `project-review` | 1.0.0 | active | L0+L1 | pm | 2026-05-30 | — | — |
+| `pdf-export` | 1.3.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `promote-variant` | 1.0.1 | active | L0 | pm | 2026-06-05 | — | Workspace operator only — not deployed to L2 |
+| `research` | 1.2.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `script-lifecycle-manager` | 1.2.0 | active | L0+L1 | pm | 2026-05-30 | — | — |
 | `security-scan` | 1.0.0 | active | L0+L1 | security-expert | 2026-05-30 | — | — |
 | `simulate-project-creation` | 1.0.0 | active | L0 | scaffolding-expert | 2026-05-30 | — | Workspace scaffolding test only |
@@ -34,9 +39,11 @@
 | `solution-design` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `stakeholder-alignment` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `stakeholder-review-management` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
+| `storyline` | 1.2.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
 | `team-builder` | 1.1.0 | active | L0+L1 | pm | 2026-06-06 | — | — |
 | `technical-feasibility` | 1.0.0 | active | L0+L1+L2 | pm | 2026-06-06 | — | co-consult only |
 | `translate` | 1.0.0 | active | L0+L1 | pm | 2026-06-06 | — | — |
 | `ui-ux-pro-max` | 1.0.0 | active | L0+L1 | architect | 2026-06-06 | — | Restored to L0+L1 — was incorrectly removed in PR 231 |
 | `validate-docs-links` | 1.0.0 | active | L0+L1 | docs-writer | 2026-05-30 | — | — |
 | `verify-authorization` | 1.0.0 | active | L0+L1+L2 | security-expert | 2026-06-06 | — | co-security only |
+| `version` | 1.3.0 | active | L0+L1+L2 | pm | 2026-06-20 | — | co-deck only |
