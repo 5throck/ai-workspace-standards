@@ -15,7 +15,7 @@ const VERSIONS_MD  = 'VERSIONS.md';
 const MAX_DISPLAY  = 20;
 
 function getWorkspaceRoot(): string {
-  return resolve(dirname(import.meta.path), '..');
+  return resolve(dirname(import.meta.path), '../..');
 }
 
 function makeVersionId(desc: string, agent: string): string {

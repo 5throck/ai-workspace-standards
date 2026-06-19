@@ -426,7 +426,7 @@ async function main() {
     process.exit(1);
   }
 
-  const workspaceRoot = resolve(dirname(import.meta.path), '..');
+  const workspaceRoot = resolve(dirname(import.meta.path), '../..');
   const projectDir    = resolve(workspaceRoot, projectArg);
   if (!existsSync(projectDir)) {
     console.error(`❌ 프로젝트 폴더 없음: ${projectDir}`); process.exit(1);
