@@ -117,14 +117,26 @@ The `agent_overrides:` YAML block specifies the delta between the L1 base and th
 export type OverrideOp = 'append' | 'replace' | 'remove';
 
 /**
+ * Valid section keys for agent body overrides.
+ * Maps to the 6 overridable sections defined in §2.3.
+ * (## ⚠️ PM-ONLY INVOCATION is not overridable — always inherited from L1.)
+ */
+export type SectionKey =
+  | 'role' | 'responsibilities' | 'output_format'
+  | 'constraints' | 'meeting_participation' | 'dispatch_protocol';
+
+/**
  * Override specification for a single agent body section.
  * Use `items` for append/remove (bullet-list sections).
  * Use `content` for replace (prose or structured sections).
+ * Note: "SectionOverride" is unrelated to the ADR-0039 override pattern — it refers
+ * to L1→L2 agent body section overriding introduced by ADR-0043.
  */
 export interface SectionOverride {
   op: OverrideOp;
-  items?: string[];   // required when op is 'append' or 'remove'
-  content?: string;   // required when op is 'replace'
+  items?: string[];        // required when op is 'append' or 'remove'
+  content?: string;        // required when op is 'replace'
+  remove_reason?: string;  // required when op is 'remove' (triggers Hard Warning if absent)
 }
 
 /**
@@ -133,7 +145,7 @@ export interface SectionOverride {
 export interface AgentOverrides {
   source: string;     // e.g., "l1/analyst"
   version: string;    // semver, must match L1 AGENTS.md registry entry
-  sections: Partial<Record<string, SectionOverride>>;
+  sections: Partial<Record<SectionKey, SectionOverride>>;
 }
 
 /**

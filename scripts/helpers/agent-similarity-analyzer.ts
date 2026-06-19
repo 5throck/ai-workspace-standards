@@ -11,7 +11,7 @@
  *                     and checks whether the declared version matches
  *                     the current L1 registry version.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @phase Wave 2a: Agent Similarity Analysis
  *
  * See: docs/adr/0043-l1-agent-layer-hybrid-override.md
@@ -19,9 +19,15 @@
  *
  * Dependencies:
  * - lib/encoding-utils.ts (UTF-8 handling)
+ *
+ * Changelog:
+ *   1.1.0 — Fix CRLF normalization (Windows silent failure), exclude pm.md from
+ *            Mode 1, path-traversal guard in getL1RegistryVersion, --output= safe
+ *            parsing, missingL1 bucket in DriftReport, workspace-root guard.
+ *   1.0.0 — Initial implementation.
  */
 
-import { join, basename } from 'path';
+import { join, basename, resolve, sep } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
 
@@ -30,6 +36,15 @@ import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
 // ============================================================================
 
 export type SimilarityBand = 'high' | 'medium' | 'low';
+
+/** Valid section keys for agent_overrides.sections */
+export type SectionKey =
+  | 'role'
+  | 'responsibilities'
+  | 'output_format'
+  | 'constraints'
+  | 'meeting_participation'
+  | 'dispatch_protocol';
 
 /** Jaccard similarity scores for each agent section */
 export interface SectionSimilarityScores {
@@ -86,6 +101,7 @@ export interface VersionDriftResult {
   agentName: string;
   l1Name: string;
   declaredVersion: string;
+  /** Current version in L1 registry, or "(not found)" when L1 file absent */
   registryVersion: string;
   isDrift: boolean;
 }
@@ -95,6 +111,8 @@ export interface DriftReport {
   scannedFiles: number;
   drifted: VersionDriftResult[];
   current: VersionDriftResult[];
+  /** L2 agents whose declared L1 file does not exist in templates/common/agents/ */
+  missingL1: VersionDriftResult[];
   timestamp: string;
 }
 
@@ -107,10 +125,25 @@ const THRESHOLD_MEDIUM = 0.70;
 const PROMOTION_MIN_VARIANTS = 3;
 
 // ============================================================================
+// CONTENT NORMALIZATION
+// ============================================================================
+
+/**
+ * Normalizes line endings to LF.
+ * readUTF8File strips BOM but does NOT normalize CRLF → LF.
+ * Without this, section-header regexes with $ fail on Windows checkouts
+ * because lines end with \r, preventing any section from being detected
+ * and causing jaccard() to return 1.0 for all empty-vs-empty pairs.
+ */
+function normalizeContent(content: string): string {
+  return content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+// ============================================================================
 // SECTION EXTRACTION
 // ============================================================================
 
-const SECTION_KEYS: Array<keyof SectionSimilarityScores> = [
+const SECTION_KEYS: Array<SectionKey> = [
   'role',
   'responsibilities',
   'output_format',
@@ -120,7 +153,7 @@ const SECTION_KEYS: Array<keyof SectionSimilarityScores> = [
 ];
 
 /** Maps section key to the Markdown heading pattern to match */
-const SECTION_HEADERS: Record<keyof SectionSimilarityScores, RegExp> = {
+const SECTION_HEADERS: Record<SectionKey, RegExp> = {
   role: /^##\s+Role\s*$/i,
   responsibilities: /^##\s+Responsibilities\s*$/i,
   output_format: /^##\s+Output\s+Format\s*$/i,
@@ -129,9 +162,9 @@ const SECTION_HEADERS: Record<keyof SectionSimilarityScores, RegExp> = {
   dispatch_protocol: /^##\s+Dispatch\s+Protocol\s*$/i,
 };
 
-/** Extracts the body text of a section from Markdown content */
-function extractSection(content: string, headerPattern: RegExp): string {
-  const lines = content.split('\n');
+/** Extracts the body text of a section from pre-normalized Markdown content */
+function extractSection(normalizedContent: string, headerPattern: RegExp): string {
+  const lines = normalizedContent.split('\n');
   let inSection = false;
   const body: string[] = [];
 
@@ -141,6 +174,7 @@ function extractSection(content: string, headerPattern: RegExp): string {
       continue;
     }
     if (inSection) {
+      // Stop at any ## heading (same or higher level)
       if (/^##\s/.test(line)) break;
       body.push(line);
     }
@@ -172,16 +206,16 @@ function jaccard(a: Set<string>, b: Set<string>): number {
   return intersection / union;
 }
 
-/** Computes all section similarity scores between two agent file contents */
+/** Computes all section similarity scores between two pre-normalized agent file contents */
 function computeSectionScores(
-  contentA: string,
-  contentB: string
+  normalizedA: string,
+  normalizedB: string
 ): SectionSimilarityScores {
   const scores: Partial<SectionSimilarityScores> = {};
 
   for (const key of SECTION_KEYS) {
-    const sectionA = extractSection(contentA, SECTION_HEADERS[key]);
-    const sectionB = extractSection(contentB, SECTION_HEADERS[key]);
+    const sectionA = extractSection(normalizedA, SECTION_HEADERS[key]);
+    const sectionB = extractSection(normalizedB, SECTION_HEADERS[key]);
     scores[key] = jaccard(tokenise(sectionA), tokenise(sectionB));
   }
 
@@ -211,7 +245,11 @@ function discoverVariants(workspaceRoot: string): string[] {
     .map(d => d.name);
 }
 
-/** Returns all agent .md files in a variant's agents/ directory */
+/**
+ * Returns all specialist agent .md files in a variant's agents/ directory.
+ * Excludes: README*, _-prefixed files, and pm.md (governance agent with
+ * different structure — not a consolidation candidate).
+ */
 function discoverAgentFiles(
   workspaceRoot: string,
   variantName: string
@@ -224,48 +262,56 @@ function discoverAgentFiles(
       f =>
         f.endsWith('.md') &&
         !f.startsWith('README') &&
-        !f.startsWith('_')
+        !f.startsWith('_') &&
+        f !== 'pm.md'
     )
     .map(f => join(agentsDir, f));
 }
 
-/** Returns true if the file has "# @extends:" on the first line */
-function hasExtendsDeclaration(content: string): boolean {
-  const firstLine = content.split('\n')[0] ?? '';
+/** Returns true if the (normalized) file has "# @extends:" on the first line */
+function hasExtendsDeclaration(normalizedContent: string): boolean {
+  const firstLine = normalizedContent.split('\n')[0] ?? '';
   return /^#\s*@extends:\s*l1\//i.test(firstLine);
 }
 
-/** Parses "# @extends: l1/<name>@<version>" from first line */
+/** Parses "# @extends: l1/<name>@<version>" from first line of normalized content */
 function parseExtendsRef(
-  content: string
+  normalizedContent: string
 ): { l1Name: string; version: string } | null {
-  const firstLine = content.split('\n')[0] ?? '';
+  const firstLine = normalizedContent.split('\n')[0] ?? '';
   const match = /^#\s*@extends:\s*l1\/([^@\s]+)@([^\s]+)/i.exec(firstLine);
   if (!match) return null;
-  return { l1Name: match[1], version: match[2] };
+  return { l1Name: match[1].trim(), version: match[2].trim() };
 }
 
 // ============================================================================
 // L1 REGISTRY LOOKUP
 // ============================================================================
 
-/** Reads the current version of an L1 agent from templates/common/agents/ frontmatter */
+/**
+ * Reads the current version of an L1 agent from templates/common/agents/ frontmatter.
+ * Includes a path-traversal guard: if the resolved path escapes common/agents/,
+ * returns null rather than reading an unintended file.
+ */
 function getL1RegistryVersion(
   workspaceRoot: string,
   l1Name: string
 ): string | null {
-  const l1Path = join(
+  const expectedDir = resolve(
     workspaceRoot,
     'templates',
     'common',
-    'agents',
-    `${l1Name}.md`
+    'agents'
   );
+  const l1Path = resolve(expectedDir, `${l1Name}.md`);
+
+  // Path traversal guard
+  if (!l1Path.startsWith(expectedDir + sep)) return null;
   if (!existsSync(l1Path)) return null;
 
-  const content = readUTF8File(l1Path);
+  const content = normalizeContent(readUTF8File(l1Path));
   const match = /^version:\s*["']?([^"'\s]+)["']?/m.exec(content);
-  return match ? match[1] : null;
+  return match ? match[1].trim() : null;
 }
 
 // ============================================================================
@@ -278,7 +324,7 @@ export function analyzeAgentSimilarity(
 ): SimilarityAnalysisResult {
   const variants = discoverVariants(workspaceRoot);
 
-  // Build map: agentName → { variant, filePath, content }[]
+  // Build map: agentName → { variant, filePath, normalizedContent }[]
   const agentMap = new Map<
     string,
     Array<{ variant: string; filePath: string; content: string }>
@@ -289,7 +335,7 @@ export function analyzeAgentSimilarity(
   for (const variant of variants) {
     const files = discoverAgentFiles(workspaceRoot, variant);
     for (const filePath of files) {
-      const content = readUTF8File(filePath);
+      const content = normalizeContent(readUTF8File(filePath));
       // Mode 1 only processes standalone (non-extends) agents
       if (hasExtendsDeclaration(content)) continue;
 
@@ -494,13 +540,14 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
   const variants = discoverVariants(workspaceRoot);
   const drifted: VersionDriftResult[] = [];
   const current: VersionDriftResult[] = [];
+  const missingL1: VersionDriftResult[] = [];
   let scannedFiles = 0;
 
   for (const variant of variants) {
     const files = discoverAgentFiles(workspaceRoot, variant);
 
     for (const filePath of files) {
-      const content = readUTF8File(filePath);
+      const content = normalizeContent(readUTF8File(filePath));
       if (!hasExtendsDeclaration(content)) continue;
 
       const ref = parseExtendsRef(content);
@@ -509,17 +556,31 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
       scannedFiles++;
 
       const registryVersion = getL1RegistryVersion(workspaceRoot, ref.l1Name);
+
+      if (registryVersion === null) {
+        // L1 file absent — broken pointer, not "up-to-date"
+        missingL1.push({
+          filePath,
+          agentName: basename(filePath, '.md'),
+          l1Name: ref.l1Name,
+          declaredVersion: ref.version,
+          registryVersion: '(not found)',
+          isDrift: false,
+        });
+        continue;
+      }
+
+      const isDrift = registryVersion !== ref.version;
       const entry: VersionDriftResult = {
         filePath,
         agentName: basename(filePath, '.md'),
         l1Name: ref.l1Name,
         declaredVersion: ref.version,
-        registryVersion: registryVersion ?? '(not found)',
-        isDrift:
-          registryVersion !== null && registryVersion !== ref.version,
+        registryVersion,
+        isDrift,
       };
 
-      if (entry.isDrift) {
+      if (isDrift) {
         drifted.push(entry);
       } else {
         current.push(entry);
@@ -531,6 +592,7 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
     scannedFiles,
     drifted,
     current,
+    missingL1,
     timestamp: new Date().toISOString(),
   };
 }
@@ -542,19 +604,34 @@ export function formatDriftReport(report: DriftReport): string {
     '',
     `> Generated: ${report.timestamp}`,
     `> L2 agents with \`# @extends:\`: ${report.scannedFiles}`,
-    `> Drifted: ${report.drifted.length} | Current: ${report.current.length}`,
+    `> Drifted: ${report.drifted.length} | Current: ${report.current.length} | Missing L1: ${report.missingL1.length}`,
     '',
     '---',
     '',
   ];
 
-  if (report.drifted.length === 0) {
+  // --- MISSING L1 ---
+  if (report.missingL1.length > 0) {
+    lines.push(`## Missing L1 Files (${report.missingL1.length} broken pointers)`, '');
     lines.push(
-      '## Version Drift',
-      '',
-      '_No drift detected — all L2 agents match L1 registry._',
+      '| File | Agent | Declared L1 | Declared Version |',
+      '|------|-------|------------|-----------------|'
+    );
+    for (const d of report.missingL1) {
+      lines.push(
+        `| \`${d.filePath}\` | ${d.agentName} | l1/${d.l1Name} | ${d.declaredVersion} |`
+      );
+    }
+    lines.push('');
+    lines.push(
+      '> **Action required**: Create the L1 agent file via `agent-promote.ts` or correct the `# @extends:` reference.',
       ''
     );
+  }
+
+  // --- DRIFTED ---
+  if (report.drifted.length === 0) {
+    lines.push('## Version Drift', '', '_No drift detected._', '');
   } else {
     lines.push(`## Version Drift (${report.drifted.length} files)`, '');
     lines.push(
@@ -573,6 +650,7 @@ export function formatDriftReport(report: DriftReport): string {
     );
   }
 
+  // --- CURRENT ---
   if (report.current.length > 0) {
     lines.push(`## Up-to-date (${report.current.length} files)`, '');
     for (const d of report.current) {
@@ -593,9 +671,22 @@ export function formatDriftReport(report: DriftReport): string {
 async function main() {
   const args = process.argv.slice(2);
   const driftMode = args.includes('--drift');
-  const outputArg = args.find(a => a.startsWith('--output='));
-  const outputPath = outputArg ? outputArg.split('=')[1] : null;
   const workspaceRoot = process.cwd();
+
+  // Workspace-root guard: this script must run from a directory that has templates/
+  if (!existsSync(join(workspaceRoot, 'templates'))) {
+    console.error(
+      'Error: agent-similarity-analyzer must be run from the workspace root.\n' +
+      `Current directory (${workspaceRoot}) has no templates/ subdirectory.`
+    );
+    process.exit(1);
+  }
+
+  // Parse --output= safely (handles paths that contain = characters)
+  const outputArgRaw = args.find(a => a.startsWith('--output='));
+  const outputPath = outputArgRaw
+    ? outputArgRaw.slice('--output='.length)
+    : null;
 
   if (driftMode) {
     const report = detectVersionDrift(workspaceRoot);
@@ -608,7 +699,8 @@ async function main() {
       console.log(text);
     }
 
-    process.exit(report.drifted.length > 0 ? 1 : 0);
+    const hasIssues = report.drifted.length + report.missingL1.length;
+    process.exit(hasIssues > 0 ? 1 : 0);
   } else {
     const result = analyzeAgentSimilarity(workspaceRoot);
     const text = formatConsolidationReport(result);
@@ -623,8 +715,8 @@ async function main() {
     const total = result.candidates.length + result.reviewNeeded.length;
     console.error(
       `\nSummary: ${result.candidates.length} high-confidence + ` +
-      `${result.reviewNeeded.length} review-needed = ${total} candidate(s) across ` +
-      `${result.scannedVariants.length} variants`
+        `${result.reviewNeeded.length} review-needed = ${total} candidate(s) across ` +
+        `${result.scannedVariants.length} variants`
     );
 
     process.exit(0);

@@ -76,7 +76,7 @@
       "mode": "marker-inject",
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+      "target_variants": ["co-consult", "co-deck", "co-design", "co-develop", "co-security", "co-work"]
     },
     "skills": {
       "description": "L0 skills/ → L1 templates/common/skills/",
