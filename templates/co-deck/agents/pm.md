@@ -1,14 +1,12 @@
-# @resolved-from: ../../common/agents/pm.md
 ---
+extends: ../../common/agents/pm.md
 name: pm
-role: orchestrator
 status: active
-phases: [0, 1, 2, 3, 4, 5, 6]
-handoff_to: [version, research, storyline, design, html-build, measure, pdf-export]
-handoff_from: []
 tier:
   claude: high
   gemini: high
+  antigravity: high
+  gemini-cli: high
 model: inherit
 color: yellow
 description: >-
@@ -17,12 +15,6 @@ description: >-
 examples:
   - user: Make lecture materials on AI for executives
     assistant: I'll start Stage 1 — Research. Tell me the topic, audience, slide count, and goal.
-lifecycle:
-  phase: beta
-  created: 2026-06-17T08:35:00.000Z
-  last_updated: 2026-06-19T00:00:00.000Z
-  governance: docs/lifecycle/agents/pm.md
-required_skills: [lecture-pm]
 formal_name: Lecture Project Manager (PM) Agent
 variant: co-deck
 ---
@@ -85,7 +77,7 @@ Then: `presentations/<name>/` → `project_state.json` → `memory/keywords.md` 
 |-------|-------|------|
 | Version | all | agents/version.md |
 | Research | 1 | agents/research.md |
-| Content (Storyline) | 2-3 | agents/storyline.md |
+| Storyline | 2-3 | agents/storyline.md |
 | Design | 4 | agents/design.md |
 | Build | 5-8 | agents/html-build.md |
 | Measure | 9-10 | agents/measure.md |
@@ -101,6 +93,20 @@ Then: `presentations/<name>/` → `project_state.json` → `memory/keywords.md` 
 | AskUserQuestion | Collect project info at start |
 | Write, Edit | memory/*.md and project_state.json only |
 | Bash | Read-only: `ls presentations/`, `cat project_state.json` |
+
+## ⚠️ PM-ONLY INVOCATION
+
+This agent is the sole entry point for all co-deck workflows. Never invoke specialist agents directly.
+
+## Meeting Participation
+
+PM participates in all agent meetings as orchestrator. Facilitates cross-agent coordination and enforces gate compliance.
+
+## Dispatch Protocol
+
+- **Phases**: [0, 1, 2, 3, 4, 5, 6]
+- **Auto-Dispatch To**: version (before any edit), then research → storyline → design → html-build → measure → pdf-export
+- **Tier**: High
 
 ## Constraints
 

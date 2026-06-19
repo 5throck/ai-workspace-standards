@@ -32,7 +32,7 @@
 | PM (Orchestrator) | `agents/pm.md` | Single entry point; reads project_state.json; dispatches all specialists | active |
 | Version | `agents/version.md` | Snapshots files before every edit; cross-cutting safety net | active |
 | Research | `agents/research.md` | Stage 1 — web research, source collection, research_notes.md | active |
-| Content | `agents/storyline.md` | Stages 2-3 — storyline.md + slide_deck.md | active |
+| Storyline | `agents/storyline.md` | Stages 2-3 — storyline.md + slide_deck.md | active |
 | Design | `agents/design.md` | Stage 4 — design_spec.md (colors, fonts, layout) | active |
 | Build | `agents/html-build.md` | Stages 5-8 — lecture_vN.html + images/ | active |
 | Measure | `agents/measure.md` | Stages 9-10 — layout_spec.json + pdf_layout_spec.md + fonts/ | active |

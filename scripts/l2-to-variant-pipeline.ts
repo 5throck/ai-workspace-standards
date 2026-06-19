@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.4.0
+ * @version 1.5.0
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -51,7 +51,7 @@ export interface PipelineConfig {
   /** Variant name */
   variantName: string;
   /** Variant type */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
   /** Variant description */
   variantDescription: string;
   /** Skip platform parity validation */
@@ -513,7 +513,7 @@ async function main() {
     console.error('Usage: bun scripts/pipeline/l2-to-variant-pipeline.ts \\');
     console.error('  --l2-path=<path-to-l2-project> \\');
     console.error('  --name=<variant-name> \\');
-    console.error('  --type=<security|development|design|consulting|collaboration> \\');
+    console.error('  --type=<security|development|design|consulting|collaboration|lecture> \\');
     console.error('  --description=<variant-description> \\');
     console.error('  [--skip-parity] \\');
     console.error('  [--skip-integration] \\');

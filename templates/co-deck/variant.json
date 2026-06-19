@@ -1,7 +1,7 @@
 {
   "name": "co-deck",
   "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 8 specialized agents covering research, content, design, HTML build, layout measurement, and PDF export.",
-  "variant_type": "design",
+  "variant_type": "lecture",
   "status": "beta",
   "version": "0.1.0",
   "inherits_common": "templates/common",
@@ -12,7 +12,6 @@
     "stablePromotedOn": null
   },
   "agents": [
-    { "name": "pm", "file": "agents/pm.md" },
     { "name": "version", "file": "agents/version.md" },
     { "name": "research", "file": "agents/research.md" },
     { "name": "storyline", "file": "agents/storyline.md" },

@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.4.0
+ * @version 1.5.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -34,7 +34,7 @@ export interface VariantMetadata {
   /** Variant description */
   description: string;
   /** Variant type for governance rules */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
   /** Lifecycle status - always beta for MVP */
   status: 'beta';
   /** Version - always 0.1.0 for MVP */
@@ -175,6 +175,7 @@ function substitutePlaceholders(content: string, metadata: VariantMetadata): str
  * @version 1.1.0
  */
 function generateVariantJson(metadata: VariantMetadata): string {
+  const today = new Date().toISOString().split('T')[0];
   const variantJson = {
     name: metadata.name,
     description: metadata.description,
@@ -183,6 +184,11 @@ function generateVariantJson(metadata: VariantMetadata): string {
     version: metadata.version,
     inherits_common: metadata.inherits_common,
     created_at: new Date().toISOString(),
+    lifecycle: {
+      statusSince: today,
+      lastTransition: `initial → ${metadata.status} on ${today}`,
+      stablePromotedOn: metadata.status === 'stable' ? today : null,
+    },
     agents: metadata.agentRoster.map(agent => ({
       name: agent.name,
       file: `agents/${agent.name}.md`,
@@ -999,6 +1005,174 @@ function generateContextMd(variantPath: string, metadata: VariantMetadata): stri
 }
 
 // ============================================================================
+// SETTINGS FILE GENERATION
+// ============================================================================
+
+/**
+ * Generate .claude/settings.json with full Agent Teams config, mcpServers, and all hooks.
+ * Produces the same structure as other stable variants (co-design, co-work, etc.).
+ * @version 1.0.0
+ */
+function generateClaudeSettings(variantPath: string): string {
+  const settingsPath = join(variantPath, '.claude', 'settings.json');
+  const settings = {
+    effortLevel: 'high',
+    permissions: {
+      deny: [
+        'Bash(git push --force*)',
+        'Bash(git push --force-with-lease*)',
+        'Bash(*--no-verify*)',
+        'Bash(rm -rf *)',
+      ],
+    },
+    env: {
+      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
+    },
+    teammateMode: 'auto',
+    mcpServers: {
+      codegraph: {
+        command: 'npx',
+        args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
+      },
+    },
+    hooks: {
+      SessionStart: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'git config core.hooksPath .githooks',
+              statusMessage: 'Configuring git hooks...',
+            },
+          ],
+        },
+      ],
+      PostToolUse: [
+        {
+          matcher: 'Write|Edit',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              async: true,
+              asyncRewake: true,
+              statusMessage: 'Running post-edit lifecycle check...',
+            },
+          ],
+          timeout: 60,
+        },
+      ],
+      TeammateIdle: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              async: true,
+              asyncRewake: true,
+              statusMessage: 'Running teammate idle lifecycle check...',
+            },
+          ],
+          timeout: 60,
+        },
+      ],
+      WorktreeCreate: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'git config core.hooksPath .githooks',
+              async: true,
+              statusMessage: 'Configuring git hooks in new worktree...',
+            },
+          ],
+        },
+      ],
+      TaskCompleted: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/audit.ts',
+              timeout: 60,
+              async: true,
+              statusMessage: 'Running QA audit on task completion...',
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  createDirectory(dirname(settingsPath));
+  writeUTF8File(settingsPath, JSON.stringify(settings, null, 2) + '\n');
+  return settingsPath;
+}
+
+/**
+ * Generate .gemini/settings.json with mcpServers, PostToolUse hook, and security policies.
+ * Produces the same structure as other stable variants.
+ * @version 1.0.0
+ */
+function generateGeminiSettings(variantPath: string): string {
+  const settingsPath = join(variantPath, '.gemini', 'settings.json');
+  const settings: Record<string, unknown> = {
+    _comment:
+      'Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. These are intentional L2 variant settings.',
+    mcpServers: {
+      codegraph: {
+        command: 'npx',
+        args: ['-y', '@colbymchenry/codegraph', 'serve'],
+      },
+    },
+    hooks: {
+      SessionStart: [
+        {
+          type: 'command',
+          command: 'git config core.hooksPath .githooks',
+          statusMessage: 'Configuring git hooks...',
+        },
+      ],
+      PostToolUse: [
+        {
+          matcher: 'Write|Edit',
+          hooks: [
+            {
+              type: 'command',
+              command: 'bun scripts/hooks/post-write-lifecycle-check.ts',
+              statusMessage: 'Running post-edit lifecycle check...',
+            },
+          ],
+        },
+      ],
+    },
+    'terminal.executionPolicy': 'Auto',
+    'artifact.reviewPolicy': 'Auto',
+    'mcp.toolApproval': 'Manual',
+    'terminal.denyList': [
+      'rm -rf',
+      'rm -r /',
+      'chmod -R 777',
+      'git push --force',
+      'git reset --hard',
+      'reboot',
+      'shutdown',
+      'format',
+      'fdisk',
+      'mkfs',
+    ],
+  };
+
+  createDirectory(dirname(settingsPath));
+  writeUTF8File(settingsPath, JSON.stringify(settings, null, 2) + '\n');
+  return settingsPath;
+}
+
+// ============================================================================
 // MAIN GENERATION FUNCTION
 // ============================================================================
 
@@ -1075,6 +1249,13 @@ export async function generateVariant(
   copyL0CommonSkills(variantPath);
   console.log(`Copied L0 common skills to .claude/skills/ and .gemini/skills/`);
 
+  // Generate .claude/settings.json and .gemini/settings.json
+  console.log(`\n=== Generating Platform Settings ===`);
+  const claudeSettingsPath = generateClaudeSettings(variantPath);
+  console.log(`Created: ${claudeSettingsPath}`);
+  const geminiSettingsPath = generateGeminiSettings(variantPath);
+  console.log(`Created: ${geminiSettingsPath}`);
+
   // Generate <variant>.context.md from canonical template
   console.log(`\n=== Generating ${metadata.name}.context.md ===`);
   const contextMdPath = generateContextMd(variantPath, metadata);
@@ -1128,7 +1309,7 @@ export async function generateVariant(
 
   // Compute summary
   const summary = {
-    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 6, // +6 for json, agents.md, readme.md, readme_ko.md, skills/SKILLS.md, context.md
+    totalFilesCreated: agentOverrides.length + skillDirectories.length + filesCopied + 8, // +8 for json, agents.md, readme.md, readme_ko.md, skills/SKILLS.md, context.md, .claude/settings.json, .gemini/settings.json
     totalDirectoriesCreated: directories.length,
     agentsInRoster: metadata.agentRoster.length,
     skillsCreated: metadata.skills.length,
