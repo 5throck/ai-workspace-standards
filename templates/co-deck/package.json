@@ -13,7 +13,9 @@
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
     "fflate": "^0.8.2",
-    "pdf-lib": "^1.17.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "optionalDependencies": {
     "playwright": "^1.45.0"
   }
 }

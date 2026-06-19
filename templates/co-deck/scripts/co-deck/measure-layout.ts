@@ -7,7 +7,19 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'http';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
-import { chromium } from 'playwright';
+
+// Playwright is an optional dependency — check before importing
+try {
+  await import('playwright');
+} catch {
+  console.error('❌ playwright is not installed.');
+  console.error('   Run the following commands to install it:');
+  console.error('     bun add playwright');
+  console.error('     bunx playwright install chromium');
+  process.exit(1);
+}
+
+const { chromium } = await import('playwright');
 
 // ── CSS selector lists per slide type ────────────────────────────────────────
 
