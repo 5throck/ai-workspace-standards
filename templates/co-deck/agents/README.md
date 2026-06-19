@@ -9,7 +9,7 @@ This folder contains the 8 specialized agents for the lecture/presentation mater
 | PM | `pm.md` | 0-6 (all) | → all agents |
 | Version | `version.md` | 0-6 (cross-cutting) | ← all agents |
 | Research | `research.md` | 1 | pm → research → storyline |
-| Content | `storyline.md` | 2-3 | research → storyline → design |
+| Storyline | `storyline.md` | 2-3 | research → storyline → design |
 | Design | `design.md` | 3 | storyline → design → html-build |
 | Build | `html-build.md` | 4 | design → html-build → measure |
 | Measure | `measure.md` | 4 | html-build → measure → pdf-export |

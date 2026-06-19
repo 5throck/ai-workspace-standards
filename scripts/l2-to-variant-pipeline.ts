@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @phase: Complete pipeline orchestration
  *
  * Dependencies:
@@ -26,7 +26,7 @@
  */
 
 import { join, basename, dirname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.js';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.js';
 import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.js';
@@ -416,6 +416,7 @@ function buildFailureResult(
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
   const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
+  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
 
   const agentFiles = scanResult.files.filter(f => {
     if (!f.relativePath.startsWith('agents/') || !f.relativePath.endsWith('.md')) return false;
@@ -425,12 +426,46 @@ function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRos
 
   return agentFiles.map(file => {
     const name = file.relativePath.replace('agents/', '').replace('.md', '');
-    return {
-      name,
-      tier: 'medium' as const,
-      model: 'claude-sonnet-4-6',
-      description: `${name} specialist agent`,
-    };
+    const absPath = join(l2ProjectPath, file.relativePath);
+
+    let tier: 'high' | 'medium' | 'low' = 'medium';
+    let model = 'inherit';
+    let description = `${name} specialist agent`;
+
+    if (existsSync(absPath)) {
+      try {
+        const content = readFileSync(absPath, 'utf-8');
+        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (fmMatch) {
+          const fm = fmMatch[1];
+          // Read tier.claude (nested) or flat tier
+          const tierClaudeMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
+          if (tierClaudeMatch) {
+            tier = tierClaudeMatch[1] as 'high' | 'medium' | 'low';
+          } else {
+            const tierFlatMatch = fm.match(/^tier:\s*(high|medium|low)/m);
+            if (tierFlatMatch) tier = tierFlatMatch[1] as 'high' | 'medium' | 'low';
+          }
+          // Read block-scalar description (>- form: next indented line)
+          const descBlockMatch = fm.match(/^description:\s*>-?\n\s+(.+)/m);
+          if (descBlockMatch) {
+            description = descBlockMatch[1].trim().substring(0, 120);
+          } else {
+            const descInlineMatch = fm.match(/^description:\s*(.+)/m);
+            if (descInlineMatch) description = descInlineMatch[1].trim().substring(0, 120);
+          }
+          // Read model (skip 'inherit' placeholder)
+          const modelMatch = fm.match(/^model:\s*(.+)/m);
+          if (modelMatch && modelMatch[1].trim() !== 'inherit') {
+            model = modelMatch[1].trim();
+          }
+        }
+      } catch {
+        // fallback to defaults already set above
+      }
+    }
+
+    return { name, tier, model, description };
   });
 }
 

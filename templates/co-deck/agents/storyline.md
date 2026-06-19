@@ -4,6 +4,26 @@ phases: [2, 3]
 handoff_to: [design]
 handoff_from: [research, pm]
 required_skills: [lecture-storyline]
+role: Storyline architect and slide deck planner for lecture content
+status: active
+tier:
+  claude: medium
+  gemini: medium
+model: inherit
+color: green
+description: >-
+  Content agent — writes storyline.md (narrative flow) and slide_deck.md (per-slide content).
+  Use when: research_notes.md is ready and Gate 2 content approval is needed.
+examples:
+  - user: Create a storyline for 60-slide AI transformation lecture
+    assistant: I'll structure chapters, write the narrative arc, and produce slide-by-slide content.
+lifecycle:
+  phase: beta
+  created: 2026-06-17T08:35:00.000Z
+  last_updated: 2026-06-19T00:00:00.000Z
+  governance: docs/lifecycle/agents/storyline.md
+formal_name: Storyline Agent
+variant: co-deck
 ---
 
 # Content Agent — Storyline / Slide Deck Planner

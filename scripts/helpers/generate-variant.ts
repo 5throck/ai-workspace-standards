@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -521,7 +521,10 @@ function generatePhaseGateRows(agents: AgentDefinition[]): string {
     .map(a => {
       const phase =
         a.phases && a.phases.length > 0 ? `Phase ${a.phases[0]}` : 'Phase 4';
-      return `| <!-- TODO: deliverable type --> | ${phase} | \`${a.name}\` | ${a.tier} | |`;
+      const deliverable = a.description
+        ? a.description.split('.')[0].trim().substring(0, 80)
+        : `${a.name} deliverable`;
+      return `| ${deliverable} | ${phase} | \`${a.name}\` | ${a.tier} | |`;
     })
     .join('\n');
 }
@@ -541,7 +544,10 @@ function generateRoleBoundaryRows(agents: AgentDefinition[]): string {
   if (agents.length === 0) return '';
   return agents
     .map(a => {
-      return `| <!-- TODO: scenario for ${a.name} --> | \`${a.name}\` | \`pm\` |`;
+      const scenario = a.description
+        ? a.description.split('.')[0].trim().substring(0, 80)
+        : `${a.name} task needed`;
+      return `| ${scenario} | \`${a.name}\` | \`pm\` |`;
     })
     .join('\n');
 }
@@ -715,7 +721,26 @@ function generateGeminiMd(variantPath: string, metadata: VariantMetadata, manife
 function generateReadme(variantPath: string, metadata: VariantMetadata): string {
   const readmePath = join(variantPath, 'README.md');
 
-  const content = `# ${metadata.name}
+  const agentRosterRows = metadata.agentRoster.map(agent => {
+    const role = agent.description
+      ? agent.description.split('.')[0].trim().substring(0, 80)
+      : `${agent.name} specialist`;
+    return `| ${agent.name} | ${role} | ${agent.tier} | ${agent.model} |`;
+  }).join('\n');
+
+  const skillsList = metadata.skills.length > 0
+    ? metadata.skills.map(skill => {
+        const desc = skill.description || (skill.triggers ? skill.triggers.join(', ') : '');
+        return `- **${skill.name}**: ${desc}`;
+      }).join('\n')
+    : '_(no variant-specific skills — see `.claude/skills/` for platform skills)_';
+
+  const content = `---
+content_hash: PLACEHOLDER
+sync_version: 1
+---
+
+# ${metadata.name}
 
 > **⚠️ BETA VARIANT** - Status: ${metadata.status} (v${metadata.version})
 > This variant is in active development and should not be used in production environments.
@@ -732,7 +757,7 @@ This is a beta variant of the workspace template. It inherits from \`${metadata.
 
 See \`CLAUDE.md\` for detailed instructions.
 
-### For Gemini Code users:
+### For Gemini CLI users:
 
 See \`GEMINI.md\` for detailed instructions.
 
@@ -754,13 +779,13 @@ This variant focuses on ${getVariantTypeDescription(metadata.variantType)}.
 
 ## Agent Roster
 
-| Agent | Tier | Model |
-|-------|------|-------|
-${metadata.agentRoster.map(agent => `| ${agent.name} | ${agent.tier} | ${agent.model} |`).join('\n')}
+| Agent | Role | Tier | Model |
+|-------|------|------|-------|
+${agentRosterRows}
 
 ## Skills
 
-${metadata.skills.map(skill => `- **${skill.name}**: ${skill.description || skill.triggers?.join(', ') || ''}`).join('\n')}
+${skillsList}
 
 ---
 

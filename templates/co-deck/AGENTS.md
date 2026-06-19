@@ -20,13 +20,13 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
 <!-- VARIANT-AGENTS-START -->
-| **design** | [`agents/design.md`](agents/design.md) | Medium | design specialist |
-| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | html-build specialist |
-| **measure** | [`agents/measure.md`](agents/measure.md) | Medium | measure specialist |
-| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | pdf-export specialist |
-| **research** | [`agents/research.md`](agents/research.md) | Medium | research specialist |
-| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | storyline specialist |
-| **version** | [`agents/version.md`](agents/version.md) | Medium | version specialist |
+| **design** | [`agents/design.md`](agents/design.md) | Medium | Locks visual design style — color palette, fonts, layout into design_spec.md |
+| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md |
+| **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
+| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | Generates sample and full PDF from slidedata.json and layout_spec.json |
+| **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md for storyline design |
+| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md from research notes |
+| **version** | [`agents/version.md`](agents/version.md) | Low | Snapshots files before every edit; restores prior states on demand |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -42,7 +42,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/design.md`](agents/design.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | design specialist |
+| **Role** | Locks visual design style — color palette, fonts, layout into design_spec.md |
 
 ### html-build
 
@@ -51,7 +51,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/html-build.md`](agents/html-build.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | html-build specialist |
+| **Role** | Generates HTML slides from slide_deck.md and design_spec.md |
 
 ### measure
 
@@ -60,7 +60,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/measure.md`](agents/measure.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | measure specialist |
+| **Role** | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
 
 ### pdf-export
 
@@ -69,7 +69,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/pdf-export.md`](agents/pdf-export.md) |
 | **Tier** | medium |
 | **Phases** | 4, 5 |
-| **Role** | pdf-export specialist |
+| **Role** | Generates sample and full PDF from slidedata.json and layout_spec.json |
 
 ### research
 
@@ -78,7 +78,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/research.md`](agents/research.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | research specialist |
+| **Role** | Gathers web sources and writes research_notes.md for storyline design |
 
 ### storyline
 
@@ -87,16 +87,16 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/storyline.md`](agents/storyline.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3 |
-| **Role** | storyline specialist |
+| **Role** | Writes storyline.md and slide_deck.md from research notes |
 
 ### version
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/version.md`](agents/version.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 0, 1, 2, 3, 4, 5, 6 |
-| **Role** | version specialist |
+| **Role** | Snapshots files before every edit; restores prior states on demand |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -175,13 +175,13 @@ User Request → PM Triage → Design Approval → Specialist Dispatch → QA Ga
 All specialist agents below are dispatched ONLY through PM:
 
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
-| `design` | Phase 3 | "design task needed", "design work required" |
-| `html-build` | Phase 4 | "html-build task needed", "html-build work required" |
-| `measure` | Phase 4 | "measure task needed", "measure work required" |
-| `pdf-export` | Phase 4, Phase 5 | "pdf-export task needed", "pdf-export work required" |
-| `research` | Phase 1 | "research task needed", "research work required" |
-| `storyline` | Phase 2, Phase 3 | "storyline task needed", "storyline work required" |
-| `version` | Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6 | "version task needed", "version work required" |
+| `design` | Phase 3 | "lock design style", "pick colors and fonts", "create design_spec.md" |
+| `html-build` | Phase 4 | "generate HTML slides", "build presentation", "create lecture HTML" |
+| `measure` | Phase 4 | "measure slide layout", "prepare for PDF", "extract coordinates" |
+| `pdf-export` | Phase 4, Phase 5 | "generate PDF", "export to PDF", "create sample PDF" |
+| `research` | Phase 1 | "research the topic", "collect sources", "write research notes" |
+| `storyline` | Phase 2, Phase 3 | "create storyline", "compose slide deck", "structure chapters" |
+| `version` | Phase 0–6 | "snapshot before edit", "backup file", "restore prior version" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -203,13 +203,13 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| <!-- TODO: deliverable type --> | Phase 3 | `design` | medium | |
-| <!-- TODO: deliverable type --> | Phase 4 | `html-build` | medium | |
-| <!-- TODO: deliverable type --> | Phase 4 | `measure` | medium | |
-| <!-- TODO: deliverable type --> | Phase 4 | `pdf-export` | medium | |
-| <!-- TODO: deliverable type --> | Phase 1 | `research` | medium | |
-| <!-- TODO: deliverable type --> | Phase 2 | `storyline` | medium | |
-| <!-- TODO: deliverable type --> | Phase 0 | `version` | medium | |
+| design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
+| lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
+| pdf_layout_spec.md (pixel coordinates for PDF engine) | Phase 4 | `measure` | medium | |
+| <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |
+| research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |
+| storyline.md + slide_deck.md (narrative and per-slide content) | Phase 2 | `storyline` | medium | |
+| _versions/ snapshots (pre-edit backups of lecture files) | Phase 0–6 | `version` | low | cross-cutting |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
@@ -341,7 +341,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | pdf-export | `agents/pdf-export.md` | Medium | ⚠️ sequential preferred | project files |
 | research | `agents/research.md` | Medium | ⚠️ sequential preferred | project files |
 | storyline | `agents/storyline.md` | Medium | ⚠️ sequential preferred | project files |
-| version | `agents/version.md` | Medium | ⚠️ sequential preferred | project files |
+| version | `agents/version.md` | Low | ✅ | project files |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
@@ -395,13 +395,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
-| <!-- TODO: scenario for design --> | `design` | `pm` |
-| <!-- TODO: scenario for html-build --> | `html-build` | `pm` |
-| <!-- TODO: scenario for measure --> | `measure` | `pm` |
-| <!-- TODO: scenario for pdf-export --> | `pdf-export` | `pm` |
-| <!-- TODO: scenario for research --> | `research` | `pm` |
-| <!-- TODO: scenario for storyline --> | `storyline` | `pm` |
-| <!-- TODO: scenario for version --> | `version` | `pm` |
+| Create or update design_spec.md (colors, fonts, layout) | `design` | `pm` |
+| Generate or update lecture_vN.html from slide_deck.md | `html-build` | `pm` |
+| Run Playwright measurement or download TTF fonts | `measure` | `pm` |
+| Generate sample PDF or full PDF output | `pdf-export` | `pm` |
+| Search web and write research_notes.md | `research` | `pm` |
+| Write or revise storyline.md or slide_deck.md | `storyline` | `pm` |
+| Snapshot any lecture file before editing | `version` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---

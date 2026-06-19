@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-18T23:29:55.796Z
+**Generated**: 2026-06-19T02:47:30.054Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-06-15 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-06-13 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-06-13 |
-| pm | agents/pm.md | high | inherit | 2026-06-13 |
+| pm | agents/pm.md | high | inherit | 2026-06-18 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-15 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-06-13 |
 
@@ -83,14 +83,14 @@
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.1.1 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.3.0 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.4.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
 | ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.0 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.3.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.4.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.0.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.3.4 | scripts/lifecycle-sync-audit.ts | N/A |

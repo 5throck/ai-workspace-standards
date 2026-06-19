@@ -67,7 +67,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -95,7 +95,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
@@ -454,4 +454,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-18*
+*Last Updated: 2026-06-19*

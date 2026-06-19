@@ -9,7 +9,7 @@
 | PM | `pm.md` | 0-6 (전체) | 오케스트레이터 — 유일한 사용자 창구 |
 | Version | `version.md` | 0-6 (횡단) | 파일 수정 전 스냅샷 보관 |
 | Research | `research.md` | 1 | 웹 리서치 및 자료 수집 |
-| Content | `storyline.md` | 2-3 | 스토리라인 및 슬라이드 덱 작성 |
+| Storyline | `storyline.md` | 2-3 | 스토리라인 및 슬라이드 덱 작성 |
 | Design | `design.md` | 3 | 디자인 스펙 (색상, 폰트, 레이아웃) |
 | Build | `html-build.md` | 4 | HTML 슬라이드 + 이미지 생성 |
 | Measure | `measure.md` | 4 | Playwright 레이아웃 측정 + 폰트 다운로드 |

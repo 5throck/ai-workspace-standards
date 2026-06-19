@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: TBD
+translated_from_hash: PLACEHOLDER
 ---
 
 # co-deck
@@ -22,7 +22,7 @@ translated_from_hash: TBD
 | **PM** | 0-6 (전체) | 오케스트레이터 — 유일한 사용자 창구, `project_state.json` 관리 |
 | **Version** | 전체 (횡단) | 모든 파일 수정 전 스냅샷 저장 |
 | Research | 1 | 웹 리서치 및 자료 수집 → `research_notes.md` |
-| Content | 2-3 | 스토리라인 및 슬라이드 구성 → `storyline.md`, `slide_deck.md` |
+| Storyline | 2-3 | 스토리라인 및 슬라이드 구성 → `storyline.md`, `slide_deck.md` |
 | Design | 4 | 색상, 폰트, 레이아웃 확정 → `design_spec.md` |
 | Build | 5-8 | HTML 슬라이드 + 이미지 생성 → `lecture_vN.html` |
 | Measure | 9-10 | Playwright 레이아웃 측정 + 폰트 다운로드 → `pdf_layout_spec.md` |
@@ -49,7 +49,7 @@ translated_from_hash: TBD
 
 ```bash
 # 버전 스냅샷 (수정 전 항상 실행)
-python scripts/snapshot.py <file>.md --workspace presentations/<project> --desc "..." --agent content
+python scripts/snapshot.py <file>.md --workspace presentations/<project> --desc "..." --agent storyline
 
 # 레이아웃 측정
 python scripts/measure_layout.py presentations/<project>/lecture_vN.html
@@ -73,4 +73,4 @@ playwright install chromium
 bun --version   # audit.ts, dev-sync.ts 실행에 필요
 ```
 
-*Last Updated: 2026-06-18 — co-deck variant template*
+*Last Updated: 2026-06-19 — co-deck variant template*

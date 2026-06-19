@@ -1,3 +1,8 @@
+---
+content_hash: PLACEHOLDER
+sync_version: 1
+---
+
 # co-deck
 
 > **⚠️ BETA VARIANT** - Status: beta (v0.1.0)
@@ -15,7 +20,7 @@ This is a beta variant of the workspace template. It inherits from `templates/co
 
 See `CLAUDE.md` for detailed instructions.
 
-### For Gemini Code users:
+### For Gemini CLI users:
 
 See `GEMINI.md` for detailed instructions.
 
@@ -33,17 +38,31 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 **Type**: design
 
-This variant focuses on Design system compliance, accessibility standards, and UX consistency.
+This variant focuses on lecture and presentation material production — from research to print-ready PDF.
 
 ## Agent Roster
 
-| Agent | Tier | Model |
-|-------|------|-------|
-
+| Agent | Role | Tier | Model |
+|-------|------|------|-------|
+| pm | Orchestrates 11-stage pipeline; single user entry point | High | inherit |
+| research | Gathers web sources and writes research_notes.md | Medium | inherit |
+| storyline | Writes storyline.md and slide_deck.md from research notes | Medium | inherit |
+| design | Locks visual design style into design_spec.md | Medium | inherit |
+| html-build | Generates HTML slides from slide_deck.md and design_spec.md | Medium | inherit |
+| measure | Auto-measures slide layout with Playwright; downloads TTF fonts | Medium | inherit |
+| pdf-export | Generates sample and full PDF from measured layout data | Medium | inherit |
+| version | Snapshots files before every edit; restores prior states | Low | inherit |
 
 ## Skills
 
-
+- **lecture-research**: Source collection and ideation — confirms topic/audience, performs web research (Korean and English), writes research_notes.md
+- **lecture-storyline**: Storyline design — given research_notes.md, produces storyline.md and slide_deck.md
+- **lecture-design**: Visual design lock — decides layout, color palette, font family and saves design_spec.md
+- **lecture-html-build**: HTML slide generation — produces lecture_vN.html from slide_deck.md and design_spec.md
+- **lecture-measure**: Layout measurement — runs Playwright to extract coordinates and downloads TTF fonts
+- **lecture-pdf-export**: PDF generation — generates sample (5 slides) and full PDF via fpdf2
+- **lecture-version**: Version snapshots — backs up files before edits; restores prior states on demand
+- **lecture-pm**: PM orchestrator — manages the 11-stage pipeline and all approval gates
 
 ---
 
