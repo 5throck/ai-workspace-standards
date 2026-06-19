@@ -29,5 +29,15 @@
     { "name": "lecture-html-build" },
     { "name": "lecture-measure" },
     { "name": "lecture-pdf-export" }
-  ]
+  ],
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/co-deck",
+    "local": [
+      { "name": "snapshot",       "path": "scripts/co-deck/snapshot.ts" },
+      { "name": "download-font",  "path": "scripts/co-deck/download-font.ts" },
+      { "name": "gen-slides-pdf", "path": "scripts/co-deck/gen-slides-pdf.ts" },
+      { "name": "measure-layout", "path": "scripts/co-deck/measure-layout.ts" }
+    ],
+    "external": []
+  }
 }

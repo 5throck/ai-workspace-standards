@@ -208,10 +208,12 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 **Script deployment path**:
 - **Source**: workspace root/scripts/ (L0 source)
 - **Stage 1**: templates/common/scripts/ (auto-synced via dev-sync)
-- **Stage 2**: templates/co-*/scripts/ (variant-specific scripts)
+- **Stage 2**: templates/co-*/scripts/ (variant overlay — common scripts land at top-level; variant-specific scripts in `scripts/<variant>/` subdirectory)
 - **Target**: Projects/*/scripts/ (copied at scaffolding time)
 
 **Layer reference**: L0 (workspace root) → L1 (templates/common) → L2 (templates/co-*) → L3 (Projects/*)
+
+**Variant-specific scripts**: Scripts unique to a variant MUST be placed in `scripts/<variant>/` (subdirectory), NOT at `scripts/` top-level. Reason: L1 `audit.ts` `verifyScriptRegistryConsistency()` uses non-recursive `readdirSync` — only top-level `.ts` files are checked against `scripts/SCRIPTS.md`. Variant scripts in subdirectories are excluded intentionally. Variant MUST NOT place `scripts/SCRIPTS.md` in its overlay (overwrites L1 registry). Declare scripts in `variant.json` → `script_manifest.local`; validated by `validate-templates.ts`. See [full details](docs/constitution/06.5-script-lifecycle.md) and [ADR-0033](docs/adr/0033-variant-specific-skills-scripts-blueprint.md).
 
 Scripts have three statuses: **active** (version bump required on change), **deprecated** (90-day minimum notice with `removal-date`), **experimental** (not propagated). Dependency tracking: scripts that call other scripts must declare `depends_on` in `SCRIPTS.md` Registry; `verify-scripts.ts` checks for circular and missing dependencies. Security advisories trigger immediate hard blocks.
 
@@ -493,5 +495,5 @@ Valid reasons include: AI context proximity (faster access without full CONSTITU
 
 ---
 
-*Last Updated: 2026-06-15*
+*Last Updated: 2026-06-19*
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.6
+ * @version 1.5.7
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -308,6 +308,19 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         }
         if (lifecycle.statusSince && lifecycle.lastTransition) {
           pass(`templates/${dir}/variant.json lifecycle fields OK (statusSince, lastTransition)`);
+        }
+      }
+
+      // B-03: script_manifest path existence check
+      const scriptManifest = raw.script_manifest as { local?: Array<{ name: string; path: string }> } | undefined;
+      if (scriptManifest?.local && Array.isArray(scriptManifest.local)) {
+        for (const entry of scriptManifest.local) {
+          const scriptPath = join(TEMPLATES_DIR, dir, entry.path);
+          if (!existsSync(scriptPath)) {
+            fail(dir, 'script-manifest', `script_manifest.local "${entry.name}": path not found: ${entry.path}`, `Create the script at templates/${dir}/${entry.path} or remove the entry from variant.json`);
+          } else {
+            pass(`templates/${dir}/variant.json script_manifest.local["${entry.name}"] → ${entry.path} ✓`);
+          }
         }
       }
 
