@@ -1,19 +1,23 @@
 ---
 name: lecture-research
-version: 1.1.0
+version: 1.2.0
 description: >
   Source collection and ideation for lecture materials. After confirming
   topic/audience/purpose, performs web research (Korean and English) and
   writes research_notes.md. Responds to "research topic", "collect sources"
   (Korean: "리서치해줘", "주제 조사해줘", "자료 수집해줘"). Stage 1 of the
   lecture workflow.
+status: active
+owner: research
+last_reviewed: 2026-06-19
+prerequisites: none
 ---
 
-## Role
+## Context
 
-Researches the lecture topic via web search (Korean + English) and organizes findings into `research_notes.md` — the primary input for the Storyline Agent.
+Researches the lecture topic via web search (Korean + English) and organizes findings into `research_notes.md` — the primary input for the Storyline Agent. Invoked at Stage 1, after the lecture topic and audience are confirmed.
 
-## When to Invoke
+## When to Use
 
 - PM Agent dispatches at Stage 1
 - User says "research X" / "리서치해줘" / "자료 수집해줘"
@@ -21,7 +25,9 @@ Researches the lecture topic via web search (Korean + English) and organizes fin
 
 ---
 
-## Step 1: Confirm Lecture Information
+## Execution Steps
+
+### Step 1: Confirm Lecture Information
 
 Confirm the following with the user before starting (skip anything already mentioned):
 
@@ -33,7 +39,7 @@ Confirm the following with the user before starting (skip anything already menti
 
 ---
 
-## Step 2: Research
+### Step 2: Research
 
 Use WebSearch and web_fetch to collect:
 
@@ -47,7 +53,7 @@ Search in both Korean and English. Always record source URLs.
 
 ---
 
-## Step 3: Write research_notes.md
+### Step 3: Write research_notes.md
 
 Organize collected content into the structure below and save to the workspace.
 
@@ -100,15 +106,10 @@ Key points the audience must take away.
 
 ---
 
-## Tools
+## Output Format
 
-- `WebSearch`, `web_fetch`
-- `Read` (referencing existing docs)
-- `Write` (save research_notes.md)
+`presentations/<project>/research_notes.md` with sections: Lecture Overview, Core Messages, Key Concepts & Content, Data / Statistics, Case Studies, References. See Step 3 template above for full structure.
 
----
+## Related Skills
 
-## Next Step
-
-After writing `research_notes.md`, request user review (Gate 1 — optional).
-Once feedback is incorporated, advance to Content Agent (`agents/storyline.md`).
+- `lecture-storyline` — consumes `research_notes.md` output from this skill

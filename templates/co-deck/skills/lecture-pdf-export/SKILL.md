@@ -1,19 +1,23 @@
 ---
 name: lecture-pdf-export
-version: 1.1.0
+version: 1.2.0
 description: >
   Generates PDF from measured layout spec and slide data using fpdf2. Extracts
-  slidedata.json, runs PDF gen scripts, reviews results. Requires layout_spec.json
-  and font TTFs. Responds to "make PDF", "export PDF", "convert to PDF" (Korean:
-  "PDF 만들어줘", "PDF 출력해줘", "PDF로 변환해줘"). Stage 11 of the workflow.
+  slideData.json, runs sample (5-slide) then full PDF generation scripts,
+  reviews results. Requires layout_spec.json and font TTFs. Responds to "make
+  PDF", "export PDF", "convert to PDF" (Korean: "PDF 만들어줘", "PDF 출력해줘",
+  "PDF로 변환해줘"). Stage 11 of the lecture workflow.
+status: active
+owner: pdf-export
+last_reviewed: 2026-06-19
+prerequisites: lecture-measure
 ---
 
-## Role
+## Context
 
-Generates the final PDF from measured layout data and slide content.
-Runs sample (5 slides) first for Gate 5 review, then full PDF after user approval.
+Generates the final lecture PDF from measured layout data and slide content using `fpdf2`. Runs a 5-slide sample first for Gate 5 review, then generates the full PDF after user approval. Invoked at Stage 11, after the Measure Agent completes.
 
-## When to Invoke
+## When to Use
 
 - PM Agent dispatches after Measure Agent completes
 - User says "make PDF" / "PDF 만들어줘" / "PDF 출력해줘"
@@ -21,19 +25,29 @@ Runs sample (5 slides) first for Gate 5 review, then full PDF after user approva
 
 ---
 
-## Required Inputs
+## Execution Steps
 
-| File | Producer |
-|------|---------|
-| `layout_spec.json` | Measure Agent |
+### Step 1: Confirm Required Inputs
+
+All inputs must exist before starting:
+
+| File | Produced by |
+|------|------------|
+| `layout_spec.json` | Measure Agent (`measure_layout.py`) |
 | `pdf_layout_spec.md` | Measure Agent |
-| `fonts/<FontName>-Regular.ttf` | Measure Agent (download_font.py) |
-| `fonts/<FontName>-Bold.ttf` | Measure Agent (download_font.py) |
+| `fonts/<FontName>-Regular.ttf` | Measure Agent (`download_font.py`) |
+| `fonts/<FontName>-Bold.ttf` | Measure Agent (`download_font.py`) |
 | HTML file | Build Agent |
+
+**Install dependencies if not present:**
+
+```bash
+pip install fpdf2 pillow --break-system-packages
+```
 
 ---
 
-## Step 1: Extract slideData
+### Step 2: Extract slideData
 
 Extract slide data from the HTML file into JSON.
 
@@ -43,23 +57,23 @@ bun scripts/extract_slidedata.mjs "path/to/lecture.html"
 node scripts/extract_slidedata.mjs "path/to/lecture.html"
 ```
 
-→ `/tmp/slidedata.json` created
+→ Produces `/tmp/slidedata.json`
 
 ---
 
-## Step 2: Generate Sample PDF (5 slides)
+### Step 3: Generate Sample PDF (5 slides)
 
-Before the full run, generate a sample for layout sanity check.
+Before the full run, generate a 5-slide sample for layout sanity check.
 
 ```bash
 python scripts/gen_sample5.py --project presentations/<project>
 ```
 
-User reviews the sample. If no issues, generate the full PDF (★ Gate 5: approval required).
+Share the sample with the user for review. If approved, proceed to Step 4 (★ Gate 5: approval required before full PDF).
 
 ---
 
-## Step 3: Generate Full PDF
+### Step 4: Generate Full PDF
 
 ```bash
 python scripts/gen_full.py --project presentations/<project>
@@ -68,19 +82,19 @@ python scripts/gen_full.py --project presentations/<project>
 python scripts/gen_full.py --project presentations/<project> --out <filename>.pdf
 ```
 
----
+**Slide type rendering logic:**
 
-## Install Dependencies
+| Condition | Render type |
+|-----------|-------------|
+| `isTitleSlide: true` | Cover |
+| `isProfileSlide: true` | Speaker intro |
+| `isDividerSlide: true` | Divider |
+| `isContactSlide: true` | Contact |
+| Otherwise | Standard slide |
 
-```bash
-pip install fpdf2 pillow --break-system-packages
-```
+If a standard slide has any of `visualImage` / `visualTitle` / `visualDisplay`, render the right panel.
 
----
-
-## Script Customization
-
-To tweak the layout, edit only the constant block at the top of `gen_full.py`.
+**Layout customization** — edit only the constant block at the top of `gen_full.py`:
 
 ```python
 # ── Editable constants ─────────────────────
@@ -96,33 +110,12 @@ T_DIV_DESC  = ...   # Divider description (pt)
 
 ---
 
-## Slide Type Handling Logic
+## Output Format
 
-| Condition | Render type |
-|-----------|-------------|
-| `isTitleSlide: true` | Cover |
-| `isProfileSlide: true` | Speaker intro |
-| `isDividerSlide: true` | Divider |
-| `isContactSlide: true` | Contact |
-| Otherwise | Standard slide |
+- `presentations/<project>/[project]_v[version].pdf` — full presentation PDF
+- `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review
 
-If a standard slide has any of `visualImage` / `visualTitle` / `visualDisplay`, render the right panel.
+## Related Skills
 
----
-
-## Output Path
-
-- Full PDF: `[project]_v[version].pdf`
-- Sample PDF: `sample_5slides.pdf`
-
----
-
-## Tools
-
-- `bash` — `extract_slidedata.mjs`, `gen_sample5.py`, `gen_full.py`
-
----
-
-## Next Step
-
-This is the final stage of the 11-stage pipeline. After full PDF is generated, present to user.
+- `lecture-measure` — produces `layout_spec.json` and TTF fonts consumed by this skill
+- `lecture-version` — snapshot the HTML and layout files before regenerating the PDF

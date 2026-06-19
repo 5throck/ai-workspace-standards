@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-19T07:34:35.388Z
+**Generated**: 2026-06-19T08:03:11.657Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 94
+- **Scripts**: 96
 - **Commands**: 6
 
 ---
@@ -85,12 +85,13 @@
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.6.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
+| golden-reference-loader.ts | 1.0.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.0 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.6.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.7.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.0.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.3.4 | scripts/lifecycle-sync-audit.ts | N/A |
@@ -98,6 +99,7 @@
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
 | new-project.ts | 1.1.4 | scripts/new-project.ts | N/A |
+| normalize-agent-skills.ts | 1.0.0 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |

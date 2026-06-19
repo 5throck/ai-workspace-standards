@@ -1,45 +1,48 @@
 ---
 name: lecture-measure
-version: 1.1.0
+version: 1.2.0
 description: >
-  Auto-measures HTML slides with Playwright to extract coordinates, fonts,
-  colors for PDF generation. Runs local server, getBoundingClientRect polling,
-  slide capture. Also downloads TTF fonts. Responds to "measure layout",
-  "prep for PDF", "extract coordinates" (Korean: "레이아웃 측정해줘", "PDF
-  준비해줘", "좌표 추출해줘", "폰트 확인해줘"). Stages 9-10 of the workflow.
+  Auto-measures HTML slides with Playwright to extract pixel coordinates, fonts,
+  and colors for PDF generation. Downloads required TTF fonts. Responds to
+  "measure layout", "prep for PDF", "extract coordinates" (Korean: "레이아웃
+  측정해줘", "PDF 준비해줘", "좌표 추출해줘", "폰트 확인해줘"). Stages 9-10
+  of the lecture workflow.
+status: active
+owner: measure
+last_reviewed: 2026-06-19
+prerequisites: lecture-html-build
 ---
 
-## Role
+## Context
 
-Auto-extracts pixel-level coordinates, fonts, and colors from the HTML slides using Playwright.
-Produces `layout_spec.json` (consumed by PDF scripts) and `pdf_layout_spec.md` (human-readable spec).
-Also downloads TTF font files required for PDF generation.
+Auto-extracts pixel-level coordinates, fonts, and colors from the HTML slides using Playwright, producing `layout_spec.json` and `pdf_layout_spec.md` consumed by the PDF export scripts. Also downloads TTF font files required for PDF generation. Invoked at Stages 9-10, after Gate 4 (Build → Measure).
 
-## When to Invoke
+## When to Use
 
-- PM Agent dispatches automatically after Gate 4 (Build → Measure)
+- PM Agent dispatches after Gate 4 (Build approval)
 - User says "measure layout" / "레이아웃 측정해줘"
-- After HTML changes that affect layout (must re-run)
+- After HTML changes that affect layout (must re-run before re-exporting PDF)
 
 ---
 
-## Stage 9: Auto Layout Measurement
+## Execution Steps
 
-### Prerequisites
+### Stage 9: Auto Layout Measurement
+
+**Prerequisites:**
 
 ```bash
 pip install playwright pillow --break-system-packages
 playwright install chromium
 ```
 
-### Run
+**Run:**
 
 ```bash
-# Pass the HTML file path as an argument
 python scripts/measure_layout.py "path/to/lecture_slide.html"
 ```
 
-`scripts/measure_layout.py` automatically:
+`measure_layout.py` automatically:
 1. Starts a local HTTP server (port 18080)
 2. Launches Chromium via Playwright
 3. Visits the first slide of each type (cover, divider, standard)
@@ -48,7 +51,7 @@ python scripts/measure_layout.py "path/to/lecture_slide.html"
 6. Saves screenshots
 7. Generates `layout_spec.json` and `pdf_layout_spec.md`
 
-### Measured Items
+**Measured items:**
 
 | Item | Method |
 |------|---------|
@@ -69,7 +72,7 @@ Baseline slides measured:
 
 ---
 
-## Stage 10: Font Download
+### Stage 10: Font Download
 
 Secure TTF files for the web fonts used in the HTML. PDF generation requires local TTFs.
 
@@ -86,26 +89,20 @@ python scripts/download_font.py <font_name> [output_dir]
 
 TTF files are saved to `fonts/`.
 
----
+**After measurement:** share `pdf_layout_spec.md` with the user to confirm measurements match the actual HTML. Cross-check any oddities against the saved screenshots.
 
-## Review Output
-
-Once `pdf_layout_spec.md` is generated, share with the user to:
-- Confirm measurements match the actual HTML
-- Cross-check oddities against screenshots
-
-> Reference: `references/measure_layout_guide.md` has the internals of `measure_layout.py` and customization notes.
+> Reference: `references/measure_layout_guide.md` has `measure_layout.py` internals and customization notes.
 
 ---
 
-## Tools
+## Output Format
 
-- `bash` — `measure_layout.py`, `download_font.py`
-- `Write` (save output files)
-- When HTML changes, snapshot `layout_spec.json` / `pdf_layout_spec.md` together via Version Agent
+- `presentations/<project>/layout_spec.json` — machine-readable pixel coordinates for PDF scripts
+- `presentations/<project>/pdf_layout_spec.md` — human-readable measurement report with screenshots
+- `fonts/<FontName>-Regular.ttf` / `fonts/<FontName>-Bold.ttf` — downloaded font files
 
----
+## Related Skills
 
-## Next Step
-
-After measurement is confirmed, advance automatically to Export Agent (`agents/pdf-export.md`).
+- `lecture-html-build` — produces the HTML file measured by this skill
+- `lecture-pdf-export` — consumes `layout_spec.json` and the TTF fonts
+- `lecture-version` — snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes

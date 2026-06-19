@@ -1,20 +1,22 @@
 ---
 name: lecture-design
-version: 1.1.0
+version: 1.2.0
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
   design", "pick colors/fonts", "make design spec" (Korean: "디자인 잡아줘",
   "컬러 정해줘", "폰트 골라줘", "레이아웃 구성해줘"). Stage 4 of the workflow.
+status: active
+owner: design
+last_reviewed: 2026-06-19
+prerequisites: lecture-storyline
 ---
 
-## Role
+## Context
 
-Locks the visual design — layout, colors, and fonts — into `design_spec.md`.
-This file is the shared reference for HTML generation and PDF export.
-Always call Version Agent before editing.
+Locks the visual design — layout, colors, and fonts — into `design_spec.md`. This file is the shared reference for HTML generation and PDF export. Invoked at Stage 4, after Gate 2 (content approval) is passed.
 
-## When to Invoke
+## When to Use
 
 - PM Agent dispatches after Gate 2 approval (storyline locked)
 - User says "lock design" / "디자인 잡아줘" / "컬러 정해줘"
@@ -22,7 +24,9 @@ Always call Version Agent before editing.
 
 ---
 
-## Step 1: Confirm Design Direction
+## Execution Steps
+
+### Step 1: Confirm Design Direction
 
 Confirm with the user (skip anything already mentioned):
 
@@ -35,15 +39,15 @@ If a reference URL is provided, open it in Claude in Chrome and analyze colors a
 
 ---
 
-## Step 2: Design Decisions
+### Step 2: Design Decisions
 
-### Layout
+#### Layout
 
 - Aspect ratio: 16:9 (default) / 4:3
 - Slide structure: header bar position/height, title position, content area, right visual panel ratio
 - Margins: outer card margin, inner padding
 
-### Color Palette
+#### Color Palette
 
 Decide on at least 8 role-based colors:
 
@@ -58,7 +62,7 @@ Decide on at least 8 role-based colors:
 | Border | border | | |
 | Visual panel bg | vis-bg | | |
 
-### Fonts
+#### Fonts
 
 - **One unified Korean+English font** is strongly recommended (mixed fonts cause rendering inconsistency)
 - Recommended fonts:
@@ -66,7 +70,7 @@ Decide on at least 8 role-based colors:
   - Sans-serif: NanumSquareNeo, Pretendard
 - Record web font URL or local TTF path
 
-### Font Sizes (baseline)
+#### Font Sizes (baseline)
 
 Decide in CSS px (HTML). Auto-converted to pt during PDF export.
 
@@ -85,7 +89,7 @@ Decide in CSS px (HTML). Auto-converted to pt during PDF export.
 
 ---
 
-## Step 3: Save design_spec.md
+### Step 3: Save design_spec.md
 
 Save the decisions above as `design_spec.md` in the workspace.
 Bundling CSS variables makes the HTML stage directly consumable:
@@ -105,15 +109,12 @@ Bundling CSS variables makes the HTML stage directly consumable:
 
 ---
 
-## Tools
+## Output Format
 
-- Browser tool (when analyzing reference URLs)
-- `Write` (save design_spec.md)
-- Always call Version Agent before editing files
+`presentations/<project>/design_spec.md` containing: layout decisions, 8-color palette table (with HEX/RGB), font family and size table, CSS variables block.
 
----
+## Related Skills
 
-## Next Step
-
-After locking `design_spec.md`, request user approval (★ Gate 3 — required).
-After approval, advance to Build Agent (`agents/html-build.md`).
+- `lecture-storyline` — provides `slide_deck.md` that drives layout decisions
+- `lecture-html-build` — consumes `design_spec.md` CSS variables
+- `lecture-measure` — uses font/color info from `design_spec.md` for PDF preparation

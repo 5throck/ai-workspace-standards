@@ -1,31 +1,36 @@
 ---
 name: lecture-version
-version: 1.1.0
+version: 1.2.0
 description: >
-  Manages version snapshots of lecture files. Auto-backs up files before
-  edits and restores prior versions on demand. Must be invoked by any other
-  agent before modifying a file. Use for version history, restore, comparison.
-  (Korean triggers: "이전 버전으로 돌아가고 싶어", "버전 목록 보여줘".)
+  Manages version snapshots of lecture files. Auto-backs up files before edits
+  and restores prior versions on demand. Must be called before any file
+  modification by any agent. Responds to "go back to previous version", "show
+  version list" (Korean: "이전 버전으로 돌아가고 싶어", "버전 목록 보여줘").
+  Cross-cutting — applies to all workflow stages.
+status: active
+owner: version
+last_reviewed: 2026-06-19
+prerequisites: none
 ---
 
-## Role
+## Context
 
-Tracks every file change and manages snapshots so any prior state can be restored at any time.
-**Must be called before any file modification by any agent — no exceptions.**
+Tracks every file change and manages snapshots so any prior state can be restored at any time. This is a cross-cutting skill — it must be called **before any file modification by any other agent**, without exception. PM Agent enforces this order automatically.
 
-## When to Invoke
+## When to Use
 
-- **Right before another agent edits a file** (Storyline, Design, Build, Measure, Export, etc.)
-- When the user says "go back to previous version" / "이전 버전으로 돌아가고 싶어"
-- When the user says "show version list" / "버전 목록 보여줘"
-- When PM Agent is about to do a destructive (overwrite) change
+- Before another agent edits a file (Storyline, Design, Build, Measure, Export, etc.)
+- User says "go back to previous version" / "이전 버전으로 돌아가고 싶어"
+- User says "show version list" / "버전 목록 보여줘"
+- PM Agent is about to perform a destructive (overwrite) change
 
 ---
 
-## Snapshot Creation
+## Execution Steps
 
-Always create a snapshot **before** editing a file.
-**`--workspace` is required to scope to the project folder.**
+### Step 1: Create Snapshot (before any edit)
+
+Always create a snapshot **before** editing a file. `--workspace` is required.
 
 ```bash
 # Single file
@@ -40,7 +45,7 @@ python scripts/snapshot.py slide_deck.md storyline.md \
   --desc "full chapter restructure" \
   --agent content
 
-# HTML file (large, snapshot only when needed)
+# HTML file (large — snapshot only when layout changes)
 python scripts/snapshot.py lecture_v1.html \
   --workspace presentations/<project> \
   --desc "backup before image swap" \
@@ -55,10 +60,10 @@ python scripts/snapshot.py images/ \
 
 > File paths are relative to `--workspace`.
 
-### --agent Value Rules
+**`--agent` value rules:**
 
-| Agent | --agent value |
-|-------|--------------|
+| Agent | `--agent` value |
+|-------|----------------|
 | PM Agent | `pm` |
 | Research Agent | `research` |
 | Storyline Agent | `storyline` |
@@ -70,13 +75,14 @@ python scripts/snapshot.py images/ \
 
 ---
 
-## Version List
+### Step 2: List Versions
 
 ```bash
 python scripts/snapshot.py --workspace presentations/<project> --list
 ```
 
 Example output:
+
 ```
 ──────────────────────────────────────────────────────────
   Stored versions (5, newest first)
@@ -85,97 +91,50 @@ Example output:
         Files: 3 / Size: 2.4MB
   [ 2] 2026-06-17_14-30_content_chapter-adjust
         Files: 2 / Size: 45KB
-  ...
 ```
 
 ---
 
-## Restore
+### Step 3: Restore a Version
 
 ```bash
-# Restore to a specific version
+# Full version ID
 python scripts/snapshot.py \
   --workspace presentations/<project> \
   --restore 2026-06-17_14-30_content_chapter-adjust
 
-# Partial version ID also works (if uniquely matched)
+# Partial version ID (if uniquely matched)
 python scripts/snapshot.py \
   --workspace presentations/<project> \
   --restore 2026-06-17_14-30
 ```
 
-⚠️ Restore **automatically backs up the current file** before restoring. Regret after restore? Just restore again.
+> Restore **automatically backs up the current file** before restoring. If you regret the restore, run `--restore` again on the new backup.
 
 ---
 
-## Storage Layout
+## Output Format
 
-Snapshots live inside the **project folder** under `_versions/`.
+Snapshots are stored under `presentations/<project>/_versions/`:
 
 ```
 presentations/<project>/
 └── _versions/
     └── 2026-06-17_14-30_content_chapter-adjust/
-        ├── slide_deck.md   # pre-edit original
-        └── storyline.md    # pre-edit original
+        ├── slide_deck.md
+        └── storyline.md
 ```
 
----
+Each snapshot auto-appends an entry to `presentations/<project>/VERSIONS.md` with date, agent, description, file sizes, and restore command.
 
-## VERSIONS.md Manifest
+**Caveats:**
+- Add `_versions/` to `.gitignore` — large folders make Git inefficient
+- HTML files are 100KB–several MB; snapshot only on layout changes
+- `fonts/` does not need snapshots — re-downloadable any time via `download_font.py`
+- Snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes (they become invalid if HTML changes)
 
-Each snapshot auto-appends an entry to the project's `VERSIONS.md`.
+## Related Skills
 
-```markdown
-## 2026-06-17_14-30_content_chapter-adjust
-
-| Field | Value |
-|------|------|
-| Date | 2026-06-17 14:30 |
-| Agent | content |
-| Description | Shrink chapter 3 slide count |
-
-Stored files:
-  - `slide_deck.md` (45KB)
-
-Restore command:
-```bash
-python scripts/snapshot.py \
-  --workspace presentations/<project> \
-  --restore 2026-06-17_14-30_content_chapter-adjust
-```
-```
-
----
-
-## Collaboration Pattern
-
-```
-[Any agent wants to edit a file]
-    ↓
-[Call Version Agent first]
-    python scripts/snapshot.py <file> \
-      --workspace presentations/<project> \
-      --desc "backup before change" --agent <agent>
-    ↓
-[Agent edits the file]
-    ↓
-[Done]
-```
-
-PM Agent enforces this order automatically.
-
----
-
-## Caveats
-
-- Consider adding `_versions/` to `.gitignore` (large folders make Git inefficient)
-- HTML files are several hundred KB to several MB — snapshot only when layout changes
-- `fonts/` doesn't need snapshots (re-downloadable any time via `download_font.py`)
-- `layout_spec.json` and `pdf_layout_spec.md` become invalid when HTML changes — snapshot them together
-
----
-
-## Tools
-
-- `bash` — `scripts/snapshot.py`
+- `lecture-html-build` — must call this skill before editing the HTML file
+- `lecture-storyline` — must call this skill before editing `slide_deck.md` or `storyline.md`
+- `lecture-measure` — must call this skill before re-running measurement (snapshots `layout_spec.json`)

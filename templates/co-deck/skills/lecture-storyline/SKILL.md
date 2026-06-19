@@ -1,21 +1,23 @@
 ---
 name: lecture-storyline
-version: 1.1.0
+version: 1.2.0
 description: >
   Designs lecture storyline and slide deck composition. Given research_notes.md
   (or direct topic input), produces storyline.md and slide_deck.md. Responds
   to "make storyline", "compose slide deck", "structure chapters" (Korean:
   "스토리라인 만들어줘", "슬라이드 구성 잡아줘", "챕터 구성해줘"). Stages 2-3
   of the lecture workflow.
+status: active
+owner: storyline
+last_reviewed: 2026-06-19
+prerequisites: lecture-research
 ---
 
-## Role
+## Context
 
-Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slide_deck.md`).
-`slide_deck.md` is the direct input consumed by the Build Agent for HTML generation.
-Always call Version Agent before editing either file.
+Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slide_deck.md`). `slide_deck.md` is the direct input consumed by the Build Agent for HTML generation. Invoked at Stages 2-3, after research is approved at Gate 1.
 
-## When to Invoke
+## When to Use
 
 - PM Agent dispatches after Stage 1 (research)
 - User says "make storyline" / "스토리라인 만들어줘"
@@ -24,7 +26,9 @@ Always call Version Agent before editing either file.
 
 ---
 
-## Step 1: Confirm Inputs
+## Execution Steps
+
+### Step 1: Confirm Inputs
 
 - If `research_notes.md` exists, read it first
 - Confirm with the user:
@@ -34,7 +38,7 @@ Always call Version Agent before editing either file.
 
 ---
 
-## Step 2: Write storyline.md
+### Step 2: Write storyline.md
 
 Construct the lecture's high-level flow narratively. Not just a table of contents — encode the logic of "why this order" so the audience journey is clear.
 
@@ -67,7 +71,7 @@ What the audience should remember after the lecture:
 
 ---
 
-## Step 3: Write slide_deck.md
+### Step 3: Write slide_deck.md
 
 Write per-slide content. This file becomes the direct input for HTML generation.
 
@@ -111,7 +115,7 @@ Repeat this structure for every slide. Dividers include part number and descript
 
 ---
 
-## Step 4: Balance Check
+### Step 4: Balance Check
 
 Self-review after writing both files:
 
@@ -121,15 +125,12 @@ Self-review after writing both files:
 
 ---
 
-## Tools
+## Output Format
 
-- `Read` (read research_notes.md)
-- `Write` (save storyline.md, slide_deck.md)
-- Always call Version Agent before editing files
+- `presentations/<project>/storyline.md` — narrative flow with chapter structure table
+- `presentations/<project>/slide_deck.md` — per-slide content with type, content bullets, and right-panel spec
 
----
+## Related Skills
 
-## Next Step
-
-After writing both files, request user review (★ Gate 2 — required).
-After approval, advance to Design Agent (`agents/design.md`).
+- `lecture-research` — produces `research_notes.md` consumed by this skill
+- `lecture-design` — consumes `slide_deck.md` output from this skill

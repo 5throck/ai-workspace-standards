@@ -11,22 +11,31 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.6.1
+ * @version 1.7.0
  * @phase: Complete pipeline orchestration
  *
- * Agent Frontmatter Normalization (v1.6.0):
- * During Wave 3 (generate-variant.ts), specialist agent files copied from the L2
- * source are automatically normalized via normalizeAgentFrontmatter():
- *   - Strips L2-only fields: lifecycle, formal_name, variant
- *   - Adds missing tier platforms (gemini, antigravity, gemini-cli) inheriting claude tier
- * pm.md, README.md, README_ko.md are excluded from normalization.
+ * Pipeline Phases:
+ *   PHASE 1   — L2 project scan (scan-l2-project.ts)
+ *   PHASE 1.5 — Agent/skill normalization — NEW in v1.7.0 (normalize-agent-skills.ts)
+ *               · Detects skill content in agent bodies (HIGH/MEDIUM/LOW confidence)
+ *               · Extracts HIGH-confidence skill content → skills/<slug>/SKILL.md
+ *               · Normalizes skill frontmatter (adds status, owner, last_reviewed)
+ *               · Renames non-standard section headers (## Role → ## Context, etc.)
+ *   PHASE 2   — L0/L1 reconciliation (reconcile-with-l0-l1.ts)
+ *   PHASE 3   — Dependency validation
+ *   PHASE 4   — Variant generation + agent frontmatter normalization (generate-variant.ts)
+ *   PHASE 4.5 — Golden reference structural gap check — NEW in v1.7.0 (golden-reference-loader.ts)
+ *               · Layer 1: verifies 7 required agent sections + 5 required skill sections
+ *               · Layer 2: checks variantType-specific optional sections
+ *               · Writes _pipeline_report.md in variant root; does NOT fail pipeline
+ *   PHASE 4.6 — pm.md processing and context.md generation
+ *   PHASE 5   — Beta lifecycle initialization
+ *   PHASE 6   — Platform parity validation
+ *   PHASE 7   — Workspace integration
  *
- * Expected agent file structure post-normalization:
- *   ## Role → ## ⚠️ PM-ONLY INVOCATION → ## Responsibilities
- *   → ## Output Format → ## Constraints → ## Meeting Participation
- *   → ## Dispatch Protocol
- *
- * See: docs/designs/variant-specialist-agent-structure.md — canonical frontmatter spec
+ * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
+ * See: docs/designs/variant-specialist-agent-structure.md
+ * See: docs/designs/variant-specialist-skill-structure.md
  *
  * Dependencies:
  * - helpers/scan-l2-project.ts (L2 scanning)
@@ -42,6 +51,18 @@
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.js';
+import {
+  normalizeAgentSkills,
+  formatNormalizationReport,
+  NormalizationResult,
+} from './helpers/normalize-agent-skills.js';
+import {
+  getAgentGoldenStructure,
+  getSkillGoldenStructure,
+  checkStructuralGaps,
+  formatGapReport,
+  StructuralGapReport,
+} from './helpers/golden-reference-loader.js';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.js';
 import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.js';
 import {
@@ -72,6 +93,10 @@ export interface PipelineConfig {
   skipParityValidation?: boolean;
   /** Skip workspace integration */
   skipIntegration?: boolean;
+  /** Skip Wave 1.5 agent/skill normalization (default: false) */
+  skipNormalization?: boolean;
+  /** Treat MEDIUM-confidence skill patterns as HIGH (auto-extract without approval gate) */
+  autoExtract?: boolean;
   /** Output path for variant (optional) */
   outputPath?: string;
 }
@@ -150,6 +175,40 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
   if (!phases.scan.success) {
     return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 1.5: AGENT/SKILL NORMALIZATION (Wave 1.5)
+  // ============================================================================
+
+  if (!config.skipNormalization) {
+    try {
+      console.log(`\n${'─'.repeat(60)}`);
+      console.log(`PHASE 1.5: Agent/Skill Normalization`);
+      console.log(`${'─'.repeat(60)}`);
+
+      const normResult: NormalizationResult = normalizeAgentSkills(
+        scanResult!,
+        config.l2ProjectPath,
+        { auto: config.autoExtract ?? false, dryRun: false },
+      );
+
+      const report = formatNormalizationReport(normResult);
+      console.log(report);
+
+      if (normResult.pendingApprovals.length > 0) {
+        console.warn(`⚠️  ${normResult.pendingApprovals.length} MEDIUM-confidence pattern(s) require review.`);
+        console.warn(`   Re-run with autoExtract: true to extract automatically.`);
+      }
+
+      console.log(`✅ PHASE 1.5 COMPLETE`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      // Non-fatal: log and continue
+      console.warn(`⚠️  PHASE 1.5 WARNING: ${errorMsg}`);
+    }
+  } else {
+    console.log(`\nPHASE 1.5: Skipped (skipNormalization=true)`);
   }
 
   // ============================================================================
@@ -244,12 +303,73 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
-  // PHASE 4.5: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // PHASE 4.5: GOLDEN REFERENCE STRUCTURAL GAP CHECK
   // ============================================================================
 
   try {
     console.log(`\n${'─'.repeat(60)}`);
-    console.log(`PHASE 4.5: Processing pm.md and Generating context.md`);
+    console.log(`PHASE 4.5: Golden Reference Structural Gap Check`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const gapReports: StructuralGapReport[] = [];
+    const variantPath = generatedVariant!.variantPath;
+    const agentGolden = getAgentGoldenStructure(config.variantType);
+    const skillGolden = getSkillGoldenStructure(config.variantType);
+
+    // Check agent files
+    const { readdirSync: rd, existsSync: ex } = await import('node:fs');
+    const { readUTF8File: ru } = await import('./lib/encoding-utils.js');
+    const { join: j } = await import('node:path');
+
+    const agentsDir = j(variantPath, 'agents');
+    if (ex(agentsDir)) {
+      for (const file of rd(agentsDir)) {
+        if (!file.endsWith('.md') || ['pm.md', 'README.md'].includes(file)) continue;
+        const filePath = j(agentsDir, file);
+        const content = ru(filePath);
+        gapReports.push(checkStructuralGaps(filePath, content, agentGolden, 'agent'));
+      }
+    }
+
+    // Check skill files
+    const skillsDir = j(variantPath, 'skills');
+    if (ex(skillsDir)) {
+      for (const skillDir of rd(skillsDir, { withFileTypes: true })) {
+        if (!skillDir.isDirectory()) continue;
+        const skillPath = j(skillsDir, skillDir.name, 'SKILL.md');
+        if (!ex(skillPath)) continue;
+        const content = ru(skillPath);
+        gapReports.push(checkStructuralGaps(skillPath, content, skillGolden, 'skill'));
+      }
+    }
+
+    const gapReport = formatGapReport(gapReports);
+    console.log(gapReport);
+
+    // Write pipeline report to variant root
+    const reportPath = j(variantPath, '_pipeline_report.md');
+    const { writeUTF8File: wu } = await import('./lib/encoding-utils.js');
+    wu(reportPath, `# Pipeline Report\n\nGenerated: ${new Date().toISOString()}\n\n\`\`\`\n${gapReport}\n\`\`\`\n`);
+
+    const failedCount = gapReports.filter(r => !r.passed).length;
+    if (failedCount > 0) {
+      console.warn(`⚠️  ${failedCount} file(s) have missing required sections. See _pipeline_report.md`);
+    }
+
+    console.log(`✅ PHASE 4.5 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    // Non-fatal: log and continue
+    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+  }
+
+  // ============================================================================
+  // PHASE 4.6: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4.6: Processing pm.md and Generating context.md`);
     console.log(`${'─'.repeat(60)}`);
 
     // Find pm.md in the generated variant
@@ -273,11 +393,11 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       console.log(`ℹ️  No pm.md found in variant, skipping context.md generation`);
     }
 
-    console.log(`✅ PHASE 4.5 COMPLETE`);
+    console.log(`✅ PHASE 4.6 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     // Don't fail the pipeline for context.md generation errors
-    console.warn(`⚠️  PHASE 4.5 WARNING: ${errorMsg}`);
+    console.warn(`⚠️  PHASE 4.6 WARNING: ${errorMsg}`);
   }
 
   // ============================================================================
