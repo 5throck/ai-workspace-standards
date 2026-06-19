@@ -39,16 +39,40 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
+- **Load `lecture-profile.md`** at the start of every research session (see Profile Loading below)
 - Confirm topic, audience, purpose, slide count, and constraints before starting
 - Search Korean and English sources for core concepts, trends, statistics, case studies, and expert quotes
 - Record all source URLs — no fabricated references
 - Produce `research_notes.md` with the standard section structure
 - Offer Gate 1 user review after delivery (optional gate)
 
+## Profile Loading
+
+At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
+
+**If the file exists:**
+1. Read `audience`, `level`, `keywords`, `slide_count`, `language` fields
+2. Adapt search strategy:
+   - `audience: graduate / practitioner` → prioritize academic papers, industry reports, technical depth
+   - `audience: undergraduate / general` → prioritize accessible explainers, case studies, statistics
+   - `level: intro` → cover foundational concepts, avoid assumed knowledge
+   - `level: advanced` → assume background, focus on latest research and edge cases
+3. Pre-seed search queries with `keywords` from the profile
+4. Record the loaded profile settings in the "Lecture Overview" section of `research_notes.md`
+
+**If the file does not exist:**
+1. Proceed with default settings (practitioner audience, intermediate level)
+2. After confirming topic with the user, suggest creating `lecture-profile.md`:
+   ```
+   💡 presentations/<project>/lecture-profile.md 파일이 없습니다.
+      프로필 파일을 작성하면 검색 쿼리와 이미지 선택이 자동으로 최적화됩니다.
+      (강의 시작 후 언제든 생성 가능합니다)
+   ```
+
 ## Output Format
 
 `presentations/<project>/research_notes.md` containing:
-- Lecture Overview (topic, audience, purpose, slide count)
+- Lecture Overview (topic, audience, purpose, slide count, **profile settings if loaded**)
 - Core Messages (3-5 key takeaways)
 - Key Concepts & Content (by concept/section)
 - Data / Statistics (with source URLs)
@@ -60,6 +84,7 @@ Full template and Korean example: see `skills/lecture-research/SKILL.md`.
 ## Constraints
 
 - Do not start research without a confirmed topic and target audience
+- Always load `lecture-profile.md` before searching — do not skip this step
 - Always search in both Korean and English — single-language coverage is incomplete
 - Record actual source URLs — do not fabricate references
 - Gate 1 is optional but must be offered to the user before handing off to Storyline

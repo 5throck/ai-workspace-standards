@@ -39,11 +39,15 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
+- **Load `lecture-profile.md`** at start: read `theme`, `instructor`, `language` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
+- Read `image-manifest.json` (from image-curator) to bind downloaded images to slide entries
 - Generate `lecture_vN.html` with all slides rendered via a single `renderSlide(data)` function
 - Embed slide content as `const slideData = [...]` JavaScript array inside the HTML
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
-- Match each slide with an image (web search, AI generation, or text-panel fallback)
+- Apply theme from `lecture-profile.md`: inject `<link rel="stylesheet" href="../../html-themes/overrides/<theme>.css">` after base CSS
+- Populate cover slide with `instructor` fields from profile (name, title, organization)
+- Bind images: for each slide with `image_role ≠ none`, use path from `image-manifest.json`; fall back to text panel if no image recorded
 - Insert speaker intro slide (position 2) and contact slide (last) if missing
 - Self-review balance after generation (slide count, bullets per slide, visual density)
 - Request Gate 4 user review before advancing to Measure Agent (optional gate)
@@ -58,8 +62,11 @@ slideData object fields and image filename convention: see `skills/lecture-html-
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
+- Load `lecture-profile.md` before generating HTML — theme and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
+- Theme must be one of: `classic | minimal | visual-heavy | academic`; default to `classic` if unset
 - Slide balance rules: ≤5 bullets per slide, ≤3 consecutive slides without visuals, counts balanced ±20%
+- For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
 - Local preview: `python -m http.server 8080` → `http://localhost:8080`
 

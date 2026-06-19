@@ -39,27 +39,91 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
+- Read `lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
 - Read `research_notes.md` if it exists; confirm total slide count, chapter count, and special slides with user
 - Write `storyline.md`: narrative flow, chapter structure table, key takeaways
-- Write `slide_deck.md`: per-slide title, type, bullets, and right-panel spec (image or text)
+- Write `slide_deck.md`: per-slide title, type, bullets, right-panel spec, **and image fields** (see Output Format)
+- Run **Cover/Divider Confirmation** before finalizing structure (see Confirmation Flow below)
 - Self-review balance before handing off: chapter counts, bullets per slide, visual density
 - Request Gate 2 user approval before advancing to Design Agent
+
+## Cover/Divider Confirmation Flow
+
+After drafting the outline but **before writing the full `slide_deck.md`**, present this confirmation:
+
+```
+📋 슬라이드 구조 확인
+
+표지 슬라이드 (필수):
+  제목: [lecture-profile.md의 title]
+  부제: [subtitle — 비어있으면 생략]
+  강사: [instructor.name, instructor.title]
+  → 표지 스타일을 변경하려면 알려주세요. 기본값으로 진행합니다.
+
+간지 삽입 (선택):
+  [각 챕터 경계마다 나열]
+  예) Part 1 "AI 기초" → 슬라이드 4 앞  [포함 / 제외]
+      Part 2 "실습"   → 슬라이드 15 앞 [포함 / 제외]
+
+응답 형식: "간지 전부 포함", "간지 없음", 또는 원하는 파트 번호를 알려주세요.
+(lecture-profile.md의 dividers.mode가 'auto'이면 이 단계를 건너뜁니다)
+(dividers.mode가 'none'이면 간지를 모두 제외합니다)
+```
+
+**Mode override rules:**
+- `dividers.mode: auto` → skip confirmation, insert dividers at all chapter boundaries
+- `dividers.mode: none` → skip confirmation, generate no dividers
+- `dividers.mode: manual` (default) → always show confirmation above
 
 ## Output Format
 
 - `presentations/<project>/storyline.md` — narrative arc, chapter table, key takeaways
-- `presentations/<project>/slide_deck.md` — per-slide spec (title, type, bullets, right panel)
+- `presentations/<project>/slide_deck.md` — per-slide spec (title, type, bullets, right panel, **image fields**)
 
 Slide types: `cover` · `speaker intro` · `divider` · `standard` · `contact`
+
+### slide_deck.md — Image Fields (per slide)
+
+Every slide entry in `slide_deck.md` MUST include these three image fields:
+
+```markdown
+## Slide 03 — AI의 한계
+
+- **type**: standard
+- **image_role**: illustrative
+- **image_query**: "robot limitation wall boundary technology"
+- **image_license**: unsplash_free
+- bullets: ...
+```
+
+**`image_role` values:**
+
+| Value | Meaning | When to use |
+|-------|---------|-------------|
+| `background` | Full-bleed background image | cover, divider, visual-heavy slides |
+| `illustrative` | Right-panel concept image | standard slides with a visual idea |
+| `data-viz` | Chart or infographic | slides presenting statistics or data |
+| `portrait` | Person/speaker photo | speaker-intro slide |
+| `none` | No image | text-only slides, lists, step-by-steps |
+
+**`image_query` guidelines:**
+- 3-6 English keywords describing the visual concept
+- Do NOT use the slide title verbatim — describe the visual, not the topic
+- Good: `"abstract network nodes glowing blue"` | Bad: `"AI 기초 개요"`
+- Append lecture style context: `"professional"`, `"academic"`, `"minimalist"`
 
 Full templates and Korean examples: see `skills/lecture-storyline/SKILL.md`.
 
 ## Constraints
 
 - Do not start without reading `research_notes.md` (if it exists)
+- Load `lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
+- Run Cover/Divider Confirmation before finalizing `slide_deck.md` (unless `dividers.mode: auto/none`)
 - Gate 2 is mandatory — do not advance to Design without explicit user approval
 - No slide should exceed 4 bullets (5 is the hard limit, 3 is ideal)
-- No more than 3 consecutive slides without visuals
+- No more than 3 consecutive slides without visuals (`image_role: none`)
+- Every slide MUST have `image_role`, `image_query`, and `image_license` fields
+- `image_query` must be in English — even for Korean-language lectures
 - Always call Version Agent before editing either file
 
 ## Meeting Participation
