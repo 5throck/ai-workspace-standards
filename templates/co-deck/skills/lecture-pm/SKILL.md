@@ -10,6 +10,7 @@ status: active
 owner: pm
 last_reviewed: 2026-06-19
 prerequisites: none
+audit_exception: pm-reference-card
 ---
 
 ## Context
