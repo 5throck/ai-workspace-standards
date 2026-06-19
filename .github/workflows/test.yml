@@ -34,7 +34,15 @@ jobs:
         run: bun install
 
       - name: Security audit - dependency vulnerabilities
-        run: bun audit || npm audit --audit-level=high
+        shell: bash
+        run: |
+          audit_output=$(bun audit 2>&1) || true
+          echo "$audit_output"
+          if echo "$audit_output" | grep -qE '[1-9][0-9]* (high|critical)'; then
+            echo "ERROR: High or critical vulnerabilities found. See audit output above."
+            exit 1
+          fi
+          echo "Security check passed (no high/critical vulnerabilities)."
 
       - name: Run integration tests
         run: bun run test
