@@ -60,7 +60,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review
 - `presentations/<project>/<project>_v<version>.pdf` — final full-deck PDF
 
-Script customization constants and slide-type rendering logic: see `skills/lecture-pdf-export/SKILL.md`.
+Script customization constants and slide-type rendering logic: see `skills/pdf-export/SKILL.md`.
 
 ## Constraints
 

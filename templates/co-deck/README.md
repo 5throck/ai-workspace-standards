@@ -36,7 +36,7 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ## Variant Type
 
-**Type**: design
+**Type**: lecture
 
 This variant focuses on lecture and presentation material production — from research to print-ready PDF.
 

@@ -57,7 +57,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Font size table (all element types in CSS px)
 - CSS variables block (`:root { --slide-bg: ; ... }`)
 
-Full color palette table, font-size table, and reference URL analysis guide: see `skills/lecture-design/SKILL.md`.
+Full color palette table, font-size table, and reference URL analysis guide: see `skills/design/SKILL.md`.
 
 ## Constraints
 

@@ -61,14 +61,15 @@
 | Skill | File | Used By | Status |
 |-------|------|---------|--------|
 | version | `skills/version/SKILL.md` | version | active |
-| lecture-research | `skills/lecture-research/SKILL.md` | research | active |
-| lecture-storyline | `skills/lecture-storyline/SKILL.md` | storyline | active |
-| lecture-design | `skills/lecture-design/SKILL.md` | design | active |
-| lecture-html-build | `skills/lecture-html-build/SKILL.md` | html-build | active |
-| lecture-measure | `skills/lecture-measure/SKILL.md` | measure | active |
-| lecture-pdf-export | `skills/lecture-pdf-export/SKILL.md` | pdf-export | active |
-| lecture-pm | `skills/lecture-pm/SKILL.md` | pm | active |
+| research | `skills/research/SKILL.md` | research | active |
+| storyline | `skills/storyline/SKILL.md` | storyline | active |
+| design | `skills/design/SKILL.md` | design | active |
+| html-build | `skills/html-build/SKILL.md` | html-build | active |
+| measure | `skills/measure/SKILL.md` | measure | active |
+| pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
 <!-- END VARIANT-INJECT -->
+
+> `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).
 
 > Skill layer: A (engine-agnostic) — platform parity copies in `.claude/skills/` and `.gemini/skills/`
 
