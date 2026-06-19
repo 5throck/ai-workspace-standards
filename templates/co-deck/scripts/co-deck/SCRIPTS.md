@@ -24,12 +24,20 @@ bun run <script-name>
 
 Install with `bun install` at project root:
 
-| Package | Version | Used by |
-|---------|---------|---------|
-| `fflate` | `^0.8.2` | `download-font.ts` |
-| `playwright` | `^1.45.0` | `measure-layout.ts` |
-| `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` |
-| `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` |
+| Package | Version | Used by | Type |
+|---------|---------|---------|------|
+| `fflate` | `^0.8.2` | `download-font.ts` | required |
+| `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` | required |
+| `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` | required |
+| `playwright` | `^1.45.0` | `measure-layout.ts` | **optional** |
+
+`playwright` is declared as `optionalDependencies` — `bun install` skips it by default.
+Install only when using `measure-layout.ts` for layout calibration:
+
+```bash
+bun add playwright
+bunx playwright install chromium
+```
 
 After playwright install, also run: `bunx playwright install chromium`
 
