@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.7.0
+ * @version 1.8.0
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -287,6 +287,21 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       agentRoster,
       skills,
     };
+
+    // Lecture-type: read extension fields from canonical co-deck template
+    if (config.variantType === 'lecture') {
+      const { readFileSync } = await import('node:fs');
+      const canonicalPath = join(process.cwd(), 'templates', 'co-deck', 'variant.json');
+      try {
+        const canonical = JSON.parse(readFileSync(canonicalPath, 'utf-8'));
+        if (canonical.agent_manifest) metadata.agent_manifest = canonical.agent_manifest;
+        if (canonical.theme_manifest) metadata.theme_manifest = canonical.theme_manifest;
+        if (canonical.lecture_profile) metadata.lecture_profile = canonical.lecture_profile;
+        console.log(`  ✅ Injected co-deck extension fields (agent_manifest, theme_manifest, lecture_profile)`);
+      } catch {
+        console.warn(`  ⚠️  Could not read templates/co-deck/variant.json — extension fields skipped`);
+      }
+    }
 
     generatedVariant = await generateVariant(metadata, reconciledManifest!, config.outputPath);
     phases.generate = { success: true, result: generatedVariant };

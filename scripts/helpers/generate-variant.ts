@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.6.0
+ * @version 1.7.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -45,6 +45,28 @@ export interface VariantMetadata {
   agentRoster: AgentDefinition[];
   /** Skills from L2 project */
   skills: SkillDefinition[];
+  /** Optional: Lecture variant — agent pipeline order and optional flags */
+  agent_manifest?: {
+    variant_agents_dir: string;
+    pipeline_order: string[];
+    optional: string[];
+    notes: string;
+  };
+  /** Optional: Lecture variant — HTML theme configuration */
+  theme_manifest?: {
+    themes_dir: string;
+    base_css: string;
+    available: string[];
+    default: string;
+    overrides_dir: string;
+    notes?: string;
+  };
+  /** Optional: Lecture variant — lecture profile template metadata */
+  lecture_profile?: {
+    template_path: string;
+    required_fields: string[];
+    notes?: string;
+  };
 }
 
 export interface AgentDefinition {
@@ -247,6 +269,9 @@ function generateVariantJson(metadata: VariantMetadata): string {
     skills: metadata.skills.map(skill => ({
       name: skill.name,
     })),
+    ...(metadata.agent_manifest && { agent_manifest: metadata.agent_manifest }),
+    ...(metadata.theme_manifest && { theme_manifest: metadata.theme_manifest }),
+    ...(metadata.lecture_profile && { lecture_profile: metadata.lecture_profile }),
   };
 
   return JSON.stringify(variantJson, null, 2);
@@ -1267,6 +1292,19 @@ export async function generateVariant(
   console.log(`\n=== Creating Directory Structure ===`);
   const directories = createDirectoryStructure(variantPath);
   console.log(`Created ${directories.length} directories`);
+
+  // Lecture-type: scaffold html-themes/ and presentations/ directories
+  if (metadata.variantType === 'lecture') {
+    for (const dir of [
+      join(variantPath, 'html-themes'),
+      join(variantPath, 'html-themes', 'base'),
+      join(variantPath, 'html-themes', 'overrides'),
+      join(variantPath, 'presentations'),
+    ]) {
+      createDirectory(dir);
+    }
+    console.log(`Created lecture-specific directories: html-themes/, presentations/`);
+  }
 
   // Generate variant.json
   console.log(`\n=== Generating variant.json ===`);
