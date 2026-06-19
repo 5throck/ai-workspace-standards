@@ -11,21 +11,45 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 
 #### 5.1 Agent File Format (Standard Frontmatter)
 
+There are two distinct agent file types with different formats:
+
+**Workspace-root agents** (`agents/*.md`) — PM, architect, auditor, and workspace-level specialists.
+No YAML frontmatter; pure Markdown. Created by `scripts/agent-create.ts`.
+
+**Variant specialist agents** (`templates/<variant>/agents/*.md`) — Domain specialists inside
+a project variant (e.g., co-develop, co-deck). Require full YAML frontmatter. See
+[`docs/designs/variant-specialist-agent-structure.md`](../designs/variant-specialist-agent-structure.md)
+for the canonical format and migration checklist.
+
+##### Variant Specialist Frontmatter (canonical)
+
 ```yaml
 ---
-name: <agent-name>
+name: <agent-slug>              # kebab-case, matches filename
+role: <one-line role description>
+status: active
 tier:
-  claude: high|medium|low        # claude-opus-4-7 | claude-sonnet-4-6 | claude-haiku-4-5
-  antigravity: high|medium|low   # gemini-3.1-pro | gemini-3.5-flash
-  gemini-cli: high|medium|low    # gemini-3.1-pro | gemini-3.5-flash
+  claude: high|medium|low       # claude-opus-4-7 | claude-sonnet-4-6 | claude-haiku-4-5
+  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.5-flash
+  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.5-flash
+  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.5-flash
 model: inherit
-color: yellow | blue | green | red | magenta | cyan | purple  # Claude Code only
-description: 'One-sentence role. Use when: "...", "...", "..."'
+color: blue | green | purple | red | orange | yellow | cyan | gray
+description: >-
+  <What the agent produces.>
+  <When to dispatch it.>
 examples:
   - user: "..."
     assistant: "..."
+phases: [1, 2]
+handoff_to: [agent-slug]
+handoff_from: [pm]
+required_skills: [skill-slug]
 ---
 ```
+
+All four tier platforms must be declared. `normalizeAgentFrontmatter()` in
+`generate-variant.ts` adds any missing platforms automatically during L2→variant conversion.
 
 The `description` field is how the AI tool selects the right agent - always write **when to use it** explicitly. The `tier` field enforces cost optimization across platforms.
 
