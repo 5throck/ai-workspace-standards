@@ -44,12 +44,20 @@ keywords:
 
 # Image acquisition preferences (used by image-curator agent)
 image:
-  # License filter — only these sources will be used
-  # Options: unsplash | pexels | wikimedia | all-free
-  source: unsplash
-  # Style hint for image search queries
+  # Primary source strategy
+  # Options: auto | pixabay | unsplash | pexels | wikimedia
+  # - auto (default): Pixabay keyless → Unsplash URL method → API keys if provided
+  # All sources are commercial-use unlimited, no attribution required
+  source: auto
+  # Style hint appended to image search queries
   # Examples: "professional", "minimalist", "tech", "nature", "abstract"
   style_hint: "professional"
+  # Optional API keys — leave empty to use keyless fallback (Pixabay free tier + Unsplash URL method)
+  # With keys: higher rate limits and more precise search results
+  api_keys:
+    unsplash: ""    # https://unsplash.com/developers — free 50 req/hr
+    pexels: ""      # https://www.pexels.com/api/ — free 200 req/hr
+    pixabay: ""     # https://pixabay.com/api/docs/ — free 100 req/hr (works keyless too)
 
 # ── Optional: Chapter overview ────────────────────────────────────
 # Pre-seed chapter titles to guide the storyline agent.

@@ -1,52 +1,140 @@
 ---
 name: version
-version: 1.0.0
+version: 1.3.0
 description: >
-  Manages version snapshots of lecture files. Auto-backs up files before
-  edits and restores prior versions on demand. Must be invoked by any other
-  agent before modifying a file. Use for version history, restore, comparison.
-  (Korean triggers: "이전 버전으로 돌아가고 싶어", "버전 목록 보여줘".)
+  Manages version snapshots of lecture files. Auto-backs up files before edits
+  and restores prior versions on demand. Must be called before any file
+  modification by any agent. Responds to "go back to previous version", "show
+  version list" (Korean: "이전 버전으로 돌아가고 싶어", "버전 목록 보여줘").
+  Cross-cutting — applies to all workflow stages.
+status: active
+owner: version
+last_reviewed: 2026-06-20
+prerequisites: none
 ---
-# Version Agent — Version Control
 
-**Stage**: Before/after every file edit (Cross-cutting)  
-**Output**: `presentations/<project>/_versions/`, `VERSIONS.md`  
-**Full instructions**: `agents/version.md`
+## Context
 
-## Role
+Tracks every file change and manages snapshots so any prior state can be restored at any time. This is a cross-cutting skill — it must be called **before any file modification by any other agent**, without exception. PM Agent enforces this order automatically.
 
-Tracks every file change and manages snapshots so any prior state can be restored at any time.
-**Must be called before any file modification by any agent — no exceptions.**
+## When to Use
 
-## When to Invoke
+- Before another agent edits a file (Storyline, Design, Build, Measure, Export, etc.)
+- User says "go back to previous version" / "이전 버전으로 돌아가고 싶어"
+- User says "show version list" / "버전 목록 보여줘"
+- PM Agent is about to perform a destructive (overwrite) change
 
-- Before another agent edits a file (always, without exception)
-- When the user says "go back to previous version" / "이전 버전으로 돌아가고 싶어"
-- When the user says "show version list" / "버전 목록 보여줘"
-- Before any destructive (overwrite) change
+---
 
-## Quick Reference
+## Execution Steps
+
+### Step 1: Create Snapshot (before any edit)
+
+Always create a snapshot **before** editing a file. `--workspace` is required.
 
 ```bash
-# Snapshot before editing (required before every file change)
-python scripts/snapshot.py <file> \
+# Single file
+bun scripts/co-deck/snapshot.ts slide_deck.md \
   --workspace presentations/<project> \
-  --desc "<what is about to change>" \
-  --agent <agent>
+  --desc "shrink chapter 3 slide count" \
+  --agent content
 
-# List versions
-python scripts/snapshot.py --workspace presentations/<project> --list
-
-# Restore to a previous version
-python scripts/snapshot.py \
+# Multiple files
+bun scripts/co-deck/snapshot.ts slide_deck.md storyline.md \
   --workspace presentations/<project> \
-  --restore <version_id>
+  --desc "full chapter restructure" \
+  --agent content
+
+# HTML file (large — snapshot only when layout changes)
+bun scripts/co-deck/snapshot.ts lecture_v1.html \
+  --workspace presentations/<project> \
+  --desc "backup before image swap" \
+  --agent build
+
+# Entire folder
+bun scripts/co-deck/snapshot.ts images/ \
+  --workspace presentations/<project> \
+  --desc "backup before image set swap" \
+  --agent build
 ```
 
-**`--agent` values**: `pm` · `research` · `content` · `design` · `build` · `measure` · `export` · `manual`
+> File paths are relative to `--workspace`.
 
-**File paths** are relative to `--workspace` (e.g., `slide_deck.md`, not the full path).
+**`--agent` value rules:**
 
-**Caveats**: HTML files are large — snapshot only when needed. `fonts/` doesn't need snapshots (re-downloadable). `layout_spec.json` and `pdf_layout_spec.md` become invalid when HTML changes — snapshot them together.
+| Agent | `--agent` value |
+|-------|----------------|
+| PM Agent | `pm` |
+| Research Agent | `research` |
+| Storyline Agent | `storyline` |
+| Design Agent | `design` |
+| Build Agent | `build` |
+| Measure Agent | `measure` |
+| Export Agent | `export` |
+| Manual backup | `manual` |
 
-→ Storage layout, VERSIONS.md format, restore examples: see `agents/version.md`
+---
+
+### Step 2: List Versions
+
+```bash
+bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
+```
+
+Example output:
+
+```
+──────────────────────────────────────────────────────────
+  Stored versions (5, newest first)
+──────────────────────────────────────────────────────────
+  [ 1] 2026-06-17_16-00_build_image-swap-backup
+        Files: 3 / Size: 2.4MB
+  [ 2] 2026-06-17_14-30_content_chapter-adjust
+        Files: 2 / Size: 45KB
+```
+
+---
+
+### Step 3: Restore a Version
+
+```bash
+# Full version ID
+bun scripts/co-deck/snapshot.ts \
+  --workspace presentations/<project> \
+  --restore 2026-06-17_14-30_content_chapter-adjust
+
+# Partial version ID (if uniquely matched)
+bun scripts/co-deck/snapshot.ts \
+  --workspace presentations/<project> \
+  --restore 2026-06-17_14-30
+```
+
+> Restore **automatically backs up the current file** before restoring. If you regret the restore, run `--restore` again on the new backup.
+
+---
+
+## Output Format
+
+Snapshots are stored under `presentations/<project>/_versions/`:
+
+```
+presentations/<project>/
+└── _versions/
+    └── 2026-06-17_14-30_content_chapter-adjust/
+        ├── slide_deck.md
+        └── storyline.md
+```
+
+Each snapshot auto-appends an entry to `presentations/<project>/VERSIONS.md` with date, agent, description, file sizes, and restore command.
+
+**Caveats:**
+- Add `_versions/` to `.gitignore` — large folders make Git inefficient
+- HTML files are 100KB–several MB; snapshot only on layout changes
+- `fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
+- Snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes (they become invalid if HTML changes)
+
+## Related Skills
+
+- `html-build` — must call this skill before editing the HTML file
+- `storyline` — must call this skill before editing `slide_deck.md` or `storyline.md`
+- `measure` — must call this skill before re-running measurement (snapshots `layout_spec.json`)

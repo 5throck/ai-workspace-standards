@@ -1,0 +1,72 @@
+/**
+ * minimal.css — co-deck theme: Minimal
+ *
+ * Text-only layout. No image panel. Large typography, generous whitespace.
+ * Ideal for text-heavy lectures, step-by-step explanations, or Q&A slides.
+ * Header replaced with a thin bottom border line.
+ */
+
+:root {
+  /* Surface — off-white for warmth */
+  --slide-bg:            #fafafa;
+  --card-bg:             #fafafa;
+  --card-shadow:         none;
+  --card-padding:        3rem 4rem;
+  --card-border:         none;
+
+  /* Header — removed; replaced with accent line via pseudo-element */
+  --header-bg:           #fafafa;
+  --header-text:         #555577;
+  --header-height:       2.4rem;
+
+  /* Typography — larger, more breathing room */
+  --font-family:         'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-size-title:     2.6rem;
+  --font-size-subtitle:  1.5rem;
+  --font-size-body:      1.1rem;
+  --font-weight-title:   700;
+  --line-height-body:    1.8;
+
+  /* Colors — neutral palette */
+  --text-primary:        #222233;
+  --text-secondary:      #555566;
+  --text-muted:          #999aaa;
+  --accent:              #333344;
+  --accent-light:        #ebebef;
+  --bullet-color:        #888899;
+  --bullet-marker:       "–";
+
+  /* Image panel — hidden */
+  --image-panel-width:   0%;
+  --image-panel-min-width: 0px;
+
+  /* Divider — light variant */
+  --divider-bg:          #222233;
+  --divider-text:        #ffffff;
+  --divider-accent:      #aaaacc;
+
+  /* Cover */
+  --cover-bg:            #222233;
+  --cover-subtitle-text: rgba(255, 255, 255, 0.7);
+
+  /* Section label */
+  --section-label-bg:    #ebebef;
+  --section-label-text:  #333344;
+}
+
+/* Hide image panel entirely in minimal theme */
+[data-theme="minimal"] .right-panel {
+  display: none !important;
+}
+
+/* Replace header bar with thin bottom border */
+[data-theme="minimal"] .slide-header {
+  background: var(--slide-bg);
+  border-bottom: 1px solid #dddde8;
+}
+
+/* Tighter section label */
+[data-theme="minimal"] .section-label {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}

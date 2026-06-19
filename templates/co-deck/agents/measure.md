@@ -40,9 +40,9 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 ## Responsibilities
 
 - Verify Playwright and font dependencies are installed before starting
-- Run `scripts/measure_layout.py` against the HTML file to capture slide element coordinates, fonts, and colors
+- Run `scripts/co-deck/measure-layout.ts` against the HTML file to capture slide element coordinates, fonts, and colors
 - Verify output: `layout_spec.json`, `pdf_layout_spec.md`, `screenshots/`
-- Download TTF files for the project fonts using `scripts/download_font.py`
+- Download TTF files for the project fonts using `scripts/co-deck/download-font.ts`
 - Share `pdf_layout_spec.md` with user for confirmation (measurements match actual HTML)
 - Snapshot `layout_spec.json` and `pdf_layout_spec.md` together via Version Agent before any HTML changes
 

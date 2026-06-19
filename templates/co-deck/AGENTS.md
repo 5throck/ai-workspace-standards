@@ -21,11 +21,13 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 <!-- VARIANT-AGENTS-START -->
 | **design** | [`agents/design.md`](agents/design.md) | Medium | Locks visual design style — color palette, fonts, layout into design_spec.md |
-| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md |
+| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
+| **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Medium | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
 | **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
 | **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | Generates sample and full PDF from slidedata.json and layout_spec.json |
-| **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md for storyline design |
-| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md from research notes |
+| **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md; loads lecture-profile.md |
+| **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Validates URLs in research_notes.md → source-verification.md + Trust Score |
+| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md with image_role/image_query fields |
 | **version** | [`agents/version.md`](agents/version.md) | Low | Snapshots files before every edit; restores prior states on demand |
 <!-- VARIANT-AGENTS-END -->
 ---
@@ -80,6 +82,24 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Phases** | 1 |
 | **Role** | Gathers web sources and writes research_notes.md for storyline design |
 
+### image-curator
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/image-curator.md`](agents/image-curator.md) |
+| **Tier** | medium |
+| **Phases** | 3.5 |
+| **Role** | Searches and downloads commercial-use images via Pixabay (keyless), Unsplash, Pexels; outputs assets/images/ + image-manifest.json |
+
+### source-verifier
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/source-verifier.md`](agents/source-verifier.md) |
+| **Tier** | medium |
+| **Phases** | 1.5 |
+| **Role** | Validates URLs in research_notes.md via HTTP check + content cross-check; outputs source-verification.md with Trust Score; optional (--skip-verify) |
+
 ### storyline
 
 | Field | Value |
@@ -87,7 +107,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/storyline.md`](agents/storyline.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3 |
-| **Role** | Writes storyline.md and slide_deck.md from research notes |
+| **Role** | Writes storyline.md and slide_deck.md with image_role/image_query fields; handles cover/divider confirmation |
 
 ### version
 

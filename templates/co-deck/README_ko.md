@@ -13,18 +13,20 @@ translated_from_hash: PLACEHOLDER
 
 **미션:** 리서치부터 인쇄용 PDF까지, 전문 AI 에이전트 팀이 강연 자료 제작을 처음부터 끝까지 함께합니다.
 
-8개의 전문 에이전트가 역할을 분담하여 자료 조사, 스토리라인 구성, 디자인, HTML 슬라이드 빌드, 레이아웃 측정, PDF 출력까지 단계별로 처리합니다.
+10개의 전문 에이전트가 역할을 분담하여 자료 조사, 출처 검증, 스토리라인 구성, 디자인, 이미지 수집, HTML 슬라이드 빌드(4가지 테마), 레이아웃 측정, PDF 출력까지 단계별로 처리합니다.
 
 ## 2. AI 팀 소개
 
 | 에이전트 | 단계 | 역할 |
 |---------|------|------|
-| **PM** | 0-6 (전체) | 오케스트레이터 — 유일한 사용자 창구, `project_state.json` 관리 |
+| **PM** | 0-11 (전체) | 오케스트레이터 — 유일한 사용자 창구, `project_state.json` 관리 |
 | **Version** | 전체 (횡단) | 모든 파일 수정 전 스냅샷 저장 |
-| Research | 1 | 웹 리서치 및 자료 수집 → `research_notes.md` |
-| Storyline | 2-3 | 스토리라인 및 슬라이드 구성 → `storyline.md`, `slide_deck.md` |
+| Research | 1 | 웹 리서치 및 자료 수집; `lecture-profile.md` 로드 → `research_notes.md` |
+| Source Verifier | 1.5 | URL 접근성 + 내용 교차 검증 → `source-verification.md` (Trust Score) |
+| Storyline | 2-3 | 스토리라인 및 슬라이드 구성 (`image_role`/`image_query` 포함) → `slide_deck.md` |
 | Design | 4 | 색상, 폰트, 레이아웃 확정 → `design_spec.md` |
-| Build | 5-8 | HTML 슬라이드 + 이미지 생성 → `lecture_vN.html` |
+| Image Curator | 3.5 | 상업적 무제한 이미지 검색·다운로드 → `assets/images/` + `image-manifest.json` |
+| Build | 5-8 | HTML 슬라이드 + 테마 적용 (`data-theme`) → `lecture_vN.html` |
 | Measure | 9-10 | Playwright 레이아웃 측정 + 폰트 다운로드 → `pdf_layout_spec.md` |
 | Export | 11 | 샘플 PDF → 검수 → 전체 PDF → `<project>.pdf` |
 
@@ -49,14 +51,14 @@ translated_from_hash: PLACEHOLDER
 
 ```bash
 # 버전 스냅샷 (수정 전 항상 실행)
-python scripts/snapshot.py <file>.md --workspace presentations/<project> --desc "..." --agent storyline
+bun scripts/co-deck/snapshot.ts <file>.md --workspace presentations/<project> --desc "..." --agent storyline
 
-# 레이아웃 측정
-python scripts/measure_layout.py presentations/<project>/lecture_vN.html
+# 레이아웃 측정 (Playwright 필요)
+bun scripts/co-deck/measure-layout.ts presentations/<project>/lecture_vN.html
 
 # PDF 생성
-python scripts/gen_sample5.py --project presentations/<project>
-python scripts/gen_full.py    --project presentations/<project>
+bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> --sample 5
+bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project>
 ```
 
 ### D. 슬래시 명령어
@@ -68,9 +70,11 @@ python scripts/gen_full.py    --project presentations/<project>
 ## 4. 의존성 설치
 
 ```bash
-pip install fpdf2 pillow playwright
-playwright install chromium
-bun --version   # audit.ts, dev-sync.ts 실행에 필요
+bun install   # pdf-lib, fflate, @pdf-lib/fontkit 설치 (Playwright는 optionalDependency — 기본 제외)
+
+# 레이아웃 측정(measure-layout.ts)이 필요한 경우에만:
+bun add playwright
+bunx playwright install chromium
 ```
 
 *Last Updated: 2026-06-19 — co-deck variant template*
