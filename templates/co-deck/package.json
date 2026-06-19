@@ -1,0 +1,19 @@
+{
+  "type": "module",
+  "name": "co-deck-project",
+  "private": true,
+  "description": "co-deck variant project — AI-assisted lecture slide production",
+  "scripts": {
+    "download-font": "bun scripts/download-font.ts",
+    "extract-slidedata": "bun scripts/extract_slidedata.mjs",
+    "measure-layout": "bun scripts/measure-layout.ts",
+    "gen-pdf": "bun scripts/gen-slides-pdf.ts",
+    "snapshot": "bun scripts/snapshot.ts"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "fflate": "^0.8.2",
+    "pdf-lib": "^1.17.1",
+    "playwright": "^1.45.0"
+  }
+}
