@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.1.0
+ * @version 1.2.0
  * Verifies all skills in skills/ directory are loadable and properly formatted
  */
 
@@ -28,10 +28,50 @@ interface SkillMetadata {
   triggers: string[];
 }
 
+/**
+ * B-03: Check SKILLS.md for stale 'layer' column in the ## Registry table header.
+ * Returns a WARN SkillCheck if the column is found, null otherwise.
+ */
+async function checkSkillsMdSchema(): Promise<SkillCheck | null> {
+  const skillsMdPath = path.join(projectRoot, 'skills', 'SKILLS.md');
+  const { existsSync } = await import('node:fs');
+  if (!existsSync(skillsMdPath)) return null;
+
+  try {
+    const content = await Bun.file(skillsMdPath).text();
+    const registryIndex = content.indexOf('## Registry');
+    if (registryIndex === -1) return null;
+
+    // Find the first table header line after ## Registry
+    const afterRegistry = content.substring(registryIndex);
+    const headerMatch = afterRegistry.match(/^\|.+\|/m);
+    if (!headerMatch) return null;
+
+    const headerLine = headerMatch[0].toLowerCase();
+    if (headerLine.includes('| layer ') || headerLine.includes('| layer|') || headerLine.match(/\|\s*layer\s*\|/)) {
+      return {
+        name: 'SKILLS.md schema',
+        path: skillsMdPath,
+        status: 'WARN',
+        issues: [
+          "SKILLS.md has a stale 'layer' column — this column no longer controls propagation (SKILL.md frontmatter is the SSOT). Run 'bun scripts/upgrade-project.ts <project-path>' to migrate."
+        ]
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 async function main(): Promise<void> {
   console.log("🔍 Verifying Skills\n");
 
   const checks = await scanSkills();
+
+  // B-03: Check SKILLS.md for stale 'layer' column
+  const skillsMdCheck = await checkSkillsMdSchema();
+  if (skillsMdCheck) checks.push(skillsMdCheck);
 
   for (const check of checks) {
     const icon = check.status === "PASS" ? "✅" : check.status === "WARN" ? "⚠️" : "❌";
@@ -80,6 +120,47 @@ async function scanSkills(): Promise<SkillCheck[]> {
   for (const skillFile of [...skillFiles, ...commonSkillFiles]) {
     const check = await verifySkill(skillFile);
     checks.push(check);
+  }
+
+  // A-03: L1 Orphan Check — L0 skills with l2_propagate: false or scope: workspace
+  // must NOT exist in templates/common/skills/
+  for (const l0File of skillFiles) {
+    try {
+      const content = await Bun.file(l0File).text();
+      const frontmatterStart = content.indexOf("---");
+      const frontmatterEnd = content.indexOf("---", 3);
+      if (frontmatterStart === -1 || frontmatterEnd === -1) continue;
+
+      const frontmatter = content.substring(frontmatterStart + 3, frontmatterEnd);
+
+      const l2PropagateMatch = frontmatter.match(/^l2_propagate:\s*(true|false)\b/m);
+      const scopeMatch = frontmatter.match(/^scope:\s*(\S+)/m);
+
+      const noPropagate = l2PropagateMatch && l2PropagateMatch[1] === 'false';
+      const isWorkspaceScope = scopeMatch && scopeMatch[1].toLowerCase() === 'workspace';
+
+      if (noPropagate || isWorkspaceScope) {
+        // Extract skill name from path like .../skills/audit-workspace/SKILL.md
+        const skillNameMatch = l0File.match(/skills[/\\]([^/\\]+)[/\\]SKILL\.md$/);
+        const skillName = skillNameMatch ? skillNameMatch[1] : null;
+        if (!skillName) continue;
+
+        const l1Path = path.join(projectRoot, 'templates', 'common', 'skills', skillName);
+        const { existsSync } = await import('node:fs');
+        if (existsSync(l1Path)) {
+          checks.push({
+            name: skillName,
+            path: l0File,
+            status: 'FAIL',
+            issues: [
+              `L1 orphan detected: skill has l2_propagate: false or scope: workspace in SKILL.md but exists in templates/common/skills/ — delete templates/common/skills/${skillName}/`
+            ]
+          });
+        }
+      }
+    } catch {
+      // Skip files that cannot be read
+    }
   }
 
   return checks;

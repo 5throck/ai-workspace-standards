@@ -47,7 +47,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Search Korean and English sources for core concepts, trends, statistics, case studies, and expert quotes
 - Record all source URLs — no fabricated references
 - Produce `research_notes.md` with the standard section structure
-- Offer Gate 1 user review after delivery (optional gate)
+- Direct handoff to next stage (Gate 1 is retired)
 
 ## Profile Loading
 
@@ -90,7 +90,7 @@ Full template and Korean example: see `skills/research/SKILL.md`.
 - Always load `presentations/<project>/lecture-profile.md` before searching — do not skip this step
 - Always search in both Korean and English — single-language coverage is incomplete
 - Record actual source URLs — do not fabricate references
-- Gate 1 is optional but must be offered to the user before handing off to Storyline
+- Proceed directly to Stage 1.5/2 once research is done (Gate 1 is retired)
 
 ## Meeting Participation
 

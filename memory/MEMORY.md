@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-21](2026-06-21.md) | fix(co-consult): remove duplicate templates/co-consult/memory directory |
 | [2026-06-20](2026-06-20.md) | feat(co-deck): Phase 2 — HTML themes, source-verifier, image source strategy, context docs update |
 | [2026-06-19](2026-06-19.md) | feat(co-deck): complete variant template — fix all structural gaps vs other variants and update l2-to-variant-pipeline |
 | [2026-06-18](2026-06-18.md) | merge: integrate main into pr branch + add co-deck variant template (Phase A-C complete) |

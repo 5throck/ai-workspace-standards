@@ -15,7 +15,7 @@ Skills follow the same L0/L1/L2 model as scripts:
 | **L1 — Template snapshot** | `templates/common/skills/` | publish: `bun run propagate:apply` | Explicit publish from L0 |
 | **L2 — Project** | `<project>/skills/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot — skills with `l2_propagate: false` are excluded at this stage and never enter `templates/common/`. L2 projects snapshot L1 at creation time — no automatic back-propagation.
+**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. Propagation filtering is controlled exclusively by SKILL.md frontmatter (`l2_propagate`/`scope`) — skills with `l2_propagate: false` or `scope: workspace` are excluded at the L0→L1 stage and never enter `templates/common/`. L2 projects snapshot L1 at creation time — no automatic back-propagation.
 
 > **Workspace Root vs. Individual Projects**:
 > - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `ui-ux-pro-max`, `simulate-project-creation`, `security-scan`, `audit-workspace`).
@@ -71,7 +71,23 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 **Current excluded skills**: `audit-workspace`, `create-variant`, `promote-variant`
 
-> `propagate-to-templates.ts` reads this field via `helpers/layer-filter.ts` and excludes the skill from L1 propagation. `new-project.ts` also checks it as a safety net.
+> `propagate-to-templates.ts` calls `includeSkillInL1()` from `helpers/layer-filter.ts`, which reads SKILL.md frontmatter directly — `l2_propagate: false` or `scope: workspace` returns `false` (excluded). `new-project.ts` also checks this as a safety net. SKILLS.md is not consulted for propagation decisions.
+
+#### SKILLS.md Registry Principle
+
+`SKILLS.md` (at both L0 and L1) is a **registry-only** file. It tracks:
+
+| Column | Purpose |
+|--------|---------|
+| `skill` | Skill directory name |
+| `version` | Current version |
+| `status` | Lifecycle state (active/deprecated/archived) |
+| `owner` | Responsible agent |
+| `last_reviewed` | Date of last review |
+| `removal-date` | Scheduled removal (if deprecated) |
+| `notes` | Human-readable context |
+
+**Prohibited in SKILLS.md**: Columns that control propagation behavior (e.g., `layer`) are explicitly forbidden. Propagation is exclusively controlled via SKILL.md frontmatter (`l2_propagate`/`scope`). Adding a `layer` column to SKILLS.md would create a silent dead column that misleads future developers — `layer-filter.ts` no longer reads it.
 
 #### 6.3 Skill Body Structure
 

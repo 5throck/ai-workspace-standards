@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.2.1
+ * @version 1.3.0
  * @status active
  *
- * Reads SCRIPTS.md and SKILLS.md layer columns and provides
- * filtering functions for publish-to-template, create-l2-scaffold,
+ * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
+ * and provides filtering functions for publish-to-template, create-l2-scaffold,
  * validate-templates, and new-project.sh.
  *
  * Layer values:
@@ -109,77 +109,14 @@ export function parseScriptLayers(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Parse SKILLS.md Registry section and return a Map<skillName, LayerValue>.
- *
- * Expected columns: skill | version | status | layer | owner | last_reviewed | removal-date | notes
- * Dynamically resolves column index from header row.
- *
- * Fallback: if SKILLS.md is not found, iterate skills/star/SKILL.md and read
- * the scope: frontmatter field:
- *   scope: workspace -> L0
- *   scope: common   -> L0+L1 (default)
- *   (no scope)      -> L0+L1
+ * Read SKILL.md frontmatter from each skill directory and return Map<skillName, LayerValue>.
+ * Reads `l2_propagate: false` and `scope: workspace` frontmatter fields — both map to 'L0'
+ * (excluded from L1 propagation).
  */
 export function parseSkillLayers(
   skillsDirPath?: string,
-  skillsMdPath?: string,
 ): Map<string, LayerValue> {
-  const mdPath =
-    skillsMdPath ?? path.join(process.cwd(), "skills", "SKILLS.md");
   const skillsDir = skillsDirPath ?? path.join(process.cwd(), "skills");
-  const result = new Map<string, LayerValue>();
-
-  // Try SKILLS.md first
-  if (fs.existsSync(mdPath)) {
-    let content: string;
-    try {
-      content = fs.readFileSync(mdPath, "utf8");
-    } catch {
-      console.warn(`[layer-filter] Could not read SKILLS.md at ${mdPath}`);
-      return _parseSkillLayersFromFrontmatter(skillsDir);
-    }
-
-    let inRegistry = false;
-    let headerParsed = false;
-    let skillColIndex = -1;
-    let layerColIndex = -1;
-
-    for (const rawLine of content.split("\n")) {
-      const line = rawLine.trim();
-
-      if (/^## Registry/.test(line)) {
-        inRegistry = true;
-        continue;
-      }
-      if (inRegistry && /^## /.test(line)) break;
-      if (!inRegistry) continue;
-      if (!line.startsWith("|")) continue;
-
-      if (!headerParsed) {
-        const cols = line.split("|").map((c) => c.trim().toLowerCase());
-        skillColIndex = cols.findIndex((c) => c === "skill");
-        layerColIndex = cols.findIndex((c) => c === "layer");
-        if (skillColIndex >= 0 && layerColIndex >= 0) headerParsed = true;
-        continue;
-      }
-
-      if (/^\|[-\s|]+\|$/.test(line)) continue;
-
-      const cols = line.split("|").map((c) => c.trim());
-      const skillCell = cols[skillColIndex] ?? "";
-      const layerCell = cols[layerColIndex] ?? "";
-
-      if (!skillCell) continue;
-
-      const skillName = skillCell.replace(/`/g, "").trim();
-      const layer = normalizeLayer(layerCell);
-      result.set(skillName, layer);
-    }
-
-    if (result.size > 0) return result;
-  }
-
-  // Fallback: read SKILL.md frontmatter
   return _parseSkillLayersFromFrontmatter(skillsDir);
 }
 

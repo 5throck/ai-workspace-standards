@@ -358,6 +358,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
   'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
   'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
+  'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
 ]);
 
 function runCheckX(): SyncIssue[] {

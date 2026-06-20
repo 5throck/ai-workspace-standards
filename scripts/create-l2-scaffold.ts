@@ -1,4 +1,4 @@
-// @version 1.6.1
+// @version 1.6.2
 ```typescript
 #!/usr/bin/env bun
 /**
@@ -264,11 +264,11 @@ function generateStubs(
         notes: "source-verifier: skip with --skip-verify. image-curator: skip if all slides use image_role: none."
       },
       theme_manifest: {
-        themes_dir: "html-themes",
-        base_css: "html-themes/base/base.css",
+        themes_dir: "docs/html-themes",
+        base_css: "docs/html-themes/base/base.css",
         available: ["classic", "minimal", "visual-heavy", "academic"],
         default: "classic",
-        overrides_dir: "html-themes/overrides",
+        overrides_dir: "docs/html-themes/overrides",
         notes: "CSS variable override themes. DOM structure immutable across themes."
       },
       lecture_profile: {
@@ -686,20 +686,20 @@ function printSummary(variant: string): void {
 }
 
 function createLectureScaffold(projectDir: string): void {
-  log("🎨 Creating lecture-specific scaffold (html-themes/, presentations/)…");
+  log("🎨 Creating lecture-specific scaffold (docs/html-themes/, presentations/)…");
   // html-themes directory structure
   for (const dir of [
-    "html-themes",
-    "html-themes/base",
-    "html-themes/overrides",
+    "docs/html-themes",
+    "docs/html-themes/base",
+    "docs/html-themes/overrides",
     "presentations",
   ]) {
     ensureDir(path.join(projectDir, dir));
   }
   // presentations/.gitkeep so the folder is tracked
   writeFile(path.join(projectDir, "presentations", ".gitkeep"), "");
-  log("    ├─ html-themes/base/");
-  log("    ├─ html-themes/overrides/");
+  log("    ├─ docs/html-themes/base/");
+  log("    ├─ docs/html-themes/overrides/");
   log("    └─ presentations/");
 }
 

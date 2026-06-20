@@ -6,8 +6,8 @@
  * DOM structure MUST NOT be altered by themes — CSS variables only.
  *
  * Usage in lecture_vN.html:
- *   <link rel="stylesheet" href="../../html-themes/base/base.css">
- *   <link rel="stylesheet" href="../../html-themes/overrides/<theme>.css">
+ *   <link rel="stylesheet" href="../../docs/html-themes/base/base.css">
+ *   <link rel="stylesheet" href="../../docs/html-themes/overrides/<theme>.css">
  *   <html data-theme="<theme>">
  */
 
