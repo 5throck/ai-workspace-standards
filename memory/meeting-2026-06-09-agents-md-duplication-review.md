@@ -1,6 +1,6 @@
 # Meeting Transcript
 **Date**: 2026-06-09
-**Topic**: AGENTS.md 중복 섹션 통합 검토
+**Topic**: AGENTS.md Duplicate Section Integration Review
 **Participants**: architect, docs-writer, auditor
 **Rounds**: 2
 **Language**: Korean (transcript saved in English)

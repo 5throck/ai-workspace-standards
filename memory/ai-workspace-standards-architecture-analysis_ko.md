@@ -1,3 +1,9 @@
+---
+language: ko
+type: analysis-report
+description: Korean-language architecture analysis of ai-workspace-standards project
+---
+
 # AI Workspace Standards 아키텍처 분석 보고서
 
 **문서 분류**: 전문 아키텍처 분석 보고서  

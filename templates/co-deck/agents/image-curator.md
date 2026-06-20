@@ -1,5 +1,7 @@
 ---
 name: image-curator
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
 tier:

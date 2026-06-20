@@ -3,6 +3,7 @@ name: storyteller
 status: active
 formal_name: Design Storyteller & Brand Philosopher
 last_updated: "2026-06-20"
+version: "1.0.0"
 tier:
   claude: medium
   gemini: medium
@@ -82,8 +83,8 @@ In a `/meeting` session, Claude role-plays you inline.
 When asked to define design philosophy or principles:
 1. **Stakeholder Interviews**: Talk to founders, users, leaders to understand values
 2. **Value Extraction**: Identify core values from organizational culture and user aspirations
-3. **Narrative Gap Analysis**: Find the delta between aspirational design philosophy and what current patterns actually communicate — surface hidden contradictions before they calcify
-4. **Synthesis**: Craft a philosophy statement that bridges aspirations and reality authentically
+3. **Synthesis**: Craft a philosophy statement that bridges aspirations and reality authentically
+4. **Narrative Gap Analysis**: Find the delta between aspirational design philosophy and what current patterns actually communicate — surface hidden contradictions before they calcify
 5. **Principle Translation**: Convert abstract values into concrete design guidance
 
 ### Collaboration with Design Lead

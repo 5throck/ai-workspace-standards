@@ -21,6 +21,8 @@ phases: [1, 2]
 handoff_to: [engagement-leader]
 handoff_from: [engagement-leader]
 required_skills: [stakeholder-alignment, org-readiness-assessment, change-impact-assessment]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

@@ -57,6 +57,7 @@ Modern AI-assisted development requires more than prompts - it requires **consis
 # Check essential tools
 git --version    # Should show 2.x.x
 bun --version    # Should show 1.x.x
+gh --version     # Optional: PR automation
 ```
 
 **Install missing tools**: See [Getting Started](docs/getting-started.md#-essential-software-must-have) for detailed installation instructions.
@@ -303,4 +304,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-19*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-20*

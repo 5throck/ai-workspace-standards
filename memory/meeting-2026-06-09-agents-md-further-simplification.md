@@ -1,6 +1,6 @@
 # Meeting Transcript
 **Date**: 2026-06-09
-**Topic**: AGENTS.md 추가 간소화 방안 논의
+**Topic**: AGENTS.md Further Simplification Strategy Discussion
 **Participants**: architect, docs-writer, auditor
 **Rounds**: 2
 **Language**: Korean (transcript saved in English)

@@ -21,6 +21,8 @@ phases: [1]
 handoff_to: [design-lead]
 handoff_from: [pm]
 required_skills: []
+version: "1.0.0"
+last_updated: "2026-05-28"
 ---
 
 ## Role

@@ -1,5 +1,7 @@
 ---
 name: pdf-export
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: PDF generation specialist using pdf-lib and measured layout data
 status: active
 tier:

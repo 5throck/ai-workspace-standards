@@ -2,6 +2,8 @@
 name: technical-writer
 role: API documentation, technical guides, and developer resources creator
 status: active
+version: "1.0.0"
+last_updated: "2026-05-28"
 formal_name: Technical Writer & Developer Documentation Specialist
 tier:
   claude: medium

@@ -1,6 +1,6 @@
 # Meeting Transcript
 **Date**: 2026-06-09
-**Topic**: docs 폴더 구조적 재설계 - 통합, 정리, superpowers 제거
+**Topic**: docs Folder Structural Redesign - Consolidation, Cleanup, superpowers Removal
 **Participants**: architect, docs-writer, auditor, lifecycle-manager
 **Rounds**: 2
 **Language**: Korean (transcript saved in English)

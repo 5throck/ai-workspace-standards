@@ -21,7 +21,9 @@ examples:
 phases: [4]
 handoff_to: [pm]
 handoff_from: [pm]
-required_skills: []
+required_skills: [project-delivery, stakeholder-alignment]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

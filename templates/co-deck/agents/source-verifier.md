@@ -1,5 +1,6 @@
 ---
 name: source-verifier
+version: "1.0.0"
 role: Research source credibility and URL existence verification specialist
 status: active
 last_updated: "2026-06-20"

@@ -2,6 +2,8 @@
 name: stack-setup
 role: Unknown stack identification and secure setup procedure specialist
 status: active
+version: "1.0.0"
+last_updated: "2026-06-20"
 tier:
   claude: low
   gemini: low

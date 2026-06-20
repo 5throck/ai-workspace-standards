@@ -1,5 +1,7 @@
 ---
 name: threat-modeler
+version: "1.0.0"
+last_updated: "2026-06-01"
 formal_name: Threat Modeler
 role: STRIDE analysis, ATT&CK mapping, and risk scoring specialist
 tier:

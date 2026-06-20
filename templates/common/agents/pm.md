@@ -3,6 +3,8 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
+version: "1.0.0"
+last_updated: "2026-05-28"
 tier:
   claude: high
   gemini: high

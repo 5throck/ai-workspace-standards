@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+last_updated: "2026-05-28"
+status: active
+---
+
 # Common Agents
 
 This directory contains agent definitions shared across all variant templates.

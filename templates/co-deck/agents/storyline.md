@@ -1,5 +1,7 @@
 ---
 name: storyline
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Storyline architect and slide deck planner for lecture content
 status: active
 tier:
@@ -8,6 +10,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+language: ko
 color: green
 description: >-
   Content agent — writes storyline.md (narrative flow) and slide_deck.md (per-slide content).

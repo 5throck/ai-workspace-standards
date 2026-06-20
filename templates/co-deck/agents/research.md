@@ -1,5 +1,7 @@
 ---
 name: research
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Web research and source collection specialist for lecture preparation
 status: active
 tier:
@@ -8,6 +10,7 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
+language: ko
 color: cyan
 description: >-
   Research agent — gathers web sources and organizes content for storyline design.

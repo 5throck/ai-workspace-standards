@@ -21,6 +21,8 @@ phases: [4]
 handoff_to: [engagement-leader]
 handoff_from: [engagement-leader]
 required_skills: [project-delivery, stakeholder-review-management]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

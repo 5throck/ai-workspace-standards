@@ -1,6 +1,8 @@
 ---
 extends: ../../common/agents/pm.md
 name: pm
+version: "1.0.0"
+last_updated: "2026-06-17"
 status: active
 tier:
   claude: high

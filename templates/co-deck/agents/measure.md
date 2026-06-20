@@ -1,5 +1,7 @@
 ---
 name: measure
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Layout measurement and font download specialist for PDF preparation
 status: active
 tier:

@@ -21,6 +21,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [service-designer, visual-designer, typography-expert]
 required_skills: []
+version: "1.0.0"
+last_updated: "2026-05-28"
 ---
 
 ## Role

@@ -2,6 +2,8 @@
 name: ms365-expert
 role: Microsoft 365 platform expertise for productivity and collaboration tools
 status: active
+version: "1.0.0"
+last_updated: "2026-05-28"
 formal_name: Microsoft 365 Collaboration Expert
 tier:
   claude: low

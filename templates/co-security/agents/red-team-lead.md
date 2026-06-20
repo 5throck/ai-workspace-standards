@@ -1,5 +1,7 @@
 ---
 name: red-team-lead
+version: "1.0.0"
+last_updated: "2026-06-20"
 formal_name: Red Team Lead
 role: Attack methodology, MITRE ATT&CK TTPs, and PoC review specialist
 tier:

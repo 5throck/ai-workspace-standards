@@ -49,6 +49,6 @@
     "variant_agents_dir": "agents",
     "pipeline_order": [],
     "optional": ["typography-expert"],
-    "notes": "storyteller: skip for purely functional/technical design work. typography-expert: skip if font decisions are pre-established by brand guidelines."
+    "notes": "storyteller: skip for purely functional/technical design work. typography-expert: skip if font decisions are pre-established by brand guidelines. System skills (agent-lifecycle-manager, platform-command-lifecycle-manager, platform-skill-lifecycle-manager, finishing-a-development-branch) are present in .claude/skills/ and .gemini/skills/ via workspace propagation — intentionally excluded from skills[] as they are workspace-level utilities, not co-design domain skills."
   }
 }

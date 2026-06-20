@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-20]**: feat(variants): `skills[]` registration gaps filled — co-consult (+documentation-writing, +research-analysis), co-design (+service-design, +ui-ux-design-intelligence), co-develop (+code-review, +refactoring, +test-driven-development), co-work (+api-documentation, +documentation-writing, +research-analysis)
 
 ### Fixed
+- **[2026-06-20]**: fix(co-work): `project-coordinator.md` self-referencing loop removed — `handoff_to: []` and `Can Lead Phases: []` (was [4]) to prevent infinite PM ping-pong (C-15)
+- **[2026-06-20]**: fix(co-consult): `required_skills` added to 6 agents (data-analyst, industry-expert, sme, solutions-architect, technology-specialist, workstream-lead) — C-17
+- **[2026-06-20]**: fix(co-deck): `api_keys:` block removed from `docs/lecture-profile.md`; replaced with comment pointing to `.env.local` — C-19
+- **[2026-06-20]**: fix(co-consult): `industry-expert.md` `## ⚠️ PM-ONLY INVOCATION` section added with enforcement rationale
+- **[2026-06-20]**: fix(co-deck): `variant.json` description updated to "10 agents (1 PM orchestrator + 9 specialists)" for accurate count
 - **[2026-06-20]**: fix(co-design/co-work): storyteller.md `Dispatch Protocol` tier corrected from `high` → `medium`
 - **[2026-06-20]**: fix(co-deck): `co-deck/variant.json` version bumped `0.1.0` → `0.2.0`; pm agent added to agents[]; image-curator added to skills[]
 - **[2026-06-20]**: fix(co-security): PostToolUse hook command corrected `bash scripts/audit.sh` → `bun scripts/audit.ts` (ADR-0036)
@@ -25,6 +30,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-20]**: fix(claude-md): CONSTITUTION.md §9/§10 cross-links corrected to existing anchors (previously pointing to non-existent anchors)
 
 ### Changed
+- **[2026-06-20]**: chore(variants): `version: "1.0.0"` and `last_updated:` frontmatter added to all 47 variant agent files across 6 variants (co-consult 11, co-design 7, co-develop 7, co-work 6, co-security 6, co-deck 10) — H-01/H-02 metadata completion
+- **[2026-06-20]**: chore(workspace-schema): `_note` field added to `_shared` object in `docs/workspace-schema.json` clarifying cross-reference purpose
+- **[2026-06-20]**: chore(co-design): `agent_manifest.notes` clarified with system skills exclusion rationale in `co-design/variant.json`
+- **[2026-06-20]**: chore(co-deck): `language: ko` added to frontmatter of `research.md` and `storyline.md`; Agent Control Flags subsection added to `docs/co-deck.context.md`
+- **[2026-06-20]**: chore(common): `version: "1.0.0"` and `last_updated: "2026-05-28"` added to `templates/common/agents/pm.md` and `templates/common/agents/_COMMON.md` frontmatter
+- **[2026-06-20]**: chore(constitution): §10 variant list updated from 4 → 6 entries to include co-security and co-deck
+- **[2026-06-20]**: chore(readme-ko): `## Prerequisites` section added to workspace root `README_ko.md` (Korean localization)
+- **[2026-06-20]**: chore(memory): 5 meeting transcript files translated from Korean to English in `**Topic**:` fields; `ai-workspace-standards-architecture-analysis_ko.md` frontmatter added
 - **[2026-06-20]**: chore(storyteller): co-design storyteller upgraded — Narrative Gap Analysis step added, 2 new examples, `last_updated` frontmatter, `handoff_to` updated
 - **[2026-06-20]**: chore(storyteller): co-work storyteller upgraded — institutional knowledge framing, 2 new examples, `last_updated` frontmatter
 - **[2026-06-20]**: chore(source-verifier): `Auto-Dispatch To` updated with research failure path; `last_updated` frontmatter added

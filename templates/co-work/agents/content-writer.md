@@ -2,6 +2,8 @@
 name: content-writer
 role: Research-to-documentation transformation and communications specialist
 status: active
+version: "1.0.0"
+last_updated: "2026-05-28"
 formal_name: Content Writer & Documentation Specialist
 tier:
   claude: medium

@@ -1,5 +1,7 @@
 ---
 name: design
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Visual design specialist for lecture slide aesthetics and brand alignment
 status: active
 tier:
