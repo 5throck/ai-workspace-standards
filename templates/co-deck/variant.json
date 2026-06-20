@@ -35,10 +35,10 @@
       "source-verifier": {
         "on_fail": "research",
         "max_retries": 2,
-        "failure_condition": "trust_score < 0.9 OR core_message_source_failed"
+        "failure_condition": "trust_score < trust_score_thresholds.pass OR core_message_source_failed"
       }
     },
-    "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < 90% or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied."
+    "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < trust_score_thresholds.pass (90%) or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied."
   },
   "skills": [
     { "name": "version" },
@@ -77,5 +77,10 @@
       "level"
     ],
     "notes": "Master template copied to presentations/<project>/lecture-profile.md on new-project creation. Agents load the local project profile at stage start."
+  },
+  "trust_score_thresholds": {
+    "pass": 0.9,
+    "warn": 0.7,
+    "escalate": 0.7
   }
 }
