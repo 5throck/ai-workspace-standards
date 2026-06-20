@@ -191,8 +191,8 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [4]  # Security-monitor leads security review in QA gate
-**Can Support In**: []
-**Auto-Dispatch To**: N/A
+**Can Lead Phases**: []
+**Can Support In**: [all]
+**Auto-Dispatch To**: [pm]
 **Tier**: medium
-**Communication Style**: async  # Security scans can run asynchronously
+**Communication Style**: async

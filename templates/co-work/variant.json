@@ -37,5 +37,15 @@
       "file": "agents/technical-writer.md"
     }
   ],
-  "skills": []
+  "skills": [
+    { "name": "api-documentation" },
+    { "name": "documentation-writing" },
+    { "name": "research-analysis" }
+  ],
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": [],
+    "optional": ["ms365-expert", "storyteller"],
+    "notes": "ms365-expert: only when MS365 tooling (Word, Excel, PowerPoint, Teams) is required. storyteller: skip for purely technical or operational work."
+  }
 }

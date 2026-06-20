@@ -259,7 +259,7 @@ When working in a plan-mode session:
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
 
-> For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](CONSTITUTION.md#9-workspace--template-boundary-policy) and [CONSTITUTION.md §10](CONSTITUTION.md#10-lifecycle-management-rules).
+> For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](docs/constitution/09-operations-workflow.md) and [CONSTITUTION.md §10](CONSTITUTION.md#10-terminology--canonical-definitions).
 <!-- COMMON-CLAUDE:END -->
 
 <!-- COMMON-CLAUDE:START -->
@@ -292,7 +292,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-12 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
+*Last Updated: 2026-06-20 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

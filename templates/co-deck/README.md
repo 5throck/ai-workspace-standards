@@ -5,7 +5,7 @@ sync_version: 1
 
 # co-deck
 
-> **⚠️ BETA VARIANT** - Status: beta (v0.1.0)
+> **⚠️ BETA VARIANT** - Status: beta (v0.2.0)
 > This variant is in active development and should not be used in production environments.
 
 ---

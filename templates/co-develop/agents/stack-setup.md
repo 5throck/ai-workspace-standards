@@ -185,8 +185,8 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [0, 1]  # Stack-setup leads team assembly and analysis
-**Can Support In**: []
-**Auto-Dispatch To**: N/A
-**Tier**: low
-**Communication Style**: sync  # Setup requires user confirmation
+**Can Lead Phases**: [0]
+**Can Support In**: [0]
+**Auto-Dispatch To**: [architect, code-writer]
+**Tier**: medium
+**Communication Style**: async

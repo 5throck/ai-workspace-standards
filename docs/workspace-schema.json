@@ -156,11 +156,43 @@
   },
   "variant_extensions": {
     "description": "Optional top-level keys allowed in variant.json beyond the base contract. Validated by validate-templates.ts.",
+    "_shared": {
+      "agent_manifest": {
+        "description": "Agent roster metadata and optional pipeline configuration. Available in all variants.",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order", "retry_policy"],
+        "notes": "pipeline_order: omit or use [] for variants with parallel/free-form agent dispatch. retry_policy: declares on_fail routing and max_retries per agent. optional[]: agents that can be skipped by PM."
+      }
+    },
+    "co-consult": {
+      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
+    "co-design": {
+      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
+    "co-develop": {
+      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
+    "co-work": {
+      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
+    "co-security": {
+      "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
     "co-deck": {
       "agent_manifest": {
-        "description": "Pipeline order and optional flags for variant agents",
-        "required_fields": ["variant_agents_dir", "pipeline_order", "optional", "notes"],
-        "notes": "optional[] lists agent names that can be skipped. Used by PM to determine gate flow."
+        "description": "Strict pipeline order, optional flags, skippable flags, and retry policy for lecture workflow agents",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order", "retry_policy"],
+        "sub_fields": {
+          "retry_policy": {
+            "description": "Per-agent failure routing. on_fail names the agent to return to. max_retries caps loops. failure_condition is an expression evaluated by PM.",
+            "example": { "source-verifier": { "on_fail": "research", "max_retries": 2, "failure_condition": "trust_score < 0.9 OR core_message_source_failed" } }
+          },
+          "optional": "Agent names that can be entirely omitted from the workflow run.",
+          "skippable": "Agent names that run but whose failure is non-blocking (--skip-verify pattern)."
+        },
+        "notes": "optional[] = omit entirely. skippable[] = run but ignore failure. retry_policy = fail-and-loop-back."
       },
       "theme_manifest": {
         "description": "HTML theme definitions for lecture slides",
