@@ -1,4 +1,4 @@
-// @version 1.6.0
+// @version 1.6.1
 ```typescript
 #!/usr/bin/env bun
 /**
@@ -272,7 +272,7 @@ function generateStubs(
         notes: "CSS variable override themes. DOM structure immutable across themes."
       },
       lecture_profile: {
-        template_path: "presentations/lecture-profile.md",
+        template_path: "docs/lecture-profile.md",
         required_fields: ["title", "audience", "level"],
         notes: "Scaffolded on new-project creation. Agents load this file at stage start."
       }
