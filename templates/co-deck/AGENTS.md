@@ -177,6 +177,11 @@ User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
 
+**Co-deck Specific Exceptions**:
+For the `co-deck` pipeline:
+1. **Optional & Auto-Advance Gates/Stages**: For stages or tasks defined as optional or auto-advancing (e.g., Stage 1.5/Gate 1.5, Stage 3/Gate 3, Stage 4/Gate 4, Stage 5-8, Stage 9-10), the PM dispatches the specialist agent automatically *without* prompting the user for approval.
+2. **Double Hop & Internal Delegation**: Secondary/internal subagent dispatches (such as a read-only specialist agent spawning a writer subagent to write output) are considered implementation details and MUST NOT trigger any user confirmation prompt.
+
 See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
 
 #### §3.1.3 Enforcement Layers

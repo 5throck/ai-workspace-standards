@@ -75,10 +75,10 @@ chapters: []
 
 # ── Divider settings ──────────────────────────────────────────────
 dividers:
-  # auto: insert dividers at each chapter boundary automatically
+  # auto (recommended): insert dividers at each chapter boundary automatically to reduce prompts
   # manual: pm/storyline agent confirms each divider position
   # none: no dividers
-  mode: manual
+  mode: auto
 
 # ── Source Verification settings ──────────────────────────────────
 # Options: true | false
@@ -108,6 +108,6 @@ This file is the single source of truth for this lecture project.
 3. Run the PM agent to begin Stage 1 (research)
 
 **Divider modes:**
-- `manual` (default): storyline agent asks which chapter boundaries get dividers
-- `auto`: inserts a divider slide at every chapter boundary
+- `auto` (default/recommended): inserts a divider slide at every chapter boundary automatically to reduce prompts
+- `manual`: storyline agent asks which chapter boundaries get dividers
 - `none`: no divider slides — pure content flow
