@@ -1,7 +1,7 @@
 ---
 name: html-build
 version: "1.0.0"
-last_updated: "2026-06-17"
+last_updated: "2026-06-20"
 role: HTML slide builder and image integration specialist
 status: active
 tier:
@@ -41,13 +41,13 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `docs/lecture-profile.md`** at start: read `theme`, `instructor`, `language` fields
+- **Load `presentations/<project>/lecture-profile.md`** at start: read `theme`, `instructor`, `language` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `image-manifest.json` (from image-curator) to bind downloaded images to slide entries
 - Generate `lecture_vN.html` with all slides rendered via a single `renderSlide(data)` function
 - Embed slide content as `const slideData = [...]` JavaScript array inside the HTML
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
-- Apply theme from `docs/lecture-profile.md`: inject `<link rel="stylesheet" href="../../html-themes/overrides/<theme>.css">` after base CSS
+- Apply theme from `presentations/<project>/lecture-profile.md`: inject `<link rel="stylesheet" href="../../html-themes/overrides/<theme>.css">` after base CSS
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
 - Bind images: for each slide with `image_role ≠ none`, use path from `image-manifest.json`; fall back to text panel if no image recorded
 - Insert speaker intro slide (position 2) and contact slide (last) if missing
@@ -63,7 +63,7 @@ slideData object fields and image filename convention: see `skills/html-build/SK
 
 ## Theme Integration — `data-theme` Rendering
 
-When generating `lecture_vN.html`, apply the theme from `docs/lecture-profile.md`:
+When generating `lecture_vN.html`, apply the theme from `presentations/<project>/lecture-profile.md`:
 
 **1. HTML root attribute** — set on `<html>` tag:
 ```html
@@ -75,7 +75,7 @@ When generating `lecture_vN.html`, apply the theme from `docs/lecture-profile.md
 <link rel="stylesheet" href="../../html-themes/base/base.css">
 <link rel="stylesheet" href="../../html-themes/overrides/minimal.css">
 ```
-Use `docs/lecture-profile.md` → `theme` value. Default: `classic`.
+Use `presentations/<project>/lecture-profile.md` → `theme` value. Default: `classic`.
 
 **3. `visual-heavy` theme only** — add background-image injection to `renderSlide()`:
 ```javascript
@@ -100,7 +100,7 @@ Available themes: `classic` | `minimal` | `visual-heavy` | `academic`
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
-- Load `docs/lecture-profile.md` before generating HTML — theme and instructor data are required
+- Load `presentations/<project>/lecture-profile.md` before generating HTML — theme and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
 - Theme must be one of: `classic | minimal | visual-heavy | academic`; default to `classic` if unset
 - Slide balance rules: ≤5 bullets per slide, ≤3 consecutive slides without visuals, counts balanced ±20%

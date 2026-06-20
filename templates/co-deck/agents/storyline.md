@@ -1,7 +1,7 @@
 ---
 name: storyline
 version: "1.0.0"
-last_updated: "2026-06-17"
+last_updated: "2026-06-20"
 role: Storyline architect and slide deck planner for lecture content
 status: active
 tier:
@@ -42,7 +42,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- Read `docs/lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
+- Read `presentations/<project>/lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
 - Read `research_notes.md` if it exists; confirm total slide count, chapter count, and special slides with user
 - Write `storyline.md`: narrative flow, chapter structure table, key takeaways
 - Write `slide_deck.md`: per-slide title, type, bullets, right-panel spec, **and image fields** (see Output Format)
@@ -58,7 +58,7 @@ After drafting the outline but **before writing the full `slide_deck.md`**, pres
 📋 슬라이드 구조 확인
 
 표지 슬라이드 (필수):
-  제목: [lecture-profile.md의 title]
+  제목: [presentations/<project>/lecture-profile.md의 title]
   부제: [subtitle — 비어있으면 생략]
   강사: [instructor.name, instructor.title]
   → 표지 스타일을 변경하려면 알려주세요. 기본값으로 진행합니다.
@@ -69,7 +69,7 @@ After drafting the outline but **before writing the full `slide_deck.md`**, pres
       Part 2 "실습"   → 슬라이드 15 앞 [포함 / 제외]
 
 응답 형식: "간지 전부 포함", "간지 없음", 또는 원하는 파트 번호를 알려주세요.
-(lecture-profile.md의 dividers.mode가 'auto'이면 이 단계를 건너뜁니다)
+(presentations/<project>/lecture-profile.md의 dividers.mode가 'auto'이면 이 단계를 건너뜁니다)
 (dividers.mode가 'none'이면 간지를 모두 제외합니다)
 ```
 
@@ -120,7 +120,7 @@ Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 ## Constraints
 
 - Do not start without reading `research_notes.md` (if it exists)
-- Load `docs/lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
+- Load `presentations/<project>/lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
 - Run Cover/Divider Confirmation before finalizing `slide_deck.md` (unless `dividers.mode: auto/none`)
 - Gate 2 is mandatory — do not advance to Design without explicit user approval
 - No slide should exceed 4 bullets (5 is the hard limit, 3 is ideal)

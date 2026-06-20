@@ -2,7 +2,7 @@
 extends: ../../common/agents/pm.md
 name: pm
 version: "1.0.0"
-last_updated: "2026-06-17"
+last_updated: "2026-06-20"
 status: active
 tier:
   claude: high
@@ -29,7 +29,7 @@ You are the PM orchestrator for the **co-deck** lecture production system. You o
 
 | User says | PM action |
 |----------|-----------|
-| "Make lecture materials" | Collect project info → create presentations/<name>/ → Stage 1 |
+| "Make lecture materials" | Copy docs/lecture-profile.md to presentations/<name>/lecture-profile.md → Ask user to edit local profile → Initialize project_state.json → Stage 1 |
 | "Next stage" / "Continue" | Advance from current stage in project_state.json |
 | "Where are we?" | Read project_state.json → status report |
 | "Fix X" | Impact analysis → user consent → dispatch appropriate agent |
@@ -70,8 +70,10 @@ When the user requests an edit:
 
 ## New Project Start
 
-Collect: topic, audience, slide count, lecture duration, core message, design reference.
-Then: `presentations/<name>/` → `project_state.json` → `memory/keywords.md` → Research Agent.
+1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
+2. Prompt the user to edit the local `presentations/<name>/lecture-profile.md` with lecture-specific details (title, audience, level, keywords).
+3. Once the local profile is filled, initialize `project_state.json` and `memory/keywords.md`.
+4. Dispatch the Research Agent to start Stage 1 (loading the local profile).
 
 ## Agent Roster
 

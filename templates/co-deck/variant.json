@@ -70,7 +70,12 @@
   },
   "lecture_profile": {
     "template_path": "docs/lecture-profile.md",
-    "required_fields": ["title", "audience", "level"],
-    "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
+    "project_path": "presentations/<project>/lecture-profile.md",
+    "required_fields": [
+      "title",
+      "audience",
+      "level"
+    ],
+    "notes": "Master template copied to presentations/<project>/lecture-profile.md on new-project creation. Agents load the local project profile at stage start."
   }
 }

@@ -1,7 +1,7 @@
 ---
 name: research
 version: "1.0.0"
-last_updated: "2026-06-17"
+last_updated: "2026-06-20"
 role: Web research and source collection specialist for lecture preparation
 status: active
 tier:
@@ -51,7 +51,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Profile Loading
 
-At the start of Stage 1, check for `docs/lecture-profile.md`:
+At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
 
 **If the file exists:**
 1. Read `audience`, `level`, `keywords`, `slide_count`, `language` fields
@@ -65,9 +65,9 @@ At the start of Stage 1, check for `docs/lecture-profile.md`:
 
 **If the file does not exist:**
 1. Proceed with default settings (practitioner audience, intermediate level)
-2. After confirming topic with the user, suggest creating `lecture-profile.md`:
+2. After confirming topic with the user, suggest creating `presentations/<project>/lecture-profile.md`:
    ```
-   💡 docs/lecture-profile.md 파일이 없습니다.
+   💡 presentations/<project>/lecture-profile.md 파일이 없습니다.
       프로필 파일을 작성하면 검색 쿼리와 이미지 선택이 자동으로 최적화됩니다.
       (강의 시작 후 언제든 생성 가능합니다)
    ```
@@ -87,7 +87,7 @@ Full template and Korean example: see `skills/research/SKILL.md`.
 ## Constraints
 
 - Do not start research without a confirmed topic and target audience
-- Always load `lecture-profile.md` before searching — do not skip this step
+- Always load `presentations/<project>/lecture-profile.md` before searching — do not skip this step
 - Always search in both Korean and English — single-language coverage is incomplete
 - Record actual source URLs — do not fabricate references
 - Gate 1 is optional but must be offered to the user before handing off to Storyline

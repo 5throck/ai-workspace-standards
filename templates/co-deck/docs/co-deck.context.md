@@ -136,9 +136,9 @@ Base styles: `html-themes/base/base.css` (shared CSS variables — do not modify
 ## Lecture Profile
 
 <!-- VARIANT-INJECT: lecture-profile -->
-`docs/lecture-profile.md` is the single source of truth for per-lecture settings.
+`presentations/<project>/lecture-profile.md` is the single source of truth for per-lecture settings. (The master template is located at `docs/lecture-profile.md` and copied to the presentation folder on start).
 
-**Scaffolded automatically** on `bun new-project` — edit before starting Stage 1.
+**Scaffolded automatically** on new project start — edit the copy under your presentation folder before starting Stage 1.
 
 Key fields:
 ```yaml
@@ -299,7 +299,8 @@ User: "make a lecture about X"
 | Folder | Purpose |
 |--------|---------|
 | `presentations/<project>/` | All outputs for a single lecture project |
-| `docs/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
+| `docs/lecture-profile.md` | Master template for lecture profile (copied on project start) |
+| `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/assets/images/` | Downloaded images (image-curator output) |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
 | `agents/` | Agent role definitions (10 agents) |
@@ -317,7 +318,7 @@ User: "make a lecture about X"
 
 <!-- VARIANT-INJECT: domain-rules -->
 1. **Version Agent is always called first** — before any file modification by any agent
-2. **lecture-profile.md is the single source of truth** for theme, audience, instructor, and image settings
+2. **presentations/<project>/lecture-profile.md is the single source of truth** for theme, audience, instructor, and image settings
 3. **project_state.json tracks pipeline progress** — PM reads this to resume interrupted sessions
 4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
 5. **PDF requires layout measurement** — always run Measure Agent before Export Agent
