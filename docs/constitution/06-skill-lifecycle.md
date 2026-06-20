@@ -52,9 +52,24 @@ name: Skill Display Name
 description: >
   Describe exactly when this skill should be loaded.
   The AI tool uses this to decide whether to auto-trigger it.
+scope: common
+l2_propagate: false   # optional; defaults to true — set false for workspace-management skills
 version: 1.0.0
 ---
 ```
+
+#### L2 Propagation Control
+
+Skills in `templates/common/skills/` are normally copied to generated projects (L2) at `new-project` time. To exclude a skill from L2 projects, set `l2_propagate: false` in the SKILL.md frontmatter.
+
+| `l2_propagate` value | Behavior |
+|---------------------|----------|
+| `true` (default) | Skill is copied to generated project `skills/` at creation time |
+| `false` | Skill stays in L0+L1 only; excluded from L2 generated projects |
+
+**When to use `l2_propagate: false`**: Workspace-management skills that operate on the workspace infrastructure itself (variant creation, script lifecycle, workspace audits) and have no meaningful use inside generated projects.
+
+> `new-project.ts` automatically reads this field during scaffolding — no manual exclusion list required.
 
 #### 6.3 Skill Body Structure
 

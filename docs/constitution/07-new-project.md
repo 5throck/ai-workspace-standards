@@ -30,7 +30,7 @@ live there as **real, editable files** (not embedded strings).
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
-| `scripts/` | audit, dev-sync, sync-md (.ts) | Ready to use |
+| `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (see `L0+L1-ws` scope) |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
 | `CHANGELOG.md` | User-visible change history | Ready to use |
 | `README.md` | GitHub landing page | Fill in project description |
@@ -41,7 +41,22 @@ live there as **real, editable files** (not embedded strings).
 > **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
 > generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
 
-#### 7.3 Post-Scaffold Checklist
+#### 7.3 L2 Exclusion Rules
+
+Not everything in `templates/common/` is appropriate for generated projects. `new-project.ts` applies metadata-based filtering after the initial copy:
+
+| Artifact type | Exclusion mechanism | How to add new exclusions |
+|---------------|---------------------|--------------------------|
+| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add field to the skill's SKILL.md in both `skills/` and `templates/common/skills/` |
+| **Scripts** | `// @l2-propagate: false` header comment + `L0+L1-ws` scope in SCRIPTS.md | Add comment to script file in both `scripts/` and `templates/common/scripts/`; update scope in SCRIPTS.md |
+
+The filtering is automatic — `new-project.ts` reads the metadata at scaffolding time. No hardcoded exclusion lists are maintained.
+
+**Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`, `script-lifecycle-manager`
+
+**Excluded scripts** (workspace-management): `agent-create.ts`, `agent-delete.ts`, `agent-list.ts`, `agent-verify.ts`, `agent-lifecycle-audit.ts`, `upgrade-project.ts`
+
+#### 7.4 Post-Scaffold Checklist
 
 ```
 □ docs/context.md
@@ -101,7 +116,7 @@ Variant-specific sections are marked with inject markers:
 > by `l2-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
 ```
 
-#### 7.3.5 Variant Scaffolding — File Overlay Mechanics
+#### 7.4.5 Variant Scaffolding — File Overlay Mechanics
 
 When `new-project.ts` creates a project from a variant template, it applies files in a specific order. Understanding this order is critical for variant template authors.
 
@@ -137,7 +152,7 @@ This ensures every scaffolded project has the standard lifecycle scripts regardl
 
 ---
 
-#### 7.4 Layer × Stage Reference Matrix
+#### 7.5 Layer × Stage Reference Matrix
 
 Two independent dimensions govern the workspace lifecycle:
 

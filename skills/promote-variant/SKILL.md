@@ -5,6 +5,7 @@ description: >
   Use when: PROMOTION_CHECKLIST conditions are all met, ready to create templates/co-<name>/.
 status: active
 scope: common
+l2_propagate: false
 version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05

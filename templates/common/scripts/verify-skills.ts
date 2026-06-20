@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.0.0
+ * @version 1.1.0
  * Verifies all skills in skills/ directory are loadable and properly formatted
  */
 
@@ -75,8 +75,9 @@ async function scanSkills(): Promise<SkillCheck[]> {
   }
 
   const skillFiles = await scanDirectory("skills");
+  const commonSkillFiles = await scanDirectory("templates/common/skills");
 
-  for (const skillFile of skillFiles) {
+  for (const skillFile of [...skillFiles, ...commonSkillFiles]) {
     const check = await verifySkill(skillFile);
     checks.push(check);
   }
@@ -195,6 +196,20 @@ async function verifySkill(skillFile: string): Promise<SkillCheck> {
         if (!frontmatter.includes("metadata:")) {
           issues.push("Missing 'metadata' section");
           status = "WARN";
+        }
+
+        // Check l2_propagate field for skills in templates/common/skills/
+        if (skillFile.includes('templates/common/skills') || skillFile.includes('templates\\common\\skills')) {
+          if (!frontmatter.includes('l2_propagate:')) {
+            issues.push('Missing l2_propagate field — add l2_propagate: true or l2_propagate: false to clarify L2 propagation intent');
+            if (status !== 'FAIL') status = 'WARN';
+          } else {
+            const l2Match = frontmatter.match(/^l2_propagate:\s*(true|false)\b/m);
+            if (!l2Match) {
+              issues.push('Invalid l2_propagate value — must be true or false (boolean, not quoted)');
+              if (status !== 'FAIL') status = 'WARN';
+            }
+          }
         }
       }
     }

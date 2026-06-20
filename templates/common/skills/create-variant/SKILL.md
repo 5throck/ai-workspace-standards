@@ -5,6 +5,7 @@ description: >
   Use when: creating a new co-<name> variant, scaffolding a new domain-specific AI team.
 status: active
 scope: common
+l2_propagate: false
 version: 1.0.1
 owner: pm
 last_reviewed: 2026-06-05

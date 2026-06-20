@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 // @version 1.0.0
+// @l2-propagate: false
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //

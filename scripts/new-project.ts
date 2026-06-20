@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.5
+// @version 1.1.6
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -473,15 +473,42 @@ for (const f of cleanupFiles) {
   if (existsSync(fp)) rmSync(fp);
 }
 
-// Remove L0/workspace-only skills from generated project
-// simulate-project-creation: workspace-only (scope: workspace)
-// agent-lifecycle-manager: scope: common but lives in skills/ via templates/common/skills/
-//   → must NOT also exist in .claude/skills/ or .gemini/skills/ (duplication bug)
-const L0_SKILLS = ['simulate-project-creation', 'agent-lifecycle-manager'];
-for (const skill of L0_SKILLS) {
+// Remove workspace-only skills (l2_propagate: false in SKILL.md frontmatter)
+// Also remove legacy hardcoded L0-only skills (scope: workspace)
+const LEGACY_L0_SKILLS = ['simulate-project-creation'];
+for (const skill of LEGACY_L0_SKILLS) {
   for (const base of ['skills', '.claude/skills', '.gemini/skills']) {
     const dp = join(projectDir, base, skill);
     if (existsSync(dp)) rmSync(dp, { recursive: true });
+  }
+}
+const projectSkillsDir = join(projectDir, 'skills');
+if (existsSync(projectSkillsDir)) {
+  for (const skillName of readdirSync(projectSkillsDir)) {
+    const skillMd = join(projectSkillsDir, skillName, 'SKILL.md');
+    if (existsSync(skillMd)) {
+      const content = readFileSync(skillMd, 'utf-8');
+      if (/^l2_propagate:\s*false\b/m.test(content)) {
+        rmSync(join(projectSkillsDir, skillName), { recursive: true });
+        console.log(`  🗑️  Excluded L1-only skill: ${skillName}`);
+      }
+    }
+  }
+}
+
+// Remove workspace-only scripts (@l2-propagate: false in file header)
+const projectScriptsDir = join(projectDir, 'scripts');
+if (existsSync(projectScriptsDir)) {
+  for (const scriptName of readdirSync(projectScriptsDir)) {
+    if (!scriptName.endsWith('.ts')) continue;
+    const scriptPath = join(projectScriptsDir, scriptName);
+    try {
+      const content = readFileSync(scriptPath, 'utf-8');
+      if (/^\/\/ @l2-propagate:\s*false\b/m.test(content)) {
+        rmSync(scriptPath);
+        console.log(`  🗑️  Excluded L1-only script: ${scriptName}`);
+      }
+    } catch { /* skip unreadable files */ }
   }
 }
 

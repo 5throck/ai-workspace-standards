@@ -41,6 +41,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- Layer column values (ONLY 3 TYPES EXIST):
   L0           = workspace root only; must NOT be copied to templates/common/ or L2 projects
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
+  L0+L1-ws     = workspace-management scripts; in L0+L1 but NOT copied to L2 projects (marked @l2-propagate: false)
   L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
 <!-- pair: reserved field (was used for sh/ps1 pair tracking — abolished per ADR-0036) -->
@@ -48,11 +49,11 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
-| `agent-create.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `agent-delete.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `agent-lifecycle-audit.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
-| `agent-list.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `agent-create.ts` | L0 | 1.0.0 | active | —| —| L0+L1-ws | —|
+| `agent-delete.ts` | L0 | 1.0.0 | active | —| —| L0+L1-ws | —|
+| `agent-lifecycle-audit.ts` | L0 | 1.1.2 | active | —| —| L0+L1-ws | —|
+| `agent-list.ts` | L0 | 1.0.0 | active | —| —| L0+L1-ws | —|
+| `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1-ws | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.8.0 | active | —| —| L0+L1 | —|
@@ -110,7 +111,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.5 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.1.6 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.0.8 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
@@ -131,7 +132,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0+L1-ws | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -143,8 +144,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `verify-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `verify-skills.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
 

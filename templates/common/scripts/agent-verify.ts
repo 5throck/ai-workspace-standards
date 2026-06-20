@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @l2-propagate: false
 /**
  * Agent Verification Script for Workspace Root
  * @version 1.0.1
