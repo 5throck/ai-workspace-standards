@@ -30,7 +30,7 @@ live there as **real, editable files** (not embedded strings).
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
-| `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (see `L0+L1-ws` scope) |
+| `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (scope `L0` in SCRIPTS.md) |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
 | `CHANGELOG.md` | User-visible change history | Ready to use |
 | `README.md` | GitHub landing page | Fill in project description |
@@ -43,14 +43,14 @@ live there as **real, editable files** (not embedded strings).
 
 #### 7.3 L2 Exclusion Rules
 
-Not everything in `templates/common/` is appropriate for generated projects. `new-project.ts` applies metadata-based filtering after the initial copy:
+Workspace-management artifacts are excluded **at the L0→L1 propagation stage** by `propagate-to-templates.ts`, so `templates/common/` only contains artifacts that belong in generated projects. `new-project.ts` applies a secondary safety-net check after copying, in case any artifact was added directly to `templates/common/` without going through the propagation pipeline.
 
 | Artifact type | Exclusion mechanism | How to add new exclusions |
 |---------------|---------------------|--------------------------|
-| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add field to the skill's SKILL.md in both `skills/` and `templates/common/skills/` |
-| **Scripts** | `// @l2-propagate: false` header comment + `L0+L1-ws` scope in SCRIPTS.md | Add comment to script file in both `scripts/` and `templates/common/scripts/`; update scope in SCRIPTS.md |
+| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add `l2_propagate: false` to the skill's SKILL.md in `skills/` (root only — `propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
+| **Scripts** | Scope `L0` in SCRIPTS.md | Set scope to `L0` in SCRIPTS.md (`propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
 
-The filtering is automatic — `new-project.ts` reads the metadata at scaffolding time. No hardcoded exclusion lists are maintained.
+The filtering is automatic — `propagate-to-templates.ts` enforces it at publish time, and `new-project.ts` re-checks as a safety net. No hardcoded exclusion lists are maintained.
 
 **Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`
 

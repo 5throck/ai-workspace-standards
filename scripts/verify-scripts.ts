@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -51,7 +51,7 @@ interface RegistryEntry {
   status: "active" | "deprecated" | "experimental";
   removalDate: string; // "—" or "YYYY-MM-DD"
   securityAdvisory: string; // "—" or "CVE-XXXX"
-  layer: "common" | "L0-only" | "L1-only" | "L0+L1-ws" | "L0+L1" | "L0+L1+L2" | string;
+  layer: "common" | "L0-only" | "L1-only" | "L0+L1" | "L0+L1+L2" | string;
   pair: string;  // "—" or "<script-name>" (.sh declares its .ps1 pair)
 }
 
@@ -199,38 +199,6 @@ function checkDriftReport(): void {
   process.exit(0); // drift is warn-only
 }
 
-// ── L2 Propagation Consistency Check ─────────────────────────────────────────
-
-function checkL2PropagateConsistency(entries: RegistryEntry[], dir: string): { passed: number; failed: number; warnings: string[] } {
-  const result = { passed: 0, failed: 0, warnings: [] as string[] };
-
-  for (const entry of entries) {
-    const scriptFile = join(dir, entry.script);
-    const isL0L1Ws = entry.layer === 'L0+L1-ws';
-
-    if (!existsSync(scriptFile)) continue;
-    if (!entry.script.endsWith('.ts')) continue;
-
-    let content: string;
-    try {
-      content = readFileSync(scriptFile, 'utf-8');
-    } catch { continue; }
-
-    const hasMarker = /^\/\/ @l2-propagate:\s*false\b/m.test(content);
-
-    if (isL0L1Ws && !hasMarker) {
-      result.warnings.push(`[FAIL] ${entry.script}: scope is L0+L1-ws in SCRIPTS.md but missing // @l2-propagate: false header`);
-      result.failed++;
-    } else if (!isL0L1Ws && hasMarker) {
-      result.warnings.push(`[WARN] ${entry.script}: has // @l2-propagate: false header but scope is not L0+L1-ws in SCRIPTS.md`);
-      result.failed++;
-    } else if (isL0L1Ws && hasMarker) {
-      result.passed++;
-    }
-  }
-
-  return result;
-}
 
 // ── Verify Mode ──────────────────────────────────────────────────────────────
 
@@ -384,21 +352,6 @@ function verify(): boolean {
         `⚠️  PAIR STATUS DRIFT: \`${entry.script}\` (${entry.status}) ↔ \`${entry.pair}\` (${pairEntry.status}) — statuses should match`
       );
     }
-  }
-
-  // L2 propagation consistency check
-  const l2Check = checkL2PropagateConsistency(registry, scriptsDir);
-  if (l2Check.warnings.length > 0) {
-    console.log('\n=== L2 Propagation Consistency ===');
-    for (const w of l2Check.warnings) {
-      console.log(w);
-    }
-  }
-  if (l2Check.failed > 0) {
-    for (const w of l2Check.warnings) {
-      errors.push(w);
-    }
-    passed = false;
   }
 
   // Output

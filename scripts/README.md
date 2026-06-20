@@ -36,10 +36,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or —-->
 <!-- security-advisory: CVE-XXXX or —-->
-<!-- Layer column values (ONLY 3 TYPES EXIST):
+<!-- Layer column values (ONLY 2 TYPES USED):
   L0           = workspace root only; must NOT be copied to templates/common/ or L2 projects
   L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
-  L0+L1-ws     = workspace-management scripts; in L0+L1 but NOT copied to L2 projects (marked @l2-propagate: false)
   L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
 <!-- pair: reserved field (was used for sh/ps1 pair tracking — abolished per ADR-0036) -->
@@ -75,7 +74,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/inject-global-plugins.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/layer-filter.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/layer-filter.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.4 | active | —| —| L0+L1 | —|
@@ -107,7 +106,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.3.4 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.3.6 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.1.6 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -130,7 +129,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0+L1-ws | —|
+| `upgrade-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
@@ -142,7 +141,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
@@ -151,7 +150,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 ## Layer Classification Framework
 
-> **Only 3 layer types exist**. L1-only is architecturally invalid and has been removed.
+> **Two layer types are in use**: `L0` (workspace root only) and `L0+L1` (workspace + template snapshot). `L0+L1+L2` is reserved but unused.
 
 | Layer | Description | Publish | Example |
 |-------|-------------|---------|---------|

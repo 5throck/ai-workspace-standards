@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.0.0
+ * @version 1.2.0
  * @status active
  *
  * Reads SCRIPTS.md and SKILLS.md layer columns and provides
@@ -217,7 +217,10 @@ function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerV
           const scope = scopeMatch[1].trim().toLowerCase();
           if (scope === "workspace") layer = "L0";
           else if (scope === "common") layer = "L0+L1";
-          break;
+        }
+        // l2_propagate: false overrides scope — skill stays in L0 only
+        if (/^\s*l2_propagate\s*:\s*false\b/.test(fmLine)) {
+          layer = "L0";
         }
       }
     }
