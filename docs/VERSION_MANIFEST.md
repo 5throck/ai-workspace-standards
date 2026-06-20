@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-20T13:27:10.969Z
+**Generated**: 2026-06-20T13:35:04.359Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -94,9 +94,9 @@
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.8.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
-| layer-filter.ts | 1.1.0 | scripts/helpers/layer-filter.ts | fs, path |
+| layer-filter.ts | 1.2.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
-| lifecycle-sync-audit.ts | 1.3.5 | scripts/lifecycle-sync-audit.ts | N/A |
+| lifecycle-sync-audit.ts | 1.3.6 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
@@ -153,7 +153,7 @@
 | verify-new-project-tests.ts | 1.0.2 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.1 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.1.0 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.2.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | 1.1.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 | write-scripts-snapshot.ts | 1.0.0 | scripts/helpers/write-scripts-snapshot.ts | N/A |

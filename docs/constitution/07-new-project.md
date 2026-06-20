@@ -30,7 +30,7 @@ live there as **real, editable files** (not embedded strings).
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
-| `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (see `L0+L1-ws` scope) |
+| `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (scope `L0` in SCRIPTS.md) |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
 | `CHANGELOG.md` | User-visible change history | Ready to use |
 | `README.md` | GitHub landing page | Fill in project description |
@@ -48,7 +48,7 @@ Workspace-management artifacts are excluded **at the L0→L1 propagation stage**
 | Artifact type | Exclusion mechanism | How to add new exclusions |
 |---------------|---------------------|--------------------------|
 | **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add `l2_propagate: false` to the skill's SKILL.md in `skills/` (root only — `propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
-| **Scripts** | `// @l2-propagate: false` header comment + `L0+L1-ws` scope in SCRIPTS.md | Add `// @l2-propagate: false` header to the script in `scripts/` and set scope to `L0+L1-ws` in SCRIPTS.md (`propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
+| **Scripts** | Scope `L0` in SCRIPTS.md | Set scope to `L0` in SCRIPTS.md (`propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
 
 The filtering is automatic — `propagate-to-templates.ts` enforces it at publish time, and `new-project.ts` re-checks as a safety net. No hardcoded exclusion lists are maintained.
 
