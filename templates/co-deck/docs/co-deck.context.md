@@ -288,7 +288,7 @@ User: "make a lecture about X"
 - Gates 2, 3, 5 are **MANDATORY** — PM must NOT advance without user approval
 - Gate 1, 1.5, and 4 are optional — PM may ask user or auto-advance
 - Gate 5: always generate 5-slide sample first; full PDF only after approval
-- Gate 1.5: if Trust Score < 60%, hold for re-research before advancing to storyline
+- Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -323,7 +323,7 @@ User: "make a lecture about X"
 4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
 5. **PDF requires layout measurement** — always run Measure Agent before Export Agent
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
-7. **source-verifier is optional but recommended** — Trust Score < 60% should block storyline
+7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
 9. **CSS DOM structure is immutable** — themes change CSS variables only, never DOM elements
 <!-- END VARIANT-INJECT -->

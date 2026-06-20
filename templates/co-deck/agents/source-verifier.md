@@ -134,9 +134,9 @@ Result classification:
 ## Gate 1.5 Recommendation
 
 [One of:]
-- ✅ **Proceed to Storyline** — Trust Score ≥ 90%, no critical sources failed
-- ⚠️ **Proceed with Caution** — Trust Score 70–89%, some secondary sources failed
-- ❌ **Hold — Re-research Required** — Trust Score < 70% or Core Message sources failed
+- ✅ **Proceed to Storyline** — Trust Score ≥ trust_score_thresholds.pass (90%), no critical sources failed
+- ⚠️ **Proceed with Caution** — Trust Score between trust_score_thresholds.warn (70%) and trust_score_thresholds.pass (90%), some secondary sources failed
+- ❌ **Hold — Re-research Required** — Trust Score < trust_score_thresholds.escalate (70%) or Core Message sources failed
 ```
 
 ## Skip Flag
@@ -192,7 +192,7 @@ In a `/meeting` session, Claude role-plays you inline.
 When Gate 1.5 Recommendation is ❌ **Hold — Re-research Required**, execute the following retry loop:
 
 ### Trigger Conditions (either is sufficient)
-- **Trust Score < 90%** — more than 10% of sources failed or were unverifiable
+- **Trust Score < trust_score_thresholds.pass (90%)** — more than 10% of sources failed or were unverifiable
 - **Core Message source failed** — any ❌ Failed source cited in a Core Message slide
 
 ### Retry Steps
@@ -200,7 +200,7 @@ When Gate 1.5 Recommendation is ❌ **Hold — Re-research Required**, execute t
 2. **Hand off to research agent** with the re-search list and the original topic/audience context from `presentations/<project>/lecture-profile.md`
 3. **Research agent** runs targeted searches to find replacement or supplementary sources
 4. **Re-run source-verifier** on the updated `research_notes.md`
-5. **Max retries: 2**. If Trust Score remains < 70% after 2 retry cycles, escalate to PM with the final `source-verification.md` — PM decides whether to proceed with exclusions, narrow scope, or halt
+5. **Max retries: 2**. If Trust Score remains < trust_score_thresholds.escalate (70%) after 2 retry cycles, escalate to PM with the final `source-verification.md` — PM decides whether to proceed with exclusions, narrow scope, or halt
 
 ### Escalation Format (after max retries exhausted)
 ```

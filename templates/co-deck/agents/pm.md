@@ -119,3 +119,4 @@ PM participates in all agent meetings as orchestrator. Facilitates cross-agent c
 - **Gates 2, 3, 5**: Cannot proceed without explicit user approval
 - **Impact first**: Report scope of any rework before executing
 - **keywords.md**: Update when user introduces new domain terms
+- **Gate 1.5 (Source Verification)**: Evaluate verification status using thresholds defined in `variant.json` (`trust_score_thresholds`).

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.4
+// @version 1.1.5
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -473,8 +473,11 @@ for (const f of cleanupFiles) {
   if (existsSync(fp)) rmSync(fp);
 }
 
-// Remove L0 skills
-const L0_SKILLS = ['simulate-project-creation'];
+// Remove L0/workspace-only skills from generated project
+// simulate-project-creation: workspace-only (scope: workspace)
+// agent-lifecycle-manager: scope: common but lives in skills/ via templates/common/skills/
+//   → must NOT also exist in .claude/skills/ or .gemini/skills/ (duplication bug)
+const L0_SKILLS = ['simulate-project-creation', 'agent-lifecycle-manager'];
 for (const skill of L0_SKILLS) {
   for (const base of ['skills', '.claude/skills', '.gemini/skills']) {
     const dp = join(projectDir, base, skill);

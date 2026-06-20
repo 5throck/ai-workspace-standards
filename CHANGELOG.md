@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-06-20]**: fix(variants): remove `agent-lifecycle-manager` from `.claude/skills/` and `.gemini/skills/` of all 6 variants — it is a `scope: common` workspace skill deployed via `skills/` and must not be duplicated in platform-config skill dirs; affected: co-consult, co-design, co-develop, co-work, co-security, co-deck (12 dirs removed)
+- **[2026-06-20]**: fix(co-deck): move `extract_slidedata.mjs` from `scripts/` root to `scripts/co-deck/` — aligns with all other co-deck scripts; prevents stray file at generated project `scripts/` root
+- **[2026-06-20]**: fix(new-project): add `agent-lifecycle-manager` to `L0_SKILLS` cleanup list in `scripts/new-project.ts` — safety net to remove `.claude/skills/agent-lifecycle-manager` and `.gemini/skills/agent-lifecycle-manager` from any generated project
+
 ### Added
 - **[2026-06-20]**: feat(variants): standard sections (`## ⚠️ PM-ONLY INVOCATION`, `## Responsibilities`, `## Output Format`, `## Constraints`) added to 31 variant agent files across co-consult (10), co-design (7), co-work (6), co-security (5), co-develop (3) — resolves all WARN items from project-review audit
 - **[2026-06-20]**: feat(co-deck): `retry_policy` and `skippable[]` fields added to `agent_manifest` in `co-deck/variant.json` — source-verifier on_fail→research, max_retries:2, failure_condition: trust_score < 0.9
