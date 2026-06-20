@@ -18,7 +18,7 @@ Skills follow the same L0/L1/L2 model as scripts:
 **Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. Propagation filtering is controlled exclusively by SKILL.md frontmatter (`l2_propagate`/`scope`) — skills with `l2_propagate: false` or `scope: workspace` are excluded at the L0→L1 stage and never enter `templates/common/`. L2 projects snapshot L1 at creation time — no automatic back-propagation.
 
 > **Workspace Root vs. Individual Projects**:
-> - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `ui-ux-pro-max`, `simulate-project-creation`, `security-scan`, `audit-workspace`).
+> - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `simulate-project-creation`, `security-scan`, `audit-workspace`).
 > - **Individual Projects**: Skills are project-specific workflows defined by the development team.
 
 #### 6.1 Folder Structure

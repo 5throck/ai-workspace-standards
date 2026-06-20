@@ -104,8 +104,7 @@ The multi-agent meeting on 2026-06-01 concluded that a VERSION_MANIFEST could so
 | Skills | 15 | 14 | 1 | 0 |
 | Commands | 8 | 8 | 0 | 0 |
 
-**Out-of-Sync Details**:
-- `skills/ui-ux-pro-max/SKILL.md`: exists in `.claude/` but missing `.gemini/` counterpart (intentional exclusion - see `gemini-parity: skip` in frontmatter)
+**Out-of-Sync Details**: None
 
 #### Workspace → Templates/Common Propagation
 
@@ -130,8 +129,7 @@ The multi-agent meeting on 2026-06-01 concluded that a VERSION_MANIFEST could so
 #### Platform Parity Drift
 
 ```
-⚠ WARNING: 1 skill missing .gemini/ counterpart (intentional)
-  - ui-ux-pro-max (gemini-parity: skip)
+No platform parity drift detected
 ```
 
 #### Documentation Drift

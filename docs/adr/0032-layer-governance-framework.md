@@ -252,7 +252,6 @@ The following table shows the correct Layer classification for representative sc
 | `agents/pm.md` (per variant) | `L0+L1+L2` | Each variant has a customized PM agent with domain-specific instructions. The base is in templates/common/agents/, and each templates/co-*/agents/ contains a variant override. |
 | `skills/co-consult/` (domain skills) | `L0+L1+L2` | co-consult-specific domain skills. Not applicable to other variants. Variant override exists in templates/co-consult/skills/. |
 | `skills/meeting-facilitation/` | `L0+L1` | General-purpose skill applicable to all variants without modification. |
-| `skills/ui-ux-pro-max/` | `L0+L1` | General-purpose skill applicable to all variants without modification. |
 
 ---
 

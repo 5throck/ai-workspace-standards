@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-20T17:19:58.450Z
+**Generated**: 2026-06-20T17:38:30.574Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 18
+- **Skills**: 17
 - **Scripts**: 98
 - **Commands**: 6
 
@@ -50,7 +50,6 @@
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
-| ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
 
 ---
@@ -90,7 +89,7 @@
 | golden-reference-loader.ts | 1.0.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.0 | scripts/ingest-security-frameworks.ts | N/A |
-| inject-global-plugins.ts | 1.0.0 | scripts/helpers/inject-global-plugins.ts | N/A |
+| inject-global-plugins.ts | 1.0.1 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.8.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
@@ -178,7 +177,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 6 / 6
-- **Skills with parity**: 4 / 18
+- **Skills with parity**: 4 / 17
 
 ---
 
@@ -202,7 +201,6 @@
 - Skill skill-lifecycle-manager has no triggers defined
 - Skill team-builder has no triggers defined
 - Skill translate has no triggers defined
-- Skill ui-ux-pro-max has no triggers defined
 - Skill validate-docs-links has no triggers defined
 - Command changelog not integrated as a skill
 - Command commit-push-pr not integrated as a skill
