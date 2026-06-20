@@ -1,12 +1,15 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-06-13",
+  "last_updated": "2026-06-20",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
       "latest": "1.0.0",
       "released": "2026-05-28",
       "status": "stable",
+      "changelog": [
+        "2026-06-20: added agent_manifest block + skills[] registration (code-review, refactoring, test-driven-development)"
+      ],
       "security_advisories": [],
       "migration_guides": []
     },
@@ -14,6 +17,9 @@
       "latest": "1.0.0",
       "released": "2026-05-28",
       "status": "stable",
+      "changelog": [
+        "2026-06-20: added agent_manifest block + skills[] registration (api-documentation, documentation-writing, research-analysis); storyteller.md upgraded (tier fix, examples, last_updated)"
+      ],
       "security_advisories": [],
       "migration_guides": []
     },
@@ -21,6 +27,9 @@
       "latest": "1.0.0",
       "released": "2026-05-28",
       "status": "stable",
+      "changelog": [
+        "2026-06-20: added agent_manifest block + skills[] registration (service-design, ui-ux-design-intelligence); storyteller.md upgraded (tier fix, Gap Analysis, examples, last_updated)"
+      ],
       "security_advisories": [],
       "migration_guides": []
     },
@@ -28,6 +37,9 @@
       "latest": "1.0.0",
       "released": "2026-06-01",
       "status": "stable",
+      "changelog": [
+        "2026-06-20: added agent_manifest block with pipeline_order"
+      ],
       "security_advisories": [],
       "migration_guides": [
         "docs/migrations/co-security/0.1.0-to-0.2.0.md"
@@ -37,15 +49,21 @@
       "latest": "1.0.0",
       "status": "stable",
       "released": "2026-06-02",
+      "changelog": [
+        "2026-06-20: added agent_manifest block; skills[] expanded with documentation-writing and research-analysis"
+      ],
       "security_advisories": [],
       "migration_guides": []
     },
     "co-deck": {
-      "latest": "0.1.0",
+      "latest": "0.2.0",
       "released": "2026-06-17",
       "status": "beta",
       "source_project": "Projects/co-deck_prototype",
       "promoted_via": "l2-to-variant-pipeline.ts",
+      "changelog": [
+        "2026-06-20: v0.2.0 — added retry_policy to agent_manifest (source-verifier on_fail→research, max_retries:2); source-verifier.md Failure Protocol section added; optional/skippable/retry_policy 3-concept separation in notes"
+      ],
       "security_advisories": [],
       "migration_guides": []
     }

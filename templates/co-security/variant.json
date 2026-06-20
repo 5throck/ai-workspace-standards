@@ -34,8 +34,12 @@
     }
   ],
   "skills": [
-    {
-      "name": "verify-authorization"
-    }
-  ]
+    { "name": "verify-authorization" }
+  ],
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": ["red-team-lead", "threat-modeler", "pentester", "patch-engineer", "report-writer"],
+    "optional": ["patch-engineer"],
+    "notes": "patch-engineer: skip for report-only engagements where remediation is out of scope."
+  }
 }

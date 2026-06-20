@@ -5,7 +5,7 @@ translated_from_hash: PLACEHOLDER
 
 # co-deck
 
-> **Status**: 🔶 Beta — v0.1.0
+> **Status**: 🔶 Beta — v0.2.0
 
 **Co-Deck** 워크스페이스에 오신 것을 환영합니다. 이곳은 강연 및 발표 자료를 AI와 함께 제작하는 11단계 워크플로우 시스템입니다.
 
@@ -77,4 +77,4 @@ bun add playwright
 bunx playwright install chromium
 ```
 
-*Last Updated: 2026-06-19 — co-deck variant template*
+*Last Updated: 2026-06-20 — co-deck variant template*

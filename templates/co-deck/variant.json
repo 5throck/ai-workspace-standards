@@ -3,7 +3,7 @@
   "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 9 specialized agents covering research, source verification, content, design, image curation, HTML build (4 themes), layout measurement, and PDF export.",
   "variant_type": "lecture",
   "status": "beta",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "inherits_common": "templates/common",
   "created_at": "2026-06-17T08:35:00.906Z",
   "lifecycle": {
@@ -12,6 +12,7 @@
     "stablePromotedOn": null
   },
   "agents": [
+    { "name": "pm",              "file": "agents/pm.md" },
     { "name": "version",          "file": "agents/version.md" },
     { "name": "research",         "file": "agents/research.md" },
     { "name": "source-verifier",  "file": "agents/source-verifier.md" },
@@ -29,13 +30,22 @@
       "image-curator", "html-build", "measure", "pdf-export"
     ],
     "optional": ["source-verifier", "image-curator"],
-    "notes": "source-verifier: skip with --skip-verify flag for draft iterations. image-curator: skip if all slides use image_role: none or images are pre-supplied."
+    "skippable": ["source-verifier"],
+    "retry_policy": {
+      "source-verifier": {
+        "on_fail": "research",
+        "max_retries": 2,
+        "failure_condition": "trust_score < 0.9 OR core_message_source_failed"
+      }
+    },
+    "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < 90% or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied."
   },
   "skills": [
     { "name": "version" },
     { "name": "research" },
     { "name": "storyline" },
     { "name": "design" },
+    { "name": "image-curator" },
     { "name": "html-build" },
     { "name": "measure" },
     { "name": "pdf-export" }

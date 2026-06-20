@@ -54,44 +54,26 @@
     }
   ],
   "skills": [
-    {
-      "name": "change-impact-assessment"
-    },
-    {
-      "name": "competitive-intelligence"
-    },
-    {
-      "name": "consulting-report-writing"
-    },
-    {
-      "name": "executive-presentation"
-    },
-    {
-      "name": "financial-modeling"
-    },
-    {
-      "name": "insight-synthesis"
-    },
-    {
-      "name": "narrative-framework"
-    },
-    {
-      "name": "org-readiness-assessment"
-    },
-    {
-      "name": "project-delivery"
-    },
-    {
-      "name": "solution-design"
-    },
-    {
-      "name": "stakeholder-alignment"
-    },
-    {
-      "name": "stakeholder-review-management"
-    },
-    {
-      "name": "technical-feasibility"
-    }
-  ]
+    { "name": "change-impact-assessment" },
+    { "name": "competitive-intelligence" },
+    { "name": "consulting-report-writing" },
+    { "name": "documentation-writing" },
+    { "name": "executive-presentation" },
+    { "name": "financial-modeling" },
+    { "name": "insight-synthesis" },
+    { "name": "narrative-framework" },
+    { "name": "org-readiness-assessment" },
+    { "name": "project-delivery" },
+    { "name": "research-analysis" },
+    { "name": "solution-design" },
+    { "name": "stakeholder-alignment" },
+    { "name": "stakeholder-review-management" },
+    { "name": "technical-feasibility" }
+  ],
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": [],
+    "optional": [],
+    "notes": "Agents are dispatched by PM based on engagement phase. No strict sequential dependency — PM activates specialists as the consulting engagement requires."
+  }
 }

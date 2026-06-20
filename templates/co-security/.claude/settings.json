@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/audit.sh",
+            "command": "bun scripts/audit.ts",
             "async": true,
             "asyncRewake": true
           }

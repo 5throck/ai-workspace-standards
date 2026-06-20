@@ -9,6 +9,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-06-20]**: feat(co-deck): `retry_policy` and `skippable[]` fields added to `agent_manifest` in `co-deck/variant.json` — source-verifier on_fail→research, max_retries:2, failure_condition: trust_score < 0.9
+- **[2026-06-20]**: feat(co-deck): `## Failure Protocol` section added to `source-verifier.md` with retry loop (max 2 cycles), escalation format, and PM handoff path; `handoff_to` updated to include research and pm
+- **[2026-06-20]**: feat(variants): `agent_manifest` block added to all 5 stable variants (co-consult, co-design, co-develop, co-work, co-security) with `pipeline_order`, `optional`, and contextual `notes`
+- **[2026-06-20]**: feat(workspace-schema): `_shared.agent_manifest` schema block added to `docs/workspace-schema.json` covering required/optional fields and co-deck retry_policy sub-schema
+- **[2026-06-20]**: feat(variants): `skills[]` registration gaps filled — co-consult (+documentation-writing, +research-analysis), co-design (+service-design, +ui-ux-design-intelligence), co-develop (+code-review, +refactoring, +test-driven-development), co-work (+api-documentation, +documentation-writing, +research-analysis)
+
+### Fixed
+- **[2026-06-20]**: fix(co-design/co-work): storyteller.md `Dispatch Protocol` tier corrected from `high` → `medium`
+- **[2026-06-20]**: fix(co-deck): `co-deck/variant.json` version bumped `0.1.0` → `0.2.0`; pm agent added to agents[]; image-curator added to skills[]
+- **[2026-06-20]**: fix(co-security): PostToolUse hook command corrected `bash scripts/audit.sh` → `bun scripts/audit.ts` (ADR-0036)
+- **[2026-06-20]**: fix(co-consult): industry-expert `handoff_to` corrected from non-existent `analyst` → `project-consultant`
+- **[2026-06-20]**: fix(co-design): `storyteller` removed from `agent_manifest.optional[]` — it is a core narrative agent, not omittable
+- **[2026-06-20]**: fix(trust-score): trust_score threshold unified to 0.9/90% across variant.json notes, workspace-schema.json example, and source-verifier.md Gate 1.5 and Failure Protocol
+- **[2026-06-20]**: fix(claude-md): CONSTITUTION.md §9/§10 cross-links corrected to existing anchors (previously pointing to non-existent anchors)
+
+### Changed
+- **[2026-06-20]**: chore(storyteller): co-design storyteller upgraded — Narrative Gap Analysis step added, 2 new examples, `last_updated` frontmatter, `handoff_to` updated
+- **[2026-06-20]**: chore(storyteller): co-work storyteller upgraded — institutional knowledge framing, 2 new examples, `last_updated` frontmatter
+- **[2026-06-20]**: chore(source-verifier): `Auto-Dispatch To` updated with research failure path; `last_updated` frontmatter added
+- **[2026-06-20]**: chore(co-develop): `security-monitor.md` and `stack-setup.md` structural sections verified/added (PM-ONLY, Dispatch Protocol, Meeting Participation, handoff_from)
+- **[2026-06-20]**: chore(co-security): red-team-lead `Can Lead Phases` corrected [] (was [1]); PM-ONLY scope clarified
+- **[2026-06-20]**: chore(co-consult): PM-ONLY removed from direct-user-entry agents (project-consultant, researcher)
+
+### Added
 - **[2026-06-19]**: feat(wave-2a): introduce L1 agent layer — `templates/common/agents/` with `.gitkeep`, ADR-0043 (L1 agent layer and hybrid override mechanism), `docs/designs/l1-agent-format-spec.md` (TypeScript interfaces + governance rules), and `scripts/helpers/agent-similarity-analyzer.ts` v1.1.0 (Mode 1 cross-variant Jaccard similarity scan, Mode 2 L2 version drift detection; critical fixes: CRLF normalization, path traversal guard, missingL1 bucket, pm.md exclusion, SectionKey type, remove_reason field)
 - **[2026-06-19]**: feat(co-deck): convert 4 Python scripts to TypeScript — `snapshot.ts`, `download-font.ts`, `measure-layout.ts`, `gen-slides-pdf.ts` (merges gen_full.py + gen_sample5.py with `--sample N` flag); add `package.json` and `scripts/SCRIPTS.md` lifecycle registry for co-deck variant; remove original `.py` files
 - **[2026-06-19]**: feat(wave-2a): register `helpers/agent-promote.ts` (experimental stub, Wave 2b) and `helpers/agent-similarity-analyzer.ts` v1.1.0 in SCRIPTS.md (L0 and L1 template); add `co-deck` to `governance-agents.target_variants` in `scripts/propagation-map.json`
@@ -728,7 +752,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-19*
+*Last Updated: 2026-06-20*
 
 
 
