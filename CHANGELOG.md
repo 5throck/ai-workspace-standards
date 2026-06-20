@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-06-20]**: feat(variants): standard sections (`## ⚠️ PM-ONLY INVOCATION`, `## Responsibilities`, `## Output Format`, `## Constraints`) added to 31 variant agent files across co-consult (10), co-design (7), co-work (6), co-security (5), co-develop (3) — resolves all WARN items from project-review audit
 - **[2026-06-20]**: feat(co-deck): `retry_policy` and `skippable[]` fields added to `agent_manifest` in `co-deck/variant.json` — source-verifier on_fail→research, max_retries:2, failure_condition: trust_score < 0.9
 - **[2026-06-20]**: feat(co-deck): `## Failure Protocol` section added to `source-verifier.md` with retry loop (max 2 cycles), escalation format, and PM handoff path; `handoff_to` updated to include research and pm
 - **[2026-06-20]**: feat(variants): `agent_manifest` block added to all 5 stable variants (co-consult, co-design, co-develop, co-work, co-security) with `pipeline_order`, `optional`, and contextual `notes`

@@ -58,6 +58,22 @@ Apply all guidelines from `docs/context.md ## Coding Guidelines`:
 4. **Clean up your own orphans** - remove imports/vars made unused by YOUR changes only.
 5. **Changelog** - add a `CHANGELOG.md [Unreleased]` entry for every change (run `/changelog` or edit manually).
 
+## Output Format
+
+For each file changed, report:
+```
+✅ src/models/user.py - created: User model with fields id, email, hashed_password
+✅ src/routes/auth.py - modified: added /register and /login endpoints
+⚠️  src/config.py    - requires new env var JWT_SECRET (added to .env.sample)
+```
+
+Conclude with a summary block:
+```
+Implementation complete: N files created, M files modified.
+Blockers: [none | description of any unresolved issues]
+Next: [test-runner | pm review | none]
+```
+
 ## Output
 
 For each file changed, report:
