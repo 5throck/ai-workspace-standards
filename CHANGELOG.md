@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **[2026-06-20]**: fix(l2-propagation): correct l2_propagate assignments — add `l2_propagate: false` to `agent-lifecycle-manager` (references agent-create/delete/list/verify scripts absent in L2); remove `l2_propagate: false` from `script-lifecycle-manager` (L2 projects have their own SCRIPTS.md and verify-scripts.ts)
+
 ### Added
 - **[2026-06-20]**: feat(l2-propagation): metadata-based L2 exclusion for skills and scripts — `l2_propagate: false` in SKILL.md frontmatter + `// @l2-propagate: false` header comment exclude workspace-management artifacts from generated projects; replaces hardcoded exclusion lists in `new-project.ts`
 - **[2026-06-20]**: feat(verify-skills): add `l2_propagate` field validation for `templates/common/skills/` — warns if field is missing or not a bare boolean (`v1.1.0`)
