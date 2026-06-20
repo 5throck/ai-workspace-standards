@@ -39,7 +39,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- Read `lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
+- Read `docs/lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
 - Read `research_notes.md` if it exists; confirm total slide count, chapter count, and special slides with user
 - Write `storyline.md`: narrative flow, chapter structure table, key takeaways
 - Write `slide_deck.md`: per-slide title, type, bullets, right-panel spec, **and image fields** (see Output Format)
@@ -117,7 +117,7 @@ Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 ## Constraints
 
 - Do not start without reading `research_notes.md` (if it exists)
-- Load `lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
+- Load `docs/lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
 - Run Cover/Divider Confirmation before finalizing `slide_deck.md` (unless `dividers.mode: auto/none`)
 - Gate 2 is mandatory — do not advance to Design without explicit user approval
 - No slide should exceed 4 bullets (5 is the hard limit, 3 is ideal)
