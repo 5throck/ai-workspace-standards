@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - **[2026-06-20]**: fix(l2-propagation): revert agent script exclusions — `agent-create/delete/list/verify.ts` and `agent-lifecycle-audit.ts` restored to `L0+L1` scope (copied to L2); `agent-lifecycle-manager` skill `l2_propagate: false` removed (skill + scripts both in L2); `script-lifecycle-manager` skill confirmed in L2 (L2 projects manage their own scripts)
+- **[2026-06-20]**: docs(constitution): update §6, §6.5, §7 to reflect final L2 exclusion list — excluded skills: `audit-workspace`, `create-variant`, `promote-variant`; excluded scripts: `upgrade-project.ts` only; corrected examples and "when to use" guidance
 
 ### Added
 - **[2026-06-20]**: feat(l2-propagation): metadata-based L2 exclusion for skills and scripts — `l2_propagate: false` in SKILL.md frontmatter + `// @l2-propagate: false` header comment exclude workspace-management artifacts from generated projects; replaces hardcoded exclusion lists in `new-project.ts`

@@ -67,7 +67,9 @@ Skills in `templates/common/skills/` are normally copied to generated projects (
 | `true` (default) | Skill is copied to generated project `skills/` at creation time |
 | `false` | Skill stays in L0+L1 only; excluded from L2 generated projects |
 
-**When to use `l2_propagate: false`**: Workspace-management skills that operate on the workspace infrastructure itself (variant creation, script lifecycle, workspace audits) and have no meaningful use inside generated projects.
+**When to use `l2_propagate: false`**: Workspace-management skills that operate on the workspace infrastructure itself (variant creation, workspace audits) and have no meaningful use inside generated projects. Skills used in daily project work — agent management, script management, meeting facilitation — should remain in L2.
+
+**Current excluded skills**: `audit-workspace`, `create-variant`, `promote-variant`
 
 > `new-project.ts` automatically reads this field during scaffolding — no manual exclusion list required.
 
