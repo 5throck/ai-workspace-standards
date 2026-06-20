@@ -47,12 +47,6 @@
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },
-    "audit-workspace": {
-      "source": "skills/audit-workspace/SKILL.md",
-      "version": "1.0.0",
-      "overridable": false,
-      "description": "Workspace standards audit"
-    },
     "security-scan": {
       "source": "skills/security-scan/SKILL.md",
       "version": "1.0.0",
