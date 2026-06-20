@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-20T14:41:59.653Z
+**Generated**: 2026-06-20T14:58:01.457Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -74,7 +74,7 @@
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| create-l2-scaffold.ts | 1.6.1 | scripts/create-l2-scaffold.ts | child_process, fs, path |
+| create-l2-scaffold.ts | 1.6.2 | scripts/create-l2-scaffold.ts | child_process, fs, path |
 | dev-sync.ts | 1.2.4 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
@@ -85,7 +85,7 @@
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.1.1 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.7.0 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.7.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
 | golden-reference-loader.ts | 1.0.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | ingest-external-skills.ts | 1.0.1 | scripts/ingest-external-skills.ts | N/A |

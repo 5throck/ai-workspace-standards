@@ -69,8 +69,8 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 **Theme injection** (from `lecture-profile.md`):
 ```html
 <html lang="ko" data-theme="classic">
-<link rel="stylesheet" href="../../html-themes/base/base.css">
-<link rel="stylesheet" href="../../html-themes/overrides/classic.css">
+<link rel="stylesheet" href="../../docs/html-themes/base/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/overrides/classic.css">
 ```
 Available themes: `classic | minimal | visual-heavy | academic`. Default: `classic`.
 

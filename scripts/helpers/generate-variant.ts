@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.7.0
+ * @version 1.7.1
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -1296,14 +1296,14 @@ export async function generateVariant(
   // Lecture-type: scaffold html-themes/ and presentations/ directories
   if (metadata.variantType === 'lecture') {
     for (const dir of [
-      join(variantPath, 'html-themes'),
-      join(variantPath, 'html-themes', 'base'),
-      join(variantPath, 'html-themes', 'overrides'),
+      join(variantPath, 'docs', 'html-themes'),
+      join(variantPath, 'docs', 'html-themes', 'base'),
+      join(variantPath, 'docs', 'html-themes', 'overrides'),
       join(variantPath, 'presentations'),
     ]) {
       createDirectory(dir);
     }
-    console.log(`Created lecture-specific directories: html-themes/, presentations/`);
+    console.log(`Created lecture-specific directories: docs/html-themes/, presentations/`);
   }
 
   // Generate variant.json

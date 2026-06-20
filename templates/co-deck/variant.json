@@ -61,11 +61,11 @@
     "external": []
   },
   "theme_manifest": {
-    "themes_dir": "html-themes",
-    "base_css": "html-themes/base/base.css",
+    "themes_dir": "docs/html-themes",
+    "base_css": "docs/html-themes/base/base.css",
     "available": ["classic", "minimal", "visual-heavy", "academic"],
     "default": "classic",
-    "overrides_dir": "html-themes/overrides",
+    "overrides_dir": "docs/html-themes/overrides",
     "notes": "CSS variable override themes. DOM structure is immutable across all themes. visual-heavy requires renderSlide() data-theme detection for background-image injection."
   },
   "lecture_profile": {

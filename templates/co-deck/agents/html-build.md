@@ -47,7 +47,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Generate `lecture_vN.html` with all slides rendered via a single `renderSlide(data)` function
 - Embed slide content as `const slideData = [...]` JavaScript array inside the HTML
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
-- Apply theme from `presentations/<project>/lecture-profile.md`: inject `<link rel="stylesheet" href="../../html-themes/overrides/<theme>.css">` after base CSS
+- Apply theme from `presentations/<project>/lecture-profile.md`: inject `<link rel="stylesheet" href="../../docs/html-themes/overrides/<theme>.css">` after base CSS
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
 - Bind images: for each slide with `image_role ≠ none`, use path from `image-manifest.json`; fall back to text panel if no image recorded
 - Insert speaker intro slide (position 2) and contact slide (last) if missing
@@ -72,8 +72,8 @@ When generating `lecture_vN.html`, apply the theme from `presentations/<project>
 
 **2. CSS link injection** — after the base stylesheet:
 ```html
-<link rel="stylesheet" href="../../html-themes/base/base.css">
-<link rel="stylesheet" href="../../html-themes/overrides/minimal.css">
+<link rel="stylesheet" href="../../docs/html-themes/base/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/overrides/minimal.css">
 ```
 Use `presentations/<project>/lecture-profile.md` → `theme` value. Default: `classic`.
 

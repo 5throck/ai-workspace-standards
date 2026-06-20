@@ -119,12 +119,12 @@ CSS variable override themes — DOM structure is immutable across all themes.
 
 | Theme | File | Best For | Image Panel |
 |-------|------|----------|-------------|
-| `classic` | `html-themes/overrides/classic.css` | General purpose (default) | 45% right panel |
-| `minimal` | `html-themes/overrides/minimal.css` | Text-heavy lectures | None |
-| `visual-heavy` | `html-themes/overrides/visual-heavy.css` | Visual storytelling | Full-bleed background |
-| `academic` | `html-themes/overrides/academic.css` | Research / thesis | 30% illustration panel |
+| `classic` | `docs/html-themes/overrides/classic.css` | General purpose (default) | 45% right panel |
+| `minimal` | `docs/html-themes/overrides/minimal.css` | Text-heavy lectures | None |
+| `visual-heavy` | `docs/html-themes/overrides/visual-heavy.css` | Visual storytelling | Full-bleed background |
+| `academic` | `docs/html-themes/overrides/academic.css` | Research / thesis | 30% illustration panel |
 
-Base styles: `html-themes/base/base.css` (shared CSS variables — do not modify per-theme).
+Base styles: `docs/html-themes/base/base.css` (shared CSS variables — do not modify per-theme).
 
 **Theme selection**: set `theme:` in `docs/lecture-profile.md`. Default: `classic`.
 
@@ -306,8 +306,8 @@ User: "make a lecture about X"
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
-| `html-themes/base/` | Shared CSS variable foundation |
-| `html-themes/overrides/` | Per-theme CSS variable overrides (4 themes) |
+| `docs/html-themes/base/` | Shared CSS variable foundation |
+| `docs/html-themes/overrides/` | Per-theme CSS variable overrides (4 themes) |
 | `memory/` | Dev session logs |
 | `docs/` | Project context + ADRs |
 <!-- END VARIANT-INJECT -->
