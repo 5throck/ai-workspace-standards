@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-20]**: feat(variants): `skills[]` registration gaps filled — co-consult (+documentation-writing, +research-analysis), co-design (+service-design, +ui-ux-design-intelligence), co-develop (+code-review, +refactoring, +test-driven-development), co-work (+api-documentation, +documentation-writing, +research-analysis)
 
 ### Fixed
+- **[2026-06-20]**: fix(co-deck): updated path of `lecture-profile.md` from `docs/lecture-profile.md` to `presentations/<project>/lecture-profile.md` across all agents (pm, research, storyline, image-curator, source-verifier) and `variant.json` to keep local presentation settings isolated from shared template folder; added warning header to master template `lecture-profile.md`
 - **[2026-06-20]**: fix(co-work): `project-coordinator.md` self-referencing loop removed — `handoff_to: []` and `Can Lead Phases: []` (was [4]) to prevent infinite PM ping-pong (C-15)
 - **[2026-06-20]**: fix(co-consult): `required_skills` added to 6 agents (data-analyst, industry-expert, sme, solutions-architect, technology-specialist, workstream-lead) — C-17
 - **[2026-06-20]**: fix(co-deck): `api_keys:` block removed from `docs/lecture-profile.md`; replaced with comment pointing to `.env.local` — C-19

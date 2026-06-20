@@ -1,4 +1,9 @@
 ---
+# ⚠️ MASTER TEMPLATE — DO NOT EDIT DIRECTLY FOR SPECIFIC LECTURES
+# This file acts as the master template.
+# It is automatically copied to 'presentations/<project>/lecture-profile.md' when you start a new project.
+# Please edit the local copy in your presentation folder instead.
+
 # ── Lecture Profile ──────────────────────────────────────────────
 # Edit the fields below before starting research.
 # The pm, research, storyline, and html-build agents all read this file.
