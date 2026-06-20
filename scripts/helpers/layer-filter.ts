@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.2.0
+ * @version 1.2.1
  * @status active
  *
  * Reads SCRIPTS.md and SKILLS.md layer columns and provides
@@ -32,6 +32,7 @@ function normalizeLayer(raw: string): LayerValue {
   if (v === "L0-only" || v === "L0") return "L0";
   if (v === "common" || v === "L0+L1") return "L0+L1";
   if (v === "L0+L1+L2") return "L0+L1+L2";
+  // L0+L1-ws was retired — any stale value falls through to L0+L1 (treated as common)
   // Default unrecognized values to L0+L1 (safe — keeps script in template)
   return "L0+L1";
 }
