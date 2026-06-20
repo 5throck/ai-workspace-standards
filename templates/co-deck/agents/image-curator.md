@@ -39,7 +39,7 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 ## Responsibilities
 
 - Read `slide_deck.md` and extract all slides with `image_role` ≠ `none`
-- Read `lecture-profile.md` for `image.source` and `image.style_hint` preferences
+- Read `docs/lecture-profile.md` for `image.source` and `image.style_hint` preferences
 - For each slide with an image query:
   - Refine the raw `image_query` with the profile's `style_hint` and `level` context
   - Search using Web Search tool (Unsplash, Pexels, or Wikimedia — license-clear only)
@@ -109,7 +109,7 @@ All sources used are **commercial-use unlimited** — no watermarks, no attribut
 
 ### `source: auto` Resolution Order
 
-1. Check `lecture-profile.md` `image.api_keys` — if any key is present, use that API
+1. Check `docs/lecture-profile.md` `image.api_keys` — if any key is present, use that API
 2. If no keys: try Pixabay keyless endpoint first
 3. If Pixabay keyless fails or returns no results: fall back to Unsplash URL method
 4. If both fail: mark slide as missing image (do not block pipeline)

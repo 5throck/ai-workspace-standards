@@ -48,7 +48,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Profile Loading
 
-At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
+At the start of Stage 1, check for `docs/lecture-profile.md`:
 
 **If the file exists:**
 1. Read `audience`, `level`, `keywords`, `slide_count`, `language` fields
@@ -64,7 +64,7 @@ At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
 1. Proceed with default settings (practitioner audience, intermediate level)
 2. After confirming topic with the user, suggest creating `lecture-profile.md`:
    ```
-   💡 presentations/<project>/lecture-profile.md 파일이 없습니다.
+   💡 docs/lecture-profile.md 파일이 없습니다.
       프로필 파일을 작성하면 검색 쿼리와 이미지 선택이 자동으로 최적화됩니다.
       (강의 시작 후 언제든 생성 가능합니다)
    ```

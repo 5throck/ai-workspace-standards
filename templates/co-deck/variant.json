@@ -59,7 +59,7 @@
     "notes": "CSS variable override themes. DOM structure is immutable across all themes. visual-heavy requires renderSlide() data-theme detection for background-image injection."
   },
   "lecture_profile": {
-    "template_path": "presentations/lecture-profile.md",
+    "template_path": "docs/lecture-profile.md",
     "required_fields": ["title", "audience", "level"],
     "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
   }

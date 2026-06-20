@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-19
+# Last Updated: 2026-06-20
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -114,7 +114,7 @@ CSS variable override themes — DOM structure is immutable across all themes.
 
 Base styles: `html-themes/base/base.css` (shared CSS variables — do not modify per-theme).
 
-**Theme selection**: set `theme:` in `presentations/<project>/lecture-profile.md`. Default: `classic`.
+**Theme selection**: set `theme:` in `docs/lecture-profile.md`. Default: `classic`.
 
 **`visual-heavy` special behavior**: `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. `<html data-theme="visual-heavy">` must be set for CSS selectors to activate.
 <!-- END VARIANT-INJECT -->
@@ -124,7 +124,7 @@ Base styles: `html-themes/base/base.css` (shared CSS variables — do not modify
 ## Lecture Profile
 
 <!-- VARIANT-INJECT: lecture-profile -->
-`presentations/<project>/lecture-profile.md` is the single source of truth for per-lecture settings.
+`docs/lecture-profile.md` is the single source of truth for per-lecture settings.
 
 **Scaffolded automatically** on `bun new-project` — edit before starting Stage 1.
 
@@ -287,7 +287,7 @@ User: "make a lecture about X"
 | Folder | Purpose |
 |--------|---------|
 | `presentations/<project>/` | All outputs for a single lecture project |
-| `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
+| `docs/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/assets/images/` | Downloaded images (image-curator output) |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
 | `agents/` | Agent role definitions (10 agents) |
