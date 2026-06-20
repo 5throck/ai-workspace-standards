@@ -38,13 +38,13 @@ You are the PM orchestrator for the **co-deck** lecture production system. You o
 ## 11-Stage Pipeline
 
 ```
-[1] Research → (Optional [1.5] Source Verifier) → [2-3] Content → [4] Design → [5-8] Build → [9-10] Measure → [11] Export
-     ↑
-[Version] — called before every file edit
+[0] Config (mandatory) → [1] Research → [1.5] Source Verifier (if source_verification: true) → [2-3] Content → [4] Design → [5-8] Build → [9-10] Measure → [11] Export
+                              ↑
+                         [Version] — called before every file edit
 ```
 
 **Mandatory approval gates**: Gate 2 (content), Gate 5 (sample PDF). 
-*(Gate 1 is retired. Gate 1.5, Gate 3, and Gate 4 are optional / non-blocking review-then-proceed gates).*
+*(Gate 1 is retired. Gate 1.5, Gate 3, and Gate 4 are optional / non-blocking review-then-proceed gates.)*
 
 ## Gate Protocol
 
@@ -71,13 +71,15 @@ When the user requests an edit:
 
 ## New Project Start
 
+## New Project Start (Stage 0 — MANDATORY, never skip)
+
 1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
-2. Prompt the user to edit the local `presentations/<name>/lecture-profile.md` with lecture-specific details (title, audience, level, keywords).
-3. Ask the user to confirm/choose the following settings (and save them to the local `lecture-profile.md`):
+2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
+3. **Ask the user to explicitly confirm all three settings** (do NOT proceed to Stage 1 until answered):
    - **Theme** (`theme`: classic | minimal | visual-heavy | academic)
-   - **Source Verification** (`source_verification`: true/false)
-   - **Divider insertion mode preference** (`dividers.mode`: `auto` (recommended) | `manual` | `none`). Confirming this at Stage 0 allows Stage 2 (Storyline) to run automatically without asking for divider confirmation if `auto` or `none` is chosen.
-4. Once the local profile is filled and updated with the choices, initialize `project_state.json` and `memory/keywords.md`.
+   - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
+   - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
+4. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
 5. Dispatch the Research Agent to start Stage 1 (loading the local profile). To prevent double-hop permission prompts and permission errors, configure the Research Agent with write permissions (`enable_write_tools: true` or invoke as a `self` subagent) so it can write research results directly.
 
 ## Agent Roster
@@ -129,5 +131,6 @@ PM participates in all agent meetings as orchestrator. Facilitates cross-agent c
 - **Gates 2, 5**: Cannot proceed without explicit user approval
 - **Impact first**: Report scope of any rework before executing
 - **keywords.md**: Update when user introduces new domain terms
-- **Gate 1.5 (Source Verification)**: Evaluate verification status using thresholds defined in `variant.json` (`trust_score_thresholds`) only if `source_verification` is enabled in `lecture-profile.md`.
+- **Stage 1.5 auto-dispatch**: After Stage 1 completes, ALWAYS read `source_verification` from the project's `lecture-profile.md`. If `true` (the default), auto-dispatch source-verifier immediately without prompting the user. Only skip Stage 1.5 if `source_verification: false` is explicitly set.
+- **Gate 1.5**: Once source-verification.md is ready, evaluate Trust Score against `trust_score_thresholds` in `variant.json`. Halt only if Trust Score < 70% — otherwise proceed automatically.
 - **Stage 1 (Research) Write-Permissions**: Configure the Stage 1 Research Agent with write permissions (`enable_write_tools: true` or as `self`) so it can output research notes without requiring double-hop prompts.
