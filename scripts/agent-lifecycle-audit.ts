@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @l2-propagate: false
 /**
  * Agent Lifecycle Audit Script
  *
@@ -10,6 +11,7 @@
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
  * @version 1.1.2
+ * @l2-propagate false
  * @last_updated 2026-06-02
  * @license MIT
  */

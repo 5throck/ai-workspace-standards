@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-06-20]**: feat(l2-propagation): metadata-based L2 exclusion for skills and scripts — `l2_propagate: false` in SKILL.md frontmatter + `// @l2-propagate: false` header comment exclude workspace-management artifacts from generated projects; replaces hardcoded exclusion lists in `new-project.ts`
+- **[2026-06-20]**: feat(verify-skills): add `l2_propagate` field validation for `templates/common/skills/` — warns if field is missing or not a bare boolean (`v1.1.0`)
+- **[2026-06-20]**: feat(verify-scripts): add `checkL2PropagateConsistency()` — cross-checks `L0+L1-ws` scope in SCRIPTS.md against `@l2-propagate: false` header; mismatches fail pre-commit (`v1.1.0`)
+- **[2026-06-20]**: docs: update constitution §6, §6.5, §7 to document `l2_propagate`, `@l2-propagate`, `L0+L1-ws` scope, and §7.3 L2 Exclusion Rules
+
 ### Fixed
 - **[2026-06-20]**: fix(variants): remove `agent-lifecycle-manager` from `.claude/skills/` and `.gemini/skills/` of all 6 variants — it is a `scope: common` workspace skill deployed via `skills/` and must not be duplicated in platform-config skill dirs; affected: co-consult, co-design, co-develop, co-work, co-security, co-deck (12 dirs removed)
 - **[2026-06-20]**: fix(co-deck): move `extract_slidedata.mjs` from `scripts/` root to `scripts/co-deck/` — aligns with all other co-deck scripts; prevents stray file at generated project `scripts/` root
