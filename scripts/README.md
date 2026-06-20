@@ -150,7 +150,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 
 ## Layer Classification Framework
 
-> **Only 2 layer types are used**. L0+L1-ws has been removed (collapsed to L0). L0+L1+L2 is reserved but unused.
+> **Two layer types are in use**: `L0` (workspace root only) and `L0+L1` (workspace + template snapshot). `L0+L1+L2` is reserved but unused.
 
 | Layer | Description | Publish | Example |
 |-------|-------------|---------|---------|
