@@ -30,6 +30,40 @@ sync_version: 1
 
 ---
 
+## 사전 요구 사항 (Prerequisites)
+
+이 워크스페이스를 사용하기 전에 필수 소프트웨어가 설치되어 있는지 확인하세요.
+
+> **📖 상세 가이드**: 전체 설치 지침 및 문제 해결은 [시작 가이드](docs/getting-started.md)를 참조하세요.
+
+### 필수 도구
+
+| 도구 | 버전 | 용도 | 설치 |
+|------|------|------|------|
+| **Git** | 2.x+ | 버전 관리 및 훅 자동화 | [git-scm.com](https://git-scm.com/downloads) |
+| **Bun** ⭐ | 1.x+ | TypeScript 스크립트, 프로젝트 생성 (필수) | `curl -fsSL https://bun.sh/install \| bash` |
+
+**주요 변경사항**: Bun은 이제 프로젝트 생성에 **필수**입니다 (Python/PowerShell 인라인 코드를 대체합니다).
+
+### 선택적 도구
+
+| 도구 | 용도 | 설치 |
+|------|------|------|
+| **GitHub CLI (gh)** | PR 자동화 | [cli.github.com](https://cli.github.com/) |
+
+### 빠른 확인
+
+```bash
+# 필수 도구 확인
+git --version    # 2.x.x 이상이어야 합니다
+bun --version    # 1.x.x 이상이어야 합니다
+gh --version     # 선택 사항: PR 자동화
+```
+
+**설치 안내**: 자세한 설치 지침은 [시작 가이드](docs/getting-started.md#-essential-software-must-have)를 참조하세요.
+
+---
+
 ## 빠른 시작 (Quick Start)
 
 ### 1. 워크스페이스 루트로 클론
@@ -244,4 +278,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-19*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-20*

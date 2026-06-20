@@ -157,6 +157,7 @@
   "variant_extensions": {
     "description": "Optional top-level keys allowed in variant.json beyond the base contract. Validated by validate-templates.ts.",
     "_shared": {
+      "_note": "Documentation-only cross-reference. $ref values here are NOT machine-validated JSON Schema refs. For standard JSON Schema, use $defs pattern instead.",
       "agent_manifest": {
         "description": "Agent roster metadata and optional pipeline configuration. Available in all variants.",
         "required_fields": ["variant_agents_dir", "optional", "notes"],

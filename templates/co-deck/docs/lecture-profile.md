@@ -52,12 +52,7 @@ image:
   # Style hint appended to image search queries
   # Examples: "professional", "minimalist", "tech", "nature", "abstract"
   style_hint: "professional"
-  # Optional API keys — leave empty to use keyless fallback (Pixabay free tier + Unsplash URL method)
-  # With keys: higher rate limits and more precise search results
-  api_keys:
-    unsplash: ""    # https://unsplash.com/developers — free 50 req/hr
-    pexels: ""      # https://www.pexels.com/api/ — free 200 req/hr
-    pixabay: ""     # https://pixabay.com/api/docs/ — free 100 req/hr (works keyless too)
+  # API keys are loaded from `.env.local` (gitignored) — do not store keys in this file.
 
 # ── Optional: Chapter overview ────────────────────────────────────
 # Pre-seed chapter titles to guide the storyline agent.

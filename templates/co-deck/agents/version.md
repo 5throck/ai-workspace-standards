@@ -1,5 +1,7 @@
 ---
 name: version
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: Version snapshot manager for all lecture production files
 status: active
 tier:

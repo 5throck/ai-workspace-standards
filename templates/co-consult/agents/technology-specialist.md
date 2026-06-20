@@ -20,7 +20,9 @@ examples:
 phases: [4]
 handoff_to: [engagement-leader]
 handoff_from: [communications-lead, solutions-architect]
-required_skills: []
+required_skills: [technical-feasibility, solution-design]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

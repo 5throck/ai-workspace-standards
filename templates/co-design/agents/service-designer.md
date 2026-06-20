@@ -21,6 +21,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: [service-design]
+version: "1.0.0"
+last_updated: "2026-05-28"
 ---
 
 ## Role

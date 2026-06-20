@@ -53,6 +53,18 @@
 >
 > After any agent change: update AGENTS.md and this table.
 
+### Agent Control Flags
+
+Three flags control agent execution in the co-deck pipeline:
+
+| Flag | Location | Meaning |
+|------|----------|---------|
+| `optional[]` | `agent_manifest.optional` | Agent is **omitted entirely** from the workflow run. Use when the agent's output is not needed for this project type. |
+| `skippable[]` | `agent_manifest.skippable` | Agent **runs**, but failure is non-blocking — the `--skip-verify` flag treats it as a soft gate. Use for optional quality checks. |
+| `retry_policy` | `agent_manifest.retry_policy` | Agent **fails and loops back** to a named predecessor agent for re-work. Max retries configurable. |
+
+**Example**: `source-verifier` is both `optional` (can be omitted) AND has a `retry_policy` (if it runs and fails trust threshold, it returns to `research` for another pass).
+
 ---
 
 ## Skills

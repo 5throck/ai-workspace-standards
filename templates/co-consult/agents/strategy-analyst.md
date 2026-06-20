@@ -21,6 +21,8 @@ phases: [1]
 handoff_to: [communications-lead, solutions-architect]
 handoff_from: [engagement-leader]
 required_skills: [research-analysis, competitive-intelligence, financial-modeling, insight-synthesis]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

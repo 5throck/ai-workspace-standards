@@ -20,7 +20,9 @@ examples:
 phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
-required_skills: [api-documentation, documentation-writing, solution-design, technical-feasibility, narrative-framework]
+required_skills: [solution-design, technical-feasibility]
+version: "1.0.0"
+last_updated: "2026-06-02"
 ---
 
 ## Role

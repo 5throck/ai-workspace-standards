@@ -1,6 +1,6 @@
 # Meeting Transcript
 **Date**: 2026-06-09
-**Topic**: L0→L1→L2 배포 전략에 따른 workspace root 파일 templates/common 배포 및 L1 variant별 pm.md 생성 설계
+**Topic**: L0→L1→L2 Deployment Strategy — workspace root file templates/common Deployment and L1 per-variant pm.md Creation Design
 **Participants**: architect, docs-writer, lifecycle-manager
 **Rounds**: 2
 **Language**: Korean (transcript saved in English)

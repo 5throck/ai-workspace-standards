@@ -1,6 +1,6 @@
 # Meeting Transcript
 **Date**: 2026-06-09
-**Topic**: AGENTS.md 구조적 재설계 - 중복 제거 및 CONSTITUTION.md 위임
+**Topic**: AGENTS.md Structural Redesign - Duplicate Removal and CONSTITUTION.md Delegation
 **Participants**: architect, docs-writer
 **Rounds**: 2
 **Language**: Korean (transcript saved in English)

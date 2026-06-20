@@ -21,6 +21,8 @@ phases: [2, 3]
 handoff_to: [visual-designer, service-designer, typography-expert]
 handoff_from: [ux-researcher]
 required_skills: [ui-ux-design-intelligence, service-design]
+version: "1.0.0"
+last_updated: "2026-05-28"
 ---
 
 ## Role

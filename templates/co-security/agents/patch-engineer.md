@@ -1,5 +1,7 @@
 ---
 name: patch-engineer
+version: "1.0.0"
+last_updated: "2026-06-01"
 formal_name: Patch Engineer
 role: Cross-platform patch deployment and remediation specialist
 tier:

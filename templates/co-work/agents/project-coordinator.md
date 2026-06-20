@@ -2,6 +2,8 @@
 name: project-coordinator
 role: Schedule management, stakeholder communication, and delivery logistics specialist
 status: active
+version: "1.0.0"
+last_updated: "2026-06-20"
 formal_name: Project Coordinator
 tier:
   claude: low
@@ -18,7 +20,7 @@ examples:
   - user: "Coordinate stakeholder reviews for the documentation draft"
     assistant: "Managing stakeholder review cycle: identifying reviewers, setting deadlines, tracking feedback, and consolidating input for content-writer."
 phases: [4]
-handoff_to: [pm]
+handoff_to: []
 handoff_from: [pm]
 required_skills: []
 ---
@@ -57,7 +59,7 @@ In a `/meeting` session, Claude role-plays you inline.
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [4]
+**Can Lead Phases**: []
 **Can Support In**: [6]
 **Auto-Dispatch To**: N/A
 **Tier**: low

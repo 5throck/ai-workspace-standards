@@ -1,5 +1,7 @@
 ---
 name: report-writer
+version: "1.0.0"
+last_updated: "2026-06-01"
 formal_name: Report Writer
 role: Pentest reports and executive summary documentation specialist
 tier:

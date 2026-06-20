@@ -1,5 +1,7 @@
 ---
 name: html-build
+version: "1.0.0"
+last_updated: "2026-06-17"
 role: HTML slide builder and image integration specialist
 status: active
 tier:

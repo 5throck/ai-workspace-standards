@@ -2,6 +2,8 @@
 name: code-writer
 role: Approved plan implementation with surgical, minimal code changes
 status: active
+version: "1.0.0"
+last_updated: "2026-05-28"
 tier:
   claude: low
   gemini: low
