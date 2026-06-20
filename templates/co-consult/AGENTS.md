@@ -126,9 +126,9 @@ All specialist agents below are dispatched ONLY through PM:
  
  ---
  
-### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+### Cost Optimization (3-Tier Strategy)
 
-The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
+The PM uses a 3-tier model strategy to optimize cost and quality:
 
 - **High-tier (Design/Plan)**: Used exclusively by the Engagement Leader/Change Management Partner for complex reasoning, architectural design, and writing precise sub-agent prompts.
 - **Medium-tier (Review/QA)**: Used by Strategy Analyst or Communications Lead to review, synthesize, and perform quality gates. Acts as an independent supervisor.

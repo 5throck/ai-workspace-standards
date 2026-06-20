@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.6
+// @version 1.1.7
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -581,12 +581,6 @@ if (existsSync(setupTs)) {
   // Pass relative path to bash to avoid Windows path separator issues
   const result = spawnSync('bash', ['scripts/setup.sh'], { stdio: 'inherit', cwd: projectDir });
   if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry.");
-}
-
-// ── Dynamic Plugin Injection ───────────────────────────────────────────────────
-const injectPlugins = join(workspaceRoot, 'scripts', 'helpers', 'inject-global-plugins.ts');
-if (existsSync(injectPlugins)) {
-  spawnSync('bun', [injectPlugins, projectDir, platform], { stdio: 'inherit' });
 }
 
 // ── 10. Final banner ──────────────────────────────────────────────────────────

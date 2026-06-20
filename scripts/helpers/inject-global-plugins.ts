@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 /**
  * inject-global-plugins.ts
- * @version 1.0.0
+ * @version 1.0.1
  *
- * Dynamically instructs the scaffolded project to use global plugins (superpowers, ui-ux-pro-max)
+ * Dynamically instructs the scaffolded project to use global plugins (superpowers)
  * instead of relying on statically copied skill files, reducing project bloat.
  * 
  * Usage:
@@ -28,7 +28,7 @@ if (!existsSync(projectDir)) {
 }
 
 // 1. Remove statically copied heavy skills if they were copied from templates
-const skillsToRemove = ['ui-ux-pro-max', 'superpowers'];
+const skillsToRemove = ['superpowers'];
 for (const skill of skillsToRemove) {
   const skillDir = join(projectDir, 'skills', skill);
   if (existsSync(skillDir)) {
@@ -47,11 +47,11 @@ const globalToolsPath = join(docsDir, 'GLOBAL_TOOLS.md');
 let content = `# Global Tools Configuration\n\nThis project automatically links to global developer tools.\n`;
 
 if (platform === 'claude' || platform === 'both') {
-  content += `\n## Claude Plugins\nThe following plugins must be globally available in \`~/.claude/plugins\`:\n- superpowers\n- ui-ux-pro-max\n`;
+  content += `\n## Claude Plugins\nThe following plugins must be globally available in \`~/.claude/plugins\`:\n- superpowers\n`;
 }
 
 if (platform === 'antigravity' || platform === 'both') {
-  content += `\n## Antigravity Extensions\nThe following extensions must be globally available in \`~/.gemini/config/plugins\`:\n- superpowers\n- ui-ux-pro-max\n`;
+  content += `\n## Antigravity Extensions\nThe following extensions must be globally available in \`~/.gemini/config/plugins\`:\n- superpowers\n`;
 }
 
 writeFileSync(globalToolsPath, content, 'utf-8');

@@ -43,7 +43,6 @@
 | `team-builder` | 1.1.0 | active | pm | 2026-06-06 | — | — |
 | `technical-feasibility` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `translate` | 1.0.0 | active | pm | 2026-06-06 | — | — |
-| `ui-ux-pro-max` | 1.0.0 | active | architect | 2026-06-06 | — | Restored to L0+L1 — was incorrectly removed in PR 231 |
 | `validate-docs-links` | 1.0.0 | active | docs-writer | 2026-05-30 | — | — |
 | `verify-authorization` | 1.0.0 | active | security-expert | 2026-06-06 | — | co-security only |
 | `version` | 1.3.0 | active | pm | 2026-06-20 | — | co-deck only |
