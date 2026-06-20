@@ -15,7 +15,7 @@ Skills follow the same L0/L1/L2 model as scripts:
 | **L1 — Template snapshot** | `templates/common/skills/` | publish: `bun run propagate:apply` | Explicit publish from L0 |
 | **L2 — Project** | `<project>/skills/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. L2 projects snapshot L1 at creation time — no automatic back-propagation.
+**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot — skills with `l2_propagate: false` are excluded at this stage and never enter `templates/common/`. L2 projects snapshot L1 at creation time — no automatic back-propagation.
 
 > **Workspace Root vs. Individual Projects**:
 > - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `ui-ux-pro-max`, `simulate-project-creation`, `security-scan`, `audit-workspace`).
@@ -60,18 +60,18 @@ version: 1.0.0
 
 #### L2 Propagation Control
 
-Skills in `templates/common/skills/` are normally copied to generated projects (L2) at `new-project` time. To exclude a skill from L2 projects, set `l2_propagate: false` in the SKILL.md frontmatter.
+Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propagate-to-templates.ts`, and then snapshot-copied to generated projects (L2) at `new-project` time. Skills with `l2_propagate: false` are **excluded at the L0→L1 propagation stage** — they never enter `templates/common/` and therefore never reach L2 projects.
 
-| `l2_propagate` value | Behavior |
-|---------------------|----------|
-| `true` (default) | Skill is copied to generated project `skills/` at creation time |
-| `false` | Skill stays in L0+L1 only; excluded from L2 generated projects |
+| `l2_propagate` value | Propagated to L1? | Copied to L2? |
+|---------------------|-------------------|---------------|
+| `true` (default) | ✅ Yes | ✅ Yes |
+| `false` | ❌ No — stays in L0 only | ❌ No |
 
-**When to use `l2_propagate: false`**: Workspace-management skills that operate on the workspace infrastructure itself (variant creation, workspace audits) and have no meaningful use inside generated projects. Skills used in daily project work — agent management, script management, meeting facilitation — should remain in L2.
+**When to use `l2_propagate: false`**: Workspace-management skills that should never leave the workspace root — variant creation tools, workspace audit scripts, etc. These skills exist only at L0 and are never propagated to templates or generated projects.
 
 **Current excluded skills**: `audit-workspace`, `create-variant`, `promote-variant`
 
-> `new-project.ts` automatically reads this field during scaffolding — no manual exclusion list required.
+> `propagate-to-templates.ts` reads this field via `helpers/layer-filter.ts` and excludes the skill from L1 propagation. `new-project.ts` also checks it as a safety net.
 
 #### 6.3 Skill Body Structure
 

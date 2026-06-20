@@ -11,8 +11,8 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.4
- * @last_updated 2026-06-02
+ * @version 1.3.5
+ * @last_updated 2026-06-20
  * @license MIT
  */
 
@@ -139,7 +139,7 @@ function parseScriptsMdRegistry(
 
     const rawLayer = layerColIdx >= 0 ? (cols[layerColIdx] ?? '') : '';
     let layer: RegistryEntry['layer'] = 'common';
-    if (rawLayer === 'L0-only' || rawLayer === 'L0') layer = 'L0-only';
+    if (rawLayer === 'L0-only' || rawLayer === 'L0' || rawLayer === 'L0+L1-ws') layer = 'L0-only';
     else if (rawLayer === 'L1-only') layer = 'L1-only';
 
     result.set(filename, { version, layer });

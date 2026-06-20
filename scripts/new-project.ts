@@ -473,8 +473,10 @@ for (const f of cleanupFiles) {
   if (existsSync(fp)) rmSync(fp);
 }
 
-// Remove workspace-only skills (l2_propagate: false in SKILL.md frontmatter)
-// Also remove legacy hardcoded L0-only skills (scope: workspace)
+// Safety-net: remove any workspace-only skills that bypassed propagation filtering
+// (l2_propagate: false). Primary enforcement is in propagate-to-templates.ts via
+// layer-filter.ts — this block catches manual additions to templates/common/skills/.
+// Also removes legacy hardcoded L0-only skills (scope: workspace).
 const LEGACY_L0_SKILLS = ['simulate-project-creation'];
 for (const skill of LEGACY_L0_SKILLS) {
   for (const base of ['skills', '.claude/skills', '.gemini/skills']) {
@@ -496,7 +498,9 @@ if (existsSync(projectSkillsDir)) {
   }
 }
 
-// Remove workspace-only scripts (@l2-propagate: false in file header)
+// Safety-net: remove any workspace-only scripts that bypassed propagation filtering
+// (@l2-propagate: false header). Primary enforcement is in propagate-to-templates.ts
+// via layer-filter.ts — this block catches manual additions to templates/common/scripts/.
 const projectScriptsDir = join(projectDir, 'scripts');
 if (existsSync(projectScriptsDir)) {
   for (const scriptName of readdirSync(projectScriptsDir)) {

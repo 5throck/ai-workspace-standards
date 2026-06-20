@@ -43,14 +43,14 @@ live there as **real, editable files** (not embedded strings).
 
 #### 7.3 L2 Exclusion Rules
 
-Not everything in `templates/common/` is appropriate for generated projects. `new-project.ts` applies metadata-based filtering after the initial copy:
+Workspace-management artifacts are excluded **at the L0→L1 propagation stage** by `propagate-to-templates.ts`, so `templates/common/` only contains artifacts that belong in generated projects. `new-project.ts` applies a secondary safety-net check after copying, in case any artifact was added directly to `templates/common/` without going through the propagation pipeline.
 
 | Artifact type | Exclusion mechanism | How to add new exclusions |
 |---------------|---------------------|--------------------------|
-| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add field to the skill's SKILL.md in both `skills/` and `templates/common/skills/` |
-| **Scripts** | `// @l2-propagate: false` header comment + `L0+L1-ws` scope in SCRIPTS.md | Add comment to script file in both `scripts/` and `templates/common/scripts/`; update scope in SCRIPTS.md |
+| **Skills** | `l2_propagate: false` in `SKILL.md` frontmatter | Add `l2_propagate: false` to the skill's SKILL.md in `skills/` (root only — `propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
+| **Scripts** | `// @l2-propagate: false` header comment + `L0+L1-ws` scope in SCRIPTS.md | Add `// @l2-propagate: false` header to the script in `scripts/` and set scope to `L0+L1-ws` in SCRIPTS.md (`propagate-to-templates.ts` will exclude it from `templates/common/` automatically) |
 
-The filtering is automatic — `new-project.ts` reads the metadata at scaffolding time. No hardcoded exclusion lists are maintained.
+The filtering is automatic — `propagate-to-templates.ts` enforces it at publish time, and `new-project.ts` re-checks as a safety net. No hardcoded exclusion lists are maintained.
 
 **Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`
 
