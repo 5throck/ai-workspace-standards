@@ -196,9 +196,9 @@ Request received
 > **Why serial writes?** Concurrent writes to the same files cause merge conflicts and lock contention.
 > Always wait for a write agent to complete before dispatching the next.
 
-### Superpowers Plugin & Cost Optimization (3-Tier Strategy)
+### Cost Optimization (3-Tier Strategy)
 
-The PM agent MUST leverage the **`superpowers`** plugin for harness engineering using a 3-tier model strategy to optimize cost and quality:
+The PM uses a 3-tier model strategy to optimize cost and quality:
 
 - **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
 - **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.

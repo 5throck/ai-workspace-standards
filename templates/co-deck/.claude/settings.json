@@ -1,6 +1,7 @@
 {
   "effortLevel": "high",
   "permissions": {
+    "allow": ["WebSearch(*)", "WebFetch(*)"],
     "deny": [
       "Bash(git push --force*)",
       "Bash(git push --force-with-lease*)",

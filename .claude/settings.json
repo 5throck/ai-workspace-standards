@@ -6,7 +6,9 @@
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
       "Bash(curl -sI *)",
-      "Bash(bun scripts/validate-templates.ts *)"
+      "Bash(bun scripts/validate-templates.ts *)",
+      "WebSearch(*)",
+      "WebFetch(*)"
     ],
     "deny": [
       "Bash(git push --force*)",
