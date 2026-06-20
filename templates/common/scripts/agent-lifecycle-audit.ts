@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-// @l2-propagate: false
 /**
  * Agent Lifecycle Audit Script
  *

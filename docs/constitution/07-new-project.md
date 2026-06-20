@@ -52,9 +52,9 @@ Not everything in `templates/common/` is appropriate for generated projects. `ne
 
 The filtering is automatic — `new-project.ts` reads the metadata at scaffolding time. No hardcoded exclusion lists are maintained.
 
-**Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`, `script-lifecycle-manager`
+**Excluded skills** (workspace-management): `audit-workspace`, `create-variant`, `promote-variant`
 
-**Excluded scripts** (workspace-management): `agent-create.ts`, `agent-delete.ts`, `agent-list.ts`, `agent-verify.ts`, `agent-lifecycle-audit.ts`, `upgrade-project.ts`
+**Excluded scripts** (workspace-management): `upgrade-project.ts`
 
 #### 7.4 Post-Scaffold Checklist
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-// @l2-propagate: false
 /**
  * Agent Creator CLI for Workspace Root
  * @version 1.0.0
