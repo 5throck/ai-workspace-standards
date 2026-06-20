@@ -79,6 +79,12 @@ dividers:
   # manual: pm/storyline agent confirms each divider position
   # none: no dividers
   mode: manual
+
+# ── Source Verification settings ──────────────────────────────────
+# Options: true | false
+# - true (default): Runs the source-verifier agent to validate references.
+# - false: Skips source verification (equivalent to --skip-verify).
+source_verification: true
 ---
 
 # Lecture Profile
@@ -89,6 +95,7 @@ This file is the single source of truth for this lecture project.
 
 | Agent | How it uses this profile |
 |-------|-------------------------|
+| `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier` |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
 | `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode` |
 | `html-build` | Reads `theme`, `instructor` for cover/speaker-intro slides |

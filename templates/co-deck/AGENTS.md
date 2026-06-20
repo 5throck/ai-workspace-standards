@@ -379,17 +379,17 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Phase | Name | PM Role | Specialist Agents |
 |-------|------|---------|-------------------|
 | 0 | Project Initiation | Owner — reads lecture-profile.md, initializes project_state.json | — |
-| 1 | Research | Observer — reviews research_notes.md at Gate 1 | `research` |
-| 1.5 | Source Verification | Gate 1.5 reviewer — checks Trust Score, holds if <60% | `source-verifier` (optional) |
+| 1 | Research | Direct handoff (Gate 1 retired) | `research` |
+| 1.5 | Source Verification | Gate 1.5 reviewer — checks Trust Score, configured at Stage 0 | `source-verifier` (optional) |
 | 2-3 | Storyline | Gate 2 approver — reviews storyline.md and slide_deck.md | `storyline` |
-| 4 | Design | Gate 3 approver — locks design_spec.md | `design` |
+| 4 | Design | Gate 3 reviewer — optional design spec review | `design` |
 | 3.5 | Image Curation | Observer — reviews image-manifest.json | `image-curator` (optional) |
 | 5-8 | HTML Build | Gate 4 reviewer — optional HTML preview before measure | `html-build` |
 | 9-10 | Layout Measure | Observer — reviews pdf_layout_spec.md | `measure` |
 | 11 | PDF Export | Gate 5 approver — reviews sample PDF before full PDF | `pdf-export` |
 
-> Gates 2, 3, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
-> Gates 1, 1.5, 4 are **optional** — PM may auto-advance or prompt user.
+> Gates 2, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
+> Gates 1.5, 3, 4 are **optional** — PM may auto-advance or prompt user (Gate 1 is retired).
 
 ### 4.2 Harness Engineering Workflow
 

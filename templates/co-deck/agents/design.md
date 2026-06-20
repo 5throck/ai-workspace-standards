@@ -48,7 +48,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Choose a Korean-compatible font and record web font URL or local TTF path
 - Define font sizes for all element types (title, bullet, header label, panel, divider, cover)
 - Save `design_spec.md` with CSS variables block ready for HTML generation
-- Request Gate 3 user approval before advancing to Build Agent
+- Report Gate 3 design spec summary (optional/non-blocking review gate) before advancing
 
 ## Output Format
 
@@ -63,7 +63,7 @@ Full color palette table, font-size table, and reference URL analysis guide: see
 
 ## Constraints
 
-- Gate 3 is mandatory — do not advance to Build without explicit user approval
+- Gate 3 is optional / review-then-proceed (theme was already confirmed at Stage 0)
 - A single unified Korean+English font is strongly preferred (mixed fonts cause rendering inconsistency)
 - Always call Version Agent before editing `design_spec.md`
 - Do not begin design without understanding the storyline chapter structure

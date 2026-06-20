@@ -232,21 +232,21 @@ No `.env` required by default. API keys for image sources are optional and store
 <!-- VARIANT-INJECT: development-workflow -->
 ```
 User: "make a lecture about X"
-  → PM reads lecture-profile.md (or prompts user to fill it)
-  → Dispatches Research → Source Verifier → Storyline → Design → Image Curator → Build → Measure → Export
-  → Gates 2, 3, 5 require explicit user approval before advancing
-  → Gate 1.5 (source-verifier) and Gate 4 (html-build) are optional
+  → PM reads lecture-profile.md (or prompts user to fill it, confirming theme and source_verification)
+  → Dispatches Research → (Optional Source Verifier) → Storyline → Design → Image Curator → Build → Measure → Export
+  → Gates 2, 5 require explicit user approval before advancing
+  → Gate 1.5 (source-verifier), Gate 3 (design), and Gate 4 (html-build) are optional / non-blocking
 ```
 
 ### Pipeline Stages
 
 | Stage | Agent | Gate | Key Output |
 |-------|-------|------|-----------|
-| 0 | PM | — | project_state.json initialized; lecture-profile.md confirmed |
-| 1 | Research | Gate 1 (optional) | research_notes.md |
-| 1.5 | Source Verifier | **Gate 1.5** (optional, `--skip-verify` to bypass) | source-verification.md + Trust Score |
+| 0 | PM | — | project_state.json initialized; lecture-profile.md confirmed (theme & source_verification set) |
+| 1 | Research | — | research_notes.md |
+| 1.5 | Source Verifier | **Gate 1.5** (optional, skip if source_verification: false) | source-verification.md + Trust Score |
 | 2-3 | Storyline | **Gate 2 (required)** | storyline.md, slide_deck.md (with image_role/image_query) |
-| 4 | Design | **Gate 3 (required)** | design_spec.md |
+| 4 | Design | Gate 3 (optional review) | design_spec.md |
 | 3.5 | Image Curator | — | assets/images/, image-manifest.json |
 | 5-8 | Build | Gate 4 (optional) | lecture_vN.html (theme applied, images bound) |
 | 9-10 | Measure | — | layout_spec.json, pdf_layout_spec.md |
@@ -285,8 +285,8 @@ User: "make a lecture about X"
 4. API keys are optional — keyless Pixabay is the default
 
 ### Approval Gate Rules
-- Gates 2, 3, 5 are **MANDATORY** — PM must NOT advance without user approval
-- Gate 1, 1.5, and 4 are optional — PM may ask user or auto-advance
+- Gates 2, 5 are **MANDATORY** — PM must NOT advance without user approval
+- Gate 1.5, 3, and 4 are optional — PM may ask user or auto-advance (Gate 1 is retired)
 - Gate 5: always generate 5-slide sample first; full PDF only after approval
 - Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
