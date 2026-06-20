@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-20T13:50:53.021Z
+**Generated**: 2026-06-20T14:26:30.940Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -94,7 +94,7 @@
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.8.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
-| layer-filter.ts | 1.2.1 | scripts/helpers/layer-filter.ts | fs, path |
+| layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.3.6 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -137,7 +137,7 @@
 | test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.0.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.1.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.3.0 | scripts/validate-md-language.ts | fs |
@@ -154,7 +154,7 @@
 | verify-platform-lifecycle.ts | 1.1.1 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.2.0 | scripts/verify-scripts.ts | fs, path |
-| verify-skills.ts | 1.1.0 | scripts/verify-skills.ts | N/A |
+| verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 | write-scripts-snapshot.ts | 1.0.0 | scripts/helpers/write-scripts-snapshot.ts | N/A |
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //
@@ -267,6 +267,62 @@ for (const rel of PRESERVE_FILES) {
   if (existsSync(join(projectDir, rel))) { console.log(`  PRESERVE: ${rel}`); preserveListed++; }
 }
 if (existsSync(join(projectDir, 'src'))) { console.log('  PRESERVE: src/ (directory — not touched)'); preserveListed++; }
+console.log('');
+
+// ── SKILLS.md schema migration (layer column removal) ─────────────────────────
+console.log('--- SKILLS.md schema migration (layer column removal) ---');
+const skillsMdPath = join(projectDir, 'skills', 'SKILLS.md');
+if (existsSync(skillsMdPath)) {
+  const skillsMdContent = readFileSync(skillsMdPath, 'utf8');
+  const lines = skillsMdContent.split('\n');
+
+  // Find ## Registry section and locate its header row
+  const registryLineIdx = lines.findIndex(l => l.trim() === '## Registry');
+  if (registryLineIdx !== -1) {
+    // Find first | row after ## Registry (the header)
+    let headerIdx = -1;
+    for (let i = registryLineIdx + 1; i < lines.length; i++) {
+      if (lines[i].trimStart().startsWith('|')) { headerIdx = i; break; }
+    }
+
+    if (headerIdx !== -1) {
+      const headerCells = lines[headerIdx].split('|').map(c => c.trim());
+      // headerCells[0] === '', headerCells[1..n-1] are column names, headerCells[n] === ''
+      const layerColIndex = headerCells.findIndex((c, i) => i > 0 && c.toLowerCase() === 'layer');
+
+      if (layerColIndex !== -1) {
+        // Remove layer column from every | row in the Registry section (until next ## or EOF)
+        const newLines = [...lines];
+        for (let i = headerIdx; i < newLines.length; i++) {
+          if (i > headerIdx && newLines[i].trim().startsWith('##')) break;
+          if (!newLines[i].trimStart().startsWith('|')) continue;
+          const cells = newLines[i].split('|');
+          // cells[0] = '' (before first |), cells[layerColIndex] = the layer cell, cells[last] = ''
+          cells.splice(layerColIndex, 1);
+          newLines[i] = cells.join('|');
+        }
+
+        // Inject comment before ## Registry heading
+        const comment = '<!-- propagation controlled via SKILL.md l2_propagate/scope -->';
+        newLines.splice(registryLineIdx, 0, comment);
+
+        const newContent = newLines.join('\n');
+        if (!dryRun) {
+          writeFileSync(skillsMdPath, newContent, 'utf8');
+        }
+        console.log(`  ${dryTag}MIGRATED: skills/SKILLS.md — removed stale 'layer' column`);
+      } else {
+        console.log("  INFO: skills/SKILLS.md — no 'layer' column found (already migrated)");
+      }
+    } else {
+      console.log("  INFO: skills/SKILLS.md — ## Registry section has no table header");
+    }
+  } else {
+    console.log("  INFO: skills/SKILLS.md — no ## Registry section found");
+  }
+} else {
+  console.log("  INFO: skills/SKILLS.md not found — skipping migration");
+}
 console.log('');
 
 // ── Post-upgrade: write template-version.txt ───────────────────────────────────
