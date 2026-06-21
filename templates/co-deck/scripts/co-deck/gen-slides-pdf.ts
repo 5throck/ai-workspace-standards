@@ -313,8 +313,8 @@ function strip(s: string | undefined | null): string {
 
 function imgPath(src: string | undefined, imgDir: string): string | null {
   if (!src) return null;
-  const fname = src.replace('images/', '');
-  const p = join(imgDir, fname);
+  // src is relative to the project dir (e.g. "images/slide-03.png")
+  const p = join(imgDir, src);
   return existsSync(p) ? p : null;
 }
 
@@ -930,7 +930,7 @@ async function main() {
   const outName  = get('--out') ?? defaultPdfName;
   const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'presentations/assets/fonts');
   const dataPath = resolve(get('--data') ?? join(projectDir, 'slidedata.json'));
-  const imgDir   = resolve(workspaceRoot, 'presentations/assets/images');
+  const imgDir   = projectDir;  // visualImage paths in slidedata.json are relative to projectDir
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {
