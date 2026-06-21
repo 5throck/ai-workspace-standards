@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--
+  scroll/template.html — co-deck Scroll Theme Skeleton
+  =====================================================
+  Rendering paradigm: vertical scroll, all slides in DOM simultaneously.
+  Navigation: collapsible left TOC panel + top progress bar.
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="scroll" data-style="<style>"> attributes
+    2. Replaces <!-- INJECT:CSS --> with base.css + style.css <link> tags
+    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
+    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="scroll" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+  <!-- Example (replaced by html-build):
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
+  -->
+</head>
+<body>
+
+  <!-- Top progress bar -->
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <!-- Main layout: TOC panel + slide container -->
+  <div id="viewer">
+    <aside id="toc-panel" class="toc-panel" aria-label="목차">
+      <button id="toc-toggle" class="toc-toggle" onclick="toggleToc()" title="목차 접기/펼치기">☰</button>
+      <nav class="toc-nav">
+        <ul class="toc-list" id="toc-list"></ul>
+      </nav>
+    </aside>
+
+    <main id="slide-container">
+      <!-- INJECT:slides -->
+      <!--
+        Each .slide rendered by renderSlide(data, index) must have:
+          <div class="slide" id="slide-${index}" data-type="standard|cover|divider|contact">
+            ... slide content ...
+          </div>
+      -->
+    </main>
+  </div>
+
+  <script>
+    // INJECT:slideData
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── Slide Renderer ────────────────────────────────────────────────────────
+    function renderSlide(data, index) {
+      // html-build implements this function using design_spec.md CSS variables.
+      // Theme defines structure; style defines appearance.
+      throw new Error('renderSlide() must be implemented by html-build agent');
+    }
+
+    // ── TOC ──────────────────────────────────────────────────────────────────
+    function buildToc() {
+      const list = document.getElementById('toc-list');
+      slideData.forEach((slide, i) => {
+        const li = document.createElement('li');
+        if (slide.isDividerSlide) {
+          li.className = 'toc-item toc-section';
+          li.textContent = slide.section || slide.title || '';
+          li.style.cursor = 'pointer';
+          li.addEventListener('click', () => goToSlide(i));
+        } else if (slide.isTitleSlide || slide.isProfileSlide || slide.isContactSlide) {
+          li.className = 'toc-item toc-section';
+          li.textContent = slide.title || slide.section || '';
+        } else {
+          li.className = 'toc-item';
+          li.textContent = (i + 1) + '. ' + (slide.title || '');
+          li.addEventListener('click', () => goToSlide(i));
+        }
+        li.id = 'toc-item-' + i;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleToc() {
+      document.getElementById('toc-panel').classList.toggle('collapsed');
+    }
+
+    function goToSlide(index) {
+      const target = document.getElementById('slide-' + index);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
+      const tocItem = document.getElementById('toc-item-' + index);
+      if (tocItem) { tocItem.classList.add('active'); tocItem.scrollIntoView({ block: 'nearest' }); }
+    }
+
+    function initScrollSpy() {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = entry.target.dataset.slideIndex;
+            if (idx !== undefined) {
+              document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
+              const tocItem = document.getElementById('toc-item-' + idx);
+              if (tocItem) { tocItem.classList.add('active'); tocItem.scrollIntoView({ block: 'nearest' }); }
+            }
+          }
+        });
+      }, { threshold: 0.5 });
+      document.querySelectorAll('.slide').forEach((el, i) => {
+        el.dataset.slideIndex = i;
+        observer.observe(el);
+      });
+    }
+
+    // ── Progress bar ─────────────────────────────────────────────────────────
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      const fill = document.getElementById('progress-fill');
+      if (fill) fill.style.width = pct + '%';
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      buildToc();
+      initScrollSpy();
+      window.addEventListener('scroll', updateProgress, { passive: true });
+    });
+  </script>
+</body>
+</html>

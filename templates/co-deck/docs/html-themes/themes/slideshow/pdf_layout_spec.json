@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "page": {
+    "width_mm": 338.7,
+    "height_mm": 190.5,
+    "margin_mm": 0.0,
+    "aspect_ratio": "16:9"
+  },
+  "calibration": {
+    "viewport_px": null,
+    "_viewport_px_note": "Requires Playwright measurement: bun scripts/co-deck/measure-layout.ts --theme slideshow. Until measured, px-based font sizes fall back to pt equivalents via gen-slides-pdf.ts defaults."
+  },
+  "layout": {
+    "content_x_pct": 0.05,
+    "content_y_pct": 0.15,
+    "content_w_pct": 0.90,
+    "content_h_pct": 0.70,
+    "title_y_pct": 0.25,
+    "main_y_pct": 0.42,
+    "counter_x_pct": 0.90,
+    "counter_y_pct": 0.05
+  },
+  "fonts": {
+    "title_pt": 36.0,
+    "bullet_pt": 16.0,
+    "punchline_pt": 48.0,
+    "punchline_sub_pt": 20.0
+  },
+  "line_heights": {
+    "title_px": 54.0,
+    "bullet_px": 36.0,
+    "bullet_gap_px": 22.0,
+    "punchline_px": 72.0
+  },
+  "slide_types": {
+    "title": true,
+    "divider": false,
+    "punchline": true,
+    "standard": true
+  }
+}

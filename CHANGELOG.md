@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-20]**: fix(new-project): add `agent-lifecycle-manager` to `L0_SKILLS` cleanup list in `scripts/new-project.ts` — safety net to remove `.claude/skills/agent-lifecycle-manager` and `.gemini/skills/agent-lifecycle-manager` from any generated project
 
 ### Added
+- **[2026-06-21]**: feat(co-deck): two-layer theme/style system (scroll/slideshow themes × 4 styles, THEMES.md registry, T-Stage authoring pipeline, shared asset pool, preview.html) (`templates/co-deck/docs/html-themes/`)
 - **[2026-06-20]**: feat(variants): standard sections (`## ⚠️ PM-ONLY INVOCATION`, `## Responsibilities`, `## Output Format`, `## Constraints`) added to 31 variant agent files across co-consult (10), co-design (7), co-work (6), co-security (5), co-develop (3) — resolves all WARN items from project-review audit
 - **[2026-06-20]**: feat(co-deck): `retry_policy` and `skippable[]` fields added to `agent_manifest` in `co-deck/variant.json` — source-verifier on_fail→research, max_retries:2, failure_condition: trust_score < 0.9
 - **[2026-06-20]**: feat(co-deck): `## Failure Protocol` section added to `source-verifier.md` with retry loop (max 2 cycles), escalation format, and PM handoff path; `handoff_to` updated to include research and pm
@@ -782,7 +783,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-20*
+*Last Updated: 2026-06-21*
 
 
 

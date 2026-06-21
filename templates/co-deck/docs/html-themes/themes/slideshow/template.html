@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--
+  slideshow/template.html — co-deck Slideshow Theme Skeleton
+  ===========================================================
+  Rendering paradigm: fullscreen single-slide, one active at a time.
+  Navigation: prev/next buttons and left/right arrow keys.
+  Transition: CSS opacity + transform (cubic-bezier easing).
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="slideshow" data-style="<style>"> attributes
+    2. Replaces <!-- INJECT:CSS --> with base.css + style.css <link> tags
+    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
+    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+
+  CONTENT RULES (from theme.json):
+    - max 3 bullets per slide, max 20 chars in title
+    - one message per slide — prefer visuals over text blocks
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="slideshow" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+  <!-- Example (replaced by html-build):
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
+  -->
+  <style>
+    /* Slideshow-specific layout — not overrideable by style.css */
+    body { margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-color, #0b0f19); }
+    .presentation-container { position: relative; width: min(92vw, 1300px); aspect-ratio: 16/9; }
+    .slide { position: absolute; inset: 0; border-radius: var(--slide-radius, 20px); opacity: 0; pointer-events: none; transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1); transform: scale(0.97) translateY(12px); }
+    .slide.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+    #nav-prev, #nav-next { position: fixed; top: 50%; transform: translateY(-50%); background: var(--nav-btn-bg, rgba(255,255,255,0.08)); border: 1px solid var(--nav-btn-border, rgba(255,255,255,0.15)); color: var(--nav-btn-color, rgba(255,255,255,0.7)); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    #nav-prev:hover, #nav-next:hover { background: var(--nav-btn-hover, rgba(255,255,255,0.16)); }
+    #nav-prev { left: 16px; }
+    #nav-next { right: 16px; }
+    #slide-counter { position: fixed; bottom: 20px; right: 24px; font-size: 0.75rem; color: var(--text-muted, rgba(255,255,255,0.4)); letter-spacing: 0.05em; }
+  </style>
+</head>
+<body>
+
+  <div class="presentation-container" id="presentation">
+    <!-- INJECT:slides -->
+    <!--
+      Each .slide rendered by renderSlide(data, index) must have:
+        <div class="slide" id="slide-${index}" data-type="standard|cover|divider|contact">
+          ... slide content ...
+        </div>
+      First slide gets class="slide active".
+    -->
+  </div>
+
+  <button id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
+  <button id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+  <div id="slide-counter"></div>
+
+  <script>
+    // INJECT:slideData
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── Slide Renderer ────────────────────────────────────────────────────────
+    function renderSlide(data, index) {
+      // html-build implements this function using design_spec.md CSS variables.
+      // Theme defines structure; style defines appearance.
+      throw new Error('renderSlide() must be implemented by html-build agent');
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (index < 0 || index >= slides.length) return;
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+      const counter = document.getElementById('slide-counter');
+      if (counter) counter.textContent = (index + 1) + ' / ' + slides.length;
+    }
+
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      showSlide(0);
+    });
+  </script>
+</body>
+</html>

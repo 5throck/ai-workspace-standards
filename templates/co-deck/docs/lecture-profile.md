@@ -34,13 +34,21 @@ instructor:
   organization: ""
   email: ""
 
-# HTML theme for slide rendering (used by html-build agent)
-# Options: classic | minimal | visual-heavy | academic
-# - classic       : text left, image right panel (default)
-# - minimal       : text-only, clean whitespace
-# - visual-heavy  : full-bleed images with text overlay
-# - academic      : dense 2-column layout for research/thesis
-theme: classic
+# Presentation rendering settings (used by html-build and storyline agents)
+# theme   — HTML structure and navigation paradigm
+#   Options: scroll | slideshow
+#   - scroll    : vertical scroll, all slides visible, TOC panel (default)
+#   - slideshow : fullscreen single-slide, prev/next navigation
+# style   — CSS visual variable set (color, font, spacing)
+#   Options: classic | minimal | visual-heavy | academic
+#   - classic      : text left, image right panel (default)
+#   - minimal      : text-only, clean whitespace
+#   - visual-heavy : full-bleed images with text overlay (scroll only)
+#   - academic     : dense 2-column layout for research/thesis (scroll only)
+# Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
+presentation:
+  theme: scroll
+  style: classic
 
 # Keywords used by research agent to focus search queries
 # Add 5-10 domain-specific terms
@@ -85,6 +93,20 @@ dividers:
 # - true (default): Runs the source-verifier agent to validate references.
 # - false: Skips source verification (equivalent to --skip-verify).
 source_verification: true
+
+# ── Per-project layout overrides ──────────────────────────────────
+# Override global theme/style defaults for this project only.
+# Uncomment and edit any of the sections below as needed.
+# PM will warn at Stage 0 if any override differs from theme defaults.
+#
+# layout_overrides:
+#   page:
+#     width_mm: 254.0      # 4:3 ratio (default: 338.7)
+#     height_mm: 190.5
+#   content_rules:
+#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 3)
+#   colors:
+#     accent: [180, 30, 50]      # institution CI color override
 ---
 
 # Lecture Profile
@@ -98,7 +120,7 @@ This file is the single source of truth for this lecture project.
 | `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier` |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
 | `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode` |
-| `html-build` | Reads `theme`, `instructor` for cover/speaker-intro slides |
+| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor` for cover/speaker-intro slides |
 | `image-curator` | Reads `image.source`, `image.style_hint` for search queries |
 
 **Getting started:**

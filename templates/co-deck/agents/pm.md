@@ -69,18 +69,41 @@ When the user requests an edit:
 4. Reset downstream steps to "pending" in project_state.json
 5. Skip Measure (Stage 9-10) if layout structure is unchanged
 
-## New Project Start
-
 ## New Project Start (Stage 0 — MANDATORY, never skip)
 
 1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
 2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
-3. **Ask the user to explicitly confirm all three settings** (do NOT proceed to Stage 1 until answered):
-   - **Theme** (`theme`: classic | minimal | visual-heavy | academic)
+3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
+   - **Rendering theme** (`presentation.theme`: `scroll` (default) | `slideshow`) — HTML structure
+   - **Visual style** (`presentation.style`: `classic` (default) | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
-4. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
+4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
+   > ⚠️ This project has layout overrides that differ from the global `<theme>` theme defaults:
+   > - `<key>`: `<override_value>` (default: `<theme_default>`)
+   > These will apply to HTML rendering and PDF generation. Continue?
+5. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
 5. Dispatch the Research Agent to start Stage 1 (loading the local profile). To prevent double-hop permission prompts and permission errors, configure the Research Agent with write permissions (`enable_write_tools: true` or invoke as a `self` subagent) so it can write research results directly.
+
+## T-Stage Pipeline (Theme/Style Authoring)
+
+When user requests **"create a new theme"** or **"create a new style"**, enter the T-Stage pipeline instead of the 11-Stage pipeline:
+
+**Style Workflow** (lightweight, 3 steps):
+1. PM collects style name + visual characteristics from user
+2. PM dispatches Design to author `styles/<name>/style.css` (CSS variable overrides only)
+3. PM provides preview link: `docs/html-themes/preview/preview.html?theme=scroll&style=<name>` → user approval → register in THEMES.md
+
+**Theme Workflow** (T-Stage, 5 steps):
+```
+T-0: PM — collect theme name + rendering paradigm from user
+T-1: html-build — author template.html (renderSlide, TOC/nav structure)
+T-2: design — author theme.json (content_rules, compatible_styles, recommended_structure)
+T-3: storyline — review content_rules + author recommended_structure
+T-4: PM — provide preview link → user approval → THEMES.md registration
+```
+
+For complete T-Stage spec, see `skills/theme-authoring/SKILL.md`.
 
 ## Agent Roster
 
@@ -131,6 +154,9 @@ PM participates in all agent meetings as orchestrator. Facilitates cross-agent c
 - **Gates 2, 5**: Cannot proceed without explicit user approval
 - **Impact first**: Report scope of any rework before executing
 - **keywords.md**: Update when user introduces new domain terms
+- **Theme × Style compatibility**: Before confirming `presentation.theme` and `presentation.style` at Stage 0, check `docs/html-themes/THEMES.md` compatibility matrix. Reject incompatible combinations (e.g., `visual-heavy` + `slideshow`) and explain why.
+- **Stage 2 (Storyline) dispatch**: When dispatching Storyline, pass the resolved `theme.json` path (`docs/html-themes/themes/<theme>/theme.json`) so Storyline can read `content_rules` (max bullets, title length, slide count range) and apply them during slide_deck.md generation.
 - **Stage 1.5 auto-dispatch**: After Stage 1 completes, ALWAYS read `source_verification` from the project's `lecture-profile.md`. If `true` (the default), auto-dispatch source-verifier immediately without prompting the user. Only skip Stage 1.5 if `source_verification: false` is explicitly set.
 - **Gate 1.5**: Once source-verification.md is ready, evaluate Trust Score against `trust_score_thresholds` in `variant.json`. Halt only if Trust Score < 70% — otherwise proceed automatically.
 - **Stage 1 (Research) Write-Permissions**: Configure the Stage 1 Research Agent with write permissions (`enable_write_tools: true` or as `self`) so it can output research notes without requiring double-hop prompts.
+- **TypeScript first**: Use `bun scripts/co-deck/` TypeScript scripts for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript (e.g., a library with no TS equivalent). Never suggest Python as the default tool when a TypeScript script already exists.

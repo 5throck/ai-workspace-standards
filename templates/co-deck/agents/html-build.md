@@ -41,15 +41,16 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `presentations/<project>/lecture-profile.md`** at start: read `theme`, `instructor`, `language` fields
+- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
-- Read `image-manifest.json` (from image-curator) to bind downloaded images to slide entries
+- Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with all slides rendered via a single `renderSlide(data)` function
 - Embed slide content as `const slideData = [...]` JavaScript array inside the HTML
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
-- Apply theme from `presentations/<project>/lecture-profile.md`: inject `<link rel="stylesheet" href="../../docs/html-themes/overrides/<theme>.css">` after base CSS
+- Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
+- **For `scroll` theme**: wrap in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`; each `.slide` must have `id="slide-${index}"`
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
-- Bind images: for each slide with `image_role ≠ none`, use path from `image-manifest.json`; fall back to text panel if no image recorded
+- Bind images: for each slide with `image_role ≠ none`, use `../assets/images/<slug>.<ext>` path from `image-manifest.json` → `path` field; fall back to text panel if no image recorded
 - Insert speaker intro slide (position 2) and contact slide (last) if missing
 - Self-review balance after generation (slide count, bullets per slide, visual density)
 - Request Gate 4 user review before advancing to Measure Agent (optional gate)
@@ -57,53 +58,58 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 ## Output Format
 
 - `presentations/<project>/lecture_vN.html` — single HTML file with embedded slideData
-- `presentations/<project>/assets/images/` — per-slide image files (from image-curator manifest)
+- Images are in the **shared pool** at `presentations/assets/images/<slug>.<ext>` (managed by image-curator; html-build references them via `../assets/images/<slug>.<ext>`)
 
 slideData object fields and image filename convention: see `skills/html-build/SKILL.md`.
 
-## Theme Integration — `data-theme` Rendering
+## Theme + Style Integration
 
-When generating `lecture_vN.html`, apply the theme from `presentations/<project>/lecture-profile.md`:
+When generating `lecture_vN.html`, read `presentation.theme` and `presentation.style` from `lecture-profile.md`:
 
-**1. HTML root attribute** — set on `<html>` tag:
+**1. HTML root attributes** — set on `<html>` tag:
 ```html
-<html lang="ko" data-theme="minimal">
+<html lang="ko" data-theme="scroll" data-style="classic">
 ```
 
-**2. CSS link injection** — after the base stylesheet:
+**2. CSS link injection** — base + style override:
 ```html
 <link rel="stylesheet" href="../../docs/html-themes/base/base.css">
-<link rel="stylesheet" href="../../docs/html-themes/overrides/minimal.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
 ```
-Use `presentations/<project>/lecture-profile.md` → `theme` value. Default: `classic`.
+(Legacy override path: `docs/html-themes/overrides/<style>.css` — use if `styles/<name>/` not yet migrated)
 
-**3. `visual-heavy` theme only** — add background-image injection to `renderSlide()`:
+**3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent scroll/slideshow structure.
+
+**4. `scroll` theme — TOC sidebar is MANDATORY**:
+```html
+<div id="viewer">
+  <aside id="toc-panel"><!-- TOC items injected here --></aside>
+  <main id="slide-container"><!-- slides injected here --></main>
+</div>
+```
+Each `.slide` element must carry `id="slide-${index}"`.
+
+**5. `visual-heavy` style only** — inject CSS property per slide in `renderSlide()`:
 ```javascript
-function renderSlide(data) {
-  const theme = document.documentElement.dataset.theme;
-  if (theme === 'visual-heavy' && data.imagePath) {
-    document.querySelector('.slide').style.setProperty(
-      '--slide-bg-image', `url('${data.imagePath}')`
-    );
-  }
-  // rest of renderSlide logic unchanged
+if (document.documentElement.dataset.style === 'visual-heavy' && data.imagePath) {
+  el.style.setProperty('--slide-bg-image', `url('${data.imagePath}')`);
 }
 ```
 
-**4. `data-type` attribute** — set on each `.slide` div for CSS type selectors:
+**6. `data-type` attribute** — set on each `.slide`:
 ```html
 <div class="slide" data-type="standard">  <!-- cover | divider | standard | contact -->
 ```
 
-Available themes: `classic` | `minimal` | `visual-heavy` | `academic`
+Available themes: `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic`
 
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
-- Load `presentations/<project>/lecture-profile.md` before generating HTML — theme and instructor data are required
+- Load `presentations/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
-- Theme must be one of: `classic | minimal | visual-heavy | academic`; default to `classic` if unset
-- Slide balance rules: ≤5 bullets per slide, ≤3 consecutive slides without visuals, counts balanced ±20%
+- Default theme: `scroll`; default style: `classic`
+- Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤3); ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
 - Local preview: `bunx serve .` → `http://localhost:3000`

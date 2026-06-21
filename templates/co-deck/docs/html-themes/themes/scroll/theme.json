@@ -1,0 +1,40 @@
+{
+  "name": "scroll",
+  "version": "1.0.0",
+  "description": "Vertical scroll layout — all slides rendered in DOM simultaneously, navigated by scrolling with a collapsible left TOC panel and top progress bar.",
+  "rendering": {
+    "paradigm": "scroll",
+    "slides_in_dom": "all",
+    "navigation": "scroll + TOC",
+    "progress_indicator": "top progress bar"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 5,
+    "max_title_chars": 30,
+    "recommended_slide_count": "30-60",
+    "notes": "Scroll layout allows higher information density per slide. Longer explanations and sub-bullet nesting are acceptable."
+  },
+  "compatible_styles": ["classic", "minimal", "academic"],
+  "incompatible_styles": [
+    {
+      "name": "visual-heavy",
+      "reason": "Full-bleed background images work best with fixed-height slides. Scroll layout's variable-height slides may cause background-image sizing issues on long content slides."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → Speaker Intro → [Part Divider → 8-12 Content → Summary] × N → Contact",
+    "audience_fit": ["graduate", "practitioner", "academic"],
+    "notes": "Scroll layout supports deep dives. Chapter dividers + summary slides per part work well. TOC panel is always visible."
+  },
+  "requires_slideData": true,
+  "toc_required": true,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "punchline": false,
+    "standard": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "added": "2026-06-21",
+  "author": "co-deck"
+}

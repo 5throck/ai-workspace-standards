@@ -1,0 +1,44 @@
+{
+  "name": "slideshow",
+  "version": "1.0.0",
+  "description": "Fullscreen single-slide presentation with animated prev/next navigation. One slide active at a time; slides transition with CSS opacity/transform animations.",
+  "rendering": {
+    "paradigm": "slideshow",
+    "slides_in_dom": "all (one active)",
+    "navigation": "prev/next buttons + keyboard arrows",
+    "progress_indicator": "slide counter (N / Total)"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 3,
+    "max_title_chars": 20,
+    "recommended_slide_count": "20-40",
+    "notes": "Fullscreen layout demands one message per slide. Short titles, minimal bullets. Dense text breaks the visual rhythm. Prefer visuals over text blocks."
+  },
+  "compatible_styles": ["classic", "minimal"],
+  "incompatible_styles": [
+    {
+      "name": "visual-heavy",
+      "reason": "visual-heavy uses full-bleed CSS background-image which conflicts with slideshow's rounded-card layout (border-radius clips the bleed). Use a slideshow-specific visual style instead."
+    },
+    {
+      "name": "academic",
+      "reason": "academic's 30% illustration side panel shrinks to unreadable width in fullscreen slideshow aspect ratio."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → [Topic → 2-3 Detail → Punchline] × N → Contact",
+    "audience_fit": ["general", "practitioner", "undergraduate"],
+    "notes": "Optimized for fast transitions and presentations. Each 'chapter' = one topic + 2-3 detail slides + a single strong punchline. Avoid long text blocks."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": false,
+    "punchline": true,
+    "standard": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "added": "2026-06-21",
+  "author": "co-deck"
+}

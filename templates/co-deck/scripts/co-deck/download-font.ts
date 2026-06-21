@@ -137,10 +137,21 @@ async function main() {
     process.exit(1);
   }
 
-  const outputDir = resolve(args[1] ?? 'fonts');
+  const outputDir = resolve(args[1] ?? 'presentations/assets/fonts');
   mkdirSync(outputDir, { recursive: true });
 
   const spec = FONT_CATALOG[fontKey];
+
+  // Check-before-download: skip if all font files already exist
+  const allExist = Object.values(spec.files).every(filename =>
+    existsSync(join(outputDir, filename))
+  );
+  if (allExist) {
+    console.log(`✅ ${spec.name} 폰트가 이미 존재합니다: ${outputDir}`);
+    console.log(`   파일: ${Object.values(spec.files).join(', ')}`);
+    process.exit(0);
+  }
+
   console.log(`\n📦 ${spec.name} 다운로드 시작`);
   console.log(`   URL: ${spec.url}`);
   console.log(`   저장 위치: ${outputDir}/\n`);

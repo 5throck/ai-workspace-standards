@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "page": {
+    "width_mm": 338.7,
+    "height_mm": 190.5,
+    "margin_mm": 5.0,
+    "aspect_ratio": "16:9"
+  },
+  "calibration": {
+    "viewport_px": 611.4
+  },
+  "layout": {
+    "pad_x_pct": 0.0438,
+    "header_y_pct": 0.091,
+    "header_h_pct": 0.064,
+    "title_y_pct": 0.224,
+    "main_y_pct": 0.349,
+    "bullet_w_pct": 0.503,
+    "vis_x_pct": 0.584,
+    "vis_y_pct": 0.390,
+    "vis_w_pct": 0.372,
+    "vis_h_pct": 0.561,
+    "vis_pad_pct": 0.052,
+    "ts_title_y_pct": 0.3967,
+    "ts_sub_y_pct": 0.5346,
+    "ts_meta_y_pct": 0.6676,
+    "ts_w_pct": 0.9123,
+    "div_img_x_pct": 0.5582,
+    "div_img_y_pct": 0.2613,
+    "div_img_w_pct": 0.3972,
+    "div_img_h_pct": 0.6059,
+    "div_txt_w_pct": 0.4766
+  },
+  "fonts": {
+    "title_pt": 28.0,
+    "bullet_pt": 12.5,
+    "div_title_pt": 28.0,
+    "div_desc_pt": 13.0,
+    "section_px": 13.6,
+    "slide_num_px": 14.4,
+    "vis_title_px": 13.6,
+    "vis_body_px": 16.0,
+    "ts_title_px": 56.0,
+    "ts_sub_px": 24.0,
+    "ts_meta_px": 16.0,
+    "div_part_px": 22.4
+  },
+  "line_heights": {
+    "title_px": 46.0,
+    "bullet_px": 29.44,
+    "bullet_gap_px": 19.2,
+    "ts_title_px": 70.0,
+    "div_title_px": 56.0,
+    "div_desc_px": 28.16
+  },
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "punchline": false,
+    "standard": true
+  }
+}
