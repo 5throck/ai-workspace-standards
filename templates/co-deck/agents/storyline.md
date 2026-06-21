@@ -85,6 +85,10 @@ After drafting the outline but **before writing the full `slide_deck.md`**, pres
 
 Slide types: `cover` · `speaker intro` · `divider` · `standard` · `contact`
 
+**Theme-specific slide type rules:**
+- `presentation.theme: slideshow` — use `isPunchline: true` for impact/summary slides that need large-font single-statement emphasis; do NOT use `isDividerSlide` (divider slides are not supported in slideshow).
+- `presentation.theme: scroll` — `isDividerSlide: true` is available for part/chapter boundaries; `isPunchline` is not used.
+
 ### slide_deck.md — Image Fields (per slide)
 
 Every slide entry in `slide_deck.md` MUST include these three image fields:

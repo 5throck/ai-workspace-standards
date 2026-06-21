@@ -78,7 +78,11 @@ When the user requests an edit:
    - **Visual style** (`presentation.style`: `classic` (default) | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
-4. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
+4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
+   > ⚠️ This project has layout overrides that differ from the global `<theme>` theme defaults:
+   > - `<key>`: `<override_value>` (default: `<theme_default>`)
+   > These will apply to HTML rendering and PDF generation. Continue?
+5. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
 5. Dispatch the Research Agent to start Stage 1 (loading the local profile). To prevent double-hop permission prompts and permission errors, configure the Research Agent with write permissions (`enable_write_tools: true` or invoke as a `self` subagent) so it can write research results directly.
 
 ## T-Stage Pipeline (Theme/Style Authoring)

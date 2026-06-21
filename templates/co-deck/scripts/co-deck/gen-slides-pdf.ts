@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.1.0
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Merges gen_full.py + gen_sample5.py — use --sample N to limit slide count.
 // Usage:
@@ -15,110 +15,45 @@ import fontkit from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 
-// ── Page geometry (mm) ────────────────────────────────────────────────────────
-
-const PW = 338.7;   // landscape width mm  (16:9)
-const PH = 190.5;   // landscape height mm
-const CM = 5.0;     // card margin mm
-const CX = CM, CY = CM;
-const CW = PW - CM * 2;   // 328.7
-const CH = PH - CM * 2;   // 180.5
+// ── Constants ─────────────────────────────────────────────────────────────────
 
 const MM_TO_PT = 2.835;
 const mm = (v: number) => v * MM_TO_PT;
 
-// ── Pixel → PDF unit helpers (calibrated from measure_layout.py output) ──────
+// ── Spec merge helpers ────────────────────────────────────────────────────────
 
-const px2pt = (px: number) => (px / 611.4) * CH * 2.835;
-const px2mm = (px: number) => (px / 611.4) * CH;
+function deepMerge(base: any, override: any): any {
+  if (!override) return base;
+  const result = { ...base };
+  for (const key of Object.keys(override)) {
+    if (typeof override[key] === 'object' && !Array.isArray(override[key]) && override[key] !== null) {
+      result[key] = deepMerge(base[key] ?? {}, override[key]);
+    } else {
+      result[key] = override[key];
+    }
+  }
+  return result;
+}
 
-// ── Font sizes (pt) ───────────────────────────────────────────────────────────
+// Convert an [R, G, B] array (0-255) to a pdf-lib RGB value
+const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
 
-const T_SECT      = px2pt(13.6);
-const T_NUM       = px2pt(14.4);
-const T_TITLE     = 28.0;
-const T_BUL       = 12.5;
-const T_VIS_T     = px2pt(13.6);
-const T_VIS_B     = px2pt(16.0);
-const T_TS_TITLE  = px2pt(56.0);
-const T_TS_SUB    = px2pt(24.0);
-const T_TS_META   = px2pt(16.0);
-const T_DIV_PART  = px2pt(22.4);
-const T_DIV_TITLE = 28.0;
-const T_DIV_DESC  = 13.0;
+// ── Frontmatter parser ────────────────────────────────────────────────────────
 
-// ── Line heights (mm) ─────────────────────────────────────────────────────────
-
-const LH_TITLE     = px2mm(46.0);
-const LH_BUL       = px2mm(29.44);
-const BUL_GAP      = px2mm(19.2);
-const LH_TS_TITLE  = px2mm(70.0);
-const LH_DIV_TITLE = px2mm(56.0);
-const LH_DIV_DESC  = px2mm(28.16);
-
-// ── Layout percentages ────────────────────────────────────────────────────────
-
-const P_PAD_X       = 0.0438;
-const P_HDR_Y       = 0.091;
-const P_HDR_H       = 0.064;
-const P_TITLE_Y     = 0.224;
-const P_MAIN_Y      = 0.349;
-const P_BUL_W       = 0.503;
-const P_VIS_X       = 0.584;
-const P_VIS_Y       = 0.390;
-const P_VIS_W       = 0.372;
-const P_VIS_H       = 0.561;
-const P_VIS_PAD     = 0.052;
-const P_TS_TITLE_Y  = 0.3967;
-const P_TS_SUB_Y    = 0.5346;
-const P_TS_META_Y   = 0.6676;
-const P_TS_W        = 0.9123;
-const P_DIV_IMG_X   = 0.5582;
-const P_DIV_IMG_Y   = 0.2613;
-const P_DIV_IMG_W   = 0.3972;
-const P_DIV_IMG_H   = 0.6059;
-const P_DIV_TXT_W   = 0.4766;
-
-// ── Derived mm coords ─────────────────────────────────────────────────────────
-
-const pad_x    = P_PAD_X * CW;
-const hdr_y    = CY + P_HDR_Y * CH;
-const hdr_h    = P_HDR_H * CH;
-const bul_x    = CX + pad_x;
-const bul_w    = P_BUL_W * CW;
-const title_y  = CY + P_TITLE_Y * CH;
-const main_y   = CY + P_MAIN_Y * CH;
-const vis_x    = CX + P_VIS_X * CW;
-const vis_y    = CY + P_VIS_Y * CH;
-const vis_w    = P_VIS_W * CW;
-const vis_h    = P_VIS_H * CH;
-const img_pad  = P_VIS_PAD * vis_w;
-
-const ts_w        = P_TS_W * CW;
-const ts_title_y  = CY + P_TS_TITLE_Y * CH;
-const ts_sub_y    = CY + P_TS_SUB_Y * CH;
-const ts_meta_y   = CY + P_TS_META_Y * CH;
-
-const div_img_x = CX + P_DIV_IMG_X * CW;
-const div_img_y = CY + P_DIV_IMG_Y * CH;
-const div_img_w = P_DIV_IMG_W * CW;
-const div_img_h = P_DIV_IMG_H * CH;
-const div_txt_w = P_DIV_TXT_W * CW;
-
-// ── Colour palette ────────────────────────────────────────────────────────────
-
-const C_BG     = rgb(17/255,  24/255,  39/255);
-const C_WHITE  = rgb(1, 1, 1);
-const C_DARK   = rgb(11/255,  15/255,  25/255);
-const C_TEXT   = rgb(226/255, 232/255, 240/255);
-const C_MUTED  = rgb(156/255, 163/255, 175/255);
-const C_ACCENT = rgb(217/255, 119/255, 6/255);
-const C_BORDER = rgb(31/255,  41/255,  55/255);
-const C_BODY   = rgb(203/255, 213/255, 225/255);
-const C_VIS_BG = rgb(20/255,  28/255,  42/255);
-const C_DARK2  = rgb(10/255,  14/255,  22/255);
-const C_DARK3  = rgb(8/255,   12/255,  22/255);
-const C_META   = rgb(100/255, 108/255, 120/255);
+function parseFrontmatter(content: string): Record<string, any> {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const lines = match[1].split('\n');
+  const result: Record<string, any> = {};
+  for (const line of lines) {
+    const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
+    const styleMatch = line.match(/^\s{2}style:\s*(\S+)/);
+    if (themeMatch) result.theme = themeMatch[1];
+    if (styleMatch) result.style = styleMatch[1];
+  }
+  // TODO: parse layout_overrides YAML block
+  return result;
+}
 
 // ── Slide renderer ────────────────────────────────────────────────────────────
 
@@ -128,16 +63,17 @@ class Renderer {
   private bold: PDFFont;
   private curFont: PDFFont;
   private curSize = 12;
-  private curColor: RGB = C_WHITE;
+  private curColor: RGB;
   readonly pageW: number;   // pts
   readonly pageH: number;   // pts
 
-  constructor(regular: PDFFont, bold: PDFFont) {
-    this.regular  = regular;
-    this.bold     = bold;
-    this.curFont  = regular;
-    this.pageW    = mm(PW);
-    this.pageH    = mm(PH);
+  constructor(regular: PDFFont, bold: PDFFont, pageWMm: number, pageHMm: number, defaultColor: RGB) {
+    this.regular   = regular;
+    this.bold      = bold;
+    this.curFont   = regular;
+    this.curColor  = defaultColor;
+    this.pageW     = mm(pageWMm);
+    this.pageH     = mm(pageHMm);
   }
 
   setPage(p: PDFPage) { this.page = p; }
@@ -227,17 +163,17 @@ class Renderer {
   }
 
   // Estimate total rendered height of a bullet list in mm
-  estimateBulletHeight(bullets: string[], widthMm: number): number {
-    this.setFont(false, T_BUL);
+  estimateBulletHeight(bullets: string[], widthMm: number, tBul: number, lhBul: number, bulGap: number): number {
+    this.setFont(false, tBul);
     let total = 0;
     let nValid = 0;
     for (const b of bullets) {
       const t = strip(b);
       if (!t) continue;
       nValid++;
-      total += this.wrapText(t, widthMm).length * LH_BUL + BUL_GAP;
+      total += this.wrapText(t, widthMm).length * lhBul + bulGap;
     }
-    if (nValid > 0) total -= BUL_GAP;
+    if (nValid > 0) total -= bulGap;
     return total;
   }
 
@@ -298,9 +234,93 @@ function imgPath(src: string | undefined, imgDir: string): string | null {
   return existsSync(p) ? p : null;
 }
 
+// ── Slide data type ───────────────────────────────────────────────────────────
+
+interface SlideData {
+  section?:       string;
+  title?:         string;
+  subtitle?:      string;
+  meta?:          string;
+  desc?:          string;
+  partNum?:       string;
+  bullets?:       string[];
+  visualImage?:   string;
+  visualTitle?:   string;
+  visualDisplay?: string;
+  isTitleSlide?:  boolean;
+  isDividerSlide?: boolean;
+  isPunchline?:   boolean;
+}
+
+// ── Layout spec type ──────────────────────────────────────────────────────────
+
+interface LayoutSpec {
+  page?: {
+    width_mm?: number;
+    height_mm?: number;
+    margin_mm?: number;
+  };
+  calibration?: {
+    viewport_px?: number;
+  };
+  fonts?: {
+    title_pt?: number;
+    bullet_pt?: number;
+    punchline_pt?: number;
+    punchline_sub_pt?: number;
+  };
+  layout?: {
+    pad_x?: number;
+    hdr_y?: number;
+    hdr_h?: number;
+    title_y?: number;
+    main_y?: number;
+    bul_w?: number;
+    vis_x?: number;
+    vis_y?: number;
+    vis_w?: number;
+    vis_h?: number;
+    vis_pad?: number;
+    ts_title_y?: number;
+    ts_sub_y?: number;
+    ts_meta_y?: number;
+    ts_w?: number;
+    div_img_x?: number;
+    div_img_y?: number;
+    div_img_w?: number;
+    div_img_h?: number;
+    div_txt_w?: number;
+  };
+  colors?: {
+    background?: number[];
+    white?: number[];
+    dark?: number[];
+    text?: number[];
+    text_muted?: number[];
+    accent?: number[];
+    border?: number[];
+    body?: number[];
+    vis_bg?: number[];
+    dark2?: number[];
+    dark3?: number[];
+    meta?: number[];
+  };
+}
+
 // ── Slide render functions ────────────────────────────────────────────────────
 
-async function drawHeader(r: Renderer, sec: string, n: number, total: number) {
+async function drawHeader(
+  r: Renderer,
+  sec: string,
+  n: number,
+  total: number,
+  spec: LayoutSpec,
+  // derived coords passed in
+  CX: number, CY: number, CW: number, CH: number,
+  hdr_y: number, hdr_h: number, bul_x: number, pad_x: number,
+  C_DARK: RGB, C_ACCENT: RGB, C_MUTED: RGB, C_BORDER: RGB,
+  T_SECT: number, T_NUM: number,
+) {
   r.fillRect(CX, CY, CW, hdr_y - CY + hdr_h, C_DARK);
   const hy = hdr_y + hdr_h * 0.18;
   r.setFont(true,  T_SECT); r.setColor(C_ACCENT);
@@ -310,11 +330,25 @@ async function drawHeader(r: Renderer, sec: string, n: number, total: number) {
   r.drawHLine(bul_x, hdr_y + hdr_h, CX + CW - pad_x, 0.088, C_BORDER);
 }
 
-async function renderTitleSlide(r: Renderer, doc: PDFDocument, data: SlideData, n: number, total: number) {
-  await drawHeader(r, strip(data.section), n, total);
+async function renderTitleSlide(
+  r: Renderer,
+  doc: PDFDocument,
+  data: SlideData,
+  n: number,
+  total: number,
+  spec: LayoutSpec,
+  coords: ReturnType<typeof buildCoords>,
+  colors: ReturnType<typeof buildColors>,
+  sizes: ReturnType<typeof buildSizes>,
+) {
+  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, ts_w, ts_title_y, ts_sub_y, ts_meta_y, px2mm } = coords;
+  const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_META } = colors;
+  const { T_SECT, T_NUM, T_TS_TITLE, T_TS_SUB, T_TS_META } = sizes;
+
+  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
 
   r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
-  r.multiCell(ts_w, LH_TS_TITLE, strip(data.title), bul_x, ts_title_y);
+  r.multiCell(ts_w, px2mm(70.0), strip(data.title), bul_x, ts_title_y);
 
   r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
   r.multiCell(ts_w, px2mm(36), strip(data.subtitle), bul_x, ts_sub_y);
@@ -323,9 +357,24 @@ async function renderTitleSlide(r: Renderer, doc: PDFDocument, data: SlideData, 
   r.multiCell(ts_w, px2mm(24), strip(data.meta), bul_x, ts_meta_y);
 }
 
-async function renderDividerSlide(r: Renderer, doc: PDFDocument, data: SlideData, n: number, total: number, imgDir: string) {
+async function renderDividerSlide(
+  r: Renderer,
+  doc: PDFDocument,
+  data: SlideData,
+  n: number,
+  total: number,
+  imgDir: string,
+  spec: LayoutSpec,
+  coords: ReturnType<typeof buildCoords>,
+  colors: ReturnType<typeof buildColors>,
+  sizes: ReturnType<typeof buildSizes>,
+) {
+  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, div_img_x, div_img_y, div_img_w, div_img_h, div_txt_w, px2mm } = coords;
+  const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_TEXT, C_DARK2, C_DARK3 } = colors;
+  const { T_SECT, T_NUM, T_DIV_PART, T_DIV_TITLE, T_DIV_DESC } = sizes;
+
   r.fillRect(CX, CY, CW, CH, C_DARK2);
-  await drawHeader(r, strip(data.section), n, total);
+  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
 
   const py0 = CY + 0.40 * CH;
   r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
@@ -333,10 +382,12 @@ async function renderDividerSlide(r: Renderer, doc: PDFDocument, data: SlideData
 
   const py1 = py0 + px2mm(34);
   r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
+  const LH_DIV_TITLE = px2mm(56.0);
   const afterTitle = r.multiCell(div_txt_w, LH_DIV_TITLE, strip(data.title), bul_x, py1, 'L');
 
   const py2 = afterTitle + px2mm(16);
   r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
+  const LH_DIV_DESC = px2mm(28.16);
   r.multiCell(div_txt_w, LH_DIV_DESC, strip(data.desc), bul_x, py2, 'L');
 
   const ip = imgPath(data.visualImage, imgDir);
@@ -346,8 +397,64 @@ async function renderDividerSlide(r: Renderer, doc: PDFDocument, data: SlideData
   }
 }
 
-async function renderStandardSlide(r: Renderer, doc: PDFDocument, data: SlideData, n: number, total: number, imgDir: string) {
-  await drawHeader(r, strip(data.section), n, total);
+async function renderPunchlineSlide(
+  r: Renderer,
+  doc: PDFDocument,
+  data: SlideData,
+  n: number,
+  total: number,
+  spec: LayoutSpec,
+  coords: ReturnType<typeof buildCoords>,
+  colors: ReturnType<typeof buildColors>,
+  sizes: ReturnType<typeof buildSizes>,
+) {
+  const { CX, CY, CW, CH } = coords;
+  const { C_BG, C_ACCENT, C_MUTED } = colors;
+
+  const punchlinePt    = spec.fonts?.punchline_pt    ?? 48;
+  const punchlineSubPt = spec.fonts?.punchline_sub_pt ?? 20;
+
+  // Fill background
+  r.fillRect(CX, CY, CW, CH, C_BG);
+
+  // Center title vertically
+  const titleLh  = punchlinePt / MM_TO_PT;
+  const subLh    = punchlineSubPt / MM_TO_PT;
+  const gap      = 6;
+  const blockH   = titleLh + gap + subLh;
+  const startY   = CY + (CH - blockH) / 2;
+
+  r.setFont(true, punchlinePt); r.setColor(C_ACCENT);
+  r.multiCell(CW, titleLh, strip(data.title), CX, startY, 'C');
+
+  const subText = strip(data.subtitle) || strip((data.bullets ?? [])[0]);
+  if (subText) {
+    r.setFont(false, punchlineSubPt); r.setColor(C_MUTED);
+    r.multiCell(CW, subLh, subText, CX, startY + titleLh + gap, 'C');
+  }
+}
+
+async function renderStandardSlide(
+  r: Renderer,
+  doc: PDFDocument,
+  data: SlideData,
+  n: number,
+  total: number,
+  imgDir: string,
+  spec: LayoutSpec,
+  coords: ReturnType<typeof buildCoords>,
+  colors: ReturnType<typeof buildColors>,
+  sizes: ReturnType<typeof buildSizes>,
+) {
+  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, vis_x, vis_y, vis_w, vis_h, img_pad, title_y, main_y, bul_w, px2mm } = coords;
+  const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_BODY, C_VIS_BG } = colors;
+  const { T_SECT, T_NUM, T_TITLE, T_BUL, T_VIS_T, T_VIS_B } = sizes;
+
+  const LH_TITLE = px2mm(46.0);
+  const LH_BUL   = px2mm(29.44);
+  const BUL_GAP  = px2mm(19.2);
+
+  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
 
   const hasRight = !!(data.visualImage || data.visualDisplay || data.visualTitle);
   const titleW   = CW - pad_x * 2;
@@ -358,7 +465,7 @@ async function renderStandardSlide(r: Renderer, doc: PDFDocument, data: SlideDat
 
   const bullets     = data.bullets ?? [];
   const availableH  = (CY + CH) - main_y - 4;
-  const totalBh     = r.estimateBulletHeight(bullets, bulTxtW - 6);
+  const totalBh     = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
   let by            = main_y + Math.max(0, (availableH - totalBh) / 2);
 
   for (const b of bullets) {
@@ -396,21 +503,116 @@ async function renderStandardSlide(r: Renderer, doc: PDFDocument, data: SlideDat
   }
 }
 
-// ── Slide data type ───────────────────────────────────────────────────────────
+// ── Derived coordinate builder ────────────────────────────────────────────────
 
-interface SlideData {
-  section?:       string;
-  title?:         string;
-  subtitle?:      string;
-  meta?:          string;
-  desc?:          string;
-  partNum?:       string;
-  bullets?:       string[];
-  visualImage?:   string;
-  visualTitle?:   string;
-  visualDisplay?: string;
-  isTitleSlide?:  boolean;
-  isDividerSlide?: boolean;
+function buildCoords(spec: LayoutSpec) {
+  const PW  = spec.page?.width_mm  ?? 338.7;
+  const PH  = spec.page?.height_mm ?? 190.5;
+  const CM  = spec.page?.margin_mm ?? 5.0;
+  const VP  = spec.calibration?.viewport_px ?? 611.4;
+
+  const CX = CM, CY = CM;
+  const CW = PW - CM * 2;
+  const CH = PH - CM * 2;
+
+  const px2pt = (px: number) => (px / VP) * CH * 2.835;
+  const px2mm = (px: number) => (px / VP) * CH;
+
+  const L = spec.layout ?? {};
+
+  const P_PAD_X      = L.pad_x      ?? 0.0438;
+  const P_HDR_Y      = L.hdr_y      ?? 0.091;
+  const P_HDR_H      = L.hdr_h      ?? 0.064;
+  const P_TITLE_Y    = L.title_y    ?? 0.224;
+  const P_MAIN_Y     = L.main_y     ?? 0.349;
+  const P_BUL_W      = L.bul_w      ?? 0.503;
+  const P_VIS_X      = L.vis_x      ?? 0.584;
+  const P_VIS_Y      = L.vis_y      ?? 0.390;
+  const P_VIS_W      = L.vis_w      ?? 0.372;
+  const P_VIS_H      = L.vis_h      ?? 0.561;
+  const P_VIS_PAD    = L.vis_pad    ?? 0.052;
+  const P_TS_TITLE_Y = L.ts_title_y ?? 0.3967;
+  const P_TS_SUB_Y   = L.ts_sub_y   ?? 0.5346;
+  const P_TS_META_Y  = L.ts_meta_y  ?? 0.6676;
+  const P_TS_W       = L.ts_w       ?? 0.9123;
+  const P_DIV_IMG_X  = L.div_img_x  ?? 0.5582;
+  const P_DIV_IMG_Y  = L.div_img_y  ?? 0.2613;
+  const P_DIV_IMG_W  = L.div_img_w  ?? 0.3972;
+  const P_DIV_IMG_H  = L.div_img_h  ?? 0.6059;
+  const P_DIV_TXT_W  = L.div_txt_w  ?? 0.4766;
+
+  const pad_x   = P_PAD_X * CW;
+  const hdr_y   = CY + P_HDR_Y * CH;
+  const hdr_h   = P_HDR_H * CH;
+  const bul_x   = CX + pad_x;
+  const bul_w   = P_BUL_W * CW;
+  const title_y = CY + P_TITLE_Y * CH;
+  const main_y  = CY + P_MAIN_Y * CH;
+  const vis_x   = CX + P_VIS_X * CW;
+  const vis_y   = CY + P_VIS_Y * CH;
+  const vis_w   = P_VIS_W * CW;
+  const vis_h   = P_VIS_H * CH;
+  const img_pad = P_VIS_PAD * vis_w;
+
+  const ts_w       = P_TS_W * CW;
+  const ts_title_y = CY + P_TS_TITLE_Y * CH;
+  const ts_sub_y   = CY + P_TS_SUB_Y * CH;
+  const ts_meta_y  = CY + P_TS_META_Y * CH;
+
+  const div_img_x = CX + P_DIV_IMG_X * CW;
+  const div_img_y = CY + P_DIV_IMG_Y * CH;
+  const div_img_w = P_DIV_IMG_W * CW;
+  const div_img_h = P_DIV_IMG_H * CH;
+  const div_txt_w = P_DIV_TXT_W * CW;
+
+  return {
+    PW, PH, CM, CX, CY, CW, CH,
+    px2pt, px2mm,
+    pad_x, hdr_y, hdr_h, bul_x, bul_w, title_y, main_y,
+    vis_x, vis_y, vis_w, vis_h, img_pad,
+    ts_w, ts_title_y, ts_sub_y, ts_meta_y,
+    div_img_x, div_img_y, div_img_w, div_img_h, div_txt_w,
+  };
+}
+
+// ── Color builder ─────────────────────────────────────────────────────────────
+
+function buildColors(spec: LayoutSpec) {
+  const c = spec.colors ?? {};
+  return {
+    C_BG     : toRGB(c.background  ?? [17,  24,  39]),
+    C_WHITE  : toRGB(c.white       ?? [255, 255, 255]),
+    C_DARK   : toRGB(c.dark        ?? [11,  15,  25]),
+    C_TEXT   : toRGB(c.text        ?? [226, 232, 240]),
+    C_MUTED  : toRGB(c.text_muted  ?? [156, 163, 175]),
+    C_ACCENT : toRGB(c.accent      ?? [217, 119, 6]),
+    C_BORDER : toRGB(c.border      ?? [31,  41,  55]),
+    C_BODY   : toRGB(c.body        ?? [203, 213, 225]),
+    C_VIS_BG : toRGB(c.vis_bg      ?? [20,  28,  42]),
+    C_DARK2  : toRGB(c.dark2       ?? [10,  14,  22]),
+    C_DARK3  : toRGB(c.dark3       ?? [8,   12,  22]),
+    C_META   : toRGB(c.meta        ?? [100, 108, 120]),
+  };
+}
+
+// ── Font size builder ─────────────────────────────────────────────────────────
+
+function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
+  const f = spec.fonts ?? {};
+  return {
+    T_SECT      : px2pt(13.6),
+    T_NUM       : px2pt(14.4),
+    T_TITLE     : f.title_pt  ?? 28.0,
+    T_BUL       : f.bullet_pt ?? 12.5,
+    T_VIS_T     : px2pt(13.6),
+    T_VIS_B     : px2pt(16.0),
+    T_TS_TITLE  : px2pt(56.0),
+    T_TS_SUB    : px2pt(24.0),
+    T_TS_META   : px2pt(16.0),
+    T_DIV_PART  : px2pt(22.4),
+    T_DIV_TITLE : f.title_pt  ?? 28.0,
+    T_DIV_DESC  : 13.0,
+  };
 }
 
 // ── CLI ───────────────────────────────────────────────────────────────────────
@@ -418,20 +620,55 @@ interface SlideData {
 async function main() {
   const args = process.argv.slice(2);
   const get  = (flag: string) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : undefined; };
-  const has  = (flag: string) => args.includes(flag);
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('사용법: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir fonts/] [--data path/to/slidedata.json]');
+    console.error('Usage: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir fonts/] [--data path/to/slidedata.json]');
     process.exit(1);
   }
 
   const workspaceRoot = resolve(dirname(import.meta.path), '../..');
   const projectDir    = resolve(workspaceRoot, projectArg);
   if (!existsSync(projectDir)) {
-    console.error(`❌ 프로젝트 폴더 없음: ${projectDir}`); process.exit(1);
+    console.error(`Project folder not found: ${projectDir}`); process.exit(1);
   }
 
+  // ── Read lecture-profile.md and parse theme/style ─────────────────────────
+  const lectureProfilePath = join(projectDir, 'lecture-profile.md');
+  let lectureProfile: Record<string, any> = {};
+  if (existsSync(lectureProfilePath)) {
+    const profileContent = readFileSync(lectureProfilePath, 'utf-8');
+    lectureProfile = parseFrontmatter(profileContent);
+  }
+
+  const theme = lectureProfile.theme ?? 'scroll';
+  const style = lectureProfile.style ?? 'classic';
+
+  // ── Load spec files (3-layer merge) ──────────────────────────────────────
+  const themeSpecPath = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
+  const styleSpecPath = resolve(workspaceRoot, `docs/html-themes/styles/${style}/pdf_color_spec.json`);
+
+  const themeSpec: LayoutSpec = existsSync(themeSpecPath) ? JSON.parse(readFileSync(themeSpecPath, 'utf-8')) : {};
+  const styleSpec: any        = existsSync(styleSpecPath) ? JSON.parse(readFileSync(styleSpecPath, 'utf-8')) : {};
+
+  // Merge: themeSpec base → styleSpec colors → layout_overrides
+  let layoutSpec: LayoutSpec = themeSpec;
+  if (styleSpec.colors) {
+    layoutSpec = deepMerge(layoutSpec, { colors: styleSpec.colors });
+  }
+  if (lectureProfile.layout_overrides) {
+    layoutSpec = deepMerge(layoutSpec, lectureProfile.layout_overrides);
+  }
+
+  // ── Build derived geometry, colors, and font sizes ────────────────────────
+  const coords = buildCoords(layoutSpec);
+  const colors = buildColors(layoutSpec);
+  const sizes  = buildSizes(layoutSpec, coords.px2pt);
+
+  const { PW, PH, CW, CH, CX, CY } = coords;
+  const { C_DARK, C_BG } = colors;
+
+  // ── Parse remaining CLI flags ─────────────────────────────────────────────
   const sampleArg   = get('--sample');
   const sampleCount = sampleArg ? parseInt(sampleArg, 10) : null;
 
@@ -446,22 +683,23 @@ async function main() {
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {
-    console.error(`❌ slidedata.json 없음: ${dataPath}`);
-    console.error('   먼저 bun scripts/extract_slidedata.mjs <html> 를 실행하세요.');
+    console.error(`slidedata.json not found: ${dataPath}`);
+    console.error('   Run bun scripts/extract_slidedata.mjs <html> first.');
     process.exit(1);
   }
 
   const fontR = join(fontDir, 'MaruBuri-Regular.ttf');
   const fontB = join(fontDir, 'MaruBuri-Bold.ttf');
   if (!existsSync(fontR) || !existsSync(fontB)) {
-    console.error(`❌ 폰트 파일 없음: ${fontDir}/MaruBuri-*.ttf`);
-    console.error('   먼저 bun scripts/download-font.ts maruburi 를 실행하세요.');
+    console.error(`Font files not found: ${fontDir}/MaruBuri-*.ttf`);
+    console.error('   Run bun scripts/download-font.ts maruburi first.');
     process.exit(1);
   }
 
-  console.log(`📁 프로젝트: ${projectDir}`);
-  console.log(`📄 출력: ${outPath}`);
-  console.log(`Card ${CW.toFixed(1)}×${CH.toFixed(1)}mm`);
+  console.log(`Project: ${projectDir}`);
+  console.log(`Output:  ${outPath}`);
+  console.log(`Theme: ${theme}  Style: ${style}`);
+  console.log(`Card ${CW.toFixed(1)}x${CH.toFixed(1)}mm`);
 
   let slideData: SlideData[] = JSON.parse(readFileSync(dataPath, 'utf-8'));
   if (sampleCount != null) slideData = slideData.slice(0, sampleCount);
@@ -473,7 +711,7 @@ async function main() {
 
   const regularFont = await pdfDoc.embedFont(readFileSync(fontR));
   const boldFont    = await pdfDoc.embedFont(readFileSync(fontB));
-  const renderer    = new Renderer(regularFont, boldFont);
+  const renderer    = new Renderer(regularFont, boldFont, PW, PH, colors.C_WHITE);
 
   for (let idx = 0; idx < slideData.length; idx++) {
     const data = slideData[idx];
@@ -486,15 +724,17 @@ async function main() {
     const n = idx + 1;
 
     if (data.isTitleSlide) {
-      await renderTitleSlide(renderer, pdfDoc, data, n, TOTAL);
-    } else if (data.isDividerSlide) {
-      await renderDividerSlide(renderer, pdfDoc, data, n, TOTAL, imgDir);
+      await renderTitleSlide(renderer, pdfDoc, data, n, TOTAL, layoutSpec, coords, colors, sizes);
+    } else if (data.isDividerSlide && theme === 'scroll') {
+      await renderDividerSlide(renderer, pdfDoc, data, n, TOTAL, imgDir, layoutSpec, coords, colors, sizes);
+    } else if (data.isPunchline && theme === 'slideshow') {
+      await renderPunchlineSlide(renderer, pdfDoc, data, n, TOTAL, layoutSpec, coords, colors, sizes);
     } else {
-      await renderStandardSlide(renderer, pdfDoc, data, n, TOTAL, imgDir);
+      await renderStandardSlide(renderer, pdfDoc, data, n, TOTAL, imgDir, layoutSpec, coords, colors, sizes);
     }
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
-      console.log(`  슬라이드 ${idx + 1}/${TOTAL} 처리 중...`);
+      console.log(`  Slide ${idx + 1}/${TOTAL}...`);
     }
   }
 
@@ -502,8 +742,8 @@ async function main() {
   writeFileSync(outPath, pdfBytes);
 
   const sizeKb = Math.round(statSync(outPath).size / 1024);
-  console.log(`\n✅ 저장 → ${outPath}`);
-  console.log(`   크기: ${sizeKb}KB`);
+  console.log(`\nSaved -> ${outPath}`);
+  console.log(`   Size: ${sizeKb}KB`);
 }
 
-main().catch(err => { console.error('❌', err); process.exit(1); });
+main().catch(err => { console.error('Error:', err); process.exit(1); });

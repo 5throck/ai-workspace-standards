@@ -32,6 +32,12 @@
   },
   "requires_slideData": true,
   "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": false,
+    "punchline": true,
+    "standard": true
+  },
   "css_base": "docs/html-themes/styles/base.css",
   "added": "2026-06-21",
   "author": "co-deck"

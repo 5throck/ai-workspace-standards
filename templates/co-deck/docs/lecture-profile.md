@@ -93,6 +93,20 @@ dividers:
 # - true (default): Runs the source-verifier agent to validate references.
 # - false: Skips source verification (equivalent to --skip-verify).
 source_verification: true
+
+# ── Per-project layout overrides ──────────────────────────────────
+# Override global theme/style defaults for this project only.
+# Uncomment and edit any of the sections below as needed.
+# PM will warn at Stage 0 if any override differs from theme defaults.
+#
+# layout_overrides:
+#   page:
+#     width_mm: 254.0      # 4:3 ratio (default: 338.7)
+#     height_mm: 190.5
+#   content_rules:
+#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 3)
+#   colors:
+#     accent: [180, 30, 50]      # institution CI color override
 ---
 
 # Lecture Profile
