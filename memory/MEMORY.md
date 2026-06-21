@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-22](2026-06-22.md) | chore: update |
 | [2026-06-21](2026-06-21.md) | feat(variant-sync): pluggable variant audit hooks and pipeline integrity validation |
 | [2026-06-20](2026-06-20.md) | feat(co-deck): Phase 2 — HTML themes, source-verifier, image source strategy, context docs update |
 | [2026-06-19](2026-06-19.md) | feat(co-deck): complete variant template — fix all structural gaps vs other variants and update l2-to-variant-pipeline |
