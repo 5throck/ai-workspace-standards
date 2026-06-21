@@ -440,9 +440,9 @@ async function main() {
     : `${projectDir.split(/[/\\]/).pop()}.pdf`;
 
   const outName  = get('--out') ?? defaultPdfName;
-  const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'fonts');
+  const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'presentations/assets/fonts');
   const dataPath = resolve(get('--data') ?? join(projectDir, 'slidedata.json'));
-  const imgDir   = join(projectDir, 'images');
+  const imgDir   = resolve(workspaceRoot, 'presentations/assets/images');
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {

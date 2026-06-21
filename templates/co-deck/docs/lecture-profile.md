@@ -34,13 +34,21 @@ instructor:
   organization: ""
   email: ""
 
-# HTML theme for slide rendering (used by html-build agent)
-# Options: classic | minimal | visual-heavy | academic
-# - classic       : text left, image right panel (default)
-# - minimal       : text-only, clean whitespace
-# - visual-heavy  : full-bleed images with text overlay
-# - academic      : dense 2-column layout for research/thesis
-theme: classic
+# Presentation rendering settings (used by html-build and storyline agents)
+# theme   — HTML structure and navigation paradigm
+#   Options: scroll | slideshow
+#   - scroll    : vertical scroll, all slides visible, TOC panel (default)
+#   - slideshow : fullscreen single-slide, prev/next navigation
+# style   — CSS visual variable set (color, font, spacing)
+#   Options: classic | minimal | visual-heavy | academic
+#   - classic      : text left, image right panel (default)
+#   - minimal      : text-only, clean whitespace
+#   - visual-heavy : full-bleed images with text overlay (scroll only)
+#   - academic     : dense 2-column layout for research/thesis (scroll only)
+# Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
+presentation:
+  theme: scroll
+  style: classic
 
 # Keywords used by research agent to focus search queries
 # Add 5-10 domain-specific terms
@@ -98,7 +106,7 @@ This file is the single source of truth for this lecture project.
 | `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier` |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
 | `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode` |
-| `html-build` | Reads `theme`, `instructor` for cover/speaker-intro slides |
+| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor` for cover/speaker-intro slides |
 | `image-curator` | Reads `image.source`, `image.style_hint` for search queries |
 
 **Getting started:**

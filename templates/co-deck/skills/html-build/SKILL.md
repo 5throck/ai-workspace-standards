@@ -40,22 +40,22 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 ```javascript
 // Cover
 { isTitleSlide: true, section: "", title: "강연 제목", subtitle: "부제목",
-  meta: "날짜 | 주최", visualImage: "assets/images/slide-001-cover.jpg" }
+  meta: "날짜 | 주최", visualImage: "../assets/images/lecture-hall-professional.jpg" }
 
 // Speaker intro
 { isProfileSlide: true, section: "INTRODUCTION", title: "강연자 소개",
   speakerName: "이름", speakerTitle: "직책 / 소속", speakerBio: "약력 (2-3줄)",
-  visualImage: "assets/images/slide-002-speaker.jpg" }
+  visualImage: "../assets/images/speaker-portrait.jpg" }
 
 // Divider (part break)
 { isDividerSlide: true, section: "섹션명", partNum: "PART 01",
   title: "파트 제목", desc: "이 파트에서 다룰 내용 한 줄 요약",
-  visualImage: "assets/images/slide-003-part1.jpg" }
+  visualImage: "../assets/images/ai-transformation-abstract.jpg" }
 
 // Standard slide
 { section: "섹션명", title: "슬라이드 제목",
   bullets: ["불릿 1", "불릿 2", "불릿 3"],
-  visualImage: "assets/images/slide-004-keyword.jpg" }
+  visualImage: "../assets/images/data-analysis-dashboard.jpg" }
   // or text panel: visualTitle: "오른쪽 패널 제목", visualDisplay: "패널 본문"
 
 // Contact (last slide)
@@ -66,15 +66,15 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
 
-**Theme injection** (from `lecture-profile.md`):
+**Theme + Style injection** (from `lecture-profile.md` → `presentation.theme` + `presentation.style`):
 ```html
-<html lang="ko" data-theme="classic">
+<html lang="ko" data-theme="scroll" data-style="classic">
 <link rel="stylesheet" href="../../docs/html-themes/base/base.css">
-<link rel="stylesheet" href="../../docs/html-themes/overrides/classic.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
 ```
-Available themes: `classic | minimal | visual-heavy | academic`. Default: `classic`.
+Available themes: `scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic`. Defaults: `scroll` + `classic`.
 
-**Image paths:** use paths from `image-manifest.json` (produced by Image Curator Agent). Naming convention: `assets/images/slide-<NNN>-<slug>.<ext>`.
+**Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 
 ---
 

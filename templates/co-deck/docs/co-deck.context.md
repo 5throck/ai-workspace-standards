@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-20
+# Last Updated: 2026-06-21
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -79,6 +79,7 @@ Three flags control agent execution in the co-deck pipeline:
 | html-build | `skills/html-build/SKILL.md` | html-build | active |
 | measure | `skills/measure/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
+| theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
 <!-- END VARIANT-INJECT -->
 
 > `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).
@@ -112,23 +113,51 @@ bunx playwright install chromium
 
 ---
 
-## HTML Themes
+## Theme & Style System
 
 <!-- VARIANT-INJECT: html-themes -->
-CSS variable override themes — DOM structure is immutable across all themes.
+co-deck uses a **two-layer** presentation appearance system. Authoritative registry: `docs/html-themes/THEMES.md`.
 
-| Theme | File | Best For | Image Panel |
-|-------|------|----------|-------------|
+### Layer 1 — Theme (렌더링 패러다임)
+
+A **theme** defines the HTML structure, navigation, and rendering paradigm. Each theme is a package folder containing `template.html` (HTML skeleton) and `theme.json` (metadata + content rules + compatibility).
+
+| Name | Paradigm | Navigation | TOC | Content Rules | Folder |
+|------|----------|-----------|-----|---------------|--------|
+| `scroll` | Vertical scroll, all slides in DOM | Scroll + TOC panel | Required | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
+| `slideshow` | Fullscreen single-slide, CSS transitions | Prev/Next + arrow keys | None | max 3 bullets, 20 char title, 20-40 slides | `docs/html-themes/themes/slideshow/` |
+
+`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `incompatible_styles`, `recommended_structure`.
+
+### Layer 2 — Style (CSS 변수 세트)
+
+A **style** is a CSS variable override file that controls color, font, and spacing. Styles do NOT change DOM structure.
+
+| Name | File | Best For | Image Panel |
+|------|------|---------|-------------|
 | `classic` | `docs/html-themes/overrides/classic.css` | General purpose (default) | 45% right panel |
 | `minimal` | `docs/html-themes/overrides/minimal.css` | Text-heavy lectures | None |
 | `visual-heavy` | `docs/html-themes/overrides/visual-heavy.css` | Visual storytelling | Full-bleed background |
 | `academic` | `docs/html-themes/overrides/academic.css` | Research / thesis | 30% illustration panel |
 
-Base styles: `docs/html-themes/base/base.css` (shared CSS variables — do not modify per-theme).
+Base: `docs/html-themes/base/base.css` (shared CSS variables — do not modify per style).
 
-**Theme selection**: set `theme:` in `docs/lecture-profile.md`. Default: `classic`.
+### Compatibility
 
-**`visual-heavy` special behavior**: `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. `<html data-theme="visual-heavy">` must be set for CSS selectors to activate.
+Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
+
+| Style ↓ / Theme → | `scroll` | `slideshow` |
+|-------------------|----------|-------------|
+| `classic` | ✅ | ✅ |
+| `minimal` | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
+| `academic` | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
+
+### Theme/Style Authoring
+
+To create a new theme or style, use the **T-Stage** or **Style Workflow** via the PM agent. See `skills/theme-authoring/SKILL.md`.
+
+**`visual-heavy` special behavior**: `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element.
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -145,7 +174,9 @@ Key fields:
 title: "강의 제목"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
-theme: classic | minimal | visual-heavy | academic
+presentation:
+  theme: scroll       # HTML structure: scroll | slideshow
+  style: classic      # CSS variables: classic | minimal | visual-heavy | academic
 keywords: [키워드1, 키워드2]
 instructor:
   name: ""
@@ -154,15 +185,11 @@ instructor:
 image:
   source: auto        # Pixabay keyless → Unsplash URL → API keys
   style_hint: "professional"
-  api_keys:
-    pixabay: ""       # optional — keyless works without this
-    unsplash: ""
-    pexels: ""
 dividers:
-  mode: manual        # manual | auto | none
+  mode: auto          # auto | manual | none
 ```
 
-**Agents that read this file**: research (queries), storyline (slide_count, dividers.mode), html-build (theme, instructor), image-curator (source, style_hint, api_keys).
+**Agents that read this file**: research (queries), storyline (slide_count, dividers.mode + reads `theme.json content_rules` for slide density constraints), html-build (`presentation.theme` + `presentation.style`, instructor), image-curator (source, style_hint).
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -180,9 +207,13 @@ Handled by the `image-curator` agent (Stage 3.5). All sources are **commercial-u
 | Unsplash API | Optional | 50/hr | Unsplash License |
 | Wikimedia | Not required | Unlimited | CC0 / CC-BY |
 
-**Output**: `presentations/<project>/assets/images/slide-<NNN>-<slug>.<ext>` + `image-manifest.json`
+**Shared image pool**: `presentations/assets/images/<slug>.<ext>`
 
-**`image-manifest.json`** records: source URL, license, `commercial_use: true`, `attribution_required: false`, download status. Missing images are logged but do not block the pipeline.
+**Naming**: slug-only (`ai-future-professional.jpg`) — no slide-number prefix. The slug is the content identifier, enabling cross-project reuse. image-curator checks the pool before downloading: if `<slug>.<ext>` exists it sets `"reused": true` and skips download.
+
+**Per-project manifest**: `presentations/<project>/image-manifest.json` — maps slide index → slug, records source URL, license, `"reused": true/false`. Missing images are logged but do not block the pipeline.
+
+**HTML image path** (from `presentations/<project>/lecture.html`): `../assets/images/<slug>.<ext>`
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -218,8 +249,9 @@ bun install                      # installs pdf-lib, fflate, @pdf-lib/fontkit
 bun add playwright
 bunx playwright install chromium
 
-# Font download (run once per project before PDF export)
-bun run download-font maruburi
+# Font download — saves to shared pool presentations/assets/fonts/
+# Check-before-download: skips if font files already exist
+bun scripts/co-deck/download-font.ts maruburi
 ```
 
 No `.env` required by default. API keys for image sources are optional and stored in `lecture-profile.md`.
@@ -231,18 +263,22 @@ No `.env` required by default. API keys for image sources are optional and store
 
 <!-- VARIANT-INJECT: development-workflow -->
 ```
-User: "make a lecture about X"
-  → PM reads lecture-profile.md (or prompts user to fill it, confirming theme and source_verification)
-  → Dispatches Research → (Optional Source Verifier) → Storyline → Design → Image Curator → Build → Measure → Export
-  → Gates 2, 5 require explicit user approval before advancing
-  → Gate 1.5 (source-verifier), Gate 3 (design), and Gate 4 (html-build) are optional / non-blocking
+User: "make a lecture about X"          → PM 11-Stage pipeline (see table below)
+User: "create a new theme/style"        → PM T-Stage / Style Workflow (see skills/theme-authoring/SKILL.md)
+```
+
+**11-Stage pipeline**:
+```
+PM reads lecture-profile.md → confirms presentation.theme + presentation.style + source_verification + dividers.mode
+→ Research → (Source Verifier) → Storyline → Design → Image Curator → Build → Measure → Export
+→ Gates 2, 5: mandatory user approval · Gate 1.5, 3, 4: optional / auto-advance
 ```
 
 ### Pipeline Stages
 
 | Stage | Agent | Gate | Key Output |
 |-------|-------|------|-----------|
-| 0 | PM | — | project_state.json initialized; lecture-profile.md confirmed (theme & source_verification set) |
+| 0 | PM | — | project_state.json initialized; lecture-profile.md confirmed (`presentation.theme` + `presentation.style` + `source_verification` + `dividers.mode`) |
 | 1 | Research | — | research_notes.md |
 | 1.5 | Source Verifier | **Gate 1.5** (optional, skip if source_verification: false) | source-verification.md + Trust Score |
 | 2-3 | Storyline | **Gate 2 (required)** | storyline.md, slide_deck.md (with image_role/image_query) |
@@ -260,29 +296,32 @@ User: "make a lecture about X"
 
 ### Content Rules
 1. Research must cover both Korean and English sources
-2. Slide count: 30-60 per lecture (discuss with user before exceeding)
-3. Each slide: ≤ 5 bullet points (3 is ideal); `image_role: none` max 3 consecutive slides
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: scroll theme → max 5 bullets, 30-60 slides; slideshow → max 3 bullets, 20-40 slides
+3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
 
 ### Design Rules
 1. 8-role color palette: defined in design_spec.md CSS variable block
 2. Font: Korean-compatible (MaruBuri, NanumSquare Neo, or Noto Sans KR)
-3. Layout: determined by theme (classic = two-panel; minimal = text only; visual-heavy = full image)
+3. Layout: determined by `presentation.style` (classic = two-panel; minimal = text only; visual-heavy = full image)
 4. No hardcoded color or font values in HTML — CSS variables only
+5. Verify `presentation.theme × presentation.style` compatibility in `docs/html-themes/THEMES.md` before generating HTML
 
 ### Build Rules
 1. Always call Version Agent before editing any file
 2. HTML must embed `slideData` array for PDF extraction
-3. Set `<html data-theme="<theme>">` and inject theme CSS link
-4. Images: named `assets/images/slide-<NNN>-<slug>.<ext>` (from image-curator manifest)
+3. Set `<html data-theme="<theme>" data-style="<style>">` and inject `base.css` + style CSS links
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
+6. **TOC sidebar is MANDATORY for scroll theme**: wrap slides in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`. Each `.slide` must carry `id="slide-${index}"`.
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
 2. `image_query` must be in English — even for Korean lectures
-3. `visual-heavy` theme requires `image_role: background` on most slides
-4. API keys are optional — keyless Pixabay is the default
+3. `visual-heavy` style requires `image_role: background` on most slides
+4. image-curator checks shared pool before downloading — reuse existing slugs when possible
+5. API keys are optional — keyless Pixabay is the default
 
 ### Approval Gate Rules
 - Gates 2, 5 are **MANDATORY** — PM must NOT advance without user approval
@@ -301,13 +340,20 @@ User: "make a lecture about X"
 | `presentations/<project>/` | All outputs for a single lecture project |
 | `docs/lecture-profile.md` | Master template for lecture profile (copied on project start) |
 | `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
-| `presentations/<project>/assets/images/` | Downloaded images (image-curator output) |
+| `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
+| `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
+| `presentations/assets/icons/` | **Shared icon pool** |
+| `presentations/assets/images/` | **Shared image pool** — slug-named, cross-project reuse |
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
-| `docs/html-themes/base/` | Shared CSS variable foundation |
-| `docs/html-themes/overrides/` | Per-theme CSS variable overrides (4 themes) |
+| `docs/html-themes/base/` | Shared CSS variable foundation (`base.css`) |
+| `docs/html-themes/styles/<name>/style.css` | Per-style CSS variable overrides (canonical path for new styles) |
+| `docs/html-themes/overrides/` | Legacy override files (migration to `styles/` deferred) |
+| `docs/html-themes/themes/<name>/` | Theme packages: `template.html` + `theme.json` |
+| `docs/html-themes/preview/` | `preview.html` — URL-param CSS swap for theme × style validation |
+| `docs/html-themes/THEMES.md` | Authoritative theme + style registry |
 | `memory/` | Dev session logs |
 | `docs/` | Project context + ADRs |
 <!-- END VARIANT-INJECT -->
@@ -325,9 +371,12 @@ User: "make a lecture about X"
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
 7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
-9. **CSS DOM structure is immutable** — themes change CSS variables only, never DOM elements
+9. **Theme vs Style boundary**: Themes own DOM structure (template.html); styles own CSS variables only (style.css). Never modify DOM in a style file.
+10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
+11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
+12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation.
 <!-- END VARIANT-INJECT -->
 
 ---
 
-*co-deck.context.md version: 2.0 — updated 2026-06-20: TypeScript migration, Phase 1 (lecture-profile, image-curator, storyline image fields, cover/divider flow), Phase 2 (HTML themes 4종, source-verifier, Pixabay keyless image strategy)*
+*co-deck.context.md version: 2.1 — updated 2026-06-21: two-layer theme/style system (scroll/slideshow themes × classic/minimal/visual-heavy/academic styles); shared asset pool (presentations/assets/fonts|icons|images/); slug-based image naming + check-before-download; T-Stage authoring pipeline; THEMES.md registry; theme.json content_rules at Stage 2; Stage 0 expanded to 4 confirmation items; theme-authoring skill entry; domain rules 9-12 added*

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<!--
+  preview.html — co-deck Theme x Style Preview Tool
+  Usage: open in browser with URL params:
+    preview.html?theme=scroll&style=classic
+    preview.html?theme=slideshow&style=minimal
+  All slide content is hardcoded dummy data — not user input.
+-->
+<html lang="ko" data-theme="scroll" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>co-deck Preview</title>
+  <link id="base-css" rel="stylesheet" href="../base/base.css">
+  <link id="style-css" rel="stylesheet" href="../overrides/classic.css">
+  <style>
+    #preview-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); color: #fff;
+      padding: 8px 16px; font: 13px/1.4 monospace;
+      display: flex; align-items: center; gap: 16px;
+    }
+    #preview-bar label { opacity: 0.7; }
+    #preview-bar select { background: #222; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 6px; }
+    .hint { margin-left: auto; opacity: 0.5; font-size: 11px; }
+    body { padding-top: 40px; }
+    .slide { min-height: 300px; margin: 0 0 16px; padding: 40px; border-radius: 12px; background: var(--slide-bg, rgba(255,255,255,0.04)); border: 1px solid rgba(255,255,255,0.06); }
+  </style>
+</head>
+<body>
+
+  <div id="preview-bar">
+    <label>Theme:</label>
+    <select id="theme-select" onchange="applyParams()">
+      <option value="scroll">scroll</option>
+      <option value="slideshow">slideshow</option>
+    </select>
+    <label>Style:</label>
+    <select id="style-select" onchange="applyParams()">
+      <option value="classic">classic</option>
+      <option value="minimal">minimal</option>
+      <option value="visual-heavy">visual-heavy</option>
+      <option value="academic">academic</option>
+    </select>
+    <span class="hint">preview.html?theme=scroll&amp;style=classic</span>
+  </div>
+
+  <div id="slide-host"></div>
+
+  <script>
+    // Hardcoded dummy slide data (6 slides) — not user input
+    const SLIDE_DATA = [
+      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연' },
+      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점' },
+      { type: 'standard', section: '기술 변화의 흐름', title: '인공지능의 부상', bullets: ['딥러닝 혁명 (2012~)', 'LLM과 생성형 AI (2022~)', '업무 자동화 가속'] },
+      { type: 'standard', section: '기술 변화의 흐름', title: '데이터 중심 조직', bullets: ['데이터 리터러시의 중요성', 'AI 도입 장벽과 해결 방안', '사람 + AI 협업 모델'] },
+      { type: 'standard', section: '기술 변화의 흐름', title: '미래 역량', bullets: ['비판적 사고와 문제 정의', '크리에이티브 역량', 'AI 도구 활용 능력'] },
+      { type: 'contact',  title: '감사합니다', email: 'speaker@example.com', linkedin: 'linkedin.com/in/speaker' }
+    ];
+
+    function getParams() {
+      const p = new URLSearchParams(location.search);
+      return { theme: p.get('theme') || 'scroll', style: p.get('style') || 'classic' };
+    }
+
+    function applyParams() {
+      const theme = document.getElementById('theme-select').value;
+      const style = document.getElementById('style-select').value;
+      const url = new URL(location.href);
+      url.searchParams.set('theme', theme);
+      url.searchParams.set('style', style);
+      history.replaceState(null, '', url);
+      applyThemeStyle(theme, style);
+    }
+
+    function applyThemeStyle(theme, style) {
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.style = style;
+      const styleLink = document.getElementById('style-css');
+      styleLink.href = '../styles/' + style + '/style.css';
+      document.title = 'co-deck Preview — theme:' + theme + ' style:' + style;
+      renderSlides(theme);
+    }
+
+    function el(tag, styles, text) {
+      const e = document.createElement(tag);
+      if (styles) Object.assign(e.style, styles);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    function buildSlideEl(data) {
+      const div = document.createElement('div');
+      div.className = 'slide';
+      div.dataset.type = data.type;
+
+      if (data.type === 'cover') {
+        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
+        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '12px' }, data.title));
+        wrap.appendChild(el('div', { fontSize: '1.1em', color: 'var(--text-muted,rgba(255,255,255,0.6))' }, data.subtitle || ''));
+        wrap.appendChild(el('div', { marginTop: '24px', fontSize: '0.85em', color: 'var(--text-muted,rgba(255,255,255,0.4))' }, data.meta || ''));
+        div.appendChild(wrap);
+      } else if (data.type === 'divider') {
+        const wrap = el('div', { padding: '20px 0' });
+        wrap.appendChild(el('div', { fontSize: '0.8em', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-color,#d97706)', marginBottom: '8px' }, data.partNum || ''));
+        wrap.appendChild(el('div', { fontSize: '1.8em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '8px' }, data.title));
+        wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))' }, data.desc || ''));
+        div.appendChild(wrap);
+      } else if (data.type === 'contact') {
+        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
+        wrap.appendChild(el('div', { fontSize: '1.6em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '24px' }, data.title));
+        wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))', lineHeight: '2' }, data.email + ' · ' + data.linkedin));
+        div.appendChild(wrap);
+      } else {
+        const wrap = el('div');
+        wrap.appendChild(el('div', { fontSize: '0.75em', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted,rgba(255,255,255,0.4))', marginBottom: '6px' }, data.section || ''));
+        wrap.appendChild(el('div', { fontSize: '1.3em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '16px' }, data.title));
+        const ul = el('ul', { margin: '0', paddingLeft: '20px' });
+        (data.bullets || []).forEach(b => ul.appendChild(el('li', { margin: '6px 0', color: 'var(--text-body,rgba(255,255,255,0.85))' }, b)));
+        wrap.appendChild(ul);
+        div.appendChild(wrap);
+      }
+      return div;
+    }
+
+    function renderSlides(theme) {
+      const host = document.getElementById('slide-host');
+      // Remove all child nodes safely
+      while (host.firstChild) host.removeChild(host.firstChild);
+
+      if (theme === 'slideshow') {
+        // Slideshow: fixed container, slides stacked, prev/next
+        const outer = el('div', { maxWidth: '900px', margin: '20px auto', position: 'relative', aspectRatio: '16/9' });
+        SLIDE_DATA.forEach((data, i) => {
+          const s = buildSlideEl(data);
+          Object.assign(s.style, { position: 'absolute', inset: '0', opacity: i === 0 ? '1' : '0', transition: 'opacity 0.45s' });
+          s.id = 'slide-' + i;
+          outer.appendChild(s);
+        });
+        host.appendChild(outer);
+
+        const counter = el('div', { position: 'fixed', bottom: '20px', right: '24px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' });
+        counter.id = 'slide-counter';
+        host.appendChild(counter);
+        currentSlide = 0;
+        updateCounter();
+      } else {
+        // Scroll: vertical list with TOC
+        const viewer = el('div', { display: 'flex' });
+        viewer.id = 'viewer';
+
+        const toc = el('aside', { width: '200px', minHeight: '100vh', padding: '60px 12px 20px', borderRight: '1px solid rgba(255,255,255,0.08)', flexShrink: '0' });
+        toc.id = 'toc-panel';
+        const tocList = el('ul', { listStyle: 'none', margin: '0', padding: '0' });
+        tocList.id = 'toc-list';
+        toc.appendChild(tocList);
+        viewer.appendChild(toc);
+
+        const main = el('main', { flex: '1', padding: '20px' });
+        main.id = 'slide-container';
+        SLIDE_DATA.forEach((data, i) => {
+          const s = buildSlideEl(data);
+          s.id = 'slide-' + i;
+          main.appendChild(s);
+
+          const li = el('li', { padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8em', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' },
+            data.type === 'cover' ? '표지' : data.type === 'divider' ? '◆ ' + data.title : (i + '. ' + data.title));
+          li.addEventListener('click', () => document.getElementById('slide-' + i).scrollIntoView({ behavior: 'smooth' }));
+          tocList.appendChild(li);
+        });
+        viewer.appendChild(main);
+        host.appendChild(viewer);
+      }
+    }
+
+    // Slideshow navigation
+    let currentSlide = 0;
+    function updateCounter() {
+      const counter = document.getElementById('slide-counter');
+      if (counter) counter.textContent = (currentSlide + 1) + ' / ' + SLIDE_DATA.length;
+    }
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (index < 0 || index >= slides.length) return;
+      slides.forEach(s => { s.style.opacity = '0'; s.style.pointerEvents = 'none'; });
+      slides[index].style.opacity = '1';
+      slides[index].style.pointerEvents = 'auto';
+      currentSlide = index;
+      updateCounter();
+    }
+    function changeSlide(delta) { showSlide(currentSlide + delta); }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+    });
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      const { theme, style } = getParams();
+      document.getElementById('theme-select').value = theme;
+      document.getElementById('style-select').value = style;
+      applyThemeStyle(theme, style);
+    });
+  </script>
+</body>
+</html>
