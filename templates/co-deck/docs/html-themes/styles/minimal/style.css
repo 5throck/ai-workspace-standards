@@ -1,5 +1,5 @@
 /**
- * minimal.css — co-deck theme: Minimal
+ * style.css — co-deck style: Minimal
  *
  * Text-only layout. No image panel. Large typography, generous whitespace.
  * Ideal for text-heavy lectures, step-by-step explanations, or Q&A slides.
@@ -54,19 +54,19 @@
   --section-label-text:  #333344;
 }
 
-/* Hide image panel entirely in minimal theme */
-[data-theme="minimal"] .right-panel {
+/* Hide image panel entirely in minimal style */
+[data-style="minimal"] .right-panel {
   display: none !important;
 }
 
 /* Replace header bar with thin bottom border */
-[data-theme="minimal"] .slide-header {
+[data-style="minimal"] .slide-header {
   background: var(--slide-bg);
   border-bottom: 1px solid #dddde8;
 }
 
 /* Tighter section label */
-[data-theme="minimal"] .section-label {
+[data-style="minimal"] .section-label {
   font-weight: 400;
   letter-spacing: 0.04em;
 }

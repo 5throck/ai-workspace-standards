@@ -2,13 +2,13 @@
  * base.css — co-deck HTML theme foundation
  *
  * Declares all CSS custom properties used across slide themes.
- * Theme overrides (overrides/*.css) may redefine any variable here.
- * DOM structure MUST NOT be altered by themes — CSS variables only.
+ * Style overrides (styles/<name>/style.css) may redefine any variable here.
+ * DOM structure MUST NOT be altered by styles — CSS variables only.
  *
- * Usage in lecture_vN.html:
- *   <link rel="stylesheet" href="../../docs/html-themes/base/base.css">
- *   <link rel="stylesheet" href="../../docs/html-themes/overrides/<theme>.css">
- *   <html data-theme="<theme>">
+ * Usage in lecture_vN.html (injected by html-build agent via <!-- INJECT:CSS -->):
+ *   <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+ *   <link rel="stylesheet" href="../../docs/html-themes/styles/<style>/style.css">
+ *   <html data-theme="<theme>" data-style="<style>">
  */
 
 /* ── Color Palette ──────────────────────────────────────────────── */

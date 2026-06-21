@@ -137,12 +137,12 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 | Name | File | Best For | Image Panel |
 |------|------|---------|-------------|
-| `classic` | `docs/html-themes/overrides/classic.css` | General purpose (default) | 45% right panel |
-| `minimal` | `docs/html-themes/overrides/minimal.css` | Text-heavy lectures | None |
-| `visual-heavy` | `docs/html-themes/overrides/visual-heavy.css` | Visual storytelling | Full-bleed background |
-| `academic` | `docs/html-themes/overrides/academic.css` | Research / thesis | 30% illustration panel |
+| `classic` | `docs/html-themes/styles/classic/style.css` | General purpose (default) | 45% right panel |
+| `minimal` | `docs/html-themes/styles/minimal/style.css` | Text-heavy lectures | None |
+| `visual-heavy` | `docs/html-themes/styles/visual-heavy/style.css` | Visual storytelling | Full-bleed background |
+| `academic` | `docs/html-themes/styles/academic/style.css` | Research / thesis | 30% illustration panel |
 
-Base: `docs/html-themes/base/base.css` (shared CSS variables — do not modify per style).
+Base: `docs/html-themes/styles/base.css` (shared structural CSS rules + default variables; injected before style.css by html-build).
 
 Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB color keys (`background`, `accent`, `text_primary`, etc.). Read by `gen-slides-pdf.ts` as Layer 2 of the 3-layer PDF merge.
 
@@ -364,9 +364,8 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
-| `docs/html-themes/base/` | Shared CSS variable foundation (`base.css`) |
-| `docs/html-themes/styles/<name>/style.css` | Per-style CSS variable overrides (canonical path for new styles) |
-| `docs/html-themes/overrides/` | Legacy override files (migration to `styles/` deferred) |
+| `docs/html-themes/styles/base.css` | Shared CSS structural foundation + default variables |
+| `docs/html-themes/styles/<name>/style.css` | Per-style CSS variable overrides (`style.css` + `pdf_color_spec.json` per folder) |
 | `docs/html-themes/themes/<name>/` | Theme packages: `template.html` + `theme.json` |
 | `docs/html-themes/preview/` | `preview.html` — URL-param CSS swap for theme × style validation |
 | `docs/html-themes/THEMES.md` | Authoritative theme + style registry |
@@ -397,4 +396,4 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 
 ---
 
-*co-deck.context.md version: 2.3 — updated 2026-06-21: 3-layer PDF merge section added (pdf_layout_spec.json per theme, pdf_color_spec.json per style, layout_overrides per project); domain rule 14 added; slide_types field documented*
+*co-deck.context.md version: 2.4 — updated 2026-06-21: html-themes restructure — styles migrated from overrides/ to styles/<name>/style.css; base.css moved to styles/base.css; File Organization Policy updated; previous: 3-layer PDF merge section, domain rule 14, slide_types field*

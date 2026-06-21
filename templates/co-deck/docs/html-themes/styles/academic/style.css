@@ -1,5 +1,5 @@
 /**
- * academic.css — co-deck theme: Academic
+ * style.css — co-deck style: Academic
  *
  * Dense 2-column layout with serif typography. Smaller font sizes,
  * tighter spacing, cream background. Ideal for thesis presentations,
@@ -64,7 +64,7 @@
 }
 
 /* Academic header: replace solid bar with bottom border rule */
-[data-theme="academic"] .slide-header {
+[data-style="academic"] .slide-header {
   background: var(--slide-bg);
   border-bottom: 2px solid var(--accent);
   color: var(--accent);
@@ -74,12 +74,12 @@
 }
 
 /* Tighter bullet spacing */
-[data-theme="academic"] .bullets-container {
+[data-style="academic"] .bullets-container {
   gap: 0.4rem;
 }
 
 /* Footnote-style section label */
-[data-theme="academic"] .section-label {
+[data-style="academic"] .section-label {
   font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.08em;
@@ -87,13 +87,13 @@
 }
 
 /* Image panel with thin border frame */
-[data-theme="academic"] .right-panel {
+[data-style="academic"] .right-panel {
   border: 1px solid #c8bca8;
   border-radius: 0.125rem;
 }
 
 /* Cover slide uses dark background with serif font */
-[data-theme="academic"] .slide[data-type="cover"] .slide-title {
+[data-style="academic"] .slide[data-type="cover"] .slide-title {
   font-size: 2rem;
   letter-spacing: -0.01em;
 }

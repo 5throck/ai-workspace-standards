@@ -105,12 +105,10 @@ A **style** controls color, font, and spacing via `styles/base.css` (shared foun
 
 | Name | Version | Status | CSS File | PDF Color Spec | Best For | Image Panel |
 |------|---------|--------|----------|----------------|---------|-------------|
-| `classic` | 1.0.0 | active | `docs/html-themes/overrides/classic.css` | `styles/classic/pdf_color_spec.json` | General purpose (default) | 45% right panel |
-| `minimal` | 1.0.0 | active | `docs/html-themes/overrides/minimal.css` | `styles/minimal/pdf_color_spec.json` | Text-heavy lectures | None |
-| `visual-heavy` | 1.0.0 | active | `docs/html-themes/overrides/visual-heavy.css` | `styles/visual-heavy/pdf_color_spec.json` | Visual storytelling | Full-bleed background |
-| `academic` | 1.0.0 | active | `docs/html-themes/overrides/academic.css` | `styles/academic/pdf_color_spec.json` | Research / thesis | 30% illustration panel |
-
-> **Note on CSS file paths**: Current style CSS files live in `overrides/` (legacy path). New styles should be created under `styles/<name>/style.css`. Migration of existing styles is deferred until all HTML file references are updated.
+| `classic` | 1.0.0 | active | `docs/html-themes/styles/classic/style.css` | `styles/classic/pdf_color_spec.json` | General purpose (default) | 45% right panel |
+| `minimal` | 1.0.0 | active | `docs/html-themes/styles/minimal/style.css` | `styles/minimal/pdf_color_spec.json` | Text-heavy lectures | None |
+| `visual-heavy` | 1.0.0 | active | `docs/html-themes/styles/visual-heavy/style.css` | `styles/visual-heavy/pdf_color_spec.json` | Visual storytelling | Full-bleed background |
+| `academic` | 1.0.0 | active | `docs/html-themes/styles/academic/style.css` | `styles/academic/pdf_color_spec.json` | Research / thesis | 30% illustration panel |
 
 ### `pdf_color_spec.json` Schema
 
@@ -136,8 +134,7 @@ Referenced by `gen-slides-pdf.ts` as `spec.colors.<role>`. Per-project accent ov
 
 | File | Purpose |
 |------|---------|
-| `docs/html-themes/base/base.css` | Shared CSS variables: colors, fonts, spacing, TOC, progress bar |
-| `docs/html-themes/styles/base.css` | Canonical future path (same content — migration in progress) |
+| `docs/html-themes/styles/base.css` | Shared CSS foundation: structural rules + default color/font/spacing variables. Injected before `style.css` by html-build. |
 
 ---
 
@@ -156,13 +153,14 @@ Referenced by `gen-slides-pdf.ts` as `spec.colors.<role>`. Per-project accent ov
 
 ## Adding a New Style
 
-1. Create `docs/html-themes/styles/<name>/style.css` — CSS variable overrides only (no structural rules)
+1. Create `docs/html-themes/styles/<name>/style.css` — CSS variable overrides only (no structural rules; use `[data-style="<name>"]` selectors for structural exceptions)
 2. Create `docs/html-themes/styles/<name>/pdf_color_spec.json` — 12 role-based RGB color keys (see schema above)
 3. Update every `theme.json` that is compatible with this style → add to `compatible_styles`
 4. Register in this file (THEMES.md) — add row to Styles table and update Compatibility Matrix
 5. Update `docs/lecture-profile.md` → style field options comment
 6. Update `docs/co-deck.context.md` → HTML Themes section
-7. Run `bun scripts/audit.ts` to verify
+7. Run `bun scripts/co-deck/validate-theme-styles.ts` to verify `compatible_styles` ↔ `styles/` consistency
+8. Run `bun scripts/audit.ts` to verify
 
 > Use the **Style Workflow** (`skills/theme-authoring/SKILL.md` → S-1 through S-3) for step-by-step guidance.
 
@@ -182,4 +180,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Later layers win on specific keys. Missing keys fall back to the previous layer or built-in defaults.
 
-*Last updated: 2026-06-21 — added image_zones, toc, content_constraints, print, slide_type_overrides sections to pdf_layout_spec.json schema (v1.1.0); previous: added pdf_layout_spec.json + pdf_color_spec.json per theme/style; slide_types field; 3-layer merge documentation*
+*Last updated: 2026-06-21 — migrated style CSS to styles/<name>/style.css (removed overrides/ legacy path); base.css moved to styles/base.css; added validate-templates.ts to "Adding a New Style" guide; previous: added image_zones, toc, content_constraints, print, slide_type_overrides sections to pdf_layout_spec.json schema (v1.1.0)*
