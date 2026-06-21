@@ -1,0 +1,46 @@
+{
+  "name": "pitch",
+  "version": "1.0.0",
+  "description": "Floating-card presenter deck with bottom navigation bar, speaker script panel, and slide-out TOC drawer. Cards are viewport-relative (not fixed 1280×720); each slide transitions with scale+translateY animation. Optimised for live presentations where the presenter needs access to speaking notes.",
+  "rendering": {
+    "paradigm": "pitch",
+    "slides_in_dom": "all (one active)",
+    "navigation": "bottom footer bar — prev/next buttons + TOC drawer + script toggle",
+    "progress_indicator": "progress bar (bottom) + slide counter (footer)"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 4,
+    "max_title_chars": 28,
+    "recommended_slide_count": "20-50",
+    "notes": "Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets; each bullet should be a concise takeaway. Divider slides must have a compelling image on the right panel. Script field is shown in the presenter panel — keep it to 2-3 sentences."
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark"],
+  "incompatible_styles": [
+    {
+      "name": "visual-heavy",
+      "reason": "visual-heavy full-bleed background conflicts with pitch's floating rounded-card layout."
+    },
+    {
+      "name": "academic",
+      "reason": "academic side illustration panel is too narrow in pitch's grid layout."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → Speaker Intro → Agenda → [Divider → 3-5 Content] × N → Contact",
+    "audience_fit": ["practitioner", "general"],
+    "notes": "Divider slides mark chapter boundaries and require a visual image. Speaker intro slide uses 'profile' type. Contact slide uses 'contact' type."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "profile": true,
+    "standard": true,
+    "contact": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_theme": "docs/html-themes/themes/pitch/theme.css",
+  "added": "2026-06-22",
+  "author": "co-deck"
+}

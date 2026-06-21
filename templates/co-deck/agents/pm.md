@@ -74,7 +74,7 @@ When the user requests an edit:
 1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
 2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
 3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
-   - **Rendering theme** (`presentation.theme`: `scroll` (default) | `slideshow`) — HTML structure
+   - **Rendering theme** (`presentation.theme`: `scroll` (default) | `notebook` | `pitch` | `slideshow`) — HTML structure
    - **Visual style** (`presentation.style`: `premium-dark` (default) | `classic` | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
@@ -113,6 +113,8 @@ For complete T-Stage spec, see `skills/theme-authoring/SKILL.md`.
 | Research | 1 | agents/research.md |
 | Storyline | 2-3 | agents/storyline.md |
 | Design | 4 | agents/design.md |
+| Image Curator | 3.5 | agents/image-curator.md |
+| Diagram Specialist | 3.5 | agents/diagram-specialist.md |
 | Build | 5-8 | agents/html-build.md |
 | Measure | 9-10 | agents/measure.md |
 | Export | 11 | agents/pdf-export.md |

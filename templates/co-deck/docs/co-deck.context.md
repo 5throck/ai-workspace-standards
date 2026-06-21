@@ -41,15 +41,18 @@
 | Storyline | `agents/storyline.md` | 2-3 | storyline.md + slide_deck.md with image_role/image_query fields; cover/divider confirmation | active |
 | Design | `agents/design.md` | 4 | design_spec.md (colors, fonts, layout) | active |
 | Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
+| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG+PNG) | active |
 | Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
 | Measure | `agents/measure.md` | 9-10 | layout_spec.json + pdf_layout_spec.md (Playwright-based) | active |
 | Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
 <!-- END VARIANT-INJECT -->
 
 > **Pipeline order** (variant.json `agent_manifest.pipeline_order`):
-> version → research → **source-verifier** → storyline → design → **image-curator** → html-build → measure → pdf-export
+> version → research → **source-verifier** → storyline → design → **image-curator** ‖ **diagram-specialist** → html-build → measure → pdf-export
 >
-> **Optional agents**: `source-verifier` (skip with `--skip-verify`), `image-curator` (skip if no images needed)
+> ‖ = parallel at Stage 3.5; image-curator handles photos, diagram-specialist handles SVG diagrams/charts
+>
+> **Optional agents**: `source-verifier` (skip with `--skip-verify`), `image-curator` (skip if no images needed), `diagram-specialist` (skip if no visual_spec fields in slide_deck.md)
 >
 > After any agent change: update AGENTS.md and this table.
 
@@ -132,6 +135,8 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 | Name | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|----------|-----------|-----|---------------|--------|
+| `notebook` | Ruled-paper card, centered fullscreen, opacity fade | Prev/Next + chapter tabs (footer) + arrow keys | None | max 4 bullets, 30 char title, 20-40 slides | `docs/html-themes/themes/notebook/` |
+| `pitch` | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
 | `scroll` | Vertical scroll, all slides in DOM | Scroll + TOC panel | Required | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
 | `slideshow` | Fullscreen single-slide, CSS transitions | Prev/Next + arrow keys | None | max 3 bullets, 20 char title, 20-40 slides | `docs/html-themes/themes/slideshow/` |
 
@@ -171,13 +176,13 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `scroll` | `slideshow` |
-|-------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ |
-| `classic` | ✅ | ✅ |
-| `minimal` | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
-| `academic` | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
+| Style ↓ / Theme → | `notebook` | `pitch` | `scroll` | `slideshow` |
+|-------------------|------------|---------|----------|-------------|
+| `premium-dark` | ❌ incompatible (dark bg destroys ruled-paper texture) | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ❌ incompatible (full-bleed destroys margin line) | ❌ incompatible | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
+| `academic` | ✅ | ❌ incompatible (30% panel too narrow in pitch grid) | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
 
 ### Theme/Style Authoring
 
@@ -233,7 +238,7 @@ title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
-  theme: scroll       # HTML structure: scroll | slideshow
+  theme: scroll       # HTML structure: notebook | pitch | scroll | slideshow
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
 keywords: [Keyword 1, Keyword 2]
 instructor:
@@ -455,7 +460,7 @@ CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artif
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
-12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, slideshow-incompatible.
+12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, incompatible with notebook/pitch/slideshow. `premium-dark` is incompatible with `notebook` (dark background destroys ruled-paper texture).
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
 14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.2.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).

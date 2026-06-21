@@ -72,7 +72,7 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-Available themes: `scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
+Available themes: `notebook | pitch | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
 
 **Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 

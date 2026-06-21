@@ -12,6 +12,8 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 
 | Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
+| `notebook` | 1.0.0 | active | Ruled-paper card, centered fullscreen, opacity fade | Prev/Next + chapter tabs (footer) + arrow keys | None | classic, minimal, academic | `themes/notebook/` |
+| `pitch` | 1.0.0 | active | Floating card, viewport-relative (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | classic, minimal, premium-dark | `themes/pitch/` |
 | `scroll` | 1.0.0 | active | Vertical scroll — all slides in DOM | Scroll + TOC panel | Required | premium-dark, classic, minimal, academic, visual-heavy (⚠ partial) | `themes/scroll/` |
 | `slideshow` | 1.0.0 | active | Fullscreen single-slide, animated transitions | Prev/Next + arrow keys | None | classic, minimal, premium-dark | `themes/slideshow/` |
 
@@ -113,13 +115,13 @@ PDF export and print specifications. `bleed_mm`: bleed area for professional pri
 
 ### Compatibility Matrix
 
-| Style ↓ / Theme → | `scroll` | `slideshow` |
-|-------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ |
-| `classic` | ✅ | ✅ |
-| `minimal` | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible |
-| `academic` | ✅ | ❌ incompatible |
+| Style ↓ / Theme → | `notebook` | `pitch` | `scroll` | `slideshow` |
+|-------------------|------------|---------|----------|-------------|
+| `premium-dark` | ❌ incompatible | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ❌ incompatible | ❌ incompatible | ⚠️ partial | ❌ incompatible |
+| `academic` | ✅ | ❌ incompatible | ✅ | ❌ incompatible |
 
 **Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
 

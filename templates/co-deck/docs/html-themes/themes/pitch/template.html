@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!--
+  pitch/template.html — co-deck Pitch Theme Skeleton
+  ===================================================
+  Rendering paradigm: floating card, viewport-relative (not fixed 1280×720).
+  Navigation: bottom footer bar — prev/next buttons, TOC drawer, script toggle.
+  Transition: scale(0.98)+translateY(10px) → scale(1)+translateY(0), 0.6s cubic-bezier(0.16,1,0.3,1).
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="pitch" data-style="<style>"> attributes
+    2. Replaces <!-- INJECT:CSS --> with base.css + theme.css + style.css <link> tags
+    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
+    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+
+  CONTENT RULES (from theme.json):
+    - max 4 bullets per slide, max 28 chars in title
+    - script field → speaker notes panel (presenter-facing, hidden by default)
+    - divider slides must include a visualImage for the right panel
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="pitch" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+  <!-- Example load order (replaced by html-build): foundation → theme → style.
+  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../themes/pitch/theme.css">
+  <link rel="stylesheet" href="../../styles/classic/style.css">
+  -->
+</head>
+<body>
+
+  <!-- TOC overlay -->
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+
+  <!-- TOC drawer -->
+  <nav class="toc-drawer" id="toc-drawer" aria-label="목차">
+    <div class="toc-title">목차</div>
+    <ul class="toc-list" id="toc-list">
+      <!-- Populated by buildTOC() -->
+    </ul>
+  </nav>
+
+  <!-- Script panel (speaker notes) -->
+  <div class="script-panel" id="script-panel" role="note" aria-live="polite">
+    <div class="script-label">발표자 노트</div>
+    <div id="script-text"></div>
+  </div>
+
+  <!-- Presentation area -->
+  <div class="presentation-container" id="presentation">
+    <!-- INJECT:slides -->
+    <!--
+      Each .slide rendered by renderSlide(data, index) must have:
+        <div class="slide" id="slide-${index}" data-type="title|divider|profile|standard|contact">
+          ... slide content ...
+        </div>
+      First slide gets class="slide active".
+
+      Slide types:
+        title    → isTitleSlide:true  — centered cover (eyebrow, title, subtitle/meta)
+        divider  → isDividerSlide:true — left text + right image (partNum, title, desc, visualImage)
+        profile  → isProfileSlide:true — centered speaker intro (title, name, affiliation, bio)
+        contact  → isContactSlide:true — contact details (title, content/bullets)
+        standard → (default)          — content grid left (section, title, bullets) + right (visualImage)
+
+      SlideData fields used by pitch theme:
+        section, title, bullets[], subtitle, meta,
+        isTitleSlide, isDividerSlide, isProfileSlide, isContactSlide,
+        partNum, desc, script, visualImage, visualTitle, visualDisplay
+    -->
+  </div>
+
+  <!-- Footer bar -->
+  <footer class="pitch-footer" id="pitch-footer">
+    <div class="footer-left">
+      <span class="slide-counter" id="slide-counter">1 / 1</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="목차 열기/닫기" title="목차">☰ 목차</button>
+      <button class="footer-btn" id="script-btn" onclick="toggleScript()" aria-label="발표자 노트 보기/숨기기" title="발표자 노트">📝 노트</button>
+      <button class="nav-btn" id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
+      <button class="nav-btn" id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+    </div>
+  </footer>
+
+  <script>
+    // <!-- INJECT:slideData -->
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── Slide Renderer ────────────────────────────────────────────────────────
+    function renderSlide(data, index) {
+      // html-build implements this function using theme.css structure and CSS variables.
+      // Theme defines structure; style.css defines appearance.
+      throw new Error('renderSlide() must be implemented by html-build agent');
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    let currentSlide = 0;
+    let scriptVisible = false;
+
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (index < 0 || index >= slides.length) return;
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+
+      // counter + progress bar
+      const counter = document.getElementById('slide-counter');
+      if (counter) counter.textContent = (index + 1) + ' / ' + slides.length;
+      const bar = document.getElementById('progress-bar');
+      if (bar) bar.style.width = ((index + 1) / slides.length * 100) + '%';
+
+      // speaker script
+      updateScript(index);
+
+      // TOC active state
+      const tocItems = document.querySelectorAll('.toc-item');
+      tocItems.forEach((el, i) => el.classList.toggle('active', i === index));
+    }
+
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+
+    // ── Script panel ──────────────────────────────────────────────────────────
+    function updateScript(index) {
+      const panel = document.getElementById('script-panel');
+      const textEl = document.getElementById('script-text');
+      if (!panel || !textEl) return;
+      const data = typeof slideData !== 'undefined' ? slideData[index] : null;
+      const script = data && data.script ? data.script : '';
+      textEl.textContent = script;
+      if (!script && scriptVisible) {
+        panel.classList.remove('show');
+      } else if (scriptVisible && script) {
+        panel.classList.add('show');
+      }
+    }
+
+    function toggleScript() {
+      const panel = document.getElementById('script-panel');
+      const btn = document.getElementById('script-btn');
+      if (!panel) return;
+      const data = typeof slideData !== 'undefined' ? slideData[currentSlide] : null;
+      const hasScript = data && data.script;
+      scriptVisible = !scriptVisible;
+      panel.classList.toggle('show', scriptVisible && !!hasScript);
+      if (btn) btn.classList.toggle('active', scriptVisible);
+    }
+
+    // ── TOC drawer ────────────────────────────────────────────────────────────
+    function buildTOC() {
+      const list = document.getElementById('toc-list');
+      if (!list || typeof slideData === 'undefined') return;
+      // Clear existing items safely
+      while (list.firstChild) list.removeChild(list.firstChild);
+      slideData.forEach((data, i) => {
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (i === 0 ? ' active' : '');
+        li.onclick = () => { showSlide(i); closeTOC(); };
+        const num = document.createElement('span');
+        num.className = 'toc-item-num';
+        num.textContent = String(i + 1).padStart(2, '0');
+        const label = document.createElement('span');
+        label.textContent = data.title || '(제목 없음)';
+        li.appendChild(num);
+        li.appendChild(label);
+        list.appendChild(li);
+      });
+    }
+
+    function toggleTOC() {
+      const drawer = document.getElementById('toc-drawer');
+      const overlay = document.getElementById('toc-overlay');
+      const btn = document.getElementById('toc-btn');
+      if (!drawer) return;
+      const isOpen = drawer.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+      if (btn) btn.classList.toggle('active', isOpen);
+    }
+
+    function closeTOC() {
+      const drawer = document.getElementById('toc-drawer');
+      const overlay = document.getElementById('toc-overlay');
+      const btn = document.getElementById('toc-btn');
+      if (drawer)  drawer.classList.remove('open');
+      if (overlay) overlay.classList.remove('show');
+      if (btn)     btn.classList.remove('active');
+    }
+
+    // ── Keyboard shortcuts ────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+      if (e.key === 'Escape') closeTOC();
+      if (e.key === 's' || e.key === 'S') toggleScript();
+      if (e.key === 't' || e.key === 'T') toggleTOC();
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      buildTOC();
+      showSlide(0);
+    });
+  </script>
+</body>
+</html>

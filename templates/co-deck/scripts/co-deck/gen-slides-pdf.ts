@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.3.3 — profile slide LH/GAP re-derived from Playwright measurement of HTML slide-2 (1280x720 space, viewport_px=720): card flex-gap(32)+item margin-top; LH_NAME 40->44, LH_BIO 22->25, gaps 20/12/6/16 -> 32/40/36.8/49.6.
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
@@ -570,38 +570,62 @@ function renderPunchlineSlide(ctx: RenderCtx) {
 }
 
 function renderProfileSlide(ctx: RenderCtx) {
-  const { r, data, coords, colors, sizes } = ctx;
-  const { C_BG, C_DARK, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
-  const { T_TITLE, T_BUL } = sizes;
-  const LH_TITLE = coords.px2mm(40);
-  const LH_BUL   = coords.px2mm(24);
+  const { r, data, coords, colors } = ctx;
+  const { C_BG, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
 
+  // HTML .slide[data-type="profile"] .slide-card: flex column, centered H+V,
+  // text-align:center. Render a vertically-centered column:
+  //   eyebrow → title → name → affiliation → bio
   r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
-  const titleR   = tryRegion(ctx, 'title')   ?? { x: coords.CX + coords.CW * 0.031, y: coords.CY + coords.CH * 0.115, w: coords.CW * 0.938, h: coords.CH * 0.115 };
-  const contentR = tryRegion(ctx, 'content') ?? { x: coords.CX + coords.CW * 0.031, y: coords.CY + coords.CH * 0.255, w: coords.CW * 0.938, h: coords.CH * 0.680 };
+  const bandW = coords.CW * 0.80;
+  const bandX = coords.CX + (coords.CW - bandW) / 2;
 
-  // Dark header bar (same as standard slides)
-  r.fillRect(0, 0, coords.CW, coords.CY + titleR.y * 0.71, C_DARK);
+  // Font sizes in pt; line-height boxes (LH) and inter-item gaps (GAP) are px
+  // values measured from the rendered HTML slide-2 (Playwright getBoundingClientRect
+  // on the 1280x720 natural design space — viewport_px=720, so px→mm is exact, no scaling).
+  // Inter-item gap model: card flex `gap:32px` + each item's margin-top.
+  const SZ_EYEBROW = 11, LH_EYEBROW = coords.px2mm(18);
+  const SZ_TITLE   = 26, LH_TITLE   = coords.px2mm(40);
+  const SZ_NAME    = 26, LH_NAME    = coords.px2mm(44);
+  const SZ_AFFIL   = 15, LH_AFFIL   = coords.px2mm(24);
+  const SZ_BIO     = 13, LH_BIO     = coords.px2mm(25);
+  const GAP_E = coords.px2mm(32),   GAP_T = coords.px2mm(40),   // 32+0 , 32+8
+        GAP_N = coords.px2mm(36.8), GAP_A = coords.px2mm(49.6); // 32+4.8, 32+17.6
 
-  // Slide title (e.g. "연자 소개")
-  r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleR.w, LH_TITLE, strip(data.title), titleR.x, titleR.y, 'L');
+  const eyebrowTxt = 'Introduction';                 // HTML .profile-eyebrow (hardcoded)
+  const titleTxt   = strip(data.title);
+  const nameTxt    = strip(data.speakerName);
+  const affilTxt   = strip(data.speakerTitle);
+  const bioLines   = (data.speakerBio ?? '')
+    .split(/<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
 
-  // Speaker name — larger than body, accent color
-  const nameY = contentR.y;
-  r.setFont(true, T_TITLE); r.setColor(C_ACCENT);
-  r.multiCell(contentR.w, LH_TITLE, strip(data.speakerName), contentR.x, nameY, 'L');
+  // Vertically center the block.
+  const blockH = LH_EYEBROW + GAP_E + LH_TITLE + GAP_T + LH_NAME + GAP_N
+               + LH_AFFIL + GAP_A + LH_BIO * Math.max(1, bioLines.length);
+  let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
-  // Speaker title/affiliation
-  const titleLineY = nameY + LH_TITLE + coords.px2mm(6);
-  r.setFont(false, T_BUL); r.setColor(C_MUTED);
-  r.multiCell(contentR.w, LH_BUL, strip(data.speakerTitle), contentR.x, titleLineY, 'L');
+  r.setFont(true,  SZ_EYEBROW); r.setColor(C_ACCENT);                // gold uppercase eyebrow
+  r.cell(bandW, LH_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
+  y += LH_EYEBROW + GAP_E;
 
-  // Bio line
-  const bioY = titleLineY + LH_BUL + coords.px2mm(10);
-  r.setFont(false, T_BUL); r.setColor(C_BODY);
-  r.multiCell(contentR.w, LH_BUL, strip(data.speakerBio), contentR.x, bioY, 'L');
+  r.setFont(true,  SZ_TITLE); r.setColor(C_WHITE);                   // "연자 소개"
+  r.cell(bandW, LH_TITLE, titleTxt, bandX, y, 'C');
+  y += LH_TITLE + GAP_T;
+
+  r.setFont(true,  SZ_NAME); r.setColor(C_WHITE);                    // name = --text-on-dark (white)
+  r.cell(bandW, LH_NAME, nameTxt, bandX, y, 'C');
+  y += LH_NAME + GAP_N;
+
+  r.setFont(false, SZ_AFFIL); r.setColor(C_BODY);                    // affiliation = --text-secondary
+  r.cell(bandW, LH_AFFIL, affilTxt, bandX, y, 'C');
+  y += LH_AFFIL + GAP_A;
+
+  r.setFont(false, SZ_BIO); r.setColor(C_MUTED);                     // bio = --text-muted
+  for (const line of bioLines) {
+    r.cell(bandW, LH_BIO, line, bandX, y, 'C');
+    y += LH_BIO;
+  }
 }
 
 function renderContactSlide(ctx: RenderCtx) {
@@ -930,7 +954,7 @@ async function main() {
   const outName  = get('--out') ?? defaultPdfName;
   const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'presentations/assets/fonts');
   const dataPath = resolve(get('--data') ?? join(projectDir, 'slidedata.json'));
-  const imgDir   = projectDir;  // visualImage paths in slidedata.json are relative to projectDir
+  const imgDir   = projectDir;  // visualImage paths in slidedata.json are relative to projectDir (imgPath = join(imgDir, src), no prefix strip)
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {

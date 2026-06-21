@@ -102,7 +102,7 @@ if (document.documentElement.dataset.style === 'visual-heavy' && data.imagePath)
 <div class="slide" data-type="standard">  <!-- cover | divider | standard | contact -->
 ```
 
-Available themes: `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
+Available themes: `notebook` | `pitch` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
 ## Constraints
 

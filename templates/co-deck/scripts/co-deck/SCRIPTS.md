@@ -49,7 +49,7 @@ After playwright install, also run: `bunx playwright install chromium`
 | script | version | status | description | cli-usage |
 |--------|---------|--------|-------------|-----------|
 | `download-font.ts` | 1.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
-| `gen-slides-pdf.ts` | 1.3.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); supports profile/contact/punchline slide types, header bar, image zones; use --sample N to limit | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
+| `gen-slides-pdf.ts` | 1.3.3 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); supports profile/contact/punchline slide types, header bar, image zones; use --sample N to limit | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
 | `gen-visual-images.ts` | 2.1.0 | active | CSS concept diagrams → SVG file (saved to disk) → PNG file; design principle: SVG is source artifact, PNG is delivery format for both HTML and PDF; uses @resvg/resvg-js + Malgun Gothic | `bun scripts/co-deck/gen-visual-images.ts --project presentations/<proj>` |
 | `measure-layout.ts` | 1.0.0 | active | Measure HTML slide layout using Playwright; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
@@ -105,4 +105,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
 
-*Last Updated: 2026-06-21 — gen-visual-images.ts bumped to 2.1.0 (SVG saved to disk as source artifact alongside PNG); previous: 2026-06-21 Phase 3 (ADR-0045): validate-theme-styles.ts 2.0.0, added generate-themes-manifest.ts + scaffold-theme-style.ts*
+*Last Updated: 2026-06-21 — gen-slides-pdf.ts bumped to 1.3.3 (profile slide: Playwright-measured LH/GAP values, fully centered eyebrow+title+name+affil+bio block); previous: 2026-06-22 gen-visual-images.ts bumped to 2.1.0 (SVG saved to disk as source artifact alongside PNG)*

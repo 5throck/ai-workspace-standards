@@ -109,7 +109,8 @@ Every slide entry in `slide_deck.md` MUST include these three image fields:
 |-------|---------|-------------|
 | `background` | Full-bleed background image | cover, divider, visual-heavy slides |
 | `illustrative` | Right-panel concept image | standard slides with a visual idea |
-| `data-viz` | Chart or infographic | slides presenting statistics or data |
+| `diagram` | Concept diagram (cycle/flow/matrix/pyramid/timeline/comparison) | relationship or structure slides |
+| `chart` | Data chart (bar/line/pie) | slides presenting statistics or trend data |
 | `portrait` | Person/speaker photo | speaker-intro slide |
 | `none` | No image | text-only slides, lists, step-by-steps |
 
@@ -118,6 +119,74 @@ Every slide entry in `slide_deck.md` MUST include these three image fields:
 - Do NOT use the slide title verbatim — describe the visual, not the topic
 - Good: `"abstract network nodes glowing blue"` | Bad: `"AI 기초 개요"`
 - Append lecture style context: `"professional"`, `"academic"`, `"minimalist"`
+- For `image_role: diagram` or `image_role: chart` — `image_query` is unused; fill `visual_spec` instead (see below)
+
+### slide_deck.md — visual_spec (for diagram and chart slides)
+
+When `image_role` is `diagram` or `chart`, add a `visual_spec` block. This is consumed by diagram-specialist at Stage 3.5 to generate SVG artifacts.
+
+```markdown
+## Slide 07 — AI 학습 사이클
+
+- **type**: standard
+- **image_role**: diagram
+- **image_query**: ""
+- **image_license**: generated
+- **visual_spec**:
+  - type: diagram
+  - slug: "ai-learning-cycle"
+  - diagram_type: cycle
+  - elements:
+    - label: "데이터 수집"
+      order: 1
+      sub: "센서·API"
+    - label: "모델 학습"
+      order: 2
+    - label: "평가·검증"
+      order: 3
+    - label: "배포·운영"
+      order: 4
+  - accent: primary
+  - caption: "AI 학습 사이클 4단계"
+```
+
+```markdown
+## Slide 12 — 시장 규모 추이
+
+- **type**: standard
+- **image_role**: chart
+- **image_query**: ""
+- **image_license**: generated
+- **visual_spec**:
+  - type: chart
+  - slug: "ai-market-growth"
+  - chart_type: bar
+  - data:
+    - labels: ["2022", "2023", "2024"]
+    - series:
+      - name: "시장 규모(조원)"
+        values: [12.3, 18.7, 29.4]
+  - source: "출처: 한국IDC, 2025"
+  - caption: "국내 AI 시장 규모 추이"
+```
+
+**visual_spec field reference:**
+
+| Field | Required | Values | Notes |
+|-------|---------|--------|-------|
+| `type` | ✅ | `diagram` \| `chart` | Routes to DiagramRenderer or ChartRenderer |
+| `slug` | ✅ | kebab-case string | Output filename: `assets/diagrams/<slug>.svg` |
+| `diagram_type` | diagram only | `cycle` \| `flow` \| `matrix` \| `pyramid` \| `timeline` \| `comparison` | |
+| `elements[].label` | diagram only | string | Node label text |
+| `elements[].order` | diagram only | integer | Rendering order |
+| `elements[].sub` | optional | string | Sub-label below main label |
+| `chart_type` | chart only | `bar` \| `line` \| `pie` | |
+| `data.labels` | chart only | string[] | X-axis or pie segment labels |
+| `data.series[].name` | chart only | string | Series display name |
+| `data.series[].values` | chart only | number[] | Must match labels length |
+| `data.source` | chart only ✅ | string | Mandatory — renders as PDF caption |
+| `accent` | optional | `primary` \| `secondary` \| `neutral` | Maps to design_spec.md color role |
+| `caption` | optional | string | Renders below diagram/chart |
 
 Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 
