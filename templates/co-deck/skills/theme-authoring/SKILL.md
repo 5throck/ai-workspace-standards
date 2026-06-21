@@ -16,8 +16,8 @@ prerequisites: pm
 
 co-deck uses a two-layer system: **Theme** (HTML structure + rendering paradigm) and **Style** (CSS variable set). Authoring either requires a dedicated pipeline separate from the 11-Stage lecture production pipeline.
 
-- **Theme** = `docs/html-themes/themes/<name>/` → `template.html` + `theme.json`
-- **Style** = `docs/html-themes/styles/<name>/style.css` (CSS variable overrides only)
+- **Theme** = `docs/html-themes/themes/<name>/` → `template.html` + `theme.json` + `pdf_layout_spec.json`
+- **Style** = `docs/html-themes/styles/<name>/` → `style.css` + `pdf_color_spec.json`
 - **Registry**: `docs/html-themes/THEMES.md` — must be updated after every addition
 - **Preview**: `docs/html-themes/preview/preview.html?theme=X&style=Y`
 
@@ -43,16 +43,23 @@ Ask the user:
 3. Target audience / lecture type (used for THEMES.md "Best For" annotation)
 
 ### Step S-2: PM dispatches Design
-Design agent authors `docs/html-themes/styles/<name>/style.css`:
+Design agent authors two files in `docs/html-themes/styles/<name>/`:
+
+**`style.css`**:
 - CSS variable overrides only — no DOM structure changes
 - Must define all required CSS variables from `docs/html-themes/base/base.css`
 - No hardcoded color or font values anywhere except in the variable declarations
+
+**`pdf_color_spec.json`**:
+- 12 role-based RGB color keys matching the CSS variables (see `THEMES.md` schema)
+- Keys: `background`, `card_dark` through `card_dark4`, `text_primary` through `text_meta`, `accent`, `border`, `white`
+- Used by `gen-slides-pdf.ts` as Layer 2 in the 3-layer PDF merge
 
 ### Step S-3: PM — preview + approval + registration
 1. Provide preview link: `docs/html-themes/preview/preview.html?theme=scroll&style=<name>`
 2. Wait for user approval
 3. On approval:
-   - Add row to THEMES.md Styles table
+   - Add row to THEMES.md Styles table (include `pdf_color_spec.json` path column)
    - Update Compatibility Matrix in THEMES.md
    - Add style name to `compatible_styles` in each compatible theme's `theme.json`
    - Update `docs/lecture-profile.md` style options comment
@@ -77,6 +84,13 @@ html-build authors `docs/html-themes/themes/<name>/template.html`:
 - Implements navigation JS (TOC, keyboard, buttons as appropriate)
 - Implements renderSlide stub that html-build will fill during lecture production
 - Must respect theme boundary: no CSS visual values — CSS variables only
+
+Also authors `docs/html-themes/themes/<name>/pdf_layout_spec.json`:
+- `page`: dimensions (default 338.7×190.5mm 16:9; `margin_mm: 0.0` for full-bleed themes)
+- `calibration.viewport_px`: measure via Playwright (`bun scripts/co-deck/measure-layout.ts`) against `template.html`; set `null` if Playwright not available (px-based sizes will fall back to defaults)
+- `layout`: all element position/size percentages derived from the HTML layout
+- `fonts`: `title_pt`, `bullet_pt` (mandatory); theme-specific sizes (e.g., `punchline_pt` for slideshow)
+- `slide_types`: which slide types this theme uses (`title`, `divider`, `punchline`, `standard`)
 
 ### T-2: PM dispatches design
 design authors `docs/html-themes/themes/<name>/theme.json`:
@@ -131,14 +145,14 @@ storyline reviews and authors:
 ### Style Workflow (3 steps)
 
 1. **S-1 (PM)**: Collect style name + visual characteristics from user (see Style Workflow section above)
-2. **S-2 (design)**: Author `docs/html-themes/styles/<name>/style.css` — CSS variable overrides only
+2. **S-2 (design)**: Author `docs/html-themes/styles/<name>/style.css` (CSS variable overrides) + `pdf_color_spec.json` (12 role-based RGB keys)
 3. **S-3 (PM)**: Provide preview link → user approval → register in THEMES.md + update compatible_styles in theme.json files
 
 ### T-Stage / Theme Workflow (5 steps)
 
 1. **T-0 (PM)**: Collect theme name + rendering paradigm from user (see T-Stage Pipeline section above)
-2. **T-1 (html-build)**: Author `docs/html-themes/themes/<name>/template.html` — HTML skeleton + navigation JS
-3. **T-2 (design)**: Author `docs/html-themes/themes/<name>/theme.json` — content_rules + compatible_styles
+2. **T-1 (html-build)**: Author `template.html` (HTML skeleton + navigation JS) + `pdf_layout_spec.json` (geometry, layout percentages, slide_types)
+3. **T-2 (design)**: Author `theme.json` — content_rules + compatible_styles + slide_types
 4. **T-3 (storyline)**: Validate content_rules + author `recommended_structure` field in theme.json
 5. **T-4 (PM)**: Provide preview link → user approval → register in THEMES.md + update all affected files
 
@@ -146,11 +160,13 @@ storyline reviews and authors:
 
 **Style Workflow outputs:**
 - `docs/html-themes/styles/<name>/style.css` — CSS variable override file
+- `docs/html-themes/styles/<name>/pdf_color_spec.json` — 12 role-based RGB color keys
 - Updated `docs/html-themes/THEMES.md` — new row in Styles table + updated Compatibility Matrix
 
 **Theme Workflow outputs:**
 - `docs/html-themes/themes/<name>/template.html` — HTML skeleton
-- `docs/html-themes/themes/<name>/theme.json` — metadata + content_rules + recommended_structure
+- `docs/html-themes/themes/<name>/theme.json` — metadata + content_rules + recommended_structure + slide_types
+- `docs/html-themes/themes/<name>/pdf_layout_spec.json` — page geometry + layout percentages + font sizes + slide_types
 - Updated `docs/html-themes/THEMES.md` — new row in Themes table + updated Compatibility Matrix
 
 ## Constraints

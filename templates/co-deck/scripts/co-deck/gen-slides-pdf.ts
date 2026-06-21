@@ -43,7 +43,8 @@ const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
 function parseFrontmatter(content: string): Record<string, any> {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
-  const lines = match[1].split('\n');
+  const frontmatterContent = match[1];
+  const lines = frontmatterContent.split('\n');
   const result: Record<string, any> = {};
   for (const line of lines) {
     const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
@@ -51,8 +52,86 @@ function parseFrontmatter(content: string): Record<string, any> {
     if (themeMatch) result.theme = themeMatch[1];
     if (styleMatch) result.style = styleMatch[1];
   }
-  // TODO: parse layout_overrides YAML block
+  const overrides = parseLayoutOverrides(frontmatterContent);
+  if (Object.keys(overrides).length > 0) {
+    result.layout_overrides = overrides;
+  }
   return result;
+}
+
+function parseScalar(raw: string): any {
+  // RGB array: [R, G, B]
+  const arrMatch = raw.match(/^\[(\d+),\s*(\d+),\s*(\d+)\]$/);
+  if (arrMatch) return [Number(arrMatch[1]), Number(arrMatch[2]), Number(arrMatch[3])];
+  // Number
+  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
+  // Boolean
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  // String (strip optional quotes)
+  return raw.replace(/^["']|["']$/g, '');
+}
+
+function parseIndentedBlock(lines: string[], baseIndent: number): { value: Record<string, any>, consumed: number } {
+  const result: Record<string, any> = {};
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const indent = line.search(/\S/);
+    if (indent < 0) { i++; continue; }  // blank line
+    if (indent < baseIndent) break;
+    if (indent > baseIndent) { i++; continue; }  // unexpected deeper indent, skip
+
+    const match = line.match(/^(\s*)([\w_-]+):\s*(.*)/);
+    if (!match) { i++; continue; }
+
+    const key = match[2];
+    const rawVal = match[3].trim();
+
+    if (!rawVal) {
+      // Nested object — collect child lines
+      const childLines = lines.slice(i + 1);
+      const { value, consumed } = parseIndentedBlock(childLines, indent + 2);
+      result[key] = value;
+      i += 1 + consumed;
+    } else {
+      // Scalar value
+      result[key] = parseScalar(rawVal);
+      i++;
+    }
+  }
+
+  return { value: result, consumed: i };
+}
+
+function parseLayoutOverrides(frontmatter: string): Record<string, any> {
+  const lines = frontmatter.split('\n');
+
+  // Find the layout_overrides: line (uncommented)
+  let startIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed === 'layout_overrides:' && !lines[i].trimStart().startsWith('#')) {
+      startIdx = i;
+      break;
+    }
+  }
+  if (startIdx === -1) return {};
+
+  // Collect subsequent indented uncommented lines
+  const block: string[] = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;  // skip blank/comment
+    // Stop if we hit a top-level key (no leading spaces)
+    if (line.length > 0 && line[0] !== ' ') break;
+    block.push(line);
+  }
+
+  // Parse indented block into nested object
+  return parseIndentedBlock(block, 0).value;
 }
 
 // ── Slide renderer ────────────────────────────────────────────────────────────

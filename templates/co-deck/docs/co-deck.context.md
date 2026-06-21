@@ -127,7 +127,9 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 | `scroll` | Vertical scroll, all slides in DOM | Scroll + TOC panel | Required | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
 | `slideshow` | Fullscreen single-slide, CSS transitions | Prev/Next + arrow keys | None | max 3 bullets, 20 char title, 20-40 slides | `docs/html-themes/themes/slideshow/` |
 
-`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `incompatible_styles`, `recommended_structure`.
+`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `incompatible_styles`, `recommended_structure`, `slide_types` (declares which slide types the theme supports).
+
+Each theme folder also includes **`pdf_layout_spec.json`** — page geometry (`width_mm`, `height_mm`, `margin_mm`), `calibration.viewport_px`, layout percentages, font sizes, and `slide_types`. Read by `gen-slides-pdf.ts` as Layer 1 of the 3-layer PDF merge.
 
 ### Layer 2 — Style (CSS 변수 세트)
 
@@ -141,6 +143,8 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 | `academic` | `docs/html-themes/overrides/academic.css` | Research / thesis | 30% illustration panel |
 
 Base: `docs/html-themes/base/base.css` (shared CSS variables — do not modify per style).
+
+Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB color keys (`background`, `accent`, `text_primary`, etc.). Read by `gen-slides-pdf.ts` as Layer 2 of the 3-layer PDF merge.
 
 ### Compatibility
 
@@ -158,6 +162,18 @@ Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md
 To create a new theme or style, use the **T-Stage** or **Style Workflow** via the PM agent. See `skills/theme-authoring/SKILL.md`.
 
 **`visual-heavy` special behavior**: `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element.
+
+### 3-Layer PDF Merge
+
+`gen-slides-pdf.ts` merges three layers at runtime (later layers win):
+
+```
+Layer 1 — theme  : docs/html-themes/themes/<theme>/pdf_layout_spec.json   → geometry, coordinates, fonts
+Layer 2 — style  : docs/html-themes/styles/<style>/pdf_color_spec.json    → color palette
+Layer 3 — project: presentations/<project>/lecture-profile.md             → layout_overrides block
+```
+
+Per-project overrides (e.g., 4:3 ratio, CI accent color, higher bullet count) are set in `lecture-profile.md` → `layout_overrides` and take precedence over both theme and style defaults.
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -376,8 +392,9 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
 12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation.
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
+14. **3-layer PDF merge**: `gen-slides-pdf.ts` always loads `pdf_layout_spec.json` (theme) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. Never hardcode geometry or color values in the script.
 <!-- END VARIANT-INJECT -->
 
 ---
 
-*co-deck.context.md version: 2.2 — updated 2026-06-21: domain rule 13 added (TypeScript-first); pm.md Constraints updated with TypeScript-first rule*
+*co-deck.context.md version: 2.3 — updated 2026-06-21: 3-layer PDF merge section added (pdf_layout_spec.json per theme, pdf_color_spec.json per style, layout_overrides per project); domain rule 14 added; slide_types field documented*

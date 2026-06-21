@@ -7,7 +7,8 @@
     "aspect_ratio": "16:9"
   },
   "calibration": {
-    "viewport_px": null
+    "viewport_px": null,
+    "_viewport_px_note": "Requires Playwright measurement: bun scripts/co-deck/measure-layout.ts --theme slideshow. Until measured, px-based font sizes fall back to pt equivalents via gen-slides-pdf.ts defaults."
   },
   "layout": {
     "content_x_pct": 0.05,
