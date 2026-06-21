@@ -409,7 +409,7 @@ If **≥ 50 %** of variants declare an override for the same agent or skill, the
 
 ### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
 
-Behavioral guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
+Behavior guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
 
 ---
 
@@ -511,7 +511,10 @@ The allowable values for `lang_reason` are:
 Exception is NOT available for: agents/*.md, skills/*.md, CONSTITUTION.md,
 CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.
 
+#### Pluggable Variant Audit Hook
+
+A mechanism that allows variant-specific validation checks to be executed during the synchronization and validation pipeline without modifying core script files (e.g., `dev-sync.ts`, `audit.ts`). Variant-specific audits are placed in `scripts/audit-variant.ts`. If this script is present, the core validation runner (`audit.ts`) dynamically detects and executes it. Any non-zero exit code from `audit-variant.ts` will fail the audit gate.
+
 ---
 
 *Last Updated: 2026-06-21*
-

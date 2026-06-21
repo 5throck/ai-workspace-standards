@@ -53,7 +53,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.8.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.9.0 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -83,7 +83,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/normalize-agent-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
