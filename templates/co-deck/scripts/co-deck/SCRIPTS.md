@@ -30,6 +30,7 @@ Install with `bun install` at project root:
 | `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` | required |
 | `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` | required |
 | `playwright` | `^1.45.0` | `measure-layout.ts` | **optional** |
+| `@resvg/resvg-js` | `^2.6.2` | `gen-visual-images.ts` | required |
 
 `playwright` is declared as `optionalDependencies` — `bun install` skips it by default.
 Install only when using `measure-layout.ts` for layout calibration:
@@ -48,7 +49,8 @@ After playwright install, also run: `bunx playwright install chromium`
 | script | version | status | description | cli-usage |
 |--------|---------|--------|-------------|-----------|
 | `download-font.ts` | 1.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
-| `gen-slides-pdf.ts` | 1.2.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); use --sample N to limit | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
+| `gen-slides-pdf.ts` | 1.3.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); supports profile/contact/punchline slide types, header bar, image zones; use --sample N to limit | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
+| `gen-visual-images.ts` | 2.0.0 | active | Generate PNG visuals for PDF right panels via SVG rendering (no browser required); uses @resvg/resvg-js + Malgun Gothic for Korean text | `bun scripts/co-deck/gen-visual-images.ts --project presentations/<proj>` |
 | `measure-layout.ts` | 1.0.0 | active | Measure HTML slide layout using Playwright; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
 | `validate-theme-styles.ts` | 2.0.0 | active | Validate html-themes structure for the unified region-based layout model (ADR-0045): shared-pool integrity, theme.json consistency, region schema + slide_type↔region cross-check, Layer-0 layout_base.json skeleton | `bun scripts/co-deck/validate-theme-styles.ts [--root <path>]` |

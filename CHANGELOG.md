@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
 
 ### Fixed
+- **[2026-06-22]**: fix(co-deck): cover slide eyebrow (`meta`) now renders above title with accent color; title/subtitle vertical coordinates adjusted for centered layout (`pdf_layout_spec.json`, `gen-slides-pdf.ts`); `gen-visual-images.ts` v2.0.0 (SVG→PNG, no browser) synced to `templates/co-deck/`
 - **[2026-06-22]**: fix(co-deck): correct `classic/pdf_color_spec.json` to a LIGHT palette matching `classic/style.css` — previously held a dark palette, causing an HTML(light)/PDF(dark) mismatch; the dark palette now lives under `premium-dark`
 - **[2026-06-20]**: fix(l2-propagation): revert agent script exclusions — `agent-create/delete/list/verify.ts` and `agent-lifecycle-audit.ts` restored to `L0+L1` scope (copied to L2); `agent-lifecycle-manager` skill `l2_propagate: false` removed (skill + scripts both in L2); `script-lifecycle-manager` skill confirmed in L2 (L2 projects manage their own scripts)
 - **[2026-06-20]**: docs(constitution): update §6, §6.5, §7 to reflect final L2 exclusion list — excluded skills: `audit-workspace`, `create-variant`, `promote-variant`; excluded scripts: `upgrade-project.ts` only; corrected examples and "when to use" guidance

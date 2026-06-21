@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
@@ -328,12 +328,22 @@ interface SlideData {
   desc?:          string;
   partNum?:       string;
   bullets?:       string[];
+  visual?:        string;
   visualImage?:   string;
   visualTitle?:   string;
   visualDisplay?: string;
   isTitleSlide?:  boolean;
   isDividerSlide?: boolean;
   isPunchline?:   boolean;
+  isProfileSlide?: boolean;
+  speakerName?:   string;
+  speakerTitle?:  string;
+  speakerBio?:    string;
+  photoPath?:     string;
+  isContactSlide?: boolean;
+  contactName?:   string;
+  contactEmail?:  string;
+  contactNote?:   string;
 }
 
 // ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
@@ -470,17 +480,18 @@ function renderTitleSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
+  // meta (cover-eyebrow): drawn BEFORE title — small accent label above the main title
+  const meta = strip(data.meta);
+  if (meta && metaR) {
+    r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
+    r.multiCell(metaR.w, coords.px2mm(24), meta.toUpperCase(), metaR.x, metaR.y, 'C');
+  }
+
   r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y);
+  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y, 'C');
 
   r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y);
-
-  const meta = strip(data.meta);
-  if (meta) {
-    r.setFont(true, T_TS_META); r.setColor(C_META);
-    r.multiCell(metaR.w, coords.px2mm(24), meta, metaR.x, metaR.y);
-  }
+  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
 }
 
 function renderDividerSlide(ctx: RenderCtx) {
@@ -558,6 +569,76 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   }
 }
 
+function renderProfileSlide(ctx: RenderCtx) {
+  const { r, data, coords, colors, sizes } = ctx;
+  const { C_BG, C_DARK, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
+  const { T_TITLE, T_BUL } = sizes;
+  const LH_TITLE = coords.px2mm(40);
+  const LH_BUL   = coords.px2mm(24);
+
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+
+  const titleR   = tryRegion(ctx, 'title')   ?? { x: coords.CX + coords.CW * 0.031, y: coords.CY + coords.CH * 0.115, w: coords.CW * 0.938, h: coords.CH * 0.115 };
+  const contentR = tryRegion(ctx, 'content') ?? { x: coords.CX + coords.CW * 0.031, y: coords.CY + coords.CH * 0.255, w: coords.CW * 0.938, h: coords.CH * 0.680 };
+
+  // Dark header bar (same as standard slides)
+  r.fillRect(0, 0, coords.CW, coords.CY + titleR.y * 0.71, C_DARK);
+
+  // Slide title (e.g. "연자 소개")
+  r.setFont(true, T_TITLE); r.setColor(C_WHITE);
+  r.multiCell(titleR.w, LH_TITLE, strip(data.title), titleR.x, titleR.y, 'L');
+
+  // Speaker name — larger than body, accent color
+  const nameY = contentR.y;
+  r.setFont(true, T_TITLE); r.setColor(C_ACCENT);
+  r.multiCell(contentR.w, LH_TITLE, strip(data.speakerName), contentR.x, nameY, 'L');
+
+  // Speaker title/affiliation
+  const titleLineY = nameY + LH_TITLE + coords.px2mm(6);
+  r.setFont(false, T_BUL); r.setColor(C_MUTED);
+  r.multiCell(contentR.w, LH_BUL, strip(data.speakerTitle), contentR.x, titleLineY, 'L');
+
+  // Bio line
+  const bioY = titleLineY + LH_BUL + coords.px2mm(10);
+  r.setFont(false, T_BUL); r.setColor(C_BODY);
+  r.multiCell(contentR.w, LH_BUL, strip(data.speakerBio), contentR.x, bioY, 'L');
+}
+
+function renderContactSlide(ctx: RenderCtx) {
+  const { r, data, coords, colors, sizes } = ctx;
+  const { C_BG, C_DARK, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
+  const { T_TITLE, T_BUL } = sizes;
+  const LH_TITLE = coords.px2mm(40);
+  const LH_BUL   = coords.px2mm(24);
+
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+
+  const titleR   = tryRegion(ctx, 'title')   ?? { x: coords.CX + coords.CW * 0.10, y: coords.CY + coords.CH * 0.28, w: coords.CW * 0.80, h: coords.CH * 0.20 };
+  const contentR = tryRegion(ctx, 'content') ?? { x: coords.CX + coords.CW * 0.10, y: coords.CY + coords.CH * 0.52, w: coords.CW * 0.80, h: coords.CH * 0.30 };
+
+  // Dark header strip (thin)
+  r.fillRect(0, 0, coords.CW, coords.CY + coords.CH * 0.071, C_DARK);
+
+  // "감사합니다" title — centered, accent
+  const punchPt = sizes.T_TS_TITLE * 0.55;
+  r.setFont(true, punchPt); r.setColor(C_ACCENT);
+  r.multiCell(titleR.w, LH_TITLE * 1.2, strip(data.title), titleR.x, titleR.y, 'C');
+
+  // Contact name
+  r.setFont(true, T_BUL); r.setColor(C_WHITE);
+  r.multiCell(contentR.w, LH_BUL, strip(data.contactName), contentR.x, contentR.y, 'C');
+
+  // Email
+  const emailY = contentR.y + LH_BUL + coords.px2mm(6);
+  r.setFont(false, T_BUL); r.setColor(C_MUTED);
+  r.multiCell(contentR.w, LH_BUL, strip(data.contactEmail), contentR.x, emailY, 'C');
+
+  // Note / CTA
+  const noteY = emailY + LH_BUL + coords.px2mm(10);
+  r.setFont(false, T_BUL * 0.9); r.setColor(C_BODY);
+  r.multiCell(contentR.w, LH_BUL, strip(data.contactNote), contentR.x, noteY, 'C');
+}
+
 async function renderStandardSlide(ctx: RenderCtx) {
   const { r, doc, data, n, total, imgDir, spec, coords, colors, sizes, declared, region } = ctx;
   const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_BODY, C_VIS_BG } = colors;
@@ -580,25 +661,35 @@ async function renderStandardSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), n, total, headerR, contentR, titleR.x, coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
-  const hasRight = !!(data.visualImage || data.visualDisplay || data.visualTitle) && !!visR;
+  // data.visual (text description) maps to visualDisplay; "none" is excluded.
+  const rawVisual = data.visual && data.visual.toLowerCase() !== 'none' ? data.visual : undefined;
+  const visualDisplay = data.visualDisplay || (!data.visualImage ? rawVisual : undefined);
+  const hasRight = !!(data.visualImage || visualDisplay || data.visualTitle) && !!visR;
   const titleW   = titleR.w;
   const bulTxtW  = hasRight ? Math.min(contentR.w, visR!.x - contentR.x - 6) : contentR.w;
 
+  // HTML .slide-content uses justify-content: center — vertically center the
+  // [title + gap + bullets] block as a unit in the available area below the header.
+  const headerBottom = headerR ? headerR.y + headerR.h : coords.CY;
+  const cardBottom   = coords.CY + coords.CH - coords.px2mm(8);
+  const availStart   = headerBottom + coords.px2mm(8);
+  const availH       = cardBottom - availStart;
+
+  const bullets  = data.bullets ?? [];
+  const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
+  const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
+  const blockGap = bullets.length > 0 ? coords.px2mm(12) : 0;
+  const blockH   = titleH + blockGap + totalBh;
+  const blockY   = availStart + Math.max(0, (availH - blockH) / 2);
+
   r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, titleR.y, 'L');
+  const afterTitle = r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, blockY, 'L');
 
-  const bullets = data.bullets ?? [];
-  const totalBh = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
-  // Vertically center the bullet block inside the content region. The -4 mm
-  // bottom margin mirrors the pre-rewrite availableH computation so scroll
-  // bullet placement is preserved bit-for-bit.
-  const availableH = contentR.h - 4;
-  let by = contentR.y + Math.max(0, (availableH - totalBh) / 2);
-
+  let by = afterTitle + blockGap;
   for (const b of bullets) {
     const txt = strip(b);
     if (!txt) continue;
-    if (by > contentR.y + contentR.h - 6) break;
+    if (by > cardBottom) break;
     r.drawEllipse(contentR.x, by + LH_BUL * 0.28, 3.2, C_ACCENT);
     r.setFont(false, T_BUL); r.setColor(C_BODY);
     const afterBul = r.multiCell(bulTxtW - 6, LH_BUL, txt, contentR.x + 6, by, 'L');
@@ -613,8 +704,8 @@ async function renderStandardSlide(ctx: RenderCtx) {
       await r.placeImage(doc, ip, visR!.x + pad, visR!.y + pad, visR!.w - pad * 2, visR!.h - pad * 2);
     } else {
       const vt = strip(data.visualTitle);
-      const vd = strip(data.visualDisplay);
-      const lhVt = coords.px2mm(20), lhVb = coords.px2mm(24), gap = 4;
+      const vd = strip(visualDisplay);
+      const lhVt = coords.px2mm(24), lhVb = coords.px2mm(22), gap = 5;
       const hVt = vt ? r.estimateTextHeight(vt, visR!.w - 8, T_VIS_T, lhVt, true)  : 0;
       const hVb = vd ? r.estimateTextHeight(vd, visR!.w - 8, T_VIS_B, lhVb, false) : 0;
       const totalH = hVt + (vt && vd ? gap : 0) + hVb;
@@ -624,14 +715,15 @@ async function renderStandardSlide(ctx: RenderCtx) {
         vy = r.multiCell(visR!.w - 8, lhVt, vt, visR!.x + 4, vy, 'C') + gap;
       }
       if (vd) {
-        r.setFont(false, T_VIS_B); r.setColor(C_MUTED);
+        r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
         r.multiCell(visR!.w - 8, lhVb, vd, visR!.x + 4, vy, 'C');
       }
     }
   }
 
-  if (metaR) {
-    // Slide counter (e.g. slideshow's counter_x_pct/counter_y_pct).
+  if (metaR && !headerR) {
+    // Slide counter — skip when headerR is present since drawHeaderBar already
+    // renders the number on the right side of the header bar.
     r.setFont(false, T_NUM); r.setColor(C_MUTED);
     r.cell(metaR.w, metaR.h, `${n} / ${total}`, metaR.x, metaR.y, 'R');
   }
@@ -890,16 +982,13 @@ async function main() {
     const slideTypes = layoutSpec.slide_types ?? {};
     const has        = (t: string) => !!(slideTypes[t] && slideTypes[t].regions);
 
-    let type: 'title' | 'divider' | 'punchline' | 'standard';
-    if (data.isTitleSlide && has('title')) {
-      type = 'title';
-    } else if (data.isDividerSlide && has('divider')) {
-      type = 'divider';
-    } else if (data.isPunchline && has('punchline')) {
-      type = 'punchline';
-    } else {
-      type = 'standard';
-    }
+    let type: 'title' | 'divider' | 'punchline' | 'profile' | 'contact' | 'standard';
+    if (data.isTitleSlide && has('title'))           type = 'title';
+    else if (data.isDividerSlide && has('divider'))  type = 'divider';
+    else if (data.isPunchline && has('punchline'))   type = 'punchline';
+    else if (data.isProfileSlide && has('profile'))  type = 'profile';
+    else if (data.isContactSlide && has('contact'))  type = 'contact';
+    else                                             type = 'standard';
 
     const declared = slideTypes[type]?.regions ?? [];
     // Per-slide-type region resolver: honours slide_type_overrides[type][name].
@@ -913,6 +1002,8 @@ async function main() {
     if (type === 'title')          renderTitleSlide(ctx);
     else if (type === 'divider')   await renderDividerSlide(ctx);
     else if (type === 'punchline') renderPunchlineSlide(ctx);
+    else if (type === 'profile')   renderProfileSlide(ctx);
+    else if (type === 'contact')   renderContactSlide(ctx);
     else                           await renderStandardSlide(ctx);
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
