@@ -97,6 +97,7 @@
 | 2026-06-05 | Antigravity parity gap root cause — PM execution plan table missing Platform column | [meeting-2026-06-05-antigravity-parity-gap-root-cause.md](archive/meeting-2026-06-05-antigravity-parity-gap-root-cause.md) |
 | 2026-06-05 | Action item completeness review — C-01 L0→L1→L2 scope, A-00 and D-01 added | [meeting-2026-06-05-action-item-completeness-review.md](archive/meeting-2026-06-05-action-item-completeness-review.md) |
 | 2026-06-21 | Pluggable variant audit hooks and pipeline integrity validation | [meeting-2026-06-21-variant-dev-sync-verification.md](meeting-2026-06-21-variant-dev-sync-verification.md) |
+| 2026-06-21 | html-themes per-theme style restructure design — artifact ownership, target structure, 3-layer PDF merge | [meeting-2026-06-21-html-themes-per-theme-style-design.md](meeting-2026-06-21-html-themes-per-theme-style-design.md) |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | *(archived — file not preserved)* |
 
 ## ADRs
