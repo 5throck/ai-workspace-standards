@@ -68,11 +68,11 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 
 **Theme + Style injection** (from `lecture-profile.md` → `presentation.theme` + `presentation.style`):
 ```html
-<html lang="ko" data-theme="scroll" data-style="classic">
-<link rel="stylesheet" href="../../docs/html-themes/base/base.css">
-<link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
+<html lang="ko" data-theme="scroll" data-style="premium-dark">
+<link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-Available themes: `scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic`. Defaults: `scroll` + `classic`.
+Available themes: `scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
 
 **Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 

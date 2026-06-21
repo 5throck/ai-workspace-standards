@@ -8,7 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-06-22]**: feat(co-deck): add `premium-dark` style as the default visual style for scroll/slideshow themes — dark navy (`#111827`) + gold accent (`#D97706`) + radial-gradient cover/divider + MaruBuri/Noto Serif KR + gold title glow; derived from the `kyobo_ax_2026` executive deck; wired as default across `theme.json` (scroll/slideshow `compatible_styles[0]`), `html-build`/`pm` agents, `html-build` SKILL.md, `preview.html`, `gen-slides-pdf.ts`, and `variant.json` `theme_manifest.default` (renamed from `kyobo` — a brand name is inappropriate for a reusable style)
+- **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
+
 ### Fixed
+- **[2026-06-22]**: fix(co-deck): correct `classic/pdf_color_spec.json` to a LIGHT palette matching `classic/style.css` — previously held a dark palette, causing an HTML(light)/PDF(dark) mismatch; the dark palette now lives under `premium-dark`
 - **[2026-06-20]**: fix(l2-propagation): revert agent script exclusions — `agent-create/delete/list/verify.ts` and `agent-lifecycle-audit.ts` restored to `L0+L1` scope (copied to L2); `agent-lifecycle-manager` skill `l2_propagate: false` removed (skill + scripts both in L2); `script-lifecycle-manager` skill confirmed in L2 (L2 projects manage their own scripts)
 - **[2026-06-20]**: docs(constitution): update §6, §6.5, §7 to reflect final L2 exclusion list — excluded skills: `audit-workspace`, `create-variant`, `promote-variant`; excluded scripts: `upgrade-project.ts` only; corrected examples and "when to use" guidance
 

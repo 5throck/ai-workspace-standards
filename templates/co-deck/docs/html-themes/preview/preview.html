@@ -20,7 +20,7 @@
       bun scripts/co-deck/generate-themes-manifest.ts
   ─────────────────────────────────────────────────────────────────────────────
 -->
-<html lang="ko" data-theme="scroll" data-style="classic">
+<html lang="ko" data-theme="scroll" data-style="premium-dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,7 +69,7 @@
 
     function getParams() {
       const p = new URLSearchParams(location.search);
-      return { theme: p.get('theme') || 'scroll', style: p.get('style') || 'classic' };
+      return { theme: p.get('theme') || 'scroll', style: p.get('style') || 'premium-dark' };
     }
 
     let currentTheme = null;

@@ -14,7 +14,7 @@
     "recommended_slide_count": "20-40",
     "notes": "Fullscreen layout demands one message per slide. Short titles, minimal bullets. Dense text breaks the visual rhythm. Prefer visuals over text blocks."
   },
-  "compatible_styles": ["classic", "minimal"],
+  "compatible_styles": ["classic", "minimal", "premium-dark"],
   "incompatible_styles": [
     {
       "name": "visual-heavy",

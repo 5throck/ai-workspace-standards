@@ -1,17 +1,17 @@
 {
   "version": "1.0.0",
   "colors": {
-    "background":   [17, 24, 39],
-    "card_dark":    [11, 15, 25],
-    "card_dark2":   [20, 28, 42],
-    "card_dark3":   [10, 14, 22],
-    "card_dark4":   [8, 12, 22],
-    "text_primary": [226, 232, 240],
-    "text_body":    [203, 213, 225],
-    "text_muted":   [156, 163, 175],
-    "text_meta":    [100, 108, 120],
-    "accent":       [217, 119, 6],
-    "border":       [31, 41, 55],
+    "background":   [255, 255, 255],
+    "card_dark":    [26, 26, 46],
+    "card_dark2":   [40, 40, 60],
+    "card_dark3":   [232, 237, 242],
+    "card_dark4":   [241, 245, 249],
+    "text_primary": [26, 26, 46],
+    "text_body":    [74, 74, 106],
+    "text_muted":   [136, 136, 170],
+    "text_meta":    [170, 170, 190],
+    "accent":       [74, 144, 217],
+    "border":       [226, 232, 240],
     "white":        [255, 255, 255]
   }
 }

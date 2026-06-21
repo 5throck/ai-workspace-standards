@@ -1,0 +1,53 @@
+/**
+ * style.css — co-deck style: Premium Dark
+ *
+ * Dark navy surfaces + gold (amber) accent + serif typography + soft gold title glow.
+ * Derived from the kyobo_ax_2026 executive lecture deck (scroll theme).
+ * Pure CSS-variable overrides — no DOM/structural changes.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
+
+:root {
+  /* Surface */
+  --slide-bg:            #111827;
+  --slide-border:        1px solid #1F2937;
+  --card-bg:             #141C2A;
+  --card-border:         1px solid #1F2937;
+  --card-shadow:         0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --card-padding:        2rem 2.5rem;
+
+  /* Header bar */
+  --header-bg:           #0B0F19;
+  --header-text:         #E2E8F0;
+
+  /* Typography */
+  --font-family:         'MaruBuri', 'Noto Serif KR', 'Georgia', 'Batang', serif;
+  --font-weight-title:   700;
+  --title-text-shadow:   0 0 20px rgba(217, 119, 6, 0.4);
+
+  /* Text colors */
+  --text-primary:        #E2E8F0;
+  --text-secondary:      #CBD5E1;
+  --text-muted:          #9CA3AF;
+  --text-on-dark:        #FFFFFF;
+
+  /* Accent & interactive */
+  --accent:              #D97706;
+  --accent-light:        rgba(217, 119, 6, 0.1);
+  --accent-dark:         #B45309;
+
+  /* Bullet list */
+  --bullet-color:        #D97706;
+
+  /* Divider slide */
+  --divider-bg:          radial-gradient(circle at center, #1E293B 0%, #0B0F19 100%);
+  --divider-text:        #FFFFFF;
+  --divider-accent:      #D97706;
+
+  /* Cover slide */
+  --cover-bg:            radial-gradient(circle at center, #1E293B 0%, #0B0F19 100%);
+  --cover-text:          #FFFFFF;
+  --cover-subtitle-text: rgba(226, 232, 240, 0.75);
+  --cover-meta-text:     rgba(156, 163, 175, 0.85);
+}

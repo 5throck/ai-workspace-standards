@@ -14,7 +14,7 @@
     "recommended_slide_count": "30-60",
     "notes": "Scroll layout allows higher information density per slide. Longer explanations and sub-bullet nesting are acceptable."
   },
-  "compatible_styles": ["classic", "minimal", "academic", "visual-heavy"],
+  "compatible_styles": ["premium-dark", "classic", "minimal", "academic", "visual-heavy"],
   "partial_styles": [
     {
       "name": "visual-heavy",

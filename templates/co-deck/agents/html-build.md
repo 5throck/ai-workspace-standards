@@ -68,7 +68,7 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 
 **1. HTML root attributes** — set on `<html>` tag:
 ```html
-<html lang="ko" data-theme="scroll" data-style="classic">
+<html lang="ko" data-theme="scroll" data-style="premium-dark">
 ```
 
 **2. CSS link injection** — always inject in this order (foundation → theme → style):
@@ -102,14 +102,14 @@ if (document.documentElement.dataset.style === 'visual-heavy' && data.imagePath)
 <div class="slide" data-type="standard">  <!-- cover | divider | standard | contact -->
 ```
 
-Available themes: `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic`
+Available themes: `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
 - Load `presentations/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
-- Default theme: `scroll`; default style: `classic`
+- Default theme: `scroll`; default style: `premium-dark`
 - Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤3); ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
