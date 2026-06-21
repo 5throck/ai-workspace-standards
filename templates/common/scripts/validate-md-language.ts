@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.4.1
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -53,9 +53,38 @@ const KOREAN_PATTERN = /[가-힯ᄀ-ᇿ]/;
 // English sentence pattern (requires letters, spaces, and sentence punctuation)
 const ENGLISH_SENTENCE_PATTERN = /[A-Za-z][A-Za-z\s,;\.!\?]{10,}/;
 
+// Permitted lang_reason values for Korean exception declarations
+const ALLOWED_LANG_REASONS = ['legal', 'source-material', 'proper-noun'] as const;
+
 interface Violation {
   file: string;
   reason: string;
+}
+
+/**
+ * Returns true for protected paths where lang: ko exception is never permitted.
+ */
+function isProtectedPath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, '/');
+  const basename = normalized.split('/').pop() ?? '';
+  if (['CLAUDE.md', 'GEMINI.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
+  if (basename.endsWith('.context.md')) return true;
+  return [
+    /(?:^|\/)agents\/[^/]+\.md$/,
+    /(?:^|\/)skills\/.*\.md$/,
+  ].some(p => p.test(normalized));
+}
+
+/**
+ * Extract lang and lang_reason from YAML frontmatter.
+ */
+function parseFrontmatterLang(content: string): { lang?: string; lang_reason?: string } {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+  const fm = match[1];
+  const lang = /^lang:\s*(\S+)/m.exec(fm)?.[1];
+  const lang_reason = /^lang_reason:\s*(\S+)/m.exec(fm)?.[1];
+  return { lang, lang_reason };
 }
 
 /**
@@ -136,7 +165,12 @@ function isExcludedPath(filePath: string): boolean {
 }
 
 /**
- * Analyze file content for language violations
+ * Analyze file content for language violations using 4-stage judgment.
+ *
+ * Stage 1 (exception folder) is handled upstream by isExcludedPath / isOfficialDocument.
+ * Stage 2: Protected path (agents/, skills/, governance files) → FAIL
+ * Stage 3: lang: ko frontmatter → PASS+INFO (valid reason) or FAIL (missing/invalid)
+ * Stage 4: No declaration → FAIL
  */
 function analyzeFile(filePath: string): Violation | null {
   try {
@@ -145,23 +179,37 @@ function analyzeFile(filePath: string): Violation | null {
     // Remove code blocks and inline code from analysis
     const contentWithoutCode = content.replace(/```[\s\S]*?```/g, "")
       .replace(/`[^`]+`/g, "")
-      .replace(/\[[^\]]+\]\([^)]+\)/g, ""); // Remove markdown links
+      .replace(/\[[^\]]+\]\([^)]+\)/g, "");
 
-    // Check for Korean characters
     const hasKorean = KOREAN_PATTERN.test(contentWithoutCode);
+    if (!hasKorean) return null;
 
-    // Check for English sentences
-    const hasEnglish = ENGLISH_SENTENCE_PATTERN.test(contentWithoutCode);
-
-    // Violation: Korean-only content (has Korean but no English)
-    if (hasKorean && !hasEnglish) {
+    // Stage 2: Protected path — no exception permitted
+    if (isProtectedPath(filePath)) {
       return {
         file: filePath,
-        reason: "Korean-only content detected (no English sentences found)"
+        reason: "Korean content in protected path (agents/, skills/, or governance file) — lang: ko exception is not permitted"
       };
     }
 
-    return null;
+    // Stage 3: Frontmatter lang declaration
+    const { lang, lang_reason } = parseFrontmatterLang(content);
+    if (lang === 'ko') {
+      if (lang_reason && (ALLOWED_LANG_REASONS as readonly string[]).includes(lang_reason)) {
+        console.log(`   ℹ️  [INFO] Korean exception granted: ${filePath} (lang_reason: ${lang_reason})`);
+        return null;
+      }
+      return {
+        file: filePath,
+        reason: `lang: ko declared but lang_reason is ${lang_reason ? `invalid ("${lang_reason}")` : 'missing'} — must be one of: ${ALLOWED_LANG_REASONS.join(' | ')}`
+      };
+    }
+
+    // Stage 4: Korean without declaration
+    return {
+      file: filePath,
+      reason: "Korean content detected without lang: ko declaration"
+    };
   } catch (error) {
     console.error(`Error reading ${filePath}:`, error);
     return null;
@@ -172,7 +220,7 @@ function analyzeFile(filePath: string): Violation | null {
  * Main validation function
  */
 async function validateMarkdownLanguage(): Promise<void> {
-  console.log("🔍 Scanning for Korean-only markdown files...\n");
+  console.log("🔍 Scanning official markdown files for undeclared Korean content...\n");
 
   // Find all .md files using Bun's built-in Glob API
   const globber = new Bun.Glob("**/*.md");
@@ -217,18 +265,19 @@ async function validateMarkdownLanguage(): Promise<void> {
 
   // Report results
   if (violations.length === 0) {
-    console.log("✅ No language-only violations in official documents.\n");
+    console.log("✅ No language violations in official documents.\n");
     console.log(`   Scanned ${officialCount} official markdown files (agents, governance, skills, templates)`);
     console.log(`   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`);
     process.exit(0);
   } else {
-    console.log(`❌ Found ${violations.length} Korean-only violation(s) in official documents:\n`);
+    console.log(`❌ Found ${violations.length} language violation(s) in official documents:\n`);
     violations.forEach((v) => {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: Official documents (agents, governance, skills, templates, etc.) must contain English sentences.");
-    console.log("See: CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts\n");
+    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter.");
+    console.log("Exception NOT available for: agents/, skills/, CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
+    console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
   }
 }

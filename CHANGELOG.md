@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - **[2026-06-21]**: feat(i18n): add Korean language policy exception for legal/regulatory content — allows lang: ko and lang_reason in frontmatter for content files; updates validate-md-language.ts and CONSTITUTION.md
+- **[2026-06-21]**: feat(i18n): implement 4-stage Korean content audit judgment in `scripts/validate-md-language.ts` v1.4.0 — protected path check (agents/, skills/, governance files → FAIL), frontmatter lang: ko + valid lang_reason → PASS+INFO, undeclared Korean → FAIL
 - **[2026-06-20]**: feat(l2-propagation): metadata-based L2 exclusion for skills and scripts — `l2_propagate: false` in SKILL.md frontmatter + `// @l2-propagate: false` header comment exclude workspace-management artifacts from generated projects; replaces hardcoded exclusion lists in `new-project.ts`
 - **[2026-06-20]**: feat(verify-skills): add `l2_propagate` field validation for `templates/common/skills/` — warns if field is missing or not a bare boolean (`v1.1.0`)
 - **[2026-06-20]**: feat(verify-scripts): add `checkL2PropagateConsistency()` — cross-checks `L0+L1-ws` scope in SCRIPTS.md against `@l2-propagate: false` header; mismatches fail pre-commit (`v1.1.0`)

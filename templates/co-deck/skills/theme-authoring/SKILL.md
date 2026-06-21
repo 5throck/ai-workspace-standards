@@ -5,7 +5,7 @@ description: >
   Entry point for creating a new co-deck theme or style. PM dispatches
   the appropriate workflow (Style Workflow or T-Stage) based on user request.
   Responds to: "create a new theme", "add a new style", "make a dark theme",
-  "새 테마 만들어줘", "스타일 추가해줘".
+  "create a dark style", "add slideshow theme".
 status: active
 owner: pm
 last_reviewed: 2026-06-21
@@ -27,8 +27,8 @@ co-deck uses a two-layer system: **Theme** (HTML structure + rendering paradigm)
 
 | User says | Route |
 |-----------|-------|
-| "create a new style", "add dark style", "새 스타일 추가" | Style Workflow |
-| "create a new theme", "add slideshow variant", "새 테마 만들어줘" | T-Stage (Theme Workflow) |
+| "create a new style", "add dark style", "add style variant" | Style Workflow |
+| "create a new theme", "add slideshow variant", "new theme" | T-Stage (Theme Workflow) |
 
 ---
 
