@@ -1,5 +1,6 @@
-// @version 2.0.0
-// Generate right-panel visual PNGs via SVG rendering (no browser required).
+// @version 2.1.0
+// Generate right-panel visual images via SVG rendering (no browser required).
+// Design principle: CSS concept diagrams → save SVG to disk → convert to PNG → use PNG in both HTML and PDF.
 // Uses @resvg/resvg-js + Malgun Gothic for Korean text on Windows.
 //
 // Usage:
@@ -445,9 +446,11 @@ for (const { slide, data } of targets) {
 
   try {
     const svg = gen();
+    const svgPath = destPath.replace(/\.png$/, '.svg');
+    writeFileSync(svgPath, svg, 'utf-8');  // save SVG source artifact
     const png = svgToPng(svg);
     writeFileSync(destPath, png);
-    console.log(`   ✅  Slide ${slide} → ${imgPath} (${Math.round(png.length / 1024)}KB)`);
+    console.log(`   ✅  Slide ${slide} → ${imgPath} (${Math.round(png.length / 1024)}KB) + .svg`);
     success++;
   } catch (e) {
     console.error(`   ❌  Slide ${slide}: ${(e as Error).message}`);

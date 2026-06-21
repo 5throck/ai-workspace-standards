@@ -97,19 +97,27 @@ Three flags control agent execution in the co-deck pipeline:
 | `measure-layout.ts` | `scripts/co-deck/` | Playwright layout measurement → layout_spec.json (optional) | active |
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | CSS concept diagrams → SVG file → PNG file (no browser; `@resvg/resvg-js`) | active |
 | `extract_slidedata.mjs` | `scripts/` | HTML slideData → slidedata.json | active |
 <!-- END VARIANT-INJECT -->
 
 ### Bun Dependencies
 
 ```bash
-bun install          # installs pdf-lib, fflate, @pdf-lib/fontkit
+bun install          # installs pdf-lib, fflate, @pdf-lib/fontkit, @resvg/resvg-js
                      # playwright is SKIPPED (optionalDependency)
 
 # Only if measure-layout.ts is needed:
 bun add playwright
 bunx playwright install chromium
 ```
+
+| Package | Version | Used By |
+|---------|---------|---------|
+| `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` |
+| `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` |
+| `fflate` | `^0.8.2` | `download-font.ts` |
+| `@resvg/resvg-js` | `^2.6.2` | `gen-visual-images.ts` |
 
 ---
 
@@ -365,6 +373,28 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
 6. **TOC sidebar is MANDATORY for scroll theme**: wrap slides in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`. Each `.slide` must carry `id="slide-${index}"`.
+
+### Visual Diagram Pipeline
+
+For slides that use concept diagrams (not stock photos), the pipeline is:
+
+```
+CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artifact)
+                                           → images/<stem>.png (rendered output)
+                                           → slideData[i].visualImage = "images/<stem>.png"
+                                           → HTML: applyVisualImages() injects <img> into .right-panel
+                                           → PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
+```
+
+**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to disk so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency.
+
+**Rules**:
+1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
+2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
+3. `slidedata.json` `visualImage` field must reference the PNG path (relative to project dir, e.g. `"images/slide-03.png"`)
+4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
+5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
+6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
