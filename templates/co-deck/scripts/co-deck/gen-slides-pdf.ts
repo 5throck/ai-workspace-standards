@@ -775,7 +775,7 @@ async function main() {
   }
 
   const theme = lectureProfile.theme ?? 'scroll';
-  const style = lectureProfile.style ?? 'classic';
+  const style = lectureProfile.style ?? 'premium-dark';
 
   // ── Load spec files (4-layer merge: base → theme → style colors → overrides) ──
   // AC-7: missing base/theme spec files are HARD ERRORS (no silent fallback).

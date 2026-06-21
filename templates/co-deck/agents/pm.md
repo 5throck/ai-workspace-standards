@@ -75,7 +75,7 @@ When the user requests an edit:
 2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
 3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
    - **Rendering theme** (`presentation.theme`: `scroll` (default) | `slideshow`) — HTML structure
-   - **Visual style** (`presentation.style`: `classic` (default) | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
+   - **Visual style** (`presentation.style`: `premium-dark` (default) | `classic` | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
 4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:

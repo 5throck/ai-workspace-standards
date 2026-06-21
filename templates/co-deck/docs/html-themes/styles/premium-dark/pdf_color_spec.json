@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "colors": {
+    "background":   [17, 24, 39],
+    "card_dark":    [11, 15, 25],
+    "card_dark2":   [20, 28, 42],
+    "card_dark3":   [10, 14, 22],
+    "card_dark4":   [8, 12, 22],
+    "text_primary": [226, 232, 240],
+    "text_body":    [203, 213, 225],
+    "text_muted":   [156, 163, 175],
+    "text_meta":    [100, 108, 120],
+    "accent":       [217, 119, 6],
+    "border":       [31, 41, 55],
+    "white":        [255, 255, 255]
+  }
+}

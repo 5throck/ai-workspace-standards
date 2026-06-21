@@ -139,10 +139,15 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 | Name | File | Best For | Image Panel |
 |------|------|---------|-------------|
-| `classic` | `docs/html-themes/styles/classic/style.css` | General purpose (default) | 45% right panel |
+| `premium-dark` | `docs/html-themes/styles/premium-dark/style.css` | Executive / keynote — dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow (default) | Inherited from theme |
+| `classic` | `docs/html-themes/styles/classic/style.css` | General purpose | 45% right panel |
 | `minimal` | `docs/html-themes/styles/minimal/style.css` | Text-heavy lectures | None |
 | `visual-heavy` | `docs/html-themes/styles/visual-heavy/style.css` | Visual storytelling (scroll-partial / slideshow-incompatible) | Full-bleed background |
 | `academic` | `docs/html-themes/styles/academic/style.css` | Research / thesis | 30% illustration panel |
+
+> **`premium-dark` is the default style** as of 2026-06-22 (replaces `classic`). Projects whose `lecture-profile.md` does not set `style` now render `premium-dark`. Derived from the `kyobo_ax_2026` executive lecture deck; optimized for `scroll`, compatible with `slideshow`.
+>
+> **`classic` color-spec drift fix** (2026-06-22): `styles/classic/pdf_color_spec.json` previously held a dark palette that mismatched its light CSS — corrected to the matching LIGHT palette. The dark palette now lives under `styles/premium-dark/pdf_color_spec.json`.
 
 **CSS Load Order** (injected by html-build; later layers override earlier ones):
 
@@ -160,6 +165,7 @@ Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md
 
 | Style ↓ / Theme → | `scroll` | `slideshow` |
 |-------------------|----------|-------------|
+| `premium-dark` | ✅ | ✅ |
 | `classic` | ✅ | ✅ |
 | `minimal` | ✅ | ✅ |
 | `visual-heavy` | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
@@ -220,7 +226,7 @@ audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
   theme: scroll       # HTML structure: scroll | slideshow
-  style: classic      # CSS variables: classic | minimal | visual-heavy | academic
+  style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
 keywords: [Keyword 1, Keyword 2]
 instructor:
   name: ""
@@ -426,4 +432,4 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 
 ---
 
-*co-deck.context.md version: 2.5 — updated 2026-06-21: region-based layout model (ADR-0045 Decision #2) — `pdf_layout_spec.json` v1.2.0 declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; Layer 0 `themes/_shared/layout_base.json`; per-theme `theme.css` + `theme.json` `css_theme` field; CSS Load Order (base → theme.css → style.css); 3-layer → 4-layer PDF merge; validation/preview workflow (`validate-theme-styles.ts` v2.0.0, `generate-themes-manifest.ts` v1.0.0, `scaffold-theme-style.ts` v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Previous: v2.4 html-themes restructure (styles migrated to styles/<name>/style.css; base.css moved to styles/base.css).*
+*co-deck.context.md version: 2.6 — updated 2026-06-22: `premium-dark` style added as DEFAULT (dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow; scroll-compatible primary + slideshow-compatible; derived from the `kyobo_ax_2026` executive deck); `classic/pdf_color_spec.json` corrected to a LIGHT palette (drift fix); `base.css` neutral `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`. Previous: v2.5 2026-06-21 region-based layout model (ADR-0045 Decision #2) — `pdf_layout_spec.json` v1.2.0 declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; Layer 0 `themes/_shared/layout_base.json`; per-theme `theme.css` + `theme.json` `css_theme` field; CSS Load Order (base → theme.css → style.css); 3-layer → 4-layer PDF merge; validation/preview workflow (`validate-theme-styles.ts` v2.0.0, `generate-themes-manifest.ts` v1.0.0, `scaffold-theme-style.ts` v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Prior: v2.4 html-themes restructure (styles migrated to styles/<name>/style.css; base.css moved to styles/base.css).*

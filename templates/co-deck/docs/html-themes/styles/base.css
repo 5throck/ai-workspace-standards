@@ -41,6 +41,7 @@
   --font-weight-title:   700;
   --font-weight-body:    400;
   --line-height-body:    1.65;
+  --title-text-shadow:   none;
 
   /* Text colors */
   --text-primary:        #1a1a2e;
@@ -169,6 +170,7 @@ html, body {
   font-weight: var(--font-weight-title);
   color: var(--text-primary);
   line-height: 1.25;
+  text-shadow: var(--title-text-shadow);
 }
 
 .slide-subtitle {
