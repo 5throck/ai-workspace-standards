@@ -1,12 +1,12 @@
 /**
- * visual-heavy.css — co-deck theme: Visual Heavy
+ * style.css — co-deck style: Visual Heavy
  *
  * Full-bleed background image with semi-transparent content overlay.
  * Text overlaid on the image. Best for visual storytelling lectures,
  * keynote-style presentations, or brand/design topics.
  *
  * Image injection: renderSlide() sets --slide-bg-image via inline style.
- * Requires <html data-theme="visual-heavy"> to activate structural rules.
+ * Requires <html data-style="visual-heavy"> to activate structural rules.
  *
  * DOM structure unchanged — image rendered via CSS background-image.
  */
@@ -62,14 +62,14 @@
 }
 
 /* Full-bleed background image on slide root */
-[data-theme="visual-heavy"] .slide {
+[data-style="visual-heavy"] .slide {
   background-image: var(--slide-bg-image, none);
   background-size: cover;
   background-position: center;
 }
 
 /* Semi-transparent overlay on the entire card */
-[data-theme="visual-heavy"] .slide-card {
+[data-style="visual-heavy"] .slide-card {
   background: var(--card-bg);
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
@@ -77,29 +77,29 @@
 }
 
 /* Hide right panel — image is the background, not a panel */
-[data-theme="visual-heavy"] .right-panel {
+[data-style="visual-heavy"] .right-panel {
   display: none !important;
 }
 
 /* Divider and cover slides also use background image */
-[data-theme="visual-heavy"] .slide[data-type="divider"],
-[data-theme="visual-heavy"] .slide[data-type="cover"] {
+[data-style="visual-heavy"] .slide[data-type="divider"],
+[data-style="visual-heavy"] .slide[data-type="cover"] {
   background-image: var(--slide-bg-image, none);
   background-size: cover;
   background-position: center;
 }
 
-[data-theme="visual-heavy"] .slide[data-type="divider"] .slide-card,
-[data-theme="visual-heavy"] .slide[data-type="cover"] .slide-card {
+[data-style="visual-heavy"] .slide[data-type="divider"] .slide-card,
+[data-style="visual-heavy"] .slide[data-type="cover"] .slide-card {
   background: rgba(0, 0, 0, 0.55);
 }
 
 /* Text shadow for readability over images */
-[data-theme="visual-heavy"] .slide-title,
-[data-theme="visual-heavy"] .slide-subtitle {
+[data-style="visual-heavy"] .slide-title,
+[data-style="visual-heavy"] .slide-subtitle {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
-[data-theme="visual-heavy"] .bullet-item {
+[data-style="visual-heavy"] .bullet-item {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }

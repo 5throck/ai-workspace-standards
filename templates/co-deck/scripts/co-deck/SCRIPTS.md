@@ -51,6 +51,7 @@ After playwright install, also run: `bunx playwright install chromium`
 | `gen-slides-pdf.ts` | 1.1.0 | active | Generate full or sample PDF deck from slidedata.json (use --sample N to limit) | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
 | `measure-layout.ts` | 1.0.0 | active | Measure HTML slide layout using Playwright; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
+| `validate-theme-styles.ts` | 1.0.0 | active | Cross-validate theme.json compatible_styles ↔ styles/ directory; flags missing style.css and orphaned style folders | `bun scripts/co-deck/validate-theme-styles.ts` |
 
 Also available in `scripts/` root (not co-deck specific):
 
@@ -94,9 +95,10 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Governance chain:**
 - `templates/co-deck/variant.json` → `script_manifest.local` declares each script
-- `bun scripts/validate-templates.ts` check B-03 verifies all declared paths exist
+- `bun scripts/validate-templates.ts` check B-03 verifies all declared paths exist (L0 workspace check)
+- `bun scripts/co-deck/validate-theme-styles.ts` cross-validates `theme.json compatible_styles` ↔ `styles/` filesystem (variant-level check)
 - `bun scripts/lifecycle-sync-audit.ts` Check V verifies `@version` consistency within this registry
 
 **Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
 
-*Last Updated: 2026-06-21 — updated Design Note: workaround language removed, replaced with ADR-0033 canonical pattern reference*
+*Last Updated: 2026-06-21 — added validate-theme-styles.ts (1.0.0) for compatible_styles ↔ styles/ cross-validation; previous: Design Note updated to ADR-0033 canonical pattern reference*

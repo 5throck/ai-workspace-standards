@@ -71,12 +71,12 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 <html lang="ko" data-theme="scroll" data-style="classic">
 ```
 
-**2. CSS link injection** — base + style override:
+**2. CSS link injection** — always inject in this order (base first, then style override):
 ```html
-<link rel="stylesheet" href="../../docs/html-themes/base/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
 ```
-(Legacy override path: `docs/html-themes/overrides/<style>.css` — use if `styles/<name>/` not yet migrated)
+`base.css` defines all structural CSS rules and default variable values. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance.
 
 **3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent scroll/slideshow structure.
 
