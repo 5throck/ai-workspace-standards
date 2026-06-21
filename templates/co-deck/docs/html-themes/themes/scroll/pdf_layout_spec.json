@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -58,5 +58,57 @@
     "divider": true,
     "punchline": false,
     "standard": true
+  },
+  "image_zones": {
+    "standard": {
+      "x_pct": 0.584,
+      "y_pct": 0.390,
+      "w_pct": 0.372,
+      "h_pct": 0.561,
+      "fit": "contain"
+    },
+    "divider": {
+      "x_pct": 0.5582,
+      "y_pct": 0.2613,
+      "w_pct": 0.3972,
+      "h_pct": 0.6059,
+      "fit": "cover"
+    }
+  },
+  "toc": {
+    "width_pct": 0.18,
+    "item_h_px": 32.0,
+    "indent_px": 12.0,
+    "max_visible_items": 20
+  },
+  "content_constraints": {
+    "standard": {
+      "max_bullets": 5,
+      "max_title_chars": 30,
+      "max_body_chars": 120
+    },
+    "divider": {
+      "max_title_chars": 20,
+      "max_desc_chars": 60
+    },
+    "title": {
+      "max_title_chars": 40,
+      "max_subtitle_chars": 80
+    }
+  },
+  "print": {
+    "bleed_mm": 3.0,
+    "crop_marks": false,
+    "page_numbers": true,
+    "page_number_position": "bottom-right"
+  },
+  "slide_type_overrides": {
+    "title": {
+      "title_y_pct": 0.3967,
+      "content_w_pct": 0.9123
+    },
+    "divider": {
+      "text_w_pct": 0.4766
+    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -37,5 +37,39 @@
     "divider": false,
     "punchline": true,
     "standard": true
+  },
+  "image_zones": {
+    "standard": {
+      "x_pct": 0.55,
+      "y_pct": 0.20,
+      "w_pct": 0.40,
+      "h_pct": 0.65,
+      "fit": "contain"
+    }
+  },
+  "toc": null,
+  "content_constraints": {
+    "standard": {
+      "max_bullets": 3,
+      "max_title_chars": 20,
+      "max_body_chars": 80
+    },
+    "punchline": {
+      "max_title_chars": 30,
+      "max_subtitle_chars": 60
+    }
+  },
+  "print": {
+    "bleed_mm": 0.0,
+    "crop_marks": false,
+    "page_numbers": true,
+    "page_number_position": "bottom-right"
+  },
+  "slide_type_overrides": {
+    "punchline": {
+      "content_x_pct": 0.10,
+      "content_y_pct": 0.20,
+      "content_w_pct": 0.80
+    }
   }
 }
