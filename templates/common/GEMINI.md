@@ -153,13 +153,21 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 <!-- COMMON-GEMINI:START -->
 ### 4. Language Policy for Documentation
 
-All `.md` files you create or modify MUST be in English, except when working in `ko/` or `locales/ko/` directories (Korean translation zones).
+All `.md` files you create or modify MUST be in English, except in `ko/` or `locales/ko/` directories (Korean translation zones) or when explicitly declared as a Korean legal/regulatory content exception.
 
 - README.md, CLAUDE.md, GEMINI.md, AGENTS.md, context.md, CHANGELOG.md — English only
 - All documentation in docs/, agents/, skills/ — English only
 - Git commit messages, PR titles, PR descriptions — English only
 - Branch names — English only
 - Code comments — English (unless documenting locale-specific logic)
+
+#### Language Policy Exception
+For files where Korean is legally or academically mandatory, add to the frontmatter:
+```yaml
+lang: ko
+lang_reason: legal # legal | source-material | proper-noun
+```
+*(Not available for: agents/*.md, skills/*.md, context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md)*
 <!-- COMMON-GEMINI:END -->
 
 ### 5. Agent Dispatch Rules
@@ -280,7 +288,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-20 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-21 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

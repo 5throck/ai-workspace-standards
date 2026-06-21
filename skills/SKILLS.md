@@ -21,7 +21,7 @@
 | `design` | 1.2.0 | active | pm | 2026-06-20 | — | co-deck only |
 | `executive-presentation` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `financial-modeling` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
-| `html-build` | 1.3.0 | active | pm | 2026-06-20 | — | co-deck only |
+| `html-build` | 1.3.1 | active | pm | 2026-06-21 | — | co-deck only |
 | `insight-synthesis` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
 | `measure` | 1.3.0 | active | pm | 2026-06-20 | — | co-deck only |
 | `meeting-facilitation` | 1.4.0 | active | pm | 2026-06-05 | — | — |
@@ -42,6 +42,7 @@
 | `storyline` | 1.2.0 | active | pm | 2026-06-20 | — | co-deck only |
 | `team-builder` | 1.1.0 | active | pm | 2026-06-06 | — | — |
 | `technical-feasibility` | 1.0.0 | active | pm | 2026-06-06 | — | co-consult only |
+| `theme-authoring` | 1.0.1 | active | pm | 2026-06-21 | — | co-deck only |
 | `translate` | 1.0.0 | active | pm | 2026-06-06 | — | — |
 | `validate-docs-links` | 1.0.0 | active | docs-writer | 2026-05-30 | — | — |
 | `verify-authorization` | 1.0.0 | active | security-expert | 2026-06-06 | — | co-security only |

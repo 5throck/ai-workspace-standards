@@ -5,8 +5,7 @@ description: >
   Generates PDF from measured layout spec and slide data using pdf-lib. Extracts
   slideData.json, runs sample (5-slide) then full PDF generation scripts,
   reviews results. Requires layout_spec.json and font TTFs. Responds to "make
-  PDF", "export PDF", "convert to PDF" (Korean: "PDF 만들어줘", "PDF 출력해줘",
-  "PDF로 변환해줘"). Stage 11 of the lecture workflow.
+  PDF", "export PDF", "convert to PDF" . Stage 11 of the lecture workflow.
 status: active
 owner: pdf-export
 last_reviewed: 2026-06-20
@@ -20,7 +19,7 @@ Generates the final lecture PDF from measured layout data and slide content usin
 ## When to Use
 
 - PM Agent dispatches after Measure Agent completes
-- User says "make PDF" / "PDF 만들어줘" / "PDF 출력해줘"
+- User says "make PDF"
 - After HTML or layout changes require PDF regeneration
 
 ---

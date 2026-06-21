@@ -4,7 +4,7 @@ description: >
   Guides the Engagement Leader through building a new AI agent team for any consulting domain.
   Covers requirements interview, web benchmarking, current team diagnosis, proposal generation,
   and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute.
-  Triggered by: "새 팀 구성", "에이전트팀 변경", "신규 도메인 팀 빌딩", "build new agent team".
+  Triggered by: "build new agent team".
 version: 1.1.0
 status: active
 scope: common
@@ -136,9 +136,9 @@ Agents to DELETE : N
 Skills to CREATE : N
 Skills to REASSIGN: N
 
-To execute: reply "승인" or "approve"
+To execute: reply "approve"
 To revise:  reply with specific change requests
-To cancel:  reply "취소" or "cancel"
+To cancel:  reply "cancel"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

@@ -5,7 +5,7 @@ description: >
   Designs lecture storyline and slide deck composition. Given research_notes.md
   (or direct topic input), produces storyline.md and slide_deck.md. Responds
   to "make storyline", "compose slide deck", "structure chapters" (Korean:
-  "스토리라인 만들어줘", "슬라이드 구성 잡아줘", "챕터 구성해줘"). Stages 2-3
+  "make storyline", "compose slide deck", "restructure chapters"). Stages 2-3
   of the lecture workflow.
 status: active
 owner: storyline
@@ -20,9 +20,9 @@ Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slid
 ## When to Use
 
 - PM Agent dispatches after Stage 1 (research)
-- User says "make storyline" / "스토리라인 만들어줘"
-- User says "compose slide deck" / "슬라이드 구성 잡아줘"
-- User says "restructure chapters" / "챕터 구성 바꿔줘"
+- User says "make storyline"
+- User says "compose slide deck"
+- User says "restructure chapters"
 
 ---
 
@@ -103,14 +103,14 @@ Repeat this structure for every slide. Dividers include part number and descript
 > Korean example (actual slide content for a Korean lecture is written in Korean):
 >
 > ```markdown
-> ## 5. divider — AX 시대의 도래
+> ## 5. divider — The Arrival of the AX Era
 >
-> **섹션**: PART 01
-> **유형**: 간지(divider)
+> **Section**: PART 01
+> **Type**: divider
 >
-> ### 내용
-> - 증권 산업의 패러다임 전환
-> - AX(AI Transformation)의 정의
+> ### Content
+> - Paradigm shift in the securities industry
+> - Definition of AX (AI Transformation)
 > ```
 
 ---

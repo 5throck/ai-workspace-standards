@@ -1,6 +1,6 @@
 ---
 name: theme-authoring
-version: 1.0.0
+version: 1.0.1
 description: >
   Entry point for creating a new co-deck theme or style. PM dispatches
   the appropriate workflow (Style Workflow or T-Stage) based on user request.

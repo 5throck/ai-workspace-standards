@@ -4,7 +4,7 @@
 
 | Date | Summary |
 |------|---------|
-| [2026-06-21](2026-06-21.md) | fix(co-consult): remove duplicate templates/co-consult/memory directory |
+| [2026-06-21](2026-06-21.md) | feat(variant-sync): pluggable variant audit hooks and pipeline integrity validation |
 | [2026-06-20](2026-06-20.md) | feat(co-deck): Phase 2 — HTML themes, source-verifier, image source strategy, context docs update |
 | [2026-06-19](2026-06-19.md) | feat(co-deck): complete variant template — fix all structural gaps vs other variants and update l2-to-variant-pipeline |
 | [2026-06-18](2026-06-18.md) | merge: integrate main into pr branch + add co-deck variant template (Phase A-C complete) |
@@ -96,6 +96,7 @@
 | 2026-06-05 | Tier governance L0→L1→L2 propagation strategy — principles vs specialist-list separation | [meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md](archive/meeting-2026-06-05-tier-governance-l0-l1-l2-propagation.md) |
 | 2026-06-05 | Antigravity parity gap root cause — PM execution plan table missing Platform column | [meeting-2026-06-05-antigravity-parity-gap-root-cause.md](archive/meeting-2026-06-05-antigravity-parity-gap-root-cause.md) |
 | 2026-06-05 | Action item completeness review — C-01 L0→L1→L2 scope, A-00 and D-01 added | [meeting-2026-06-05-action-item-completeness-review.md](archive/meeting-2026-06-05-action-item-completeness-review.md) |
+| 2026-06-21 | Pluggable variant audit hooks and pipeline integrity validation | [meeting-2026-06-21-variant-dev-sync-verification.md](meeting-2026-06-21-variant-dev-sync-verification.md) |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | *(archived — file not preserved)* |
 
 ## ADRs
@@ -103,3 +104,4 @@
 | ID | Title | Status | File |
 |----|-------|--------|------|
 | ADR-0001 | Document Format Single Source of Truth | Accepted | [adr-0001-document-format-single-source-of-truth.md](archive/adr-0001-document-format-single-source-of-truth.md) |
+| ADR-0044 | Pluggable Variant Audit Hooks and Pipeline Integrity Validation | Accepted | [0044-variant-specific-audit-hooks.md](../docs/adr/0044-variant-specific-audit-hooks.md) |

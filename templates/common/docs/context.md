@@ -130,6 +130,14 @@ Every entry under `[Unreleased]` MUST include a PR reference:
 | CHANGELOG.md entries | English only |
 | memory/ session logs | English only |
 
+#### Language Policy Exception (Korean Legal/Regulatory Content)
+For files where Korean is legally or academically mandatory (such as statutory texts or primary source quotations), a narrow exception is permitted by adding the following frontmatter:
+```yaml
+lang: ko
+lang_reason: legal # legal | source-material | proper-noun
+```
+*(This exception is NOT available for operational files like agents, skills, and context files)*
+
 ### File Encoding
 
 All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.

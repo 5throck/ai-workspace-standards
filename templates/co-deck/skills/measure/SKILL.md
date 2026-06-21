@@ -4,8 +4,7 @@ version: 1.3.0
 description: >
   Auto-measures HTML slides with Playwright to extract pixel coordinates, fonts,
   and colors for PDF generation. Downloads required TTF fonts. Responds to
-  "measure layout", "prep for PDF", "extract coordinates" (Korean: "레이아웃
-  측정해줘", "PDF 준비해줘", "좌표 추출해줘", "폰트 확인해줘"). Stages 9-10
+  "measure layout", "prep for PDF", "extract coordinates" . Stages 9-10
   of the lecture workflow.
 status: active
 owner: measure
@@ -20,7 +19,7 @@ Auto-extracts pixel-level coordinates, fonts, and colors from the HTML slides us
 ## When to Use
 
 - PM Agent dispatches after Gate 4 (Build approval)
-- User says "measure layout" / "레이아웃 측정해줘"
+- User says "measure layout"
 - After HTML changes that affect layout (must re-run before re-exporting PDF)
 
 ---

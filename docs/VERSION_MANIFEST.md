@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-21T01:20:03.147Z
+**Generated**: 2026-06-21T02:29:51.954Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -68,7 +68,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.8.0 | scripts/audit.ts | bun |
+| audit.ts | 2.9.0 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -111,7 +111,7 @@
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
-| reconcile-with-l0-l1.ts | 1.1.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
+| reconcile-with-l0-l1.ts | 1.2.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | remove-project.ts | 1.0.0 | scripts/remove-project.ts | N/A |
 | resolve-variants.ts | 1.0.0 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | 1.0.0 | scripts/retry-handler.ts | N/A |
@@ -139,7 +139,7 @@
 | upgrade-project.ts | 1.1.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
-| validate-md-language.ts | 1.3.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.4.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | 1.0.0 | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |

@@ -118,7 +118,7 @@ bunx playwright install chromium
 <!-- VARIANT-INJECT: html-themes -->
 co-deck uses a **two-layer** presentation appearance system. Authoritative registry: `docs/html-themes/THEMES.md`.
 
-### Layer 1 — Theme (렌더링 패러다임)
+### Layer 1 — Theme (Rendering Paradigm)
 
 A **theme** defines the HTML structure, navigation, and rendering paradigm. Each theme is a package folder containing `template.html` (HTML skeleton) and `theme.json` (metadata + content rules + compatibility).
 
@@ -131,7 +131,7 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 Each theme folder also includes **`pdf_layout_spec.json`** — page geometry (`width_mm`, `height_mm`, `margin_mm`), `calibration.viewport_px`, layout percentages, font sizes, and `slide_types`. Read by `gen-slides-pdf.ts` as Layer 1 of the 3-layer PDF merge.
 
-### Layer 2 — Style (CSS 변수 세트)
+### Layer 2 — Style (CSS Variable Set)
 
 A **style** is a CSS variable override file that controls color, font, and spacing. Styles do NOT change DOM structure.
 
@@ -187,13 +187,13 @@ Per-project overrides (e.g., 4:3 ratio, CI accent color, higher bullet count) ar
 
 Key fields:
 ```yaml
-title: "강의 제목"
+title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
   theme: scroll       # HTML structure: scroll | slideshow
   style: classic      # CSS variables: classic | minimal | visual-heavy | academic
-keywords: [키워드1, 키워드2]
+keywords: [Keyword 1, Keyword 2]
 instructor:
   name: ""
   title: ""

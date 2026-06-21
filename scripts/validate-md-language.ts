@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 /**
  * Markdown Language Validation Script with I18N Support
  *

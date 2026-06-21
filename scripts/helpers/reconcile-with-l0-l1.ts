@@ -5,7 +5,7 @@
  * Compares L2 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:
@@ -395,6 +395,16 @@ export async function reconcileWithL0L1(
 
   // Reconcile each file
   for (const file of scanResult.files) {
+    // Prevent modification of core scripts in L2 projects
+    const normalizedPath = file.relativePath.replace(/\\/g, '/');
+    if (normalizedPath === 'scripts/dev-sync.ts' || normalizedPath === 'scripts/audit.ts') {
+      const isIdenticalToL0 = file.existsInL0 && file.hashL2 === file.hashL0;
+      const isIdenticalToL1 = file.existsInL1 && file.hashL2 === file.hashL1;
+      if (!isIdenticalToL0 && !isIdenticalToL1) {
+        throw new Error(`Integrity Violation: Core script '${normalizedPath}' has been modified. Direct modifications to core scripts are forbidden. Please migrate your variant-specific validations to 'scripts/audit-variant.ts' instead.`);
+      }
+    }
+
     const result = reconcileFile(file, variantName);
 
     const reconciledFile: ReconciledFile = {

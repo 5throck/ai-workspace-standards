@@ -1,4 +1,4 @@
-// @version 2.8.0
+// @version 2.9.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -1210,6 +1210,18 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
     const pmConsistencyPass = checkPmConsistency();
     if (!pmConsistencyPass) {
         errors++;
+    }
+}
+
+// 27. Variant-specific audit checks
+const variantAuditPath = path.join('scripts', 'audit-variant.ts');
+if (fs.existsSync(variantAuditPath)) {
+    console.log(`\n${CYAN}🔄 Running variant-specific audit checks via ${variantAuditPath}...${RESET}`);
+    try {
+        execFileSync('bun', [variantAuditPath], { stdio: 'inherit' });
+        Pass('Variant-specific audit checks passed');
+    } catch (e) {
+        Fail('Variant-specific audit checks failed');
     }
 }
 
