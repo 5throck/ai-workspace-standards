@@ -71,12 +71,13 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 <html lang="ko" data-theme="scroll" data-style="classic">
 ```
 
-**2. CSS link injection** — always inject in this order (base first, then style override):
+**2. CSS link injection** — always inject in this order (foundation → theme → style):
 ```html
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/themes/scroll/theme.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
 ```
-`base.css` defines all structural CSS rules and default variable values. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance.
+`base.css` is the shared foundation (structural rules + default variables). `themes/<theme>/theme.css` is the paradigm-specific extension (e.g. scroll's TOC panel + progress bar; slideshow is currently empty). `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/scroll/theme.css` segment with `themes/slideshow/theme.css` when `data-theme="slideshow"`.
 
 **3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent scroll/slideshow structure.
 

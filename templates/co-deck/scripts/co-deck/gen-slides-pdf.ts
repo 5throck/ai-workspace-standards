@@ -1,5 +1,7 @@
-// @version 1.1.0
+// @version 1.2.0
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
+// Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
+// `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
 // Merges gen_full.py + gen_sample5.py — use --sample N to limit slide count.
 // Usage:
 //   bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
@@ -26,7 +28,10 @@ function deepMerge(base: any, override: any): any {
   if (!override) return base;
   const result = { ...base };
   for (const key of Object.keys(override)) {
-    if (typeof override[key] === 'object' && !Array.isArray(override[key]) && override[key] !== null) {
+    if (override[key] === null) {
+      // Explicit null overrides (e.g. toc: null) — clear the slot.
+      result[key] = null;
+    } else if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
       result[key] = deepMerge(base[key] ?? {}, override[key]);
     } else {
       result[key] = override[key];
@@ -178,7 +183,7 @@ class Renderer {
   }
 
   // Draw a single line of text. yMm is the top of the line (fpdf2 style).
-  // We approximate the baseline as yMm + cellH * 0.68 (empirical for typical fonts).
+  // We approximate the baseline as yMm + cellH * 0.72 (empirical for typical fonts).
   private drawLine(text: string, xMm: number, yMm: number, cellH: number) {
     const baselineY = this.fy(yMm + cellH * 0.72);
     this.page.drawText(text, {
@@ -331,263 +336,325 @@ interface SlideData {
   isPunchline?:   boolean;
 }
 
-// ── Layout spec type ──────────────────────────────────────────────────────────
+// ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
 
-interface LayoutSpec {
-  page?: {
-    width_mm?: number;
-    height_mm?: number;
-    margin_mm?: number;
-  };
-  calibration?: {
-    viewport_px?: number;
-  };
-  fonts?: {
-    title_pt?: number;
-    bullet_pt?: number;
-    punchline_pt?: number;
-    punchline_sub_pt?: number;
-  };
-  layout?: {
-    pad_x?: number;
-    hdr_y?: number;
-    hdr_h?: number;
-    title_y?: number;
-    main_y?: number;
-    bul_w?: number;
-    vis_x?: number;
-    vis_y?: number;
-    vis_w?: number;
-    vis_h?: number;
-    vis_pad?: number;
-    ts_title_y?: number;
-    ts_sub_y?: number;
-    ts_meta_y?: number;
-    ts_w?: number;
-    div_img_x?: number;
-    div_img_y?: number;
-    div_img_w?: number;
-    div_img_h?: number;
-    div_txt_w?: number;
-  };
-  colors?: {
-    background?: number[];
-    white?: number[];
-    dark?: number[];
-    text?: number[];
-    text_muted?: number[];
-    accent?: number[];
-    border?: number[];
-    body?: number[];
-    vis_bg?: number[];
-    dark2?: number[];
-    dark3?: number[];
-    meta?: number[];
-  };
+interface Region {
+  x_pct: number;
+  y_pct: number;
+  w_pct: number;
+  h_pct: number;
+  fit?:  'contain' | 'cover';
 }
 
-// ── Slide render functions ────────────────────────────────────────────────────
+interface LayoutSpec {
+  version?:     string;
+  page?: {
+    width_mm?:  number;
+    height_mm?: number;
+    margin_mm?: number;
+    aspect_ratio?: string;
+  };
+  calibration?: {
+    viewport_px?: number | null;
+  };
+  regions?: Record<string, Region | null>;
+  slide_types?: Record<string, {
+    regions?: string[];
+  }>;
+  slide_type_overrides?: Record<string, Record<string, Region | null>>;
+  fonts?: {
+    title_pt?:         number;
+    bullet_pt?:        number;
+    punchline_pt?:     number;
+    punchline_sub_pt?: number;
+    div_title_pt?:     number;
+    div_desc_pt?:      number;
+    section_px?:       number;
+    slide_num_px?:     number;
+    vis_title_px?:     number;
+    vis_body_px?:      number;
+    ts_title_px?:      number;
+    ts_sub_px?:        number;
+    ts_meta_px?:       number;
+    div_part_px?:      number;
+  };
+  line_heights?: {
+    title_px?:       number;
+    bullet_px?:      number;
+    bullet_gap_px?:  number;
+    ts_title_px?:    number;
+    div_title_px?:   number;
+    div_desc_px?:    number;
+    punchline_px?:   number;
+  };
+  content_constraints?: Record<string, any>;
+  print?: Record<string, any>;
+  image_zones?: Record<string, any>;
+  toc?: any;
+  colors?: Record<string, number[]>;
+}
 
-async function drawHeader(
+// A region resolved to absolute mm coordinates relative to the page top-left.
+interface ResolvedRegion {
+  x: number; y: number; w: number; h: number; fit?: 'contain' | 'cover';
+}
+
+const RESOLVE_ERROR_PREFIX = '[region-spec] ';
+
+// ── Slide render helpers ──────────────────────────────────────────────────────
+
+// Render the header bar for standard/title/divider slides. The header region
+// encodes the TEXT BAND (hdr_y, hdr_h); the dark bar extends from the card top
+// (CX, CY) down to headerR.y + headerR.h to mirror the pre-rewrite fillRect.
+// Section/number baseline math mirrors the pre-rewrite drawHeader exactly.
+function drawHeaderBar(
   r: Renderer,
-  sec: string,
-  n: number,
-  total: number,
-  spec: LayoutSpec,
-  // derived coords passed in
-  CX: number, CY: number, CW: number, CH: number,
-  hdr_y: number, hdr_h: number, bul_x: number, pad_x: number,
+  sec: string, n: number, total: number,
+  headerR: ResolvedRegion, contentR: ResolvedRegion | null,
+  titleX: number,
+  cardTopY: number,   // CY — top of the card (dark bar starts here)
   C_DARK: RGB, C_ACCENT: RGB, C_MUTED: RGB, C_BORDER: RGB,
   T_SECT: number, T_NUM: number,
 ) {
-  r.fillRect(CX, CY, CW, hdr_y - CY + hdr_h, C_DARK);
-  const hy = hdr_y + hdr_h * 0.18;
+  // Dark bar: from cardTopY down to the bottom of the header text band.
+  const barH = (headerR.y - cardTopY) + headerR.h;
+  r.fillRect(headerR.x, cardTopY, headerR.w, barH, C_DARK);
+  const hy      = headerR.y + headerR.h * 0.18;
+  const numX    = headerR.x + headerR.w - 45;  // ~30mm-wide right-aligned number cell
+  const lineEnd = headerR.x + headerR.w - (contentR ? (contentR.x - headerR.x) : 0);
   r.setFont(true,  T_SECT); r.setColor(C_ACCENT);
-  r.cell(180, hdr_h * 0.6, sec.toUpperCase(), bul_x, hy, 'L');
+  r.cell(180, headerR.h * 0.6, sec.toUpperCase(), titleX, hy, 'L');
   r.setFont(false, T_NUM);  r.setColor(C_MUTED);
-  r.cell(30, hdr_h * 0.6, `${n} / ${total}`, CX + CW - 45, hy, 'R');
-  r.drawHLine(bul_x, hdr_y + hdr_h, CX + CW - pad_x, 0.088, C_BORDER);
+  r.cell(30, headerR.h * 0.6, `${n} / ${total}`, numX, hy, 'R');
+  r.drawHLine(titleX, headerR.y + headerR.h, lineEnd, 0.088, C_BORDER);
 }
 
-async function renderTitleSlide(
-  r: Renderer,
-  doc: PDFDocument,
-  data: SlideData,
-  n: number,
-  total: number,
-  spec: LayoutSpec,
-  coords: ReturnType<typeof buildCoords>,
-  colors: ReturnType<typeof buildColors>,
-  sizes: ReturnType<typeof buildSizes>,
-) {
-  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, ts_w, ts_title_y, ts_sub_y, ts_meta_y, px2mm } = coords;
-  const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_META } = colors;
-  const { T_SECT, T_NUM, T_TS_TITLE, T_TS_SUB, T_TS_META } = sizes;
+// ── Slide render functions (region-driven) ────────────────────────────────────
+//
+// Each render function receives a `region(name)` resolver that returns the
+// ResolvedRegion for the requested region name. Regions not declared by the
+// slide type are NOT resolved — accessing one is a hard error (AC-7). Renderers
+// iterate only the regions declared in slide_types[type].regions (AC-2).
 
-  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
+interface RenderCtx {
+  r:        Renderer;
+  doc:      PDFDocument;
+  data:     SlideData;
+  n:        number;
+  total:    number;
+  imgDir?:  string;
+  spec:     LayoutSpec;
+  coords:   ReturnType<typeof buildCoords>;
+  colors:   ReturnType<typeof buildColors>;
+  sizes:    ReturnType<typeof buildSizes>;
+  declared: string[];                 // slide_types[type].regions
+  region:   (name: string) => ResolvedRegion;
+}
+
+function renderTitleSlide(ctx: RenderCtx) {
+  const { r, data, spec, coords, colors, sizes, region } = ctx;
+  const { C_ACCENT, C_MUTED, C_WHITE, C_META, C_DARK, C_BORDER } = colors;
+  const { T_TS_TITLE, T_TS_SUB, T_TS_META, T_SECT, T_NUM } = sizes;
+
+  // Title slide layout: optional header (if declared), then a large title block
+  // + subtitle + meta line. Regions declared: ["title", "subtitle"] at minimum;
+  // scroll also declares "header" on its title slide_type to preserve the
+  // section bar drawn by the pre-rewrite renderer.
+  const titleR = region('title');
+  const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
+  const metaR  = tryRegion(ctx, 'meta')     ?? subR;
+  const hdrR   = tryRegion(ctx, 'header');
+
+  if (hdrR) {
+    // Mirrors the pre-rewrite title-slide header: dark bar + section text + number.
+    drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
+  }
 
   r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
-  r.multiCell(ts_w, px2mm(70.0), strip(data.title), bul_x, ts_title_y);
+  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y);
 
   r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-  r.multiCell(ts_w, px2mm(36), strip(data.subtitle), bul_x, ts_sub_y);
+  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y);
 
-  r.setFont(true,  T_TS_META); r.setColor(C_META);
-  r.multiCell(ts_w, px2mm(24), strip(data.meta), bul_x, ts_meta_y);
-}
-
-async function renderDividerSlide(
-  r: Renderer,
-  doc: PDFDocument,
-  data: SlideData,
-  n: number,
-  total: number,
-  imgDir: string,
-  spec: LayoutSpec,
-  coords: ReturnType<typeof buildCoords>,
-  colors: ReturnType<typeof buildColors>,
-  sizes: ReturnType<typeof buildSizes>,
-) {
-  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, div_img_x, div_img_y, div_img_w, div_img_h, div_txt_w, px2mm } = coords;
-  const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_TEXT, C_DARK2, C_DARK3 } = colors;
-  const { T_SECT, T_NUM, T_DIV_PART, T_DIV_TITLE, T_DIV_DESC } = sizes;
-
-  r.fillRect(CX, CY, CW, CH, C_DARK2);
-  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
-
-  const py0 = CY + 0.40 * CH;
-  r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
-  r.cell(div_txt_w, px2mm(28), (strip(data.partNum)).toUpperCase(), bul_x, py0, 'L');
-
-  const py1 = py0 + px2mm(34);
-  r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
-  const LH_DIV_TITLE = px2mm(56.0);
-  const afterTitle = r.multiCell(div_txt_w, LH_DIV_TITLE, strip(data.title), bul_x, py1, 'L');
-
-  const py2 = afterTitle + px2mm(16);
-  r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
-  const LH_DIV_DESC = px2mm(28.16);
-  r.multiCell(div_txt_w, LH_DIV_DESC, strip(data.desc), bul_x, py2, 'L');
-
-  const ip = imgPath(data.visualImage, imgDir);
-  if (ip) {
-    r.fillRect(div_img_x, div_img_y, div_img_w, div_img_h, C_DARK3);
-    await r.placeImage(doc, ip, div_img_x, div_img_y, div_img_w, div_img_h);
+  const meta = strip(data.meta);
+  if (meta) {
+    r.setFont(true, T_TS_META); r.setColor(C_META);
+    r.multiCell(metaR.w, coords.px2mm(24), meta, metaR.x, metaR.y);
   }
 }
 
-async function renderPunchlineSlide(
-  r: Renderer,
-  doc: PDFDocument,
-  data: SlideData,
-  n: number,
-  total: number,
-  spec: LayoutSpec,
-  coords: ReturnType<typeof buildCoords>,
-  colors: ReturnType<typeof buildColors>,
-  sizes: ReturnType<typeof buildSizes>,
-) {
+function renderDividerSlide(ctx: RenderCtx) {
+  const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
+  const { C_DARK2, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
   const { CX, CY, CW, CH } = coords;
+  const lh = spec.line_heights ?? {};
+  const { T_DIV_PART, T_DIV_TITLE, T_DIV_DESC, T_SECT, T_NUM } = sizes;
+
+  // Divider fills the full card with a darker shade, then (if declared) draws
+  // the section header bar, then places a part/title/desc block on the left and
+  // an image (optional) on the right.
+  r.fillRect(CX, CY, CW, CH, C_DARK2);
+
+  const titleR = region('title');
+  const visR   = region('visual');
+  const hdrR   = tryRegion(ctx, 'header');
+
+  if (hdrR) {
+    drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
+  }
+
+  const LH_T = lh.div_title_px ? coords.px2mm(lh.div_title_px) : coords.px2mm(56.0);
+  const LH_D = lh.div_desc_px  ? coords.px2mm(lh.div_desc_px)  : coords.px2mm(28.16);
+
+  const py0 = titleR.y;
+  r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
+  r.cell(titleR.w, coords.px2mm(28), (strip(data.partNum)).toUpperCase(), titleR.x, py0, 'L');
+
+  const py1 = py0 + coords.px2mm(34);
+  r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
+  const afterTitle = r.multiCell(titleR.w, LH_T, strip(data.title), titleR.x, py1, 'L');
+
+  const py2 = afterTitle + coords.px2mm(16);
+  r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
+  r.multiCell(titleR.w, LH_D, strip(data.desc), titleR.x, py2, 'L');
+
+  const ip = imgPath(data.visualImage, imgDir ?? '');
+  if (ip) {
+    r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
+    r.placeImage(doc, ip, visR.x, visR.y, visR.w, visR.h);
+  }
+}
+
+function renderPunchlineSlide(ctx: RenderCtx) {
+  const { r, data, spec, colors, region } = ctx;
   const { C_BG, C_ACCENT, C_MUTED } = colors;
+  const f = spec.fonts ?? {};
 
-  const punchlinePt    = spec.fonts?.punchline_pt    ?? 48;
-  const punchlineSubPt = spec.fonts?.punchline_sub_pt ?? 20;
+  const punchlinePt    = f.punchline_pt    ?? 48;
+  const punchlineSubPt = f.punchline_sub_pt ?? 20;
 
-  // Fill background
-  r.fillRect(CX, CY, CW, CH, C_BG);
+  // Punchline regions: title + subtitle, both centered in their boxes.
+  const titleR = region('title');
+  const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
 
-  // Center title vertically
-  const titleLh  = punchlinePt / MM_TO_PT;
-  const subLh    = punchlineSubPt / MM_TO_PT;
-  const gap      = 6;
-  const blockH   = titleLh + gap + subLh;
-  const startY   = CY + (CH - blockH) / 2;
+  // Fill background across the title+subtitle bounding box (use title region as
+  // the punchline content box when present in slide_type_overrides).
+  const bgR = (titleR.w > 0 && titleR.h > 0) ? titleR : { x: 0, y: 0, w: r.pageW / MM_TO_PT, h: r.pageH / MM_TO_PT };
+  r.fillRect(bgR.x, bgR.y, bgR.w, bgR.h, C_BG);
+
+  const titleLh = punchlinePt / MM_TO_PT;
+  const subLh   = punchlineSubPt / MM_TO_PT;
+  const gap     = 6;
+  const blockH  = titleLh + gap + subLh;
+  const startY  = titleR.y + Math.max(0, (titleR.h - blockH) / 2);
 
   r.setFont(true, punchlinePt); r.setColor(C_ACCENT);
-  r.multiCell(CW, titleLh, strip(data.title), CX, startY, 'C');
+  r.multiCell(titleR.w, titleLh, strip(data.title), titleR.x, startY, 'C');
 
   const subText = strip(data.subtitle) || strip((data.bullets ?? [])[0]);
   if (subText) {
     r.setFont(false, punchlineSubPt); r.setColor(C_MUTED);
-    r.multiCell(CW, subLh, subText, CX, startY + titleLh + gap, 'C');
+    r.multiCell(subR.w, subLh, subText, subR.x, startY + titleLh + gap, 'C');
   }
 }
 
-async function renderStandardSlide(
-  r: Renderer,
-  doc: PDFDocument,
-  data: SlideData,
-  n: number,
-  total: number,
-  imgDir: string,
-  spec: LayoutSpec,
-  coords: ReturnType<typeof buildCoords>,
-  colors: ReturnType<typeof buildColors>,
-  sizes: ReturnType<typeof buildSizes>,
-) {
-  const { CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, vis_x, vis_y, vis_w, vis_h, img_pad, title_y, main_y, bul_w, px2mm } = coords;
+async function renderStandardSlide(ctx: RenderCtx) {
+  const { r, doc, data, n, total, imgDir, spec, coords, colors, sizes, declared, region } = ctx;
   const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_BODY, C_VIS_BG } = colors;
+  const lh  = spec.line_heights ?? {};
   const { T_SECT, T_NUM, T_TITLE, T_BUL, T_VIS_T, T_VIS_B } = sizes;
 
-  const LH_TITLE = px2mm(46.0);
-  const LH_BUL   = px2mm(29.44);
-  const BUL_GAP  = px2mm(19.2);
+  const LH_TITLE = lh.title_px      ? coords.px2mm(lh.title_px)     : coords.px2mm(46.0);
+  const LH_BUL   = lh.bullet_px     ? coords.px2mm(lh.bullet_px)    : coords.px2mm(29.44);
+  const BUL_GAP  = lh.bullet_gap_px ? coords.px2mm(lh.bullet_gap_px): coords.px2mm(19.2);
 
-  await drawHeader(r, strip(data.section), n, total, spec, CX, CY, CW, CH, hdr_y, hdr_h, bul_x, pad_x, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
+  // Resolve the regions this standard slide type declares. Some themes omit
+  // header/meta/visual — access defensively for those.
+  const headerR  = tryRegion(ctx, 'header');
+  const titleR   = tryRegion(ctx, 'title')   ?? (headerR ? { x: headerR.x, y: headerR.y + headerR.h + coords.px2mm(8), w: headerR.w, h: 30 } : null)!;
+  const contentR = tryRegion(ctx, 'content') ?? titleR;
+  const visR     = tryRegion(ctx, 'visual');
+  const metaR    = tryRegion(ctx, 'meta');
 
-  const hasRight = !!(data.visualImage || data.visualDisplay || data.visualTitle);
-  const titleW   = CW - pad_x * 2;
-  const bulTxtW  = hasRight ? bul_w : CW - pad_x * 2;
+  if (headerR) {
+    drawHeaderBar(r, strip(data.section), n, total, headerR, contentR, titleR.x, coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
+  }
+
+  const hasRight = !!(data.visualImage || data.visualDisplay || data.visualTitle) && !!visR;
+  const titleW   = titleR.w;
+  const bulTxtW  = hasRight ? Math.min(contentR.w, visR!.x - contentR.x - 6) : contentR.w;
 
   r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleW, LH_TITLE, strip(data.title), bul_x, title_y, 'L');
+  r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, titleR.y, 'L');
 
-  const bullets     = data.bullets ?? [];
-  const availableH  = (CY + CH) - main_y - 4;
-  const totalBh     = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
-  let by            = main_y + Math.max(0, (availableH - totalBh) / 2);
+  const bullets = data.bullets ?? [];
+  const totalBh = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
+  // Vertically center the bullet block inside the content region. The -4 mm
+  // bottom margin mirrors the pre-rewrite availableH computation so scroll
+  // bullet placement is preserved bit-for-bit.
+  const availableH = contentR.h - 4;
+  let by = contentR.y + Math.max(0, (availableH - totalBh) / 2);
 
   for (const b of bullets) {
     const txt = strip(b);
     if (!txt) continue;
-    if (by > CY + CH - 6) break;
-    r.drawEllipse(bul_x, by + LH_BUL * 0.28, 3.2, C_ACCENT);
+    if (by > contentR.y + contentR.h - 6) break;
+    r.drawEllipse(contentR.x, by + LH_BUL * 0.28, 3.2, C_ACCENT);
     r.setFont(false, T_BUL); r.setColor(C_BODY);
-    const afterBul = r.multiCell(bulTxtW - 6, LH_BUL, txt, bul_x + 6, by, 'L');
+    const afterBul = r.multiCell(bulTxtW - 6, LH_BUL, txt, contentR.x + 6, by, 'L');
     by = afterBul + BUL_GAP;
   }
 
   if (hasRight) {
-    r.fillRect(vis_x, vis_y, vis_w, vis_h, C_VIS_BG);
-    const ip = imgPath(data.visualImage, imgDir);
+    r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
+    const ip = imgPath(data.visualImage, imgDir ?? '');
     if (ip) {
-      await r.placeImage(doc, ip, vis_x + img_pad, vis_y + img_pad, vis_w - img_pad * 2, vis_h - img_pad * 2);
+      const pad = visR!.w * 0.052;
+      await r.placeImage(doc, ip, visR!.x + pad, visR!.y + pad, visR!.w - pad * 2, visR!.h - pad * 2);
     } else {
       const vt = strip(data.visualTitle);
       const vd = strip(data.visualDisplay);
-      const lhVt = px2mm(20), lhVb = px2mm(24), gap = 4;
-      const hVt = vt ? r.estimateTextHeight(vt, vis_w - 8, T_VIS_T, lhVt, true)  : 0;
-      const hVb = vd ? r.estimateTextHeight(vd, vis_w - 8, T_VIS_B, lhVb, false) : 0;
+      const lhVt = coords.px2mm(20), lhVb = coords.px2mm(24), gap = 4;
+      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - 8, T_VIS_T, lhVt, true)  : 0;
+      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - 8, T_VIS_B, lhVb, false) : 0;
       const totalH = hVt + (vt && vd ? gap : 0) + hVb;
-      let vy = vis_y + Math.max(0, (vis_h - totalH) / 2);
+      let vy = visR!.y + Math.max(0, (visR!.h - totalH) / 2);
       if (vt) {
         r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
-        vy = r.multiCell(vis_w - 8, lhVt, vt, vis_x + 4, vy, 'C') + gap;
+        vy = r.multiCell(visR!.w - 8, lhVt, vt, visR!.x + 4, vy, 'C') + gap;
       }
       if (vd) {
         r.setFont(false, T_VIS_B); r.setColor(C_MUTED);
-        r.multiCell(vis_w - 8, lhVb, vd, vis_x + 4, vy, 'C');
+        r.multiCell(visR!.w - 8, lhVb, vd, visR!.x + 4, vy, 'C');
       }
     }
   }
+
+  if (metaR) {
+    // Slide counter (e.g. slideshow's counter_x_pct/counter_y_pct).
+    r.setFont(false, T_NUM); r.setColor(C_MUTED);
+    r.cell(metaR.w, metaR.h, `${n} / ${total}`, metaR.x, metaR.y, 'R');
+  }
 }
 
-// ── Derived coordinate builder ────────────────────────────────────────────────
+// Resolve a region WITHOUT erroring if it's not declared by this slide type.
+// Used by renderers to support optional regions (subtitle, meta, header) without
+// forcing every theme to declare them.
+function tryRegion(ctx: RenderCtx, name: string): ResolvedRegion | null {
+  if (!ctx.declared.includes(name)) return null;
+  try {
+    return ctx.region(name);
+  } catch {
+    return null;
+  }
+}
+
+// ── Region resolver (theme-agnostic) ──────────────────────────────────────────
 
 function buildCoords(spec: LayoutSpec) {
   const PW  = spec.page?.width_mm  ?? 338.7;
   const PH  = spec.page?.height_mm ?? 190.5;
-  const CM  = spec.page?.margin_mm ?? 5.0;
+  const CM  = spec.page?.margin_mm ?? 0.0;
   const VP  = spec.calibration?.viewport_px ?? 611.4;
 
   const CX = CM, CY = CM;
@@ -597,66 +664,53 @@ function buildCoords(spec: LayoutSpec) {
   const px2pt = (px: number) => (px / VP) * CH * 2.835;
   const px2mm = (px: number) => (px / VP) * CH;
 
-  const L = spec.layout ?? {};
+  const regions       = spec.regions ?? {};
+  const typeOverrides = spec.slide_type_overrides ?? {};
 
-  const P_PAD_X      = L.pad_x      ?? 0.0438;
-  const P_HDR_Y      = L.hdr_y      ?? 0.091;
-  const P_HDR_H      = L.hdr_h      ?? 0.064;
-  const P_TITLE_Y    = L.title_y    ?? 0.224;
-  const P_MAIN_Y     = L.main_y     ?? 0.349;
-  const P_BUL_W      = L.bul_w      ?? 0.503;
-  const P_VIS_X      = L.vis_x      ?? 0.584;
-  const P_VIS_Y      = L.vis_y      ?? 0.390;
-  const P_VIS_W      = L.vis_w      ?? 0.372;
-  const P_VIS_H      = L.vis_h      ?? 0.561;
-  const P_VIS_PAD    = L.vis_pad    ?? 0.052;
-  const P_TS_TITLE_Y = L.ts_title_y ?? 0.3967;
-  const P_TS_SUB_Y   = L.ts_sub_y   ?? 0.5346;
-  const P_TS_META_Y  = L.ts_meta_y  ?? 0.6676;
-  const P_TS_W       = L.ts_w       ?? 0.9123;
-  const P_DIV_IMG_X  = L.div_img_x  ?? 0.5582;
-  const P_DIV_IMG_Y  = L.div_img_y  ?? 0.2613;
-  const P_DIV_IMG_W  = L.div_img_w  ?? 0.3972;
-  const P_DIV_IMG_H  = L.div_img_h  ?? 0.6059;
-  const P_DIV_TXT_W  = L.div_txt_w  ?? 0.4766;
-
-  const pad_x   = P_PAD_X * CW;
-  const hdr_y   = CY + P_HDR_Y * CH;
-  const hdr_h   = P_HDR_H * CH;
-  const bul_x   = CX + pad_x;
-  const bul_w   = P_BUL_W * CW;
-  const title_y = CY + P_TITLE_Y * CH;
-  const main_y  = CY + P_MAIN_Y * CH;
-  const vis_x   = CX + P_VIS_X * CW;
-  const vis_y   = CY + P_VIS_Y * CH;
-  const vis_w   = P_VIS_W * CW;
-  const vis_h   = P_VIS_H * CH;
-  const img_pad = P_VIS_PAD * vis_w;
-
-  const ts_w       = P_TS_W * CW;
-  const ts_title_y = CY + P_TS_TITLE_Y * CH;
-  const ts_sub_y   = CY + P_TS_SUB_Y * CH;
-  const ts_meta_y  = CY + P_TS_META_Y * CH;
-
-  const div_img_x = CX + P_DIV_IMG_X * CW;
-  const div_img_y = CY + P_DIV_IMG_Y * CH;
-  const div_img_w = P_DIV_IMG_W * CW;
-  const div_img_h = P_DIV_IMG_H * CH;
-  const div_txt_w = P_DIV_TXT_W * CW;
+  // Resolve a region for a given slide type. Resolution order:
+  //   1. slide_type_overrides[type][name]  (per-slide-type value)
+  //   2. regions[name]                       (theme-wide value)
+  // A null at either level means "this region is not defined for this slide".
+  // Throws loudly if both are absent/null (AC-7: no silent empty rendering).
+  const region = (name: string, slideType?: string): ResolvedRegion => {
+    let raw: Region | null | undefined;
+    if (slideType && typeOverrides[slideType]) {
+      raw = typeOverrides[slideType][name];
+    }
+    if (raw === undefined) raw = regions[name] ?? null;
+    if (raw === null || raw === undefined) {
+      throw new Error(
+        `${RESOLVE_ERROR_PREFIX}Required region "${name}"${
+          slideType ? ` for slide_type "${slideType}"` : ''
+        } is not defined. Check regions.* / slide_type_overrides in pdf_layout_spec.json.`,
+      );
+    }
+    return {
+      x: CX + raw.x_pct * CW,
+      y: CY + raw.y_pct * CH,
+      w: raw.w_pct * CW,
+      h: raw.h_pct * CH,
+      fit: raw.fit,
+    };
+  };
 
   return {
     PW, PH, CM, CX, CY, CW, CH,
     px2pt, px2mm,
-    pad_x, hdr_y, hdr_h, bul_x, bul_w, title_y, main_y,
-    vis_x, vis_y, vis_w, vis_h, img_pad,
-    ts_w, ts_title_y, ts_sub_y, ts_meta_y,
-    div_img_x, div_img_y, div_img_w, div_img_h, div_txt_w,
+    region,
+    // Back-compat helpers for code paths that still want page-level constants.
+    pageW: PW, pageH: PH,
   };
 }
 
 // ── Color builder ─────────────────────────────────────────────────────────────
 
 function buildColors(spec: LayoutSpec) {
+  // Color key resolution mirrors the pre-rewrite buildColors exactly so scroll
+  // rendering is preserved bit-for-bit. The pre-rewrite code looked up short
+  // keys (dark, dark2, dark3, text, body, vis_bg, meta); style pdf_color_spec
+  // uses long keys (card_dark*, text_*), so most roles fall through to the
+  // hardcoded defaults unless a project override provides the short key.
   const c = spec.colors ?? {};
   return {
     C_BG     : toRGB(c.background  ?? [17,  24,  39]),
@@ -679,18 +733,18 @@ function buildColors(spec: LayoutSpec) {
 function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
   const f = spec.fonts ?? {};
   return {
-    T_SECT      : px2pt(13.6),
-    T_NUM       : px2pt(14.4),
+    T_SECT      : f.section_px   ? px2pt(f.section_px)   : px2pt(13.6),
+    T_NUM       : f.slide_num_px ? px2pt(f.slide_num_px) : px2pt(14.4),
     T_TITLE     : f.title_pt  ?? 28.0,
     T_BUL       : f.bullet_pt ?? 12.5,
-    T_VIS_T     : px2pt(13.6),
-    T_VIS_B     : px2pt(16.0),
-    T_TS_TITLE  : px2pt(56.0),
-    T_TS_SUB    : px2pt(24.0),
-    T_TS_META   : px2pt(16.0),
-    T_DIV_PART  : px2pt(22.4),
-    T_DIV_TITLE : f.title_pt  ?? 28.0,
-    T_DIV_DESC  : 13.0,
+    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : px2pt(13.6),
+    T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : px2pt(16.0),
+    T_TS_TITLE  : f.ts_title_px ? px2pt(f.ts_title_px) : px2pt(56.0),
+    T_TS_SUB    : f.ts_sub_px   ? px2pt(f.ts_sub_px)   : px2pt(24.0),
+    T_TS_META   : f.ts_meta_px  ? px2pt(f.ts_meta_px)  : px2pt(16.0),
+    T_DIV_PART  : f.div_part_px ? px2pt(f.div_part_px) : px2pt(22.4),
+    T_DIV_TITLE : f.div_title_pt ?? f.title_pt ?? 28.0,
+    T_DIV_DESC  : f.div_desc_pt  ?? 13.0,
   };
 }
 
@@ -723,20 +777,46 @@ async function main() {
   const theme = lectureProfile.theme ?? 'scroll';
   const style = lectureProfile.style ?? 'classic';
 
-  // ── Load spec files (3-layer merge) ──────────────────────────────────────
-  const themeSpecPath = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
-  const styleSpecPath = resolve(workspaceRoot, `docs/html-themes/styles/${style}/pdf_color_spec.json`);
+  // ── Load spec files (4-layer merge: base → theme → style colors → overrides) ──
+  // AC-7: missing base/theme spec files are HARD ERRORS (no silent fallback).
+  const basePath   = resolve(workspaceRoot, 'docs/html-themes/themes/_shared/layout_base.json');
+  const themePath  = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
+  const stylePath  = resolve(workspaceRoot, `docs/html-themes/styles/${style}/pdf_color_spec.json`);
 
-  const themeSpec: LayoutSpec = existsSync(themeSpecPath) ? JSON.parse(readFileSync(themeSpecPath, 'utf-8')) : {};
-  const styleSpec: any        = existsSync(styleSpecPath) ? JSON.parse(readFileSync(styleSpecPath, 'utf-8')) : {};
+  for (const [label, p] of [['layout_base', basePath], ['theme spec', themePath]] as const) {
+    if (!existsSync(p)) {
+      console.error(`${RESOLVE_ERROR_PREFIX}${label} not found: ${p}`);
+      process.exit(1);
+    }
+  }
+  // Style color spec is optional-but-warned (themes still have color defaults).
+  let styleSpec: any = {};
+  if (existsSync(stylePath)) {
+    styleSpec = JSON.parse(readFileSync(stylePath, 'utf-8'));
+  } else {
+    console.warn(`[region-spec] style color spec not found: ${stylePath} — falling back to theme color defaults.`);
+  }
 
-  // Merge: themeSpec base → styleSpec colors → layout_overrides
-  let layoutSpec: LayoutSpec = themeSpec;
+  const baseSpec:  LayoutSpec = JSON.parse(readFileSync(basePath,  'utf-8'));
+  const themeSpec: LayoutSpec = JSON.parse(readFileSync(themePath, 'utf-8'));
+
+  // Final spec = deepMerge(layout_base, theme_spec, style_colors, project_overrides).
+  let layoutSpec: LayoutSpec = deepMerge(baseSpec, themeSpec);
   if (styleSpec.colors) {
     layoutSpec = deepMerge(layoutSpec, { colors: styleSpec.colors });
   }
   if (lectureProfile.layout_overrides) {
     layoutSpec = deepMerge(layoutSpec, lectureProfile.layout_overrides);
+  }
+
+  // ── Validate the merged spec has a usable region model ─────────────────────
+  if (!layoutSpec.regions || Object.keys(layoutSpec.regions).length === 0) {
+    console.error(`${RESOLVE_ERROR_PREFIX}merged spec has no "regions" block (theme=${theme}).`);
+    process.exit(1);
+  }
+  if (!layoutSpec.slide_types || Object.keys(layoutSpec.slide_types).length === 0) {
+    console.error(`${RESOLVE_ERROR_PREFIX}merged spec has no "slide_types" block (theme=${theme}).`);
+    process.exit(1);
   }
 
   // ── Build derived geometry, colors, and font sizes ────────────────────────
@@ -802,18 +882,41 @@ async function main() {
 
     const n = idx + 1;
 
-    if (data.isTitleSlide) {
-      await renderTitleSlide(renderer, pdfDoc, data, n, TOTAL, layoutSpec, coords, colors, sizes);
-    } else if (data.isDividerSlide && theme === 'scroll') {
-      await renderDividerSlide(renderer, pdfDoc, data, n, TOTAL, imgDir, layoutSpec, coords, colors, sizes);
-    } else if (data.isPunchline && theme === 'slideshow') {
-      await renderPunchlineSlide(renderer, pdfDoc, data, n, TOTAL, layoutSpec, coords, colors, sizes);
+    // AC-2: dispatch is driven by which slide_types the THEME declares, not by
+    // theme name. isDividerSlide + declared "divider"  → renderDividerSlide;
+    // isPunchline     + declared "punchline" → renderPunchlineSlide;
+    // isTitleSlide    + declared "title"      → renderTitleSlide;
+    // otherwise                            → "standard".
+    const slideTypes = layoutSpec.slide_types ?? {};
+    const has        = (t: string) => !!(slideTypes[t] && slideTypes[t].regions);
+
+    let type: 'title' | 'divider' | 'punchline' | 'standard';
+    if (data.isTitleSlide && has('title')) {
+      type = 'title';
+    } else if (data.isDividerSlide && has('divider')) {
+      type = 'divider';
+    } else if (data.isPunchline && has('punchline')) {
+      type = 'punchline';
     } else {
-      await renderStandardSlide(renderer, pdfDoc, data, n, TOTAL, imgDir, layoutSpec, coords, colors, sizes);
+      type = 'standard';
     }
 
+    const declared = slideTypes[type]?.regions ?? [];
+    // Per-slide-type region resolver: honours slide_type_overrides[type][name].
+    const region = (name: string) => coords.region(name, type);
+
+    const ctx: RenderCtx = {
+      r: renderer, doc: pdfDoc, data, n, total: TOTAL, imgDir,
+      spec: layoutSpec, coords, colors, sizes, declared, region,
+    };
+
+    if (type === 'title')          renderTitleSlide(ctx);
+    else if (type === 'divider')   await renderDividerSlide(ctx);
+    else if (type === 'punchline') renderPunchlineSlide(ctx);
+    else                           await renderStandardSlide(ctx);
+
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
-      console.log(`  Slide ${idx + 1}/${TOTAL}...`);
+      console.log(`  Slide ${idx + 1}/${TOTAL}... [${type}]`);
     }
   }
 

@@ -48,10 +48,12 @@ After playwright install, also run: `bunx playwright install chromium`
 | script | version | status | description | cli-usage |
 |--------|---------|--------|-------------|-----------|
 | `download-font.ts` | 1.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
-| `gen-slides-pdf.ts` | 1.1.0 | active | Generate full or sample PDF deck from slidedata.json (use --sample N to limit) | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
+| `gen-slides-pdf.ts` | 1.2.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); use --sample N to limit | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
 | `measure-layout.ts` | 1.0.0 | active | Measure HTML slide layout using Playwright; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
-| `validate-theme-styles.ts` | 1.0.0 | active | Cross-validate theme.json compatible_styles ↔ styles/ directory; flags missing style.css and orphaned style folders | `bun scripts/co-deck/validate-theme-styles.ts` |
+| `validate-theme-styles.ts` | 2.0.0 | active | Validate html-themes structure for the unified region-based layout model (ADR-0045): shared-pool integrity, theme.json consistency, region schema + slide_type↔region cross-check, Layer-0 layout_base.json skeleton | `bun scripts/co-deck/validate-theme-styles.ts [--root <path>]` |
+| `generate-themes-manifest.ts` | 1.0.0 | active | Scan themes/ + styles/ and emit preview/themes-manifest.js (file://-safe global) so preview.html dropdowns populate without fetch() | `bun scripts/co-deck/generate-themes-manifest.ts [--root <path>]` |
+| `scaffold-theme-style.ts` | 1.0.0 | active | Scaffold a new theme (themes/<name>/{template.html,theme.json,theme.css,pdf_layout_spec.json}) or style (styles/<name>/{style.css,pdf_color_spec.json}); refuses to overwrite; regenerates manifest | `bun scripts/co-deck/scaffold-theme-style.ts --theme <name> [--style <name>]` |
 
 Also available in `scripts/` root (not co-deck specific):
 
@@ -101,4 +103,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
 
-*Last Updated: 2026-06-21 — added validate-theme-styles.ts (1.0.0) for compatible_styles ↔ styles/ cross-validation; previous: Design Note updated to ADR-0033 canonical pattern reference*
+*Last Updated: 2026-06-21 — Phase 3 (ADR-0045): bumped validate-theme-styles.ts to 2.0.0 (region schema + shared pool); added generate-themes-manifest.ts (1.0.0) and scaffold-theme-style.ts (1.0.0); previous: validate-theme-styles.ts (1.0.0) for compatible_styles ↔ styles/ cross-validation*

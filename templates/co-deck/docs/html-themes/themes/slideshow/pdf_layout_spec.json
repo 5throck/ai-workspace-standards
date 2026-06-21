@@ -1,5 +1,6 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "_comment": "Slideshow theme — region schema (ADR-0045 Decision #2). Region values derived from the prior content_*/counter_* fields, FIXING the bug where slideshow rendered with scroll's defaults. buildCoords() now consumes these regions uniformly.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -10,15 +11,29 @@
     "viewport_px": null,
     "_viewport_px_note": "Requires Playwright measurement: bun scripts/co-deck/measure-layout.ts --theme slideshow. Until measured, px-based font sizes fall back to pt equivalents via gen-slides-pdf.ts defaults."
   },
-  "layout": {
-    "content_x_pct": 0.05,
-    "content_y_pct": 0.15,
-    "content_w_pct": 0.90,
-    "content_h_pct": 0.70,
-    "title_y_pct": 0.25,
-    "main_y_pct": 0.42,
-    "counter_x_pct": 0.90,
-    "counter_y_pct": 0.05
+  "regions": {
+    "header":  null,
+    "title":   { "x_pct": 0.05, "y_pct": 0.25, "w_pct": 0.90, "h_pct": 0.15 },
+    "content": { "x_pct": 0.05, "y_pct": 0.15, "w_pct": 0.90, "h_pct": 0.70 },
+    "visual":  { "x_pct": 0.55, "y_pct": 0.20, "w_pct": 0.40, "h_pct": 0.65, "fit": "contain" },
+    "meta":    { "x_pct": 0.90, "y_pct": 0.05, "w_pct": 0.08, "h_pct": 0.04 },
+    "toc":     null
+  },
+  "slide_types": {
+    "title":     { "regions": ["title", "subtitle"] },
+    "punchline": { "regions": ["title", "subtitle"] },
+    "standard":  { "regions": ["title", "content", "visual", "meta"] }
+  },
+  "slide_type_overrides": {
+    "title": {
+      "title":    { "x_pct": 0.10, "y_pct": 0.30, "w_pct": 0.80, "h_pct": 0.15 },
+      "subtitle": { "x_pct": 0.10, "y_pct": 0.48, "w_pct": 0.80, "h_pct": 0.10 }
+    },
+    "punchline": {
+      "title":    { "x_pct": 0.10, "y_pct": 0.35, "w_pct": 0.80, "h_pct": 0.15 },
+      "subtitle": { "x_pct": 0.10, "y_pct": 0.55, "w_pct": 0.80, "h_pct": 0.10 },
+      "content":  { "x_pct": 0.10, "y_pct": 0.20, "w_pct": 0.80, "h_pct": 0.60 }
+    }
   },
   "fonts": {
     "title_pt": 36.0,
@@ -31,12 +46,6 @@
     "bullet_px": 36.0,
     "bullet_gap_px": 22.0,
     "punchline_px": 72.0
-  },
-  "slide_types": {
-    "title": true,
-    "divider": false,
-    "punchline": true,
-    "standard": true
   },
   "image_zones": {
     "standard": {
@@ -64,12 +73,5 @@
     "crop_marks": false,
     "page_numbers": true,
     "page_number_position": "bottom-right"
-  },
-  "slide_type_overrides": {
-    "punchline": {
-      "content_x_pct": 0.10,
-      "content_y_pct": 0.20,
-      "content_w_pct": 0.80
-    }
   }
 }

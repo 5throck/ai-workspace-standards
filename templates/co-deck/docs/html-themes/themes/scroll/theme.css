@@ -1,0 +1,61 @@
+/* scroll theme extension — paradigm-specific UI extracted from the shared foundation (TOC panel, progress bar). Loaded after styles/base.css. */
+
+/* ── TOC panel (scroll-specific) ─────────────────────────────────── */
+#viewer {
+  display: flex;
+  min-height: 100vh;
+}
+
+#toc-panel {
+  width: 220px;
+  flex-shrink: 0;
+  background: #1a1a2e;
+  padding: 1rem 0.75rem;
+  transition: width 0.25s ease;
+}
+
+#toc-panel.collapsed {
+  width: 48px;
+  overflow: hidden;
+}
+
+.toc-nav { margin-top: 2.5rem; }
+
+.toc-list { list-style: none; padding: 0; margin: 0; }
+
+.toc-item {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s, color 0.15s;
+}
+
+.toc-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.toc-item.active { background: rgba(74, 144, 217, 0.2); color: #4a90d9; }
+.toc-item.toc-section { color: rgba(255,255,255,0.35); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; cursor: default; margin-top: 0.5rem; }
+
+.toc-toggle {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.75rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+#slide-container { flex: 1; padding: 1rem; }
+
+/* ── Progress bar ────────────────────────────────────────────────── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,0.1); z-index: 100;
+}
+#progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }

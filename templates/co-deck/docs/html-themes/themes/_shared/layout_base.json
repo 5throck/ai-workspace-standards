@@ -1,0 +1,22 @@
+{
+  "version": "1.2.0",
+  "_comment": "Layer 0 shared defaults for the unified region-based layout model (ADR-0045 Decision #2). Per-theme pdf_layout_spec.json overrides regions/slide_types; page/print here are the 16:9 baseline.",
+  "page": {
+    "width_mm": 338.7,
+    "height_mm": 190.5,
+    "aspect_ratio": "16:9"
+  },
+  "print": {
+    "crop_marks": false,
+    "page_numbers": true,
+    "page_number_position": "bottom-right"
+  },
+  "regions": {
+    "header": null,
+    "title": null,
+    "content": null,
+    "visual": null,
+    "meta": null,
+    "toc": null
+  }
+}
