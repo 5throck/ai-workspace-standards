@@ -422,9 +422,10 @@ CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artif
 | `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
+| `presentations/<project>/images/` | **Project-local images** — SVG-generated concept diagram PNGs + SVG source files; NOT shared across projects |
 | `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
 | `presentations/assets/icons/` | **Shared icon pool** |
-| `presentations/assets/images/` | **Shared image pool** — slug-named, cross-project reuse |
+| `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
