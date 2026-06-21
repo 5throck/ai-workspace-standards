@@ -1,5 +1,6 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "_comment": "Scroll theme — region schema (ADR-0045 Decision #2). Region values derived from the prior coordinate fields so rendering is preserved. slide_types declare which regions each slide uses; slide-type-specific region values override the base region for that slide type.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -9,27 +10,29 @@
   "calibration": {
     "viewport_px": 611.4
   },
-  "layout": {
-    "pad_x_pct": 0.0438,
-    "header_y_pct": 0.091,
-    "header_h_pct": 0.064,
-    "title_y_pct": 0.224,
-    "main_y_pct": 0.349,
-    "bullet_w_pct": 0.503,
-    "vis_x_pct": 0.584,
-    "vis_y_pct": 0.390,
-    "vis_w_pct": 0.372,
-    "vis_h_pct": 0.561,
-    "vis_pad_pct": 0.052,
-    "ts_title_y_pct": 0.3967,
-    "ts_sub_y_pct": 0.5346,
-    "ts_meta_y_pct": 0.6676,
-    "ts_w_pct": 0.9123,
-    "div_img_x_pct": 0.5582,
-    "div_img_y_pct": 0.2613,
-    "div_img_w_pct": 0.3972,
-    "div_img_h_pct": 0.6059,
-    "div_txt_w_pct": 0.4766
+  "regions": {
+    "header":  { "x_pct": 0.0,    "y_pct": 0.091,  "w_pct": 1.0,    "h_pct": 0.064 },
+    "title":   { "x_pct": 0.0438, "y_pct": 0.224,  "w_pct": 0.9124, "h_pct": 0.10  },
+    "content": { "x_pct": 0.0438, "y_pct": 0.349,  "w_pct": 0.503,  "h_pct": 0.651 },
+    "visual":  { "x_pct": 0.584,  "y_pct": 0.390,  "w_pct": 0.372,  "h_pct": 0.561, "fit": "contain" },
+    "meta":    null,
+    "toc":     null
+  },
+  "slide_types": {
+    "title":   { "regions": ["header", "title", "subtitle", "meta"] },
+    "divider": { "regions": ["header", "title", "visual"] },
+    "standard":{ "regions": ["header", "title", "content", "visual"] }
+  },
+  "slide_type_overrides": {
+    "title": {
+      "title":    { "x_pct": 0.0438, "y_pct": 0.3967, "w_pct": 0.9123, "h_pct": 0.10 },
+      "subtitle": { "x_pct": 0.0438, "y_pct": 0.5346, "w_pct": 0.9123, "h_pct": 0.10 },
+      "meta":     { "x_pct": 0.0438, "y_pct": 0.6676, "w_pct": 0.9123, "h_pct": 0.08 }
+    },
+    "divider": {
+      "title":  { "x_pct": 0.0438, "y_pct": 0.40,   "w_pct": 0.4766, "h_pct": 0.45 },
+      "visual": { "x_pct": 0.5582, "y_pct": 0.2613, "w_pct": 0.3972, "h_pct": 0.6059, "fit": "cover" }
+    }
   },
   "fonts": {
     "title_pt": 28.0,
@@ -52,12 +55,6 @@
     "ts_title_px": 70.0,
     "div_title_px": 56.0,
     "div_desc_px": 28.16
-  },
-  "slide_types": {
-    "title": true,
-    "divider": true,
-    "punchline": false,
-    "standard": true
   },
   "image_zones": {
     "standard": {
@@ -101,14 +98,5 @@
     "crop_marks": false,
     "page_numbers": true,
     "page_number_position": "bottom-right"
-  },
-  "slide_type_overrides": {
-    "title": {
-      "title_y_pct": 0.3967,
-      "content_w_pct": 0.9123
-    },
-    "divider": {
-      "text_w_pct": 0.4766
-    }
   }
 }

@@ -39,6 +39,7 @@
     "standard": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_theme": "docs/html-themes/themes/slideshow/theme.css",
   "added": "2026-06-21",
   "author": "co-deck"
 }

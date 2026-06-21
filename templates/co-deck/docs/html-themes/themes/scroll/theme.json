@@ -14,13 +14,14 @@
     "recommended_slide_count": "30-60",
     "notes": "Scroll layout allows higher information density per slide. Longer explanations and sub-bullet nesting are acceptable."
   },
-  "compatible_styles": ["classic", "minimal", "academic"],
-  "incompatible_styles": [
+  "compatible_styles": ["classic", "minimal", "academic", "visual-heavy"],
+  "partial_styles": [
     {
       "name": "visual-heavy",
-      "reason": "Full-bleed background images work best with fixed-height slides. Scroll layout's variable-height slides may cause background-image sizing issues on long content slides."
+      "reason": "Works well for short/visual slides (cover, divider, image-driven content). Full-bleed background images may have sizing issues on scroll's variable-height long content slides; prefer classic/academic/minimal for text-dense slides."
     }
   ],
+  "incompatible_styles": [],
   "recommended_structure": {
     "pattern": "Cover → Speaker Intro → [Part Divider → 8-12 Content → Summary] × N → Contact",
     "audience_fit": ["graduate", "practitioner", "academic"],
@@ -35,6 +36,7 @@
     "standard": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_theme": "docs/html-themes/themes/scroll/theme.css",
   "added": "2026-06-21",
   "author": "co-deck"
 }

@@ -8,11 +8,11 @@
 
 ## Themes
 
-A **theme** is a rendering paradigm package of **3 files**: HTML skeleton (`template.html`) + metadata/content-rules (`theme.json`) + PDF layout specification (`pdf_layout_spec.json`).
+A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`template.html`) + metadata/content-rules (`theme.json`) + per-theme CSS extension (`theme.css`) + region-based PDF layout specification (`pdf_layout_spec.json`).
 
 | Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
-| `scroll` | 1.0.0 | active | Vertical scroll — all slides in DOM | Scroll + TOC panel | Required | classic, minimal, academic | `themes/scroll/` |
+| `scroll` | 1.0.0 | active | Vertical scroll — all slides in DOM | Scroll + TOC panel | Required | classic, minimal, academic, visual-heavy (⚠ partial) | `themes/scroll/` |
 | `slideshow` | 1.0.0 | active | Fullscreen single-slide, animated transitions | Prev/Next + arrow keys | None | classic, minimal | `themes/slideshow/` |
 
 ### Theme Package Files
@@ -22,20 +22,40 @@ Each theme folder contains:
 | File | Required | Purpose |
 |------|----------|---------|
 | `template.html` | ✅ | HTML skeleton with `<!-- INJECT:CSS -->`, `<!-- INJECT:slideData -->`, `<!-- INJECT:slides -->` placeholders |
-| `theme.json` | ✅ | `content_rules`, `compatible_styles`, `recommended_structure`, `toc_required`, `slide_types` |
-| `pdf_layout_spec.json` | ✅ | PDF geometry (`page`), calibration (`viewport_px`), layout percentages, font sizes, `slide_types` |
+| `theme.json` | ✅ | `content_rules`, `compatible_styles`, `partial_styles`, `incompatible_styles`, `recommended_structure`, `toc_required`, `slide_types`, `css_base`, `css_theme` |
+| `theme.css` | ✅ | Per-theme CSS extension layered between `base.css` and `styles/<style>/style.css` (see CSS Load Order). Defines theme-specific structural rules (e.g. scroll TOC panel, slideshow card geometry). |
+| `pdf_layout_spec.json` | ✅ | Region-based PDF layout: `page` geometry, `calibration.viewport_px`, `regions.*`, `slide_types[type].regions`, `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print` |
 
-### `pdf_layout_spec.json` Schema
+> **`css_theme` field** (`theme.json`): each theme declares the path to its `theme.css` (e.g. `"css_theme": "docs/html-themes/themes/scroll/theme.css"`). html-build reads this to inject the per-theme CSS in the correct order.
+
+### `pdf_layout_spec.json` Schema (region model, v1.2.0)
+
+The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinates are declared once per region name; slide renderers iterate the regions declared for each slide type. `gen-slides-pdf.ts` v1.2.0 `buildCoords()` is **theme-agnostic** — it resolves `regions.*` uniformly for every theme and dispatches render functions by declared `slide_types`, not by theme name.
 
 ```json
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "page": { "width_mm": 338.7, "height_mm": 190.5, "margin_mm": 5.0, "aspect_ratio": "16:9" },
   "calibration": { "viewport_px": 611.4 },
-  "layout": { "pad_x_pct": 0.0438, "header_y_pct": 0.091, "..." : "..." },
-  "fonts": { "title_pt": 28.0, "bullet_pt": 12.5, "..." : "..." },
-  "line_heights": { "title_px": 46.0, "..." : "..." },
-  "slide_types": { "title": true, "divider": true, "punchline": false, "standard": true },
+  "regions": {
+    "header":  { "x_pct": 0.0,    "y_pct": 0.091,  "w_pct": 1.0,    "h_pct": 0.064 },
+    "title":   { "x_pct": 0.0438, "y_pct": 0.224,  "w_pct": 0.9124, "h_pct": 0.10  },
+    "content": { "x_pct": 0.0438, "y_pct": 0.349,  "w_pct": 0.503,  "h_pct": 0.651 },
+    "visual":  { "x_pct": 0.584,  "y_pct": 0.390,  "w_pct": 0.372,  "h_pct": 0.561, "fit": "contain" },
+    "meta":    null,
+    "toc":     null
+  },
+  "slide_types": {
+    "title":    { "regions": ["header", "title", "subtitle", "meta"] },
+    "divider":  { "regions": ["header", "title", "visual"] },
+    "standard": { "regions": ["header", "title", "content", "visual"] }
+  },
+  "slide_type_overrides": {
+    "title":   { "title": { "x_pct": 0.0438, "y_pct": 0.3967, "w_pct": 0.9123, "h_pct": 0.10 } },
+    "divider": { "visual": { "x_pct": 0.5582, "y_pct": 0.2613, "w_pct": 0.3972, "h_pct": 0.6059, "fit": "cover" } }
+  },
+  "fonts": { "title_pt": 28.0, "bullet_pt": 12.5 },
+  "line_heights": { "title_px": 46.0, "bullet_px": 29.44 },
   "image_zones": {
     "standard": { "x_pct": 0.584, "y_pct": 0.390, "w_pct": 0.372, "h_pct": 0.561, "fit": "contain" },
     "divider":  { "x_pct": 0.558, "y_pct": 0.261, "w_pct": 0.397, "h_pct": 0.606, "fit": "cover" }
@@ -46,34 +66,37 @@ Each theme folder contains:
     "divider":  { "max_title_chars": 20, "max_desc_chars": 60 },
     "title":    { "max_title_chars": 40, "max_subtitle_chars": 80 }
   },
-  "print": { "bleed_mm": 3.0, "crop_marks": false, "page_numbers": true, "page_number_position": "bottom-right" },
-  "slide_type_overrides": {
-    "title":   { "title_y_pct": 0.3967, "content_w_pct": 0.9123 },
-    "divider": { "text_w_pct": 0.4766 }
-  }
+  "print": { "bleed_mm": 3.0, "crop_marks": false, "page_numbers": true, "page_number_position": "bottom-right" }
 }
 ```
 
-**Mandatory fields**: `page`, `calibration.viewport_px`, `layout.*`, `fonts.title_pt`, `fonts.bullet_pt`
+**Mandatory fields**: `page`, `calibration.viewport_px`, `regions.*`, `slide_types[type].regions`, `fonts.title_pt`, `fonts.bullet_pt`
 **Optional fields**: other `fonts.*`, `line_heights.*` (script falls back to built-in defaults if absent)
-**`slide_types`**: declares which slide types this theme supports — read by Storyline agent at Stage 2
+**`slide_types`** (top-level object): also appears in `theme.json` as the boolean "which slide types this theme supports" declaration — read by Storyline agent at Stage 2.
+
+#### Region model
+
+- **`regions.*`**: page-relative layout rectangles. Each value is either `null` (region not used by this theme) or an object `{ x_pct, y_pct, w_pct, h_pct, fit? }` where all `*_pct` are fractions of page width/height in `[0, 1]` and `fit` ∈ `"contain"` | `"cover"` | `"fill"` (optional, image-fitting hint for the `visual` region).
+- **`slide_types[type].regions`**: array of region names that the given slide type uses. The PDF renderer iterates exactly these regions; theme name is irrelevant to dispatch. A region referenced here that resolves to `null` (and is not overridden) is treated as "absent for this slide" — renderers skip it via the optional-region resolver.
+- **`slide_type_overrides[type]`**: per-slide-type region value overrides that supersede the theme-wide `regions.*` value for that slide type only. Used for title/divider slides whose geometry differs from standard.
+
+#### Layer 0 — `_shared/layout_base.json`
+
+`themes/_shared/layout_base.json` holds the **Layer 0 defaults** for the region model: the 16:9 `page` baseline, `print` defaults, and a region skeleton whose values are all `null` (`header`, `title`, `content`, `visual`, `meta`, `toc`). It is the merge base — it never fills a region a theme intends to leave null. `_shared/` is excluded from the theme scan (it is not itself a theme).
 
 #### `image_zones`
-Named image placement zones per slide type. `x_pct`, `y_pct`, `w_pct`, `h_pct` are page-relative fractions. `fit`: `"contain"` (preserve aspect ratio) | `"cover"` (fill zone). Omit a slide type key if that type has no image zone (e.g., slideshow standard). `toc: null` for themes that do not use TOC.
+Named image placement zones per slide type (legacy companion to the `visual` region; kept for backwards compatibility and for styles that key image geometry by slide type). `x_pct`, `y_pct`, `w_pct`, `h_pct` are page-relative fractions. `fit`: `"contain"` (preserve aspect ratio) | `"cover"` (fill zone). Omit a slide type key if that type has no image zone (e.g., slideshow standard). Set `toc: null` for themes that do not use TOC.
 
 #### `toc`
 TOC panel layout (scroll theme only). `width_pct`: TOC panel width as fraction of page width. `item_h_px`: height per TOC item. `indent_px`: indentation per nesting level. `max_visible_items`: maximum items visible without scrolling. Set to `null` for themes that do not use TOC.
 
 #### `content_constraints`
-Geometry-derived content limits per slide type. Values are derived from `layout` area dimensions divided by `line_heights`. Read by the Storyline agent at Stage 2 to determine slide density. Keep in sync with the geometry-related entries in `theme.json content_rules`.
+Geometry-derived content limits per slide type. Values are derived from region area dimensions divided by `line_heights`. Read by the Storyline agent at Stage 2 to determine slide density. Keep in sync with the geometry-related entries in `theme.json content_rules`.
 
 #### `print`
 PDF export and print specifications. `bleed_mm`: bleed area for professional printing (0 = no bleed). `crop_marks`: whether to include crop marks. `page_numbers`: whether to include page numbers in PDF output. `page_number_position`: `"bottom-right"` | `"bottom-center"` | `"bottom-left"`.
 
-#### `slide_type_overrides`
-Per-slide-type layout overrides that supersede the global `layout` values for specific slide types only. Slide types not listed here inherit all global `layout` values unchanged.
-
-### `theme.json` `slide_types` Field
+### `theme.json` `slide_types` + `css_theme` Fields
 
 ```json
 "slide_types": {
@@ -81,8 +104,12 @@ Per-slide-type layout overrides that supersede the global `layout` values for sp
   "divider":  true,   // scroll only
   "punchline": false, // slideshow only
   "standard": true
-}
+},
+"css_base":  "docs/html-themes/styles/base.css",
+"css_theme": "docs/html-themes/themes/<theme>/theme.css"
 ```
+
+`css_base` points at the shared foundation; `css_theme` points at this theme's per-theme CSS extension. html-build reads both and injects them in CSS Load Order (see below).
 
 ### Compatibility Matrix
 
@@ -93,7 +120,23 @@ Per-slide-type layout overrides that supersede the global `layout` values for sp
 | `visual-heavy` | ⚠️ partial | ❌ incompatible |
 | `academic` | ✅ | ❌ incompatible |
 
-**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json notes) · ❌ Incompatible
+**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
+
+> **`visual-heavy` is RETAINED** as an active style. It is **scroll-partial** (works well for short/visual slides — cover, divider, image-driven content; avoid for text-dense scroll slides) and **slideshow-incompatible** (full-bleed background-image conflicts with slideshow's rounded-card layout). Listed in `scroll/theme.json` under both `compatible_styles` and `partial_styles`; listed in `slideshow/theme.json` under `incompatible_styles`.
+
+---
+
+## CSS Load Order
+
+The shared style/color pool (ADR-0045 Decision B) is the single source for all themes. CSS is injected by html-build in this fixed order (later layers override earlier ones):
+
+```
+1. styles/base.css                       — shared foundation: structural rules + default variables
+2. themes/<theme>/theme.css              — per-theme extension (TOC panel, card geometry, etc.)
+3. styles/<style>/style.css              — per-style visual overrides (colors, fonts, spacing)
+```
+
+`theme.json` declares `css_base` (→ `styles/base.css`) and `css_theme` (→ `themes/<theme>/theme.css`) so html-build can resolve both paths without hardcoding. Styles live in the **shared `styles/` pool**, NOT under individual themes — any theme can pair with any compatible style without duplicating CSS.
 
 ---
 
@@ -134,33 +177,93 @@ Referenced by `gen-slides-pdf.ts` as `spec.colors.<role>`. Per-project accent ov
 
 | File | Purpose |
 |------|---------|
-| `docs/html-themes/styles/base.css` | Shared CSS foundation: structural rules + default color/font/spacing variables. Injected before `style.css` by html-build. |
+| `docs/html-themes/styles/base.css` | Shared CSS foundation: structural rules + default color/font/spacing variables. Injected first in the CSS Load Order by html-build. |
+
+---
+
+## Directory Structure
+
+```
+docs/html-themes/
+├── THEMES.md                              # THIS FILE — authoritative theme + style registry
+├── styles/                                # SHARED style/color pool (ADR-0045 Decision B)
+│   ├── base.css                           # shared foundation (Layer 1 of CSS Load Order)
+│   ├── classic/      { style.css, pdf_color_spec.json }
+│   ├── minimal/      { style.css, pdf_color_spec.json }
+│   ├── visual-heavy/ { style.css, pdf_color_spec.json }   # RETAINED — scroll-partial / slideshow-incompatible
+│   └── academic/     { style.css, pdf_color_spec.json }
+├── themes/
+│   ├── _shared/
+│   │   └── layout_base.json               # Layer 0 — region skeleton (all null) + 16:9 page + print defaults
+│   ├── scroll/
+│   │   ├── template.html
+│   │   ├── theme.json                     # css_base + css_theme + compatible_styles + partial_styles[]
+│   │   ├── theme.css                      # per-theme extension (Layer 2 of CSS Load Order)
+│   │   └── pdf_layout_spec.json           # region schema (regions.*, slide_types[type].regions, ...)
+│   └── slideshow/
+│       ├── template.html
+│       ├── theme.json
+│       ├── theme.css
+│       └── pdf_layout_spec.json
+└── preview/
+    ├── preview.html                       # theme × style previewer (dropdowns populated from manifest)
+    └── themes-manifest.js                 # AUTO-GENERATED — file://-safe manifest for dropdown population
+```
+
+> Styles stay in the shared `styles/` pool — they are NOT nested under individual themes. Any theme can pair with any compatible style. `themes/_shared/` is the Layer 0 base, not a theme itself (excluded from the theme scan).
+
+---
+
+## Scripts & Tools
+
+All scripts live under `templates/co-deck/scripts/co-deck/`. Run from the workspace root via `bun`.
+
+| Script | Version | Purpose |
+|--------|---------|---------|
+| `validate-theme-styles.ts` | 2.0.0 | Validates the unified region-based layout model: shared-pool integrity (each `styles/<name>/` has `style.css` + `pdf_color_spec.json`), `theme.json` `compatible_styles`/`partial_styles`/`incompatible_styles` consistency, region schema (each region is `null` or `{x_pct,y_pct,w_pct,h_pct,fit?}` with `*_pct ∈ [0,1]`), `slide_types[type].regions` ↔ region cross-check, and Layer 0 `_shared/layout_base.json` skeleton. Run after any theme/style edit. |
+| `generate-themes-manifest.ts` | 1.0.0 | Scans `themes/` (excluding `_shared`) and `styles/` → emits `preview/themes-manifest.js` (a `file://`-safe `<script>`-loadable global, since `fetch()` of local JSON is blocked on `file://`). **Regenerate after adding or removing any theme or style.** |
+| `scaffold-theme-style.ts` | 1.0.0 | Scaffolds a new theme (`--theme <name>`) or style (`--style <name>`) with the correct file layout — region-skeleton stubs for themes, adapted style copies for styles. Auto-regenerates the manifest. Never overwrites existing directories. |
+
+```bash
+# Validate after editing any theme/style/region spec
+bun scripts/co-deck/validate-theme-styles.ts
+
+# Regenerate the preview manifest (also run automatically by scaffold-theme-style.ts)
+bun scripts/co-deck/generate-themes-manifest.ts
+
+# Scaffold a new theme or style (stubs region-skeleton files + regenerates manifest)
+bun scripts/co-deck/scaffold-theme-style.ts --theme <name>
+bun scripts/co-deck/scaffold-theme-style.ts --style <name>
+```
 
 ---
 
 ## Adding a New Theme
 
-1. Create `docs/html-themes/themes/<name>/` folder
-2. Write `template.html` — HTML skeleton with `<!-- INJECT:CSS -->`, `<!-- INJECT:slideData -->`, `<!-- INJECT:slides -->` placeholders
-3. Write `theme.json` — include `name`, `version`, `content_rules`, `compatible_styles`, `incompatible_styles`, `toc_required`, `slide_types`
-4. Write `pdf_layout_spec.json` — page geometry, `calibration.viewport_px` (measure via Playwright on `template.html`), layout percentages, font sizes, `slide_types`
-5. Register in this file (THEMES.md) — add row to Themes table and update Compatibility Matrix
-6. Update `agents/html-build.md` → Available themes list
-7. Update `docs/co-deck.context.md` → HTML Themes section
-8. Run `bun scripts/audit.ts` to verify
+1. Run `bun scripts/co-deck/scaffold-theme-style.ts --theme <name>` — stubs `themes/<name>/{template.html, theme.json, theme.css, pdf_layout_spec.json}` with region-skeleton placeholders and auto-regenerates the manifest.
+2. Edit `template.html` — HTML skeleton with `<!-- INJECT:CSS -->`, `<!-- INJECT:slideData -->`, `<!-- INJECT:slides -->` placeholders.
+3. Edit `theme.json` — include `name`, `version`, `content_rules`, `compatible_styles`, `partial_styles` (if any), `incompatible_styles` (with `reason`), `toc_required`, `slide_types`, `css_base`, `css_theme`.
+4. Edit `theme.css` — per-theme structural extension (keep visual overrides in styles).
+5. Edit `pdf_layout_spec.json` — fill `regions.*`, `slide_types[type].regions`, `slide_type_overrides` (if needed), `fonts`, `line_heights`, `content_constraints`, `toc`, `print`, `page`, `calibration.viewport_px` (measure via Playwright on `template.html`).
+6. Register in this file (THEMES.md) — add row to Themes table and update Compatibility Matrix.
+7. Update `agents/html-build.md` → Available themes list.
+8. Update `docs/co-deck.context.md` → Theme & Style System section.
+9. Run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool).
+10. Run `bun scripts/audit.ts` to verify.
 
 > Use the **T-Stage pipeline** (`skills/theme-authoring/SKILL.md`) — T-0 through T-4 — for step-by-step guidance.
 
 ## Adding a New Style
 
-1. Create `docs/html-themes/styles/<name>/style.css` — CSS variable overrides only (no structural rules; use `[data-style="<name>"]` selectors for structural exceptions)
-2. Create `docs/html-themes/styles/<name>/pdf_color_spec.json` — 12 role-based RGB color keys (see schema above)
-3. Update every `theme.json` that is compatible with this style → add to `compatible_styles`
-4. Register in this file (THEMES.md) — add row to Styles table and update Compatibility Matrix
-5. Update `docs/lecture-profile.md` → style field options comment
-6. Update `docs/co-deck.context.md` → HTML Themes section
-7. Run `bun scripts/co-deck/validate-theme-styles.ts` to verify `compatible_styles` ↔ `styles/` consistency
-8. Run `bun scripts/audit.ts` to verify
+1. Run `bun scripts/co-deck/scaffold-theme-style.ts --style <name>` — stubs `styles/<name>/{style.css, pdf_color_spec.json}` as adapted copies and auto-regenerates the manifest.
+2. Edit `styles/<name>/style.css` — CSS variable overrides only (no structural rules; use `[data-style="<name>"]` selectors for structural exceptions).
+3. Edit `styles/<name>/pdf_color_spec.json` — 12 role-based RGB color keys (see schema above).
+4. Update every `theme.json` that is compatible with this style → add to `compatible_styles` (or `partial_styles` with a `reason` if partial).
+5. Register in this file (THEMES.md) — add row to Styles table and update Compatibility Matrix.
+6. Update `docs/lecture-profile.md` → style field options comment.
+7. Update `docs/co-deck.context.md` → Theme & Style System section.
+8. Run `bun scripts/co-deck/validate-theme-styles.ts` to verify `compatible_styles` ↔ `styles/` consistency and region schema.
+9. Run `bun scripts/audit.ts` to verify.
 
 > Use the **Style Workflow** (`skills/theme-authoring/SKILL.md` → S-1 through S-3) for step-by-step guidance.
 
@@ -168,16 +271,17 @@ Referenced by `gen-slides-pdf.ts` as `spec.colors.<role>`. Per-project accent ov
 
 ---
 
-## 3-Layer PDF Merge
+## 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` builds the final PDF spec at runtime by merging 3 layers:
+`gen-slides-pdf.ts` (v1.2.0) builds the final PDF spec at runtime by `deepMerge`-ing 4 layers (later layers win on specific keys):
 
 ```
-Layer 1 (theme)  : docs/html-themes/themes/<theme>/pdf_layout_spec.json  → geometry, coordinates, fonts
-Layer 2 (style)  : docs/html-themes/styles/<style>/pdf_color_spec.json   → color palette
+Layer 0 (shared) : docs/html-themes/themes/_shared/layout_base.json      → region skeleton (all null) + 16:9 page + print defaults
+Layer 1 (theme)  : docs/html-themes/themes/<theme>/pdf_layout_spec.json  → regions.*, slide_types[type].regions, slide_type_overrides, fonts, line_heights, content_constraints, toc, print
+Layer 2 (style)  : docs/html-themes/styles/<style>/pdf_color_spec.json   → color palette (colors.<role>)
 Layer 3 (project): presentations/<project>/lecture-profile.md            → layout_overrides block
 ```
 
-Later layers win on specific keys. Missing keys fall back to the previous layer or built-in defaults.
+Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-06-21 — migrated style CSS to styles/<name>/style.css (removed overrides/ legacy path); base.css moved to styles/base.css; added validate-templates.ts to "Adding a New Style" guide; previous: added image_zones, toc, content_constraints, print, slide_type_overrides sections to pdf_layout_spec.json schema (v1.1.0)*
+*Last updated: 2026-06-21 — region-based layout model (ADR-0045 Decision #2): `pdf_layout_spec.json` v1.2.0 now declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; `themes/_shared/layout_base.json` (Layer 0) added; per-theme `theme.css` + `theme.json` `css_theme` field; 4-layer PDF merge; `preview/themes-manifest.js` (auto-generated); scripts `validate-theme-styles.ts` (v2.0.0), `generate-themes-manifest.ts` (v1.0.0), `scaffold-theme-style.ts` (v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Previous: migrated style CSS to styles/<name>/style.css; base.css moved to styles/base.css.*
