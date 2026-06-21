@@ -14,7 +14,7 @@ metadata:
   triggers:
     - promote variant
     - Phase B
-    - variant 승격
+    - variant promotion
     - promote to template
     - create template from prototype
 ---

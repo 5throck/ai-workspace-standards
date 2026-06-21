@@ -5,7 +5,7 @@ description: >
   Manages version snapshots of lecture files. Auto-backs up files before edits
   and restores prior versions on demand. Must be called before any file
   modification by any agent. Responds to "go back to previous version", "show
-  version list" (Korean: "이전 버전으로 돌아가고 싶어", "버전 목록 보여줘").
+  version list".
   Cross-cutting — applies to all workflow stages.
 status: active
 owner: version
@@ -20,8 +20,8 @@ Tracks every file change and manages snapshots so any prior state can be restore
 ## When to Use
 
 - Before another agent edits a file (Storyline, Design, Build, Measure, Export, etc.)
-- User says "go back to previous version" / "이전 버전으로 돌아가고 싶어"
-- User says "show version list" / "버전 목록 보여줘"
+- User says "go back to previous version"
+- User says "show version list"
 - PM Agent is about to perform a destructive (overwrite) change
 
 ---

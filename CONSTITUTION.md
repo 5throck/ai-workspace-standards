@@ -493,7 +493,25 @@ This annotation:
 
 Valid reasons include: AI context proximity (faster access without full CONSTITUTION.md load), variant-specific contextualization, platform-specific adaptation.
 
+#### Language Policy Exception — Korean Legal/Regulatory Content
+
+The English-only policy admits a narrow exception for files where Korean is legally
+or academically mandatory. To declare an exception, add to the file's frontmatter:
+
+```yaml
+lang: ko
+lang_reason: legal   # legal | source-material | proper-noun
+```
+
+The allowable values for `lang_reason` are:
+- `legal`: Statutory texts, ordinances, regulations, contracts where the Korean original has legal force.
+- `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
+- `proper-noun`: Files dominated by Korean proper nouns (e.g., institution names, person names).
+
+Exception is NOT available for: agents/*.md, skills/*.md, CONSTITUTION.md,
+CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.
+
 ---
 
-*Last Updated: 2026-06-20*
+*Last Updated: 2026-06-21*
 

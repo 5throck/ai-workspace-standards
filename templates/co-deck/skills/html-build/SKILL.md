@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: 1.3.0
+version: 1.3.1
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -10,7 +10,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-06-20
+last_reviewed: 2026-06-21
 prerequisites: design
 ---
 

@@ -14,8 +14,8 @@ metadata:
   triggers:
     - create variant
     - new variant
-    - 새 variant 만들기
-    - variant 생성
+    - create variant
+    - variant creation
     - scaffold new variant
     - new co- project
 ---

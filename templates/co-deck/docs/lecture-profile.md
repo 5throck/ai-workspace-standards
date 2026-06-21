@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 # ⚠️ MASTER TEMPLATE — DO NOT EDIT DIRECTLY FOR SPECIFIC LECTURES
 # This file acts as the master template.
 # It is automatically copied to 'presentations/<project>/lecture-profile.md' when you start a new project.

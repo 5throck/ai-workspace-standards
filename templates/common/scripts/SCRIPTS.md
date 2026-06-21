@@ -134,7 +134,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `upgrade-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-md-language.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
+| `validate-md-language.ts` | L0 | 1.4.0 | active | — | — | L0+L1 | — |
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.8 | active | —| —| L0 | —|
