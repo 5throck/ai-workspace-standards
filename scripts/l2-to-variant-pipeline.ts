@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.8.0
+ * @version 1.8.1
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -369,6 +369,34 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const failedCount = gapReports.filter(r => !r.passed).length;
     if (failedCount > 0) {
       console.warn(`⚠️  ${failedCount} file(s) have missing required sections. See _pipeline_report.md`);
+    }
+
+    // BLOCKING CHECK: AGENTS.md must have §-numbered structure and VARIANT-* markers.
+    // Without these, l2-to-variant-pipeline.ts injection has no anchors → silent drift.
+    const agentsMdPath = j(variantPath, 'AGENTS.md');
+    if (ex(agentsMdPath)) {
+      const { readUTF8File: ru2 } = await import('./lib/encoding-utils.js');
+      const agentsMdContent = ru2(agentsMdPath);
+      const requiredMarkers = [
+        'VARIANT-AGENTS-START',
+        'VARIANT-AGENT-DETAILS-START',
+        'VARIANT-DISPATCH-TRIGGERS-START',
+        'VARIANT-PHASE-GATE-START',
+        'VARIANT-SUBAGENT-ROSTER-START',
+        'VARIANT-ROLE-BOUNDARY-START',
+      ];
+      const missingMarkers = requiredMarkers.filter(m => !agentsMdContent.includes(`<!-- ${m} -->`));
+      const hasSectionedStructure = agentsMdContent.includes('## §1:') && agentsMdContent.includes('## §3:');
+      if (missingMarkers.length > 0 || !hasSectionedStructure) {
+        const issues: string[] = [];
+        if (!hasSectionedStructure) issues.push('missing §-numbered section structure (§1/§3/§5)');
+        if (missingMarkers.length > 0) issues.push(`missing VARIANT-* markers: ${missingMarkers.join(', ')}`);
+        console.error(`\n❌ PHASE 4.5 BLOCKING: AGENTS.md structure is misaligned with L1 template.`);
+        console.error(`   ${issues.join('; ')}`);
+        console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${variantPath.split(/[\\/]/).pop()}`);
+        console.error(`   Then re-run the pipeline.\n`);
+        process.exit(1);
+      }
     }
 
     console.log(`✅ PHASE 4.5 COMPLETE`);

@@ -436,6 +436,12 @@ When a user request matches a skill trigger, apply this priority order — **enf
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
+### Platform Skills Registry
+
+| Skill | Location | Purpose |
+|-------|----------|---------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
+
 ---
 
 

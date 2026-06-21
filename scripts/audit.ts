@@ -867,6 +867,24 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
                     Warn(`AGENTS.md PM Direct Execution Scope not synced to: templates/${entry}/AGENTS.md`);
                     syncWarnings++;
                 }
+                // Check for §-numbered structure and VARIANT-* placeholder markers (required for l2-to-variant-pipeline.ts injection)
+                const requiredMarkers = [
+                    'VARIANT-AGENTS-START',
+                    'VARIANT-AGENT-DETAILS-START',
+                    'VARIANT-DISPATCH-TRIGGERS-START',
+                    'VARIANT-PHASE-GATE-START',
+                    'VARIANT-SUBAGENT-ROSTER-START',
+                    'VARIANT-ROLE-BOUNDARY-START',
+                ];
+                const missingMarkers = requiredMarkers.filter(m => !variantContent.includes(`<!-- ${m} -->`));
+                if (missingMarkers.length > 0) {
+                    Fail(`templates/${entry}/AGENTS.md missing VARIANT-* markers: ${missingMarkers.join(', ')} — regenerate using L0 workspace script: regenerate-agents-md.ts --variant ${entry}`);
+                    syncWarnings++;
+                }
+                if (!variantContent.includes('## §1:') || !variantContent.includes('## §3:') || !variantContent.includes('## §5:')) {
+                    Fail(`templates/${entry}/AGENTS.md missing §-numbered section structure (§1/§3/§5) — regenerate using L0 workspace script: regenerate-agents-md.ts --variant ${entry}`);
+                    syncWarnings++;
+                }
             }
         }
         if (syncWarnings === 0) {
