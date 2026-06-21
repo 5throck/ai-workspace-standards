@@ -20,7 +20,7 @@
     "toc":     null
   },
   "slide_types": {
-    "title":    { "regions": ["title", "subtitle"] },
+    "title":    { "regions": ["title", "subtitle", "meta"] },
     "punchline": { "regions": ["title", "subtitle"] },
     "standard": { "regions": ["header", "title", "content", "visual", "meta"] },
     "profile":  { "regions": ["title", "content"] },
