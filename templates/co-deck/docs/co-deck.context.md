@@ -375,8 +375,9 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
 12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation.
+13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
 <!-- END VARIANT-INJECT -->
 
 ---
 
-*co-deck.context.md version: 2.1 — updated 2026-06-21: two-layer theme/style system (scroll/slideshow themes × classic/minimal/visual-heavy/academic styles); shared asset pool (presentations/assets/fonts|icons|images/); slug-based image naming + check-before-download; T-Stage authoring pipeline; THEMES.md registry; theme.json content_rules at Stage 2; Stage 0 expanded to 4 confirmation items; theme-authoring skill entry; domain rules 9-12 added*
+*co-deck.context.md version: 2.2 — updated 2026-06-21: domain rule 13 added (TypeScript-first); pm.md Constraints updated with TypeScript-first rule*
