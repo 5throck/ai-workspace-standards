@@ -1,6 +1,6 @@
 {
   "name": "co-deck",
-  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 10 agents (1 PM orchestrator + 9 specialists) covering research, source verification, content, design, image curation, HTML build (4 themes), layout measurement, and PDF export.",
+  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 11 agents (1 PM orchestrator + 10 specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (4 themes), layout measurement, and PDF export.",
   "variant_type": "lecture",
   "status": "beta",
   "version": "0.2.0",
@@ -18,8 +18,9 @@
     { "name": "source-verifier",  "file": "agents/source-verifier.md" },
     { "name": "storyline",        "file": "agents/storyline.md" },
     { "name": "design",           "file": "agents/design.md" },
-    { "name": "image-curator",    "file": "agents/image-curator.md" },
-    { "name": "html-build",       "file": "agents/html-build.md" },
+    { "name": "image-curator",      "file": "agents/image-curator.md" },
+    { "name": "diagram-specialist", "file": "agents/diagram-specialist.md" },
+    { "name": "html-build",         "file": "agents/html-build.md" },
     { "name": "measure",          "file": "agents/measure.md" },
     { "name": "pdf-export",       "file": "agents/pdf-export.md" }
   ],
@@ -27,9 +28,9 @@
     "variant_agents_dir": "agents",
     "pipeline_order": [
       "version", "research", "source-verifier", "storyline", "design",
-      "image-curator", "html-build", "measure", "pdf-export"
+      "image-curator", "diagram-specialist", "html-build", "measure", "pdf-export"
     ],
-    "optional": ["source-verifier", "image-curator"],
+    "optional": ["source-verifier", "image-curator", "diagram-specialist"],
     "skippable": ["source-verifier"],
     "retry_policy": {
       "source-verifier": {
@@ -38,7 +39,7 @@
         "failure_condition": "trust_score < trust_score_thresholds.pass OR core_message_source_failed"
       }
     },
-    "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < trust_score_thresholds.pass (90%) or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied."
+    "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < trust_score_thresholds.pass (90%) or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied. diagram-specialist: skip if no visual_spec fields exist in slide_deck.md. image-curator and diagram-specialist run in parallel at Stage 3.5."
   },
   "skills": [
     { "name": "version" },
