@@ -11,8 +11,8 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.3.6
- * @last_updated 2026-06-20
+ * @version 1.4.0
+ * @last_updated 2026-06-21
  * @license MIT
  */
 
@@ -487,6 +487,120 @@ function runCheckD(): DuplicateEntry[] {
 }
 
 /**
+ * Parse a variant-level SCRIPTS.md registry.
+ * Variant SCRIPTS.md format: | script | version | status | description | cli-usage |
+ * Returns map of { filename -> version }.
+ */
+function parseVariantScriptsMd(filePath: string): Map<string, string> {
+  const result = new Map<string, string>();
+  if (!existsSync(filePath)) return result;
+
+  const content = readFileSync(filePath, 'utf-8');
+  const registryMatch = content.match(/## Registry\r?\n([\s\S]*?)(?:\r?\n## |\s*$)/);
+  if (!registryMatch) return result;
+
+  const lines = registryMatch[1].split('\n');
+  for (const line of lines) {
+    if (!line.startsWith('|')) continue;
+    const cols = line.split('|').map(c => c.trim());
+    if (cols.length < 4) continue;
+    const rawName = cols[1];
+    if (!rawName.startsWith('`') || rawName === 'script') continue;
+    const filename = rawName.replace(/`/g, '').trim();
+    const version = cols[2];
+    if (filename && version && version !== 'version' && !version.startsWith('-')) {
+      result.set(filename, version);
+    }
+  }
+  return result;
+}
+
+/**
+ * Check V: Variant script @version consistency.
+ * For each variant with script_manifest.local in variant.json,
+ * validates that each script's @version comment matches the version
+ * in the variant's own scripts/<variant>/SCRIPTS.md registry.
+ * See ADR-0033.
+ */
+function runCheckV(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+  if (!IS_WORKSPACE_ROOT) return issues;
+
+  const templatesDir = join(ROOT, 'templates');
+  if (!existsSync(templatesDir)) return issues;
+
+  let variantDirs: string[];
+  try {
+    variantDirs = readdirSync(templatesDir)
+      .filter(d => d.startsWith('co-'))
+      .map(d => join(templatesDir, d))
+      .filter(d => statSync(d).isDirectory());
+  } catch {
+    return issues;
+  }
+
+  for (const variantDir of variantDirs) {
+    const variantJsonPath = join(variantDir, 'variant.json');
+    if (!existsSync(variantJsonPath)) continue;
+
+    let variantJson: { script_manifest?: { local?: Array<{ name: string; path: string }> } };
+    try {
+      variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+    } catch {
+      continue;
+    }
+
+    const localScripts = variantJson.script_manifest?.local;
+    if (!localScripts || localScripts.length === 0) continue;
+
+    const variantName = basename(variantDir); // e.g. 'co-deck'
+    // variant SCRIPTS.md is at: templates/co-deck/scripts/co-deck/SCRIPTS.md
+    const variantScriptsMd = join(variantDir, 'scripts', variantName, 'SCRIPTS.md');
+
+    // Parse variant registry (different column format from L1 SCRIPTS.md)
+    const variantRegistry = parseVariantScriptsMd(variantScriptsMd);
+
+    for (const entry of localScripts) {
+      const scriptFile = join(variantDir, entry.path);
+      if (!existsSync(scriptFile)) continue; // B-03 already catches missing files
+
+      const fileVersion = extractFileVersion(scriptFile);
+      const registryVersion = variantRegistry.get(basename(entry.path));
+
+      if (fileVersion === null) {
+        issues.push({
+          level: 'warning',
+          file: `templates/${variantName}/${entry.path}`,
+          message: `Check V: ${variantName}/${entry.path} — @version header missing (add @version to enable version tracking)`,
+        });
+        continue;
+      }
+
+      if (registryVersion === undefined) {
+        issues.push({
+          level: 'warning',
+          file: variantScriptsMd.replace(ROOT + '/', '').replace(ROOT + '\\', ''),
+          message: `Check V: ${variantName}/${entry.path} declared in variant.json but not found in ${variantName}/scripts/${variantName}/SCRIPTS.md registry`,
+          fix: `Add ${basename(entry.path)} to templates/${variantName}/scripts/${variantName}/SCRIPTS.md`,
+        });
+        continue;
+      }
+
+      if (fileVersion !== registryVersion) {
+        issues.push({
+          level: 'error',
+          file: `templates/${variantName}/${entry.path}`,
+          message: `Check V: ${variantName}/${entry.path} @version ${fileVersion} does not match ${variantName}/SCRIPTS.md entry ${registryVersion}`,
+          fix: `Update templates/${variantName}/scripts/${variantName}/SCRIPTS.md version for ${basename(entry.path)} from ${registryVersion} to ${fileVersion}`,
+        });
+      }
+    }
+  }
+
+  return issues;
+}
+
+/**
  * Apply --fix for Check A errors: update version entries in scripts/SCRIPTS.md
  * to match the @version found in each file.
  */
@@ -547,6 +661,9 @@ function runAudit(jsonMode = false): AuditResult {
     console.log(
       `${colors.dim}Check X: templates/common/scripts/ references to L0-only scripts${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check V: variant scripts @version vs variant SCRIPTS.md registry${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -554,6 +671,7 @@ function runAudit(jsonMode = false): AuditResult {
   const checkBIssues = runCheckB();
   const checkCIssues = runCheckC();
   const checkXIssues = runCheckX();
+  const checkVIssues = runCheckV();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -574,16 +692,18 @@ function runAudit(jsonMode = false): AuditResult {
     ...checkBIssues.filter((i) => i.level === 'error'),
     ...checkCIssues.filter((i) => i.level === 'error'),
     ...checkXIssues.filter((i) => i.level === 'error'),
+    ...checkVIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
     ...checkBIssues.filter((i) => i.level === 'warning'),
     ...checkCIssues.filter((i) => i.level === 'warning'),
     ...checkXIssues.filter((i) => i.level === 'warning'),
+    ...checkVIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 5,
+    checksRun: 6,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

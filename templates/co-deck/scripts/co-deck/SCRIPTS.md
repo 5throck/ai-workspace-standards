@@ -48,7 +48,7 @@ After playwright install, also run: `bunx playwright install chromium`
 | script | version | status | description | cli-usage |
 |--------|---------|--------|-------------|-----------|
 | `download-font.ts` | 1.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
-| `gen-slides-pdf.ts` | 1.0.0 | active | Generate full or sample PDF deck from slidedata.json (use --sample N to limit) | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
+| `gen-slides-pdf.ts` | 1.1.0 | active | Generate full or sample PDF deck from slidedata.json (use --sample N to limit) | `bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
 | `measure-layout.ts` | 1.0.0 | active | Measure HTML slide layout using Playwright; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
 
@@ -84,10 +84,19 @@ bun scripts/co-deck/snapshot.ts lecture.html --workspace presentations/<project>
 
 ## Design Note
 
-These scripts reside in `scripts/co-deck/` rather than `scripts/` root because:
-- `verifyScriptRegistryConsistency()` in L1 `audit.ts` uses non-recursive `readdirSync` on `scripts/`
-- Top-level `.ts` files must be registered in `scripts/SCRIPTS.md` (L1 common registry)
-- Variant-specific scripts should NOT pollute the L1 registry
-- Subdirectory placement is the canonical solution for variant-layer scripts
+These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skills & Scripts Blueprint** (Accepted).
 
-*Last Updated: 2026-06-19 — Initial registry: moved from scripts/ root to scripts/co-deck/ subdirectory to fix L1 audit compatibility*
+**Canonical placement rule** (per [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)):
+- Variant scripts MUST be placed in `scripts/<variant>/` (a subdirectory), NOT in the top-level `scripts/`
+- Top-level `.ts` files must be registered in the shared L1 `scripts/SCRIPTS.md`
+- Variant scripts in `scripts/<variant>/` are intentionally excluded from that check — they are not shared L1 scripts
+- The non-recursive `readdirSync` in `verifyScriptRegistryConsistency()` is a **deliberate design constraint**, not a limitation
+
+**Governance chain:**
+- `templates/co-deck/variant.json` → `script_manifest.local` declares each script
+- `bun scripts/validate-templates.ts` check B-03 verifies all declared paths exist
+- `bun scripts/lifecycle-sync-audit.ts` Check V verifies `@version` consistency within this registry
+
+**Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
+
+*Last Updated: 2026-06-21 — updated Design Note: workaround language removed, replaced with ADR-0033 canonical pattern reference*
