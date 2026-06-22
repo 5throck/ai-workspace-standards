@@ -1,18 +1,23 @@
 #!/usr/bin/env node
 /**
- * extract_slidedata.mjs
+ * extract_slidedata.mjs  v1.2.0
  * HTML 슬라이드 파일에서 slideData 배열을 추출하여 slidedata.json으로 저장.
  *
  * 사용법:
- *   bun scripts/extract_slidedata.mjs <html_file> [output_json]
- *   node scripts/extract_slidedata.mjs <html_file> [output_json]
+ *   bun scripts/co-deck/extract_slidedata.mjs <html_file> [output_json]
  *
  * 예시:
- *   bun scripts/extract_slidedata.mjs lecture_v4.html slidedata.json
+ *   bun scripts/co-deck/extract_slidedata.mjs presentations/my-deck/lecture_v1.html slidedata.json
+ *
+ * 변경 이력:
+ *   v1.1.0 — 비-탐욕 regex 1차 추출 제거; 괄호 깊이 상태머신을 1차 추출기로 승격 (A-01).
+ *            transform의 // 주석 제거를 문자열 외부 전용으로 강화 (A-01).
+ *            dynamic-eval fallback 제거 — 보안 정책 준수; 상태머신으로 불필요 (A-02).
+ *   v1.2.0 — JS→JSON transform 제거; html-build strict-JSON 계약(Stage C) 적용 후 단순화 (A-04).
  */
 
 import { readFileSync, writeFileSync } from "fs";
-import { resolve, dirname, basename, join } from "path";
+import { resolve, dirname, join } from "path";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -27,43 +32,86 @@ const outPath = args[1]
 
 const html = readFileSync(htmlPath, "utf-8");
 
-// slideData 배열을 추출하는 정규식 패턴
-// const slideData = [...] 또는 var slideData = [...] 형태를 탐지
-const patterns = [
-  /(?:const|let|var)\s+slideData\s*=\s*(\[[\s\S]*?\]);?\s*\n/,
-  /(?:const|let|var)\s+slideData\s*=\s*(\[[\s\S]*\])\s*;?\s*<\/script>/,
-];
+/**
+ * Bracket-depth-counting extractor (string/comment-aware state machine).
+ * Finds the first top-level `[...]` at or after `startPos` and returns it.
+ *
+ * Correctly skips `[` and `]` inside:
+ *   - double-quoted strings  "..."
+ *   - single-quoted strings  '...'
+ *   - template literals      `...`
+ *   - line comments          // ...\n
+ *   - block comments         /* ... *\/
+ *
+ * Returns null if no balanced array is found.
+ */
+function extractBalancedArray(src, startPos) {
+  const openBracket = src.indexOf("[", startPos);
+  if (openBracket === -1) return null;
 
-let rawJson = null;
-for (const pattern of patterns) {
-  const match = html.match(pattern);
-  if (match) {
-    rawJson = match[1];
-    break;
+  let depth = 0;
+  let i = openBracket;
+  const len = src.length;
+
+  while (i < len) {
+    const ch = src[i];
+
+    // Line comment — skip to end of line
+    if (ch === "/" && src[i + 1] === "/") {
+      i += 2;
+      while (i < len && src[i] !== "\n") i++;
+      continue;
+    }
+
+    // Block comment — skip to */
+    if (ch === "/" && src[i + 1] === "*") {
+      i += 2;
+      while (i < len - 1 && !(src[i] === "*" && src[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+
+    // String literals — skip entire string, handling backslash escapes
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const quote = ch;
+      i++;
+      while (i < len) {
+        if (src[i] === "\\") { i += 2; continue; }
+        if (src[i] === quote) { i++; break; }
+        i++;
+      }
+      continue;
+    }
+
+    // Track bracket depth
+    if (ch === "[") {
+      depth++;
+    } else if (ch === "]") {
+      depth--;
+      if (depth === 0) {
+        return src.slice(openBracket, i + 1);
+      }
+    }
+
+    i++;
   }
+
+  return null; // unbalanced — no complete array found
 }
 
+// Primary extraction: locate `slideData` declaration and extract array via state machine
+let rawJson = null;
+const declMatch = html.match(/(?:const|let|var)\s+slideData\s*=\s*/);
+if (declMatch) {
+  const afterAssign = (declMatch.index ?? 0) + declMatch[0].length;
+  rawJson = extractBalancedArray(html, afterAssign);
+}
+
+// Secondary extraction: find `slideData` keyword anywhere and scan forward for `[`
 if (!rawJson) {
-  // 더 넓은 범위로 재시도: slideData = 이후 모든 내용
-  const startIdx = html.indexOf("slideData");
-  if (startIdx !== -1) {
-    const afterAssign = html.indexOf("[", startIdx);
-    if (afterAssign !== -1) {
-      // 괄호 매칭으로 배열 끝 찾기
-      let depth = 0;
-      let endIdx = afterAssign;
-      for (let i = afterAssign; i < html.length; i++) {
-        if (html[i] === "[") depth++;
-        else if (html[i] === "]") {
-          depth--;
-          if (depth === 0) {
-            endIdx = i;
-            break;
-          }
-        }
-      }
-      rawJson = html.slice(afterAssign, endIdx + 1);
-    }
+  const kwIdx = html.indexOf("slideData");
+  if (kwIdx !== -1) {
+    rawJson = extractBalancedArray(html, kwIdx);
   }
 }
 
@@ -72,35 +120,15 @@ if (!rawJson) {
   process.exit(1);
 }
 
-// JavaScript 객체 리터럴을 JSON으로 변환
-// - 단일따옴표 → 큰따옴표
-// - 후행 쉼표 제거
-// - 키에 따옴표 추가
-let jsonStr = rawJson
-  // 주석 제거 (// ...)
-  .replace(/\/\/[^\n]*/g, "")
-  // 주석 제거 (/* ... */)
-  .replace(/\/\*[\s\S]*?\*\//g, "")
-  // 단일따옴표 문자열을 큰따옴표로 변환 (이스케이프 주의)
-  .replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, (_, inner) => `"${inner.replace(/"/g, '\\"')}"`)
-  // 후행 쉼표 제거 (JSON 비허용)
-  .replace(/,\s*([}\]])/g, "$1")
-  // 키에 따옴표 추가: key: → "key":
-  .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":');
-
+// JSON.parse directly — html-build must emit strict JSON (Stage C contract)
 let slideData;
 try {
-  slideData = JSON.parse(jsonStr);
+  slideData = JSON.parse(rawJson);
 } catch (e) {
-  // JSON 파싱 실패 시 eval 방식으로 재시도
-  try {
-    // Function 생성자를 사용하여 안전하게 평가
-    slideData = new Function(`return ${rawJson}`)();
-  } catch (e2) {
-    console.error("❌ slideData 파싱 실패:", e2.message);
-    console.error("raw JSON 일부:", rawJson.slice(0, 200));
-    process.exit(1);
-  }
+  console.error("❌ slideData JSON.parse 실패:", e.message);
+  console.error("   힌트: html-build가 strict JSON을 출력하는지 확인하세요 (모든 키/값 큰따옴표, 후행 쉼표 없음, 주석 없음).");
+  console.error("raw JSON 일부:", rawJson.slice(0, 200));
+  process.exit(1);
 }
 
 writeFileSync(outPath, JSON.stringify(slideData, null, 2), "utf-8");

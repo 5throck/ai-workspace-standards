@@ -96,7 +96,7 @@ The template's `initSlides()` builds each `.slide` (with `id="slide-${index}"`) 
 
 Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`, and slideshow additionally emits `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
 
-> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via regex (not the DOM), so runtime DOM rendering leaves the extract/measure/PDF pipeline intact.
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). **slideData MUST be strict JSON** — all keys double-quoted, all string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax (template literals, unquoted keys, comments) will break the PDF pipeline.
 
 Available themes: `notebook` | `pitch` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
