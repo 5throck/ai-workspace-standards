@@ -70,8 +70,15 @@ body {
   box-sizing: border-box;
 }
 
-.slide-left  { display: flex; flex-direction: column; justify-content: center; }
-.slide-right { display: flex; align-items: center; justify-content: center; }
+.slide-left   { display: flex; flex-direction: column; justify-content: center; }
+.right-panel  { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+.right-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
 
 /* ─── Cover slide ────────────────────────────────────────────────────────── */
 .slide[data-type="title"] {
