@@ -1,0 +1,6 @@
+# Shared image pool — co-deck variant
+#
+# Image-curator writes shared-pool images here as `presentations/assets/images/<slug>.<ext>`.
+# html-build references them from per-project decks via `../assets/images/<slug>.<ext>`.
+# This empty folder is scaffolded into every new co-deck project so the shared pool exists at
+# new-project time. Kept under version control via this .gitkeep.
