@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-21T23:44:44.356Z
+**Generated**: 2026-06-22T00:08:59.001Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -92,7 +92,7 @@
 | inject-global-plugins.ts | 1.0.1 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.8.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.8.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.0 | scripts/lifecycle-sync-audit.ts | N/A |

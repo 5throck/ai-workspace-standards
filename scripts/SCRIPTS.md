@@ -101,7 +101,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.8.1 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.8.2 | active | —| —| L0 | Phase 1.6 (pm.md pre-flight), Phase 3.5 (AGENTS.md §-structure check + BLOCKING gate)|
 | `regenerate-agents-md.ts` | L0 | 1.0.0 | active | —| —| L0 | Regenerates variant AGENTS.md from L1 common template; fixes missing VARIANT-* markers|
 | `lib/agent-override-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
