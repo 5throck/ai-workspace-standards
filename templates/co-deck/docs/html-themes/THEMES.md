@@ -23,12 +23,14 @@ Each theme folder contains:
 
 | File | Required | Purpose |
 |------|----------|---------|
-| `template.html` | ✅ | HTML skeleton with `<!-- INJECT:CSS -->`, `<!-- INJECT:slideData -->`, `<!-- INJECT:slides -->` placeholders |
+| `template.html` | ✅ | HTML skeleton with `<!-- INJECT:CSS -->`, `<!-- INJECT:slideData -->`, `<!-- INJECT:slides -->` placeholders. **Authoritative renderer:** `renderSlide(data, index)` + `initSlides()` build the `.slide` DOM at runtime from the injected `slideData` (via `createElement`/`textContent`); html-build injects only `slideData` + CSS links and leaves the slide container empty. |
 | `theme.json` | ✅ | `content_rules`, `compatible_styles`, `partial_styles`, `incompatible_styles`, `recommended_structure`, `toc_required`, `slide_types`, `css_base`, `css_theme` |
 | `theme.css` | ✅ | Per-theme CSS extension layered between `base.css` and `styles/<style>/style.css` (see CSS Load Order). Defines theme-specific structural rules (e.g. scroll TOC panel, slideshow card geometry). |
 | `pdf_layout_spec.json` | ✅ | Region-based PDF layout: `page` geometry, `calibration.viewport_px`, `regions.*`, `slide_types[type].regions`, `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print` |
 
 > **`css_theme` field** (`theme.json`): each theme declares the path to its `theme.css` (e.g. `"css_theme": "docs/html-themes/themes/scroll/theme.css"`). html-build reads this to inject the per-theme CSS in the correct order.
+
+> **Runtime rendering contract (all 4 themes):** `template.html`'s `renderSlide(data, index)` is the single source of truth for slide structure. It maps `slideData` flags → a theme-specific `data-type` (pitch/notebook: `isTitleSlide→"title"`; scroll/slideshow: `isTitleSlide→"cover"`; slideshow: `isPunchlineSlide→"punchline"`; all: `isDividerSlide→"divider"`, `isProfileSlide→"profile"`, `isContactSlide→"contact"`, else `"standard"`) and emits each theme's native structural classes (pitch `divider-left/right`+`slide-content`+`slide-visual`; notebook `cover-rule`+`gutter-num`+`nb-tabs`; scroll/slideshow base.css `slide-card`+`bullets-container`). `initSlides()` runs on `DOMContentLoaded` **before** each theme's TOC/tab/spy hooks. The PDF pipeline is unaffected: `extract_slidedata.mjs` parses the inline `const slideData = [...]` array (not the DOM), so runtime rendering is invisible to extract/measure/PDF.
 
 ### `pdf_layout_spec.json` Schema (region model, v1.2.0)
 

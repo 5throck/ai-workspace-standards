@@ -44,8 +44,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
-- Generate `lecture_vN.html` with all slides rendered via a single `renderSlide(data)` function
-- Embed slide content as `const slideData = [...]` JavaScript array inside the HTML
+- Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` JavaScript array; the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
 - Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
 - **For `scroll` theme**: wrap in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`; each `.slide` must have `id="slide-${index}"`
@@ -81,26 +80,23 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 
 **3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent scroll/slideshow structure.
 
-**4. `scroll` theme — TOC sidebar is MANDATORY**:
+**4. `scroll` theme — TOC sidebar is MANDATORY** (provided by the template):
 ```html
 <div id="viewer">
   <aside id="toc-panel"><!-- TOC items injected here --></aside>
   <main id="slide-container"><!-- slides injected here --></main>
 </div>
 ```
-Each `.slide` element must carry `id="slide-${index}"`.
+The template's `initSlides()` builds each `.slide` (with `id="slide-${index}"`) at runtime. html-build leaves the container empty and injects only `slideData`.
 
-**5. `visual-heavy` style only** — inject CSS property per slide in `renderSlide()`:
-```javascript
-if (document.documentElement.dataset.style === 'visual-heavy' && data.imagePath) {
-  el.style.setProperty('--slide-bg-image', `url('${data.imagePath}')`);
-}
-```
+**5. Slide rendering model (runtime — NOT hand-authored):** `renderSlide(data, index)` and `initSlides()` are implemented **inside each theme template** (`docs/html-themes/themes/<theme>/template.html`). On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. html-build's job is **only**:
+- Inject CSS `<link>` tags in order base→theme→style (step 2).
+- Inject the `slideData` array (step 3 / field schema in `skills/html-build/SKILL.md`).
+- Leave the slide container empty — `<!-- INJECT:slides -->` is satisfied at **runtime** by the template's own `initSlides()`.
 
-**6. `data-type` attribute** — set on each `.slide`:
-```html
-<div class="slide" data-type="standard">  <!-- cover | divider | standard | contact -->
-```
+Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`, and slideshow additionally emits `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
+
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via regex (not the DOM), so runtime DOM rendering leaves the extract/measure/PDF pipeline intact.
 
 Available themes: `notebook` | `pitch` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 

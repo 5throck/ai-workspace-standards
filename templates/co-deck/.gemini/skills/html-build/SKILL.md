@@ -64,7 +64,16 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
   contactPhone: "010-XXXX-XXXX" }
 ```
 
-Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
+Use `design_spec.md`'s CSS variables directly. Do not hardcode color or font values.
+
+**Slide rendering model (runtime):** the theme template (`docs/html-themes/themes/<theme>/template.html`) **owns** `renderSlide(data, index)` and `initSlides()`. On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. Your job is **only**:
+1. Inject the CSS `<link>` tags in order base→theme→style (see Theme injection below).
+2. Inject the `slideData` array (the field schema above).
+3. Leave the slide container empty — `<!-- INJECT:slides -->` is satisfied at **runtime** by the template's own `initSlides()`.
+
+Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()` — both are the template's responsibility.
+
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via regex (not the DOM), so runtime rendering leaves the extract/measure/PDF pipeline intact.
 
 **Theme injection** (from `lecture-profile.md`):
 ```html

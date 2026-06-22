@@ -11,7 +11,9 @@
     1. Injects <html data-theme="pitch" data-style="<style>"> attributes
     2. Replaces <!-- INJECT:CSS --> with base.css + theme.css + style.css <link> tags
     3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
-    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+    4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
+       defined in this template's <script>. html-build injects slideData only and
+       MUST NOT hand-author .slide divs — leave the presentation container empty.
 
   CONTENT RULES (from theme.json):
     - max 4 bullets per slide, max 28 chars in title
@@ -55,23 +57,29 @@
   <div class="presentation-container" id="presentation">
     <!-- INJECT:slides -->
     <!--
-      Each .slide rendered by renderSlide(data, index) must have:
+      RUNTIME RENDERING: each .slide div is constructed at runtime by
+      renderSlide(data, index) / initSlides() defined in this template's <script>.
+      html-build injects slideData only (via INJECT:slideData) and MUST NOT
+      hand-author .slide divs here — leave this container empty.
+
+      Each rendered slide has the shape:
         <div class="slide" id="slide-${index}" data-type="title|divider|profile|standard|contact">
-          ... slide content ...
+          ... native pitch-theme child nodes ...
         </div>
       First slide gets class="slide active".
 
-      Slide types:
-        title    → isTitleSlide:true  — centered cover (eyebrow, title, subtitle/meta)
-        divider  → isDividerSlide:true — left text + right image (partNum, title, desc, visualImage)
-        profile  → isProfileSlide:true — centered speaker intro (title, name, affiliation, bio)
-        contact  → isContactSlide:true — contact details (title, content/bullets)
-        standard → (default)          — content grid left (section, title, bullets) + right (visualImage)
+      Slide types (data-type from slideType()):
+        title    → isTitleSlide:true   — centered cover (slide-eyebrow, slide-title, slide-subtitle, slide-meta)
+        divider  → isDividerSlide:true — divider-left (divider-part, divider-title, divider-desc) + divider-right (img)
+        profile  → isProfileSlide:true — profile-eyebrow, profile-name, profile-affiliation, profile-bio
+        contact  → isContactSlide:true — contact-title + contact-info (contactEmail / contactLinkedIn)
+        standard → (default)           — slide-content grid: slide-left (slide-section, slide-title, slide-bullets) + slide-right (slide-visual: img | visualTitle+visualDisplay)
 
       SlideData fields used by pitch theme:
         section, title, bullets[], subtitle, meta,
         isTitleSlide, isDividerSlide, isProfileSlide, isContactSlide,
-        partNum, desc, script, visualImage, visualTitle, visualDisplay
+        partNum, desc, script, visualImage, visualTitle, visualDisplay,
+        speakerName, speakerTitle, speakerBio, contactEmail, contactLinkedIn
     -->
   </div>
 
@@ -95,11 +103,141 @@
     // <!-- INJECT:slideData -->
     // const slideData = [ ... ];  <-- replaced by html-build
 
-    // ── Slide Renderer ────────────────────────────────────────────────────────
+    // ── Slide renderer (authoritative — html-build injects slideData only) ─────
+    // The .slide DOM is built at runtime by renderSlide()/initSlides() below.
+    // html-build must NOT hand-author .slide divs — it injects slideData (INJECT:slideData)
+    // and CSS links only, and leaves the presentation container empty. The renderer
+    // constructs DOM with createElement + textContent (text auto-escaped, no markup
+    // injection surface). slideData is author-controlled lecture content.
+
+    // Strip tags for img alt / text fallbacks.
+    function escapeText(s) {
+      return String(s == null ? '' : s).replace(/<\/?[^>]+(>|$)/g, '');
+    }
+
+    // createElement helper: set className + (optionally) textContent, return node.
+    function el(tag, cls, text) {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    // createElement('img'); set .src + .alt; return node.
+    function img(src, alt) {
+      const node = document.createElement('img');
+      node.src = src || '';
+      node.alt = alt || '';
+      return node;
+    }
+
+    // Append inline text with **bold** -> <strong>, all text via textContent (auto-escape).
+    function appendInline(parent, s) {
+      const parts = String(s == null ? '' : s).split(/\*\*(.*?)\*\*/g);
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) parent.appendChild(document.createTextNode(parts[i]));
+        else parent.appendChild(el('strong', null, parts[i]));
+      }
+    }
+
+    // Build the bullet list for the given container class. arr: array of bullet strings.
+    function buildBullets(parent, arr) {
+      const ul = el('ul', 'slide-bullets');
+      if (Array.isArray(arr)) {
+        arr.forEach(function (b) {
+          const li = el('li');
+          appendInline(li, b);
+          ul.appendChild(li);
+        });
+      }
+      parent.appendChild(ul);
+    }
+
+    // Map slideData flags → pitch data-type vocabulary.
+    function slideType(d) {
+      if (d.isTitleSlide)    return 'title';
+      if (d.isDividerSlide)  return 'divider';
+      if (d.isProfileSlide)  return 'profile';
+      if (d.isContactSlide)  return 'contact';
+      return 'standard';
+    }
+
+    // Pitch-native slide children (classes styled by pitch/theme.css + style.css).
+    // Appends child nodes onto the slide element; returns nothing.
+    function buildSlideChildren(slide, data, index) {
+      const type = slideType(data);
+      const section = data.section || '';
+      const title = data.title || '';
+
+      if (type === 'title') {
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) slide.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) slide.appendChild(el('p', 'slide-meta', data.meta));
+        return;
+      }
+      if (type === 'divider') {
+        const left = el('div', 'divider-left');
+        left.appendChild(el('span', 'divider-part', data.partNum || ''));
+        left.appendChild(el('h1', 'divider-title', title));
+        if (data.desc != null) left.appendChild(el('p', 'divider-desc', data.desc));
+        slide.appendChild(left);
+        const right = el('div', 'divider-right');
+        if (data.visualImage) right.appendChild(img(data.visualImage, escapeText(title)));
+        slide.appendChild(right);
+        return;
+      }
+      if (type === 'profile') {
+        slide.appendChild(el('div', 'profile-eyebrow', section));
+        slide.appendChild(el('div', 'profile-name', data.speakerName || title));
+        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
+        if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
+        return;
+      }
+      if (type === 'contact') {
+        slide.appendChild(el('div', 'contact-title', title));
+        const info = el('div', 'contact-info');
+        if (data.contactEmail) info.appendChild(el('div', null, data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', null, data.contactLinkedIn));
+        slide.appendChild(info);
+        return;
+      }
+      // standard
+      const content = el('div', 'slide-content');
+      const left = el('div', 'slide-left');
+      left.appendChild(el('div', 'slide-section', section));
+      left.appendChild(el('h2', 'slide-title', title));
+      buildBullets(left, data.bullets);
+      content.appendChild(left);
+
+      const right = el('div', 'slide-right');
+      if (data.visualImage) {
+        right.appendChild(img(data.visualImage, escapeText(data.visualTitle || title)));
+      } else {
+        const visual = el('div', 'slide-visual');
+        visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
+        const display = el('div', 'visual-display', data.visualDisplay || '');
+        display.style.whiteSpace = 'pre-line';
+        visual.appendChild(display);
+        right.appendChild(visual);
+      }
+      content.appendChild(right);
+      slide.appendChild(content);
+    }
+
     function renderSlide(data, index) {
-      // html-build implements this function using theme.css structure and CSS variables.
-      // Theme defines structure; style.css defines appearance.
-      throw new Error('renderSlide() must be implemented by html-build agent');
+      const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
+      slide.id = 'slide-' + index;
+      slide.dataset.type = slideType(data);
+      buildSlideChildren(slide, data, index);
+      return slide;
+    }
+
+    function initSlides() {
+      const container = document.getElementById('presentation');
+      if (!container || typeof slideData === 'undefined') return;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      slideData.forEach(function (d, i) { container.appendChild(renderSlide(d, i)); });
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────
@@ -208,6 +346,7 @@
 
     // ── Init ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+      initSlides();
       buildTOC();
       showSlide(0);
     });

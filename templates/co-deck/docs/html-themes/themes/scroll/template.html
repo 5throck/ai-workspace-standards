@@ -10,7 +10,9 @@
     1. Injects <html data-theme="scroll" data-style="<style>"> attributes
     2. Replaces <!-- INJECT:CSS --> with base.css + style.css <link> tags
     3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
-    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+    4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
+       defined in this template's <script>. html-build injects slideData only and
+       MUST NOT hand-author .slide divs — leave the slide container empty.
 
   STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
 -->
@@ -43,9 +45,15 @@
     <main id="slide-container">
       <!-- INJECT:slides -->
       <!--
-        Each .slide rendered by renderSlide(data, index) must have:
-          <div class="slide" id="slide-${index}" data-type="standard|cover|divider|contact">
-            ... slide content ...
+        RUNTIME RENDERING: each .slide div is constructed at runtime by
+        renderSlide(data, index) / initSlides() defined in this template's <script>
+        (container id: slide-container). html-build injects slideData only
+        (via INJECT:slideData) and MUST NOT hand-author .slide divs here — leave
+        this container empty.
+
+        Each rendered slide has the shape:
+          <div class="slide" id="slide-${index}" data-type="standard|cover|divider|contact|profile">
+            ... base.css child nodes (.slide-header, .slide-card, etc.) ...
           </div>
       -->
     </main>
@@ -55,11 +63,153 @@
     // INJECT:slideData
     // const slideData = [ ... ];  <-- replaced by html-build
 
-    // ── Slide Renderer ────────────────────────────────────────────────────────
+    // ── Slide renderer (authoritative — html-build injects slideData only) ─────
+    // The .slide DOM is built at runtime by renderSlide()/initSlides() below.
+    // html-build must NOT hand-author .slide divs — it injects slideData (INJECT:slideData)
+    // and CSS links only, and leaves the slide container empty. The renderer constructs
+    // DOM with createElement + textContent (text auto-escaped). Vocabulary is base.css:
+    // .slide-header > .section-label, .slide-card > .slide-content (.slide-title,
+    // .slide-subtitle, .cover-meta, .bullets-container > .bullet-item) + .right-panel img.
+
+    // Strip tags for img alt / text fallbacks.
+    function escapeText(s) {
+      return String(s == null ? '' : s).replace(/<\/?[^>]+(>|$)/g, '');
+    }
+
+    // createElement helper: set className + (optionally) textContent, return node.
+    function el(tag, cls, text) {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    // createElement('img'); set .src + .alt; return node.
+    function img(src, alt) {
+      const node = document.createElement('img');
+      node.src = src || '';
+      node.alt = alt || '';
+      return node;
+    }
+
+    // Append inline text with **bold** -> <strong>, all text via textContent (auto-escape).
+    function appendInline(parent, s) {
+      const parts = String(s == null ? '' : s).split(/\*\*(.*?)\*\*/g);
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) parent.appendChild(document.createTextNode(parts[i]));
+        else parent.appendChild(el('strong', null, parts[i]));
+      }
+    }
+
+    // Build bullets using base.css vocabulary: .bullets-container > .bullet-item.
+    function buildBullets(parent, arr) {
+      const container = el('div', 'bullets-container');
+      if (Array.isArray(arr)) {
+        arr.forEach(function (b) {
+          const item = el('div', 'bullet-item');
+          appendInline(item, b);
+          container.appendChild(item);
+        });
+      }
+      parent.appendChild(container);
+    }
+
+    // Map slideData flags → base.css data-type vocabulary (cover, not title).
+    function slideType(d) {
+      if (d.isTitleSlide)    return 'cover';
+      if (d.isDividerSlide)  return 'divider';
+      if (d.isProfileSlide)  return 'profile';
+      if (d.isContactSlide)  return 'contact';
+      return 'standard';
+    }
+
+    // Build the .slide-header with a section label.
+    function buildHeader(slide, section) {
+      const header = el('div', 'slide-header');
+      header.appendChild(el('span', 'section-label', section || ''));
+      slide.appendChild(header);
+    }
+
+    // scroll/base.css-native slide children. Appends child nodes; returns nothing.
+    function buildSlideChildren(slide, data, index) {
+      const type = slideType(data);
+      const section = data.section || '';
+      const title = data.title || '';
+
+      if (type === 'cover') {
+        buildHeader(slide, section);
+        const card = el('div', 'slide-card');
+        const content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) content.appendChild(el('p', 'cover-meta', data.meta));
+        card.appendChild(content);
+        slide.appendChild(card);
+        return;
+      }
+      if (type === 'divider') {
+        buildHeader(slide, section);
+        const card = el('div', 'slide-card');
+        const content = el('div', 'slide-content');
+        if (data.partNum != null) content.appendChild(el('div', 'part-number', data.partNum));
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.desc != null) content.appendChild(el('p', 'slide-subtitle', data.desc));
+        card.appendChild(content);
+        slide.appendChild(card);
+        return;
+      }
+      if (type === 'profile') {
+        buildHeader(slide, section);
+        const card = el('div', 'slide-card');
+        const content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', data.speakerName || title));
+        if (data.speakerTitle != null) content.appendChild(el('p', 'slide-subtitle', data.speakerTitle));
+        if (data.speakerBio != null) content.appendChild(el('p', 'slide-subtitle', data.speakerBio));
+        card.appendChild(content);
+        slide.appendChild(card);
+        return;
+      }
+      if (type === 'contact') {
+        buildHeader(slide, section);
+        const card = el('div', 'slide-card');
+        const content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.contactEmail) content.appendChild(el('p', 'slide-subtitle', data.contactEmail));
+        if (data.contactLinkedIn) content.appendChild(el('p', 'slide-subtitle', data.contactLinkedIn));
+        card.appendChild(content);
+        slide.appendChild(card);
+        return;
+      }
+      // standard
+      buildHeader(slide, section);
+      const card = el('div', 'slide-card');
+      const content = el('div', 'slide-content');
+      content.appendChild(el('h2', 'slide-title', title));
+      if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
+      buildBullets(content, data.bullets);
+      card.appendChild(content);
+
+      if (data.visualImage) {
+        const panel = el('div', 'right-panel');
+        panel.appendChild(img(data.visualImage, escapeText(data.visualTitle || title)));
+        card.appendChild(panel);
+      }
+      slide.appendChild(card);
+    }
+
     function renderSlide(data, index) {
-      // html-build implements this function using design_spec.md CSS variables.
-      // Theme defines structure; style defines appearance.
-      throw new Error('renderSlide() must be implemented by html-build agent');
+      const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
+      slide.id = 'slide-' + index;
+      slide.dataset.type = slideType(data);
+      buildSlideChildren(slide, data, index);
+      return slide;
+    }
+
+    function initSlides() {
+      const container = document.getElementById('slide-container');
+      if (!container || typeof slideData === 'undefined') return;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      slideData.forEach(function (d, i) { container.appendChild(renderSlide(d, i)); });
     }
 
     // ── TOC ──────────────────────────────────────────────────────────────────
@@ -127,6 +277,7 @@
 
     // ── Init ─────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+      initSlides();
       buildToc();
       initScrollSpy();
       window.addEventListener('scroll', updateProgress, { passive: true });
