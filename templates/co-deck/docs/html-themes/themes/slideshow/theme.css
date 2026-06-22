@@ -1,1 +1,24 @@
-/* slideshow theme extension — paradigm-specific overrides (transitions/navigation). Currently no overrides beyond the shared foundation. */
+/* slideshow theme extension — paradigm-specific overrides (transitions/navigation). */
+
+/* ── Punchline slide ──────────────────────────────────────────────────────────
+   Large centered single statement. Emitted by buildSlideChildren() when
+   isPunchlineSlide is set: a .slide-card > .slide-content > h2.slide-title.
+   Colors/sizing come from base.css CSS variables — no hardcoded values. */
+.slide[data-type="punchline"] .slide-card {
+  background: transparent;
+  align-items: center;
+}
+
+.slide[data-type="punchline"] .slide-content {
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.slide[data-type="punchline"] .slide-title {
+  font-size: calc(var(--font-size-title, 2rem) * 1.8);
+  font-weight: var(--font-weight-title, 700);
+  line-height: 1.2;
+  color: var(--text-primary, var(--divider-text));
+  max-width: 80%;
+}

@@ -108,6 +108,23 @@ body {
   max-width: 70%;
 }
 
+/* Cover meta line under the subtitle on title slides */
+.slide[data-type="title"] .slide-meta {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, rgba(249,250,251,0.45));
+}
+
+/* Per-slide number badge (emitted by buildSlideChildren when a slide carries a number).
+   Pitch also exposes a footer .slide-counter; this rule lets a slide-local badge reuse
+   the same muted treatment without a hardcoded color. */
+.slide .slide-number {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, rgba(249,250,251,0.4));
+}
+
 /* ─── Divider slide ──────────────────────────────────────────────────────── */
 .slide[data-type="divider"] {
   display: grid;
