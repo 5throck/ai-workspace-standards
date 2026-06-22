@@ -115,6 +115,13 @@
       "version": "1.0.0",
       "description": "Tests new-project scaffolding logic in a temporary directory",
       "propagated_to_common": true
+    },
+    "meeting-facilitation": {
+      "claude_source": ".claude/skills/meeting-facilitation/SKILL.md",
+      "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
+      "version": "1.4.0",
+      "description": "Structured multi-agent meeting facilitation — delegates to .claude/commands/meeting.md",
+      "propagated_to_common": true
     }
   },
   "common_scripts": {

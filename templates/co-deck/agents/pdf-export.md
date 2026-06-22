@@ -52,7 +52,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 ## Responsibilities
 
 - Verify all required inputs are present before starting
-- Extract slide data from HTML into `slidedata.json` using `scripts/extract_slidedata.mjs`
+- Extract slide data from HTML into `slidedata.json` using `scripts/co-deck/extract_slidedata.mjs`
 - Generate 5-slide sample PDF with `bun scripts/co-deck/gen-slides-pdf.ts --sample 5` for Gate 5 review
 - Present sample to user and request approval (Gate 5 — mandatory)
 - Generate full PDF with `bun scripts/co-deck/gen-slides-pdf.ts` after approval

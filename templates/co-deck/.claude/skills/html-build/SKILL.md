@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: 1.3.0
+version: 1.3.1
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -16,7 +16,7 @@ prerequisites: design
 
 ## Context
 
-Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a JavaScript array (`const slideData = [...]`) inside the HTML. Invoked at Stages 5-8, after Gate 3 (design approval).
+Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a **strict-JSON** array (`const slideData = [...]`) inside the HTML. Strict-JSON means: all keys double-quoted, all string values double-quoted, no trailing commas, no JavaScript comments, no single-quoted strings, no template literals. This contract enables `extract_slidedata.mjs` to parse slideData via `JSON.parse` directly. Invoked at Stages 5-8, after Gate 3 (design approval).
 
 ## When to Use
 
@@ -33,7 +33,7 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 **File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder.
 
-**slideData Structure:** Slide data lives in a JavaScript array embedded as `const slideData = [...]` inside the HTML file.
+**slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments.
 
 > Korean example — field keys stay in English; only the content values are Korean.
 
@@ -73,7 +73,7 @@ Use `design_spec.md`'s CSS variables directly. Do not hardcode color or font val
 
 Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()` — both are the template's responsibility.
 
-> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via regex (not the DOM), so runtime rendering leaves the extract/measure/PDF pipeline intact.
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
 
 **Theme injection** (from `lecture-profile.md`):
 ```html

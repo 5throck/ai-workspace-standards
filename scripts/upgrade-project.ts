@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //
@@ -173,12 +173,25 @@ function resolveTemplate(rel: string): string {
 
 function diffSummary(old: string, src: string): void {
   if (!existsSync(old)) { console.log('    (project file does not exist — will create)'); return; }
-  const oldLines = readFileSync(old, 'utf8').split('\n').length;
-  const newLines = readFileSync(src, 'utf8').split('\n').length;
-  const diff = spawnSync('diff', [old, src], { encoding: 'utf8' });
-  const added = (diff.stdout.match(/^>/gm) ?? []).length;
-  const removed = (diff.stdout.match(/^</gm) ?? []).length;
-  console.log(`    Lines: ${oldLines} -> ${newLines}  (+${added}/-${removed})`);
+  const oldArr = readFileSync(old, 'utf8').split('\n');
+  const newArr = readFileSync(src, 'utf8').split('\n');
+  const { added, removed } = lineDiffCounts(oldArr, newArr);
+  console.log(`    Lines: ${oldArr.length} -> ${newArr.length}  (+${added}/-${removed})`);
+}
+
+// LCS-based line diff counts — cross-platform (no external `diff` dependency,
+// which is absent on Windows PATH and previously crashed with null stdout).
+function lineDiffCounts(a: string[], b: string[]): { added: number; removed: number } {
+  const n = a.length, m = b.length;
+  // dp[i][j] = length of the longest common subsequence of a[i..] and b[j..]
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const lcs = dp[0][0];
+  return { removed: n - lcs, added: m - lcs };
 }
 
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {

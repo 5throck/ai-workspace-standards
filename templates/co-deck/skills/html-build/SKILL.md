@@ -16,7 +16,7 @@ prerequisites: design
 
 ## Context
 
-Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a JavaScript array (`const slideData = [...]`) inside the HTML. Invoked at Stages 5-8, after Gate 3 (design approval).
+Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a **strict-JSON** array (`const slideData = [...]`) inside the HTML. Strict-JSON means: all keys double-quoted, all string values double-quoted, no trailing commas, no JavaScript comments, no single-quoted strings, no template literals. Invoked at Stages 5-8, after Gate 3 (design approval).
 
 ## When to Use
 
@@ -33,7 +33,7 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 **File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder.
 
-**slideData Structure:** Slide data lives in a JavaScript array embedded as `const slideData = [...]` inside the HTML file.
+**slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments. This enables `extract_slidedata.mjs` to parse via `JSON.parse` directly without a transform step.
 
 > Korean example — field keys stay in English; only the content values are Korean.
 
@@ -114,7 +114,9 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 
 ## Output Format
 
-`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData`, theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
+`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
+
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
 
 ## Related Skills
 

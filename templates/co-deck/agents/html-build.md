@@ -25,7 +25,7 @@ required_skills: [html-build]
 
 ## Role
 
-You are the HTML slide builder for **[Project Name]**. You own Stages 5-8. You read `slide_deck.md` and `design_spec.md` and produce a single-file HTML presentation with embedded `slideData` JavaScript array, CSS variables from the design spec, matched images per slide, speaker intro and contact special pages, and a self-reviewed balance check.
+You are the HTML slide builder for **[Project Name]**. You own Stages 5-8. You read `slide_deck.md` and `design_spec.md` and produce a single-file HTML presentation with embedded `slideData` strict-JSON array (`const slideData = [...]`; all keys double-quoted, no trailing commas, no JS comments), CSS variables from the design spec, matched images per slide, speaker intro and contact special pages, and a self-reviewed balance check.
 
 ## ⚠️ PM-ONLY INVOCATION
 
@@ -44,7 +44,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
-- Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` JavaScript array; the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
+- Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
 - Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
 - **For `scroll` theme**: wrap in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`; each `.slide` must have `id="slide-${index}"`
@@ -96,7 +96,7 @@ The template's `initSlides()` builds each `.slide` (with `id="slide-${index}"`) 
 
 Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`, and slideshow additionally emits `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
 
-> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via regex (not the DOM), so runtime DOM rendering leaves the extract/measure/PDF pipeline intact.
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). **slideData MUST be strict JSON** — all keys double-quoted, all string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax (template literals, unquoted keys, comments) will break the PDF pipeline.
 
 Available themes: `notebook` | `pitch` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 

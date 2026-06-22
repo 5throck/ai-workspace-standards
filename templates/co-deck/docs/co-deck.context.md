@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-21
+# Last Updated: 2026-06-22
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -101,7 +101,7 @@ Three flags control agent execution in the co-deck pipeline:
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
 | `gen-visual-images.ts` | `scripts/co-deck/` | CSS concept diagrams → SVG file → PNG file (no browser; `@resvg/resvg-js`) | active |
-| `extract_slidedata.mjs` | `scripts/` | HTML slideData → slidedata.json | active |
+| `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
 ### Bun Dependencies

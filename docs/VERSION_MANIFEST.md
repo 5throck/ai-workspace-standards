@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-22T06:11:20.548Z
+**Generated**: 2026-06-22T07:15:00.725Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 17
+- **Skills**: 18
 - **Scripts**: 99
 - **Commands**: 6
 
@@ -39,6 +39,7 @@
 | create-variant | 1.0.1 | skills/create-variant/SKILL.md | workspace | N/A | pm |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
 | meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
+| meeting-facilitation | 1.4.0 | .claude/skills/meeting-facilitation/SKILL.md | both | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
 | project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
@@ -137,7 +138,7 @@
 | test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.1.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.1.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.1 | scripts/validate-md-language.ts | fs |
@@ -178,7 +179,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 6 / 6
-- **Skills with parity**: 4 / 17
+- **Skills with parity**: 5 / 18
 
 ---
 
@@ -190,6 +191,7 @@
 - Skill audit-workspace has no triggers defined
 - Skill create-variant has no triggers defined
 - Skill finishing-a-development-branch has no triggers defined
+- Skill meeting-facilitation has no triggers defined
 - Skill meeting-facilitation has no triggers defined
 - Skill platform-command-lifecycle-manager has no triggers defined
 - Skill platform-skill-lifecycle-manager has no triggers defined

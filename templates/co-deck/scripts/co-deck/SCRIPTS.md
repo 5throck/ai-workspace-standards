@@ -61,7 +61,7 @@ Also available in `scripts/` root (not co-deck specific):
 
 | script | version | status | description |
 |--------|---------|--------|-------------|
-| `extract_slidedata.mjs` | — | active | Extract slideData array from HTML file to slidedata.json |
+| `extract_slidedata.mjs` | 1.2.0 | active | Extract slideData array from HTML file to slidedata.json (bracket-depth state machine; requires strict-JSON slideData) |
 
 ---
 
@@ -72,7 +72,7 @@ Also available in `scripts/` root (not co-deck specific):
 bun scripts/co-deck/download-font.ts maruburi
 
 # 2. Extract slide data from HTML
-bun scripts/extract_slidedata.mjs presentations/<project>/lecture.html
+bun scripts/co-deck/extract_slidedata.mjs presentations/<project>/lecture.html
 
 # 3. (Optional) Measure layout for calibration
 bun scripts/co-deck/measure-layout.ts presentations/<project>/lecture.html
