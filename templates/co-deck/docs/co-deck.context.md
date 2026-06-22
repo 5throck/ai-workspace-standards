@@ -97,10 +97,11 @@ Three flags control agent execution in the co-deck pipeline:
 | Script | Location | Purpose | Status |
 |--------|----------|---------|--------|
 | `snapshot.ts` | `scripts/co-deck/` | File versioning / restore per project | active |
-| `measure-layout.ts` | `scripts/co-deck/` | Playwright layout measurement → layout_spec.json (optional) | active |
+| `measure-layout.ts` | `scripts/co-deck/` | Playwright layout measurement → layout_spec.json (optional); v1.1.0: validates HTML structure, `slideData` presence, and `.slide` count before Playwright launches — exits with clear error if HTML is incomplete | active |
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | CSS concept diagrams → SVG file → PNG file (no browser; `@resvg/resvg-js`) | active |
+| `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.0): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG; exits cleanly if no diagram-defs.ts exists | active |
 | `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
@@ -384,12 +385,23 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 For slides that use concept diagrams (not stock photos), the pipeline is:
 
 ```
-CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artifact)
-                                           → images/<stem>.png (rendered output)
-                                           → slideData[i].visualImage = "images/<stem>.png"
-                                           → HTML: applyVisualImages() injects <img> into .right-panel
-                                           → PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
+presentations/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
+        ↓ dynamic import
+gen-visual-images.ts (infrastructure dispatcher)
+        ↓
+images/<stem>.svg  (source artifact saved to disk)
+images/<stem>.png  (rendered output)
+        ↓
+slideData[i].visualImage = "images/<stem>.png"
+        ↓ HTML: applyVisualImages() injects <img> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
 ```
+
+**Architecture (v3.0.0)**:
+- `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
+- `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
+- Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
+- If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
 
 **Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to disk so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency.
 
@@ -400,6 +412,7 @@ CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artif
 4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
 5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `images/slide-03-nested-layers.png`)
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
@@ -468,4 +481,4 @@ CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artif
 
 ---
 
-*co-deck.context.md version: 2.6 — updated 2026-06-22: `premium-dark` style added as DEFAULT (dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow; scroll-compatible primary + slideshow-compatible; derived from the `kyobo_ax_2026` executive deck); `classic/pdf_color_spec.json` corrected to a LIGHT palette (drift fix); `base.css` neutral `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`. Previous: v2.5 2026-06-21 region-based layout model (ADR-0045 Decision #2) — `pdf_layout_spec.json` v1.2.0 declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; Layer 0 `themes/_shared/layout_base.json`; per-theme `theme.css` + `theme.json` `css_theme` field; CSS Load Order (base → theme.css → style.css); 3-layer → 4-layer PDF merge; validation/preview workflow (`validate-theme-styles.ts` v2.0.0, `generate-themes-manifest.ts` v1.0.0, `scaffold-theme-style.ts` v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Prior: v2.4 html-themes restructure (styles migrated to styles/<name>/style.css; base.css moved to styles/base.css).*
+*co-deck.context.md version: 2.8 — updated 2026-06-22: `gen-visual-images.ts` v3.0.0 (infrastructure-only; dynamic import of `presentations/<project>/diagram-defs.ts`); new `diagram-helpers.ts` v1.0.0 (shared utilities + palettes); Visual Diagram Pipeline section updated with v3.0.0 architecture. Previous: v2.7 — updated 2026-06-22: `measure-layout.ts` v1.1.0 — HTML pre-flight validation (structure, `slideData`, `.slide` count) before Playwright launches. Previous: v2.6 — updated 2026-06-22: `premium-dark` style added as DEFAULT (dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow; scroll-compatible primary + slideshow-compatible; derived from the `kyobo_ax_2026` executive deck); `classic/pdf_color_spec.json` corrected to a LIGHT palette (drift fix); `base.css` neutral `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`. Previous: v2.5 2026-06-21 region-based layout model (ADR-0045 Decision #2) — `pdf_layout_spec.json` v1.2.0 declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; Layer 0 `themes/_shared/layout_base.json`; per-theme `theme.css` + `theme.json` `css_theme` field; CSS Load Order (base → theme.css → style.css); 3-layer → 4-layer PDF merge; validation/preview workflow (`validate-theme-styles.ts` v2.0.0, `generate-themes-manifest.ts` v1.0.0, `scaffold-theme-style.ts` v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Prior: v2.4 html-themes restructure (styles migrated to styles/<name>/style.css; base.css moved to styles/base.css).*

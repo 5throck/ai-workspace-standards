@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.1.0
 // Measure HTML slide layout coordinates, fonts, and colors using Playwright.
 // Outputs layout_spec.json and pdf_layout_spec.md for PDF generation calibration.
 // Usage: bun scripts/measure-layout.ts <html_file> [output_dir]
@@ -189,6 +189,57 @@ function generateMd(spec: Record<string, LayoutSpec>, htmlFile: string): string 
   return lines.join('\n');
 }
 
+// ── HTML pre-flight validation ─────────────────────────────────────────────────
+
+function validateHtml(htmlPath: string): void {
+  let content: string;
+  try {
+    content = readFileSync(htmlPath, 'utf-8');
+  } catch (e) {
+    console.error(`❌ HTML 파일을 읽을 수 없습니다: ${htmlPath}`);
+    console.error(`   ${(e as Error).message}`);
+    process.exit(1);
+  }
+
+  const errors: string[] = [];
+
+  if (content.trim().length === 0) {
+    errors.push('파일이 비어 있습니다.');
+  }
+
+  if (!/<!DOCTYPE\s+html/i.test(content) && !/<html/i.test(content)) {
+    errors.push('HTML 문서 구조가 없습니다 (<!DOCTYPE html> 또는 <html> 태그 없음).');
+  }
+
+  if (!/<\/html>/i.test(content)) {
+    errors.push('</html> 닫힘 태그가 없습니다 — 파일이 불완전하게 생성됐을 수 있습니다.');
+  }
+
+  if (!/<\/body>/i.test(content)) {
+    errors.push('</body> 닫힘 태그가 없습니다 — 파일이 불완전하게 생성됐을 수 있습니다.');
+  }
+
+  if (!/const\s+slideData\s*=\s*\[/i.test(content) && !/var\s+slideData\s*=\s*\[/i.test(content) && !/let\s+slideData\s*=\s*\[/i.test(content)) {
+    errors.push('slideData 배열 선언이 없습니다 — extract_slidedata.mjs 실행 후 HTML 빌드가 완료됐는지 확인하세요.');
+  }
+
+  const slideCount = (content.match(/class="slide[^"]*"/g) ?? []).length;
+  if (slideCount === 0) {
+    errors.push('슬라이드 요소(.slide)가 없습니다 — HTML 빌드가 완료됐는지 확인하세요.');
+  }
+
+  if (errors.length > 0) {
+    console.error(`\n❌ HTML 파일 검증 실패: ${htmlPath}`);
+    for (const err of errors) {
+      console.error(`   • ${err}`);
+    }
+    console.error('\n   HTML 파일을 먼저 올바르게 생성한 뒤 measure를 재실행하세요.');
+    process.exit(1);
+  }
+
+  console.log(`✅ HTML 검증 통과 (슬라이드 ${slideCount}개 감지)`);
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -202,6 +253,8 @@ async function main() {
   if (!existsSync(htmlPath)) {
     console.error(`❌ 파일을 찾을 수 없습니다: ${htmlPath}`); process.exit(1);
   }
+
+  validateHtml(htmlPath);
 
   const outputDir       = resolve(args[1] ?? dirname(htmlPath));
   const screenshotsDir  = join(outputDir, 'screenshots');
