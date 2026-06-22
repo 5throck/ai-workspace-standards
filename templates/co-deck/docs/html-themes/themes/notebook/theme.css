@@ -1,0 +1,382 @@
+/*
+  notebook/theme.css — co-deck Notebook Theme CSS
+  =================================================
+  Ruled-paper layout with:
+    - White slide card, repeating horizontal ruled lines (28px pitch)
+    - Red left margin line at 64px from card left edge
+    - Left gutter (0-64px): section number, icons
+    - Content area (64px+): eyebrow, title, bullets with → marker
+    - Footer: page number (left) + chapter tabs (right)
+    - Slide transition: opacity fade, 0.35s ease
+    - Print-friendly: white/cream surfaces, no dark backgrounds inside cards
+*/
+
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-color, #e8e4dc);
+  font-family: var(--font-body, 'Pretendard', 'Noto Sans KR', sans-serif);
+  color: var(--text-primary, #2c2a20);
+}
+
+/* ─── Presentation container ─────────────────────────────────────────────── */
+.presentation-container {
+  position: relative;
+  width: min(92vw, 1280px);
+  aspect-ratio: 16 / 9;
+}
+
+/* ─── Slide card ─────────────────────────────────────────────────────────── */
+.slide {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--slide-radius, 8px);
+  background: var(--slide-bg, #fafaf8);
+  border: 1px solid var(--card-border, #d8d4c8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Ruled lines overlay ────────────────────────────────────────────────── */
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 27px,
+    var(--rule-line, #e4e0d6) 27px,
+    var(--rule-line, #e4e0d6) 28px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Red margin line ────────────────────────────────────────────────────── */
+.slide::after {
+  content: '';
+  position: absolute;
+  left: 64px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--margin-line, #e8a898);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Slide inner (above overlay) ───────────────────────────────────────── */
+.slide-inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ─── Slide body (content + gutter) ─────────────────────────────────────── */
+.slide-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ─── Left gutter (0–64px) ───────────────────────────────────────────────── */
+.slide-gutter {
+  width: 64px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 18px;
+  gap: 8px;
+}
+
+.gutter-num {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--accent-color, #b05030);
+  letter-spacing: 0.05em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  opacity: 0.6;
+}
+
+/* ─── Content area (64px+) ───────────────────────────────────────────────── */
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 24px 12px 16px;
+  min-width: 0;
+}
+
+.slide-eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-color, #b05030);
+  margin-bottom: 6px;
+  line-height: 28px;
+}
+
+.slide-title {
+  font-size: clamp(0.9rem, 1.6vw, 1.3rem);
+  font-weight: 500;
+  color: var(--text-primary, #2c2a20);
+  line-height: 28px;
+  border-bottom: 1px solid var(--card-border, #d8d4c8);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+/* ─── Bullets ────────────────────────────────────────────────────────────── */
+.slide-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.slide-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+  line-height: 28px;
+  color: var(--text-primary, #3a3830);
+}
+
+.slide-bullets li::before {
+  content: '→';
+  color: var(--accent-color, #b05030);
+  flex-shrink: 0;
+  font-size: 0.85em;
+  margin-top: 1px;
+}
+
+/* ─── Cover slide (title type) ───────────────────────────────────────────── */
+.slide[data-type="title"] {
+  align-items: center;
+  justify-content: center;
+}
+
+.slide[data-type="title"] .slide-inner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.cover-rule {
+  width: 56px;
+  height: 3px;
+  background: var(--accent-color, #b05030);
+  margin: 0 auto 16px;
+  border-radius: 2px;
+}
+
+.cover-title {
+  font-size: clamp(1.2rem, 2.4vw, 2rem);
+  font-weight: 500;
+  color: var(--text-primary, #2c2a20);
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+.cover-eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color, #b05030);
+  margin-bottom: 6px;
+}
+
+.cover-subtitle {
+  font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+  color: var(--text-secondary, #6a6860);
+}
+
+/* ─── Divider slide ──────────────────────────────────────────────────────── */
+.slide[data-type="divider"] .slide-inner {
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 2rem 0 80px;
+}
+
+.divider-part {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-color, #b05030);
+  margin-bottom: 8px;
+  line-height: 28px;
+}
+
+.divider-title {
+  font-size: clamp(1.1rem, 2vw, 1.8rem);
+  font-weight: 500;
+  color: var(--text-primary, #2c2a20);
+  line-height: 1.3;
+  border-left: 3px solid var(--accent-color, #b05030);
+  padding-left: 14px;
+  margin-bottom: 12px;
+}
+
+.divider-desc {
+  font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+  color: var(--text-secondary, #6a6860);
+  line-height: 1.6;
+  padding-left: 17px;
+}
+
+/* ─── Profile slide ──────────────────────────────────────────────────────── */
+.slide[data-type="profile"] .slide-inner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 3rem;
+}
+
+.profile-eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color, #b05030);
+  margin-bottom: 8px;
+}
+
+.profile-name {
+  font-size: clamp(1.1rem, 2vw, 1.6rem);
+  font-weight: 500;
+  color: var(--text-primary, #2c2a20);
+  margin-bottom: 4px;
+}
+
+.profile-affiliation {
+  font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+  color: var(--accent-color, #b05030);
+  margin-bottom: 14px;
+}
+
+.profile-bio {
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: var(--text-secondary, #6a6860);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+/* ─── Contact slide ──────────────────────────────────────────────────────── */
+.slide[data-type="contact"] .slide-inner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* ─── Footer bar ─────────────────────────────────────────────────────────── */
+.notebook-footer {
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid var(--card-border, #d8d4c8);
+  background: var(--footer-bg, #f4f1eb);
+  padding: 5px 14px 5px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.nb-page {
+  font-size: 9px;
+  color: var(--text-secondary, #888);
+  font-style: italic;
+  padding-left: 50px;
+  white-space: nowrap;
+}
+
+/* ─── Chapter tabs ───────────────────────────────────────────────────────── */
+.nb-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.nb-tab {
+  font-size: 8px;
+  padding: 2px 9px;
+  border: 0.5px solid var(--card-border, #d8d4c8);
+  border-radius: 3px;
+  color: var(--text-secondary, #888);
+  background: var(--slide-bg, #fffef9);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nb-tab:hover {
+  background: var(--accent-color, #b05030);
+  color: #fff;
+  border-color: var(--accent-color, #b05030);
+}
+
+.nb-tab.active {
+  background: var(--accent-color, #b05030);
+  color: #fff;
+  border-color: var(--accent-color, #b05030);
+}
+
+/* ─── Prev/Next nav buttons ──────────────────────────────────────────────── */
+#nav-prev, #nav-next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--slide-bg, rgba(250,250,248,0.9));
+  border: 1px solid var(--card-border, #d8d4c8);
+  color: var(--text-secondary, #888);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+#nav-prev:hover, #nav-next:hover {
+  background: var(--accent-color, #b05030);
+  color: #fff;
+  border-color: var(--accent-color, #b05030);
+}
+
+#nav-prev { left: 12px; }
+#nav-next { right: 12px; }

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-21T16:07:30.312Z
+**Generated**: 2026-06-22T00:45:03.067Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 17
-- **Scripts**: 98
+- **Scripts**: 99
 - **Commands**: 6
 
 ---
@@ -92,7 +92,7 @@
 | inject-global-plugins.ts | 1.0.1 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.0 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.0 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.8.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.8.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.0 | scripts/lifecycle-sync-audit.ts | N/A |
@@ -112,6 +112,7 @@
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.2.0 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
+| regenerate-agents-md.ts | 1.0.0 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.0 | scripts/remove-project.ts | N/A |
 | resolve-variants.ts | 1.0.0 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | 1.0.0 | scripts/retry-handler.ts | N/A |

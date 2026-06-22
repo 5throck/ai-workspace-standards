@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.8.0
+ * @version 1.8.2
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -24,11 +24,22 @@
  *   PHASE 2   — L0/L1 reconciliation (reconcile-with-l0-l1.ts)
  *   PHASE 3   — Dependency validation
  *   PHASE 4   — Variant generation + agent frontmatter normalization (generate-variant.ts)
+ *   PHASE 1.6 — pm.md structure pre-flight diagnosis — NEW in v1.8.2
+ *               · Checks extends: pattern, 200-line limit, duplicate sections vs L1 common pm.md
+ *               · Read-only (report-only) by default; set autoFixPmMd:true for guidance
+ *               · Non-blocking: warns on issues, does not halt pipeline
+ *   PHASE 3.5 — AGENTS.md §-structure pre-flight check — NEW in v1.8.2
+ *               · Verifies §-numbered structure (§1/§3) and all 6 VARIANT-*-START/END markers
+ *               · BLOCKING if markers missing (Phase 4 injection silently fails without them)
+ *               · Set autoFixAgentsMd:true to auto-call regenerate-agents-md.ts and continue
  *   PHASE 4.5 — Golden reference structural gap check — NEW in v1.7.0 (golden-reference-loader.ts)
  *               · Layer 1: verifies 7 required agent sections + 5 required skill sections
  *               · Layer 2: checks variantType-specific optional sections
  *               · Writes _pipeline_report.md in variant root; does NOT fail pipeline
- *   PHASE 4.6 — pm.md processing and context.md generation
+ *               · Additional BLOCKING check: AGENTS.md VARIANT-* marker presence (double defense)
+ *   PHASE 4.6 — Generated variant pm.md completion + context.md generation
+ *               · Operates on GENERATED variant output (not L2 source)
+ *               · Distinct from Phase 1.6 (source diagnosis)
  *   PHASE 5   — Beta lifecycle initialization
  *   PHASE 6   — Platform parity validation
  *   PHASE 7   — Workspace integration
@@ -97,6 +108,10 @@ export interface PipelineConfig {
   skipNormalization?: boolean;
   /** Treat MEDIUM-confidence skill patterns as HIGH (auto-extract without approval gate) */
   autoExtract?: boolean;
+  /** Auto-fix pm.md structural issues found in Phase 1.6 (default: false = report only) */
+  autoFixPmMd?: boolean;
+  /** Auto-regenerate AGENTS.md when §-structure/VARIANT-* markers are missing in Phase 3.5 (default: false) */
+  autoFixAgentsMd?: boolean;
   /** Output path for variant (optional) */
   outputPath?: string;
 }
@@ -212,6 +227,75 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
+  // PHASE 1.6: PM.MD STRUCTURE PRE-FLIGHT DIAGNOSIS
+  // ============================================================================
+  // Read-only by default. Checks: extends: pattern, 200-line limit, duplicate
+  // sections vs L1 common pm.md. Set autoFixPmMd:true to enable auto-slimming.
+  // Non-blocking: issues are reported as warnings to allow human decision.
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 1.6: pm.md Structure Pre-flight Diagnosis`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const { readFileSync: rfs, existsSync: ex16 } = await import('node:fs');
+    const { join: j16 } = await import('node:path');
+
+    const l2PmPath = j16(config.l2ProjectPath, 'agents', 'pm.md');
+    const l1CommonPmPath = j16('templates', 'common', 'agents', 'pm.md');
+
+    if (!ex16(l2PmPath)) {
+      console.log(`ℹ️  No agents/pm.md found in L2 source — skipping Phase 1.6`);
+    } else {
+      const pmContent = rfs(l2PmPath, 'utf-8');
+      const pmLines = pmContent.split('\n').length;
+      const pmIssues: string[] = [];
+
+      // Check 1: extends: pattern
+      if (!pmContent.includes('extends:')) {
+        pmIssues.push(`Missing 'extends:' pattern — L2 pm.md should delegate to common via extends: ../../common/agents/pm.md`);
+      }
+
+      // Check 2: 200-line limit
+      if (pmLines > 200) {
+        pmIssues.push(`Line count ${pmLines} exceeds 200-line L2 limit (L0 duplication bug risk)`);
+      }
+
+      // Check 3: Duplicate sections vs L1 common pm.md
+      if (ex16(l1CommonPmPath)) {
+        const l1Content = rfs(l1CommonPmPath, 'utf-8');
+        const l1Headers = [...l1Content.matchAll(/^#{1,3} .+/gm)].map(m => m[0].trim());
+        const l2Headers = [...pmContent.matchAll(/^#{1,3} .+/gm)].map(m => m[0].trim());
+        const duplicates = l2Headers.filter(h => l1Headers.includes(h));
+        if (duplicates.length > 0) {
+          pmIssues.push(`${duplicates.length} section header(s) duplicated from L1 common pm.md: ${duplicates.slice(0, 3).join(', ')}${duplicates.length > 3 ? '...' : ''}`);
+        }
+      }
+
+      if (pmIssues.length === 0) {
+        console.log(`✅ pm.md structure OK (${pmLines} lines, extends pattern present)`);
+      } else {
+        console.warn(`⚠️  PHASE 1.6: pm.md has ${pmIssues.length} structural issue(s):`);
+        for (const issue of pmIssues) {
+          console.warn(`   - ${issue}`);
+        }
+        if (config.autoFixPmMd) {
+          console.warn(`   autoFixPmMd=true: Manual review recommended — automatic pm.md slimming not yet implemented.`);
+          console.warn(`   Action required: manually slim agents/pm.md to < 200 lines using extends: pattern.`);
+        } else {
+          console.warn(`   Run with autoFixPmMd:true to enable auto-fix guidance, or fix manually before proceeding.`);
+        }
+      }
+    }
+
+    console.log(`✅ PHASE 1.6 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn(`⚠️  PHASE 1.6 WARNING: ${errorMsg}`);
+  }
+
+  // ============================================================================
   // PHASE 2: RECONCILE WITH L0/L1
   // ============================================================================
 
@@ -263,6 +347,100 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`✅ Dependency validation passed`);
   }
   console.log(`✅ PHASE 3 COMPLETE`);
+
+  // ============================================================================
+  // PHASE 3.5: AGENTS.MD §-STRUCTURE AND VARIANT-* MARKER PRE-FLIGHT CHECK
+  // ============================================================================
+  // Verifies the L2 source AGENTS.md has the §-numbered structure and all 6
+  // VARIANT-*-START/END anchor markers required for Phase 4 injection.
+  // Without markers, injectVariantPlaceholders() silently produces an uninjected
+  // file — this gate catches that BEFORE generation runs.
+  //
+  // Default: report-only (non-blocking warn). Set autoFixAgentsMd:true to
+  // auto-regenerate from templates/common/AGENTS.md via regenerate-agents-md.ts.
+  // BLOCKING if auto-fix is not available and markers are missing.
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 3.5: AGENTS.md §-Structure Pre-flight Check`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const { readFileSync: rfs35, existsSync: ex35 } = await import('node:fs');
+    const { join: j35 } = await import('node:path');
+
+    const l2AgentsMdPath = j35(config.l2ProjectPath, 'AGENTS.md');
+
+    if (!ex35(l2AgentsMdPath)) {
+      console.log(`ℹ️  No AGENTS.md found in L2 source — will be generated from scratch in Phase 4.`);
+    } else {
+      const agentsMdContent = rfs35(l2AgentsMdPath, 'utf-8');
+
+      const requiredMarkers = [
+        'VARIANT-AGENTS-START',
+        'VARIANT-AGENT-DETAILS-START',
+        'VARIANT-DISPATCH-TRIGGERS-START',
+        'VARIANT-PHASE-GATE-START',
+        'VARIANT-SUBAGENT-ROSTER-START',
+        'VARIANT-ROLE-BOUNDARY-START',
+      ];
+      const missingMarkers = requiredMarkers.filter(m => !agentsMdContent.includes(`<!-- ${m} -->`));
+      const hasSectionedStructure = agentsMdContent.includes('## §1:') && agentsMdContent.includes('## §3:');
+
+      if (missingMarkers.length === 0 && hasSectionedStructure) {
+        console.log(`✅ AGENTS.md structure OK — all VARIANT-* markers present, §-numbered sections found`);
+      } else {
+        const issues: string[] = [];
+        if (!hasSectionedStructure) issues.push('missing §-numbered section structure (§1/§3)');
+        if (missingMarkers.length > 0) issues.push(`missing VARIANT-* markers: ${missingMarkers.join(', ')}`);
+
+        console.warn(`⚠️  PHASE 3.5: AGENTS.md structure misaligned with L1 template:`);
+        for (const issue of issues) console.warn(`   - ${issue}`);
+
+        if (config.autoFixAgentsMd) {
+          console.log(`   autoFixAgentsMd=true: regenerating AGENTS.md from L1 common template...`);
+          try {
+            // Inline regeneration: read L1 template, inject agent blocks, write to L2 source
+            const commonTemplate = j35('templates', 'common', 'AGENTS.md');
+            if (!ex35(commonTemplate)) {
+              throw new Error(`L1 template not found: ${commonTemplate}`);
+            }
+            // Delegate to regenerate-agents-md.ts via subprocess
+            const { execFileSync: efs } = await import('node:child_process');
+            const variantDirName = config.l2ProjectPath.split(/[\\/]/).pop() ?? config.variantName;
+            // Map L2 path to templates/<variant> if it lives under templates/
+            const isInTemplates = config.l2ProjectPath.replace(/\\/g, '/').includes('templates/');
+            if (isInTemplates) {
+              efs('bun', ['scripts/regenerate-agents-md.ts', '--variant', variantDirName], { stdio: 'inherit' });
+              console.log(`   ✅ AGENTS.md regenerated for ${variantDirName}`);
+            } else {
+              console.warn(`   ⚠️  L2 source is not under templates/ — auto-regeneration skipped. Run manually:`);
+              console.warn(`      bun scripts/regenerate-agents-md.ts --variant ${variantDirName}`);
+            }
+          } catch (fixErr) {
+            const fixMsg = fixErr instanceof Error ? fixErr.message : String(fixErr);
+            console.error(`   ❌ Auto-regeneration failed: ${fixMsg}`);
+            console.error(`   Fix manually: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
+            console.error(`   Then re-run the pipeline.`);
+            process.exit(1);
+          }
+        } else {
+          // BLOCKING: Phase 4 injection will silently produce wrong output without markers
+          console.error(`\n❌ PHASE 3.5 BLOCKING: AGENTS.md is missing injection anchors.`);
+          console.error(`   Phase 4 injectVariantPlaceholders() will find no markers → uninjected output.`);
+          console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
+          console.error(`   Or re-run pipeline with autoFixAgentsMd:true\n`);
+          process.exit(1);
+        }
+      }
+    }
+
+    console.log(`✅ PHASE 3.5 COMPLETE`);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === undefined) throw error; // re-throw process.exit
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn(`⚠️  PHASE 3.5 WARNING: ${errorMsg}`);
+  }
 
   // ============================================================================
   // PHASE 4: GENERATE VARIANT
@@ -371,6 +549,34 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       console.warn(`⚠️  ${failedCount} file(s) have missing required sections. See _pipeline_report.md`);
     }
 
+    // BLOCKING CHECK: AGENTS.md must have §-numbered structure and VARIANT-* markers.
+    // Without these, l2-to-variant-pipeline.ts injection has no anchors → silent drift.
+    const agentsMdPath = j(variantPath, 'AGENTS.md');
+    if (ex(agentsMdPath)) {
+      const { readUTF8File: ru2 } = await import('./lib/encoding-utils.js');
+      const agentsMdContent = ru2(agentsMdPath);
+      const requiredMarkers = [
+        'VARIANT-AGENTS-START',
+        'VARIANT-AGENT-DETAILS-START',
+        'VARIANT-DISPATCH-TRIGGERS-START',
+        'VARIANT-PHASE-GATE-START',
+        'VARIANT-SUBAGENT-ROSTER-START',
+        'VARIANT-ROLE-BOUNDARY-START',
+      ];
+      const missingMarkers = requiredMarkers.filter(m => !agentsMdContent.includes(`<!-- ${m} -->`));
+      const hasSectionedStructure = agentsMdContent.includes('## §1:') && agentsMdContent.includes('## §3:');
+      if (missingMarkers.length > 0 || !hasSectionedStructure) {
+        const issues: string[] = [];
+        if (!hasSectionedStructure) issues.push('missing §-numbered section structure (§1/§3/§5)');
+        if (missingMarkers.length > 0) issues.push(`missing VARIANT-* markers: ${missingMarkers.join(', ')}`);
+        console.error(`\n❌ PHASE 4.5 BLOCKING: AGENTS.md structure is misaligned with L1 template.`);
+        console.error(`   ${issues.join('; ')}`);
+        console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${variantPath.split(/[\\/]/).pop()}`);
+        console.error(`   Then re-run the pipeline.\n`);
+        process.exit(1);
+      }
+    }
+
     console.log(`✅ PHASE 4.5 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
@@ -379,7 +585,15 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
-  // PHASE 4.6: PROCESS PM.MD AND GENERATE CONTEXT.MD
+  // PHASE 4.6: GENERATED VARIANT PM.MD COMPLETION + CONTEXT.MD GENERATION
+  // ============================================================================
+  // Role: "generation completion" — operates on the GENERATED variant pm.md,
+  // NOT the L2 source pm.md. Interprets extends: pattern and fills
+  // <!-- VARIANT-SECTION: ... --> markers with variant-specific data, then
+  // generates docs/<variant>.context.md from variant_overrides.
+  //
+  // Distinct from Phase 1.6 (source diagnosis): Phase 1.6 diagnoses the L2
+  // source file; Phase 4.6 completes the already-generated variant output.
   // ============================================================================
 
   try {

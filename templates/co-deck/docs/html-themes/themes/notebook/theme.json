@@ -1,0 +1,46 @@
+{
+  "name": "notebook",
+  "version": "1.0.0",
+  "description": "Ruled-paper notebook layout with red margin line, chapter tabs, and print-friendly white background. Each slide looks like a handwritten study page — ruled lines, arrow bullets, red accent, and a footer with page number and chapter tabs. Optimised for reference material, workshop handouts, and study guides that learners revisit after the session.",
+  "rendering": {
+    "paradigm": "notebook",
+    "slides_in_dom": "all (one active)",
+    "navigation": "prev/next buttons + chapter tab bar (footer) + arrow keys",
+    "progress_indicator": "page number (footer left) + chapter tabs (footer right)"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 4,
+    "max_title_chars": 30,
+    "recommended_slide_count": "20-40",
+    "notes": "Ruled lines fix line rhythm — keep bullet text to 1-2 lines each. Titles up to 30 chars (sits cleanly on one ruled line). Max 4 bullets; each bullet should be a self-contained study note. Chapter tabs auto-populate from divider slides — include at least one divider per chapter. Content is print-friendly: avoid dark backgrounds inside slide cards."
+  },
+  "compatible_styles": ["classic", "minimal", "academic"],
+  "incompatible_styles": [
+    {
+      "name": "premium-dark",
+      "reason": "premium-dark dark navy background conflicts with notebook's white ruled-paper card design."
+    },
+    {
+      "name": "visual-heavy",
+      "reason": "visual-heavy full-bleed background image destroys the ruled-paper texture and margin line."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → [Divider → 3-5 Content] × N → Summary",
+    "audience_fit": ["student", "practitioner"],
+    "notes": "Divider slides auto-generate chapter tab labels. Cover uses centered layout with decorative rule. Summary slide uses contact/closing type."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "profile": true,
+    "standard": true,
+    "contact": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_theme": "docs/html-themes/themes/notebook/theme.css",
+  "added": "2026-06-22",
+  "author": "co-deck"
+}

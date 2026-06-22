@@ -1,8 +1,8 @@
 # L2-to-Variant Pipeline - Design Completeness Checklist
 
 > **Architect**: Verification that design is production-ready
-> **Status**: ✅ COMPLETE - Ready for PM Review
-> **Date**: 2026-06-03
+> **Status**: ✅ UPDATED - Phase 1.6 + Phase 3.5 added (v1.8.2, 2026-06-22)
+> **Date**: 2026-06-03 | **Last Updated**: 2026-06-22
 
 ---
 
@@ -22,6 +22,14 @@
 - [x] Hash computation approach (SHA-256)
 - [x] Version extraction rules (@version headers)
 
+### ✅ Phase 1.6: pm.md Pre-flight Diagnosis (v1.8.2)
+- [x] `extends:` pattern check specified (non-blocking warn)
+- [x] 200-line limit proxy check for L0 duplication
+- [x] Duplicate section detection vs L1 common pm.md header list
+- [x] Auto-fix flag (`autoFixPmMd`) behavior documented
+- [x] Role boundary with Phase 4.6 clarified (source diagnosis vs. generation completion)
+- [x] ADR reference: `docs/adr/0046-l2-pipeline-preflight-checks.md`
+
 ### ✅ Phase 2: L0/L1 Reflection & Reconciliation
 - [x] Version comparison strategy (Semver)
 - [x] Reconciliation logic pseudocode
@@ -29,6 +37,15 @@
 - [x] Reclassification matrix
 - [x] Reconciled manifest schema
 - [x] Conflict resolution framework
+
+### ✅ Phase 3.5: AGENTS.md §-Structure Check (v1.8.2, BLOCKING)
+- [x] 6 VARIANT-\*-START marker requirement specified (AGENTS, AGENT-DETAILS, DISPATCH-TRIGGERS, PHASE-GATE, SUBAGENT-ROSTER, ROLE-BOUNDARY)
+- [x] §1: and §3: section header presence required
+- [x] BLOCKING severity rationale documented (silent functional failure if injection no-ops)
+- [x] Auto-fix via `regenerate-agents-md.ts --variant <name>` (`autoFixAgentsMd` flag)
+- [x] Double-defense relationship with Phase 4.5 documented
+- [x] Root cause documented: pre-§-structure AGENTS.md drift in co-consult/co-work/co-security/co-design
+- [x] ADR reference: `docs/adr/0046-l2-pipeline-preflight-checks.md`
 
 ### ✅ Phase 3: Variant Generation
 - [x] variant.json generation strategy

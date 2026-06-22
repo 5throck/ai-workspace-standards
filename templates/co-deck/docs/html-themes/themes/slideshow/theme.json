@@ -34,7 +34,7 @@
   "toc_required": false,
   "slide_types": {
     "title": true,
-    "divider": false,
+    "divider": true,
     "punchline": true,
     "standard": true
   },

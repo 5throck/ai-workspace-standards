@@ -38,15 +38,18 @@ instructor:
 
 # Presentation rendering settings (used by html-build and storyline agents)
 # theme   — HTML structure and navigation paradigm
-#   Options: scroll | slideshow
+#   Options: notebook | pitch | scroll | slideshow
+#   - notebook  : ruled-paper card, chapter tabs, print-friendly (classic/minimal/academic)
+#   - pitch     : floating card + speaker notes panel + footer bar (classic/minimal/premium-dark)
 #   - scroll    : vertical scroll, all slides visible, TOC panel (default)
 #   - slideshow : fullscreen single-slide, prev/next navigation
 # style   — CSS visual variable set (color, font, spacing)
-#   Options: classic | minimal | visual-heavy | academic
-#   - classic      : text left, image right panel (default)
+#   Options: premium-dark | classic | minimal | visual-heavy | academic
+#   - premium-dark : dark navy + gold accent + serif typography (default; scroll/slideshow/pitch only)
+#   - classic      : text left, image right panel
 #   - minimal      : text-only, clean whitespace
 #   - visual-heavy : full-bleed images with text overlay (scroll only)
-#   - academic     : dense 2-column layout for research/thesis (scroll only)
+#   - academic     : dense layout for research/thesis (notebook/scroll only)
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:
   theme: scroll

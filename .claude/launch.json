@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lecture-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "co-deck1/presentations/ai-harness-multiagent-leaders", "-l", "19091", "--no-clipboard"],
+      "port": 19091
+    }
+  ]
+}

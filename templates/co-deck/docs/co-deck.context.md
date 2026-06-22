@@ -41,15 +41,18 @@
 | Storyline | `agents/storyline.md` | 2-3 | storyline.md + slide_deck.md with image_role/image_query fields; cover/divider confirmation | active |
 | Design | `agents/design.md` | 4 | design_spec.md (colors, fonts, layout) | active |
 | Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
+| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG+PNG) | active |
 | Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
 | Measure | `agents/measure.md` | 9-10 | layout_spec.json + pdf_layout_spec.md (Playwright-based) | active |
 | Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
 <!-- END VARIANT-INJECT -->
 
 > **Pipeline order** (variant.json `agent_manifest.pipeline_order`):
-> version → research → **source-verifier** → storyline → design → **image-curator** → html-build → measure → pdf-export
+> version → research → **source-verifier** → storyline → design → **image-curator** ‖ **diagram-specialist** → html-build → measure → pdf-export
 >
-> **Optional agents**: `source-verifier` (skip with `--skip-verify`), `image-curator` (skip if no images needed)
+> ‖ = parallel at Stage 3.5; image-curator handles photos, diagram-specialist handles SVG diagrams/charts
+>
+> **Optional agents**: `source-verifier` (skip with `--skip-verify`), `image-curator` (skip if no images needed), `diagram-specialist` (skip if no visual_spec fields in slide_deck.md)
 >
 > After any agent change: update AGENTS.md and this table.
 
@@ -97,19 +100,27 @@ Three flags control agent execution in the co-deck pipeline:
 | `measure-layout.ts` | `scripts/co-deck/` | Playwright layout measurement → layout_spec.json (optional) | active |
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | CSS concept diagrams → SVG file → PNG file (no browser; `@resvg/resvg-js`) | active |
 | `extract_slidedata.mjs` | `scripts/` | HTML slideData → slidedata.json | active |
 <!-- END VARIANT-INJECT -->
 
 ### Bun Dependencies
 
 ```bash
-bun install          # installs pdf-lib, fflate, @pdf-lib/fontkit
+bun install          # installs pdf-lib, fflate, @pdf-lib/fontkit, @resvg/resvg-js
                      # playwright is SKIPPED (optionalDependency)
 
 # Only if measure-layout.ts is needed:
 bun add playwright
 bunx playwright install chromium
 ```
+
+| Package | Version | Used By |
+|---------|---------|---------|
+| `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` |
+| `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` |
+| `fflate` | `^0.8.2` | `download-font.ts` |
+| `@resvg/resvg-js` | `^2.6.2` | `gen-visual-images.ts` |
 
 ---
 
@@ -124,6 +135,8 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 | Name | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|----------|-----------|-----|---------------|--------|
+| `notebook` | Ruled-paper card, centered fullscreen, opacity fade | Prev/Next + chapter tabs (footer) + arrow keys | None | max 4 bullets, 30 char title, 20-40 slides | `docs/html-themes/themes/notebook/` |
+| `pitch` | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
 | `scroll` | Vertical scroll, all slides in DOM | Scroll + TOC panel | Required | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
 | `slideshow` | Fullscreen single-slide, CSS transitions | Prev/Next + arrow keys | None | max 3 bullets, 20 char title, 20-40 slides | `docs/html-themes/themes/slideshow/` |
 
@@ -163,13 +176,13 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `scroll` | `slideshow` |
-|-------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ |
-| `classic` | ✅ | ✅ |
-| `minimal` | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
-| `academic` | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
+| Style ↓ / Theme → | `notebook` | `pitch` | `scroll` | `slideshow` |
+|-------------------|------------|---------|----------|-------------|
+| `premium-dark` | ❌ incompatible (dark bg destroys ruled-paper texture) | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ❌ incompatible (full-bleed destroys margin line) | ❌ incompatible | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
+| `academic` | ✅ | ❌ incompatible (30% panel too narrow in pitch grid) | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
 
 ### Theme/Style Authoring
 
@@ -225,7 +238,7 @@ title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
-  theme: scroll       # HTML structure: scroll | slideshow
+  theme: scroll       # HTML structure: notebook | pitch | scroll | slideshow
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
 keywords: [Keyword 1, Keyword 2]
 instructor:
@@ -366,6 +379,28 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
 6. **TOC sidebar is MANDATORY for scroll theme**: wrap slides in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`. Each `.slide` must carry `id="slide-${index}"`.
 
+### Visual Diagram Pipeline
+
+For slides that use concept diagrams (not stock photos), the pipeline is:
+
+```
+CSS-defined concept → gen-visual-images.ts → images/<stem>.svg (source artifact)
+                                           → images/<stem>.png (rendered output)
+                                           → slideData[i].visualImage = "images/<stem>.png"
+                                           → HTML: applyVisualImages() injects <img> into .right-panel
+                                           → PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
+```
+
+**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to disk so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency.
+
+**Rules**:
+1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
+2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
+3. `slidedata.json` `visualImage` field must reference the PNG path (relative to project dir, e.g. `"images/slide-03.png"`)
+4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
+5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
+6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
+
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
 2. `image_query` must be in English — even for Korean lectures
@@ -392,9 +427,10 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
+| `presentations/<project>/images/` | **Project-local images** — SVG-generated concept diagram PNGs + SVG source files; NOT shared across projects |
 | `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
 | `presentations/assets/icons/` | **Shared icon pool** |
-| `presentations/assets/images/` | **Shared image pool** — slug-named, cross-project reuse |
+| `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
@@ -424,7 +460,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
-12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, slideshow-incompatible.
+12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, incompatible with notebook/pitch/slideshow. `premium-dark` is incompatible with `notebook` (dark background destroys ruled-paper texture).
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
 14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.2.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).

@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.9 — contact slide HTML parity: renderContactSlide now centers an 80% band (was the narrow left content region), removes the spurious dark header strip, and uses the measured HTML colors — "감사합니다" WHITE bold (was gold), contact lines secondary #CBD5E1 (was white/muted split), CTA note GOLD (was body) — with measured vertical positions/gaps. Previous 1.3.8: punchline spacing + divider bg parity.
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
@@ -313,8 +313,8 @@ function strip(s: string | undefined | null): string {
 
 function imgPath(src: string | undefined, imgDir: string): string | null {
   if (!src) return null;
-  const fname = src.replace('images/', '');
-  const p = join(imgDir, fname);
+  // src is relative to the project dir (e.g. "images/slide-03.png")
+  const p = join(imgDir, src);
   return existsSync(p) ? p : null;
 }
 
@@ -324,16 +324,28 @@ interface SlideData {
   section?:       string;
   title?:         string;
   subtitle?:      string;
+  text?:          string;   // punchline main statement (HTML .punch-text)
+  sub?:           string;   // punchline support line (HTML .punch-sub)
   meta?:          string;
   desc?:          string;
   partNum?:       string;
   bullets?:       string[];
+  visual?:        string;
   visualImage?:   string;
   visualTitle?:   string;
   visualDisplay?: string;
   isTitleSlide?:  boolean;
   isDividerSlide?: boolean;
   isPunchline?:   boolean;
+  isProfileSlide?: boolean;
+  speakerName?:   string;
+  speakerTitle?:  string;
+  speakerBio?:    string;
+  photoPath?:     string;
+  isContactSlide?: boolean;
+  contactName?:   string;
+  contactEmail?:  string;
+  contactNote?:   string;
 }
 
 // ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
@@ -470,30 +482,34 @@ function renderTitleSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
+  // meta (cover-eyebrow): drawn BEFORE title — small accent label above the main title
+  const meta = strip(data.meta);
+  if (meta && metaR) {
+    r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
+    r.multiCell(metaR.w, coords.px2mm(24), meta.toUpperCase(), metaR.x, metaR.y, 'C');
+  }
+
   r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y);
+  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y, 'C');
 
   r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y);
-
-  const meta = strip(data.meta);
-  if (meta) {
-    r.setFont(true, T_TS_META); r.setColor(C_META);
-    r.multiCell(metaR.w, coords.px2mm(24), meta, metaR.x, metaR.y);
-  }
+  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
 }
 
 function renderDividerSlide(ctx: RenderCtx) {
   const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
-  const { C_DARK2, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
+  const { C_BG, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
   const { CX, CY, CW, CH } = coords;
   const lh = spec.line_heights ?? {};
   const { T_DIV_PART, T_DIV_TITLE, T_DIV_DESC, T_SECT, T_NUM } = sizes;
 
-  // Divider fills the full card with a darker shade, then (if declared) draws
-  // the section header bar, then places a part/title/desc block on the left and
-  // an image (optional) on the right.
-  r.fillRect(CX, CY, CW, CH, C_DARK2);
+  // Divider fills the full card with the SAME surface as the cover/standard card
+  // (C_BG). HTML .slide[data-type="divider"] uses --divider-bg which is identical
+  // to --cover-bg (radial #1E293B→#0B0F19); the PDF flattens that radial to C_BG
+  // for the cover, so the divider must too — otherwise it renders as a darker slab
+  // (#0A0E16) that differs from every other slide. Then (if declared) draws the
+  // section header bar, then places a part/title/desc block (left + optional image).
+  r.fillRect(CX, CY, CW, CH, C_BG);
 
   const titleR = region('title');
   const visR   = region('visual');
@@ -506,19 +522,25 @@ function renderDividerSlide(ctx: RenderCtx) {
   const LH_T = lh.div_title_px ? coords.px2mm(lh.div_title_px) : coords.px2mm(56.0);
   const LH_D = lh.div_desc_px  ? coords.px2mm(lh.div_desc_px)  : coords.px2mm(28.16);
 
-  const py0 = titleR.y;
+  const ip = imgPath(data.visualImage, imgDir ?? '');
+  // Text-only dividers (no image) render CENTERED like a premium-dark title card;
+  // image dividers (e.g. scroll theme) keep the original left-aligned + right-image layout.
+  const align: 'L' | 'C' = ip ? 'L' : 'C';
+  // Vertically center the partNum/title/desc block within titleR for text-only dividers.
+  const blockH = coords.px2mm(34) + LH_T + coords.px2mm(16) + LH_D;
+  const py0 = ip ? titleR.y : titleR.y + Math.max(0, (titleR.h - blockH) / 2);
+
   r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
-  r.cell(titleR.w, coords.px2mm(28), (strip(data.partNum)).toUpperCase(), titleR.x, py0, 'L');
+  r.cell(titleR.w, coords.px2mm(28), (strip(data.partNum)).toUpperCase(), titleR.x, py0, align);
 
   const py1 = py0 + coords.px2mm(34);
   r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
-  const afterTitle = r.multiCell(titleR.w, LH_T, strip(data.title), titleR.x, py1, 'L');
+  const afterTitle = r.multiCell(titleR.w, LH_T, strip(data.title), titleR.x, py1, align);
 
   const py2 = afterTitle + coords.px2mm(16);
   r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
-  r.multiCell(titleR.w, LH_D, strip(data.desc), titleR.x, py2, 'L');
+  r.multiCell(titleR.w, LH_D, strip(data.desc), titleR.x, py2, align);
 
-  const ip = imgPath(data.visualImage, imgDir ?? '');
   if (ip) {
     r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
     r.placeImage(doc, ip, visR.x, visR.y, visR.w, visR.h);
@@ -526,36 +548,191 @@ function renderDividerSlide(ctx: RenderCtx) {
 }
 
 function renderPunchlineSlide(ctx: RenderCtx) {
-  const { r, data, spec, colors, region } = ctx;
-  const { C_BG, C_ACCENT, C_MUTED } = colors;
+  const { r, data, spec, coords, colors, region } = ctx;
+  const { C_BG, C_ACCENT, C_WHITE, C_BODY } = colors;
   const f = spec.fonts ?? {};
 
-  const punchlinePt    = f.punchline_pt    ?? 48;
-  const punchlineSubPt = f.punchline_sub_pt ?? 20;
+  // Per-item sizes aligned to HTML .punch-* (Playwright px × 0.75 = pt).
+  // Key parity fix: HTML .punch-text is WHITE (--text-on-dark, gold glow), not gold.
+  const SZ_TAG  = 9.6;                          // .part-tag   12.8px (gold, uppercase)
+  const SZ_MARK = 43.2;                         // .punch-mark 57.6px (gold decorative quote)
+  const SZ_TEXT = f.punchline_pt     ?? 24;     // .punch-text 32px (WHITE, bold)
+  const SZ_SUB  = f.punchline_sub_pt ?? 12.24;  // .punch-sub  16.32px (slate)
 
-  // Punchline regions: title + subtitle, both centered in their boxes.
+  // Stack part-tag → mark → text → sub, centered as a block (mirrors HTML flex centering).
+  // Gaps + box heights are the EXACT rendered element-to-element spacing measured from
+  // slide-7 punchline (Playwright on the 720px design space): each GAP is box-bottom →
+  // next-box-top. With these, the PDF element tops reproduce HTML exactly (text at +144px
+  // from part-tag top, sub at +293px — matching HTML 346−202 and 495−202).
+  const BOX_TAG      = coords.px2mm(18);    // .part-tag rendered height (12.8px font, normal LH)
+  const GAP_TAG_MARK = coords.px2mm(56);    // part-tag box bottom → mark box top
+  const BOX_MARK     = coords.px2mm(29);    // .punch-mark line-height 0.5 (57.6px font → 29px box)
+  const GAP_MARK_TXT = coords.px2mm(41);    // mark box bottom → text top
+  const LH_TEXT      = coords.px2mm(46.4);  // .punch-text line-height 1.45 (per line)
+  const GAP_TXT_SUB  = coords.px2mm(56);    // text bottom → sub top
+  const LH_SUB       = coords.px2mm(23);    // .punch-sub rendered height (16.32px font)
+
   const titleR = region('title');
-  const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
+  const box    = tryRegion(ctx, 'content') ?? titleR;   // center within the large content region
+  const bandW  = box.w;
 
-  // Fill background across the title+subtitle bounding box (use title region as
-  // the punchline content box when present in slide_type_overrides).
-  const bgR = (titleR.w > 0 && titleR.h > 0) ? titleR : { x: 0, y: 0, w: r.pageW / MM_TO_PT, h: r.pageH / MM_TO_PT };
-  r.fillRect(bgR.x, bgR.y, bgR.w, bgR.h, C_BG);
+  // HTML constrains .punch-text to max-width: 32ch (≈607px ≈160.6mm) so the statement
+  // wraps to ~2 centered lines. Reproduce that exact max-width (measured from slide-7,
+  // whose natural width 169.3mm > 160.6mm → wraps). Count the wrapped lines so blockH /
+  // vertical centering accounts for the ACTUAL statement height.
+  const statement = strip(data.text) || strip(data.title);
+  r.setFont(true, SZ_TEXT);
+  const textBand = Math.min(bandW, coords.px2mm(607));
+  const textX    = box.x + (bandW - textBand) / 2;
+  const textLineH = (statement ? r.wrapText(statement, textBand).length : 1) * LH_TEXT;
 
-  const titleLh = punchlinePt / MM_TO_PT;
-  const subLh   = punchlineSubPt / MM_TO_PT;
-  const gap     = 6;
-  const blockH  = titleLh + gap + subLh;
-  const startY  = titleR.y + Math.max(0, (titleR.h - blockH) / 2);
+  const blockH = BOX_TAG + GAP_TAG_MARK + BOX_MARK + GAP_MARK_TXT + textLineH + GAP_TXT_SUB + LH_SUB;
+  let y = box.y + Math.max(0, (box.h - blockH) / 2);
 
-  r.setFont(true, punchlinePt); r.setColor(C_ACCENT);
-  r.multiCell(titleR.w, titleLh, strip(data.title), titleR.x, startY, 'C');
+  // Full-bleed dark background (HTML .slide[data-type="punchline"] is radial navy).
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
-  const subText = strip(data.subtitle) || strip((data.bullets ?? [])[0]);
-  if (subText) {
-    r.setFont(false, punchlineSubPt); r.setColor(C_MUTED);
-    r.multiCell(subR.w, subLh, subText, subR.x, startY + titleLh + gap, 'C');
+  // part-tag (gold, uppercase) — e.g. "PART 01 · 패러다임 전환"
+  const sec = strip(data.section);
+  if (sec) {
+    r.setFont(false, SZ_TAG); r.setColor(C_ACCENT);
+    r.cell(bandW, BOX_TAG, sec.toUpperCase(), box.x, y, 'C');
+    y += BOX_TAG + GAP_TAG_MARK;
   }
+
+  // decorative gold quote mark (") above the statement
+  r.setFont(false, SZ_MARK); r.setColor(C_ACCENT);
+  r.cell(bandW, BOX_MARK, '“', box.x, y, 'C');
+  y += BOX_MARK + GAP_MARK_TXT;
+
+  // punch-text (WHITE, bold) — the statement (data.text, fallback title), wrapped at the
+  // HTML max-width (textBand), centered on the same axis as the tag/mark/sub above.
+  r.setFont(true, SZ_TEXT); r.setColor(C_WHITE);
+  const afterText = r.multiCell(textBand, LH_TEXT, statement, textX, y, 'C');
+  y = afterText + GAP_TXT_SUB;
+
+  // punch-sub (slate) — support line (data.sub, fallback subtitle/bullets)
+  const subText = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
+  if (subText) {
+    r.setFont(false, SZ_SUB); r.setColor(C_BODY);
+    r.multiCell(bandW, LH_SUB, subText, box.x, y, 'C');
+  }
+}
+
+function renderProfileSlide(ctx: RenderCtx) {
+  const { r, data, coords, colors } = ctx;
+  const { C_BG, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
+
+  // HTML .slide[data-type="profile"] .slide-card: flex column, centered H+V,
+  // text-align:center. Render a vertically-centered column:
+  //   eyebrow → title → name → affiliation → bio
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+
+  const bandW = coords.CW * 0.80;
+  const bandX = coords.CX + (coords.CW - bandW) / 2;
+
+  // Font sizes (SZ, pt) aligned per-item to HTML .profile-* via px×0.75 (the px→pt
+  // calibration ratio). Line-height boxes (LH) and inter-item gaps (GAP) are px values
+  // measured from the rendered HTML slide-2 (Playwright on the 1280x720 natural design
+  // space — viewport_px=720, so px→mm is exact); positions are already aligned, only
+  // glyph sizes are tuned here. Inter-item gap model: card flex `gap:32px` + margin-top.
+  const SZ_EYEBROW = 9.6,  LH_EYEBROW = coords.px2mm(18);   // .profile-eyebrow 12.8px
+  const SZ_TITLE   = 24,   LH_TITLE   = coords.px2mm(40);   // .slide-title    32px
+  const SZ_NAME    = 22.8, LH_NAME    = coords.px2mm(44);   // .profile-name   30.4px
+  const SZ_AFFIL   = 12.6, LH_AFFIL   = coords.px2mm(24);   // .profile-title  16.8px
+  const SZ_BIO     = 11,   LH_BIO     = coords.px2mm(25);   // .profile-bio    14.72px
+  const GAP_E = coords.px2mm(32),   GAP_T = coords.px2mm(40),   // 32+0 , 32+8
+        GAP_N = coords.px2mm(36.8), GAP_A = coords.px2mm(49.6); // 32+4.8, 32+17.6
+
+  const eyebrowTxt = 'Introduction';                 // HTML .profile-eyebrow (hardcoded)
+  const titleTxt   = strip(data.title);
+  const nameTxt    = strip(data.speakerName);
+  const affilTxt   = strip(data.speakerTitle);
+  const bioLines   = (data.speakerBio ?? '')
+    .split(/<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
+
+  // Vertically center the block.
+  const blockH = LH_EYEBROW + GAP_E + LH_TITLE + GAP_T + LH_NAME + GAP_N
+               + LH_AFFIL + GAP_A + LH_BIO * Math.max(1, bioLines.length);
+  let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
+
+  r.setFont(true,  SZ_EYEBROW); r.setColor(C_ACCENT);                // gold uppercase eyebrow
+  r.cell(bandW, LH_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
+  y += LH_EYEBROW + GAP_E;
+
+  r.setFont(true,  SZ_TITLE); r.setColor(C_WHITE);                   // "연자 소개"
+  r.cell(bandW, LH_TITLE, titleTxt, bandX, y, 'C');
+  y += LH_TITLE + GAP_T;
+
+  r.setFont(true,  SZ_NAME); r.setColor(C_WHITE);                    // name = --text-on-dark (white)
+  r.cell(bandW, LH_NAME, nameTxt, bandX, y, 'C');
+  y += LH_NAME + GAP_N;
+
+  r.setFont(false, SZ_AFFIL); r.setColor(C_BODY);                    // affiliation = --text-secondary
+  r.cell(bandW, LH_AFFIL, affilTxt, bandX, y, 'C');
+  y += LH_AFFIL + GAP_A;
+
+  r.setFont(false, SZ_BIO); r.setColor(C_MUTED);                     // bio = --text-muted
+  for (const line of bioLines) {
+    r.cell(bandW, LH_BIO, line, bandX, y, 'C');
+    y += LH_BIO;
+  }
+}
+
+function renderContactSlide(ctx: RenderCtx) {
+  const { r, data, coords, colors } = ctx;
+  const { C_BG, C_ACCENT, C_WHITE, C_BODY } = colors;
+
+  // HTML .slide-card is a centered flex column (gap ~32px); the 3 children — .contact-thanks,
+  // .contact-line (name + email), .contact-next — are all horizontally centered. Measured from
+  // slide-24 (Playwright, 720px design space):
+  //   .contact-thanks 234–294  41.6px  WHITE bold   "감사합니다"
+  //   .contact-line   336–384  15.2px  #CBD5E1 reg   name + email (2 lines)
+  //   .contact-next   445–486  14.08px GOLD   reg    CTA (1 line)
+  // No header bar (HTML contact slide has none). Everything sits on the C_BG surface, centered
+  // in an 80% band — NOT the default (narrow, left-aligned) content region the old code used.
+  const LH_THANKS = coords.px2mm(60);    // .contact-thanks box (41.6px, line-height ~1.44)
+  const LH_LINE   = coords.px2mm(24.5);  // .contact-line per line (15.2px)
+  const LH_NOTE   = coords.px2mm(24);    // .contact-next line (14.08px)
+  const GAP_TL    = coords.px2mm(42);    // thanks bottom → contact-lines top
+  const GAP_LN    = coords.px2mm(60);    // contact-lines bottom → note top
+
+  const SZ_THANKS = 31.2;  // .contact-thanks 41.6px (px × 0.75)
+  const SZ_LINE   = 11.4;  // .contact-line   15.2px
+  const SZ_NOTE   = 10.56; // .contact-next   14.08px
+
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
+
+  const bandW = coords.CW * 0.80;                 // centered 80% band (HTML centers everything)
+  const bandX = coords.CX + (coords.CW - bandW) / 2;
+
+  const thanks = strip(data.title);
+  const name   = strip(data.contactName);
+  const email  = strip(data.contactEmail);
+  const note   = strip(data.contactNote);
+  const nLines = (name ? 1 : 0) + (email ? 1 : 0) || 1;
+
+  r.setFont(false, SZ_NOTE);
+  const noteLines = note ? Math.max(1, r.wrapText(note, bandW).length) : 1;
+
+  // Vertically center the whole contact group, then stack with measured gaps.
+  const blockH = LH_THANKS + GAP_TL + LH_LINE * nLines + GAP_LN + LH_NOTE * noteLines;
+  let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
+
+  // "감사합니다" — WHITE bold (HTML .contact-thanks is white, not gold)
+  r.setFont(true, SZ_THANKS); r.setColor(C_WHITE);
+  r.cell(bandW, LH_THANKS, thanks, bandX, y, 'C');
+  y += LH_THANKS + GAP_TL;
+
+  // contact lines — secondary #CBD5E1 (C_BODY), regular weight
+  r.setFont(false, SZ_LINE); r.setColor(C_BODY);
+  if (name)  { r.cell(bandW, LH_LINE, name,  bandX, y, 'C'); y += LH_LINE; }
+  if (email) { r.cell(bandW, LH_LINE, email, bandX, y, 'C'); y += LH_LINE; }
+
+  // note / CTA — GOLD (HTML .contact-next is accent gold)
+  y += GAP_LN;
+  r.setFont(false, SZ_NOTE); r.setColor(C_ACCENT);
+  r.multiCell(bandW, LH_NOTE, note, bandX, y, 'C');
 }
 
 async function renderStandardSlide(ctx: RenderCtx) {
@@ -580,25 +757,35 @@ async function renderStandardSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), n, total, headerR, contentR, titleR.x, coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
-  const hasRight = !!(data.visualImage || data.visualDisplay || data.visualTitle) && !!visR;
+  // data.visual (text description) maps to visualDisplay; "none" is excluded.
+  const rawVisual = data.visual && data.visual.toLowerCase() !== 'none' ? data.visual : undefined;
+  const visualDisplay = data.visualDisplay || (!data.visualImage ? rawVisual : undefined);
+  const hasRight = !!(data.visualImage || visualDisplay || data.visualTitle) && !!visR;
   const titleW   = titleR.w;
   const bulTxtW  = hasRight ? Math.min(contentR.w, visR!.x - contentR.x - 6) : contentR.w;
 
+  // HTML .slide-content uses justify-content: center — vertically center the
+  // [title + gap + bullets] block as a unit in the available area below the header.
+  const headerBottom = headerR ? headerR.y + headerR.h : coords.CY;
+  const cardBottom   = coords.CY + coords.CH - coords.px2mm(8);
+  const availStart   = headerBottom + coords.px2mm(8);
+  const availH       = cardBottom - availStart;
+
+  const bullets  = data.bullets ?? [];
+  const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
+  const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
+  const blockGap = bullets.length > 0 ? coords.px2mm(12) : 0;
+  const blockH   = titleH + blockGap + totalBh;
+  const blockY   = availStart + Math.max(0, (availH - blockH) / 2);
+
   r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, titleR.y, 'L');
+  const afterTitle = r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, blockY, 'L');
 
-  const bullets = data.bullets ?? [];
-  const totalBh = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
-  // Vertically center the bullet block inside the content region. The -4 mm
-  // bottom margin mirrors the pre-rewrite availableH computation so scroll
-  // bullet placement is preserved bit-for-bit.
-  const availableH = contentR.h - 4;
-  let by = contentR.y + Math.max(0, (availableH - totalBh) / 2);
-
+  let by = afterTitle + blockGap;
   for (const b of bullets) {
     const txt = strip(b);
     if (!txt) continue;
-    if (by > contentR.y + contentR.h - 6) break;
+    if (by > cardBottom) break;
     r.drawEllipse(contentR.x, by + LH_BUL * 0.28, 3.2, C_ACCENT);
     r.setFont(false, T_BUL); r.setColor(C_BODY);
     const afterBul = r.multiCell(bulTxtW - 6, LH_BUL, txt, contentR.x + 6, by, 'L');
@@ -613,8 +800,8 @@ async function renderStandardSlide(ctx: RenderCtx) {
       await r.placeImage(doc, ip, visR!.x + pad, visR!.y + pad, visR!.w - pad * 2, visR!.h - pad * 2);
     } else {
       const vt = strip(data.visualTitle);
-      const vd = strip(data.visualDisplay);
-      const lhVt = coords.px2mm(20), lhVb = coords.px2mm(24), gap = 4;
+      const vd = strip(visualDisplay);
+      const lhVt = coords.px2mm(24), lhVb = coords.px2mm(22), gap = 5;
       const hVt = vt ? r.estimateTextHeight(vt, visR!.w - 8, T_VIS_T, lhVt, true)  : 0;
       const hVb = vd ? r.estimateTextHeight(vd, visR!.w - 8, T_VIS_B, lhVb, false) : 0;
       const totalH = hVt + (vt && vd ? gap : 0) + hVb;
@@ -624,14 +811,15 @@ async function renderStandardSlide(ctx: RenderCtx) {
         vy = r.multiCell(visR!.w - 8, lhVt, vt, visR!.x + 4, vy, 'C') + gap;
       }
       if (vd) {
-        r.setFont(false, T_VIS_B); r.setColor(C_MUTED);
+        r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
         r.multiCell(visR!.w - 8, lhVb, vd, visR!.x + 4, vy, 'C');
       }
     }
   }
 
-  if (metaR) {
-    // Slide counter (e.g. slideshow's counter_x_pct/counter_y_pct).
+  if (metaR && !headerR) {
+    // Slide counter — skip when headerR is present since drawHeaderBar already
+    // renders the number on the right side of the header bar.
     r.setFont(false, T_NUM); r.setColor(C_MUTED);
     r.cell(metaR.w, metaR.h, `${n} / ${total}`, metaR.x, metaR.y, 'R');
   }
@@ -838,7 +1026,7 @@ async function main() {
   const outName  = get('--out') ?? defaultPdfName;
   const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'presentations/assets/fonts');
   const dataPath = resolve(get('--data') ?? join(projectDir, 'slidedata.json'));
-  const imgDir   = resolve(workspaceRoot, 'presentations/assets/images');
+  const imgDir   = projectDir;  // visualImage paths in slidedata.json are relative to projectDir (imgPath = join(imgDir, src), no prefix strip)
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {
@@ -890,16 +1078,13 @@ async function main() {
     const slideTypes = layoutSpec.slide_types ?? {};
     const has        = (t: string) => !!(slideTypes[t] && slideTypes[t].regions);
 
-    let type: 'title' | 'divider' | 'punchline' | 'standard';
-    if (data.isTitleSlide && has('title')) {
-      type = 'title';
-    } else if (data.isDividerSlide && has('divider')) {
-      type = 'divider';
-    } else if (data.isPunchline && has('punchline')) {
-      type = 'punchline';
-    } else {
-      type = 'standard';
-    }
+    let type: 'title' | 'divider' | 'punchline' | 'profile' | 'contact' | 'standard';
+    if (data.isTitleSlide && has('title'))           type = 'title';
+    else if (data.isDividerSlide && has('divider'))  type = 'divider';
+    else if (data.isPunchline && has('punchline'))   type = 'punchline';
+    else if (data.isProfileSlide && has('profile'))  type = 'profile';
+    else if (data.isContactSlide && has('contact'))  type = 'contact';
+    else                                             type = 'standard';
 
     const declared = slideTypes[type]?.regions ?? [];
     // Per-slide-type region resolver: honours slide_type_overrides[type][name].
@@ -913,6 +1098,8 @@ async function main() {
     if (type === 'title')          renderTitleSlide(ctx);
     else if (type === 'divider')   await renderDividerSlide(ctx);
     else if (type === 'punchline') renderPunchlineSlide(ctx);
+    else if (type === 'profile')   renderProfileSlide(ctx);
+    else if (type === 'contact')   renderContactSlide(ctx);
     else                           await renderStandardSlide(ctx);
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {

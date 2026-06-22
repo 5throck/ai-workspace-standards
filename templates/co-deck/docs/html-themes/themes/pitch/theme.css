@@ -1,0 +1,457 @@
+/*
+  pitch/theme.css — co-deck Pitch Theme CSS
+  ==========================================
+  Floating-card presenter layout with:
+    - Viewport-relative card (92vw × 82vh, max 1300×750px, border-radius 20px)
+    - Bottom footer bar: glass morphism, progress bar, TOC toggle, script toggle, nav
+    - Script (speaker notes) panel: slides up from bottom, translucent glass
+    - TOC drawer: slides in from left, fixed-width 320px
+    - Scale+translateY transition: 0.6s cubic-bezier(0.16,1,0.3,1)
+    - CSS-variable driven — all colors come from style.css overrides
+*/
+
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--bg-color, #0B0F19);
+  font-family: var(--font-body, 'Pretendard', 'Noto Sans KR', sans-serif);
+  color: var(--text-primary, #F9FAFB);
+}
+
+/* ─── Presentation area (above footer) ──────────────────────────────────── */
+.presentation-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+/* ─── Slide card ─────────────────────────────────────────────────────────── */
+.slide {
+  position: absolute;
+  width: 92%;
+  max-width: 1300px;
+  height: 82%;
+  max-height: 750px;
+  border-radius: var(--slide-radius, 20px);
+  background: var(--slide-bg, #111827);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--card-border, rgba(255,255,255,0.07));
+  overflow: hidden;
+
+  /* transition */
+  opacity: 0;
+  transform: scale(0.98) translateY(10px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+/* ─── Slide content grid (standard slides) ───────────────────────────────── */
+.slide-content {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  height: 100%;
+  padding: 3rem 3.5rem;
+  box-sizing: border-box;
+}
+
+.slide-left  { display: flex; flex-direction: column; justify-content: center; }
+.slide-right { display: flex; align-items: center; justify-content: center; }
+
+/* ─── Cover slide ────────────────────────────────────────────────────────── */
+.slide[data-type="title"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem;
+  box-sizing: border-box;
+}
+
+.slide[data-type="title"] .slide-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1.5rem;
+}
+
+.slide[data-type="title"] .slide-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary, #F9FAFB);
+  margin-bottom: 1.5rem;
+}
+
+.slide[data-type="title"] .slide-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: var(--text-secondary, rgba(249,250,251,0.65));
+  line-height: 1.6;
+  max-width: 70%;
+}
+
+/* ─── Divider slide ──────────────────────────────────────────────────────── */
+.slide[data-type="divider"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.slide[data-type="divider"] .divider-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3rem 4rem 4rem;
+  background: var(--divider-left-bg, rgba(0,0,0,0.2));
+}
+
+.slide[data-type="divider"] .divider-part {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1rem;
+}
+
+.slide[data-type="divider"] .divider-title {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary, #F9FAFB);
+}
+
+.slide[data-type="divider"] .divider-desc {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-secondary, rgba(249,250,251,0.65));
+  line-height: 1.6;
+}
+
+.slide[data-type="divider"] .divider-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.slide[data-type="divider"] .divider-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+
+/* ─── Profile slide ──────────────────────────────────────────────────────── */
+.slide[data-type="profile"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.slide[data-type="profile"] .profile-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1rem;
+}
+
+.slide[data-type="profile"] .profile-name {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 700;
+  color: var(--text-primary, #F9FAFB);
+  margin-bottom: 0.5rem;
+}
+
+.slide[data-type="profile"] .profile-affiliation {
+  font-size: 1.1rem;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 2rem;
+}
+
+.slide[data-type="profile"] .profile-bio {
+  font-size: 1rem;
+  color: var(--text-secondary, rgba(249,250,251,0.7));
+  line-height: 1.7;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ─── Contact slide ──────────────────────────────────────────────────────── */
+.slide[data-type="contact"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem;
+  box-sizing: border-box;
+}
+
+.slide[data-type="contact"] .contact-title {
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--text-primary, #F9FAFB);
+  margin-bottom: 2rem;
+}
+
+.slide[data-type="contact"] .contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-secondary, rgba(249,250,251,0.7));
+}
+
+/* ─── Standard slide typographic elements ────────────────────────────────── */
+.slide-section {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 0.75rem;
+}
+
+.slide-title {
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary, #F9FAFB);
+  margin-bottom: 2rem;
+}
+
+.slide-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.slide-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary, rgba(249,250,251,0.8));
+}
+
+.slide-bullets li::before {
+  content: '▸';
+  color: var(--accent-color, #D97706);
+  flex-shrink: 0;
+  margin-top: 0.1em;
+}
+
+.slide-visual {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* ─── Footer bar ─────────────────────────────────────────────────────────── */
+.pitch-footer {
+  background: var(--glass-bg, rgba(17, 24, 39, 0.85));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--card-border, rgba(255,255,255,0.07));
+  padding: 0.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-shrink: 0;
+}
+
+.footer-left  { display: flex; align-items: center; gap: 1.5rem; }
+.footer-right { display: flex; align-items: center; gap: 1rem; }
+
+.slide-counter {
+  font-size: 0.75rem;
+  color: var(--text-muted, rgba(249,250,251,0.4));
+  letter-spacing: 0.05em;
+  min-width: 48px;
+}
+
+/* ─── Progress bar ───────────────────────────────────────────────────────── */
+.progress-bar-wrap {
+  flex: 1;
+  height: 3px;
+  background: var(--card-border, rgba(255,255,255,0.1));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent-color, #D97706);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Footer icon buttons ────────────────────────────────────────────────── */
+.footer-btn {
+  background: none;
+  border: 1px solid var(--card-border, rgba(255,255,255,0.12));
+  color: var(--text-muted, rgba(249,250,251,0.5));
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.footer-btn:hover,
+.footer-btn.active {
+  background: var(--accent-color, #D97706);
+  color: #fff;
+  border-color: var(--accent-color, #D97706);
+}
+
+.nav-btn {
+  background: var(--glass-bg, rgba(255,255,255,0.06));
+  border: 1px solid var(--card-border, rgba(255,255,255,0.12));
+  color: var(--text-primary, #F9FAFB);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover { background: var(--nav-btn-hover, rgba(255,255,255,0.14)); }
+
+/* ─── Script panel ───────────────────────────────────────────────────────── */
+.script-panel {
+  position: fixed;
+  bottom: 4.8rem;
+  left: 5%;
+  right: 5%;
+  background: var(--glass-bg, rgba(17, 24, 39, 0.92));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary, rgba(249,250,251,0.75));
+  z-index: 50;
+
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.script-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.script-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 0.5rem;
+}
+
+/* ─── TOC drawer ─────────────────────────────────────────────────────────── */
+.toc-drawer {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 320px;
+  height: 100vh;
+  background: var(--slide-bg, #111827);
+  border-right: 1px solid var(--card-border, rgba(255,255,255,0.1));
+  z-index: 100;
+  overflow-y: auto;
+  transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.toc-drawer.open { left: 0; }
+
+.toc-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1.5rem;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toc-item {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary, rgba(249,250,251,0.65));
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toc-item:hover  { background: rgba(255,255,255,0.05); color: var(--text-primary, #F9FAFB); }
+.toc-item.active { background: rgba(217,119,6,0.12); color: var(--accent-color, #D97706); }
+
+.toc-item-num {
+  font-size: 0.7rem;
+  color: var(--text-muted, rgba(249,250,251,0.3));
+  min-width: 1.5rem;
+}
+
+/* ─── TOC overlay (backdrop when drawer is open) ─────────────────────────── */
+.toc-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0,0,0,0.4);
+}
+
+.toc-overlay.show { display: block; }

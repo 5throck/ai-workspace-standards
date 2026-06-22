@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!--
+  notebook/template.html — co-deck Notebook Theme Skeleton
+  =========================================================
+  Rendering paradigm: ruled-paper notebook card, fullscreen centered.
+  Navigation: prev/next buttons + chapter tab bar (footer) + arrow keys.
+  Transition: opacity fade, 0.35s ease.
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="notebook" data-style="<style>"> attributes
+    2. Replaces <!-- INJECT:CSS --> with base.css + theme.css + style.css <link> tags
+    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
+    4. Replaces <!-- INJECT:slides --> with rendered .slide divs
+
+  CONTENT RULES (from theme.json):
+    - max 4 bullets per slide, max 30 chars in title
+    - ruled lines fix rhythm — keep each bullet to 1-2 lines
+    - divider slides auto-generate chapter tab labels
+
+  SLIDE STRUCTURE per type:
+    title    → isTitleSlide:true   — centered cover (cover-rule + eyebrow + title + subtitle)
+    divider  → isDividerSlide:true — left-margin indent, left accent border title, desc
+    profile  → isProfileSlide:true — centered speaker intro
+    contact  → isContactSlide:true — centered contact info
+    standard → (default)           — gutter + content (eyebrow, title underline, bullets)
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="notebook" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+  <!-- Example load order (replaced by html-build): foundation → theme → style.
+  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../themes/notebook/theme.css">
+  <link rel="stylesheet" href="../../styles/classic/style.css">
+  -->
+</head>
+<body>
+
+  <div class="presentation-container" id="presentation">
+    <!-- INJECT:slides -->
+    <!--
+      Each .slide rendered by renderSlide(data, index) must follow this structure:
+
+      ── title (isTitleSlide) ──────────────────────────────────────
+      <div class="slide active" id="slide-0" data-type="title">
+        <div class="slide-inner">
+          <div class="cover-eyebrow">{data.meta}</div>
+          <div class="cover-rule"></div>
+          <div class="cover-title">{data.title}</div>
+          <div class="cover-subtitle">{data.subtitle}</div>
+        </div>
+      </div>
+
+      ── divider (isDividerSlide) ───────────────────────────────────
+      <div class="slide" id="slide-N" data-type="divider">
+        <div class="slide-inner">
+          <div class="divider-part">{data.partNum} / {data.section}</div>
+          <div class="divider-title">{data.title}</div>
+          <div class="divider-desc">{data.desc}</div>
+        </div>
+      </div>
+
+      ── standard (default) ────────────────────────────────────────
+      <div class="slide" id="slide-N" data-type="standard">
+        <div class="slide-inner">
+          <div class="slide-body">
+            <div class="slide-gutter">
+              <span class="gutter-num">{slideIndex}</span>
+            </div>
+            <div class="slide-content">
+              <div class="slide-eyebrow">{data.section}</div>
+              <div class="slide-title">{data.title}</div>
+              <ul class="slide-bullets">
+                <li>{bullet}</li> ...
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="notebook-footer">
+          <div class="nb-page">p. {pageNum}</div>
+          <div class="nb-tabs" id="nb-tabs-N"><!-- populated by buildTabs() --></div>
+        </div>
+      </div>
+    -->
+  </div>
+
+  <button id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
+  <button id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+
+  <script>
+    // <!-- INJECT:slideData -->
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── Slide Renderer ────────────────────────────────────────────────────────
+    function renderSlide(data, index) {
+      // html-build implements this function using theme.css structure and CSS variables.
+      // Theme defines structure; style.css defines appearance.
+      throw new Error('renderSlide() must be implemented by html-build agent');
+    }
+
+    // ── Chapter tabs ──────────────────────────────────────────────────────────
+    // chapters: [{label, firstSlide}] built from divider slides
+    let chapters = [];
+
+    function buildChapters() {
+      chapters = [];
+      if (typeof slideData === 'undefined') return;
+      slideData.forEach((d, i) => {
+        if (d.isDividerSlide) {
+          chapters.push({ label: d.title || d.section || ('Ch.' + (chapters.length + 1)), firstSlide: i });
+        }
+      });
+    }
+
+    function renderTabs(activeSlide) {
+      if (!chapters.length) return;
+      const activeChapter = chapters.reduce((acc, ch, i) => ch.firstSlide <= activeSlide ? i : acc, 0);
+      document.querySelectorAll('.nb-tabs').forEach(container => {
+        while (container.firstChild) container.removeChild(container.firstChild);
+        chapters.forEach((ch, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'nb-tab' + (i === activeChapter ? ' active' : '');
+          btn.textContent = ch.label;
+          btn.onclick = () => showSlide(ch.firstSlide);
+          container.appendChild(btn);
+        });
+      });
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (index < 0 || index >= slides.length) return;
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+      renderTabs(index);
+    }
+
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      buildChapters();
+      showSlide(0);
+    });
+  </script>
+</body>
+</html>
