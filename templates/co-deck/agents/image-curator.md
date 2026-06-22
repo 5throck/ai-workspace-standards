@@ -1,7 +1,7 @@
 ---
 name: image-curator
-version: "1.0.0"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-06-22"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
 tier:
@@ -93,30 +93,47 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 All sources used are **commercial-use unlimited** — no watermarks, no attribution required (except Wikimedia CC-BY).
 
-### Keyless Default (no API key needed)
+### With API Keys (higher limits, best search accuracy)
 
-| Priority | Source | Method | Rate Limit | License |
-|----------|--------|--------|-----------|---------|
-| 1 | **Pixabay** | `https://pixabay.com/api/?key=&q=<query>&image_type=photo&safesearch=true` | 100/hr keyless | Pixabay License (commercial free) |
-| 2 | **Unsplash URL** | `https://source.unsplash.com/1280x720/?<query>` | ~50/hr | Unsplash License (commercial free) |
+| Priority | Source | Endpoint | Rate Limit (free tier) | License |
+|----------|--------|----------|----------------------|---------|
+| 1 | **Unsplash API** | `https://api.unsplash.com/search/photos?query=<q>` | 50 req/hr | Unsplash License |
+| 2 | **Pexels API** | `https://api.pexels.com/v1/search?query=<q>` | 200 req/hr | Pexels License |
+| 3 | **Pixabay API** | `https://pixabay.com/api/?key=<k>&q=<q>` | 100 req/hr | Pixabay License |
+| 4 | **Wikimedia** | `https://commons.wikimedia.org/w/api.php` | Unlimited | CC0/CC-BY (record attribution for CC-BY) |
 
-### With API Keys (higher limits, better search accuracy)
+### Without API Keys — Web Search Fallback
 
-| Source | Endpoint | Rate Limit (free tier) | License |
-|--------|----------|----------------------|---------|
-| **Unsplash API** | `https://api.unsplash.com/search/photos?query=<q>` | 50 req/hr | Unsplash License |
-| **Pexels API** | `https://api.pexels.com/v1/search?query=<q>` | 200 req/hr | Pexels License |
-| **Pixabay API** | `https://pixabay.com/api/?key=<k>&q=<q>` | 100 req/hr | Pixabay License |
-| **Wikimedia** | `https://commons.wikimedia.org/w/api.php` | Unlimited | CC0/CC-BY (record attribution for CC-BY) |
+When no API key is available (or API calls fail), use the **WebSearch tool** to find license-clear images directly. Do **not** attempt API endpoints without a valid key.
+
+**Search query pattern:**
+```
+site:unsplash.com OR site:pixabay.com OR site:pexels.com <image_query> <style_hint>
+```
+
+For each result:
+1. Use `WebFetch` on the image page URL to extract the direct image download URL
+2. Confirm the image is license-clear (Unsplash/Pixabay/Pexels pages all display license clearly)
+3. Download via `curl -L -o` to the shared pool path
+
+**Preferred web search targets (in order):**
+
+| Priority | Site | License |
+|----------|------|---------|
+| 1 | `unsplash.com` | Unsplash License (commercial free) |
+| 2 | `pixabay.com` | Pixabay License (commercial free) |
+| 3 | `pexels.com` | Pexels License (commercial free) |
+| 4 | `commons.wikimedia.org` | CC0 / CC-BY |
+
+> If WebSearch returns no usable results after 2 attempts: mark slide as missing, do not block pipeline.
+
+**Never use:** watermarked stock sites, images requiring paid license, screenshots of copyrighted UI, Google Images without explicit CC filter.
 
 ### `source: auto` Resolution Order
 
-1. Check `presentations/<project>/lecture-profile.md` `image.api_keys` — if any key is present, use that API
-2. If no keys: try Pixabay keyless endpoint first
-3. If Pixabay keyless fails or returns no results: fall back to Unsplash URL method
-4. If both fail: mark slide as missing image (do not block pipeline)
-
-**Never use:** watermarked stock sites, images requiring paid license, screenshots of copyrighted UI, Google Images without explicit CC filter.
+1. Check `presentations/<project>/lecture-profile.md` `image.api_keys` — if any key is present, use that API (With API Keys table above)
+2. If no keys or API returns error: **use WebSearch fallback** (see Without API Keys section above)
+3. If WebSearch also fails after 2 attempts: mark slide as missing image (do not block pipeline)
 
 ## Image Role Guidelines
 
@@ -147,6 +164,50 @@ Refine raw `image_query` from slide_deck.md:
 - Maximum image file size: 2MB per slide (resize if needed)
 - Always create `presentations/assets/images/` directory before downloading
 
+## Parallel Sub-Agent Dispatch
+
+For batches of **3 or more slides** requiring new image downloads, dispatch sub-agents in parallel rather than downloading sequentially. This reduces Stage 3.5 wall-clock time significantly.
+
+### When to parallelize
+
+- 3+ slides need new downloads (not already in shared pool)
+- All image queries are independent (always true — slides don't depend on each other's images)
+
+### Dispatch pattern
+
+After resolving all image URLs (via API or WebSearch), group them into batches of up to 6 slides and spawn one sub-agent per batch:
+
+```
+Agent(
+  description = "Download images batch 1 (slides 0-5)",
+  prompt = """
+Download the following images to presentations/assets/images/:
+
+| slug | url | ext |
+|------|-----|-----|
+| ai-future-professional | https://... | jpg |
+| data-analysis-dashboard | https://... | jpg |
+...
+
+For each row:
+1. Check if presentations/assets/images/<slug>.<ext> already exists — skip if so.
+2. Run: curl -L -o "presentations/assets/images/<slug>.<ext>" "<url>"
+3. Verify the file exists and is > 10KB (reject and report if < 10KB — likely an error page).
+4. Report result: OK / SKIP / FAIL for each slug.
+""",
+  subagent_type = "claude"
+)
+```
+
+Spawn all batch agents in a **single message** (parallel tool calls). Wait for all results before writing `image-manifest.json`.
+
+### After all batches complete
+
+- Collect OK / SKIP / FAIL reports from each sub-agent
+- Set `"reused": true` for any SKIP (already existed)
+- Mark FAIL slides as missing in the manifest
+- Proceed to Gate 3.5 review as normal
+
 ## Shell Commands for Download
 
 ```bash
@@ -158,7 +219,7 @@ if [ ! -f "presentations/assets/images/<slug>.<ext>" ]; then
   curl -L -o "presentations/assets/images/<slug>.<ext>" "<url>"
 fi
 
-# Verify download
+# Verify download (reject files < 10KB — likely error pages)
 ls -la "presentations/assets/images/"
 ```
 
