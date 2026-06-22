@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-22T00:45:03.067Z
+**Generated**: 2026-06-22T06:23:28.828Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -137,7 +137,7 @@
 | test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.1.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.1.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.1 | scripts/validate-md-language.ts | fs |
