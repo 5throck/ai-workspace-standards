@@ -1,10 +1,10 @@
 # L2-to-Variant Conversion Pipeline Design
 
 > **Architect**: Design document for converting L2 projects into new template variants
-> **Status**: Draft Design - Pending PM Review
+> **Status**: Draft Design - Implementation In Progress
 > **Created**: 2026-06-03
-> **Last Updated**: 2026-06-03 (Added ADR Requirements & Template Version Management)
-> **Phase**: 1 - Analysis & Design
+> **Last Updated**: 2026-06-22 (Added Phase 1.6 pm.md pre-flight and Phase 3.5 AGENTS.md §-structure check; v1.8.2)
+> **Phase**: 4 - Implementation
 
 ---
 
@@ -17,13 +17,24 @@ This document defines the architectural design for a pipeline that analyzes user
 2. **No lifecycle governance for new variants** — All variants default to "stable" status without validation
 3. **No template version management policy** — L1 (templates/common/) version impact unclear
 
-**Solution**: An automated pipeline with six phases:
+**Solution**: An automated pipeline with two stages and multiple phases:
+
+**Stage 1 — Scan & Prepare** (source normalization before generation):
 1. **Phase 0 - ADR Creation**: Architectural decision record for variant creation rationale
 2. **Phase 1 - Variant Structure Conversion**: Analyze L2 project → Extract variant-specific components
-3. **Phase 2 - L0/L1 Reflection**: Compare with workspace → Reconcile versions → Repropagate
-4. **Phase 3 - Variant Generation**: Create variant structure with **BETA DEFAULT** (status="beta", version="0.1.0")
-5. **Phase 3.5 - Beta Lifecycle Setup**: Initialize lifecycle tracking, documentation, and promotion pathway
-6. **Phase 4 - Template Version Policy**: Define L1 version impact and bumping rules
+3. **Phase 1.5 - Agent/Skill Frontmatter Normalization**: Validate agent/skill frontmatter fields
+4. **Phase 1.6 - pm.md Pre-flight Diagnosis** *(NEW, v1.8.2)*: Check L2 agents/pm.md structure — `extends:` pattern, 200-line limit, duplicate section detection vs L1 common pm.md
+5. **Phase 2 - L0/L1 Reflection**: Compare with workspace → Reconcile versions → Repropagate
+6. **Phase 3 - Dependency Validation**: Confirm dependency resolution
+7. **Phase 3.5 - AGENTS.md §-Structure Check** *(NEW, v1.8.2, BLOCKING)*: Validate L2 AGENTS.md for VARIANT-\*-START/END markers and §1:/§3: section presence
+
+**Stage 2 — Generate & Validate** (generation with post-generation QA):
+8. **Phase 4 - Variant Generation**: Create variant structure with **BETA DEFAULT** (status="beta", version="0.1.0")
+9. **Phase 4.5 - Golden Reference Gap Check** *(BLOCKING, double-defense)*: Validate generated AGENTS.md structure against golden reference
+10. **Phase 4.6 - pm.md Generation Completion**: Inject variant-specific sections into generated pm.md; generate context.md
+11. **Phase 5 - Beta Lifecycle Initialization**: Initialize lifecycle tracking, documentation, and promotion pathway
+12. **Phase 6 - Platform Parity Validation**: Verify .claude/ ↔ .gemini/ parity
+13. **Phase 7 - Workspace Integration**: Workspace updates and integration
 
 **Key Innovation**: The pipeline respects SSOT (Single Source of Truth) principles by:
 - **NEW**: Requiring ADR for all new variant creations (governance enforcement)
@@ -33,6 +44,7 @@ This document defines the architectural design for a pipeline that analyzes user
 - Platform parity validation (.claude/ ↔ .gemini/)
 - **NEW**: **Beta lifecycle governance** (all new variants start as beta, promote to stable after validation)
 - **NEW**: **Template version management** (L1 version impact policy and bumping rules)
+- **NEW (v1.8.2)**: **Pre-flight source normalization** — Phase 1.6 (pm.md structure check) and Phase 3.5 (AGENTS.md §-structure BLOCKING gate) ensure L2 source is in a generatable state before Stage 2 begins
 
 ---
 
@@ -101,6 +113,59 @@ L2 Project Path (User Input)
     ▼
 templates/<new-variant>/
 ```
+
+> **Note on Phase numbering alignment**: This design document uses the implementation phase numbering from `scripts/l2-to-variant-pipeline.ts`. Phases 1.6 and 3.5 were added in v1.8.2 (2026-06-22) after the original design (Phase 0-4) was written. The original design's "Phase 3.5 - Beta Lifecycle Setup" now corresponds to implementation **Phase 5**.
+
+---
+
+## 1.5. Stage 1 Pre-flight Checks (v1.8.2 — NEW)
+
+> **Implementation**: `scripts/l2-to-variant-pipeline.ts` v1.8.2 | `docs/adr/0046-l2-pipeline-preflight-checks.md`
+
+Phase 1.6 and Phase 3.5 were introduced to normalize L2 source files before Stage 2 generation begins. The principle: **ensure the source is in a generatable state before generating**.
+
+### Phase 1.6: pm.md Pre-flight Diagnosis (Non-blocking)
+
+**Objective**: Detect L2 `agents/pm.md` structural problems that would cause duplication bugs or incorrect generation.
+
+**Position in pipeline**: After Phase 1.5 (agent/skill frontmatter normalization), before Phase 2 (L0/L1 reconciliation).
+
+**Severity**: Non-blocking (warn only). Human review is possible for pm.md issues.
+
+**Checks performed**:
+
+| Check | Threshold | Action |
+|-------|-----------|--------|
+| `extends:` pattern presence | Required | WARN if missing — L2 pm.md should delegate common content via `extends: ../../common/agents/pm.md` |
+| Line count | ≤ 200 lines | WARN if exceeded — proxy for L0 duplication bug (common content duplicated in L2) |
+| Duplicate section headers | 0 | WARN for each L1 section found verbatim in L2 — indicates redundant content |
+
+**Auto-fix** (`config.autoFixPmMd: true`): Outputs guidance only (does not modify source files by default). Modification only with explicit `--auto-fix` flag + git backup.
+
+**Role distinction**:
+- Phase 1.6 = **source diagnosis** (reads L2 source, outputs report)
+- Phase 4.6 = **generation completion** (writes into the generated variant file — not the source)
+
+### Phase 3.5: AGENTS.md §-Structure Check (BLOCKING)
+
+**Objective**: Validate L2 `AGENTS.md` has all required VARIANT-\*-START/END markers and §-numbered sections before Stage 2 generation. Missing markers cause `injectVariantPlaceholders()` in `generate-variant.ts` to silently no-op, leaving AGENTS.md unpopulated.
+
+**Position in pipeline**: After Phase 3 (dependency validation), immediately before Phase 4 (variant generation).
+
+**Severity**: BLOCKING — pipeline halts if any required marker is missing.
+
+**Checks performed**:
+
+| Check | Required Items | Action |
+|-------|----------------|--------|
+| VARIANT-\* markers | 6 markers (AGENTS, AGENT-DETAILS, DISPATCH-TRIGGERS, PHASE-GATE, SUBAGENT-ROSTER, ROLE-BOUNDARY) | FAIL pipeline if any missing |
+| §-numbered sections | `## §1:` and `## §3:` minimum | FAIL pipeline if missing |
+
+**Auto-fix** (`config.autoFixAgentsMd: true`): Calls `regenerate-agents-md.ts --variant <name>` via subprocess to regenerate the AGENTS.md from L1 common template + variant agent frontmatter. Only runs if variant path is under `templates/`.
+
+**Double-defense**: Phase 4.5 (Golden Reference Gap Check) also validates VARIANT-\* markers in the generated output, guarding against `--skip-normalize` bypass and external structural edits.
+
+**Root cause this addresses**: co-consult, co-work, co-security, co-design AGENTS.md were generated before the §-numbered L1 structure was introduced → had no VARIANT-\*-START/END markers → pipeline injection found no anchors → silent drift. Fixed by `regenerate-agents-md.ts --all` (2026-06-22).
 
 ---
 
@@ -353,13 +418,19 @@ Create <variant-name> variant as new template under `templates/<variant-name>/`.
 
 | Phase | Duration | Owner | Deliverables |
 |-------|----------|-------|--------------|
-| **ADR Creation** | 1-2 days | Architect | ADR document, PM approval |
-| **Phase 1 (Analysis)** | 2-3 days | Architect | L2 scan, intermediate manifest |
-| **Phase 2 (Reconcile)** | 2-3 days | Architect | Reconciled manifest |
-| **Phase 3 (Generate)** | 3-5 days | Automation Engineer | Variant structure, validation |
-| **Phase 3.5 (Beta Setup)** | 2-3 days | Lifecycle Manager | Beta lifecycle, documentation |
-| **Phase 4 (Integration)** | 3-5 days | PM + Docs Writer | Workspace updates, propagation |
-| **Phase 5 (Validation)** | 2-3 days | PM + Auditor | QA audit, testing |
+| **Phase 0 (ADR)** | 1-2 days | Architect | ADR document, PM approval |
+| **Phase 1 (L2 Scan)** | 2-3 days | Automation Engineer | L2 scan, intermediate manifest |
+| **Phase 1.5 (Frontmatter)** | < 1 day | Automation Engineer | Normalized agent/skill frontmatter |
+| **Phase 1.6 (pm.md Pre-flight)** *(NEW)* | < 1 day | Automation Engineer | pm.md structure report, optional auto-fix |
+| **Phase 2 (Reconcile)** | 2-3 days | Automation Engineer | Reconciled manifest |
+| **Phase 3 (Dependencies)** | 1-2 days | Automation Engineer | Dependency validation |
+| **Phase 3.5 (AGENTS.md Check)** *(NEW, BLOCKING)* | < 1 day | Automation Engineer | AGENTS.md §-structure validated; auto-regenerate if `--auto-fix-agents-md` |
+| **Phase 4 (Generate)** | 3-5 days | Automation Engineer | Variant structure, VARIANT-* injection |
+| **Phase 4.5 (Gap Check)** | < 1 day | Automation Engineer | Golden reference gap check (BLOCKING) |
+| **Phase 4.6 (pm.md Completion)** | < 1 day | Automation Engineer | Variant pm.md sections injected; context.md generated |
+| **Phase 5 (Beta Lifecycle)** | 2-3 days | Lifecycle Manager | Beta lifecycle tracking, documentation |
+| **Phase 6 (Platform Parity)** | 1-2 days | PM | .claude/ ↔ .gemini/ parity validated |
+| **Phase 7 (Integration)** | 2-3 days | PM + Docs Writer | Workspace updates, propagation |
 | **Total** | 15-25 days | Full team | Production-ready beta variant |
 
 ### Success Criteria
