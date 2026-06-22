@@ -1,6 +1,6 @@
 {
-  "version": "1.3.1",
-  "_comment": "Slideshow theme — region schema (ADR-0045 Decision #2). v1.3.1: added slide_type_overrides.profile for centered profile slide layout; v1.3.0: added header region + profile/contact slide_types for HTML-PDF parity.",
+  "version": "1.3.3",
+  "_comment": "Slideshow theme — region schema (ADR-0045 Decision #2). v1.3.3: per-item font sizes aligned to HTML (px×0.75=pt) — cover/divider/punchline tuned individually, standard unchanged; v1.3.2: added divider slide_type + centered title override; v1.3.1: added slide_type_overrides.profile for centered profile slide layout; v1.3.0: added header region + profile/contact slide_types for HTML-PDF parity.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -24,7 +24,8 @@
     "punchline": { "regions": ["title", "subtitle"] },
     "standard": { "regions": ["header", "title", "content", "visual", "meta"] },
     "profile":  { "regions": ["title", "content"] },
-    "contact":  { "regions": ["title", "content"] }
+    "contact":  { "regions": ["title", "content"] },
+    "divider":  { "regions": ["title"] }
   },
   "slide_type_overrides": {
     "title": {
@@ -40,13 +41,23 @@
       "title":    { "x_pct": 0.10, "y_pct": 0.30, "w_pct": 0.80, "h_pct": 0.18 },
       "subtitle": { "x_pct": 0.10, "y_pct": 0.52, "w_pct": 0.80, "h_pct": 0.12 },
       "content":  { "x_pct": 0.10, "y_pct": 0.18, "w_pct": 0.80, "h_pct": 0.65 }
+    },
+    "divider": {
+      "title":   { "x_pct": 0.10, "y_pct": 0.18, "w_pct": 0.80, "h_pct": 0.64 }
     }
   },
   "fonts": {
     "title_pt": 24.0,
     "bullet_pt": 12.0,
-    "punchline_pt": 36.0,
-    "punchline_sub_pt": 16.0
+    "punchline_pt": 24.0,
+    "punchline_sub_pt": 12.24,
+    "ts_title_px": 43.2,
+    "ts_sub_px": 20.8,
+    "ts_meta_px": 12.8,
+    "div_part_px": 16.0,
+    "div_title_pt": 32.4,
+    "div_desc_pt": 13.44,
+    "_fonts_note": "Per-item sizes = Playwright-measured HTML px × 0.75 (the px→pt calibration ratio, validated by standard title 32px=24pt). title_pt/bullet_pt (standard slide) unchanged — already aligned."
   },
   "line_heights": {
     "title_px": 40.0,
