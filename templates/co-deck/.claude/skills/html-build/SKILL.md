@@ -33,7 +33,7 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 **File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder.
 
-**slideData Structure:** Slide data lives in a JavaScript array embedded as `const slideData = [...]` inside the HTML file.
+**slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments.
 
 > Korean example — field keys stay in English; only the content values are Korean.
 

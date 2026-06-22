@@ -50,7 +50,7 @@ All inputs must exist before starting:
 Extract slide data from the HTML file into JSON.
 
 ```bash
-bun scripts/extract_slidedata.mjs "path/to/lecture.html"
+bun scripts/co-deck/extract_slidedata.mjs "path/to/lecture.html"
 ```
 
 → Produces `/tmp/slidedata.json`
