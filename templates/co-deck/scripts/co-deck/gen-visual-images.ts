@@ -1,4 +1,4 @@
-// @version 3.0.0
+// @version 3.0.1 — backport from co-deck2 instance: target filter now honours an absent `visual` field — when `visualImage` is present but `visual` is undefined, an `images/`-prefixed visualImage still counts as a diagram target (previously such slides were silently dropped). Previous 3.0.0: infrastructure-only dispatcher.
 // Generate right-panel visual images via SVG rendering (no browser required).
 // Project-specific diagram generators live in presentations/<project>/diagram-defs.ts.
 // Shared utilities (svgWrap, svgToPng, palettes) live in diagram-helpers.ts.
@@ -54,7 +54,12 @@ else          console.log(`   Font   : system default (Korean may not render)`);
 
 const targets = slidedata
   .map((s, i) => ({ slide: i + 1, data: s }))
-  .filter(({ data }) => data.visualImage && data.visual && data.visual.toLowerCase() !== 'none');
+  .filter(({ data }) => {
+    if (!data.visualImage) return false;
+    // If visual field exists, honour its value; otherwise treat images/ prefix as a diagram target
+    if (data.visual !== undefined) return data.visual.toLowerCase() !== 'none';
+    return (data.visualImage as string).startsWith('images/');
+  });
 
 console.log(`   Targets: ${targets.length} slides\n`);
 

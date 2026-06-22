@@ -191,6 +191,7 @@ PM: ▶️ [specialist] dispatch...
 For the `co-deck` pipeline:
 1. **Optional & Auto-Advance Gates/Stages**: For stages or tasks defined as optional or auto-advancing (e.g., Stage 1.5/Gate 1.5, Stage 3/Gate 3, Stage 4/Gate 4, Stage 5-8, Stage 9-10), the PM dispatches the specialist agent automatically *without* prompting the user for approval.
 2. **Double Hop & Internal Delegation**: Secondary/internal subagent dispatches (such as a read-only specialist agent spawning a writer subagent to write output) are considered implementation details and MUST NOT trigger any user confirmation prompt.
+3. **Gate 3.5 — Image Manifest (Mandatory when the deck uses images)**: Unlike the optional/auto-advance gates above, Gate 3.5 is a **hard gate**. After `image-curator` produces `image-manifest.json`, run `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>`. The handoff to `html-build` is **BLOCKED** until it exits 0 (no duplicate `content_hash` ERRORs; aspect-ratio WARNs reviewed). Skipped only when the deck uses no images. See [agents/image-curator.md — Gate 3.5 Validation](agents/image-curator.md).
 
 See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
 
@@ -243,7 +244,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- VARIANT-PHASE-GATE-START -->
 | design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
 | lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
-| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | optional: skip if no images needed |
+| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
 | assets/diagrams/*.svg + *.png + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md |
 | pdf_layout_spec.md (pixel coordinates for PDF engine) | Phase 4 | `measure` | medium | |
 | <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |

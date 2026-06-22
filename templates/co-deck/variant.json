@@ -59,6 +59,7 @@
       { "name": "gen-slides-pdf",             "path": "scripts/co-deck/gen-slides-pdf.ts" },
       { "name": "measure-layout",             "path": "scripts/co-deck/measure-layout.ts" },
       { "name": "validate-theme-styles",      "path": "scripts/co-deck/validate-theme-styles.ts" },
+      { "name": "validate-image-manifest",    "path": "scripts/co-deck/validate-image-manifest.ts" },
       { "name": "generate-themes-manifest",   "path": "scripts/co-deck/generate-themes-manifest.ts" },
       { "name": "scaffold-theme-style",       "path": "scripts/co-deck/scaffold-theme-style.ts" }
     ],

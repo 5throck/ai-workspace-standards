@@ -34,7 +34,7 @@
   -->
   <style>
     /* Slideshow-specific layout — not overrideable by style.css */
-    body { margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-color, #0b0f19); }
+    body { margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-color); }
     .presentation-container { position: relative; width: min(92vw, 1300px); aspect-ratio: 16/9; }
     .slide { position: absolute; inset: 0; border-radius: var(--slide-radius, 20px); opacity: 0; pointer-events: none; transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1); transform: scale(0.97) translateY(12px); }
     .slide.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }

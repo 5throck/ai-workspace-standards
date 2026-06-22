@@ -13,6 +13,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
 
 :root {
+  /* Page background — warm gray-cream complementing the cream surface */
+  --bg-color:            #e8e4dc;
+
   /* Surface — warm cream */
   --slide-bg:            #f8f6f0;
   --card-bg:             #f8f6f0;

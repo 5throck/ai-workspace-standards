@@ -112,6 +112,22 @@ source_verification: true
 #     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 3)
 #   colors:
 #     accent: [180, 30, 50]      # institution CI color override
+#   # ── fonts / line_heights — the primary PDF-fitting levers (read by gen-slides-pdf.ts) ──
+#   # pitch theme reference (calibrated 2026-06-22 on a 20-slide B2B deck).
+#   # Math: font_mm = pt/2.835; line_mm = px*190.5/750; line_mm must exceed font_mm.
+#   # At 28pt: font=9.88mm, title_px=48 → lh=12.19mm (ratio 1.23) ✓
+#   # At 36pt: font=12.70mm, div_title_px=62 → lh=15.74mm (ratio 1.24) ✓
+#   fonts:
+#     title_pt: 28
+#     bullet_pt: 13
+#     div_title_pt: 36
+#     div_desc_pt: 14
+#   line_heights:
+#     title_px: 48
+#     bullet_px: 28
+#     bullet_gap_px: 16
+#     div_title_px: 62
+#     div_desc_px: 30
 ---
 
 # Lecture Profile

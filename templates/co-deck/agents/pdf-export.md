@@ -1,7 +1,7 @@
 ---
 name: pdf-export
-version: "1.0.0"
-last_updated: "2026-06-17"
+version: "1.1.0"
+last_updated: "2026-06-23"
 role: PDF generation specialist using pdf-lib and measured layout data
 status: active
 tier:
@@ -56,6 +56,26 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Generate 5-slide sample PDF with `bun scripts/co-deck/gen-slides-pdf.ts --sample 5` for Gate 5 review
 - Present sample to user and request approval (Gate 5 — mandatory)
 - Generate full PDF with `bun scripts/co-deck/gen-slides-pdf.ts` after approval
+
+## PDF-Fitting Levers & Rendering Behavior (gen-slides-pdf.ts v1.4.0)
+
+When the Gate 5 sample shows fitting problems (text overflow, letterboxed images, divider centering off), the FIRST place to look is `lecture-profile.md` → `layout_overrides` — these are the tuning dials, NOT hardcoded script constants. Never edit script constants to fix a per-deck layout issue.
+
+**Typography tuning — `layout_overrides.fonts` + `layout_overrides.line_heights`:**
+
+| Group | Keys | Unit |
+|-------|------|------|
+| `fonts` | `title_pt`, `bullet_pt`, `div_title_pt`, `div_desc_pt` | point size |
+| `line_heights` | `title_px`, `bullet_px`, `bullet_gap_px`, `div_title_px`, `div_desc_px` | px at VP=750 |
+
+Math: `font_mm = pt / 2.835`; `line_mm = px * 190.5 / 750`; **`line_mm` MUST exceed `font_mm`**. A calibrated **pitch-theme reference** (title 28pt / bullet 13pt / div_title 36pt / div_desc 14pt + matching line heights) is shipped as a commented example in `docs/lecture-profile.md` — uncomment and adjust for the deck.
+
+**Image placement:**
+- **Divider images** use **cover-crop** (`placeImageCover`, object-fit: cover via a pdf-lib clip path): the image fills the region and crops overflow, so a portrait/landscape aspect mismatch no longer letterboxes.
+- **Right-panel illustrative images** use **contain** fit inside a 5% pad (letterbox-safe).
+
+**Font fallback:**
+- `gen-slides-pdf.ts` prefers **Pretendard** (`Pretendard-Regular/Bold.ttf`) when present, else falls back to **MaruBuri**. Confirm the Measure Agent downloaded whichever pair the deck uses.
 
 ## Output Format
 

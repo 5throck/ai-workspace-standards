@@ -19,7 +19,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-color, #e8e4dc);
+  background: var(--bg-color);
   font-family: var(--font-body, 'Pretendard', 'Noto Sans KR', sans-serif);
   color: var(--text-primary, #2c2a20);
 }

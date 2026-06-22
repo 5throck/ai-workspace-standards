@@ -1,4 +1,4 @@
-// @version 1.3.9 — contact slide HTML parity: renderContactSlide now centers an 80% band (was the narrow left content region), removes the spurious dark header strip, and uses the measured HTML colors — "감사합니다" WHITE bold (was gold), contact lines secondary #CBD5E1 (was white/muted split), CTA note GOLD (was body) — with measured vertical positions/gaps. Previous 1.3.8: punchline spacing + divider bg parity.
+// @version 1.4.0 — backport from co-deck2 instance: (1) placeImageCover — object-fit:cover image placement via pdf-lib clip operators (divider images crop-to-fill instead of letterbox); (2) parseLayoutOverrides base-indent fix so fonts/line_heights overrides nested under layout_overrides actually parse; (3) renderDividerSlide is async + wrapping-aware vertical centering within the full card; (4) standard-slide block gap 12→24px + right-panel bg only painted when needed; (5) font fallback Pretendard→MaruBuri. Previous 1.3.9: contact slide HTML parity.
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
@@ -12,7 +12,8 @@
 //   --data     path to slidedata.json (default: <project>/slidedata.json)
 // Requires: pdf-lib @pdf-lib/fontkit (bun install pdf-lib @pdf-lib/fontkit)
 
-import { PDFDocument, PDFFont, PDFPage, rgb, RGB } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFPage, rgb, RGB,
+  pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
@@ -135,8 +136,15 @@ function parseLayoutOverrides(frontmatter: string): Record<string, any> {
     block.push(line);
   }
 
-  // Parse indented block into nested object
-  return parseIndentedBlock(block, 0).value;
+  // Determine the base indent from the first non-blank block line so that
+  // parseIndentedBlock sees the correct depth (block lines are already indented
+  // relative to the YAML root, not to column 0).
+  const minIndent = block.reduce((min, l) => {
+    const ind = l.search(/\S/);
+    return ind >= 0 ? Math.min(min, ind) : min;
+  }, Infinity);
+  const baseIndent = minIndent === Infinity ? 0 : minIndent;
+  return parseIndentedBlock(block, baseIndent).value;
 }
 
 // ── Slide renderer ────────────────────────────────────────────────────────────
@@ -282,23 +290,54 @@ class Renderer {
     this.page.drawEllipse({ x: cx, y: cy, xScale: this.pt(diamMm / 2), yScale: this.pt(diamMm / 2), color });
   }
 
+  async embedImg(doc: PDFDocument, imgPath: string) {
+    const data = readFileSync(imgPath);
+    const ext  = imgPath.split('.').pop()?.toLowerCase();
+    return ext === 'png' ? await doc.embedPng(data) : await doc.embedJpg(data);
+  }
+
+  drawEmbeddedImage(img: any, xMm: number, yMm: number, wMm: number, hMm: number) {
+    this.page.drawImage(img, {
+      x: this.pt(xMm), y: this.fy(yMm + hMm),
+      width: this.pt(wMm), height: this.pt(hMm),
+    });
+  }
+
+  async placeImageCover(doc: PDFDocument, imgPath: string, xMm: number, yMm: number, wMm: number, hMm: number) {
+    try {
+      const img = await this.embedImg(doc, imgPath);
+      const { width: ow, height: oh } = img;
+      const imgAsp = ow / oh;
+      const boxAsp = wMm / hMm;
+      let iw: number, ih: number;
+      if (imgAsp > boxAsp) { ih = hMm; iw = ih * imgAsp; }
+      else                 { iw = wMm; ih = iw / imgAsp; }
+      const ix = xMm + (wMm - iw) / 2;
+      const iy = yMm + (hMm - ih) / 2;
+      const cx = this.pt(xMm), cy = this.fy(yMm + hMm);
+      const cw = this.pt(wMm), ch = this.pt(hMm);
+      this.page.pushOperators(
+        pushGraphicsState(),
+        moveTo(cx, cy), lineTo(cx + cw, cy), lineTo(cx + cw, cy + ch), lineTo(cx, cy + ch),
+        closePath(), clip(), endPath(),
+      );
+      this.drawEmbeddedImage(img, ix, iy, iw, ih);
+      this.page.pushOperators(popGraphicsState());
+    } catch (e: any) {
+      console.warn(`  img err: ${e.message}`);
+    }
+  }
+
   async placeImage(doc: PDFDocument, imgPath: string, xMm: number, yMm: number, mwMm: number, mhMm: number) {
     try {
-      const data = readFileSync(imgPath);
-      const ext  = imgPath.split('.').pop()?.toLowerCase();
-      const img  = ext === 'png' ? await doc.embedPng(data) : await doc.embedJpg(data);
+      const img  = await this.embedImg(doc, imgPath);
       const { width: ow, height: oh } = img;
       const asp = oh / ow;
       let iw = mwMm, ih = iw * asp;
       if (ih > mhMm) { ih = mhMm; iw = ih / asp; }
       const ix = xMm + (mwMm - iw) / 2;
       const iy = yMm + (mhMm - ih) / 2;
-      this.page.drawImage(img, {
-        x: this.pt(ix),
-        y: this.fy(iy + ih),
-        width:  this.pt(iw),
-        height: this.pt(ih),
-      });
+      this.drawEmbeddedImage(img, ix, iy, iw, ih);
     } catch (e: any) {
       console.warn(`  img err: ${e.message}`);
     }
@@ -496,7 +535,7 @@ function renderTitleSlide(ctx: RenderCtx) {
   r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
 }
 
-function renderDividerSlide(ctx: RenderCtx) {
+async function renderDividerSlide(ctx: RenderCtx) {
   const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
   const { C_BG, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
   const { CX, CY, CW, CH } = coords;
@@ -523,12 +562,19 @@ function renderDividerSlide(ctx: RenderCtx) {
   const LH_D = lh.div_desc_px  ? coords.px2mm(lh.div_desc_px)  : coords.px2mm(28.16);
 
   const ip = imgPath(data.visualImage, imgDir ?? '');
-  // Text-only dividers (no image) render CENTERED like a premium-dark title card;
-  // image dividers (e.g. scroll theme) keep the original left-aligned + right-image layout.
   const align: 'L' | 'C' = ip ? 'L' : 'C';
-  // Vertically center the partNum/title/desc block within titleR for text-only dividers.
-  const blockH = coords.px2mm(34) + LH_T + coords.px2mm(16) + LH_D;
-  const py0 = ip ? titleR.y : titleR.y + Math.max(0, (titleR.h - blockH) / 2);
+
+  // Estimate actual block height accounting for title/desc text wrapping.
+  // For image dividers, center vertically within the full card (not just titleR).
+  // For text-only dividers, center within titleR as before.
+  r.setFont(true, T_DIV_TITLE);
+  const titleH_est = r.estimateTextHeight(strip(data.title), titleR.w, T_DIV_TITLE, LH_T, true);
+  r.setFont(false, T_DIV_DESC);
+  const descH_est  = r.estimateTextHeight(strip(data.desc ?? ''), titleR.w, T_DIV_DESC, LH_D, false);
+  const blockH = coords.px2mm(34) + titleH_est + coords.px2mm(16) + descH_est;
+  const py0 = ip
+    ? coords.CY + Math.max(coords.px2mm(32), (coords.CH - blockH) / 2)
+    : titleR.y + Math.max(0, (titleR.h - blockH) / 2);
 
   r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
   r.cell(titleR.w, coords.px2mm(28), (strip(data.partNum)).toUpperCase(), titleR.x, py0, align);
@@ -543,7 +589,7 @@ function renderDividerSlide(ctx: RenderCtx) {
 
   if (ip) {
     r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
-    r.placeImage(doc, ip, visR.x, visR.y, visR.w, visR.h);
+    await r.placeImageCover(doc, ip, visR.x, visR.y, visR.w, visR.h);
   }
 }
 
@@ -774,9 +820,9 @@ async function renderStandardSlide(ctx: RenderCtx) {
   const bullets  = data.bullets ?? [];
   const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
   const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
-  const blockGap = bullets.length > 0 ? coords.px2mm(12) : 0;
+  const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
   const blockH   = titleH + blockGap + totalBh;
-  const blockY   = availStart + Math.max(0, (availH - blockH) / 2);
+  const blockY   = availStart + Math.max(0, (availH - blockH) * 0.5);
 
   r.setFont(true, T_TITLE); r.setColor(C_WHITE);
   const afterTitle = r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, blockY, 'L');
@@ -793,12 +839,13 @@ async function renderStandardSlide(ctx: RenderCtx) {
   }
 
   if (hasRight) {
-    r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
     const ip = imgPath(data.visualImage, imgDir ?? '');
     if (ip) {
       const pad = visR!.w * 0.052;
+      r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       await r.placeImage(doc, ip, visR!.x + pad, visR!.y + pad, visR!.w - pad * 2, visR!.h - pad * 2);
     } else {
+      r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       const vt = strip(data.visualTitle);
       const vd = strip(visualDisplay);
       const lhVt = coords.px2mm(24), lhVb = coords.px2mm(22), gap = 5;
@@ -1035,11 +1082,19 @@ async function main() {
     process.exit(1);
   }
 
-  const fontR = join(fontDir, 'MaruBuri-Regular.ttf');
-  const fontB = join(fontDir, 'MaruBuri-Bold.ttf');
-  if (!existsSync(fontR) || !existsSync(fontB)) {
-    console.error(`Font files not found: ${fontDir}/MaruBuri-*.ttf`);
-    console.error('   Run bun scripts/download-font.ts maruburi first.');
+  // Resolve font files: prefer Pretendard, fall back to MaruBuri
+  const FONT_CANDIDATES: Array<[string, string]> = [
+    ['Pretendard-Regular.ttf', 'Pretendard-Bold.ttf'],
+    ['MaruBuri-Regular.ttf',   'MaruBuri-Bold.ttf'],
+  ];
+  let fontR = '', fontB = '';
+  for (const [r, b] of FONT_CANDIDATES) {
+    const rp = join(fontDir, r), bp = join(fontDir, b);
+    if (existsSync(rp) && existsSync(bp)) { fontR = rp; fontB = bp; break; }
+  }
+  if (!fontR) {
+    console.error(`Font files not found in: ${fontDir}`);
+    console.error('   Expected Pretendard-Regular/Bold.ttf or MaruBuri-Regular/Bold.ttf');
     process.exit(1);
   }
 

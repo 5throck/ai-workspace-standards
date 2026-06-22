@@ -12,6 +12,9 @@
  */
 
 :root {
+  /* Page background — dark; normally covered by the full-bleed slide image */
+  --bg-color:            #0a0a1e;
+
   /* Surface — transparent; image set via JS as CSS variable */
   --slide-bg:            #0a0a1e;  /* fallback when no image */
   --card-bg:             rgba(10, 10, 30, 0.72);
