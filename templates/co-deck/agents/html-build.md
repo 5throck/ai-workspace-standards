@@ -61,6 +61,8 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 slideData object fields and image filename convention: see `skills/html-build/SKILL.md`.
 
+> **STRICT PROHIBITION**: Do NOT create any `.ts`, `.js`, `.sh`, or `.py` script files inside `presentations/<project>/`. The only permitted TypeScript file under a project folder is `diagram-defs.ts` (owned by the diagram-specialist agent). If you feel you need a helper script to build HTML, use the existing `scripts/co-deck/` infrastructure instead.
+
 ## Theme + Style Integration
 
 When generating `lecture_vN.html`, read `presentation.theme` and `presentation.style` from `lecture-profile.md`:
