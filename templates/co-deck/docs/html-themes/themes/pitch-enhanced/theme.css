@@ -65,6 +65,14 @@
   border-radius: 12px;
 }
 
+/* Diagram/SVG images (generated via gen-visual-images.ts, paths start with "images/")
+   use contain-fit to prevent cropping of structural elements. Stock photos
+   (paths start with "../assets/images/") retain cover-fit above. */
+.right-panel img[src^="images/"] {
+  object-fit: contain;
+  padding: 0.5rem;
+}
+
 /* ─── Cover slide (title type) ──────────────────────────────────────────── */
 .slide[data-type="title"] {
   display: flex;
