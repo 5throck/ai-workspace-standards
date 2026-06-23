@@ -1,0 +1,293 @@
+/*
+  pitch-enhanced/theme.css — co-deck Pitch-Enhanced Theme CSS
+  =============================================================
+  PPT-style fullscreen single-slide view preserving the pitch theme's floating-card
+  aesthetic (viewport-relative card, rounded corners, content grid) with:
+    - Viewport-relative card (92vw × aspect-ratio 16/9, max 1280px, border-radius 20px)
+    - Pitch-native content grid (slide-content: 1.15fr 0.85fr) for standard slides
+    - Pitch-native slide types: title, divider, profile, contact, standard, punchline
+    - Thumbnail panel and transition effects handled by ppt-engine.css
+    - Footer bar handled by ppt-engine.css
+
+  Load order: base.css → ppt-engine.css → this file → style.css
+  All visual values use CSS variables — never hardcode colors.
+*/
+
+/* ─── Slide card (pitch aesthetic: larger border-radius, floating shadow) ── */
+.slide {
+  position: absolute;
+  width: 92%;
+  max-width: 1300px;
+  height: 82%;
+  max-height: 750px;
+  border-radius: var(--slide-radius, 20px);
+  background: var(--slide-bg);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--card-border, rgba(255,255,255,0.07));
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.slide.active {
+  pointer-events: auto;
+}
+
+/* ─── Slide content grid (standard slides — pitch native) ───────────────── */
+.slide-content {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  height: 100%;
+  padding: 3rem 3.5rem;
+  box-sizing: border-box;
+}
+
+.slide-left   { display: flex; flex-direction: column; justify-content: center; }
+.right-panel  { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+.right-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* ─── Cover slide (title type) ──────────────────────────────────────────── */
+.slide[data-type="title"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem;
+  box-sizing: border-box;
+}
+
+.slide[data-type="title"] .slide-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1.5rem;
+}
+
+.slide[data-type="title"] .slide-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.slide[data-type="title"] .slide-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 70%;
+}
+
+.slide[data-type="title"] .slide-meta {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* ─── Punchline slide (added to pitch — large centered title) ─────────────── */
+.slide[data-type="punchline"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem;
+  box-sizing: border-box;
+}
+
+.slide[data-type="punchline"] .slide-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1.5rem;
+}
+
+.slide[data-type="punchline"] .slide-title {
+  font-size: clamp(2.2rem, 4.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+/* ─── Divider slide ──────────────────────────────────────────────────────── */
+.slide[data-type="divider"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.slide[data-type="divider"] .divider-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3rem 4rem 4rem;
+  background: var(--divider-left-bg, rgba(0,0,0,0.2));
+}
+
+.slide[data-type="divider"] .divider-part {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1rem;
+}
+
+.slide[data-type="divider"] .divider-title {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.slide[data-type="divider"] .divider-desc {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.slide[data-type="divider"] .divider-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.slide[data-type="divider"] .divider-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+
+/* ─── Profile slide ──────────────────────────────────────────────────────── */
+.slide[data-type="profile"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.slide[data-type="profile"] .profile-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 1rem;
+}
+
+.slide[data-type="profile"] .profile-name {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.slide[data-type="profile"] .profile-affiliation {
+  font-size: 1.1rem;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 2rem;
+}
+
+.slide[data-type="profile"] .profile-bio {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ─── Contact slide ──────────────────────────────────────────────────────── */
+.slide[data-type="contact"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem;
+  box-sizing: border-box;
+}
+
+.slide[data-type="contact"] .contact-title {
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+.slide[data-type="contact"] .contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Standard slide typographic elements (pitch native) ────────────────── */
+.slide-section {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 0.75rem;
+}
+
+.slide-title {
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+.slide-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.slide-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.slide-bullets li::before {
+  content: '\25B8';
+  color: var(--accent-color, #D97706);
+  flex-shrink: 0;
+  margin-top: 0.1em;
+}
+
+.slide-visual {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* ─── Per-slide number badge (optional, reused from pitch) ───────────────── */
+.slide .slide-number {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}

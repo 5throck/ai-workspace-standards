@@ -38,18 +38,19 @@ instructor:
 
 # Presentation rendering settings (used by html-build and storyline agents)
 # theme   — HTML structure and navigation paradigm
-#   Options: notebook | pitch | scroll | slideshow
-#   - notebook  : ruled-paper card, chapter tabs, print-friendly (classic/minimal/academic)
-#   - pitch     : floating card + speaker notes panel + footer bar (classic/minimal/premium-dark)
-#   - scroll    : vertical scroll, all slides visible, TOC panel (default)
-#   - slideshow : fullscreen single-slide, prev/next navigation
+#   Options: notebook | pitch | pitch-enhanced | scroll | slideshow
+#   - notebook        : PPT Outline View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
+#   - pitch           : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
+#   - pitch-enhanced  : PPT Presenter View — pitch aesthetics + thumbnails + transitions + timer (all 5 styles; visual-heavy: partial)
+#   - scroll           : PPT Reading View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
+#   - slideshow        : PPT Presentation View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
 # style   — CSS visual variable set (color, font, spacing)
 #   Options: premium-dark | classic | minimal | visual-heavy | academic
-#   - premium-dark : dark navy + gold accent + serif typography (default; scroll/slideshow/pitch only)
+#   - premium-dark : dark navy + gold accent + serif typography (default; all themes)
 #   - classic      : text left, image right panel
 #   - minimal      : text-only, clean whitespace
-#   - visual-heavy : full-bleed images with text overlay (scroll only)
-#   - academic     : dense layout for research/thesis (notebook/scroll only)
+#   - visual-heavy : full-bleed images with text overlay (partial for PPT themes)
+#   - academic     : dense layout for research/thesis (all themes except pitch)
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:
   theme: scroll

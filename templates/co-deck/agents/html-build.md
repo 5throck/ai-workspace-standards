@@ -72,35 +72,36 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 <html lang="ko" data-theme="scroll" data-style="premium-dark">
 ```
 
-**2. CSS link injection** — always inject in this order (foundation → theme → style):
+**2. CSS link injection** — always inject in this order (foundation → PPT engine → theme → style):
 ```html
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+<!-- PPT themes only (notebook, scroll, slideshow, pitch-enhanced): -->
+<link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
 <link rel="stylesheet" href="../../docs/html-themes/themes/scroll/theme.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
 ```
-`base.css` is the shared foundation (structural rules + default variables). `themes/<theme>/theme.css` is the paradigm-specific extension (e.g. scroll's TOC panel + progress bar; slideshow is currently empty). `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/scroll/theme.css` segment with `themes/slideshow/theme.css` when `data-theme="slideshow"`.
+`base.css` is the shared foundation (structural rules + default variables). For PPT-transformed themes (`notebook`, `scroll`, `slideshow`, `pitch-enhanced`), inject `ppt-engine.css` between `base.css` and the theme CSS — it provides shared thumbnail panel, transition effects, footer bar, timer, and speaker notes styles. For the original `pitch` theme, omit `ppt-engine.css`. `themes/<theme>/theme.css` is the paradigm-specific extension. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/scroll/theme.css` segment with the active theme's CSS path.
 
-**3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent scroll/slideshow structure.
+**3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent theme structure.
 
-**4. `scroll` theme — TOC sidebar is MANDATORY** (provided by the template):
-```html
-<div id="viewer">
-  <aside id="toc-panel"><!-- TOC items injected here --></aside>
-  <main id="slide-container"><!-- slides injected here --></main>
-</div>
-```
-The template's `initSlides()` builds each `.slide` (with `id="slide-${index}"`) at runtime. html-build leaves the container empty and injects only `slideData`.
+**4. PPT themes (notebook, scroll, slideshow, pitch-enhanced)** use the PPT layout with `.ppt-main` wrapper containing `.thumbnail-panel` and `.presentation-container`. The template's `initSlides()` builds slides at runtime and calls `initPPT()` to initialize thumbnails, transitions, and timer. html-build leaves the container empty and injects only `slideData`.
 
-**5. Slide rendering model (runtime — NOT hand-authored):** `renderSlide(data, index)` and `initSlides()` are implemented **inside each theme template** (`docs/html-themes/themes/<theme>/template.html`). On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. html-build's job is **only**:
-- Inject CSS `<link>` tags in order base→theme→style (step 2).
+**5. Original `pitch` theme** uses its own layout with `.pitch-footer`, `.toc-drawer`, and `.script-panel`. No PPT engine.
+
+**6. `scroll` theme v1.0.0 had a TOC sidebar — this is replaced in v2.0.0 with the PPT thumbnail panel.**
+
+**7. Slide rendering model (runtime — NOT hand-authored):** `renderSlide(data, index)` and `initSlides()` are implemented **inside each theme template** (`docs/html-themes/themes/<theme>/template.html`). On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. html-build's job is **only**:
+- Inject CSS `<link>` tags in order base→[ppt-engine]→theme→style (step 2).
 - Inject the `slideData` array (step 3 / field schema in `skills/html-build/SKILL.md`).
 - Leave the slide container empty — `<!-- INJECT:slides -->` is satisfied at **runtime** by the template's own `initSlides()`.
 
-Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`, and slideshow additionally emits `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
+Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/pitch-enhanced/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`; slideshow/notebook/pitch-enhanced also emit `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). **slideData MUST be strict JSON** — all keys double-quoted, all string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax (template literals, unquoted keys, comments) will break the PDF pipeline.
 
-Available themes: `notebook` | `pitch` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
+Available themes: `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
+
+> **Theme guide**: PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced) share `ppt-engine.css`/`ppt-engine.js` for thumbnails, transitions (fade/push/zoom), timer, and speaker notes. The original `pitch` theme uses its own layout (TOC drawer, no thumbnails, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
 
 ## Constraints
 

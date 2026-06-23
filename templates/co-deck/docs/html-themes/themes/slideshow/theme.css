@@ -1,9 +1,19 @@
-/* slideshow theme extension — paradigm-specific overrides (transitions/navigation). */
+/*
+  slideshow/theme.css — co-deck Slideshow Theme (PPT Presentation View)
+  =====================================================================
+  Paradigm-specific overrides for PPT-style fullscreen presentation.
+  Loaded after base.css and ppt-engine.css.
 
-/* ── Punchline slide ──────────────────────────────────────────────────────────
-   Large centered single statement. Emitted by buildSlideChildren() when
-   isPunchlineSlide is set: a .slide-card > .slide-content > h2.slide-title.
-   Colors/sizing come from base.css CSS variables — no hardcoded values. */
+  Uses base.css vocabulary (.slide-header, .slide-card, .slide-content,
+  .bullets-container, .bullet-item, .right-panel) plus the slideshow-specific
+  punchline type (large centered statement).
+
+  Colors/sizing come from CSS variables — no hardcoded values.
+*/
+
+/* ── Punchline slide ──────────────────────────────────────────────────────
+   Large centered single statement. Emitted when isPunchlineSlide is set:
+   .slide-card > .slide-content > h2.slide-title (1.8x base title size). */
 .slide[data-type="punchline"] .slide-card {
   background: transparent;
   align-items: center;
@@ -21,4 +31,9 @@
   line-height: 1.2;
   color: var(--text-primary, var(--divider-text));
   max-width: 80%;
+}
+
+/* ── Cover slide specific sizing ───────────────────────────────────────── */
+.slide[data-type="cover"] .slide-title {
+  font-size: 2.6rem;
 }

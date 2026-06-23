@@ -95,8 +95,10 @@
   border-radius: 0.125rem;
 }
 
-/* Cover slide uses dark background with serif font */
-[data-style="academic"] .slide[data-type="cover"] .slide-title {
+/* Cover slide uses dark background with serif font
+   Supports both base.css 'cover' type and pitch/pitch-enhanced 'title' type */
+[data-style="academic"] .slide[data-type="cover"] .slide-title,
+[data-style="academic"] .slide[data-type="title"] .slide-title {
   font-size: 2rem;
   letter-spacing: -0.01em;
 }
