@@ -115,6 +115,21 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   PM runs /sync "type: description" → PR opened
 ```
 
+##### 5.4.1 Execution Plan Table Format
+
+All PM execution plans MUST use the following table format (enforced in `CLAUDE.md` and `AGENTS.md`):
+
+```
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 1 | ... | ... | Medium | claude-sonnet-4-6 | 2026-06-24-topic-slug |
+```
+
+- **Spec column**: References the spec ID from `docs/specs/registry.json`. A plan without a spec ID generates a PM Gateway warning (non-blocking). Spec IDs follow the format `YYYY-MM-DD-<topic-slug>`.
+- See [§9.7 Spec Registry](09-operations-workflow.md#97-spec-registry--design-gate) for the full spec lifecycle.
+
+---
+
 #### 5.5 L0→L1→L2 PM.md Variant Handling (added 2026-06-08)
 
 The workspace supports variant-specific PM agents for different project types (co-consult, co-design, co-develop, co-security, co-work). These variants use the **Layout Reconstruction** architecture to ensure L2 pm.md files contain only variant-specific content.

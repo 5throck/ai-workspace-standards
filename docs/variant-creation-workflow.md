@@ -44,6 +44,10 @@ Develop variant-specific functionality in isolation without affecting workspace 
 - **Output**: `memory/[variant-name]-plan.md`
 - **Template**: Use `variant-execution-plan-template.md`
 - **Content**: Why/What/How, Architecture, Development Strategy, Folder Structure, Agent/Skill Catalogs, Execution Roadmap
+- **Spec Registration** (mandatory after creating the plan doc):
+  ```bash
+  bun scripts/spec-register.ts --file memory/[variant-name]-plan.md --source manual
+  ```
 
 **A-2. New Project Creation**
 - **Location**: `Projects/[variant-name]/`
