@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-23T18:16:07.409Z
+**Generated**: 2026-06-23T18:34:43.203Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 18
-- **Scripts**: 99
+- **Scripts**: 102
 - **Commands**: 6
 
 ---
@@ -69,13 +69,13 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.9.2 | scripts/audit.ts | bun |
+| audit.ts | 2.10.0 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.6.2 | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.5 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.3.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -108,6 +108,7 @@
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
+| project-to-variant.ts | 1.0.0 | scripts/project-to-variant.ts | N/A |
 | propagate-to-templates.ts | 2.0.8 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
@@ -122,6 +123,7 @@
 | security-validator.ts | 1.0.0 | scripts/helpers/security-validator.ts | fs, path |
 | skill-dependency-analysis.ts | 1.0.0 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.1.3 | scripts/skill-lifecycle-audit.ts | N/A |
+| spec-register.ts | 1.0.0 | scripts/spec-register.ts | N/A |
 | substitute-placeholders.ts | 1.1.0 | scripts/helpers/substitute-placeholders.ts | N/A |
 | sync-agent-status.ts | 1.0.0 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
@@ -148,6 +150,7 @@
 | validate-pm-extends.ts | 0.3.0 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.0 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.5.9 | scripts/validate-templates.ts | js-yaml |
+| variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.0 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.0 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.0 | scripts/verify-memory.ts | fs, path |

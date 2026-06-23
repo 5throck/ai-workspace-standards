@@ -55,7 +55,7 @@ This skill provides the framework for running structured multi-agent meetings wh
 
 **Command Format**:
 ```bash
-/meeting "meeting topic here" --agents agent1,agent2 --rounds 2 --language ko --dialogue
+/meeting "meeting topic here" --agents agent1,agent2 --rounds 2 --language ko --dialogue [--spec]
 ```
 
 **Mode Selection**:

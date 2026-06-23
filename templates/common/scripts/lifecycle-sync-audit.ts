@@ -359,6 +359,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
   'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
   'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
+  'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
 ]);
 
 function runCheckX(): SyncIssue[] {

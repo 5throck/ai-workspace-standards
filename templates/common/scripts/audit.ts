@@ -1,4 +1,4 @@
-// @version 2.9.2
+// @version 2.10.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -10,6 +10,7 @@ import * as url from 'node:url';
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
 const SKIP_MEMORY = process.argv.includes('--skip-memory');
+const SPEC_CHECK = process.argv.includes('--spec-check');
 
 // Project context path (used in multiple checks)
 const projectCtxPath = path.join('docs', 'context.md');
@@ -1269,6 +1270,66 @@ if (fs.existsSync(variantAuditPath)) {
         Pass('Variant-specific audit checks passed');
     } catch (e) {
         Fail('Variant-specific audit checks failed');
+    }
+}
+
+// ── Spec Registry Checks (--spec-check mode, warn-only) ─────────────────────
+if (SPEC_CHECK && !LIFECYCLE_ONLY) {
+    const SPEC_REGISTRY = path.join('docs', 'specs', 'registry.json');
+    if (!fs.existsSync(SPEC_REGISTRY)) {
+        Warn('Spec registry not found at docs/specs/registry.json — run: bun scripts/spec-register.ts to initialize');
+    } else {
+        interface SpecEntry { id: string; file: string; status: string; created: string; last_updated: string; }
+        interface Registry { specs: SpecEntry[]; }
+        const registry: Registry = JSON.parse(fs.readFileSync(SPEC_REGISTRY, 'utf-8'));
+
+        // Check 1: modified code files with no associated spec
+        let changedFiles: string[] = [];
+        try {
+            const { stdout } = await $`git diff --name-only HEAD`.quiet().nothrow();
+            changedFiles = stdout.toString().trim().split('\n').filter(Boolean);
+        } catch {}
+
+        const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];
+        const changedCode = changedFiles.filter(f => codeChangedDirs.some(d => f.startsWith(d)));
+        if (changedCode.length > 0) {
+            const registeredFiles = new Set(registry.specs.map(s => s.file));
+            // Loose check: any approved/draft spec is sufficient (no file-level mapping required)
+            const hasActiveSpec = registry.specs.some(s => s.status === 'approved' || s.status === 'implemented');
+            if (!hasActiveSpec) {
+                Warn(`Spec check: ${changedCode.length} code file(s) changed but no approved/implemented spec found in registry — consider running brainstorming skill or spec-register.ts`);
+            } else {
+                Pass(`Spec check: code changes covered by spec registry (${registry.specs.filter(s => s.status === 'approved' || s.status === 'implemented').length} active spec(s))`);
+            }
+        }
+
+        // Check 2: stale approved specs (approved but not implemented after 14 days)
+        const STALE_DAYS = 14;
+        const now = Date.now();
+        const staleSpecs = registry.specs.filter(s => {
+            if (s.status !== 'approved') return false;
+            const created = Date.parse(s.created);
+            return !isNaN(created) && (now - created) > STALE_DAYS * 86400 * 1000;
+        });
+        if (staleSpecs.length > 0) {
+            for (const s of staleSpecs) {
+                Warn(`Spec check: "${s.id}" has been approved for >${STALE_DAYS} days without implementation — update status or implement`);
+            }
+        } else if (registry.specs.length > 0) {
+            Pass('Spec check: no stale approved specs');
+        }
+
+        // Check 3: spec file existence
+        let missingSpecFiles = 0;
+        for (const s of registry.specs) {
+            if (!fs.existsSync(s.file)) {
+                Warn(`Spec check: registered spec file missing: ${s.file} (id: ${s.id})`);
+                missingSpecFiles++;
+            }
+        }
+        if (missingSpecFiles === 0 && registry.specs.length > 0) {
+            Pass(`Spec check: all ${registry.specs.length} spec file(s) exist`);
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-// @version 1.2.5
+// @version 1.3.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -124,6 +124,12 @@ if (hasBun) {
 const archiveMemoryTs = path.join('scripts', 'archive-memory.ts');
 if (fs.existsSync(archiveMemoryTs)) {
     await $`bun ${archiveMemoryTs}`;
+}
+
+// 3.9 Spec registry check (non-blocking — warns if approved specs are stale or code has no spec)
+const specRegPath = path.join('docs', 'specs', 'registry.json');
+if (fs.existsSync(specRegPath)) {
+    await $`bun scripts/audit.ts --spec-check --lifecycle-only`.quiet().nothrow();
 }
 
 // 4. Audit gate — call audit.ts directly (platform-independent, no shell intermediary)

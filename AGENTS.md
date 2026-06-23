@@ -388,8 +388,8 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ### 5.1 Standard Execution Plan Template
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
 | N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [model] |
 | N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [model] |
@@ -406,7 +406,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 When modifying files that affect both CLAUDE.md and GEMINI.md:
 
-| # | Task | Agent | Tier | Model | Platform |
+| # | Task | Agent | Tier | Model | Spec | Platform |
 |---|------|-------|------|---------|----------|
 | 1 | [task] | [specialist] | [tier] | [model] | Both |
 | N-1 | Lifecycle Update | lifecycle-manager | Medium | [model] | Both |
@@ -420,8 +420,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 #### Example 1: Multi-Agent Platform Parity Update
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
 | 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
 | 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
 | 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
@@ -433,8 +433,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 #### Example 2: Single Specialist Task
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
 | 1 | Update project README introduction | docs-writer | Medium | claude-sonnet-4-6 |
 | 2 | Lifecycle Update (if needed) | lifecycle-manager | Medium | claude-sonnet-4-6 |
 | 3 | Final QA Audit | auditor | Medium | claude-sonnet-4-6 |
