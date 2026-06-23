@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-06-24](2026-06-24.md) | chore: update |
 | [2026-06-23](2026-06-23.md) | feat(co-deck): background image rendering + TTS voice selection improvements |
 | [2026-06-22](2026-06-22.md) | chore: update |
 | [2026-06-21](2026-06-21.md) | feat(variant-sync): pluggable variant audit hooks and pipeline integrity validation |
