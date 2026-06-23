@@ -139,9 +139,11 @@ For the other 5 variants (co-security, co-develop, co-consult, co-work, co-desig
 
 | Variant | pm.md Lines | Pattern |
 |---------|-------------|---------|
-| co-deck | ~20 | Frontmatter-only (inherit) ✅ |
-| co-security | ~7 | Frontmatter-only (inherit) ✅ |
-| co-develop | ~7 | Frontmatter-only (inherit) ✅ |
-| co-consult | ~7 | Frontmatter-only (inherit) ✅ |
-| co-work | ~20 | Frontmatter-only (inherit) ✅ |
-| co-design | ~20 | Frontmatter-only (inherit) ✅ |
+| co-deck | 7 | Frontmatter-only (inherit) ✅ |
+| co-security | 7 | Frontmatter-only (inherit) ✅ |
+| co-develop | 7 | Frontmatter-only (inherit) ✅ |
+| co-consult | 7 | Frontmatter-only (inherit) ✅ |
+| co-work | 7 | Frontmatter-only (inherit) ✅ |
+| co-design | 7 | Frontmatter-only (inherit) ✅ |
+
+**All 6 variants now follow an identical 7-line minimal frontmatter pattern.** Domain-specific workflow orchestration lives exclusively in each variant's `AGENTS.md §4.2`.

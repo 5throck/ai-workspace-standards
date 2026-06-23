@@ -192,12 +192,12 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| <!-- TODO: deliverable type --> | Phase 1 | `architect` | high | |
-| <!-- TODO: deliverable type --> | Phase 4 | `code-writer` | low | |
-| <!-- TODO: deliverable type --> | Phase 3 | `designer` | medium | |
-| <!-- TODO: deliverable type --> | Phase 0 | `security-monitor` | medium | |
-| <!-- TODO: deliverable type --> | Phase 0 | `stack-setup` | low | |
-| <!-- TODO: deliverable type --> | Phase 4 | `test-runner` | medium | |
+| Architecture design, implementation plan, ADR | Phase 1-2 | `architect` | high | Must precede implementation |
+| Feature implementation, bug fix, code change (approved plan exists) | Phase 4 | `code-writer` | low | Plan from `architect` required |
+| UI/UX spec, wireframes, design tokens, component behaviour | Phase 3 | `designer` | medium | Before `code-writer` for UI work |
+| Vulnerability scan, advisory check, secret-leak baseline | Phase 0/6 | `security-monitor` | medium | Post-scaffold baseline + pre-PR check |
+| Environment setup, stack initialization, dependency install | Phase 0 | `stack-setup` | low | Project init |
+| Test authoring, QA gate execution, acceptance criteria validation | Phase 4/6 | `test-runner` | medium | After `code-writer`, before PR |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
@@ -394,12 +394,12 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
-| <!-- TODO: scenario for architect --> | `architect` | `pm` |
-| <!-- TODO: scenario for code-writer --> | `code-writer` | `pm` |
-| <!-- TODO: scenario for designer --> | `designer` | `pm` |
-| <!-- TODO: scenario for security-monitor --> | `security-monitor` | `pm` |
-| <!-- TODO: scenario for stack-setup --> | `stack-setup` | `pm` |
-| <!-- TODO: scenario for test-runner --> | `test-runner` | `pm` |
+| Produce implementation plan, technical spec, or ADR | `architect` | `pm` |
+| Write, modify, or delete source files from an approved plan | `code-writer` | `pm` |
+| Author wireframes, component specs, or design tokens | `designer` | `pm` |
+| Run vulnerability/advisory scan or secret-leak check | `security-monitor` | `pm` |
+| Initialize tech stack or install dependencies | `stack-setup` | `pm` |
+| Author tests, run QA gate, or validate acceptance criteria | `test-runner` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---

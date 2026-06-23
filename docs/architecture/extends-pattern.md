@@ -197,6 +197,7 @@ Migrate existing variants one at a time:
 3. `templates/co-consult/agents/pm.md` ✅ (already frontmatter-only)
 4. `templates/co-develop/agents/pm.md` ✅ (already frontmatter-only)
 5. `templates/co-security/agents/pm.md` ✅ (already frontmatter-only)
+6. `templates/co-deck/agents/pm.md` ✅ (migrated 2026-06-23, ADR-0048 — domain orchestration moved to AGENTS.md §4.2)
 
 **Migration Process per Variant**:
 ```bash
@@ -404,9 +405,10 @@ git cherry-pick <phase-1-commit>
 - [x] Migrate co-consult variant
 - [x] Migrate co-develop variant
 - [x] Migrate co-security variant
+- [x] Migrate co-deck variant (ADR-0048 — domain orchestration moved to AGENTS.md §4.2)
 - [x] Test all variants in production
 - [x] Run platform parity tests
-- [x] Document Phase 2 completion in memory log (see ADR-0047)
+- [x] Document Phase 2 completion in memory log (see ADR-0047, ADR-0048)
 - [x] Update ADR-0033 with Phase 2 completion status
 
 ### Phase 3 Checklist
