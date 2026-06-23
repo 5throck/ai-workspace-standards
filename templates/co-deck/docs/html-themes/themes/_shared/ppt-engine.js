@@ -52,29 +52,18 @@ var ThumbnailRenderer = {
     if (!panel || typeof slideData === 'undefined') return;
     while (panel.firstChild) panel.removeChild(panel.firstChild);
 
-    // Create temporary container for measuring slide dimensions
-    var tempContainer = document.getElementById('presentation');
-    var slideW = 1280; // default reference
-    var slideH = 720;
-
     slideData.forEach(function(data, i) {
       // Create thumbnail item wrapper
       var item = el('div', 'thumbnail-item' + (i === 0 ? ' active' : ''));
       item.dataset.index = i;
       item.onclick = function() { showSlide(i); };
 
-      // Label (slide number)
+      // Slide number badge
       item.appendChild(el('div', 'thumb-label', String(i + 1)));
 
-      // Clone the rendered slide into the thumbnail
-      var slideNode = document.getElementById('slide-' + i);
-      if (slideNode) {
-        var clone = slideNode.cloneNode(true);
-        clone.className = 'thumb-slide';
-        clone.id = '';
-        clone.removeAttribute('style');
-        item.appendChild(clone);
-      }
+      // Headline text extracted from slideData
+      var headline = data.title || data.subtitle || ('Slide ' + (i + 1));
+      item.appendChild(el('div', 'thumb-headline', headline));
 
       panel.appendChild(item);
     });
@@ -282,6 +271,7 @@ var NarrationEngine = {
   // Internal
   _available: false,
   _voicesLoaded: false,
+  _voiceCount: 0,
   _config: null,
 
   // Extensible language registry (add new languages here)
@@ -317,12 +307,16 @@ var NarrationEngine = {
     }
 
     var self = this;
+    this._voiceCount = 0;
 
-    // Load voices — some browsers load them asynchronously
+    // Load voices — some browsers load them asynchronously (Chrome may fire
+    // onvoiceschanged multiple times as voices load incrementally).
     function loadVoices() {
       var voices = speechSynthesis.getVoices();
-      if (voices.length > 0) {
+      if (voices.length > 0 && voices.length !== self._voiceCount) {
+        self._voiceCount = voices.length;
         self._voicesLoaded = true;
+        // Rebuild dropdowns only when the voice list actually changed
         self._buildLanguageDropdown();
         self._updateVoiceDropdown();
       }
@@ -332,6 +326,10 @@ var NarrationEngine = {
     if (speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = loadVoices;
     }
+
+    // Fallback: some browsers never fire onvoiceschanged.
+    // Retry once after 500ms to catch late-loading voices.
+    setTimeout(loadVoices, 500);
 
     // Chrome bug workaround: speechSynthesis can pause after ~15s of inactivity.
     // Keep it alive with a periodic no-op utterance.
@@ -345,9 +343,7 @@ var NarrationEngine = {
       }
     }, 14000);
 
-    // Build dropdown UI
-    this._buildLanguageDropdown();
-    this._updateVoiceDropdown();
+    // Bind click-outside handler (dropdowns are built by loadVoices callback)
     this._bindOutsideClick();
 
     // Start auto-advance timer if enabled
@@ -430,20 +426,14 @@ var NarrationEngine = {
 
     utterance.onstart = function() {
       self._updateButtonStates();
-      var playBtn = document.getElementById('narration-play-btn');
-      if (playBtn) playBtn.classList.add('speaking');
     };
 
     utterance.onend = function() {
-      var playBtn = document.getElementById('narration-play-btn');
-      if (playBtn) playBtn.classList.remove('speaking');
       self._onSpeechEnd();
     };
 
     utterance.onerror = function(e) {
       if (e.error === 'canceled' || e.error === 'interrupted') return;
-      var playBtn = document.getElementById('narration-play-btn');
-      if (playBtn) playBtn.classList.remove('speaking');
       self.stop();
     };
 
@@ -472,7 +462,7 @@ var NarrationEngine = {
   _onSlideChanged: function(index) {
     // Called when slide changes during playback
     speechSynthesis.cancel();
-    if (this.isPlaying) {
+    if (this.isPlaying && !this.isPaused) {
       var self = this;
       setTimeout(function() { self._speak(index); }, 50);
     }
@@ -511,8 +501,6 @@ var NarrationEngine = {
     speechSynthesis.cancel();
     this.isPlaying = false;
     this.isPaused = false;
-    var playBtn = document.getElementById('narration-play-btn');
-    if (playBtn) playBtn.classList.remove('speaking');
     this._updateButtonStates();
 
     // Restart auto-advance timer if enabled (narration stopped)
@@ -665,6 +653,8 @@ var NarrationEngine = {
     var btn = document.getElementById('voice-select-btn');
     if (!dropdown || !btn) return;
 
+    // Preserve open state across rebuilds
+    var wasOpen = dropdown.classList.contains('show');
     dropdown.innerHTML = '';
 
     var voices = this._getVoicesForLanguage(this.language);
@@ -681,37 +671,53 @@ var NarrationEngine = {
     voices.forEach(function(voice) {
       var option = document.createElement('div');
       option.className = 'voice-option' + (currentVoice && currentVoice.name === voice.name ? ' active' : '');
-      option.textContent = voice.name;
-      option.title = voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
+
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'voice-name';
+      nameSpan.textContent = voice.name;
+
+      var badge = document.createElement('span');
+      badge.className = 'voice-badge';
+      badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
+
+      option.appendChild(nameSpan);
+      option.appendChild(badge);
+      option.title = voice.name + ' — ' + voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
       option.onclick = function(e) {
         e.stopPropagation();
-        self._selectVoiceInDropdown(voice.name);
+        self._selectVoiceInDropdown(voice.name, voice.lang, voice.localService);
         self._toggleVoiceDropdown();
       };
       dropdown.appendChild(option);
     });
 
-    // Update button label
+    // Update button label with compact info
     if (currentVoice) {
-      btn.textContent = '🎤 ' + currentVoice.name;
+      btn.innerHTML = '🎤 ' + currentVoice.name + ' <span class="voice-badge">' + currentVoice.lang + '</span>';
     } else {
-      btn.textContent = '🎤 Default';
+      btn.innerHTML = '🎤 Default';
     }
+
+    // Restore open state if it was open before rebuild
+    if (wasOpen) dropdown.classList.add('show');
   },
 
-  _selectVoiceInDropdown: function(voiceName) {
+  _selectVoiceInDropdown: function(voiceName, voiceLang, isLocal) {
     // Persist to localStorage per language
     localStorage.setItem('narration_voice_' + this.language, voiceName);
 
     // Update dropdown active state
     var options = document.querySelectorAll('.voice-option');
     options.forEach(function(opt) {
-      opt.classList.toggle('active', opt.textContent === voiceName);
+      var nameEl = opt.querySelector('.voice-name');
+      opt.classList.toggle('active', nameEl && nameEl.textContent === voiceName);
     });
 
-    // Update button label
+    // Update button label with badge
     var btn = document.getElementById('voice-select-btn');
-    if (btn) btn.textContent = '🎤 ' + voiceName;
+    if (btn) {
+      btn.innerHTML = '🎤 ' + voiceName + ' <span class="voice-badge">' + (voiceLang || '') + '</span>';
+    }
 
     // Restart speech with new voice if playing
     if (this.isPlaying && !this.isPaused) {
@@ -757,16 +763,21 @@ var NarrationEngine = {
 
     if (playBtn) {
       if (this.isPlaying && !this.isPaused) {
-        playBtn.textContent = 'Pause';
-        playBtn.classList.add('active');
+        playBtn.textContent = '⏸ Pause';
+        playBtn.classList.add('speaking');
+        playBtn.classList.remove('paused');
+      } else if (this.isPlaying && this.isPaused) {
+        playBtn.textContent = '▶ Resume';
+        playBtn.classList.add('paused');
+        playBtn.classList.remove('speaking');
       } else {
-        playBtn.textContent = 'Play';
-        playBtn.classList.remove('active');
+        playBtn.textContent = '▶ Play';
+        playBtn.classList.remove('speaking', 'paused');
       }
     }
 
     if (autoBtn) {
-      autoBtn.textContent = this.isAutoAdvance ? 'Auto' : 'Manual';
+      autoBtn.textContent = this.isAutoAdvance ? '⏩ Auto' : '⏸ Manual';
       autoBtn.classList.toggle('active', this.isAutoAdvance);
     }
   }

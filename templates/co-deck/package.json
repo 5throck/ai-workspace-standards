@@ -8,6 +8,7 @@
     "extract-slidedata": "bun scripts/extract_slidedata.mjs",
     "measure-layout": "bun scripts/co-deck/measure-layout.ts",
     "gen-pdf": "bun scripts/co-deck/gen-slides-pdf.ts",
+    "auto-calibrate": "bun scripts/co-deck/auto-calibrate.ts",
     "snapshot": "bun scripts/co-deck/snapshot.ts"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
     "pdf-lib": "^1.17.1"
   },
   "optionalDependencies": {
-    "playwright": "^1.45.0"
+    "playwright": "^1.45.0",
+    "pdf-to-png-converter": "^4.1.0"
   }
 }

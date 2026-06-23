@@ -229,6 +229,9 @@
       const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
       slide.id = 'slide-' + index;
       slide.dataset.type = slideType(data);
+      if (data.backgroundImage) {
+        slide.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+      }
       buildSlideChildren(slide, data, index);
       return slide;
     }

@@ -1,7 +1,7 @@
 ---
 name: image-curator
-version: "1.2.0"
-last_updated: "2026-06-22"
+version: "1.3.0"
+last_updated: "2026-06-23"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
 tier:
@@ -41,7 +41,17 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 ## Responsibilities
 
 - Read `slide_deck.md` and extract all slides with `image_role` ≠ `none`
-- Read `presentations/<project>/lecture-profile.md` for `image.source` and `image.style_hint` preferences
+- Read `presentations/<project>/lecture-profile.md` for `image.source`, `image.style_hint`, and `background_image` preferences
+- **Background image handling**: When `background_image.enabled` and `background_image.source === 'download'`:
+  - Search for a wide, atmospheric landscape image (~1920×1080, aspect ratio ~1.78) using the configured provider
+  - Use `background_image.keywords` if non-empty, otherwise fall back to top-level `keywords`
+  - Append `image.style_hint` for visual consistency
+  - Save to `presentations/assets/images/bg-deck.<ext>` (slug: `bg-deck`)
+  - Add a **global background entry** to `image-manifest.json` with `image_role: "background"`, `"scope": "global"`, `"slide_index": -1` (not tied to a specific slide)
+  - The `scope` field controls which slides receive the background:
+    - `all` → every slide
+    - `divider-cover` → only title, divider, and punchline slides
+    - `individual` → only slides with their own `image_role: "background"` entry (no global download needed)
 - For each slide with an image query:
   - Derive a **content slug** from the image concept (e.g., `ai-future-professional`, `data-analysis-dashboard`) — 2-4 word kebab-case, no slide number prefix
   - **Check shared pool first**: if `presentations/assets/images/<slug>.<ext>` already exists, set `"reused": true` and skip download
@@ -70,6 +80,14 @@ Two quality checks apply to EVERY downloaded image, in addition to the slug reus
 {
   "generated_at": "YYYY-MM-DDThh:mm:ssZ",
   "source_profile": "pixabay",
+  "background_image": {
+    "enabled": true,
+    "scope": "divider-cover",
+    "slug": "bg-deck",
+    "path": "presentations/assets/images/bg-deck.jpg",
+    "overlay_color": [0, 0, 0],
+    "overlay_opacity": 0.4
+  },
   "slides": [
     {
       "slide_index": 0,

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-23T12:10:01.518Z
+**Generated**: 2026-06-23T14:58:10.551Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -61,7 +61,7 @@
 |------|---------|----------|--------------|
 | agent-create.ts | 1.0.0 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.0 | scripts/agent-delete.ts | N/A |
-| agent-lifecycle-audit.ts | 1.1.2 | scripts/agent-lifecycle-audit.ts | N/A |
+| agent-lifecycle-audit.ts | 1.1.3 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
 | agent-override-merge.ts | 1.0.0 | scripts/lib/agent-override-merge.ts | js-yaml |
 | agent-promote.ts | 0.1.0 | scripts/helpers/agent-promote.ts | N/A |

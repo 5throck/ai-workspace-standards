@@ -73,6 +73,37 @@ image:
   style_hint: "professional"
   # API keys are loaded from `.env.local` (gitignored) — do not store keys in this file.
 
+# ── Background image settings ──────────────────────────────────────
+# When enabled, slides use a downloaded image as background instead of
+# a solid color. A semi-transparent overlay preserves text readability.
+# Currently supported in PDF output and HTML (visual-heavy style).
+background_image:
+  # Enable background images for this presentation
+  enabled: false
+  # Which slides get the background image
+  # Options: all | divider-cover | individual
+  #   all            : every slide uses the background image
+  #   divider-cover  : only divider, cover/title, and punchline slides
+  #   individual     : per-slide assignment via image-manifest image_role: background
+  scope: divider-cover
+  # Image source
+  # Options: download | none
+  #   download : search and download from image.source provider (Pixabay/Unsplash/Pexels)
+  #   none     : no background image (solid color only)
+  source: download
+  # Overlay applied on top of the background image for text readability
+  overlay:
+    # Overlay color [R, G, B] (0-255)
+    color: [0, 0, 0]
+    # Opacity 0.0 (fully transparent) to 1.0 (fully opaque)
+    opacity: 0.4
+  # Keywords for background image search (used when source: download)
+  # If empty, falls back to the top-level `keywords` field above
+  keywords: []
+  # Fallback solid background color when no image is available
+  # If null, uses the style's pdf_color_spec.json background color
+  fallback_color: null
+
 # ── Optional: Chapter overview ────────────────────────────────────
 # Pre-seed chapter titles to guide the storyline agent.
 # Leave empty ([]) to let the agent decide.
@@ -166,11 +197,12 @@ This file is the single source of truth for this lecture project.
 
 | Agent | How it uses this profile |
 |-------|-------------------------|
-| `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier` |
+| `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier`; asks user about `background_image` at Stage 0 |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
 | `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode`, `narration.languages` for multi-lang scripts |
-| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor` for cover/speaker-intro slides |
-| `image-curator` | Reads `image.source`, `image.style_hint` for search queries |
+| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor`, `background_image` for slide rendering |
+| `image-curator` | Reads `image.source`, `image.style_hint` for search queries; reads `background_image` for deck-wide background download |
+| `pdf-export` | Reads `background_image` for PDF background image rendering with overlay |
 
 **Getting started:**
 

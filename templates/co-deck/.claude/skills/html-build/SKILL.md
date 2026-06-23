@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: 1.3.1
+version: 1.4.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -93,6 +93,17 @@ Read `image-manifest.json` and bind downloaded images to matching slideData entr
 - If slide has `image_role: background` → switch to `visualTitle` / `visualDisplay` text panel fallback
 - If slide has `image_role: illustrative` → omit the right panel; switch to full-text layout
 - Never use placeholder or generic images — always use manifest paths or text fallback
+
+**Background image binding** (when `lecture-profile.md` → `background_image.enabled` is true):
+
+1. Read `background_image` config from `lecture-profile.md`
+2. Read the global background image path from `image-manifest.json` → `background_image.path`
+3. Convert to relative path: `../assets/images/<slug>.<ext>`
+4. Inject `backgroundImage` field into `slideData` entries based on scope:
+   - `all` → every slide gets `"backgroundImage": "../assets/images/bg-deck.jpg"`
+   - `divider-cover` → only slides where `isTitleSlide`, `isDividerSlide`, or `isPunchline` is true
+   - `individual` → only slides with `image_role: "background"` in the manifest
+5. The template's `renderSlide()` reads `data.backgroundImage` and sets `--slide-bg-image` CSS variable (consumed by `visual-heavy/style.css` for full-bleed backgrounds)
 
 ---
 
