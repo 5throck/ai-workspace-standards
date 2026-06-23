@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.0.0"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-06-23"
 role: HTML slide builder and image integration specialist
 status: active
 tier:
@@ -41,7 +41,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration` fields
+- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration`, `background_image` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
@@ -50,6 +50,11 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - **For `scroll` theme**: wrap in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`; each `.slide` must have `id="slide-${index}"`
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
 - Bind images: for each slide with `image_role ≠ none`, use `../assets/images/<slug>.<ext>` path from `image-manifest.json` → `path` field; fall back to text panel if no image recorded
+- **Background image binding**: When `lecture-profile.md` → `background_image.enabled` is true, inject a `backgroundImage` field into `slideData` entries. The value is the relative path to the global background image (from `image-manifest.json` → `background_image.path`, rewritten as `../assets/images/<slug>.<ext>`). Scope determines which slides receive it:
+  - `all` → every slide gets `backgroundImage`
+  - `divider-cover` → only slides where `isTitleSlide`, `isDividerSlide`, or `isPunchline` is true
+  - `individual` → only slides with their own `image_role: "background"` entry in the manifest
+  The template's `renderSlide()` reads `data.backgroundImage` and sets `--slide-bg-image` CSS variable, which is consumed by `visual-heavy/style.css`
 - Insert speaker intro slide (position 2) and contact slide (last) if missing
 - Self-review balance after generation (slide count, bullets per slide, visual density)
 - Request Gate 4 user review before advancing to Measure Agent (optional gate)

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-23T07:08:49.289Z
+**Generated**: 2026-06-23T17:43:45.428Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -61,7 +61,7 @@
 |------|---------|----------|--------------|
 | agent-create.ts | 1.0.0 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.0 | scripts/agent-delete.ts | N/A |
-| agent-lifecycle-audit.ts | 1.1.2 | scripts/agent-lifecycle-audit.ts | N/A |
+| agent-lifecycle-audit.ts | 1.1.3 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
 | agent-override-merge.ts | 1.0.0 | scripts/lib/agent-override-merge.ts | js-yaml |
 | agent-promote.ts | 0.1.0 | scripts/helpers/agent-promote.ts | N/A |
@@ -69,13 +69,13 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.9.0 | scripts/audit.ts | bun |
+| audit.ts | 2.9.2 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.6.2 | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.2.4 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.2.5 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -138,7 +138,7 @@
 | test-runner.ts | 1.0.2 | scripts/test-runner.ts | child_process, fs, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | update-variant-lifecycle.ts | 1.0.0 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.1.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.2.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.2 | scripts/validate-md-language.ts | fs |
@@ -147,7 +147,7 @@
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.0 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.0 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.8 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.9 | scripts/validate-templates.ts | js-yaml |
 | variant-governance-rules.ts | 1.1.0 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.0 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.0 | scripts/verify-memory.ts | fs, path |

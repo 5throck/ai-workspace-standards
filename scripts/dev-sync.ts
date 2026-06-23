@@ -1,4 +1,4 @@
-// @version 1.2.4
+// @version 1.2.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -224,9 +224,13 @@ try {
 const syncContext = crypto.randomUUID();
 process.env.SYNC_ACTIVE = "1";
 process.env.DEV_SYNC_CONTEXT = syncContext;
-fs.writeFileSync('.sync_context.tmp', syncContext);
+// Write to git repo root — hooks run from there, not from CWD
+const repoRootResult = await $`git rev-parse --show-toplevel`.quiet().nothrow();
+const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
+const tmpPath = repoRoot ? path.join(repoRoot, '.sync_context.tmp') : '.sync_context.tmp';
+fs.writeFileSync(tmpPath, syncContext);
 
-const cleanupTmp = () => { try { if (fs.existsSync('.sync_context.tmp')) fs.unlinkSync('.sync_context.tmp'); } catch {} };
+const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch {} };
 process.on('exit', cleanupTmp);
 
 try {

@@ -1,14 +1,20 @@
-// @version 1.4.0 — backport from co-deck2 instance: (1) placeImageCover — object-fit:cover image placement via pdf-lib clip operators (divider images crop-to-fill instead of letterbox); (2) parseLayoutOverrides base-indent fix so fonts/line_heights overrides nested under layout_overrides actually parse; (3) renderDividerSlide is async + wrapping-aware vertical centering within the full card; (4) standard-slide block gap 12→24px + right-panel bg only painted when needed; (5) font fallback Pretendard→MaruBuri. Previous 1.3.9: contact slide HTML parity.
+// @version 1.7.0 — Background image support. When lecture-profile.md → background_image.enabled
+//   is true, renders full-bleed background image (cover-crop) with semi-transparent overlay.
+//   Supports scope: all | divider-cover | individual. Reads background_image config from
+//   lecture-profile frontmatter; resolves image path from image-manifest.json or slideData.
+//   v1.6.0: OS-aware font search paths (Windows, macOS, Linux).
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
 // Merges gen_full.py + gen_sample5.py — use --sample N to limit slide count.
 // Usage:
 //   bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
+//   bun scripts/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+//   --auto-calibrate  estimate fonts/line_heights from CSS and print layout_overrides YAML (no PDF)
 //   --project  project folder (relative to workspace root)
 //   --out      output PDF filename (default: <folder>.pdf or <folder>_sample<N>.pdf)
 //   --sample   limit to first N slides only (omit for full deck)
-//   --font-dir directory containing MaruBuri TTF files (default: fonts/)
+//   --font-dir directory containing font TTF files (default: presentations/assets/fonts/)
 //   --data     path to slidedata.json (default: <project>/slidedata.json)
 // Requires: pdf-lib @pdf-lib/fontkit (bun install pdf-lib @pdf-lib/fontkit)
 
@@ -16,7 +22,8 @@ import { PDFDocument, PDFFont, PDFPage, rgb, RGB,
   pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
-import { join, resolve, dirname } from 'path';
+import { join, resolve, dirname, homedir } from 'path';
+import { platform } from 'os';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -147,6 +154,93 @@ function parseLayoutOverrides(frontmatter: string): Record<string, any> {
   return parseIndentedBlock(block, baseIndent).value;
 }
 
+// ── Background image config parser ───────────────────────────────────────────
+// Reads the background_image: section from lecture-profile.md frontmatter.
+// Returns null when background_image is not configured or disabled.
+
+interface BgImageConfig {
+  enabled: boolean;
+  scope: 'all' | 'divider-cover' | 'individual';
+  source: string;
+  overlay: { color: number[]; opacity: number };
+  keywords: string[];
+  fallback_color: number[] | null;
+}
+
+function parseBackgroundImage(frontmatter: string): BgImageConfig | null {
+  const lines = frontmatter.split('\n');
+  let startIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed === 'background_image:' && !lines[i].trimStart().startsWith('#')) {
+      startIdx = i;
+      break;
+    }
+  }
+  if (startIdx === -1) return null;
+
+  const block: string[] = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    if (line.length > 0 && line[0] !== ' ') break;
+    block.push(line);
+  }
+  if (block.length === 0) return null;
+
+  const minIndent = block.reduce((min, l) => {
+    const ind = l.search(/\S/);
+    return ind >= 0 ? Math.min(min, ind) : min;
+  }, Infinity);
+  const parsed = parseIndentedBlock(block, minIndent === Infinity ? 0 : minIndent).value as Record<string, any>;
+
+  const enabled = parsed.enabled === true;
+  if (!enabled) return null;
+
+  return {
+    enabled: true,
+    scope: parsed.scope ?? 'divider-cover',
+    source: parsed.source ?? 'download',
+    overlay: {
+      color: parsed.overlay?.color ?? [0, 0, 0],
+      opacity: parsed.overlay?.opacity ?? 0.4,
+    },
+    keywords: parsed.keywords ?? [],
+    fallback_color: parsed.fallback_color ?? null,
+  };
+}
+
+// Resolve the background image file path for a given slide.
+// Returns null if the slide should not have a background image or the file doesn't exist.
+function resolveBgImagePath(
+  data: SlideData,
+  slideIdx: number,
+  bgConfig: BgImageConfig,
+  imgDir: string,
+  globalBgPath: string | null,
+  slideBgEntries: Map<number, string>,
+): string | null {
+  if (!bgConfig.enabled) return null;
+
+  // Individual mode: only slides with explicit background entries
+  if (bgConfig.scope === 'individual') {
+    return slideBgEntries.get(slideIdx) ?? null;
+  }
+
+  // 'all' or 'divider-cover' mode: use global background image
+  if (!globalBgPath) return null;
+
+  if (bgConfig.scope === 'divider-cover') {
+    // Only title, divider, punchline slides
+    if (!data.isTitleSlide && !data.isDividerSlide && !data.isPunchline) return null;
+  }
+
+  // scope === 'all' or divider-cover with matching slide type
+  const fullPath = resolve(imgDir, globalBgPath);
+  return existsSync(fullPath) ? fullPath : null;
+}
+
 // ── Slide renderer ────────────────────────────────────────────────────────────
 
 class Renderer {
@@ -187,6 +281,20 @@ class Renderer {
       width:  this.pt(wMm),
       height: this.pt(hMm),
       color,
+    });
+  }
+
+  // Fill a rectangle with semi-transparent overlay for background image readability.
+  // Uses pdf-lib page opacity to achieve the transparency effect.
+  fillRectOverlay(xMm: number, yMm: number, wMm: number, hMm: number, color: RGB, opacity: number) {
+    const prevOpacity = (this.page as any).opacity ?? 1;
+    this.page.drawRectangle({
+      x: this.pt(xMm),
+      y: this.fy(yMm + hMm),
+      width:  this.pt(wMm),
+      height: this.pt(hMm),
+      color,
+      opacity,
     });
   }
 
@@ -371,6 +479,7 @@ interface SlideData {
   bullets?:       string[];
   visual?:        string;
   visualImage?:   string;
+  backgroundImage?: string;   // relative path to full-bleed background image (from html-build)
   visualTitle?:   string;
   visualDisplay?: string;
   isTitleSlide?:  boolean;
@@ -983,6 +1092,144 @@ function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
   };
 }
 
+// ── Auto-calibrate: estimate layout_overrides from CSS ───────────────────────
+// Reads CSS custom properties (--font-size-title, --bullet-gap, etc.) from the
+// project's theme CSS files and computes estimated fonts/line_heights values.
+// Prints a YAML block suitable for pasting into lecture-profile.md.
+// This is an OPTIONAL utility — existing static theme JSON remains the default.
+
+async function autoCalibrate(workspaceRoot: string, projectArg: string) {
+  const projectDir = resolve(workspaceRoot, projectArg);
+
+  // Read lecture-profile.md for theme/style
+  const profilePath = join(projectDir, 'lecture-profile.md');
+  let theme = 'scroll', style = 'premium-dark';
+  if (existsSync(profilePath)) {
+    const profile = parseFrontmatter(readFileSync(profilePath, 'utf-8'));
+    theme = profile.theme ?? 'scroll';
+    style = profile.style ?? 'premium-dark';
+  }
+
+  // CSS files to read (in cascade order: base → theme → style)
+  const cssFiles = [
+    resolve(workspaceRoot, 'docs/html-themes/styles/base.css'),
+    resolve(workspaceRoot, `docs/html-themes/themes/${theme}/theme.css`),
+    resolve(workspaceRoot, `docs/html-themes/styles/${style}/style.css`),
+  ];
+
+  // Parse CSS custom properties
+  const cssVars: Record<string, string> = {};
+  for (const cssPath of cssFiles) {
+    if (!existsSync(cssPath)) continue;
+    const content = readFileSync(cssPath, 'utf-8');
+    // Match: --var-name: value; (inside :root or other selectors)
+    const varRegex = /--([a-zA-Z0-9-]+)\s*:\s*([^;{}]+)/g;
+    let match;
+    while ((match = varRegex.exec(content)) !== null) {
+      cssVars[match[1]] = match[2].trim();
+    }
+  }
+
+  // Helper: convert CSS rem value to px (1rem = 16px base)
+  const remToPx = (val: string): number => {
+    const s = val.replace(/\s/g, '');
+    if (s.endsWith('rem')) return parseFloat(s) * 16;
+    if (s.endsWith('px')) return parseFloat(s);
+    const num = parseFloat(s);
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Extract relevant CSS values
+  const titleFontSize = remToPx(cssVars['font-size-title'] ?? '2rem');       // 32px
+  const subtitleFontSize = remToPx(cssVars['font-size-subtitle'] ?? '1.3rem'); // 20.8px
+  const bodyFontSize = remToPx(cssVars['font-size-body'] ?? '1rem');          // 16px
+  const headerHeight = remToPx(cssVars['header-height'] ?? '3.2rem');        // 51.2px
+  const cardPaddingV = remToPx(cssVars['card-padding']?.split(' ')[0] ?? '2rem'); // 32px
+  const bulletGap = remToPx(cssVars['bullet-gap'] ?? '0.6rem');             // 9.6px
+  const imagePanelWidth = parseFloat(cssVars['image-panel-width'] ?? '45%'); // 45
+  const lineHeightBody = parseFloat(cssVars['line-height-body'] ?? '1.65');  // 1.65
+
+  // Get viewport_px from theme spec
+  const themePath = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
+  let viewportPx = 720;
+  if (existsSync(themePath)) {
+    const spec = JSON.parse(readFileSync(themePath, 'utf-8'));
+    viewportPx = spec.calibration?.viewport_px ?? 720;
+  }
+
+  const pageH = 190.5; // mm
+
+  // Calibration multipliers (derived from analysis of existing tuned specs):
+  // fonts: pt values are typically CSS_px × 0.75 × ~1.05-1.15 (PDF-optimized)
+  // line_heights: values are typically CSS_px × ~1.8-2.0 (scaled to viewport space)
+  const FONT_PT_MULT = 0.85;    // CSS px → PDF pt multiplier (tuned)
+  const LINE_H_MULT = 1.85;      // CSS px → viewport_px multiplier (tuned)
+
+  // Compute estimated values
+  const titlePt = Math.round(titleFontSize * FONT_PT_MULT * 10) / 10;
+  const bulletPt = Math.round(bodyFontSize * FONT_PT_MULT * 10) / 10;
+  const divTitlePt = Math.round(titleFontSize * 1.1 * FONT_PT_MULT * 10) / 10;  // divider slightly larger
+  const divDescPt = Math.round(subtitleFontSize * FONT_PT_MULT * 10) / 10;
+
+  const titlePx = Math.round(titleFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
+  const bulletPx = Math.round(bodyFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
+  const bulletGapPx = Math.round(bulletGap * LINE_H_MULT * 100) / 100;
+  const divTitlePx = Math.round(titleFontSize * 1.1 * lineHeightBody * LINE_H_MULT * 100) / 100;
+  const divDescPx = Math.round(subtitleFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
+
+  // Validate: line_mm must exceed font_mm
+  const titleLineMm = (titlePx / viewportPx) * pageH;
+  const titleFontMm = titlePt / MM_TO_PT;
+  const bulletLineMm = (bulletPx / viewportPx) * pageH;
+  const bulletFontMm = bulletPt / MM_TO_PT;
+
+  console.log(`\n📐 Auto-Calibrate: ${theme} theme, ${style} style`);
+  console.log(`   Viewport: ${viewportPx}px | Page: ${pageH}mm\n`);
+
+  console.log('   CSS values read:');
+  console.log(`     --font-size-title: ${cssVars['font-size-title'] ?? '2rem'} = ${titleFontSize}px`);
+  console.log(`     --font-size-body: ${cssVars['font-size-body'] ?? '1rem'} = ${bodyFontSize}px`);
+  console.log(`     --bullet-gap: ${cssVars['bullet-gap'] ?? '0.6rem'} = ${bulletGap}px`);
+  console.log(`     --line-height-body: ${lineHeightBody}`);
+  console.log(`     --image-panel-width: ${imagePanelWidth}%`);
+  console.log('');
+
+  console.log('   Estimated layout_overrides for lecture-profile.md:');
+  console.log('   ─────────────────────────────────────────────────');
+
+  const yaml = [
+    '  layout_overrides:',
+    '    fonts:',
+    `      title_pt: ${titlePt}`,
+    `      bullet_pt: ${bulletPt}`,
+    `      div_title_pt: ${divTitlePt}`,
+    `      div_desc_pt: ${divDescPt}`,
+    '    line_heights:',
+    `      title_px: ${titlePx}`,
+    `      bullet_px: ${bulletPx}`,
+    `      bullet_gap_px: ${bulletGapPx}`,
+    `      div_title_px: ${divTitlePx}`,
+    `      div_desc_px: ${divDescPx}`,
+  ];
+  for (const line of yaml) console.log(line);
+
+  console.log('');
+  console.log('   Validation:');
+  const titleOk = titleLineMm > titleFontMm;
+  const bulletOk = bulletLineMm > bulletFontMm;
+  console.log(`     title:   font_mm=${titleFontMm.toFixed(2)}, line_mm=${titleLineMm.toFixed(2)} ${titleOk ? '✅' : '❌ (line < font!)'}`);
+  console.log(`     bullet:  font_mm=${bulletFontMm.toFixed(2)}, line_mm=${bulletLineMm.toFixed(2)} ${bulletOk ? '✅' : '❌ (line < font!)'}`);
+
+  if (!titleOk || !bulletOk) {
+    console.log('\n   ⚠️  Validation failed — line heights too small for font sizes.');
+    console.log('   Increase line_heights values above or decrease fonts.');
+  }
+
+  console.log('\n   💡 Copy the YAML block above into your lecture-profile.md frontmatter.');
+  console.log('   Compare with theme defaults in:');
+  console.log(`     docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
+}
+
 // ── CLI ───────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -992,7 +1239,14 @@ async function main() {
   const projectArg = get('--project');
   if (!projectArg) {
     console.error('Usage: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir fonts/] [--data path/to/slidedata.json]');
+    console.error('       bun scripts/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>');
     process.exit(1);
+  }
+
+  // ── --auto-calibrate mode: estimate layout_overrides from CSS ─────────────
+  if (args.includes('--auto-calibrate')) {
+    await autoCalibrate(workspaceRoot, projectArg);
+    return;
   }
 
   const workspaceRoot = resolve(dirname(import.meta.path), '../..');
@@ -1004,9 +1258,11 @@ async function main() {
   // ── Read lecture-profile.md and parse theme/style ─────────────────────────
   const lectureProfilePath = join(projectDir, 'lecture-profile.md');
   let lectureProfile: Record<string, any> = {};
+  let bgImageConfig: BgImageConfig | null = null;
   if (existsSync(lectureProfilePath)) {
     const profileContent = readFileSync(lectureProfilePath, 'utf-8');
     lectureProfile = parseFrontmatter(profileContent);
+    bgImageConfig = parseBackgroundImage(profileContent);
   }
 
   const theme = lectureProfile.theme ?? 'scroll';
@@ -1082,15 +1338,28 @@ async function main() {
     process.exit(1);
   }
 
-  // Resolve font files: prefer Pretendard, fall back to MaruBuri
-  const FONT_CANDIDATES: Array<[string, string]> = [
+  // Resolve font files: prefer project dir, then OS system font directories
+  const FONT_FAMILIES: Array<[string, string]> = [
     ['Pretendard-Regular.ttf', 'Pretendard-Bold.ttf'],
     ['MaruBuri-Regular.ttf',   'MaruBuri-Bold.ttf'],
   ];
+
+  // Build search order: project fontDir → OS system dirs
+  const sysFontDirs: string[] = (() => {
+    const p = platform();
+    const home = homedir();
+    if (p === 'win32') return ['C:/Windows/Fonts'];
+    if (p === 'darwin') return [join(home, 'Library/Fonts'), '/Library/Fonts', '/System/Library/Fonts'];
+    return [join(home, '.local/share/fonts'), '/usr/share/fonts/truetype', '/usr/share/fonts'];
+  })();
+
   let fontR = '', fontB = '';
-  for (const [r, b] of FONT_CANDIDATES) {
-    const rp = join(fontDir, r), bp = join(fontDir, b);
-    if (existsSync(rp) && existsSync(bp)) { fontR = rp; fontB = bp; break; }
+  for (const [r, b] of FONT_FAMILIES) {
+    for (const dir of [fontDir, ...sysFontDirs]) {
+      const rp = join(dir, r), bp = join(dir, b);
+      if (existsSync(rp) && existsSync(bp)) { fontR = rp; fontB = bp; break; }
+    }
+    if (fontR) break;
   }
   if (!fontR) {
     console.error(`Font files not found in: ${fontDir}`);
@@ -1108,6 +1377,38 @@ async function main() {
 
   const TOTAL = slideData.length;
 
+  // ── Background image setup ──────────────────────────────────────────────
+  // Resolve the global background image path from image-manifest.json or slideData.
+  let globalBgPath: string | null = null;
+  const slideBgEntries = new Map<number, string>();  // slide_index → image path (individual mode)
+  if (bgImageConfig) {
+    // Try image-manifest.json first (global background_image section)
+    const manifestPath = join(projectDir, 'image-manifest.json');
+    if (existsSync(manifestPath)) {
+      try {
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+        if (manifest.background_image?.path) {
+          globalBgPath = manifest.background_image.path;
+        }
+        // Collect individual per-slide background entries
+        for (const entry of (manifest.slides ?? [])) {
+          if (entry.image_role === 'background' && entry.slide_index >= 0) {
+            slideBgEntries.set(entry.slide_index, entry.path);
+          }
+        }
+      } catch { /* ignore parse errors — background is optional */ }
+    }
+    // Fallback: check slideData backgroundImage fields for individual entries
+    for (let i = 0; i < slideData.length; i++) {
+      if (slideData[i].backgroundImage && !slideBgEntries.has(i)) {
+        slideBgEntries.set(i, slideData[i].backgroundImage!);
+      }
+    }
+    if (globalBgPath) {
+      console.log(`Background image: ${globalBgPath} (scope: ${bgImageConfig.scope}, overlay: rgba(${bgImageConfig.overlay.color.join(',')},${bgImageConfig.overlay.opacity}))`);
+    }
+  }
+
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
@@ -1122,6 +1423,26 @@ async function main() {
 
     renderer.fillRect(0, 0, PW, PH, C_DARK);
     renderer.fillRect(CX, CY, CW, CH, C_BG);
+
+    // ── Background image rendering (full-bleed + overlay) ────────────────
+    if (bgImageConfig) {
+      const bgPath = resolveBgImagePath(data, idx, bgImageConfig, imgDir, globalBgPath, slideBgEntries);
+      if (bgPath) {
+        try {
+          // Draw full-bleed background image (cover-crop to entire page)
+          const pageWmm = PW;  // page width in mm (same as PW from coords)
+          const pageHmm = PH;  // page height in mm
+          await renderer.placeImageCover(pdfDoc, bgPath, 0, 0, pageWmm, pageHmm);
+          // Draw semi-transparent overlay for text readability
+          if (bgImageConfig.overlay.opacity > 0) {
+            const [or, og, ob] = bgImageConfig.overlay.color;
+            renderer.fillRectOverlay(0, 0, pageWmm, pageHmm, rgb(or / 255, og / 255, ob / 255), bgImageConfig.overlay.opacity);
+          }
+        } catch (e: any) {
+          console.warn(`  bg image err (slide ${idx + 1}): ${e.message}`);
+        }
+      }
+    }
 
     const n = idx + 1;
 

@@ -1,15 +1,5 @@
 {
   "_comment": "Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. Security policies (terminal.executionPolicy, mcp.toolApproval, terminal.denyList) explicitly set for co-work projects.",
-  "mcpServers": {
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@colbymchenry/codegraph",
-        "serve"
-      ]
-    }
-  },
   "hooks": {
     "SessionStart": [
       {

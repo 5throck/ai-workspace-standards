@@ -1,5 +1,7 @@
 ---
 name: Database Migration
+owner: automation-engineer
+status: active
 description: >
   Use when running, rolling back, or generating Alembic database migrations.
   Trigger on: "run migrations", "create migration", "rollback migration",

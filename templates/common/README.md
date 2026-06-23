@@ -22,15 +22,9 @@ sync_version: 1
 # 1. Activate git hooks
 git config core.hooksPath .githooks
 
-# 2. Run setup (creates .env, installs dependencies, makes initial commit)
-#    macOS / Linux / Windows Git Bash
-bash scripts/setup.sh
-
-#    Windows - PowerShell
-.\scripts\setup.ps1
+# 2. Install dependencies
+bun install
 ```
-
-> `setup.sh` auto-detects your stack (Node.js, Python, Ruby, .NET, Java, Go, Rust) and installs dependencies. Pass `--skip-install` or `--skip-commit` to override.
 
 ## Documentation
 

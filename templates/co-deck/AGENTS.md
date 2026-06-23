@@ -472,11 +472,12 @@ When the user requests an edit:
 
 1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
 2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
-3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
+3. **Ask the user to explicitly confirm all settings** (do NOT proceed to Stage 1 until answered):
    - **Rendering theme** (`presentation.theme`) — HTML structure; read available themes from `docs/html-themes/THEMES.md` registry
    - **Visual style** (`presentation.style`) — CSS variable set; read available styles from `docs/html-themes/THEMES.md` registry; check the compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
+   - **Background image** (`background_image.enabled`: `false` (default) | `true`) — if enabled, ask scope (`all` | `divider-cover` | `individual`), source (`download` | `svg`), and overlay preferences; writes to `background_image` section in `lecture-profile.md`
 4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
    > ⚠️ This project has layout overrides that differ from the global `<theme>` theme defaults:
    > - `<key>`: `<override_value>` (default: `<theme_default>`)

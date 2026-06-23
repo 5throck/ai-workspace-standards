@@ -21,7 +21,7 @@
     { "name": "image-curator",      "file": "agents/image-curator.md" },
     { "name": "diagram-specialist", "file": "agents/diagram-specialist.md" },
     { "name": "html-build",         "file": "agents/html-build.md" },
-    { "name": "measure",          "file": "agents/measure.md" },
+    { "name": "measure",          "file": "agents/measure.md", "role": "PDF layout preparation (Playwright-free)" },
     { "name": "pdf-export",       "file": "agents/pdf-export.md" }
   ],
   "agent_manifest": {
@@ -48,7 +48,7 @@
     { "name": "design" },
     { "name": "image-curator" },
     { "name": "html-build" },
-    { "name": "measure" },
+    { "name": "prep-pdf" },
     { "name": "pdf-export" }
   ],
   "script_manifest": {
@@ -57,7 +57,9 @@
       { "name": "snapshot",                   "path": "scripts/co-deck/snapshot.ts" },
       { "name": "download-font",              "path": "scripts/co-deck/download-font.ts" },
       { "name": "gen-slides-pdf",             "path": "scripts/co-deck/gen-slides-pdf.ts" },
-      { "name": "measure-layout",             "path": "scripts/co-deck/measure-layout.ts" },
+      { "name": "measure-layout",             "path": "scripts/co-deck/measure-layout.ts", "status": "deprecated" },
+      { "name": "estimate-layout",           "path": "scripts/co-deck/estimate-layout.ts" },
+      { "name": "auto-calibrate",           "path": "scripts/co-deck/auto-calibrate.ts" },
       { "name": "validate-theme-styles",      "path": "scripts/co-deck/validate-theme-styles.ts" },
       { "name": "validate-image-manifest",    "path": "scripts/co-deck/validate-image-manifest.ts" },
       { "name": "generate-themes-manifest",   "path": "scripts/co-deck/generate-themes-manifest.ts" },

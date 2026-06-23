@@ -29,18 +29,14 @@ Install with `bun install` at project root:
 | `fflate` | `^0.8.2` | `download-font.ts` | required |
 | `pdf-lib` | `^1.17.1` | `gen-slides-pdf.ts` | required |
 | `@pdf-lib/fontkit` | `^1.1.1` | `gen-slides-pdf.ts` | required |
-| `playwright` | `^1.45.0` | `measure-layout.ts` | **optional** |
+| `playwright` | `^1.45.0` | `measure-layout.ts` | **deprecated** |
 | `@resvg/resvg-js` | `^2.6.2` | `gen-visual-images.ts` | required |
+| `pdf-to-png-converter` | `^4.1.0` | `auto-calibrate.ts` | optional |
 
-`playwright` is declared as `optionalDependencies` — `bun install` skips it by default.
-Install only when using `measure-layout.ts` for layout calibration:
-
-```bash
-bun add playwright
-bunx playwright install chromium
-```
-
-After playwright install, also run: `bunx playwright install chromium`
+`playwright` is declared as `optionalDependencies` — **deprecated**. The `measure-layout.ts` script
+that required it is deprecated; use `estimate-layout.ts` instead (no Playwright dependency).
+`pdf-to-png-converter` is optional — used by `auto-calibrate.ts` for PDF→image conversion in the
+iterative calibration loop. Pre-built native binaries, no build step required.
 
 ---
 
@@ -48,11 +44,13 @@ After playwright install, also run: `bunx playwright install chromium`
 
 | script | version | status | description | cli-usage |
 |--------|---------|--------|-------------|-----------|
-| `download-font.ts` | 1.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
-| `gen-slides-pdf.ts` | 1.4.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); supports divider/profile/contact/punchline slide types, header bar, image zones; per-item font sizes aligned to HTML (px×0.75); punchline reads text/sub fields (white statement + gold quote mark + part-tag) with measured element-to-element gaps (56/41/56 px) and dynamic text line-count centering; contact slide centers an 80% band with measured HTML colors (thanks white, lines secondary, CTA gold) and no header strip; divider card uses C_BG (matches cover/standard, not a darker slab); text-only dividers render centered; **v1.4.0 backport from co-deck2 instance**: placeImageCover (object-fit:cover via pdf-lib clip) for divider images so they crop-to-fill instead of letterbox, layout_overrides fonts/line_heights base-indent parser fix (nested overrides now actually parse), wrapping-aware divider vertical centering within the full card, Pretendard→MaruBuri font fallback; use --sample N to limit | `bun scripts/<variant>/gen-slides-pdf.ts --project presentations/<proj> [--sample 5]` |
-| `diagram-helpers.ts` | 1.0.0 | active | Shared SVG utilities for diagram generation: svgWrap, svgToPng, wrapText, colour palettes (DARK_AMBER, B2B_NAVY); imported by each project's diagram-defs.ts | (library — not invoked directly) |
+| `download-font.ts` | 2.0.0 | active | Download Korean TTF fonts (MaruBuri, NotoSansKR, etc.) for PDF generation; **v2.0.0**: OS-aware default font directory, system font detection skips download if all fonts found | `bun scripts/co-deck/download-font.ts maruburi [fonts/]` |
+| `gen-slides-pdf.ts` | 1.7.0 | active | Generate full or sample PDF deck from slidedata.json via the region-based layout model (ADR-0045); supports divider/profile/contact/punchline slide types, header bar, image zones; per-item font sizes aligned to HTML (px×0.75); **v1.7.0**: background image rendering — reads `background_image` from lecture-profile.md, resolves images from image-manifest.json or slideData, renders full-bleed cover-crop + semi-transparent overlay (scope: all/divider-cover/individual); v1.6.0: OS-aware FONT_FAMILIES + sysFontDirs search; v1.5.0: `--auto-calibrate`; v1.4.0: placeImageCover, layout_overrides parser fix; use --sample N to limit | `bun scripts/<variant>/gen-slides-pdf.ts --project presentations/<proj> [--sample 5] [--auto-calibrate]` |
+| `diagram-helpers.ts` | 1.1.0 | active | Shared SVG utilities for diagram generation: svgWrap, svgToPng, wrapText, colour palettes (DARK_AMBER, B2B_NAVY); imported by each project's diagram-defs.ts; **v1.1.0**: OS-aware system font candidates (platform()+homedir()) | (library — not invoked directly) |
 | `gen-visual-images.ts` | 3.0.1 | active | Infrastructure-only dispatcher: reads slidedata.json, dynamically imports presentations/\<project\>/diagram-defs.ts, renders SVG → PNG per slide; project generators are fully isolated in diagram-defs.ts; **v3.0.1 backport from co-deck2 instance**: target filter honours an absent `visual` field — an `images/`-prefixed visualImage still counts as a diagram target (previously such slides were silently dropped) | `bun scripts/co-deck/gen-visual-images.ts --project presentations/<proj>` |
-| `measure-layout.ts` | 1.1.0 | active | Measure HTML slide layout using Playwright; validates HTML structure/slideData before launch; outputs layout_spec.json + pdf_layout_spec.md | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
+| `measure-layout.ts` | 1.1.0 | **deprecated** | ~~Measure HTML slide layout using Playwright~~ — replaced by estimate-layout.ts (Playwright-free). Output (layout_spec.json) was never consumed by gen-slides-pdf.ts. | `bun scripts/co-deck/measure-layout.ts <html_file> [output_dir]` |
+| `estimate-layout.ts` | 1.1.0 | active | Playwright-free PDF layout preparation: reads lecture-profile.md, resolves 4-layer spec merge (base→theme→style→overrides), validates fonts, outputs layout_summary.md; optional --sample flag generates 5-slide sample PDF; **v1.1.0**: OS-aware font search via getSystemFontDirs() and findFontFile() | `bun scripts/co-deck/estimate-layout.ts --project presentations/<proj> [--sample] [--font-dir fonts/]` |
+| `auto-calibrate.ts` | 1.0.0 | active | Iterative auto-calibration loop: generates 5-page sample PDF → converts to images (pdf-to-png-converter v4) → numerically validates layout (font/line_height constraints) → auto-adjusts layout_overrides → repeats up to 3 iterations → prompts user for approval; outputs calibration report | `bun scripts/co-deck/auto-calibrate.ts --project presentations/<proj> [--max-iter 3] [--sample 5]` |
 | `snapshot.ts` | 1.0.0 | active | File version snapshot manager — save/list/restore versioned copies | `bun scripts/co-deck/snapshot.ts <files> --workspace presentations/<proj> --desc "..." --agent "..."` |
 | `validate-theme-styles.ts` | 2.0.0 | active | Validate html-themes structure for the unified region-based layout model (ADR-0045): shared-pool integrity, theme.json consistency, region schema + slide_type↔region cross-check, Layer-0 layout_base.json skeleton | `bun scripts/co-deck/validate-theme-styles.ts [--root <path>]` |
 | `validate-image-manifest.ts` | 1.0.0 | active | Validate image-manifest.json — Gate 3.5 hard gate: recomputes SHA-256 content hash + reads pixel dimensions (inline zero-dep PNG/JPEG/SVG parsers) for every image; ERROR on any duplicate content-hash across slides (blocks image-curator → html-build); WARN on missing extended schema fields (content_hash/width/height/aspect_ratio) and on aspect-ratio deviation > 30% from the theme × image_role target | `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<proj> [--root <path>]` |
@@ -70,22 +68,31 @@ Also available in `scripts/` root (not co-deck specific):
 ## Typical Workflow
 
 ```bash
-# 1. Download fonts
-bun scripts/co-deck/download-font.ts maruburi
+# 1. Download fonts (once)
+bun scripts/co-deck/download-font.ts pretendard
 
-# 2. Extract slide data from HTML
+# 2. Estimate layout and validate setup
+bun scripts/co-deck/estimate-layout.ts --project presentations/<project>
+
+# 3. (Optional) Auto-calibrate for new themes
+bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+
+# 4. (Optional) Iterative calibration loop (numerical validation)
+bun scripts/co-deck/auto-calibrate.ts --project presentations/<project> --max-iter 3 --sample 5
+
+# 5. Extract slide data from HTML
 bun scripts/co-deck/extract_slidedata.mjs presentations/<project>/lecture.html
 
-# 3. (Optional) Measure layout for calibration
-bun scripts/co-deck/measure-layout.ts presentations/<project>/lecture.html
-
-# 4. Generate PDF
-bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project>
-
-# 5. Generate 5-slide sample
+# 6. Generate 5-slide sample for review
 bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> --sample 5
 
-# 6. Snapshot before edits
+# 7. Generate full PDF
+bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project>
+
+# 8. (Optional) Prep + sample in one step
+bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --sample
+
+# 9. Snapshot before edits
 bun scripts/co-deck/snapshot.ts lecture.html --workspace presentations/<project> --desc "before chapter 3 edits" --agent content
 ```
 
@@ -107,4 +114,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
 
-*Last Updated: 2026-06-22 — backport from co-deck2 instance: gen-slides-pdf.ts v1.4.0 (placeImageCover cover-crop, layout_overrides fonts/line_heights parser fix, wrapping-aware divider centering, Pretendard→MaruBuri font fallback) + gen-visual-images.ts v3.0.1 (absent-`visual` target filter) + lecture-profile.md pitch `fonts`/`line_heights` commented reference; previous: validate-image-manifest.ts v1.0.0 (Gate 3.5)*
+*Last Updated: 2026-06-23 — Phase 2+3: gen-slides-pdf.ts v1.7.0 (background image rendering with overlay); previous: auto-calibrate.ts v1.0.0, download-font.ts v2.0.0, diagram-helpers.ts v1.1.0, estimate-layout.ts v1.1.0, gen-slides-pdf.ts v1.6.0 (OS FONT_FAMILIES)*

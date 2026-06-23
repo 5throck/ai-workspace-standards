@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.8
+ * @version 1.5.9
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -878,7 +878,9 @@ function checkL0L1ScriptParity() {
   }
   const l0Files = new Set(readdirSync(L0_SCRIPTS).filter(f => !statSync(join(L0_SCRIPTS, f)).isDirectory()));
   const l1Files = new Set(readdirSync(L1_SCRIPTS).filter(f => !statSync(join(L1_SCRIPTS, f)).isDirectory()));
-  const filesInBoth = [...l1Files].filter(f => l0Files.has(f) && !l0OnlyScripts.has(f));
+  // Exclude registry/documentation files — SCRIPTS.md is intentionally a per-layer subset
+  const registryFiles = new Set(['SCRIPTS.md']);
+  const filesInBoth = [...l1Files].filter(f => l0Files.has(f) && !l0OnlyScripts.has(f) && !registryFiles.has(f));
   for (const f of filesInBoth) {
     commonScripts.add(f);
   }

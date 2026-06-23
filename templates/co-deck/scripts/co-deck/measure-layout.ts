@@ -1,4 +1,10 @@
 // @version 1.1.0
+// ⚠️ DEPRECATED (v1.2.0) — Replaced by estimate-layout.ts (Playwright-free).
+// This script requires Playwright and its output (layout_spec.json) was never
+// consumed by gen-slides-pdf.ts. The 4-layer spec merge in gen-slides-pdf.ts reads
+// static theme JSON files directly. Use estimate-layout.ts instead.
+//
+// Original description:
 // Measure HTML slide layout coordinates, fonts, and colors using Playwright.
 // Outputs layout_spec.json and pdf_layout_spec.md for PDF generation calibration.
 // Usage: bun scripts/measure-layout.ts <html_file> [output_dir]

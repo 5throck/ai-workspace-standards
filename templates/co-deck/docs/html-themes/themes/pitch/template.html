@@ -128,6 +128,10 @@
       const node = document.createElement('img');
       node.src = src || '';
       node.alt = alt || '';
+      node.onerror = function() {
+        this.style.opacity = '0.2';
+        this.classList.add('img-fallback');
+      };
       return node;
     }
 
@@ -153,8 +157,29 @@
       parent.appendChild(ul);
     }
 
+    // Convert plain-text visualDisplay into structured DOM elements.
+    // [Title] → .visual-heading, ✓/→/• → .visual-item, default → .visual-paragraph
+    function renderVisualDisplay(parent, text) {
+      if (!text) return;
+      var lines = String(text).split('\n');
+      lines.forEach(function(line) {
+        var trimmed = line.trim();
+        if (!trimmed) { parent.appendChild(document.createElement('br')); return; }
+        if (/^\[.+\]$/.test(trimmed)) {
+          parent.appendChild(el('div', 'visual-heading', trimmed.replace(/^\[|\]$/g, '')));
+          return;
+        }
+        if (/^[✓✗✔✘→►•▪▫▸❯]\s*/.test(trimmed)) {
+          parent.appendChild(el('div', 'visual-item visual-item-check', trimmed));
+          return;
+        }
+        parent.appendChild(el('div', 'visual-paragraph', trimmed));
+      });
+    }
+
     // Map slideData flags → pitch data-type vocabulary.
     function slideType(d) {
+      if (d.isPunchlineSlide) return 'punchline';
       if (d.isTitleSlide)    return 'title';
       if (d.isDividerSlide)  return 'divider';
       if (d.isProfileSlide)  return 'profile';
@@ -176,6 +201,11 @@
         if (data.meta != null) slide.appendChild(el('p', 'slide-meta', data.meta));
         return;
       }
+      if (type === 'punchline') {
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
+        return;
+      }
       if (type === 'divider') {
         const left = el('div', 'divider-left');
         left.appendChild(el('span', 'divider-part', data.partNum || ''));
@@ -189,6 +219,11 @@
       }
       if (type === 'profile') {
         slide.appendChild(el('div', 'profile-eyebrow', section));
+        if (data.visualImage) {
+          const avatar = img(data.visualImage, escapeText(data.speakerName || title));
+          avatar.className = 'profile-avatar';
+          slide.appendChild(avatar);
+        }
         slide.appendChild(el('div', 'profile-name', data.speakerName || title));
         slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
         if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
@@ -197,8 +232,9 @@
       if (type === 'contact') {
         slide.appendChild(el('div', 'contact-title', title));
         const info = el('div', 'contact-info');
-        if (data.contactEmail) info.appendChild(el('div', null, data.contactEmail));
-        if (data.contactLinkedIn) info.appendChild(el('div', null, data.contactLinkedIn));
+        if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
+        if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
         slide.appendChild(info);
         return;
       }
@@ -216,8 +252,8 @@
       } else {
         const visual = el('div', 'slide-visual');
         visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
-        const display = el('div', 'visual-display', data.visualDisplay || '');
-        display.style.whiteSpace = 'pre-line';
+        const display = el('div', 'visual-display');
+        renderVisualDisplay(display, data.visualDisplay);
         visual.appendChild(display);
         right.appendChild(visual);
       }
@@ -229,6 +265,9 @@
       const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
       slide.id = 'slide-' + index;
       slide.dataset.type = slideType(data);
+      if (data.backgroundImage) {
+        slide.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+      }
       buildSlideChildren(slide, data, index);
       return slide;
     }

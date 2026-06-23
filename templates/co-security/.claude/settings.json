@@ -1,7 +1,10 @@
 {
   "effortLevel": "high",
   "permissions": {
-    "allow": ["WebSearch(*)", "WebFetch(*)"],
+    "allow": [
+      "WebSearch(*)",
+      "WebFetch(*)"
+    ],
     "deny": [
       "Bash(git push --force*)",
       "Bash(git push --force-with-lease*)",
@@ -13,15 +16,6 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "teammateMode": "auto",
-  "mcpServers": {
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "@colbymchenry/codegraph@0.9.7",
-        "serve"
-      ]
-    }
-  },
   "hooks": {
     "SessionStart": [
       {

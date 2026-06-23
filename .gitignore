@@ -82,6 +82,7 @@ __pycache__/
 
 # --- CodeGraph Index ---
 .codegraph/
+nul
 NUL
 
 # --- Sandbox for testing ---
@@ -91,7 +92,7 @@ NUL
 test-*/
 
 # External projects (not part of ai-workspace-standards)
-Pricing-Mgmt-Simulation/
+co-deck2
 
 # Archive directory ignored to save space (local preservation only)
 memory/archive/

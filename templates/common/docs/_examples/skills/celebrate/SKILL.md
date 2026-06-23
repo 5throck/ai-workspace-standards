@@ -1,5 +1,7 @@
 ---
 name: celebrate
+owner: pm
+status: active
 description: "Celebrate the successful completion of a task to boost team morale."
 metadata:
   type: utility

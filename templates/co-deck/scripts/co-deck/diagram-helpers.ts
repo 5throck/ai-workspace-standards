@@ -1,19 +1,58 @@
-// @version 1.0.0
+// @version 1.1.0 — OS-aware font candidate paths (Windows, macOS, Linux).
 // Shared SVG utilities for diagram generation.
 // Imported by each project's presentations/<project>/diagram-defs.ts.
 // Do NOT add project-specific content here — keep this infrastructure-only.
 
 import { existsSync } from 'node:fs';
+import { join, homedir } from 'node:path';
+import { platform } from 'node:os';
 import { Resvg } from '@resvg/resvg-js';
 
 export const W = 420, H = 470;
 
-const fontCandidates = [
-  'C:/Windows/Fonts/malgun.ttf',
-  'C:/Windows/Fonts/HANDotum.ttf',
-  '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
-];
-export const fontPath = fontCandidates.find(existsSync);
+// ── OS-aware Korean font discovery ─────────────────────────────────────────────
+// Searches system font directories + user font directories per platform.
+// Order matters: earlier entries are preferred.
+
+const systemFontCandidates: string[] = (() => {
+  const p = platform();
+  const home = homedir();
+  const candidates: string[] = [];
+
+  if (p === 'win32') {
+    const winFonts = 'C:/Windows/Fonts';
+    candidates.push(
+      join(winFonts, 'Pretendard-Regular.ttf'),
+      join(winFonts, 'MaruBuri-Regular.ttf'),
+      join(winFonts, 'malgun.ttf'),
+      join(winFonts, 'Malgun Gothic.ttf'),
+      join(winFonts, 'HANDotum.ttf'),
+      join(winFonts, 'NanumGothic.ttf'),
+    );
+  } else if (p === 'darwin') {
+    candidates.push(
+      join(home, 'Library/Fonts/Pretendard-Regular.ttf'),
+      join(home, 'Library/Fonts/MaruBuri-Regular.ttf'),
+      '/Library/Fonts/Pretendard-Regular.ttf',
+      '/Library/Fonts/AppleSDGothicNeo-Regular.otf',
+      '/System/Library/Fonts/PingFang.ttc',
+      join(home, 'Library/Fonts/NanumGothic.ttf'),
+    );
+  } else {
+    // Linux
+    candidates.push(
+      join(home, '.local/share/fonts/Pretendard-Regular.ttf'),
+      join(home, '.local/share/fonts/MaruBuri-Regular.ttf'),
+      '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+      '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+      '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+    );
+  }
+
+  return candidates;
+})();
+
+export const fontPath = systemFontCandidates.find(existsSync);
 
 export function svgToPng(svg: string): Buffer {
   const opts: Record<string, any> = { fitTo: { mode: 'original' } };

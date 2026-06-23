@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.2
+ * @version 1.1.3
  * @l2-propagate false
  * @last_updated 2026-06-02
  * @license MIT
@@ -165,8 +165,8 @@ function findAgentFiles(dir: string): string[] {
 
   if (!existsSync(dir)) return agents;
 
-  // At workspace root: only scan agents/ directory
-  if (IS_WORKSPACE_ROOT && dir === ROOT) {
+  // If project root has an agents/ directory, only scan that (avoids false positives in docs/, etc.)
+  if (dir === ROOT) {
     const agentsDir = join(dir, 'agents');
     if (existsSync(agentsDir)) {
       return findAgentFiles(agentsDir);

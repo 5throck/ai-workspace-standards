@@ -69,15 +69,21 @@
       <button class="transition-btn" data-mode="push" onclick="TransitionEngine.setMode('push')" title="Push 전환">Push</button>
       <button class="transition-btn" data-mode="zoom" onclick="TransitionEngine.setMode('zoom')" title="Zoom 전환">Zoom</button>
       <button class="footer-btn" id="script-btn" onclick="PresenterTools.toggleScript()" aria-label="발표자 노트" title="발표자 노트">📝 노트</button>
-      <div class="narration-dropdown-wrap">
-        <button class="footer-btn" id="voice-lang-btn" onclick="NarrationEngine._toggleLanguageDropdown()" aria-label="언어 선택" title="언어 선택">KR ▾</button>
-        <div class="voice-lang-dropdown" id="voice-lang-dropdown"></div>
+      <!-- TTS controls group -->
+      <div class="footer-tts-group">
+        <div class="narration-dropdown-wrap">
+          <button class="footer-btn" id="voice-lang-btn" onclick="NarrationEngine._toggleLanguageDropdown()" aria-label="언어 선택" title="언어 선택">KR ▾</button>
+          <div class="voice-lang-dropdown" id="voice-lang-dropdown"></div>
+        </div>
+        <button class="footer-btn" id="narration-play-btn" onclick="NarrationEngine.togglePlay()" aria-label="음성 재생" title="음성 재생 (P)">▶ Play</button>
+        <div class="narration-dropdown-wrap">
+          <button class="footer-btn" id="voice-select-btn" onclick="NarrationEngine._toggleVoiceDropdown()" aria-label="음성 선택" title="음성 선택">🎤 Default</button>
+          <div class="voice-select-dropdown" id="voice-select-dropdown"></div>
+        </div>
       </div>
-      <button class="footer-btn" id="narration-play-btn" onclick="NarrationEngine.togglePlay()" aria-label="음성 재생" title="음성 재생 (P)">Play</button>
-      <button class="footer-btn" id="narration-auto-advance-btn" onclick="NarrationEngine.toggleAutoAdvance()" aria-label="자동 넘기기" title="자동 넘기기 (A)">Manual</button>
-      <div class="narration-dropdown-wrap">
-        <button class="footer-btn" id="voice-select-btn" onclick="NarrationEngine._toggleVoiceDropdown()" aria-label="음성 선택" title="음성 선택">🎤 Default</button>
-        <div class="voice-select-dropdown" id="voice-select-dropdown"></div>
+      <!-- Slide advance controls group -->
+      <div class="footer-slide-group">
+        <button class="footer-btn" id="narration-auto-advance-btn" onclick="NarrationEngine.toggleAutoAdvance()" aria-label="자동 넘기기" title="자동 넘기기 (A)">⏸ Manual</button>
       </div>
       <span class="presenter-timer" id="timer-display">00:00</span>
       <button class="footer-btn" id="timer-btn" onclick="PresenterTools.toggleTimer()" aria-label="타이머" title="타이머">⏱</button>
@@ -152,6 +158,11 @@
       }
       if (type === 'profile') {
         slide.appendChild(el('div', 'profile-eyebrow', section));
+        if (data.visualImage) {
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          avatar.className = 'profile-avatar';
+          slide.appendChild(avatar);
+        }
         slide.appendChild(el('div', 'profile-name', data.speakerName || title));
         slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
         if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
@@ -160,8 +171,9 @@
       if (type === 'contact') {
         slide.appendChild(el('div', 'contact-title', title));
         var info = el('div', 'contact-info');
-        if (data.contactEmail) info.appendChild(el('div', null, data.contactEmail));
-        if (data.contactLinkedIn) info.appendChild(el('div', null, data.contactLinkedIn));
+        if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
+        if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
         slide.appendChild(info);
         return;
       }
@@ -179,8 +191,8 @@
       } else {
         var visual = el('div', 'slide-visual');
         visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
-        var display = el('div', 'visual-display', data.visualDisplay || '');
-        display.style.whiteSpace = 'pre-line';
+        var display = el('div', 'visual-display');
+        renderVisualDisplay(display, data.visualDisplay);
         visual.appendChild(display);
         right.appendChild(visual);
       }
@@ -192,6 +204,9 @@
       var slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
       slide.id = 'slide-' + index;
       slide.dataset.type = slideType(data);
+      if (data.backgroundImage) {
+        slide.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+      }
       buildSlideChildren(slide, data, index);
       return slide;
     }

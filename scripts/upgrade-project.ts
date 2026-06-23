@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.1
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //
@@ -11,6 +11,7 @@ import {
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -162,6 +163,34 @@ if (!dryRun) {
   console.log('');
 }
 
+// ── Version utilities ─────────────────────────────────────────────────────────
+function semverGt(a: string, b: string): boolean {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
+    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
+  }
+  return false;
+}
+
+function extractScriptVersion(filePath: string): string {
+  if (!existsSync(filePath)) return '';
+  const line = readFileSync(filePath, 'utf8').split('\n').find(l => /^\s*\/\/\s*@version\s+\d/.test(l)) ?? '';
+  return line.match(/(\d+\.\d+\.\d+)/)?.[1] ?? '';
+}
+
+function extractFrontmatterVersion(filePath: string): string {
+  if (!existsSync(filePath)) return '';
+  const content = readFileSync(filePath, 'utf8');
+  return content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
+}
+
+function fileHash(filePath: string): string {
+  if (!existsSync(filePath)) return '';
+  return createHash('md5').update(readFileSync(filePath)).digest('hex');
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function resolveTemplate(rel: string): string {
   const vf = join(templatesDir, rel);
@@ -229,7 +258,7 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 }
 
-let lockedChanged = 0, mergeChanged = 0, preserveListed = 0;
+let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
 
 // ── LOCKED files ───────────────────────────────────────────────────────────────
 console.log('--- LOCKED files (always overwrite) ---');
@@ -338,6 +367,170 @@ if (existsSync(skillsMdPath)) {
 }
 console.log('');
 
+// ── SYNC_IF_NEWER: scripts/ ───────────────────────────────────────────────────
+console.log('--- SYNC_IF_NEWER: scripts/ ---');
+const scriptSubDirs = ['', 'hooks', 'lib', 'helpers'];
+for (const subDir of scriptSubDirs) {
+  const tplScriptsDir = join(commonDir, 'scripts', subDir);
+  if (!existsSync(tplScriptsDir)) continue;
+  const relPrefix = subDir ? `scripts/${subDir}` : 'scripts';
+  for (const fname of readdirSync(tplScriptsDir)) {
+    if (!fname.endsWith('.ts')) continue;
+    const tplFile = join(tplScriptsDir, fname);
+    if (!statSync(tplFile).isFile()) continue;
+    const rel = `${relPrefix}/${fname}`;
+    const projFile = join(projectDir, rel);
+    const tplVer = extractScriptVersion(tplFile);
+    if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
+    const projVer = extractScriptVersion(projFile);
+    if (!existsSync(projFile)) {
+      console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (semverGt(tplVer, projVer)) {
+      console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      if (!dryRun) copyFileSync(tplFile, projFile);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else {
+      console.log(`  OK     ${rel}  ${projVer}`);
+    }
+  }
+}
+console.log('');
+
+// ── SYNC_IF_NEWER: agents/ ────────────────────────────────────────────────────
+console.log('--- SYNC_IF_NEWER: agents/ ---');
+const tplAgentsDirs = [join(templatesDir, 'agents'), join(commonDir, 'agents')];
+const seenAgents = new Set<string>();
+for (const agentsDir of tplAgentsDirs) {
+  if (!existsSync(agentsDir)) continue;
+  for (const fname of readdirSync(agentsDir)) {
+    if (!fname.endsWith('.md') || seenAgents.has(fname)) continue;
+    if (fname === 'README.md' || fname === 'README_ko.md' || fname === '_COMMON.md') {
+      console.log(`  PRESERVE (README): agents/${fname}`);
+      seenAgents.add(fname);
+      continue;
+    }
+    seenAgents.add(fname);
+    const tplFile = join(agentsDir, fname);
+    if (!statSync(tplFile).isFile()) continue;
+    const rel = `agents/${fname}`;
+    const projFile = join(projectDir, rel);
+    const tplVer = extractFrontmatterVersion(tplFile);
+    if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
+    const projVer = extractFrontmatterVersion(projFile);
+    if (!existsSync(projFile)) {
+      console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (!projVer) {
+      console.log(`  UPDATE ${rel}  (no version) → ${tplVer}`);
+      if (!dryRun) copyFileSync(tplFile, projFile);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (semverGt(tplVer, projVer)) {
+      console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      if (!dryRun) copyFileSync(tplFile, projFile);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else {
+      console.log(`  OK     ${rel}  ${projVer}`);
+    }
+  }
+}
+// List project-only agents as PRESERVE
+const projAgentsDir = join(projectDir, 'agents');
+if (existsSync(projAgentsDir)) {
+  for (const fname of readdirSync(projAgentsDir)) {
+    if (fname.endsWith('.md') && !seenAgents.has(fname)) {
+      console.log(`  PRESERVE (project-only): agents/${fname}`);
+    }
+  }
+}
+console.log('');
+
+// ── SYNC_IF_NEWER: skills/ ────────────────────────────────────────────────────
+console.log('--- SYNC_IF_NEWER: skills/ ---');
+const tplSkillsDir = join(commonDir, 'skills');
+const seenSkills = new Set<string>();
+if (existsSync(tplSkillsDir)) {
+  for (const skillName of readdirSync(tplSkillsDir)) {
+    const tplSkillFile = join(tplSkillsDir, skillName, 'SKILL.md');
+    if (!existsSync(tplSkillFile)) continue;
+    seenSkills.add(skillName);
+    const projSkillFile = join(projectDir, 'skills', skillName, 'SKILL.md');
+    const tplVer = extractFrontmatterVersion(tplSkillFile);
+    if (tplVer) {
+      const projVer = extractFrontmatterVersion(projSkillFile);
+      if (!existsSync(projSkillFile)) {
+        console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
+        if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        syncChanged++;
+      } else if (semverGt(tplVer, projVer)) {
+        console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}`);
+        if (!dryRun) copyFileSync(tplSkillFile, projSkillFile);
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        syncChanged++;
+      } else {
+        console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+      }
+    } else {
+      // No explicit version — compare by content hash
+      const tplHash = fileHash(tplSkillFile);
+      const projHash = fileHash(projSkillFile);
+      if (!existsSync(projSkillFile)) {
+        console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
+        if (!dryRun) { mkdirSync(dirname(projSkillFile), { recursive: true }); copyFileSync(tplSkillFile, projSkillFile); }
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        syncChanged++;
+      } else if (tplHash !== projHash) {
+        console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
+        if (!dryRun) copyFileSync(tplSkillFile, projSkillFile);
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
+        syncChanged++;
+      } else {
+        console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+      }
+    }
+  }
+}
+// List project-only skills as PRESERVE
+const projSkillsDir = join(projectDir, 'skills');
+if (existsSync(projSkillsDir)) {
+  for (const skillName of readdirSync(projSkillsDir)) {
+    if (!seenSkills.has(skillName) && existsSync(join(projSkillsDir, skillName, 'SKILL.md'))) {
+      console.log(`  PRESERVE (project-only): skills/${skillName}/`);
+    }
+  }
+}
+console.log('');
+
+// ── OVERWRITE: docs/_common/ (allowlist) ──────────────────────────────────────
+console.log('--- OVERWRITE: docs/_common/ (governance files) ---');
+const DOCS_OVERWRITE = ['security.md'];
+const DOCS_PRESERVE  = ['phase-definitions.md', 'context.md', 'README.md', 'README_ko.md'];
+for (const fname of DOCS_OVERWRITE) {
+  const src = join(commonDir, 'docs', '_common', fname);
+  const dest = join(projectDir, 'docs', fname);
+  if (!existsSync(src)) { console.log(`  SKIP (no template): docs/${fname}`); continue; }
+  if (!existsSync(dest)) {
+    console.log(`  NEW   docs/${fname}`);
+  } else {
+    diffSummary(dest, src);
+  }
+  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+  console.log(`  ${dryTag}WROTE: docs/${fname}`);
+  syncChanged++;
+}
+for (const fname of DOCS_PRESERVE) {
+  if (existsSync(join(projectDir, 'docs', fname))) console.log(`  PRESERVE: docs/${fname}`);
+}
+console.log('');
+
 // ── Post-upgrade: write template-version.txt ───────────────────────────────────
 if (!dryRun) {
   mkdirSync(join(projectDir, '.claude'), { recursive: true });
@@ -384,6 +577,7 @@ console.log('========================================================');
 console.log('  Upgrade Complete');
 console.log(`  Locked files updated : ${lockedChanged}`);
 console.log(`  Merge files processed: ${mergeChanged}`);
+console.log(`  Sync files updated   : ${syncChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');

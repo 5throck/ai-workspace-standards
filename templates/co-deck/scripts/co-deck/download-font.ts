@@ -1,12 +1,15 @@
-// @version 1.0.0
+// @version 2.0.0 — OS-aware font directory defaults + system font detection.
 // Download Korean TTF fonts for PDF generation — saves to fonts/ directory.
+// Auto-detects OS to set default font directory; skips download if fonts are already
+// installed system-wide.
 // Usage: bun scripts/download-font.ts <font_name> [output_dir]
 // Fonts: maruburi | notosanskr | nanumsquareneo | pretendard
 // Requires: fflate (bun install fflate)
 
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
-import { join, resolve } from 'path';
-import { unzipSync, strFromU8 } from 'fflate';
+import { join, resolve, homedir } from 'path';
+import { platform } from 'os';
+import { unzipSync } from 'fflate';
 
 interface FontSpec {
   name: string;
@@ -74,6 +77,56 @@ const FONT_CATALOG: Record<string, FontSpec> = {
   },
 };
 
+// ── OS-aware default font directory ─────────────────────────────────────────────
+
+function getDefaultFontDir(): string {
+  const p = platform();
+  const home = homedir();
+
+  if (p === 'win32') {
+    // Windows: use project-relative fonts/ (system font install requires admin)
+    return 'fonts';
+  } else if (p === 'darwin') {
+    // macOS: user font directory (no admin needed)
+    return join(home, 'Library/Fonts');
+  } else {
+    // Linux: XDG user font directory
+    return join(home, '.local/share/fonts');
+  }
+}
+
+// ── System font detection ───────────────────────────────────────────────────────
+
+function getSystemFontDirs(): string[] {
+  const p = platform();
+  const home = homedir();
+
+  if (p === 'win32') {
+    return ['C:/Windows/Fonts'];
+  } else if (p === 'darwin') {
+    return [
+      join(home, 'Library/Fonts'),
+      '/Library/Fonts',
+      '/System/Library/Fonts',
+    ];
+  } else {
+    return [
+      join(home, '.local/share/fonts'),
+      '/usr/share/fonts/truetype',
+      '/usr/share/fonts/opentype',
+      '/usr/share/fonts',
+    ];
+  }
+}
+
+function findSystemFont(filename: string): string | null {
+  for (const dir of getSystemFontDirs()) {
+    const path = join(dir, filename);
+    if (existsSync(path)) return path;
+  }
+  return null;
+}
+
 async function downloadBytes(url: string, headers: Record<string, string>): Promise<Uint8Array> {
   const resp = await fetch(url, { headers });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
@@ -127,6 +180,7 @@ async function main() {
   if (args.length < 1) {
     console.log(`사용법: bun scripts/download-font.ts <font_name> [output_dir]`);
     console.log(`\n지원 폰트: ${Object.keys(FONT_CATALOG).join(', ')}`);
+    console.log(`\nOS 감지: ${platform()} — 기본 폰트 디렉토리: ${getDefaultFontDir()}`);
     process.exit(1);
   }
 
@@ -137,23 +191,39 @@ async function main() {
     process.exit(1);
   }
 
-  const outputDir = resolve(args[1] ?? 'presentations/assets/fonts');
+  const outputDir = resolve(args[1] ?? getDefaultFontDir());
   mkdirSync(outputDir, { recursive: true });
 
   const spec = FONT_CATALOG[fontKey];
 
-  // Check-before-download: skip if all font files already exist
-  const allExist = Object.values(spec.files).every(filename =>
+  // Check-before-download: skip if all font files already exist in output dir
+  const allExistInOutput = Object.values(spec.files).every(filename =>
     existsSync(join(outputDir, filename))
   );
-  if (allExist) {
+  if (allExistInOutput) {
     console.log(`✅ ${spec.name} 폰트가 이미 존재합니다: ${outputDir}`);
     console.log(`   파일: ${Object.values(spec.files).join(', ')}`);
     process.exit(0);
   }
 
+  // Check-before-download: skip if all font files exist in system directories
+  const allExistInSystem = Object.keys(spec.files).every(filename =>
+    findSystemFont(filename) !== null
+  );
+  if (allExistInSystem) {
+    console.log(`✅ ${spec.name} 폰트가 시스템에 이미 설치되어 있습니다:`);
+    for (const filename of Object.keys(spec.files)) {
+      const sysPath = findSystemFont(filename);
+      console.log(`   ${filename} → ${sysPath}`);
+    }
+    console.log(`\n   💡 프로젝트 폰트 디렉토리에도 복사하려면:`);
+    console.log(`   bun scripts/download-font.ts ${fontKey} ${outputDir}`);
+    process.exit(0);
+  }
+
   console.log(`\n📦 ${spec.name} 다운로드 시작`);
   console.log(`   URL: ${spec.url}`);
+  console.log(`   OS: ${platform()}`);
   console.log(`   저장 위치: ${outputDir}/\n`);
 
   try {
