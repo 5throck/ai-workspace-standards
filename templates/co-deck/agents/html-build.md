@@ -41,7 +41,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language` fields
+- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
@@ -112,6 +112,7 @@ Available themes: `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slidesho
 - Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤3); ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
+- **UTF-8 encoding**: All generated HTML files MUST be written as UTF-8 without BOM. On Windows (Korean locale), the default code page is CP949 — always ensure `chcp 65001` or `$OutputEncoding = [System.Text.Encoding]::UTF8` is active before writing files to prevent Korean text corruption
 - Local preview: `bunx serve .` → `http://localhost:3000`
 
 ## Meeting Participation

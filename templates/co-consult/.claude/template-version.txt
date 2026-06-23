@@ -1,4 +1,4 @@
-﻿variant=co-consult
+variant=co-consult
 version=0.5.0
 platform=both
 created=2026-06-03T00:25:16Z

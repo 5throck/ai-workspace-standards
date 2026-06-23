@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **[2026-06-23]**: feat(co-deck): add NarrationEngine TTS auto-play — Web Speech API reads `slideData[i].script` aloud with auto-advance (auto/manual mode toggle, ko/en/ja multi-language, keyboard shortcuts P/A, footer UI buttons in all 4 PPT themes, speaking pulse animation); storyline agent mandates `script` field per slide; lecture-profile.md gains `narration` config section; migrate `docs/superpowers/` to `docs/designs/` with semantic filenames
+- **[2026-06-23]**: feat(co-deck): NarrationEngine v2.0 — independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible `LANGUAGES` object replacing cycle toggle); voice selector dropdown (filtered by language, localStorage persistence per `narration_voice_<lang>`); configurable via `narrationConfig` bridge (lecture-profile.md → html-build → initPPT); footer UI updated in all 4 PPT themes (slideshow, scroll, notebook, pitch-enhanced); dropdown CSS styles added to ppt-engine.css; THEMES.md + co-deck.context.md feature tables updated
+- **[2026-06-23]**: fix(co-deck): enforce UTF-8 without BOM + LF line endings across html-themes/ — normalize 36 files CRLF→LF; add `.gitattributes` (eol=lf for HTML/CSS/JS/JSON/MD); add File Encoding Standard section to THEMES.md; add UTF-8 output constraints to html-build agent/skill; add Domain Rule #16 to co-deck.context.md
+- **[2026-06-23]**: fix(encoding): remove UTF-8 BOM from 3 template files (co-consult `.gitattributes`, co-consult `template-version.txt`, common `.gitattributes`) + root `.gitattributes`; strengthen root `.gitattributes` with explicit `eol=lf` for all text file types (md, js, ts, json, html, css, yml, yaml, toml, sh, c, h, mjs) to prevent `core.autocrlf=true` CRLF checkout on Windows; re-normalize 142 CRLF files across all 7 variants
 - **[2026-06-23]**: feat(co-deck): register `validate-image-manifest.ts` (v1.0.0) as the Gate 3.5 hard gate — recomputes SHA-256 content hash + reads pixel dimensions (inline zero-dep PNG/JPEG/SVG parsers) for every image; ERROR on duplicate content-hash across slides (blocks image-curator → html-build); WARN on missing extended schema fields (content_hash/width/height/aspect_ratio) and aspect-ratio deviation >30% from the theme × image_role target; declared in `scripts/co-deck/SCRIPTS.md` + `variant.json` `script_manifest.local`
 - **[2026-06-22]**: feat(co-deck): make each theme's `renderSlide(data, index)` the authoritative slide-structure implementation across pitch/notebook/scroll/slideshow — replaces the `throw new Error` stub with an imperative DOM builder (`createElement`/`textContent`/`appendChild`) that emits each theme's native classes (pitch `divider-left/right` + `slide-content` + `slide-visual`, notebook `cover-rule` + `gutter-num` + `nb-tabs`, scroll/slideshow base.css `slide-card` + `bullets-container`); a shared `initSlides()` runs on `DOMContentLoaded` before each theme's TOC/tab/spy hooks; html-build now injects only `slideData` + CSS links and stops hand-authoring `.slide` divs (`html-build` SKILL.md ×2 + agent .md updated; `THEMES.md` documents the runtime-render contract). PDF pipeline unaffected — `extract_slidedata.mjs` parses the inline `slideData` array, not the DOM
 - **[2026-06-22]**: feat(co-deck): add `premium-dark` style as the default visual style for scroll/slideshow themes — dark navy (`#111827`) + gold accent (`#D97706`) + radial-gradient cover/divider + MaruBuri/Noto Serif KR + gold title glow; derived from the `kyobo_ax_2026` executive deck; wired as default across `theme.json` (scroll/slideshow `compatible_styles[0]`), `html-build`/`pm` agents, `html-build` SKILL.md, `preview.html`, `gen-slides-pdf.ts`, and `variant.json` `theme_manifest.default` (renamed from `kyobo` — a brand name is inappropriate for a reusable style)
@@ -301,7 +305,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-05-29]**: `scripts/new-project.sh` — replaced all Python inline code with TypeScript helper calls; UTF-8 decoding errors resolved
 - **[2026-05-29]**: `scripts/new-project.ps1` — replaced PowerShell native code with TypeScript helper calls; now uses identical logic to SH version (single source of truth)
 - **[2026-05-29]**: `.claude/settings.json` and all template settings files — fixed SessionStart hook structure (added missing `matcher` and `hooks` wrapper)
-- **[2026-05-29]**: `.gitignore` — added negation patterns for `!docs/governance/`, `!docs/lifecycle/`, `!docs/variant/`, `!docs/superpowers/`, `!templates/common/`
+- **[2026-05-29]**: `.gitignore` — added negation patterns for `!docs/governance/`, `!docs/lifecycle/`, `!docs/variant/`, `!docs/designs/`, `!templates/common/`
 - **[2026-05-29]**: `CLAUDE.md` §2 — added platform parity note: "every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`; see CONSTITUTION.md §6"
 - **[2026-05-29]**: `GEMINI.md` §6 — added platform parity note referencing `CONSTITUTION.md §6 Cross-Platform Deployment Rule`
 - **[2026-05-29]**: `.claude/commands/new-project.md` — added `gemini-parity: skip` frontmatter (Claude Code Agent tool dispatch has no Gemini equivalent)
@@ -799,7 +803,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-22*
+*Last Updated: 2026-06-23*
 
 
 

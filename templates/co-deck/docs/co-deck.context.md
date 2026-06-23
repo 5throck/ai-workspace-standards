@@ -158,8 +158,9 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), Escape (close) |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + nav buttons |
+| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 
@@ -183,7 +184,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer) [PPT themes only]
+2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer, narration) [PPT themes only]
 3. themes/<theme>/theme.css           — per-theme extension
 4. styles/<style>/style.css           — per-style visual overrides
 ```
@@ -500,8 +501,9 @@ slideData[i].visualImage = "images/<stem>.png"
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
 14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.4.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
+16. **UTF-8 without BOM (LF)**: All co-deck files — source templates, generated HTML, scripts, markdown, JSON — MUST use UTF-8 encoding without BOM and LF line endings. html-build agent must verify `<meta charset="UTF-8">` in generated HTML. On Windows (Korean locale), ensure `chcp 65001` is set before any file write to prevent CP949 corruption. See `docs/html-themes/THEMES.md → File Encoding Standard` for enforcement details.
 <!-- END VARIANT-INJECT -->
 
 ---
 
-*co-deck.context.md version: 3.0 — updated 2026-06-23: PPT transformation — notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); all PPT themes compatible with all 5 styles (visual-heavy: partial); compatibility matrix updated; lecture profile theme options updated. Previous: v2.9 — updated 2026-06-23: backport from co-deck2 instance — `gen-slides-pdf.ts` v1.4.0 (placeImageCover cover-crop, `layout_overrides` fonts/line_heights parser fix, wrapping-aware divider centering, Pretendard→MaruBuri font fallback); `gen-visual-images.ts` v3.0.1 (absent-`visual` target filter); stale version refs fixed (`gen-slides-pdf.ts` v1.2.0→v1.4.0; `gen-visual-images.ts` v2.1.0/v3.0.0→v3.0.1); `agents/pdf-export.md` v1.1.0 documents the new PDF-fitting levers.*
+*co-deck.context.md version: 3.3 — updated 2026-06-23: NarrationEngine v2.0 — independent narration/auto-advance toggles (4 combinations); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via narrationConfig; footer UI updated in all 4 PPT themes (dropdowns replace toggle buttons); THEMES.md and co-deck.context.md feature tables updated. Previous: v3.2 — updated 2026-06-23: File encoding standard enforced — all co-deck files UTF-8 without BOM + LF line endings; html-themes/ 36 files normalized CRLF→LF; .gitattributes added for HTML/CSS/JS/JSON eol=lf; html-build agent/skill gain UTF-8 output constraints; THEMES.md File Encoding Standard section added.*

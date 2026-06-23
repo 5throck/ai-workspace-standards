@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.1
+// @version 1.4.2
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -9,7 +9,7 @@
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
  * templates/, and SECURITY.md.
  *
- * Excludes: memory/ logs, docs/superpowers/, docs/adr/, locale-specific files
+ * Excludes: memory/ logs, docs/designs/, docs/adr/, locale-specific files
  * for all supported I18N languages, and node_modules/.git directories.
  *
  * Locale-only content in excluded paths is acceptable. Mixed-language content
@@ -156,7 +156,7 @@ function isExcludedPath(filePath: string): boolean {
   }
 
   // Exclude planning/draft docs (locale-only content is acceptable here)
-  if (normalizedPath.startsWith("docs/superpowers/") ||
+  if (normalizedPath.startsWith("docs/designs/") ||
       normalizedPath.startsWith("docs/adr/")) {
     return true;
   }

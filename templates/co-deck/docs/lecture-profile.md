@@ -94,6 +94,33 @@ dividers:
   # none: no dividers
   mode: auto
 
+# ── Narration (TTS auto-play) settings ───────────────────────────
+# Controls the Web Speech API narration and auto-advance features in the HTML viewer.
+# The storyline agent generates a `script` field for every slide regardless.
+narration:
+  # Whether to enable the TTS narration play button in the HTML viewer
+  # Options: true | false (default: true)
+  enabled: true
+  # Whether to enable automatic slide advancement (independent of narration)
+  # When true, slides advance automatically at the configured interval.
+  # Options: true | false (default: false)
+  autoAdvance: false
+  # Interval for auto-advance when narration is NOT playing (seconds)
+  # When narration IS playing, slides advance after narration ends (~800ms).
+  # Options: integer (default: 5)
+  autoAdvanceInterval: 5
+  # Languages for which to generate translated narration scripts.
+  # The primary language (from `language` field) always gets a `script` field.
+  # Additional languages generate `scriptEn`, `scriptJa`, etc.
+  # Options: empty list (primary only) | [ko, en, ja] (all three)
+  # Example: [ko, en]    — Korean primary + English translation
+  #          [ko, en, ja] — all three languages
+  #          []           — primary language only (no extra translations)
+  languages: []
+  # Default narration language in the HTML player
+  # Options: ko | en | ja (must be in `languages` or match `language` field)
+  defaultLanguage: ko
+
 # ── Source Verification settings ──────────────────────────────────
 # Options: true | false
 # - true (default): Runs the source-verifier agent to validate references.
@@ -141,7 +168,7 @@ This file is the single source of truth for this lecture project.
 |-------|-------------------------|
 | `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier` |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
-| `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode` |
+| `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode`, `narration.languages` for multi-lang scripts |
 | `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor` for cover/speaker-intro slides |
 | `image-curator` | Reads `image.source`, `image.style_hint` for search queries |
 
