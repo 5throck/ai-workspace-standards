@@ -45,7 +45,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Read `presentations/<project>/lecture-profile.md` at start (if present); extract `slide_count`, `chapters`, `instructor`, `dividers.mode`
 - Read `research_notes.md` if it exists; confirm total slide count, chapter count, and special slides with user
 - Write `storyline.md`: narrative flow, chapter structure table, key takeaways
-- Write `slide_deck.md`: per-slide title, type, bullets, right-panel spec, **and image fields** (see Output Format)
+- Write `slide_deck.md`: per-slide title, type, bullets, right-panel spec, **narration script**, **and image fields** (see Output Format)
 - Run **Cover/Divider Confirmation** before finalizing structure (see Confirmation Flow below)
 - Self-review balance before handing off: chapter counts, bullets per slide, visual density
 - Request Gate 2 user approval before advancing to Design Agent
@@ -196,6 +196,35 @@ When `image_role` is `diagram` or `chart`, add a `visual_spec` block. This is co
 
 Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 
+### slide_deck.md — Narration Script (per slide)
+
+Every slide entry in `slide_deck.md` MUST include a **`script`** field containing the speaker narration text for that slide. This enables the HTML viewer's TTS auto-play feature (Web Speech API) which reads the script aloud and auto-advances slides.
+
+```markdown
+## Slide 03 — AI의 한계
+
+- **type**: standard
+- **script**: "이 슬라이드에서는 현재 AI 기술이 가진 한계점을 살펴보겠습니다. 첫째, 데이터 의존성 문제가 있습니다..."
+- bullets: ...
+```
+
+**`script` field rules:**
+- **Required** for every slide — no exceptions
+- Write in the lecture's primary language (Korean for `language: ko`, English for `language: en`)
+- 2-4 sentences, natural spoken style — this text will be read aloud by TTS
+- Include transitional cues between slides for natural flow
+
+**Multi-language narration (optional):**
+If `lecture-profile.md` contains a `narration.languages` list with more than one language, generate additional script fields:
+
+| Field | Language | Example |
+|-------|----------|---------|
+| `script` | Primary (always) | Korean narration for `language: ko` lectures |
+| `scriptEn` | English | English translation of the narration |
+| `scriptJa` | Japanese | Japanese translation of the narration |
+
+Only generate language-specific fields for languages listed in `narration.languages`. The primary `script` field is always required regardless of narration settings.
+
 ## Constraints
 
 - Do not start without reading `research_notes.md` (if it exists)
@@ -205,6 +234,8 @@ Full templates and Korean examples: see `skills/storyline/SKILL.md`.
 - No slide should exceed 4 bullets (5 is the hard limit, 3 is ideal)
 - No more than 3 consecutive slides without visuals (`image_role: none`)
 - Every slide MUST have `image_role`, `image_query`, and `image_license` fields
+- Every slide MUST have a `script` field with speaker narration text (for TTS auto-play)
+- If `lecture-profile.md` has `narration.languages`, generate `scriptEn`/`scriptJa` as needed
 - `image_query` must be in English — even for Korean-language lectures
 - Always call Version Agent before editing either file
 

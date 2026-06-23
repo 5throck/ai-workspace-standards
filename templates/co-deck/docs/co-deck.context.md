@@ -158,8 +158,9 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), Escape (close) |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + nav buttons |
+| **NarrationEngine (TTS)** | **Web Speech API — reads `slideData[i].script` aloud, auto-advances slides in auto mode, supports ko/en/ja multi-language narration** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (auto/manual mode), Escape (close/stop narration) |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language, play, auto)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 
@@ -183,7 +184,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer) [PPT themes only]
+2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer, narration) [PPT themes only]
 3. themes/<theme>/theme.css           — per-theme extension
 4. styles/<style>/style.css           — per-style visual overrides
 ```
@@ -504,4 +505,4 @@ slideData[i].visualImage = "images/<stem>.png"
 
 ---
 
-*co-deck.context.md version: 3.0 — updated 2026-06-23: PPT transformation — notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); all PPT themes compatible with all 5 styles (visual-heavy: partial); compatibility matrix updated; lecture profile theme options updated. Previous: v2.9 — updated 2026-06-23: backport from co-deck2 instance — `gen-slides-pdf.ts` v1.4.0 (placeImageCover cover-crop, `layout_overrides` fonts/line_heights parser fix, wrapping-aware divider centering, Pretendard→MaruBuri font fallback); `gen-visual-images.ts` v3.0.1 (absent-`visual` target filter); stale version refs fixed (`gen-slides-pdf.ts` v1.2.0→v1.4.0; `gen-visual-images.ts` v2.1.0/v3.0.0→v3.0.1); `agents/pdf-export.md` v1.1.0 documents the new PDF-fitting levers.*
+*co-deck.context.md version: 3.1 — updated 2026-06-23: NarrationEngine TTS auto-play added to PPT engine (Web Speech API, ko/en/ja multi-language, auto/manual mode, keyboard shortcuts P/A); storyline agent mandates `script` field per slide; lecture-profile.md gains `narration` config section. Previous: v3.0 — updated 2026-06-23: PPT transformation — notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); all PPT themes compatible with all 5 styles (visual-heavy: partial); compatibility matrix updated; lecture profile theme options updated. Previous: v2.9 — updated 2026-06-23: backport from co-deck2 instance — `gen-slides-pdf.ts` v1.4.0 (placeImageCover cover-crop, `layout_overrides` fonts/line_heights parser fix, wrapping-aware divider centering, Pretendard→MaruBuri font fallback); `gen-visual-images.ts` v3.0.1 (absent-`visual` target filter); stale version refs fixed (`gen-slides-pdf.ts` v1.2.0→v1.4.0; `gen-visual-images.ts` v2.1.0/v3.0.0→v3.0.1); `agents/pdf-export.md` v1.1.0 documents the new PDF-fitting levers.*

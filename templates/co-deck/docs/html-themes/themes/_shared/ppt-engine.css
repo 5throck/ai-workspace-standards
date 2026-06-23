@@ -348,3 +348,13 @@ body {
 .presenter-timer.running {
   color: var(--accent-color, #D97706);
 }
+
+/* ─── NarrationEngine: speaking pulse animation ───────────────────── */
+.footer-btn.speaking {
+  animation: speak-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes speak-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
+}

@@ -1,12 +1,13 @@
 /*
   ppt-engine.js — PPT-style common runtime engine
-  ===============================================
+  ================================================
   Shared JavaScript for all PPT-transformed themes. Inlined into each template.html.
   Provides:
     - ThumbnailRenderer: CSS-transform based slide thumbnails (no library needed)
     - TransitionEngine: fade / push / zoom transitions with direction awareness
     - PresenterTools: speaker script panel + presentation timer
     - ThumbnailNav: left sidebar thumbnail panel with highlight + toggle
+    - NarrationEngine: Web Speech API TTS narration with auto-advance
 
   Usage in template.html:
     1. Include this script block after slideData injection
@@ -245,6 +246,268 @@ var PresenterTools = {
   }
 };
 
+// ── NarrationEngine ───────────────────────────────────────────────────
+// Web Speech API TTS narration with auto-advance support.
+// Reads slideData[i].script (or language-specific variant) aloud.
+// Supports auto mode (speech end -> next slide) and manual mode.
+
+var NarrationEngine = {
+  isPlaying: false,
+  isAutoMode: true,
+  language: 'ko',
+  currentUtterance: null,
+  _available: false,
+  _voicesLoaded: false,
+
+  LANG_LABELS: { ko: 'KR', en: 'EN', ja: 'JA' },
+  LANG_NAMES: { ko: 'Korean', en: 'English', ja: 'Japanese' },
+  LANG_CYCLE: ['ko', 'en', 'ja'],
+  LANG_VOICE_MAP: {
+    ko: ['ko-KR', 'ko_KR', 'korean'],
+    en: ['en-US', 'en-GB', 'en_AU', 'english'],
+    ja: ['ja-JP', 'ja_JP', 'japanese']
+  },
+
+  init: function() {
+    this._available = ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined');
+    if (!this._available) {
+      // Hide all narration UI
+      var els = ['narration-play-btn', 'narration-auto-btn', 'voice-lang-btn'];
+      els.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      return;
+    }
+
+    var self = this;
+
+    // Load voices — some browsers load them asynchronously
+    function loadVoices() {
+      var voices = speechSynthesis.getVoices();
+      if (voices.length > 0) self._voicesLoaded = true;
+    }
+
+    loadVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // Chrome bug workaround: speechSynthesis can pause after ~15s of inactivity.
+    // Keep it alive with a periodic no-op utterance.
+    setInterval(function() {
+      if (!self._available) return;
+      if (!speechSynthesis.speaking && !speechSynthesis.paused) {
+        var u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        u.rate = 10;
+        speechSynthesis.speak(u);
+      }
+    }, 14000);
+
+    this._updateButtonStates();
+  },
+
+  getScript: function(index) {
+    var data = typeof slideData !== 'undefined' ? slideData[index] : null;
+    if (!data) return '';
+
+    if (this.language === 'en' && data.scriptEn) return data.scriptEn;
+    if (this.language === 'ja' && data.scriptJa) return data.scriptJa;
+    return data.script || '';
+  },
+
+  _findVoice: function(lang) {
+    var voices = speechSynthesis.getVoices();
+    var candidates = this.LANG_VOICE_MAP[lang] || [];
+    for (var c = 0; c < candidates.length; c++) {
+      for (var v = 0; v < voices.length; v++) {
+        if (voices[v].lang === candidates[c]) return voices[v];
+      }
+    }
+    // Fallback: find any voice whose lang starts with the language code
+    var prefix = lang.split('-')[0];
+    for (var v2 = 0; v2 < voices.length; v2++) {
+      if (voices[v2].lang.indexOf(prefix) === 0) return voices[v2];
+    }
+    return null; // use default
+  },
+
+  _speak: function(index) {
+    if (!this._available) return;
+    var text = this.getScript(index);
+    if (!text) {
+      // No script for this slide — skip in auto mode
+      if (this.isAutoMode) {
+        var slides = document.querySelectorAll('.slide');
+        if (index < slides.length - 1) {
+          var self = this;
+          setTimeout(function() { changeSlide(1); }, 200);
+        } else {
+          this.stop();
+        }
+      }
+      return;
+    }
+
+    speechSynthesis.cancel();
+
+    var self = this;
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = this.language;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    var voice = this._findVoice(this.language);
+    if (voice) utterance.voice = voice;
+
+    utterance.onstart = function() {
+      self._updateButtonStates();
+      var playBtn = document.getElementById('narration-play-btn');
+      if (playBtn) playBtn.classList.add('speaking');
+    };
+
+    utterance.onend = function() {
+      var playBtn = document.getElementById('narration-play-btn');
+      if (playBtn) playBtn.classList.remove('speaking');
+      self._onSpeechEnd();
+    };
+
+    utterance.onerror = function(e) {
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      var playBtn = document.getElementById('narration-play-btn');
+      if (playBtn) playBtn.classList.remove('speaking');
+      self.stop();
+    };
+
+    this.currentUtterance = utterance;
+    speechSynthesis.speak(utterance);
+  },
+
+  _onSpeechEnd: function() {
+    if (!this.isPlaying) return;
+    var slides = document.querySelectorAll('.slide');
+    if (this.isAutoMode && currentSlide < slides.length - 1) {
+      var self = this;
+      setTimeout(function() { changeSlide(1); }, 800);
+    } else if (!this.isAutoMode) {
+      // Manual mode — wait for user to advance
+      this.isPlaying = false;
+      this._updateButtonStates();
+    } else {
+      // Last slide reached in auto mode
+      this.stop();
+    }
+  },
+
+  _onSlideChanged: function(index) {
+    // Called when slide changes during playback
+    speechSynthesis.cancel();
+    if (this.isPlaying) {
+      var self = this;
+      setTimeout(function() { self._speak(index); }, 50);
+    }
+  },
+
+  play: function() {
+    if (!this._available) return;
+
+    if (speechSynthesis.paused) {
+      // Resume from pause
+      speechSynthesis.resume();
+      this.isPlaying = true;
+      this._updateButtonStates();
+      return;
+    }
+
+    this.isPlaying = true;
+    this._speak(currentSlide);
+  },
+
+  pause: function() {
+    if (!this._available || !this.isPlaying) return;
+    speechSynthesis.pause();
+    // isPlaying stays true — indicates paused state
+    this._updateButtonStates();
+  },
+
+  stop: function() {
+    if (!this._available) return;
+    speechSynthesis.cancel();
+    this.isPlaying = false;
+    var playBtn = document.getElementById('narration-play-btn');
+    if (playBtn) playBtn.classList.remove('speaking');
+    this._updateButtonStates();
+  },
+
+  togglePlay: function() {
+    if (!this._available) return;
+    if (this.isPlaying && !speechSynthesis.paused) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  },
+
+  toggleAuto: function() {
+    this.isAutoMode = !this.isAutoMode;
+    this._updateButtonStates();
+  },
+
+  cycleLanguage: function() {
+    var idx = this.LANG_CYCLE.indexOf(this.language);
+    this.language = this.LANG_CYCLE[(idx + 1) % this.LANG_CYCLE.length];
+    var btn = document.getElementById('voice-lang-btn');
+    if (btn) btn.textContent = this.LANG_LABELS[this.language];
+    // If currently playing, restart with new language
+    if (this.isPlaying) {
+      speechSynthesis.cancel();
+      var self = this;
+      setTimeout(function() { self._speak(currentSlide); }, 50);
+    }
+  },
+
+  setLanguage: function(lang) {
+    if (this.LANG_CYCLE.indexOf(lang) === -1) return;
+    this.language = lang;
+    var btn = document.getElementById('voice-lang-btn');
+    if (btn) btn.textContent = this.LANG_LABELS[this.language];
+    if (this.isPlaying) {
+      speechSynthesis.cancel();
+      var self = this;
+      setTimeout(function() { self._speak(currentSlide); }, 50);
+    }
+  },
+
+  _updateButtonStates: function() {
+    var playBtn = document.getElementById('narration-play-btn');
+    var autoBtn = document.getElementById('narration-auto-btn');
+    var langBtn = document.getElementById('voice-lang-btn');
+
+    if (playBtn) {
+      if (this.isPlaying && !speechSynthesis.paused) {
+        playBtn.textContent = 'Pause';
+        playBtn.classList.add('active');
+      } else if (this.isPlaying && speechSynthesis.paused) {
+        playBtn.textContent = 'Play';
+        playBtn.classList.remove('active');
+      } else {
+        playBtn.textContent = 'Play';
+        playBtn.classList.remove('active');
+      }
+    }
+
+    if (autoBtn) {
+      autoBtn.textContent = this.isAutoMode ? 'Auto' : 'Manual';
+      autoBtn.classList.toggle('active', this.isAutoMode);
+    }
+
+    if (langBtn) {
+      langBtn.textContent = this.LANG_LABELS[this.language];
+    }
+  }
+};
+
 // ── ThumbnailNav ───────────────────────────────────────────────────────
 // Toggle the thumbnail panel visibility.
 
@@ -297,6 +560,11 @@ function showSlide(index) {
   PresenterTools.updateScript(index);
   ThumbnailRenderer.highlight(index);
 
+  // Notify NarrationEngine of slide change
+  if (NarrationEngine._available && NarrationEngine.isPlaying) {
+    NarrationEngine._onSlideChanged(index);
+  }
+
   // Clean up transition classes after animation completes
   var dur = TransitionEngine.mode === 'fade' ? 550 : 550;
   setTimeout(function() { TransitionEngine.cleanup(); }, dur);
@@ -308,6 +576,9 @@ function changeSlide(delta) {
 
 // ── Keyboard shortcuts ──────────────────────────────────────────────────
 document.addEventListener('keydown', function(e) {
+  // Don't capture if user is typing in an input
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
@@ -317,14 +588,20 @@ document.addEventListener('keydown', function(e) {
     changeSlide(-1);
   }
   if (e.key === 'Escape') {
-    // Close any open overlays
-    var panel = document.getElementById('script-panel');
-    if (panel && panel.classList.contains('show')) {
-      PresenterTools.toggleScript();
+    // Stop narration first, then close overlays
+    if (NarrationEngine._available && NarrationEngine.isPlaying) {
+      NarrationEngine.stop();
+    } else {
+      var panel = document.getElementById('script-panel');
+      if (panel && panel.classList.contains('show')) {
+        PresenterTools.toggleScript();
+      }
     }
   }
   if (e.key === 's' || e.key === 'S') PresenterTools.toggleScript();
   if (e.key === 't' || e.key === 'T') ThumbnailNav.toggle();
+  if (e.key === 'p' || e.key === 'P') NarrationEngine.togglePlay();
+  if (e.key === 'a' || e.key === 'A') NarrationEngine.toggleAuto();
 });
 
 // ── PPT Init (call from each theme's DOMContentLoaded) ──────────────────
@@ -360,4 +637,7 @@ function initPPT(options) {
       ThumbnailRenderer.init(slideData, 'thumbnail-panel');
     }
   });
+
+  // Initialize narration engine
+  NarrationEngine.init();
 }

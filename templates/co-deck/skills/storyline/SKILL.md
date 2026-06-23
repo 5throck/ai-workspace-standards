@@ -83,6 +83,7 @@ Write per-slide content. This file becomes the direct input for HTML generation.
 
 **Section**: [section name shown in header]
 **Type**: cover / speaker intro / divider / standard / contact
+**Script**: [Speaker narration text — 2-4 sentences, natural spoken style. Required for every slide.]
 
 ### Content
 - Bullet 1
@@ -122,6 +123,8 @@ Self-review after writing both files:
 - Are slide counts balanced across chapters (within ±20%)?
 - Any slides with too many bullets? (4 max recommended, 5 is hard limit)
 - No more than 3 consecutive slides without visuals?
+- Does every slide have a `script` field with narration text?
+- If multi-language narration is requested, do translated script fields exist?
 
 ---
 

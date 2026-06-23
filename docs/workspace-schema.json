@@ -130,6 +130,7 @@
       "test-proj3",
       "co-develop",
       ".agent",
+      ".agents",
       ".opencode",
       ".openchrome",
       ".playwright-mcp",
