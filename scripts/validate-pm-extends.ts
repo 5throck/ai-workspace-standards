@@ -7,7 +7,7 @@
  * Validates pm.md extends chains for correctness and compliance.
  * Implements validation rules from ADR-0033.
  *
- * @version 0.2.1
+ * @version 0.3.0
  * @author automation-engineer
  *
  * Usage:
@@ -36,6 +36,7 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname, resolve } from 'node:path';
+import { execSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 
 /**
@@ -463,14 +464,42 @@ function validatePmFile(filePath: string, workspaceRoot: string, options: Valida
 }
 
 /**
- * Find all pm.md files in workspace
+ * Find all pm.md files in workspace.
+ *
+ * Uses `git ls-files` to resolve only git-tracked files, so untracked
+ * directories (test projects, generated output) are automatically excluded.
+ * Falls back to filesystem scan if git is unavailable (CI edge cases).
  */
 function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
   if (targetPaths && targetPaths.length > 0) {
     return targetPaths.filter(p => existsSync(p));
   }
 
+  // Primary: use git ls-files to get only tracked pm.md files
+  try {
+    const trackedFiles = execSync('git ls-files -- "*/pm.md" "**/pm.md" "pm.md"', {
+      cwd: workspaceRoot,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+
+    if (trackedFiles.length > 0) {
+      return trackedFiles
+        .split('\n')
+        .filter(Boolean)
+        .map(f => resolve(workspaceRoot, f))
+        .filter(f => existsSync(f));
+    }
+  } catch {
+    // git unavailable — fall through to filesystem scan
+  }
+
+  // Fallback: filesystem scan (only in templates/ and agents/ + root)
   const pmFiles: string[] = [];
+  const scanDirs = [
+    join(workspaceRoot, 'agents'),
+    join(workspaceRoot, 'templates'),
+  ];
 
   function scanDirectory(dir: string) {
     try {
@@ -480,7 +509,6 @@ function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
         const fullPath = join(dir, entry.name);
 
         if (entry.isDirectory()) {
-          // Skip node_modules and .git
           if (entry.name !== 'node_modules' && entry.name !== '.git') {
             scanDirectory(fullPath);
           }
@@ -488,12 +516,15 @@ function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
           pmFiles.push(fullPath);
         }
       }
-    } catch (error) {
+    } catch {
       // Skip directories we can't read
     }
   }
 
-  scanDirectory(workspaceRoot);
+  for (const dir of scanDirs) {
+    if (existsSync(dir)) scanDirectory(dir);
+  }
+
   return pmFiles;
 }
 

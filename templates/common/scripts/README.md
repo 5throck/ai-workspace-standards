@@ -145,7 +145,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-scripts.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validate-pm-extends.ts` | L0 | 0.2.1 | active | —| —| L0+L1 | —|
+| `validate-pm-extends.ts` | L0 | 0.3.0 | active | —| —| L0+L1 | —|
 
 ---
 

@@ -383,6 +383,75 @@ git revert <phase-2-commits>
 git cherry-pick <phase-1-commit>
 ```
 
+## Variant pm.md Frontmatter Schema
+
+Since ADR-0048 (June 2026), all variant pm.md files follow a frontmatter-only extends pattern. The schema defines **required** and **optional** fields.
+
+### Schema Definition
+
+| Field | Required | Level | Description |
+|-------|----------|-------|-------------|
+| `extends` | **Yes** | L1, L2 | Path to parent pm.md (`../../common/agents/pm.md` for L2, `../../../agents/pm.md` for L1) |
+| `name` | **Yes** | All | Agent identifier (always `pm`) |
+| `variant` | **Yes** | L2 only | Variant identifier (`co-deck`, `co-work`, etc.) |
+| `version` | **Yes** | All | Semver version string (e.g. `"1.1.0"`) |
+| `last_updated` | **Yes** | All | ISO date (e.g. `"2026-06-23"`) |
+| `formal_name` | No | L0, L1 | Human-readable name |
+| `status` | No | All | `active` / `deprecated` / `draft` |
+| `tier` | No | L0, L1 | Per-platform model tier mapping (`claude`, `gemini`, `antigravity`, `gemini-cli`) |
+| `model` | No | L0, L1 | Model override strategy (`inherit` or explicit model name) |
+| `color` | No | L0, L1 | Display color for tool UI |
+| `description` | No | L0, L1 | Agent description with trigger phrases |
+| `examples` | No | L0, L1 | Usage example pairs (`user` / `assistant`) |
+| `role` | No | L0 | Role classification (e.g. `orchestrator`) |
+| `lifecycle` | No | L0 | Lifecycle metadata (phase, created, last_updated, governance path) |
+
+### Inheritance Rules
+
+The L2→L1→L0 extends chain resolves as follows:
+1. **L2 frontmatter** fields are read first
+2. **L1 frontmatter** fields are read and merged (L2 values take priority for duplicate keys)
+3. **L0 frontmatter** fields are the base (L1 values take priority for duplicate keys)
+
+**Body content**: If L2 has no body (frontmatter-only), the resolved body comes from L1 → L0. If L2 has any body content, it **completely replaces** the entire parent chain body.
+
+### Usage Patterns
+
+**Minimal pattern** (all current variants use this):
+```yaml
+---
+extends: ../../common/agents/pm.md
+name: pm
+variant: co-deck
+version: "1.1.0"
+last_updated: "2026-06-23"
+---
+```
+
+**Rich pattern** (for variants needing custom description/examples):
+```yaml
+---
+extends: ../../common/agents/pm.md
+name: pm
+variant: co-example
+version: "1.0.0"
+last_updated: "2026-06-23"
+description: >-
+  Custom variant PM description. Use when: "specific trigger phrase"
+examples:
+  - user: "Start co-example workflow"
+    assistant: "I'll begin the co-example pipeline..."
+---
+```
+
+> **Note**: Both patterns are valid. Use the minimal pattern when L1 common defaults are sufficient. Use the rich pattern only when variant-specific override is needed.
+
+### Validation
+
+- `validate-pm-extends.ts` scans only git-tracked `pm.md` files (untracked test projects are auto-excluded)
+- Required fields (`extends`, `name`, `variant`, `version`, `last_updated`) are not yet enforced by the validator — only extends chain correctness is checked
+- `audit.ts` verifies L0→L1→L2 alignment and pm.md consistency
+
 ## Implementation Checklist
 
 ### Phase 1 Checklist
@@ -494,11 +563,12 @@ git cherry-pick <phase-1-commit>
 ### Impact on Existing Variants
 
 **Affected Variants**:
-- `templates/co-design/agents/pm.md`
-- `templates/co-work/agents/pm.md`
-- `templates/co-consult/agents/pm.md`
-- `templates/co-develop/agents/pm.md`
-- `templates/co-security/agents/pm.md`
+- `templates/co-deck/agents/pm.md` (migrated ADR-0048 — domain orchestration moved to AGENTS.md §4.2)
+- `templates/co-design/agents/pm.md` (migrated ADR-0047)
+- `templates/co-work/agents/pm.md` (migrated ADR-0047)
+- `templates/co-consult/agents/pm.md` (already frontmatter-only)
+- `templates/co-develop/agents/pm.md` (already frontmatter-only)
+- `templates/co-security/agents/pm.md` (already frontmatter-only)
 
 **Changes Required**:
 1. Add frontmatter `extends` field
@@ -834,9 +904,16 @@ git cherry-pick <phase-2-commit-hash>
 - **Solution**: Check extends resolution logic is consistent
 - **Verification**: Run platform parity test suite
 
+**Issue 6: "validate-pm-extends scans untracked test projects"**
+- **Cause**: `findPmFiles()` previously scanned entire workspace filesystem
+- **Solution**: `validate-pm-extends.ts` now uses `git ls-files` to scan only git-tracked pm.md files. Untracked directories (test projects, generated output) are automatically excluded. Fallback filesystem scan is scoped to `agents/` and `templates/` only.
+- **Verification**: Run `bun scripts/validate-pm-extends.ts` — should show 0 errors if all tracked files are valid
+
 ## Related Documentation
 
 - [ADR-0039: L0→L1→L2 Hierarchy and Extends Implementation](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)
+- [ADR-0047: Variant PM Extends Redundant Body Cleanup](../adr/0047-variant-pm-extends-redundant-body-cleanup.md)
+- [ADR-0048: Variant PM Architecture — AGENTS.md as Workflow SSOT](../adr/0048-variant-pm-agents-md-workflow-ssot.md)
 - [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md)
 - [Variant PM Specification](../templates/variant-pm-spec.md)
 - [Scaffold Script Documentation](../scripts/create-l2-scaffold.ts)
