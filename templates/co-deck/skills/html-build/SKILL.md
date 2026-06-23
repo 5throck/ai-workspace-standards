@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: 1.4.0
+version: 1.5.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -10,7 +10,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-06-21
+last_reviewed: 2026-06-24
 prerequisites: design
 ---
 
@@ -40,9 +40,10 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 ```javascript
 // Cover
 { isTitleSlide: true, section: "", title: "강연 제목", subtitle: "부제목",
-  meta: "날짜 | 주최", visualImage: "../assets/images/lecture-hall-professional.jpg" }
+  meta: "날짜 | 주최", visualImage: "../assets/images/lecture-hall-professional.jpg",
+  backgroundImage: "../assets/images/bg-deck.jpg" }
 
-// Speaker intro
+// Speaker intro (visualImage → portrait avatar on profile slides)
 { isProfileSlide: true, section: "INTRODUCTION", title: "강연자 소개",
   speakerName: "이름", speakerTitle: "직책 / 소속", speakerBio: "약력 (2-3줄)",
   visualImage: "../assets/images/speaker-portrait.jpg" }
@@ -50,18 +51,30 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 // Divider (part break)
 { isDividerSlide: true, section: "섹션명", partNum: "PART 01",
   title: "파트 제목", desc: "이 파트에서 다룰 내용 한 줄 요약",
-  visualImage: "../assets/images/ai-transformation-abstract.jpg" }
+  visualImage: "../assets/images/ai-transformation-abstract.jpg",
+  backgroundImage: "../assets/images/bg-deck.jpg" }
 
-// Standard slide
+// Standard slide (image)
 { section: "섹션명", title: "슬라이드 제목",
   bullets: ["불릿 1", "불릿 2", "불릿 3"],
   visualImage: "../assets/images/data-analysis-dashboard.jpg" }
-  // or text panel: visualTitle: "오른쪽 패널 제목", visualDisplay: "패널 본문"
+
+// Standard slide (text panel — structured visualDisplay)
+// visualDisplay supports structured rendering via renderVisualDisplay():
+//   [Box Title]  → .visual-heading (bold, accented)
+//   ✓ / → / •    → .visual-item .visual-item-check (list marker)
+//   (default)    → .visual-paragraph (normal text)
+{ section: "섹션명", title: "슬라이드 제목",
+  bullets: ["불릿 1", "불릿 2"],
+  visualTitle: "핵심 포인트", visualDisplay: "[현재 상황]\n✓ 항목 1\n✓ 항목 2\n\n[개선 방향]\n→ 방향 1\n→ 방향 2" }
 
 // Contact (last slide)
 { isContactSlide: true, section: "CLOSING", title: "감사합니다",
   contactEmail: "email@example.com", contactLinkedIn: "linkedin.com/in/...",
   contactPhone: "010-XXXX-XXXX" }
+
+// Punchline (impactful closing)
+{ isPunchlineSlide: true, section: "", title: "핵심 메시지" }
 ```
 
 Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
@@ -72,7 +85,15 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-Available themes: `notebook | pitch | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
+Available themes: `notebook | pitch | pitch-enhanced | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
+
+**Theme capabilities:**
+- All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
+- `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
+- `notebook`, `scroll`, `slideshow` use `slide-card` (content + right-panel) for standard slides.
+- `pitch-enhanced`, `notebook`, `scroll`, `slideshow` support PPT features (thumbnails, transitions, timer, speaker notes, TTS).
+- `pitch` uses its own layout (TOC drawer, no thumbnails, no transitions).
+- `visual-heavy` style uses `--slide-bg-image` CSS variable for full-bleed background images.
 
 **Narration config injection** (from `lecture-profile.md` → `narration` section):
 Read the `narration` block from `lecture-profile.md` and inject a `narrationConfig` object into the `initPPT()` call. This bridges lecture profile settings to the runtime NarrationEngine:

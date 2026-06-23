@@ -16,16 +16,6 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "teammateMode": "auto",
-  "mcpServers": {
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "@colbymchenry/codegraph@1.0.1",
-        "serve",
-        "--mcp"
-      ]
-    }
-  },
   "hooks": {
     "SessionStart": [
       {
