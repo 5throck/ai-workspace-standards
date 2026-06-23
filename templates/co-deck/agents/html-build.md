@@ -41,7 +41,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language` fields
+- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)

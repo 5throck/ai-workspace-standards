@@ -358,3 +358,61 @@ body {
   0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
   50% { box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
 }
+
+/* ─── NarrationEngine v2.0: dropdown menus ───────────────────────── */
+.narration-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.voice-lang-dropdown,
+.voice-select-dropdown {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 140px;
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.voice-lang-dropdown.show,
+.voice-select-dropdown.show {
+  display: block;
+}
+
+.voice-lang-option,
+.voice-option {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--text-muted, rgba(255,255,255,0.7));
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.voice-lang-option:hover,
+.voice-option:hover {
+  background: var(--accent-color, #D97706);
+  color: #fff;
+}
+
+.voice-lang-option.active,
+.voice-option.active {
+  color: var(--accent-color, #D97706);
+  font-weight: 600;
+}
+
+.voice-lang-option.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}

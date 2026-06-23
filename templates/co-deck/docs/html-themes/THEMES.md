@@ -45,9 +45,9 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine (TTS)** | **Web Speech API — reads `slideData[i].script` aloud, auto-advances slides in auto mode, supports ko/en/ja multi-language narration** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (auto/manual mode), Escape (close/stop narration) |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language, play, auto)** + nav buttons |
+| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 

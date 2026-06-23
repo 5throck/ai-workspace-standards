@@ -95,12 +95,20 @@ dividers:
   mode: auto
 
 # ── Narration (TTS auto-play) settings ───────────────────────────
-# Controls the Web Speech API narration feature in the HTML viewer.
+# Controls the Web Speech API narration and auto-advance features in the HTML viewer.
 # The storyline agent generates a `script` field for every slide regardless.
 narration:
-  # Whether to enable the TTS play button in the HTML viewer
+  # Whether to enable the TTS narration play button in the HTML viewer
   # Options: true | false (default: true)
   enabled: true
+  # Whether to enable automatic slide advancement (independent of narration)
+  # When true, slides advance automatically at the configured interval.
+  # Options: true | false (default: false)
+  autoAdvance: false
+  # Interval for auto-advance when narration is NOT playing (seconds)
+  # When narration IS playing, slides advance after narration ends (~800ms).
+  # Options: integer (default: 5)
+  autoAdvanceInterval: 5
   # Languages for which to generate translated narration scripts.
   # The primary language (from `language` field) always gets a `script` field.
   # Additional languages generate `scriptEn`, `scriptJa`, etc.

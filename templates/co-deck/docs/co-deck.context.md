@@ -158,9 +158,9 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine (TTS)** | **Web Speech API — reads `slideData[i].script` aloud, auto-advances slides in auto mode, supports ko/en/ja multi-language narration** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (auto/manual mode), Escape (close/stop narration) |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language, play, auto)** + nav buttons |
+| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 
@@ -506,4 +506,4 @@ slideData[i].visualImage = "images/<stem>.png"
 
 ---
 
-*co-deck.context.md version: 3.2 — updated 2026-06-23: File encoding standard enforced — all co-deck files UTF-8 without BOM + LF line endings; html-themes/ 36 files normalized CRLF→LF; .gitattributes added for HTML/CSS/JS/JSON eol=lf; html-build agent/skill gain UTF-8 output constraints; THEMES.md File Encoding Standard section added. Previous: v3.1 — updated 2026-06-23: NarrationEngine TTS auto-play added to PPT engine (Web Speech API, ko/en/ja multi-language, auto/manual mode, keyboard shortcuts P/A); storyline agent mandates `script` field per slide; lecture-profile.md gains `narration` config section.*
+*co-deck.context.md version: 3.3 — updated 2026-06-23: NarrationEngine v2.0 — independent narration/auto-advance toggles (4 combinations); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via narrationConfig; footer UI updated in all 4 PPT themes (dropdowns replace toggle buttons); THEMES.md and co-deck.context.md feature tables updated. Previous: v3.2 — updated 2026-06-23: File encoding standard enforced — all co-deck files UTF-8 without BOM + LF line endings; html-themes/ 36 files normalized CRLF→LF; .gitattributes added for HTML/CSS/JS/JSON eol=lf; html-build agent/skill gain UTF-8 output constraints; THEMES.md File Encoding Standard section added.*

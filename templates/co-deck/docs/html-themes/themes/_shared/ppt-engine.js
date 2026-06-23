@@ -246,33 +246,69 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine ───────────────────────────────────────────────────
-// Web Speech API TTS narration with auto-advance support.
+// ── NarrationEngine v2.0 ───────────────────────────────────────────────
+// Web Speech API TTS narration with independent auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
-// Supports auto mode (speech end -> next slide) and manual mode.
+//
+// State separation:
+//   isPlaying / isPaused  →  narration (speech synthesis)
+//   isAutoAdvance         →  auto-slide timer (independent from narration)
+//
+// 4 combinations:
+//   Both ON  — narration drives slide timing (onend → next slide)
+//   Narrator only — stops after each slide, waits for user
+//   Auto-slide only — timer-driven slide advance (default 5s interval)
+//   Both OFF — fully manual navigation
+//
+// Config bridge: lecture-profile.md → html-build injects narrationConfig
+//   → initPPT({ narration: narrationConfig }) → NarrationEngine.init(config)
+//
+// Voice selection: dropdown filtered by language, persisted in localStorage.
 
 var NarrationEngine = {
+  // Narration state
   isPlaying: false,
-  isAutoMode: true,
-  language: 'ko',
+  isPaused: false,
   currentUtterance: null,
+
+  // Auto-advance state (completely independent from narration)
+  isAutoAdvance: false,
+  _autoAdvanceTimer: null,
+  _autoAdvanceInterval: 5000, // ms
+
+  // Language & voice
+  language: 'ko',
+
+  // Internal
   _available: false,
   _voicesLoaded: false,
+  _config: null,
 
-  LANG_LABELS: { ko: 'KR', en: 'EN', ja: 'JA' },
-  LANG_NAMES: { ko: 'Korean', en: 'English', ja: 'Japanese' },
-  LANG_CYCLE: ['ko', 'en', 'ja'],
-  LANG_VOICE_MAP: {
-    ko: ['ko-KR', 'ko_KR', 'korean'],
-    en: ['en-US', 'en-GB', 'en_AU', 'english'],
-    ja: ['ja-JP', 'ja_JP', 'japanese']
+  // Extensible language registry (add new languages here)
+  LANGUAGES: {
+    ko: { label: '한국어', shortLabel: 'KR', voicePrefix: 'ko' },
+    en: { label: 'English', shortLabel: 'EN', voicePrefix: 'en' },
+    ja: { label: '日本語', shortLabel: 'JA', voicePrefix: 'ja' }
   },
 
-  init: function() {
+  init: function(config) {
     this._available = ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined');
+    this._config = config || {};
+
+    // Apply config defaults
+    if (this._config.autoAdvance) {
+      this.isAutoAdvance = true;
+    }
+    if (this._config.autoAdvanceInterval) {
+      this._autoAdvanceInterval = this._config.autoAdvanceInterval * 1000;
+    }
+    if (this._config.defaultLanguage && this.LANGUAGES[this._config.defaultLanguage]) {
+      this.language = this._config.defaultLanguage;
+    }
+
     if (!this._available) {
       // Hide all narration UI
-      var els = ['narration-play-btn', 'narration-auto-btn', 'voice-lang-btn'];
+      var els = ['narration-play-btn', 'narration-auto-advance-btn', 'voice-lang-btn', 'voice-select-btn'];
       els.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -285,7 +321,11 @@ var NarrationEngine = {
     // Load voices — some browsers load them asynchronously
     function loadVoices() {
       var voices = speechSynthesis.getVoices();
-      if (voices.length > 0) self._voicesLoaded = true;
+      if (voices.length > 0) {
+        self._voicesLoaded = true;
+        self._buildLanguageDropdown();
+        self._updateVoiceDropdown();
+      }
     }
 
     loadVoices();
@@ -305,6 +345,16 @@ var NarrationEngine = {
       }
     }, 14000);
 
+    // Build dropdown UI
+    this._buildLanguageDropdown();
+    this._updateVoiceDropdown();
+    this._bindOutsideClick();
+
+    // Start auto-advance timer if enabled
+    if (this.isAutoAdvance) {
+      this._startAutoAdvanceTimer();
+    }
+
     this._updateButtonStates();
   },
 
@@ -317,28 +367,45 @@ var NarrationEngine = {
     return data.script || '';
   },
 
-  _findVoice: function(lang) {
+  // ── Voice selection ───────────────────────────────────────────────
+
+  _getVoicesForLanguage: function(lang) {
     var voices = speechSynthesis.getVoices();
-    var candidates = this.LANG_VOICE_MAP[lang] || [];
-    for (var c = 0; c < candidates.length; c++) {
-      for (var v = 0; v < voices.length; v++) {
-        if (voices[v].lang === candidates[c]) return voices[v];
+    var prefix = this.LANGUAGES[lang] ? this.LANGUAGES[lang].voicePrefix : lang;
+    return voices.filter(function(v) {
+      return v.lang.indexOf(prefix) === 0;
+    });
+  },
+
+  _findVoice: function(lang) {
+    // Check localStorage first
+    var savedVoice = localStorage.getItem('narration_voice_' + lang);
+    if (savedVoice) {
+      var voices = speechSynthesis.getVoices();
+      for (var i = 0; i < voices.length; i++) {
+        if (voices[i].name === savedVoice && voices[i].lang.indexOf(lang) === 0) {
+          return voices[i];
+        }
       }
     }
-    // Fallback: find any voice whose lang starts with the language code
-    var prefix = lang.split('-')[0];
-    for (var v2 = 0; v2 < voices.length; v2++) {
-      if (voices[v2].lang.indexOf(prefix) === 0) return voices[v2];
+
+    // BCP47 candidate matching
+    var prefix = this.LANGUAGES[lang] ? this.LANGUAGES[lang].voicePrefix : lang;
+    var voices = speechSynthesis.getVoices();
+    for (var v = 0; v < voices.length; v++) {
+      if (voices[v].lang.indexOf(prefix) === 0) return voices[v];
     }
     return null; // use default
   },
+
+  // ── Speech synthesis ──────────────────────────────────────────────
 
   _speak: function(index) {
     if (!this._available) return;
     var text = this.getScript(index);
     if (!text) {
-      // No script for this slide — skip in auto mode
-      if (this.isAutoMode) {
+      // No script for this slide
+      if (this.isAutoAdvance) {
         var slides = document.querySelectorAll('.slide');
         if (index < slides.length - 1) {
           var self = this;
@@ -387,15 +454,17 @@ var NarrationEngine = {
   _onSpeechEnd: function() {
     if (!this.isPlaying) return;
     var slides = document.querySelectorAll('.slide');
-    if (this.isAutoMode && currentSlide < slides.length - 1) {
+
+    if (this.isAutoAdvance && currentSlide < slides.length - 1) {
+      // Both on: narration drives timing — advance after speech
       var self = this;
       setTimeout(function() { changeSlide(1); }, 800);
-    } else if (!this.isAutoMode) {
-      // Manual mode — wait for user to advance
+    } else if (!this.isAutoAdvance) {
+      // Narrator only: stop after each slide, wait for user
       this.isPlaying = false;
       this._updateButtonStates();
     } else {
-      // Last slide reached in auto mode
+      // Last slide reached
       this.stop();
     }
   },
@@ -407,27 +476,33 @@ var NarrationEngine = {
       var self = this;
       setTimeout(function() { self._speak(index); }, 50);
     }
+    // Restart auto-advance timer on slide change
+    if (this.isAutoAdvance) {
+      this._restartAutoAdvanceTimer();
+    }
   },
+
+  // ── Playback controls ─────────────────────────────────────────────
 
   play: function() {
     if (!this._available) return;
 
-    if (speechSynthesis.paused) {
-      // Resume from pause
+    if (this.isPaused) {
       speechSynthesis.resume();
-      this.isPlaying = true;
+      this.isPaused = false;
       this._updateButtonStates();
       return;
     }
 
     this.isPlaying = true;
+    this.isPaused = false;
     this._speak(currentSlide);
   },
 
   pause: function() {
     if (!this._available || !this.isPlaying) return;
     speechSynthesis.pause();
-    // isPlaying stays true — indicates paused state
+    this.isPaused = true;
     this._updateButtonStates();
   },
 
@@ -435,43 +510,147 @@ var NarrationEngine = {
     if (!this._available) return;
     speechSynthesis.cancel();
     this.isPlaying = false;
+    this.isPaused = false;
     var playBtn = document.getElementById('narration-play-btn');
     if (playBtn) playBtn.classList.remove('speaking');
     this._updateButtonStates();
+
+    // Restart auto-advance timer if enabled (narration stopped)
+    if (this.isAutoAdvance) {
+      this._restartAutoAdvanceTimer();
+    }
   },
 
   togglePlay: function() {
     if (!this._available) return;
-    if (this.isPlaying && !speechSynthesis.paused) {
+    if (this.isPlaying && !this.isPaused) {
       this.pause();
     } else {
       this.play();
     }
   },
 
-  toggleAuto: function() {
-    this.isAutoMode = !this.isAutoMode;
+  // ── Auto-advance controls ──────────────────────────────────────────
+
+  toggleAutoAdvance: function() {
+    this.isAutoAdvance = !this.isAutoAdvance;
+    if (this.isAutoAdvance) {
+      this._startAutoAdvanceTimer();
+    } else {
+      this._stopAutoAdvanceTimer();
+    }
     this._updateButtonStates();
   },
 
-  cycleLanguage: function() {
-    var idx = this.LANG_CYCLE.indexOf(this.language);
-    this.language = this.LANG_CYCLE[(idx + 1) % this.LANG_CYCLE.length];
-    var btn = document.getElementById('voice-lang-btn');
-    if (btn) btn.textContent = this.LANG_LABELS[this.language];
-    // If currently playing, restart with new language
-    if (this.isPlaying) {
-      speechSynthesis.cancel();
-      var self = this;
-      setTimeout(function() { self._speak(currentSlide); }, 50);
+  _startAutoAdvanceTimer: function() {
+    var self = this;
+    this._stopAutoAdvanceTimer();
+    this._autoAdvanceTimer = setInterval(function() {
+      // Skip tick if narration is actively speaking (narration handles timing)
+      if (self.isPlaying && !self.isPaused) return;
+      var slides = document.querySelectorAll('.slide');
+      if (currentSlide < slides.length - 1) {
+        changeSlide(1);
+      } else {
+        self._stopAutoAdvanceTimer();
+      }
+    }, this._autoAdvanceInterval);
+  },
+
+  _stopAutoAdvanceTimer: function() {
+    if (this._autoAdvanceTimer) {
+      clearInterval(this._autoAdvanceTimer);
+      this._autoAdvanceTimer = null;
     }
+  },
+
+  _restartAutoAdvanceTimer: function() {
+    if (this.isAutoAdvance && !(this.isPlaying && !this.isPaused)) {
+      this._startAutoAdvanceTimer();
+    }
+  },
+
+  // ── Language dropdown ──────────────────────────────────────────────
+
+  _buildLanguageDropdown: function() {
+    var dropdown = document.getElementById('voice-lang-dropdown');
+    var btn = document.getElementById('voice-lang-btn');
+    if (!dropdown || !btn) return;
+
+    dropdown.innerHTML = '';
+
+    // Determine available languages from config or default to all
+    var configLangs = (this._config && this._config.languages) || Object.keys(this.LANGUAGES);
+    var self = this;
+
+    configLangs.forEach(function(lang) {
+      var langInfo = self.LANGUAGES[lang];
+      if (!langInfo) return;
+
+      // Check if any slide has script for this language
+      var hasScript = false;
+      if (typeof slideData !== 'undefined') {
+        for (var i = 0; i < slideData.length; i++) {
+          var s = slideData[i].script || '';
+          if (lang === 'en') s = slideData[i].scriptEn || s;
+          if (lang === 'ja') s = slideData[i].scriptJa || s;
+          if (s) { hasScript = true; break; }
+        }
+      }
+
+      var option = document.createElement('div');
+      option.className = 'voice-lang-option' + (lang === self.language ? ' active' : '') + (!hasScript ? ' disabled' : '');
+      option.textContent = langInfo.label + ' (' + langInfo.shortLabel + ')';
+      option.dataset.lang = lang;
+
+      if (hasScript) {
+        option.onclick = function(e) {
+          e.stopPropagation();
+          self.setLanguage(lang);
+          self._toggleLanguageDropdown();
+        };
+      }
+
+      dropdown.appendChild(option);
+    });
+
+    // Update button label
+    var currentLang = this.LANGUAGES[this.language];
+    if (currentLang) {
+      btn.textContent = currentLang.shortLabel + ' ▾';
+    }
+  },
+
+  _toggleLanguageDropdown: function() {
+    var dropdown = document.getElementById('voice-lang-dropdown');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+    // Close voice dropdown
+    var voiceDd = document.getElementById('voice-select-dropdown');
+    if (voiceDd) voiceDd.classList.remove('show');
   },
 
   setLanguage: function(lang) {
-    if (this.LANG_CYCLE.indexOf(lang) === -1) return;
+    if (!this.LANGUAGES[lang]) return;
     this.language = lang;
+
+    // Update dropdown active state
+    var options = document.querySelectorAll('.voice-lang-option');
+    options.forEach(function(opt) {
+      opt.classList.toggle('active', opt.dataset.lang === lang);
+    });
+
+    // Update button label
     var btn = document.getElementById('voice-lang-btn');
-    if (btn) btn.textContent = this.LANG_LABELS[this.language];
+    if (btn) {
+      var langInfo = this.LANGUAGES[lang];
+      btn.textContent = langInfo.shortLabel + ' ▾';
+    }
+
+    // Rebuild voice dropdown for new language
+    this._updateVoiceDropdown();
+
+    // Restart speech with new language if playing
     if (this.isPlaying) {
       speechSynthesis.cancel();
       var self = this;
@@ -479,18 +658,107 @@ var NarrationEngine = {
     }
   },
 
+  // ── Voice selector dropdown ───────────────────────────────────────
+
+  _updateVoiceDropdown: function() {
+    var dropdown = document.getElementById('voice-select-dropdown');
+    var btn = document.getElementById('voice-select-btn');
+    if (!dropdown || !btn) return;
+
+    dropdown.innerHTML = '';
+
+    var voices = this._getVoicesForLanguage(this.language);
+    var currentVoice = this._findVoice(this.language);
+
+    if (voices.length === 0) {
+      btn.style.display = 'none';
+      return;
+    }
+
+    btn.style.display = '';
+
+    var self = this;
+    voices.forEach(function(voice) {
+      var option = document.createElement('div');
+      option.className = 'voice-option' + (currentVoice && currentVoice.name === voice.name ? ' active' : '');
+      option.textContent = voice.name;
+      option.title = voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
+      option.onclick = function(e) {
+        e.stopPropagation();
+        self._selectVoiceInDropdown(voice.name);
+        self._toggleVoiceDropdown();
+      };
+      dropdown.appendChild(option);
+    });
+
+    // Update button label
+    if (currentVoice) {
+      btn.textContent = '🎤 ' + currentVoice.name;
+    } else {
+      btn.textContent = '🎤 Default';
+    }
+  },
+
+  _selectVoiceInDropdown: function(voiceName) {
+    // Persist to localStorage per language
+    localStorage.setItem('narration_voice_' + this.language, voiceName);
+
+    // Update dropdown active state
+    var options = document.querySelectorAll('.voice-option');
+    options.forEach(function(opt) {
+      opt.classList.toggle('active', opt.textContent === voiceName);
+    });
+
+    // Update button label
+    var btn = document.getElementById('voice-select-btn');
+    if (btn) btn.textContent = '🎤 ' + voiceName;
+
+    // Restart speech with new voice if playing
+    if (this.isPlaying && !this.isPaused) {
+      speechSynthesis.cancel();
+      var self = this;
+      setTimeout(function() { self._speak(currentSlide); }, 50);
+    }
+  },
+
+  _toggleVoiceDropdown: function() {
+    var dropdown = document.getElementById('voice-select-dropdown');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+    // Close language dropdown
+    var langDd = document.getElementById('voice-lang-dropdown');
+    if (langDd) langDd.classList.remove('show');
+  },
+
+  // ── Outside click handler ──────────────────────────────────────────
+
+  _bindOutsideClick: function() {
+    var self = this;
+    document.addEventListener('click', function(e) {
+      // Close language dropdown if click is outside
+      var langWrap = e.target.closest('.narration-dropdown-wrap');
+      if (!langWrap || !langWrap.querySelector('#voice-lang-dropdown')) {
+        var langDd = document.getElementById('voice-lang-dropdown');
+        if (langDd) langDd.classList.remove('show');
+      }
+      // Close voice dropdown if click is outside
+      if (!langWrap || !langWrap.querySelector('#voice-select-dropdown')) {
+        var voiceDd = document.getElementById('voice-select-dropdown');
+        if (voiceDd) voiceDd.classList.remove('show');
+      }
+    });
+  },
+
+  // ── UI state ──────────────────────────────────────────────────────
+
   _updateButtonStates: function() {
     var playBtn = document.getElementById('narration-play-btn');
-    var autoBtn = document.getElementById('narration-auto-btn');
-    var langBtn = document.getElementById('voice-lang-btn');
+    var autoBtn = document.getElementById('narration-auto-advance-btn');
 
     if (playBtn) {
-      if (this.isPlaying && !speechSynthesis.paused) {
+      if (this.isPlaying && !this.isPaused) {
         playBtn.textContent = 'Pause';
         playBtn.classList.add('active');
-      } else if (this.isPlaying && speechSynthesis.paused) {
-        playBtn.textContent = 'Play';
-        playBtn.classList.remove('active');
       } else {
         playBtn.textContent = 'Play';
         playBtn.classList.remove('active');
@@ -498,12 +766,8 @@ var NarrationEngine = {
     }
 
     if (autoBtn) {
-      autoBtn.textContent = this.isAutoMode ? 'Auto' : 'Manual';
-      autoBtn.classList.toggle('active', this.isAutoMode);
-    }
-
-    if (langBtn) {
-      langBtn.textContent = this.LANG_LABELS[this.language];
+      autoBtn.textContent = this.isAutoAdvance ? 'Auto' : 'Manual';
+      autoBtn.classList.toggle('active', this.isAutoAdvance);
     }
   }
 };
@@ -601,7 +865,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 's' || e.key === 'S') PresenterTools.toggleScript();
   if (e.key === 't' || e.key === 'T') ThumbnailNav.toggle();
   if (e.key === 'p' || e.key === 'P') NarrationEngine.togglePlay();
-  if (e.key === 'a' || e.key === 'A') NarrationEngine.toggleAuto();
+  if (e.key === 'a' || e.key === 'A') NarrationEngine.toggleAutoAdvance();
 });
 
 // ── PPT Init (call from each theme's DOMContentLoaded) ──────────────────
@@ -638,6 +902,6 @@ function initPPT(options) {
     }
   });
 
-  // Initialize narration engine
-  NarrationEngine.init();
+  // Initialize narration engine (pass config if available)
+  NarrationEngine.init(options.narration);
 }

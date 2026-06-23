@@ -74,6 +74,24 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 ```
 Available themes: `notebook | pitch | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
 
+**Narration config injection** (from `lecture-profile.md` → `narration` section):
+Read the `narration` block from `lecture-profile.md` and inject a `narrationConfig` object into the `initPPT()` call. This bridges lecture profile settings to the runtime NarrationEngine:
+```javascript
+// Inject before the DOMContentLoaded listener or alongside initPPT call
+var narrationConfig = {
+  enabled: true,
+  autoAdvance: false,
+  autoAdvanceInterval: 5,
+  defaultLanguage: 'ko',
+  languages: ['ko']
+};
+initPPT({ transition: 'fade', showTimer: true, showThumbnails: true, narration: narrationConfig });
+```
+- `enabled: false` → hides all narration/auto-advance buttons in the HTML viewer
+- `autoAdvance: true` → enables auto-advance timer (independent of narration)
+- `languages` → populates the language dropdown (only languages with scripts in slideData are clickable)
+- If `narration` section is absent or `enabled: false`, set `enabled: false`
+
 **Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 
 ---
