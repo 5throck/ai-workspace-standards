@@ -192,11 +192,11 @@ function processVariantContent(content: string): ProcessedContent {
 Migrate existing variants one at a time:
 
 **Migration Order**:
-1. `templates/co-design/agents/pm.md` (low-risk test)
-2. `templates/co-work/agents/pm.md`
-3. `templates/co-consult/agents/pm.md`
-4. `templates/co-develop/agents/pm.md`
-5. `templates/co-security/agents/pm.md`
+1. `templates/co-design/agents/pm.md` ✅ (migrated 2026-06-23, ADR-0047)
+2. `templates/co-work/agents/pm.md` ✅ (migrated 2026-06-23, ADR-0047)
+3. `templates/co-consult/agents/pm.md` ✅ (already frontmatter-only)
+4. `templates/co-develop/agents/pm.md` ✅ (already frontmatter-only)
+5. `templates/co-security/agents/pm.md` ✅ (already frontmatter-only)
 
 **Migration Process per Variant**:
 ```bash
@@ -386,25 +386,28 @@ git cherry-pick <phase-1-commit>
 
 ### Phase 1 Checklist
 
-- [ ] Add frontmatter extends field to all 5 existing variants
-- [ ] Implement extends parsing in scaffold script
-- [ ] Add backward compatibility layer
-- [ ] Test dual-mode operation (frontmatter + markers)
-- [ ] Document Phase 1 completion in memory log
-- [ ] Verify no breaking changes to existing workflows
-- [ ] Update ADR-0033 with Phase 1 completion status
+- [x] Add frontmatter extends field to all 5 existing variants
+- [x] Implement extends parsing in scaffold script
+- [x] Add backward compatibility layer
+- [x] Test dual-mode operation (frontmatter + markers)
+- [x] Document Phase 1 completion in memory log
+- [x] Verify no breaking changes to existing workflows
+- [x] Update ADR-0033 with Phase 1 completion status
 
 ### Phase 2 Checklist
 
-- [ ] Implement deprecation warnings for markers
-- [ ] Switch scaffold script to frontmatter-first processing
-- [ ] Migrate co-design variant (test case)
-- [ ] Verify co-design migration success
-- [ ] Migrate remaining 4 variants
-- [ ] Test all variants in production
-- [ ] Run platform parity tests
-- [ ] Document Phase 2 completion in memory log
-- [ ] Update ADR-0033 with Phase 2 completion status
+- [x] Implement deprecation warnings for markers
+- [x] Switch scaffold script to frontmatter-first processing
+- [x] Migrate co-design variant (test case)
+- [x] Verify co-design migration success
+- [x] Migrate co-work variant
+- [x] Migrate co-consult variant
+- [x] Migrate co-develop variant
+- [x] Migrate co-security variant
+- [x] Test all variants in production
+- [x] Run platform parity tests
+- [x] Document Phase 2 completion in memory log (see ADR-0047)
+- [x] Update ADR-0033 with Phase 2 completion status
 
 ### Phase 3 Checklist
 
@@ -846,7 +849,7 @@ For questions or issues during migration:
 
 ---
 
-**Document Status**: Active  
-**Next Review**: 2026-06-14 (after Phase 1 completion)  
+**Document Status**: Phase 2 Complete  
+**Next Review**: 2026-09-14 (Q3 quarterly review)  
 **Maintainer**: docs-writer agent  
 **Approved By**: architect agent (design review)
