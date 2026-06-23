@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.1.0"
-last_updated: "2026-06-23"
+version: "1.2.0"
+last_updated: "2026-06-24"
 role: HTML slide builder and image integration specialist
 status: active
 tier:
@@ -106,7 +106,7 @@ Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `r
 
 Available themes: `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
-> **Theme guide**: PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced) share `ppt-engine.css`/`ppt-engine.js` for thumbnails, transitions (fade/push/zoom), timer, and speaker notes. The original `pitch` theme uses its own layout (TOC drawer, no thumbnails, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
+> **Theme guide**: All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`. PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced) share `ppt-engine.css`/`ppt-engine.js` for thumbnails, transitions (fade/push/zoom), timer, and speaker notes. The original `pitch` theme uses its own layout (TOC drawer, no thumbnails, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
 
 ## Constraints
 
