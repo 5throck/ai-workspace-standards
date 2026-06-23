@@ -599,7 +599,7 @@ var NarrationEngine = {
     var btn = document.getElementById('voice-lang-btn');
     if (!dropdown || !btn) return;
 
-    dropdown.innerHTML = '';
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
 
     // Determine available languages from config or default to all
     var configLangs = (this._config && this._config.languages) || Object.keys(this.LANGUAGES);
@@ -689,7 +689,7 @@ var NarrationEngine = {
 
     // Preserve open state across rebuilds
     var wasOpen = dropdown.classList.contains('show');
-    dropdown.innerHTML = '';
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
 
     var voices = this._getVoicesForLanguage(this.language);
     var currentVoice = this._findVoice(this.language);
@@ -727,9 +727,14 @@ var NarrationEngine = {
 
     // Update button label with compact info
     if (currentVoice) {
-      btn.innerHTML = '🎤 ' + currentVoice.name + ' <span class="voice-badge">' + currentVoice.lang + '</span>';
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
+      var badge = document.createElement('span');
+      badge.className = 'voice-badge';
+      badge.textContent = currentVoice.lang;
+      btn.appendChild(badge);
     } else {
-      btn.innerHTML = '🎤 Default';
+      btn.textContent = '🎤 Default';
     }
 
     // Restore open state if it was open before rebuild
@@ -750,7 +755,12 @@ var NarrationEngine = {
     // Update button label with badge
     var btn = document.getElementById('voice-select-btn');
     if (btn) {
-      btn.innerHTML = '🎤 ' + voiceName + ' <span class="voice-badge">' + (voiceLang || '') + '</span>';
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('🎤 ' + voiceName + ' '));
+      var voiceBadge = document.createElement('span');
+      voiceBadge.className = 'voice-badge';
+      voiceBadge.textContent = voiceLang || '';
+      btn.appendChild(voiceBadge);
     }
 
     // Restart speech with new voice if playing
