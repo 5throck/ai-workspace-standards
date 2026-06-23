@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.2.1
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //
@@ -511,8 +511,8 @@ console.log('');
 
 // ── OVERWRITE: docs/_common/ (allowlist) ──────────────────────────────────────
 console.log('--- OVERWRITE: docs/_common/ (governance files) ---');
-const DOCS_OVERWRITE = ['phase-definitions.md', 'security.md'];
-const DOCS_PRESERVE  = ['context.md', 'README.md', 'README_ko.md'];
+const DOCS_OVERWRITE = ['security.md'];
+const DOCS_PRESERVE  = ['phase-definitions.md', 'context.md', 'README.md', 'README_ko.md'];
 for (const fname of DOCS_OVERWRITE) {
   const src = join(commonDir, 'docs', '_common', fname);
   const dest = join(projectDir, 'docs', fname);
