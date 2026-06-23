@@ -188,12 +188,24 @@ PM: ▶️ [specialist] dispatch...
 ```
 
 **Co-deck Specific Exceptions**:
-For the `co-deck` pipeline:
+For the `co-deck` 11-Stage pipeline:
+
 1. **Optional & Auto-Advance Gates/Stages**: For stages or tasks defined as optional or auto-advancing (e.g., Stage 1.5/Gate 1.5, Stage 3/Gate 3, Stage 4/Gate 4, Stage 5-8, Stage 9-10), the PM dispatches the specialist agent automatically *without* prompting the user for approval.
 2. **Double Hop & Internal Delegation**: Secondary/internal subagent dispatches (such as a read-only specialist agent spawning a writer subagent to write output) are considered implementation details and MUST NOT trigger any user confirmation prompt.
 3. **Gate 3.5 — Image Manifest (Mandatory when the deck uses images)**: Unlike the optional/auto-advance gates above, Gate 3.5 is a **hard gate**. After `image-curator` produces `image-manifest.json`, run `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>`. The handoff to `html-build` is **BLOCKED** until it exits 0 (no duplicate `content_hash` ERRORs; aspect-ratio WARNs reviewed). Skipped only when the deck uses no images. See [agents/image-curator.md — Gate 3.5 Validation](agents/image-curator.md).
+4. **Gate Protocol**: Mandatory gates require explicit user approval; optional gates proceed after review.
+   - **Gate 2 (Mandatory)** — storyline.md + slide_deck.md ready: "⚠️ Approving starts design and HTML. Approve?"
+   - **Gate 5 (Mandatory)** — sample_5slides.pdf ready: "Check layout and fonts. Generate full PDF? Approve?"
+   - **Gate 1.5 (Optional)** — source-verification.md ready: Output Trust Score and proceed (halt only if Trust Score < 70% and source_verification is enabled).
+   - **Gate 3 (Optional)** — design_spec.md ready: Output theme/spec summary and proceed.
+   - **Gate 4 (Optional)** — HTML draft built: Output built file details and proceed.
+5. **Theme × Style compatibility**: Before confirming `presentation.theme` and `presentation.style` at Stage 0, check `docs/html-themes/THEMES.md` compatibility matrix. Reject incompatible combinations and explain why — the compatibility matrix in THEMES.md is the SSOT.
+6. **Stage 1.5 auto-dispatch**: After Stage 1 completes, ALWAYS read `source_verification` from the project's `lecture-profile.md`. If `true` (the default), auto-dispatch source-verifier immediately without prompting the user.
+7. **Gate 1.5 Trust Score threshold**: Once source-verification.md is ready, evaluate Trust Score against `trust_score_thresholds` in `variant.json`. Halt only if Trust Score < 70% — otherwise proceed automatically.
+8. **Stage 1 Write-Permissions**: Configure the Stage 1 Research Agent with write permissions (`enable_write_tools: true` or as `self`) so it can output research notes without requiring double-hop prompts.
+9. **TypeScript first**: Use `bun scripts/co-deck/` TypeScript scripts for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript.
 
-See [agents/pm.md](agents/pm.md) for complete role definition and delegation protocols.
+See [agents/pm.md](agents/pm.md) for common PM role definition and delegation protocols.
 
 #### §3.1.3 Enforcement Layers
 1. **Tool-Level**: Agent tool rejects non-PM specialist calls (hard enforcement)
@@ -422,41 +434,75 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 > Gates 2, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
 > Gates 1.5, 3, 4 are **optional** — PM may auto-advance or prompt user (Gate 1 is retired).
 
-### 4.2 Harness Engineering Workflow
-
-Following the **PM governance workflow** defined in [docs/context.md](docs/context.md):
+### 4.2 Co-deck 11-Stage Pipeline
 
 ```
-Phase 0 - Project Initiation (PM-owned)
-  PM assesses workspace requirements
-  PM dynamically creates new agents/skills and resolves R&R overlap
-  PM updates AGENTS.md and maintains skill registry
-
-Phase 1-2 - Planning & Architecture (specialist-autonomous)
-  PM classifies the request; Architect produces implementation plan + ADR
-  Dispatch read-only agents in parallel (analysis, research)
-  PM synthesizes findings → acceptance criteria
-  PM validates design approach and obtains explicit user approval → GATE
-
-Phase 3 - Design Handoff (variant-specific)
-  Architect hands off approved plan to execution agents
-  Agents can dispatch each other directly for routine handoffs
-
-Phase 4 - Execution (specialist-autonomous)
-  `[implementation specialist]` implements per approved plan
-  `[docs specialist]` updates docs as needed
-  Agents can dispatch each other directly for routine handoffs
-
-Phase 5 - Lifecycle Finalization (PM-owned)
-  PM updates governance records for any changed artifacts
-  PM logs decisions to memory/YYYY-MM-DD.md
-
-Phase 6 - Quality Assurance & Finalization (PM-owned)
-  PM executes bun scripts/qa-gate.ts
-  Validates: workspace audit, project tests, documentation consistency
-  Maximum 2 iterations before PM escalation → GATE
-  PM runs /sync "type: description" → PR opened
+[0] Config (mandatory) → [1] Research → [1.5] Source Verifier (if source_verification: true) → [2-3] Content → [4] Design → [5-8] Build → [9-10] Measure → [11] Export
+                              ↑
+                         [Version] — called before every file edit
 ```
+
+**Mandatory approval gates**: Gate 2 (content), Gate 5 (sample PDF).
+*(Gate 1 is retired. Gate 1.5, Gate 3, and Gate 4 are optional / non-blocking review-then-proceed gates.)*
+
+#### Gate Protocol
+
+On reaching a gate, PM outputs a structured summary and waits for explicit user approval (for mandatory gates) or proceeds after review:
+
+- **Gate 1.5 (Optional)** — source-verification.md ready: Output Trust Score and proceed (halt only if Trust Score < 70% and source_verification is enabled).
+- **Gate 2 (Mandatory)** — storyline.md + slide_deck.md ready: "⚠️ Approving starts design and HTML. Approve?"
+- **Gate 3 (Optional)** — design_spec.md ready: Output theme/spec summary and proceed.
+- **Gate 4 (Optional)** — HTML draft built: Output built file details and proceed.
+- **Gate 5 (Mandatory)** — sample_5slides.pdf ready: "Check layout and fonts. Generate full PDF? Approve?"
+
+#### Project State
+
+PM reads and writes `presentations/<lecture>/project_state.json`. Every step has `status` (pending / in_progress / completed) and `approved` (bool). Always update immediately after each step.
+
+#### Rework Rules
+
+When the user requests an edit:
+1. Report downstream impact (which stages need re-run)
+2. Call Version Agent before any file changes
+3. Dispatch the appropriate agent with minimum re-execution scope
+4. Reset downstream steps to "pending" in project_state.json
+5. Skip Measure (Stage 9-10) if layout structure is unchanged
+
+#### Stage 0 — New Project Start (MANDATORY, never skip)
+
+1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
+2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
+3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
+   - **Rendering theme** (`presentation.theme`) — HTML structure; read available themes from `docs/html-themes/THEMES.md` registry
+   - **Visual style** (`presentation.style`) — CSS variable set; read available styles from `docs/html-themes/THEMES.md` registry; check the compatibility matrix before accepting
+   - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
+   - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
+4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
+   > ⚠️ This project has layout overrides that differ from the global `<theme>` theme defaults:
+   > - `<key>`: `<override_value>` (default: `<theme_default>`)
+   > These will apply to HTML rendering and PDF generation. Continue?
+5. Save the confirmed values to the local `lecture-profile.md`, then initialize `project_state.json` and `memory/keywords.md`.
+6. Dispatch the Research Agent to start Stage 1 (loading the local profile). To prevent double-hop permission prompts and permission errors, configure the Research Agent with write permissions (`enable_write_tools: true` or invoke as a `self` subagent) so it can write research results directly.
+
+#### T-Stage Pipeline (Theme/Style Authoring)
+
+When user requests **"create a new theme"** or **"create a new style"**, enter the T-Stage pipeline instead of the 11-Stage pipeline:
+
+**Style Workflow** (lightweight, 3 steps):
+1. PM collects style name + visual characteristics from user
+2. PM dispatches Design to author `styles/<name>/style.css` (CSS variable overrides only)
+3. PM provides preview link: `docs/html-themes/preview/preview.html?theme=scroll&style=<name>` → user approval → register in THEMES.md
+
+**Theme Workflow** (T-Stage, 5 steps):
+```
+T-0: PM — collect theme name + rendering paradigm from user
+T-1: html-build — author template.html (renderSlide, TOC/nav structure)
+T-2: design — author theme.json (content_rules, compatible_styles, recommended_structure)
+T-3: storyline — review content_rules + author recommended_structure
+T-4: PM — provide preview link → user approval → THEMES.md registration
+```
+
+For complete T-Stage spec, see `skills/theme-authoring/SKILL.md`.
 
 ---
 
