@@ -218,6 +218,20 @@ Referenced by `gen-slides-pdf.ts` as `spec.colors.<role>`. Per-project accent ov
 
 ---
 
+## File Encoding Standard
+
+All files under `docs/html-themes/` (and all files produced by the co-deck pipeline) MUST use **UTF-8 without BOM** with **LF line endings**. This is enforced by:
+
+- `.editorconfig` (inherited from `templates/common/`): `charset = utf-8`, `end_of_line = lf`
+- `.gitattributes` (`templates/co-deck/`): `*.html`, `*.css`, `*.js`, `*.json` → `text eol=lf`
+- `scripts/lib/encoding-utils.ts`: conversion utilities (`normalizeLineEndings`, `writeUTF8File`, `batchConvertToUTF8`)
+- `scripts/audit.ts`: BOM detection on markdown files
+- html-build agent: explicit UTF-8 output constraint (see `agents/html-build.md` → Constraints)
+
+> ⚠️ **Windows CP949 Risk**: On Korean Windows systems, the default code page is CP949 (EUC-KR). Always ensure `chcp 65001` or `$OutputEncoding = [System.Text.Encoding]::UTF8` is active before creating or editing any co-deck file to prevent encoding corruption of Korean text.
+
+---
+
 ## Directory Structure
 
 ```
@@ -338,4 +352,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-06-23 — PPT transformation: notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes, **NarrationEngine TTS auto-play**); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); visual-heavy/academic style CSS patched for `title` data-type alias; all PPT themes compatible with all 5 styles (visual-heavy: partial). Previous: 2026-06-22 — `premium-dark` style added as DEFAULT; `classic/pdf_color_spec.json` corrected; `base.css` gains `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`.*
+*Last updated: 2026-06-23 — File Encoding Standard section added (UTF-8 without BOM, LF line endings, .gitattributes enforcement, CP949 risk guidance). Previous: 2026-06-23 — PPT transformation: notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes, **NarrationEngine TTS auto-play**); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); visual-heavy/academic style CSS patched for `title` data-type alias; all PPT themes compatible with all 5 styles (visual-heavy: partial). Previous: 2026-06-22 — `premium-dark` style added as DEFAULT; `classic/pdf_color_spec.json` corrected; `base.css` gains `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`.*

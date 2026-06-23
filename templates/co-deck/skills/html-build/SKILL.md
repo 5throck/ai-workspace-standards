@@ -117,6 +117,8 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 `lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
+>
+> **Encoding**: All output HTML files MUST be UTF-8 without BOM. Verify `<meta charset="UTF-8">` is present in `<head>`. On Korean Windows systems, ensure `chcp 65001` is active before writing files to prevent CP949 corruption of Korean text content.
 
 ## Related Skills
 

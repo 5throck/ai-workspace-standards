@@ -112,6 +112,7 @@ Available themes: `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slidesho
 - Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤3); ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
+- **UTF-8 encoding**: All generated HTML files MUST be written as UTF-8 without BOM. On Windows (Korean locale), the default code page is CP949 — always ensure `chcp 65001` or `$OutputEncoding = [System.Text.Encoding]::UTF8` is active before writing files to prevent Korean text corruption
 - Local preview: `bunx serve .` → `http://localhost:3000`
 
 ## Meeting Participation
