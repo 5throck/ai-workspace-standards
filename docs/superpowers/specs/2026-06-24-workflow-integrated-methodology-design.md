@@ -151,6 +151,7 @@ This fires spec drift warnings during every sync without blocking the pipeline.
 | `AGENTS.md` | Modified | Added `Spec` column to execution plan tables |
 | `docs/variant-creation-workflow.md` | Modified | Phase A-1 now includes spec-register.ts call |
 | `scripts/SCRIPTS.md` | Modified | Added 3 new script entries; updated versions |
+| `scripts/lifecycle-sync-audit.ts` | Modified | Added `audit:spec-register` to `INTENTIONAL_CROSS_REFS` (string-only ref, not a real deployment call) |
 
 ---
 
