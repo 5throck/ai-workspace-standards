@@ -25,6 +25,11 @@
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--card-border, rgba(255,255,255,0.07));
   overflow: hidden;
   pointer-events: none;
+  /* Neutralize base.css display:flex; flex-direction:column — standard
+     slides use grid via .slide-content, not flex column.  Type-specific
+     overrides (title, divider, profile, contact, punchline) have higher
+     specificity via [data-type="..."] and re-set display as needed. */
+  display: block;
 }
 
 .slide.active {
@@ -42,7 +47,16 @@
 }
 
 .slide-left   { display: flex; flex-direction: column; justify-content: center; }
-.right-panel  { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.right-panel  {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Neutralize base.css leaks: min-width:280px constrains the grid,
+     border-radius:0.375rem clashes with pitch's borderless aesthetic */
+  min-width: 0;
+  border-radius: 0;
+}
 
 .right-panel img {
   width: 100%;
