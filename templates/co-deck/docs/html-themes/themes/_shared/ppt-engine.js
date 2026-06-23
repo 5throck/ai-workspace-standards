@@ -31,6 +31,10 @@ function imgEl(src, alt) {
   const node = document.createElement('img');
   node.src = src || '';
   node.alt = alt || '';
+  node.onerror = function() {
+    this.style.opacity = '0.2';
+    this.classList.add('img-fallback');
+  };
   return node;
 }
 
@@ -40,6 +44,36 @@ function appendInline(parent, s) {
     if (i % 2 === 0) parent.appendChild(document.createTextNode(parts[i]));
     else parent.appendChild(el('strong', null, parts[i]));
   }
+}
+
+// ── Visual display structured renderer ──────────────────────────────
+// Converts plain-text visualDisplay content into structured DOM elements.
+// Patterns:
+//   [Title]           → .visual-heading (bold, accented)
+//   ✓ / ✗ / → / •    → .visual-item .visual-item-check (list with marker)
+//   (empty line)      → <br>
+//   (default)         → .visual-paragraph (normal text)
+// Called by theme template renderers when data.visualDisplay is present.
+
+function renderVisualDisplay(parent, text) {
+  if (!text) return;
+  var lines = String(text).split('\n');
+  lines.forEach(function(line) {
+    var trimmed = line.trim();
+    if (!trimmed) { parent.appendChild(document.createElement('br')); return; }
+    // [Box Title] → heading
+    if (/^\[.+\]$/.test(trimmed)) {
+      parent.appendChild(el('div', 'visual-heading', trimmed.replace(/^\[|\]$/g, '')));
+      return;
+    }
+    // Check/cross/arrow/bullet items
+    if (/^[✓✗✔✘→►•▪▫▸❯]\s*/.test(trimmed)) {
+      parent.appendChild(el('div', 'visual-item visual-item-check', trimmed));
+      return;
+    }
+    // Default paragraph
+    parent.appendChild(el('div', 'visual-paragraph', trimmed));
+  });
 }
 
 // ── ThumbnailRenderer ────────────────────────────────────────────────────

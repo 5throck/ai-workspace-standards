@@ -3,8 +3,9 @@
     "codegraph": {
       "command": "npx",
       "args": [
-        "@colbymchenry/codegraph@0.9.7",
-        "serve"
+        "@colbymchenry/codegraph@1.0.1",
+        "serve",
+        "--mcp"
       ]
     }
   },

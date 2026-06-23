@@ -377,6 +377,14 @@ body {
   border-color: var(--accent-color, #D97706);
 }
 
+/* ─── Image fallback (broken/missing image) ──────────────────────── */
+.img-fallback {
+  opacity: 0.2;
+  min-width: 80px;
+  min-height: 60px;
+  transition: opacity 0.3s ease;
+}
+
 /* ─── Footer control groups ─────────────────────────────────────────── */
 .footer-tts-group {
   display: flex;

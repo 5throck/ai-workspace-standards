@@ -158,6 +158,11 @@
       }
       if (type === 'profile') {
         slide.appendChild(el('div', 'profile-eyebrow', section));
+        if (data.visualImage) {
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          avatar.className = 'profile-avatar';
+          slide.appendChild(avatar);
+        }
         slide.appendChild(el('div', 'profile-name', data.speakerName || title));
         slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
         if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
@@ -166,8 +171,9 @@
       if (type === 'contact') {
         slide.appendChild(el('div', 'contact-title', title));
         var info = el('div', 'contact-info');
-        if (data.contactEmail) info.appendChild(el('div', null, data.contactEmail));
-        if (data.contactLinkedIn) info.appendChild(el('div', null, data.contactLinkedIn));
+        if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
+        if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
         slide.appendChild(info);
         return;
       }
@@ -185,8 +191,8 @@
       } else {
         var visual = el('div', 'slide-visual');
         visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
-        var display = el('div', 'visual-display', data.visualDisplay || '');
-        display.style.whiteSpace = 'pre-line';
+        var display = el('div', 'visual-display');
+        renderVisualDisplay(display, data.visualDisplay);
         visual.appendChild(display);
         right.appendChild(visual);
       }
