@@ -52,6 +52,10 @@ Thumbs.db
 # CodeGraph Index
 .codegraph/
 
+# Windows reserved device name artifacts (created by git hooks on cmd.exe)
+nul
+NUL
+
 # --- Sandbox for testing ---
 .sandbox/
 
