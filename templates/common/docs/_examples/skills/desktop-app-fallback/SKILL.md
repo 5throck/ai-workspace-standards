@@ -1,5 +1,7 @@
 ---
 name: desktop-app-fallback
+owner: pm
+status: active
 description: Manual Post-Write QA chain for Claude Code Desktop App (hooks don't fire)
 metadata:
   type: task

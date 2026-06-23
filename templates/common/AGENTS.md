@@ -21,7 +21,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
-     Each row: | Agent Name | [`agents/name.md`](agents/name.md) | Tier | Role description |
+     Each row: | Agent Name | agents/name.md (link) | Tier | Role description |
      See docs/context.md for agent frontmatter specification. -->
 <!-- VARIANT-AGENTS-END -->
 ---
@@ -277,7 +277,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 <!-- Add project-specific specialist agents here. Format:
-     | Agent Name | `agents/name.md` | High/Medium/Low | parallel conditions | write scope |
+     | Agent Name | agents/name.md (path) | High/Medium/Low | parallel conditions | write scope |
      See §1 for the agent roster and docs/context.md for frontmatter specification. -->
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 

@@ -55,98 +55,52 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.9.1 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.9.2 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.6.2 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.2.4 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.2.5 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `fix-script-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.7.1 | active | —| —| L0 | —|
-| `helpers/agent-promote.ts` | L0 | 0.1.0 | experimental | —| —| L0 | —|
-| `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/golden-reference-loader.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/inject-global-plugins.ts` | L0 | 1.0.1 | deprecated | 2026-09-21| —| L0 | —|
-| `helpers/inject-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/integration-helpers.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/layer-filter.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
-| `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.4 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.test.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-package-scripts.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
-| `helpers/variant-governance-rules.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/normalize-agent-skills.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/scan-l2-project.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/substitute-placeholders.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/template-validation.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/update-variant-lifecycle.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/validate-output.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/validate-platform-parity.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `helpers/write-scripts-snapshot.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.6 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
-| `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.8.2 | active | —| —| L0 | Phase 1.6 (pm.md pre-flight), Phase 3.5 (AGENTS.md §-structure check + BLOCKING gate)|
-| `regenerate-agents-md.ts` | L0 | 1.0.0 | active | —| —| L0 | Regenerates variant AGENTS.md from L1 common template; fixes missing VARIANT-* markers|
-| `lib/agent-override-merge.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
-| `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.1.8 | active | —| —| L0 | —|
-| `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.8 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
-| `sync-skills-to-l2.ts` | L0 | 1.0.0 | active | — | — | L0 | — |
 | `sync-skills.ts` | L0 | 1.0.0 | active | — | — | L0+L1 | — |
-| `tag-template.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.3 | active | —| —| L0+L1 | —|
-| `test-new-project.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `test-extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.4.2 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.8 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `verify-new-project-tests.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.0 | active | —| —| L0+L1 | —|
 
 ---

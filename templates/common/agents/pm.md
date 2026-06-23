@@ -13,6 +13,7 @@ tier:
 model: inherit
 color: yellow
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
+role: Orchestrates multi-agent workflows, enforces quality gates, and dispatches specialist agents
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Team Assembly) and Phase 2 (Design approval)"

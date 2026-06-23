@@ -1,4 +1,4 @@
-// @version 2.9.1
+// @version 2.9.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -47,10 +47,10 @@ if (fs.existsSync('CHANGELOG.md')) {
 }
 
 // 2. CONSTITUTION.md must be accessible
-if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md')) {
+if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md')) {
     Pass('CONSTITUTION.md accessible');
 } else {
-    Fail('CONSTITUTION.md not found (expected at ./ or ../)');
+    Fail('CONSTITUTION.md not found (expected at ./, ../, or ../../)');
 }
 
 // 2.5. Constitution section files must exist and be non-empty (workspace root only)
