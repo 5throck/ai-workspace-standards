@@ -1,9 +1,9 @@
-// @version 2.9.0
+// @version 2.9.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
 import * as url from 'node:url';
 
@@ -895,6 +895,16 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
 
 // Check: Workspace root should not contain stray test artifacts or unauthorized files
 if (IS_WORKSPACE_ROOT) {
+    // Windows reserved device names that external tools (codegraph, antivirus, etc.)
+    // can create as files when run inside Git Bash (where > nul writes a file, not the device).
+    const WINDOWS_DEVICE_NAMES = new Set([
+        'nul', 'NUL', 'con', 'CON', 'prn', 'PRN', 'aux', 'AUX',
+        'com1','com2','com3','com4','com5','com6','com7','com8','com9',
+        'COM1','COM2','COM3','COM4','COM5','COM6','COM7','COM8','COM9',
+        'lpt1','lpt2','lpt3','lpt4','lpt5','lpt6','lpt7','lpt8','lpt9',
+        'LPT1','LPT2','LPT3','LPT4','LPT5','LPT6','LPT7','LPT8','LPT9',
+    ]);
+
     let strayFound = 0;
     try {
         const schemaRaw = fs.readFileSync(path.join('docs', 'workspace-schema.json'), 'utf-8');
@@ -919,8 +929,27 @@ if (IS_WORKSPACE_ROOT) {
                 }
             } else {
                 if (!allowedFiles.includes(item)) {
-                    Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
-                    strayFound++;
+                    if (WINDOWS_DEVICE_NAMES.has(item)) {
+                        // Auto-delete: Windows device name artifact created by external tools
+                        // (e.g. codegraph or antivirus running "cmd > nul" in Git Bash context).
+                        // Must use bash rm, not fs.unlinkSync — Bun maps "nul" to the Windows
+                        // NUL device on Windows, so the Node.js fs API cannot unlink it.
+                        try {
+                            const rmResult = spawnSync('bash', ['-c', `rm -f -- "${item}"`], { encoding: 'utf-8' });
+                            if (rmResult.status === 0) {
+                                Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
+                            } else {
+                                Fail(`Windows device name artifact '${item}' could not be deleted: ${rmResult.stderr}`);
+                                strayFound++;
+                            }
+                        } catch (e) {
+                            Fail(`Windows device name artifact '${item}' could not be deleted: ${e}`);
+                            strayFound++;
+                        }
+                    } else {
+                        Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
+                        strayFound++;
+                    }
                 }
             }
         }
