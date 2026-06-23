@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-22
+# Last Updated: 2026-06-23
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -101,7 +101,7 @@ Three flags control agent execution in the co-deck pipeline:
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
 | `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.0): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG; exits cleanly if no diagram-defs.ts exists | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
 | `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
@@ -134,18 +134,34 @@ co-deck uses a **two-layer** presentation appearance system. Authoritative regis
 
 A **theme** defines the HTML structure, navigation, and rendering paradigm. Each theme is a package folder containing `template.html` (HTML skeleton), `theme.json` (metadata + content rules + compatibility), `theme.css` (per-theme CSS extension), and `pdf_layout_spec.json` (region-based layout spec).
 
-| Name | Paradigm | Navigation | TOC | Content Rules | Folder |
-|------|----------|-----------|-----|---------------|--------|
-| `notebook` | Ruled-paper card, centered fullscreen, opacity fade | Prev/Next + chapter tabs (footer) + arrow keys | None | max 4 bullets, 30 char title, 20-40 slides | `docs/html-themes/themes/notebook/` |
-| `pitch` | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
-| `scroll` | Vertical scroll, all slides in DOM | Scroll + TOC panel | Required | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
-| `slideshow` | Fullscreen single-slide, CSS transitions | Prev/Next + arrow keys | None | max 3 bullets, 20 char title, 20-40 slides | `docs/html-themes/themes/slideshow/` |
+| Name | Version | Paradigm | Navigation | TOC | Content Rules | Folder |
+|------|---------|----------|-----------|-----|---------------|--------|
+| `notebook` | 2.0.0 | PPT Outline View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/notebook/` |
+| `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
+| `pitch-enhanced` | 2.0.0 | PPT Presenter View — pitch floating-card + thumbnails, transitions, timer | PPT footer bar (thumbnails + transitions fade/push/zoom + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
+| `scroll` | 2.0.0 | PPT Reading View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/scroll/` |
+| `slideshow` | 2.0.0 | PPT Presentation View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
 
-`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_styles` (scroll lists `visual-heavy`), `incompatible_styles` (slideshow lists `visual-heavy` + `academic`), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_theme` (→ `themes/<name>/theme.css`).
+`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_compatibility` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
 
-Each theme folder also includes **`theme.css`** (per-theme CSS extension — TOC panel, card geometry) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.2.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
+Each theme folder also includes **`theme.css`** (per-theme CSS extension — card geometry, slide type layouts) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.4.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
 
 > **Layer 0 — shared defaults**: `docs/html-themes/themes/_shared/layout_base.json` holds the region skeleton (all regions `null`) + the 16:9 `page` baseline + `print` defaults. It is the merge base, never filled by the renderer. `_shared/` is excluded from the theme scan (it is not itself a theme).
+
+### PPT Transformed Themes (v2.0.0)
+
+Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
+
+| Feature | Implementation |
+|---------|---------------|
+| Thumbnail navigation panel | CSS `transform: scale(0.14)` on cloned slide DOM nodes — no external library |
+| Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
+| Presenter timer | `setInterval`-based clock with start/pause/reset |
+| Speaker notes panel | Glass-morphism overlay with per-slide script content |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), Escape (close) |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + nav buttons |
+
+The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 
 ### Layer 2 — Style (CSS Variable Set)
 
@@ -156,10 +172,10 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 | `premium-dark` | `docs/html-themes/styles/premium-dark/style.css` | Executive / keynote — dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow (default) | Inherited from theme |
 | `classic` | `docs/html-themes/styles/classic/style.css` | General purpose | 45% right panel |
 | `minimal` | `docs/html-themes/styles/minimal/style.css` | Text-heavy lectures | None |
-| `visual-heavy` | `docs/html-themes/styles/visual-heavy/style.css` | Visual storytelling (scroll-partial / slideshow-incompatible) | Full-bleed background |
+| `visual-heavy` | `docs/html-themes/styles/visual-heavy/style.css` | Visual storytelling (partial for all PPT themes) | Full-bleed background |
 | `academic` | `docs/html-themes/styles/academic/style.css` | Research / thesis | 30% illustration panel |
 
-> **`premium-dark` is the default style** as of 2026-06-22 (replaces `classic`). Projects whose `lecture-profile.md` does not set `style` now render `premium-dark`. Derived from the `kyobo_ax_2026` executive lecture deck; optimized for `scroll`, compatible with `slideshow`.
+> **`premium-dark` is the default style** as of 2026-06-22 (replaces `classic`). Projects whose `lecture-profile.md` does not set `style` now render `premium-dark`. Derived from the `kyobo_ax_2026` executive lecture deck; compatible with all themes.
 >
 > **`classic` color-spec drift fix** (2026-06-22): `styles/classic/pdf_color_spec.json` previously held a dark palette that mismatched its light CSS — corrected to the matching LIGHT palette. The dark palette now lives under `styles/premium-dark/pdf_color_spec.json`.
 
@@ -167,9 +183,12 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/<theme>/theme.css           — per-theme extension
-3. styles/<style>/style.css           — per-style visual overrides
+2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer) [PPT themes only]
+3. themes/<theme>/theme.css           — per-theme extension
+4. styles/<style>/style.css           — per-style visual overrides
 ```
+
+> For the original `pitch` theme (v1.0.0), step 2 is omitted (no `css_ppt_engine`).
 
 Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB color keys (`background`, `accent`, `text_primary`, etc.). Read by `gen-slides-pdf.ts` as Layer 2 of the 4-layer PDF merge.
 
@@ -177,23 +196,27 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `notebook` | `pitch` | `scroll` | `slideshow` |
-|-------------------|------------|---------|----------|-------------|
-| `premium-dark` | ❌ incompatible (dark bg destroys ruled-paper texture) | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ❌ incompatible (full-bleed destroys margin line) | ❌ incompatible | ⚠️ partial | ❌ incompatible (full-bleed breaks rounded-card layout) |
-| `academic` | ✅ | ❌ incompatible (30% panel too narrow in pitch grid) | ✅ | ❌ incompatible (30% panel collapses in fullscreen) |
+| Style ↓ / Theme → | `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` |
+|-------------------|------------|---------|------------------|----------|-------------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial |
+| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
+
+> **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible
+>
+> **`pitch` (v1.0.0)** preserves its original incompatibilities. Use `pitch-enhanced` for full style compatibility with pitch aesthetics.
 
 ### Theme/Style Authoring
 
 To create a new theme or style, use the **T-Stage** or **Style Workflow** via the PM agent. See `skills/theme-authoring/SKILL.md`. The `scaffold-theme-style.ts` script stubs the correct file layout (region skeleton for themes, adapted copy for styles) and auto-regenerates the preview manifest.
 
-**`visual-heavy` special behavior** (RETAINED — scroll-partial / slideshow-incompatible): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well on scroll for short/visual slides (cover, divider, image-driven content); avoid for text-dense scroll slides. Incompatible with slideshow (full-bleed conflicts with rounded-card layout).
+**`visual-heavy` special behavior** (`⚠️ partial` for all PPT themes): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well for short/visual slides (cover, divider, image-driven content); avoid for text-dense slides. Background image may be partially clipped by card boundary in pitch-enhanced or base.css card layouts. Incompatible with original `pitch` (full-bleed conflicts with floating-card layout).
 
 ### 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` (v1.2.0) merges four layers at runtime via `deepMerge` (later layers win):
+`gen-slides-pdf.ts` (v1.4.0) merges four layers at runtime via `deepMerge` (later layers win):
 
 ```
 Layer 0 — shared : docs/html-themes/themes/_shared/layout_base.json       → region skeleton (all null) + 16:9 page + print defaults
@@ -202,7 +225,7 @@ Layer 2 — style  : docs/html-themes/styles/<style>/pdf_color_spec.json    → 
 Layer 3 — project: presentations/<project>/lecture-profile.md             → layout_overrides block
 ```
 
-Region values that are `null` in the theme spec stay `null` (Layer 0 never fills a region the theme intends to leave absent). Required regions referenced by `slide_types[type].regions` that resolve to `null` throw — there is no silent fallback. Per-project overrides (e.g., 4:3 ratio, CI accent color, higher bullet count) are set in `lecture-profile.md` → `layout_overrides` and take precedence over all theme/style defaults.
+Region values that are `null` in the theme spec stay `null` (Layer 0 never fills a region the theme intends to leave absent). Required regions referenced by `slide_types[type].regions` that resolve to `null` throw — there is no silent fallback. Per-project overrides (e.g., 4:3 ratio, CI accent color, higher bullet count, **PDF font sizes / line heights** via `layout_overrides.fonts`/`line_heights`) are set in `lecture-profile.md` → `layout_overrides` and take precedence over all theme/style defaults.
 
 ### Validation & Preview Workflow
 
@@ -239,7 +262,7 @@ title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
-  theme: scroll       # HTML structure: notebook | pitch | scroll | slideshow
+  theme: scroll       # HTML structure: notebook | pitch | pitch-enhanced | scroll | slideshow
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
 keywords: [Keyword 1, Keyword 2]
 instructor:
@@ -475,10 +498,10 @@ slideData[i].visualImage = "images/<stem>.png"
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
 12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, incompatible with notebook/pitch/slideshow. `premium-dark` is incompatible with `notebook` (dark background destroys ruled-paper texture).
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
-14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.2.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script.
+14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.4.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
 <!-- END VARIANT-INJECT -->
 
 ---
 
-*co-deck.context.md version: 2.8 — updated 2026-06-22: `gen-visual-images.ts` v3.0.0 (infrastructure-only; dynamic import of `presentations/<project>/diagram-defs.ts`); new `diagram-helpers.ts` v1.0.0 (shared utilities + palettes); Visual Diagram Pipeline section updated with v3.0.0 architecture. Previous: v2.7 — updated 2026-06-22: `measure-layout.ts` v1.1.0 — HTML pre-flight validation (structure, `slideData`, `.slide` count) before Playwright launches. Previous: v2.6 — updated 2026-06-22: `premium-dark` style added as DEFAULT (dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow; scroll-compatible primary + slideshow-compatible; derived from the `kyobo_ax_2026` executive deck); `classic/pdf_color_spec.json` corrected to a LIGHT palette (drift fix); `base.css` neutral `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`. Previous: v2.5 2026-06-21 region-based layout model (ADR-0045 Decision #2) — `pdf_layout_spec.json` v1.2.0 declares `regions.*` + `slide_types[type].regions` + `slide_type_overrides`; Layer 0 `themes/_shared/layout_base.json`; per-theme `theme.css` + `theme.json` `css_theme` field; CSS Load Order (base → theme.css → style.css); 3-layer → 4-layer PDF merge; validation/preview workflow (`validate-theme-styles.ts` v2.0.0, `generate-themes-manifest.ts` v1.0.0, `scaffold-theme-style.ts` v1.0.0); visual-heavy RETAINED (scroll-partial / slideshow-incompatible). Prior: v2.4 html-themes restructure (styles migrated to styles/<name>/style.css; base.css moved to styles/base.css).*
+*co-deck.context.md version: 3.0 — updated 2026-06-23: PPT transformation — notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); all PPT themes compatible with all 5 styles (visual-heavy: partial); compatibility matrix updated; lecture profile theme options updated. Previous: v2.9 — updated 2026-06-23: backport from co-deck2 instance — `gen-slides-pdf.ts` v1.4.0 (placeImageCover cover-crop, `layout_overrides` fonts/line_heights parser fix, wrapping-aware divider centering, Pretendard→MaruBuri font fallback); `gen-visual-images.ts` v3.0.1 (absent-`visual` target filter); stale version refs fixed (`gen-slides-pdf.ts` v1.2.0→v1.4.0; `gen-visual-images.ts` v2.1.0/v3.0.0→v3.0.1); `agents/pdf-export.md` v1.1.0 documents the new PDF-fitting levers.*

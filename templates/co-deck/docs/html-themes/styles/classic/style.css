@@ -10,6 +10,9 @@
  */
 
 :root {
+  /* Page background — neutral light gray framing the white card */
+  --bg-color:            #e8e8e8;
+
   /* Surface */
   --slide-bg:            #ffffff;
   --card-bg:             #ffffff;

@@ -10,6 +10,8 @@
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial workspace root PM established | lifecycle-manager |
 | 2026-05-30 | production | production | Updated Meeting Facilitation section to reflect dual execution modes | antigravity |
+| 2026-06-23 | production | production | ADR-0047: Migrated co-work/co-design pm.md to frontmatter-only extends (redundant body cleanup) | lifecycle-manager |
+| 2026-06-23 | production | production | ADR-0048: Migrated co-deck pm.md domain orchestration to AGENTS.md §4.2, converted pm.md to frontmatter-only. All 6 variants now follow identical 7-line minimal frontmatter pattern. | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -23,6 +25,8 @@
 - [x] Meeting facilitation role defined
 - [x] Platform detection logic documented
 - [x] Successfully validated in workspace root operations
+- [x] ADR-0047: All variant pm.md files are frontmatter-only extends (no redundant body)
+- [x] ADR-0048: AGENTS.md is SSOT for all variant workflow orchestration; pm.md is agent identity file only
 
 ## Dependencies
 
@@ -58,6 +62,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-05-30
-- **Last Reviewer**: antigravity
+- **Last Updated**: 2026-06-23
+- **Last Reviewer**: lifecycle-manager
 

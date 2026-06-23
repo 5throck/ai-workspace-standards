@@ -192,12 +192,15 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| <!-- TODO: deliverable type --> | Phase 1 | `architect` | high | |
-| <!-- TODO: deliverable type --> | Phase 4 | `code-writer` | low | |
-| <!-- TODO: deliverable type --> | Phase 3 | `designer` | medium | |
-| <!-- TODO: deliverable type --> | Phase 0 | `security-monitor` | medium | |
-| <!-- TODO: deliverable type --> | Phase 0 | `stack-setup` | low | |
-| <!-- TODO: deliverable type --> | Phase 4 | `test-runner` | medium | |
+<!-- REQUIRES DOMAIN DESIGN: fill when co-develop is promoted to active.
+     Each row maps a deliverable type to its required specialist agent and phase.
+     Reference agent definitions in agents/<name>.md for role descriptions. -->
+| <!-- deliverable type: architect --> | Phase TBD | `architect` | high | TBD |
+| <!-- deliverable type: code-writer --> | Phase TBD | `code-writer` | low | TBD |
+| <!-- deliverable type: designer --> | Phase TBD | `designer` | medium | TBD |
+| <!-- deliverable type: security-monitor --> | Phase TBD | `security-monitor` | medium | TBD |
+| <!-- deliverable type: stack-setup --> | Phase TBD | `stack-setup` | low | TBD |
+| <!-- deliverable type: test-runner --> | Phase TBD | `test-runner` | medium | TBD |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
@@ -394,12 +397,14 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
-| <!-- TODO: scenario for architect --> | `architect` | `pm` |
-| <!-- TODO: scenario for code-writer --> | `code-writer` | `pm` |
-| <!-- TODO: scenario for designer --> | `designer` | `pm` |
-| <!-- TODO: scenario for security-monitor --> | `security-monitor` | `pm` |
-| <!-- TODO: scenario for stack-setup --> | `stack-setup` | `pm` |
-| <!-- TODO: scenario for test-runner --> | `test-runner` | `pm` |
+<!-- REQUIRES DOMAIN DESIGN: fill when co-develop is promoted to active.
+     Each row defines which agent owns a scenario, to resolve dispatch ambiguity. -->
+| <!-- scenario: architect --> | `architect` | `pm` |
+| <!-- scenario: code-writer --> | `code-writer` | `pm` |
+| <!-- scenario: designer --> | `designer` | `pm` |
+| <!-- scenario: security-monitor --> | `security-monitor` | `pm` |
+| <!-- scenario: stack-setup --> | `stack-setup` | `pm` |
+| <!-- scenario: test-runner --> | `test-runner` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---

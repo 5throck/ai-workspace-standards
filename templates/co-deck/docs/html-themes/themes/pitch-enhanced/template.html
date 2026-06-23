@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <!--
-  slideshow/template.html — co-deck Slideshow Theme (PPT Presentation View)
-  =======================================================================
+  pitch-enhanced/template.html — co-deck Pitch-Enhanced Theme (PPT Presenter View)
+  ===========================================================================
   Rendering paradigm: PPT-style fullscreen single-slide with thumbnail panel,
-  transition effects (fade/push/zoom), presenter tools, and footer nav bar.
+  transition effects (fade/push/zoom), presenter tools (speaker notes + timer),
+  and footer navigation bar. Preserves the pitch theme's floating-card aesthetic
+  (viewport-relative card, rounded corners, content grid) while adding all PPT features.
 
   HOW TO USE:
     html-build reads this template and:
-    1. Injects <html data-theme="slideshow" data-style="<style>"> attributes
+    1. Injects <html data-theme="pitch-enhanced" data-style="<style>"> attributes
     2. Replaces <!-- INJECT:CSS --> with base.css + ppt-engine.css + theme.css + style.css links
     3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
     4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
 
   CONTENT RULES (from theme.json):
     - max 4 bullets per slide, max 28 chars in title
+    - all 5 styles compatible (visual-heavy: partial)
     - punchline type supported for impactful closing statements
 
   STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
 -->
-<html lang="ko" data-theme="slideshow" data-style="classic">
+<html lang="ko" data-theme="pitch-enhanced" data-style="classic">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +30,7 @@
   <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
   <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
   <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
-  <link rel="stylesheet" href="../../docs/html-themes/themes/slideshow/theme.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/pitch-enhanced/theme.css">
   <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
   -->
 </head>
@@ -83,35 +86,30 @@
     // imgEl, appendInline) are loaded via <script> inclusion or inlined here.
     // Each template includes the full ppt-engine.js before theme-specific code.
 
-    // ── Slideshow slide renderer ────────────────────────────────────────
-    // Uses base.css vocabulary (.slide-header, .slide-card, etc.) plus
-    // slideshow-specific punchline type.
+    // ── Pitch-enhanced slide renderer ──────────────────────────────────
+    // Preserves the pitch theme's native DOM vocabulary (slide-content,
+    // slide-left, right-panel, divider-left, divider-right, etc.) while
+    // adding punchline slide type support.
 
-    function buildBullets_slideshow(parent, arr) {
-      var container = el('div', 'bullets-container');
+    function buildBullets_pitchEnhanced(parent, arr) {
+      var ul = el('ul', 'slide-bullets');
       if (Array.isArray(arr)) {
-        arr.forEach(function(b) {
-          var item = el('div', 'bullet-item');
-          appendInline(item, b);
-          container.appendChild(item);
+        arr.forEach(function (b) {
+          var li = el('li');
+          appendInline(li, b);
+          ul.appendChild(li);
         });
       }
-      parent.appendChild(container);
+      parent.appendChild(ul);
     }
 
     function slideType(d) {
       if (d.isPunchlineSlide) return 'punchline';
-      if (d.isTitleSlide)     return 'cover';
-      if (d.isDividerSlide)   return 'divider';
+      if (d.isTitleSlide)    return 'title';
+      if (d.isDividerSlide)  return 'divider';
       if (d.isProfileSlide)   return 'profile';
-      if (d.isContactSlide)   return 'contact';
+      if (d.isContactSlide)  return 'contact';
       return 'standard';
-    }
-
-    function buildHeader(slide, section) {
-      var header = el('div', 'slide-header');
-      header.appendChild(el('span', 'section-label', section || ''));
-      slide.appendChild(header);
     }
 
     function buildSlideChildren(slide, data, index) {
@@ -120,72 +118,64 @@
       var title = data.title || '';
 
       if (type === 'punchline') {
-        var card = el('div', 'slide-card');
-        var content = el('div', 'slide-content');
-        content.appendChild(el('h2', 'slide-title', title));
-        card.appendChild(content);
-        slide.appendChild(card);
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
         return;
       }
-      if (type === 'cover') {
-        buildHeader(slide, section);
-        var card = el('div', 'slide-card');
-        var content = el('div', 'slide-content');
-        content.appendChild(el('h1', 'slide-title', title));
-        if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
-        if (data.meta != null) content.appendChild(el('p', 'cover-meta', data.meta));
-        card.appendChild(content);
-        slide.appendChild(card);
+      if (type === 'title') {
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) slide.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) slide.appendChild(el('p', 'slide-meta', data.meta));
         return;
       }
       if (type === 'divider') {
-        buildHeader(slide, section);
-        var card = el('div', 'slide-card');
-        var content = el('div', 'slide-content');
-        if (data.partNum != null) content.appendChild(el('div', 'part-number', data.partNum));
-        content.appendChild(el('h1', 'slide-title', title));
-        if (data.desc != null) content.appendChild(el('p', 'slide-subtitle', data.desc));
-        card.appendChild(content);
-        slide.appendChild(card);
+        var left = el('div', 'divider-left');
+        left.appendChild(el('span', 'divider-part', data.partNum || ''));
+        left.appendChild(el('h1', 'divider-title', title));
+        if (data.desc != null) left.appendChild(el('p', 'divider-desc', data.desc));
+        slide.appendChild(left);
+        var right = el('div', 'divider-right');
+        if (data.visualImage) right.appendChild(imgEl(data.visualImage, escapeText(title)));
+        slide.appendChild(right);
         return;
       }
       if (type === 'profile') {
-        buildHeader(slide, section);
-        var card = el('div', 'slide-card');
-        var content = el('div', 'slide-content');
-        content.appendChild(el('h1', 'slide-title', data.speakerName || title));
-        if (data.speakerTitle != null) content.appendChild(el('p', 'slide-subtitle', data.speakerTitle));
-        if (data.speakerBio != null) content.appendChild(el('p', 'slide-subtitle', data.speakerBio));
-        card.appendChild(content);
-        slide.appendChild(card);
+        slide.appendChild(el('div', 'profile-eyebrow', section));
+        slide.appendChild(el('div', 'profile-name', data.speakerName || title));
+        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
+        if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
         return;
       }
       if (type === 'contact') {
-        buildHeader(slide, section);
-        var card = el('div', 'slide-card');
-        var content = el('div', 'slide-content');
-        content.appendChild(el('h1', 'slide-title', title));
-        if (data.contactEmail) content.appendChild(el('p', 'slide-subtitle', data.contactEmail));
-        if (data.contactLinkedIn) content.appendChild(el('p', 'slide-subtitle', data.contactLinkedIn));
-        card.appendChild(content);
-        slide.appendChild(card);
+        slide.appendChild(el('div', 'contact-title', title));
+        var info = el('div', 'contact-info');
+        if (data.contactEmail) info.appendChild(el('div', null, data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', null, data.contactLinkedIn));
+        slide.appendChild(info);
         return;
       }
       // standard
-      buildHeader(slide, section);
-      var card = el('div', 'slide-card');
       var content = el('div', 'slide-content');
-      content.appendChild(el('h2', 'slide-title', title));
-      if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
-      buildBullets_slideshow(content, data.bullets);
-      card.appendChild(content);
+      var left = el('div', 'slide-left');
+      left.appendChild(el('div', 'slide-section', section));
+      left.appendChild(el('h2', 'slide-title', title));
+      buildBullets_pitchEnhanced(left, data.bullets);
+      content.appendChild(left);
 
+      var right = el('div', 'right-panel');
       if (data.visualImage) {
-        var panel = el('div', 'right-panel');
-        panel.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
-        card.appendChild(panel);
+        right.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
+      } else {
+        var visual = el('div', 'slide-visual');
+        visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
+        var display = el('div', 'visual-display', data.visualDisplay || '');
+        display.style.whiteSpace = 'pre-line';
+        visual.appendChild(display);
+        right.appendChild(visual);
       }
-      slide.appendChild(card);
+      content.appendChild(right);
+      slide.appendChild(content);
     }
 
     function renderSlide(data, index) {
@@ -200,11 +190,11 @@
       var container = document.getElementById('presentation');
       if (!container || typeof slideData === 'undefined') return;
       while (container.firstChild) container.removeChild(container.firstChild);
-      slideData.forEach(function(d, i) { container.appendChild(renderSlide(d, i)); });
+      slideData.forEach(function (d, i) { container.appendChild(renderSlide(d, i)); });
     }
 
     // ── Init ────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       initSlides();
       showSlide(0);
       initPPT({ transition: 'fade', showTimer: true, showThumbnails: true });

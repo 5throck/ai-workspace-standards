@@ -18,7 +18,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--bg-color, #0B0F19);
+  background: var(--bg-color);
   font-family: var(--font-body, 'Pretendard', 'Noto Sans KR', sans-serif);
   color: var(--text-primary, #F9FAFB);
 }

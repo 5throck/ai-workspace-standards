@@ -13,6 +13,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
 
 :root {
+  /* Page background — warm gray-cream complementing the cream surface */
+  --bg-color:            #e8e4dc;
+
   /* Surface — warm cream */
   --slide-bg:            #f8f6f0;
   --card-bg:             #f8f6f0;
@@ -92,8 +95,10 @@
   border-radius: 0.125rem;
 }
 
-/* Cover slide uses dark background with serif font */
-[data-style="academic"] .slide[data-type="cover"] .slide-title {
+/* Cover slide uses dark background with serif font
+   Supports both base.css 'cover' type and pitch/pitch-enhanced 'title' type */
+[data-style="academic"] .slide[data-type="cover"] .slide-title,
+[data-style="academic"] .slide[data-type="title"] .slide-title {
   font-size: 2rem;
   letter-spacing: -0.01em;
 }

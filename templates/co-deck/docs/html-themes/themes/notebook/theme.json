@@ -1,46 +1,48 @@
 {
+  "version": "2.0.0",
+  "_comment": "Notebook theme (PPT Outline View) — region schema (ADR-0045 Decision #2). v2.0.0: PPT transformation — ruled-paper removed, full style compatibility, visual region added, punchline slide type added.",
   "name": "notebook",
-  "version": "1.0.0",
-  "description": "Ruled-paper notebook layout with red margin line, chapter tabs, and print-friendly white background. Each slide looks like a handwritten study page — ruled lines, arrow bullets, red accent, and a footer with page number and chapter tabs. Optimised for reference material, workshop handouts, and study guides that learners revisit after the session.",
+  "version_num": "2.0.0",
+  "description": "PPT-style outline presentation with thumbnail navigation, transition effects, speaker script panel, and footer nav. Previously a ruled-paper notebook layout, now transformed to a clean PPT outline view while retaining its structured content density. Supports visual panel (right-side images).",
   "rendering": {
     "paradigm": "notebook",
     "slides_in_dom": "all (one active)",
-    "navigation": "prev/next buttons + chapter tab bar (footer) + arrow keys",
-    "progress_indicator": "page number (footer left) + chapter tabs (footer right)"
+    "navigation": "thumbnail panel + footer bar — prev/next, transition mode selector, script toggle, timer",
+    "progress_indicator": "progress bar (footer) + slide counter + timer"
   },
   "content_rules": {
     "max_bullets_per_slide": 4,
     "max_title_chars": 30,
-    "recommended_slide_count": "20-40",
-    "notes": "Ruled lines fix line rhythm — keep bullet text to 1-2 lines each. Titles up to 30 chars (sits cleanly on one ruled line). Max 4 bullets; each bullet should be a self-contained study note. Chapter tabs auto-populate from divider slides — include at least one divider per chapter. Content is print-friendly: avoid dark backgrounds inside slide cards."
+    "recommended_slide_count": "20-50",
+    "notes": "Outline-style layout supports structured content. Titles up to 30 chars. Max 4 bullets per slide. Visual images supported on right panel."
   },
-  "compatible_styles": ["classic", "minimal", "academic"],
-  "incompatible_styles": [
-    {
-      "name": "premium-dark",
-      "reason": "premium-dark dark navy background conflicts with notebook's white ruled-paper card design."
-    },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "partial_styles": [
     {
       "name": "visual-heavy",
-      "reason": "visual-heavy full-bleed background image destroys the ruled-paper texture and margin line."
+      "reason": "Full-bleed background images work for cover/divider; text-heavy outline slides better with classic/academic."
     }
   ],
+  "incompatible_styles": [],
   "recommended_structure": {
     "pattern": "Cover → [Divider → 3-5 Content] × N → Summary",
-    "audience_fit": ["student", "practitioner"],
-    "notes": "Divider slides auto-generate chapter tab labels. Cover uses centered layout with decorative rule. Summary slide uses contact/closing type."
+    "audience_fit": ["student", "practitioner", "general"],
+    "notes": "Divider slides mark chapter sections. Outline-style is well-suited for structured, information-dense presentations."
   },
   "requires_slideData": true,
   "toc_required": false,
   "slide_types": {
     "title": true,
     "divider": true,
+    "punchline": true,
     "profile": true,
     "standard": true,
     "contact": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/notebook/theme.css",
   "added": "2026-06-22",
+  "modified": "2026-06-23",
   "author": "co-deck"
 }

@@ -1,0 +1,46 @@
+{
+  "name": "pitch-enhanced",
+  "version": "2.0.0",
+  "description": "PPT-style presenter view preserving pitch's floating-card aesthetic. Adds thumbnail navigation panel, transition effects (fade/push/zoom), presenter timer, and speaker notes. All 5 styles compatible. Cloned from pitch theme with full PPT feature set for easy rollback.",
+  "rendering": {
+    "paradigm": "ppt-presenter",
+    "slides_in_dom": "all (one active)",
+    "navigation": "PPT footer bar — prev/next + transition mode selector (fade/push/zoom) + thumbnail panel + script toggle + timer",
+    "progress_indicator": "progress bar (footer) + slide counter + thumbnail highlight"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 4,
+    "max_title_chars": 28,
+    "recommended_slide_count": "20-50",
+    "notes": "Same content rules as pitch. Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets. Divider slides must have a compelling image. Punchline type supported for impactful closing statements."
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "incompatible_styles": [],
+  "partial_compatibility": [
+    {
+      "name": "visual-heavy",
+      "reason": "visual-heavy full-bleed background-image on .slide is partially visible in floating-card layout (card clips overflow). Background gradient works fully."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → Speaker Intro → Agenda → [Divider → 3-5 Content] × N → Punchline → Contact",
+    "audience_fit": ["practitioner", "general"],
+    "notes": "Same recommended structure as pitch, with added punchline type for impactful closing statements."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "profile": true,
+    "standard": true,
+    "contact": true,
+    "punchline": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
+  "css_theme": "docs/html-themes/themes/pitch-enhanced/theme.css",
+  "added": "2026-06-23",
+  "author": "co-deck",
+  "based_on": "pitch v1.0.0"
+}

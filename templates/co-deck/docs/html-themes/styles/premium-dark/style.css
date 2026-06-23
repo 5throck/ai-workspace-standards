@@ -9,6 +9,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
 
 :root {
+  /* Page background — dark canvas matching the cover gradient core */
+  --bg-color:            #0B0F19;
+
   /* Surface */
   --slide-bg:            #111827;
   --slide-border:        1px solid #1F2937;

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Records and governs the lifecycle of agents and skills.
+Records and governs the lifecycle of agents, skills, and scripts.
 
 ## File Structure
 
@@ -16,6 +16,10 @@ docs/lifecycle/
 │   ├── auditor.md
 │   ├── docs-writer.md
 │   ├── lifecycle-manager.md
+│   └── ...
+├── scripts/
+│   ├── validate-pm-extends.md
+│   ├── new-project.md
 │   └── ...
 ├── skills/
 │   ├── skill-lifecycle-manager.md

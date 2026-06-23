@@ -7,6 +7,9 @@
  */
 
 :root {
+  /* Page background — soft gray to frame the airy off-white card */
+  --bg-color:            #e8e8e8;
+
   /* Surface — off-white for warmth */
   --slide-bg:            #fafafa;
   --card-bg:             #fafafa;

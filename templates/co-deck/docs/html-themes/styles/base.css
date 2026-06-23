@@ -13,6 +13,10 @@
 
 /* ── Color Palette ──────────────────────────────────────────────── */
 :root {
+  /* Page background — canvas behind the floating slide card.
+     Consumed by theme body rules as var(--bg-color); styles override per palette. */
+  --bg-color:            #e8e8e8;
+
   /* Slide surface */
   --slide-bg:            #ffffff;
   --slide-border:        none;
@@ -107,7 +111,7 @@
 html, body {
   width: 100%;
   height: 100%;
-  background: #e8e8e8;
+  background: var(--bg-color, #e8e8e8);
   font-family: var(--font-family);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;

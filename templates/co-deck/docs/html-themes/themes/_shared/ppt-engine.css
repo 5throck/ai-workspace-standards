@@ -1,0 +1,350 @@
+/*
+  ppt-engine.css — PPT-style common UI foundation
+  ================================================
+  Shared CSS for all PPT-transformed themes. Provides:
+    - Thumbnail navigation panel (left sidebar with scaled slide clones)
+    - Transition effects (fade, push left/right, zoom/morph)
+    - Presenter tools panel (speaker notes)
+    - Footer navigation bar (progress + counter + controls)
+    - Presenter timer UI
+
+  Load order: base.css → ppt-engine.css → theme.css → style.css
+  All visual values use CSS variables — never hardcode colors.
+*/
+
+/* ─── PPT Layout: Body ──────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+  font-family: var(--font-body, 'Pretendard', 'Noto Sans KR', sans-serif);
+  color: var(--text-primary);
+}
+
+/* ─── Main viewport (above footer, beside thumbnails) ──────────────────── */
+.ppt-main {
+  flex: 1;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── Presentation container (centers the active slide) ─────────────────── */
+.presentation-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+/* ─── Thumbnail navigation panel ────────────────────────────────────────── */
+.thumbnail-panel {
+  width: 180px;
+  flex-shrink: 0;
+  background: var(--thumb-panel-bg, rgba(0, 0, 0, 0.85));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid var(--thumb-panel-border, rgba(255,255,255,0.08));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.3s ease,
+              padding 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.thumbnail-panel.hidden {
+  width: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+.thumbnail-panel::-webkit-scrollbar { width: 4px; }
+.thumbnail-panel::-webkit-scrollbar-track { background: transparent; }
+.thumbnail-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* Individual thumbnail item */
+.thumbnail-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.thumbnail-item:hover {
+  border-color: var(--thumb-hover-border, rgba(255,255,255,0.3));
+}
+
+.thumbnail-item.active {
+  border-color: var(--accent-color, #D97706);
+  box-shadow: 0 0 0 1px var(--accent-color, #D97706);
+}
+
+/* Scaled slide clone inside thumbnail */
+.thumbnail-item .thumb-slide {
+  position: absolute;
+  inset: 0;
+  transform: scale(0.14);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+/* Thumbnail label (slide number) */
+.thumbnail-item .thumb-label {
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  font-size: 8px;
+  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.55);
+  padding: 0 3px;
+  border-radius: 2px;
+  line-height: 1.4;
+  z-index: 2;
+}
+
+/* ─── Slide card (shared base for PPT themes) ──────────────────────────── */
+.slide {
+  position: absolute;
+  width: 92%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--slide-radius, 4px);
+  background: var(--slide-bg);
+  box-shadow: var(--slide-shadow, 0 4px 24px rgba(0,0,0,0.3), 0 0 0 1px var(--card-border, rgba(255,255,255,0.06)));
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.slide.active {
+  pointer-events: auto;
+}
+
+/* ─── Transition: Fade (default) ───────────────────────────────────────── */
+.transition-fade .slide {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.transition-fade .slide.active {
+  opacity: 1;
+}
+
+/* ─── Transition: Push (left/right) ─────────────────────────────────────── */
+.transition-push .slide {
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s ease;
+  transform: translateX(100%);
+}
+
+.transition-push .slide.exit-left {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.transition-push .slide.exit-right {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.transition-push .slide.enter-left {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.transition-push .slide.enter-right {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.transition-push .slide.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* ─── Transition: Zoom/Morph ────────────────────────────────────────────── */
+.transition-zoom .slide {
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.5s ease;
+  transform: scale(0.85);
+}
+
+.transition-zoom .slide.exit-zoom-out {
+  transform: scale(1.15);
+  opacity: 0;
+}
+
+.transition-zoom .slide.exit-zoom-in {
+  transform: scale(0.7);
+  opacity: 0;
+}
+
+.transition-zoom .slide.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ─── Footer navigation bar ───────────────────────────────────────────── */
+.ppt-footer {
+  background: var(--footer-bg, rgba(17, 24, 39, 0.88));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--footer-border, rgba(255,255,255,0.07));
+  padding: 0.6rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+.footer-left  { display: flex; align-items: center; gap: 1rem; }
+.footer-right { display: flex; align-items: center; gap: 0.75rem; }
+
+.slide-counter {
+  font-size: 0.72rem;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  letter-spacing: 0.05em;
+  min-width: 48px;
+  white-space: nowrap;
+}
+
+/* ─── Progress bar ──────────────────────────────────────────────────────── */
+.progress-bar-wrap {
+  flex: 1;
+  height: 3px;
+  background: var(--progress-track, rgba(255,255,255,0.1));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent-color, #D97706);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Footer buttons ───────────────────────────────────────────────────── */
+.footer-btn {
+  background: none;
+  border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  color: var(--text-muted, rgba(255,255,255,0.5));
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.footer-btn:hover,
+.footer-btn.active {
+  background: var(--accent-color, #D97706);
+  color: #fff;
+  border-color: var(--accent-color, #D97706);
+}
+
+.nav-btn {
+  background: var(--nav-btn-bg, rgba(255,255,255,0.06));
+  border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover { background: var(--nav-btn-hover, rgba(255,255,255,0.14)); }
+
+/* ─── Transition mode selector buttons ──────────────────────────────────── */
+.transition-btn {
+  background: none;
+  border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.transition-btn:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+.transition-btn.active { background: var(--accent-color, #D97706); color: #fff; border-color: var(--accent-color, #D97706); }
+
+/* ─── Script panel (speaker notes) ─────────────────────────────────────── */
+.script-panel {
+  position: fixed;
+  bottom: 3.6rem;
+  left: 5%;
+  right: 5%;
+  background: var(--glass-bg, rgba(17, 24, 39, 0.92));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border, rgba(255,255,255,0.1));
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--text-secondary, rgba(255,255,255,0.75));
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.script-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.script-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color, #D97706);
+  margin-bottom: 0.4rem;
+}
+
+/* ─── Presenter timer ──────────────────────────────────────────────────── */
+.presenter-timer {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  min-width: 52px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.presenter-timer.running {
+  color: var(--accent-color, #D97706);
+}

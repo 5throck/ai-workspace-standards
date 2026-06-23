@@ -1,34 +1,33 @@
 {
+  "version": "2.0.0",
+  "_comment": "Slideshow theme (PPT Presentation View) — region schema (ADR-0045 Decision #2). v2.0.0: PPT transformation — full style compatibility, profile/contact slide_types added, content_rules relaxed (max_bullets 3→4, max_title_chars 20→28).",
   "name": "slideshow",
-  "version": "1.0.0",
-  "description": "Fullscreen single-slide presentation with animated prev/next navigation. One slide active at a time; slides transition with CSS opacity/transform animations.",
+  "version_num": "2.0.0",
+  "description": "PPT-style fullscreen single-slide presentation with thumbnail navigation panel, transition effects (fade/push/zoom), speaker script panel, and footer navigation bar. One slide active at a time with smooth animated transitions. Includes punchline slide type for impactful closing statements.",
   "rendering": {
     "paradigm": "slideshow",
     "slides_in_dom": "all (one active)",
-    "navigation": "prev/next buttons + keyboard arrows",
-    "progress_indicator": "slide counter (N / Total)"
+    "navigation": "thumbnail panel + footer bar — prev/next, transition mode selector, script toggle, timer",
+    "progress_indicator": "progress bar (footer) + slide counter + timer"
   },
   "content_rules": {
-    "max_bullets_per_slide": 3,
-    "max_title_chars": 20,
-    "recommended_slide_count": "20-40",
-    "notes": "Fullscreen layout demands one message per slide. Short titles, minimal bullets. Dense text breaks the visual rhythm. Prefer visuals over text blocks."
+    "max_bullets_per_slide": 4,
+    "max_title_chars": 28,
+    "recommended_slide_count": "20-50",
+    "notes": "Fullscreen layout suits concise messaging. Titles up to 28 chars. Max 4 bullets per slide. Punchline slides for impactful single-statement closers. Speaker script field shown in presenter panel."
   },
-  "compatible_styles": ["classic", "minimal", "premium-dark"],
-  "incompatible_styles": [
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "partial_styles": [
     {
       "name": "visual-heavy",
-      "reason": "visual-heavy uses full-bleed CSS background-image which conflicts with slideshow's rounded-card layout (border-radius clips the bleed). Use a slideshow-specific visual style instead."
-    },
-    {
-      "name": "academic",
-      "reason": "academic's 30% illustration side panel shrinks to unreadable width in fullscreen slideshow aspect ratio."
+      "reason": "Full-bleed background images may conflict with rounded-card layout. Works for cover/divider slides; avoid for text-dense content."
     }
   ],
+  "incompatible_styles": [],
   "recommended_structure": {
     "pattern": "Cover → [Topic → 2-3 Detail → Punchline] × N → Contact",
     "audience_fit": ["general", "practitioner", "undergraduate"],
-    "notes": "Optimized for fast transitions and presentations. Each 'chapter' = one topic + 2-3 detail slides + a single strong punchline. Avoid long text blocks."
+    "notes": "Optimized for fast transitions. Each 'chapter' = one topic + detail slides + punchline. Use speaker script for talking points."
   },
   "requires_slideData": true,
   "toc_required": false,
@@ -36,10 +35,14 @@
     "title": true,
     "divider": true,
     "punchline": true,
-    "standard": true
+    "profile": true,
+    "standard": true,
+    "contact": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/slideshow/theme.css",
   "added": "2026-06-21",
+  "modified": "2026-06-23",
   "author": "co-deck"
 }

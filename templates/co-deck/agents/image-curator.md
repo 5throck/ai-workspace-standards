@@ -1,6 +1,6 @@
 ---
 name: image-curator
-version: "1.1.0"
+version: "1.2.0"
 last_updated: "2026-06-22"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
@@ -50,6 +50,14 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 - Report any slides where no suitable image was found (leave slot empty, do not fabricate)
 - Request Gate 3.5 review: show manifest summary before handing off to html-build
 
+### Anti-Duplication & Aspect Matching (mandatory)
+
+Two quality checks apply to EVERY downloaded image, in addition to the slug reuse check above:
+
+- **Content-hash dedup (prevents duplicate images across the deck).** After downloading, compute a SHA-256 hash of the image bytes (record it as `content_hash`) and compare it against every other image already in THIS deck's `image-manifest.json`. If the same hash already exists under a different slide/slug, **reject the candidate and re-search** — do NOT keep a second copy. The slug reuse check alone is insufficient: it only catches identical *filenames*, not identical *content* filed under different slugs. This is the root cause of real bugs where two slides end up displaying the same picture.
+- **Aspect-ratio matching (prevents poor panel fit).** Before accepting a candidate, compare its aspect ratio (width ÷ height) to the target for this slide's `theme × image_role` (see Aspect-Ratio Targets below). Prefer candidates within ±30 % of the target. If every license-clear candidate deviates by more than 30 %, pick the closest one and proceed — the Gate 3.5 validator will emit a WARN so the mismatch is visible. (`object-fit: contain` renders a mismatch gracefully via letterboxing, but a close match always looks better.)
+- Record the actual `width`, `height`, `aspect_ratio`, and `content_hash` of every downloaded image in the manifest.
+
 ## Output Format
 
 **Shared image pool:** `presentations/assets/images/<slug>.<ext>`
@@ -75,6 +83,10 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
       "commercial_use": true,
       "attribution_required": false,
       "photographer": "Name",
+      "content_hash": "sha256:<64 hex of the downloaded image bytes>",
+      "width": 1920,
+      "height": 1080,
+      "aspect_ratio": 1.78,
       "reused": false
     }
   ],
@@ -139,11 +151,27 @@ For each result:
 
 | `image_role` | Meaning | Search strategy |
 |-------------|---------|-----------------|
-| `background` | Full-bleed slide background | Wide, atmospheric, low-text-interference |
-| `illustrative` | Right-panel concept image | Clear subject, clean background |
+| `background` | Full-bleed slide background | Wide, atmospheric, low-text-interference; landscape (~1.78) |
+| `illustrative` | Right-panel concept image | Clear subject, clean background; match orientation to the theme's right-panel aspect — derive from `pdf_layout_spec.json` → `image_zones.standard` (see below) |
 | `data-viz` | Chart or infographic | Search for real chart → fallback: text panel |
 | `portrait` | Speaker/person photo | Use instructor info from lecture-profile |
 | `none` | No image for this slide | Skip — do not download |
+
+## Aspect-Ratio Targets by Theme × Role
+
+> **SSOT**: Derive aspect-ratio targets from `docs/html-themes/themes/<theme>/pdf_layout_spec.json` → `image_zones` at runtime. Do NOT hardcode per-theme targets here — the spec is the single source of truth.
+>
+> **How to read the spec:**
+> - `image_zones.standard` → `illustrative` right-panel target: `aspect = w_pct / h_pct` (page-relative fractions cancel to effective aspect ratio)
+> - `image_zones.divider` → `divider` right-image target: same calculation
+> - For `background` role (full-bleed): always target ~1.78 (16:9 landscape)
+>
+> **Common defaults** (derived from current specs):
+> - `illustrative` (right panel): themes with a content grid → typically portrait (~0.42 of slide width ÷ full height ≈ 0.42 × 16/9 ≈ 0.73); themes without a right panel → N/A (use `background` instead)
+> - `background`: always landscape ~1.78
+> - `divider`: typically square-ish ~1.0 or full-bleed landscape
+>
+> **If a new theme is added**: read its `pdf_layout_spec.json` → `image_zones` to determine the target. No agent file updates needed.
 
 ## Query Refinement Rules
 
@@ -164,6 +192,23 @@ Refine raw `image_query` from slide_deck.md:
 - Maximum image file size: 2MB per slide (resize if needed)
 - Always create `presentations/assets/images/` directory before downloading
 
+## Gate 3.5 Validation
+
+Before requesting Gate 3.5 review and handing off to `html-build`, run the image-manifest validator:
+
+```bash
+bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>
+```
+
+The validator recomputes a SHA-256 content hash and reads dimensions for every image referenced in the manifest, then checks:
+
+- **ERROR** — any image file missing or unreadable.
+- **ERROR** — two or more slides sharing the same `content_hash` (duplicate image across the deck). This is a hard block: re-curate one of the duplicates before handoff.
+- **WARN** — an entry missing `content_hash` / `width` / `height` / `aspect_ratio` (regenerate the manifest to populate them).
+- **WARN** — an image whose aspect ratio deviates more than 30 % from its `theme × image_role` target.
+
+**Handoff to `html-build` is blocked until the validator exits 0** (no ERRORs; WARNs reviewed). See the Gate 3.5 entry in `pm.md`.
+
 ## Parallel Sub-Agent Dispatch
 
 For batches of **3 or more slides** requiring new image downloads, dispatch sub-agents in parallel rather than downloading sequentially. This reduces Stage 3.5 wall-clock time significantly.
@@ -171,7 +216,7 @@ For batches of **3 or more slides** requiring new image downloads, dispatch sub-
 ### When to parallelize
 
 - 3+ slides need new downloads (not already in shared pool)
-- All image queries are independent (always true — slides don't depend on each other's images)
+- All image **queries** are independent — slides don't depend on each other's queries, so downloads can run in parallel. But image **results must be unique across the deck**: two slides must never display the same picture (see Anti-Duplication & Aspect Matching above). Parallel downloads must still pass the content-hash dedup check before `image-manifest.json` is written.
 
 ### Dispatch pattern
 

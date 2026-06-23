@@ -1,42 +1,48 @@
 {
+  "version": "2.0.0",
+  "_comment": "Scroll theme (PPT Reading View) — region schema (ADR-0045 Decision #2). v2.0.0: PPT transformation — vertical scroll removed, single-slide active mode, toc_required=false, punchline type added.",
   "name": "scroll",
-  "version": "1.0.0",
-  "description": "Vertical scroll layout — all slides rendered in DOM simultaneously, navigated by scrolling with a collapsible left TOC panel and top progress bar.",
+  "version_num": "2.0.0",
+  "description": "PPT-style reading presentation with highest content density (5 bullets, 30 char titles, 120 char body). Thumbnail navigation, transition effects, speaker script panel, and footer nav. Previously a vertical scroll layout, now transformed to a PPT reading view while retaining its generous content constraints and well-designed PDF region layout.",
   "rendering": {
     "paradigm": "scroll",
-    "slides_in_dom": "all",
-    "navigation": "scroll + TOC",
-    "progress_indicator": "top progress bar"
+    "slides_in_dom": "all (one active)",
+    "navigation": "thumbnail panel + footer bar — prev/next, transition mode selector, script toggle, timer",
+    "progress_indicator": "progress bar (footer) + slide counter + timer"
   },
   "content_rules": {
     "max_bullets_per_slide": 5,
     "max_title_chars": 30,
     "recommended_slide_count": "30-60",
-    "notes": "Scroll layout allows higher information density per slide. Longer explanations and sub-bullet nesting are acceptable."
+    "notes": "Reading view allows the highest information density. Titles up to 30 chars. Max 5 bullets per slide. Body text up to 120 chars per slide. Best for deep-dive content."
   },
-  "compatible_styles": ["premium-dark", "classic", "minimal", "academic", "visual-heavy"],
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
   "partial_styles": [
     {
       "name": "visual-heavy",
-      "reason": "Works well for short/visual slides (cover, divider, image-driven content). Full-bleed background images may have sizing issues on scroll's variable-height long content slides; prefer classic/academic/minimal for text-dense slides."
+      "reason": "Full-bleed background images work well for cover/divider/visual slides. For text-dense content, prefer classic/academic/minimal."
     }
   ],
   "incompatible_styles": [],
   "recommended_structure": {
     "pattern": "Cover → Speaker Intro → [Part Divider → 8-12 Content → Summary] × N → Contact",
     "audience_fit": ["graduate", "practitioner", "academic"],
-    "notes": "Scroll layout supports deep dives. Chapter dividers + summary slides per part work well. TOC panel is always visible."
+    "notes": "Reading view supports deep dives with high content density. Divider slides mark chapter sections."
   },
   "requires_slideData": true,
-  "toc_required": true,
+  "toc_required": false,
   "slide_types": {
     "title": true,
     "divider": true,
-    "punchline": false,
-    "standard": true
+    "punchline": true,
+    "standard": true,
+    "profile": true,
+    "contact": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/scroll/theme.css",
   "added": "2026-06-21",
+  "modified": "2026-06-23",
   "author": "co-deck"
 }

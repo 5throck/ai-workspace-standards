@@ -1,31 +1,21 @@
 <!DOCTYPE html>
 <!--
-  notebook/template.html — co-deck Notebook Theme Skeleton
-  =========================================================
-  Rendering paradigm: ruled-paper notebook card, fullscreen centered.
-  Navigation: prev/next buttons + chapter tab bar (footer) + arrow keys.
-  Transition: opacity fade, 0.35s ease.
+  notebook/template.html — co-deck Notebook Theme (PPT Outline View)
+  ================================================================
+  Rendering paradigm: PPT-style single-slide with thumbnail panel,
+  transition effects, presenter tools, and footer nav. Replaces the
+  original ruled-paper notebook layout with a clean PPT outline view.
 
   HOW TO USE:
     html-build reads this template and:
     1. Injects <html data-theme="notebook" data-style="<style>"> attributes
-    2. Replaces <!-- INJECT:CSS --> with base.css + theme.css + style.css <link> tags
+    2. Replaces <!-- INJECT:CSS --> with base.css + ppt-engine.css + theme.css + style.css
     3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
     4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
-       defined in this template's <script>. html-build injects slideData only and
-       MUST NOT hand-author .slide divs — leave the presentation container empty.
 
   CONTENT RULES (from theme.json):
     - max 4 bullets per slide, max 30 chars in title
-    - ruled lines fix rhythm — keep each bullet to 1-2 lines
-    - divider slides auto-generate chapter tab labels
-
-  SLIDE STRUCTURE per type:
-    title    → isTitleSlide:true   — centered cover (cover-rule + eyebrow + title + subtitle)
-    divider  → isDividerSlide:true — left-margin indent, left accent border title, desc
-    profile  → isProfileSlide:true — centered speaker intro
-    contact  → isContactSlide:true — centered contact info
-    standard → (default)           — gutter + content (eyebrow, title underline, bullets)
+    - divider slides mark chapter boundaries
 
   STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
 -->
@@ -35,192 +25,166 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><!-- INJECT:title --></title>
   <!-- INJECT:CSS -->
-  <!-- Example load order (replaced by html-build): foundation → theme → style.
-  <link rel="stylesheet" href="../../styles/base.css">
-  <link rel="stylesheet" href="../../themes/notebook/theme.css">
-  <link rel="stylesheet" href="../../styles/classic/style.css">
+  <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/notebook/theme.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
   -->
 </head>
-<body>
+<body class="transition-fade">
 
-  <div class="presentation-container" id="presentation">
-    <!-- INJECT:slides -->
-    <!--
-      RUNTIME RENDERING: each .slide div is constructed at runtime by
-      renderSlide(data, index) / initSlides() defined in this template's <script>.
-      html-build injects slideData only (via INJECT:slideData) and MUST NOT
-      hand-author .slide divs here — leave this container empty.
+  <!-- Main layout: thumbnails + presentation -->
+  <div class="ppt-main">
+    <!-- Thumbnail navigation panel -->
+    <aside class="thumbnail-panel" id="thumbnail-panel" aria-label="슬라이드 썸네일">
+      <!-- Populated by ThumbnailRenderer.init() -->
+    </aside>
 
-      Each .slide rendered by renderSlide(data, index) follows this structure:
-
-      ── title (isTitleSlide) ──────────────────────────────────────
-      <div class="slide active" id="slide-0" data-type="title">
-        <div class="slide-inner">
-          <div class="cover-eyebrow">{data.meta}</div>
-          <div class="cover-rule"></div>
-          <div class="cover-title">{data.title}</div>
-          <div class="cover-subtitle">{data.subtitle}</div>
-        </div>
-      </div>
-
-      ── divider (isDividerSlide) ───────────────────────────────────
-      <div class="slide" id="slide-N" data-type="divider">
-        <div class="slide-inner">
-          <div class="divider-part">{data.partNum} / {data.section}</div>
-          <div class="divider-title">{data.title}</div>
-          <div class="divider-desc">{data.desc}</div>
-        </div>
-      </div>
-
-      ── standard (default) ────────────────────────────────────────
-      <div class="slide" id="slide-N" data-type="standard">
-        <div class="slide-inner">
-          <div class="slide-body">
-            <div class="slide-gutter">
-              <span class="gutter-num">{slideIndex}</span>
-            </div>
-            <div class="slide-content">
-              <div class="slide-eyebrow">{data.section}</div>
-              <div class="slide-title">{data.title}</div>
-              <ul class="slide-bullets">
-                <li>{bullet}</li> ...
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="notebook-footer">
-          <div class="nb-page">p. {pageNum}</div>
-          <div class="nb-tabs" id="nb-tabs-N"><!-- populated by buildTabs() --></div>
-        </div>
-      </div>
-    -->
+    <!-- Presentation area -->
+    <div class="presentation-container" id="presentation">
+      <!-- INJECT:slides -->
+    </div>
   </div>
 
-  <button id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
-  <button id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+  <!-- Script panel (speaker notes) -->
+  <div class="script-panel" id="script-panel" role="note" aria-live="polite">
+    <div class="script-label">발표자 노트</div>
+    <div id="script-text"></div>
+  </div>
+
+  <!-- Footer bar -->
+  <footer class="ppt-footer" id="ppt-footer">
+    <div class="footer-left">
+      <button class="footer-btn" id="thumb-toggle-btn" onclick="ThumbnailNav.toggle()" aria-label="썸네일 패널" title="썸네일">▦ 썸네일</button>
+      <span class="slide-counter" id="slide-counter">1 / 1</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <button class="transition-btn" data-mode="fade" onclick="TransitionEngine.setMode('fade')" title="Fade 전환">Fade</button>
+      <button class="transition-btn" data-mode="push" onclick="TransitionEngine.setMode('push')" title="Push 전환">Push</button>
+      <button class="transition-btn" data-mode="zoom" onclick="TransitionEngine.setMode('zoom')" title="Zoom 전환">Zoom</button>
+      <button class="footer-btn" id="script-btn" onclick="PresenterTools.toggleScript()" aria-label="발표자 노트" title="발표자 노트">📝 노트</button>
+      <span class="presenter-timer" id="timer-display">00:00</span>
+      <button class="footer-btn" id="timer-btn" onclick="PresenterTools.toggleTimer()" aria-label="타이머" title="타이머">⏱</button>
+      <button class="nav-btn" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
+      <button class="nav-btn" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+    </div>
+  </footer>
 
   <script>
     // <!-- INJECT:slideData -->
     // const slideData = [ ... ];  <-- replaced by html-build
 
-    // ── Slide renderer (authoritative — html-build injects slideData only) ─────
-    // The .slide DOM is built at runtime by renderSlide()/initSlides() below.
-    // html-build must NOT hand-author .slide divs — it injects slideData (INJECT:slideData)
-    // and CSS links only, and leaves the presentation container empty. The renderer
-    // constructs DOM with createElement + textContent (text auto-escaped).
+    // ── Notebook (PPT Outline) slide renderer ───────────────────────────
+    // Uses base.css vocabulary. Supports title, divider, profile, contact,
+    // punchline, and standard slides. Visual panel on right side (new).
 
-    // Strip tags for img alt / text fallbacks.
-    function escapeText(s) {
-      return String(s == null ? '' : s).replace(/<\/?[^>]+(>|$)/g, '');
-    }
-
-    // createElement helper: set className + (optionally) textContent, return node.
-    function el(tag, cls, text) {
-      const node = document.createElement(tag);
-      if (cls) node.className = cls;
-      if (text != null) node.textContent = text;
-      return node;
-    }
-
-    // createElement('img'); set .src + .alt; return node.
-    function img(src, alt) {
-      const node = document.createElement('img');
-      node.src = src || '';
-      node.alt = alt || '';
-      return node;
-    }
-
-    // Append inline text with **bold** -> <strong>, all text via textContent (auto-escape).
-    function appendInline(parent, s) {
-      const parts = String(s == null ? '' : s).split(/\*\*(.*?)\*\*/g);
-      for (let i = 0; i < parts.length; i++) {
-        if (i % 2 === 0) parent.appendChild(document.createTextNode(parts[i]));
-        else parent.appendChild(el('strong', null, parts[i]));
-      }
-    }
-
-    // Build the notebook bullet list. arr: array of bullet strings.
-    function buildBullets(parent, arr) {
-      const ul = el('ul', 'slide-bullets');
+    function buildBullets_notebook(parent, arr) {
+      var container = el('div', 'bullets-container');
       if (Array.isArray(arr)) {
-        arr.forEach(function (b) {
-          const li = el('li');
-          appendInline(li, b);
-          ul.appendChild(li);
+        arr.forEach(function(b) {
+          var item = el('div', 'bullet-item');
+          appendInline(item, b);
+          container.appendChild(item);
         });
       }
-      parent.appendChild(ul);
+      parent.appendChild(container);
     }
 
-    // Map slideData flags → notebook data-type vocabulary.
     function slideType(d) {
-      if (d.isTitleSlide)    return 'title';
-      if (d.isDividerSlide)  return 'divider';
-      if (d.isProfileSlide)  return 'profile';
-      if (d.isContactSlide)  return 'contact';
+      if (d.isPunchlineSlide) return 'punchline';
+      if (d.isTitleSlide)     return 'cover';
+      if (d.isDividerSlide)   return 'divider';
+      if (d.isProfileSlide)   return 'profile';
+      if (d.isContactSlide)   return 'contact';
       return 'standard';
     }
 
-    // Notebook-native slide children (classes styled by notebook/theme.css).
-    // Appends child nodes onto the slide element; returns nothing.
-    function buildSlideChildren(slide, data, index) {
-      const type = slideType(data);
-      const inner = el('div', 'slide-inner');
+    function buildHeader(slide, section) {
+      var header = el('div', 'slide-header');
+      header.appendChild(el('span', 'section-label', section || ''));
+      slide.appendChild(header);
+    }
 
-      if (type === 'title') {
-        inner.appendChild(el('div', 'cover-eyebrow', data.meta || ''));
-        inner.appendChild(el('div', 'cover-rule'));
-        inner.appendChild(el('div', 'cover-title', data.title || ''));
-        if (data.subtitle != null) inner.appendChild(el('div', 'cover-subtitle', data.subtitle));
-        slide.appendChild(inner);
+    function buildSlideChildren(slide, data, index) {
+      var type = slideType(data);
+      var section = data.section || '';
+      var title = data.title || '';
+
+      if (type === 'punchline') {
+        var card = el('div', 'slide-card');
+        var content = el('div', 'slide-content');
+        content.appendChild(el('h2', 'slide-title', title));
+        card.appendChild(content);
+        slide.appendChild(card);
+        return;
+      }
+      if (type === 'cover') {
+        buildHeader(slide, section);
+        var card = el('div', 'slide-card');
+        var content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) content.appendChild(el('p', 'cover-meta', data.meta));
+        card.appendChild(content);
+        slide.appendChild(card);
         return;
       }
       if (type === 'divider') {
-        inner.appendChild(el('div', 'divider-part', (data.partNum || '') + ' / ' + (data.section || '')));
-        inner.appendChild(el('div', 'divider-title', data.title || ''));
-        if (data.desc != null) inner.appendChild(el('div', 'divider-desc', data.desc));
-        slide.appendChild(inner);
+        buildHeader(slide, section);
+        var card = el('div', 'slide-card');
+        var content = el('div', 'slide-content');
+        if (data.partNum != null) content.appendChild(el('div', 'part-number', data.partNum));
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.desc != null) content.appendChild(el('p', 'slide-subtitle', data.desc));
+        card.appendChild(content);
+        slide.appendChild(card);
         return;
       }
       if (type === 'profile') {
-        inner.appendChild(el('div', 'profile-eyebrow', data.section || ''));
-        inner.appendChild(el('div', 'profile-name', data.speakerName || data.title || ''));
-        inner.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
-        if (data.speakerBio != null) inner.appendChild(el('div', 'profile-bio', data.speakerBio));
-        slide.appendChild(inner);
+        buildHeader(slide, section);
+        var card = el('div', 'slide-card');
+        var content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', data.speakerName || title));
+        if (data.speakerTitle != null) content.appendChild(el('p', 'slide-subtitle', data.speakerTitle));
+        if (data.speakerBio != null) content.appendChild(el('p', 'slide-subtitle', data.speakerBio));
+        card.appendChild(content);
+        slide.appendChild(card);
         return;
       }
       if (type === 'contact') {
-        inner.appendChild(el('div', 'cover-title', data.title || ''));
-        if (data.contactEmail) inner.appendChild(el('div', 'cover-subtitle', data.contactEmail));
-        if (data.contactLinkedIn) inner.appendChild(el('div', 'cover-subtitle', data.contactLinkedIn));
-        slide.appendChild(inner);
+        buildHeader(slide, section);
+        var card = el('div', 'slide-card');
+        var content = el('div', 'slide-content');
+        content.appendChild(el('h1', 'slide-title', title));
+        if (data.contactEmail) content.appendChild(el('p', 'slide-subtitle', data.contactEmail));
+        if (data.contactLinkedIn) content.appendChild(el('p', 'slide-subtitle', data.contactLinkedIn));
+        card.appendChild(content);
+        slide.appendChild(card);
         return;
       }
-      // standard
-      const body = el('div', 'slide-body');
-      const gutter = el('div', 'slide-gutter');
-      gutter.appendChild(el('span', 'gutter-num', String(index + 1)));
-      body.appendChild(gutter);
+      // standard — with visual panel support
+      buildHeader(slide, section);
+      var card = el('div', 'slide-card');
+      var content = el('div', 'slide-content');
+      content.appendChild(el('h2', 'slide-title', title));
+      if (data.subtitle != null) content.appendChild(el('p', 'slide-subtitle', data.subtitle));
+      buildBullets_notebook(content, data.bullets);
+      card.appendChild(content);
 
-      const content = el('div', 'slide-content');
-      content.appendChild(el('div', 'slide-eyebrow', data.section || ''));
-      content.appendChild(el('div', 'slide-title', data.title || ''));
-      buildBullets(content, data.bullets);
-      body.appendChild(content);
-      inner.appendChild(body);
-      slide.appendChild(inner);
-
-      const footer = el('div', 'notebook-footer');
-      footer.appendChild(el('div', 'nb-page', 'p. ' + (index + 1)));
-      const tabs = el('div', 'nb-tabs');
-      tabs.id = 'nb-tabs-' + index;
-      footer.appendChild(tabs);
-      slide.appendChild(footer);
+      if (data.visualImage) {
+        var panel = el('div', 'right-panel');
+        panel.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
+        card.appendChild(panel);
+      }
+      slide.appendChild(card);
     }
 
     function renderSlide(data, index) {
-      const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
+      var slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
       slide.id = 'slide-' + index;
       slide.dataset.type = slideType(data);
       buildSlideChildren(slide, data, index);
@@ -228,67 +192,17 @@
     }
 
     function initSlides() {
-      const container = document.getElementById('presentation');
+      var container = document.getElementById('presentation');
       if (!container || typeof slideData === 'undefined') return;
       while (container.firstChild) container.removeChild(container.firstChild);
-      slideData.forEach(function (d, i) { container.appendChild(renderSlide(d, i)); });
+      slideData.forEach(function(d, i) { container.appendChild(renderSlide(d, i)); });
     }
 
-    // ── Chapter tabs ──────────────────────────────────────────────────────────
-    // chapters: [{label, firstSlide}] built from divider slides
-    let chapters = [];
-
-    function buildChapters() {
-      chapters = [];
-      if (typeof slideData === 'undefined') return;
-      slideData.forEach((d, i) => {
-        if (d.isDividerSlide) {
-          chapters.push({ label: d.title || d.section || ('Ch.' + (chapters.length + 1)), firstSlide: i });
-        }
-      });
-    }
-
-    function renderTabs(activeSlide) {
-      if (!chapters.length) return;
-      const activeChapter = chapters.reduce((acc, ch, i) => ch.firstSlide <= activeSlide ? i : acc, 0);
-      document.querySelectorAll('.nb-tabs').forEach(container => {
-        while (container.firstChild) container.removeChild(container.firstChild);
-        chapters.forEach((ch, i) => {
-          const btn = document.createElement('button');
-          btn.className = 'nb-tab' + (i === activeChapter ? ' active' : '');
-          btn.textContent = ch.label;
-          btn.onclick = () => showSlide(ch.firstSlide);
-          container.appendChild(btn);
-        });
-      });
-    }
-
-    // ── Navigation ────────────────────────────────────────────────────────────
-    let currentSlide = 0;
-
-    function showSlide(index) {
-      const slides = document.querySelectorAll('.slide');
-      if (index < 0 || index >= slides.length) return;
-      slides.forEach(s => s.classList.remove('active'));
-      slides[index].classList.add('active');
-      currentSlide = index;
-      renderTabs(index);
-    }
-
-    function changeSlide(delta) {
-      showSlide(currentSlide + delta);
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
-    });
-
-    // ── Init ──────────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
+    // ── Init ────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
       initSlides();
-      buildChapters();
       showSlide(0);
+      initPPT({ transition: 'fade', showTimer: true, showThumbnails: true });
     });
   </script>
 </body>
