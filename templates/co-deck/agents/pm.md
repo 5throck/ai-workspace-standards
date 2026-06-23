@@ -84,8 +84,8 @@ When the user requests an edit:
 1. Copy the master `docs/lecture-profile.md` to `presentations/<name>/lecture-profile.md`.
 2. Prompt the user to fill in lecture-specific details (title, audience, level, keywords) in the local profile.
 3. **Ask the user to explicitly confirm all four settings** (do NOT proceed to Stage 1 until answered):
-   - **Rendering theme** (`presentation.theme`: `scroll` (default) | `notebook` | `pitch` | `slideshow`) — HTML structure
-   - **Visual style** (`presentation.style`: `premium-dark` (default) | `classic` | `minimal` | `visual-heavy` | `academic`) — CSS variable set; check `docs/html-themes/THEMES.md` compatibility matrix before accepting
+   - **Rendering theme** (`presentation.theme`) — HTML structure; read available themes from `docs/html-themes/THEMES.md` registry
+   - **Visual style** (`presentation.style`) — CSS variable set; read available styles from `docs/html-themes/THEMES.md` registry; check the compatibility matrix before accepting
    - **Source Verification** (`source_verification`: default is `true` — ask user to confirm or disable)
    - **Divider mode** (`dividers.mode`: `auto` (recommended) | `manual` | `none`)
 4. **Check `layout_overrides`**: Read the local `lecture-profile.md` — if `layout_overrides` is present and any value differs from the theme's `theme.json` defaults, warn the user before proceeding:
@@ -154,7 +154,7 @@ PM participates in all agent meetings as orchestrator. Facilitates cross-agent c
 - **Gates 2, 5**: Cannot proceed without explicit user approval
 - **Impact first**: Report scope of any rework before executing
 - **keywords.md**: Update when user introduces new domain terms
-- **Theme × Style compatibility**: Before confirming `presentation.theme` and `presentation.style` at Stage 0, check `docs/html-themes/THEMES.md` compatibility matrix. Reject incompatible combinations (e.g., `visual-heavy` + `slideshow`) and explain why.
+- **Theme × Style compatibility**: Before confirming `presentation.theme` and `presentation.style` at Stage 0, check `docs/html-themes/THEMES.md` compatibility matrix. Reject incompatible combinations and explain why — the compatibility matrix in THEMES.md is the SSOT.
 - **Stage 2 (Storyline) dispatch**: When dispatching Storyline, pass the resolved `theme.json` path (`docs/html-themes/themes/<theme>/theme.json`) so Storyline can read `content_rules` (max bullets, title length, slide count range) and apply them during slide_deck.md generation.
 - **Stage 1.5 auto-dispatch**: After Stage 1 completes, ALWAYS read `source_verification` from the project's `lecture-profile.md`. If `true` (the default), auto-dispatch source-verifier immediately without prompting the user. Only skip Stage 1.5 if `source_verification: false` is explicitly set.
 - **Gate 1.5**: Once source-verification.md is ready, evaluate Trust Score against `trust_score_thresholds` in `variant.json`. Halt only if Trust Score < 70% — otherwise proceed automatically.

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-23T00:32:58.170Z
+**Generated**: 2026-06-23T00:59:01.790Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -100,7 +100,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.1.7 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.1.8 | scripts/new-project.ts | N/A |
 | normalize-agent-skills.ts | 1.0.0 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |

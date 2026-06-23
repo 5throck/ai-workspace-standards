@@ -83,11 +83,17 @@ After drafting the outline but **before writing the full `slide_deck.md`**, pres
 - `presentations/<project>/storyline.md` — narrative arc, chapter table, key takeaways
 - `presentations/<project>/slide_deck.md` — per-slide spec (title, type, bullets, right panel, **image fields**)
 
-Slide types: `cover` · `speaker intro` · `divider` · `standard` · `contact`
+Slide types: `cover` · `speaker intro` · `divider` · `punchline` · `standard` · `contact`
 
 **Theme-specific slide type rules:**
-- `presentation.theme: slideshow` — use `isPunchline: true` for impact/summary slides that need large-font single-statement emphasis; do NOT use `isDividerSlide` (divider slides are not supported in slideshow).
-- `presentation.theme: scroll` — `isDividerSlide: true` is available for part/chapter boundaries; `isPunchline` is not used.
+> **SSOT**: Read `slide_types` from `docs/html-themes/themes/<theme>/theme.json` at runtime. Each theme declares which slide types it supports (e.g., `"punchline": true` or `"punchline": false`). Do NOT hardcode theme-specific rules here — the theme.json is the single source of truth.
+>
+> Common patterns:
+> - `isPunchline: true` — use for impact/summary slides (large-font single-statement emphasis). Supported when `theme.json` declares `"punchline": true`.
+> - `isDividerSlide: true` — use for chapter/part boundaries. Supported when `theme.json` declares `"divider": true`.
+> - `isProfileSlide: true` — speaker intro slide. Supported when `theme.json` declares `"profile": true`.
+>
+> Available themes and compatibility: see `docs/html-themes/THEMES.md` registry.
 
 ### slide_deck.md — Image Fields (per slide)
 

@@ -152,26 +152,26 @@ For each result:
 | `image_role` | Meaning | Search strategy |
 |-------------|---------|-----------------|
 | `background` | Full-bleed slide background | Wide, atmospheric, low-text-interference; landscape (~1.78) |
-| `illustrative` | Right-panel concept image | Clear subject, clean background; match orientation to the theme's right-panel aspect (pitch = portrait ~0.73) — see Aspect-Ratio Targets below |
+| `illustrative` | Right-panel concept image | Clear subject, clean background; match orientation to the theme's right-panel aspect — derive from `pdf_layout_spec.json` → `image_zones.standard` (see below) |
 | `data-viz` | Chart or infographic | Search for real chart → fallback: text panel |
 | `portrait` | Speaker/person photo | Use instructor info from lecture-profile |
 | `none` | No image for this slide | Skip — do not download |
 
 ## Aspect-Ratio Targets by Theme × Role
 
-Match each candidate's aspect ratio (width ÷ height) to the target for its `theme × image_role`. Close matches avoid letterboxing (and earlier cropping) in the rendered slide.
-
-| theme | image_role | target aspect (w/h) | orientation |
-|-------|-----------|---------------------|-------------|
-| pitch | `illustrative` (right panel) | ~0.73 | portrait |
-| pitch | `background` | ~1.78 | landscape |
-| pitch | `divider` (right image, full-bleed) | ~1.0 | square-ish / any |
-| notebook | `background` | ~1.78 | landscape |
-| scroll | `background` | ~1.78 | landscape |
-
-- The pitch right-panel target (~0.73) is derived from `docs/html-themes/themes/pitch/theme.css`: the content grid is `grid-template-columns: 1.15fr 0.85fr`, so the right panel is ~0.42 of the slide width, paired with the portrait card height → an effective panel aspect of roughly 0.73. **If the theme grid changes, re-measure with `bun scripts/co-deck/measure-layout.ts` and update this table.**
-- Themes without a right panel (notebook, scroll) only use images only as full-bleed backgrounds → landscape.
-- The Gate 3.5 validator flags any image whose recorded `aspect_ratio` deviates more than 30 % from its target.
+> **SSOT**: Derive aspect-ratio targets from `docs/html-themes/themes/<theme>/pdf_layout_spec.json` → `image_zones` at runtime. Do NOT hardcode per-theme targets here — the spec is the single source of truth.
+>
+> **How to read the spec:**
+> - `image_zones.standard` → `illustrative` right-panel target: `aspect = w_pct / h_pct` (page-relative fractions cancel to effective aspect ratio)
+> - `image_zones.divider` → `divider` right-image target: same calculation
+> - For `background` role (full-bleed): always target ~1.78 (16:9 landscape)
+>
+> **Common defaults** (derived from current specs):
+> - `illustrative` (right panel): themes with a content grid → typically portrait (~0.42 of slide width ÷ full height ≈ 0.42 × 16/9 ≈ 0.73); themes without a right panel → N/A (use `background` instead)
+> - `background`: always landscape ~1.78
+> - `divider`: typically square-ish ~1.0 or full-bleed landscape
+>
+> **If a new theme is added**: read its `pdf_layout_spec.json` → `image_zones` to determine the target. No agent file updates needed.
 
 ## Query Refinement Rules
 

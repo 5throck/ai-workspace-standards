@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.7
+// @version 1.1.8
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -467,6 +467,7 @@ const cleanupFiles = [
   'scripts/propagation-map.json',
   'variant.json',
   'agents/pm.md.backup',
+  'docs/variant.context.template.md',  // scaffolding-only template — generates <variant>.context.md via applyContextTemplate()
 ];
 for (const f of cleanupFiles) {
   const fp = join(projectDir, f);
