@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-23
+# Last Updated: 2026-06-24
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -101,7 +101,7 @@ Three flags control agent execution in the co-deck pipeline:
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
 | `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.1.0): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG to shared pool `presentations/assets/diagrams/`; auto-rewrites slidedata.json visualImage paths to `../assets/diagrams/` convention; exits cleanly if no diagram-defs.ts exists | active |
 | `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
@@ -158,7 +158,7 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
@@ -400,7 +400,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 1. Always call Version Agent before editing any file
 2. HTML must embed `slideData` array for PDF extraction
 3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
-4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.png`; reference as `../assets/diagrams/<stem>.png` (path auto-rewritten by gen-visual-images.ts)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
 6. **TOC sidebar is MANDATORY for scroll theme**: wrap slides in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`. Each `.slide` must carry `id="slide-${index}"`.
 
@@ -413,30 +413,31 @@ presentations/<project>/diagram-defs.ts  ← project-specific generators (author
         ↓ dynamic import
 gen-visual-images.ts (infrastructure dispatcher)
         ↓
-images/<stem>.svg  (source artifact saved to disk)
-images/<stem>.png  (rendered output)
-        ↓
-slideData[i].visualImage = "images/<stem>.png"
-        ↓ HTML: applyVisualImages() injects <img> into .right-panel
+presentations/assets/diagrams/<stem>.svg  (source artifact — shared pool)
+presentations/assets/diagrams/<stem>.png  (rendered output — shared pool)
+        ↓ auto-rewrite slidedata.json
+slideData[i].visualImage = "../assets/diagrams/<stem>.png"
+        ↓ HTML: renderSlide() injects <img> into .right-panel
         ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
 ```
 
-**Architecture (v3.0.0)**:
+**Architecture (v3.1.0)**:
 - `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
 - `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
 - Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
 - If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
+- **Unified output path**: SVG and PNG are saved to `presentations/assets/diagrams/` (shared pool), matching the diagram-specialist agent convention. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/` in slidedata.json.
 
-**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to disk so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency.
+**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to the shared pool so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency across projects.
 
 **Rules**:
 1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
-2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
-3. `slidedata.json` `visualImage` field must reference the PNG path (relative to project dir, e.g. `"images/slide-03.png"`)
-4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
-5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
+2. SVG source files (`presentations/assets/diagrams/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
+3. `slidedata.json` `visualImage` field must reference the shared pool path (e.g. `"../assets/diagrams/slide-03.png"`)
+4. HTML `renderSlide()` injects `<img>` into `.right-panel` at runtime using `slideData[i].visualImage`
+5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
-7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `images/slide-03-nested-layers.png`)
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.png`)
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
@@ -464,10 +465,11 @@ slideData[i].visualImage = "images/<stem>.png"
 | `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
-| `presentations/<project>/images/` | **Project-local images** — SVG-generated concept diagram PNGs + SVG source files; NOT shared across projects |
+| `presentations/<project>/images/` | **Project-local images** — deprecated; diagram assets moved to shared pool `presentations/assets/diagrams/` |
 | `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
 | `presentations/assets/icons/` | **Shared icon pool** |
 | `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
+| `presentations/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
@@ -506,4 +508,4 @@ slideData[i].visualImage = "images/<stem>.png"
 
 ---
 
-*co-deck.context.md version: 3.5 — updated 2026-06-23: TTS voice selection improvements — loadVoices() timing fix (voice count tracking, 500ms fallback timer, incremental onvoiceschanged rebuild), voice dropdown badge UI (voice-name + voice-badge with lang · L/N, active state styling, open-state preservation across rebuilds). ppt-engine.js + ppt-engine.css updated. Previous: v3.4 — Background image system v1.7.0; v3.3 — NarrationEngine v2.0.*
+*co-deck.context.md version: 3.6 — updated 2026-06-24: Thumbnail panel defaults to hidden (all PPT themes), auto-advance requires manual toggle (config cannot override), right-panel text vertically centered, right-panel image box enlarged (1fr 1fr grid) with object-fit:contain, diagram output unified to shared pool `presentations/assets/diagrams/` (gen-visual-images.ts v3.1.0). Previous: v3.5 — TTS voice selection improvements.*

@@ -4,7 +4,7 @@
   PPT-style fullscreen single-slide view preserving the pitch theme's floating-card
   aesthetic (viewport-relative card, rounded corners, content grid) with:
     - Viewport-relative card (92vw × aspect-ratio 16/9, max 1280px, border-radius 20px)
-    - Pitch-native content grid (slide-content: 1.15fr 0.85fr) for standard slides
+    - Pitch-native content grid (slide-content: 1fr 1fr) for standard slides
     - Pitch-native slide types: title, divider, profile, contact, standard, punchline
     - Thumbnail panel and transition effects handled by ppt-engine.css
     - Footer bar handled by ppt-engine.css
@@ -39,7 +39,7 @@
 /* ─── Slide content grid (standard slides — pitch native) ───────────────── */
 .slide-content {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr 1fr;
   gap: 3rem;
   height: 100%;
   padding: 3rem 3.5rem;
@@ -52,16 +52,19 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 0.75rem;
+  box-sizing: border-box;
   /* Neutralize base.css leaks: min-width:280px constrains the grid,
      border-radius:0.375rem clashes with pitch's borderless aesthetic */
   min-width: 0;
   border-radius: 0;
+  background: rgba(255,255,255,0.03);
 }
 
 .right-panel img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 12px;
 }
 
@@ -297,7 +300,11 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   border-radius: 12px;
+  padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 /* ─── Visual panel text elements ────────────────────────────────────── */

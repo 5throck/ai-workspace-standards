@@ -133,7 +133,9 @@ narration:
   # Options: true | false (default: true)
   enabled: true
   # Whether to enable automatic slide advancement (independent of narration)
-  # When true, slides advance automatically at the configured interval.
+  # ⚠️ This field is informational only — the HTML viewer ignores this config
+  # value. Auto-advance can only be activated by the user clicking the
+  # "⏸ Manual" button or pressing 'A' key in the HTML presentation viewer.
   # Options: true | false (default: false)
   autoAdvance: false
   # Interval for auto-advance when narration is NOT playing (seconds)

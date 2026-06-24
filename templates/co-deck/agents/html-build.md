@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: "1.2.0"
+version: "1.2.1"
 last_updated: "2026-06-24"
 role: HTML slide builder and image integration specialist
 status: active
@@ -63,6 +63,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 - `presentations/<project>/lecture_vN.html` — single HTML file with embedded slideData
 - Images are in the **shared pool** at `presentations/assets/images/<slug>.<ext>` (managed by image-curator; html-build references them via `../assets/images/<slug>.<ext>`)
+- Diagrams are in the **shared diagram pool** at `presentations/assets/diagrams/<stem>.png` (managed by diagram-specialist + gen-visual-images.ts; visualImage paths use `../assets/diagrams/<stem>.png`)
 
 slideData object fields and image filename convention: see `skills/html-build/SKILL.md`.
 

@@ -269,7 +269,7 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine v2.0 ───────────────────────────────────────────────
+// ── NarrationEngine v2.1 ───────────────────────────────────────────────
 // Web Speech API TTS narration with independent auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
 //
@@ -281,7 +281,12 @@ var PresenterTools = {
 //   Both ON  — narration drives slide timing (onend → next slide)
 //   Narrator only — stops after each slide, waits for user
 //   Auto-slide only — timer-driven slide advance (default 5s interval)
-//   Both OFF — fully manual navigation
+//   Both OFF — fully manual navigation (DEFAULT on load)
+//
+// IMPORTANT: Auto-advance is NEVER enabled by config. The user must
+// explicitly toggle it via the "⏸ Manual" button or press 'A' key.
+// narrationConfig.autoAdvance is ignored — only autoAdvanceInterval
+// and language settings are respected from config.
 //
 // Config bridge: lecture-profile.md → html-build injects narrationConfig
 //   → initPPT({ narration: narrationConfig }) → NarrationEngine.init(config)
@@ -319,10 +324,7 @@ var NarrationEngine = {
     this._available = ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined');
     this._config = config || {};
 
-    // Apply config defaults
-    if (this._config.autoAdvance) {
-      this.isAutoAdvance = true;
-    }
+    // Apply config defaults (auto-advance is NEVER enabled by config — user must toggle manually)
     if (this._config.autoAdvanceInterval) {
       this._autoAdvanceInterval = this._config.autoAdvanceInterval * 1000;
     }
@@ -942,8 +944,8 @@ function initPPT(options) {
     if (timerDisp) timerDisp.style.display = 'none';
   }
 
-  // Show/hide thumbnail panel
-  if (options.showThumbnails === false) {
+  // Show/hide thumbnail panel — hidden by default; only shown when explicitly requested
+  if (options.showThumbnails !== true) {
     var panel = document.getElementById('thumbnail-panel');
     if (panel) panel.classList.add('hidden');
     ThumbnailNav.visible = false;

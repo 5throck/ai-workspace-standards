@@ -46,9 +46,9 @@ You are the diagram and chart specialist for **[Project Name]**. You own Stage 3
 1. **CSS-variable SVG** — `presentations/assets/diagrams/<slug>.svg` — for html-build inline embed. Uses `var(--accent-color)`, `var(--text-primary)`, `var(--card-bg)` etc.
 2. **Hex-resolved PNG** — `presentations/assets/diagrams/<slug>.png` — for pdf-export. Derived from the same SVG with all CSS variables replaced by hex values from `design_spec.md`. Generated via `@resvg/resvg-js`.
 
-> **Design principle (inherited from gen-visual-images.ts v3.0.1)**: SVG is the source artifact; PNG is the delivery format. Never generate PNG directly — always derive it from the SVG.
+> **Design principle (inherited from gen-visual-images.ts v3.1.0)**: SVG is the source artifact; PNG is the delivery format. Never generate PNG directly — always derive it from the SVG.
 >
-> **Target selection (gen-visual-images.ts v3.0.1)**: a slide is a diagram target when it carries a `visualImage`. If the `visual` field is present, honour it (`none` excludes the slide); if `visual` is **absent**, an `images/`-prefixed `visualImage` still counts as a diagram target. Set `visualImage` on every diagram slide, and prefer setting `visual` explicitly to avoid ambiguity.
+> **Target selection (gen-visual-images.ts v3.1.0)**: a slide is a diagram target when it carries a `visualImage` field. The script accepts both legacy `images/` paths and new `../assets/diagrams/` paths. Output is always written to the shared pool `presentations/assets/diagrams/`. Set `visualImage` on every diagram slide, and prefer setting `visual` explicitly to avoid ambiguity.
 
 ## ⚠️ PM-ONLY INVOCATION
 
