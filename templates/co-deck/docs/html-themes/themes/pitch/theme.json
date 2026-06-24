@@ -36,6 +36,7 @@
     "title": true,
     "divider": true,
     "profile": true,
+    "punchline": true,
     "standard": true,
     "contact": true
   },

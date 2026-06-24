@@ -16,7 +16,7 @@
   },
   "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
   "incompatible_styles": [],
-  "partial_compatibility": [
+  "partial_styles": [
     {
       "name": "visual-heavy",
       "reason": "visual-heavy full-bleed background-image on .slide is partially visible in floating-card layout (card clips overflow). Background gradient works fully."

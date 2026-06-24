@@ -47,7 +47,6 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
 - Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
-- **For `scroll` theme**: wrap in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`; each `.slide` must have `id="slide-${index}"`
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
 - Bind images: for each slide with `image_role ≠ none`, use `../assets/images/<slug>.<ext>` path from `image-manifest.json` → `path` field; fall back to text panel if no image recorded
 - **Background image binding**: When `lecture-profile.md` → `background_image.enabled` is true, inject a `backgroundImage` field into `slideData` entries. The value is the relative path to the global background image (from `image-manifest.json` → `background_image.path`, rewritten as `../assets/images/<slug>.<ext>`). Scope determines which slides receive it:
@@ -84,7 +83,7 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 <!-- PPT themes only (notebook, scroll, slideshow, pitch-enhanced): -->
 <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
 <link rel="stylesheet" href="../../docs/html-themes/themes/scroll/theme.css">
-<link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
 `base.css` is the shared foundation (structural rules + default variables). For PPT-transformed themes (`notebook`, `scroll`, `slideshow`, `pitch-enhanced`), inject `ppt-engine.css` between `base.css` and the theme CSS — it provides shared thumbnail panel, transition effects, footer bar, timer, and speaker notes styles. For the original `pitch` theme, omit `ppt-engine.css`. `themes/<theme>/theme.css` is the paradigm-specific extension. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/scroll/theme.css` segment with the active theme's CSS path.
 
@@ -115,7 +114,7 @@ Available themes: `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slidesho
 - Load `presentations/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
 - Default theme: `scroll`; default style: `premium-dark`
-- Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤3); ≤3 consecutive slides without visuals; slide counts balanced ±20%
+- Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤4); ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
 - **UTF-8 encoding**: All generated HTML files MUST be written as UTF-8 without BOM. On Windows (Korean locale), the default code page is CP949 — always ensure `chcp 65001` or `$OutputEncoding = [System.Text.Encoding]::UTF8` is active before writing files to prevent Korean text corruption

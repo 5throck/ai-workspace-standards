@@ -45,7 +45,7 @@ Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PP
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
@@ -53,7 +53,7 @@ The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC d
 
 ### `pdf_layout_spec.json` Schema (region model, v1.2.0)
 
-The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinates are declared once per region name; slide renderers iterate the regions declared for each slide type. `gen-slides-pdf.ts` v1.2.0 `buildCoords()` is **theme-agnostic** — it resolves `regions.*` uniformly for every theme and dispatches render functions by declared `slide_types`, not by theme name.
+The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinates are declared once per region name; slide renderers iterate the regions declared for each slide type. `gen-slides-pdf.ts` v1.7.0 `buildCoords()` is **theme-agnostic** — it resolves `regions.*` uniformly for every theme and dispatches render functions by declared `slide_types`, not by theme name.
 
 ```json
 {
@@ -147,7 +147,7 @@ PDF export and print specifications. `bleed_mm`: bleed area for professional pri
 | `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial |
 | `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
 
-**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles` or `partial_compatibility`) · ❌ Incompatible (see theme.json `incompatible_styles`)
+**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
 
 > **`visual-heavy`** is `⚠️ partial` for all PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced): full-bleed `background-image` on `.slide` works but the floating-card clipping in pitch-enhanced or the card-boundary in base.css themes means some image area may be cropped. The text-shadow overlay works fully.
 >
@@ -341,7 +341,7 @@ bun scripts/co-deck/scaffold-theme-style.ts --style <name>
 
 ## 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` (v1.2.0) builds the final PDF spec at runtime by `deepMerge`-ing 4 layers (later layers win on specific keys):
+`gen-slides-pdf.ts` (v1.7.0) builds the final PDF spec at runtime by `deepMerge`-ing 4 layers (later layers win on specific keys):
 
 ```
 Layer 0 (shared) : docs/html-themes/themes/_shared/layout_base.json      → region skeleton (all null) + 16:9 page + print defaults
@@ -352,4 +352,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-06-23 — File Encoding Standard section added (UTF-8 without BOM, LF line endings, .gitattributes enforcement, CP949 risk guidance). Previous: 2026-06-23 — PPT transformation: notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes, **NarrationEngine TTS auto-play**); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); visual-heavy/academic style CSS patched for `title` data-type alias; all PPT themes compatible with all 5 styles (visual-heavy: partial). Previous: 2026-06-22 — `premium-dark` style added as DEFAULT; `classic/pdf_color_spec.json` corrected; `base.css` gains `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`.*
+*Last updated: 2026-06-24 — NarrationEngine version aligned to v2.1; gen-slides-pdf version aligned to v1.7.0. Previous: 2026-06-23 — File Encoding Standard section added (UTF-8 without BOM, LF line endings, .gitattributes enforcement, CP949 risk guidance).*

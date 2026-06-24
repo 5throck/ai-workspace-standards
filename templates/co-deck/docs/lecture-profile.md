@@ -54,7 +54,7 @@ instructor:
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:
   theme: scroll
-  style: classic
+  style: premium-dark
 
 # Keywords used by research agent to focus search queries
 # Add 5-10 domain-specific terms
@@ -170,7 +170,7 @@ source_verification: true
 #     width_mm: 254.0      # 4:3 ratio (default: 338.7)
 #     height_mm: 190.5
 #   content_rules:
-#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 3)
+#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 4)
 #   colors:
 #     accent: [180, 30, 50]      # institution CI color override
 #   # ── fonts / line_heights — the primary PDF-fitting levers (read by gen-slides-pdf.ts) ──
