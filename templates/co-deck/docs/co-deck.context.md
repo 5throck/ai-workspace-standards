@@ -136,11 +136,14 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 | Name | Version | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|---------|----------|-----------|-----|---------------|--------|
-| `notebook` | 2.0.0 | PPT Outline View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 30 char title | `docs/html-themes/themes/notebook/` |
+| `notebook` | 3.0.0 | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 30 char title | `docs/html-themes/themes/notebook/` |
+| `outline` | 3.0.0 | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 6 bullets, 35 char title, 30-60 slides | `docs/html-themes/themes/outline/` |
 | `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
-| `pitch-enhanced` | 2.0.0 | PPT Presenter View — pitch floating-card + thumbnails, transitions, timer | PPT footer bar (thumbnails + transitions fade/push/zoom + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
-| `scroll` | 2.0.0 | PPT Reading View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
-| `slideshow` | 2.0.0 | PPT Presentation View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
+| `pitch-enhanced` | 3.0.0 | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
+| `scroll` | 3.0.0 | PPT Reading View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
+| `slideshow` | 3.0.0 | PPT Presentation View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
+| `vertical` | 3.0.0 | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | max 5 bullets, 28 char title, 30-60 slides | `docs/html-themes/themes/vertical/` |
+| `zen` | 3.0.0 | Presentation Zen — full-bleed backgrounds, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 3 bullets, 28 char title, 10-30 slides | `docs/html-themes/themes/zen/` |
 
 `theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_styles` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
 
@@ -148,18 +151,18 @@ Each theme folder also includes **`theme.css`** (per-theme CSS extension — car
 
 > **Layer 0 — shared defaults**: `docs/html-themes/themes/_shared/layout_base.json` holds the region skeleton (all regions `null`) + the 16:9 `page` baseline + `print` defaults. It is the merge base, never filled by the renderer. `_shared/` is excluded from the theme scan (it is not itself a theme).
 
-### PPT Transformed Themes (v2.0.0)
+### PPT Transformed Themes (v3.0.0)
 
 Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
 
 | Feature | Implementation |
 |---------|---------------|
-| Thumbnail navigation panel | CSS `transform: scale(0.14)` on cloned slide DOM nodes — no external library |
+| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, `T` key shortcut — replaces thumbnail panel** |
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
 | **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
@@ -176,7 +179,7 @@ The five themes split into **two architectural families** with intentional desig
 | **Slide card sizing** | `92vw × 82vh`, max 1300×750px, border-radius 20px | `aspect-ratio: 16/9`, max 1280px, border-radius 4px |
 | **Grid layout** | CSS Grid (`1fr 1fr` in pitch-enhanced, `1.15fr 0.85fr` in pitch) | Flexbox via base.css `.slide-card` |
 | **Transitions** | pitch: scale+translateY · pitch-enhanced: ppt-engine fade/push/zoom | ppt-engine fade/push/zoom |
-| **Navigation** | pitch: TOC drawer (`T` key) · pitch-enhanced: thumbnail panel + ppt-footer | thumbnail panel + ppt-footer |
+| **Navigation** | pitch: TOC drawer (`T` key) · pitch-enhanced: TOC drawer + ppt-footer | TOC drawer + ppt-footer |
 | **PDF calibration** | 750px (matches 750px max-height card) | 720px (matches 1280×720 reference) |
 
 > **pitch-enhanced** is a **hybrid**: it uses the ppt-engine runtime (thumbnails, transitions, NarrationEngine, timer) but preserves the pitch-native DOM vocabulary and floating-card geometry. Its `theme.css` (393 lines) is the most complex override layer, neutralizing base.css defaults that conflict with the pitch aesthetic.
@@ -201,7 +204,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer, narration) [PPT themes only]
+2. themes/_shared/ppt-engine.css      — PPT common UI (TOC drawer, transitions, footer, timer, narration) [PPT themes only]
 3. themes/<theme>/theme.css           — per-theme extension
 4. styles/<style>/style.css           — per-style visual overrides
 ```
@@ -214,13 +217,13 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` |
-|-------------------|------------|---------|------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial |
-| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
+| Style ↓ / Theme → | `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` |
+|-------------------|------------|-----------|---------|------------------|----------|-------------|------------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ | ✅ | ❌ incompatible |
 
 > **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible
 >
@@ -524,4 +527,4 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.png"
 
 ---
 
-*co-deck.context.md version: 3.7 — updated 2026-06-24: Theme Architecture section (Pitch Family vs PPT-Engine Family), NarrationEngine v2.1, gen-slides-pdf v1.7.0, content rules per-theme accuracy (scroll 5 bullets/30 char, slideshow 4 bullets/20-50 slides), pitch theme.json punchline added, partial_styles field name unified, default style premium-dark, stale scroll TOC rule removed. Previous: v3.6 — Thumbnail panel defaults to hidden (all PPT themes), auto-advance requires manual toggle (config cannot override), right-panel text vertically centered, right-panel image box enlarged (1fr 1fr grid) with object-fit:contain, diagram output unified to shared pool `presentations/assets/diagrams/` (gen-visual-images.ts v3.1.0).*
+*co-deck.context.md version: 3.8 — updated 2026-06-24: v3.0.0 theme updates — 3 new themes (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); TOCBuilder + NarrationEngine.onSlideAdvance in ppt-engine.js; vertical theme uses IntersectionObserver; compatibility matrix expanded to 8 themes. Previous: v3.7 — Theme Architecture section (Pitch Family vs PPT-Engine Family), NarrationEngine v2.1, gen-slides-pdf v1.7.0, content rules per-theme accuracy, pitch theme.json punchline added, partial_styles field name unified, default style premium-dark, stale scroll TOC rule removed.*

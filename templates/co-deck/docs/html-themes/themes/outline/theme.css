@@ -1,0 +1,61 @@
+/*
+  outline/theme.css — co-deck Outline Theme (Research Notebook)
+  =============================================================
+  Text-focused presentation with full-width content area.
+  No image panel — all space dedicated to structured text content.
+  Loaded after base.css and ppt-engine.css.
+*/
+
+/* ── Disable image panel completely ────────────────────────────────── */
+.right-panel {
+  display: none !important;
+}
+
+/* ── Single-column card layout ─────────────────────────────────────── */
+.slide-card {
+  flex-direction: column;
+}
+
+/* ── Centered readable content column ─────────────────────────────── */
+.slide-content {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  gap: 0.9rem;
+}
+
+/* ── Generous typography for readability ────────────────────────────── */
+.slide-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.3;
+}
+
+.bullet-item {
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  line-height: 1.7;
+}
+
+.bullets-container {
+  gap: 0.65rem;
+}
+
+/* ── Divider: centered ─────────────────────────────────────────────── */
+.slide[data-type="divider"] .slide-content {
+  text-align: center;
+  align-items: center;
+}
+
+/* ── Cover slide ───────────────────────────────────────────────────── */
+.slide[data-type="cover"] .slide-title {
+  font-size: 2.4rem;
+}
+
+/* ── Page number (prominent for researchers) ──────────────────────── */
+.slide .slide-page-num {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 0.65rem;
+  color: var(--text-muted, rgba(255,255,255,0.3));
+  z-index: 5;
+}

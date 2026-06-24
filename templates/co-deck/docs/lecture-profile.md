@@ -38,12 +38,15 @@ instructor:
 
 # Presentation rendering settings (used by html-build and storyline agents)
 # theme   — HTML structure and navigation paradigm
-#   Options: notebook | pitch | pitch-enhanced | scroll | slideshow
-#   - notebook        : PPT Outline View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
-#   - pitch           : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
-#   - pitch-enhanced  : PPT Presenter View — pitch aesthetics + thumbnails + transitions + timer (all 5 styles; visual-heavy: partial)
-#   - scroll           : PPT Reading View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
-#   - slideshow        : PPT Presentation View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
+#   Options: notebook | outline | pitch | pitch-enhanced | scroll | slideshow | vertical | zen
+#   - notebook        : PPT Outline View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - outline          : Research Notebook — text-only, no image panel, TOC drawer, all 5 styles (visual-heavy: partial)
+#   - pitch            : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
+#   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all 5 styles; visual-heavy: partial)
+#   - scroll           : PPT Reading View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - slideshow        : PPT Presentation View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver, all 5 styles (visual-heavy: full)
+#   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 3 bullets (classic/minimal/premium-dark; visual-heavy, academic: incompatible)
 # style   — CSS visual variable set (color, font, spacing)
 #   Options: premium-dark | classic | minimal | visual-heavy | academic
 #   - premium-dark : dark navy + gold accent + serif typography (default; all themes)

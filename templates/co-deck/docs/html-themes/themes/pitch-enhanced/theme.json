@@ -1,12 +1,12 @@
 {
   "name": "pitch-enhanced",
-  "version": "2.0.0",
-  "description": "PPT-style presenter view preserving pitch's floating-card aesthetic. Adds thumbnail navigation panel, transition effects (fade/push/zoom), presenter timer, and speaker notes. All 5 styles compatible. Cloned from pitch theme with full PPT feature set for easy rollback.",
+  "version": "3.0.0",
+  "description": "PPT-style presenter view preserving pitch's floating-card aesthetic. Adds TOC drawer navigation, transition effects (fade/push/zoom), presenter timer, and speaker notes. All 5 styles compatible. Cloned from pitch theme with full PPT feature set for easy rollback.",
   "rendering": {
     "paradigm": "ppt-presenter",
     "slides_in_dom": "all (one active)",
-    "navigation": "PPT footer bar — prev/next + transition mode selector (fade/push/zoom) + thumbnail panel + script toggle + timer",
-    "progress_indicator": "progress bar (footer) + slide counter + thumbnail highlight"
+    "navigation": "PPT footer bar — prev/next + transition mode selector (fade/push/zoom) + TOC drawer + script toggle + timer",
+    "progress_indicator": "progress bar (footer) + slide counter + TOC highlight"
   },
   "content_rules": {
     "max_bullets_per_slide": 4,
