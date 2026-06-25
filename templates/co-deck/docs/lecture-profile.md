@@ -42,7 +42,7 @@ instructor:
 #   - outline          : Research Notebook — text-only, no image panel, TOC drawer, all 5 styles (visual-heavy: partial)
 #   - pitch            : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
 #   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all 5 styles; visual-heavy: partial)
-#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver, all 5 styles (visual-heavy: full)
+#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar with TOC drawer, IntersectionObserver, all 5 styles (visual-heavy: full)
 #   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 3 bullets (classic/minimal/premium-dark; visual-heavy, academic: incompatible)
 # style   — CSS visual variable set (color, font, spacing)
 #   Options: premium-dark | classic | minimal | visual-heavy | academic

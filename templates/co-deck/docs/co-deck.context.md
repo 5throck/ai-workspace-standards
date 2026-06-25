@@ -154,7 +154,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 
 | Feature | Implementation |
 |---------|---------------|
-| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, `T` key shortcut — replaces thumbnail panel** |
+| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, close button, headline text-overflow ellipsis, `T` key shortcut — replaces thumbnail panel** |
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
@@ -163,6 +163,8 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
+
+> **Vertical theme body override**: `ppt-engine.css` sets `body { display: flex; height: 100vh; overflow: hidden }` for PPT themes (slides arranged as flex children). The vertical theme overrides this to `body { display: block; height: auto; overflow-y: auto }` — `position: sticky` does not work on children of a flex container, so the flex layout must be neutralized for the sticky top bar to function.
 
 ### Theme Architecture — Two Families
 

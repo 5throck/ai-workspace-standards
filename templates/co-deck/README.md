@@ -10,7 +10,7 @@ sync_version: 1
 
 ---
 
-Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 10 specialized agents covering research, source verification, content, design, image curation, HTML build (4 themes), layout measurement, and PDF export.
+Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 10 specialized agents covering research, source verification, content, design, image curation, HTML build (5 themes), layout measurement, and PDF export.
 
 ## Quick Start
 

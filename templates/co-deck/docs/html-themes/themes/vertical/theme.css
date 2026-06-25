@@ -2,7 +2,7 @@
   vertical/theme.css — co-deck Vertical Theme (True Vertical Scroll)
   ====================================================================
   Overrides ppt-engine.css defaults for vertical scroll layout.
-  - body: scrollable, no overflow hidden
+  - body: block layout (neutralize ppt-engine flex), auto height, scrollable
   - .ppt-main: not used (display none)
   - .slide: relative position, min-height 100vh, natural aspect ratio
   - .vertical-topbar: sticky top bar with glass-morphism
@@ -12,6 +12,8 @@
 
 /* ── Body: enable page scrolling ─────────────────────────────────── */
 body {
+  display: block !important;
+  height: auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch;
