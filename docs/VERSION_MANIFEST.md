@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-23T23:57:08.100Z
+**Generated**: 2026-06-25T04:24:38.587Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -69,7 +69,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.0 | scripts/audit.ts | bun |
+| audit.ts | 2.10.1 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -96,7 +96,7 @@
 | l2-to-variant-pipeline.ts | 1.8.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
-| lifecycle-sync-audit.ts | 1.4.0 | scripts/lifecycle-sync-audit.ts | N/A |
+| lifecycle-sync-audit.ts | 1.4.1 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
@@ -109,7 +109,7 @@
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.0 | scripts/project-to-variant.ts | N/A |
-| propagate-to-templates.ts | 2.0.8 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.9 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
@@ -143,7 +143,7 @@
 | upgrade-project.ts | 1.2.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.0 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
-| validate-md-language.ts | 1.4.2 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.4.3 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-output.ts | 1.0.0 | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | 1.1.0 | scripts/helpers/validate-platform-parity.ts | fs, path |
