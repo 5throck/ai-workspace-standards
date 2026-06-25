@@ -1,4 +1,4 @@
-// @version 3.0.1 — backport from co-deck2 instance: target filter now honours an absent `visual` field — when `visualImage` is present but `visual` is undefined, an `images/`-prefixed visualImage still counts as a diagram target (previously such slides were silently dropped). Previous 3.0.0: infrastructure-only dispatcher.
+// @version 3.1.0 — diagram output unified to shared pool `presentations/assets/diagrams/`; target filter accepts both legacy `images/` and new `../assets/diagrams/` paths; slidedata.json visualImage paths auto-rewritten to `../assets/diagrams/` convention. Previous 3.0.1: target filter honours absent `visual` field.
 // Generate right-panel visual images via SVG rendering (no browser required).
 // Project-specific diagram generators live in presentations/<project>/diagram-defs.ts.
 // Shared utilities (svgWrap, svgToPng, palettes) live in diagram-helpers.ts.
@@ -44,7 +44,7 @@ if (!existsSync(slidedataPath)) {
 }
 const slidedata: Array<Record<string, any>> = JSON.parse(readFileSync(slidedataPath, 'utf-8'));
 
-const imagesDir = join(projectDir, 'images');
+const imagesDir = join(workspaceRoot, 'presentations', 'assets', 'diagrams');
 if (!existsSync(imagesDir)) mkdirSync(imagesDir, { recursive: true });
 
 console.log(`\n🎨 Visual image generation (SVG → PNG, no browser)`);
@@ -56,38 +56,55 @@ const targets = slidedata
   .map((s, i) => ({ slide: i + 1, data: s }))
   .filter(({ data }) => {
     if (!data.visualImage) return false;
-    // If visual field exists, honour its value; otherwise treat images/ prefix as a diagram target
-    if (data.visual !== undefined) return data.visual.toLowerCase() !== 'none';
-    return (data.visualImage as string).startsWith('images/');
+    // Accept both legacy per-project paths (images/...) and new shared pool paths (../assets/diagrams/...)
+    const path = data.visualImage as string;
+    return path.startsWith('images/') || path.startsWith('../assets/diagrams/');
   });
 
 console.log(`   Targets: ${targets.length} slides\n`);
 
 let success = 0, skipped = 0;
-for (const { slide, data } of targets) {
+let slidedataDirty = false;
+
+for (const { slide: slideIdx, data } of targets) {
   const imgPath  = data.visualImage as string;
-  const stem     = imgPath.replace(/^images\//, '').replace(/\.png$/, '');
-  const destPath = join(projectDir, imgPath);
+  const stem     = imgPath.replace(/^images\//, '').replace(/^(\.\.\/assets\/diagrams\/)/, '').replace(/\.png$/, '');
+  const svgPath  = join(imagesDir, stem + '.svg');
+  const pngPath  = join(imagesDir, stem + '.png');
 
   const gen = GENERATORS[stem];
   if (!gen) {
-    console.log(`   ⚠️  Slide ${slide}: no generator for "${stem}", skipping`);
+    console.log(`   ⚠️  Slide ${slideIdx}: no generator for "${stem}", skipping`);
     skipped++;
     continue;
   }
 
   try {
-    const svg     = gen();
-    const svgPath = destPath.replace(/\.png$/, '.svg');
+    const svg = gen();
     writeFileSync(svgPath, svg, 'utf-8');
     const png = svgToPng(svg);
-    writeFileSync(destPath, png);
-    console.log(`   ✅  Slide ${slide} → ${imgPath} (${Math.round(png.length / 1024)}KB) + .svg`);
+    writeFileSync(pngPath, png);
+
+    // Update slidedata visualImage path to shared pool reference
+    const sharedPoolPath = '../assets/diagrams/' + stem + '.png';
+    if (data.visualImage !== sharedPoolPath) {
+      data.visualImage = sharedPoolPath;
+      slidedataDirty = true;
+    }
+
+    console.log(`   ✅  Slide ${slideIdx} → ${sharedPoolPath} (${Math.round(png.length / 1024)}KB) + .svg`);
     success++;
   } catch (e) {
-    console.error(`   ❌  Slide ${slide}: ${(e as Error).message}`);
+    console.error(`   ❌  Slide ${slideIdx}: ${(e as Error).message}`);
   }
 }
 
+// Write updated slidedata.json if paths were rewritten
+if (slidedataDirty) {
+  writeFileSync(slidedataPath, JSON.stringify(slidedata, null, 2), 'utf-8');
+  console.log(`   Updated slidedata.json visualImage paths → ../assets/diagrams/`);
+}
+
 console.log(`\n✅ Done: ${success} generated, ${skipped} skipped`);
+console.log(`   Output: ${imagesDir}`);
 console.log(`   Re-run PDF: bun scripts/co-deck/gen-slides-pdf.ts --project ${projectArg}\n`);

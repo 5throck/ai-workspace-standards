@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0",
-  "_comment": "Notebook theme (PPT Outline View) — region schema (ADR-0045 Decision #2). v2.0.0: PPT transformation — ruled-paper removed, full style compatibility, visual region added, punchline slide type added.",
+  "version": "3.0.0",
+  "_comment": "Notebook theme (PPT Outline View) — region schema (ADR-0045 Decision #2). v3.0.0: TOC drawer replaces thumbnail panel; all PPT features retained.",
   "name": "notebook",
-  "version_num": "2.0.0",
-  "description": "PPT-style outline presentation with thumbnail navigation, transition effects, speaker script panel, and footer nav. Previously a ruled-paper notebook layout, now transformed to a clean PPT outline view while retaining its structured content density. Supports visual panel (right-side images).",
+  "version_num": "3.0.0",
+  "description": "PPT-style outline presentation with TOC drawer navigation, transition effects, speaker script panel, and footer nav. Previously a ruled-paper notebook layout, now transformed to a clean PPT outline view while retaining its structured content density. Supports visual panel (right-side images).",
   "rendering": {
     "paradigm": "notebook",
     "slides_in_dom": "all (one active)",
-    "navigation": "thumbnail panel + footer bar — prev/next, transition mode selector, script toggle, timer",
-    "progress_indicator": "progress bar (footer) + slide counter + timer"
+    "navigation": "TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer",
+    "progress_indicator": "progress bar (footer) + slide counter + TOC highlight"
   },
   "content_rules": {
     "max_bullets_per_slide": 4,
@@ -43,6 +43,6 @@
   "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/notebook/theme.css",
   "added": "2026-06-22",
-  "modified": "2026-06-23",
+  "modified": "2026-06-24",
   "author": "co-deck"
 }

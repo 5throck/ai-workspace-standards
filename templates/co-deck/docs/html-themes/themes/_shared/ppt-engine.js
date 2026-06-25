@@ -3,16 +3,16 @@
   ================================================
   Shared JavaScript for all PPT-transformed themes. Inlined into each template.html.
   Provides:
-    - ThumbnailRenderer: CSS-transform based slide thumbnails (no library needed)
     - TransitionEngine: fade / push / zoom transitions with direction awareness
     - PresenterTools: speaker script panel + presentation timer
-    - ThumbnailNav: left sidebar thumbnail panel with highlight + toggle
-    - NarrationEngine: Web Speech API TTS narration with auto-advance
+    - TOCBuilder: slide-out TOC drawer with headline navigation
+    - NarrationEngine v2.1: Web Speech API TTS narration with auto-advance
 
   Usage in template.html:
     1. Include this script block after slideData injection
     2. Call initPPT(slideData, containerId, options) from DOMContentLoaded
-    3. Options: { transition: 'fade'|'push'|'zoom', timer: true|false }
+    3. Options: { transition: 'fade'|'push'|'zoom', timer: true|false,
+                  showTOC: true|false, verticalMode: false }
 */
 
 // ── DOM helpers (shared with theme renderers) ──────────────────────────────
@@ -76,41 +76,49 @@ function renderVisualDisplay(parent, text) {
   });
 }
 
-// ── ThumbnailRenderer ────────────────────────────────────────────────────
-// Creates CSS-transform-scaled clones of each slide in the thumbnail panel.
-// No external library needed — pure DOM clone + CSS scale.
+// ── TOCBuilder ────────────────────────────────────────────────────────
+// Builds and manages the TOC drawer with slide headline navigation.
+// Ported from pitch v1.0.0 TOC drawer, adapted for glass-morphism style.
 
-var ThumbnailRenderer = {
-  init: function(slideData, panelId, renderFn) {
-    var panel = document.getElementById(panelId);
-    if (!panel || typeof slideData === 'undefined') return;
-    while (panel.firstChild) panel.removeChild(panel.firstChild);
+var TOCBuilder = {
+  visible: false,
+
+  init: function(slideData, listId) {
+    var list = document.getElementById(listId);
+    if (!list || typeof slideData === 'undefined') return;
+    while (list.firstChild) list.removeChild(list.firstChild);
 
     slideData.forEach(function(data, i) {
-      // Create thumbnail item wrapper
-      var item = el('div', 'thumbnail-item' + (i === 0 ? ' active' : ''));
-      item.dataset.index = i;
-      item.onclick = function() { showSlide(i); };
+      var li = document.createElement('li');
+      li.className = 'toc-item' + (i === 0 ? ' active' : '');
+      li.dataset.index = i;
+      li.onclick = function() {
+        if (typeof scrollToSlide === 'function') { scrollToSlide(i); }
+        else { showSlide(i); }
+        closeTOC();
+      };
 
-      // Slide number badge
-      item.appendChild(el('div', 'thumb-label', String(i + 1)));
+      var num = document.createElement('span');
+      num.className = 'toc-item-num';
+      num.textContent = String(i + 1);
+      li.appendChild(num);
 
-      // Headline text extracted from slideData
-      var headline = data.title || data.subtitle || ('Slide ' + (i + 1));
-      item.appendChild(el('div', 'thumb-headline', headline));
+      var headline = document.createElement('span');
+      headline.className = 'toc-item-headline';
+      headline.textContent = data.title || data.subtitle || ('Slide ' + (i + 1));
+      li.appendChild(headline);
 
-      panel.appendChild(item);
+      list.appendChild(li);
     });
   },
 
   highlight: function(index) {
-    var items = document.querySelectorAll('.thumbnail-item');
+    var items = document.querySelectorAll('.toc-item');
     items.forEach(function(item, i) {
       item.classList.toggle('active', i === index);
     });
-
-    // Scroll active thumbnail into view
-    var activeItem = document.querySelector('.thumbnail-item[data-index="' + index + '"]');
+    // Scroll active item into view
+    var activeItem = document.querySelector('.toc-item[data-index="' + index + '"]');
     if (activeItem) {
       activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -269,7 +277,7 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine v2.0 ───────────────────────────────────────────────
+// ── NarrationEngine v2.1 ───────────────────────────────────────────────
 // Web Speech API TTS narration with independent auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
 //
@@ -281,7 +289,12 @@ var PresenterTools = {
 //   Both ON  — narration drives slide timing (onend → next slide)
 //   Narrator only — stops after each slide, waits for user
 //   Auto-slide only — timer-driven slide advance (default 5s interval)
-//   Both OFF — fully manual navigation
+//   Both OFF — fully manual navigation (DEFAULT on load)
+//
+// IMPORTANT: Auto-advance is NEVER enabled by config. The user must
+// explicitly toggle it via the "⏸ Manual" button or press 'A' key.
+// narrationConfig.autoAdvance is ignored — only autoAdvanceInterval
+// and language settings are respected from config.
 //
 // Config bridge: lecture-profile.md → html-build injects narrationConfig
 //   → initPPT({ narration: narrationConfig }) → NarrationEngine.init(config)
@@ -302,6 +315,10 @@ var NarrationEngine = {
   // Language & voice
   language: 'ko',
 
+  // Hook: override how "advance to next slide" works.
+  // Default = changeSlide(1). Vertical theme sets this to scrollToSlide.
+  onSlideAdvance: function() { changeSlide(1); },
+
   // Internal
   _available: false,
   _voicesLoaded: false,
@@ -319,10 +336,7 @@ var NarrationEngine = {
     this._available = ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined');
     this._config = config || {};
 
-    // Apply config defaults
-    if (this._config.autoAdvance) {
-      this.isAutoAdvance = true;
-    }
+    // Apply config defaults (auto-advance is NEVER enabled by config — user must toggle manually)
     if (this._config.autoAdvanceInterval) {
       this._autoAdvanceInterval = this._config.autoAdvanceInterval * 1000;
     }
@@ -439,7 +453,7 @@ var NarrationEngine = {
         var slides = document.querySelectorAll('.slide');
         if (index < slides.length - 1) {
           var self = this;
-          setTimeout(function() { changeSlide(1); }, 200);
+          setTimeout(function() { self.onSlideAdvance(); }, 200);
         } else {
           this.stop();
         }
@@ -482,7 +496,7 @@ var NarrationEngine = {
     if (this.isAutoAdvance && currentSlide < slides.length - 1) {
       // Both on: narration drives timing — advance after speech
       var self = this;
-      setTimeout(function() { changeSlide(1); }, 800);
+      setTimeout(function() { self.onSlideAdvance(); }, 800);
     } else if (!this.isAutoAdvance) {
       // Narrator only: stop after each slide, wait for user
       this.isPlaying = false;
@@ -572,7 +586,7 @@ var NarrationEngine = {
       if (self.isPlaying && !self.isPaused) return;
       var slides = document.querySelectorAll('.slide');
       if (currentSlide < slides.length - 1) {
-        changeSlide(1);
+        self.onSlideAdvance();
       } else {
         self._stopAutoAdvanceTimer();
       }
@@ -827,21 +841,29 @@ var NarrationEngine = {
   }
 };
 
-// ── ThumbnailNav ───────────────────────────────────────────────────────
-// Toggle the thumbnail panel visibility.
+// ── TOC toggle functions (used by all PPT themes) ──────────────────────
 
-var ThumbnailNav = {
-  visible: true,
+function toggleTOC() {
+  var drawer = document.getElementById('toc-drawer');
+  var overlay = document.getElementById('toc-overlay');
+  var btn = document.getElementById('toc-btn');
+  if (!drawer) return;
+  TOCBuilder.visible = !TOCBuilder.visible;
+  drawer.classList.toggle('open', TOCBuilder.visible);
+  if (overlay) overlay.classList.toggle('show', TOCBuilder.visible);
+  if (btn) btn.classList.toggle('active', TOCBuilder.visible);
+}
 
-  toggle: function() {
-    var panel = document.getElementById('thumbnail-panel');
-    var btn = document.getElementById('thumb-toggle-btn');
-    if (!panel) return;
-    this.visible = !this.visible;
-    panel.classList.toggle('hidden', !this.visible);
-    if (btn) btn.classList.toggle('active', this.visible);
-  }
-};
+function closeTOC() {
+  var drawer = document.getElementById('toc-drawer');
+  var overlay = document.getElementById('toc-overlay');
+  var btn = document.getElementById('toc-btn');
+  if (!drawer) return;
+  TOCBuilder.visible = false;
+  drawer.classList.remove('open');
+  if (overlay) overlay.classList.remove('show');
+  if (btn) btn.classList.remove('active');
+}
 
 // ── Shared navigation (used by all PPT themes) ─────────────────────────
 
@@ -877,7 +899,7 @@ function showSlide(index) {
 
   // Update presenter tools
   PresenterTools.updateScript(index);
-  ThumbnailRenderer.highlight(index);
+  TOCBuilder.highlight(index);
 
   // Notify NarrationEngine of slide change
   if (NarrationEngine._available && NarrationEngine.isPlaying) {
@@ -918,13 +940,15 @@ document.addEventListener('keydown', function(e) {
     }
   }
   if (e.key === 's' || e.key === 'S') PresenterTools.toggleScript();
-  if (e.key === 't' || e.key === 'T') ThumbnailNav.toggle();
+  if (e.key === 't' || e.key === 'T') toggleTOC();
   if (e.key === 'p' || e.key === 'P') NarrationEngine.togglePlay();
   if (e.key === 'a' || e.key === 'A') NarrationEngine.toggleAutoAdvance();
 });
 
 // ── PPT Init (call from each theme's DOMContentLoaded) ──────────────────
-// options: { transition: 'fade'|'push'|'zoom', showTimer: true|false, showThumbnails: true|false }
+// options: { transition: 'fade'|'push'|'zoom', showTimer: true|false,
+//            showTOC: true|false, verticalMode: false,
+//            narration: narrationConfig }
 function initPPT(options) {
   options = options || {};
   TransitionEngine.init(options.transition || 'fade');
@@ -942,18 +966,10 @@ function initPPT(options) {
     if (timerDisp) timerDisp.style.display = 'none';
   }
 
-  // Show/hide thumbnail panel
-  if (options.showThumbnails === false) {
-    var panel = document.getElementById('thumbnail-panel');
-    if (panel) panel.classList.add('hidden');
-    ThumbnailNav.visible = false;
-  }
-
-  // Initialize thumbnails after slides are rendered
-  // Use requestAnimationFrame to ensure slides are in DOM
+  // Initialize TOC drawer after slides are rendered
   requestAnimationFrame(function() {
     if (typeof slideData !== 'undefined') {
-      ThumbnailRenderer.init(slideData, 'thumbnail-panel');
+      TOCBuilder.init(slideData, 'toc-list');
     }
   });
 

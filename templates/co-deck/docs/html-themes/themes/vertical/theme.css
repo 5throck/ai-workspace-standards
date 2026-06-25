@@ -1,0 +1,187 @@
+/*
+  vertical/theme.css — co-deck Vertical Theme (True Vertical Scroll)
+  ====================================================================
+  Overrides ppt-engine.css defaults for vertical scroll layout.
+  - body: scrollable, no overflow hidden
+  - .ppt-main: not used (display none)
+  - .slide: relative position, min-height 100vh, natural aspect ratio
+  - .vertical-topbar: sticky top bar with glass-morphism
+  - .ppt-footer: hidden (controls moved to top bar)
+  - .slide.active: inset left accent border indicator
+*/
+
+/* ── Body: enable page scrolling ─────────────────────────────────── */
+body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Hide unused PPT layout ──────────────────────────────────────── */
+.ppt-main {
+  display: none !important;
+}
+
+.ppt-footer {
+  display: none !important;
+}
+
+/* ── Vertical container ──────────────────────────────────────────── */
+.vertical-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ── Slide: full-viewport height, natural layout ─────────────────── */
+.slide {
+  position: relative !important;
+  min-height: 100vh;
+  width: 100%;
+  aspect-ratio: auto !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 24px 40px;
+  box-sizing: border-box;
+}
+
+.slide + .slide {
+  border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+}
+
+/* Active slide indicator: inset left accent border */
+.slide.active {
+  box-shadow: inset 3px 0 0 var(--accent-color, #2563eb) !important;
+}
+
+/* ── Sticky top bar ─────────────────────────────────────────────── */
+.vertical-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-size: 13px;
+  color: var(--text-primary, #1f2937);
+}
+
+.topbar-left,
+.topbar-center,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.topbar-center {
+  flex: 0;
+}
+
+.topbar-right {
+  flex: 0;
+}
+
+/* ── Top bar buttons ─────────────────────────────────────────────── */
+.topbar-btn,
+.vertical-topbar .nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-primary, #1f2937);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.topbar-btn:hover,
+.vertical-topbar .nav-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent-color, #2563eb);
+}
+
+.topbar-btn.active {
+  background: var(--accent-color, #2563eb);
+  color: #fff;
+  border-color: var(--accent-color, #2563eb);
+}
+
+.topbar-btn.speaking {
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
+}
+
+/* ── Progress bar in top bar ─────────────────────────────────────── */
+.topbar-left .progress-bar-wrap {
+  width: 120px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.topbar-left .progress-bar-fill {
+  height: 100%;
+  background: var(--accent-color, #2563eb);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.topbar-left .slide-counter {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+}
+
+/* ── Timer display ───────────────────────────────────────────────── */
+.topbar-right .presenter-timer {
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--text-secondary, #6b7280);
+  min-width: 40px;
+}
+
+/* ── Slide card (within vertical layout) ─────────────────────────── */
+.slide .slide-card {
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Responsive adjustments ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .vertical-topbar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 12px;
+  }
+
+  .topbar-left .progress-bar-wrap {
+    width: 80px;
+  }
+
+  .slide {
+    padding: 48px 16px 32px;
+  }
+
+  .topbar-right {
+    display: none;
+  }
+}

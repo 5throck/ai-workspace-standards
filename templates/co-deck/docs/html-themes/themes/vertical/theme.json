@@ -1,0 +1,43 @@
+{
+  "name": "vertical",
+  "version": "3.0.0",
+  "version_num": "3.0.0",
+  "_comment": "Vertical theme (True Vertical Scroll) — all slides stacked, sticky top bar, IntersectionObserver tracking, TOC drawer navigation. v3.0.0: initial release.",
+  "description": "True vertical scroll presentation where all slides are stacked in a scrollable page. Sticky top bar provides TTS controls, auto-advance, timer, progress, and arrow navigation. IntersectionObserver tracks active slide. TOC drawer for headline navigation. Ideal for long-form content and reading-style presentations.",
+  "rendering": {
+    "paradigm": "vertical-scroll",
+    "slides_in_dom": "all (scrollable)",
+    "navigation": "sticky top bar — TOC drawer + prev/next arrows + TTS controls + auto-advance + timer + progress bar",
+    "progress_indicator": "progress bar (top bar) + slide counter + active slide highlight (inset accent border)"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 5,
+    "max_title_chars": 28,
+    "recommended_slide_count": "30-60",
+    "notes": "Vertical scroll suits long-form content. Titles up to 28 chars. Max 5 bullets per slide. All slide types supported. Works well with 30+ slides for deep-dive presentations. Keyboard: ArrowUp/Down, PageUp/PageDown, Home/End, Space."
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "partial_styles": [],
+  "incompatible_styles": [],
+  "recommended_structure": {
+    "pattern": "Cover → Speaker Intro → [Part Divider → 8-12 Content → Summary] × N → Contact",
+    "audience_fit": ["graduate", "practitioner", "academic"],
+    "notes": "Long-form vertical layout supports deep dives. Each section flows naturally as the user scrolls. TTS with auto-advance enables hands-free presentation."
+  },
+  "requires_slideData": true,
+  "toc_required": true,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "profile": true,
+    "standard": true,
+    "contact": true,
+    "punchline": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
+  "css_theme": "docs/html-themes/themes/vertical/theme.css",
+  "added": "2026-06-24",
+  "author": "co-deck",
+  "based_on": "scroll v3.0.0"
+}

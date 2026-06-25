@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "_comment": "outline theme (Research Notebook) — text-focused, no image panel. v1.0.0: new paradigm. Full-width content area, no right-panel. All styles compatible.",
+  "name": "outline",
+  "version_num": "1.0.0",
+  "description": "Research notebook theme — text-focused presentation with headline + bullet structure. No image panel; full width dedicated to text content. Designed for researchers and academics who present structured content with minimal visual distractions.",
+  "rendering": {
+    "paradigm": "outline",
+    "slides_in_dom": "all (one active)",
+    "navigation": "TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls",
+    "progress_indicator": "progress bar (footer) + slide counter + timer"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 6,
+    "max_title_chars": 35,
+    "recommended_slide_count": "20-50",
+    "notes": "Research-oriented outline style. Titles up to 35 chars. Max 6 bullets per slide. Images and diagrams are NOT displayed. Focus on structured text content."
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "partial_styles": [],
+  "incompatible_styles": [],
+  "recommended_structure": {
+    "pattern": "Cover → [Divider → 4-6 Content] × N → Summary",
+    "audience_fit": ["academic", "graduate", "researcher"],
+    "notes": "Outline-style optimized for structured, information-dense presentations. Divider slides mark chapter sections."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "punchline": true,
+    "profile": true,
+    "standard": true,
+    "contact": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
+  "css_theme": "docs/html-themes/themes/outline/theme.css",
+  "added": "2026-06-24",
+  "modified": "2026-06-24",
+  "author": "co-deck"
+}

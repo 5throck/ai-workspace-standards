@@ -12,11 +12,14 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 
 | Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
-| `notebook` | 2.0.0 | active | PPT Outline View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/notebook/` |
+| `notebook` | 3.0.0 | active | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/notebook/` |
+| `outline` | 3.0.0 | active | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/outline/` |
 | `pitch` | 1.0.0 | active | Floating card, viewport-relative (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | classic, minimal, premium-dark | `themes/pitch/` |
-| `pitch-enhanced` | 2.0.0 | active | PPT Presenter View — pitch floating-card + thumbnails, transitions, timer | PPT footer bar (thumbnails + transitions fade/push/zoom + script + timer + prev/next) | None | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
-| `scroll` | 2.0.0 | active | PPT Reading View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | premium-dark, classic, minimal, academic, visual-heavy (⚠ partial) | `themes/scroll/` |
-| `slideshow` | 2.0.0 | active | PPT Presentation View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/slideshow/` |
+| `pitch-enhanced` | 3.0.0 | active | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
+| `scroll` | 3.0.0 | active | PPT Reading View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | premium-dark, classic, minimal, academic, visual-heavy (⚠ partial) | `themes/scroll/` |
+| `slideshow` | 3.0.0 | active | PPT Presentation View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/slideshow/` |
+| `vertical` | 3.0.0 | active | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
+| `zen` | 3.0.0 | active | Presentation Zen — full-bleed background images, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark (visual-heavy: incompatible — no text-dense content) | `themes/zen/` |
 
 ### Theme Package Files
 
@@ -35,25 +38,25 @@ Each theme folder contains:
 
 > **Runtime rendering contract (all themes):** `template.html`'s `renderSlide(data, index)` is the single source of truth for slide structure. It maps `slideData` flags → a theme-specific `data-type` (pitch/pitch-enhanced/notebook: `isTitleSlide→"title"`; scroll/slideshow: `isTitleSlide→"cover"`; slideshow/notebook/pitch-enhanced: `isPunchlineSlide→"punchline"`; all: `isDividerSlide→"divider"`, `isProfileSlide→"profile"`, `isContactSlide→"contact"`, else `"standard"`) and emits each theme's native structural classes. `initSlides()` runs on `DOMContentLoaded`. The PDF pipeline is unaffected: `extract_slidedata.mjs` (v1.2.0) parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM), so runtime rendering is invisible to extract/measure/PDF. slideData **MUST be strict JSON** (all keys/values double-quoted, no trailing commas, no JS comments) for `JSON.parse` to succeed.
 
-### PPT Transformed Themes (v2.0.0)
+### PPT Transformed Themes (v3.0.0)
 
 Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
 
 | Feature | Implementation |
 |---------|---------------|
-| Thumbnail navigation panel | CSS `transform: scale(0.14)` on cloned slide DOM nodes — no external library |
+| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, `T` key shortcut — replaces thumbnail panel** |
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
 
 ### `pdf_layout_spec.json` Schema (region model, v1.2.0)
 
-The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinates are declared once per region name; slide renderers iterate the regions declared for each slide type. `gen-slides-pdf.ts` v1.2.0 `buildCoords()` is **theme-agnostic** — it resolves `regions.*` uniformly for every theme and dispatches render functions by declared `slide_types`, not by theme name.
+The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinates are declared once per region name; slide renderers iterate the regions declared for each slide type. `gen-slides-pdf.ts` v1.7.0 `buildCoords()` is **theme-agnostic** — it resolves `regions.*` uniformly for every theme and dispatches render functions by declared `slide_types`, not by theme name.
 
 ```json
 {
@@ -139,15 +142,15 @@ PDF export and print specifications. `bleed_mm`: bleed area for professional pri
 
 ### Compatibility Matrix
 
-| Style ↓ / Theme → | `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` |
-|-------------------|------------|---------|------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial |
-| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
+| Style ↓ / Theme → | `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` |
+|-------------------|------------|-----------|---------|------------------|----------|-------------|------------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ | ✅ | ❌ incompatible |
 
-**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles` or `partial_compatibility`) · ❌ Incompatible (see theme.json `incompatible_styles`)
+**Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
 
 > **`visual-heavy`** is `⚠️ partial` for all PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced): full-bleed `background-image` on `.slide` works but the floating-card clipping in pitch-enhanced or the card-boundary in base.css themes means some image area may be cropped. The text-shadow overlay works fully.
 >
@@ -161,7 +164,7 @@ The shared style/color pool (ADR-0045 Decision B) is the single source for all t
 
 ```
 1. styles/base.css                       — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css         — PPT common UI (thumbnails, transitions, footer, timer) [PPT themes only]
+2. themes/_shared/ppt-engine.css         — PPT common UI (TOC drawer, transitions, footer, timer, narration) [PPT themes only]
 3. themes/<theme>/theme.css              — per-theme extension (card geometry, slide type layouts, etc.)
 4. styles/<style>/style.css              — per-style visual overrides (colors, fonts, spacing)
 ```
@@ -248,8 +251,13 @@ docs/html-themes/
 │   ├── _shared/
 │   │   ├── layout_base.json               # Layer 0 — region skeleton (all null) + 16:9 page + print defaults
 │   │   ├── ppt-engine.css                  # PPT common UI (thumbnails, transitions, footer, timer, narration)
-│   │   └── ppt-engine.js                   # PPT common runtime (ThumbnailRenderer, TransitionEngine, NarrationEngine, etc.)
+│   │   └── ppt-engine.js                   # PPT common runtime (TOCBuilder, TransitionEngine, NarrationEngine, etc.)
 │   ├── notebook/
+│   │   ├── template.html
+│   │   ├── theme.json
+│   │   ├── theme.css
+│   │   └── pdf_layout_spec.json
+│   ├── outline/
 │   │   ├── template.html
 │   │   ├── theme.json
 │   │   ├── theme.css
@@ -269,11 +277,22 @@ docs/html-themes/
 │   │   ├── theme.json
 │   │   ├── theme.css
 │   │   └── pdf_layout_spec.json
-│   └── slideshow/
-│       ├── template.html
-│       ├── theme.json
-│       ├── theme.css
-│       └── pdf_layout_spec.json
+│   ├── slideshow/
+│   │   ├── template.html
+│   │   ├── theme.json
+│   │   ├── theme.css
+│   │   └── pdf_layout_spec.json
+│   ├── vertical/
+│   │   ├── template.html
+│   │   ├── theme.json
+│   │   ├── theme.css
+│   │   └── pdf_layout_spec.json
+│   ├── zen/
+│   │   ├── template.html
+│   │   ├── theme.json
+│   │   ├── theme.css
+│   │   └── pdf_layout_spec.json
+└── preview/
 └── preview/
     ├── preview.html                       # theme × style previewer (dropdowns populated from manifest)
     └── themes-manifest.js                 # AUTO-GENERATED — file://-safe manifest for dropdown population
@@ -341,7 +360,7 @@ bun scripts/co-deck/scaffold-theme-style.ts --style <name>
 
 ## 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` (v1.2.0) builds the final PDF spec at runtime by `deepMerge`-ing 4 layers (later layers win on specific keys):
+`gen-slides-pdf.ts` (v1.7.0) builds the final PDF spec at runtime by `deepMerge`-ing 4 layers (later layers win on specific keys):
 
 ```
 Layer 0 (shared) : docs/html-themes/themes/_shared/layout_base.json      → region skeleton (all null) + 16:9 page + print defaults
@@ -352,4 +371,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-06-23 — File Encoding Standard section added (UTF-8 without BOM, LF line endings, .gitattributes enforcement, CP949 risk guidance). Previous: 2026-06-23 — PPT transformation: notebook/scroll/slideshow themes v2.0.0 (base.css vocabulary + PPT engine: thumbnails, transitions fade/push/zoom, presenter timer, speaker notes, **NarrationEngine TTS auto-play**); pitch-enhanced v2.0.0 (pitch clone + PPT features, full style compatibility); `_shared/ppt-engine.css` + `_shared/ppt-engine.js` (common PPT modules); original pitch v1.0.0 preserved unchanged; CSS Load Order updated to 4 steps (base → ppt-engine → theme → style); visual-heavy/academic style CSS patched for `title` data-type alias; all PPT themes compatible with all 5 styles (visual-heavy: partial). Previous: 2026-06-22 — `premium-dark` style added as DEFAULT; `classic/pdf_color_spec.json` corrected; `base.css` gains `--title-text-shadow` hook; `variant.json` `theme_manifest.default` = `premium-dark`.*
+*Last updated: 2026-06-24 — v3.0.0: 3 new themes added (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); TOCBuilder + NarrationEngine.onSlideAdvance hook added to ppt-engine.js; vertical theme uses IntersectionObserver + sticky top bar; compatibility matrix expanded to 8 themes. Previous: NarrationEngine version aligned to v2.1; gen-slides-pdf version aligned to v1.7.0.*

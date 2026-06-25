@@ -1,0 +1,125 @@
+/*
+  zen/theme.css — co-deck Zen Theme (Presentation Zen)
+  ====================================================
+  Fullscreen background images with gradient overlay and centered key message.
+  Loaded after base.css and ppt-engine.css.
+  No side image panel — background covers entire slide.
+*/
+
+/* ── Zen slide: fullscreen background image ────────────────────────── */
+.slide {
+  background-color: var(--slide-bg, #111827);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.slide[data-bg] {
+  background-image: var(--slide-bg-image);
+}
+
+/* ── Zen overlay (semi-transparent gradient) ─────────────────────────── */
+.zen-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--zen-overlay-color-top, rgba(0, 0, 0, 0.55)),
+    var(--zen-overlay-color-bottom, rgba(0, 0, 0, 0.35))
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Zen card: transparent, centered text ───────────────────────────── */
+.slide-card {
+  background: transparent;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.slide-content {
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+/* ── Header hidden for zen aesthetic ────────────────────────────────── */
+.slide-header {
+  display: none;
+}
+
+/* ── Typography ────────────────────────────────────────────────────── */
+.slide-title {
+  color: var(--text-on-dark, #ffffff);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.slide-subtitle {
+  color: var(--cover-subtitle-text, rgba(255, 255, 255, 0.75));
+}
+
+.bullet-item {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-size-body, 1rem);
+}
+
+.bullet-item::before {
+  content: "•";
+  color: var(--accent-color, #D97706);
+}
+
+.bullets-container {
+  gap: 0.5rem;
+  max-width: 600px;
+}
+
+/* ── Cover slide ──────────────────────────────────────────────────── */
+.slide[data-type="cover"] .slide-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: var(--cover-text, #ffffff);
+}
+
+/* ── Punchline slide: extra large ──────────────────────────────────── */
+.slide[data-type="punchline"] .slide-content {
+  justify-content: center;
+}
+
+.slide[data-type="punchline"] .slide-title {
+  font-size: calc(var(--font-size-title, 2rem) * 2);
+  color: var(--cover-text, #ffffff);
+  max-width: 85%;
+}
+
+/* ── Divider slide ─────────────────────────────────────────────────── */
+.slide[data-type="divider"] .slide-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  color: var(--divider-text, #ffffff);
+}
+
+.part-number {
+  color: var(--accent-color, #D97706);
+}
+
+/* ── Profile slide ─────────────────────────────────────────────────── */
+.slide[data-type="profile"] .slide-content {
+  align-items: center;
+}
+
+.profile-avatar {
+  border-color: var(--accent-color, #D97706);
+}
+
+/* ── Contact slide ────────────────────────────────────────────────── */
+.contact-item {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Fallback: no background image ─────────────────────────────────── */
+.slide:not([data-bg]) {
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a14 100%);
+}

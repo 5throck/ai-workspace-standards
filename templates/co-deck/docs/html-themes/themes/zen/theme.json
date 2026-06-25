@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "_comment": "zen theme (Presentation Zen) — fullscreen background images with centered key message. v1.0.0: new paradigm. No thumbnail panel; uses shared TOC drawer from ppt-engine.",
+  "name": "zen",
+  "version_num": "1.0.0",
+  "description": "Presentation Zen theme — fullscreen background images with semi-transparent overlay and centered key message. Optimized for visual storytelling with minimal text (max 3 bullets). No side image panel; background image covers the entire slide.",
+  "rendering": {
+    "paradigm": "zen",
+    "slides_in_dom": "all (one active)",
+    "navigation": "TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls",
+    "progress_indicator": "progress bar (footer) + slide counter + timer"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 3,
+    "max_title_chars": 30,
+    "recommended_slide_count": "15-25",
+    "notes": "Presentation Zen style. Titles up to 30 chars. Max 3 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration."
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic"],
+  "partial_styles": [],
+  "incompatible_styles": [
+    {
+      "name": "visual-heavy",
+      "reason": "visual-heavy already applies full-bleed background-image via CSS — would double-apply with zen's built-in background system."
+    }
+  ],
+  "recommended_structure": {
+    "pattern": "Cover → [Topic → 2-3 Detail → Punchline] × N → Contact",
+    "audience_fit": ["general", "practitioner", "undergraduate"],
+    "notes": "Optimized for concise visual storytelling. Each chapter = topic + detail + punchline. Background images essential."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "punchline": true,
+    "profile": true,
+    "standard": true,
+    "contact": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
+  "css_theme": "docs/html-themes/themes/zen/theme.css",
+  "added": "2026-06-24",
+  "modified": "2026-06-24",
+  "author": "co-deck"
+}

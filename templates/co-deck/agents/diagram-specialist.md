@@ -48,7 +48,7 @@ You are the diagram and chart specialist for **[Project Name]**. You own Stage 3
 
 > **Design principle (inherited from gen-visual-images.ts v3.0.1)**: SVG is the source artifact and the primary delivery format for HTML — browsers render SVG natively via `<img>` tags with no quality loss. PNG conversion is optional, required only when PDF export is planned (the PDF pipeline's `embedImg()` only handles `.png` and `.jpg`). Never generate PNG directly — always derive it from the SVG.
 >
-> **Target selection (gen-visual-images.ts v3.0.1)**: a slide is a diagram target when it carries a `visualImage`. If the `visual` field is present, honour it (`none` excludes the slide); if `visual` is **absent**, an `images/`-prefixed `visualImage` still counts as a diagram target. Set `visualImage` on every diagram slide, and prefer setting `visual` explicitly to avoid ambiguity.
+> **Target selection (gen-visual-images.ts v3.1.0)**: a slide is a diagram target when it carries a `visualImage` field. The script accepts both legacy `images/` paths and new `../assets/diagrams/` paths. Output is always written to the shared pool `presentations/assets/diagrams/`. Set `visualImage` on every diagram slide, and prefer setting `visual` explicitly to avoid ambiguity.
 
 ## ⚠️ PM-ONLY INVOCATION
 

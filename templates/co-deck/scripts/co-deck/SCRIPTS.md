@@ -114,4 +114,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
 
-*Last Updated: 2026-06-24 — Phase 2+3: gen-slides-pdf.ts v1.7.0 (background image rendering with overlay); previous: auto-calibrate.ts v1.0.0, download-font.ts v2.0.0, diagram-helpers.ts v1.1.0, estimate-layout.ts v1.1.0, gen-slides-pdf.ts v1.6.0 (OS FONT_FAMILIES)*
+*Last Updated: 2026-06-25 — Phase 2+3: gen-slides-pdf.ts v1.7.0 (background image rendering with overlay); previous: auto-calibrate.ts v1.0.0, download-font.ts v2.0.0, diagram-helpers.ts v1.1.0, estimate-layout.ts v1.1.0, gen-slides-pdf.ts v1.6.0 (OS FONT_FAMILIES)*

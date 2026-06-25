@@ -1,0 +1,111 @@
+{
+  "version": "1.2.0",
+  "_comment": "vertical theme PDF layout — standard PPT layout with generous content area for long-form content. Same page format as scroll theme.",
+  "page": {
+    "width_mm": 338.7,
+    "height_mm": 190.5,
+    "margin_mm": 0.0,
+    "aspect_ratio": "16:9"
+  },
+  "calibration": {
+    "viewport_px": 720,
+    "_viewport_px_note": "Slide height in px (1280x720). Used for px→mm/pt conversion."
+  },
+  "regions": {
+    "header":  { "x_pct": 0.0,    "y_pct": 0.091,  "w_pct": 1.0,    "h_pct": 0.064 },
+    "title":   { "x_pct": 0.0438, "y_pct": 0.224,  "w_pct": 0.9124, "h_pct": 0.10  },
+    "content": { "x_pct": 0.0438, "y_pct": 0.349,  "w_pct": 0.503,  "h_pct": 0.651 },
+    "visual":  { "x_pct": 0.584,  "y_pct": 0.390,  "w_pct": 0.372,  "h_pct": 0.561, "fit": "contain" },
+    "meta":    null,
+    "toc":     null
+  },
+  "slide_types": {
+    "title":     { "regions": ["header", "title", "subtitle"] },
+    "punchline": { "regions": ["title", "subtitle"] },
+    "standard":  { "regions": ["header", "title", "content", "visual"] },
+    "divider":   { "regions": ["header", "title", "visual"] },
+    "profile":   { "regions": ["title", "content"] },
+    "contact":   { "regions": ["title", "content"] }
+  },
+  "slide_type_overrides": {
+    "title": {
+      "title":    { "x_pct": 0.0438, "y_pct": 0.3967, "w_pct": 0.9123, "h_pct": 0.10 },
+      "subtitle": { "x_pct": 0.0438, "y_pct": 0.5346, "w_pct": 0.9123, "h_pct": 0.10 }
+    },
+    "divider": {
+      "title":  { "x_pct": 0.0438, "y_pct": 0.40,   "w_pct": 0.4766, "h_pct": 0.45 },
+      "visual": { "x_pct": 0.5582, "y_pct": 0.2613, "w_pct": 0.3972, "h_pct": 0.6059, "fit": "cover" }
+    },
+    "punchline": {
+      "title":    { "x_pct": 0.10, "y_pct": 0.30, "w_pct": 0.80, "h_pct": 0.18 },
+      "subtitle": { "x_pct": 0.10, "y_pct": 0.52, "w_pct": 0.80, "h_pct": 0.12 },
+      "content":  { "x_pct": 0.10, "y_pct": 0.18, "w_pct": 0.80, "h_pct": 0.65 }
+    },
+    "profile": {
+      "title":   { "x_pct": 0.10, "y_pct": 0.25, "w_pct": 0.80, "h_pct": 0.14 },
+      "content": { "x_pct": 0.10, "y_pct": 0.42, "w_pct": 0.80, "h_pct": 0.42 }
+    },
+    "contact": {
+      "title":   { "x_pct": 0.10, "y_pct": 0.25, "w_pct": 0.80, "h_pct": 0.16 },
+      "content": { "x_pct": 0.10, "y_pct": 0.44, "w_pct": 0.80, "h_pct": 0.42 }
+    }
+  },
+  "fonts": {
+    "title_pt": 22.0,
+    "bullet_pt": 13.0,
+    "punchline_pt": 24.0,
+    "punchline_sub_pt": 14.0,
+    "div_title_pt": 22.0,
+    "div_desc_pt": 13.0
+  },
+  "line_heights": {
+    "title_px": 44.0,
+    "bullet_px": 28.0,
+    "bullet_gap_px": 16.0,
+    "punchline_px": 52.0,
+    "div_title_px": 44.0,
+    "div_desc_px": 28.16
+  },
+  "image_zones": {
+    "standard": {
+      "x_pct": 0.584,
+      "y_pct": 0.390,
+      "w_pct": 0.372,
+      "h_pct": 0.561,
+      "fit": "contain"
+    },
+    "divider": {
+      "x_pct": 0.5582,
+      "y_pct": 0.2613,
+      "w_pct": 0.3972,
+      "h_pct": 0.6059,
+      "fit": "cover"
+    }
+  },
+  "toc": null,
+  "content_constraints": {
+    "standard": {
+      "max_bullets": 5,
+      "max_title_chars": 28,
+      "max_body_chars": 120
+    },
+    "punchline": {
+      "max_title_chars": 28,
+      "max_subtitle_chars": 60
+    },
+    "divider": {
+      "max_title_chars": 20,
+      "max_desc_chars": 60
+    },
+    "title": {
+      "max_title_chars": 40,
+      "max_subtitle_chars": 80
+    }
+  },
+  "print": {
+    "bleed_mm": 0.0,
+    "crop_marks": false,
+    "page_numbers": true,
+    "page_number_position": "bottom-right"
+  }
+}

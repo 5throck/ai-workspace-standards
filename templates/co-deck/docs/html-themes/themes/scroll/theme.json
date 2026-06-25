@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0",
-  "_comment": "Scroll theme (PPT Reading View) — region schema (ADR-0045 Decision #2). v2.0.0: PPT transformation — vertical scroll removed, single-slide active mode, toc_required=false, punchline type added.",
+  "version": "3.0.0",
+  "_comment": "Scroll theme (PPT Reading View) — region schema (ADR-0045 Decision #2). v3.0.0: TOC drawer replaces thumbnail panel; all PPT features retained.",
   "name": "scroll",
-  "version_num": "2.0.0",
-  "description": "PPT-style reading presentation with highest content density (5 bullets, 30 char titles, 120 char body). Thumbnail navigation, transition effects, speaker script panel, and footer nav. Previously a vertical scroll layout, now transformed to a PPT reading view while retaining its generous content constraints and well-designed PDF region layout.",
+  "version_num": "3.0.0",
+  "description": "PPT-style reading presentation with highest content density (5 bullets, 30 char titles, 120 char body). TOC drawer navigation, transition effects, speaker script panel, and footer nav. Previously a vertical scroll layout, now transformed to a PPT reading view while retaining its generous content constraints and well-designed PDF region layout.",
   "rendering": {
     "paradigm": "scroll",
     "slides_in_dom": "all (one active)",
-    "navigation": "thumbnail panel + footer bar — prev/next, transition mode selector, script toggle, timer",
-    "progress_indicator": "progress bar (footer) + slide counter + timer"
+    "navigation": "TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer",
+    "progress_indicator": "progress bar (footer) + slide counter + TOC highlight"
   },
   "content_rules": {
     "max_bullets_per_slide": 5,
@@ -43,6 +43,6 @@
   "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/scroll/theme.css",
   "added": "2026-06-21",
-  "modified": "2026-06-23",
+  "modified": "2026-06-24",
   "author": "co-deck"
 }
