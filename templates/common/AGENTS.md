@@ -379,8 +379,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | claude-haiku-4-5 |
 | 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
 | 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm | Medium | claude-sonnet-4-6 |
-| 6 | Final QA Audit (bun scripts/audit.ts) | pm | Medium | claude-sonnet-4-6 |
+| 5 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
@@ -389,8 +388,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | Update project README introduction | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 2 | Lifecycle Update (if needed) | pm | Medium | claude-sonnet-4-6 |
-| 3 | Final QA Audit | pm | Medium | claude-sonnet-4-6 |
+| 2 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential
 

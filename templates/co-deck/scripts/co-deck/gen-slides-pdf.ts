@@ -620,8 +620,8 @@ function renderTitleSlide(ctx: RenderCtx) {
 
   // Title slide layout: optional header (if declared), then a large title block
   // + subtitle + meta line. Regions declared: ["title", "subtitle"] at minimum;
-  // scroll also declares "header" on its title slide_type to preserve the
-  // section bar drawn by the pre-rewrite renderer.
+// PPT themes with a header region declare "header" on their title slide_type to preserve the
+// section bar drawn by the pre-rewrite renderer.
   const titleR = region('title');
   const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
   const metaR  = tryRegion(ctx, 'meta')     ?? subR;
@@ -1052,8 +1052,8 @@ function buildCoords(spec: LayoutSpec) {
 // ── Color builder ─────────────────────────────────────────────────────────────
 
 function buildColors(spec: LayoutSpec) {
-  // Color key resolution mirrors the pre-rewrite buildColors exactly so scroll
-  // rendering is preserved bit-for-bit. The pre-rewrite code looked up short
+// Color key resolution mirrors the pre-rewrite buildColors exactly so pre-rewrite
+// rendering is preserved bit-for-bit. The pre-rewrite code looked up short
   // keys (dark, dark2, dark3, text, body, vis_bg, meta); style pdf_color_spec
   // uses long keys (card_dark*, text_*), so most roles fall through to the
   // hardcoded defaults unless a project override provides the short key.
@@ -1105,10 +1105,10 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
 
   // Read lecture-profile.md for theme/style
   const profilePath = join(projectDir, 'lecture-profile.md');
-  let theme = 'scroll', style = 'premium-dark';
+  let theme = 'pitch-enhanced', style = 'premium-dark';
   if (existsSync(profilePath)) {
     const profile = parseFrontmatter(readFileSync(profilePath, 'utf-8'));
-    theme = profile.theme ?? 'scroll';
+    theme = profile.theme ?? 'pitch-enhanced';
     style = profile.style ?? 'premium-dark';
   }
 
@@ -1267,7 +1267,7 @@ async function main() {
     bgImageConfig = parseBackgroundImage(profileContent);
   }
 
-  const theme = lectureProfile.theme ?? 'scroll';
+  const theme = lectureProfile.theme ?? 'pitch-enhanced';
   const style = lectureProfile.style ?? 'premium-dark';
 
   // ── Load spec files (4-layer merge: base → theme → style colors → overrides) ──

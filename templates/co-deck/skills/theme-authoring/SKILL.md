@@ -5,7 +5,7 @@ description: >
   Entry point for creating a new co-deck theme or style. PM dispatches
   the appropriate workflow (Style Workflow or T-Stage) based on user request.
   Responds to: "create a new theme", "add a new style", "make a dark theme",
-  "create a dark style", "add slideshow theme".
+  "create a dark style", "add zen theme".
 status: active
 owner: pm
 last_reviewed: 2026-06-21
@@ -28,7 +28,7 @@ co-deck uses a two-layer system: **Theme** (HTML structure + rendering paradigm)
 | User says | Route |
 |-----------|-------|
 | "create a new style", "add dark style", "add style variant" | Style Workflow |
-| "create a new theme", "add slideshow variant", "new theme" | T-Stage (Theme Workflow) |
+| "create a new theme", "add zen variant", "new theme" | T-Stage (Theme Workflow) |
 
 ---
 
@@ -56,7 +56,7 @@ Design agent authors two files in `docs/html-themes/styles/<name>/`:
 - Used by `gen-slides-pdf.ts` as Layer 2 in the 3-layer PDF merge
 
 ### Step S-3: PM — preview + approval + registration
-1. Provide preview link: `docs/html-themes/preview/preview.html?theme=scroll&style=<name>`
+1. Provide preview link: `docs/html-themes/preview/preview.html?theme=pitch-enhanced&style=<name>`
 2. Wait for user approval
 3. On approval:
    - Add row to THEMES.md Styles table (include `pdf_color_spec.json` path column)
@@ -73,7 +73,7 @@ Design agent authors two files in `docs/html-themes/styles/<name>/`:
 ### T-0: PM — collect theme spec
 Ask the user:
 1. Theme name (kebab-case, e.g., `magazine`, `card-deck`)
-2. Rendering paradigm: how are slides displayed? (scroll, slideshow, carousel, grid…)
+2. Rendering paradigm: how are slides displayed? (scrollable, stacked, carousel, grid…)
 3. Navigation: how does the user move between slides?
 4. TOC required? (yes / no)
 5. Which existing styles should be compatible?
@@ -188,5 +188,5 @@ storyline reviews and authors:
 - `docs/html-themes/THEMES.md` — authoritative registry
 - `docs/html-themes/preview/preview.html` — preview tool
 - `docs/html-themes/base/base.css` — shared CSS variable foundation
-- `docs/html-themes/themes/scroll/` — reference theme (scroll)
-- `docs/html-themes/themes/slideshow/` — reference theme (slideshow)
+- `docs/html-themes/themes/pitch-enhanced/` — reference theme (PPT-engine hybrid)
+- `docs/html-themes/themes/zen/` — reference theme (fullscreen stacked)
