@@ -23,7 +23,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **design** | [`agents/design.md`](agents/design.md) | Medium | Locks visual design style — color palette, fonts, layout into design_spec.md |
 | **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
 | **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Medium | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
-| **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Generates SVG concept diagrams and data charts from visual_spec → assets/diagrams/ (SVG+PNG) |
+| **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Generates SVG concept diagrams and data charts from visual_spec → assets/diagrams/; SVG is primary delivery format for HTML, PNG optional for PDF export |
 | **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
 | **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | Generates sample and full PDF from slidedata.json and layout_spec.json |
 | **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md; loads lecture-profile.md |
@@ -99,7 +99,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 3.5 |
-| **Role** | Generates SVG concept diagrams (cycle/flow/matrix/pyramid/timeline/comparison) and data charts (bar/line/pie) from visual_spec fields in slide_deck.md; outputs CSS-variable SVG (html-build) + hex-resolved PNG (pdf-export) to assets/diagrams/; parallel to image-curator |
+| **Role** | Generates SVG concept diagrams (cycle/flow/matrix/pyramid/timeline/comparison) and data charts (bar/line/pie) from visual_spec fields in slide_deck.md; outputs CSS-variable SVG as primary delivery format for HTML; PNG is optional and required only for PDF export; parallel to image-curator |
 
 ### source-verifier
 
@@ -257,7 +257,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
 | lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
 | image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
-| assets/diagrams/*.svg + *.png + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md |
+| assets/diagrams/*.svg (+ optional *.png) + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md; SVG is primary delivery format for HTML, PNG optional for PDF export |
 | pdf_layout_spec.md (pixel coordinates for PDF engine) | Phase 4 | `measure` | medium | |
 | <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |
 | research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |

@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.8
+ * @version 2.0.9
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -1043,12 +1043,16 @@ if (!existsSync(MAP_PATH)) {
 }
 
 // Encoding gate — only on --apply (not dry-run or governance/docs modes)
+// Only scan git-tracked files — skip untracked local directories
 if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
+  const gitLsResult = execFileSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
+  const trackedFiles = new Set(gitLsResult.trim().split('\n').filter(Boolean));
   const scanDirs = ['.', join('templates')];
   const allViolations: EncodingViolation[] = [];
   for (const scanDir of scanDirs) {
     if (existsSync(scanDir)) {
       for (const file of walkFilesForEncoding(scanDir)) {
+        if (!trackedFiles.has(file.replace(/\\/g, '/'))) continue; // skip untracked
         allViolations.push(...checkFileEncoding(file));
       }
     }
