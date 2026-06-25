@@ -497,9 +497,10 @@ body {
 
 /* ── Neutralize base.css responsive scaling for PPT themes ───────────
    base.css applies transform: scale(calc(100vw / 1280)) on .slide at
-   ≤1340px for scroll/slideshow/notebook viewport-based layouts.
-   PPT themes use percentage-based sizing + position:absolute so this
-   scaling double-applies (ppt-engine already positions slides via
+   ≤1340px for viewport-based layouts.
+   PPT themes (outline, pitch-enhanced, zen, vertical) use
+   percentage-based sizing + position:absolute so this scaling
+   double-applies (ppt-engine already positions slides via
    top/left/translate), causing double-scale and broken transitions.  */
 @media (max-width: 1340px) {
   .slide {

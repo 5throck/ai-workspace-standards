@@ -51,7 +51,7 @@ This variant focuses on lecture and presentation material production — from re
 | design | Locks visual design style into design_spec.md | Medium | inherit |
 | image-curator | Searches and downloads commercial-use images (Pixabay/Unsplash/Pexels) | Medium | inherit |
 | diagram-specialist | Generates SVG concept diagrams and data charts from visual_spec; SVG primary for HTML, PNG optional for PDF | Medium | inherit |
-| html-build | Generates HTML slides with theme injection (`data-theme`); 4 themes | Medium | inherit |
+| html-build | Generates HTML slides with theme injection (`data-theme`); 5 themes | Medium | inherit |
 | measure | Auto-measures slide layout with Playwright; downloads TTF fonts | Medium | inherit |
 | pdf-export | Generates sample and full PDF from measured layout data | Medium | inherit |
 | version | Snapshots files before every edit; restores prior states | Low | inherit |
@@ -64,7 +64,7 @@ This variant focuses on lecture and presentation material production — from re
 - **design**: Visual design lock — decides layout, color palette, font family and saves design_spec.md
 - **image-curator**: Image acquisition — Pixabay (keyless), Unsplash URL, Pexels/Unsplash API; all sources commercial-use unlimited
 - **diagram-specialist**: Diagram and chart generation — 6 concept diagram types (cycle/flow/matrix/pyramid/timeline/comparison) + 3 SVG chart types (bar/line/pie); SVG is primary delivery format for HTML; PNG is optional, required only for PDF export
-- **html-build**: HTML slide generation — applies `data-theme` attribute; injects base.css + override CSS; 4 themes (notebook, pitch, scroll, slideshow)
+- **html-build**: HTML slide generation — applies `data-theme` attribute; injects base.css + override CSS; 5 themes (outline, pitch, pitch-enhanced, vertical, zen)
 - **measure**: Layout measurement — runs Playwright to extract coordinates and downloads TTF fonts
 - **pdf-export**: PDF generation — generates sample (5 slides) and full PDF via pdf-lib
 - **version**: Version snapshots — backs up files before edits; restores prior states on demand

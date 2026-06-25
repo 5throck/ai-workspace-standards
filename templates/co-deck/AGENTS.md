@@ -492,7 +492,7 @@ When user requests **"create a new theme"** or **"create a new style"**, enter t
 **Style Workflow** (lightweight, 3 steps):
 1. PM collects style name + visual characteristics from user
 2. PM dispatches Design to author `styles/<name>/style.css` (CSS variable overrides only)
-3. PM provides preview link: `docs/html-themes/preview/preview.html?theme=scroll&style=<name>` → user approval → register in THEMES.md
+3. PM provides preview link: `docs/html-themes/preview/preview.html?theme=pitch-enhanced&style=<name>` → user approval → register in THEMES.md
 
 **Theme Workflow** (T-Stage, 5 steps):
 ```

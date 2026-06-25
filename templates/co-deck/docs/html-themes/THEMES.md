@@ -12,12 +12,9 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 
 | Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
-| `notebook` | 3.0.0 | active | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/notebook/` |
-| `outline` | 3.0.0 | active | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/outline/` |
+| `outline` | 3.0.0 | active | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/outline/` |
 | `pitch` | 1.0.0 | active | Floating card, viewport-relative (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | classic, minimal, premium-dark | `themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | active | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
-| `scroll` | 3.0.0 | active | PPT Reading View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | premium-dark, classic, minimal, academic, visual-heavy (⚠ partial) | `themes/scroll/` |
-| `slideshow` | 3.0.0 | active | PPT Presentation View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/slideshow/` |
 | `vertical` | 3.0.0 | active | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
 | `zen` | 3.0.0 | active | Presentation Zen — full-bleed background images, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark (visual-heavy: incompatible — no text-dense content) | `themes/zen/` |
 
@@ -32,15 +29,15 @@ Each theme folder contains:
 | `theme.css` | ✅ | Per-theme CSS extension layered between `base.css` (and optionally `ppt-engine.css`) and `styles/<style>/style.css` (see CSS Load Order). Defines theme-specific structural rules. |
 | `pdf_layout_spec.json` | ✅ | Region-based PDF layout: `page` geometry, `calibration.viewport_px`, `regions.*`, `slide_types[type].regions`, `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print` |
 
-> **`css_theme` field** (`theme.json`): each theme declares the path to its `theme.css` (e.g. `"css_theme": "docs/html-themes/themes/scroll/theme.css"`). html-build reads this to inject the per-theme CSS in the correct order.
+> **`css_theme` field** (`theme.json`): each theme declares the path to its `theme.css` (e.g. `"css_theme": "docs/html-themes/themes/pitch-enhanced/theme.css"`). html-build reads this to inject the per-theme CSS in the correct order.
 >
 > **`css_ppt_engine` field** (`theme.json`): PPT-transformed themes declare the path to the shared PPT engine CSS (`docs/html-themes/themes/_shared/ppt-engine.css`). html-build injects this between `base.css` and `theme.css`.
 
-> **Runtime rendering contract (all themes):** `template.html`'s `renderSlide(data, index)` is the single source of truth for slide structure. It maps `slideData` flags → a theme-specific `data-type` (pitch/pitch-enhanced/notebook: `isTitleSlide→"title"`; scroll/slideshow: `isTitleSlide→"cover"`; slideshow/notebook/pitch-enhanced: `isPunchlineSlide→"punchline"`; all: `isDividerSlide→"divider"`, `isProfileSlide→"profile"`, `isContactSlide→"contact"`, else `"standard"`) and emits each theme's native structural classes. `initSlides()` runs on `DOMContentLoaded`. The PDF pipeline is unaffected: `extract_slidedata.mjs` (v1.2.0) parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM), so runtime rendering is invisible to extract/measure/PDF. slideData **MUST be strict JSON** (all keys/values double-quoted, no trailing commas, no JS comments) for `JSON.parse` to succeed.
+> **Runtime rendering contract (all themes):** `template.html`'s `renderSlide(data, index)` is the single source of truth for slide structure. It maps `slideData` flags → a theme-specific `data-type` (pitch/pitch-enhanced: `isTitleSlide→"title"`; outline: `isTitleSlide→"cover"`; pitch-enhanced: `isPunchlineSlide→"punchline"`; all: `isDividerSlide→"divider"`, `isProfileSlide→"profile"`, `isContactSlide→"contact"`, else `"standard"`) and emits each theme's native structural classes. `initSlides()` runs on `DOMContentLoaded`. The PDF pipeline is unaffected: `extract_slidedata.mjs` (v1.2.0) parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM), so runtime rendering is invisible to extract/measure/PDF. slideData **MUST be strict JSON** (all keys/values double-quoted, no trailing commas, no JS comments) for `JSON.parse` to succeed.
 
 ### PPT Transformed Themes (v3.0.0)
 
-Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
+Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
 
 | Feature | Implementation |
 |---------|---------------|
@@ -111,10 +108,10 @@ The spec uses a **region-based layout model** (ADR-0045 Decision #2). Coordinate
 `themes/_shared/layout_base.json` holds the **Layer 0 defaults** for the region model: the 16:9 `page` baseline, `print` defaults, and a region skeleton whose values are all `null` (`header`, `title`, `content`, `visual`, `meta`, `toc`). It is the merge base — it never fills a region a theme intends to leave null. `_shared/` is excluded from the theme scan (it is not itself a theme).
 
 #### `image_zones`
-Named image placement zones per slide type (legacy companion to the `visual` region; kept for backwards compatibility and for styles that key image geometry by slide type). `x_pct`, `y_pct`, `w_pct`, `h_pct` are page-relative fractions. `fit`: `"contain"` (preserve aspect ratio) | `"cover"` (fill zone). Omit a slide type key if that type has no image zone (e.g., slideshow standard). Set `toc: null` for themes that do not use TOC.
+Named image placement zones per slide type (legacy companion to the `visual` region; kept for backwards compatibility and for styles that key image geometry by slide type). `x_pct`, `y_pct`, `w_pct`, `h_pct` are page-relative fractions. `fit`: `"contain"` (preserve aspect ratio) | `"cover"` (fill zone). Omit a slide type key if that type has no image zone (e.g., themes without an image panel on standard slides). Set `toc: null` for themes that do not use TOC.
 
 #### `toc`
-TOC panel layout (scroll theme only — scroll v1.0.0). `width_pct`: TOC panel width as fraction of page width. `item_h_px`: height per TOC item. `indent_px`: indentation per nesting level. `max_visible_items`: maximum items visible without scrolling. Set to `null` for themes that do not use TOC.
+TOC panel layout (PPT themes). `width_pct`: TOC panel width as fraction of page width. `item_h_px`: height per TOC item. `indent_px`: indentation per nesting level. `max_visible_items`: maximum items visible without scrolling. Set to `null` for themes that do not use TOC.
 
 #### `content_constraints`
 Geometry-derived content limits per slide type. Values are derived from region area dimensions divided by `line_heights`. Read by the Storyline agent at Stage 2 to determine slide density. Keep in sync with the geometry-related entries in `theme.json content_rules`.
@@ -142,17 +139,17 @@ PDF export and print specifications. `bleed_mm`: bleed area for professional pri
 
 ### Compatibility Matrix
 
-| Style ↓ / Theme → | `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` |
-|-------------------|------------|-----------|---------|------------------|----------|-------------|------------|-------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial | ✅ | ❌ incompatible |
-| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ | ✅ | ❌ incompatible |
+| Style ↓ / Theme → | `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` |
+|-------------------|-----------|---------|------------------|------------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ❌ incompatible |
 
 **Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
 
-> **`visual-heavy`** is `⚠️ partial` for all PPT-transformed themes (notebook, scroll, slideshow, pitch-enhanced): full-bleed `background-image` on `.slide` works but the floating-card clipping in pitch-enhanced or the card-boundary in base.css themes means some image area may be cropped. The text-shadow overlay works fully.
+> **`visual-heavy`** is `⚠️ partial` for all PPT-transformed themes (outline, pitch-enhanced, zen, vertical): full-bleed `background-image` on `.slide` works but the floating-card clipping in pitch-enhanced or the card-boundary in base.css themes means some image area may be cropped. The text-shadow overlay works fully.
 >
 > **`pitch` (v1.0.0)** preserves its original incompatibilities (visual-heavy, academic) — these are not patched. Use `pitch-enhanced` for full style compatibility with pitch aesthetics.
 
@@ -252,11 +249,6 @@ docs/html-themes/
 │   │   ├── layout_base.json               # Layer 0 — region skeleton (all null) + 16:9 page + print defaults
 │   │   ├── ppt-engine.css                  # PPT common UI (thumbnails, transitions, footer, timer, narration)
 │   │   └── ppt-engine.js                   # PPT common runtime (TOCBuilder, TransitionEngine, NarrationEngine, etc.)
-│   ├── notebook/
-│   │   ├── template.html
-│   │   ├── theme.json
-│   │   ├── theme.css
-│   │   └── pdf_layout_spec.json
 │   ├── outline/
 │   │   ├── template.html
 │   │   ├── theme.json
@@ -272,16 +264,6 @@ docs/html-themes/
 │   │   ├── theme.json
 │   │   ├── theme.css
 │   │   └── pdf_layout_spec.json
-│   ├── scroll/
-│   │   ├── template.html
-│   │   ├── theme.json
-│   │   ├── theme.css
-│   │   └── pdf_layout_spec.json
-│   ├── slideshow/
-│   │   ├── template.html
-│   │   ├── theme.json
-│   │   ├── theme.css
-│   │   └── pdf_layout_spec.json
 │   ├── vertical/
 │   │   ├── template.html
 │   │   ├── theme.json
@@ -292,7 +274,6 @@ docs/html-themes/
 │   │   ├── theme.json
 │   │   ├── theme.css
 │   │   └── pdf_layout_spec.json
-└── preview/
 └── preview/
     ├── preview.html                       # theme × style previewer (dropdowns populated from manifest)
     └── themes-manifest.js                 # AUTO-GENERATED — file://-safe manifest for dropdown population
@@ -371,4 +352,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-06-24 — v3.0.0: 3 new themes added (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); TOCBuilder + NarrationEngine.onSlideAdvance hook added to ppt-engine.js; vertical theme uses IntersectionObserver + sticky top bar; compatibility matrix expanded to 8 themes. Previous: NarrationEngine version aligned to v2.1; gen-slides-pdf version aligned to v1.7.0.*
+*Last updated: 2026-06-25 — notebook, scroll, slideshow themes removed; remaining 5 themes: outline (v3.0.0), pitch (v1.0.0), pitch-enhanced (v3.0.0), vertical (v3.0.0), zen (v3.0.0); default theme changed to pitch-enhanced. Previous (2026-06-24): 3 new themes added (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); compatibility matrix expanded to 8 themes.*

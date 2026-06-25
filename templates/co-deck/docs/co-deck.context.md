@@ -136,12 +136,9 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 | Name | Version | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|---------|----------|-----------|-----|---------------|--------|
-| `notebook` | 3.0.0 | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 30 char title | `docs/html-themes/themes/notebook/` |
 | `outline` | 3.0.0 | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 6 bullets, 35 char title, 30-60 slides | `docs/html-themes/themes/outline/` |
 | `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
-| `scroll` | 3.0.0 | PPT Reading View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
-| `slideshow` | 3.0.0 | PPT Presentation View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
 | `vertical` | 3.0.0 | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | max 5 bullets, 28 char title, 30-60 slides | `docs/html-themes/themes/vertical/` |
 | `zen` | 3.0.0 | Presentation Zen — full-bleed backgrounds, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 3 bullets, 28 char title, 10-30 slides | `docs/html-themes/themes/zen/` |
 
@@ -153,7 +150,7 @@ Each theme folder also includes **`theme.css`** (per-theme CSS extension — car
 
 ### PPT Transformed Themes (v3.0.0)
 
-Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
+Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
 
 | Feature | Implementation |
 |---------|---------------|
@@ -171,18 +168,18 @@ The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC d
 
 The five themes split into **two architectural families** with intentional design differences:
 
-| Aspect | **Pitch Family** (pitch, pitch-enhanced) | **PPT-Engine Family** (scroll, notebook, slideshow) |
-|--------|----------------------------------------|------------------------------------------------------|
-| **Shared engine** | pitch: none (self-contained) · pitch-enhanced: ppt-engine.js/css | ppt-engine.js + ppt-engine.css |
+| Aspect | **Pitch Family** (pitch — native DOM) | **PPT-Engine Family** (outline, pitch-enhanced, zen, vertical) |
+|--------|--------------------------------------|---------------------------------------------------------------|
+| **Shared engine** | None (self-contained) | ppt-engine.js + ppt-engine.css |
 | **DOM vocabulary** | `.slide-content > .slide-left + .right-panel` · `<ul class="slide-bullets"><li>` | `.slide-header + .slide-card` · `<div class="bullets-container"><div class="bullet-item">` |
 | **Cover slide type** | `data-type="title"` | `data-type="cover"` |
 | **Slide card sizing** | `92vw × 82vh`, max 1300×750px, border-radius 20px | `aspect-ratio: 16/9`, max 1280px, border-radius 4px |
-| **Grid layout** | CSS Grid (`1fr 1fr` in pitch-enhanced, `1.15fr 0.85fr` in pitch) | Flexbox via base.css `.slide-card` |
-| **Transitions** | pitch: scale+translateY · pitch-enhanced: ppt-engine fade/push/zoom | ppt-engine fade/push/zoom |
-| **Navigation** | pitch: TOC drawer (`T` key) · pitch-enhanced: TOC drawer + ppt-footer | TOC drawer + ppt-footer |
+| **Grid layout** | CSS Grid (`1.15fr 0.85fr`) | Flexbox via base.css `.slide-card` |
+| **Transitions** | scale+translateY | ppt-engine fade/push/zoom |
+| **Navigation** | TOC drawer (`T` key) | TOC drawer + ppt-footer |
 | **PDF calibration** | 750px (matches 750px max-height card) | 720px (matches 1280×720 reference) |
 
-> **pitch-enhanced** is a **hybrid**: it uses the ppt-engine runtime (thumbnails, transitions, NarrationEngine, timer) but preserves the pitch-native DOM vocabulary and floating-card geometry. Its `theme.css` (393 lines) is the most complex override layer, neutralizing base.css defaults that conflict with the pitch aesthetic.
+> **pitch-enhanced** is a **hybrid**: it uses the ppt-engine runtime (TOC drawer, transitions, NarrationEngine, timer) but preserves the pitch-native DOM vocabulary and floating-card geometry. Its `theme.css` (393 lines) is the most complex override layer, neutralizing base.css defaults that conflict with the pitch aesthetic.
 
 ### Layer 2 — Style (CSS Variable Set)
 
@@ -217,13 +214,13 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` |
-|-------------------|------------|-----------|---------|------------------|----------|-------------|------------|-------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial | ✅ | ❌ incompatible |
-| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ | ✅ | ❌ incompatible |
+| Style ↓ / Theme → | `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` |
+|-------------------|-----------|---------|------------------|------------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ❌ incompatible |
 
 > **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible
 >
@@ -233,7 +230,7 @@ Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md
 
 To create a new theme or style, use the **T-Stage** or **Style Workflow** via the PM agent. See `skills/theme-authoring/SKILL.md`. The `scaffold-theme-style.ts` script stubs the correct file layout (region skeleton for themes, adapted copy for styles) and auto-regenerates the preview manifest.
 
-**`visual-heavy` special behavior** (`⚠️ partial` for all PPT themes): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well for short/visual slides (cover, divider, image-driven content); avoid for text-dense slides. Background image may be partially clipped by card boundary in pitch-enhanced or base.css card layouts. Incompatible with original `pitch` (full-bleed conflicts with floating-card layout).
+**`visual-heavy` special behavior** (`⚠️ partial` for outline, pitch-enhanced, zen, vertical): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well for short/visual slides (cover, divider, image-driven content); avoid for text-dense slides. Background image may be partially clipped by card boundary in pitch-enhanced or base.css card layouts. Incompatible with original `pitch` (full-bleed conflicts with floating-card layout).
 
 ### 4-Layer PDF Merge
 
@@ -283,7 +280,7 @@ title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
-  theme: scroll       # HTML structure: notebook | pitch | pitch-enhanced | scroll | slideshow
+  theme: pitch-enhanced  # HTML structure: outline | pitch | pitch-enhanced | vertical | zen
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
 keywords: [Keyword 1, Keyword 2]
 instructor:
@@ -404,7 +401,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 
 ### Content Rules
 1. Research must cover both Korean and English sources
-2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: scroll theme → max 5 bullets, 30-60 slides; slideshow → max 4 bullets, 20-50 slides
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: pitch-enhanced → max 4 bullets, 28 char title
 3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
@@ -519,7 +516,7 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
-12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is RETAINED — scroll-partial, incompatible with notebook/pitch/slideshow. `premium-dark` is incompatible with `notebook` (dark background destroys ruled-paper texture).
+12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is partial for outline, pitch-enhanced, zen, vertical; incompatible with pitch.
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
 14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.7.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**. **Background images** (v1.7.0): when `background_image.enabled: true` in lecture-profile.md, the renderer applies full-bleed background images via `placeImageCover()` + semi-transparent overlay via `fillRectOverlay()` per scope (`all`/`divider-cover`/`individual`). Image paths resolved from `image-manifest.json` first, then `slideData.backgroundImage`, then `fallback_color`.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
@@ -528,4 +525,4 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 ---
 
-*co-deck.context.md version: 3.8 — updated 2026-06-24: v3.0.0 theme updates — 3 new themes (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); TOCBuilder + NarrationEngine.onSlideAdvance in ppt-engine.js; vertical theme uses IntersectionObserver; compatibility matrix expanded to 8 themes. Previous: v3.7 — Theme Architecture section (Pitch Family vs PPT-Engine Family), NarrationEngine v2.1, gen-slides-pdf v1.7.0, content rules per-theme accuracy, pitch theme.json punchline added, partial_styles field name unified, default style premium-dark, stale scroll TOC rule removed.*
+*co-deck.context.md version: 3.9 — updated 2026-06-25: removed notebook, scroll, slideshow themes; remaining 5 themes (outline, pitch, pitch-enhanced, vertical, zen); default theme changed to pitch-enhanced; PPT-Engine Family updated to outline/pitch-enhanced/zen/vertical; Pitch Family now pitch-only (native DOM); compatibility matrix reduced to 5 columns. Previous: v3.8 — v3.0.0 theme updates — 3 new themes (zen, vertical, outline); all PPT themes upgraded to v3.0.0.*

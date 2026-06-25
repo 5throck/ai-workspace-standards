@@ -359,7 +359,7 @@ async function main() {
   const profileContent = readFileSync(lectureProfilePath, 'utf-8');
   const profile = parseFrontmatter(profileContent);
 
-  const theme = profile.theme ?? 'scroll';
+  const theme = profile.theme ?? 'pitch-enhanced';
   const style = profile.style ?? 'premium-dark';
   const hasOverrides = !!profile.layout_overrides && Object.keys(profile.layout_overrides).length > 0;
 

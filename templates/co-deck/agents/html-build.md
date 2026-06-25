@@ -74,47 +74,47 @@ When generating `lecture_vN.html`, read `presentation.theme` and `presentation.s
 
 **1. HTML root attributes** — set on `<html>` tag:
 ```html
-<html lang="ko" data-theme="scroll" data-style="premium-dark">
+<html lang="ko" data-theme="pitch-enhanced" data-style="premium-dark">
 ```
 
 **2. CSS link injection** — always inject in this order (foundation → PPT engine → theme → style):
 ```html
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
-<!-- PPT themes only (notebook, outline, scroll, slideshow, pitch-enhanced, zen, vertical): -->
+<!-- PPT themes only (outline, pitch-enhanced, zen, vertical): -->
 <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
-<link rel="stylesheet" href="../../docs/html-themes/themes/scroll/theme.css">
+<link rel="stylesheet" href="../../docs/html-themes/themes/pitch-enhanced/theme.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-`base.css` is the shared foundation (structural rules + default variables). For PPT-engine themes (`notebook`, `outline`, `scroll`, `slideshow`, `pitch-enhanced`, `zen`, `vertical`), inject `ppt-engine.css` between `base.css` and the theme CSS — it provides shared TOC drawer, transition effects, footer bar, timer, and speaker notes styles. For the original `pitch` theme, omit `ppt-engine.css`. `themes/<theme>/theme.css` is the paradigm-specific extension. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/scroll/theme.css` segment with the active theme's CSS path.
+`base.css` is the shared foundation (structural rules + default variables). For PPT-engine themes (`outline`, `pitch-enhanced`, `zen`, `vertical`), inject `ppt-engine.css` between `base.css` and the theme CSS — it provides shared TOC drawer, transition effects, footer bar, timer, and speaker notes styles. For the original `pitch` theme, omit `ppt-engine.css`. `themes/<theme>/theme.css` is the paradigm-specific extension. `style.css` overrides color/font variables only. Injection order is mandatory — reversing it breaks variable inheritance. Replace the `themes/pitch-enhanced/theme.css` segment with the active theme's CSS path.
 
 **3. Template from theme package** — use `docs/html-themes/themes/<theme>/template.html` as the HTML skeleton. Do not reinvent theme structure.
 
-**4. PPT-engine themes (notebook, outline, scroll, slideshow, pitch-enhanced, zen, vertical)** use the PPT layout with `.ppt-main` wrapper (or `.vertical-container` for vertical) containing `.presentation-container`. The template's `initSlides()` builds slides at runtime and calls `initPPT()` to initialize TOC drawer, transitions, and timer. html-build leaves the container empty and injects only `slideData`. The `vertical` theme uses a sticky top bar instead of footer; its slides are stacked in a scrollable page with IntersectionObserver tracking.
+**4. PPT-engine themes (outline, pitch-enhanced, zen, vertical)** use the PPT layout with `.ppt-main` wrapper (or `.vertical-container` for vertical) containing `.presentation-container`. The template's `initSlides()` builds slides at runtime and calls `initPPT()` to initialize TOC drawer, transitions, and timer. html-build leaves the container empty and injects only `slideData`. The `vertical` theme uses a sticky top bar instead of footer; its slides are stacked in a scrollable page with IntersectionObserver tracking.
 
 **5. Original `pitch` theme** uses its own layout with `.pitch-footer`, `.toc-drawer`, and `.script-panel`. No PPT engine.
 
-**6. `scroll` theme v1.0.0 had a TOC sidebar — replaced in v2.0.0 with thumbnail panel, then in v3.0.0 with TOC drawer (shared across all PPT-engine themes).**
+**6. `pitch-enhanced` is the recommended PPT-engine theme** — it combines pitch aesthetics with TOC drawer, transitions, timer, and NarrationEngine. The `vertical` theme uses IntersectionObserver + sticky top bar instead of footer.
 
 **7. Slide rendering model (runtime — NOT hand-authored):** `renderSlide(data, index)` and `initSlides()` are implemented **inside each theme template** (`docs/html-themes/themes/<theme>/template.html`). On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. html-build's job is **only**:
 - Inject CSS `<link>` tags in order base→[ppt-engine]→theme→style (step 2).
 - Inject the `slideData` array (step 3 / field schema in `skills/html-build/SKILL.md`).
 - Leave the slide container empty — `<!-- INJECT:slides -->` is satisfied at **runtime** by the template's own `initSlides()`.
 
-Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/pitch-enhanced/notebook emit `title` for the cover slide, scroll/slideshow emit `cover`; slideshow/notebook/pitch-enhanced also emit `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
+Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()`. The template derives `data-type` and `id="slide-${index}"` from each `slideData` entry automatically. The `data-type` vocabulary is theme-specific: pitch/pitch-enhanced emit `title` for the cover slide; outline emits `cover`; pitch-enhanced also emits `punchline` (`isPunchlineSlide`); all themes emit `divider | profile | contact | standard`. The renderer also sets per-slide `--slide-bg-image` (for `visual-heavy`).
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). **slideData MUST be strict JSON** — all keys double-quoted, all string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax (template literals, unquoted keys, comments) will break the PDF pipeline.
 
-Available themes: `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
+Available themes: `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
-> **Theme guide**: All 8 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide` (except `outline` which ignores visual panels). PPT-engine themes (notebook, outline, scroll, slideshow, pitch-enhanced, zen, vertical) share `ppt-engine.css`/`ppt-engine.js` for TOC drawer, transitions (fade/push/zoom), timer, and speaker notes. The `vertical` theme uses IntersectionObserver for scroll tracking and a sticky top bar (no footer). The original `pitch` theme uses its own layout (TOC drawer, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
+> **Theme guide**: All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide` (except `outline` which ignores visual panels). PPT-engine themes (outline, pitch-enhanced, zen, vertical) share `ppt-engine.css`/`ppt-engine.js` for TOC drawer, transitions (fade/push/zoom), timer, and speaker notes. The `vertical` theme uses IntersectionObserver for scroll tracking and a sticky top bar (no footer). The original `pitch` theme uses its own layout (TOC drawer, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
 
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
 - Load `presentations/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
-- Default theme: `scroll`; default style: `premium-dark`
-- Bullet density: follow `theme.json content_rules` (scroll ≤5, slideshow ≤4); ≤3 consecutive slides without visuals; slide counts balanced ±20%
+- Default theme: `pitch-enhanced`; default style: `premium-dark`
+- Bullet density: follow `theme.json content_rules`; ≤3 consecutive slides without visuals; slide counts balanced ±20%
 - For slides where image-curator found no image: use text-panel fallback — never use placeholder images
 - Always call Version Agent before editing the HTML file
 - **UTF-8 encoding**: All generated HTML files MUST be written as UTF-8 without BOM. On Windows (Korean locale), the default code page is CP949 — always ensure `chcp 65001` or `$OutputEncoding = [System.Text.Encoding]::UTF8` is active before writing files to prevent Korean text corruption

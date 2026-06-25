@@ -335,7 +335,7 @@ async function main() {
     // ── Step 1: Load spec with current overrides ──────────────────────────
     const profileContent = readFileSync(profilePath, 'utf-8');
     const profile = parseFrontmatter(profileContent);
-    const theme = profile.theme ?? 'scroll';
+    const theme = profile.theme ?? 'pitch-enhanced';
     const style = profile.style ?? 'premium-dark';
 
     const basePath = resolve(workspaceRoot, 'docs/html-themes/themes/_shared/layout_base.json');

@@ -18,16 +18,16 @@ Five changes to the co-deck variant:
 
 ## Change 1: Thumbnail Panel — Start Hidden
 
-**Problem**: All PPT themes (pitch-enhanced, scroll, notebook, slideshow) start with the thumbnail panel visible. Users must manually close it. Presentations should begin with a clean, full-screen slide view.
+**Problem**: All PPT themes (pitch-enhanced, outline, zen, vertical) start with the thumbnail panel visible. Users must manually close it. Presentations should begin with a clean, full-screen slide view.
 
 **Solution**: Default `showThumbnails` to `false` in `initPPT()` calls across all PPT theme templates.
 
 **Files**:
 - `docs/html-themes/themes/_shared/ppt-engine.js` — change default behavior in `initPPT()`
 - `docs/html-themes/themes/pitch-enhanced/template.html` — `showThumbnails: false`
-- `docs/html-themes/themes/scroll/template.html` — `showThumbnails: false`
-- `docs/html-themes/themes/notebook/template.html` — `showThumbnails: false`
-- `docs/html-themes/themes/slideshow/template.html` — `showThumbnails: false`
+- `docs/html-themes/themes/outline/template.html` — `showThumbnails: false`
+- `docs/html-themes/themes/zen/template.html` — `showThumbnails: false`
+- `docs/html-themes/themes/vertical/template.html` — `showThumbnails: false`
 
 **Behavior**: Panel is hidden on load. User opens via the thumbnail toggle button or `T` key. State persists per session.
 
