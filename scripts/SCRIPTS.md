@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.1 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -115,7 +115,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.0 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.8 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.0.9 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|

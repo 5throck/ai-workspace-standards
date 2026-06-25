@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-25T03:12:29.807Z
+**Generated**: 2026-06-25T03:22:19.910Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -69,7 +69,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.0 | scripts/audit.ts | bun |
+| audit.ts | 2.10.1 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -109,7 +109,7 @@
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.2 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.0 | scripts/project-to-variant.ts | N/A |
-| propagate-to-templates.ts | 2.0.8 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.0.9 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.1 | scripts/readme-lifecycle-audit.ts | N/A |
