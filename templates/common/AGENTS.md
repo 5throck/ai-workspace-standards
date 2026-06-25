@@ -346,14 +346,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | pm | Medium | [model] |
-| N | Final QA Audit (bun scripts/audit.ts) | pm | Medium | [model] |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] |
 
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
 - Tier column is MANDATORY (High/Medium/Low)
-- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- End every plan with the `/sync` row — it covers lifecycle update, audit, commit, push, and PR
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 
@@ -364,8 +363,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | # | Task | Agent | Tier | Model | Platform |
 |---|------|-------|------|---------|----------|
 | 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N-1 | Lifecycle Update | pm | Medium | [model] | Both |
-| N | Final QA | pm | Medium | [model] | Both |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | Both |
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 

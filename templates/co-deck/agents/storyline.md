@@ -142,6 +142,7 @@ When `image_role` is `diagram` or `chart`, add a `visual_spec` block. This is co
   - type: diagram
   - slug: "ai-learning-cycle"
   - diagram_type: cycle
+  - orientation: auto        # cycle ignores this — included for schema completeness
   - elements:
     - label: "데이터 수집"
       order: 1
@@ -183,6 +184,7 @@ When `image_role` is `diagram` or `chart`, add a `visual_spec` block. This is co
 | `type` | ✅ | `diagram` \| `chart` | Routes to DiagramRenderer or ChartRenderer |
 | `slug` | ✅ | kebab-case string | Output filename: `assets/diagrams/<slug>.svg` |
 | `diagram_type` | diagram only | `cycle` \| `flow` \| `matrix` \| `pyramid` \| `timeline` \| `comparison` | |
+| `orientation` | optional | `horizontal` \| `vertical` \| `auto` | `flow`/`timeline` only — default `auto`; ignored for other types |
 | `elements[].label` | diagram only | string | Node label text |
 | `elements[].order` | diagram only | integer | Rendering order |
 | `elements[].sub` | optional | string | Sub-label below main label |

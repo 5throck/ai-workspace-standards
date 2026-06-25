@@ -146,8 +146,7 @@ Before dispatching any specialist agents (Level 2 tasks), PM **must** output an 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
 | 1 | [task description] | [agent name] | High/Medium/Low | opus/sonnet/haiku |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager (workspace) / pm (variant) | Medium | [Model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor (workspace) / pm (variant) | Medium | [Model] |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [Model] |
 
 **Rules**:
 - Declare execution order (parallel vs sequential) below the table
@@ -517,4 +516,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-06-21*
+*Last Updated: 2026-06-25*

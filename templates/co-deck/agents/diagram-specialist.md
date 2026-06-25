@@ -1,7 +1,7 @@
 ---
 name: diagram-specialist
-version: "1.0.0"
-last_updated: "2026-06-22"
+version: "1.1.0"
+last_updated: "2026-06-25"
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier:
@@ -82,6 +82,7 @@ visual_spec:
 
   # --- DiagramRenderer fields (type: diagram) ---
   diagram_type: cycle | flow | matrix | pyramid | timeline | comparison
+  orientation: horizontal | vertical | auto   # optional — default: auto (flow/timeline only; ignored for other types)
   elements:
     - label: "데이터 수집"
       order: 1
@@ -144,14 +145,49 @@ All templates follow these visual grammar rules:
 - **Border-radius**: 8px for rectangular nodes, 50% for circle nodes, 4px for badges
 - **Padding inside nodes**: minimum 12px horizontal, 8px vertical
 
-| Type | Layout | Use case | Max elements |
-|------|--------|---------|-------------|
-| `cycle` | Circle of N nodes with curved arrows | Process loops, feedback cycles | 3–6 |
-| `flow` | Left-to-right or top-to-bottom node chain | Sequential steps, pipelines | 3–8 |
-| `matrix` | 2×2 grid with axis labels | 2-dimension classification | 4 (fixed) |
-| `pyramid` | Stacked trapezoid layers, bottom-heavy | Hierarchy, priority tiers | 3–5 |
-| `timeline` | Horizontal or vertical time axis with events | Chronological progression, roadmap | 3–8 |
-| `comparison` | N vertical columns with row attributes | Side-by-side option evaluation | 2–4 columns |
+| Type | Layout | Default Orientation | `orientation` honored? | Use case | Max elements |
+|------|--------|--------------------|-----------------------|---------|-------------|
+| `cycle` | Circle of N nodes with curved arrows | N/A (circular) | **Ignored** | Process loops, feedback cycles | 3–6 |
+| `flow` | Node chain | **vertical** | ✅ Yes | Sequential steps, pipelines | 3–8 |
+| `matrix` | 2×2 grid with axis labels | N/A (bidirectional) | **Ignored** | 2-dimension classification | 4 (fixed) |
+| `pyramid` | Stacked trapezoid layers, bottom-heavy | Vertical (top→bottom) | **Ignored** | Hierarchy, priority tiers | 3–5 |
+| `timeline` | Time axis with events | **vertical** | ✅ Yes | Chronological progression, roadmap | 3–8 |
+| `comparison` | N vertical columns with row attributes | Horizontal spread | **Ignored** | Side-by-side option evaluation | 2–4 columns |
+
+## Orientation Resolution (`flow` and `timeline` only)
+
+`orientation` is only meaningful for `flow` and `timeline` diagram types. For all other types the field is silently ignored and the type's fixed layout applies.
+
+### Resolution priority chain
+
+```
+Explicit orientation value  >  auto rules  >  type default (vertical)
+```
+
+### `auto` resolution rules (evaluated in priority order)
+
+| Priority | Condition | Result | Rationale |
+|----------|-----------|--------|-----------|
+| 1 | Element count ≥ 5 | **vertical** | Many elements stack better vertically to avoid horizontal crowding |
+| 2 | Element count ≤ 4 | **horizontal** | Few elements fit naturally in a left-to-right chain |
+| 3 | Average label length > 15 chars | **vertical** | Long labels exceed horizontal box width on W=420 canvas |
+| 4 | Explicit `horizontal` + label exceeds capacity | Warn + recommend `vertical` | Agent flags infeasibility; does NOT silently override |
+
+### Handling infeasibility (Rule 4)
+
+When an explicit `horizontal` orientation is requested but labels are too long for the W=420 canvas:
+
+1. Generate the diagram with `horizontal` as requested
+2. Add a warning to the run summary: `"⚠️ Slide N: horizontal orientation may cause label truncation — recommend vertical"`
+3. Do NOT silently switch to vertical — the storyline agent made an explicit choice
+
+### Backward compatibility
+
+- Existing `slide_deck.md` files without an `orientation` field → treated as `auto` (no breakage)
+- Existing `diagram-defs.ts` coordinates → unaffected (hardcoded coordinates remain valid)
+- Existing SVG assets → unaffected
+
+> **Note**: The canvas size assumed by `auto` rules is W=380, H=520 (pitch-enhanced right-panel). If `diagram-helpers.ts` canvas dimensions change, update the threshold in Rule 3 accordingly.
 
 ## ChartRenderer — Chart Library (3 types)
 
@@ -178,8 +214,9 @@ Chart visual rules:
 3. For each `visual_spec` entry:
    a. Route to `DiagramRenderer` or `ChartRenderer` by `type`
    b. Select template by `diagram_type` or `chart_type`
-   c. Generate CSS-variable SVG → save `.svg` (primary delivery format for HTML)
-   d. (Optional — if PDF export is planned) Resolve CSS variables to hex → render via `@resvg/resvg-js` → save `.png`
+   c. For `flow` / `timeline`: resolve `orientation` field using the priority chain in §Orientation Resolution; apply resolved layout direction to SVG coordinate generation
+   d. Generate CSS-variable SVG → save `.svg` (primary delivery format for HTML; `slidedata.json` `visualImage` references this path)
+   e. Resolve CSS variables to hex → render via `@resvg/resvg-js` → save `.png` alongside (PDF sibling; gen-slides-pdf.ts auto-derives this path from the SVG path)
    e. Append entry to `diagram-manifest.json`
 4. Report summary: N diagrams generated, N charts generated, any skipped slugs
 

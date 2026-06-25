@@ -478,11 +478,9 @@ bun scripts/audit.ts
 
 Expected: `✅ All checks passed.`
 
-- [ ] **Step 4: Lifecycle update (N-1)**
+- [ ] **Step 4: Commit via /sync**
 
-Update `scripts/SCRIPTS.md` and `templates/common/scripts/SCRIPTS.md` version entries.
-
-- [ ] **Step 5: Commit via /sync**
+`/sync` handles lifecycle update (SCRIPTS.md, VERSION_MANIFEST), audit, commit, push, and PR in one pipeline.
 
 ```
 /sync "refactor: consolidate publish-to-template.ts into propagate-to-templates.ts (M-10)"

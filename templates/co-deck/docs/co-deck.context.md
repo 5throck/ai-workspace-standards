@@ -420,7 +420,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 1. Always call Version Agent before editing any file
 2. HTML must embed `slideData` array for PDF extraction
 3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
-4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.png`; reference as `../assets/diagrams/<stem>.png` (path auto-rewritten by gen-visual-images.ts)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
 
 ### Visual Diagram Pipeline
@@ -432,31 +432,32 @@ presentations/<project>/diagram-defs.ts  ← project-specific generators (author
         ↓ dynamic import
 gen-visual-images.ts (infrastructure dispatcher)
         ↓
-images/<stem>.svg  (source artifact saved to disk — primary delivery format for HTML)
-images/<stem>.png  (optional — required only for PDF export)
+presentations/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
+presentations/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
         ↓
-slideData[i].visualImage = "images/<stem>.svg"   (or .png if PDF pipeline is planned)
-        ↓ HTML: template buildSlideChildren() checks data.visualImage and injects <img> into .right-panel
-        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json (PNG only)
+slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen-visual-images.ts v3.2.0)
+        ↓ HTML: template buildSlideChildren() injects <img src="...svg"> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts imgPath() auto-derives "../assets/diagrams/<stem>.png" from the SVG path
 ```
 
-**Architecture (v3.1.0)**:
+**Architecture (v3.2.0)**:
 - `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
 - `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
 - Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
 - If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
-- **Unified output path**: SVG and PNG are saved to `presentations/assets/diagrams/` (shared pool), matching the diagram-specialist agent convention. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/` in slidedata.json.
+- **Unified output path**: SVG and PNG are both saved to `presentations/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
 
-**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG conversion is **optional**, required only when PDF export is planned (the PDF pipeline's `embedImg()` only handles `.png` and `.jpg`). When both formats exist on disk, PDF consumers should reference the `.png` path.
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG is generated alongside as a PDF sibling; the PDF pipeline (`gen-slides-pdf.ts`) auto-derives the `.png` path from the `.svg` path in `imgPath()` — no manual path switching required.
 
 **Rules**:
 1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
-2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
-3. `slidedata.json` `visualImage` field should reference the SVG path for HTML delivery (relative to project dir, e.g. `"images/slide-03.svg"`); reference the PNG path only when PDF export is planned and PNG artifacts exist
+2. Both SVG and PNG artifacts MUST exist in the shared pool — SVG for HTML, PNG for PDF
+3. `slidedata.json` `visualImage` field MUST reference the SVG path (e.g. `"../assets/diagrams/slide-03.svg"`); gen-visual-images.ts v3.2.0 enforces this automatically
 4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
 5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
-7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.png`)
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.svg`)
+8. **Diagram orientation** (`flow`/`timeline` only): set `orientation: horizontal | vertical | auto` in `visual_spec`. Default is `auto` — diagram-specialist resolves layout direction by element count and label length. Other diagram types (`cycle`, `matrix`, `pyramid`, `comparison`) ignore this field. See `agents/diagram-specialist.md §Orientation Resolution`.
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
