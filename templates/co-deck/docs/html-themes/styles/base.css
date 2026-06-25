@@ -57,6 +57,8 @@
   --accent:              #4a90d9;
   --accent-light:        #e8f0fb;
   --accent-dark:         #2c6fba;
+  /* Alias used by ppt-engine.css and pitch theme TOC. Kept in sync with --accent. */
+  --accent-color:        var(--accent);
 
   /* Section label / tag */
   --section-label-bg:    var(--accent);

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.2
+// @version 1.4.3
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -22,7 +22,7 @@
  * Exit codes: 0 (pass), 1 (violation found)
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "node:path";
 
 /**
@@ -233,13 +233,33 @@ async function validateMarkdownLanguage(): Promise<void> {
     if (code !== 'EPERM' && code !== 'EACCES') throw err;
     console.warn(`⚠️  Glob scan encountered permission error (${code}) — some directories may be skipped`);
   }
+  // Collect root-level generated project directories (have AGENTS.md or variant.json)
+  // to exclude their contents from scanning — they are separate projects, not workspace governance.
+  const cwd = process.cwd();
+  const rootProjectDirs = new Set<string>();
+  try {
+    const { readdirSync, statSync } = await import("fs");
+    for (const entry of readdirSync(cwd, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const fullPath = join(cwd, entry.name);
+      if (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json'))) {
+        rootProjectDirs.add(entry.name + '/');
+      }
+    }
+  } catch { /* ignore scan errors */ }
+
   const mdFiles = allFiles.filter((f) => {
     const normalized = f.replace(/\\/g, "/");
-    return !normalized.includes("node_modules/") &&
-           !normalized.includes(".git/") &&
-           !normalized.includes("dist/") &&
-           !normalized.includes("build/") &&
-           !normalized.startsWith("test-project/");  // exclude test scaffold artifacts
+    if (normalized.includes("node_modules/") ||
+        normalized.includes(".git/") ||
+        normalized.includes("dist/") ||
+        normalized.includes("build/") ||
+        normalized.startsWith("test-project/")) return false;
+    // Exclude root-level generated project directories
+    for (const dir of rootProjectDirs) {
+      if (normalized.startsWith(dir)) return false;
+    }
+    return true;
   });
 
   const violations: Violation[] = [];

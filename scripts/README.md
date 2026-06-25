@@ -107,7 +107,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.1.8 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -136,7 +136,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-md-language.ts` | L0 | 1.4.2 | active | —| —| L0+L1 | —|
+| `validate-md-language.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.9 | active | —| —| L0 | —|
@@ -462,4 +462,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-06-23*
+*Last Updated: 2026-06-25*

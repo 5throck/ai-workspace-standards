@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
 
 ### Fixed
+- **[2026-06-24]**: fix(co-deck): unify CSS variable names across styles — add `--accent-color: var(--accent)` alias in base.css so pitch/pitch-enhanced TOC accent colors correctly reflect each style's accent (classic=#4a90d9, minimal=#333344, academic=#8b1a1a, visual-heavy=#7ec8f0); hardcode bright text colors in ppt-engine.css glass panels (thumbnail counter, footer buttons, transition buttons, script panel, presenter timer, voice options) to prevent dark-on-dark contrast failure when light styles set --text-muted to dark values
+- **[2026-06-24]**: fix(co-deck): pitch theme TOC drawer uses hardcoded dark glass panel + bright text instead of CSS variable fallbacks that produced invisible text on light styles; add backgroundImage to preview.html cover/divider slides and set --slide-bg-image CSS variable in buildSlideEl() for style-aware background rendering
 - **[2026-06-24]**: feat(co-deck): improve HTML generation across all 5 themes — add `visual-title`/`visual-display`/`visual-heading`/`visual-item`/`visual-paragraph` CSS rules (P0); add `imgEl()` onerror handler with `.img-fallback` styling for broken images (P0); add `renderVisualDisplay()` structured text parser (`[Title]` → heading, `✓/→/•` → list item, default → paragraph) in ppt-engine.js + pitch theme (P2); add `visualDisplay` text panel support to base themes slideshow/notebook/scroll (P1); add `isPunchlineSlide` support to pitch theme (P1); add profile avatar (`visualImage` → circular crop) and `contactPhone` field to all themes (P1); update html-build agent v1.2.0 + SKILL.md v1.5.0 with full documentation
 - **[2026-06-24]**: fix(co-deck): remove all `innerHTML` usage from `ppt-engine.js` NarrationEngine — replace 2 `dropdown.innerHTML = ''` with `while(firstChild) removeChild(firstChild)` loops and 3 `btn.innerHTML` with `textContent` + `createElement('span')` DOM construction; prevents LLMs from applying spurious `innerHTML → clearEl()` security patches during html-build invocations
 - **[2026-06-24]**: fix(co-deck): neutralize base.css structural rule leaks into pitch-enhanced PPT theme — add `@media (max-width: 1340px) { .slide { transform: none; } }` in ppt-engine.css to prevent double-scaling at 1366px viewport; add `display: block` on `.slide` in pitch-enhanced/theme.css to neutralize base.css `display:flex; flex-direction:column` leak on standard slides (type-specific overrides via `[data-type="..."]` retain higher specificity); add `min-width:0; border-radius:0` on `.right-panel` to neutralize base.css `min-width:280px` and `border-radius:0.375rem` leaks
@@ -807,7 +809,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-23*
+*Last Updated: 2026-06-25*
 
 
 

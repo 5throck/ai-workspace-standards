@@ -59,8 +59,8 @@
   <script>
     // Hardcoded dummy slide data (6 slides) — not user input
     const SLIDE_DATA = [
-      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연' },
-      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점' },
+      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연', backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80' },
+      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점', backgroundImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=80' },
       { type: 'standard', section: '기술 변화의 흐름', title: '인공지능의 부상', bullets: ['딥러닝 혁명 (2012~)', 'LLM과 생성형 AI (2022~)', '업무 자동화 가속'] },
       { type: 'standard', section: '기술 변화의 흐름', title: '데이터 중심 조직', bullets: ['데이터 리터러시의 중요성', 'AI 도입 장벽과 해결 방안', '사람 + AI 협업 모델'] },
       { type: 'standard', section: '기술 변화의 흐름', title: '미래 역량', bullets: ['비판적 사고와 문제 정의', '크리에이티브 역량', 'AI 도구 활용 능력'] },
@@ -157,6 +157,9 @@
       const div = document.createElement('div');
       div.className = 'slide';
       div.dataset.type = data.type;
+      if (data.backgroundImage) {
+        div.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+      }
 
       if (data.type === 'cover') {
         const wrap = el('div', { textAlign: 'center', padding: '40px 0' });

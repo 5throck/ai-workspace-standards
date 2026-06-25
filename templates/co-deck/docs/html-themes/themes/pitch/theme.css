@@ -524,8 +524,10 @@ body {
   left: -320px;
   width: 320px;
   height: 100vh;
-  background: var(--slide-bg, #111827);
-  border-right: 1px solid var(--card-border, rgba(255,255,255,0.1));
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255,255,255,0.08);
   z-index: 100;
   overflow-y: auto;
   transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -558,19 +560,19 @@ body {
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   cursor: pointer;
-  color: var(--text-secondary, rgba(249,250,251,0.65));
+  color: rgba(255,255,255,0.65);
   transition: background 0.15s, color 0.15s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.toc-item:hover  { background: rgba(255,255,255,0.05); color: var(--text-primary, #F9FAFB); }
-.toc-item.active { background: rgba(217,119,6,0.12); color: var(--accent-color, #D97706); }
+.toc-item:hover  { background: rgba(255,255,255,0.05); color: #ffffff; }
+.toc-item.active { background: rgba(217,119,6,0.15); color: var(--accent-color, #D97706); }
 
 .toc-item-num {
   font-size: 0.7rem;
-  color: var(--text-muted, rgba(249,250,251,0.3));
+  color: rgba(255,255,255,0.3);
   min-width: 1.5rem;
 }
 

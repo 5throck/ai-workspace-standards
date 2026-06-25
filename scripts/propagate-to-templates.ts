@@ -139,7 +139,7 @@ function checkFileEncoding(filePath: string): EncodingViolation[] {
   return violations;
 }
 
-const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli', '.codegraph']);
+const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli', '.codegraph', 'co-deck2', 'co-deck3', 'co-conult2']);
 
 function walkFilesForEncoding(dir: string): string[] {
   const results: string[] = [];
