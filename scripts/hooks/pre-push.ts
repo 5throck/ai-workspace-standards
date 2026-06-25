@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.2
+ * @version 1.2.3
  */
 
 import { $ } from "bun";
@@ -50,11 +50,17 @@ async function main() {
     console.log("  ✅ Regex secret scan passed (install gitleaks for full coverage)");
   }
 
-  try {
-    await $`bun scripts/audit.ts`;
-  } catch {
-    console.error("\n\x1b[31m❌ Audit failed — push blocked. Fix issues above before pushing.\x1b[0m");
-    process.exit(1);
+  // When running via /sync (SYNC_ACTIVE=1), dev-sync.ts already ran full audit before commit — skip here to avoid duplicate execution.
+  const auditAlreadyRan = process.env.SYNC_ACTIVE === "1";
+  if (!auditAlreadyRan) {
+    try {
+      await $`bun scripts/audit.ts`;
+    } catch {
+      console.error("\n\x1b[31m❌ Audit failed — push blocked. Fix issues above before pushing.\x1b[0m");
+      process.exit(1);
+    }
+  } else {
+    console.log("  [audit skipped — already ran in dev-sync pipeline]");
   }
 
   console.log("=== pre-push integration tests ===");

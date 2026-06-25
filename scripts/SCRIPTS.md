@@ -98,7 +98,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.6 | active | —| —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.2.2 | active | —| —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.2.3 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.8.2 | active | —| —| L0 | Phase 1.6 (pm.md pre-flight), Phase 3.5 (AGENTS.md §-structure check + BLOCKING gate)|
