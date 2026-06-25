@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.0
+ * @version 1.4.1
  * @last_updated 2026-06-21
  * @license MIT
  */
@@ -459,6 +459,10 @@ function runCheckD(): DuplicateEntry[] {
       const fullPath = join(dir, item.name);
 
       if (item.isDirectory()) {
+        // Skip generated project directories at workspace root (have AGENTS.md or variant.json)
+        if (dir === ROOT && (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json')))) {
+          continue;
+        }
         walkDir(fullPath);
       } else if (item.isFile() && item.name.endsWith('.md')) {
         // Skip CONSTITUTION.md (contains definition example, not a real duplicate)
