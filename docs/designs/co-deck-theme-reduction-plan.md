@@ -8,7 +8,7 @@
 
 **Tech Stack:** Markdown, TypeScript (Bun runtime), CSS, JSON
 
-**Design Spec:** `docs/superpowers/specs/2026-06-25-co-deck-theme-reduction-design.md`
+**Design Spec:** `docs/designs/co-deck-theme-reduction-design.md`
 
 ---
 
