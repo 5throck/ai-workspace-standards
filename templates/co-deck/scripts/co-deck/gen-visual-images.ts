@@ -1,4 +1,4 @@
-// @version 3.1.0 — diagram output unified to shared pool `presentations/assets/diagrams/`; target filter accepts both legacy `images/` and new `../assets/diagrams/` paths; slidedata.json visualImage paths auto-rewritten to `../assets/diagrams/` convention. Previous 3.0.1: target filter honours absent `visual` field.
+// @version 3.2.0 — visualImage in slidedata.json now references SVG path (HTML primary delivery format); PNG still generated alongside for PDF use. Previous 3.1.0: unified output to shared pool.
 // Generate right-panel visual images via SVG rendering (no browser required).
 // Project-specific diagram generators live in presentations/<project>/diagram-defs.ts.
 // Shared utilities (svgWrap, svgToPng, palettes) live in diagram-helpers.ts.
@@ -68,7 +68,7 @@ let slidedataDirty = false;
 
 for (const { slide: slideIdx, data } of targets) {
   const imgPath  = data.visualImage as string;
-  const stem     = imgPath.replace(/^images\//, '').replace(/^(\.\.\/assets\/diagrams\/)/, '').replace(/\.png$/, '');
+  const stem     = imgPath.replace(/^images\//, '').replace(/^(\.\.\/assets\/diagrams\/)/, '').replace(/\.(png|svg)$/, '');
   const svgPath  = join(imagesDir, stem + '.svg');
   const pngPath  = join(imagesDir, stem + '.png');
 
@@ -85,14 +85,14 @@ for (const { slide: slideIdx, data } of targets) {
     const png = svgToPng(svg);
     writeFileSync(pngPath, png);
 
-    // Update slidedata visualImage path to shared pool reference
-    const sharedPoolPath = '../assets/diagrams/' + stem + '.png';
-    if (data.visualImage !== sharedPoolPath) {
-      data.visualImage = sharedPoolPath;
+    // Update slidedata visualImage path to shared pool SVG reference (HTML primary delivery format)
+    const svgPoolPath = '../assets/diagrams/' + stem + '.svg';
+    if (data.visualImage !== svgPoolPath) {
+      data.visualImage = svgPoolPath;
       slidedataDirty = true;
     }
 
-    console.log(`   ✅  Slide ${slideIdx} → ${sharedPoolPath} (${Math.round(png.length / 1024)}KB) + .svg`);
+    console.log(`   ✅  Slide ${slideIdx} → ${svgPoolPath} + .png (PDF: ${Math.round(png.length / 1024)}KB)`);
     success++;
   } catch (e) {
     console.error(`   ❌  Slide ${slideIdx}: ${(e as Error).message}`);
@@ -102,7 +102,7 @@ for (const { slide: slideIdx, data } of targets) {
 // Write updated slidedata.json if paths were rewritten
 if (slidedataDirty) {
   writeFileSync(slidedataPath, JSON.stringify(slidedata, null, 2), 'utf-8');
-  console.log(`   Updated slidedata.json visualImage paths → ../assets/diagrams/`);
+  console.log(`   Updated slidedata.json visualImage paths → ../assets/diagrams/ (SVG — HTML primary)`);
 }
 
 console.log(`\n✅ Done: ${success} generated, ${skipped} skipped`);

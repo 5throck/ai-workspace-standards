@@ -460,8 +460,10 @@ function strip(s: string | undefined | null): string {
 
 function imgPath(src: string | undefined, imgDir: string): string | null {
   if (!src) return null;
-  // src is relative to the project dir (e.g. "images/slide-03.png")
-  const p = join(imgDir, src);
+  // src is relative to the project dir; visualImage may reference .svg (HTML primary delivery format).
+  // PDF pipeline only embeds .png/.jpg — auto-derive PNG path when src is SVG.
+  const resolved = src.endsWith('.svg') ? src.replace(/\.svg$/, '.png') : src;
+  const p = join(imgDir, resolved);
   return existsSync(p) ? p : null;
 }
 

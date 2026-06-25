@@ -178,8 +178,8 @@ Chart visual rules:
 3. For each `visual_spec` entry:
    a. Route to `DiagramRenderer` or `ChartRenderer` by `type`
    b. Select template by `diagram_type` or `chart_type`
-   c. Generate CSS-variable SVG → save `.svg` (primary delivery format for HTML)
-   d. (Optional — if PDF export is planned) Resolve CSS variables to hex → render via `@resvg/resvg-js` → save `.png`
+   c. Generate CSS-variable SVG → save `.svg` (primary delivery format for HTML; `slidedata.json` `visualImage` references this path)
+   d. Resolve CSS variables to hex → render via `@resvg/resvg-js` → save `.png` alongside (PDF sibling; gen-slides-pdf.ts auto-derives this path from the SVG path)
    e. Append entry to `diagram-manifest.json`
 4. Report summary: N diagrams generated, N charts generated, any skipped slugs
 
