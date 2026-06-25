@@ -417,7 +417,7 @@ images/<stem>.svg  (source artifact saved to disk)
 images/<stem>.png  (rendered output)
         ↓
 slideData[i].visualImage = "images/<stem>.png"
-        ↓ HTML: applyVisualImages() injects <img> into .right-panel
+        ↓ HTML: template buildSlideChildren() checks data.visualImage and injects <img> into .right-panel
         ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
 ```
 
@@ -433,8 +433,8 @@ slideData[i].visualImage = "images/<stem>.png"
 1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
 2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
 3. `slidedata.json` `visualImage` field must reference the PNG path (relative to project dir, e.g. `"images/slide-03.png"`)
-4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
-5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
 7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `images/slide-03-nested-layers.png`)
 
