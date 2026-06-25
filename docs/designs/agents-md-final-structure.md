@@ -132,7 +132,7 @@ Direct specialist agent invocation bypasses PM Gateway governance. PM denies suc
 Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](skills/meeting-facilitation/SKILL.md).
 
 **§3.4: Execution Plan Display**
-Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. Always include N-1 (Lifecycle Update) and N (Final QA Audit) as final steps. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
+Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
 
 **§3.5: Role Boundaries**
 PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](agents/pm.md) ⚠️ CRITICAL section.
@@ -666,7 +666,7 @@ Direct specialist agent invocation bypasses PM Gateway governance. PM denies suc
 Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](skills/meeting-facilitation/SKILL.md).
 
 ### §3.4: Execution Plan Display
-Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. Always include N-1 (Lifecycle Update) and N (Final QA Audit) as final steps. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
+Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
 
 ### §3.5: Role Boundaries
 PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](agents/pm.md) ⚠️ CRITICAL section.
