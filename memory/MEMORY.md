@@ -4,7 +4,7 @@
 
 | Date | Summary |
 |------|---------|
-| [2026-06-24](2026-06-24.md) | feat(co-deck): pitch-enhanced UX fixes + diagram path unification to shared pool |
+| [2026-06-25](2026-06-25.md) | fix(co-deck): unify CSS variable names across styles, fix glass panel contrast, improve TOC visibility, add preview backgroundImage support |
 | [2026-06-24](2026-06-24.md) | chore: update |
 | [2026-06-23](2026-06-23.md) | feat(co-deck): background image rendering + TTS voice selection improvements |
 | [2026-06-22](2026-06-22.md) | chore: update |

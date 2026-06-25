@@ -239,6 +239,24 @@ Only generate language-specific fields for languages listed in `narration.langua
 - `image_query` must be in English — even for Korean-language lectures
 - Always call Version Agent before editing either file
 
+### ⚠️ Diagram/Chart Slide Mandatory Rule
+
+Slides whose right panel should show a **visual diagram** (flowchart, architecture, matrix, cycle, comparison, timeline, chart, etc.) **MUST** use `image_role: diagram` or `image_role: chart` with a `visual_spec` block. This triggers the Diagram Specialist (Stage 3.5) to generate proper SVG artifacts via `diagram-defs.ts` + `gen-visual-images.ts`.
+
+**PROHIBITED**: Writing diagram content as `visualDisplay` plain text (Unicode arrows, brackets, checkmarks approximating a visual layout). The `visualDisplay` field is ONLY for text-based visual summaries — checklists, key points, short annotations — NOT for structural diagrams.
+
+| Right panel content | Correct approach | Wrong approach |
+|--------------------|-----------------|----------------|
+| Flowchart, process flow | `image_role: diagram` + `visual_spec` (type: flow) | `visualDisplay` with "→ Step 1 → Step 2" |
+| Architecture diagram | `image_role: diagram` + `visual_spec` (type: flow) | `visualDisplay` with bracketed text blocks |
+| Matrix/comparison | `image_role: diagram` + `visual_spec` (type: matrix) | `visualDisplay` with aligned columns |
+| Cycle/feedback loop | `image_role: diagram` + `visual_spec` (type: cycle) | `visualDisplay` with circular arrows |
+| Bar/line/pie chart | `image_role: chart` + `visual_spec` (chart_type) | `visualDisplay` with ASCII numbers |
+| Key points checklist | `visualTitle` + `visualDisplay` with ✓ markers | (This IS correct for text summaries) |
+| Short annotations | `visualTitle` + `visualDisplay` | (This IS correct for text panels) |
+
+**Self-check**: Before finalizing `slide_deck.md`, audit every slide's right panel content. If `visualDisplay` contains structural diagram patterns (arrows connecting steps, nested boxes, grid-like comparisons), convert it to `image_role: diagram` + `visual_spec`.
+
 ## Meeting Participation
 
 In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.

@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-24
+# Last Updated: 2026-06-25
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -41,7 +41,7 @@
 | Storyline | `agents/storyline.md` | 2-3 | storyline.md + slide_deck.md with image_role/image_query fields; cover/divider confirmation | active |
 | Design | `agents/design.md` | 4 | design_spec.md (colors, fonts, layout) | active |
 | Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
-| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG+PNG) | active |
+| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG primary for HTML; PNG optional for PDF) | active |
 | Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
 | Measure | `agents/measure.md` | 9-10 | layout_spec.json + pdf_layout_spec.md (Playwright-based) | active |
 | Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
@@ -101,7 +101,7 @@ Three flags control agent execution in the co-deck pipeline:
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
 | `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.1.0): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG to shared pool `presentations/assets/diagrams/`; auto-rewrites slidedata.json visualImage paths to `../assets/diagrams/` convention; exits cleanly if no diagram-defs.ts exists | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG (primary delivery format for HTML) with optional PNG for PDF; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
 | `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
@@ -432,12 +432,12 @@ presentations/<project>/diagram-defs.ts  ← project-specific generators (author
         ↓ dynamic import
 gen-visual-images.ts (infrastructure dispatcher)
         ↓
-presentations/assets/diagrams/<stem>.svg  (source artifact — shared pool)
-presentations/assets/diagrams/<stem>.png  (rendered output — shared pool)
-        ↓ auto-rewrite slidedata.json
-slideData[i].visualImage = "../assets/diagrams/<stem>.png"
-        ↓ HTML: renderSlide() injects <img> into .right-panel
-        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
+images/<stem>.svg  (source artifact saved to disk — primary delivery format for HTML)
+images/<stem>.png  (optional — required only for PDF export)
+        ↓
+slideData[i].visualImage = "images/<stem>.svg"   (or .png if PDF pipeline is planned)
+        ↓ HTML: template buildSlideChildren() checks data.visualImage and injects <img> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json (PNG only)
 ```
 
 **Architecture (v3.1.0)**:
@@ -447,14 +447,14 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.png"
 - If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
 - **Unified output path**: SVG and PNG are saved to `presentations/assets/diagrams/` (shared pool), matching the diagram-specialist agent convention. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/` in slidedata.json.
 
-**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to the shared pool so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency across projects.
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG conversion is **optional**, required only when PDF export is planned (the PDF pipeline's `embedImg()` only handles `.png` and `.jpg`). When both formats exist on disk, PDF consumers should reference the `.png` path.
 
 **Rules**:
 1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
-2. SVG source files (`presentations/assets/diagrams/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
-3. `slidedata.json` `visualImage` field must reference the shared pool path (e.g. `"../assets/diagrams/slide-03.png"`)
-4. HTML `renderSlide()` injects `<img>` into `.right-panel` at runtime using `slideData[i].visualImage`
-5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped
+2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
+3. `slidedata.json` `visualImage` field should reference the SVG path for HTML delivery (relative to project dir, e.g. `"images/slide-03.svg"`); reference the PNG path only when PDF export is planned and PNG artifacts exist
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
 7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.png`)
 

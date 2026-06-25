@@ -208,7 +208,9 @@
 
       if (data.visualImage) {
         var panel = el('div', 'right-panel');
-        panel.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
+        var imgElem = imgEl(data.visualImage, escapeText(data.visualTitle || title));
+        if (data.visualImage.indexOf('/diagrams/') !== -1) imgElem.classList.add('img-diagram');
+        panel.appendChild(imgElem);
         card.appendChild(panel);
       } else if (data.visualDisplay) {
         var panel = el('div', 'right-panel');

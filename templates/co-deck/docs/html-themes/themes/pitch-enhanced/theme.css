@@ -68,6 +68,12 @@
   border-radius: 12px;
 }
 
+.right-panel img.img-diagram {
+  object-fit: contain;
+  background: transparent;
+  padding: 0.5rem;
+}
+
 /* ─── Cover slide (title type) ──────────────────────────────────────────── */
 .slide[data-type="title"] {
   display: flex;
@@ -301,7 +307,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   border-radius: 12px;
   padding: 1.5rem;
   box-sizing: border-box;

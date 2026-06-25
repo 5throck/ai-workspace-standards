@@ -241,7 +241,7 @@ body {
 
 .slide-counter {
   font-size: 0.72rem;
-  color: var(--text-muted, rgba(255,255,255,0.4));
+  color: rgba(255,255,255,0.4);
   letter-spacing: 0.05em;
   min-width: 48px;
   white-space: nowrap;
@@ -267,7 +267,7 @@ body {
 .footer-btn {
   background: none;
   border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
-  color: var(--text-muted, rgba(255,255,255,0.5));
+  color: rgba(255,255,255,0.5);
   border-radius: 6px;
   padding: 0.3rem 0.65rem;
   font-size: 0.72rem;
@@ -304,7 +304,7 @@ body {
 .transition-btn {
   background: none;
   border: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
-  color: var(--text-muted, rgba(255,255,255,0.4));
+  color: rgba(255,255,255,0.4);
   border-radius: 6px;
   padding: 0.3rem 0.55rem;
   font-size: 0.65rem;
@@ -330,7 +330,7 @@ body {
   padding: 1.2rem 1.5rem;
   font-size: 0.85rem;
   line-height: 1.7;
-  color: var(--text-secondary, rgba(255,255,255,0.75));
+  color: rgba(255,255,255,0.75);
   z-index: 50;
   opacity: 0;
   transform: translateY(16px);
@@ -357,7 +357,7 @@ body {
 .presenter-timer {
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
-  color: var(--text-muted, rgba(255,255,255,0.4));
+  color: rgba(255,255,255,0.4);
   min-width: 52px;
   text-align: center;
   letter-spacing: 0.04em;
@@ -440,7 +440,7 @@ body {
   padding: 6px 12px;
   cursor: pointer;
   font-size: 0.72rem;
-  color: var(--text-muted, rgba(255,255,255,0.7));
+  color: rgba(255,255,255,0.7);
   transition: background 0.15s, color 0.15s;
   display: flex;
   align-items: center;
@@ -457,7 +457,7 @@ body {
 
 .voice-badge {
   font-size: 0.6rem;
-  color: var(--text-muted, rgba(255,255,255,0.5));
+  color: rgba(255,255,255,0.5);
   background: rgba(255,255,255,0.08);
   padding: 1px 6px;
   border-radius: 3px;
