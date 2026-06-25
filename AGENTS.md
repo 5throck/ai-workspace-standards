@@ -391,14 +391,14 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N-1 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | [model] |
-| N | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | [model] |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] |
 
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
 - Tier column is MANDATORY (High/Medium/Low)
-- Always include Lifecycle Update (N-1) and Final QA Audit (N) as final two steps
+- `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
+- No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 
@@ -409,8 +409,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | # | Task | Agent | Tier | Model | Spec | Platform |
 |---|------|-------|------|---------|----------|
 | 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N-1 | Lifecycle Update | lifecycle-manager | Medium | [model] | Both |
-| N | Final QA | auditor | Medium | [model] | Both |
+| N | `/sync "type(scope): message"` | pm | Medium | [model] | Both |
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 
@@ -426,8 +425,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
 | 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
 | 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 5 | Lifecycle Update (Version, Timestamp, SCRIPTS.md) | lifecycle-manager | Medium | claude-sonnet-4-6 |
-| 6 | Final QA Audit (bun scripts/audit.ts) | auditor | Medium | claude-sonnet-4-6 |
+| 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
@@ -436,8 +434,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
 | 1 | Update project README introduction | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | Lifecycle Update (if needed) | lifecycle-manager | Medium | claude-sonnet-4-6 |
-| 3 | Final QA Audit | auditor | Medium | claude-sonnet-4-6 |
+| 2 | `/sync "docs: update project README introduction"` | pm | Medium | claude-sonnet-4-6 |
 
 **Execution Order**: Sequential
 
