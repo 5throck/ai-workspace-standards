@@ -89,7 +89,7 @@ Also authors `docs/html-themes/themes/<name>/pdf_layout_spec.json`:
 - `page`: dimensions (default 338.7×190.5mm 16:9; `margin_mm: 0.0` for full-bleed themes)
 - `calibration.viewport_px`: measure via Playwright (`bun scripts/co-deck/measure-layout.ts`) against `template.html`; set `null` if Playwright not available (px-based sizes will fall back to defaults)
 - `layout`: all element position/size percentages derived from the HTML layout
-- `fonts`: `title_pt`, `bullet_pt` (mandatory); theme-specific sizes (e.g., `punchline_pt` for slideshow)
+- `fonts`: `title_pt`, `bullet_pt` (mandatory); theme-specific sizes (e.g., `punchline_pt` for pitch-enhanced)
 - `slide_types`: which slide types this theme uses (`title`, `divider`, `punchline`, `standard`)
 
 ### T-2: PM dispatches design

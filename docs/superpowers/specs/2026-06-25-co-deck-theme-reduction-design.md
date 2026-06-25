@@ -96,8 +96,8 @@ All `_shared/` files are retained. Remaining 5 themes (`outline`, `pitch-enhance
 
 | File | Change |
 |------|--------|
-| `scripts/co-deck/auto-calibrate.ts` | `profile.theme ?? 'scroll'` → `profile.theme ?? 'pitch-enhanced'` |
-| `scripts/co-deck/estimate-layout.ts` | `profile.theme ?? 'scroll'` → `profile.theme ?? 'pitch-enhanced'` |
+| `scripts/co-deck/auto-calibrate.ts` | `profile.theme || 'scroll'` → `profile.theme || 'pitch-enhanced'` |
+| `scripts/co-deck/estimate-layout.ts` | `profile.theme || 'scroll'` → `profile.theme || 'pitch-enhanced'` |
 | `scripts/co-deck/gen-slides-pdf.ts` | 4 occurrences of `'scroll'` fallback → `'pitch-enhanced'` |
 
 ### 5.4 Documentation & Config Updates (10 files)
