@@ -8,7 +8,7 @@
 
 **Tech Stack:** Markdown, TypeScript (Bun runtime), CSS, JSON
 
-**Design Spec:** `docs/superpowers/specs/2026-06-25-co-deck-theme-reduction-design.md`
+**Design Spec:** `docs/designs/co-deck-theme-reduction-design.md`
 
 ---
 
@@ -55,22 +55,22 @@ git commit -m "chore(co-deck): remove notebook, scroll, slideshow theme director
 
 In `templates/co-deck/scripts/co-deck/auto-calibrate.ts`, change:
 ```typescript
-const theme = profile.theme ?? 'scroll';
+const theme = profile.theme || 'scroll';
 ```
 to:
 ```typescript
-const theme = profile.theme ?? 'pitch-enhanced';
+const theme = profile.theme || 'pitch-enhanced';
 ```
 
 - [ ] **Step 2: Update estimate-layout.ts fallback**
 
 In `templates/co-deck/scripts/co-deck/estimate-layout.ts`, change:
 ```typescript
-const theme = profile.theme ?? 'scroll';
+const theme = profile.theme || 'scroll';
 ```
 to:
 ```typescript
-const theme = profile.theme ?? 'pitch-enhanced';
+const theme = profile.theme || 'pitch-enhanced';
 ```
 
 - [ ] **Step 3: Update gen-slides-pdf.ts fallbacks (3 occurrences)**
@@ -83,14 +83,14 @@ let theme = 'scroll', style = 'premium-dark';
 let theme = 'pitch-enhanced', style = 'premium-dark';
 
 // Occurrence 2 (line ~1111): fallback
-theme = profile.theme ?? 'scroll';
+theme = profile.theme || 'scroll';
 // →
-theme = profile.theme ?? 'pitch-enhanced';
+theme = profile.theme || 'pitch-enhanced';
 
 // Occurrence 3 (line ~1270): main entry fallback
-const theme = lectureProfile.theme ?? 'scroll';
+const theme = lectureProfile.theme || 'scroll';
 // →
-const theme = lectureProfile.theme ?? 'pitch-enhanced';
+const theme = lectureProfile.theme || 'pitch-enhanced';
 ```
 
 - [ ] **Step 4: Generalize scroll-specific comments in gen-slides-pdf.ts**

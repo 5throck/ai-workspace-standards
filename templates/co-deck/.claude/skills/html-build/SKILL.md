@@ -81,17 +81,17 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 
 **Theme + Style injection** (from `lecture-profile.md` → `presentation.theme` + `presentation.style`):
 ```html
-<html lang="ko" data-theme="scroll" data-style="premium-dark">
+<html lang="ko" data-theme="pitch-enhanced" data-style="premium-dark">
 <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
 <link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-Available themes: `notebook | pitch | pitch-enhanced | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
+Available themes: `outline | pitch | pitch-enhanced | vertical | zen`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `pitch-enhanced` + `premium-dark`.
 
 **Theme capabilities:**
 - All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
-- `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
-- `notebook`, `scroll`, `slideshow` use `slide-card` (content + right-panel) for standard slides.
-- `pitch-enhanced`, `notebook`, `scroll`, `slideshow` support PPT features (thumbnails, transitions, timer, speaker notes, TTS).
+- `pitch` uses `slide-content` grid (left text + right visual panel) for standard slides.
+- `pitch-enhanced`, `outline`, `zen`, `vertical` use `slide-card` (content + right-panel) for standard slides.
+- PPT-engine themes (`outline`, `pitch-enhanced`, `zen`, `vertical`) support PPT features (TOC drawer, transitions, timer, speaker notes, TTS).
 - `pitch` uses its own layout (TOC drawer, no thumbnails, no transitions).
 - `visual-heavy` style uses `--slide-bg-image` CSS variable for full-bleed background images.
 
