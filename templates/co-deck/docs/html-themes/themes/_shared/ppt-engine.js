@@ -50,30 +50,51 @@ function appendInline(parent, s) {
 // Converts plain-text visualDisplay content into structured DOM elements.
 // Patterns:
 //   [Title]           → .visual-heading (bold, accented)
-//   ✓ / ✗ / → / •    → .visual-item .visual-item-check (list with marker)
+//   [Title] + single marker line (no blank) → .visual-heading-inline (one line)
+//   ✓ / ✗ / → / •    → .visual-item (marker preserved in text, no CSS ::before)
 //   (empty line)      → <br>
 //   (default)         → .visual-paragraph (normal text)
 // Called by theme template renderers when data.visualDisplay is present.
 
+var MARKER_RE = /^[✓✗✔✘→►•▪▫▸❯]/;
+
 function renderVisualDisplay(parent, text) {
   if (!text) return;
   var lines = String(text).split('\n');
-  lines.forEach(function(line) {
-    var trimmed = line.trim();
-    if (!trimmed) { parent.appendChild(document.createElement('br')); return; }
-    // [Box Title] → heading
+  var i = 0;
+  while (i < lines.length) {
+    var trimmed = lines[i].trim();
+    if (!trimmed) { parent.appendChild(document.createElement('br')); i++; continue; }
+
+    // [Box Title] — check if next non-empty line is a single marker line (inline collapse)
     if (/^\[.+\]$/.test(trimmed)) {
-      parent.appendChild(el('div', 'visual-heading', trimmed.replace(/^\[|\]$/g, '')));
-      return;
+      var label = trimmed.replace(/^\[|\]$/g, '');
+      var next = i + 1 < lines.length ? lines[i + 1].trim() : '';
+      var afterNext = i + 2 < lines.length ? lines[i + 2].trim() : null;
+      // Collapse: [Title] immediately followed by one marker line, then blank or end
+      if (next && MARKER_RE.test(next) && (afterNext === null || afterNext === '')) {
+        var combined = el('div', 'visual-item');
+        combined.textContent = label + ' ' + next;
+        parent.appendChild(combined);
+        i += 2; // consume heading + marker line
+        continue;
+      }
+      parent.appendChild(el('div', 'visual-heading', label));
+      i++;
+      continue;
     }
-    // Check/cross/arrow/bullet items
-    if (/^[✓✗✔✘→►•▪▫▸❯]\s*/.test(trimmed)) {
-      parent.appendChild(el('div', 'visual-item visual-item-check', trimmed));
-      return;
+
+    // Marker items — render text as-is, no CSS ::before bullet
+    if (MARKER_RE.test(trimmed)) {
+      parent.appendChild(el('div', 'visual-item', trimmed));
+      i++;
+      continue;
     }
+
     // Default paragraph
     parent.appendChild(el('div', 'visual-paragraph', trimmed));
-  });
+    i++;
+  }
 }
 
 // ── TOCBuilder ────────────────────────────────────────────────────────
@@ -122,6 +143,69 @@ var TOCBuilder = {
     if (activeItem) {
       activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+  }
+};
+
+// ── ThumbnailNav ──────────────────────────────────────────────────────────
+// Manages the thumbnail-panel sidebar for PPT themes that use it
+// (pitch-enhanced, etc.). Builds a slide title list on first open,
+// highlights the active slide, and syncs with showSlide().
+
+var ThumbnailNav = {
+  visible: false,
+  _built: false,
+
+  init: function() {
+    var panel = document.getElementById('thumbnail-panel');
+    if (!panel) return;
+    // Start hidden; user toggles via button
+    panel.classList.add('hidden');
+    this.visible = false;
+    this._build(panel);
+    this._built = true;
+  },
+
+  toggle: function() {
+    var panel = document.getElementById('thumbnail-panel');
+    var btn   = document.getElementById('thumb-toggle-btn');
+    if (!panel) return;
+    this.visible = !this.visible;
+    panel.classList.toggle('hidden', !this.visible);
+    if (btn) btn.classList.toggle('active', this.visible);
+    if (this.visible) this.highlight(currentSlide);
+  },
+
+  _build: function(panel) {
+    if (typeof slideData === 'undefined') return;
+    while (panel.firstChild) panel.removeChild(panel.firstChild);
+    slideData.forEach(function(d, i) {
+      var item = document.createElement('div');
+      item.className = 'thumbnail-item' + (i === 0 ? ' active' : '');
+      item.dataset.index = i;
+      item.title = d.title || ('Slide ' + (i + 1));
+      item.onclick = function() { showSlide(i); };
+
+      var num = document.createElement('span');
+      num.className = 'thumb-label';
+      num.textContent = i + 1;
+
+      var label = document.createElement('span');
+      label.className = 'thumb-headline';
+      label.textContent = d.title || d.subtitle || ('Slide ' + (i + 1));
+
+      item.appendChild(num);
+      item.appendChild(label);
+      panel.appendChild(item);
+    });
+  },
+
+  highlight: function(index) {
+    var items = document.querySelectorAll('.thumbnail-item');
+    items.forEach(function(item, i) {
+      item.classList.toggle('active', i === index);
+    });
+    var active = document.querySelector('.thumbnail-item[data-index="' + index + '"]');
+    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 };
 
@@ -900,6 +984,7 @@ function showSlide(index) {
   // Update presenter tools
   PresenterTools.updateScript(index);
   TOCBuilder.highlight(index);
+  if (ThumbnailNav.visible) ThumbnailNav.highlight(index);
 
   // Notify NarrationEngine of slide change
   if (NarrationEngine._available && NarrationEngine.isPlaying) {
@@ -966,11 +1051,12 @@ function initPPT(options) {
     if (timerDisp) timerDisp.style.display = 'none';
   }
 
-  // Initialize TOC drawer after slides are rendered
+  // Initialize TOC drawer and thumbnail panel after slides are rendered
   requestAnimationFrame(function() {
     if (typeof slideData !== 'undefined') {
       TOCBuilder.init(slideData, 'toc-list');
     }
+    ThumbnailNav.init();
   });
 
   // Initialize narration engine (pass config if available)
