@@ -1,4 +1,4 @@
-// @version 2.10.0
+// @version 2.10.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -913,8 +913,13 @@ if (IS_WORKSPACE_ROOT) {
         const allowedFiles: string[] = schema?.rootAllowlist?.files ?? [];
         const allowedDirs: string[] = schema?.rootAllowlist?.dirs ?? [];
 
+        // Only scan git-tracked top-level items — ignore untracked local directories (e.g. test projects)
+        const gitLsResult = spawnSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
+        const trackedItems = new Set((gitLsResult.stdout || '').trim().split('\n').filter(Boolean).map(f => f.split('/')[0]));
         const items = fs.readdirSync('.');
         for (const item of items) {
+            // Skip untracked local items entirely
+            if (!trackedItems.has(item)) continue;
             const isDir = fs.statSync(item).isDirectory();
             if (isDir) {
                 if (!allowedDirs.includes(item)) {

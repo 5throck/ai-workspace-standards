@@ -38,12 +38,15 @@ instructor:
 
 # Presentation rendering settings (used by html-build and storyline agents)
 # theme   — HTML structure and navigation paradigm
-#   Options: notebook | pitch | pitch-enhanced | scroll | slideshow
-#   - notebook        : PPT Outline View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
-#   - pitch           : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
-#   - pitch-enhanced  : PPT Presenter View — pitch aesthetics + thumbnails + transitions + timer (all 5 styles; visual-heavy: partial)
-#   - scroll           : PPT Reading View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
-#   - slideshow        : PPT Presentation View — thumbnail panel, transitions, all 5 styles (visual-heavy: partial)
+#   Options: notebook | outline | pitch | pitch-enhanced | scroll | slideshow | vertical | zen
+#   - notebook        : PPT Outline View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - outline          : Research Notebook — text-only, no image panel, TOC drawer, all 5 styles (visual-heavy: partial)
+#   - pitch            : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
+#   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all 5 styles; visual-heavy: partial)
+#   - scroll           : PPT Reading View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - slideshow        : PPT Presentation View — TOC drawer, transitions, all 5 styles (visual-heavy: partial)
+#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver, all 5 styles (visual-heavy: full)
+#   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 3 bullets (classic/minimal/premium-dark; visual-heavy, academic: incompatible)
 # style   — CSS visual variable set (color, font, spacing)
 #   Options: premium-dark | classic | minimal | visual-heavy | academic
 #   - premium-dark : dark navy + gold accent + serif typography (default; all themes)
@@ -54,7 +57,7 @@ instructor:
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:
   theme: scroll
-  style: classic
+  style: premium-dark
 
 # Keywords used by research agent to focus search queries
 # Add 5-10 domain-specific terms
@@ -133,7 +136,9 @@ narration:
   # Options: true | false (default: true)
   enabled: true
   # Whether to enable automatic slide advancement (independent of narration)
-  # When true, slides advance automatically at the configured interval.
+  # ⚠️ This field is informational only — the HTML viewer ignores this config
+  # value. Auto-advance can only be activated by the user clicking the
+  # "⏸ Manual" button or pressing 'A' key in the HTML presentation viewer.
   # Options: true | false (default: false)
   autoAdvance: false
   # Interval for auto-advance when narration is NOT playing (seconds)
@@ -168,7 +173,7 @@ source_verification: true
 #     width_mm: 254.0      # 4:3 ratio (default: 338.7)
 #     height_mm: 190.5
 #   content_rules:
-#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 3)
+#     max_bullets_per_slide: 7   # default per theme.json (scroll: 5, slideshow: 4)
 #   colors:
 #     accent: [180, 30, 50]      # institution CI color override
 #   # ── fonts / line_heights — the primary PDF-fitting levers (read by gen-slides-pdf.ts) ──

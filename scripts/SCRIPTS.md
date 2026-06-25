@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.1 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -109,13 +109,13 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/pipeline-state.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.1.8 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.0 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.8 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.0.9 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -138,7 +138,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-md-language.ts` | L0 | 1.4.2 | active | —| —| L0+L1 | —|
+| `validate-md-language.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.9 | active | —| —| L0 | —|

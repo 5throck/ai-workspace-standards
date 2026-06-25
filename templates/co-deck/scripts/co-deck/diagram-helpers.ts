@@ -1,4 +1,4 @@
-// @version 1.1.0 — OS-aware font candidate paths (Windows, macOS, Linux).
+// @version 1.2.0 — Default canvas matches pitch-enhanced right-panel aspect ratio.
 // Shared SVG utilities for diagram generation.
 // Imported by each project's presentations/<project>/diagram-defs.ts.
 // Do NOT add project-specific content here — keep this infrastructure-only.
@@ -8,7 +8,11 @@ import { join, homedir } from 'node:path';
 import { platform } from 'node:os';
 import { Resvg } from '@resvg/resvg-js';
 
-export const W = 420, H = 470;
+// Default canvas dimensions. Match the pitch-enhanced .right-panel aspect ratio
+// (0.85fr column in a 16:9 slide with padding). Diagram-defs.ts may override
+// by passing explicit w/h to svgWrap(). Previous values W=420 H=470 produced
+// near-square diagrams that got heavily cropped by object-fit:cover.
+export const W = 380, H = 520;
 
 // ── OS-aware Korean font discovery ─────────────────────────────────────────────
 // Searches system font directories + user font directories per platform.

@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-23
+# Last Updated: 2026-06-25
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -41,7 +41,7 @@
 | Storyline | `agents/storyline.md` | 2-3 | storyline.md + slide_deck.md with image_role/image_query fields; cover/divider confirmation | active |
 | Design | `agents/design.md` | 4 | design_spec.md (colors, fonts, layout) | active |
 | Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
-| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG+PNG) | active |
+| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG primary for HTML; PNG optional for PDF) | active |
 | Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
 | Measure | `agents/measure.md` | 9-10 | layout_spec.json + pdf_layout_spec.md (Playwright-based) | active |
 | Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
@@ -101,7 +101,7 @@ Three flags control agent execution in the co-deck pipeline:
 | `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
 | `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
 | `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG → PNG; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG (primary delivery format for HTML) with optional PNG for PDF; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
 | `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
@@ -136,33 +136,53 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 | Name | Version | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|---------|----------|-----------|-----|---------------|--------|
-| `notebook` | 2.0.0 | PPT Outline View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/notebook/` |
+| `notebook` | 3.0.0 | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 30 char title | `docs/html-themes/themes/notebook/` |
+| `outline` | 3.0.0 | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 6 bullets, 35 char title, 30-60 slides | `docs/html-themes/themes/outline/` |
 | `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
-| `pitch-enhanced` | 2.0.0 | PPT Presenter View — pitch floating-card + thumbnails, transitions, timer | PPT footer bar (thumbnails + transitions fade/push/zoom + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
-| `scroll` | 2.0.0 | PPT Reading View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/scroll/` |
-| `slideshow` | 2.0.0 | PPT Presentation View — base.css vocabulary, thumbnail panel, transitions | PPT footer bar (thumbnails + transitions + script + timer + prev/next) | None | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
+| `pitch-enhanced` | 3.0.0 | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
+| `scroll` | 3.0.0 | PPT Reading View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 5 bullets, 30 char title, 30-60 slides | `docs/html-themes/themes/scroll/` |
+| `slideshow` | 3.0.0 | PPT Presentation View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/slideshow/` |
+| `vertical` | 3.0.0 | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | max 5 bullets, 28 char title, 30-60 slides | `docs/html-themes/themes/vertical/` |
+| `zen` | 3.0.0 | Presentation Zen — full-bleed backgrounds, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 3 bullets, 28 char title, 10-30 slides | `docs/html-themes/themes/zen/` |
 
-`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_compatibility` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
+`theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_styles` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
 
-Each theme folder also includes **`theme.css`** (per-theme CSS extension — card geometry, slide type layouts) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.4.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
+Each theme folder also includes **`theme.css`** (per-theme CSS extension — card geometry, slide type layouts) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.7.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
 
 > **Layer 0 — shared defaults**: `docs/html-themes/themes/_shared/layout_base.json` holds the region skeleton (all regions `null`) + the 16:9 `page` baseline + `print` defaults. It is the merge base, never filled by the renderer. `_shared/` is excluded from the theme scan (it is not itself a theme).
 
-### PPT Transformed Themes (v2.0.0)
+### PPT Transformed Themes (v3.0.0)
 
 Themes `notebook`, `scroll`, `slideshow`, and `pitch-enhanced` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
 
 | Feature | Implementation |
 |---------|---------------|
-| Thumbnail navigation panel | CSS `transform: scale(0.14)` on cloned slide DOM nodes — no external library |
+| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, `T` key shortcut — replaces thumbnail panel** |
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.0 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (thumbnails), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration) |
+| **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
+
+### Theme Architecture — Two Families
+
+The five themes split into **two architectural families** with intentional design differences:
+
+| Aspect | **Pitch Family** (pitch, pitch-enhanced) | **PPT-Engine Family** (scroll, notebook, slideshow) |
+|--------|----------------------------------------|------------------------------------------------------|
+| **Shared engine** | pitch: none (self-contained) · pitch-enhanced: ppt-engine.js/css | ppt-engine.js + ppt-engine.css |
+| **DOM vocabulary** | `.slide-content > .slide-left + .right-panel` · `<ul class="slide-bullets"><li>` | `.slide-header + .slide-card` · `<div class="bullets-container"><div class="bullet-item">` |
+| **Cover slide type** | `data-type="title"` | `data-type="cover"` |
+| **Slide card sizing** | `92vw × 82vh`, max 1300×750px, border-radius 20px | `aspect-ratio: 16/9`, max 1280px, border-radius 4px |
+| **Grid layout** | CSS Grid (`1fr 1fr` in pitch-enhanced, `1.15fr 0.85fr` in pitch) | Flexbox via base.css `.slide-card` |
+| **Transitions** | pitch: scale+translateY · pitch-enhanced: ppt-engine fade/push/zoom | ppt-engine fade/push/zoom |
+| **Navigation** | pitch: TOC drawer (`T` key) · pitch-enhanced: TOC drawer + ppt-footer | TOC drawer + ppt-footer |
+| **PDF calibration** | 750px (matches 750px max-height card) | 720px (matches 1280×720 reference) |
+
+> **pitch-enhanced** is a **hybrid**: it uses the ppt-engine runtime (thumbnails, transitions, NarrationEngine, timer) but preserves the pitch-native DOM vocabulary and floating-card geometry. Its `theme.css` (393 lines) is the most complex override layer, neutralizing base.css defaults that conflict with the pitch aesthetic.
 
 ### Layer 2 — Style (CSS Variable Set)
 
@@ -184,7 +204,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css      — PPT common UI (thumbnails, transitions, footer, timer, narration) [PPT themes only]
+2. themes/_shared/ppt-engine.css      — PPT common UI (TOC drawer, transitions, footer, timer, narration) [PPT themes only]
 3. themes/<theme>/theme.css           — per-theme extension
 4. styles/<style>/style.css           — per-style visual overrides
 ```
@@ -197,13 +217,13 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `notebook` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` |
-|-------------------|------------|---------|------------------|----------|-------------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial |
-| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
+| Style ↓ / Theme → | `notebook` | `outline` | `pitch` | `pitch-enhanced` | `scroll` | `slideshow` | `vertical` | `zen` |
+|-------------------|------------|-----------|---------|------------------|----------|-------------|------------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ⚠️ partial | ⚠️ partial | ❌ incompatible | ⚠️ partial | ⚠️ partial | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ | ✅ | ❌ incompatible |
 
 > **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible
 >
@@ -217,7 +237,7 @@ To create a new theme or style, use the **T-Stage** or **Style Workflow** via th
 
 ### 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` (v1.4.0) merges four layers at runtime via `deepMerge` (later layers win):
+`gen-slides-pdf.ts` (v1.7.0) merges four layers at runtime via `deepMerge` (later layers win):
 
 ```
 Layer 0 — shared : docs/html-themes/themes/_shared/layout_base.json       → region skeleton (all null) + 16:9 page + print defaults
@@ -384,7 +404,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 
 ### Content Rules
 1. Research must cover both Korean and English sources
-2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: scroll theme → max 5 bullets, 30-60 slides; slideshow → max 3 bullets, 20-40 slides
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: scroll theme → max 5 bullets, 30-60 slides; slideshow → max 4 bullets, 20-50 slides
 3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
@@ -400,9 +420,8 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 1. Always call Version Agent before editing any file
 2. HTML must embed `slideData` array for PDF extraction
 3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
-4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.png`; reference as `../assets/diagrams/<stem>.png` (path auto-rewritten by gen-visual-images.ts)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
-6. **TOC sidebar is MANDATORY for scroll theme**: wrap slides in `<div id="viewer"><aside id="toc-panel">…</aside><main id="slide-container">…</main></div>`. Each `.slide` must carry `id="slide-${index}"`.
 
 ### Visual Diagram Pipeline
 
@@ -413,30 +432,31 @@ presentations/<project>/diagram-defs.ts  ← project-specific generators (author
         ↓ dynamic import
 gen-visual-images.ts (infrastructure dispatcher)
         ↓
-images/<stem>.svg  (source artifact saved to disk)
-images/<stem>.png  (rendered output)
+images/<stem>.svg  (source artifact saved to disk — primary delivery format for HTML)
+images/<stem>.png  (optional — required only for PDF export)
         ↓
-slideData[i].visualImage = "images/<stem>.png"
-        ↓ HTML: applyVisualImages() injects <img> into .right-panel
-        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json
+slideData[i].visualImage = "images/<stem>.svg"   (or .png if PDF pipeline is planned)
+        ↓ HTML: template buildSlideChildren() checks data.visualImage and injects <img> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts reads visualImage from slidedata.json (PNG only)
 ```
 
-**Architecture (v3.0.0)**:
+**Architecture (v3.1.0)**:
 - `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
 - `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
 - Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
 - If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
+- **Unified output path**: SVG and PNG are saved to `presentations/assets/diagrams/` (shared pool), matching the diagram-specialist agent convention. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/` in slidedata.json.
 
-**Design principle**: SVG is the source of truth; PNG is the delivery format. Both are saved to disk so HTML and PDF consume identical pixel-level images, guaranteeing visual consistency.
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG conversion is **optional**, required only when PDF export is planned (the PDF pipeline's `embedImg()` only handles `.png` and `.jpg`). When both formats exist on disk, PDF consumers should reference the `.png` path.
 
 **Rules**:
 1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
 2. SVG source files (`images/<stem>.svg`) MUST be saved alongside PNG — they are source artifacts, not intermediate files
-3. `slidedata.json` `visualImage` field must reference the PNG path (relative to project dir, e.g. `"images/slide-03.png"`)
-4. HTML `applyVisualImages()` replaces `.right-panel` CSS diagrams with `<img>` at runtime using `slideData[i].visualImage`
-5. Slides that use `.cards-3` layout (no `.right-panel`) are intentionally skipped by `applyVisualImages()`
+3. `slidedata.json` `visualImage` field should reference the SVG path for HTML delivery (relative to project dir, e.g. `"images/slide-03.svg"`); reference the PNG path only when PDF export is planned and PNG artifacts exist
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
-7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `images/slide-03-nested-layers.png`)
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.png`)
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
@@ -464,10 +484,11 @@ slideData[i].visualImage = "images/<stem>.png"
 | `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
 | `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
 | `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
-| `presentations/<project>/images/` | **Project-local images** — SVG-generated concept diagram PNGs + SVG source files; NOT shared across projects |
+| `presentations/<project>/images/` | **Project-local images** — deprecated; diagram assets moved to shared pool `presentations/assets/diagrams/` |
 | `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
 | `presentations/assets/icons/` | **Shared icon pool** |
 | `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
+| `presentations/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
 | `agents/` | Agent role definitions (10 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
@@ -506,4 +527,4 @@ slideData[i].visualImage = "images/<stem>.png"
 
 ---
 
-*co-deck.context.md version: 3.5 — updated 2026-06-23: TTS voice selection improvements — loadVoices() timing fix (voice count tracking, 500ms fallback timer, incremental onvoiceschanged rebuild), voice dropdown badge UI (voice-name + voice-badge with lang · L/N, active state styling, open-state preservation across rebuilds). ppt-engine.js + ppt-engine.css updated. Previous: v3.4 — Background image system v1.7.0; v3.3 — NarrationEngine v2.0.*
+*co-deck.context.md version: 3.8 — updated 2026-06-24: v3.0.0 theme updates — 3 new themes (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); TOCBuilder + NarrationEngine.onSlideAdvance in ppt-engine.js; vertical theme uses IntersectionObserver; compatibility matrix expanded to 8 themes. Previous: v3.7 — Theme Architecture section (Pitch Family vs PPT-Engine Family), NarrationEngine v2.1, gen-slides-pdf v1.7.0, content rules per-theme accuracy, pitch theme.json punchline added, partial_styles field name unified, default style premium-dark, stale scroll TOC rule removed.*

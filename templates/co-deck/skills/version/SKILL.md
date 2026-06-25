@@ -51,10 +51,10 @@ bun scripts/co-deck/snapshot.ts lecture_v1.html \
   --desc "backup before image swap" \
   --agent build
 
-# Entire folder
-bun scripts/co-deck/snapshot.ts images/ \
+# Diagram assets (shared pool)
+bun scripts/co-deck/snapshot.ts ../assets/diagrams/ \
   --workspace presentations/<project> \
-  --desc "backup before image set swap" \
+  --desc "backup before diagram regeneration" \
   --agent build
 ```
 

@@ -3,7 +3,7 @@
   scroll/template.html — co-deck Scroll Theme (PPT Reading View)
   =============================================================
   Rendering paradigm: PPT-style single-slide presentation with high
-  content density, thumbnail navigation, transition effects, presenter
+  content density, TOC drawer, transition effects, presenter
   tools, and footer nav. Previously a vertical scroll layout, now
   transformed to a PPT reading view while retaining its generous
   content constraints.
@@ -36,13 +36,20 @@
 </head>
 <body class="transition-fade">
 
-  <!-- Main layout: thumbnails + presentation -->
-  <div class="ppt-main">
-    <!-- Thumbnail navigation panel -->
-    <aside class="thumbnail-panel" id="thumbnail-panel" aria-label="슬라이드 썸네일">
-      <!-- Populated by ThumbnailRenderer.init() -->
-    </aside>
+  <!-- TOC drawer (slide headline navigation) -->
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+  <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
+    <div class="toc-header">
+      <span class="toc-title">슬라이드 목차</span>
+      <button class="toc-close-btn" onclick="closeTOC()" aria-label="닫기">&times;</button>
+    </div>
+    <div class="toc-list" id="toc-list">
+      <!-- Populated by TOCBuilder.init() -->
+    </div>
+  </div>
 
+  <!-- Main layout: presentation only -->
+  <div class="ppt-main">
     <!-- Presentation area -->
     <div class="presentation-container" id="presentation">
       <!-- INJECT:slides -->
@@ -58,7 +65,7 @@
   <!-- Footer bar -->
   <footer class="ppt-footer" id="ppt-footer">
     <div class="footer-left">
-      <button class="footer-btn" id="thumb-toggle-btn" onclick="ThumbnailNav.toggle()" aria-label="썸네일 패널" title="썸네일">▦ 썸네일</button>
+      <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="슬라이드 목차" title="슬라이드 목차 (T)">☰ 목차</button>
       <span class="slide-counter" id="slide-counter">1 / 1</span>
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progress-bar"></div>
@@ -201,7 +208,9 @@
 
       if (data.visualImage) {
         var panel = el('div', 'right-panel');
-        panel.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
+        var imgElem = imgEl(data.visualImage, escapeText(data.visualTitle || title));
+        if (data.visualImage.indexOf('/diagrams/') !== -1) imgElem.classList.add('img-diagram');
+        panel.appendChild(imgElem);
         card.appendChild(panel);
       } else if (data.visualDisplay) {
         var panel = el('div', 'right-panel');
@@ -238,7 +247,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       initSlides();
       showSlide(0);
-      initPPT({ transition: 'fade', showTimer: true, showThumbnails: true });
+      initPPT({ transition: 'fade', showTimer: true });
     });
   </script>
 </body>

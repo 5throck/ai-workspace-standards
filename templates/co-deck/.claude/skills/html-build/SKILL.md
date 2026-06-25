@@ -1,6 +1,6 @@
 ---
 name: html-build
-version: 1.4.0
+version: 1.5.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -10,13 +10,13 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-06-20
+last_reviewed: 2026-06-24
 prerequisites: design
 ---
 
 ## Context
 
-Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a **strict-JSON** array (`const slideData = [...]`) inside the HTML. Strict-JSON means: all keys double-quoted, all string values double-quoted, no trailing commas, no JavaScript comments, no single-quoted strings, no template literals. This contract enables `extract_slidedata.mjs` to parse slideData via `JSON.parse` directly. Invoked at Stages 5-8, after Gate 3 (design approval).
+Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies theme from `lecture-profile.md`, binds images from `image-manifest.json`, inserts special pages (speaker intro, contact), and checks balance. Slide data is embedded as a **strict-JSON** array (`const slideData = [...]`) inside the HTML. Strict-JSON means: all keys double-quoted, all string values double-quoted, no trailing commas, no JavaScript comments, no single-quoted strings, no template literals. Invoked at Stages 5-8, after Gate 3 (design approval).
 
 ## When to Use
 
@@ -33,57 +33,87 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 **File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder.
 
-**slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments.
+**slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments. This enables `extract_slidedata.mjs` to parse via `JSON.parse` directly without a transform step.
 
 > Korean example — field keys stay in English; only the content values are Korean.
 
 ```javascript
 // Cover
 { isTitleSlide: true, section: "", title: "강연 제목", subtitle: "부제목",
-  meta: "날짜 | 주최", visualImage: "assets/images/slide-001-cover.jpg" }
+  meta: "날짜 | 주최", visualImage: "../assets/images/lecture-hall-professional.jpg",
+  backgroundImage: "../assets/images/bg-deck.jpg" }
 
-// Speaker intro
+// Speaker intro (visualImage → portrait avatar on profile slides)
 { isProfileSlide: true, section: "INTRODUCTION", title: "강연자 소개",
   speakerName: "이름", speakerTitle: "직책 / 소속", speakerBio: "약력 (2-3줄)",
-  visualImage: "assets/images/slide-002-speaker.jpg" }
+  visualImage: "../assets/images/speaker-portrait.jpg" }
 
 // Divider (part break)
 { isDividerSlide: true, section: "섹션명", partNum: "PART 01",
   title: "파트 제목", desc: "이 파트에서 다룰 내용 한 줄 요약",
-  visualImage: "assets/images/slide-003-part1.jpg" }
+  visualImage: "../assets/images/ai-transformation-abstract.jpg",
+  backgroundImage: "../assets/images/bg-deck.jpg" }
 
-// Standard slide
+// Standard slide (image)
 { section: "섹션명", title: "슬라이드 제목",
   bullets: ["불릿 1", "불릿 2", "불릿 3"],
-  visualImage: "assets/images/slide-004-keyword.jpg" }
-  // or text panel: visualTitle: "오른쪽 패널 제목", visualDisplay: "패널 본문"
+  visualImage: "../assets/images/data-analysis-dashboard.jpg" }
+
+// Standard slide (text panel — structured visualDisplay)
+// visualDisplay supports structured rendering via renderVisualDisplay():
+//   [Box Title]  → .visual-heading (bold, accented)
+//   ✓ / → / •    → .visual-item .visual-item-check (list marker)
+//   (default)    → .visual-paragraph (normal text)
+{ section: "섹션명", title: "슬라이드 제목",
+  bullets: ["불릿 1", "불릿 2"],
+  visualTitle: "핵심 포인트", visualDisplay: "[현재 상황]\n✓ 항목 1\n✓ 항목 2\n\n[개선 방향]\n→ 방향 1\n→ 방향 2" }
 
 // Contact (last slide)
 { isContactSlide: true, section: "CLOSING", title: "감사합니다",
   contactEmail: "email@example.com", contactLinkedIn: "linkedin.com/in/...",
   contactPhone: "010-XXXX-XXXX" }
+
+// Punchline (impactful closing)
+{ isPunchlineSlide: true, section: "", title: "핵심 메시지" }
 ```
 
-Use `design_spec.md`'s CSS variables directly. Do not hardcode color or font values.
+Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
 
-**Slide rendering model (runtime):** the theme template (`docs/html-themes/themes/<theme>/template.html`) **owns** `renderSlide(data, index)` and `initSlides()`. On `DOMContentLoaded`, `initSlides()` reads the inline `const slideData = [...]` array and builds the `.slide` DOM. Your job is **only**:
-1. Inject the CSS `<link>` tags in order base→theme→style (see Theme injection below).
-2. Inject the `slideData` array (the field schema above).
-3. Leave the slide container empty — `<!-- INJECT:slides -->` is satisfied at **runtime** by the template's own `initSlides()`.
-
-Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `renderSlide()` — both are the template's responsibility.
-
-> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
-
-**Theme injection** (from `lecture-profile.md`):
+**Theme + Style injection** (from `lecture-profile.md` → `presentation.theme` + `presentation.style`):
 ```html
-<html lang="ko" data-theme="classic">
-<link rel="stylesheet" href="../../docs/html-themes/base/base.css">
-<link rel="stylesheet" href="../../docs/html-themes/overrides/classic.css">
+<html lang="ko" data-theme="scroll" data-style="premium-dark">
+<link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+<link rel="stylesheet" href="../../docs/html-themes/styles/premium-dark/style.css">
 ```
-Available themes: `classic | minimal | visual-heavy | academic`. Default: `classic`.
+Available themes: `notebook | pitch | pitch-enhanced | scroll | slideshow`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `scroll` + `premium-dark`.
 
-**Image paths:** use paths from `image-manifest.json` (produced by Image Curator Agent). Naming convention: `assets/images/slide-<NNN>-<slug>.<ext>`.
+**Theme capabilities:**
+- All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
+- `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
+- `notebook`, `scroll`, `slideshow` use `slide-card` (content + right-panel) for standard slides.
+- `pitch-enhanced`, `notebook`, `scroll`, `slideshow` support PPT features (thumbnails, transitions, timer, speaker notes, TTS).
+- `pitch` uses its own layout (TOC drawer, no thumbnails, no transitions).
+- `visual-heavy` style uses `--slide-bg-image` CSS variable for full-bleed background images.
+
+**Narration config injection** (from `lecture-profile.md` → `narration` section):
+Read the `narration` block from `lecture-profile.md` and inject a `narrationConfig` object into the `initPPT()` call. This bridges lecture profile settings to the runtime NarrationEngine:
+```javascript
+// Inject before the DOMContentLoaded listener or alongside initPPT call
+var narrationConfig = {
+  enabled: true,
+  autoAdvance: false,
+  autoAdvanceInterval: 5,
+  defaultLanguage: 'ko',
+  languages: ['ko']
+};
+initPPT({ transition: 'fade', showTimer: true, showThumbnails: true, narration: narrationConfig });
+```
+- `enabled: false` → hides all narration/auto-advance buttons in the HTML viewer
+- `autoAdvance: true` → enables auto-advance timer (independent of narration)
+- `languages` → populates the language dropdown (only languages with scripts in slideData are clickable)
+- If `narration` section is absent or `enabled: false`, set `enabled: false`
+
+**Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 
 ---
 
@@ -134,7 +164,11 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 
 ## Output Format
 
-`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData`, theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
+`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
+
+> PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
+>
+> **Encoding**: All output HTML files MUST be UTF-8 without BOM. Verify `<meta charset="UTF-8">` is present in `<head>`. On Korean Windows systems, ensure `chcp 65001` is active before writing files to prevent CP949 corruption of Korean text content.
 
 ## Related Skills
 
