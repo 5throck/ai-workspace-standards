@@ -221,6 +221,12 @@ html, body {
   display: block;
 }
 
+.right-panel img.img-diagram {
+  object-fit: contain;
+  background: transparent;
+  padding: 0.5rem;
+}
+
 /* ── Cover Slide ─────────────────────────────────────────────────── */
 .slide[data-type="cover"] {
   background: var(--cover-bg);
@@ -297,6 +303,7 @@ html, body {
 .slide-visual {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   width: 100%;
   height: 100%;
   border-radius: 12px;

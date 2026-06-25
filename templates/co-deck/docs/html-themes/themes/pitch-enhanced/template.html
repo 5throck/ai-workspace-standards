@@ -152,7 +152,11 @@
         if (data.desc != null) left.appendChild(el('p', 'divider-desc', data.desc));
         slide.appendChild(left);
         var right = el('div', 'divider-right');
-        if (data.visualImage) right.appendChild(imgEl(data.visualImage, escapeText(title)));
+        if (data.visualImage) {
+          var dividerImg = imgEl(data.visualImage, escapeText(title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) dividerImg.classList.add('img-diagram');
+          right.appendChild(dividerImg);
+        }
         slide.appendChild(right);
         return;
       }
@@ -187,7 +191,9 @@
 
       var right = el('div', 'right-panel');
       if (data.visualImage) {
-        right.appendChild(imgEl(data.visualImage, escapeText(data.visualTitle || title)));
+        var img = imgEl(data.visualImage, escapeText(data.visualTitle || title));
+        if (data.visualImage.indexOf('/diagrams/') !== -1) img.classList.add('img-diagram');
+        right.appendChild(img);
       } else {
         var visual = el('div', 'slide-visual');
         visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
