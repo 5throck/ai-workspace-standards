@@ -2,8 +2,8 @@
 <!--
   preview.html — co-deck Theme x Style Preview Tool
   Usage: open in browser with URL params:
-    preview.html?theme=scroll&style=classic
-    preview.html?theme=slideshow&style=minimal
+    preview.html?theme=outline&style=classic
+    preview.html?theme=zen&style=minimal
   All slide content is hardcoded dummy data — not user input.
 
   ─────────────────────────────────────────────────────────────────────────────
@@ -20,13 +20,13 @@
       bun scripts/co-deck/generate-themes-manifest.ts
   ─────────────────────────────────────────────────────────────────────────────
 -->
-<html lang="ko" data-theme="scroll" data-style="premium-dark">
+<html lang="ko" data-theme="outline" data-style="premium-dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>co-deck Preview</title>
   <link id="base-css" rel="stylesheet" href="../styles/base.css">
-  <link id="theme-css" rel="stylesheet" href="../themes/scroll/theme.css">
+  <link id="theme-css" rel="stylesheet" href="../themes/outline/theme.css">
   <link id="style-css" rel="stylesheet" href="../styles/classic/style.css">
   <style>
     #preview-bar {
@@ -59,17 +59,19 @@
   <script>
     // Hardcoded dummy slide data (6 slides) — not user input
     const SLIDE_DATA = [
-      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연' },
-      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점' },
+      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연', backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80' },
+      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점', backgroundImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=80' },
       { type: 'standard', section: '기술 변화의 흐름', title: '인공지능의 부상', bullets: ['딥러닝 혁명 (2012~)', 'LLM과 생성형 AI (2022~)', '업무 자동화 가속'] },
       { type: 'standard', section: '기술 변화의 흐름', title: '데이터 중심 조직', bullets: ['데이터 리터러시의 중요성', 'AI 도입 장벽과 해결 방안', '사람 + AI 협업 모델'] },
       { type: 'standard', section: '기술 변화의 흐름', title: '미래 역량', bullets: ['비판적 사고와 문제 정의', '크리에이티브 역량', 'AI 도구 활용 능력'] },
+      { type: 'punchline', section: '기술 변화의 흐름', title: '변화는 이미 시작되었다' },
+      { type: 'profile', section: '기술 변화의 흐름', title: '연사 소개', speakerName: '홍길동', speakerTitle: '수석 연구원', speakerBio: '10년 경력의 AI 전문가' },
       { type: 'contact',  title: '감사합니다', email: 'speaker@example.com', linkedin: 'linkedin.com/in/speaker' }
     ];
 
     function getParams() {
       const p = new URLSearchParams(location.search);
-      return { theme: p.get('theme') || 'scroll', style: p.get('style') || 'premium-dark' };
+      return { theme: p.get('theme') || 'outline', style: p.get('style') || 'premium-dark' };
     }
 
     let currentTheme = null;
@@ -88,6 +90,13 @@
       history.replaceState(null, '', url);
       applyThemeStyle(theme, style);
     }
+
+    // ── Theme paradigm classification ───────────────────────────────────────
+    // Themes that use fullscreen stacked layout (one slide visible, prev/next).
+    // Everything else falls through to the vertical scroll layout.
+    const STACKED_THEMES = new Set([
+      'pitch', 'pitch-enhanced', 'outline', 'zen'
+    ]);
 
     // ── Manifest-driven dropdown population ─────────────────────────────────
     // The dropdowns are populated from window.__THEMES_MANIFEST__ (loaded via
@@ -157,6 +166,10 @@
       const div = document.createElement('div');
       div.className = 'slide';
       div.dataset.type = data.type;
+      if (data.backgroundImage) {
+        div.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+        div.dataset.bg = 'true';
+      }
 
       if (data.type === 'cover') {
         const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
@@ -175,6 +188,16 @@
         wrap.appendChild(el('div', { fontSize: '1.6em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '24px' }, data.title));
         wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))', lineHeight: '2' }, data.email + ' · ' + data.linkedin));
         div.appendChild(wrap);
+      } else if (data.type === 'punchline') {
+        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
+        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary,#fff)' }, data.title));
+        div.appendChild(wrap);
+      } else if (data.type === 'profile') {
+        const wrap = el('div', { padding: '20px 0' });
+        wrap.appendChild(el('div', { fontSize: '1.4em', fontWeight: 'bold', color: 'var(--text-primary,#fff)' }, data.speakerName || data.title));
+        if (data.speakerTitle) wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))', marginTop: '8px' }, data.speakerTitle));
+        if (data.speakerBio) wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.5))', marginTop: '4px', fontSize: '0.9em' }, data.speakerBio));
+        div.appendChild(wrap);
       } else {
         const wrap = el('div');
         wrap.appendChild(el('div', { fontSize: '0.75em', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted,rgba(255,255,255,0.4))', marginBottom: '6px' }, data.section || ''));
@@ -192,8 +215,9 @@
       // Remove all child nodes safely
       while (host.firstChild) host.removeChild(host.firstChild);
 
-      if (theme === 'slideshow') {
-        // Slideshow: fixed container, slides stacked, prev/next
+      if (STACKED_THEMES.has(theme)) {
+        // Fullscreen stacked: one slide visible at a time, prev/next, keyboard nav
+        // (pitch, pitch-enhanced, outline, zen)
         const outer = el('div', { maxWidth: '900px', margin: '20px auto', position: 'relative', aspectRatio: '16/9' });
         SLIDE_DATA.forEach((data, i) => {
           const s = buildSlideEl(data);
@@ -228,7 +252,7 @@
           main.appendChild(s);
 
           const li = el('li', { padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8em', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' },
-            data.type === 'cover' ? '표지' : data.type === 'divider' ? '◆ ' + data.title : (i + '. ' + data.title));
+            data.type === 'cover' ? '표지' : data.type === 'divider' ? '◆ ' + data.title : data.type === 'punchline' ? '★ ' + data.title : data.type === 'profile' ? '👤 ' + (data.speakerName || data.title) : (i + '. ' + data.title));
           li.addEventListener('click', () => document.getElementById('slide-' + i).scrollIntoView({ behavior: 'smooth' }));
           tocList.appendChild(li);
         });
@@ -264,7 +288,7 @@
       // Resolve against the manifest so a stale URL param never references a
       // theme/style that no longer exists.
       const knownThemes = MANIFEST.themes.map((t) => t.name);
-      if (!knownThemes.includes(theme)) theme = knownThemes[0] || 'scroll';
+      if (!knownThemes.includes(theme)) theme = knownThemes[0] || 'outline';
       populateThemeSelect();
       populateStyleSelect(theme);
       document.getElementById('theme-select').value = theme;
