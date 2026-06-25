@@ -457,6 +457,7 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
 6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
 7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.svg`)
+8. **Diagram orientation** (`flow`/`timeline` only): set `orientation: horizontal | vertical | auto` in `visual_spec`. Default is `auto` — diagram-specialist resolves layout direction by element count and label length. Other diagram types (`cycle`, `matrix`, `pyramid`, `comparison`) ignore this field. See `agents/diagram-specialist.md §Orientation Resolution`.
 
 ### Image Rules
 1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
