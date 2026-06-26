@@ -48,14 +48,14 @@
   },
   "fonts": {
     "title_pt": 22.0,
-    "bullet_pt": 11.0,
+    "bullet_pt": 14.0,
     "punchline_pt": 32.0,
     "punchline_sub_pt": 14.0
   },
   "line_heights": {
     "title_px": 38.0,
-    "bullet_px": 22.0,
-    "bullet_gap_px": 12.0,
+    "bullet_px": 28.0,
+    "bullet_gap_px": 16.0,
     "punchline_px": 52.0
   },
   "image_zones": {

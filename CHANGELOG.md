@@ -24,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-22]**: feat(co-deck): add `premium-dark` style as the default visual style for scroll/slideshow themes — dark navy (`#111827`) + gold accent (`#D97706`) + radial-gradient cover/divider + MaruBuri/Noto Serif KR + gold title glow; derived from the `kyobo_ax_2026` executive deck; wired as default across `theme.json` (scroll/slideshow `compatible_styles[0]`), `html-build`/`pm` agents, `html-build` SKILL.md, `preview.html`, `gen-slides-pdf.ts`, and `variant.json` `theme_manifest.default` (renamed from `kyobo` — a brand name is inappropriate for a reusable style)
 - **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
 
+### Changed
+- **[2026-06-26]**: fix(co-deck): increase PDF body/bullet font sizes for readability — bullet_pt raised across all 5 themes (pitch/pitch-enhanced 11→14pt, vertical/outline 13→15pt, zen 14→15pt); bullet_px and bullet_gap_px adjusted proportionally; gen-slides-pdf.ts v1.8.0 fallback bullet_pt 12.5→14.0, auto-calibrate FONT_PT_MULT 0.85→0.94
+
 ### Fixed
 - **[2026-06-26]**: fix(co-deck): vertical template.html `</div>` mismatched closing tag for `<ul class="toc-list">` — changed to `</ul>`
 - **[2026-06-26]**: fix(co-deck): visual-heavy style.css `:root {}` block premature closure orphaning 14 custom properties (section-label, divider, cover variables) — removed stray closing brace
