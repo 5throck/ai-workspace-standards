@@ -352,13 +352,6 @@ html, body {
   padding: 0.15rem 0;
 }
 
-.visual-item-check::before {
-  content: var(--bullet-marker, "▸");
-  color: var(--accent, var(--accent-color, #4a90d9));
-  flex-shrink: 0;
-  margin-top: 0.05em;
-}
-
 .visual-paragraph {
   font-size: var(--font-size-body, 1rem);
   line-height: 1.6;
