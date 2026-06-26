@@ -1,4 +1,7 @@
-// @version 1.7.0 — Background image support. When lecture-profile.md → background_image.enabled
+// @version 1.8.0 — Increased PDF body/bullet font sizes for readability. bullet_pt raised
+//   from 11-13pt to 14-15pt across all themes; bullet_px/line_heights adjusted proportionally.
+//   Auto-calibrate FONT_PT_MULT tuned from 0.85→0.94 to produce readable estimates.
+//   v1.7.0: Background image support. When lecture-profile.md → background_image.enabled
 //   is true, renders full-bleed background image (cover-crop) with semi-transparent overlay.
 //   Supports scope: all | divider-cover | individual. Reads background_image config from
 //   lecture-profile frontmatter; resolves image path from image-manifest.json or slideData.
@@ -1098,7 +1101,7 @@ function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
     T_SECT      : f.section_px   ? px2pt(f.section_px)   : px2pt(13.6),
     T_NUM       : f.slide_num_px ? px2pt(f.slide_num_px) : px2pt(14.4),
     T_TITLE     : f.title_pt  ?? 28.0,
-    T_BUL       : f.bullet_pt ?? 12.5,
+    T_BUL       : f.bullet_pt ?? 14.0,
     T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : px2pt(13.6),
     T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : px2pt(16.0),
     T_TS_TITLE  : f.ts_title_px ? px2pt(f.ts_title_px) : px2pt(56.0),
@@ -1178,10 +1181,10 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
   const pageH = 190.5; // mm
 
   // Calibration multipliers (derived from analysis of existing tuned specs):
-  // fonts: pt values are typically CSS_px × 0.75 × ~1.05-1.15 (PDF-optimized)
+  // fonts: pt values are typically CSS_px × 0.75 × ~1.1-1.25 (PDF-optimized)
   // line_heights: values are typically CSS_px × ~1.8-2.0 (scaled to viewport space)
-  const FONT_PT_MULT = 0.85;    // CSS px → PDF pt multiplier (tuned)
-  const LINE_H_MULT = 1.85;      // CSS px → viewport_px multiplier (tuned)
+  const FONT_PT_MULT = 0.94;    // CSS px → PDF pt multiplier (tuned for readability)
+  const LINE_H_MULT = 1.90;     // CSS px → viewport_px multiplier (tuned)
 
   // Compute estimated values
   const titlePt = Math.round(titleFontSize * FONT_PT_MULT * 10) / 10;
