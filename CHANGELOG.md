@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
 
 ### Fixed
+- **[2026-06-26]**: fix(co-deck): remove CSS `::before` bullet markers from visual panel text in pitch/pitch-enhanced themes — visual panel text items (with embedded markers like →, ✓) displayed duplicate bullets due to CSS `::before` pseudo-elements; removed `.visual-item-check::before` rules from base.css, pitch/theme.css, pitch-enhanced/theme.css; aligned pitch/template.html `renderVisualDisplay()` class from `visual-item-check` to `visual-item` to match ppt-engine.js shared implementation
 - **[2026-06-26]**: fix(co-deck): vertical template.html `</div>` mismatched closing tag for `<ul class="toc-list">` — changed to `</ul>`
 - **[2026-06-26]**: fix(co-deck): visual-heavy style.css `:root {}` block premature closure orphaning 14 custom properties (section-label, divider, cover variables) — removed stray closing brace
 - **[2026-06-26]**: fix(co-deck): vertical theme sticky topbar scrolls away — `ppt-engine.css` sets `body { display: flex }` for PPT themes but vertical theme only overrode `overflow`; add `display: block !important; height: auto !important` to `vertical/theme.css` body rule to restore normal flow context enabling `position: sticky` on `.vertical-topbar`
