@@ -156,6 +156,12 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 - Implementation plans with phased delivery, capability requirements, and change management considerations
 - Functional risk registers identifying domain-specific risks and mitigation strategies
 
+## Output Destination
+
+- Functional analysis reports → `docs/research/{topic}-{function}-analysis-{YYYY-MM-DD}.md`
+- Benchmarking summaries → `docs/research/{topic}-benchmarking-{YYYY-MM-DD}.md`
+- Create the target folder if it does not exist before saving.
+
 ## Constraints
 
 - Do NOT apply generic business analysis when specialized functional depth is required
