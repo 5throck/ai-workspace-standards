@@ -398,10 +398,26 @@ class Renderer {
     this.page.drawEllipse({ x: cx, y: cy, xScale: this.pt(diamMm / 2), yScale: this.pt(diamMm / 2), color });
   }
 
+  /**
+   * Detect actual image format from magic bytes, falling back to extension.
+   * Prevents "SOI not found in JPEG" errors when a PNG is saved with .jpg extension.
+   */
+  private detectImageFormat(data: Buffer): 'png' | 'jpeg' {
+    // PNG magic: 89 50 4E 47
+    if (data.length >= 4 && data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4E && data[3] === 0x47) {
+      return 'png';
+    }
+    // JPEG magic: FF D8 FF
+    if (data.length >= 3 && data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
+      return 'jpeg';
+    }
+    return 'jpeg'; // fallback default
+  }
+
   async embedImg(doc: PDFDocument, imgPath: string) {
     const data = readFileSync(imgPath);
-    const ext  = imgPath.split('.').pop()?.toLowerCase();
-    return ext === 'png' ? await doc.embedPng(data) : await doc.embedJpg(data);
+    const format = this.detectImageFormat(data);
+    return format === 'png' ? await doc.embedPng(data) : await doc.embedJpg(data);
   }
 
   drawEmbeddedImage(img: any, xMm: number, yMm: number, wMm: number, hMm: number) {
