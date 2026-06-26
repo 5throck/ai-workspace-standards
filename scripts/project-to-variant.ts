@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.0.1
 /**
  * project-to-variant.ts
  *
@@ -76,12 +76,12 @@ function collectFiles(dir: string): string[] {
 }
 
 const commonFiles = new Set(
-  collectFiles(COMMON_DIR).map(f => path.relative(COMMON_DIR, f).replace(/\/g, '/'))
+  collectFiles(COMMON_DIR).map(f => path.relative(COMMON_DIR, f).replace(/\\/g, '/'))
 );
 
 const sourceFiles = collectFiles(sourceDir).map(f => ({
   abs: f,
-  rel: path.relative(sourceDir, f).replace(/\/g, '/'),
+  rel: path.relative(sourceDir, f).replace(/\\/g, '/'),
 }));
 
 const SKIP_PATTERNS = [/^\.git\//, /^node_modules\//, /^memory\//];
