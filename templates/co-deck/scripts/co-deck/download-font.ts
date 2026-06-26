@@ -7,8 +7,8 @@
 // Requires: fflate (bun install fflate)
 
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
-import { join, resolve, homedir } from 'path';
-import { platform } from 'os';
+import { join, resolve } from 'path';
+import { platform, homedir } from 'os';
 import { unzipSync } from 'fflate';
 
 interface FontSpec {
