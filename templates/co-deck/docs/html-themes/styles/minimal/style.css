@@ -55,6 +55,19 @@
   /* Section label */
   --section-label-bg:    #ebebef;
   --section-label-text:  #333344;
+
+  /* Chrome / UI surfaces */
+  --border-color:         rgba(0, 0, 0, 0.08);
+  --border-subtle:        rgba(0, 0, 0, 0.06);
+  --glass-bg:             rgba(250, 250, 250, 0.95);
+  --toc-drawer-bg:        var(--glass-bg);
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(0, 0, 0, 0.03);
+  --text-dim:             rgba(0, 0, 0, 0.3);
+  --scrollbar-thumb:      rgba(0, 0, 0, 0.1);
+  --progress-track:       rgba(0, 0, 0, 0.06);
+  --nav-btn-bg:           rgba(0, 0, 0, 0.03);
+  --nav-btn-hover:        rgba(0, 0, 0, 0.06);
 }
 
 /* Hide image panel entirely in minimal style */

@@ -48,6 +48,20 @@
   --image-panel-width:   0%;
   --image-panel-min-width: 0px;
 
+  /* Chrome / UI surfaces */
+  --border-color:         rgba(255, 255, 255, 0.14);
+  --border-subtle:        rgba(255, 255, 255, 0.08);
+  --glass-bg:             rgba(10, 10, 30, 0.88);
+  --toc-drawer-bg:        var(--glass-bg);
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(255, 255, 255, 0.06);
+  --text-dim:             rgba(255, 255, 255, 0.4);
+  --scrollbar-thumb:      rgba(255, 255, 255, 0.15);
+  --progress-track:       rgba(255, 255, 255, 0.1);
+  --nav-btn-bg:           rgba(255, 255, 255, 0.06);
+  --nav-btn-hover:        rgba(255, 255, 255, 0.14);
+}
+
   /* Section label */
   --section-label-bg:    rgba(126, 200, 240, 0.25);
   --section-label-text:  #ffffff;

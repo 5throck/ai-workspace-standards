@@ -53,4 +53,17 @@
   --cover-text:          #FFFFFF;
   --cover-subtitle-text: rgba(226, 232, 240, 0.75);
   --cover-meta-text:     rgba(156, 163, 175, 0.85);
+
+  /* Chrome / UI surfaces */
+  --border-color:         rgba(255, 255, 255, 0.12);
+  --border-subtle:        rgba(255, 255, 255, 0.07);
+  --glass-bg:             rgba(17, 24, 39, 0.92);
+  --toc-drawer-bg:        var(--glass-bg);
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(255, 255, 255, 0.05);
+  --text-dim:             rgba(255, 255, 255, 0.4);
+  --scrollbar-thumb:      rgba(255, 255, 255, 0.15);
+  --progress-track:       rgba(255, 255, 255, 0.1);
+  --nav-btn-bg:           rgba(255, 255, 255, 0.06);
+  --nav-btn-hover:        rgba(255, 255, 255, 0.14);
 }

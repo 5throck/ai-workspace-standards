@@ -94,21 +94,21 @@ slideData.forEach(function(data, i) {
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-dim);
   min-width: 20px;
   text-align: center;
   line-height: 1.4;
 }
 
 .thumbnail-item.active .thumb-label {
-  color: var(--accent-color, #D97706);
+  color: var(--accent-color);
 }
 
 /* Headline text */
 .thumbnail-item .thumb-headline {
   font-size: 11px;
   line-height: 1.3;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -116,7 +116,7 @@ slideData.forEach(function(data, i) {
 }
 
 .thumbnail-item.active .thumb-headline {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 ```
