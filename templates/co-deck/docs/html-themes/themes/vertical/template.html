@@ -9,9 +9,9 @@
   HOW TO USE:
     html-build reads this template and:
     1. Injects <html data-theme="vertical" data-style="<style>"> attributes
-    2. Replaces <!-- INJECT:CSS --> with base.css + ppt-engine.css + theme.css + style.css links
-    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
-    4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
+    2. Replaces [INJECT:CSS] with base.css + ppt-engine.css + theme.css + style.css links
+    3. Replaces [INJECT:slideData] with: const slideData = [...];
+    4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
 
   CONTENT RULES (from theme.json):
     - max 5 bullets per slide, max 28 chars in title
