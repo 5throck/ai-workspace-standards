@@ -81,6 +81,19 @@
   display: block;
 }
 
+/* When title slide has no image, center the content */
+.slide[data-type="title"]:not(:has(.right-panel)) .slide-content {
+  grid-template-columns: 1fr;
+  text-align: center;
+  justify-items: center;
+}
+
+.slide[data-type="title"]:not(:has(.right-panel)) .slide-left {
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .slide[data-type="title"] .slide-eyebrow {
   font-size: 0.8rem;
   font-weight: 600;
@@ -233,6 +246,21 @@
    Only display:block is needed to cancel the base.css flex default. */
 .slide[data-type="contact"] {
   display: block;
+}
+
+/* When contact slide has no image, center the content */
+.slide[data-type="contact"]:not(:has(.right-panel)) .slide-content {
+  grid-template-columns: 1fr;
+  text-align: center;
+  justify-items: center;
+}
+
+.slide[data-type="contact"]:not(:has(.right-panel)) .slide-left {
+  align-items: center;
+}
+
+.slide[data-type="contact"]:not(:has(.right-panel)) .contact-info {
+  align-items: center;
 }
 
 .slide[data-type="contact"] .contact-title {
