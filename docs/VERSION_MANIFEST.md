@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-26T22:50:51.105Z
+**Generated**: 2026-06-26T22:54:27.890Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -108,7 +108,7 @@
 | post-write-lifecycle-check.ts | 1.0.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.6 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.3 | scripts/hooks/pre-push.ts | bun |
-| project-to-variant.ts | 1.0.0 | scripts/project-to-variant.ts | N/A |
+| project-to-variant.ts | 1.0.1 | scripts/project-to-variant.ts | N/A |
 | propagate-to-templates.ts | 2.0.9 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.0.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
