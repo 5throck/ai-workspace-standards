@@ -5,7 +5,7 @@
  * Text overlaid on the image. Best for visual storytelling lectures,
  * keynote-style presentations, or brand/design topics.
  *
- * Image injection: renderSlide() sets --slide-bg-image via inline style.
+ * Image injection: renderSlide() sets background-image via inline style.
  * Requires <html data-style="visual-heavy"> to activate structural rules.
  *
  * DOM structure unchanged — image rendered via CSS background-image.
