@@ -90,6 +90,14 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 - Financial models with assumptions documented and scenario analyses
 - Strategic options frameworks presenting trade-offs for PM and client decision-making
 
+## Output Destination
+
+- Research findings reports → `docs/research/{topic}-research-{YYYY-MM-DD}.md`
+- Competitive landscape analyses → `docs/research/{topic}-competitive-{YYYY-MM-DD}.md`
+- Financial models → `docs/research/{topic}-financial-model-{YYYY-MM-DD}.md`
+- Strategic options frameworks → `docs/research/{topic}-strategic-options-{YYYY-MM-DD}.md`
+- Create the target folder if it does not exist before saving.
+
 ## Constraints
 
 - Do NOT speculate beyond available evidence — clearly label all hypotheses as such

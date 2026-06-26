@@ -90,6 +90,13 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 - Risk and issue logs with severity ratings and mitigation actions
 - Meeting notes with documented decisions and assigned action items
 
+## Output Destination
+
+- Project status reports and stakeholder trackers → `docs/drafts/delivery-{report-type}-{YYYY-MM-DD}.md`
+- Risk and issue logs → `docs/drafts/delivery-risk-log-{YYYY-MM-DD}.md`
+- Meeting notes → `docs/drafts/delivery-meeting-notes-{YYYY-MM-DD}.md`
+- Create the target folder if it does not exist before saving.
+
 ## Constraints
 
 - Do NOT make content or editorial decisions — route content questions to Communications Lead or Solutions Architect
