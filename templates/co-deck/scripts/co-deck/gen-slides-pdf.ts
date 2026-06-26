@@ -22,8 +22,8 @@ import { PDFDocument, PDFFont, PDFPage, rgb, RGB,
   pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
-import { join, resolve, dirname, homedir } from 'path';
-import { platform } from 'os';
+import { join, resolve, dirname } from 'path';
+import { platform, homedir } from 'os';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

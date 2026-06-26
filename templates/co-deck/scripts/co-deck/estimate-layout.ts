@@ -6,8 +6,8 @@
 // No Playwright dependency required.
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join, resolve, dirname, homedir } from 'path';
-import { platform } from 'os';
+import { join, resolve, dirname } from 'path';
+import { platform, homedir } from 'os';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
