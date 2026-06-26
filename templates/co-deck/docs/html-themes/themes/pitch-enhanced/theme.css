@@ -355,13 +355,6 @@
   padding: 0.12rem 0;
 }
 
-.slide-visual .visual-item-check::before {
-  content: '▸';
-  color: var(--accent-color, #D97706);
-  flex-shrink: 0;
-  margin-top: 0.05em;
-}
-
 .slide-visual .visual-paragraph {
   font-size: 0.92rem;
   line-height: 1.6;

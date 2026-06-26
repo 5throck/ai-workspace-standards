@@ -171,7 +171,7 @@
           return;
         }
         if (/^[✓✗✔✘→►•▪▫▸❯]\s*/.test(trimmed)) {
-          parent.appendChild(el('div', 'visual-item visual-item-check', trimmed));
+          parent.appendChild(el('div', 'visual-item', trimmed));
           return;
         }
         parent.appendChild(el('div', 'visual-paragraph', trimmed));

@@ -68,6 +68,8 @@ Use in Phase 3 whenever a formal consulting deliverable (strategy report, assess
 - **Recommendation Prioritization Matrix** (Impact × Feasibility)
 - **Executive Summary** (standalone, max 2 pages)
 
+> **Save Output To**: `docs/reports/{deliverable-type}-{YYYY-MM-DD}.md` — create the folder if it does not exist.
+
 ## Related Skills
 
 - narrative-framework
