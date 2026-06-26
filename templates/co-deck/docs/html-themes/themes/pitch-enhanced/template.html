@@ -180,12 +180,24 @@
         return;
       }
       if (type === 'contact') {
-        slide.appendChild(el('div', 'contact-title', title));
+        var contactContent = el('div', 'slide-content');
+        var contactLeft = el('div', 'slide-left');
+        contactLeft.appendChild(el('div', 'slide-section', section));
+        contactLeft.appendChild(el('div', 'contact-title', title));
         var info = el('div', 'contact-info');
         if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
         if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
         if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
-        slide.appendChild(info);
+        contactLeft.appendChild(info);
+        contactContent.appendChild(contactLeft);
+        if (data.visualImage) {
+          var contactRight = el('div', 'right-panel');
+          var cImg = imgEl(data.visualImage, escapeText(title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) cImg.classList.add('img-diagram');
+          contactRight.appendChild(cImg);
+          contactContent.appendChild(contactRight);
+        }
+        slide.appendChild(contactContent);
         return;
       }
       // standard
