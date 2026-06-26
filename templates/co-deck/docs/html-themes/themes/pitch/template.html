@@ -9,9 +9,9 @@
   HOW TO USE:
     html-build reads this template and:
     1. Injects <html data-theme="pitch" data-style="<style>"> attributes
-    2. Replaces <!-- INJECT:CSS --> with base.css + theme.css + style.css <link> tags
-    3. Replaces <!-- INJECT:slideData --> with: const slideData = [...];
-    4. <!-- INJECT:slides --> is satisfied at RUNTIME by renderSlide()/initSlides()
+    2. Replaces [INJECT:CSS] with base.css + theme.css + style.css <link> tags
+    3. Replaces [INJECT:slideData] with: const slideData = [...];
+    4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
        defined in this template's <script>. html-build injects slideData only and
        MUST NOT hand-author .slide divs — leave the presentation container empty.
 
