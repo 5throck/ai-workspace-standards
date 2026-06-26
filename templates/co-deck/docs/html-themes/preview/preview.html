@@ -167,7 +167,9 @@
       div.className = 'slide';
       div.dataset.type = data.type;
       if (data.backgroundImage) {
-        div.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+        div.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
         div.dataset.bg = 'true';
       }
 

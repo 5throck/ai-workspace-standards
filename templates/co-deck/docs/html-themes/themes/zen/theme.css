@@ -14,9 +14,7 @@
   background-repeat: no-repeat;
 }
 
-.slide[data-bg] {
-  background-image: var(--slide-bg-image);
-}
+/* background-image is set inline by renderSlide() — no CSS variable needed */
 
 /* ── Zen overlay (semi-transparent gradient) ─────────────────────────── */
 .zen-overlay {

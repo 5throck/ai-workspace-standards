@@ -77,12 +77,9 @@
   --cover-meta-text:     rgba(255, 255, 255, 0.55);
 }
 
-/* Full-bleed background image on slide root */
-[data-style="visual-heavy"] .slide {
-  background-image: var(--slide-bg-image, none);
-  background-size: cover;
-  background-position: center;
-}
+/* Full-bleed background image on slide root
+   Background images are applied via inline style by renderSlide() (not CSS variable).
+   These rules provide overlay styling only; background-image itself is set in JS. */
 
 /* Semi-transparent overlay on the entire card */
 [data-style="visual-heavy"] .slide-card {
@@ -97,14 +94,11 @@
   display: none !important;
 }
 
-/* Divider and cover slides also use background image
-   Supports both base.css 'cover' type and pitch/pitch-enhanced 'title' type */
+/* Divider and cover slides: darker overlay for text readability */
 [data-style="visual-heavy"] .slide[data-type="divider"],
 [data-style="visual-heavy"] .slide[data-type="cover"],
 [data-style="visual-heavy"] .slide[data-type="title"] {
-  background-image: var(--slide-bg-image, none);
-  background-size: cover;
-  background-position: center;
+  /* background-image is set inline by renderSlide() */
 }
 
 [data-style="visual-heavy"] .slide[data-type="divider"] .slide-card,
