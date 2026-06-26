@@ -140,8 +140,9 @@ narration:
   autoAdvance: false
   # Interval for auto-advance when narration is NOT playing (seconds)
   # When narration IS playing, slides advance after narration ends (~800ms).
-  # Options: integer (default: 5)
-  autoAdvanceInterval: 5
+  # Options: integer (default: 8)
+  #   Note: default bumped to 8 per user request
+  autoAdvanceInterval: 8
   # Languages for which to generate translated narration scripts.
   # The primary language (from `language` field) always gets a `script` field.
   # Additional languages generate `scriptEn`, `scriptJa`, etc.
