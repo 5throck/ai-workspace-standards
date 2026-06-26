@@ -44,7 +44,7 @@
     </div>
     <ul class="toc-list" id="toc-list">
       <!-- Populated by TOCBuilder.init() -->
-    </div>
+    </ul>
   </div>
 
   <!-- Sticky top bar (controls — always visible) -->
@@ -63,6 +63,14 @@
     <div class="topbar-right">
       <button class="topbar-btn" id="narration-play-btn" onclick="NarrationEngine.togglePlay()" aria-label="음성 재생" title="음성 재생 (P)">▶ Play</button>
       <button class="topbar-btn" id="narration-auto-advance-btn" onclick="NarrationEngine.toggleAutoAdvance()" aria-label="자동 넘기기" title="자동 넘기기 (A)">⏸ Manual</button>
+      <div class="narration-dropdown-wrap">
+        <button class="topbar-btn" id="voice-lang-btn" onclick="NarrationEngine._toggleLanguageDropdown()" aria-label="언어 선택">KR ▾</button>
+        <div class="voice-lang-dropdown" id="voice-lang-dropdown"></div>
+      </div>
+      <div class="narration-dropdown-wrap">
+        <button class="topbar-btn" id="voice-select-btn" onclick="NarrationEngine._toggleVoiceDropdown()" aria-label="음성 선택">🎤 Default</button>
+        <div class="voice-select-dropdown" id="voice-select-dropdown"></div>
+      </div>
       <span class="presenter-timer" id="timer-display">00:00</span>
       <button class="topbar-btn" id="timer-btn" onclick="PresenterTools.toggleTimer()" aria-label="타이머" title="타이머">⏱</button>
     </div>

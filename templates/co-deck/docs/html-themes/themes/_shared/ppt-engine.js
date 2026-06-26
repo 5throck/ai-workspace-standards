@@ -103,12 +103,14 @@ function renderVisualDisplay(parent, text) {
 
 var TOCBuilder = {
   visible: false,
+  _scrollOnClick: false,  // set true by vertical theme to keep TOC open after item click
 
   init: function(slideData, listId) {
     var list = document.getElementById(listId);
     if (!list || typeof slideData === 'undefined') return;
     while (list.firstChild) list.removeChild(list.firstChild);
 
+    var self = this;
     slideData.forEach(function(data, i) {
       var li = document.createElement('li');
       li.className = 'toc-item' + (i === 0 ? ' active' : '');
@@ -116,7 +118,7 @@ var TOCBuilder = {
       li.onclick = function() {
         if (typeof scrollToSlide === 'function') { scrollToSlide(i); }
         else { showSlide(i); }
-        closeTOC();
+        if (!self._scrollOnClick) { closeTOC(); }
       };
 
       var num = document.createElement('span');
