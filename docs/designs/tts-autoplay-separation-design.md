@@ -88,7 +88,7 @@ Added visual grouping and paused state styles:
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  border-left: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  border-left: 1px solid var(--border-subtle);
 }
 
 .footer-slide-group {

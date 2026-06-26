@@ -39,7 +39,7 @@
     #preview-bar select { background: #222; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 6px; }
     .hint { margin-left: auto; opacity: 0.5; font-size: 11px; }
     body { padding-top: 40px; }
-    .slide { min-height: 300px; margin: 0 0 16px; padding: 40px; border-radius: 12px; background: var(--slide-bg, rgba(255,255,255,0.04)); border: 1px solid rgba(255,255,255,0.06); }
+    .slide { min-height: 300px; margin: 0 0 16px; padding: 40px; border-radius: 12px; background: var(--slide-bg); border: 1px solid var(--border-subtle); }
   </style>
 </head>
 <body>
@@ -167,43 +167,45 @@
       div.className = 'slide';
       div.dataset.type = data.type;
       if (data.backgroundImage) {
-        div.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+        div.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
         div.dataset.bg = 'true';
       }
 
       if (data.type === 'cover') {
         const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '12px' }, data.title));
-        wrap.appendChild(el('div', { fontSize: '1.1em', color: 'var(--text-muted,rgba(255,255,255,0.6))' }, data.subtitle || ''));
-        wrap.appendChild(el('div', { marginTop: '24px', fontSize: '0.85em', color: 'var(--text-muted,rgba(255,255,255,0.4))' }, data.meta || ''));
+        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '12px' }, data.title));
+        wrap.appendChild(el('div', { fontSize: '1.1em', color: 'var(--text-secondary)' }, data.subtitle || ''));
+        wrap.appendChild(el('div', { marginTop: '24px', fontSize: '0.85em', color: 'var(--text-dim)' }, data.meta || ''));
         div.appendChild(wrap);
       } else if (data.type === 'divider') {
         const wrap = el('div', { padding: '20px 0' });
-        wrap.appendChild(el('div', { fontSize: '0.8em', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-color,#d97706)', marginBottom: '8px' }, data.partNum || ''));
-        wrap.appendChild(el('div', { fontSize: '1.8em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '8px' }, data.title));
-        wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))' }, data.desc || ''));
+        wrap.appendChild(el('div', { fontSize: '0.8em', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-color)', marginBottom: '8px' }, data.partNum || ''));
+        wrap.appendChild(el('div', { fontSize: '1.8em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }, data.title));
+        wrap.appendChild(el('div', { color: 'var(--text-secondary)' }, data.desc || ''));
         div.appendChild(wrap);
       } else if (data.type === 'contact') {
         const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '1.6em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '24px' }, data.title));
-        wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))', lineHeight: '2' }, data.email + ' · ' + data.linkedin));
+        wrap.appendChild(el('div', { fontSize: '1.6em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }, data.title));
+        wrap.appendChild(el('div', { color: 'var(--text-secondary)', lineHeight: '2' }, data.email + ' · ' + data.linkedin));
         div.appendChild(wrap);
       } else if (data.type === 'punchline') {
         const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary,#fff)' }, data.title));
+        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary)' }, data.title));
         div.appendChild(wrap);
       } else if (data.type === 'profile') {
         const wrap = el('div', { padding: '20px 0' });
-        wrap.appendChild(el('div', { fontSize: '1.4em', fontWeight: 'bold', color: 'var(--text-primary,#fff)' }, data.speakerName || data.title));
-        if (data.speakerTitle) wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.6))', marginTop: '8px' }, data.speakerTitle));
-        if (data.speakerBio) wrap.appendChild(el('div', { color: 'var(--text-muted,rgba(255,255,255,0.5))', marginTop: '4px', fontSize: '0.9em' }, data.speakerBio));
+        wrap.appendChild(el('div', { fontSize: '1.4em', fontWeight: 'bold', color: 'var(--text-primary)' }, data.speakerName || data.title));
+        if (data.speakerTitle) wrap.appendChild(el('div', { color: 'var(--text-secondary)', marginTop: '8px' }, data.speakerTitle));
+        if (data.speakerBio) wrap.appendChild(el('div', { color: 'var(--text-muted)', marginTop: '4px', fontSize: '0.9em' }, data.speakerBio));
         div.appendChild(wrap);
       } else {
         const wrap = el('div');
-        wrap.appendChild(el('div', { fontSize: '0.75em', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted,rgba(255,255,255,0.4))', marginBottom: '6px' }, data.section || ''));
-        wrap.appendChild(el('div', { fontSize: '1.3em', fontWeight: 'bold', color: 'var(--text-primary,#fff)', marginBottom: '16px' }, data.title));
+        wrap.appendChild(el('div', { fontSize: '0.75em', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-dim)', marginBottom: '6px' }, data.section || ''));
+        wrap.appendChild(el('div', { fontSize: '1.3em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }, data.title));
         const ul = el('ul', { margin: '0', paddingLeft: '20px' });
-        (data.bullets || []).forEach(b => ul.appendChild(el('li', { margin: '6px 0', color: 'var(--text-body,rgba(255,255,255,0.85))' }, b)));
+        (data.bullets || []).forEach(b => ul.appendChild(el('li', { margin: '6px 0', color: 'var(--text-primary)' }, b)));
         wrap.appendChild(ul);
         div.appendChild(wrap);
       }
@@ -227,7 +229,7 @@
         });
         host.appendChild(outer);
 
-        const counter = el('div', { position: 'fixed', bottom: '20px', right: '24px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' });
+        const counter = el('div', { position: 'fixed', bottom: '20px', right: '24px', fontSize: '0.75rem', color: 'var(--text-dim)' });
         counter.id = 'slide-counter';
         host.appendChild(counter);
         currentSlide = 0;
@@ -237,7 +239,7 @@
         const viewer = el('div', { display: 'flex' });
         viewer.id = 'viewer';
 
-        const toc = el('aside', { width: '200px', minHeight: '100vh', padding: '60px 12px 20px', borderRight: '1px solid rgba(255,255,255,0.08)', flexShrink: '0' });
+        const toc = el('aside', { width: '200px', minHeight: '100vh', padding: '60px 12px 20px', borderRight: '1px solid var(--border-subtle)', flexShrink: '0' });
         toc.id = 'toc-panel';
         const tocList = el('ul', { listStyle: 'none', margin: '0', padding: '0' });
         tocList.id = 'toc-list';
@@ -251,7 +253,7 @@
           s.id = 'slide-' + i;
           main.appendChild(s);
 
-          const li = el('li', { padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8em', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' },
+          const li = el('li', { padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8em', color: 'var(--text-muted)', marginBottom: '2px' },
             data.type === 'cover' ? '표지' : data.type === 'divider' ? '◆ ' + data.title : data.type === 'punchline' ? '★ ' + data.title : data.type === 'profile' ? '👤 ' + (data.speakerName || data.title) : (i + '. ' + data.title));
           li.addEventListener('click', () => document.getElementById('slide-' + i).scrollIntoView({ behavior: 'smooth' }));
           tocList.appendChild(li);

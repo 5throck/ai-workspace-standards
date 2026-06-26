@@ -5,7 +5,7 @@
  * Text overlaid on the image. Best for visual storytelling lectures,
  * keynote-style presentations, or brand/design topics.
  *
- * Image injection: renderSlide() sets --slide-bg-image via inline style.
+ * Image injection: renderSlide() sets background-image via inline style.
  * Requires <html data-style="visual-heavy"> to activate structural rules.
  *
  * DOM structure unchanged — image rendered via CSS background-image.
@@ -48,6 +48,19 @@
   --image-panel-width:   0%;
   --image-panel-min-width: 0px;
 
+  /* Chrome / UI surfaces */
+  --border-color:         rgba(255, 255, 255, 0.14);
+  --border-subtle:        rgba(255, 255, 255, 0.08);
+  --glass-bg:             rgba(10, 10, 30, 0.88);
+  --toc-drawer-bg:        var(--glass-bg);
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(255, 255, 255, 0.06);
+  --text-dim:             rgba(255, 255, 255, 0.4);
+  --scrollbar-thumb:      rgba(255, 255, 255, 0.15);
+  --progress-track:       rgba(255, 255, 255, 0.1);
+  --nav-btn-bg:           rgba(255, 255, 255, 0.06);
+  --nav-btn-hover:        rgba(255, 255, 255, 0.14);
+
   /* Section label */
   --section-label-bg:    rgba(126, 200, 240, 0.25);
   --section-label-text:  #ffffff;
@@ -64,12 +77,9 @@
   --cover-meta-text:     rgba(255, 255, 255, 0.55);
 }
 
-/* Full-bleed background image on slide root */
-[data-style="visual-heavy"] .slide {
-  background-image: var(--slide-bg-image, none);
-  background-size: cover;
-  background-position: center;
-}
+/* Full-bleed background image on slide root
+   Background images are applied via inline style by renderSlide() (not CSS variable).
+   These rules provide overlay styling only; background-image itself is set in JS. */
 
 /* Semi-transparent overlay on the entire card */
 [data-style="visual-heavy"] .slide-card {
@@ -84,14 +94,11 @@
   display: none !important;
 }
 
-/* Divider and cover slides also use background image
-   Supports both base.css 'cover' type and pitch/pitch-enhanced 'title' type */
+/* Divider and cover slides: darker overlay for text readability */
 [data-style="visual-heavy"] .slide[data-type="divider"],
 [data-style="visual-heavy"] .slide[data-type="cover"],
 [data-style="visual-heavy"] .slide[data-type="title"] {
-  background-image: var(--slide-bg-image, none);
-  background-size: cover;
-  background-position: center;
+  /* background-image is set inline by renderSlide() */
 }
 
 [data-style="visual-heavy"] .slide[data-type="divider"] .slide-card,

@@ -41,7 +41,8 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 
 | Feature | Implementation |
 |---------|---------------|
-| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, `T` key shortcut — replaces thumbnail panel** |
+| **TOC drawer navigation** | **Slide-out drawer with headline list (TOCBuilder), glass-morphism styling, close button, headline text-overflow ellipsis, `T` key shortcut — replaces thumbnail panel** |
+| **Chrome/UI theming** | **All chrome surfaces (TOC drawer, footer, thumbnail panel, script panel, voice dropdowns, topbar) use CSS variables defined in style.css — automatically adapts to dark/light palettes** |
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
@@ -49,7 +50,13 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
-The original `pitch` theme (v1.0.0) is preserved unchanged with its native TOC drawer, scale+translateY transition, and original style compatibility.
+The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system.
+
+> **Chrome/UI variable system**: `ppt-engine.css` and `pitch/theme.css` reference CSS variables (`--toc-drawer-bg`, `--glass-bg`, `--footer-bg`, `--border-subtle`, `--hover-bg`, `--text-dim`, `--scrollbar-thumb`, `--progress-track`, `--nav-btn-bg`, `--nav-btn-hover`) that are defined per-style in `styles/<name>/style.css`. Dark styles (premium-dark, visual-heavy) get dark glass surfaces; light styles (classic, academic, minimal) get light glass surfaces — no theme-level overrides needed.
+
+> **Vertical theme body override**: `ppt-engine.css` sets `body { display: flex; height: 100vh; overflow: hidden }` for PPT themes. The vertical theme overrides this to `body { display: block; height: auto; overflow-y: auto }` — `position: sticky` does not work on children of a flex container, so the flex layout must be neutralized for the sticky top bar to function.
+
+> **Vertical topbar auto-theming**: The vertical topbar uses `var(--glass-bg)` for its background (same as TOC drawer and footer), so it automatically adapts to dark/light styles. Buttons use `var(--nav-btn-bg)`, `var(--nav-btn-hover)`, and `var(--border-subtle)`.
 
 ### `pdf_layout_spec.json` Schema (region model, v1.2.0)
 
@@ -247,7 +254,7 @@ docs/html-themes/
 ├── themes/
 │   ├── _shared/
 │   │   ├── layout_base.json               # Layer 0 — region skeleton (all null) + 16:9 page + print defaults
-│   │   ├── ppt-engine.css                  # PPT common UI (thumbnails, transitions, footer, timer, narration)
+│   │   ├── ppt-engine.css                  # PPT common UI (TOC drawer, transitions, footer, timer, narration)
 │   │   └── ppt-engine.js                   # PPT common runtime (TOCBuilder, TransitionEngine, NarrationEngine, etc.)
 │   ├── outline/
 │   │   ├── template.html

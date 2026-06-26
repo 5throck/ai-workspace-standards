@@ -36,6 +36,16 @@
 </head>
 <body class="transition-fade">
 
+  <!-- TOC drawer (slide headline navigation) -->
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+  <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
+    <div class="toc-header">
+      <span class="toc-title">슬라이드 목차</span>
+      <button class="toc-close-btn" onclick="closeTOC()" aria-label="닫기">&times;</button>
+    </div>
+    <ul class="toc-list" id="toc-list"></ul>
+  </div>
+
   <!-- Main layout: thumbnail sidebar + presentation -->
   <div class="ppt-main">
     <aside class="thumbnail-panel" id="thumbnail-panel" aria-label="슬라이드 썸네일"></aside>
@@ -54,6 +64,7 @@
   <!-- Footer bar -->
   <footer class="ppt-footer" id="ppt-footer">
     <div class="footer-left">
+      <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="슬라이드 목차" title="목차 (T)">☰ 목차</button>
       <button class="footer-btn" id="thumb-toggle-btn" onclick="ThumbnailNav.toggle()" aria-label="썸네일 패널" title="썸네일 (T)">▦ 썸네일</button>
       <span class="slide-counter" id="slide-counter">1 / 1</span>
       <div class="progress-bar-wrap">
@@ -207,7 +218,9 @@
       slide.id = 'slide-' + index;
       slide.dataset.type = slideType(data);
       if (data.backgroundImage) {
-        slide.style.setProperty('--slide-bg-image', 'url(' + data.backgroundImage + ')');
+        slide.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        slide.style.backgroundSize = 'cover';
+        slide.style.backgroundPosition = 'center';
       }
       buildSlideChildren(slide, data, index);
       return slide;

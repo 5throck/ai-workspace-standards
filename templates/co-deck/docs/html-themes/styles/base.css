@@ -82,6 +82,22 @@
   --cover-text:          #ffffff;
   --cover-subtitle-text: rgba(255, 255, 255, 0.75);
   --cover-meta-text:     rgba(255, 255, 255, 0.6);
+
+  /* ── Chrome / UI surface variables ──────────────────────────────────
+     Used by ppt-engine.css for TOC drawer, footer, thumbnail panel,
+     script panel, voice dropdowns, and other overlay surfaces.
+     Style files SHOULD override these per palette. */
+  --border-color:         rgba(0, 0, 0, 0.1);
+  --border-subtle:        rgba(255, 255, 255, 0.07);
+  --glass-bg:             rgba(17, 24, 39, 0.92);
+  --toc-drawer-bg:        var(--glass-bg);
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(255, 255, 255, 0.05);
+  --text-dim:             rgba(255, 255, 255, 0.4);
+  --scrollbar-thumb:      rgba(255, 255, 255, 0.15);
+  --progress-track:       rgba(255, 255, 255, 0.1);
+  --nav-btn-bg:           rgba(255, 255, 255, 0.06);
+  --nav-btn-hover:        rgba(255, 255, 255, 0.14);
 }
 
 /* ── Layout ─────────────────────────────────────────────────────── */

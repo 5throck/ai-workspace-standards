@@ -35,16 +35,17 @@
 </head>
 <body class="transition-fade">
 
-  <!-- TOC overlay -->
-  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
-
   <!-- TOC drawer -->
-  <nav class="toc-drawer" id="toc-drawer" aria-label="목차">
-    <div class="toc-title">목차</div>
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+  <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
+    <div class="toc-header">
+      <span class="toc-title">슬라이드 목차</span>
+      <button class="toc-close-btn" onclick="closeTOC()" aria-label="닫기">&times;</button>
+    </div>
     <ul class="toc-list" id="toc-list">
       <!-- Populated by TOCBuilder.init() -->
     </ul>
-  </nav>
+  </div>
 
   <!-- Main layout: presentation only (no thumbnail panel) -->
   <div class="ppt-main">
@@ -226,7 +227,9 @@
       slide.id = "slide-" + index;
       slide.dataset.type = slideType(data);
       if (data.backgroundImage) {
-        slide.style.setProperty("--slide-bg-image", "url(" + data.backgroundImage + ")");
+        slide.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        slide.style.backgroundSize = 'cover';
+        slide.style.backgroundPosition = 'center';
         slide.dataset.bg = "true";
       }
       buildSlideChildren(slide, data, index);

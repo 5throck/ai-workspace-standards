@@ -165,7 +165,7 @@ After the existing `.footer-btn.speaking` block (around line 355), add:
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  border-left: 1px solid var(--footer-btn-border, rgba(255,255,255,0.12));
+  border-left: 1px solid var(--border-subtle);
 }
 
 .footer-slide-group {

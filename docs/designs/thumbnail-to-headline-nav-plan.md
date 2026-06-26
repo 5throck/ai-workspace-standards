@@ -90,14 +90,14 @@ Replace the `.thumbnail-item` block (lines 80-90) — remove `aspect-ratio: 16 /
 }
 
 .thumbnail-item:hover {
-  border-color: var(--thumb-hover-border, rgba(255,255,255,0.3));
-  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-subtle);
+  background-color: var(--hover-bg);
 }
 
 .thumbnail-item.active {
-  border-color: var(--accent-color, #D97706);
-  box-shadow: 0 0 0 1px var(--accent-color, #D97706);
-  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+  background-color: var(--accent-light);
 }
 ```
 
@@ -113,14 +113,14 @@ Replace `.thumb-label` (lines 110-122) with a compact slide-number badge:
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-dim);
   min-width: 20px;
   text-align: center;
   line-height: 1.4;
 }
 
 .thumbnail-item.active .thumb-label {
-  color: var(--accent-color, #D97706);
+  color: var(--accent-color);
 }
 ```
 
@@ -133,7 +133,7 @@ Add after `.thumb-label`:
 .thumbnail-item .thumb-headline {
   font-size: 11px;
   line-height: 1.3;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -141,7 +141,7 @@ Add after `.thumb-label`:
 }
 
 .thumbnail-item.active .thumb-headline {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 ```

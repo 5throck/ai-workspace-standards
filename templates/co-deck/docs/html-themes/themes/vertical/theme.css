@@ -2,16 +2,21 @@
   vertical/theme.css — co-deck Vertical Theme (True Vertical Scroll)
   ====================================================================
   Overrides ppt-engine.css defaults for vertical scroll layout.
-  - body: scrollable, no overflow hidden
+  - body: block layout (neutralize ppt-engine flex), auto height, scrollable
   - .ppt-main: not used (display none)
   - .slide: relative position, min-height 100vh, natural aspect ratio
   - .vertical-topbar: sticky top bar with glass-morphism
   - .ppt-footer: hidden (controls moved to top bar)
   - .slide.active: inset left accent border indicator
+  - cover/contact slides: force column stacking (base.css row default override)
+  - bullets: no-protrude marker via ::before, readable 1.35rem font
+  - voice dropdowns: open downward (topbar is at top, not footer)
 */
 
 /* ── Body: enable page scrolling ─────────────────────────────────── */
 body {
+  display: block !important;
+  height: auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch;
@@ -53,7 +58,7 @@ body {
 
 /* Active slide indicator: inset left accent border */
 .slide.active {
-  box-shadow: inset 3px 0 0 var(--accent-color, #2563eb) !important;
+  box-shadow: inset 3px 0 0 var(--accent-color) !important;
 }
 
 /* ── Sticky top bar ─────────────────────────────────────────────── */
@@ -66,13 +71,13 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   font-size: 13px;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
 }
 
 .topbar-left,
@@ -99,10 +104,10 @@ body {
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--text-primary, #1f2937);
+  background: var(--nav-btn-bg);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 12px;
   white-space: nowrap;
@@ -111,14 +116,14 @@ body {
 
 .topbar-btn:hover,
 .vertical-topbar .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--accent-color, #2563eb);
+  background: var(--nav-btn-hover);
+  border-color: var(--accent-color);
 }
 
 .topbar-btn.active {
-  background: var(--accent-color, #2563eb);
+  background: var(--accent-color);
   color: #fff;
-  border-color: var(--accent-color, #2563eb);
+  border-color: var(--accent-color);
 }
 
 .topbar-btn.speaking {
@@ -131,14 +136,14 @@ body {
 .topbar-left .progress-bar-wrap {
   width: 120px;
   height: 4px;
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--progress-track);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .topbar-left .progress-bar-fill {
   height: 100%;
-  background: var(--accent-color, #2563eb);
+  background: var(--accent-color);
   border-radius: 2px;
   transition: width 0.3s ease;
   width: 0%;
@@ -146,7 +151,7 @@ body {
 
 .topbar-left .slide-counter {
   font-size: 12px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -154,7 +159,7 @@ body {
 .topbar-right .presenter-timer {
   font-size: 12px;
   font-family: monospace;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   min-width: 40px;
 }
 
@@ -163,6 +168,62 @@ body {
   max-width: 100%;
   margin: 0 auto;
   width: 100%;
+}
+
+/* ── Cover slide: stack title / subtitle / meta vertically ──────────
+   base.css sets .slide-card { flex-direction: row } globally.
+   Override here so title, subtitle, meta appear on separate lines. */
+.slide[data-type="cover"] .slide-card {
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ── Contact (closing) slide: same vertical stacking ─────────────── */
+.slide[data-type="contact"] .slide-card {
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ── Voice dropdowns: open downward from sticky topbar ───────────────
+   ppt-engine.css defaults to bottom:100% (designed for footer themes).
+   Override so dropdowns fall below the topbar, not above it. */
+.vertical-topbar .voice-lang-dropdown,
+.vertical-topbar .voice-select-dropdown {
+  bottom: auto;
+  top: 100%;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Bullet list: align under headline, larger readable font ─────────
+   Markers must not protrude beyond the left edge of the slide title.
+   absolute-positioned ::before keeps text body flush with the title. */
+.slide-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1.35rem;
+  line-height: 1.65;
+}
+
+.slide-bullets li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: var(--text-secondary);
+}
+
+.slide-bullets li::before {
+  content: "▸";
+  color: var(--accent-color);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  font-size: 0.9em;
 }
 
 /* ── Responsive adjustments ───────────────────────────────────────── */
