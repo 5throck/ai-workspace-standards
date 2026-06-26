@@ -74,15 +74,11 @@
   padding: 0.5rem;
 }
 
-/* ─── Cover slide (title type) ──────────────────────────────────────────── */
+/* ─── Title slide ───────────────────────────────────────────────────────── */
+/* title slide now uses slide-content 1fr/1fr grid (left: eyebrow+title+subtitle, right: image).
+   display:block cancels the base.css flex default so slide-content grid takes over. */
 .slide[data-type="title"] {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 4rem;
-  box-sizing: border-box;
+  display: block;
 }
 
 .slide[data-type="title"] .slide-eyebrow {
