@@ -2,7 +2,7 @@
 <!--
   pitch-enhanced/template.html — co-deck Pitch-Enhanced Theme (PPT Presenter View)
   ===========================================================================
-  Rendering paradigm: PPT-style fullscreen single-slide with thumbnail-panel sidebar,
+  Rendering paradigm: PPT-style fullscreen single-slide with TOC drawer navigation,
   transition effects (fade/push/zoom), presenter tools (speaker notes + timer),
   and footer navigation bar. Preserves the pitch theme's floating-card aesthetic
   (viewport-relative card, rounded corners, content grid) while adding all PPT features.
@@ -46,9 +46,8 @@
     <ul class="toc-list" id="toc-list"></ul>
   </div>
 
-  <!-- Main layout: thumbnail sidebar + presentation -->
+  <!-- Main layout: presentation -->
   <div class="ppt-main">
-    <aside class="thumbnail-panel" id="thumbnail-panel" aria-label="슬라이드 썸네일"></aside>
     <!-- Presentation area -->
     <div class="presentation-container" id="presentation">
       <!-- INJECT:slides -->
@@ -65,7 +64,6 @@
   <footer class="ppt-footer" id="ppt-footer">
     <div class="footer-left">
       <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="슬라이드 목차" title="목차 (T)">☰ 목차</button>
-      <button class="footer-btn" id="thumb-toggle-btn" onclick="ThumbnailNav.toggle()" aria-label="썸네일 패널" title="썸네일 (T)">▦ 썸네일</button>
       <span class="slide-counter" id="slide-counter">1 / 1</span>
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progress-bar"></div>
@@ -146,10 +144,21 @@
         return;
       }
       if (type === 'title') {
-        slide.appendChild(el('div', 'slide-eyebrow', section));
-        slide.appendChild(el('h1', 'slide-title', title));
-        if (data.subtitle != null) slide.appendChild(el('p', 'slide-subtitle', data.subtitle));
-        if (data.meta != null) slide.appendChild(el('p', 'slide-meta', data.meta));
+        var titleContent = el('div', 'slide-content');
+        var titleLeft = el('div', 'slide-left');
+        titleLeft.appendChild(el('div', 'slide-eyebrow', section));
+        titleLeft.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) titleLeft.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) titleLeft.appendChild(el('p', 'slide-meta', data.meta));
+        titleContent.appendChild(titleLeft);
+        if (data.visualImage) {
+          var titleRight = el('div', 'right-panel');
+          var tImg = imgEl(data.visualImage, escapeText(title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) tImg.classList.add('img-diagram');
+          titleRight.appendChild(tImg);
+          titleContent.appendChild(titleRight);
+        }
+        slide.appendChild(titleContent);
         return;
       }
       if (type === 'divider') {
@@ -249,7 +258,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       initSlides();
       showSlide(0);
-      initPPT({ transition: 'fade', showTimer: true, showThumbnails: true });
+      initPPT({ transition: 'fade', showTimer: true, showThumbnails: false });
     });
   </script>
 </body>

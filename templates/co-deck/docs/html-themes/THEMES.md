@@ -35,6 +35,8 @@ Each theme folder contains:
 
 > **Runtime rendering contract (all themes):** `template.html`'s `renderSlide(data, index)` is the single source of truth for slide structure. It maps `slideData` flags → a theme-specific `data-type` (pitch/pitch-enhanced: `isTitleSlide→"title"`; outline: `isTitleSlide→"cover"`; pitch-enhanced: `isPunchlineSlide→"punchline"`; all: `isDividerSlide→"divider"`, `isProfileSlide→"profile"`, `isContactSlide→"contact"`, else `"standard"`) and emits each theme's native structural classes. `initSlides()` runs on `DOMContentLoaded`. The PDF pipeline is unaffected: `extract_slidedata.mjs` (v1.2.0) parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM), so runtime rendering is invisible to extract/measure/PDF. slideData **MUST be strict JSON** (all keys/values double-quoted, no trailing commas, no JS comments) for `JSON.parse` to succeed.
 
+> **`outline` theme `cover` vs `title` split (intentional):** The outline `template.html` `slideType()` returns `"cover"` (not `"title"`) for `isTitleSlide` — this is the outline HTML renderer's vocabulary for its cover slide layout. The `theme.json` `slide_types` and `pdf_layout_spec.json` use `"title"` (the canonical PDF pipeline key). The split is intentional: HTML renderer uses `"cover"` to apply outline-specific cover CSS; the PDF pipeline reads `isTitleSlide` directly from `slideData` and maps to `"title"` in `pdf_layout_spec.json`. No fix needed.
+
 ### PPT Transformed Themes (v3.0.0)
 
 Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT engine layer (`themes/_shared/ppt-engine.css` + `themes/_shared/ppt-engine.js`) providing:
@@ -50,7 +52,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
-The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system.
+The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system. **NarrationEngine v2.1 (voice dropdowns, TTS) is intentionally NOT included in the `pitch` theme** — it is a preserved original theme excluded from all ppt-engine upgrades. Use `pitch-enhanced` for full NarrationEngine support.
 
 > **Chrome/UI variable system**: `ppt-engine.css` and `pitch/theme.css` reference CSS variables (`--toc-drawer-bg`, `--glass-bg`, `--footer-bg`, `--border-subtle`, `--hover-bg`, `--text-dim`, `--scrollbar-thumb`, `--progress-track`, `--nav-btn-bg`, `--nav-btn-hover`) that are defined per-style in `styles/<name>/style.css`. Dark styles (premium-dark, visual-heavy) get dark glass surfaces; light styles (classic, academic, minimal) get light glass surfaces — no theme-level overrides needed.
 
