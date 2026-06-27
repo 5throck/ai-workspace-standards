@@ -95,23 +95,32 @@ Available themes: `outline | pitch | pitch-enhanced | vertical | zen`. Available
 - `pitch` uses its own layout (TOC drawer, no thumbnails, no transitions).
 - `visual-heavy` style uses `--slide-bg-image` CSS variable for full-bleed background images.
 
-**Narration config injection** (from `lecture-profile.md` → `narration` section):
-Read the `narration` block from `lecture-profile.md` and inject a `narrationConfig` object into the `initPPT()` call. This bridges lecture profile settings to the runtime NarrationEngine:
+**Narration and auto-advance config injection** (from `lecture-profile.md` → `narration` + `auto_advance` sections):
+Read the `narration` and `auto_advance` blocks from `lecture-profile.md` and inject two independent config objects into the `initPPT()` call. This bridges lecture profile settings to the runtime NarrationEngine v2.3:
 ```javascript
 // Inject before the DOMContentLoaded listener or alongside initPPT call
 var narrationConfig = {
   enabled: true,
-  autoAdvance: false,
-  autoAdvanceInterval: 5,
+  autoPlay: false,
   defaultLanguage: 'ko',
   languages: ['ko']
 };
-initPPT({ transition: 'fade', showTimer: true, showThumbnails: true, narration: narrationConfig });
+var autoAdvanceConfig = {
+  enabled: true,
+  startAsAuto: false,
+  interval: 8
+};
+initPPT({ transition: 'fade', showTimer: true, showThumbnails: true,
+          narration: narrationConfig, autoAdvance: autoAdvanceConfig });
 ```
-- `enabled: false` → hides all narration/auto-advance buttons in the HTML viewer
-- `autoAdvance: true` → enables auto-advance timer (independent of narration)
-- `languages` → populates the language dropdown (only languages with scripts in slideData are clickable)
-- If `narration` section is absent or `enabled: false`, set `enabled: false`
+- `narration.enabled: false` → hides TTS play button, language dropdown, voice selector; disables 'P' keyboard shortcut
+- `narration.autoPlay: true` → auto-starts TTS narration on page load
+- `auto_advance.enabled: false` → hides auto-advance toggle button; disables 'A' keyboard shortcut
+- `auto_advance.startAsAuto: true` → starts auto-advance timer immediately on page load
+- `auto_advance.interval` → configures the timer interval (seconds) for auto-advance slides
+- `narration.languages` → populates the language dropdown (only languages with scripts in slideData are clickable)
+- If `narration` section is absent, set `narration.enabled: false`. If `auto_advance` section is absent, use defaults (`enabled: true`, `startAsAuto: false`, `interval: 8`)
+- **Backward compatibility**: if the old single `narration.autoAdvance` or `narration.autoAdvanceInterval` fields are present, silently ignore them
 
 **Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
 
