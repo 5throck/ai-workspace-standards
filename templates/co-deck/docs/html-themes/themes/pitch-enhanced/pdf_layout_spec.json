@@ -20,7 +20,7 @@
     "toc":     null
   },
   "slide_types": {
-    "title":     { "regions": ["meta", "title", "subtitle"] },
+    "title":     { "regions": ["meta", "title", "subtitle", "visual"] },
     "punchline": { "regions": ["meta", "title"] },
     "divider":   { "regions": ["title", "content", "visual"] },
     "profile":   { "regions": ["title", "content"] },
@@ -31,7 +31,8 @@
     "title": {
       "meta":     { "x_pct": 0.10, "y_pct": 0.32, "w_pct": 0.80, "h_pct": 0.06 },
       "title":    { "x_pct": 0.10, "y_pct": 0.40, "w_pct": 0.80, "h_pct": 0.22 },
-      "subtitle": { "x_pct": 0.10, "y_pct": 0.65, "w_pct": 0.80, "h_pct": 0.10 }
+      "subtitle": { "x_pct": 0.10, "y_pct": 0.65, "w_pct": 0.80, "h_pct": 0.10 },
+      "visual":   { "x_pct": 0.518, "y_pct": 0.064, "w_pct": 0.440, "h_pct": 0.872, "fit": "contain" }
     },
     "punchline": {
       "meta":     { "x_pct": 0.10, "y_pct": 0.28, "w_pct": 0.80, "h_pct": 0.06 },

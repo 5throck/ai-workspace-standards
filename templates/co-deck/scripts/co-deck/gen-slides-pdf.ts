@@ -635,44 +635,88 @@ interface RenderCtx {
   region:   (name: string) => ResolvedRegion;
 }
 
-function renderTitleSlide(ctx: RenderCtx) {
-  const { r, data, spec, coords, colors, sizes, region } = ctx;
+async function renderTitleSlide(ctx: RenderCtx) {
+  const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
   const { C_ACCENT, C_MUTED, C_WHITE, C_META, C_DARK, C_BORDER } = colors;
   const { T_TS_TITLE, T_TS_SUB, T_TS_META, T_SECT, T_NUM } = sizes;
 
-  // Title slide layout: optional header (if declared), then a large title block
-  // + subtitle + meta line. Regions declared: ["title", "subtitle"] at minimum;
-// PPT themes with a header region declare "header" on their title slide_type to preserve the
-// section bar drawn by the pre-rewrite renderer.
   const titleR = region('title');
   const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
   const metaR  = tryRegion(ctx, 'meta')     ?? subR;
+  const visR   = tryRegion(ctx, 'visual');
   const hdrR   = tryRegion(ctx, 'header');
 
   if (hdrR) {
-    // Mirrors the pre-rewrite title-slide header: dark bar + section text + number.
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
-  // Section eyebrow: drawn ABOVE title — matches HTML .slide-eyebrow which uses data.section
-  const eyebrow = strip(data.section);
-  if (eyebrow && metaR) {
-    r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
-    r.multiCell(metaR.w, coords.px2mm(24), eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
-  }
+  const ip = imgPath(data.visualImage, imgDir ?? '');
+  const hasImage = !!(ip && visR);
 
-  r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
-  r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y, 'C');
+  if (hasImage) {
+    // HTML: .slide-content 1fr/1fr grid — slide-left (L-aligned text) + right-panel (image)
+    // Left column: from slide margin to visR, gap = 3rem
+    const margin  = coords.CX + coords.px2mm(56);          // padding-left 3.5rem
+    const textW   = visR!.x - margin - coords.px2mm(48);   // gap 3rem
+    const LH_EYE  = coords.px2mm(20);
+    const LH_TTL  = coords.px2mm(70);
+    const LH_SUB_LN  = coords.px2mm(36);
+    const LH_META_LN = coords.px2mm(24);
+    const GAP_EYE = coords.px2mm(24);   // margin-bottom: 1.5rem
+    const GAP_TTL = coords.px2mm(24);
+    const GAP_SUB = coords.px2mm(24);
 
-  r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-  r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
+    const eyebrow  = strip(data.section);
+    const titleTxt = strip(data.title);
+    const subtitle = strip(data.subtitle);
+    const meta     = strip(data.meta);
 
-  // Meta: drawn AFTER subtitle — matches HTML .slide-meta which appears below subtitle
-  const meta = strip(data.meta);
-  if (meta) {
-    const metaY = subR.y + coords.px2mm(36) + coords.px2mm(12);
-    r.setFont(false, T_TS_META); r.setColor(C_META);
-    r.multiCell(subR.w, coords.px2mm(24), meta, subR.x, metaY, 'C');
+    r.setFont(true, T_TS_TITLE);
+    const titleLineCount = r.wrapText(titleTxt, textW).length;
+    const hEye   = eyebrow  ? LH_EYE + GAP_EYE                       : 0;
+    const hTitle = titleLineCount * LH_TTL + (subtitle || meta ? GAP_TTL : 0);
+    const hSub   = subtitle ? LH_SUB_LN + (meta ? GAP_SUB : 0)       : 0;
+    const hMeta  = meta     ? LH_META_LN                              : 0;
+    const blockH = hEye + hTitle + hSub + hMeta;
+
+    let vy = coords.CY + coords.px2mm(48)
+           + Math.max(0, (coords.CH - coords.px2mm(96) - blockH) / 2);
+
+    if (eyebrow) {
+      r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
+      r.multiCell(textW, LH_EYE, eyebrow.toUpperCase(), margin, vy, 'L');
+      vy += LH_EYE + GAP_EYE;
+    }
+    r.setFont(true, T_TS_TITLE); r.setColor(C_WHITE);
+    vy = r.multiCell(textW, LH_TTL, titleTxt, margin, vy, 'L');
+    if (subtitle || meta) vy += GAP_TTL;
+    if (subtitle) {
+      r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
+      vy = r.multiCell(textW, LH_SUB_LN, subtitle, margin, vy, 'L');
+      if (meta) vy += GAP_SUB;
+    }
+    if (meta) {
+      r.setFont(false, T_TS_META); r.setColor(C_META);
+      r.multiCell(textW, LH_META_LN, meta, margin, vy, 'L');
+    }
+    await r.placeImage(doc, ip!, visR!.x, visR!.y, visR!.w, visR!.h);
+  } else {
+    // No image: single centered column (HTML: grid-template-columns: 1fr, text-align: center)
+    const eyebrow = strip(data.section);
+    if (eyebrow && metaR) {
+      r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
+      r.multiCell(metaR.w, coords.px2mm(24), eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
+    }
+    r.setFont(true, T_TS_TITLE); r.setColor(C_WHITE);
+    r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y, 'C');
+    r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
+    r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
+    const meta = strip(data.meta);
+    if (meta) {
+      const metaY = subR.y + coords.px2mm(36) + coords.px2mm(12);
+      r.setFont(false, T_TS_META); r.setColor(C_META);
+      r.multiCell(subR.w, coords.px2mm(24), meta, subR.x, metaY, 'C');
+    }
   }
 }
 
@@ -808,58 +852,49 @@ function renderPunchlineSlide(ctx: RenderCtx) {
 
 function renderProfileSlide(ctx: RenderCtx) {
   const { r, data, coords, colors } = ctx;
-  const { C_BG, C_ACCENT, C_WHITE, C_MUTED, C_BODY } = colors;
+  const { C_BG, C_ACCENT, C_WHITE, C_MUTED } = colors;
 
-  // HTML .slide[data-type="profile"] .slide-card: flex column, centered H+V,
-  // text-align:center. Render a vertically-centered column:
-  //   eyebrow → title → name → affiliation → bio
+  // HTML pitch-enhanced .slide[data-type="profile"]:
+  //   flex column, centered, text-align:center, padding: 4rem
+  //   profile-eyebrow (section) → profile-name → profile-affiliation (accent) → profile-bio
+  //   No slide-title element.
   r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
   const bandW = coords.CW * 0.80;
   const bandX = coords.CX + (coords.CW - bandW) / 2;
 
-  // Font sizes (SZ, pt) aligned per-item to HTML .profile-* via px×0.75 (the px→pt
-  // calibration ratio). Line-height boxes (LH) and inter-item gaps (GAP) are px values
-  // measured from the rendered HTML slide-2 (Playwright on the 1280x720 natural design
-  // space — viewport_px=720, so px→mm is exact); positions are already aligned, only
-  // glyph sizes are tuned here. Inter-item gap model: card flex `gap:32px` + margin-top.
-  const SZ_EYEBROW = 9.6,  LH_EYEBROW = coords.px2mm(18);   // .profile-eyebrow 12.8px
-  const SZ_TITLE   = 24,   LH_TITLE   = coords.px2mm(40);   // .slide-title    32px
-  const SZ_NAME    = 22.8, LH_NAME    = coords.px2mm(44);   // .profile-name   30.4px
-  const SZ_AFFIL   = 12.6, LH_AFFIL   = coords.px2mm(24);   // .profile-title  16.8px
-  const SZ_BIO     = 11,   LH_BIO     = coords.px2mm(25);   // .profile-bio    14.72px
-  const GAP_E = coords.px2mm(32),   GAP_T = coords.px2mm(40),   // 32+0 , 32+8
-        GAP_N = coords.px2mm(36.8), GAP_A = coords.px2mm(49.6); // 32+4.8, 32+17.6
+  // CSS-derived font sizes (VP=750): .75rem=12px, clamp max 2.8rem=44.8px, 1.1rem=17.6px, 1rem=16px
+  const SZ_EYEBROW = coords.px2pt(12),    LH_EYEBROW = coords.px2mm(18);
+  const SZ_NAME    = coords.px2pt(44.8),  LH_NAME    = coords.px2mm(56);
+  const SZ_AFFIL   = coords.px2pt(17.6),  LH_AFFIL   = coords.px2mm(28);
+  const SZ_BIO     = coords.px2pt(16),    LH_BIO     = coords.px2mm(27);  // lh 1.7×16=27.2px
+  const GAP_E = coords.px2mm(16);   // margin-bottom: 1rem
+  const GAP_N = coords.px2mm(8);    // margin-bottom: 0.5rem
+  const GAP_A = coords.px2mm(32);   // margin-bottom: 2rem
 
-  const eyebrowTxt = 'Introduction';                 // HTML .profile-eyebrow (hardcoded)
-  const titleTxt   = strip(data.title);
+  const eyebrowTxt = strip(data.section);
   const nameTxt    = strip(data.speakerName);
   const affilTxt   = strip(data.speakerTitle);
   const bioLines   = (data.speakerBio ?? '')
     .split(/\n|<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
 
-  // Vertically center the block.
-  const blockH = LH_EYEBROW + GAP_E + LH_TITLE + GAP_T + LH_NAME + GAP_N
+  const blockH = LH_EYEBROW + GAP_E + LH_NAME + GAP_N
                + LH_AFFIL + GAP_A + LH_BIO * Math.max(1, bioLines.length);
   let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
-  r.setFont(true,  SZ_EYEBROW); r.setColor(C_ACCENT);                // gold uppercase eyebrow
+  r.setFont(true,  SZ_EYEBROW); r.setColor(C_ACCENT);
   r.cell(bandW, LH_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
   y += LH_EYEBROW + GAP_E;
 
-  r.setFont(true,  SZ_TITLE); r.setColor(C_WHITE);                   // "연자 소개"
-  r.cell(bandW, LH_TITLE, titleTxt, bandX, y, 'C');
-  y += LH_TITLE + GAP_T;
-
-  r.setFont(true,  SZ_NAME); r.setColor(C_WHITE);                    // name = --text-on-dark (white)
+  r.setFont(true,  SZ_NAME); r.setColor(C_WHITE);
   r.cell(bandW, LH_NAME, nameTxt, bandX, y, 'C');
   y += LH_NAME + GAP_N;
 
-  r.setFont(false, SZ_AFFIL); r.setColor(C_BODY);                    // affiliation = --text-secondary
+  r.setFont(false, SZ_AFFIL); r.setColor(C_ACCENT);   // CSS: var(--accent-color)
   r.cell(bandW, LH_AFFIL, affilTxt, bandX, y, 'C');
   y += LH_AFFIL + GAP_A;
 
-  r.setFont(false, SZ_BIO); r.setColor(C_MUTED);                     // bio = --text-muted
+  r.setFont(false, SZ_BIO); r.setColor(C_MUTED);
   for (const line of bioLines) {
     r.cell(bandW, LH_BIO, line, bandX, y, 'C');
     y += LH_BIO;
@@ -989,7 +1024,7 @@ async function renderStandardSlide(ctx: RenderCtx) {
       r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       const vt = strip(data.visualTitle);
       const vd = strip(visualDisplay);
-      const lhVt = coords.px2mm(24), lhVb = coords.px2mm(22), gap = 5;
+      const lhVt = coords.px2mm(24), lhVb = coords.px2mm(24), gap = 5;
       // CSS-derived inner padding: read visual_inner_padding_px from spec (e.g. 24px for 1.5rem),
       // with a 2mm minimum floor for readability when CSS padding is 0.
       const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
@@ -1116,7 +1151,7 @@ function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
     T_NUM       : f.slide_num_px ? px2pt(f.slide_num_px) : px2pt(14.4),
     T_TITLE     : f.title_pt  ?? 28.0,
     T_BUL       : f.bullet_pt ?? 14.0,
-    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : px2pt(13.6),
+    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : px2pt(18.4),
     T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : px2pt(16.0),
     T_TS_TITLE  : f.ts_title_px ? px2pt(f.ts_title_px) : px2pt(56.0),
     T_TS_SUB    : f.ts_sub_px   ? px2pt(f.ts_sub_px)   : px2pt(24.0),
@@ -1506,7 +1541,7 @@ async function main() {
       spec: layoutSpec, coords, colors, sizes, declared, region,
     };
 
-    if (type === 'title')          renderTitleSlide(ctx);
+    if (type === 'title')          await renderTitleSlide(ctx);
     else if (type === 'divider')   await renderDividerSlide(ctx);
     else if (type === 'punchline') renderPunchlineSlide(ctx);
     else if (type === 'profile')   renderProfileSlide(ctx);
