@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-26
+# Last Updated: 2026-06-27
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -159,7 +159,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.1 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`** |
+| **NarrationEngine v2.2 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`; v2.2: `_onSlideChanged` fires on both `isPlaying` and `isAutoAdvance` (fixes auto-advance timer restart on slide change)** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 

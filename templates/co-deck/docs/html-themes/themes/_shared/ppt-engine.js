@@ -6,7 +6,7 @@
     - TransitionEngine: fade / push / zoom transitions with direction awareness
     - PresenterTools: speaker script panel + presentation timer
     - TOCBuilder: slide-out TOC drawer with headline navigation
-    - NarrationEngine v2.1: Web Speech API TTS narration with auto-advance
+    - NarrationEngine v2.2: Web Speech API TTS narration with auto-advance; _onSlideChanged now fires on isAutoAdvance as well as isPlaying
 
   Usage in template.html:
     1. Include this script block after slideData injection
@@ -363,7 +363,7 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine v2.1 ───────────────────────────────────────────────
+// ── NarrationEngine v2.2 ───────────────────────────────────────────────
 // Web Speech API TTS narration with independent auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
 //
