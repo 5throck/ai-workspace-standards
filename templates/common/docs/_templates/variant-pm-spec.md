@@ -138,3 +138,4 @@ Extends chain validation enforces security constraints:
 - **ADR-0033**: Complete L0→L1→L2 hierarchy specification
 - **ADR-0031**: L1-L2 Fork Model governance
 - **CONSTITUTION.md §5**: Multi-agent architecture rules
+<!-- intentional-duplicate: CONSTITUTION.md referenced as L0 governance source (this file is L1-only, never propagates to L2) -->

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.8
+// @version 1.1.9
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -278,6 +278,28 @@ const L1_ONLY_DIRS = ['docs/_templates', 'docs/_examples', 'docs/adr', 'docs/spe
 for (const d of L1_ONLY_DIRS) {
   const dp = join(projectDir, d);
   if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Excluded L1-only directory: ${d}`); }
+}
+
+// ── 2.5b. Sanitize: remove L0 CONSTITUTION.md references from all .md files ────
+// Defense-in-depth: strip lines referencing CONSTITUTION.md or docs/constitution/ paths
+// that should not exist in generated L2 variant projects.
+const L0_REF_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+let sanitizedCount = 0;
+for (const f of walkFiles(projectDir)) {
+  if (!f.endsWith('.md')) continue;
+  const original = readFileSync(f, 'utf-8');
+  const cleaned = original
+    .split('\n')
+    .filter(line => !L0_REF_PATTERN.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n');
+  if (cleaned !== original) {
+    writeFileSync(f, cleaned);
+    sanitizedCount++;
+  }
+}
+if (sanitizedCount > 0) {
+  console.log(`  🧹 Sanitized ${sanitizedCount} file(s): removed L0 CONSTITUTION references`);
 }
 
 // Clear memory log files (new projects start with empty memory/)

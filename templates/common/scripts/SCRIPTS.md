@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.1 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.2 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.1 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -65,7 +65,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `gen-pr-body.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `helpers/merge-frontmatter.ts` | L0 | 1.8.4 | active | —| —| L0+L1 | —|
+| `helpers/merge-frontmatter.ts` | L0 | 1.8.5 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.test.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|

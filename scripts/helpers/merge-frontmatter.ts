@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.4
+ * @version 1.8.5
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -1683,9 +1683,9 @@ function removeL0OnlyContent(content: string, variantLevel: string): string {
 
   let processed = content;
 
-  // Remove lines containing CONSTITUTION.md references
+  // Remove lines containing CONSTITUTION.md or docs/constitution/ path references
   processed = processed.replace(
-    /^.*CONSTITUTION\.md.*$/gm,
+    /^.*(CONSTITUTION\.md|docs[\/\\]constitution[\/\\]).*$/gim,
     ''
   );
 

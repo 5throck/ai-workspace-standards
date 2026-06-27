@@ -100,7 +100,7 @@ bun scripts/co-deck/snapshot.ts lecture.html --workspace presentations/<project>
 
 These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skills & Scripts Blueprint** (Accepted).
 
-**Canonical placement rule** (per [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)):
+**Canonical placement rule** (per Script Lifecycle §6.5):
 - Variant scripts MUST be placed in `scripts/<variant>/` (a subdirectory), NOT in the top-level `scripts/`
 - Top-level `.ts` files must be registered in the shared L1 `scripts/SCRIPTS.md`
 - Variant scripts in `scripts/<variant>/` are intentionally excluded from that check — they are not shared L1 scripts
@@ -112,6 +112,6 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 - `bun scripts/co-deck/validate-theme-styles.ts` cross-validates `theme.json compatible_styles` ↔ `styles/` filesystem (variant-level check)
 - `bun scripts/lifecycle-sync-audit.ts` Check V verifies `@version` consistency within this registry
 
-**Reference:** [ADR-0033](../../../../docs/adr/0033-variant-specific-skills-scripts-blueprint.md) · [Script Lifecycle §6.5](../../../../docs/constitution/06.5-script-lifecycle.md)
+**Reference:** ADR-0033 · Script Lifecycle §6.5
 
 *Last Updated: 2026-06-27 — gen-slides-pdf.ts v1.9.0 (CJK fallback font for Hanja glyphs + LinkedIn contact rendering); previous: v1.8.0 (increased PDF body/bullet font sizes for readability)*
