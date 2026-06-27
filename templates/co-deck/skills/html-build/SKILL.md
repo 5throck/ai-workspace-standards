@@ -103,6 +103,7 @@ var narrationConfig = {
   enabled: true,
   autoPlay: false,
   defaultLanguage: 'ko',
+  scriptLanguage: 'ko',
   languages: ['ko']
 };
 var autoAdvanceConfig = {
@@ -115,6 +116,7 @@ initPPT({ transition: 'fade', showTimer: true, showThumbnails: false,
 ```
 - `narration.enabled: false` → hides TTS play button, language dropdown, voice selector; disables 'P' keyboard shortcut
 - `narration.autoPlay: true` → auto-starts TTS narration on page load
+- `narration.scriptLanguage` → declares what language the primary `script` field is written in (defaults to `'ko'`); read from `script_language` in lecture-profile.md, falls back to `language` field
 - `auto_advance.enabled: false` → hides auto-advance toggle button; disables 'A' keyboard shortcut
 - `auto_advance.startAsAuto: true` → starts auto-advance timer immediately on page load
 - `auto_advance.interval` → configures the timer interval (seconds) for auto-advance slides

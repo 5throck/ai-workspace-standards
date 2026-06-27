@@ -31,7 +31,7 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 ### Stage 5: HTML Slide Generation
 
-**File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder.
+**File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder (photos) + `assets/diagrams/` folder (SVG/PNG diagrams).
 
 **slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments. This enables `extract_slidedata.mjs` to parse via `JSON.parse` directly without a transform step.
 
@@ -89,10 +89,10 @@ Available themes: `outline | pitch | pitch-enhanced | vertical | zen`. Available
 
 **Theme capabilities:**
 - All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
-- `pitch` uses `slide-content` grid (left text + right visual panel) for standard slides.
-- `pitch-enhanced`, `outline`, `zen`, `vertical` use `slide-card` (content + right-panel) for standard slides.
-- PPT-engine themes (`outline`, `pitch-enhanced`, `zen`, `vertical`) support PPT features (TOC drawer, transitions, timer, speaker notes, TTS).
-- `pitch` uses its own layout (TOC drawer, no thumbnails, no transitions).
+- `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
+- `outline`, `pitch-enhanced`, `zen`, `vertical` use `slide-card` (content + right-panel) for standard slides.
+- `outline`, `pitch-enhanced`, `zen`, `vertical` support PPT features (TOC drawer, transitions, timer, speaker notes, TTS).
+- `pitch` uses its own layout (TOC drawer, no transitions).
 - `visual-heavy` style uses `--slide-bg-image` CSS variable for full-bleed background images.
 
 **Narration and auto-advance config injection** (from `lecture-profile.md` → `narration` + `auto_advance` sections):
@@ -103,6 +103,7 @@ var narrationConfig = {
   enabled: true,
   autoPlay: false,
   defaultLanguage: 'ko',
+  scriptLanguage: 'ko',
   languages: ['ko']
 };
 var autoAdvanceConfig = {
@@ -110,11 +111,12 @@ var autoAdvanceConfig = {
   startAsAuto: false,
   interval: 8
 };
-initPPT({ transition: 'fade', showTimer: true, showThumbnails: true,
+initPPT({ transition: 'fade', showTimer: true, showThumbnails: false,
           narration: narrationConfig, autoAdvance: autoAdvanceConfig });
 ```
 - `narration.enabled: false` → hides TTS play button, language dropdown, voice selector; disables 'P' keyboard shortcut
 - `narration.autoPlay: true` → auto-starts TTS narration on page load
+- `narration.scriptLanguage` → declares what language the primary `script` field is written in (defaults to `'ko'`); read from `script_language` in lecture-profile.md, falls back to `language` field
 - `auto_advance.enabled: false` → hides auto-advance toggle button; disables 'A' keyboard shortcut
 - `auto_advance.startAsAuto: true` → starts auto-advance timer immediately on page load
 - `auto_advance.interval` → configures the timer interval (seconds) for auto-advance slides
@@ -122,7 +124,7 @@ initPPT({ transition: 'fade', showTimer: true, showThumbnails: true,
 - If `narration` section is absent, set `narration.enabled: false`. If `auto_advance` section is absent, use defaults (`enabled: true`, `startAsAuto: false`, `interval: 8`)
 - **Backward compatibility**: if the old single `narration.autoAdvance` or `narration.autoAdvanceInterval` fields are present, silently ignore them
 
-**Image paths:** All images live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix.
+**Image paths:** Photos live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix. Diagrams (SVG/PNG) live in the shared pool at `presentations/assets/diagrams/`. Use `../assets/diagrams/<stem>.png` for diagram slides. Paths are auto-rewritten by `gen-visual-images.ts` when run.
 
 ---
 
@@ -173,7 +175,7 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 
 ## Output Format
 
-`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` alongside.
+`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` (photos) + `assets/diagrams/` (SVG/PNG) alongside.
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
 >

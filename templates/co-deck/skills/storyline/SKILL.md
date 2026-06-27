@@ -83,7 +83,7 @@ Write per-slide content. This file becomes the direct input for HTML generation.
 
 **Section**: [section name shown in header]
 **Type**: cover / speaker intro / divider / standard / contact
-**Script**: [Speaker narration text — 2-4 sentences, natural spoken style. Required for every slide.]
+**Script**: [Speaker narration text — 2-4 sentences, natural spoken style. Required for every slide. Write in `script_language` from lecture-profile.md (defaults to `language`).]
 
 ### Content
 - Bullet 1

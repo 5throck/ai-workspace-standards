@@ -166,7 +166,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.3 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.3: config-driven initial states, per-engine UI hiding** |
+| **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing, per-engine UI hiding** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
@@ -296,6 +296,7 @@ level: intro | intermediate | advanced
 presentation:
   theme: pitch-enhanced  # HTML structure: outline | pitch | pitch-enhanced | vertical | zen
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
+script_language: ko      # Language of TTS narration script (defaults to `language` if not set)
 keywords: [Keyword 1, Keyword 2]
 instructor:
   name: ""
@@ -323,7 +324,7 @@ auto_advance:
 source_verification: true
 ```
 
-**Agents that read this file**: research (audience, level, keywords), storyline (slide_count, chapters, dividers.mode, narration.languages), html-build (theme, style, instructor, background_image, narration, auto_advance), image-curator (source, style_hint, background_image), pdf-export (background_image, layout_overrides).
+**Agents that read this file**: research (audience, level, keywords), storyline (slide_count, chapters, dividers.mode, script_language, narration.languages), html-build (theme, style, instructor, background_image, script_language, narration, auto_advance), image-curator (source, style_hint, background_image), pdf-export (background_image, layout_overrides).
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -554,4 +555,4 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 ---
 
-*co-deck.context.md version: 4.0 — updated 2026-06-28: fixed 9 documentation gaps (Measure→PrepPDF, Scripts table +7, Skills table +prep-pdf, Lecture Profile fields, Agents count, Pipeline Stage 9-10, pdf-export reader, Domain Rule 5, Tech Stack); NarrationEngine v2.3 (independent narration/auto_advance config sections with per-engine enabled flags).*
+*co-deck.context.md version: 4.1 — updated 2026-06-28: added `script_language` field (explicit TTS script language declaration); NarrationEngine v2.4 (scriptLanguage config for correct getScript() routing).*

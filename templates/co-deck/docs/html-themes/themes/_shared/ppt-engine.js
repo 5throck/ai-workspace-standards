@@ -363,7 +363,7 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine v2.3 ───────────────────────────────────────────────
+// ── NarrationEngine v2.4 ───────────────────────────────────────────────
 // Web Speech API TTS narration with config-driven auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
 //
@@ -383,6 +383,12 @@ var PresenterTools = {
 //   autoAdvanceConfig.enabled  → show/hide auto-advance UI (toggle button)
 //   autoAdvanceConfig.startAsAuto → start auto-advance as "Auto" on page load
 //   autoAdvanceConfig.interval → timer interval (seconds)
+//
+// Script language (v2.4):
+//   narrationConfig.scriptLanguage → declares what language the primary `script`
+//     field is written in. Defaults to 'ko' if not provided.
+//     Used by getScript() to decide when to read data.script vs data.scriptXx,
+//     and by _buildLanguageDropdown() to detect primary script availability.
 //
 // Config bridge: lecture-profile.md → html-build injects TWO config objects
 //   narrationConfig    → initPPT({ narration: narrationConfig })
@@ -408,6 +414,7 @@ var NarrationEngine = {
 
   // Language & voice
   language: 'ko',
+  _scriptLanguage: 'ko',  // v2.4: language of the primary `script` field
 
   // Hook: override how "advance to next slide" works.
   // Default = changeSlide(1). Vertical theme sets this to scrollToSlide.
@@ -444,6 +451,10 @@ var NarrationEngine = {
     // Apply TTS config defaults
     if (this._config.autoPlay) {
       this._autoPlay = true;
+    }
+    // v2.4: script language — declares what language the primary `script` field is in
+    if (this._config.scriptLanguage) {
+      this._scriptLanguage = this._config.scriptLanguage;
     }
     if (this._config.defaultLanguage && this.LANGUAGES[this._config.defaultLanguage]) {
       this.language = this._config.defaultLanguage;
@@ -530,6 +541,8 @@ var NarrationEngine = {
     var data = typeof slideData !== 'undefined' ? slideData[index] : null;
     if (!data) return '';
 
+    // v2.4: use _scriptLanguage to detect when the primary `script` field matches
+    if (this.language === this._scriptLanguage) return data.script || '';
     if (this.language === 'en' && data.scriptEn) return data.scriptEn;
     if (this.language === 'ja' && data.scriptJa) return data.scriptJa;
     return data.script || '';
@@ -747,13 +760,15 @@ var NarrationEngine = {
       var langInfo = self.LANGUAGES[lang];
       if (!langInfo) return;
 
-      // Check if any slide has script for this language
+      // Check if any slide has script for this language (v2.4: uses _scriptLanguage)
       var hasScript = false;
       if (typeof slideData !== 'undefined') {
         for (var i = 0; i < slideData.length; i++) {
           var s = slideData[i].script || '';
-          if (lang === 'en') s = slideData[i].scriptEn || s;
-          if (lang === 'ja') s = slideData[i].scriptJa || s;
+          if (lang === self._scriptLanguage) s = slideData[i].script || '';
+          else if (lang === 'en') s = slideData[i].scriptEn || '';
+          else if (lang === 'ja') s = slideData[i].scriptJa || '';
+          else s = '';
           if (s) { hasScript = true; break; }
         }
       }
