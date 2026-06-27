@@ -212,7 +212,7 @@ Every slide entry in `slide_deck.md` MUST include a **`script`** field containin
 
 **`script` field rules:**
 - **Required** for every slide — no exceptions
-- Write in the lecture's primary language (Korean for `language: ko`, English for `language: en`)
+- Write in the language declared by `script_language` in `lecture-profile.md` (defaults to `language` field; Korean for `script_language: ko`, English for `script_language: en`)
 - 2-4 sentences, natural spoken style — this text will be read aloud by TTS
 - Include transitional cues between slides for natural flow
 
@@ -221,7 +221,7 @@ If `lecture-profile.md` contains a `narration.languages` list with more than one
 
 | Field | Language | Example |
 |-------|----------|---------|
-| `script` | Primary (always) | Korean narration for `language: ko` lectures |
+| `script` | `script_language` (always required) | Korean narration for `script_language: ko` lectures |
 | `scriptEn` | English | English translation of the narration |
 | `scriptJa` | Japanese | Japanese translation of the narration |
 
@@ -230,7 +230,7 @@ Only generate language-specific fields for languages listed in `narration.langua
 ## Constraints
 
 - Do not start without reading `research_notes.md` (if it exists)
-- Load `presentations/<project>/lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`
+- Load `presentations/<project>/lecture-profile.md` before drafting; use its `slide_count`, `chapters`, `dividers.mode`, `script_language`
 - Run Cover/Divider Confirmation before finalizing `slide_deck.md` (unless `dividers.mode: auto/none`)
 - Gate 2 is mandatory — do not advance to Design without explicit user approval
 - No slide should exceed 4 bullets (5 is the hard limit, 3 is ideal)

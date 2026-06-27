@@ -1,4 +1,4 @@
-// @version 2.10.1
+// @version 2.10.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -969,17 +969,20 @@ if (IS_WORKSPACE_ROOT) {
 // Check: L0 Leakage (CONSTITUTION.md references in templates)
 if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     let leakageErrors = 0;
+    // Matches: CONSTITUTION.md (literal), docs/constitution/ or docs\constitution\ path patterns
+    const L0_LEAK_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
     const checkLeakage = (dir: string) => {
         for (const item of fs.readdirSync(dir)) {
             const itemPath = path.join(dir, item);
             const stat = fs.statSync(itemPath);
             if (stat.isDirectory()) {
-                if (item === 'docs') continue;
+                if (SKIP_DIRS.has(item)) continue;
                 checkLeakage(itemPath);
             } else if (stat.isFile() && itemPath.endsWith('.md')) {
                 const content = fs.readFileSync(itemPath, 'utf-8');
-                if (content.includes('CONSTITUTION.md') && !content.includes('intentional-duplicate')) {
-                    Fail(`L0 Leakage: ${itemPath} contains unauthorized reference to CONSTITUTION.md`);
+                if (L0_LEAK_PATTERN.test(content) && !content.includes('intentional-duplicate')) {
+                    Fail(`L0 Leakage: ${itemPath} contains unauthorized reference to CONSTITUTION`);
                     leakageErrors++;
                 }
             }
@@ -987,7 +990,7 @@ if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     };
     checkLeakage('templates');
     if (leakageErrors === 0) {
-        Pass('L0 Leakage check: no unauthorized CONSTITUTION.md references in templates');
+        Pass('L0 Leakage check: no unauthorized CONSTITUTION references in templates');
     }
 }
 

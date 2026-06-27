@@ -146,10 +146,9 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 ## Output Destination
 
-- Architecture documents and technical designs → `docs/reports/{topic}-architecture-{YYYY-MM-DD}.md`
-- Implementation roadmaps → `docs/reports/{topic}-roadmap-{YYYY-MM-DD}.md`
-- Feasibility assessments → `docs/reports/{topic}-feasibility-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 

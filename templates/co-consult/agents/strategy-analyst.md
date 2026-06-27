@@ -92,11 +92,9 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 ## Output Destination
 
-- Research findings reports → `docs/research/{topic}-research-{YYYY-MM-DD}.md`
-- Competitive landscape analyses → `docs/research/{topic}-competitive-{YYYY-MM-DD}.md`
-- Financial models → `docs/research/{topic}-financial-model-{YYYY-MM-DD}.md`
-- Strategic options frameworks → `docs/research/{topic}-strategic-options-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 

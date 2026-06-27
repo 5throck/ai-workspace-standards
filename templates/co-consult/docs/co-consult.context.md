@@ -229,13 +229,13 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 | Folder | Purpose |
 |--------|---------|
-| `docs/reports/` | Final deliverables, client-ready reports |
-| `docs/drafts/` | Work-in-progress documents and drafts |
-| `docs/research/` | Research notes, source materials, data |
-| `docs/presentations/` | Client presentation decks |
+| `deliverables/reports/` | Final deliverables, client-ready reports |
+| `deliverables/drafts/` | Work-in-progress documents and drafts |
+| `deliverables/research/` | Research notes, source materials, data |
+| `deliverables/presentations/` | Client presentation decks |
 | `memory/` | Session logs, meeting transcripts |
 
-> **Note**: These folders are created automatically when an agent first saves an output to them. They do not need to exist at project initialization.
+> **Note**: The `deliverables/` subdirectories and their README.md files are created automatically during project scaffolding.
 
 ### Output Destination Mapping
 
@@ -243,17 +243,17 @@ Each agent must save its deliverables to the designated folder with the specifie
 
 | Agent | Output Type | Destination | Naming Convention |
 |-------|-------------|-------------|-------------------|
-| Industry Expert | Industry analysis reports, trend briefings | `docs/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}.md` |
-| Industry Expert | Regulatory overviews | `docs/research/` | `{topic}-regulatory-{YYYY-MM-DD}.md` |
-| Strategy Analyst | Research findings, competitive analyses, financial models | `docs/research/` | `{topic}-{report-type}-{YYYY-MM-DD}.md` |
-| Data Analyst | Data analysis reports, model outputs | `docs/research/` | `{topic}-data-analysis-{YYYY-MM-DD}.md` |
-| Subject Matter Expert | Functional analysis reports, benchmarking | `docs/research/` | `{topic}-{function}-analysis-{YYYY-MM-DD}.md` |
-| Change Management Partner | Culture statements, readiness assessments | `docs/research/` | `{topic}-change-assessment-{YYYY-MM-DD}.md` |
-| Communications Lead | Consulting reports, stakeholder comms | `docs/reports/` | `{deliverable-type}-{YYYY-MM-DD}.md` |
-| Communications Lead | Executive presentations | `docs/presentations/` | `{deck-title}-{YYYY-MM-DD}.md` |
-| Solutions Architect | Architecture documents, feasibility assessments | `docs/reports/` | `{topic}-architecture-{YYYY-MM-DD}.md` |
-| Workstream Lead | Status reports, execution plans, risk logs | `docs/drafts/` | `{workstream}-{report-type}-{YYYY-MM-DD}.md` |
-| Delivery Manager | Project status reports, stakeholder trackers | `docs/drafts/` | `delivery-{report-type}-{YYYY-MM-DD}.md` |
+| Industry Expert | Industry analysis reports, trend briefings | `deliverables/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}.md` |
+| Industry Expert | Regulatory overviews | `deliverables/research/` | `{topic}-regulatory-{YYYY-MM-DD}.md` |
+| Strategy Analyst | Research findings, competitive analyses, financial models | `deliverables/research/` | `{topic}-{report-type}-{YYYY-MM-DD}.md` |
+| Data Analyst | Data analysis reports, model outputs | `deliverables/research/` | `{topic}-data-analysis-{YYYY-MM-DD}.md` |
+| Subject Matter Expert | Functional analysis reports, benchmarking | `deliverables/research/` | `{topic}-{function}-analysis-{YYYY-MM-DD}.md` |
+| Change Management Partner | Culture statements, readiness assessments | `deliverables/research/` | `{topic}-change-assessment-{YYYY-MM-DD}.md` |
+| Communications Lead | Consulting reports, stakeholder comms | `deliverables/reports/` | `{deliverable-type}-{YYYY-MM-DD}.md` |
+| Communications Lead | Executive presentations | `deliverables/presentations/` | `{deck-title}-{YYYY-MM-DD}.md` |
+| Solutions Architect | Architecture documents, feasibility assessments | `deliverables/reports/` | `{topic}-architecture-{YYYY-MM-DD}.md` |
+| Workstream Lead | Status reports, execution plans, risk logs | `deliverables/drafts/` | `{workstream}-{report-type}-{YYYY-MM-DD}.md` |
+| Delivery Manager | Project status reports, stakeholder trackers | `deliverables/drafts/` | `delivery-{report-type}-{YYYY-MM-DD}.md` |
 
 ---
 
@@ -264,7 +264,7 @@ Each agent must save its deliverables to the designated folder with the specifie
 3. Stakeholder review comments must be tracked in the delivery coordination log.
 4. Publication artifacts must be version-controlled before distribution.
 5. Change management assessments must include organizational readiness scores.
-6. All agent-produced deliverables must be saved to their designated output folder per the Output Destination Mapping table above. Create the folder if it does not exist.
+6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
 
 ---
 

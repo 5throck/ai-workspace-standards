@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-06-27T12:18:38.725Z
+**Generated**: 2026-06-27T23:39:55.548Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -69,12 +69,12 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.1 | scripts/audit.ts | bun |
+| audit.ts | 2.10.2 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| create-l2-scaffold.ts | 1.6.2 | scripts/create-l2-scaffold.ts | child_process, fs, path |
+| create-l2-scaffold.ts | 1.6.3 | scripts/create-l2-scaffold.ts | child_process, fs, path |
 | dev-sync.ts | 1.3.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
@@ -98,9 +98,9 @@
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.1 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
-| merge-frontmatter.ts | 1.8.4 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
+| merge-frontmatter.ts | 1.8.5 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.0 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.1.8 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.2.0 | scripts/new-project.ts | N/A |
 | normalize-agent-skills.ts | 1.0.0 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | pipeline-state.ts | 1.1.0 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |

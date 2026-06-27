@@ -363,27 +363,36 @@ var PresenterTools = {
   }
 };
 
-// ── NarrationEngine v2.2 ───────────────────────────────────────────────
-// Web Speech API TTS narration with independent auto-advance support.
+// ── NarrationEngine v2.4 ───────────────────────────────────────────────
+// Web Speech API TTS narration with config-driven auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
 //
-// State separation:
-//   isPlaying / isPaused  →  narration (speech synthesis)
+// State separation (two independent features):
+//   isPlaying / isPaused  →  narration (TTS speech synthesis)
 //   isAutoAdvance         →  auto-slide timer (independent from narration)
 //
 // 4 combinations:
 //   Both ON  — narration drives slide timing (onend → next slide)
 //   Narrator only — stops after each slide, waits for user
-//   Auto-slide only — timer-driven slide advance (default 5s interval)
+//   Auto-slide only — timer-driven slide advance (configurable interval)
 //   Both OFF — fully manual navigation (DEFAULT on load)
 //
-// IMPORTANT: Auto-advance is NEVER enabled by config. The user must
-// explicitly toggle it via the "⏸ Manual" button or press 'A' key.
-// narrationConfig.autoAdvance is ignored — only autoAdvanceInterval
-// and language settings are respected from config.
+// Config-driven controls (v2.3):
+//   narrationConfig.enabled    → show/hide TTS UI (play, language, voice)
+//   narrationConfig.autoPlay   → auto-start TTS narration on page load
+//   autoAdvanceConfig.enabled  → show/hide auto-advance UI (toggle button)
+//   autoAdvanceConfig.startAsAuto → start auto-advance as "Auto" on page load
+//   autoAdvanceConfig.interval → timer interval (seconds)
 //
-// Config bridge: lecture-profile.md → html-build injects narrationConfig
-//   → initPPT({ narration: narrationConfig }) → NarrationEngine.init(config)
+// Script language (v2.4):
+//   narrationConfig.scriptLanguage → declares what language the primary `script`
+//     field is written in. Defaults to 'ko' if not provided.
+//     Used by getScript() to decide when to read data.script vs data.scriptXx,
+//     and by _buildLanguageDropdown() to detect primary script availability.
+//
+// Config bridge: lecture-profile.md → html-build injects TWO config objects
+//   narrationConfig    → initPPT({ narration: narrationConfig })
+//   autoAdvanceConfig  → initPPT({ autoAdvance: autoAdvanceConfig })
 //
 // Voice selection: dropdown filtered by language, persisted in localStorage.
 
@@ -398,8 +407,14 @@ var NarrationEngine = {
   _autoAdvanceTimer: null,
   _autoAdvanceInterval: 5000, // ms
 
+  // Feature visibility guards (v2.3)
+  _enabled: true,            // TTS UI visible
+  _autoAdvanceEnabled: true,  // auto-advance UI visible
+  _autoPlay: false,          // auto-start TTS on page load
+
   // Language & voice
   language: 'ko',
+  _scriptLanguage: 'ko',  // v2.4: language of the primary `script` field
 
   // Hook: override how "advance to next slide" works.
   // Default = changeSlide(1). Vertical theme sets this to scrollToSlide.
@@ -421,19 +436,34 @@ var NarrationEngine = {
   init: function(config) {
     this._available = ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined');
     this._config = config || {};
+    this._enabled = this._config.enabled !== false;
 
-    // Apply config defaults (auto-advance is NEVER enabled by config — user must toggle manually)
-    if (this._config.autoAdvanceInterval) {
-      this._autoAdvanceInterval = this._config.autoAdvanceInterval * 1000;
+    // Hide TTS-only UI if narration is disabled (v2.3)
+    if (!this._enabled) {
+      var ttsEls = ['narration-play-btn', 'voice-lang-btn', 'voice-select-btn'];
+      ttsEls.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      return;
+    }
+
+    // Apply TTS config defaults
+    if (this._config.autoPlay) {
+      this._autoPlay = true;
+    }
+    // v2.4: script language — declares what language the primary `script` field is in
+    if (this._config.scriptLanguage) {
+      this._scriptLanguage = this._config.scriptLanguage;
     }
     if (this._config.defaultLanguage && this.LANGUAGES[this._config.defaultLanguage]) {
       this.language = this._config.defaultLanguage;
     }
 
     if (!this._available) {
-      // Hide all narration UI
-      var els = ['narration-play-btn', 'narration-auto-advance-btn', 'voice-lang-btn', 'voice-select-btn'];
-      els.forEach(function(id) {
+      // speechSynthesis not available — hide TTS UI (not auto-advance)
+      var ttsEls2 = ['narration-play-btn', 'voice-lang-btn', 'voice-select-btn'];
+      ttsEls2.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
       });
@@ -480,18 +510,39 @@ var NarrationEngine = {
     // Bind click-outside handler (dropdowns are built by loadVoices callback)
     this._bindOutsideClick();
 
-    // Start auto-advance timer if enabled
-    if (this.isAutoAdvance) {
-      this._startAutoAdvanceTimer();
+    this._updateButtonStates();
+  },
+
+  // ── Independent auto-advance initialization (v2.3) ────────────────
+  // Called separately from init() so auto-advance has its own config.
+  initAutoAdvance: function(config) {
+    config = config || {};
+    this._autoAdvanceEnabled = config.enabled !== false;
+
+    // Hide auto-advance UI if disabled (v2.3)
+    if (!this._autoAdvanceEnabled) {
+      var btn = document.getElementById('narration-auto-advance-btn');
+      if (btn) btn.style.display = 'none';
+      return;
     }
 
-    this._updateButtonStates();
+    // Apply auto-advance config defaults (v2.3)
+    if (config.interval) {
+      this._autoAdvanceInterval = config.interval * 1000;
+    }
+    if (config.startAsAuto) {
+      this.isAutoAdvance = true;
+      this._startAutoAdvanceTimer();
+      this._updateButtonStates();
+    }
   },
 
   getScript: function(index) {
     var data = typeof slideData !== 'undefined' ? slideData[index] : null;
     if (!data) return '';
 
+    // v2.4: use _scriptLanguage to detect when the primary `script` field matches
+    if (this.language === this._scriptLanguage) return data.script || '';
     if (this.language === 'en' && data.scriptEn) return data.scriptEn;
     if (this.language === 'ja' && data.scriptJa) return data.scriptJa;
     return data.script || '';
@@ -709,13 +760,15 @@ var NarrationEngine = {
       var langInfo = self.LANGUAGES[lang];
       if (!langInfo) return;
 
-      // Check if any slide has script for this language
+      // Check if any slide has script for this language (v2.4: uses _scriptLanguage)
       var hasScript = false;
       if (typeof slideData !== 'undefined') {
         for (var i = 0; i < slideData.length; i++) {
           var s = slideData[i].script || '';
-          if (lang === 'en') s = slideData[i].scriptEn || s;
-          if (lang === 'ja') s = slideData[i].scriptJa || s;
+          if (lang === self._scriptLanguage) s = slideData[i].script || '';
+          else if (lang === 'en') s = slideData[i].scriptEn || '';
+          else if (lang === 'ja') s = slideData[i].scriptJa || '';
+          else s = '';
           if (s) { hasScript = true; break; }
         }
       }
@@ -1028,14 +1081,20 @@ document.addEventListener('keydown', function(e) {
   }
   if (e.key === 's' || e.key === 'S') PresenterTools.toggleScript();
   if (e.key === 't' || e.key === 'T') toggleTOC();
-  if (e.key === 'p' || e.key === 'P') NarrationEngine.togglePlay();
-  if (e.key === 'a' || e.key === 'A') NarrationEngine.toggleAutoAdvance();
+  if (e.key === 'p' || e.key === 'P') {
+    if (!NarrationEngine._enabled) return;  // TTS disabled guard (v2.3)
+    NarrationEngine.togglePlay();
+  }
+  if (e.key === 'a' || e.key === 'A') {
+    if (!NarrationEngine._autoAdvanceEnabled) return;  // auto-advance disabled guard (v2.3)
+    NarrationEngine.toggleAutoAdvance();
+  }
 });
 
 // ── PPT Init (call from each theme's DOMContentLoaded) ──────────────────
 // options: { transition: 'fade'|'push'|'zoom', showTimer: true|false,
 //            showTOC: true|false, verticalMode: false,
-//            narration: narrationConfig }
+//            narration: narrationConfig, autoAdvance: autoAdvanceConfig }
 function initPPT(options) {
   options = options || {};
   TransitionEngine.init(options.transition || 'fade');
@@ -1061,6 +1120,16 @@ function initPPT(options) {
     ThumbnailNav.init();
   });
 
-  // Initialize narration engine (pass config if available)
+  // Initialize narration engine (TTS) — pass narrationConfig
   NarrationEngine.init(options.narration);
+
+  // Initialize auto-advance independently — pass autoAdvanceConfig (v2.3)
+  NarrationEngine.initAutoAdvance(options.autoAdvance);
+
+  // Trigger auto-play if configured (v2.3)
+  if (NarrationEngine._autoPlay && NarrationEngine._enabled) {
+    requestAnimationFrame(function() {
+      NarrationEngine.play();
+    });
+  }
 }

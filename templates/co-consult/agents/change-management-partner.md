@@ -141,10 +141,9 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 ## Output Destination
 
-- Culture statements and change narratives → `docs/research/{topic}-change-assessment-{YYYY-MM-DD}.md`
-- Organizational readiness assessments → `docs/research/{topic}-readiness-{YYYY-MM-DD}.md`
-- Stakeholder alignment maps → `docs/research/{topic}-stakeholder-alignment-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 

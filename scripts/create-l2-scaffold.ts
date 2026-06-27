@@ -1,4 +1,4 @@
-// @version 1.6.2
+// @version 1.6.3
 ```typescript
 #!/usr/bin/env bun
 /**
@@ -494,12 +494,12 @@ Legal Basis / Role / Protocols), then register them in the roster table below.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOMAIN_DOC_DIRS: Record<string, string[]> = {
-  ehs: ["reports", "procedures", "blueprint"],
-  development: ["drafts", "reports", "research"],
-  design: ["drafts", "reports", "research"],
-  consulting: ["reports", "deliverables", "research"],
+  ehs: ["docs/reports", "docs/procedures", "docs/blueprint"],
+  development: ["docs/drafts", "docs/reports", "docs/research"],
+  design: ["docs/drafts", "docs/reports", "docs/research"],
+  consulting: ["deliverables/reports", "deliverables/drafts", "deliverables/research", "deliverables/presentations"],
 };
-const DEFAULT_DOC_DIRS = ["drafts", "reports", "research"];
+const DEFAULT_DOC_DIRS = ["docs/drafts", "docs/reports", "docs/research"];
 
 function createDomainDocs(projectDir: string, domain: string | null, variant: string): void {
   log("📁 Creating docs/ subdirectories…");
@@ -519,9 +519,9 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
     log(`  ⚠️  Unknown domain "${domain}" — using default doc layout.`);
   }
   for (const d of dirs) {
-    gitkeep(path.join(projectDir, "docs", d));
+    gitkeep(path.join(projectDir, d));
   }
-  log(`  ✅ docs/{${dirs.join(", ")}}/ created`);
+  log(`  ✅ {${dirs.join(", ")}}/ created`);
 
   // agents/ directory with README placeholder.
   const agentsReadme = `# agents/

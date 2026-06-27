@@ -21,7 +21,7 @@
 | **Runtime** | Bun (required — replaces Node.js/Python) |
 | **PDF Engine** | pdf-lib + @pdf-lib/fontkit |
 | **Font Download** | fflate (TTF/woff2 download utility) |
-| **HTML Renderer** | Playwright (Chromium) — optional, for `measure-layout.ts` only |
+| **HTML Renderer** | Playwright — **deprecated** (optional, for legacy `measure-layout.ts` only; use `estimate-layout.ts` instead) |
 | **Image Sources** | Pixabay API (keyless) · Unsplash URL method · Pexels/Unsplash API (optional keys) |
 | **Package Manager** | Bun (`bun install`) |
 | **Testing** | Manual gate-based workflow (approval gates at stages 2, 3, 5) |
@@ -43,7 +43,7 @@
 | Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
 | Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG primary for HTML; PNG optional for PDF) | active |
 | Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
-| Measure | `agents/measure.md` | 9-10 | layout_spec.json + pdf_layout_spec.md (Playwright-based) | active |
+| Measure | `agents/measure.md` | 9-10 | layout_summary.md via estimate-layout.ts (Playwright-free); optional auto-calibrate loop | active |
 | Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
 <!-- END VARIANT-INJECT -->
 
@@ -81,6 +81,7 @@ Three flags control agent execution in the co-deck pipeline:
 | design | `skills/design/SKILL.md` | design | active |
 | html-build | `skills/html-build/SKILL.md` | html-build | active |
 | measure | `skills/measure/SKILL.md` | measure | active |
+| prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
 | theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
 <!-- END VARIANT-INJECT -->
@@ -97,12 +98,18 @@ Three flags control agent execution in the co-deck pipeline:
 | Script | Location | Purpose | Status |
 |--------|----------|---------|--------|
 | `snapshot.ts` | `scripts/co-deck/` | File versioning / restore per project | active |
-| `measure-layout.ts` | `scripts/co-deck/` | Playwright layout measurement → layout_spec.json (optional); v1.1.0: validates HTML structure, `slideData` presence, and `.slide` count before Playwright launches — exits with clear error if HTML is incomplete | active |
-| `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.) | active |
-| `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (`--sample N` flag) | active |
-| `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes (`DARK_AMBER`, `B2B_NAVY`); imported by each project's `presentations/<project>/diagram-defs.ts` | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher (v3.0.1): reads slidedata.json, dynamically imports `presentations/<project>/diagram-defs.ts`, renders SVG (primary delivery format for HTML) with optional PNG for PDF; exits cleanly if no diagram-defs.ts exists; target filter honours an absent `visual` field (an `images/`-prefixed visualImage still counts as a diagram target) | active |
-| `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (v1.2.0 — bracket-depth state machine, strict-JSON required) | active |
+| `measure-layout.ts` | `scripts/co-deck/` | **deprecated** — Playwright layout measurement replaced by `estimate-layout.ts` | deprecated |
+| `estimate-layout.ts` | `scripts/co-deck/` | Playwright-free PDF layout preparation: reads lecture-profile.md, resolves 4-layer spec merge, validates fonts, outputs layout_summary.md | active |
+| `auto-calibrate.ts` | `scripts/co-deck/` | Iterative auto-calibration loop: sample PDF → PNG → numerical validation → auto-adjust layout_overrides | active |
+| `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.); OS-aware system font detection | active |
+| `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (region-based layout, background images, CJK fallback) | active |
+| `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes | active |
+| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher: reads slidedata.json, renders SVG+PNG via diagram-defs.ts | active |
+| `validate-theme-styles.ts` | `scripts/co-deck/` | Validate html-themes structure: region schema, shared pool, slide_type↔region cross-check | active |
+| `validate-image-manifest.ts` | `scripts/co-deck/` | Gate 3.5 image validation: content-hash dedup, pixel dimensions, aspect-ratio check | active |
+| `generate-themes-manifest.ts` | `scripts/co-deck/` | Regenerate preview/themes-manifest.js for preview.html dropdowns | active |
+| `scaffold-theme-style.ts` | `scripts/co-deck/` | Scaffold new theme or style with correct file layout | active |
+| `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (bracket-depth state machine, strict-JSON required) | active |
 <!-- END VARIANT-INJECT -->
 
 ### Bun Dependencies
@@ -159,7 +166,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Transition effects | CSS class toggling: fade (opacity), push (translateX), zoom (scale) |
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
-| **NarrationEngine v2.2 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; independent narration/auto-advance toggles (4 combinations: both on, narrator only, auto-slide only, both off); auto-advance starts as Manual (config cannot override); language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig`; v2.2: `_onSlideChanged` fires on both `isPlaying` and `isAutoAdvance` (fixes auto-advance timer restart on slide change)** |
+| **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing, per-engine UI hiding** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
 
@@ -289,19 +296,35 @@ level: intro | intermediate | advanced
 presentation:
   theme: pitch-enhanced  # HTML structure: outline | pitch | pitch-enhanced | vertical | zen
   style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
+script_language: ko      # Language of TTS narration script (defaults to `language` if not set)
 keywords: [Keyword 1, Keyword 2]
 instructor:
   name: ""
   title: ""
   organization: ""
+  email: ""
+  linkedin: ""
+  phone: ""
 image:
   source: auto        # Pixabay keyless → Unsplash URL → API keys
   style_hint: "professional"
+background_image:
+  enabled: false       # enable background images for slides
+  scope: divider-cover # all | divider-cover | individual
 dividers:
   mode: auto          # auto | manual | none
+narration:
+  enabled: true       # show/hide TTS controls in HTML viewer
+  auto_play: false    # auto-start TTS on page load
+  default_language: ko
+auto_advance:
+  enabled: true       # show/hide auto-advance controls in HTML viewer
+  start_as_auto: false # start auto-advance timer on page load
+  interval: 8         # seconds between auto-advance slides
+source_verification: true
 ```
 
-**Agents that read this file**: research (queries), storyline (slide_count, dividers.mode + reads `theme.json content_rules` for slide density constraints), html-build (`presentation.theme` + `presentation.style`, instructor), image-curator (source, style_hint).
+**Agents that read this file**: research (audience, level, keywords), storyline (slide_count, chapters, dividers.mode, script_language, narration.languages), html-build (theme, style, instructor, background_image, script_language, narration, auto_advance), image-curator (source, style_hint, background_image), pdf-export (background_image, layout_overrides).
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -397,7 +420,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | 4 | Design | Gate 3 (optional review) | design_spec.md |
 | 3.5 | Image Curator | — | assets/images/, image-manifest.json |
 | 5-8 | Build | Gate 4 (optional) | lecture_vN.html (theme applied, images bound) |
-| 9-10 | Measure | — | layout_spec.json, pdf_layout_spec.md |
+| 9-10 | Measure | — | layout_summary.md (estimate-layout.ts, Playwright-free) |
 | 11 | Export | **Gate 5 (required)** | sample_5slides.pdf → full .pdf |
 <!-- END VARIANT-INJECT -->
 
@@ -516,7 +539,7 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 2. **presentations/<project>/lecture-profile.md is the single source of truth** for theme, audience, instructor, and image settings
 3. **project_state.json tracks pipeline progress** — PM reads this to resume interrupted sessions
 4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
-5. **PDF requires layout measurement** — always run Measure Agent before Export Agent
+5. **PDF requires layout preparation** — run Prep PDF (estimate-layout.ts) before Export Agent; optional auto-calibrate loop for iterative refinement
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
 7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
@@ -532,4 +555,4 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 ---
 
-*co-deck.context.md version: 3.9 — updated 2026-06-25: removed notebook, scroll, slideshow themes; remaining 5 themes (outline, pitch, pitch-enhanced, vertical, zen); default theme changed to pitch-enhanced; PPT-Engine Family updated to outline/pitch-enhanced/zen/vertical; Pitch Family now pitch-only (native DOM); compatibility matrix reduced to 5 columns. Previous: v3.8 — v3.0.0 theme updates — 3 new themes (zen, vertical, outline); all PPT themes upgraded to v3.0.0.*
+*co-deck.context.md version: 4.1 — updated 2026-06-28: added `script_language` field (explicit TTS script language declaration); NarrationEngine v2.4 (scriptLanguage config for correct getScript() routing).*

@@ -133,10 +133,9 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 ## Output Destination
 
-- Status reports and execution plans → `docs/drafts/{workstream}-{report-type}-{YYYY-MM-DD}.md`
-- Risk and issue logs → `docs/drafts/{workstream}-risk-log-{YYYY-MM-DD}.md`
-- Quality gate checklists → `docs/drafts/{workstream}-quality-gate-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 

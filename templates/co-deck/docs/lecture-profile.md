@@ -29,6 +29,12 @@ slide_count: 40
 # Options: ko | en | ko-en (bilingual)
 language: ko
 
+# Language of the TTS narration script (primary `script` field in slide_deck.md)
+# Controls: (1) what language storyline writes the script in, (2) which script field NarrationEngine reads as primary
+# Options: ko | en | ja | <any lang code>
+# Default: falls back to `language` field if not set
+script_language: ko
+
 # Instructor information (auto-injected into cover and speaker-intro slides)
 instructor:
   name: ""
@@ -125,26 +131,22 @@ dividers:
   # none: no dividers
   mode: auto
 
-# ── Narration (TTS auto-play) settings ───────────────────────────
-# Controls the Web Speech API narration and auto-advance features in the HTML viewer.
+# ── Narration (TTS) settings ──────────────────────────────────────
+# Controls the Web Speech API text-to-speech feature in the HTML viewer.
+# Independent from auto_advance — both can run simultaneously or separately.
 # The storyline agent generates a `script` field for every slide regardless.
 narration:
-  # Whether to enable the TTS narration play button in the HTML viewer
-  # Options: true | false (default: true)
+  # Whether to show TTS narration controls in the HTML viewer
+  # false → hides TTS play button, language dropdown, voice selector;
+  #          disables 'P' keyboard shortcut
+  # true  → shows TTS controls (default)
   enabled: true
-  # Whether to enable automatic slide advancement (independent of narration)
-  # ⚠️ This field is informational only — the HTML viewer ignores this config
-  # value. Auto-advance can only be activated by the user clicking the
-  # "⏸ Manual" button or pressing 'A' key in the HTML presentation viewer.
-  # Options: true | false (default: false)
-  autoAdvance: false
-  # Interval for auto-advance when narration is NOT playing (seconds)
-  # When narration IS playing, slides advance after narration ends (~800ms).
-  # Options: integer (default: 8)
-  #   Note: default bumped to 8 per user request
-  autoAdvanceInterval: 8
+  # Whether to auto-start TTS narration on page load
+  # true  → begins reading slide 1 script automatically
+  # false → narration starts paused; user clicks Play or presses 'P' (default)
+  auto_play: false
   # Languages for which to generate translated narration scripts.
-  # The primary language (from `language` field) always gets a `script` field.
+  # The primary language (from `script_language` field, defaults to `language`) always gets a `script` field.
   # Additional languages generate `scriptEn`, `scriptJa`, etc.
   # Options: empty list (primary only) | [ko, en, ja] (all three)
   # Example: [ko, en]    — Korean primary + English translation
@@ -153,7 +155,26 @@ narration:
   languages: []
   # Default narration language in the HTML player
   # Options: ko | en | ja (must be in `languages` or match `language` field)
-  defaultLanguage: ko
+  default_language: ko
+
+# ── Auto-Advance settings ─────────────────────────────────────────
+# Controls automatic slide progression in the HTML viewer.
+# Independent from narration — both can run simultaneously or separately.
+# When narration IS playing and auto-advance is ON: slides advance after
+# narration ends (~800ms delay). When narration is NOT playing: slides
+# advance on a timer.
+auto_advance:
+  # Whether to show auto-advance controls in the HTML viewer
+  # false → hides auto-advance toggle button; disables 'A' keyboard shortcut
+  # true  → shows auto-advance controls (default)
+  enabled: true
+  # Whether to start auto-advance as "Auto" on page load (config-driven)
+  # true  → auto-advance timer starts immediately on page load
+  # false → auto-advance starts as "Manual"; user toggles via button or 'A' key (default)
+  start_as_auto: false
+  # Interval between auto-advance slides when narration is NOT playing (seconds)
+  # When narration IS playing, slides advance after narration ends (~800ms).
+  interval: 8
 
 # ── Source Verification settings ──────────────────────────────────
 # Options: true | false
@@ -202,8 +223,8 @@ This file is the single source of truth for this lecture project.
 |-------|-------------------------|
 | `pm` | Reads `source_verification` to decide whether to dispatch `source-verifier`; asks user about `background_image` at Stage 0 |
 | `research` | Loads `audience`, `level`, `keywords` to tailor search queries |
-| `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode`, `narration.languages` for multi-lang scripts |
-| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor`, `background_image` for slide rendering |
+| `storyline` | Uses `slide_count`, `chapters`, `instructor`, `dividers.mode`, `script_language`, `narration.languages` for multi-lang scripts |
+| `html-build` | Reads `presentation.theme` + `presentation.style`, `instructor`, `background_image`, `script_language`, `narration`, `auto_advance` for slide rendering |
 | `image-curator` | Reads `image.source`, `image.style_hint` for search queries; reads `background_image` for deck-wide background download |
 | `pdf-export` | Reads `background_image` for PDF background image rendering with overlay |
 

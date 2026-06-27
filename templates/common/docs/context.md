@@ -146,7 +146,7 @@ All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.
 
 ## Coding Guidelines
 
-This project follows the workspace coding standards defined in [`workspace standards §8`](../../docs/constitution/08-coding-guidelines.md).
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
 
 Key rules:
 - All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
@@ -264,12 +264,6 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 - **Agent / Skill / Script** each have explicit lifecycle states (active, deprecated, retired/archived)
 - Full lifecycle rules are defined in the workspace `workspace standards` section files
 - Audit commands exist for each domain: `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`, `verify-scripts.ts`
-
-### Workspace Constitution Reference
-
-All projects must read [`workspace standards`](../../workspace standards) at session start, including the files listed in its `## Required Reading` block:
-- `docs/constitution/05-multi-agent-architecture.md` — Agent architecture, 3-tier model, PM governance workflow
-- `docs/constitution/08-coding-guidelines.md` — Behavioral guidelines for coding
 
 For full lifecycle procedures:
 - **Agent Lifecycle**: See `workspace standards` → [§5.6 Agent Lifecycle Management](../../workspace standards#agent-lifecycle-management)
