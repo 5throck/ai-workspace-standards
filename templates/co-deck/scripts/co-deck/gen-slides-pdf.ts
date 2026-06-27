@@ -325,12 +325,15 @@ class Renderer {
     this.drawLine(text, drawX, yMm, hMm);
   }
 
-  // Multi-line cell — returns Y position after last line (mm from top)
+  // Multi-line cell — returns Y position after last line (mm from top).
+  // Empty lines (from consecutive \n) consume a full hMm row as blank spacing.
   multiCell(wMm: number, hMm: number, text: string, xMm: number, yMm: number, align: 'L' | 'R' | 'C' = 'L'): number {
     const lines = this.wrapText(text, wMm);
     let y = yMm;
     for (const line of lines) {
-      this.cell(wMm, hMm, line, xMm, y, align);
+      if (line) {
+        this.cell(wMm, hMm, line, xMm, y, align);
+      }
       y += hMm;
     }
     return y;
@@ -362,7 +365,8 @@ class Renderer {
           lineW += ww;
         }
       }
-      if (line.trim()) lines.push(line.trimEnd());
+      // Preserve empty lines as empty strings so multiCell renders blank spacing.
+      lines.push(line.trimEnd());
     }
     return lines;
   }
@@ -539,36 +543,81 @@ interface LayoutSpec {
   };
   calibration?: {
     viewport_px?: number | null;
+    font_px_to_pt?: number;
   };
   regions?: Record<string, Region | null>;
   slide_types?: Record<string, {
     regions?: string[];
   }>;
   slide_type_overrides?: Record<string, Record<string, Region | null>>;
+  // Font sizes in CSS px (v2.0). Legacy _pt keys are auto-converted.
   fonts?: {
+    // CSS px keys (preferred)
+    section_px?:       number;
+    slide_num_px?:     number;
+    title_px?:         number;
+    bullet_px?:        number;
+    punchline_px?:     number;
+    punchline_sub_px?: number;
+    vis_title_px?:     number;
+    vis_body_px?:      number;
+    ts_eyebrow_px?:    number;
+    ts_title_px?:      number;
+    ts_subtitle_px?:   number;
+    ts_meta_px?:       number;
+    div_part_px?:      number;
+    div_title_px?:     number;
+    div_desc_px?:      number;
+    // Legacy pt keys (auto-converted via buildSizes)
     title_pt?:         number;
     bullet_pt?:        number;
     punchline_pt?:     number;
     punchline_sub_pt?: number;
     div_title_pt?:     number;
     div_desc_pt?:      number;
-    section_px?:       number;
-    slide_num_px?:     number;
+  };
+  // Line heights in CSS px (v2.0). One cssPx value = font-size × line-height-ratio.
+  line_heights?: {
+    title_px?:         number;
+    bullet_px?:        number;
+    bullet_gap_px?:    number;
+    punchline_px?:     number;
+    div_title_px?:     number;
+    div_desc_px?:      number;
     vis_title_px?:     number;
     vis_body_px?:      number;
+    ts_eyebrow_px?:    number;
     ts_title_px?:      number;
-    ts_sub_px?:        number;
+    ts_subtitle_px?:   number;
     ts_meta_px?:       number;
     div_part_px?:      number;
+    punch_tag_px?:     number;
+    punch_mark_px?:    number;
+    punch_text_px?:    number;
+    punch_sub_px?:     number;
+    prof_eyebrow_px?:  number;
+    prof_name_px?:     number;
+    prof_affil_px?:    number;
+    prof_bio_px?:      number;
+    cont_thanks_px?:   number;
+    cont_line_px?:     number;
+    cont_note_px?:     number;
   };
-  line_heights?: {
-    title_px?:       number;
-    bullet_px?:      number;
-    bullet_gap_px?:  number;
-    ts_title_px?:    number;
-    div_title_px?:   number;
-    div_desc_px?:    number;
-    punchline_px?:   number;
+  // Gaps between elements in CSS px.
+  gaps_px?: {
+    ts_eye_ttl_px?:      number;
+    ts_ttl_sub_px?:      number;
+    ts_sub_meta_px?:     number;
+    div_part_title_px?:  number;
+    div_title_desc_px?:  number;
+    punch_tag_mark_px?:  number;
+    punch_mark_text_px?: number;
+    punch_text_sub_px?:  number;
+    prof_eyebrow_name_px?: number;
+    prof_name_affil_px?:  number;
+    prof_affil_bio_px?:   number;
+    cont_thanks_line_px?: number;
+    cont_line_note_px?:   number;
   };
   content_constraints?: Record<string, any>;
   print?: Record<string, any>;
@@ -638,7 +687,11 @@ interface RenderCtx {
 async function renderTitleSlide(ctx: RenderCtx) {
   const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
   const { C_ACCENT, C_MUTED, C_WHITE, C_META, C_DARK, C_BORDER } = colors;
-  const { T_TS_TITLE, T_TS_SUB, T_TS_META, T_SECT, T_NUM } = sizes;
+  const {
+    T_TS_EYEBROW, T_TS_TITLE, T_TS_SUB, T_TS_META, T_SECT, T_NUM,
+    LH_TS_EYEBROW, LH_TS_TITLE, LH_TS_SUB, LH_TS_META,
+    GAP_TS_EYE_TTL, GAP_TS_TTL_SUB, GAP_TS_SUB_META,
+  } = sizes;
 
   const titleR = region('title');
   const subR   = tryRegion(ctx, 'subtitle') ?? titleR;
@@ -658,13 +711,6 @@ async function renderTitleSlide(ctx: RenderCtx) {
     // Left column: from slide margin to visR, gap = 3rem
     const margin  = coords.CX + coords.px2mm(56);          // padding-left 3.5rem
     const textW   = visR!.x - margin - coords.px2mm(48);   // gap 3rem
-    const LH_EYE  = coords.px2mm(20);
-    const LH_TTL  = coords.px2mm(70);
-    const LH_SUB_LN  = coords.px2mm(36);
-    const LH_META_LN = coords.px2mm(24);
-    const GAP_EYE = coords.px2mm(24);   // margin-bottom: 1.5rem
-    const GAP_TTL = coords.px2mm(24);
-    const GAP_SUB = coords.px2mm(24);
 
     const eyebrow  = strip(data.section);
     const titleTxt = strip(data.title);
@@ -673,49 +719,49 @@ async function renderTitleSlide(ctx: RenderCtx) {
 
     r.setFont(true, T_TS_TITLE);
     const titleLineCount = r.wrapText(titleTxt, textW).length;
-    const hEye   = eyebrow  ? LH_EYE + GAP_EYE                       : 0;
-    const hTitle = titleLineCount * LH_TTL + (subtitle || meta ? GAP_TTL : 0);
-    const hSub   = subtitle ? LH_SUB_LN + (meta ? GAP_SUB : 0)       : 0;
-    const hMeta  = meta     ? LH_META_LN                              : 0;
+    const hEye   = eyebrow  ? LH_TS_EYEBROW + GAP_TS_EYE_TTL                       : 0;
+    const hTitle = titleLineCount * LH_TS_TITLE + (subtitle || meta ? GAP_TS_TTL_SUB : 0);
+    const hSub   = subtitle ? LH_TS_SUB + (meta ? GAP_TS_SUB_META : 0)           : 0;
+    const hMeta  = meta     ? LH_TS_META                                              : 0;
     const blockH = hEye + hTitle + hSub + hMeta;
 
     let vy = coords.CY + coords.px2mm(48)
            + Math.max(0, (coords.CH - coords.px2mm(96) - blockH) / 2);
 
     if (eyebrow) {
-      r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
-      r.multiCell(textW, LH_EYE, eyebrow.toUpperCase(), margin, vy, 'L');
-      vy += LH_EYE + GAP_EYE;
+      r.setFont(true, T_TS_EYEBROW); r.setColor(C_ACCENT);
+      r.multiCell(textW, LH_TS_EYEBROW, eyebrow.toUpperCase(), margin, vy, 'L');
+      vy += LH_TS_EYEBROW + GAP_TS_EYE_TTL;
     }
     r.setFont(true, T_TS_TITLE); r.setColor(C_WHITE);
-    vy = r.multiCell(textW, LH_TTL, titleTxt, margin, vy, 'L');
-    if (subtitle || meta) vy += GAP_TTL;
+    vy = r.multiCell(textW, LH_TS_TITLE, titleTxt, margin, vy, 'L');
+    if (subtitle || meta) vy += GAP_TS_TTL_SUB;
     if (subtitle) {
       r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-      vy = r.multiCell(textW, LH_SUB_LN, subtitle, margin, vy, 'L');
-      if (meta) vy += GAP_SUB;
+      vy = r.multiCell(textW, LH_TS_SUB, subtitle, margin, vy, 'L');
+      if (meta) vy += GAP_TS_SUB_META;
     }
     if (meta) {
       r.setFont(false, T_TS_META); r.setColor(C_META);
-      r.multiCell(textW, LH_META_LN, meta, margin, vy, 'L');
+      r.multiCell(textW, LH_TS_META, meta, margin, vy, 'L');
     }
     await r.placeImage(doc, ip!, visR!.x, visR!.y, visR!.w, visR!.h);
   } else {
     // No image: single centered column (HTML: grid-template-columns: 1fr, text-align: center)
     const eyebrow = strip(data.section);
     if (eyebrow && metaR) {
-      r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
-      r.multiCell(metaR.w, coords.px2mm(24), eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
+      r.setFont(true, T_TS_EYEBROW); r.setColor(C_ACCENT);
+      r.multiCell(metaR.w, LH_TS_META, eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
     }
     r.setFont(true, T_TS_TITLE); r.setColor(C_WHITE);
-    r.multiCell(titleR.w, coords.px2mm(70.0), strip(data.title), titleR.x, titleR.y, 'C');
+    r.multiCell(titleR.w, LH_TS_TITLE, strip(data.title), titleR.x, titleR.y, 'C');
     r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
-    r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
+    r.multiCell(subR.w, LH_TS_SUB, strip(data.subtitle), subR.x, subR.y, 'C');
     const meta = strip(data.meta);
     if (meta) {
-      const metaY = subR.y + coords.px2mm(36) + coords.px2mm(12);
+      const metaY = subR.y + LH_TS_SUB + GAP_TS_SUB_META;
       r.setFont(false, T_TS_META); r.setColor(C_META);
-      r.multiCell(subR.w, coords.px2mm(24), meta, subR.x, metaY, 'C');
+      r.multiCell(subR.w, LH_TS_META, meta, subR.x, metaY, 'C');
     }
   }
 }
@@ -724,8 +770,11 @@ async function renderDividerSlide(ctx: RenderCtx) {
   const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
   const { C_BG, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
   const { CX, CY, CW, CH } = coords;
-  const lh = spec.line_heights ?? {};
-  const { T_DIV_PART, T_DIV_TITLE, T_DIV_DESC, T_SECT, T_NUM } = sizes;
+  const {
+    T_DIV_PART, T_DIV_TITLE, T_DIV_DESC, T_SECT, T_NUM,
+    LH_DIV_PART, LH_DIV_TITLE, LH_DIV_DESC,
+    GAP_DIV_PART_TITLE, GAP_DIV_TITLE_DESC,
+  } = sizes;
 
   // Divider fills the full card with the SAME surface as the cover/standard card
   // (C_BG). HTML .slide[data-type="divider"] uses --divider-bg which is identical
@@ -743,9 +792,6 @@ async function renderDividerSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
-  const LH_T = lh.div_title_px ? coords.px2mm(lh.div_title_px) : coords.px2mm(56.0);
-  const LH_D = lh.div_desc_px  ? coords.px2mm(lh.div_desc_px)  : coords.px2mm(28.16);
-
   const ip = imgPath(data.visualImage, imgDir ?? '');
   const align: 'L' | 'C' = ip ? 'L' : 'C';
 
@@ -753,24 +799,24 @@ async function renderDividerSlide(ctx: RenderCtx) {
   // For image dividers, center vertically within the full card (not just titleR).
   // For text-only dividers, center within titleR as before.
   r.setFont(true, T_DIV_TITLE);
-  const titleH_est = r.estimateTextHeight(strip(data.title), titleR.w, T_DIV_TITLE, LH_T, true);
+  const titleH_est = r.estimateTextHeight(strip(data.title), titleR.w, T_DIV_TITLE, LH_DIV_TITLE, true);
   r.setFont(false, T_DIV_DESC);
-  const descH_est  = r.estimateTextHeight(strip(data.desc ?? ''), titleR.w, T_DIV_DESC, LH_D, false);
-  const blockH = coords.px2mm(34) + titleH_est + coords.px2mm(16) + descH_est;
+  const descH_est  = r.estimateTextHeight(strip(data.desc ?? ''), titleR.w, T_DIV_DESC, LH_DIV_DESC, false);
+  const blockH = LH_DIV_PART + GAP_DIV_PART_TITLE + titleH_est + GAP_DIV_TITLE_DESC + descH_est;
   const py0 = ip
-    ? coords.CY + Math.max(coords.px2mm(32), (coords.CH - blockH) / 2)
+    ? coords.CY + Math.max(LH_DIV_PART, (coords.CH - blockH) / 2)
     : titleR.y + Math.max(0, (titleR.h - blockH) / 2);
 
   r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
-  r.cell(titleR.w, coords.px2mm(28), (strip(data.partNum)).toUpperCase(), titleR.x, py0, align);
+  r.cell(titleR.w, LH_DIV_PART, (strip(data.partNum)).toUpperCase(), titleR.x, py0, align);
 
-  const py1 = py0 + coords.px2mm(34);
+  const py1 = py0 + LH_DIV_PART + GAP_DIV_PART_TITLE;
   r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
-  const afterTitle = r.multiCell(titleR.w, LH_T, strip(data.title), titleR.x, py1, align);
+  const afterTitle = r.multiCell(titleR.w, LH_DIV_TITLE, strip(data.title), titleR.x, py1, align);
 
-  const py2 = afterTitle + coords.px2mm(16);
+  const py2 = afterTitle + GAP_DIV_TITLE_DESC;
   r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
-  r.multiCell(titleR.w, LH_D, strip(data.desc), titleR.x, py2, align);
+  r.multiCell(titleR.w, LH_DIV_DESC, strip(data.desc), titleR.x, py2, align);
 
   if (ip) {
     r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
@@ -779,29 +825,13 @@ async function renderDividerSlide(ctx: RenderCtx) {
 }
 
 function renderPunchlineSlide(ctx: RenderCtx) {
-  const { r, data, spec, coords, colors, region } = ctx;
+  const { r, data, spec, coords, colors, sizes, region } = ctx;
   const { C_BG, C_ACCENT, C_WHITE, C_BODY } = colors;
-  const f = spec.fonts ?? {};
-
-  // Per-item sizes aligned to HTML .punch-* (Playwright px × 0.75 = pt).
-  // Key parity fix: HTML .punch-text is WHITE (--text-on-dark, gold glow), not gold.
-  const SZ_TAG  = 9.6;                          // .part-tag   12.8px (gold, uppercase)
-  const SZ_MARK = 43.2;                         // .punch-mark 57.6px (gold decorative quote)
-  const SZ_TEXT = f.punchline_pt     ?? 24;     // .punch-text 32px (WHITE, bold)
-  const SZ_SUB  = f.punchline_sub_pt ?? 12.24;  // .punch-sub  16.32px (slate)
-
-  // Stack part-tag → mark → text → sub, centered as a block (mirrors HTML flex centering).
-  // Gaps + box heights are the EXACT rendered element-to-element spacing measured from
-  // slide-7 punchline (Playwright on the 720px design space): each GAP is box-bottom →
-  // next-box-top. With these, the PDF element tops reproduce HTML exactly (text at +144px
-  // from part-tag top, sub at +293px — matching HTML 346−202 and 495−202).
-  const BOX_TAG      = coords.px2mm(18);    // .part-tag rendered height (12.8px font, normal LH)
-  const GAP_TAG_MARK = coords.px2mm(56);    // part-tag box bottom → mark box top
-  const BOX_MARK     = coords.px2mm(29);    // .punch-mark line-height 0.5 (57.6px font → 29px box)
-  const GAP_MARK_TXT = coords.px2mm(41);    // mark box bottom → text top
-  const LH_TEXT      = coords.px2mm(46.4);  // .punch-text line-height 1.45 (per line)
-  const GAP_TXT_SUB  = coords.px2mm(56);    // text bottom → sub top
-  const LH_SUB       = coords.px2mm(23);    // .punch-sub rendered height (16.32px font)
+  const {
+    T_PUNCH_TAG, T_PUNCH_MARK, T_PUNCH_TEXT, T_PUNCH_SUB,
+    LH_PUNCH_TAG, LH_PUNCH_MARK, LH_PUNCH_TEXT, LH_PUNCH_SUB,
+    GAP_PUNCH_TAG_MARK, GAP_PUNCH_MARK_TEXT, GAP_PUNCH_TEXT_SUB,
+  } = sizes;
 
   const titleR = region('title');
   const box    = tryRegion(ctx, 'content') ?? titleR;   // center within the large content region
@@ -812,47 +842,52 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // whose natural width 169.3mm > 160.6mm → wraps). Count the wrapped lines so blockH /
   // vertical centering accounts for the ACTUAL statement height.
   const statement = strip(data.text) || strip(data.title);
-  r.setFont(true, SZ_TEXT);
+  r.setFont(true, T_PUNCH_TEXT);
   const textBand = Math.min(bandW, coords.px2mm(607));
   const textX    = box.x + (bandW - textBand) / 2;
-  const textLineH = (statement ? r.wrapText(statement, textBand).length : 1) * LH_TEXT;
+  const textLineH = (statement ? r.wrapText(statement, textBand).length : 1) * LH_PUNCH_TEXT;
 
-  const blockH = BOX_TAG + GAP_TAG_MARK + BOX_MARK + GAP_MARK_TXT + textLineH + GAP_TXT_SUB + LH_SUB;
+  const blockH = LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT + textLineH + GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB;
   let y = box.y + Math.max(0, (box.h - blockH) / 2);
 
-  // Full-bleed dark background (HTML .slide[data-type="punchline"] is radial navy).
+  // Full-bleed dark background (HTML .slide[data-type=”punchline”] is radial navy).
   r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
-  // part-tag (gold, uppercase) — e.g. "PART 01 · 패러다임 전환"
+  // part-tag (gold, uppercase) — e.g. “PART 01 · 패러다임 전환”
   const sec = strip(data.section);
   if (sec) {
-    r.setFont(false, SZ_TAG); r.setColor(C_ACCENT);
-    r.cell(bandW, BOX_TAG, sec.toUpperCase(), box.x, y, 'C');
-    y += BOX_TAG + GAP_TAG_MARK;
+    r.setFont(false, T_PUNCH_TAG); r.setColor(C_ACCENT);
+    r.cell(bandW, LH_PUNCH_TAG, sec.toUpperCase(), box.x, y, 'C');
+    y += LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK;
   }
 
-  // decorative gold quote mark (") above the statement
-  r.setFont(false, SZ_MARK); r.setColor(C_ACCENT);
-  r.cell(bandW, BOX_MARK, '“', box.x, y, 'C');
-  y += BOX_MARK + GAP_MARK_TXT;
+  // decorative gold quote mark (“) above the statement
+  r.setFont(false, T_PUNCH_MARK); r.setColor(C_ACCENT);
+  r.cell(bandW, LH_PUNCH_MARK, '”', box.x, y, 'C');
+  y += LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT;
 
   // punch-text (WHITE, bold) — the statement (data.text, fallback title), wrapped at the
   // HTML max-width (textBand), centered on the same axis as the tag/mark/sub above.
-  r.setFont(true, SZ_TEXT); r.setColor(C_WHITE);
-  const afterText = r.multiCell(textBand, LH_TEXT, statement, textX, y, 'C');
-  y = afterText + GAP_TXT_SUB;
+  r.setFont(true, T_PUNCH_TEXT); r.setColor(C_WHITE);
+  const afterText = r.multiCell(textBand, LH_PUNCH_TEXT, statement, textX, y, 'C');
+  y = afterText + GAP_PUNCH_TEXT_SUB;
 
   // punch-sub (slate) — support line (data.sub, fallback subtitle/bullets)
   const subText = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
   if (subText) {
-    r.setFont(false, SZ_SUB); r.setColor(C_BODY);
-    r.multiCell(bandW, LH_SUB, subText, box.x, y, 'C');
+    r.setFont(false, T_PUNCH_SUB); r.setColor(C_BODY);
+    r.multiCell(bandW, LH_PUNCH_SUB, subText, box.x, y, 'C');
   }
 }
 
 function renderProfileSlide(ctx: RenderCtx) {
-  const { r, data, coords, colors } = ctx;
+  const { r, data, coords, colors, sizes } = ctx;
   const { C_BG, C_ACCENT, C_WHITE, C_MUTED } = colors;
+  const {
+    T_PROF_EYEBROW, T_PROF_NAME, T_PROF_AFFIL, T_PROF_BIO,
+    LH_PROF_EYEBROW, LH_PROF_NAME, LH_PROF_AFFIL, LH_PROF_BIO,
+    GAP_PROF_EYEBROW_NAME, GAP_PROF_NAME_AFFIL, GAP_PROF_AFFIL_BIO,
+  } = sizes;
 
   // HTML pitch-enhanced .slide[data-type="profile"]:
   //   flex column, centered, text-align:center, padding: 4rem
@@ -863,65 +898,43 @@ function renderProfileSlide(ctx: RenderCtx) {
   const bandW = coords.CW * 0.80;
   const bandX = coords.CX + (coords.CW - bandW) / 2;
 
-  // CSS-derived font sizes (VP=750): .75rem=12px, clamp max 2.8rem=44.8px, 1.1rem=17.6px, 1rem=16px
-  const SZ_EYEBROW = coords.px2pt(12),    LH_EYEBROW = coords.px2mm(18);
-  const SZ_NAME    = coords.px2pt(44.8),  LH_NAME    = coords.px2mm(56);
-  const SZ_AFFIL   = coords.px2pt(17.6),  LH_AFFIL   = coords.px2mm(28);
-  const SZ_BIO     = coords.px2pt(16),    LH_BIO     = coords.px2mm(27);  // lh 1.7×16=27.2px
-  const GAP_E = coords.px2mm(16);   // margin-bottom: 1rem
-  const GAP_N = coords.px2mm(8);    // margin-bottom: 0.5rem
-  const GAP_A = coords.px2mm(32);   // margin-bottom: 2rem
-
   const eyebrowTxt = strip(data.section);
   const nameTxt    = strip(data.speakerName);
   const affilTxt   = strip(data.speakerTitle);
   const bioLines   = (data.speakerBio ?? '')
     .split(/\n|<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
 
-  const blockH = LH_EYEBROW + GAP_E + LH_NAME + GAP_N
-               + LH_AFFIL + GAP_A + LH_BIO * Math.max(1, bioLines.length);
+  const blockH = LH_PROF_EYEBROW + GAP_PROF_EYEBROW_NAME + LH_PROF_NAME + GAP_PROF_NAME_AFFIL
+               + LH_PROF_AFFIL + GAP_PROF_AFFIL_BIO + LH_PROF_BIO * Math.max(1, bioLines.length);
   let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
-  r.setFont(true,  SZ_EYEBROW); r.setColor(C_ACCENT);
-  r.cell(bandW, LH_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
-  y += LH_EYEBROW + GAP_E;
+  r.setFont(true,  T_PROF_EYEBROW); r.setColor(C_ACCENT);
+  r.cell(bandW, LH_PROF_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
+  y += LH_PROF_EYEBROW + GAP_PROF_EYEBROW_NAME;
 
-  r.setFont(true,  SZ_NAME); r.setColor(C_WHITE);
-  r.cell(bandW, LH_NAME, nameTxt, bandX, y, 'C');
-  y += LH_NAME + GAP_N;
+  r.setFont(true,  T_PROF_NAME); r.setColor(C_WHITE);
+  r.cell(bandW, LH_PROF_NAME, nameTxt, bandX, y, 'C');
+  y += LH_PROF_NAME + GAP_PROF_NAME_AFFIL;
 
-  r.setFont(false, SZ_AFFIL); r.setColor(C_ACCENT);   // CSS: var(--accent-color)
-  r.cell(bandW, LH_AFFIL, affilTxt, bandX, y, 'C');
-  y += LH_AFFIL + GAP_A;
+  r.setFont(false, T_PROF_AFFIL); r.setColor(C_ACCENT);   // CSS: var(--accent-color)
+  r.cell(bandW, LH_PROF_AFFIL, affilTxt, bandX, y, 'C');
+  y += LH_PROF_AFFIL + GAP_PROF_AFFIL_BIO;
 
-  r.setFont(false, SZ_BIO); r.setColor(C_MUTED);
+  r.setFont(false, T_PROF_BIO); r.setColor(C_MUTED);
   for (const line of bioLines) {
-    r.cell(bandW, LH_BIO, line, bandX, y, 'C');
-    y += LH_BIO;
+    r.cell(bandW, LH_PROF_BIO, line, bandX, y, 'C');
+    y += LH_PROF_BIO;
   }
 }
 
 function renderContactSlide(ctx: RenderCtx) {
-  const { r, data, coords, colors } = ctx;
+  const { r, data, coords, colors, sizes } = ctx;
   const { C_BG, C_ACCENT, C_WHITE, C_BODY } = colors;
-
-  // HTML .slide-card is a centered flex column (gap ~32px); the 3 children — .contact-thanks,
-  // .contact-line (name + email), .contact-next — are all horizontally centered. Measured from
-  // slide-24 (Playwright, 720px design space):
-  //   .contact-thanks 234–294  41.6px  WHITE bold   "감사합니다"
-  //   .contact-line   336–384  15.2px  #CBD5E1 reg   name + email (2 lines)
-  //   .contact-next   445–486  14.08px GOLD   reg    CTA (1 line)
-  // No header bar (HTML contact slide has none). Everything sits on the C_BG surface, centered
-  // in an 80% band — NOT the default (narrow, left-aligned) content region the old code used.
-  const LH_THANKS = coords.px2mm(60);    // .contact-thanks box (41.6px, line-height ~1.44)
-  const LH_LINE   = coords.px2mm(24.5);  // .contact-line per line (15.2px)
-  const LH_NOTE   = coords.px2mm(24);    // .contact-next line (14.08px)
-  const GAP_TL    = coords.px2mm(42);    // thanks bottom → contact-lines top
-  const GAP_LN    = coords.px2mm(60);    // contact-lines bottom → note top
-
-  const SZ_THANKS = 31.2;  // .contact-thanks 41.6px (px × 0.75)
-  const SZ_LINE   = 11.4;  // .contact-line   15.2px
-  const SZ_NOTE   = 10.56; // .contact-next   14.08px
+  const {
+    T_CONT_THANKS, T_CONT_LINE, T_CONT_NOTE,
+    LH_CONT_THANKS, LH_CONT_LINE, LH_CONT_NOTE,
+    GAP_CONT_THANKS_LINE, GAP_CONT_LINE_NOTE,
+  } = sizes;
 
   r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
 
@@ -934,38 +947,36 @@ function renderContactSlide(ctx: RenderCtx) {
   const note   = strip(data.contactNote);
   const nLines = (name ? 1 : 0) + (email ? 1 : 0) || 1;
 
-  r.setFont(false, SZ_NOTE);
+  r.setFont(false, T_CONT_NOTE);
   const noteLines = note ? Math.max(1, r.wrapText(note, bandW).length) : 1;
 
   // Vertically center the whole contact group, then stack with measured gaps.
-  const blockH = LH_THANKS + GAP_TL + LH_LINE * nLines + GAP_LN + LH_NOTE * noteLines;
+  const blockH = LH_CONT_THANKS + GAP_CONT_THANKS_LINE + LH_CONT_LINE * nLines + GAP_CONT_LINE_NOTE + LH_CONT_NOTE * noteLines;
   let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
   // "감사합니다" — WHITE bold (HTML .contact-thanks is white, not gold)
-  r.setFont(true, SZ_THANKS); r.setColor(C_WHITE);
-  r.cell(bandW, LH_THANKS, thanks, bandX, y, 'C');
-  y += LH_THANKS + GAP_TL;
+  r.setFont(true, T_CONT_THANKS); r.setColor(C_WHITE);
+  r.cell(bandW, LH_CONT_THANKS, thanks, bandX, y, 'C');
+  y += LH_CONT_THANKS + GAP_CONT_THANKS_LINE;
 
   // contact lines — secondary #CBD5E1 (C_BODY), regular weight
-  r.setFont(false, SZ_LINE); r.setColor(C_BODY);
-  if (name)  { r.cell(bandW, LH_LINE, name,  bandX, y, 'C'); y += LH_LINE; }
-  if (email) { r.cell(bandW, LH_LINE, email, bandX, y, 'C'); y += LH_LINE; }
+  r.setFont(false, T_CONT_LINE); r.setColor(C_BODY);
+  if (name)  { r.cell(bandW, LH_CONT_LINE, name,  bandX, y, 'C'); y += LH_CONT_LINE; }
+  if (email) { r.cell(bandW, LH_CONT_LINE, email, bandX, y, 'C'); y += LH_CONT_LINE; }
 
   // note / CTA — GOLD (HTML .contact-next is accent gold)
-  y += GAP_LN;
-  r.setFont(false, SZ_NOTE); r.setColor(C_ACCENT);
-  r.multiCell(bandW, LH_NOTE, note, bandX, y, 'C');
+  y += GAP_CONT_LINE_NOTE;
+  r.setFont(false, T_CONT_NOTE); r.setColor(C_ACCENT);
+  r.multiCell(bandW, LH_CONT_NOTE, note, bandX, y, 'C');
 }
 
 async function renderStandardSlide(ctx: RenderCtx) {
   const { r, doc, data, n, total, imgDir, spec, coords, colors, sizes, declared, region } = ctx;
   const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_BODY, C_VIS_BG } = colors;
-  const lh  = spec.line_heights ?? {};
-  const { T_SECT, T_NUM, T_TITLE, T_BUL, T_VIS_T, T_VIS_B } = sizes;
-
-  const LH_TITLE = lh.title_px      ? coords.px2mm(lh.title_px)     : coords.px2mm(46.0);
-  const LH_BUL   = lh.bullet_px     ? coords.px2mm(lh.bullet_px)    : coords.px2mm(29.44);
-  const BUL_GAP  = lh.bullet_gap_px ? coords.px2mm(lh.bullet_gap_px): coords.px2mm(19.2);
+  const {
+    T_SECT, T_NUM, T_TITLE, T_BUL, T_VIS_T, T_VIS_B,
+    LH_TITLE, LH_BULLET, LH_BULLET_GAP, LH_VIS_TITLE, LH_VIS_BODY,
+  } = sizes;
 
   // Resolve the regions this standard slide type declares. Some themes omit
   // header/meta/visual — access defensively for those.
@@ -995,7 +1006,7 @@ async function renderStandardSlide(ctx: RenderCtx) {
 
   const bullets  = data.bullets ?? [];
   const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
-  const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BUL, BUL_GAP);
+  const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BULLET, LH_BULLET_GAP);
   const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
   const blockH   = titleH + blockGap + totalBh;
   const blockY   = availStart + Math.max(0, (availH - blockH) * 0.5);
@@ -1008,10 +1019,10 @@ async function renderStandardSlide(ctx: RenderCtx) {
     const txt = strip(b);
     if (!txt) continue;
     if (by > cardBottom) break;
-    r.drawEllipse(contentR.x, by + LH_BUL * 0.28, 3.2, C_ACCENT);
+    r.drawEllipse(contentR.x, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
     r.setFont(false, T_BUL); r.setColor(C_BODY);
-    const afterBul = r.multiCell(bulTxtW - 6, LH_BUL, txt, contentR.x + 6, by, 'L');
-    by = afterBul + BUL_GAP;
+    const afterBul = r.multiCell(bulTxtW - 6, LH_BULLET, txt, contentR.x + 6, by, 'L');
+    by = afterBul + LH_BULLET_GAP;
   }
 
   if (hasRight) {
@@ -1024,21 +1035,21 @@ async function renderStandardSlide(ctx: RenderCtx) {
       r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       const vt = strip(data.visualTitle);
       const vd = strip((visualDisplay ?? '').replace(/<br\s*\/?>/gi, '\n'));
-      const lhVt = coords.px2mm(32), lhVb = coords.px2mm(32), gap = 5;
+      const gap = 5;
       // CSS-derived inner padding: read visual_inner_padding_px from spec (e.g. 24px for 1.5rem),
       // with a 2mm minimum floor for readability when CSS padding is 0.
       const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
-      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - visPad * 2, T_VIS_T, lhVt, true)  : 0;
-      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - visPad * 2, T_VIS_B, lhVb, false) : 0;
+      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - visPad * 2, T_VIS_T, LH_VIS_TITLE, true)  : 0;
+      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - visPad * 2, T_VIS_B, LH_VIS_BODY, false) : 0;
       const totalH = hVt + (vt && vd ? gap : 0) + hVb;
       let vy = visR!.y + visPad + Math.max(0, (visR!.h - visPad * 2 - totalH) / 2);
       if (vt) {
         r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
-        vy = r.multiCell(visR!.w - visPad * 2, lhVt, vt, visR!.x + visPad, vy, 'L') + gap;
+        vy = r.multiCell(visR!.w - visPad * 2, LH_VIS_TITLE, vt, visR!.x + visPad, vy, 'L') + gap;
       }
       if (vd) {
         r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
-        r.multiCell(visR!.w - visPad * 2, lhVb, vd, visR!.x + visPad, vy, 'L');
+        r.multiCell(visR!.w - visPad * 2, LH_VIS_BODY, vd, visR!.x + visPad, vy, 'L');
       }
     }
   }
@@ -1142,23 +1153,141 @@ function buildColors(spec: LayoutSpec) {
   };
 }
 
-// ── Font size builder ─────────────────────────────────────────────────────────
+// ── Unified CSS px → PDF size builder ─────────────────────────────────────────
+//
+// All font sizes and line heights are specified in CSS px (as rendered in the
+// browser). A single ratio `font_px_to_pt` from calibration converts them to
+// PDF pt (font sizes) or PDF mm (line heights/gaps).
+//
+// Legacy _pt keys (title_pt, bullet_pt, etc.) are auto-converted to CSS px
+// using the inverse ratio, so existing layout_overrides remain compatible.
 
-function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
+// ── Font + LineHeight + Gap sizes (all in PDF units) ──────────────────────────
+
+interface FontSizes {
+  // Font sizes (PDF pt)
+  T_SECT: number;  T_NUM: number;  T_TITLE: number;  T_BUL: number;
+  T_VIS_T: number;  T_VIS_B: number;
+  T_TS_EYEBROW: number;  T_TS_TITLE: number;  T_TS_SUB: number;  T_TS_META: number;
+  T_DIV_PART: number;  T_DIV_TITLE: number;  T_DIV_DESC: number;
+  T_PUNCH_TAG: number;  T_PUNCH_MARK: number;  T_PUNCH_TEXT: number;  T_PUNCH_SUB: number;
+  T_PROF_EYEBROW: number;  T_PROF_NAME: number;  T_PROF_AFFIL: number;  T_PROF_BIO: number;
+  T_CONT_THANKS: number;  T_CONT_LINE: number;  T_CONT_NOTE: number;
+  // Line heights (PDF mm)
+  LH_TITLE: number;  LH_BULLET: number;  LH_BULLET_GAP: number;
+  LH_VIS_TITLE: number;  LH_VIS_BODY: number;
+  LH_TS_EYEBROW: number;  LH_TS_TITLE: number;  LH_TS_SUB: number;  LH_TS_META: number;
+  LH_DIV_PART: number;  LH_DIV_TITLE: number;  LH_DIV_DESC: number;
+  LH_PUNCH_TAG: number;  LH_PUNCH_MARK: number;  LH_PUNCH_TEXT: number;  LH_PUNCH_SUB: number;
+  LH_PROF_EYEBROW: number;  LH_PROF_NAME: number;  LH_PROF_AFFIL: number;  LH_PROF_BIO: number;
+  LH_CONT_THANKS: number;  LH_CONT_LINE: number;  LH_CONT_NOTE: number;
+  // Gaps (PDF mm)
+  GAP_TS_EYE_TTL: number;  GAP_TS_TTL_SUB: number;  GAP_TS_SUB_META: number;
+  GAP_DIV_PART_TITLE: number;  GAP_DIV_TITLE_DESC: number;
+  GAP_PUNCH_TAG_MARK: number;  GAP_PUNCH_MARK_TEXT: number;  GAP_PUNCH_TEXT_SUB: number;
+  GAP_PROF_EYEBROW_NAME: number;  GAP_PROF_NAME_AFFIL: number;  GAP_PROF_AFFIL_BIO: number;
+  GAP_CONT_THANKS_LINE: number;  GAP_CONT_LINE_NOTE: number;
+}
+
+function buildSizes(spec: LayoutSpec): FontSizes {
   const f = spec.fonts ?? {};
+  const lh = spec.line_heights ?? {};
+  const gp = spec.gaps_px ?? {};
+  const mult = spec.calibration?.font_px_to_pt ?? 0.85;
+
+  // CSS px → PDF pt
+  const pt = (cssPx: number | undefined, fallback: number) =>
+    ((cssPx ?? fallback) * mult);
+
+  // CSS px → PDF mm (pt / MM_TO_PT)
+  const mm = (cssPx: number | undefined, fallback: number) =>
+    ((cssPx ?? fallback) * mult) / MM_TO_PT;
+
+  // ── Legacy _pt → CSS px conversion ──
+  // If a legacy _pt key exists but no corresponding _px key, convert it.
+  const legacyPt2CssPx = (ptVal: number | undefined) =>
+    ptVal !== undefined ? ptVal / mult : undefined;
+
+  const sectionPx   = f.section_px   ?? legacyPt2CssPx(f.title_pt !== undefined || f.section_px !== undefined ? undefined : undefined) ?? 11.2;
+  const titlePx     = f.title_px     ?? legacyPt2CssPx(f.title_pt) ?? 35.2;
+  const bulletPx    = f.bullet_px    ?? legacyPt2CssPx(f.bullet_pt) ?? 15.2;
+  const punchPx     = f.punchline_px ?? legacyPt2CssPx(f.punchline_pt) ?? 38.4;
+  const punchSubPx  = f.punchline_sub_px ?? legacyPt2CssPx(f.punchline_sub_pt) ?? 16.0;
+  const visTitlePx  = f.vis_title_px ?? legacyPt2CssPx(undefined) ?? 18.4;
+  const visBodyPx   = f.vis_body_px  ?? legacyPt2CssPx(undefined) ?? 14.72;
+  const tsEyebrowPx = f.ts_eyebrow_px ?? 12.8;
+  const tsTitlePx   = f.ts_title_px  ?? 48.0;
+  const tsSubPx     = f.ts_subtitle_px ?? 20.8;
+  const tsMetaPx    = f.ts_meta_px   ?? 12.8;
+  const divPartPx   = f.div_part_px  ?? 12.0;
+  const divTitlePx  = f.div_title_px ?? legacyPt2CssPx(f.div_title_pt) ?? 36.8;
+  const divDescPx   = f.div_desc_px  ?? legacyPt2CssPx(f.div_desc_pt) ?? 16.0;
+  const slideNumPx  = f.slide_num_px ?? 11.2;
+
   return {
-    T_SECT      : f.section_px   ? px2pt(f.section_px)   : px2pt(13.6),
-    T_NUM       : f.slide_num_px ? px2pt(f.slide_num_px) : px2pt(14.4),
-    T_TITLE     : f.title_pt  ?? 28.0,
-    T_BUL       : f.bullet_pt ?? 14.0,
-    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : 17.0,
-    T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : 14.0,
-    T_TS_TITLE  : f.ts_title_px ? px2pt(f.ts_title_px) : px2pt(56.0),
-    T_TS_SUB    : f.ts_sub_px   ? px2pt(f.ts_sub_px)   : px2pt(24.0),
-    T_TS_META   : f.ts_meta_px  ? px2pt(f.ts_meta_px)  : px2pt(16.0),
-    T_DIV_PART  : f.div_part_px ? px2pt(f.div_part_px) : px2pt(22.4),
-    T_DIV_TITLE : f.div_title_pt ?? f.title_pt ?? 28.0,
-    T_DIV_DESC  : f.div_desc_pt  ?? 13.0,
+    // Font sizes (pt)
+    T_SECT:          pt(sectionPx, 11.2),
+    T_NUM:           pt(slideNumPx, 11.2),
+    T_TITLE:         pt(titlePx, 35.2),
+    T_BUL:           pt(bulletPx, 15.2),
+    T_VIS_T:         pt(visTitlePx, 18.4),
+    T_VIS_B:         pt(visBodyPx, 14.72),
+    T_TS_EYEBROW:    pt(tsEyebrowPx, 12.8),
+    T_TS_TITLE:      pt(tsTitlePx, 48.0),
+    T_TS_SUB:        pt(tsSubPx, 20.8),
+    T_TS_META:       pt(tsMetaPx, 12.8),
+    T_DIV_PART:      pt(divPartPx, 12.0),
+    T_DIV_TITLE:     pt(divTitlePx, 36.8),
+    T_DIV_DESC:      pt(divDescPx, 16.0),
+    T_PUNCH_TAG:     pt(f.punchline_sub_px ?? 12.0, 12.0),
+    T_PUNCH_MARK:    pt(57.6, 57.6),
+    T_PUNCH_TEXT:    pt(punchPx, 38.4),
+    T_PUNCH_SUB:     pt(punchSubPx, 16.0),
+    T_PROF_EYEBROW:  pt(12.0, 12.0),
+    T_PROF_NAME:     pt(44.8, 44.8),
+    T_PROF_AFFIL:    pt(17.6, 17.6),
+    T_PROF_BIO:      pt(16.0, 16.0),
+    T_CONT_THANKS:   pt(41.6, 41.6),
+    T_CONT_LINE:     pt(15.2, 15.2),
+    T_CONT_NOTE:     pt(14.08, 14.08),
+    // Line heights (mm)
+    LH_TITLE:         mm(lh.title_px, 42.24),
+    LH_BULLET:        mm(lh.bullet_px, 22.8),
+    LH_BULLET_GAP:    mm(lh.bullet_gap_px, 15.2),
+    LH_VIS_TITLE:     mm(lh.vis_title_px, 23.92),
+    LH_VIS_BODY:      mm(lh.vis_body_px, 24.32),
+    LH_TS_EYEBROW:    mm(lh.ts_eyebrow_px, 16.0),
+    LH_TS_TITLE:      mm(lh.ts_title_px, 55.2),
+    LH_TS_SUB:        mm(lh.ts_subtitle_px, 33.28),
+    LH_TS_META:       mm(lh.ts_meta_px, 19.2),
+    LH_DIV_PART:      mm(lh.div_part_px, 16.0),
+    LH_DIV_TITLE:     mm(lh.div_title_px, 44.16),
+    LH_DIV_DESC:      mm(lh.div_desc_px, 25.6),
+    LH_PUNCH_TAG:     mm(lh.punch_tag_px, 16.0),
+    LH_PUNCH_MARK:    mm(lh.punch_mark_px, 28.8),
+    LH_PUNCH_TEXT:    mm(lh.punch_text_px, 55.68),
+    LH_PUNCH_SUB:     mm(lh.punch_sub_px, 27.2),
+    LH_PROF_EYEBROW:  mm(lh.prof_eyebrow_px, 18.0),
+    LH_PROF_NAME:     mm(lh.prof_name_px, 55.2),
+    LH_PROF_AFFIL:    mm(lh.prof_affil_px, 28.0),
+    LH_PROF_BIO:      mm(lh.prof_bio_px, 27.2),
+    LH_CONT_THANKS:   mm(lh.cont_thanks_px, 49.92),
+    LH_CONT_LINE:     mm(lh.cont_line_px, 24.0),
+    LH_CONT_NOTE:     mm(lh.cont_note_px, 22.4),
+    // Gaps (mm)
+    GAP_TS_EYE_TTL:       mm(gp.ts_eye_ttl_px, 24.0),
+    GAP_TS_TTL_SUB:       mm(gp.ts_ttl_sub_px, 24.0),
+    GAP_TS_SUB_META:      mm(gp.ts_sub_meta_px, 24.0),
+    GAP_DIV_PART_TITLE:   mm(gp.div_part_title_px, 24.0),
+    GAP_DIV_TITLE_DESC:   mm(gp.div_title_desc_px, 24.0),
+    GAP_PUNCH_TAG_MARK:   mm(gp.punch_tag_mark_px, 24.0),
+    GAP_PUNCH_MARK_TEXT:  mm(gp.punch_mark_text_px, 24.0),
+    GAP_PUNCH_TEXT_SUB:   mm(gp.punch_text_sub_px, 24.0),
+    GAP_PROF_EYEBROW_NAME: mm(gp.prof_eyebrow_name_px, 16.0),
+    GAP_PROF_NAME_AFFIL:   mm(gp.prof_name_affil_px, 8.0),
+    GAP_PROF_AFFIL_BIO:    mm(gp.prof_affil_bio_px, 32.0),
+    GAP_CONT_THANKS_LINE:  mm(gp.cont_thanks_line_px, 32.0),
+    GAP_CONT_LINE_NOTE:    mm(gp.cont_line_note_px, 32.0),
   };
 }
 
@@ -1209,60 +1338,69 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
     return isNaN(num) ? 0 : num;
   };
 
-  // Extract relevant CSS values
-  const titleFontSize = remToPx(cssVars['font-size-title'] ?? '2rem');       // 32px
-  const subtitleFontSize = remToPx(cssVars['font-size-subtitle'] ?? '1.3rem'); // 20.8px
-  const bodyFontSize = remToPx(cssVars['font-size-body'] ?? '1rem');          // 16px
-  const headerHeight = remToPx(cssVars['header-height'] ?? '3.2rem');        // 51.2px
-  const cardPaddingV = remToPx(cssVars['card-padding']?.split(' ')[0] ?? '2rem'); // 32px
-  const bulletGap = remToPx(cssVars['bullet-gap'] ?? '0.6rem');             // 9.6px
-  const imagePanelWidth = parseFloat(cssVars['image-panel-width'] ?? '45%'); // 45
-  const lineHeightBody = parseFloat(cssVars['line-height-body'] ?? '1.65');  // 1.65
+  // Helper: round to 1 decimal place
+  const r1 = (n: number) => Math.round(n * 10) / 10;
 
-  // Get viewport_px from theme spec
-  const themePath = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
-  let viewportPx = 720;
-  if (existsSync(themePath)) {
-    const spec = JSON.parse(readFileSync(themePath, 'utf-8'));
-    viewportPx = spec.calibration?.viewport_px ?? 720;
+  // Read font_px_to_pt from theme spec (default 0.85)
+  const themeSpecPath = resolve(workspaceRoot, `docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
+  let fontPxToPt = 0.85;
+  if (existsSync(themeSpecPath)) {
+    const spec = JSON.parse(readFileSync(themeSpecPath, 'utf-8'));
+    fontPxToPt = spec.calibration?.font_px_to_pt ?? 0.85;
   }
 
-  const pageH = 190.5; // mm
+  // Helper: CSS px → PDF mm (same formula as buildSizes mm())
+  const cssPxToMm = (cssPx: number) => (cssPx * fontPxToPt) / MM_TO_PT;
+  // Helper: CSS px → PDF pt
+  const cssPxToPt = (cssPx: number) => cssPx * fontPxToPt;
 
-  // Calibration multipliers (derived from analysis of existing tuned specs):
-  // fonts: pt values are typically CSS_px × 0.75 × ~1.1-1.25 (PDF-optimized)
-  // line_heights: values are typically CSS_px × ~1.8-2.0 (scaled to viewport space)
-  const FONT_PT_MULT = 0.94;    // CSS px → PDF pt multiplier (tuned for readability)
-  const LINE_H_MULT = 1.90;     // CSS px → viewport_px multiplier (tuned)
-
-  // Compute estimated values
-  const titlePt = Math.round(titleFontSize * FONT_PT_MULT * 10) / 10;
-  const bulletPt = Math.round(bodyFontSize * FONT_PT_MULT * 10) / 10;
-  const divTitlePt = Math.round(titleFontSize * 1.1 * FONT_PT_MULT * 10) / 10;  // divider slightly larger
-  const divDescPt = Math.round(subtitleFontSize * FONT_PT_MULT * 10) / 10;
-
-  const titlePx = Math.round(titleFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
-  const bulletPx = Math.round(bodyFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
-  const bulletGapPx = Math.round(bulletGap * LINE_H_MULT * 100) / 100;
-  const divTitlePx = Math.round(titleFontSize * 1.1 * lineHeightBody * LINE_H_MULT * 100) / 100;
-  const divDescPx = Math.round(subtitleFontSize * lineHeightBody * LINE_H_MULT * 100) / 100;
-
-  // Validate: line_mm must exceed font_mm
-  const titleLineMm = (titlePx / viewportPx) * pageH;
-  const titleFontMm = titlePt / MM_TO_PT;
-  const bulletLineMm = (bulletPx / viewportPx) * pageH;
-  const bulletFontMm = bulletPt / MM_TO_PT;
+  // Extract relevant CSS values
+  const titleFontSize   = remToPx(cssVars['font-size-title'] ?? '2rem');        // ~32px
+  const subtitleFontSize = remToPx(cssVars['font-size-subtitle'] ?? '1.3rem');  // ~20.8px
+  const bodyFontSize    = remToPx(cssVars['font-size-body'] ?? '1rem');         // 16px
+  const sectionFontSize = remToPx(cssVars['font-size-section'] ?? '0.7rem');    // ~11.2px
+  const bulletGap       = remToPx(cssVars['bullet-gap'] ?? '0.6rem');           // ~9.6px
+  const lineHeightBody  = parseFloat(cssVars['line-height-body'] ?? '1.65');     // 1.65
+  const lineHeightTitle = parseFloat(cssVars['line-height-title'] ?? '1.2');      // 1.2
 
   console.log(`\n📐 Auto-Calibrate: ${theme} theme, ${style} style`);
-  console.log(`   Viewport: ${viewportPx}px | Page: ${pageH}mm\n`);
+  console.log(`   font_px_to_pt: ${fontPxToPt}\n`);
 
   console.log('   CSS values read:');
-  console.log(`     --font-size-title: ${cssVars['font-size-title'] ?? '2rem'} = ${titleFontSize}px`);
-  console.log(`     --font-size-body: ${cssVars['font-size-body'] ?? '1rem'} = ${bodyFontSize}px`);
-  console.log(`     --bullet-gap: ${cssVars['bullet-gap'] ?? '0.6rem'} = ${bulletGap}px`);
-  console.log(`     --line-height-body: ${lineHeightBody}`);
-  console.log(`     --image-panel-width: ${imagePanelWidth}%`);
+  console.log(`     --font-size-title:    ${cssVars['font-size-title'] ?? '2rem'} = ${titleFontSize}px`);
+  console.log(`     --font-size-subtitle: ${cssVars['font-size-subtitle'] ?? '1.3rem'} = ${subtitleFontSize}px`);
+  console.log(`     --font-size-body:     ${cssVars['font-size-body'] ?? '1rem'} = ${bodyFontSize}px`);
+  console.log(`     --font-size-section:  ${cssVars['font-size-section'] ?? '0.7rem'} = ${sectionFontSize}px`);
+  console.log(`     --bullet-gap:         ${cssVars['bullet-gap'] ?? '0.6rem'} = ${bulletGap}px`);
+  console.log(`     --line-height-body:   ${lineHeightBody}`);
+  console.log(`     --line-height-title:  ${lineHeightTitle}`);
   console.log('');
+
+  // ── Compute CSS px font sizes ──
+  // All values are in CSS px — the same unit used in pdf_layout_spec.json fonts.*_px
+  const fonts = {
+    title_px:     r1(titleFontSize),                          // 32.0
+    bullet_px:    r1(bodyFontSize),                            // 16.0
+    section_px:   r1(sectionFontSize),                         // 11.2
+    div_title_px: r1(titleFontSize * 1.1),                    // 35.2
+    div_desc_px:  r1(subtitleFontSize),                        // 20.8
+    punchline_px: r1(titleFontSize * 1.2),                     // 38.4
+    punchline_sub_px: r1(bodyFontSize),                        // 16.0
+  };
+
+  // ── Compute CSS px line heights (font-size × line-height-ratio) ──
+  const lineHeights = {
+    title_px:       r1(titleFontSize * lineHeightTitle),          // 38.4
+    bullet_px:      r1(bodyFontSize * lineHeightBody),            // 26.4
+    bullet_gap_px:  r1(bulletGap),                                // 9.6
+    div_title_px:   r1(titleFontSize * 1.1 * lineHeightTitle),    // 42.2
+    div_desc_px:    r1(subtitleFontSize * lineHeightBody),        // 34.3
+  };
+
+  // ── Compute CSS px gaps ──
+  const gaps = {
+    bullet_gap_px: r1(bulletGap),                                 // 9.6
+  };
 
   console.log('   Estimated layout_overrides for lecture-profile.md:');
   console.log('   ─────────────────────────────────────────────────');
@@ -1270,32 +1408,48 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
   const yaml = [
     '  layout_overrides:',
     '    fonts:',
-    `      title_pt: ${titlePt}`,
-    `      bullet_pt: ${bulletPt}`,
-    `      div_title_pt: ${divTitlePt}`,
-    `      div_desc_pt: ${divDescPt}`,
+    `      title_px: ${fonts.title_px}`,
+    `      bullet_px: ${fonts.bullet_px}`,
+    `      section_px: ${fonts.section_px}`,
+    `      div_title_px: ${fonts.div_title_px}`,
+    `      div_desc_px: ${fonts.div_desc_px}`,
+    `      punchline_px: ${fonts.punchline_px}`,
+    `      punchline_sub_px: ${fonts.punchline_sub_px}`,
     '    line_heights:',
-    `      title_px: ${titlePx}`,
-    `      bullet_px: ${bulletPx}`,
-    `      bullet_gap_px: ${bulletGapPx}`,
-    `      div_title_px: ${divTitlePx}`,
-    `      div_desc_px: ${divDescPx}`,
+    `      title_px: ${lineHeights.title_px}`,
+    `      bullet_px: ${lineHeights.bullet_px}`,
+    `      bullet_gap_px: ${lineHeights.bullet_gap_px}`,
+    `      div_title_px: ${lineHeights.div_title_px}`,
+    `      div_desc_px: ${lineHeights.div_desc_px}`,
+    '    gaps_px:',
+    `      bullet_gap_px: ${gaps.bullet_gap_px}`,
   ];
   for (const line of yaml) console.log(line);
 
+  // ── Validation: line_mm must exceed font_mm ──
   console.log('');
-  console.log('   Validation:');
-  const titleOk = titleLineMm > titleFontMm;
-  const bulletOk = bulletLineMm > bulletFontMm;
-  console.log(`     title:   font_mm=${titleFontMm.toFixed(2)}, line_mm=${titleLineMm.toFixed(2)} ${titleOk ? '✅' : '❌ (line < font!)'}`);
-  console.log(`     bullet:  font_mm=${bulletFontMm.toFixed(2)}, line_mm=${bulletLineMm.toFixed(2)} ${bulletOk ? '✅' : '❌ (line < font!)'}`);
+  console.log('   Validation (CSS px → PDF mm via font_px_to_pt):');
 
-  if (!titleOk || !bulletOk) {
+  const checks = [
+    { name: 'title',  fontPx: fonts.title_px,  lhPx: lineHeights.title_px },
+    { name: 'bullet', fontPx: fonts.bullet_px,  lhPx: lineHeights.bullet_px },
+  ];
+  let allOk = true;
+  for (const c of checks) {
+    const fontMm = cssPxToMm(c.fontPx);
+    const lineMm = cssPxToMm(c.lhPx);
+    const ok = lineMm > fontMm;
+    if (!ok) allOk = false;
+    console.log(`     ${c.name}:   font_mm=${fontMm.toFixed(2)}, line_mm=${lineMm.toFixed(2)} ${ok ? '✅' : '❌ (line < font!)'}`);
+  }
+
+  if (!allOk) {
     console.log('\n   ⚠️  Validation failed — line heights too small for font sizes.');
     console.log('   Increase line_heights values above or decrease fonts.');
   }
 
   console.log('\n   💡 Copy the YAML block above into your lecture-profile.md frontmatter.');
+  console.log('   All values are in CSS px; PDF conversion uses font_px_to_pt ratio.');
   console.log('   Compare with theme defaults in:');
   console.log(`     docs/html-themes/themes/${theme}/pdf_layout_spec.json`);
 }
@@ -1383,7 +1537,7 @@ async function main() {
   // ── Build derived geometry, colors, and font sizes ────────────────────────
   const coords = buildCoords(layoutSpec);
   const colors = buildColors(layoutSpec);
-  const sizes  = buildSizes(layoutSpec, coords.px2pt);
+  const sizes  = buildSizes(layoutSpec);
 
   const { PW, PH, CW, CH, CX, CY } = coords;
   const { C_DARK, C_BG } = colors;

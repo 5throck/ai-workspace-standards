@@ -1,6 +1,6 @@
 {
-  "version": "1.2.0",
-  "_comment": "outline theme PDF layout — text-only, no visual region, full-width content.",
+  "version": "2.0.0",
+  "_comment": "outline theme PDF layout — v2.0.0: unified CSS px font/line-height system with font_px_to_pt ratio.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -9,7 +9,8 @@
   },
   "calibration": {
     "viewport_px": 720,
-    "_viewport_px_note": "Slide height in px (1280x720). Used for px→mm/pt conversion."
+    "font_px_to_pt": 0.85,
+    "_viewport_px_note": "Slide height in px (1280x720). Used for region px→mm/pt conversion."
   },
   "regions": {
     "header":  { "x_pct": 0.025, "y_pct": 0.030, "w_pct": 0.950, "h_pct": 0.041 },
@@ -50,15 +51,17 @@
     }
   },
   "fonts": {
-    "title_pt": 22.0,
-    "bullet_pt": 15.0,
-    "punchline_pt": 24.0
+    "section_px": 11.2,
+    "slide_num_px": 11.2,
+    "title_px": 35.2,
+    "bullet_px": 15.2,
+    "punchline_px": 38.4
   },
   "line_heights": {
-    "title_px": 40.0,
-    "bullet_px": 32.0,
-    "bullet_gap_px": 18.0,
-    "punchline_px": 52.0
+    "title_px": 42.24,
+    "bullet_px": 22.8,
+    "bullet_gap_px": 15.2,
+    "punchline_px": 42.24
   },
   "image_zones": {},
   "toc": null,

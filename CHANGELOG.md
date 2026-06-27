@@ -26,7 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-22]**: feat(co-deck): add opt-in `--title-text-shadow` CSS variable to `styles/base.css` (defaults `none`; zero impact on classic/minimal/academic/visual-heavy) to express the premium-dark gold title glow within the CSS-variables-only style discipline
 
 ### Changed
-- **[2026-06-26]**: fix(co-deck): increase PDF body/bullet font sizes for readability — bullet_pt raised across all 5 themes (pitch/pitch-enhanced 11→14pt, vertical/outline 13→15pt, zen 14→15pt); bullet_px and bullet_gap_px adjusted proportionally; gen-slides-pdf.ts v1.8.0 fallback bullet_pt 12.5→14.0, auto-calibrate FONT_PT_MULT 0.85→0.94
+- **[2026-06-27]**: refactor(co-deck): unify PDF font/line-height conversion to single `font_px_to_pt` ratio -- (1) gen-slides-pdf.ts: eliminate all hardcoded font sizes/line heights from 6 renderers; new `FontSizes` interface (~50 fields) + `buildSizes()` using single mult ratio from spec.calibration; `pt()`/`mm()` helpers replace scattered conversion logic; `legacyPt2CssPx()` auto-converts old `_pt` keys; autoCalibrate() outputs CSS px format (removed FONT_PT_MULT/LINE_H_MULT); fixed wrapText() empty-line deletion bug; (2) 6 theme spec JSONs (layout_base.json v2.0.0, pitch-enhanced v3.0.0, pitch/vertical/zen/outline v2.0.0): added `calibration.font_px_to_pt: 0.85`, CSS px-based `fonts.*_px` (16 keys), `line_heights.*_px` (22 keys), `gaps_px` (13 keys); removed legacy `_pt` keys; (3) auto-calibrate.ts: pdf-to-png-converter v2 API migration; (4) ppt-engine.js: NarrationEngine v2.1->v2.2
+- **[2026-06-26]**: fix(co-deck): increase PDF body/bullet font sizes for readability -- bullet_pt raised across all 5 themes (pitch/pitch-enhanced 11->14pt, vertical/outline 13->15pt, zen 14->15pt); bullet_px and bullet_gap_px adjusted proportionally; gen-slides-pdf.ts v1.8.0 fallback bullet_pt 12.5->14.0, auto-calibrate FONT_PT_MULT 0.85->0.94
 
 ### Fixed
 - **[2026-06-26]**: fix(co-deck): remove CSS `::before` bullet markers from visual panel text in pitch/pitch-enhanced themes — visual panel text items (with embedded markers like →, ✓) displayed duplicate bullets due to CSS `::before` pseudo-elements; removed `.visual-item-check::before` rules from base.css, pitch/theme.css, pitch-enhanced/theme.css; aligned pitch/template.html `renderVisualDisplay()` class from `visual-item-check` to `visual-item` to match ppt-engine.js shared implementation
@@ -826,7 +827,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-26*
+*Last Updated: 2026-06-27*
 
 
 

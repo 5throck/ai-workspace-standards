@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "_comment": "Pitch theme — region schema (ADR-0045 Decision #2). v1.0.0: initial layout for floating-card pitch theme; standard/divider/profile/contact slide types.",
+  "version": "2.0.0",
+  "_comment": "Pitch theme — region schema (ADR-0045 Decision #2). v2.0.0: unified CSS px font/line-height system with font_px_to_pt ratio.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -9,7 +9,8 @@
   },
   "calibration": {
     "viewport_px": 750,
-    "_viewport_px_note": "Pitch card max-height is 750px. Used for px→mm/pt conversion."
+    "font_px_to_pt": 0.85,
+    "_viewport_px_note": "Pitch card max-height is 750px. Used for region px→mm/pt conversion."
   },
   "regions": {
     "header":  { "x_pct": 0.030, "y_pct": 0.040, "w_pct": 0.940, "h_pct": 0.040 },
@@ -47,16 +48,22 @@
     }
   },
   "fonts": {
-    "title_pt": 22.0,
-    "bullet_pt": 14.0,
-    "punchline_pt": 32.0,
-    "punchline_sub_pt": 14.0
+    "section_px": 11.2,
+    "slide_num_px": 11.2,
+    "title_px": 35.2,
+    "bullet_px": 15.2,
+    "punchline_px": 38.4,
+    "punchline_sub_px": 16.0,
+    "vis_title_px": 18.4,
+    "vis_body_px": 14.72
   },
   "line_heights": {
-    "title_px": 38.0,
-    "bullet_px": 28.0,
-    "bullet_gap_px": 16.0,
-    "punchline_px": 52.0
+    "title_px": 42.24,
+    "bullet_px": 22.8,
+    "bullet_gap_px": 15.2,
+    "punchline_px": 42.24,
+    "vis_title_px": 23.92,
+    "vis_body_px": 24.32
   },
   "visual_inner_padding_px": 0,
   "_visual_inner_padding_px_note": "CSS .slide-visual and .right-panel have no padding in pitch theme. Gen-slides-pdf.ts applies a 2mm minimum margin floor for readability.",

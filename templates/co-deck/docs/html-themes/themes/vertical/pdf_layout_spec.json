@@ -1,6 +1,6 @@
 {
-  "version": "1.2.0",
-  "_comment": "vertical theme PDF layout — standard PPT layout with generous content area for long-form content. Same page format as scroll theme.",
+  "version": "2.0.0",
+  "_comment": "vertical theme PDF layout — v2.0.0: unified CSS px font/line-height system with font_px_to_pt ratio.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -9,7 +9,8 @@
   },
   "calibration": {
     "viewport_px": 720,
-    "_viewport_px_note": "Slide height in px (1280x720). Used for px→mm/pt conversion."
+    "font_px_to_pt": 0.85,
+    "_viewport_px_note": "Slide height in px (1280x720). Used for region px→mm/pt conversion."
   },
   "regions": {
     "header":  { "x_pct": 0.0,    "y_pct": 0.091,  "w_pct": 1.0,    "h_pct": 0.064 },
@@ -51,20 +52,22 @@
     }
   },
   "fonts": {
-    "title_pt": 22.0,
-    "bullet_pt": 15.0,
-    "punchline_pt": 24.0,
-    "punchline_sub_pt": 14.0,
-    "div_title_pt": 22.0,
-    "div_desc_pt": 15.0
+    "section_px": 11.2,
+    "slide_num_px": 11.2,
+    "title_px": 35.2,
+    "bullet_px": 15.2,
+    "punchline_px": 38.4,
+    "punchline_sub_px": 16.0,
+    "div_title_px": 36.8,
+    "div_desc_px": 16.0
   },
   "line_heights": {
-    "title_px": 44.0,
-    "bullet_px": 32.0,
-    "bullet_gap_px": 18.0,
-    "punchline_px": 52.0,
-    "div_title_px": 44.0,
-    "div_desc_px": 32.0
+    "title_px": 42.24,
+    "bullet_px": 22.8,
+    "bullet_gap_px": 15.2,
+    "punchline_px": 42.24,
+    "div_title_px": 44.16,
+    "div_desc_px": 25.6
   },
   "image_zones": {
     "standard": {
