@@ -1024,7 +1024,7 @@ async function renderStandardSlide(ctx: RenderCtx) {
       r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       const vt = strip(data.visualTitle);
       const vd = strip(visualDisplay);
-      const lhVt = coords.px2mm(24), lhVb = coords.px2mm(24), gap = 5;
+      const lhVt = coords.px2mm(32), lhVb = coords.px2mm(24), gap = 5;
       // CSS-derived inner padding: read visual_inner_padding_px from spec (e.g. 24px for 1.5rem),
       // with a 2mm minimum floor for readability when CSS padding is 0.
       const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
@@ -1151,8 +1151,8 @@ function buildSizes(spec: LayoutSpec, px2pt: (px: number) => number) {
     T_NUM       : f.slide_num_px ? px2pt(f.slide_num_px) : px2pt(14.4),
     T_TITLE     : f.title_pt  ?? 28.0,
     T_BUL       : f.bullet_pt ?? 14.0,
-    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : px2pt(18.4),
-    T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : px2pt(16.0),
+    T_VIS_T     : f.vis_title_px ? px2pt(f.vis_title_px) : 17.0,
+    T_VIS_B     : f.vis_body_px  ? px2pt(f.vis_body_px)  : 14.0,
     T_TS_TITLE  : f.ts_title_px ? px2pt(f.ts_title_px) : px2pt(56.0),
     T_TS_SUB    : f.ts_sub_px   ? px2pt(f.ts_sub_px)   : px2pt(24.0),
     T_TS_META   : f.ts_meta_px  ? px2pt(f.ts_meta_px)  : px2pt(16.0),
