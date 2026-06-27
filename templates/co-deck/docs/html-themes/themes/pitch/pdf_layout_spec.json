@@ -15,7 +15,7 @@
     "header":  { "x_pct": 0.030, "y_pct": 0.040, "w_pct": 0.940, "h_pct": 0.040 },
     "title":   { "x_pct": 0.060, "y_pct": 0.120, "w_pct": 0.520, "h_pct": 0.120 },
     "content": { "x_pct": 0.060, "y_pct": 0.270, "w_pct": 0.520, "h_pct": 0.640 },
-    "visual":  { "x_pct": 0.600, "y_pct": 0.080, "w_pct": 0.360, "h_pct": 0.850, "fit": "contain" },
+    "visual":  { "x_pct": 0.584, "y_pct": 0.064, "w_pct": 0.373, "h_pct": 0.872, "fit": "contain" },
     "meta":    { "x_pct": 0.060, "y_pct": 0.040, "w_pct": 0.520, "h_pct": 0.040 },
     "toc":     null
   },
@@ -58,12 +58,14 @@
     "bullet_gap_px": 16.0,
     "punchline_px": 52.0
   },
+  "visual_inner_padding_px": 0,
+  "_visual_inner_padding_px_note": "CSS .slide-visual and .right-panel have no padding in pitch theme. Gen-slides-pdf.ts applies a 2mm minimum margin floor for readability.",
   "image_zones": {
     "standard": {
-      "x_pct": 0.60,
-      "y_pct": 0.08,
-      "w_pct": 0.36,
-      "h_pct": 0.85,
+      "x_pct": 0.584,
+      "y_pct": 0.064,
+      "w_pct": 0.373,
+      "h_pct": 0.872,
       "fit": "contain"
     },
     "divider": {

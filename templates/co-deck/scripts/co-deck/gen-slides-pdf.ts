@@ -573,6 +573,7 @@ interface LayoutSpec {
   image_zones?: Record<string, any>;
   toc?: any;
   colors?: Record<string, number[]>;
+  visual_inner_padding_px?: number;
 }
 
 // A region resolved to absolute mm coordinates relative to the page top-left.
@@ -979,17 +980,20 @@ async function renderStandardSlide(ctx: RenderCtx) {
       const vt = strip(data.visualTitle);
       const vd = strip(visualDisplay);
       const lhVt = coords.px2mm(24), lhVb = coords.px2mm(22), gap = 5;
-      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - 8, T_VIS_T, lhVt, true)  : 0;
-      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - 8, T_VIS_B, lhVb, false) : 0;
+      // CSS-derived inner padding: read visual_inner_padding_px from spec (e.g. 24px for 1.5rem),
+      // with a 2mm minimum floor for readability when CSS padding is 0.
+      const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
+      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - visPad * 2, T_VIS_T, lhVt, true)  : 0;
+      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - visPad * 2, T_VIS_B, lhVb, false) : 0;
       const totalH = hVt + (vt && vd ? gap : 0) + hVb;
-      let vy = visR!.y + Math.max(0, (visR!.h - totalH) / 2);
+      let vy = visR!.y + visPad + Math.max(0, (visR!.h - visPad * 2 - totalH) / 2);
       if (vt) {
         r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
-        vy = r.multiCell(visR!.w - 8, lhVt, vt, visR!.x + 4, vy, 'C') + gap;
+        vy = r.multiCell(visR!.w - visPad * 2, lhVt, vt, visR!.x + visPad, vy, 'L') + gap;
       }
       if (vd) {
         r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
-        r.multiCell(visR!.w - 8, lhVb, vd, visR!.x + 4, vy, 'C');
+        r.multiCell(visR!.w - visPad * 2, lhVb, vd, visR!.x + visPad, vy, 'L');
       }
     }
   }

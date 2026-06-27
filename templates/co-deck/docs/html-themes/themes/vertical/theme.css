@@ -179,6 +179,21 @@ body {
   align-items: flex-start;
 }
 
+/* ── Visual panel text elements ──────────────────────────────────── */
+.slide-visual .visual-title {
+  text-align: left;
+  font-weight: 700;
+  color: var(--accent-color, #4a90d9);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.slide-visual .visual-display {
+  text-align: left;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
 /* ── Contact (closing) slide: same vertical stacking ─────────────── */
 .slide[data-type="contact"] .slide-card {
   flex-direction: column;

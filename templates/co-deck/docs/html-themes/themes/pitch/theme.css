@@ -339,6 +339,7 @@ body {
   color: var(--accent-color, #D97706);
   margin-bottom: 0.75rem;
   line-height: 1.3;
+  text-align: left;
 }
 
 .slide-visual .visual-display {
@@ -349,6 +350,7 @@ body {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.12) transparent;
+  text-align: left;
 }
 
 .slide-visual .visual-heading {
