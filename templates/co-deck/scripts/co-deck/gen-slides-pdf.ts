@@ -1024,7 +1024,7 @@ async function renderStandardSlide(ctx: RenderCtx) {
       r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
       const vt = strip(data.visualTitle);
       const vd = strip(visualDisplay);
-      const lhVt = coords.px2mm(32), lhVb = coords.px2mm(24), gap = 5;
+      const lhVt = coords.px2mm(32), lhVb = coords.px2mm(32), gap = 5;
       // CSS-derived inner padding: read visual_inner_padding_px from spec (e.g. 24px for 1.5rem),
       // with a 2mm minimum floor for readability when CSS padding is 0.
       const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
