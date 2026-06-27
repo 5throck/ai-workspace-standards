@@ -1,10 +1,15 @@
-// @version 1.8.0 — Increased PDF body/bullet font sizes for readability. bullet_pt raised
+// @version 1.9.0 — CJK fallback font + contact slide LinkedIn fix.
+//   When primary font (Pretendard/MaruBuri) lacks glyphs for CJK characters (e.g. 한자),
+//   automatically falls back to NotoSansKR (system or project font). Fixes tofu/box
+//   rendering on profile slides with 한자 bio text. Also fixed: renderContactSlide now
+//   renders contactLinkedIn field from slidedata.json.
+//   v1.8.0: Increased PDF body/bullet font sizes for readability. bullet_pt raised
 //   from 11-13pt to 14-15pt across all themes; bullet_px/line_heights adjusted proportionally.
 //   Auto-calibrate FONT_PT_MULT tuned from 0.85→0.94 to produce readable estimates.
 //   v1.7.0: Background image support. When lecture-profile.md → background_image.enabled
 //   is true, renders full-bleed background image (cover-crop) with semi-transparent overlay.
-//   Supports scope: all | divider-cover | individual. Reads background_image config from
-//   lecture-profile frontmatter; resolves image path from image-manifest.json or slideData.
+//   Supports scope: all | divider-cover | individual. Reads background image config from
+//   lecture-profile.md frontmatter; resolves image path from image-manifest.json or slideData.
 //   v1.6.0: OS-aware font search paths (Windows, macOS, Linux).
 // Generate a slide deck PDF from slidedata.json using pdf-lib.
 // Region-based layout model (ADR-0045 Decision #2): buildCoords() resolves
@@ -23,7 +28,7 @@
 
 import { PDFDocument, PDFFont, PDFPage, rgb, RGB,
   pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
+import fontkit, { create as fontkitCreate } from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { platform, homedir } from 'os';
@@ -250,19 +255,33 @@ class Renderer {
   private page!: PDFPage;
   private regular: PDFFont;
   private bold: PDFFont;
+  /** CJK fallback font for glyphs missing in primary font (e.g. 한자 in Pretendard). */
+  private fallbackRegular: PDFFont | null = null;
+  private fallbackBold: PDFFont | null = null;
+  /**
+   * Set of Unicode code points known to be MISSING in the primary font.
+   * Built from fontkit's hasGlyphForCodePoint at font load time.
+   * Used at render time to switch to fallback font for these code points.
+   */
+  private missingCps: Set<number> = new Set();
   private curFont: PDFFont;
   private curSize = 12;
   private curColor: RGB;
   readonly pageW: number;   // pts
   readonly pageH: number;   // pts
 
-  constructor(regular: PDFFont, bold: PDFFont, pageWMm: number, pageHMm: number, defaultColor: RGB) {
-    this.regular   = regular;
-    this.bold      = bold;
-    this.curFont   = regular;
-    this.curColor  = defaultColor;
-    this.pageW     = mm(pageWMm);
-    this.pageH     = mm(pageHMm);
+  constructor(regular: PDFFont, bold: PDFFont, pageWMm: number, pageHMm: number, defaultColor: RGB,
+              fallbackRegular?: PDFFont | null, fallbackBold?: PDFFont | null,
+              missingCps?: Set<number>) {
+    this.regular         = regular;
+    this.bold            = bold;
+    this.fallbackRegular = fallbackRegular ?? null;
+    this.fallbackBold    = fallbackBold ?? null;
+    this.missingCps      = missingCps ?? new Set();
+    this.curFont         = regular;
+    this.curColor        = defaultColor;
+    this.pageW           = mm(pageWMm);
+    this.pageH           = mm(pageHMm);
   }
 
   setPage(p: PDFPage) { this.page = p; }
@@ -270,6 +289,50 @@ class Renderer {
   // Convert mm (fpdf2-style top-left origin) → pts bottom-left (pdf-lib)
   private pt(v: number) { return mm(v); }
   private fy(yMm: number) { return this.pageH - mm(yMm); }  // flip Y: top → bottom
+
+  /**
+   * Check if the given code point is missing from the primary font
+   * (and thus should use the fallback font).
+   */
+  private needsFallback(cp: number): boolean {
+    return this.missingCps.has(cp);
+  }
+
+  /**
+   * Get the effective font for a code point: primary if it has the glyph,
+   * otherwise the fallback font (or primary if no fallback available).
+   */
+  private effectiveFontForCp(cp: number): PDFFont {
+    if (!this.needsFallback(cp)) return this.curFont;
+    const fb = this.curFont === this.bold ? this.fallbackBold : this.fallbackRegular;
+    return fb ?? this.curFont;
+  }
+
+  /**
+   * Split a string into mono-font runs where each run uses a single PDFFont.
+   * Consecutive characters sharing the same effective font are grouped together.
+   */
+  private buildFontRuns(text: string): Array<{ text: string; font: PDFFont }> {
+    // Fast path: no fallback font or no missing code points in text
+    if (!this.fallbackRegular) return [{ text, font: this.curFont }];
+    let anyMissing = false;
+    for (const ch of text) {
+      if (this.missingCps.has(ch.codePointAt(0)!)) { anyMissing = true; break; }
+    }
+    if (!anyMissing) return [{ text, font: this.curFont }];
+
+    const runs: Array<{ text: string; font: PDFFont }> = [];
+    for (const ch of text) {
+      const cp = ch.codePointAt(0)!;
+      const font = this.effectiveFontForCp(cp);
+      if (runs.length > 0 && runs[runs.length - 1].font === font) {
+        runs[runs.length - 1].text += ch;
+      } else {
+        runs.push({ text: ch, font });
+      }
+    }
+    return runs;
+  }
 
   setFont(bold: boolean, sizePt: number) {
     this.curFont = bold ? this.bold : this.regular;
@@ -303,15 +366,22 @@ class Renderer {
 
   // Draw a single line of text. yMm is the top of the line (fpdf2 style).
   // We approximate the baseline as yMm + cellH * 0.72 (empirical for typical fonts).
+  // Supports CJK fallback: splits text into mono-font runs for characters that
+  // the primary font cannot render (e.g. 한자 in Pretendard).
   private drawLine(text: string, xMm: number, yMm: number, cellH: number) {
     const baselineY = this.fy(yMm + cellH * 0.72);
-    this.page.drawText(text, {
-      x: this.pt(xMm),
-      y: baselineY,
-      size:  this.curSize,
-      font:  this.curFont,
-      color: this.curColor,
-    });
+    const runs = this.buildFontRuns(text);
+    let curX = xMm;
+    for (const run of runs) {
+      this.page.drawText(run.text, {
+        x: this.pt(curX),
+        y: baselineY,
+        size:  this.curSize,
+        font:  run.font,
+        color: this.curColor,
+      });
+      curX += run.font.widthOfTextAtSize(run.text, this.curSize) / MM_TO_PT;
+    }
   }
 
   // Single-line cell (no wrapping)
@@ -339,9 +409,14 @@ class Renderer {
     return y;
   }
 
-  // Returns text width in mm
+  // Returns text width in mm (accounts for CJK fallback font width differences)
   stringWidth(text: string): number {
-    return this.curFont.widthOfTextAtSize(text, this.curSize) / MM_TO_PT;
+    const runs = this.buildFontRuns(text);
+    let total = 0;
+    for (const run of runs) {
+      total += run.font.widthOfTextAtSize(run.text, this.curSize);
+    }
+    return total / MM_TO_PT;
   }
 
   wrapText(text: string, maxWidthMm: number): string[] {
@@ -518,9 +593,11 @@ interface SlideData {
   speakerBio?:    string;
   photoPath?:     string;
   isContactSlide?: boolean;
-  contactName?:   string;
-  contactEmail?:  string;
-  contactNote?:   string;
+  contactName?:      string;
+  contactEmail?:     string;
+  contactLinkedIn?:  string;
+  contactPhone?:     string;
+  contactNote?:      string;
 }
 
 // ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
@@ -944,8 +1021,9 @@ function renderContactSlide(ctx: RenderCtx) {
   const thanks = strip(data.title);
   const name   = strip(data.contactName);
   const email  = strip(data.contactEmail);
+  const linkedin = strip(data.contactLinkedIn);
   const note   = strip(data.contactNote);
-  const nLines = (name ? 1 : 0) + (email ? 1 : 0) || 1;
+  const nLines = (name ? 1 : 0) + (email ? 1 : 0) + (linkedin ? 1 : 0) || 1;
 
   r.setFont(false, T_CONT_NOTE);
   const noteLines = note ? Math.max(1, r.wrapText(note, bandW).length) : 1;
@@ -961,8 +1039,9 @@ function renderContactSlide(ctx: RenderCtx) {
 
   // contact lines — secondary #CBD5E1 (C_BODY), regular weight
   r.setFont(false, T_CONT_LINE); r.setColor(C_BODY);
-  if (name)  { r.cell(bandW, LH_CONT_LINE, name,  bandX, y, 'C'); y += LH_CONT_LINE; }
-  if (email) { r.cell(bandW, LH_CONT_LINE, email, bandX, y, 'C'); y += LH_CONT_LINE; }
+  if (name)     { r.cell(bandW, LH_CONT_LINE, name,     bandX, y, 'C'); y += LH_CONT_LINE; }
+  if (email)    { r.cell(bandW, LH_CONT_LINE, email,    bandX, y, 'C'); y += LH_CONT_LINE; }
+  if (linkedin) { r.cell(bandW, LH_CONT_LINE, linkedin, bandX, y, 'C'); y += LH_CONT_LINE; }
 
   // note / CTA — GOLD (HTML .contact-next is accent gold)
   y += GAP_CONT_LINE_NOTE;
@@ -1568,6 +1647,14 @@ async function main() {
     ['MaruBuri-Regular.ttf',   'MaruBuri-Bold.ttf'],
   ];
 
+  // CJK fallback font families: used when primary font lacks glyphs (e.g. 한자).
+  // Variable fonts (.ttf with fvar table) are supported by pdf-lib/fontkit.
+  const CJK_FALLBACK_FONTS: Array<[string, string]> = [
+    ['NotoSansKR-Regular.ttf', 'NotoSansKR-Bold.ttf'],
+    ['NotoSansKR-VF.ttf',      'NotoSansKR-VF.ttf'],
+    ['NotoSansKR.otf',         'NotoSansKR-Bold.otf'],
+  ];
+
   // Build search order: project fontDir → OS system dirs
   const sysFontDirs: string[] = (() => {
     const p = platform();
@@ -1589,6 +1676,28 @@ async function main() {
     console.error(`Font files not found in: ${fontDir}`);
     console.error('   Expected Pretendard-Regular/Bold.ttf or MaruBuri-Regular/Bold.ttf');
     process.exit(1);
+  }
+
+  // Resolve CJK fallback font (optional — best-effort, no error if not found)
+  let cjkFontR = '', cjkFontB = '';
+  for (const [r, b] of CJK_FALLBACK_FONTS) {
+    // For variable fonts where regular == bold (same file), check that at least regular exists
+    const rExists = (dir: string) => existsSync(join(dir, r));
+    const bExists = (dir: string) => existsSync(join(dir, b));
+    for (const dir of [fontDir, ...sysFontDirs]) {
+      if (r === b) {
+        // Same file for regular and bold (variable font)
+        if (rExists(dir)) { cjkFontR = join(dir, r); cjkFontB = cjkFontR; break; }
+      } else if (rExists(dir) && bExists(dir)) {
+        cjkFontR = join(dir, r); cjkFontB = join(dir, b); break;
+      }
+    }
+    if (cjkFontR) break;
+  }
+  if (cjkFontR) {
+    console.log(`CJK fallback font: ${cjkFontR}`);
+  } else {
+    console.log('CJK fallback font: none found (한자 glyphs may not render)');
   }
 
   console.log(`Project: ${projectDir}`);
@@ -1638,7 +1747,54 @@ async function main() {
 
   const regularFont = await pdfDoc.embedFont(readFileSync(fontR));
   const boldFont    = await pdfDoc.embedFont(readFileSync(fontB));
-  const renderer    = new Renderer(regularFont, boldFont, PW, PH, colors.C_WHITE);
+
+  // Embed CJK fallback font (optional)
+  let cjkRegularFont: PDFFont | null = null;
+  let cjkBoldFont: PDFFont | null = null;
+  if (cjkFontR) {
+    try {
+      cjkRegularFont = await pdfDoc.embedFont(readFileSync(cjkFontR));
+      if (cjkFontB && cjkFontB !== cjkFontR) {
+        cjkBoldFont = await pdfDoc.embedFont(readFileSync(cjkFontB));
+      } else {
+        cjkBoldFont = cjkRegularFont;  // variable font: same file for both weights
+      }
+    } catch (e: any) {
+      console.warn(`CJK fallback font embed failed: ${e.message}`);
+    }
+  }
+
+  // Build missing-code-point set: scan primary font for characters that the
+  // fallback font CAN render but primary CANNOT. This avoids calling
+  // hasGlyphForCodePoint per-character at render time.
+  const missingCps = new Set<number>();
+  if (cjkRegularFont) {
+    try {
+      const primaryFk  = fontkitCreate(readFileSync(fontR));
+      const fallbackFk = fontkitCreate(readFileSync(cjkFontR));
+      // Collect all code points from slidedata that are in fallback but not primary.
+      // We scan all text fields once at startup.
+      const allText = JSON.stringify(slideData);
+      for (let i = 0; i < allText.length; i++) {
+        const cp = allText.codePointAt(i);
+        if (cp === undefined || cp < 0x20) continue;
+        // Skip chars > 0xFFFF (surrogate pairs) — rare in Korean text
+        if (cp > 0xFFFF) continue;
+        if (fallbackFk.hasGlyphForCodePoint(cp) && !primaryFk.hasGlyphForCodePoint(cp)) {
+          missingCps.add(cp);
+        }
+      }
+      console.log(`CJK fallback: ${missingCps.size} code points missing in primary font`);
+      if (missingCps.size > 0) {
+        const sample = [...missingCps].slice(0, 5).map(cp => String.fromCodePoint(cp)).join('');
+        console.log(`  Missing chars sample: ${sample}`);
+      }
+    } catch (e: any) {
+      console.warn(`CJK glyph scan failed: ${e.message}`);
+    }
+  }
+
+  const renderer = new Renderer(regularFont, boldFont, PW, PH, colors.C_WHITE, cjkRegularFont, cjkBoldFont, missingCps);
 
   for (let idx = 0; idx < slideData.length; idx++) {
     const data = slideData[idx];
