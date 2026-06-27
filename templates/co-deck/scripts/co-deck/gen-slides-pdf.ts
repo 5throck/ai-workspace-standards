@@ -342,26 +342,28 @@ class Renderer {
   }
 
   wrapText(text: string, maxWidthMm: number): string[] {
-    const words = text.split(' ');
     const lines: string[] = [];
-    let line = '';
-    let lineW = 0;
+    for (const segment of text.split('\n')) {
+      const words = segment.split(' ');
+      let line = '';
+      let lineW = 0;
 
-    for (let i = 0; i < words.length; i++) {
-      const word   = words[i];
-      const suffix = i < words.length - 1 ? ' ' : '';
-      const ww     = this.stringWidth(word + suffix);
+      for (let i = 0; i < words.length; i++) {
+        const word   = words[i];
+        const suffix = i < words.length - 1 ? ' ' : '';
+        const ww     = this.stringWidth(word + suffix);
 
-      if (lineW > 0 && lineW + ww > maxWidthMm) {
-        lines.push(line.trimEnd());
-        line  = word + suffix;
-        lineW = this.stringWidth(word + suffix);
-      } else {
-        line  += word + suffix;
-        lineW += ww;
+        if (lineW > 0 && lineW + ww > maxWidthMm) {
+          lines.push(line.trimEnd());
+          line  = word + suffix;
+          lineW = this.stringWidth(word + suffix);
+        } else {
+          line  += word + suffix;
+          lineW += ww;
+        }
       }
+      if (line.trim()) lines.push(line.trimEnd());
     }
-    if (line.trim()) lines.push(line.trimEnd());
     return lines;
   }
 
@@ -652,11 +654,11 @@ function renderTitleSlide(ctx: RenderCtx) {
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
 
-  // meta (cover-eyebrow): drawn BEFORE title — small accent label above the main title
-  const meta = strip(data.meta);
-  if (meta && metaR) {
+  // Section eyebrow: drawn ABOVE title — matches HTML .slide-eyebrow which uses data.section
+  const eyebrow = strip(data.section);
+  if (eyebrow && metaR) {
     r.setFont(true, T_TS_META); r.setColor(C_ACCENT);
-    r.multiCell(metaR.w, coords.px2mm(24), meta.toUpperCase(), metaR.x, metaR.y, 'C');
+    r.multiCell(metaR.w, coords.px2mm(24), eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
   }
 
   r.setFont(true,  T_TS_TITLE); r.setColor(C_WHITE);
@@ -664,6 +666,14 @@ function renderTitleSlide(ctx: RenderCtx) {
 
   r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
   r.multiCell(subR.w, coords.px2mm(36), strip(data.subtitle), subR.x, subR.y, 'C');
+
+  // Meta: drawn AFTER subtitle — matches HTML .slide-meta which appears below subtitle
+  const meta = strip(data.meta);
+  if (meta) {
+    const metaY = subR.y + coords.px2mm(36) + coords.px2mm(12);
+    r.setFont(false, T_TS_META); r.setColor(C_META);
+    r.multiCell(subR.w, coords.px2mm(24), meta, subR.x, metaY, 'C');
+  }
 }
 
 async function renderDividerSlide(ctx: RenderCtx) {
@@ -826,7 +836,7 @@ function renderProfileSlide(ctx: RenderCtx) {
   const nameTxt    = strip(data.speakerName);
   const affilTxt   = strip(data.speakerTitle);
   const bioLines   = (data.speakerBio ?? '')
-    .split(/<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
+    .split(/\n|<br\s*\/?>/i).map((s: string) => strip(s).trim()).filter(Boolean);
 
   // Vertically center the block.
   const blockH = LH_EYEBROW + GAP_E + LH_TITLE + GAP_T + LH_NAME + GAP_N
