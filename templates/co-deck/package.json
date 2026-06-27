@@ -9,7 +9,10 @@
     "measure-layout": "bun scripts/co-deck/measure-layout.ts",
     "gen-pdf": "bun scripts/co-deck/gen-slides-pdf.ts",
     "auto-calibrate": "bun scripts/co-deck/auto-calibrate.ts",
-    "snapshot": "bun scripts/co-deck/snapshot.ts"
+    "snapshot": "bun scripts/co-deck/snapshot.ts",
+    "audit": "bun scripts/audit.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
