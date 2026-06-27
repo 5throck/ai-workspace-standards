@@ -144,9 +144,9 @@ You are the bridge between generic business analysis and industry-specific reali
 
 ## Output Destination
 
-- Industry analysis reports and trend briefings → `docs/reports/{topic}-industry-analysis-{YYYY-MM-DD}.md`
-- Regulatory landscape overviews → `docs/research/{topic}-regulatory-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 

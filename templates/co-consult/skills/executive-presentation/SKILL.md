@@ -50,7 +50,7 @@ Invoke this skill when the Communications Lead is ready to design and build the 
 - One-Page Executive Summary (standalone)
 - Speaker notes for key slides
 
-> **Save Output To**: `docs/presentations/{deck-title}-{YYYY-MM-DD}.md` — create the folder if it does not exist.
+> **Save Output To**: See Output Destination Mapping in `docs/co-consult.context.md` for destination folder and naming convention. Create the folder if it does not exist. Do not hard-code output paths.
 
 ## Related Skills
 

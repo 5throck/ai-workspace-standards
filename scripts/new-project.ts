@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.9
+// @version 1.2.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -335,6 +335,32 @@ for (const srcFile of walkFiles(templatesDir)) {
 // Ensure variant-overlaid files are also writable
 makeWritable(projectDir);
 console.log('  ✅ Variant templates copied');
+
+// ── 2.3b. Create deliverables/ subdirectories (co-consult) ──────────────────────
+if (variant === 'co-consult') {
+  const delRoot = join(projectDir, 'deliverables');
+  const delDirs = [
+    { name: 'reports', desc: 'Final deliverables, client-ready reports' },
+    { name: 'drafts', desc: 'Work-in-progress documents and drafts' },
+    { name: 'research', desc: 'Research notes, source materials, data' },
+    { name: 'presentations', desc: 'Client presentation decks' },
+  ];
+  for (const d of delDirs) {
+    const dir = join(delRoot, d.name);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'README.md'), [
+      `# deliverables/${d.name}/`,
+      '',
+      d.desc + '.',
+      '',
+      '## Output Destination',
+      '',
+      'See Output Destination Mapping in `docs/co-consult.context.md` for per-agent paths and naming conventions.',
+      '',
+    ].join('\n'));
+  }
+  console.log('  ✅ deliverables/{reports,drafts,research,presentations}/ created');
+}
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
 const pmMd = join(projectDir, 'agents', 'pm.md');

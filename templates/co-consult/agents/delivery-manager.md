@@ -92,10 +92,9 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
 
 ## Output Destination
 
-- Project status reports and stakeholder trackers → `docs/drafts/delivery-{report-type}-{YYYY-MM-DD}.md`
-- Risk and issue logs → `docs/drafts/delivery-risk-log-{YYYY-MM-DD}.md`
-- Meeting notes → `docs/drafts/delivery-meeting-notes-{YYYY-MM-DD}.md`
-- Create the target folder if it does not exist before saving.
+> **Single Source of Truth**: See Output Destination Mapping in `docs/co-consult.context.md`.
+> This table defines the exact destination folder and naming convention for every deliverable this agent produces.
+> Agent MUST read this table before saving any file. Do not hard-code output paths.
 
 ## Constraints
 
