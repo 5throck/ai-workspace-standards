@@ -82,6 +82,8 @@
       "fit": "cover"
     }
   },
+  "visual_inner_padding_px": 0,
+  "_visual_inner_padding_px_note": "CSS .slide-visual and .right-panel have no padding in vertical theme (base.css). Gen-slides-pdf.ts applies a 2mm minimum margin floor for readability.",
   "toc": null,
   "content_constraints": {
     "standard": {
