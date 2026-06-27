@@ -988,8 +988,8 @@ function showSlide(index) {
   TOCBuilder.highlight(index);
   if (ThumbnailNav.visible) ThumbnailNav.highlight(index);
 
-  // Notify NarrationEngine of slide change
-  if (NarrationEngine._available && NarrationEngine.isPlaying) {
+  // Notify NarrationEngine of slide change (for narration speech and/or auto-advance timer restart)
+  if (NarrationEngine._available && (NarrationEngine.isPlaying || NarrationEngine.isAutoAdvance)) {
     NarrationEngine._onSlideChanged(index);
   }
 
