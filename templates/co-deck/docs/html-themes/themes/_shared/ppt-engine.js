@@ -363,6 +363,36 @@ var PresenterTools = {
   }
 };
 
+// ── FullscreenManager ────────────────────────────────────────────────
+// Browser Fullscreen API: toggle via F key or footer button.
+// Uses document.documentElement as the fullscreen target.
+var FullscreenManager = {
+  _isFullscreen: false,
+
+  toggle: function() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function() {});
+    } else {
+      document.exitFullscreen().catch(function() {});
+    }
+  },
+
+  _onFullscreenChange: function() {
+    this._isFullscreen = !!document.fullscreenElement;
+    var btn = document.getElementById('fullscreen-btn');
+    if (btn) {
+      btn.title = this._isFullscreen ? '전체화면 종료 (F)' : '전체화면 (F)';
+      btn.textContent = this._isFullscreen ? '⤡' : '⤢';
+      btn.classList.toggle('active', this._isFullscreen);
+    }
+  },
+
+  init: function() {
+    var self = this;
+    document.addEventListener('fullscreenchange', function() { self._onFullscreenChange(); });
+  }
+};
+
 // ── NarrationEngine v2.4 ───────────────────────────────────────────────
 // Web Speech API TTS narration with config-driven auto-advance support.
 // Reads slideData[i].script (or language-specific variant) aloud.
@@ -1068,8 +1098,13 @@ document.addEventListener('keydown', function(e) {
     e.preventDefault();
     changeSlide(-1);
   }
+  if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
-    // Stop narration first, then close overlays
+    // Exit fullscreen first, then stop narration/close overlays
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(function() {});
+      return;
+    }
     if (NarrationEngine._available && NarrationEngine.isPlaying) {
       NarrationEngine.stop();
     } else {
@@ -1098,6 +1133,7 @@ document.addEventListener('keydown', function(e) {
 function initPPT(options) {
   options = options || {};
   TransitionEngine.init(options.transition || 'fade');
+  FullscreenManager.init();
 
   // Set initial transition button state
   document.querySelectorAll('.transition-btn').forEach(function(btn) {

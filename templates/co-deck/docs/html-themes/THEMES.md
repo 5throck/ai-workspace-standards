@@ -12,11 +12,11 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 
 | Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
-| `outline` | 3.0.0 | active | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/outline/` |
-| `pitch` | 1.0.0 | active | Floating card, viewport-relative (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | classic, minimal, premium-dark | `themes/pitch/` |
-| `pitch-enhanced` | 3.0.0 | active | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
-| `vertical` | 3.0.0 | active | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
-| `zen` | 3.0.0 | active | Presentation Zen — full-bleed background images, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | classic, minimal, premium-dark (visual-heavy: incompatible — no text-dense content) | `themes/zen/` |
+| `outline` | 3.0.0 | active | PPT Outline View — base.css vocabulary, TOC drawer, transitions | PPT footer bar (TOC drawer + transitions + script + fullscreen + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/outline/` |
+| `pitch` | 1.0.0 | active | Floating card, viewport-relative (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + fullscreen + prev/next) | Optional | classic, minimal, premium-dark | `themes/pitch/` |
+| `pitch-enhanced` | 3.0.0 | active | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + fullscreen + timer + prev/next) | Drawer | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
+| `vertical` | 3.0.0 | active | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + fullscreen + timer + progress + arrows) | Drawer | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
+| `zen` | 3.0.0 | active | Presentation Zen — full-bleed background images, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + fullscreen + timer + prev/next) | Drawer | classic, minimal, premium-dark (visual-heavy: incompatible — no text-dense content) | `themes/zen/` |
 
 ### Theme Package Files
 
@@ -49,8 +49,10 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
 | **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for per-engine UI visibility; 4 combinations: both on, narrator only, auto-slide only, both off; language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
+| **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 5 themes supported; Escape exits fullscreen first before closing overlays** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
+| **@media print** | **Ctrl+P renders one slide per page in landscape; all UI chrome hidden; slide cards flow as block with page-break-after** |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + **fullscreen button** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system. **NarrationEngine v2.4 (voice dropdowns, TTS, auto-advance) is intentionally NOT included in the `pitch` theme** — it is a preserved original theme excluded from all ppt-engine upgrades. Use `pitch-enhanced` for full NarrationEngine support.
 
@@ -170,7 +172,7 @@ The shared style/color pool (ADR-0045 Decision B) is the single source for all t
 
 ```
 1. styles/base.css                       — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css         — PPT common UI (TOC drawer, transitions, footer, timer, narration) [PPT themes only]
+2. themes/_shared/ppt-engine.css         — PPT common UI (TOC drawer, transitions, footer, timer, narration, fullscreen, @media print) [PPT themes only]
 3. themes/<theme>/theme.css              — per-theme extension (card geometry, slide type layouts, etc.)
 4. styles/<style>/style.css              — per-style visual overrides (colors, fonts, spacing)
 ```
@@ -256,8 +258,8 @@ docs/html-themes/
 ├── themes/
 │   ├── _shared/
 │   │   ├── layout_base.json               # Layer 0 — region skeleton (all null) + 16:9 page + print defaults
-│   │   ├── ppt-engine.css                  # PPT common UI (TOC drawer, transitions, footer, timer, narration)
-│   │   └── ppt-engine.js                   # PPT common runtime (TOCBuilder, TransitionEngine, NarrationEngine, etc.)
+│   │   ├── ppt-engine.css                  # PPT common UI (TOC drawer, transitions, footer, timer, narration, fullscreen, @media print)
+│   │   └── ppt-engine.js                   # PPT common runtime (TOCBuilder, TransitionEngine, FullscreenManager, NarrationEngine, etc.)
 │   ├── outline/
 │   │   ├── template.html
 │   │   ├── theme.json

@@ -322,6 +322,10 @@ body {
   border-color: var(--accent-color);
 }
 
+#fullscreen-btn.active {
+  color: var(--accent-color);
+}
+
 .nav-btn {
   background: var(--nav-btn-bg);
   border: 1px solid var(--border-subtle);
@@ -613,5 +617,76 @@ body {
   .slide {
     transform: none;
     transform-origin: center;
+  }
+}
+
+/* ── Print stylesheet: one slide per page ───────────────────────────
+   Ctrl+P renders each slide on its own page with no UI chrome.
+   Layout switches from absolute stacking to block flow.             */
+@media print {
+  /* Layout: restore normal flow, show all slides */
+  body {
+    height: auto;
+    overflow: visible;
+    display: block;
+  }
+  .ppt-main {
+    flex: none;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Hide all chrome */
+  .ppt-footer,
+  .vertical-topbar,
+  #toc-drawer,
+  #toc-overlay,
+  #script-panel,
+  #thumbnail-panel,
+  .slide-counter,
+  .progress-bar-wrap,
+  .presenter-timer,
+  #timer-btn,
+  #fullscreen-btn,
+  .transition-btn,
+  #script-btn,
+  #toc-btn,
+  .footer-tts-group,
+  .footer-slide-group,
+  .narration-dropdown-wrap {
+    display: none !important;
+  }
+
+  /* Slide cards: block flow, one per page */
+  .slide {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    margin: 0 auto !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    box-shadow: none !important;
+  }
+  .slide:last-child {
+    page-break-after: auto;
+  }
+
+  /* Transition cleanup */
+  .transition-fade .slide,
+  .transition-push .slide,
+  .transition-zoom .slide {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: landscape;
+    margin: 10mm;
   }
 }

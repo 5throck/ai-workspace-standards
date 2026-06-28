@@ -393,3 +393,47 @@ html, body {
     transform: scale(calc(100vw / 1280));
   }
 }
+
+/* ── Print stylesheet (pitch theme fallback — no ppt-engine.css) ───
+   Pitch theme loads base.css but not ppt-engine.css, so it needs
+   its own print rules here. PPT themes get their @media print
+   from ppt-engine.css instead.                                          */
+@media print {
+  body {
+    height: auto;
+    overflow: visible;
+  }
+  .pitch-footer,
+  .ppt-footer,
+  .vertical-topbar,
+  #toc-drawer,
+  #toc-overlay,
+  #script-panel,
+  #thumbnail-panel,
+  .slide-counter,
+  .progress-bar-wrap,
+  #fullscreen-btn,
+  .nav-btn,
+  #toc-btn,
+  #script-btn {
+    display: none !important;
+  }
+  .slide {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .slide:last-child {
+    page-break-after: auto;
+  }
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+}
