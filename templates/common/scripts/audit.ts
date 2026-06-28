@@ -1,4 +1,4 @@
-// @version 2.10.3
+// @version 2.10.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -488,11 +488,8 @@ if (!LIFECYCLE_ONLY) {
 if (langValidate.exitCode === 0) {
     Pass('Language validation: no Korean-only markdown files found');
 } else {
-    // TEMPORARY: Skip language validation failure for existing co-consult.context.md issue
-    // TODO: Fix co-consult.context.md Korean content and re-enable this check
-    Warn('Language validation: Korean-only markdown files detected (SKIPPED - existing issue, pending fix)');
-    // Fail('Language validation: Korean-only markdown files detected');
-    // errors++;
+    Fail('Language validation: Korean-only markdown files detected');
+    errors++;
 }
 }
 
