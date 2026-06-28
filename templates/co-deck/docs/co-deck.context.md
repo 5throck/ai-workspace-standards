@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-27
+# Last Updated: 2026-06-28
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -167,8 +167,10 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
 | **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing, per-engine UI hiding** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), Escape (close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
-| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + nav buttons |
+| **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 5 themes supported (PPT themes via ppt-engine.js, pitch via inline code); Escape exits fullscreen first before closing overlays** |
+| **@media print** | **Ctrl+P renders one slide per page in landscape orientation; all UI chrome (footer, TOC, script panel, timer, etc.) hidden; slide cards flow as block with page-break-after** |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
+| Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + **fullscreen button** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system.
 
@@ -215,7 +217,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 
 ```
 1. styles/base.css                    — shared foundation: structural rules + default variables
-2. themes/_shared/ppt-engine.css      — PPT common UI (TOC drawer, transitions, footer, timer, narration) [PPT themes only]
+2. themes/_shared/ppt-engine.css      — PPT common UI (TOC drawer, transitions, footer, timer, narration, fullscreen, @media print) [PPT themes only]
 3. themes/<theme>/theme.css           — per-theme extension
 4. styles/<style>/style.css           — per-style visual overrides
 ```
@@ -555,4 +557,4 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 ---
 
-*co-deck.context.md version: 4.1 — updated 2026-06-28: added `script_language` field (explicit TTS script language declaration); NarrationEngine v2.4 (scriptLanguage config for correct getScript() routing).*
+*co-deck.context.md version: 4.2 — updated 2026-06-28: FullscreenManager (F key + footer button) + @media print (Ctrl+P one slide per page) for all 5 themes; G1+G2 Tier 1 preview enhancements.*

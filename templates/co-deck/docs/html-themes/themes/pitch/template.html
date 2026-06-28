@@ -95,6 +95,7 @@
     <div class="footer-right">
       <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="목차 열기/닫기" title="목차">☰ 목차</button>
       <button class="footer-btn" id="script-btn" onclick="toggleScript()" aria-label="발표자 노트 보기/숨기기" title="발표자 노트">📝 노트</button>
+      <button class="footer-btn" id="fullscreen-btn" onclick="if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()" aria-label="전체화면" title="전체화면 (F)">⤢</button>
       <button class="nav-btn" id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
       <button class="nav-btn" id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
     </div>
@@ -387,9 +388,16 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
-      if (e.key === 'Escape') closeTOC();
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) { document.exitFullscreen(); return; }
+        closeTOC();
+      }
       if (e.key === 's' || e.key === 'S') toggleScript();
       if (e.key === 't' || e.key === 'T') toggleTOC();
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else document.exitFullscreen().catch(() => {});
+      }
     });
 
     // ── Init ──────────────────────────────────────────────────────────────────
