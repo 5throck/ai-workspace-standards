@@ -184,6 +184,19 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
+
+Every execution plan MUST start with Row 0 (Design Gate — architect creates/updates design doc) and end with `/sync`. Between Row 0 and `/sync`, list implementation tasks.
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | |
+
+**Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
+
 **Antigravity execution**: Use `invoke_subagent` for specialist dispatch. See §3 (Subagent Instantiation & Async Orchestration) in this file.
 <!-- COMMON-GEMINI:END -->
 
@@ -287,7 +300,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-25 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-06-28 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

@@ -9,6 +9,15 @@
       "source": "brainstorming",
       "created": "2026-06-24",
       "last_updated": "2026-06-24"
+    },
+    {
+      "id": "2026-06-28-execution-plan-design-gate",
+      "title": "execution plan design gate",
+      "file": "docs/designs/execution-plan-design-gate-design.md",
+      "status": "approved",
+      "source": "brainstorming",
+      "created": "2026-06-28",
+      "last_updated": "2026-06-28"
     }
   ]
 }

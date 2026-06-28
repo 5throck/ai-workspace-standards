@@ -241,19 +241,23 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 Each agent must save its deliverables to the designated folder with the specified naming convention. `{topic}` is derived from the engagement subject or client brief.
 
-| Agent | Output Type | Destination | Naming Convention |
+**Language Convention**: Deliverables are written in **Korean** by default. Korean-language files use the `_ko.md` suffix. English-language deliverables (only on explicit client request) use `.md` without suffix.
+
+| Agent | Output Type | Destination | Naming Convention (Korean default) |
 |-------|-------------|-------------|-------------------|
-| Industry Expert | Industry analysis reports, trend briefings | `deliverables/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}.md` |
-| Industry Expert | Regulatory overviews | `deliverables/research/` | `{topic}-regulatory-{YYYY-MM-DD}.md` |
-| Strategy Analyst | Research findings, competitive analyses, financial models | `deliverables/research/` | `{topic}-{report-type}-{YYYY-MM-DD}.md` |
-| Data Analyst | Data analysis reports, model outputs | `deliverables/research/` | `{topic}-data-analysis-{YYYY-MM-DD}.md` |
-| Subject Matter Expert | Functional analysis reports, benchmarking | `deliverables/research/` | `{topic}-{function}-analysis-{YYYY-MM-DD}.md` |
-| Change Management Partner | Culture statements, readiness assessments | `deliverables/research/` | `{topic}-change-assessment-{YYYY-MM-DD}.md` |
-| Communications Lead | Consulting reports, stakeholder comms | `deliverables/reports/` | `{deliverable-type}-{YYYY-MM-DD}.md` |
-| Communications Lead | Executive presentations | `deliverables/presentations/` | `{deck-title}-{YYYY-MM-DD}.md` |
-| Solutions Architect | Architecture documents, feasibility assessments | `deliverables/reports/` | `{topic}-architecture-{YYYY-MM-DD}.md` |
-| Workstream Lead | Status reports, execution plans, risk logs | `deliverables/drafts/` | `{workstream}-{report-type}-{YYYY-MM-DD}.md` |
-| Delivery Manager | Project status reports, stakeholder trackers | `deliverables/drafts/` | `delivery-{report-type}-{YYYY-MM-DD}.md` |
+| Industry Expert | Industry analysis reports, trend briefings | `deliverables/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}_ko.md` |
+| Industry Expert | Regulatory overviews | `deliverables/research/` | `{topic}-regulatory-{YYYY-MM-DD}_ko.md` |
+| Strategy Analyst | Research findings, competitive analyses, financial models | `deliverables/research/` | `{topic}-{report-type}-{YYYY-MM-DD}_ko.md` |
+| Data Analyst | Data analysis reports, model outputs | `deliverables/research/` | `{topic}-data-analysis-{YYYY-MM-DD}_ko.md` |
+| Subject Matter Expert | Functional analysis reports, benchmarking | `deliverables/research/` | `{topic}-{function}-analysis-{YYYY-MM-DD}_ko.md` |
+| Change Management Partner | Culture statements, readiness assessments | `deliverables/research/` | `{topic}-change-assessment-{YYYY-MM-DD}_ko.md` |
+| Communications Lead | Consulting reports, stakeholder comms | `deliverables/reports/` | `{deliverable-type}-{YYYY-MM-DD}_ko.md` |
+| Communications Lead | Executive presentations | `deliverables/presentations/` | `{deck-title}-{YYYY-MM-DD}_ko.md` |
+| Solutions Architect | Architecture documents, feasibility assessments | `deliverables/reports/` | `{topic}-architecture-{YYYY-MM-DD}_ko.md` |
+| Workstream Lead | Status reports, execution plans, risk logs | `deliverables/drafts/` | `{workstream}-{report-type}-{YYYY-MM-DD}_ko.md` |
+| Delivery Manager | Project status reports, stakeholder trackers | `deliverables/drafts/` | `delivery-{report-type}-{YYYY-MM-DD}_ko.md` |
+
+> **English deliverables**: When a client explicitly requests English output, use `{topic}-{report-type}-{YYYY-MM-DD}.md` (no `_ko` suffix).
 
 ---
 
@@ -265,8 +269,9 @@ Each agent must save its deliverables to the designated folder with the specifie
 4. Publication artifacts must be version-controlled before distribution.
 5. Change management assessments must include organizational readiness scores.
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
-7. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX or PDF reports using `bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]`. Output is saved alongside the source file. Requires project dependencies (`docx`, `pdf-lib`, `@pdf-lib/fontkit`) installed via `bun install`.
+7. **Default deliverable language is Korean**. Unless the client explicitly requests another language, all deliverables MUST be written in Korean and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
+8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
 
 ---
 
-*co-consult.context.md version: 2.1 — normalized to canonical template structure*
+*co-consult.context.md version: 2.2 — Korean default language, DOCX-only report generation*

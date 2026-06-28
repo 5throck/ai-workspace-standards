@@ -1,45 +1,43 @@
-# Design: `md-to-report.ts` — Markdown to DOCX/PDF Report Generator for co-consult
+# Design: `md-to-report.ts` — Markdown to DOCX Report Generator for co-consult
 
-**Date**: 2026-06-28
-**Status**: Approved
+**Date**: 2026-06-28 (Updated: 2026-06-28)
+**Status**: Approved (v1.2 — Korean default, DOCX only)
 **Scope**: `templates/co-consult/scripts/co-consult/md-to-report.ts`
 
 ---
 
 ## 1. Problem
 
-The co-consult template produces engagement deliverables exclusively as Markdown files in `deliverables/`. There is no mechanism to convert these into client-ready Word (.docx) or PDF documents. Consultants need professionally formatted reports with cover pages, headers/footers, tables of contents, and styled tables for client delivery.
+The co-consult template produces engagement deliverables exclusively as Markdown files in `deliverables/`. There is no mechanism to convert these into client-ready Word (.docx) documents. Consultants need professionally formatted reports with cover pages, headers/footers, tables of contents, and styled tables for client delivery.
 
 ## 2. Solution
 
-A single TypeScript script `md-to-report.ts` that converts any Markdown file in `deliverables/` into a styled DOCX and/or PDF report using consulting-style formatting (McKinsey/BCG visual language).
+A single TypeScript script `md-to-report.ts` that converts any Markdown file in `deliverables/` into a styled DOCX report. Consulting-style formatting follows McKinsey/BCG visual language.
 
 ### 2.1 Architecture
 
 ```
-Input                    Script                        Output
-─────────────────────────────────────────────────────────────
-deliverables/reports/    md-to-report.ts                .docx / .pdf
-  report.md      ──→  ┌──────────────────┐  ──→       deliverables/reports/
-                     │  1. Parse MD      │              report.docx
-                     │  2. Build AST     │              report.pdf
-                     │  3. Render DOCX   │
-                     │  4. Render PDF    │
-                     └──────────────────┘
+Input                         Script                          Output
+───────────────────────────────────────────────────────────────────
+deliverables/reports/         md-to-report.ts                   .docx
+  report_ko.md   ──→  ┌────────────────────────┐  ──→         deliverables/reports/
+                     │  1. Parse MD            │                 report_ko.docx
+                     │  2. Build AST           │
+                     │  3. Render DOCX         │
+                     └────────────────────────┘
 
-CLI: bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]
+CLI: bun scripts/co-consult/md-to-report.ts <file.md>
 ```
+
+> **PDF**: PDF conversion is out of scope for this script. Users can convert DOCX to PDF manually via Word or any office application.
 
 ### 2.2 Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `docx` | ^9.0.0 | DOCX generation (npm) |
-| `pdf-lib` | ^1.17.1 | PDF generation (co-deck proven) |
-| `@pdf-lib/fontkit` | ^1.1.1 | Font embedding (Korean support) |
 | `mdast-util-from-markdown` | latest | Markdown → MDAST parsing (unified ecosystem) |
 | `yaml` | latest | Frontmatter parsing |
-| `fflate` | ^0.8.2 (optional) | Compression |
 
 ### 2.3 File Location
 
@@ -85,8 +83,8 @@ Follows the co-deck pattern: `scripts/<variant>/<script>.ts`.
 
 ### 3.3 Markdown → Report Element Mapping
 
-| Markdown Element | DOCX/PDF Output |
-|-----------------|------------------|
+| Markdown Element | DOCX Output |
+|-----------------|-------------|
 | `# H1` (first occurrence) | Cover page title |
 | `# H1` (subsequent) | Section heading (22pt, navy) |
 | `## H2` | Subsection heading (16pt, navy) |
@@ -99,7 +97,7 @@ Follows the co-deck pattern: `scripts/<variant>/<script>.ts`.
 | `**bold**` | Bold |
 | `*italic*` | Italic |
 | `---` (horizontal rule) | Navy line divider (2px) |
-| `[text](url)` | Hyperlink (DOCX) / Blue underlined text (PDF) |
+| `[text](url)` | Hyperlink (blue underlined) |
 | `` `code` `` | Inline code (monospace, gray bg pill) |
 | Code block (```) | Gray background box, monospace, no wrapping |
 | `![alt](src)` | Inline image (if file exists, else skip) |
@@ -133,30 +131,23 @@ If no frontmatter exists, the script extracts title from the first `H1` heading 
 ## 5. CLI Interface
 
 ```bash
-# Default: DOCX only
-bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis.md
-
-# PDF only
-bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis.md --format pdf
-
-# Both formats
-bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis.md --format both
+# Default: DOCX
+bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis_ko.md
 
 # Custom output directory
-bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis.md --out deliverables/presentations/
+bun scripts/co-consult/md-to-report.ts deliverables/reports/analysis_ko.md --out deliverables/presentations/
 
 # Batch: multiple files
 bun scripts/co-consult/md-to-report.ts deliverables/reports/*.md
 
 # Batch: entire directory
-bun scripts/co-consult/md-to-report.ts deliverables/reports/ --format both
+bun scripts/co-consult/md-to-report.ts deliverables/reports/
 ```
 
 ### 5.1 Output Naming
 
-Input file `deliverables/reports/analysis.md` produces:
-- `deliverables/reports/analysis.docx`
-- `deliverables/reports/analysis.pdf`
+Input file `deliverables/reports/analysis_ko.md` produces:
+- `deliverables/reports/analysis_ko.docx`
 
 Same directory as input by default. `--out` overrides the output folder.
 
@@ -171,7 +162,7 @@ Same directory as input by default. `--out` overrides the output folder.
 ## 6. Script Internal Structure
 
 ```
-md-to-report.ts (~800-1000 lines)
+md-to-report.ts (~500-600 lines, v1.2)
 │
 ├── parseFrontmatter(raw: string)
 │   → { metadata: ReportMeta, body: string }
@@ -188,16 +179,10 @@ md-to-report.ts (~800-1000 lines)
 │   ├── addContent(doc, ast)        ← recursive AST walker
 │   └── addHeaderFooter(doc, meta)
 │
-├── renderPdf(ast: mdast.Root, meta: ReportMeta, outPath: string)
-│   ├── addCoverPage(pdf, meta)
-│   ├── addToc(pdf, ast)
-│   ├── addContent(pdf, ast)        ← recursive AST walker
-│   └── addHeaderFooter(pdf, meta)
-│
 └── main()
     ├── parseArgs(argv)
     ├── resolveInputFiles(pattern)
-    └── for each file: parse → extract → render → log
+    └── for each file: parse → extract → render DOCX → log
 ```
 
 ## 7. Table of Contents Generation
@@ -208,7 +193,6 @@ md-to-report.ts (~800-1000 lines)
 2. Assign sequential numbering: `1.`, `1.1`, `2.`, `2.1`, etc.
 3. Render as a two-column layout: `Heading text ............... p.N`
 4. **DOCX**: Use `docx.TableOfContents` field code (auto-updates when opened in Word)
-5. **PDF**: Render as static text with right-aligned page numbers (manual calculation)
 
 ### 7.2 TOC Page Styling
 
@@ -261,8 +245,27 @@ The script resolves fonts in this order:
 
 Font files are NOT bundled in the template. The script logs a warning if using a fallback font.
 
-## 10. Out of Scope
+## 10. Language Convention (v1.2)
 
+### 10.1 Default Language: Korean
+
+co-consult deliverables are written in **Korean** by default (unless the client explicitly requests English or another language).
+
+### 10.2 File Naming Convention
+
+| Language | File Suffix | Example |
+|----------|------------|---------|
+| Korean (default) | `_ko.md` | `semiconductor-trends-2026_ko.md` |
+| English | `.md` (no suffix) or `_en.md` | `semiconductor-trends-2026.md` |
+
+**Rules:**
+- When generating deliverables, agents MUST use `_ko.md` suffix for Korean-language content.
+- English-language deliverables use `.md` without suffix (legacy) or `_en.md` (explicit).
+- The md-to-report script derives the output filename from the input: `report_ko.md` → `report_ko.docx`.
+
+## 11. Out of Scope
+
+- PDF generation (users convert DOCX to PDF manually via Word or office application)
 - PPTX generation (existing `executive-presentation` skill handles this via Markdown outline)
 - Image/chart generation (images in Markdown are embedded as-is if the file exists)
 - Template-per-client customization (deferred — single consulting style for all clients)

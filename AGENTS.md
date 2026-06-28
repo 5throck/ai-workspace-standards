@@ -180,6 +180,8 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Security configuration | Phase 6 | security-expert | Medium | |
 | Project scaffolding | Phase 0 | scaffolding-expert | Low | |
 
+**Design Gate (Row 0)**: All non-exempt deliverable types above require a design document (Row 0 in the execution plan) to be created/updated by architect before implementation begins. See §5.1.1 for exemption categories.
+
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
 
 > **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
@@ -388,19 +390,41 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ### 5.1 Standard Execution Plan Template
 
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
+
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] |
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | |
 
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
+- **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
 - Tier column is MANDATORY (High/Medium/Low)
 - `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
+
+### 5.1.1 Design Gate Exemptions
+
+When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
+
+| Category | ID | Description | Row 0 Format |
+|----------|----|-------------|--------------|
+| memory-log | E1 | Session log entry in `memory/YYYY-MM-DD.md` | `── EXEMPT: memory-log ──` |
+| changelog | E2 | `CHANGELOG.md` update only | `── EXEMPT: changelog ──` |
+| hotfix-typo | E3 | Typo fix, single-line change, trivial fix | `── EXEMPT: hotfix-typo ──` |
+| pure-readme | E4 | README.md body text only (no structural/design change) | `── EXEMPT: pure-readme ──` |
+| sync-only | E5 | `/sync` execution only (lifecycle finalization) | `── EXEMPT: sync-only ──` |
+
+**Rules**:
+- Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
+- Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
+- Abuse of exemptions is a governance violation
 
 ### 5.2 Platform Parity Considerations
 

@@ -1,7 +1,9 @@
-// @version 1.0.0 — Markdown → DOCX/PDF consulting report generator.
+// @version 1.1.0 — Markdown → DOCX/PDF consulting report generator.
 //   Converts Markdown deliverables to professionally formatted Word and PDF reports
 //   with cover page, TOC, headers/footers, and consulting-style design.
 //
+//   v1.1.0: DOCX-first PDF via LibreOffice — removes direct pdf-lib rendering,
+//           adds LibreOffice CLI conversion for perfect Korean text/CJK support.
 //   v1.0.0: Initial release — DOCX + PDF dual output, frontmatter metadata,
 //           consulting theme (navy blue), Pretendard font, TOC generation.
 
@@ -12,12 +14,8 @@ import {
   TableOfContents as DocxToc, BorderStyle, ShadingType,
   convertInchesToTwip, TabStopPosition, TabStopType,
 } from 'docx';
-import {
-  PDFDocument, PDFFont, rgb, pushGraphicsState, popGraphicsState,
-  StandardFonts,
-} from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
 import { fromMarkdown } from 'mdast-util-from-markdown';
+import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync } from 'fs';
 import { join, resolve, dirname, basename, extname } from 'path';
 import { platform, homedir } from 'os';
@@ -490,337 +488,68 @@ function renderDocxInline(children: Array<TextNode | InlineNode>): TextRun[] {
   return runs;
 }
 
+
 // ═══════════════════════════════════════════════════════════════════════════════
-// PDF Renderer
+// LibreOffice PDF Converter
 // ═══════════════════════════════════════════════════════════════════════════════
 
-async function renderPdf(
-  ast: { children: MdastNode[] },
-  meta: ReportMeta,
-  outPath: string,
-  fontDir: string,
-): Promise<void> {
-  const fonts = resolveFont(fontDir);
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
+function findLibreOffice(): string | null {
+  const { platform } = process;
 
-  // Embed fonts
-  let regularFont: PDFFont, boldFont: PDFFont;
-  if (fonts.regular) {
-    regularFont = await pdfDoc.embedFont(readFileSync(fonts.regular));
-    boldFont = await pdfDoc.embedFont(readFileSync(fonts.bold));
-  } else {
-    regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    console.warn('⚠️  Using Helvetica fallback (no Pretendard found)');
-  }
-
-  const primaryRgb = hexToRgb(THEME.primary);
-  const bodyRgb = hexToRgb(THEME.body);
-  const subtleRgb = hexToRgb(THEME.subtle);
-  const lightRgb = hexToRgb(THEME.light);
-  const dividerRgb = hexToRgb(THEME.divider);
-  const codeBgRgb = hexToRgb(THEME.codeBg);
-
-  const PAGE_W = 612;  // 8.5in × 72
-  const PAGE_H = 792;  // 11in × 72
-  const M = 72;        // 1in margins
-  const CW = PAGE_W - M * 2;  // content width
-
-  // ── Cover Page ──
-  const cover = pdfDoc.addPage([PAGE_W, PAGE_H]);
-  // Navy accent bar
-  cover.drawRectangle({ x: 0, y: PAGE_H - 80, width: PAGE_W, height: 80, color: rgb(primaryRgb.r / 255, primaryRgb.g / 255, primaryRgb.b / 255) });
-
-  let y = PAGE_H - 200;
-  // Title
-  regularFont.fontSize = 28;
-  const titleLines = wrapText(meta.title, regularFont, CW);
-  for (const line of titleLines) {
-    cover.drawText(line, { x: M, y, size: 28, font: boldFont, color: rgb(primaryRgb.r / 255, primaryRgb.g / 255, primaryRgb.b / 255) });
-    y -= 36;
-  }
-
-  y -= 40;
-  // Author
-  if (meta.author) {
-    cover.drawText(meta.author, { x: M, y, size: 14, font: regularFont, color: rgb(subtleRgb.r / 255, subtleRgb.g / 255, subtleRgb.b / 255) });
-    y -= 24;
-  }
-  // Date
-  cover.drawText(meta.date, { x: M, y, size: 14, font: regularFont, color: rgb(subtleRgb.r / 255, subtleRgb.g / 255, subtleRgb.b / 255) });
-  y -= 24;
-  // Client
-  if (meta.client) {
-    cover.drawText(`Client: ${meta.client}`, { x: M, y, size: 12, font: regularFont, color: rgb(subtleRgb.r / 255, subtleRgb.g / 255, subtleRgb.b / 255) });
-  }
-
-  // ── TOC Page ──
-  const tocEntries = collectTocEntries(ast);
-  let page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-  let pageNum = 2; // cover is page 1, TOC is page 2
-
-  // TOC header
-  y = PAGE_H - M;
-  page.drawText('Table of Contents', { x: M, y, size: 22, font: boldFont, color: rgb(primaryRgb.r / 255, primaryRgb.g / 255, primaryRgb.b / 255) });
-  y -= 40;
-
-  for (const entry of tocEntries) {
-    if (y < M + 40) { page = pdfDoc.addPage([PAGE_W, PAGE_H]); pageNum++; y = PAGE_H - M; }
-    const indent = (entry.depth - 1) * 20;
-    const text = `${entry.index}  ${entry.text}`;
-    const textW = boldFont.widthOfTextAtSize(text, 12);
-    page.drawText(text, { x: M + indent, y, size: 12, font: regularFont, color: rgb(bodyRgb.r / 255, bodyRgb.g / 255, bodyRgb.b / 255) });
-
-    // Dotted leader
-    const dotStart = M + indent + textW + 5;
-    const dotEnd = PAGE_W - M - 40;
-    if (dotEnd > dotStart) {
-      let dx = dotStart;
-      while (dx < dotEnd) {
-        page.drawText('.', { x: dx, y, size: 12, font: regularFont, color: rgb(dividerRgb.r / 255, dividerRgb.g / 255, dividerRgb.b / 255) });
-        dx += regularFont.widthOfTextAtSize('.', 12) + 2;
-      }
+  if (platform === 'win32') {
+    const candidates = [
+      'C:\Program Files\LibreOffice\program\soffice.exe',
+      'C:\Program Files (x86)\LibreOffice\program\soffice.exe',
+    ];
+    for (const p of candidates) {
+      if (existsSync(p)) return p;
     }
+    try {
+      const result = execSync('where soffice', { encoding: 'utf8', stdio: 'pipe' });
+      return result.trim().split('\n')[0];
+    } catch { /* not in PATH */ }
+    return null;
   }
 
-  y -= 30;
-  // Page break after TOC
-  page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-  pageNum++;
-  y = PAGE_H - M;
+  if (platform === 'darwin') {
+    const macPath = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
+    if (existsSync(macPath)) return macPath;
+    try {
+      const result = execSync('which soffice', { encoding: 'utf8', stdio: 'pipe' });
+      return result.trim().split('\n')[0];
+    } catch { /* not in PATH */ }
+    return null;
+  }
 
-  // ── Body Pages ──
-  let isFirstH1 = true;
-  for (const node of ast.children) {
-    if (node.type === 'heading' && node.depth === 1 && isFirstH1) {
-      isFirstH1 = false;
-      continue; // skip first H1 (cover title)
-    }
+  // Linux
+  try {
+    const result = execSync('which soffice', { encoding: 'utf8', stdio: 'pipe' });
+    return result.trim().split('\n')[0];
+  } catch { /* not in PATH */ }
+  return null;
+}
 
-    const result = renderPdfNode(node, page, pdfDoc, regularFont, boldFont, M, CW, y, {
-      primaryRgb, bodyRgb, subtleRgb, lightRgb, dividerRgb, codeBgRgb,
+async function convertDocxToPdf(docxPath: string, outDir: string): Promise<string | null> {
+  const soffice = findLibreOffice();
+  if (!soffice) {
+    console.warn('⚠️ LibreOffice not found — skipping PDF. Install LibreOffice to enable PDF conversion.');
+    return null;
+  }
+
+  try {
+    execSync(`"${soffice}" --headless --convert-to pdf --outdir "${outDir}" "${docxPath}"`, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      timeout: 60_000,
     });
 
-    if ('newPage' in result && result.newPage) {
-      page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-      pageNum++;
-      y = PAGE_H - M;
-      const rerender = renderPdfNode(node, page, pdfDoc, regularFont, boldFont, M, CW, y, {
-        primaryRgb, bodyRgb, subtleRgb, lightRgb, dividerRgb, codeBgRgb,
-      });
-      y = ('y' in rerender ? rerender.y : y) - 10;
-    } else {
-      y = ('y' in result ? result.y : y) - 10;
-    }
-
-    // Check if we need a new page
-    if (y < M + 40) {
-      page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-      pageNum++;
-      y = PAGE_H - M;
-    }
+    const pdfPath = join(outDir, basename(docxPath, '.docx') + '.pdf');
+    return existsSync(pdfPath) ? pdfPath : null;
+  } catch (err: any) {
+    console.warn(`⚠️ LibreOffice PDF conversion failed: ${err.message}`);
+    return null;
   }
-
-  // ── Add headers/footers to all body pages (skip cover) ──
-  const totalPages = pdfDoc.getPageCount();
-  for (let i = 1; i < totalPages; i++) {
-    const p = pdfDoc.getPage(i);
-    const { height } = p.getSize();
-
-    // Header
-    p.drawRectangle({ x: 0, y: height - 30, width: PAGE_W, height: 30, color: rgb(primaryRgb.r / 255, primaryRgb.g / 255, primaryRgb.b / 255) });
-    const titleW = boldFont.widthOfTextAtSize(meta.title, 9);
-    p.drawText(meta.title.slice(0, 60), { x: M, y: height - 22, size: 9, font: regularFont, color: rgb(1, 1, 1) });
-    p.drawText(String(i + 1), { x: PAGE_W - M - 20, y: height - 22, size: 9, font: regularFont, color: rgb(1, 1, 1) });
-
-    // Footer
-    p.drawRectangle({ x: 0, y: 0, width: PAGE_W, height: 25, color: rgb(dividerRgb.r / 255, dividerRgb.g / 255, dividerRgb.b / 255) });
-    p.drawText(meta.date, { x: M, y: 8, size: 8, font: regularFont, color: rgb(subtleRgb.r / 255, subtleRgb.g / 255, subtleRgb.b / 255) });
-    if (meta.confidential) {
-      const confW = boldFont.widthOfTextAtSize('CONFIDENTIAL', 9);
-      p.drawText('CONFIDENTIAL', { x: PAGE_W - M - confW, y: 8, size: 9, font: boldFont, color: rgb(primaryRgb.r / 255, primaryRgb.g / 255, primaryRgb.b / 255) });
-    }
-  }
-
-  const pdfBytes = await pdfDoc.save();
-  writeFileSync(outPath, pdfBytes);
-  const sizeKb = Math.round(pdfBytes.length / 1024);
-  console.log(`   Saved -> ${outPath} (${sizeKb}KB)`);
 }
-
-function sanitizeText(text: string): string {
-  return text
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    // Replace common Unicode arrows/symbols with ASCII equivalents for PDF (WinAnsi limitation)
-    .replace(/→/g, '->')
-    .replace(/←/g, '<-')
-    .replace(/↑/g, '^')
-    .replace(/↓/g, 'v')
-    .replace(/–/g, '-')
-    .replace(/—/g, '--')
-    .replace(/…/g, '...')
-    .replace(/≥/g, '>=')
-    .replace(/≤/g, '<=')
-    .replace(/≈/g, '~')
-    .replace(/≠/g, '!=')
-    .replace(/×/g, 'x')
-    .replace(/°/g, ' deg')
-    // Strip any remaining non-WinAnsi characters
-    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '?');
-}
-
-function wrapText(text: string, font: PDFFont, maxWidth: number): string[] {
-  const words = sanitizeText(text).split(' ');
-  const lines: string[] = [];
-  let current = '';
-  for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
-    if (font.widthOfTextAtSize(test, 12) > maxWidth && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = test;
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
-}
-
-function renderPdfNode(
-  node: MdastNode,
-  page: Awaited<ReturnType<typeof PDFDocument.prototype.addPage>>,
-  pdfDoc: PDFDocument,
-  regularFont: PDFFont,
-  boldFont: PDFFont,
-  margin: number,
-  contentWidth: number,
-  startY: number,
-  colors: { primaryRgb: { r: number; g: number; b: number }; bodyRgb: { r: number; g: number; b: number }; subtleRgb: { r: number; g: number; b: number }; lightRgb: { r: number; g: number; b: number }; dividerRgb: { r: number; g: number; b: number }; codeBgRgb: { r: number; g: number; b: number } },
-): { y: number; newPage?: boolean } {
-  let y = startY;
-  const pR = colors.primaryRgb, bR = colors.bodyRgb, sR = colors.subtleRgb, lR = colors.lightRgb, dR = colors.dividerRgb, cR = colors.codeBgRgb;
-
-  if (node.type === 'heading') {
-    const text = extractText(node);
-    const sizes: Record<number, number> = { 1: 22, 2: 16, 3: 13 };
-    const size = sizes[node.depth] ?? 13;
-    const font = boldFont;
-    const lines = wrapText(text, font, contentWidth);
-
-    y -= (node.depth === 1 ? 20 : 12);
-    for (const line of lines) {
-      if (y < margin + 20) return { y, newPage: true };
-      page.drawText(line, { x: margin, y, size, font, color: rgb(pR.r / 255, pR.g / 255, pR.b / 255) });
-      y -= size + 4;
-    }
-    return { y };
-  }
-
-  if (node.type === 'paragraph') {
-    const text = extractText(node);
-    const lines = wrapText(text, regularFont, contentWidth);
-    for (const line of lines) {
-      if (y < margin + 20) return { y, newPage: true };
-      page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: rgb(bR.r / 255, bR.g / 255, bR.b / 255) });
-      y -= 18;
-    }
-    return { y };
-  }
-
-  if (node.type === 'blockquote') {
-    for (const child of node.children) {
-      if (child.type === 'paragraph') {
-        const text = extractText(child);
-        const lines = wrapText(text, regularFont, contentWidth - 30);
-        // Left border
-        page.drawRectangle({ x: margin, y: y - 4, width: 3, height: lines.length * 18 + 8, color: rgb(pR.r / 255, pR.g / 255, pR.b / 255) });
-        for (const line of lines) {
-          if (y < margin + 20) return { y, newPage: true };
-          page.drawText(line, { x: margin + 12, y, size: 11, font: regularFont, color: rgb(sR.r / 255, sR.g / 255, sR.b / 255) });
-          y -= 18;
-        }
-      }
-    }
-    return { y };
-  }
-
-  if (node.type === 'list') {
-    for (let i = 0; i < node.children.length; i++) {
-      const item = node.children[i];
-      for (const para of item.children) {
-        const text = extractText(para);
-        const bullet = node.ordered ? `${i + 1}. ` : '• ';
-        const lines = wrapText(text, regularFont, contentWidth - 40);
-        if (y < margin + 20) return { y, newPage: true };
-        const drawFont = node.ordered ? regularFont : boldFont;
-        page.drawText(bullet, { x: margin + 10, y, size: 11, font: drawFont, color: rgb(pR.r / 255, pR.g / 255, pR.b / 255) });
-        const firstLine = lines[0] ?? '';
-        page.drawText(firstLine, { x: margin + 35, y, size: 11, font: regularFont, color: rgb(bR.r / 255, bR.g / 255, bR.b / 255) });
-        y -= 18;
-        for (let li = 1; li < lines.length; li++) {
-          if (y < margin + 20) return { y, newPage: true };
-          page.drawText(lines[li], { x: margin + 35, y, size: 11, font: regularFont, color: rgb(bR.r / 255, bR.g / 255, bR.b / 255) });
-          y -= 18;
-        }
-      }
-    }
-    return { y };
-  }
-
-  if (node.type === 'table') {
-    const rows = node.children;
-    // Calculate column widths (equal distribution)
-    const colCount = rows[0]?.children.length ?? 1;
-    const colW = contentWidth / colCount;
-
-    for (let ri = 0; ri < rows.length; ri++) {
-      if (y < margin + 30) return { y, newPage: true };
-      const row = rows[ri];
-      const isHeader = ri === 0;
-      const isAlt = ri > 0 && ri % 2 === 0;
-
-      // Row background
-      const bgColor = isHeader ? pR : isAlt ? lR : null;
-      if (bgColor) {
-        page.drawRectangle({ x: margin, y: y - 16, width: contentWidth, height: 20, color: rgb(bgColor.r / 255, bgColor.g / 255, bgColor.b / 255) });
-      }
-
-      for (let ci = 0; ci < row.children.length; ci++) {
-        const cell = row.children[ci];
-        const text = extractText(cell).replace(/[\r\n]+/g, ' ').slice(0, 30); // flatten newlines, truncate long cells
-        const font = isHeader ? boldFont : regularFont;
-        const color = isHeader ? rgb(1, 1, 1) : rgb(bR.r / 255, bR.g / 255, bR.b / 255);
-        page.drawText(text, { x: margin + ci * colW + 4, y: y - 4, size: 10, font, color });
-      }
-      y -= 20;
-    }
-    return { y: y - 10 };
-  }
-
-  if (node.type === 'code') {
-    const lines = (node.value ?? '').split('\n');
-    // Background box
-    const boxH = lines.length * 14 + 10;
-    page.drawRectangle({ x: margin, y: y - boxH + 14, width: contentWidth, height: boxH, color: rgb(cR.r / 255, cR.g / 255, cR.b / 255) });
-    for (const line of lines) {
-      page.drawText(line, { x: margin + 8, y, size: 9, font: regularFont, color: rgb(bR.r / 255, bR.g / 255, bR.b / 255) });
-      y -= 14;
-    }
-    return { y };
-  }
-
-  if (node.type === 'thematicBreak') {
-    if (y < margin + 20) return { y, newPage: true };
-    page.drawRectangle({ x: margin, y: y - 2, width: contentWidth, height: 2, color: rgb(pR.r / 255, pR.g / 255, pR.b / 255) });
-    return { y: y - 20 };
-  }
-
-  return { y };
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // CLI
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -860,7 +589,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`📄 md-to-report v1.0.0`);
+  console.log(`📄 md-to-report v1.1.0`);
   console.log(`   Format: ${format}`);
   console.log(`   Files: ${inputFiles.length}`);
 
@@ -881,15 +610,21 @@ async function main() {
     if (!existsSync(fileDir)) mkdirSync(fileDir, { recursive: true });
 
     try {
+      // DOCX is always rendered (required as source for PDF conversion)
+      const docxPath = join(fileDir, `${baseName}.docx`);
+      await renderDocx(ast, meta, docxPath, fontDir);
       if (format === 'docx' || format === 'both') {
-        const docxPath = join(fileDir, `${baseName}.docx`);
-        await renderDocx(ast, meta, docxPath, fontDir);
-        const sizeKb = Math.round(statSync(docxPath).size / 1024);
-        console.log(`   ✅ DOCX -> ${docxPath} (${sizeKb}KB)`);
+        const docxSizeKb = Math.round(statSync(docxPath).size / 1024);
+        console.log(`   ✅ DOCX -> ${docxPath} (${docxSizeKb}KB)`);
       }
+
+      // Convert DOCX → PDF via LibreOffice if requested
       if (format === 'pdf' || format === 'both') {
-        const pdfPath = join(fileDir, `${baseName}.pdf`);
-        await renderPdf(ast, meta, pdfPath, fontDir);
+        const pdfResult = await convertDocxToPdf(docxPath, fileDir);
+        if (pdfResult) {
+          const pdfSizeKb = Math.round(statSync(pdfResult).size / 1024);
+          console.log(`   ✅ PDF  -> ${pdfResult} (${pdfSizeKb}KB)`);
+        }
       }
     } catch (err: any) {
       console.error(`   ❌ Error: ${err.message}`);
