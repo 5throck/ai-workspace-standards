@@ -189,11 +189,18 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
-Every execution plan MUST end with these two fixed steps:
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 |
+Every execution plan MUST start with Row 0 (Design Gate — architect creates/updates design doc) and end with `/sync`. Between Row 0 and `/sync`, list implementation tasks.
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | claude-sonnet-4-6 | NEW |
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 | |
+
+**Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
 
 **Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
 <!-- COMMON-CLAUDE:END -->
@@ -289,7 +296,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-25 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
+*Last Updated: 2026-06-28 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 

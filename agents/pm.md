@@ -149,6 +149,39 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 
 > Full dispatch rules and execution plan format: see [AGENTS.md §3](AGENTS.md#§3-pm-gateway-workflow).
 
+## Design Gate (Row 0)
+
+**Mandatory**: Every execution plan for workspace root (L0) and common template (L1) MUST include Row 0 as the first task — design document creation or update via architect.
+
+### Checklist
+
+1. **Exempt check**: Is this request in an exempt category? (E1–E5)
+   - Yes → Row 0: `── EXEMPT: <category> ──`, skip to Row 1+
+   - No → continue to step 2
+2. **Existing spec check**: Does `docs/specs/registry.json` have a relevant spec?
+   - Yes → Row 0: `Update design doc → docs/designs/<spec-id>-design.md` | Spec: `<existing-id>`
+   - No → Row 0: `Create design doc → docs/designs/<new-id>-design.md` | Spec: `NEW`
+3. **Dispatch Row 0 (architect) FIRST**, before any other dispatch
+4. **Obtain user approval** on the design document before proceeding to Row 1+
+5. **Only after design approval** → dispatch Row 1+ implementation tasks
+
+### Exempt Categories
+
+| ID | Category | Description |
+|----|----------|-------------|
+| E1 | memory-log | Session log entry in `memory/YYYY-MM-DD.md` |
+| E2 | changelog | `CHANGELOG.md` update only |
+| E3 | hotfix-typo | Typo fix, single-line change, trivial fix |
+| E4 | pure-readme | README.md body text only (no structural/design change) |
+| E5 | sync-only | `/sync` execution only (lifecycle finalization) |
+
+### Enforcement
+
+- PM MUST NOT dispatch Row 1+ before Row 0 is complete and user-approved (except exempt)
+- Architect creates/updates design doc — PM dispatches, NOT implements directly
+- Design doc MUST be committed before implementation begins
+- Only E1–E5 exemptions are valid — PM cannot invent ad-hoc exemptions
+
 ## Required Tools
 
 | Tool | Purpose |

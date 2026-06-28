@@ -270,8 +270,8 @@ Each agent must save its deliverables to the designated folder with the specifie
 5. Change management assessments must include organizational readiness scores.
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
 7. **Default deliverable language is Korean**. Unless the client explicitly requests another language, all deliverables MUST be written in Korean and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
-8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX or PDF reports using `bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx` / `report_ko.pdf`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion uses LibreOffice (`soffice`) — if not installed, PDF is skipped with a warning.
+8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
 
 ---
 
-*co-consult.context.md version: 2.2 — Korean default language + DOCX-first PDF conversion*
+*co-consult.context.md version: 2.2 — Korean default language, DOCX-only report generation*
