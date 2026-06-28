@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-06-28]**: feat(co-consult): Phase 1.5 Cross-Validation — validator agents cross-check Phase 1 research deliverables for consistency before insight-synthesis; cross-validation matrix, checklist, and re-execution triggers added to engagement-orchestration.md
+
 ### Added
 - **[2026-06-28]**: docs(co-consult): update md-to-report design spec v1.1 (Korean default + DOCX-first PDF) and co-consult.context.md v2.2 (Korean default language convention + `_ko.md` suffix for deliverables)
 - **[2026-06-28]**: feat(co-deck): preview Tier 1 — FullscreenManager + @media print — (1) ppt-engine.js: `FullscreenManager` object (F key toggle + footer button ⤢/⤡, fullscreenchange event listener, Escape exits fullscreen first); (2) ppt-engine.css: `#fullscreen-btn.active` accent color + `@media print` block (one slide per page in landscape, all UI chrome hidden, block flow with page-break-after); (3) base.css: `@media print` block for pitch theme fallback; (4) all 5 template.html: fullscreen button added (outline/pitch-enhanced/zen: footer-right; vertical: topbar-right; pitch: inline onclick); (5) THEMES.md: FullscreenManager + @media print + F key in feature table; (6) co-deck.context.md v4.2: updated PPT-Engine feature list; (7) co-deck1: all changes propagated
