@@ -1,7 +1,7 @@
 # Design: `md-to-report.ts` — Markdown to DOCX/PDF Report Generator for co-consult
 
-**Date**: 2026-06-28
-**Status**: Approved
+**Date**: 2026-06-28 (Updated: 2026-06-28)
+**Status**: Approved (v1.1 — Korean default + DOCX-first PDF)
 **Scope**: `templates/co-consult/scripts/co-consult/md-to-report.ts`
 
 ---
@@ -12,34 +12,45 @@ The co-consult template produces engagement deliverables exclusively as Markdown
 
 ## 2. Solution
 
-A single TypeScript script `md-to-report.ts` that converts any Markdown file in `deliverables/` into a styled DOCX and/or PDF report using consulting-style formatting (McKinsey/BCG visual language).
+A single TypeScript script `md-to-report.ts` that converts any Markdown file in `deliverables/` into a styled DOCX report, and optionally converts the DOCX to PDF using `libreoffice` CLI. Consulting-style formatting follows McKinsey/BCG visual language.
 
 ### 2.1 Architecture
 
 ```
-Input                    Script                        Output
-─────────────────────────────────────────────────────────────
-deliverables/reports/    md-to-report.ts                .docx / .pdf
-  report.md      ──→  ┌──────────────────┐  ──→       deliverables/reports/
-                     │  1. Parse MD      │              report.docx
-                     │  2. Build AST     │              report.pdf
-                     │  3. Render DOCX   │
-                     │  4. Render PDF    │
-                     └──────────────────┘
+Input                         Script                          Output
+───────────────────────────────────────────────────────────────────
+deliverables/reports/         md-to-report.ts                   .docx → .pdf
+  report_ko.md   ──→  ┌────────────────────────┐  ──→         deliverables/reports/
+                     │  1. Parse MD            │                 report_ko.docx
+                     │  2. Build AST           │                 report_ko.pdf (optional)
+                     │  3. Render DOCX         │
+                     │  4. Convert DOCX → PDF   │  (via libreoffice)
+                     └────────────────────────┘
 
 CLI: bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]
 ```
+
+**PDF Conversion Strategy (v1.1)**:
+- PDF is NOT rendered directly via pdf-lib. Instead, the script generates a DOCX file first, then converts it to PDF using LibreOffice (`soffice --convert-to pdf`).
+- Rationale: DOCX → PDF via LibreOffice preserves perfect formatting (Korean text, fonts, tables, layout) without WinAnsi encoding limitations or custom text-wrapping logic.
+- Fallback: If LibreOffice is not found, PDF conversion is skipped with a warning.
+- Dependencies removed from v1.0: `pdf-lib`, `@pdf-lib/fontkit` (no longer needed for direct PDF rendering).
 
 ### 2.2 Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `docx` | ^9.0.0 | DOCX generation (npm) |
-| `pdf-lib` | ^1.17.1 | PDF generation (co-deck proven) |
-| `@pdf-lib/fontkit` | ^1.1.1 | Font embedding (Korean support) |
 | `mdast-util-from-markdown` | latest | Markdown → MDAST parsing (unified ecosystem) |
 | `yaml` | latest | Frontmatter parsing |
-| `fflate` | ^0.8.2 (optional) | Compression |
+
+**External Tool (optional, for PDF):**
+
+| Tool | Purpose | Detection |
+|------|---------|-----------|
+| `soffice` (LibreOffice) | DOCX → PDF conversion | `which soffice` / `where soffice` |
+
+> **v1.1 change**: `pdf-lib`, `@pdf-lib/fontkit`, and `fflate` removed. PDF generation is handled by LibreOffice after DOCX creation.
 
 ### 2.3 File Location
 
@@ -171,7 +182,7 @@ Same directory as input by default. `--out` overrides the output folder.
 ## 6. Script Internal Structure
 
 ```
-md-to-report.ts (~800-1000 lines)
+md-to-report.ts (~600-700 lines, v1.1)
 │
 ├── parseFrontmatter(raw: string)
 │   → { metadata: ReportMeta, body: string }
@@ -188,16 +199,18 @@ md-to-report.ts (~800-1000 lines)
 │   ├── addContent(doc, ast)        ← recursive AST walker
 │   └── addHeaderFooter(doc, meta)
 │
-├── renderPdf(ast: mdast.Root, meta: ReportMeta, outPath: string)
-│   ├── addCoverPage(pdf, meta)
-│   ├── addToc(pdf, ast)
-│   ├── addContent(pdf, ast)        ← recursive AST walker
-│   └── addHeaderFooter(pdf, meta)
+├── convertDocxToPdf(docxPath: string, outDir: string): Promise<string | null>
+│   ├── findLibreOffice()
+│   ├── execSync(`soffice --headless --convert-to pdf --outdir <dir> <file>`)
+│   └── return pdfPath | null (with warning)
+│
+├── findLibreOffice(): string | null
+│   → soffice path or null
 │
 └── main()
     ├── parseArgs(argv)
     ├── resolveInputFiles(pattern)
-    └── for each file: parse → extract → render → log
+    └── for each file: parse → extract → render DOCX → (optional) convert to PDF → log
 ```
 
 ## 7. Table of Contents Generation
@@ -261,10 +274,81 @@ The script resolves fonts in this order:
 
 Font files are NOT bundled in the template. The script logs a warning if using a fallback font.
 
-## 10. Out of Scope
+## 10. Language Convention (v1.1)
+
+### 10.1 Default Language: Korean
+
+co-consult deliverables are written in **Korean** by default (unless the client explicitly requests English or another language).
+
+### 10.2 File Naming Convention
+
+| Language | File Suffix | Example |
+|----------|------------|---------|
+| Korean (default) | `_ko.md` | `semiconductor-trends-2026_ko.md` |
+| English | `.md` (no suffix) or `_en.md` | `semiconductor-trends-2026.md` |
+
+**Rules:**
+- When generating deliverables, agents MUST use `_ko.md` suffix for Korean-language content.
+- English-language deliverables use `.md` without suffix (legacy) or `_en.md` (explicit).
+- The md-to-report script derives the output filename from the input: `report_ko.md` → `report_ko.docx` / `report_ko.pdf`.
+
+### 10.3 Output Destination Mapping Update
+
+The Output Destination Mapping table in `co-consult.context.md` defines `_ko.md` as the default naming convention for all deliverables:
+
+| Agent | Output Type | Destination | Naming Convention |
+|-------|-------------|-------------|-------------------|
+| *(all agents)* | Korean deliverables (default) | `deliverables/{type}/` | `{topic}-{report-type}-{YYYY-MM-DD}_ko.md` |
+| *(all agents)* | English deliverables (on request) | `deliverables/{type}/` | `{topic}-{report-type}-{YYYY-MM-DD}.md` |
+
+## 11. PDF Conversion via LibreOffice (v1.1)
+
+### 11.1 Architecture Change
+
+v1.0 rendered PDF directly using `pdf-lib` with a hand-rolled text renderer. This approach had significant limitations:
+- **WinAnsi encoding**: Korean characters cannot be encoded; complex Unicode sanitization required
+- **Text wrapping**: Custom `wrapText()` logic was fragile for CJK text
+- **Font embedding**: Required separate `@pdf-lib/fontkit` dependency and OS font resolution
+
+v1.1 replaces direct PDF rendering with a **DOCX → LibreOffice** pipeline:
+1. Script renders DOCX (full consulting formatting, Korean text, Pretendard font)
+2. If PDF requested, script calls `soffice --headless --convert-to pdf <file.docx> --outdir <dir>`
+3. LibreOffice handles font embedding, text layout, and CJK rendering natively
+
+### 11.2 LibreOffice Detection
+
+```typescript
+function findLibreOffice(): string | null {
+  // Windows: check common install paths + PATH
+  // macOS: /Applications/LibreOffice.app/Contents/MacOS/soffice
+  // Linux: which soffice
+}
+```
+
+If LibreOffice is not found and `--format pdf` or `--format both` is requested, the script:
+- Generates DOCX successfully
+- Prints a warning: `⚠️ LibreOffice not found — skipping PDF. Install LibreOffice to enable PDF conversion.`
+- Exits with code 0 (DOCX was created)
+
+### 11.3 CLI Behavior Change
+
+```bash
+# DOCX only (default — no external tool needed)
+bun scripts/co-consult/md-to-report.ts deliverables/reports/report_ko.md
+
+# PDF only (generates DOCX first, then converts to PDF)
+bun scripts/co-consult/md-to-report.ts deliverables/reports/report_ko.md --format pdf
+
+# Both DOCX + PDF (same as 'both' since PDF path goes through DOCX)
+bun scripts/co-consult/md-to-report.ts deliverables/reports/report_ko.md --format both
+```
+
+## 12. Out of Scope
 
 - PPTX generation (existing `executive-presentation` skill handles this via Markdown outline)
 - Image/chart generation (images in Markdown are embedded as-is if the file exists)
 - Template-per-client customization (deferred — single consulting style for all clients)
 - Collaborative editing / revision tracking
 - Automated report scheduling
+- Direct PDF rendering via pdf-lib (replaced by LibreOffice conversion in v1.1)
+- LibreOffice installation management (script detects but does not install)
