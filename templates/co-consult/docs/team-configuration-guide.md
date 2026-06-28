@@ -182,6 +182,7 @@ Match agent tier to task complexity:
 ### 5. Governance Checkpoints
 Regardless of scenario size, always include:
 - **Phase 0**: Scope alignment and team confirmation with client
+- **Phase 1.5**: Cross-validation of Phase 1 deliverables before synthesis (see [`engagement-orchestration.md`](engagement-orchestration.md))
 - **Phase 2**: Design review and user/client approval gate before execution
 - **Phase 5-6**: QA gate and formal handoff
 

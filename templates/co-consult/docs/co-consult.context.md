@@ -159,6 +159,7 @@ Engagement Leader
 |-------|------|--------------|---------------|
 | 0 | Engagement Initiation | Engagement Leader defines scope, assembles team, confirms client objectives | Engagement Leader |
 | 1 | Research & Data Gathering | Strategy Analyst conducts market/competitive research; Change Management Partner assesses org readiness | Strategy Analyst, Change Management Partner |
+| 1.5 | Cross-Validation | Validator agents cross-check Phase 1 deliverables for consistency before synthesis | PM (dispatches validators) |
 | 2 | Design Review & Approval | Proposed approach presented to client/user; **approval gate** — no execution without sign-off | Engagement Leader |
 | 3 | Content Creation | Communications Lead drafts client deliverables; Solutions Architect designs technical solutions (parallel) | Communications Lead, Solutions Architect |
 | 4 | Platform Delivery | Delivery Manager coordinates stakeholder reviews; Technology Specialist implements M365 workflows | Delivery Manager, Technology Specialist |
@@ -271,7 +272,8 @@ Each agent must save its deliverables to the designated folder with the specifie
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
 7. **Default deliverable language is Korean**. Unless the client explicitly requests another language, all deliverables MUST be written in Korean and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
 8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
+9. Phase 1 research deliverables MUST pass cross-validation before entering `insight-synthesis`. PM dispatches validator agents per the Cross-Validation Matrix in [`engagement-orchestration.md`](engagement-orchestration.md). See Phase 1.5 Cross-Validation section for checklist and re-execution triggers.
 
 ---
 
-*co-consult.context.md version: 2.2 — Korean default language, DOCX-only report generation*
+*co-consult.context.md version: 2.3 — Phase 1.5 Cross-Validation*
