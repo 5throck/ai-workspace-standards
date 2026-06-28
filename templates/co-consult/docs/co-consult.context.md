@@ -265,6 +265,7 @@ Each agent must save its deliverables to the designated folder with the specifie
 4. Publication artifacts must be version-controlled before distribution.
 5. Change management assessments must include organizational readiness scores.
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
+7. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX or PDF reports using `bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]`. Output is saved alongside the source file. Requires project dependencies (`docx`, `pdf-lib`, `@pdf-lib/fontkit`) installed via `bun install`.
 
 ---
 
