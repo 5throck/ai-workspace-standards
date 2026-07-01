@@ -370,7 +370,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 
 | Category | Condition | Examples |
 |----------|-----------|---------|
-| **Common agent** | Exists identically across all variants | `pm.md`, `automation-engineer.md` |
+| **Common agent** | Exists identically across all variants | `pm.md` |
 | **Common skill** | Used in all variants without modification | `project-review`, `meeting-facilitation`, `audit-workspace`, `security-scan`, `skill-lifecycle-manager`, `agent-lifecycle-manager` |
 | **Variant-specific** | Unique to one variant; not applicable elsewhere | Domain-expert agents, variant-only skills |
 
@@ -385,6 +385,30 @@ Additive overrides are concatenated with the common file during scaffolding. Rep
 
 #### Anti-Swelling Rule
 If **≥ 50 %** of variants declare an override for the same agent or skill, the common definition must be updated instead of accumulating per-variant overrides. `bun scripts/validate-templates.ts` enforces this threshold and will fail with an actionable error listing the affected files.
+
+#### L0 Agent Non-Propagation
+
+L0 specialist agents (`architect.md`, `auditor.md`, `automation-engineer.md`,
+`docs-writer.md`, `lifecycle-manager.md`, `scaffolding-expert.md`,
+`security-expert.md`) are **not** propagated to `templates/common/agents/`.
+This is intentional — see ADR-0039 (L0→L1→L2 Hierarchy) and ADR-0040
+(L0→L1 Deployment Strategy).
+
+**Rationale**:
+- **PM is the only agent with an L0→L1→L2 extends chain.** Specialist agents are
+  dispatched by PM and resolved at runtime by the AI platform — they do not
+  require a template-layer copy.
+- **Variant projects define their own specialist agents.** L2 variants declare
+  domain-specific agents in their `variant.json` `agent_roster`, which may
+  differ from the L0 roster (e.g., a co-security variant uses `red-team-lead`
+  instead of `architect`).
+- **Bottom-up promotion instead of top-down propagation.** If a specialist agent
+  becomes common across 3+ variants (Jaccard similarity ≥ 80%), it may be
+  promoted to L1 via the process described in ADR-0043 (L1 Agent Layer Hybrid
+  Override). This is a separate, intentional workflow distinct from L0→L1
+  propagation.
+
+**Current L1 agent**: Only `pm.md` (uses `extends: ../../../agents/pm.md`).
 
 #### Adding a New Common Agent or Skill
 1. Add the file to `templates/common/agents/` or `templates/common/skills/`.

@@ -1,5 +1,5 @@
 {
-  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode.",
+  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043).",
   "version": "1.2.0",
   "domains": {
     "scripts": {
