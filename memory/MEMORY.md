@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-01](2026-07-01.md) | fix(deps): add js-yaml to templates/common/scripts/package.json for independent dependency resolution |
 | [2026-06-28](2026-06-28.md) | fix(l0-leak): remove CONSTITUTION.md references from templates and tighten audit |
 | [2026-06-27](2026-06-27.md) | feat(co-consult): add Output Destination Mapping for all deliverable-producing agents |
 | [2026-06-26](2026-06-26.md) | fix(co-deck): vertical sticky topbar + TOC drawer consistency across themes |
