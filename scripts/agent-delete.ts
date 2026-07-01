@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Deleter CLI for Workspace Root
- * @version 1.0.0
+ * @version 1.0.1
  * Deletes agent definition files from the agents/ directory
  *
  * Usage:
@@ -12,6 +12,7 @@
 
 import path from "node:path";
 import { promises as fs } from "node:fs";
+import { existsSync } from "node:fs";
 
 const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
@@ -56,7 +57,11 @@ async function deleteAgent(name: string, force: boolean = false): Promise<void> 
   console.log(`\n⚠️  Remember to:`);
   console.log(`  1. Remove the agent from AGENTS.md Agent Roster table`);
   console.log(`  2. Remove the agent from Subagent Roster table in AGENTS.md`);
-  console.log(`  3. Update CONSTITUTION.md §5.2 Role Groups if needed`);
+  if (existsSync(path.join(projectRoot, "CONSTITUTION.md"))) {
+    console.log(`  3. Update CONSTITUTION.md §5.2 Role Groups if needed`);
+  } else {
+    console.log(`  3. Update docs/context.md — Multi-Agent Architecture if needed`);
+  }
 }
 
 /**
