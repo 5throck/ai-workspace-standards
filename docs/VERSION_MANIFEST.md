@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-01T02:35:40.287Z
+**Generated**: 2026-07-01T13:11:02.781Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -59,8 +59,8 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| agent-create.ts | 1.0.0 | scripts/agent-create.ts | N/A |
-| agent-delete.ts | 1.0.0 | scripts/agent-delete.ts | N/A |
+| agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
+| agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.3 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
 | agent-override-merge.ts | 1.0.0 | scripts/lib/agent-override-merge.ts | js-yaml |
@@ -69,7 +69,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.4 | scripts/audit.ts | bun |
+| audit.ts | 2.10.5 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
@@ -83,7 +83,7 @@
 | error-handling.ts | 1.1.0 | scripts/lib/error-handling.ts | N/A |
 | extends-validator.ts | 1.0.0 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
-| gen-pr-body.ts | 1.1.1 | scripts/gen-pr-body.ts | bun |
+| gen-pr-body.ts | 1.1.2 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
@@ -157,7 +157,7 @@
 | verify-new-project-tests.ts | 1.0.2 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.1 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.2.0 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.2.1 | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 | write-scripts-snapshot.ts | 1.0.0 | scripts/helpers/write-scripts-snapshot.ts | N/A |

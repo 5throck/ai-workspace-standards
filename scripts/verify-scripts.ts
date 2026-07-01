@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -26,14 +26,26 @@ import { join, dirname, relative } from "path";
 const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
-// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/)
+// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/).
+// CONSTITUTION.md marks the L0 workspace root; variant.json / docs/context.md mark a
+// generated L1/L2 project root (no CONSTITUTION.md there by design). If this script is
+// running standalone with none of these markers present, fall back to the directory
+// containing this script's own scripts/ folder.
 function findWorkspaceRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 6; i++) {
-    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
-    dir = dirname(dir);
+    if (
+      existsSync(join(dir, "CONSTITUTION.md")) ||
+      existsSync(join(dir, "variant.json")) ||
+      existsSync(join(dir, "docs", "context.md"))
+    ) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
   }
-  throw new Error("Could not find workspace root (CONSTITUTION.md not found)");
+  return dirname(startDir);
 }
 
 const scriptDir = import.meta.dir;

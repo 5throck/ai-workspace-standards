@@ -1,4 +1,4 @@
-// @version 2.10.4
+// @version 2.10.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -47,9 +47,13 @@ if (fs.existsSync('CHANGELOG.md')) {
     Fail('CHANGELOG.md missing');
 }
 
-// 2. CONSTITUTION.md must be accessible
+// 2. CONSTITUTION.md must be accessible (workspace root / L1 template context only —
+//    L2 variant projects intentionally omit CONSTITUTION.md and use docs/context.md
+//    instead; variant.json, when present, also marks a generated project copy)
 if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md')) {
     Pass('CONSTITUTION.md accessible');
+} else if (fs.existsSync('docs/context.md') || fs.existsSync('variant.json')) {
+    Pass('CONSTITUTION.md check skipped (L1/L2 project — uses docs/context.md)');
 } else {
     Fail('CONSTITUTION.md not found (expected at ./, ../, or ../../)');
 }
