@@ -1,4 +1,6 @@
 // @version 2.0.0
+// Note: This script serves as the variant-level theme audit (scripts/audit.ts delegates
+// to scripts/audit-variant.ts which does not yet exist; this validator fills that role).
 // Validate html-themes structure for the unified region-based layout model
 // (ADR-0045 — Decision #1 shared pool, Decision #2 region model, Decision #3 preview+scaffold).
 //
@@ -28,17 +30,12 @@
 //   --root  workspace root (default: two levels above this script)
 // Exit codes: 0 = pass, 1 = validation errors found (warnings never fail).
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
-import { join, resolve, dirname } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
+import { listThemeDirs, listStyleDirs, resolveWorkspaceRoot, normalizeStyleEntry as _normalizeStyleEntry } from './lib/theme-utils.js';
 
-const args = process.argv.slice(2);
-const get = (flag: string) => {
-  const i = args.indexOf(flag);
-  return i >= 0 ? args[i + 1] : undefined;
-};
-
-const rootArg = get('--root');
-const workspaceRoot = rootArg ? resolve(rootArg) : resolve(dirname(import.meta.path), '../..');
+const rootArg = process.argv.includes('--root') ? process.argv[process.argv.indexOf('--root') + 1] : undefined;
+const workspaceRoot = rootArg ? resolve(rootArg) : resolveWorkspaceRoot(import.meta.path);
 const themesRoot = join(workspaceRoot, 'docs/html-themes/themes');
 const stylesRoot = join(workspaceRoot, 'docs/html-themes/styles');
 const sharedDir = join(themesRoot, '_shared');
@@ -53,7 +50,7 @@ const warn = (msg: string) => { console.warn(`  WARN:  ${msg}`); warnings++; };
 const REGION_KEYS = ['header', 'title', 'content', 'visual', 'meta', 'toc'] as const;
 const FIT_VALUES = new Set(['contain', 'cover', 'fill']);
 
-function readJson(path: string, label: string): any | null {
+function readJsonWithLabel(path: string, label: string): any | null {
   try {
     return JSON.parse(readFileSync(path, 'utf-8'));
   } catch (e: any) {
@@ -62,29 +59,11 @@ function readJson(path: string, label: string): any | null {
   }
 }
 
-// Read styles/<name>/ dir only if it is a directory (skip stray files like base.css).
-function listStyleDirs(): string[] {
-  if (!existsSync(stylesRoot)) return [];
-  return readdirSync(stylesRoot, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
-}
-
-// Read themes/ subdirectories, EXCLUDING _shared (the shared base is not a theme).
-function listThemeDirs(): string[] {
-  if (!existsSync(themesRoot)) return [];
-  return readdirSync(themesRoot, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name !== '_shared')
-    .map((d) => d.name);
-}
-
 // Normalize a `*_styles` entry that may be a plain string ("classic") or a
-// { name, reason? } object. Returns { name, reason, raw } or null if malformed.
+// { name, reason? } object. Returns { name, reason } or null if malformed.
 function normalizeStyleEntry(entry: any, listName: string, theme: string): { name: string; reason?: string } | null {
-  if (typeof entry === 'string') return { name: entry };
-  if (entry && typeof entry === 'object' && typeof entry.name === 'string') {
-    return { name: entry.name, reason: entry.reason };
-  }
+  const name = _normalizeStyleEntry(entry);
+  if (name !== null) return { name, reason: entry?.reason };
   err(`theme "${theme}" ${listName} entry is not a string or {name, reason} object: ${JSON.stringify(entry)}`);
   return null;
 }
@@ -124,7 +103,7 @@ if (errors > 0) {
 
 // ── 1. Shared-pool integrity: each styles/<name>/ has style.css + pdf_color_spec.json ──
 
-const styleDirs = listStyleDirs();
+const styleDirs = listStyleDirs(workspaceRoot);
 for (const s of styleDirs) {
   const sDir = join(stylesRoot, s);
   const styleCss = join(sDir, 'style.css');
@@ -138,7 +117,7 @@ for (const s of styleDirs) {
 if (!existsSync(sharedLayout)) {
   err(`themes/_shared/layout_base.json not found — Layer-0 shared base missing`);
 } else {
-  const base = readJson(sharedLayout, 'themes/_shared/layout_base.json');
+  const base = readJsonWithLabel(sharedLayout, 'themes/_shared/layout_base.json');
   if (base) {
     if (typeof base.page !== 'object' || base.page === null) {
       err('themes/_shared/layout_base.json: "page" object missing');
@@ -165,7 +144,7 @@ if (!existsSync(sharedLayout)) {
 
 // ── 3. Per-theme checks: theme.json + pdf_layout_spec.json ─────────────────────
 
-const themeDirs = listThemeDirs();
+const themeDirs = listThemeDirs(workspaceRoot);
 const allReferencedStyles = new Set<string>();
 
 for (const theme of themeDirs) {
@@ -178,7 +157,7 @@ for (const theme of themeDirs) {
     err(`themes/${theme}/theme.json missing`);
     continue;
   }
-  const themeJson = readJson(themeJsonPath, `themes/${theme}/theme.json`);
+  const themeJson = readJsonWithLabel(themeJsonPath, `themes/${theme}/theme.json`);
   if (!themeJson) continue;
 
   // 3b. compatible_styles (string[])
@@ -246,7 +225,7 @@ for (const theme of themeDirs) {
     err(`themes/${theme}/pdf_layout_spec.json missing`);
     continue;
   }
-  const spec = readJson(specPath, `themes/${theme}/pdf_layout_spec.json`);
+  const spec = readJsonWithLabel(specPath, `themes/${theme}/pdf_layout_spec.json`);
   if (!spec) continue;
 
   // regions: object with region keys, each value null or region object

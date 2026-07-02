@@ -87,6 +87,8 @@ Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a s
 ```
 Available themes: `outline | pitch | pitch-enhanced | vertical | zen`. Available styles: `classic | minimal | visual-heavy | academic | premium-dark`. Defaults: `pitch-enhanced` + `premium-dark`.
 
+> **Deterministic Builder (Task 4 — pending implementation):** A CLI `build-theme-deck.ts` will automate CSS injection, marker replacement, and ppt-engine.js inlining. Once available, html-build will invoke the builder instead of performing these steps manually. The builder handles: theme/style resolution, package validation, INJECT marker replacement, CSS link generation, ppt-engine.js inlining, strict-JSON slideData injection. html-build remains responsible for: slide content generation, image path binding, narration/auto-advance config assembly, and renderSlide() (template-provided).
+
 **Theme capabilities:**
 - All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
 - `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
@@ -180,6 +182,8 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
 >
 > **Encoding**: All output HTML files MUST be UTF-8 without BOM. Verify `<meta charset="UTF-8">` is present in `<head>`. On Korean Windows systems, ensure `chcp 65001` is active before writing files to prevent CP949 corruption of Korean text content.
+
+> **Builder Boundary:** See `agents/html-build.md` "Builder Boundary" section for the complete responsibility split between the builder and the html-build agent.
 
 ## Related Skills
 

@@ -1,0 +1,63 @@
+[
+  {
+    "headline": "Preview Title",
+    "type": "cover",
+    "bullets": ["Welcome to the theme preview"],
+    "visualTitle": "Theme Preview",
+    "visualDisplay": "Exploring the rendering capabilities"
+  },
+  {
+    "headline": "Section One",
+    "type": "divider",
+    "bullets": []
+  },
+  {
+    "headline": "Standard Slide",
+    "type": "standard",
+    "bullets": ["First bullet point", "Second bullet point", "Third bullet point"],
+    "imagePath": "",
+    "visualTitle": "Visual Title",
+    "visualDisplay": "Supporting detail text"
+  },
+  {
+    "headline": "Content with Image",
+    "type": "standard",
+    "bullets": ["Key insight one", "Key insight two"],
+    "imagePath": "../assets/diagrams/sample-diagram.svg",
+    "visualTitle": "Image Slide",
+    "visualDisplay": "Visual content alongside text"
+  },
+  {
+    "headline": "Key Takeaway",
+    "type": "punchline",
+    "bullets": ["Remember this important point"],
+    "script": "This is the narration script for the punchline slide."
+  },
+  {
+    "headline": "Presenter Profile",
+    "type": "profile",
+    "bullets": ["Expert in their field", "10 years of experience"],
+    "profileName": "Dr. Jane Smith",
+    "profileTitle": "Senior Researcher",
+    "profileAvatar": ""
+  },
+  {
+    "headline": "Contact Information",
+    "type": "contact",
+    "bullets": [],
+    "contactEmail": "jane.smith@example.com",
+    "contactPhone": "+1-555-0123",
+    "contactWebsite": "https://example.com"
+  },
+  {
+    "headline": "Another Section",
+    "type": "divider",
+    "bullets": []
+  },
+  {
+    "headline": "Visual Heavy Slide",
+    "type": "standard",
+    "bullets": ["Background image slide"],
+    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E"
+  }
+]

@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 2.0.0
 // generate-themes-manifest.ts
 //
 // Scans docs/html-themes/themes/ (excluding _shared) and docs/html-themes/styles/
@@ -15,50 +15,25 @@
 //   bun scripts/co-deck/generate-themes-manifest.ts
 //
 // Usage:
-//   bun scripts/co-deck/generate-themes-manifest.ts [--root <path>]
-//   --root  workspace root (default: two levels above this script)
+//   bun scripts/co-deck/generate-themes-manifest.ts [--root <path>] [--check] [--themes-md]
+//   --root       workspace root (default: two levels above this script)
+//   --check      exit 0 if manifest is up to date, exit 1 if stale
+//   --themes-md  regenerate theme table + compat matrix in THEMES.md
 
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join, resolve, dirname } from 'path';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { join, resolve } from 'path';
+import { listThemeDirs, listStyleDirs, resolveWorkspaceRoot, normalizeStyleEntry } from './lib/theme-utils.js';
 
 const args = process.argv.slice(2);
-const get = (flag: string) => {
-  const i = args.indexOf(flag);
-  return i >= 0 ? args[i + 1] : undefined;
-};
-
-const rootArg = get('--root');
-const workspaceRoot = rootArg ? resolve(rootArg) : resolve(dirname(import.meta.path), '../..');
+const rootArg = args.includes('--root') ? args[args.indexOf('--root') + 1] : undefined;
+const workspaceRoot = rootArg ? resolve(rootArg) : resolveWorkspaceRoot(import.meta.path);
 const themesRoot = join(workspaceRoot, 'docs/html-themes/themes');
 const stylesRoot = join(workspaceRoot, 'docs/html-themes/styles');
 const previewDir = join(workspaceRoot, 'docs/html-themes/preview');
 const manifestPath = join(previewDir, 'themes-manifest.js');
 
-// Normalize a *_styles entry that may be a string or {name, reason?}.
-function styleNameOf(entry: any): string | null {
-  if (typeof entry === 'string') return entry;
-  if (entry && typeof entry === 'object' && typeof entry.name === 'string') return entry.name;
-  return null;
-}
-
-function listThemeDirs(): string[] {
-  if (!existsSync(themesRoot)) return [];
-  return readdirSync(themesRoot, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name !== '_shared')
-    .map((d) => d.name)
-    .sort();
-}
-
-function listStyleDirs(): string[] {
-  if (!existsSync(stylesRoot)) return [];
-  return readdirSync(stylesRoot, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name)
-    .sort();
-}
-
-const themeDirs = listThemeDirs();
-const styleDirs = listStyleDirs();
+const themeDirs = listThemeDirs(workspaceRoot).sort();
+const styleDirs = listStyleDirs(workspaceRoot).sort();
 
 const themes = themeDirs.map((theme) => {
   const themeJsonPath = join(themesRoot, theme, 'theme.json');
@@ -68,10 +43,10 @@ const themes = themeDirs.map((theme) => {
     try {
       const tj = JSON.parse(readFileSync(themeJsonPath, 'utf-8'));
       compatible = (Array.isArray(tj.compatible_styles) ? tj.compatible_styles : [])
-        .map(styleNameOf)
+        .map(normalizeStyleEntry)
         .filter((s): s is string => s !== null);
       partial = (Array.isArray(tj.partial_styles) ? tj.partial_styles : [])
-        .map(styleNameOf)
+        .map(normalizeStyleEntry)
         .filter((s): s is string => s !== null);
     } catch {
       // Leave empty; validate-theme-styles.ts will report the JSON error.
@@ -83,12 +58,9 @@ const themes = themeDirs.map((theme) => {
 });
 
 const manifest = {
-  generated_at: new Date().toISOString(),
   themes,
   styles: styleDirs,
 };
-
-if (!existsSync(previewDir)) mkdirSync(previewDir, { recursive: true });
 
 // Emit as a script that assigns window.__THEMES_MANIFEST__.
 // JSON.stringify with 2-space indent; wrap so the file is valid JS loaded via <script>.
@@ -97,7 +69,132 @@ const js =
   '// Regenerate after adding/removing a theme or style: bun scripts/co-deck/generate-themes-manifest.ts\n' +
   'window.__THEMES_MANIFEST__ = ' + JSON.stringify(manifest, null, 2) + ';\n';
 
+// --- --check mode ---
+const checkMode = args.includes('--check');
+
+if (checkMode) {
+  const existing = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf-8') : '';
+  if (js === existing) {
+    console.log('themes-manifest.js is up to date.');
+    process.exit(0);
+  } else {
+    console.error('themes-manifest.js is stale. Run without --check to regenerate.');
+    process.exit(1);
+  }
+}
+
+if (!existsSync(previewDir)) mkdirSync(previewDir, { recursive: true });
+
 writeFileSync(manifestPath, js, 'utf-8');
 console.log(`themes-manifest.js written: ${manifestPath}`);
 console.log(`  themes: ${themes.map((t) => t.name).join(', ') || '(none)'}`);
 console.log(`  styles: ${styleDirs.join(', ') || '(none)'}`);
+
+// --- --themes-md mode ---
+const themesMdMode = args.includes('--themes-md');
+
+if (themesMdMode) {
+  const themesMdPath = join(workspaceRoot, 'docs/html-themes/THEMES.md');
+
+  if (!existsSync(themesMdPath)) {
+    console.error(`THEMES.md not found at ${themesMdPath}`);
+    process.exit(1);
+  }
+
+  const content = readFileSync(themesMdPath, 'utf-8');
+
+  // Helper: resolve version from theme.json (prefer version_num, fallback to version)
+  function themeVersion(name: string): string {
+    const p = join(themesRoot, name, 'theme.json');
+    if (!existsSync(p)) return '?';
+    try {
+      const j = JSON.parse(readFileSync(p, 'utf-8'));
+      return j.version_num || j.version || '?';
+    } catch {
+      return '?';
+    }
+  }
+
+  // Helper: read full theme.json
+  function readThemeJson(name: string): any {
+    const p = join(themesRoot, name, 'theme.json');
+    if (!existsSync(p)) return null;
+    try {
+      return JSON.parse(readFileSync(p, 'utf-8'));
+    } catch {
+      return null;
+    }
+  }
+
+  // Generate theme table rows
+  const themeTableRows = themeDirs.map((name) => {
+    const tj = readThemeJson(name);
+    if (!tj) return null;
+    const version = tj.version_num || tj.version || '?';
+    const paradigm = tj.rendering?.paradigm || '';
+    const navigation = tj.rendering?.navigation || '';
+    const toc = tj.toc_required ? 'Required' : tj.toc_required === false ? 'Optional' : 'Drawer';
+
+    // Build compatible styles string
+    const compatible = (Array.isArray(tj.compatible_styles) ? tj.compatible_styles : [])
+      .map(normalizeStyleEntry)
+      .filter((s): s is string => s !== null);
+
+    const partial = (Array.isArray(tj.partial_styles) ? tj.partial_styles : [])
+      .map(normalizeStyleEntry)
+      .filter((s): s is string => s !== null);
+
+    const stylesStr = compatible
+      .map((s) => partial.includes(s) ? `${s} (⚠ partial)` : s)
+      .join(', ');
+
+    return `| \`${name}\` | ${version} | active | ${paradigm} | ${navigation} | ${toc} | ${stylesStr} | \`themes/${name}/\` |`;
+  }).filter(Boolean).join('\n');
+
+  // Generate compatibility matrix
+  // Columns: all theme dirs; Rows: all style dirs
+  const matrixHeader = '| Style ↓ / Theme → | ' + themeDirs.map((t) => `\`${t}\``).join(' | ') + ' |';
+  const matrixSeparator = '|-------------------|' + themeDirs.map(() => '-----------').join('|') + '|';
+
+  const matrixRows = styleDirs.map((style) => {
+    const cells = themeDirs.map((theme) => {
+      const tj = readThemeJson(theme);
+      if (!tj) return '❓';
+
+      const incompatible = (Array.isArray(tj.incompatible_styles) ? tj.incompatible_styles : [])
+        .map(normalizeStyleEntry)
+        .filter((s): s is string => s !== null);
+
+      const partial = (Array.isArray(tj.partial_styles) ? tj.partial_styles : [])
+        .map(normalizeStyleEntry)
+        .filter((s): s is string => s !== null);
+
+      const compatible = (Array.isArray(tj.compatible_styles) ? tj.compatible_styles : [])
+        .map(normalizeStyleEntry)
+        .filter((s): s is string => s !== null);
+
+      if (incompatible.includes(style)) return '❌ incompatible';
+      if (partial.includes(style)) return '⚠️ partial';
+      if (compatible.includes(style)) return '✅';
+      return '❓';
+    });
+    return `| \`${style}\` | ${cells.join(' | ')} |`;
+  });
+
+  const compatMatrix = [matrixHeader, matrixSeparator, ...matrixRows].join('\n');
+
+  // Replace theme table between markers
+  let updated = content.replace(
+    /<!-- AUTO-GENERATED-THEME-TABLE:START.*?-->\n((?:\|[^\n]*\n?)*)<!-- AUTO-GENERATED-THEME-TABLE:END -->/s,
+    `<!-- AUTO-GENERATED-THEME-TABLE:START — do not edit between markers; regenerated by generate-themes-manifest.ts -->\n| Name | Version | Status | Paradigm | Navigation | TOC | Compatible Styles | Folder |\n|------|---------|--------|----------|-----------|-----|-------------------|--------|\n${themeTableRows}\n<!-- AUTO-GENERATED-THEME-TABLE:END -->`
+  );
+
+  // Replace compatibility matrix between markers
+  updated = updated.replace(
+    /<!-- AUTO-GENERATED-COMPAT-MATRIX:START.*?-->\n((?:\|[^\n]*\n?)*)<!-- AUTO-GENERATED-COMPAT-MATRIX:END -->/s,
+    `<!-- AUTO-GENERATED-COMPAT-MATRIX:START — do not edit between markers; regenerated by generate-themes-manifest.ts -->\n${compatMatrix}\n<!-- AUTO-GENERATED-COMPAT-MATRIX:END -->`
+  );
+
+  writeFileSync(themesMdPath, updated, 'utf-8');
+  console.log('THEMES.md tables updated.');
+}
