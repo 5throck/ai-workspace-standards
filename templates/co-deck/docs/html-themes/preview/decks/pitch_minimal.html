@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<!--
+  pitch/template.html — co-deck Pitch Theme Skeleton
+  ===================================================
+  Rendering paradigm: floating card, viewport-relative (not fixed 1280×720).
+  Navigation: bottom footer bar — prev/next buttons, TOC drawer, script toggle.
+  Transition: scale(0.98)+translateY(10px) → scale(1)+translateY(0), 0.6s cubic-bezier(0.16,1,0.3,1).
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="pitch" data-style="minimal"  data-style="<style>"> attributes
+    2. Replaces [INJECT:CSS] with base.css + theme.css + style.css <link> tags
+    3. Replaces [INJECT:slideData] with: const slideData = [...];
+    4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
+       defined in this template's <script>. html-build injects slideData only and
+       MUST NOT hand-author .slide divs — leave the presentation container empty.
+
+  CONTENT RULES (from theme.json):
+    - max 4 bullets per slide, max 28 chars in title
+    - script field → speaker notes panel (presenter-facing, hidden by default)
+    - divider slides must include a visualImage for the right panel
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="pitch" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview — pitch × minimal</title>
+    <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../themes/pitch/theme.css">
+  <link rel="stylesheet" href="../../styles/minimal/style.css">
+  <!-- Example load order (replaced by html-build): foundation → theme → style.
+  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../themes/pitch/theme.css">
+  <link rel="stylesheet" href="../../styles/classic/style.css">
+  -->
+</head>
+<body>
+
+  <!-- TOC drawer -->
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+  <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
+    <div class="toc-header">
+      <span class="toc-title">슬라이드 목차</span>
+      <button class="toc-close-btn" onclick="closeTOC()" aria-label="닫기">&times;</button>
+    </div>
+    <ul class="toc-list" id="toc-list">
+      <!-- Populated by buildTOC() -->
+    </ul>
+  </div>
+
+  <!-- Script panel (speaker notes) -->
+  <div class="script-panel" id="script-panel" role="note" aria-live="polite">
+    <div class="script-label">발표자 노트</div>
+    <div id="script-text"></div>
+  </div>
+
+  <!-- Presentation area -->
+  <div class="presentation-container" id="presentation">
+    
+    <!--
+      RUNTIME RENDERING: each .slide div is constructed at runtime by
+      renderSlide(data, index) / initSlides() defined in this template's <script>.
+      html-build injects slideData only (via INJECT:slideData) and MUST NOT
+      hand-author .slide divs here — leave this container empty.
+
+      Each rendered slide has the shape:
+        <div class="slide" id="slide-${index}" data-type="title|divider|profile|standard|contact">
+          ... native pitch-theme child nodes ...
+        </div>
+      First slide gets class="slide active".
+
+      Slide types (data-type from slideType()):
+        title    → isTitleSlide:true   — centered cover (slide-eyebrow, slide-title, slide-subtitle, slide-meta)
+        divider  → isDividerSlide:true — divider-left (divider-part, divider-title, divider-desc) + divider-right (img)
+        profile  → isProfileSlide:true — profile-eyebrow, profile-name, profile-affiliation, profile-bio
+        contact  → isContactSlide:true — contact-title + contact-info (contactEmail / contactLinkedIn)
+        standard → (default)           — slide-content grid: slide-left (slide-section, slide-title, slide-bullets) + slide-right (slide-visual: img | visualTitle+visualDisplay)
+
+      SlideData fields used by pitch theme:
+        section, title, bullets[], subtitle, meta,
+        isTitleSlide, isDividerSlide, isProfileSlide, isContactSlide,
+        partNum, desc, script, visualImage, visualTitle, visualDisplay,
+        speakerName, speakerTitle, speakerBio, contactEmail, contactLinkedIn
+    -->
+  </div>
+
+  <!-- Footer bar -->
+  <footer class="pitch-footer" id="pitch-footer">
+    <div class="footer-left">
+      <span class="slide-counter" id="slide-counter">1 / 1</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="목차 열기/닫기" title="목차">☰ 목차</button>
+      <button class="footer-btn" id="script-btn" onclick="toggleScript()" aria-label="발표자 노트 보기/숨기기" title="발표자 노트">📝 노트</button>
+      <button class="footer-btn" id="fullscreen-btn" onclick="if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()" aria-label="전체화면" title="전체화면 (F)">⤢</button>
+      <button class="nav-btn" id="nav-prev" onclick="changeSlide(-1)" aria-label="이전 슬라이드">&#8592;</button>
+      <button class="nav-btn" id="nav-next" onclick="changeSlide(1)" aria-label="다음 슬라이드">&#8594;</button>
+    </div>
+  </footer>
+
+  <script>
+    const slideData = [
+  {
+    "headline": "Preview Title",
+    "type": "cover",
+    "bullets": [
+      "Welcome to the theme preview"
+    ],
+    "visualTitle": "Theme Preview",
+    "visualDisplay": "Exploring the rendering capabilities"
+  },
+  {
+    "headline": "Section One",
+    "type": "divider",
+    "bullets": []
+  },
+  {
+    "headline": "Standard Slide",
+    "type": "standard",
+    "bullets": [
+      "First bullet point",
+      "Second bullet point",
+      "Third bullet point"
+    ],
+    "imagePath": "",
+    "visualTitle": "Visual Title",
+    "visualDisplay": "Supporting detail text"
+  },
+  {
+    "headline": "Content with Image",
+    "type": "standard",
+    "bullets": [
+      "Key insight one",
+      "Key insight two"
+    ],
+    "imagePath": "../assets/diagrams/sample-diagram.svg",
+    "visualTitle": "Image Slide",
+    "visualDisplay": "Visual content alongside text"
+  },
+  {
+    "headline": "Key Takeaway",
+    "type": "punchline",
+    "bullets": [
+      "Remember this important point"
+    ],
+    "script": "This is the narration script for the punchline slide."
+  },
+  {
+    "headline": "Presenter Profile",
+    "type": "profile",
+    "bullets": [
+      "Expert in their field",
+      "10 years of experience"
+    ],
+    "profileName": "Dr. Jane Smith",
+    "profileTitle": "Senior Researcher",
+    "profileAvatar": ""
+  },
+  {
+    "headline": "Contact Information",
+    "type": "contact",
+    "bullets": [],
+    "contactEmail": "jane.smith@example.com",
+    "contactPhone": "+1-555-0123",
+    "contactWebsite": "https://example.com"
+  },
+  {
+    "headline": "Another Section",
+    "type": "divider",
+    "bullets": []
+  },
+  {
+    "headline": "Visual Heavy Slide",
+    "type": "standard",
+    "bullets": [
+      "Background image slide"
+    ],
+    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E"
+  }
+];
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── Slide renderer (authoritative — html-build injects slideData only) ─────
+    // The .slide DOM is built at runtime by renderSlide()/initSlides() below.
+    // html-build must NOT hand-author .slide divs — it injects slideData (INJECT:slideData)
+    // and CSS links only, and leaves the presentation container empty. The renderer
+    // constructs DOM with createElement + textContent (text auto-escaped, no markup
+    // injection surface). slideData is author-controlled lecture content.
+
+    // Strip tags for img alt / text fallbacks.
+    function escapeText(s) {
+      return String(s == null ? '' : s).replace(/<\/?[^>]+(>|$)/g, '');
+    }
+
+    // createElement helper: set className + (optionally) textContent, return node.
+    function el(tag, cls, text) {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    // createElement('img'); set .src + .alt; return node.
+    function img(src, alt) {
+      const node = document.createElement('img');
+      node.src = src || '';
+      node.alt = alt || '';
+      node.onerror = function() {
+        this.style.opacity = '0.2';
+        this.classList.add('img-fallback');
+      };
+      return node;
+    }
+
+    // Append inline text with **bold** -> <strong>, all text via textContent (auto-escape).
+    function appendInline(parent, s) {
+      const parts = String(s == null ? '' : s).split(/\*\*(.*?)\*\*/g);
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) parent.appendChild(document.createTextNode(parts[i]));
+        else parent.appendChild(el('strong', null, parts[i]));
+      }
+    }
+
+    // Build the bullet list for the given container class. arr: array of bullet strings.
+    function buildBullets(parent, arr) {
+      const ul = el('ul', 'slide-bullets');
+      if (Array.isArray(arr)) {
+        arr.forEach(function (b) {
+          const li = el('li');
+          appendInline(li, b);
+          ul.appendChild(li);
+        });
+      }
+      parent.appendChild(ul);
+    }
+
+    // Convert plain-text visualDisplay into structured DOM elements.
+    // [Title] → .visual-heading, ✓/→/• → .visual-item, default → .visual-paragraph
+    function renderVisualDisplay(parent, text) {
+      if (!text) return;
+      var lines = String(text).split('\n');
+      lines.forEach(function(line) {
+        var trimmed = line.trim();
+        if (!trimmed) { parent.appendChild(document.createElement('br')); return; }
+        if (/^\[.+\]$/.test(trimmed)) {
+          parent.appendChild(el('div', 'visual-heading', trimmed.replace(/^\[|\]$/g, '')));
+          return;
+        }
+        if (/^[✓✗✔✘→►•▪▫▸❯]\s*/.test(trimmed)) {
+          parent.appendChild(el('div', 'visual-item', trimmed));
+          return;
+        }
+        parent.appendChild(el('div', 'visual-paragraph', trimmed));
+      });
+    }
+
+    // Map slideData flags → pitch data-type vocabulary.
+    function slideType(d) {
+      if (d.isPunchlineSlide) return 'punchline';
+      if (d.isTitleSlide)    return 'title';
+      if (d.isDividerSlide)  return 'divider';
+      if (d.isProfileSlide)  return 'profile';
+      if (d.isContactSlide)  return 'contact';
+      return 'standard';
+    }
+
+    // Pitch-native slide children (classes styled by pitch/theme.css + style.css).
+    // Appends child nodes onto the slide element; returns nothing.
+    function buildSlideChildren(slide, data, index) {
+      const type = slideType(data);
+      const section = data.section || '';
+      const title = data.title || '';
+
+      if (type === 'title') {
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
+        if (data.subtitle != null) slide.appendChild(el('p', 'slide-subtitle', data.subtitle));
+        if (data.meta != null) slide.appendChild(el('p', 'slide-meta', data.meta));
+        return;
+      }
+      if (type === 'punchline') {
+        slide.appendChild(el('div', 'slide-eyebrow', section));
+        slide.appendChild(el('h1', 'slide-title', title));
+        return;
+      }
+      if (type === 'divider') {
+        const left = el('div', 'divider-left');
+        left.appendChild(el('span', 'divider-part', data.partNum || ''));
+        left.appendChild(el('h1', 'divider-title', title));
+        if (data.desc != null) left.appendChild(el('p', 'divider-desc', data.desc));
+        slide.appendChild(left);
+        const right = el('div', 'divider-right');
+        if (data.visualImage) {
+          var dividerImg = img(data.visualImage, escapeText(title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) dividerImg.classList.add('img-diagram');
+          right.appendChild(dividerImg);
+        }
+        slide.appendChild(right);
+        return;
+      }
+      if (type === 'profile') {
+        slide.appendChild(el('div', 'profile-eyebrow', section));
+        if (data.visualImage) {
+          const avatar = img(data.visualImage, escapeText(data.speakerName || title));
+          avatar.className = 'profile-avatar';
+          slide.appendChild(avatar);
+        }
+        slide.appendChild(el('div', 'profile-name', data.speakerName || title));
+        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
+        if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
+        return;
+      }
+      if (type === 'contact') {
+        slide.appendChild(el('div', 'contact-title', title));
+        const info = el('div', 'contact-info');
+        if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
+        if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
+        if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
+        slide.appendChild(info);
+        return;
+      }
+      // standard
+      const content = el('div', 'slide-content');
+      const left = el('div', 'slide-left');
+      left.appendChild(el('div', 'slide-section', section));
+      left.appendChild(el('h2', 'slide-title', title));
+      buildBullets(left, data.bullets);
+      content.appendChild(left);
+
+      const right = el('div', 'right-panel');
+      if (data.visualImage) {
+        var imgElem = img(data.visualImage, escapeText(data.visualTitle || title));
+        if (data.visualImage.indexOf('/diagrams/') !== -1) imgElem.classList.add('img-diagram');
+        right.appendChild(imgElem);
+      } else {
+        const visual = el('div', 'slide-visual');
+        visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
+        const display = el('div', 'visual-display');
+        renderVisualDisplay(display, data.visualDisplay);
+        visual.appendChild(display);
+        right.appendChild(visual);
+      }
+      content.appendChild(right);
+      slide.appendChild(content);
+    }
+
+    function renderSlide(data, index) {
+      const slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
+      slide.id = 'slide-' + index;
+      slide.dataset.type = slideType(data);
+      if (data.backgroundImage) {
+        slide.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        slide.style.backgroundSize = 'cover';
+        slide.style.backgroundPosition = 'center';
+      }
+      buildSlideChildren(slide, data, index);
+      return slide;
+    }
+
+    function initSlides() {
+      const container = document.getElementById('presentation');
+      if (!container || typeof slideData === 'undefined') return;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      slideData.forEach(function (d, i) { container.appendChild(renderSlide(d, i)); });
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    let currentSlide = 0;
+    let scriptVisible = false;
+
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (index < 0 || index >= slides.length) return;
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+
+      // counter + progress bar
+      const counter = document.getElementById('slide-counter');
+      if (counter) counter.textContent = (index + 1) + ' / ' + slides.length;
+      const bar = document.getElementById('progress-bar');
+      if (bar) bar.style.width = ((index + 1) / slides.length * 100) + '%';
+
+      // speaker script
+      updateScript(index);
+
+      // TOC active state
+      const tocItems = document.querySelectorAll('.toc-item');
+      tocItems.forEach((el, i) => el.classList.toggle('active', i === index));
+    }
+
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+
+    // ── Script panel ──────────────────────────────────────────────────────────
+    function updateScript(index) {
+      const panel = document.getElementById('script-panel');
+      const textEl = document.getElementById('script-text');
+      if (!panel || !textEl) return;
+      const data = typeof slideData !== 'undefined' ? slideData[index] : null;
+      const script = data && data.script ? data.script : '';
+      textEl.textContent = script;
+      if (!script && scriptVisible) {
+        panel.classList.remove('show');
+      } else if (scriptVisible && script) {
+        panel.classList.add('show');
+      }
+    }
+
+    function toggleScript() {
+      const panel = document.getElementById('script-panel');
+      const btn = document.getElementById('script-btn');
+      if (!panel) return;
+      const data = typeof slideData !== 'undefined' ? slideData[currentSlide] : null;
+      const hasScript = data && data.script;
+      scriptVisible = !scriptVisible;
+      panel.classList.toggle('show', scriptVisible && !!hasScript);
+      if (btn) btn.classList.toggle('active', scriptVisible);
+    }
+
+    // ── TOC drawer ────────────────────────────────────────────────────────────
+    function buildTOC() {
+      const list = document.getElementById('toc-list');
+      if (!list || typeof slideData === 'undefined') return;
+      // Clear existing items safely
+      while (list.firstChild) list.removeChild(list.firstChild);
+      slideData.forEach((data, i) => {
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (i === 0 ? ' active' : '');
+        li.onclick = () => { showSlide(i); closeTOC(); };
+        const num = document.createElement('span');
+        num.className = 'toc-item-num';
+        num.textContent = String(i + 1).padStart(2, '0');
+        const label = document.createElement('span');
+        label.textContent = data.title || '(제목 없음)';
+        li.appendChild(num);
+        li.appendChild(label);
+        list.appendChild(li);
+      });
+    }
+
+    function toggleTOC() {
+      const drawer = document.getElementById('toc-drawer');
+      const overlay = document.getElementById('toc-overlay');
+      const btn = document.getElementById('toc-btn');
+      if (!drawer) return;
+      const isOpen = drawer.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+      if (btn) btn.classList.toggle('active', isOpen);
+    }
+
+    function closeTOC() {
+      const drawer = document.getElementById('toc-drawer');
+      const overlay = document.getElementById('toc-overlay');
+      const btn = document.getElementById('toc-btn');
+      if (drawer)  drawer.classList.remove('open');
+      if (overlay) overlay.classList.remove('show');
+      if (btn)     btn.classList.remove('active');
+    }
+
+    // ── Keyboard shortcuts ────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) { document.exitFullscreen(); return; }
+        closeTOC();
+      }
+      if (e.key === 's' || e.key === 'S') toggleScript();
+      if (e.key === 't' || e.key === 'T') toggleTOC();
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      initSlides();
+      buildTOC();
+      showSlide(0);
+    });
+  </script>
+</body>
+</html>

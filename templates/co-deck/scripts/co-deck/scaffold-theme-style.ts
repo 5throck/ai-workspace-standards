@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 2.0.0
 // scaffold-theme-style.ts
 //
 // Scaffold a new co-deck html-theme or style with the correct file layout,
@@ -6,13 +6,16 @@
 //
 // Usage:
 //   bun scripts/co-deck/scaffold-theme-style.ts --theme <name>
+//   bun scripts/co-deck/scaffold-theme-style.ts --theme <name> --from <source-theme>
 //   bun scripts/co-deck/scaffold-theme-style.ts --style <name>
 //   bun scripts/co-deck/scaffold-theme-style.ts --theme <name> --style <name>
 //   bun scripts/co-deck/scaffold-theme-style.ts --help
 //
 // Behavior:
 //   --theme <name>  creates themes/<name>/{template.html, theme.json, theme.css,
-//                   pdf_layout_spec.json} with region-skeleton stubs.
+//                   pdf_layout_spec.json} with minimally valid content.
+//   --from <theme>  (with --theme) derive from an existing theme: copy template.html
+//                   and theme.css as starting point, set based_on + author in theme.json.
 //   --style <name>  creates styles/<name>/{style.css, pdf_color_spec.json} as
 //                   adapted copies of an existing style (default: classic).
 //   Either or both flags may be supplied. Existing directories are NEVER
@@ -23,8 +26,9 @@
 //
 // Boundary: this script operates only on files under templates/co-deck/docs/html-themes/.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { join, resolve, dirname } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { resolveWorkspaceRoot, getArg } from './lib/theme-utils.js';
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) {
@@ -32,8 +36,13 @@ if (args.includes('--help') || args.includes('-h')) {
 
 Usage:
   bun scripts/co-deck/scaffold-theme-style.ts --theme <name>
+  bun scripts/co-deck/scaffold-theme-style.ts --theme <name> --from <source-theme>
   bun scripts/co-deck/scaffold-theme-style.ts --style <name>
   bun scripts/co-deck/scaffold-theme-style.ts --theme <name> --style <name>
+
+Options:
+  --from <theme>  Derive from an existing theme (copies template.html + theme.css,
+                  sets based_on + author in theme.json). Must be used with --theme.
 
 After scaffolding, the themes manifest is regenerated. Open:
   docs/html-themes/preview/preview.html?theme=<theme>
@@ -41,20 +50,21 @@ After scaffolding, the themes manifest is regenerated. Open:
   process.exit(0);
 }
 
-const get = (flag: string) => {
-  const i = args.indexOf(flag);
-  return i >= 0 ? args[i + 1] : undefined;
-};
-
-const workspaceRoot = resolve(dirname(import.meta.path), '../..');
+const workspaceRoot = resolveWorkspaceRoot(import.meta.path);
 const themesRoot = join(workspaceRoot, 'docs/html-themes/themes');
 const stylesRoot = join(workspaceRoot, 'docs/html-themes/styles');
 
-const themeName = get('--theme');
-const styleName = get('--style');
+const themeName = getArg(args, '--theme');
+const styleName = getArg(args, '--style');
+const fromTheme = getArg(args, '--from');
 
 if (!themeName && !styleName) {
   console.error('ERROR: must supply at least one of --theme <name> or --style <name>. Use --help for usage.');
+  process.exit(1);
+}
+
+if (fromTheme && !themeName) {
+  console.error('ERROR: --from requires --theme. Use --help for usage.');
   process.exit(1);
 }
 
@@ -69,7 +79,7 @@ function validateName(name: string, kind: string) {
 
 // ── Stub templates ─────────────────────────────────────────────────────────────
 
-const THEME_JSON_STUB = (name: string) => `{
+const THEME_JSON_STUB = (name: string, basedOn?: string) => `{
   "name": "${name}",
   "version": "0.1.0",
   "description": "TODO: describe the ${name} theme (rendering paradigm, navigation, layout intent).",
@@ -85,7 +95,7 @@ const THEME_JSON_STUB = (name: string) => `{
     "recommended_slide_count": "TODO",
     "notes": "TODO"
   },
-  "compatible_styles": [],
+  "compatible_styles": ["classic"],
   "partial_styles": [],
   "incompatible_styles": [],
   "recommended_structure": {
@@ -97,14 +107,16 @@ const THEME_JSON_STUB = (name: string) => `{
   "toc_required": false,
   "slide_types": {
     "title": true,
-    "divider": false,
+    "divider": true,
     "punchline": false,
-    "standard": true
+    "standard": true,
+    "profile": false,
+    "contact": false
   },
   "css_base": "docs/html-themes/styles/base.css",
   "css_theme": "docs/html-themes/themes/${name}/theme.css",
   "added": "${new Date().toISOString().slice(0, 10)}",
-  "author": "co-deck"
+  "author": "${basedOn ? 'scaffold-derived' : 'co-deck'}"${basedOn ? `,\n  "based_on": "${basedOn}"` : ''}
 }
 `;
 
@@ -154,16 +166,58 @@ const THEME_CSS_STUB = (name: string) => `/**
  */
 
 :root {
-  /* TODO: theme-specific layout variables (--slide-layout, --grid-cols, etc.) */
+  /* Theme-specific layout variables */
+  --slide-layout: vertical;
+  --slide-padding: 3rem;
+  --title-font-size: 2rem;
+  --bullet-font-size: 1rem;
+  --section-font-size: 0.75rem;
+}
+
+/* Slide container base */
+.slide {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title slide */
+.slide[data-type="title"] {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Standard content slide */
+.slide[data-type="standard"] {
+  padding: var(--slide-padding);
+}
+
+/* Divider slide */
+.slide[data-type="divider"] {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 `;
 
-const TEMPLATE_HTML_STUB = (name: string) => `<!-- template.html — co-deck theme: ${name} -->
-<!-- TODO: minimal HTML skeleton. The renderer injects slide regions into this
-     template. Replace with the theme's actual DOM structure. -->
-<div class="${name}-root" data-region="root">
-  <main data-region="content"></main>
-</div>
+const TEMPLATE_HTML_STUB = (name: string) => `<!DOCTYPE html>
+<html lang="en" data-theme="${name}" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+</head>
+<body>
+  <div class="${name}-root">
+    <div id="presentation" class="presentation"></div>
+  </div>
+  <script>
+    // <!-- INJECT:slideData -->
+    <!-- INJECT:slides -->
+  </script>
+</body>
+</html>
 `;
 
 // ── Scaffolder ─────────────────────────────────────────────────────────────────
@@ -179,12 +233,57 @@ function scaffoldTheme(name: string) {
   validateName(name, 'theme');
   const dir = join(themesRoot, name);
   refuseIfExists(dir, `theme "${name}"`);
+
+  // If --from is specified, validate the source theme exists
+  if (fromTheme) {
+    validateName(fromTheme, 'source theme');
+    const fromDir = join(themesRoot, fromTheme);
+    if (!existsSync(fromDir)) {
+      console.error(`ERROR: source theme "${fromTheme}" not found at ${fromDir}`);
+      process.exit(1);
+    }
+  }
+
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'theme.json'), THEME_JSON_STUB(name), 'utf-8');
-  writeFileSync(join(dir, 'theme.css'), THEME_CSS_STUB(name), 'utf-8');
-  writeFileSync(join(dir, 'template.html'), TEMPLATE_HTML_STUB(name), 'utf-8');
+  writeFileSync(join(dir, 'theme.json'), THEME_JSON_STUB(name, fromTheme), 'utf-8');
   writeFileSync(join(dir, 'pdf_layout_spec.json'), PDF_LAYOUT_SPEC_STUB(name), 'utf-8');
-  console.log(`✓ scaffolded theme: themes/${name}/  (theme.json, theme.css, template.html, pdf_layout_spec.json)`);
+
+  if (fromTheme) {
+    // Derive from existing theme: copy template.html and theme.css as starting point
+    const fromDir = join(themesRoot, fromTheme);
+    const srcTemplate = join(fromDir, 'template.html');
+    const srcCss = join(fromDir, 'theme.css');
+
+    if (existsSync(srcTemplate)) {
+      const templateContent = readFileSync(srcTemplate, 'utf-8');
+      // Update theme references in the template
+      const adaptedTemplate = templateContent
+        .replace(new RegExp(`data-theme="${fromTheme}"`, 'g'), `data-theme="${name}"`)
+        .replace(new RegExp(`${fromTheme}-root`, 'g'), `${name}-root`);
+      writeFileSync(join(dir, 'template.html'), adaptedTemplate, 'utf-8');
+    } else {
+      writeFileSync(join(dir, 'template.html'), TEMPLATE_HTML_STUB(name), 'utf-8');
+      console.warn(`  WARNING: source template.html not found in ${fromTheme}, using stub`);
+    }
+
+    if (existsSync(srcCss)) {
+      const cssContent = readFileSync(srcCss, 'utf-8');
+      // Update header comment to identify derived theme
+      const adaptedCss = cssContent
+        .replace(/co-deck theme: \w+/, `co-deck theme: ${name}`)
+        .replace(/\/\*\*[\s\S]*?\*\//, `/**\n * theme.css — co-deck theme: ${name}\n * Derived from: ${fromTheme}\n * TODO: customize theme-specific CSS variables.\n */`);
+      writeFileSync(join(dir, 'theme.css'), adaptedCss, 'utf-8');
+    } else {
+      writeFileSync(join(dir, 'theme.css'), THEME_CSS_STUB(name), 'utf-8');
+      console.warn(`  WARNING: source theme.css not found in ${fromTheme}, using stub`);
+    }
+
+    console.log(`✓ scaffolded theme: themes/${name}/  (derived from ${fromTheme}: template.html, theme.css, theme.json, pdf_layout_spec.json)`);
+  } else {
+    writeFileSync(join(dir, 'theme.css'), THEME_CSS_STUB(name), 'utf-8');
+    writeFileSync(join(dir, 'template.html'), TEMPLATE_HTML_STUB(name), 'utf-8');
+    console.log(`✓ scaffolded theme: themes/${name}/  (theme.json, theme.css, template.html, pdf_layout_spec.json)`);
+  }
 }
 
 function scaffoldStyle(name: string) {
@@ -227,7 +326,9 @@ if (genResult.error || genResult.status !== 0) {
 
 // ── Next steps ─────────────────────────────────────────────────────────────────
 console.log('\nNext steps:');
+if (themeName && fromTheme) console.log(`  • Customize themes/${themeName}/template.html and theme.css (derived from ${fromTheme})`);
 if (themeName) console.log(`  • Edit themes/${themeName}/theme.json (description, compatible_styles)`);
 if (themeName) console.log(`  • Populate themes/${themeName}/pdf_layout_spec.json regions + slide_types`);
+if (themeName) console.log(`  • Run: bun scripts/co-deck/verify-new-theme.ts ${themeName} --fast`);
 if (styleName) console.log(`  • Tune styles/${styleName}/style.css (colors, typography)`);
 console.log('  • Open: docs/html-themes/preview/preview.html' + (themeName ? `?theme=${themeName}` : ''));

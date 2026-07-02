@@ -1,0 +1,24 @@
+[
+  {
+    "headline": "Smoke Test Cover",
+    "type": "cover",
+    "bullets": ["Test bullet one", "Test bullet two"]
+  },
+  {
+    "headline": "Smoke Test Content",
+    "type": "standard",
+    "bullets": ["Point A", "Point B", "Point C"],
+    "visualTitle": "Visual Title",
+    "visualDisplay": "Visual display text"
+  },
+  {
+    "headline": "Smoke Test Divider",
+    "type": "divider",
+    "bullets": []
+  },
+  {
+    "headline": "Smoke Test Punchline",
+    "type": "punchline",
+    "bullets": ["Key takeaway"]
+  }
+]

@@ -136,6 +136,8 @@ storyline reviews and authors:
    - Update `docs/lecture-profile.md` theme options comment
    - Update `agents/html-build.md` → Available themes list
 
+> **Registration Gate:** After scaffolding, run `bun scripts/co-deck/verify-new-theme.ts <name>` to validate the theme passes all 5 checks: (1) structural validation, (2) manifest freshness, (3) THEMES.md marker consistency, (4) fixture HTML build + extraction round-trip, (5) PDF generation. Use `--fast` to skip checks 4–5 during iterative development. Use `--style <name>` to test with a specific style (default: `classic`). Use `--json` for machine-readable output. Registration is blocked until the gate exits 0.
+
 ---
 
 ---

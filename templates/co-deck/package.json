@@ -12,7 +12,11 @@
     "snapshot": "bun scripts/co-deck/snapshot.ts",
     "audit": "bun scripts/audit.ts",
     "dev-sync": "bun scripts/dev-sync.ts",
-    "sync-md": "bun scripts/sync-md.ts"
+    "sync-md": "bun scripts/sync-md.ts",
+    "test": "bun test",
+    "test:smoke": "bun test scripts/co-deck/tests/theme-browser-smoke.test.ts && node scripts/co-deck/tests/theme-browser-smoke.browser.mjs",
+    "test:visual": "bun test scripts/co-deck/tests/theme-visual-regression.test.ts",
+    "test:visual:update": "UPDATE_BASELINES=1 bun test scripts/co-deck/tests/theme-visual-regression.test.ts"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
@@ -21,6 +25,6 @@
   },
   "optionalDependencies": {
     "playwright": "^1.45.0",
-    "pdf-to-png-converter": "^4.1.0"
+    "pdf-to-png-converter": "^4.1.1"
   }
 }

@@ -70,6 +70,14 @@ slideData object fields and image filename convention: see `skills/html-build/SK
 
 ## Theme + Style Integration
 
+> **Builder (primary method — Task 4, post-implementation):** After the deterministic `build-theme-deck.ts` CLI is implemented, the html-build agent should invoke it instead of manually assembling HTML:
+> ```bash
+> bun scripts/co-deck/build-theme-deck.ts --project presentations/<name>
+> ```
+> The builder handles: theme/style resolution, package validation, INJECT marker replacement, CSS link generation, ppt-engine.js inlining, and strict-JSON slideData injection. See the **Builder Boundary** section below for what the builder does NOT handle.
+>
+> **Fallback (manual assembly — pre-builder and rollback):** If the builder exits non-zero, fall back to the manual process described below. This fallback preserves the ability to generate decks during the transition period. The manual process will be removed from this document once the builder is proven across multiple real deck generations.
+
 When generating `lecture_vN.html`, read `presentation.theme` and `presentation.style` from `lecture-profile.md`:
 
 **1. HTML root attributes** — set on `<html>` tag:
@@ -107,6 +115,24 @@ Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `r
 Available themes: `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
 > **Theme guide**: All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide` (except `outline` which ignores visual panels). PPT-engine themes (outline, pitch-enhanced, zen, vertical) share `ppt-engine.css`/`ppt-engine.js` for TOC drawer, transitions (fade/push/zoom), timer, and speaker notes. The `vertical` theme uses IntersectionObserver for scroll tracking and a sticky top bar (no footer). The original `pitch` theme uses its own layout (TOC drawer, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
+
+## Builder Boundary (Theme System Roadmap Task 4)
+
+> **Source:** `docs/designs/2026-07-01-theme-system-roadmap.md` — Meeting decision A-02/B-02.
+
+The deterministic `build-theme-deck.ts` builder handles the following; html-build is responsible for everything else:
+
+| Builder handles | html-build handles |
+|-----------------|-------------------|
+| Theme/style resolution from `lecture-profile.md` | Slide content generation (from `slide_deck.md`) |
+| Package validation via theme contract | Image path binding (from `image-manifest.json`) |
+| INJECT marker replacement (title, CSS, slides, slideData) | `renderSlide()` implementation (template-provided, per theme) |
+| CSS link generation in correct load order | `background_image` data preparation (scope, source, overlay) |
+| ppt-engine.js inlining (PPT-engine themes only) | Narration/auto-advance config object assembly |
+| strict-JSON `slideData` injection | `design_spec.md` → CSS variable overrides (if any) |
+| Output file naming (`lecture_<topic>_vN.html`) | Version snapshot before edit |
+
+**Key boundary:** `renderSlide()` is implemented inside each theme's `template.html` and is NOT part of the builder. The builder replaces `<!-- INJECT:* -->` markers and inlines assets; the template's runtime code handles slide DOM construction.
 
 ## Constraints
 
