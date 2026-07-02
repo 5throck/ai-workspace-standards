@@ -60,12 +60,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.6.3 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `dispatch-parallel.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.3.1 | active | —| —| L0+L1 | —|
+| `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `gen-pr-body.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
+| `gen-pr-body.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -118,7 +118,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `propagate-to-templates.ts` | L0 | 2.0.9 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `retry-handler.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.1.3 | active | —| —| L0+L1 | —|
