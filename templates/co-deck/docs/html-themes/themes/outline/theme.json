@@ -1,8 +1,7 @@
 {
-  "version": "1.0.0",
-  "_comment": "outline theme (Research Notebook) — text-focused, no image panel. v1.0.0: new paradigm. Full-width content area, no right-panel. All styles compatible.",
+  "version": "3.0.0",
+  "_comment": "outline theme (Research Notebook) — text-focused, no image panel. v3.0.0: PPT-engine features (TOC drawer, NarrationEngine v2.4, FullscreenManager, transitions, @media print, keyboard shortcuts). Full-width content area, no right-panel. All styles compatible.",
   "name": "outline",
-  "version_num": "1.0.0",
   "description": "Research notebook theme — text-focused presentation with headline + bullet structure. No image panel; full width dedicated to text content. Designed for researchers and academics who present structured content with minimal visual distractions.",
   "rendering": {
     "paradigm": "outline",

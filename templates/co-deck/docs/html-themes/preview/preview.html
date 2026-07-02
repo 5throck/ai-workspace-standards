@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <!--
   preview.html — co-deck Theme x Style Preview Tool
+  Uses the PRODUCTION rendering path (buildThemeDeck output) displayed in an iframe.
+
   Usage: open in browser with URL params:
     preview.html?theme=outline&style=classic
     preview.html?theme=zen&style=minimal
-  All slide content is hardcoded dummy data — not user input.
 
   ─────────────────────────────────────────────────────────────────────────────
   DYNAMIC THEME/STYLE DISCOVERY (file://-safe)
@@ -18,28 +19,85 @@
 
   REGENERATE the manifest after adding/removing a theme or style:
       bun scripts/co-deck/generate-themes-manifest.ts
+
+  REGENERATE preview decks after adding/removing a theme or style:
+      bun scripts/co-deck/build-theme-preview.ts
   ─────────────────────────────────────────────────────────────────────────────
 -->
-<html lang="ko" data-theme="outline" data-style="premium-dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>co-deck Preview</title>
-  <link id="base-css" rel="stylesheet" href="../styles/base.css">
-  <link id="theme-css" rel="stylesheet" href="../themes/outline/theme.css">
-  <link id="style-css" rel="stylesheet" href="../styles/classic/style.css">
   <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #111; color: #eee; overflow: hidden; height: 100vh; }
+
+    /* ── Top bar ──────────────────────────────────────────────────────────── */
     #preview-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-      background: rgba(0,0,0,0.85); color: #fff;
-      padding: 8px 16px; font: 13px/1.4 monospace;
-      display: flex; align-items: center; gap: 16px;
+      background: rgba(0,0,0,0.92); color: #fff;
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid #333;
     }
-    #preview-bar label { opacity: 0.7; }
-    #preview-bar select { background: #222; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 6px; }
-    .hint { margin-left: auto; opacity: 0.5; font-size: 11px; }
-    body { padding-top: 40px; }
-    .slide { min-height: 300px; margin: 0 0 16px; padding: 40px; border-radius: 12px; background: var(--slide-bg); border: 1px solid var(--border-subtle); }
+    #preview-bar label { opacity: 0.7; font-size: 12px; }
+    #preview-bar select {
+      background: #222; color: #fff; border: 1px solid #555;
+      border-radius: 4px; padding: 3px 8px; font-size: 12px;
+    }
+    #preview-bar .hint { margin-left: auto; opacity: 0.4; font-size: 10px; }
+    #preview-bar .badge {
+      display: inline-block; padding: 2px 6px; border-radius: 3px;
+      font-size: 10px; font-weight: bold;
+    }
+    #preview-bar .badge-partial { background: #b45309; color: #fff; }
+    #preview-bar .badge-incompatible { background: #dc2626; color: #fff; }
+
+    /* ── Iframe container ────────────────────────────────────────────────── */
+    #preview-frame-container {
+      position: fixed; top: 40px; left: 0; right: 0; bottom: 0;
+    }
+    #preview-iframe {
+      width: 100%; height: 100%; border: none; background: #fff;
+    }
+
+    /* ── Error panel (fail-loudly) ───────────────────────────────────────── */
+    #error-panel {
+      display: none;
+      position: fixed; top: 40px; left: 0; right: 0; bottom: 0;
+      background: #1a0000; color: #ff6b6b;
+      padding: 40px; overflow: auto; z-index: 10;
+    }
+    #error-panel.visible { display: block; }
+    #error-panel h1 { font-size: 1.5em; margin: 0 0 8px; color: #ff4444; }
+    #error-panel h2 { font-size: 1.1em; margin: 24px 0 8px; color: #ff8888; border-bottom: 1px solid #440000; padding-bottom: 4px; }
+    #error-panel .error-item { padding: 8px 12px; margin: 4px 0; background: rgba(255,0,0,0.08); border-left: 3px solid #ff4444; border-radius: 0 4px 4px 0; }
+    #error-panel .error-item pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+    #error-panel .copy-btn {
+      margin-top: 24px; padding: 8px 16px;
+      background: #dc2626; color: #fff; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 13px;
+    }
+    #error-panel .copy-btn:hover { background: #ef4444; }
+    #error-panel .copy-btn.copied { background: #16a34a; }
+
+    /* ── Loading state ────────────────────────────────────────────────────── */
+    #loading-indicator {
+      display: none;
+      position: fixed; top: 40px; left: 0; right: 0; bottom: 0;
+      background: #111; color: #888;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-direction: column; gap: 12px;
+    }
+    #loading-indicator.hidden { display: none; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #333; border-top-color: #888;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -49,258 +107,295 @@
     <select id="theme-select" onchange="applyParams()"></select>
     <label>Style:</label>
     <select id="style-select" onchange="applyParams()"></select>
+    <span id="compat-badge"></span>
     <span class="hint">preview.html?theme=pitch-enhanced&amp;style=classic</span>
   </div>
 
-  <div id="slide-host"></div>
+  <div id="preview-frame-container">
+    <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+
+  <div id="error-panel">
+    <h1>&#x26A0; Preview Rendering Error</h1>
+    <p id="error-summary"></p>
+    <h2>Contract Errors</h2>
+    <div id="contract-errors"></div>
+    <h2>Runtime Errors</h2>
+    <div id="runtime-errors"></div>
+    <button class="copy-btn" onclick="copyErrorDetails()">Copy Error Details</button>
+  </div>
+
+  <div id="loading-indicator" class="hidden">
+    <div class="spinner"></div>
+    <span>Loading preview...</span>
+  </div>
 
   <!-- Manifest: auto-generated, file://-safe global. Regenerate via bun scripts/co-deck/generate-themes-manifest.ts -->
   <script src="themes-manifest.js"></script>
   <script>
-    // Hardcoded dummy slide data (6 slides) — not user input
-    const SLIDE_DATA = [
-      { type: 'cover',    title: '미래 기술의 방향', subtitle: '인공지능과 디지털 전환', meta: '2026-06-21 | 공개 강연', backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80' },
-      { type: 'divider',  section: '1부', partNum: 'PART 01', title: '기술 변화의 흐름', desc: '지난 10년간의 핵심 변곡점', backgroundImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=80' },
-      { type: 'standard', section: '기술 변화의 흐름', title: '인공지능의 부상', bullets: ['딥러닝 혁명 (2012~)', 'LLM과 생성형 AI (2022~)', '업무 자동화 가속'] },
-      { type: 'standard', section: '기술 변화의 흐름', title: '데이터 중심 조직', bullets: ['데이터 리터러시의 중요성', 'AI 도입 장벽과 해결 방안', '사람 + AI 협업 모델'] },
-      { type: 'standard', section: '기술 변화의 흐름', title: '미래 역량', bullets: ['비판적 사고와 문제 정의', '크리에이티브 역량', 'AI 도구 활용 능력'] },
-      { type: 'punchline', section: '기술 변화의 흐름', title: '변화는 이미 시작되었다' },
-      { type: 'profile', section: '기술 변화의 흐름', title: '연사 소개', speakerName: '홍길동', speakerTitle: '수석 연구원', speakerBio: '10년 경력의 AI 전문가' },
-      { type: 'contact',  title: '감사합니다', email: 'speaker@example.com', linkedin: 'linkedin.com/in/speaker' }
-    ];
+    // ── State ─────────────────────────────────────────────────────────────
+    var currentTheme = null;
+    var currentErrorDetails = { contract: [], runtime: [] };
 
-    function getParams() {
-      const p = new URLSearchParams(location.search);
-      return { theme: p.get('theme') || 'outline', style: p.get('style') || 'premium-dark' };
+    // ── Manifest-driven dropdown population ────────────────────────────────
+    var MANIFEST = window.__THEMES_MANIFEST__ || { themes: [], styles: [] };
+
+    function populateThemeSelect() {
+      var sel = document.getElementById('theme-select');
+      var cur = sel.value;
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      for (var i = 0; i < MANIFEST.themes.length; i++) {
+        var t = MANIFEST.themes[i];
+        var opt = document.createElement('option');
+        opt.value = t.name;
+        opt.textContent = t.name;
+        sel.appendChild(opt);
+      }
+      if (cur && MANIFEST.themes.some(function(t) { return t.name === cur; })) sel.value = cur;
     }
 
-    let currentTheme = null;
+    function populateStyleSelect(themeName) {
+      var sel = document.getElementById('style-select');
+      var cur = sel.value;
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      var theme = MANIFEST.themes.find(function(t) { return t.name === themeName; });
+      // If the theme is unknown, fall back to the global styles list.
+      var styleNames = theme ? theme.styles : MANIFEST.styles;
+      var partial = new Set(theme ? (theme.partial_styles || []) : []);
+      for (var i = 0; i < styleNames.length; i++) {
+        var s = styleNames[i];
+        var label = partial.has(s) ? s + ' (\u26A0 partial)' : s;
+        var opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = label;
+        sel.appendChild(opt);
+      }
+      if (cur && styleNames.indexOf(cur) >= 0) sel.value = cur;
+    }
+
+    // ── URL parameter handling ────────────────────────────────────────────
+    function getParams() {
+      var p = new URLSearchParams(location.search);
+      return { theme: p.get('theme') || 'outline', style: p.get('style') || 'classic' };
+    }
+
     function applyParams() {
-      const theme = document.getElementById('theme-select').value;
-      // Theme changed → re-populate the style dropdown with the new theme's
-      // compatible styles, then default to the first.
+      var theme = document.getElementById('theme-select').value;
+      // Theme changed -> re-populate the style dropdown
       if (theme !== currentTheme) {
         currentTheme = theme;
         populateStyleSelect(theme);
       }
-      const style = document.getElementById('style-select').value;
-      const url = new URL(location.href);
+      var style = document.getElementById('style-select').value;
+
+      // Update URL
+      var url = new URL(location.href);
       url.searchParams.set('theme', theme);
       url.searchParams.set('style', style);
       history.replaceState(null, '', url);
-      applyThemeStyle(theme, style);
+
+      loadPreview(theme, style);
     }
 
-    // ── Theme paradigm classification ───────────────────────────────────────
-    // Themes that use fullscreen stacked layout (one slide visible, prev/next).
-    // Everything else falls through to the vertical scroll layout.
-    const STACKED_THEMES = new Set([
-      'pitch', 'pitch-enhanced', 'outline', 'zen'
-    ]);
+    // ── Load preview deck into iframe ─────────────────────────────────────
+    function loadPreview(theme, style) {
+      var errorPanel = document.getElementById('error-panel');
+      var iframe = document.getElementById('preview-iframe');
+      var loading = document.getElementById('loading-indicator');
+      var badge = document.getElementById('compat-badge');
 
-    // ── Manifest-driven dropdown population ─────────────────────────────────
-    // The dropdowns are populated from window.__THEMES_MANIFEST__ (loaded via
-    // the themes-manifest.js <script> tag, which is file://-safe). The style
-    // list is filtered to the selected theme's compatible `styles`, with
-    // `partial_styles` entries marked with a ⚠ glyph so the user knows.
-    const MANIFEST = window.__THEMES_MANIFEST__ || { themes: [], styles: [] };
+      // Reset state
+      errorPanel.classList.remove('visible');
+      currentErrorDetails = { contract: [], runtime: [] };
 
-    function populateThemeSelect() {
-      const sel = document.getElementById('theme-select');
-      const cur = sel.value;
-      while (sel.firstChild) sel.removeChild(sel.firstChild);
-      for (const t of MANIFEST.themes) {
-        const opt = el('option', null, t.name);
-        opt.value = t.name;
-        sel.appendChild(opt);
-      }
-      if (cur && MANIFEST.themes.some((t) => t.name === cur)) sel.value = cur;
-    }
-
-    function populateStyleSelect(themeName) {
-      const sel = document.getElementById('style-select');
-      const cur = sel.value;
-      while (sel.firstChild) sel.removeChild(sel.firstChild);
-      const theme = MANIFEST.themes.find((t) => t.name === themeName);
-      // If the theme is unknown, fall back to the global styles list.
-      const styleNames = theme ? theme.styles : MANIFEST.styles;
-      const partial = new Set(theme ? (theme.partial_styles || []) : []);
-      for (const s of styleNames) {
-        const label = partial.has(s) ? s + ' (⚠ partial)' : s;
-        const opt = el('option', null, label);
-        opt.value = s;
-        sel.appendChild(opt);
-      }
-      if (cur && styleNames.includes(cur)) sel.value = cur;
-    }
-
-    function applyThemeStyle(theme, style) {
-      // If the requested style isn't compatible with the theme, fall back to the
-      // theme's first available style (manifest may have changed since URL was set).
-      const themeEntry = MANIFEST.themes.find((t) => t.name === theme);
-      let effectiveStyle = style;
-      if (themeEntry && Array.isArray(themeEntry.styles) && themeEntry.styles.length > 0
-          && !themeEntry.styles.includes(style)) {
-        effectiveStyle = themeEntry.styles[0];
-        const sel = document.getElementById('style-select');
-        if (sel) sel.value = effectiveStyle;
-      }
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.dataset.style = effectiveStyle;
-      const themeLink = document.getElementById('theme-css');
-      themeLink.href = '../themes/' + theme + '/theme.css';
-      const styleLink = document.getElementById('style-css');
-      styleLink.href = '../styles/' + effectiveStyle + '/style.css';
-      document.title = 'co-deck Preview — theme:' + theme + ' style:' + effectiveStyle;
-      renderSlides(theme);
-    }
-
-    function el(tag, styles, text) {
-      const e = document.createElement(tag);
-      if (styles) Object.assign(e.style, styles);
-      if (text !== undefined) e.textContent = text;
-      return e;
-    }
-
-    function buildSlideEl(data) {
-      const div = document.createElement('div');
-      div.className = 'slide';
-      div.dataset.type = data.type;
-      if (data.backgroundImage) {
-        div.style.backgroundImage = 'url(' + data.backgroundImage + ')';
-        div.style.backgroundSize = 'cover';
-        div.style.backgroundPosition = 'center';
-        div.dataset.bg = 'true';
+      // Resolve against manifest (stale URL protection)
+      var knownThemes = MANIFEST.themes.map(function(t) { return t.name; });
+      if (knownThemes.indexOf(theme) < 0) {
+        showError('Theme "' + theme + '" not found in manifest.', ['Theme not found: ' + theme], []);
+        return;
       }
 
-      if (data.type === 'cover') {
-        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '12px' }, data.title));
-        wrap.appendChild(el('div', { fontSize: '1.1em', color: 'var(--text-secondary)' }, data.subtitle || ''));
-        wrap.appendChild(el('div', { marginTop: '24px', fontSize: '0.85em', color: 'var(--text-dim)' }, data.meta || ''));
-        div.appendChild(wrap);
-      } else if (data.type === 'divider') {
-        const wrap = el('div', { padding: '20px 0' });
-        wrap.appendChild(el('div', { fontSize: '0.8em', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-color)', marginBottom: '8px' }, data.partNum || ''));
-        wrap.appendChild(el('div', { fontSize: '1.8em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }, data.title));
-        wrap.appendChild(el('div', { color: 'var(--text-secondary)' }, data.desc || ''));
-        div.appendChild(wrap);
-      } else if (data.type === 'contact') {
-        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '1.6em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }, data.title));
-        wrap.appendChild(el('div', { color: 'var(--text-secondary)', lineHeight: '2' }, data.email + ' · ' + data.linkedin));
-        div.appendChild(wrap);
-      } else if (data.type === 'punchline') {
-        const wrap = el('div', { textAlign: 'center', padding: '40px 0' });
-        wrap.appendChild(el('div', { fontSize: '2em', fontWeight: 'bold', color: 'var(--text-primary)' }, data.title));
-        div.appendChild(wrap);
-      } else if (data.type === 'profile') {
-        const wrap = el('div', { padding: '20px 0' });
-        wrap.appendChild(el('div', { fontSize: '1.4em', fontWeight: 'bold', color: 'var(--text-primary)' }, data.speakerName || data.title));
-        if (data.speakerTitle) wrap.appendChild(el('div', { color: 'var(--text-secondary)', marginTop: '8px' }, data.speakerTitle));
-        if (data.speakerBio) wrap.appendChild(el('div', { color: 'var(--text-muted)', marginTop: '4px', fontSize: '0.9em' }, data.speakerBio));
-        div.appendChild(wrap);
+      var themeEntry = MANIFEST.themes.find(function(t) { return t.name === theme; });
+
+      // Check if style is in the theme's compatible list
+      var isPartial = false;
+      if (themeEntry) {
+        if (themeEntry.styles.indexOf(style) < 0) {
+          // Style not listed at all for this theme
+          showError('Style "' + style + '" is not compatible with theme "' + theme + '".',
+            ['Style "' + style + '" is not listed in compatible_styles for theme "' + theme + '"'], []);
+          return;
+        }
+        isPartial = (themeEntry.partial_styles || []).indexOf(style) >= 0;
+      }
+
+      // Update compat badge
+      if (isPartial) {
+        badge.innerHTML = '<span class="badge badge-partial">\u26A0 Partial</span>';
       } else {
-        const wrap = el('div');
-        wrap.appendChild(el('div', { fontSize: '0.75em', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-dim)', marginBottom: '6px' }, data.section || ''));
-        wrap.appendChild(el('div', { fontSize: '1.3em', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }, data.title));
-        const ul = el('ul', { margin: '0', paddingLeft: '20px' });
-        (data.bullets || []).forEach(b => ul.appendChild(el('li', { margin: '6px 0', color: 'var(--text-primary)' }, b)));
-        wrap.appendChild(ul);
-        div.appendChild(wrap);
+        badge.innerHTML = '';
       }
-      return div;
+
+      // Determine iframe src
+      var deckSrc = 'decks/' + encodeURIComponent(theme) + '_' + encodeURIComponent(style) + '.html';
+
+      // Show loading
+      loading.classList.remove('hidden');
+      iframe.style.display = 'none';
+
+      // Listen for errors from the iframe
+      window.removeEventListener('message', onIframeMessage);
+      window.addEventListener('message', onIframeMessage);
+
+      // Set iframe load/error handlers
+      iframe.onload = function() {
+        loading.classList.add('hidden');
+        iframe.style.display = 'block';
+      };
+      iframe.onerror = function() {
+        loading.classList.add('hidden');
+        showError('Failed to load preview deck: ' + deckSrc,
+          ['Iframe failed to load ' + deckSrc], currentErrorDetails.runtime);
+      };
+
+      // Load the deck
+      iframe.src = deckSrc;
+
+      document.title = 'co-deck Preview \u2014 theme:' + theme + ' style:' + style;
     }
 
-    function renderSlides(theme) {
-      const host = document.getElementById('slide-host');
-      // Remove all child nodes safely
-      while (host.firstChild) host.removeChild(host.firstChild);
+    // ── Iframe message handler (runtime error capture) ───────────────────
+    function onIframeMessage(event) {
+      if (event.data && event.data.type === '__preview_error__') {
+        currentErrorDetails.runtime.push(event.data.message);
+      }
+    }
 
-      if (STACKED_THEMES.has(theme)) {
-        // Fullscreen stacked: one slide visible at a time, prev/next, keyboard nav
-        // (pitch, pitch-enhanced, outline, zen)
-        const outer = el('div', { maxWidth: '900px', margin: '20px auto', position: 'relative', aspectRatio: '16/9' });
-        SLIDE_DATA.forEach((data, i) => {
-          const s = buildSlideEl(data);
-          Object.assign(s.style, { position: 'absolute', inset: '0', opacity: i === 0 ? '1' : '0', transition: 'opacity 0.45s' });
-          s.id = 'slide-' + i;
-          outer.appendChild(s);
-        });
-        host.appendChild(outer);
+    // ── Error panel display ────────────────────────────────────────────────
+    function showError(summary, contractErrors, runtimeErrors) {
+      var errorPanel = document.getElementById('error-panel');
+      var iframe = document.getElementById('preview-iframe');
+      var loading = document.getElementById('loading-indicator');
 
-        const counter = el('div', { position: 'fixed', bottom: '20px', right: '24px', fontSize: '0.75rem', color: 'var(--text-dim)' });
-        counter.id = 'slide-counter';
-        host.appendChild(counter);
-        currentSlide = 0;
-        updateCounter();
+      iframe.style.display = 'none';
+      loading.classList.add('hidden');
+
+      document.getElementById('error-summary').textContent = summary;
+      currentErrorDetails = { contract: contractErrors || [], runtime: runtimeErrors || [] };
+
+      // Render contract errors
+      var contractDiv = document.getElementById('contract-errors');
+      contractDiv.innerHTML = '';
+      if (currentErrorDetails.contract.length === 0) {
+        contractDiv.innerHTML = '<p style="opacity:0.5">No contract errors.</p>';
       } else {
-        // Scroll: vertical list with TOC
-        const viewer = el('div', { display: 'flex' });
-        viewer.id = 'viewer';
+        for (var i = 0; i < currentErrorDetails.contract.length; i++) {
+          var item = document.createElement('div');
+          item.className = 'error-item';
+          var pre = document.createElement('pre');
+          pre.textContent = currentErrorDetails.contract[i];
+          item.appendChild(pre);
+          contractDiv.appendChild(item);
+        }
+      }
 
-        const toc = el('aside', { width: '200px', minHeight: '100vh', padding: '60px 12px 20px', borderRight: '1px solid var(--border-subtle)', flexShrink: '0' });
-        toc.id = 'toc-panel';
-        const tocList = el('ul', { listStyle: 'none', margin: '0', padding: '0' });
-        tocList.id = 'toc-list';
-        toc.appendChild(tocList);
-        viewer.appendChild(toc);
+      // Render runtime errors
+      var runtimeDiv = document.getElementById('runtime-errors');
+      runtimeDiv.innerHTML = '';
+      if (currentErrorDetails.runtime.length === 0) {
+        runtimeDiv.innerHTML = '<p style="opacity:0.5">No runtime errors reported.</p>';
+      } else {
+        for (var i = 0; i < currentErrorDetails.runtime.length; i++) {
+          var item = document.createElement('div');
+          item.className = 'error-item';
+          var pre = document.createElement('pre');
+          pre.textContent = currentErrorDetails.runtime[i];
+          item.appendChild(pre);
+          runtimeDiv.appendChild(item);
+        }
+      }
 
-        const main = el('main', { flex: '1', padding: '20px' });
-        main.id = 'slide-container';
-        SLIDE_DATA.forEach((data, i) => {
-          const s = buildSlideEl(data);
-          s.id = 'slide-' + i;
-          main.appendChild(s);
+      errorPanel.classList.add('visible');
+    }
 
-          const li = el('li', { padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8em', color: 'var(--text-muted)', marginBottom: '2px' },
-            data.type === 'cover' ? '표지' : data.type === 'divider' ? '◆ ' + data.title : data.type === 'punchline' ? '★ ' + data.title : data.type === 'profile' ? '👤 ' + (data.speakerName || data.title) : (i + '. ' + data.title));
-          li.addEventListener('click', () => document.getElementById('slide-' + i).scrollIntoView({ behavior: 'smooth' }));
-          tocList.appendChild(li);
+    // ── Copy error details ────────────────────────────────────────────────
+    function copyErrorDetails() {
+      var parts = [];
+      parts.push('co-deck Preview Error Report');
+      parts.push('=============================');
+      parts.push('');
+      parts.push('Theme: ' + (document.getElementById('theme-select').value || 'N/A'));
+      parts.push('Style: ' + (document.getElementById('style-select').value || 'N/A'));
+      parts.push('');
+      if (currentErrorDetails.contract.length > 0) {
+        parts.push('Contract Errors:');
+        for (var i = 0; i < currentErrorDetails.contract.length; i++) {
+          parts.push('  - ' + currentErrorDetails.contract[i]);
+        }
+        parts.push('');
+      }
+      if (currentErrorDetails.runtime.length > 0) {
+        parts.push('Runtime Errors:');
+        for (var i = 0; i < currentErrorDetails.runtime.length; i++) {
+          parts.push('  - ' + currentErrorDetails.runtime[i]);
+        }
+      }
+      var text = parts.join('\n');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          var btn = document.querySelector('.copy-btn');
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy Error Details';
+            btn.classList.remove('copied');
+          }, 2000);
         });
-        viewer.appendChild(main);
-        host.appendChild(viewer);
+      } else {
+        // Fallback for file:// protocol
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        var btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy Error Details';
+          btn.classList.remove('copied');
+        }, 2000);
       }
     }
 
-    // Slideshow navigation
-    let currentSlide = 0;
-    function updateCounter() {
-      const counter = document.getElementById('slide-counter');
-      if (counter) counter.textContent = (currentSlide + 1) + ' / ' + SLIDE_DATA.length;
-    }
-    function showSlide(index) {
-      const slides = document.querySelectorAll('.slide');
-      if (index < 0 || index >= slides.length) return;
-      slides.forEach(s => { s.style.opacity = '0'; s.style.pointerEvents = 'none'; });
-      slides[index].style.opacity = '1';
-      slides[index].style.pointerEvents = 'auto';
-      currentSlide = index;
-      updateCounter();
-    }
-    function changeSlide(delta) { showSlide(currentSlide + delta); }
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
-    });
+    // ── Init ───────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var params = getParams();
+      var theme = params.theme;
+      var style = params.style;
 
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
-      let { theme, style } = getParams();
       // Resolve against the manifest so a stale URL param never references a
       // theme/style that no longer exists.
-      const knownThemes = MANIFEST.themes.map((t) => t.name);
-      if (!knownThemes.includes(theme)) theme = knownThemes[0] || 'outline';
+      var knownThemes = MANIFEST.themes.map(function(t) { return t.name; });
+      if (knownThemes.indexOf(theme) < 0) theme = knownThemes[0] || 'outline';
+
       populateThemeSelect();
       populateStyleSelect(theme);
       document.getElementById('theme-select').value = theme;
-      const themeEntry = MANIFEST.themes.find((t) => t.name === theme);
-      if (themeEntry && Array.isArray(themeEntry.styles) && !themeEntry.styles.includes(style)) {
+
+      // Validate style against theme's compatible list
+      var themeEntry = MANIFEST.themes.find(function(t) { return t.name === theme; });
+      if (themeEntry && themeEntry.styles.indexOf(style) < 0) {
         style = themeEntry.styles[0] || style;
       }
       document.getElementById('style-select').value = style;
+
       currentTheme = theme;
-      applyThemeStyle(theme, style);
+      loadPreview(theme, style);
     });
   </script>
 </body>

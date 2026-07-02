@@ -1,8 +1,7 @@
 {
-  "version": "1.0.0",
-  "_comment": "zen theme (Presentation Zen) — fullscreen background images with centered key message. v1.0.0: new paradigm. No thumbnail panel; uses shared TOC drawer from ppt-engine.",
+  "version": "3.0.0",
+  "_comment": "zen theme (Presentation Zen) — fullscreen background images with centered key message. v3.0.0: PPT-engine features (TOC drawer, NarrationEngine v2.4, FullscreenManager, transitions, @media print, keyboard shortcuts). No thumbnail panel; uses shared TOC drawer from ppt-engine.",
   "name": "zen",
-  "version_num": "1.0.0",
   "description": "Presentation Zen theme — fullscreen background images with semi-transparent overlay and centered key message. Optimized for visual storytelling with minimal text (max 3 bullets). No side image panel; background image covers the entire slide.",
   "rendering": {
     "paradigm": "zen",
