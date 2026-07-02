@@ -3,7 +3,7 @@
  * gen-pr-body.ts - Generate a structured PR body from commit message + diff
  * Usage: bun run scripts/gen-pr-body.ts "<commit message>"
  * Output: PR body markdown (stdout)
- * @version 1.1.2
+ * @version 1.1.3
  *
  * Behaviour:
  *   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
@@ -143,7 +143,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
   try {
     const claudeRetry = await withRetry(
       () => $`claude -p ${prompt}`.quiet().nothrow(),
-      { ...DEFAULT_CONFIG, maxRetries: 2, initialDelay: 1000 },
+      { ...DEFAULT_CONFIG, maxRetries: 2, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
       'claude pr-body'
     );
     const claudeRes = claudeRetry.result;

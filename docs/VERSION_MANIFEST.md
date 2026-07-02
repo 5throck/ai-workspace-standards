@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-01T13:11:02.781Z
+**Generated**: 2026-07-02T10:24:03.477Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -75,15 +75,15 @@
 | cleanup-completed-md.ts | 1.0.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.6.3 | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.3.0 | scripts/dev-sync.ts | bun |
-| dispatch-parallel.ts | 1.0.0 | scripts/dispatch-parallel.ts | N/A |
+| dev-sync.ts | 1.3.1 | scripts/dev-sync.ts | bun |
+| dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
 | encoding-utils.ts | 1.0.0 | scripts/lib/encoding-utils.ts | fs, path |
 | error-handling.ts | 1.1.0 | scripts/lib/error-handling.ts | N/A |
 | extends-validator.ts | 1.0.0 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.0 | scripts/fix-script-versions.ts | fs, path |
-| gen-pr-body.ts | 1.1.2 | scripts/gen-pr-body.ts | bun |
+| gen-pr-body.ts | 1.1.3 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.0 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.0.2 | scripts/generate-version-manifest.ts | bun |
@@ -117,7 +117,7 @@
 | regenerate-agents-md.ts | 1.0.0 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.0 | scripts/remove-project.ts | N/A |
 | resolve-variants.ts | 1.0.0 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| retry-handler.ts | 1.0.0 | scripts/retry-handler.ts | N/A |
+| retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | scan-l2-project.ts | 1.1.0 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
 | security-validator.test.ts | 1.0.0 | scripts/helpers/security-validator.test.ts | bun:test |
 | security-validator.ts | 1.0.0 | scripts/helpers/security-validator.ts | fs, path |

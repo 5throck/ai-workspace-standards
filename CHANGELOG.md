@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[2026-06-26]**: fix(co-deck): increase PDF body/bullet font sizes for readability -- bullet_pt raised across all 5 themes (pitch/pitch-enhanced 11->14pt, vertical/outline 13->15pt, zen 14->15pt); bullet_px and bullet_gap_px adjusted proportionally; gen-slides-pdf.ts v1.8.0 fallback bullet_pt 12.5->14.0, auto-calibrate FONT_PT_MULT 0.85->0.94
 
 ### Fixed
+- **[2026-07-02]**: fix(scripts): `withRetry` now correctly detects failures for `.nothrow()`-wrapped shell commands — `gh pr create` (`scripts/dev-sync.ts`), `git push`, and `scripts/dispatch-parallel.ts` no longer silently report success on real failures (e.g. HTTP 401); adds an optional `isSuccess` predicate to `RetryConfig` (`scripts/retry-handler.ts`) and wires the previously-unused `classifyError()` into the failure path so non-retryable auth errors fail fast instead of exhausting all retries with backoff; `classifyError`'s pattern extended to match `gh` CLI's real `"Bad credentials"` / `HTTP 401`/`403` wording (verified empirically against the live GitHub API). See `docs/designs/retry-handler-fail-fast-design.md` and ADR-0049.
 - **[2026-06-27]**: fix(co-deck): add CJK fallback font for Hanja glyphs and render LinkedIn on contact slide — (1) gen-slides-pdf.ts v1.9.0: NotoSansKR fallback font via fontkit pre-computed `missingCps` set (scans all slidedata text at startup using `fontkitCreate()` + `hasGlyphForCodePoint()`); `buildFontRuns()` splits text into per-character font runs for correct CJK rendering (現, 前 etc.); `CJK_FALLBACK_FONTS` search order across font dirs; (2) `renderContactSlide()` now reads `contactLinkedIn` field from slidedata and renders it
 - **[2026-06-27]**: fix(l0-leak): remove CONSTITUTION.md references from templates to prevent L2 leakage — (1) `templates/common/docs/context.md` + `_common/context.md`: replaced `docs/constitution/` links with inline text, removed "Workspace Constitution Reference" section; (2) `.githooks/commit-msg`: replaced CONSTITUTION.md reference with generic policy message; (3) `co-deck/SCRIPTS.md`: replaced constitution/adr path links with inline text; (4) `audit.ts` L0 Leakage check: removed `docs/` skip, expanded pattern to catch `docs/constitution/` paths (not just literal `CONSTITUTION.md`); (5) `new-project.ts`: added post-copy sanitization pass that strips CONSTITUTION reference lines from generated L2 projects; (6) `removeL0OnlyContent()`: expanded regex to catch `docs/constitution/` path patterns
 - **[2026-06-26]**: fix(co-deck): remove CSS `::before` bullet markers from visual panel text in pitch/pitch-enhanced themes — visual panel text items (with embedded markers like →, ✓) displayed duplicate bullets due to CSS `::before` pseudo-elements; removed `.visual-item-check::before` rules from base.css, pitch/theme.css, pitch-enhanced/theme.css; aligned pitch/template.html `renderVisualDisplay()` class from `visual-item-check` to `visual-item` to match ppt-engine.js shared implementation
@@ -836,7 +837,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-06-28*
+*Last Updated: 2026-07-02*
 
 
 

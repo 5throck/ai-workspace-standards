@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Parallel Agent Dispatcher
- * @version 1.0.0
+ * @version 1.0.1
  * Automates dispatching multiple read-only subagents simultaneously
  *
  * This dispatcher is optimized for tasks that can run independently:
@@ -105,7 +105,7 @@ async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
     const { withRetry, DEFAULT_CONFIG } = await import('./retry-handler.ts');
     const dispatchRetry = await withRetry(
       () => $`bun run scripts/dispatch.ts --task ${JSON.stringify(task)}`.nothrow(),
-      { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000 },
+      { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
       `dispatch:${task.role}`
     );
     const proc = dispatchRetry.result ?? { stdout: Buffer.from(''), stderr: Buffer.from(''), exitCode: 1 };
@@ -116,12 +116,16 @@ async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
 
     const elapsed = Date.now() - startTime;
 
-    if (exitCode !== 0) {
-      console.log(`   ❌ Failed with exit code ${exitCode} (${elapsed}ms)\n`);
+    if (!dispatchRetry.success) {
+      // On the failure path, withRetry's return has no `result` field (proc is the
+      // fallback stub above), so prefer lastError.message — synthesized by withRetry
+      // from the real stderr/exit code — over the now-empty stderr/generic exitCode.
+      const errMsg = dispatchRetry.lastError?.message || stderr || `exit code ${exitCode}`;
+      console.log(`   ❌ Failed: ${errMsg} (${elapsed}ms)\n`);
       return {
         task,
         status: 'failed',
-        error: stderr || `exit code ${exitCode}`,
+        error: errMsg,
         timestamp: new Date()
       };
     }

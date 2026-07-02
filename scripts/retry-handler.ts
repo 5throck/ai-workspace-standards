@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Error Recovery Handler
- * @version 1.0.0
+ * @version 1.0.1
  * Implements retry logic with exponential backoff for subagent failures
  */
 
@@ -15,6 +15,7 @@ interface RetryConfig {
   initialDelay: number; // milliseconds
   backoffMultiplier: number;
   maxDelay: number; // milliseconds
+  isSuccess?: (result: unknown) => boolean; // optional predicate; when omitted, throw = failure, return = success (unchanged behavior)
 }
 
 interface RetryResult {
@@ -49,6 +50,16 @@ async function withRetry<T>(
 
       const result = await fn();
 
+      if (config.isSuccess && !config.isSuccess(result)) {
+        // Predicate says this "successful" (non-throwing) result is actually a failure —
+        // e.g. a Bun Shell .nothrow() result with a non-zero exit code. Synthesize an
+        // Error and route it through the same failure handling a caught exception gets.
+        const r = result as { stderr?: unknown; exitCode?: unknown } | undefined;
+        const stderrText = r?.stderr !== undefined ? String(r.stderr).trim() : '';
+        const message = stderrText || `Command failed with exit code ${r?.exitCode}`;
+        throw new Error(message);
+      }
+
       const totalTime = Date.now() - startTime;
       console.log(`${context ? `[${context}] ` : ''} Success on attempt ${attempt}`);
 
@@ -61,6 +72,18 @@ async function withRetry<T>(
     } catch (error) {
       lastError = error as Error;
       console.error(`${context ? `[${context}] ` : ''}Attempt ${attempt} failed: ${lastError.message}`);
+
+      if (config.isSuccess && classifyError(lastError) === 'tool') {
+        // Non-retryable (e.g. permission/access-denied) — fail immediately without
+        // consuming remaining attempts or entering the backoff delay.
+        const totalTime = Date.now() - startTime;
+        return {
+          success: false,
+          attempts: attempt,
+          lastError,
+          totalTime
+        };
+      }
 
       if (attempt < config.maxRetries) {
         const waitTime = Math.min(delay, config.maxDelay);
@@ -117,7 +140,20 @@ function classifyError(error: Error): 'tool' | 'context' | 'logic' | 'external' 
   if (message.includes('not found') || message.includes('does not exist')) {
     return 'context';
   }
-  if (message.includes('permission') || message.includes('access denied')) {
+  if (
+    message.includes('permission') ||
+    message.includes('access denied') ||
+    message.includes('bad credentials') ||
+    message.includes('http 401') ||
+    message.includes('http 403') ||
+    message.includes('401 unauthorized') ||
+    message.includes('403 forbidden')
+  ) {
+    // Non-retryable auth failures (e.g. `gh` CLI on an expired/invalid token) surface as
+    // "Bad credentials" / "HTTP 401: Bad credentials" rather than "permission"/"access denied" —
+    // observed empirically from `gh api` and `gh pr list` against the real GitHub API with an
+    // invalid token. Matched as full phrases (not bare "401"/"403") to avoid misclassifying
+    // retryable errors that happen to contain those digits incidentally.
     return 'tool';
   }
 
