@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-- **[2026-06-28]**: feat(co-consult): Phase 1.5 Cross-Validation — validator agents cross-check Phase 1 research deliverables for consistency before insight-synthesis; cross-validation matrix, checklist, and re-execution triggers added to engagement-orchestration.md
+- **[2026-07-03]**: fix(project-review): comprehensive improvement plan from 7-agent parallel project review — Batch 1 (Critical): tsconfig.json creation, unused deps removal, import.meta.main guards (54 scripts), variant contract contradictions resolved, 5 skill lifecycle records created, VERSION_MANIFEST parsing fixed, 2 ghost lifecycle records removed; Batch 2 (High): L0→L1 propagation sync (6 scripts), pre-rebase bypass removed, CVE overrides documented, AGENTS.md heading + Language Policy exception + frontmatter standardization, docs/index.md created, shebang standardized (16 files), empty catches replaced with error logging (8 scripts), import extensions .js→.ts (25 files), 7 template lifecycle records created — 141 files changed
 
 ### Added
 - **[2026-06-28]**: docs(co-consult): update md-to-report design spec v1.1 (Korean default + DOCX-first PDF) and co-consult.context.md v2.2 (Korean default language convention + `_ko.md` suffix for deliverables)
@@ -837,7 +837,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-02*
+*Last Updated: 2026-07-03*
 
 
 
