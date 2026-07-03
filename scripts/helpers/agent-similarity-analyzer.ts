@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Wave 2a — Agent Similarity Analyzer
  *
@@ -11,7 +11,7 @@
  *                     and checks whether the declared version matches
  *                     the current L1 registry version.
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase Wave 2a: Agent Similarity Analysis
  *
  * See: docs/adr/0043-l1-agent-layer-hybrid-override.md
@@ -29,7 +29,7 @@
 
 import { join, basename, resolve, sep } from 'path';
 import { existsSync, readdirSync } from 'fs';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
+import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 
 // ============================================================================
 // TYPES (subset also declared in l1-agent-format-spec.md)
@@ -725,5 +725,7 @@ async function main() {
 
 main().catch(err => {
   console.error('agent-similarity-analyzer error:', err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

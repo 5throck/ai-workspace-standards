@@ -2,15 +2,7 @@
 # pre-rebase hook - Scan commits being rebased for secrets
 # Triggered: Before git rebase operation
 # Blocks: Rebase if secrets detected in any commit being rewritten
-# Bypass: Set REBASE_BYPASS_SECRET_SCAN=1 to disable (not recommended)
-
 set -euo pipefail
-
-# Allow bypass with environment variable (use carefully!)
-if [ "${REBASE_BYPASS_SECRET_SCAN:-0}" = "1" ]; then
-    echo "⚠️  WARNING: Secret scan bypassed via REBASE_BYPASS_SECRET_SCAN=1"
-    exit 0
-fi
 
 # Check if gitleaks is available
 if ! command -v gitleaks &> /dev/null; then
@@ -35,9 +27,6 @@ if [ $# -ge 2 ]; then
         else
             echo "❌ SECRET DETECTED in commit $commit"
             echo "   Rebase blocked to prevent secret exposure"
-            echo ""
-            echo "To bypass (not recommended):"
-            echo "  REBASE_BYPASS_SECRET_SCAN=1 git rebase $UPSTREAM $REBASE_BRANCH"
             SECRETS_FOUND=1
         fi
     done < <(git rev-list --no-merges "$UPSTREAM..$REBASE_BRANCH")

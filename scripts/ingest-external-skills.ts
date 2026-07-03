@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // ingest-external-skills.ts - Phase 4 variant-specific external skills ingestion
-// @version 1.0.1
+// @version 1.0.2
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -18,7 +18,9 @@ const templatesDir = path.resolve(path.join(workspaceRoot, 'templates'));
 
 if (!fs.existsSync(templatesDir)) {
   console.log(`${RED}templates directory not found.${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 function safeResolvePath(base: string, variant: string, ingestPath: string): string {

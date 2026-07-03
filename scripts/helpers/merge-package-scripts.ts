@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * merge-package-scripts.ts — Merge workspace scripts into project package.json
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/helpers/merge-package-scripts.ts <project-dir>
@@ -15,7 +15,9 @@ const projectDir = args[0];
 
 if (!projectDir) {
   console.error('Usage: bun merge-package-scripts.ts <project-dir>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const pkgJsonPath = join(projectDir, 'package.json');
@@ -43,8 +45,12 @@ try {
   writeFileSync(pkgJsonPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
   console.log('  ✅ Tier 2 scripts merged into package.json');
 
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } catch (error) {
   console.error(`Error: ${error}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

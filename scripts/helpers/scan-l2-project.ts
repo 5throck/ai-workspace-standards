@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * L2 Project Scanner
  *
  * Recursively scans L2 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase 1: L2 Analysis
  *
  * Dependencies:
@@ -17,8 +17,8 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { join, relative, basename } from 'path';
 import { createHash } from 'crypto';
-import { readUTF8File, detectEncoding } from '../lib/encoding-utils.js';
-import { fatalError, warningError, ErrorPhase, ErrorSeverity } from '../lib/error-handling.js';
+import { readUTF8File, detectEncoding } from '../lib/encoding-utils.ts';
+import { fatalError, warningError, ErrorPhase, ErrorSeverity } from '../lib/error-handling.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

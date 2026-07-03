@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // ingest-security-frameworks.ts - Phase 4 variant-specific security frameworks ingestion
-// @version 1.0.0
+// @version 1.0.1
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -18,7 +18,9 @@ const templatesDir = path.join(workspaceRoot, 'templates');
 
 if (!fs.existsSync(templatesDir)) {
   console.log(`${RED}templates directory not found.${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const variants = fs.readdirSync(templatesDir).filter(dir => dir.startsWith('co-'));

@@ -3,7 +3,7 @@
  * @description Agent team builder script — execution layer for the team-builder skill.
  *   Receives an approved proposal JSON (from skills/team-builder/SKILL.md Step 5) and
  *   executes all agent/skill changes in a fixed, safe order with checkpoint logging.
- * @version 1.2.0
+ * @version 1.2.1
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 
@@ -159,7 +159,8 @@ function loadCheckpoints(): Checkpoint[] {
     try {
       const raw = Bun.file(CHECKPOINT_FILE).textSync();
       return JSON.parse(raw) as Checkpoint[];
-    } catch {
+    } catch (err) {
+      console.error('[team-builder] Error: ${err}');
       return initCheckpoints();
     }
   }
@@ -210,10 +211,10 @@ async function writeFile(path: string, content: string): Promise<void> {
 
 function deleteFile(path: string): void {
   const { unlink } = require("fs");
-  try { unlink.call(null, path, () => {}); } catch {}
+  try { unlink.call(null, path, () => {}); } catch (err) { console.error('[team-builder] Error: ${err}'); }
   // use sync delete
   const { unlinkSync } = require("fs");
-  try { unlinkSync(path); } catch {}
+  try { unlinkSync(path); } catch (err) { console.error('[team-builder] Error: ${err}'); }
 }
 
 // ─── Template generators ──────────────────────────────────────────────────────
@@ -1046,7 +1047,9 @@ ${G}Examples:${Z}
   try {
     const { unlinkSync } = require("fs");
     if (existsSync(CHECKPOINT_FILE)) unlinkSync(CHECKPOINT_FILE);
-  } catch {}
+  } catch (err) {
+    console.error('[team-builder] Error: ${err}');
+  }
 
   console.log(`\n${G}╔══════════════════════════════════════════════╗`);
   console.log(`║         team-builder.ts — COMPLETE           ║`);
@@ -1062,5 +1065,7 @@ ${G}Examples:${Z}
 
 main().catch((e) => {
   console.error(`${R}[FATAL] Unhandled error: ${e}${Z}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

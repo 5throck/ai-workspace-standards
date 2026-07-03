@@ -1,7 +1,7 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 /**
  * Extends Chain Validator - Circular Reference Prevention
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Implements ADR-0033 circular reference prevention for pm.md extends pattern.
  * Provides safe fallback behavior when limits are exceeded.
@@ -19,12 +19,12 @@
  *
  * Usage:
  *   Direct validation: bun scripts/helpers/extends-validator.ts <file-path>
- *   Module import: import { safeValidateExtends } from './helpers/extends-validator.js'
+ *   Module import: import { safeValidateExtends } from './helpers/extends-validator.ts'
  */
 
 import { readFileSync, statSync } from 'fs';
 import { resolve, dirname } from 'path';
-import { validateExtendsSecurity, SecurityValidationResult } from './security-validator.js';
+import { validateExtendsSecurity, SecurityValidationResult } from './security-validator.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants (ADR-0033 Security Limits)

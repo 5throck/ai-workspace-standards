@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Golden Reference Loader — Wave 3 structural comparison
  *
@@ -6,7 +6,7 @@
  * specialist agent and skill files. Used by generate-variant.ts to detect
  * structural gaps in generated files.
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @phase 3: Variant Generation (structural comparison)
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
@@ -19,7 +19,7 @@
 
 import { join, basename } from 'path';
 import { existsSync, readdirSync } from 'fs';
-import { readUTF8File } from '../lib/encoding-utils.js';
+import { readUTF8File } from '../lib/encoding-utils.ts';
 
 // ============================================================================
 // TYPES

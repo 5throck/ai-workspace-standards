@@ -2,7 +2,7 @@
 /**
  * verify-new-project-tests.ts — Test Coverage Sync Verifier
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @last_updated 2026-05-31
  *
  * Checks that TEST: comments in new-project.sh/.ps1 align with
@@ -85,7 +85,9 @@ console.log('=== verify-new-project-tests.ts ===\n');
 // Load files
 if (!existsSync(SH_PATH) || !existsSync(PS1_PATH) || !existsSync(TEST_PATH)) {
   console.error(`❌ Required files missing. Expected: ${SH_PATH}, ${PS1_PATH}, ${TEST_PATH}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const shContent   = readFileSync(SH_PATH, 'utf-8');
@@ -140,8 +142,12 @@ if (unlinked.length > 0) {
 console.log(`\n${'─'.repeat(40)}`);
 if (errors > 0) {
   console.error(`❌ ${errors} error(s), ${warnings} warning(s) — pre-commit blocked`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 } else {
   console.log(`✅ All checks passed (${warnings} warning(s))`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }

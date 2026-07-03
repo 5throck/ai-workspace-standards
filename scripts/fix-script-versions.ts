@@ -1,16 +1,16 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Fix Script Versions
  *
  * Add @version headers to scripts that are missing them.
  * Resolves lifecycle-sync-audit warnings.
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import { readUTF8File, writeUTF8File } from './lib/encoding-utils.js';
+import { readUTF8File, writeUTF8File } from './lib/encoding-utils.ts';
 
 const WORKSPACE_ROOT = process.cwd();
 const SCRIPTS_DIR = join(WORKSPACE_ROOT, 'scripts');

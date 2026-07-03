@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * substitute-placeholders.ts — Replace placeholders in all text files
- * @version 1.1.0
+ * @version 1.1.1
  *
  * Usage:
  *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]
@@ -27,7 +27,9 @@ const variantName = args[4] || projectName;
 
 if (!projectDir || !projectName) {
   console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Find all text files
@@ -75,8 +77,12 @@ try {
     }
   }
 
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } catch (error) {
   console.error(`Error: ${error}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

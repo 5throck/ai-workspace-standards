@@ -8,8 +8,8 @@ tier:
   antigravity: medium
   gemini-cli: medium
 model: inherit
-version: "1.0.0"
-last_reviewed: "2026-06-13"
+version: 1.0.0
+last_reviewed: 2026-06-13
 color: purple
 description: 'Standardizes Markdown documentation. Use when: "Updating documentation", "README creation", "CHANGELOG updates"'
 examples:

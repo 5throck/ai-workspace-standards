@@ -1,7 +1,7 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 /**
  * Security Validator Test Suite
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Comprehensive security tests for extends chain validation
  * Implements A-11 security requirements testing

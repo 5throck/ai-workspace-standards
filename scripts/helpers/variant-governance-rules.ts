@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Variant Governance Rules
  *
@@ -8,14 +8,14 @@
  * Addresses Gap #2: Variant-weighted criteria for promotion
  * Addresses Gap #3: Dependency graph for reconciliation order
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase 2-3: Governance & Integration
  *
  * Dependencies:
  * - lib/error-handling.ts (Error management)
  */
 
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
+import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

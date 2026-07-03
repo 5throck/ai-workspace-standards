@@ -8,8 +8,8 @@ tier:
   antigravity: high
   gemini-cli: high
 model: inherit
-version: "1.0.0"
-last_reviewed: "2026-06-13"
+version: 1.0.0
+last_reviewed: 2026-06-13
 color: blue
 description: 'Produces implementation plans and ADRs. Use when: "Architecture design needed", "Project structure planning", "Technical decision making"'
 examples:

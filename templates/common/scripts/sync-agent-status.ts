@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Status Synchronization Script
- * @version 1.0.0
+ * @version 1.0.1
  * Synchronizes agent status between agent files and AGENTS.md
  */
 
@@ -28,7 +28,9 @@ console.log(`${colors.cyan}=== Agent Status Synchronization ===${colors.reset}\n
 
 if (!existsSync(AGENTS_DIR)) {
   console.log(`${colors.yellow}No agents directory found.${colors.reset}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 let changesMade = 0;
@@ -85,7 +87,9 @@ for (const file of agentFiles) {
             console.log(`     Consider moving to agents/_archive/ (run manually)`);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('[sync-agent-status] Error: ${e}');
+      }
     }
   }
 }

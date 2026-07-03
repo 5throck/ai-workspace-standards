@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.2.1
+ * @version 1.2.2
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -527,8 +527,12 @@ if (args.includes("--generate")) {
   checkDriftReport();
 } else if (args.includes("--verify") || args.length === 0) {
   const ok = verify();
-  process.exit(ok ? 0 : 1);
+  if (import.meta.main) {
+    process.exit(ok ? 0 : 1);
+  }
 } else {
   console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --generate | --report | --check-drift]`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

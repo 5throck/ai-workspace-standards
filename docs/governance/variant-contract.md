@@ -11,15 +11,17 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
 | File / Path | Notes |
 |-------------|-------|
 | `variant.json` | Must include: name, description, status, version. **Note**: `agents/pm.md` is implicitly excluded from `variant.json agents[]` — pm is required in every variant via Required Files but is treated as infrastructure, not a specialist agent. Only specialist agents (architect, code-writer, etc.) are listed in `agents[]`. |
-| `CLAUDE.md` | Claude Code session config; context load order + slash command table |
-| `GEMINI.md` | Antigravity / Gemini CLI config; same content adapted for Gemini tool names |
+| `CLAUDE.md` | Claude Code session config; context load order + slash command table — **sourced from `templates/common/`** |
+| `GEMINI.md` | Antigravity / Gemini CLI config; same content adapted for Gemini tool names — **sourced from `templates/common/`** |
 | `AGENTS.md` | Canonical agent roster with phases, tiers, and skill references |
 | `README.md` | English project README |
 | `README_ko.md` | Korean translation |
 | `agents/pm.md` | PM is required in every variant |
-| `agents/lifecycle-manager.md` | Lifecycle state monitor; secretary role; dispatched at Phase 6 Finalization |
 | `agents/README.md` | Agent directory index |
 | `agents/README_ko.md` | Korean translation of agent index |
+<!-- NOTE: agents/lifecycle-manager.md is intentionally excluded from this list.
+     Lifecycle Manager is an L0-only specialist agent per CONSTITUTION.md §L0 Agent
+     Non-Propagation. In variant projects (L2), PM handles lifecycle duties directly. -->
 | `docs/{variant}.context.md` | Project-specific context file (name is variant-dependent) |
 | `.claude/settings.json` | Shared Claude Code settings (MCP servers, hooks) |
 | `.claude/commands/changelog.md` | `/changelog` slash command |
@@ -105,15 +107,13 @@ The following files MUST NOT exist in `templates/common/`. If present, `validate
 | File | Reason |
 |------|--------|
 | `CONSTITUTION.md` | Workspace governance SSOT — projects reference via URL, not file copy |
-| `CLAUDE.md` | Must not contain workspace-root content (`C:\git\` paths or workspace-only hook config) — use variant-specific CLAUDE.md only |
-| `GEMINI.md` | Same as CLAUDE.md — variant-specific only |
 
-### Detection: workspace-root content contamination
-
-`templates/common/CLAUDE.md` or `GEMINI.md` contains workspace-root content if it references:
-- `C:\git\` or `/c/git/` absolute paths
-- `"workspace root"` in the doc-intent line
-- `scripts/dev-sync.sh` or workspace-only hook configurations
+<!-- NOTE: CLAUDE.md and GEMINI.md are intentionally NOT on this blocklist.
+     They are provided via the common layer (templates/common/) and inherited by all
+     variants during scaffolding. Variants must NOT include their own copies.
+     If templates/common/CLAUDE.md or GEMINI.md contains workspace-root content
+     (C:\git\ paths, "workspace root" in doc-intent, dev-sync.sh hooks),
+     validate-templates.ts should flag it as a contamination error. -->
 
 ### Enforcement
 

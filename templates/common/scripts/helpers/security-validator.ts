@@ -1,7 +1,7 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.

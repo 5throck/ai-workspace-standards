@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.9
+ * @version 2.0.10
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -26,7 +26,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, dirname, basename, extname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.js';
+import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
 const C = {
@@ -1039,7 +1039,9 @@ const MAP_PATH = join('scripts', 'propagation-map.json');
 
 if (!existsSync(MAP_PATH)) {
   console.error(`${C.red}Error: propagation-map.json not found at ${MAP_PATH}${C.reset}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Encoding gate — only on --apply (not dry-run or governance/docs modes)
@@ -1062,7 +1064,9 @@ if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
     for (const v of allViolations) {
       console.log(`   ${v.file}  [${v.count}×] ${v.pattern}`);
     }
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 }
 

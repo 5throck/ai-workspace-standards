@@ -2,7 +2,7 @@
 /**
  * sync-skills.ts
  * Distributes skills from the SSOT (skills/) to .claude/skills/ and .gemini/skills/
- * @version 1.0.0
+ * @version 1.0.1
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -22,7 +22,9 @@ console.log(`Syncing skills from SSOT (${ssotSkills})...`);
 
 if (!fs.existsSync(ssotSkills)) {
   console.log('No skills directory found — nothing to sync.');
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 for (const item of fs.readdirSync(ssotSkills)) {

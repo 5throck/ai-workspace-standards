@@ -5,7 +5,7 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @author automation-engineer
  * @license MIT
  *
@@ -899,5 +899,7 @@ async function main() {
 
 main().catch(err => {
   console.error('Fatal error:', err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

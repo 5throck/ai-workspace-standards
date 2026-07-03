@@ -1,7 +1,7 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.5
+ * @version 1.8.6
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -31,7 +31,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname, normalize } from 'path';
 import { load, dump } from 'js-yaml';
-import { safeValidateExtends, ExtendsValidationResult } from './extends-validator.js';
+import { safeValidateExtends, ExtendsValidationResult } from './extends-validator.ts';
 
 /**
  * Error type classification for error recovery strategy
@@ -1752,7 +1752,9 @@ if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
     console.error('  skeleton-path: Optional absolute path to skeleton file');
     console.error('  original-context-path: Optional path to the original context file for extends validation');
     console.error('  variant-level: Optional explicit variant level (L0, L1, L2)');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
   const filePath = args[0];

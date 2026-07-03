@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.8.2
+ * @version 1.8.3
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -61,31 +61,31 @@
 
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.js';
+import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.ts';
 import {
   normalizeAgentSkills,
   formatNormalizationReport,
   NormalizationResult,
-} from './helpers/normalize-agent-skills.js';
+} from './helpers/normalize-agent-skills.ts';
 import {
   getAgentGoldenStructure,
   getSkillGoldenStructure,
   checkStructuralGaps,
   formatGapReport,
   StructuralGapReport,
-} from './helpers/golden-reference-loader.js';
-import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.js';
-import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.js';
+} from './helpers/golden-reference-loader.ts';
+import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.ts';
+import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.ts';
 import {
   initializeBetaLifecycle,
   checkPromotionEligibilityDetails,
   BetaLifecycleState,
-} from './helpers/beta-lifecycle.js';
-import { validatePlatformParity, ParityValidationResult } from './helpers/validate-platform-parity.js';
-import { integrateVariantToWorkspace, IntegrationResult } from './helpers/integration-helpers.js';
-import { validateDependencies } from './helpers/variant-governance-rules.js';
-import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.js';
-import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.js';
+} from './helpers/beta-lifecycle.ts';
+import { validatePlatformParity, ParityValidationResult } from './helpers/validate-platform-parity.ts';
+import { integrateVariantToWorkspace, IntegrationResult } from './helpers/integration-helpers.ts';
+import { validateDependencies } from './helpers/variant-governance-rules.ts';
+import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.ts';
+import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
