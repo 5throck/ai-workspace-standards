@@ -19,12 +19,16 @@ const platform = args[1] || 'both';
 
 if (!projectDir) {
   console.error("❌ Missing <ProjectDir> argument.");
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (!existsSync(projectDir)) {
   console.error(`❌ Project directory not found: ${projectDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 1. Remove statically copied heavy skills if they were copied from templates

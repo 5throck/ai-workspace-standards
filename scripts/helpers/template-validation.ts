@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * template-validation.ts — Validate required template files in common/ and variant/
- * @version 1.0.1
+ * @version 1.0.2
  *
  * Usage:
  *   bun scripts/helpers/template-validation.ts <variant> [commonPath] [variantPath]
@@ -23,7 +23,9 @@ const variant = args[0];
 
 if (!variant) {
   console.error('Usage: bun template-validation.ts <variant> [commonPath] [variantPath]');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const workspaceRoot = process.cwd();
@@ -60,7 +62,11 @@ for (const file of variantRequired) {
 
 if (missing.length > 0) {
   console.error(`Missing required template files: ${missing.join(', ')}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
-process.exit(0);
+if (import.meta.main) {
+  process.exit(0);
+}

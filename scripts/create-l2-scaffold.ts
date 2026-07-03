@@ -1,4 +1,4 @@
-// @version 1.6.3
+// @version 1.6.4
 ```typescript
 #!/usr/bin/env bun
 /**
@@ -21,8 +21,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
-import { includeScriptInL2 } from './helpers/layer-filter.js';
-import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
+import { includeScriptInL2 } from './helpers/layer-filter.ts';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants

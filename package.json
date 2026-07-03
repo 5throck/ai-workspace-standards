@@ -56,10 +56,8 @@
   "workspace-scripts": true,
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@resvg/resvg-js": "^2.6.2",
     "codegraph": "^1.0.0",
     "fast-xml-parser": "^5.9.3",
-    "playwright": "^1.61.1",
     "semver": "^7.8.5",
     "simple-git": "^3.36.0"
   },

@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Variant Generator
  *
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.7.1
+ * @version 1.7.2
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -19,10 +19,10 @@
 
 import { join, dirname, resolve } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'fs';
-import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.js';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
-import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.js';
-import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.js';
+import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.ts';
+import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

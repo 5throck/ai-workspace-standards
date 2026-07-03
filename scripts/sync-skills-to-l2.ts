@@ -2,7 +2,7 @@
 /**
  * sync-skills-to-l2.ts
  * Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import { existsSync, readdirSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -20,7 +20,9 @@ const scriptArg = args.find(a => a.startsWith('--script='));
 
 if (!variantArg && !isCheckDrift) {
   console.error("Usage: bun scripts/sync-skills-to-l2.ts [--variant=<co-*>] [--skill=<name>] [--script=<name>] [--dry-run|--check-drift|--apply]");
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const variants = variantArg ? [variantArg.split('=')[1]] : readdirSync('templates').filter(d => d.startsWith('co-'));

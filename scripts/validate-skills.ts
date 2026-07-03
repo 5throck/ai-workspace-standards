@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.0.0
+ * @version 1.0.1
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
 //
@@ -53,7 +53,9 @@ if (!existsSync(SKILLS_DIR)) {
   console.error(`        Current directory: ${ROOT}`);
   console.error(`        Expected: a directory containing skills/`);
   console.error(`        Usage: cd <workspace-root> && bun scripts/validate-skills.ts`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const args = process.argv.slice(2);

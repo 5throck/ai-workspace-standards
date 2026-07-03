@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.3
+ * @version 1.2.4
  */
 
 import { $ } from "bun";
@@ -84,5 +84,7 @@ async function main() {
 
 main().catch(err => {
   console.error(err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

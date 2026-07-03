@@ -3,7 +3,7 @@ name: Lifecycle Manager
 role: specialist
 status: active
 version: 1.1.0
-last_reviewed: "2026-06-13"
+last_reviewed: 2026-06-13
 tier:
   claude: medium
   gemini: medium

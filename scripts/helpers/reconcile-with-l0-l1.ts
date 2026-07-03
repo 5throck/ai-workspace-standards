@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * L0/L1 Reconciliation
  *
  * Compares L2 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:
@@ -18,9 +18,9 @@
 import * as semver from 'semver';
 import { join, basename } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { FileClassification, L2ScanResult } from './scan-l2-project.js';
-import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.js';
-import { readUTF8File } from '../lib/encoding-utils.js';
+import { FileClassification, L2ScanResult } from './scan-l2-project.ts';
+import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
+import { readUTF8File } from '../lib/encoding-utils.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

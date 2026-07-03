@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.0.1
 /**
  * spec-register.ts
  *
@@ -92,7 +92,9 @@ if (getArg('--file')) {
 
   if (!fs.existsSync(filePath)) {
     console.error(`${RED}File not found: ${filePath}${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
   const registry = loadRegistry();
@@ -103,7 +105,9 @@ if (getArg('--file')) {
     if (meetingRef) existing.meeting_ref = meetingRef;
     saveRegistry(registry);
     console.log(`${GREEN}Updated: ${id}${RESET}`);
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
 
   const entry: SpecEntry = {
@@ -119,22 +123,30 @@ if (getArg('--file')) {
   registry.specs.push(entry);
   saveRegistry(registry);
   console.log(`${GREEN}Registered spec: ${id}${RESET}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 if (getArg('--update')) {
   const id = getArg('--update')!;
   const newStatus = getArg('--status') as SpecStatus | undefined;
-  if (!newStatus) { console.error(`${RED}--update requires --status${RESET}`); process.exit(1); }
+  if (import.meta.main) {
+    if (!newStatus) { console.error(`${RED}--update requires --status${RESET}`); process.exit(1); }
+  }
   const registry = loadRegistry();
   const entry = registry.specs.find(s => s.id === id);
-  if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
+  if (import.meta.main) {
+    if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
+  }
   const prev = entry.status;
   entry.status = newStatus;
   entry.last_updated = today();
   saveRegistry(registry);
   console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 if (hasFlag('--list') || args.length === 0) {
@@ -143,7 +155,9 @@ if (hasFlag('--list') || args.length === 0) {
   const specs = filterStatus ? registry.specs.filter(s => s.status === filterStatus) : registry.specs;
   if (specs.length === 0) {
     console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ''}.${RESET}`);
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
   console.log(`${CYAN}Spec Registry (${specs.length} entries)${RESET}
 `);
@@ -152,8 +166,12 @@ if (hasFlag('--list') || args.length === 0) {
     console.log(`  ${c}[${s.status.padEnd(11)}]${RESET} ${s.id}
              ${s.file}`);
   }
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 console.error('Usage: --file <path> --source <brainstorming|meeting|manual> | --update <id> --status <status> | --list');
-process.exit(1);
+if (import.meta.main) {
+  process.exit(1);
+}

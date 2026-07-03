@@ -9,7 +9,7 @@
  *   bun scripts/readme-lifecycle-audit.ts
  *   bun scripts/readme-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -400,7 +400,9 @@ Checks:
 
 Platform: ${PLATFORM}
   `);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 const result = auditReadmes(jsonMode);
@@ -411,4 +413,6 @@ if (jsonMode) {
   printResults(result);
 }
 
-process.exit(result.errors.length > 0 ? 1 : 0);
+if (import.meta.main) {
+  process.exit(result.errors.length > 0 ? 1 : 0);
+}

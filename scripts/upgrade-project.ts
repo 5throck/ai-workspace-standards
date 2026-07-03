@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.1
+// @version 1.2.2
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 //
@@ -29,11 +29,15 @@ for (let i = 0; i < args.length; i++) {
 
 if (!projectPath) {
   console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 if (!['claude', 'antigravity', 'both'].includes(platform)) {
   console.error('ERROR: --platform must be one of: claude, antigravity, both');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Resolve paths ──────────────────────────────────────────────────────────────
@@ -42,14 +46,18 @@ const projectDir = isAbsolute(projectPath) ? projectPath : resolve(projectPath);
 
 if (!existsSync(projectDir)) {
   console.error(`ERROR: Project directory not found: ${projectDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Validate git repo
 const gitCheck = spawnSync('git', ['-C', projectDir, 'rev-parse', '--git-dir'], { encoding: 'utf8' });
 if (gitCheck.status !== 0) {
   console.error(`ERROR: Not a git repository: ${projectDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Version resolution ─────────────────────────────────────────────────────────
@@ -69,7 +77,9 @@ if (existsSync(templateVersionFile)) {
   console.log('    This project may have been created before version tracking was introduced.');
   console.log(`    Treating as: unknown -> current (${currentVersion})\n`);
   const answer = prompt('    Proceed? [y/N] ') ?? '';
-  if (!['y', 'Y'].includes(answer)) { console.log('Aborted.'); process.exit(0); }
+  if (import.meta.main) {
+    if (!['y', 'Y'].includes(answer)) { console.log('Aborted.'); process.exit(0); }
+  }
 }
 
 if (!variant) {
@@ -78,7 +88,9 @@ if (!variant) {
     console.log(`Auto-detected variant: ${variant}`);
   } else {
     console.error('ERROR: Could not detect variant from template-version.txt. Specify --variant explicitly.');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 }
 
@@ -89,14 +101,20 @@ const validVariants = existsSync(join(workspaceRoot, 'templates'))
 if (!validVariants.includes(variant)) {
   console.error(`ERROR: Invalid variant: ${variant}`);
   console.error(`   Valid variants: ${validVariants.join(' ')}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const templatesDir = join(workspaceRoot, 'templates', variant);
 const commonDir = join(workspaceRoot, 'templates', 'common');
 
-if (!existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
-if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
+if (import.meta.main) {
+  if (!existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
+}
+if (import.meta.main) {
+  if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
+}
 
 // ── Script version comparison ──────────────────────────────────────────────────
 const scriptsSnapshot = join(projectDir, 'scripts-snapshot.json');

@@ -6,7 +6,7 @@
  * with type "additive", merges variant-specific VARIANT-SECTION blocks into the common
  * skeleton written to the project directory.
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/lib/agent-override-merge.ts <commonDir> <variantDir> <projectDir>
@@ -20,11 +20,15 @@ const [,, commonDir, variantDir, projectDir] = process.argv;
 
 if (!commonDir || !variantDir || !projectDir) {
   console.error('Usage: agent-override-merge.ts <commonDir> <variantDir> <projectDir>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const variantJsonPath = join(variantDir, 'variant.json');
-if (!existsSync(variantJsonPath)) process.exit(0);
+if (import.meta.main) {
+  if (!existsSync(variantJsonPath)) process.exit(0);
+}
 
 const variant = JSON.parse(readFileSync(variantJsonPath, 'utf8'));
 const overrides: Record<string, { type?: string }> = variant.agent_overrides || {};

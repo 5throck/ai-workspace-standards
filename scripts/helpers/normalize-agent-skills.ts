@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Wave 1.5 — Agent/Skill Normalizer
  *
@@ -6,7 +6,7 @@
  * skill files, and normalizes skill frontmatter/body section names to match
  * the canonical variant specialist structure.
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @phase 1.5: Agent/Skill Normalization
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
@@ -20,9 +20,9 @@
 
 import { join, dirname, basename } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { L2ScanResult } from './scan-l2-project.js';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
-import { warningError, ErrorPhase } from '../lib/error-handling.js';
+import { L2ScanResult } from './scan-l2-project.ts';
+import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import { warningError, ErrorPhase } from '../lib/error-handling.ts';
 
 // ============================================================================
 // TYPES

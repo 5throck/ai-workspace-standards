@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.1
+ * @version 1.4.2
  * @last_updated 2026-06-21
  * @license MIT
  */
@@ -762,7 +762,9 @@ if (fixMode) {
   // Report remaining issues after fix
   const result = runAudit(false);
   printResults(result);
-  process.exit(result.errors.length > 0 ? 1 : 0);
+  if (import.meta.main) {
+    process.exit(result.errors.length > 0 ? 1 : 0);
+  }
 } else {
   const result = runAudit(jsonMode);
 
@@ -779,6 +781,8 @@ if (fixMode) {
     printResults(result);
   }
 
-  process.exit(result.errors.length > 0 ? 1 : 0);
+  if (import.meta.main) {
+    process.exit(result.errors.length > 0 ? 1 : 0);
+  }
 }
 

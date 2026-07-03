@@ -1,10 +1,10 @@
-// @version 2.10.5
+// @version 2.10.6
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import * as url from 'node:url';
 
 // Check for --lifecycle-only flag
@@ -1300,7 +1300,9 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
         try {
             const { stdout } = await $`git diff --name-only HEAD`.quiet().nothrow();
             changedFiles = stdout.toString().trim().split('\n').filter(Boolean);
-        } catch {}
+        } catch (err) {
+          console.error('[audit] Error: ${err}');
+        }
 
         const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];
         const changedCode = changedFiles.filter(f => codeChangedDirs.some(d => f.startsWith(d)));
@@ -1348,8 +1350,12 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
 console.log("");
 if (errors === 0) {
     console.log(`${GREEN}✅ All checks passed.${RESET}`);
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
 } else {
     console.log(`${RED}❌ ${errors} check(s) failed. Fix before committing.${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }

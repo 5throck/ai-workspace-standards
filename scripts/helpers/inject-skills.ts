@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * inject-skills.ts
- * @version 1.0.0
+ * @version 1.0.1
  * inject-skills.ts — Inject AGENTS.md Skills table into context.md
  *
  * Usage:
@@ -19,7 +19,9 @@ const projectDir = args[0];
 
 if (!projectDir) {
   console.error('Usage: bun inject-skills.ts <project-dir>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Try to find variant context file
@@ -43,13 +45,17 @@ if (!contextMdPath) {
 }
 
 if (!contextMdPath) {
-  process.exit(0); // No context file found, not an error
+  if (import.meta.main) {
+    process.exit(0); // No context file found, not an error
+  }
 }
 
 const agentsMdPath = join(projectDir, 'AGENTS.md');
 
 if (!existsSync(agentsMdPath)) {
-  process.exit(0); // AGENTS.md not found, not an error
+  if (import.meta.main) {
+    process.exit(0); // AGENTS.md not found, not an error
+  }
 }
 
 try {
@@ -59,7 +65,9 @@ try {
   // Extract Skills table from AGENTS.md
   const skillsMatch = agentsContent.match(/^## Skills\s*(\| Skill .*?)(?=\n---|\Z)/ms);
   if (!skillsMatch) {
-    process.exit(0); // No skills table found, not an error
+    if (import.meta.main) {
+      process.exit(0); // No skills table found, not an error
+    }
   }
 
   const skillsTable = skillsMatch[1].trim();
@@ -75,8 +83,12 @@ try {
     console.log('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md');
   }
 
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } catch (error) {
   console.error(`Error: ${error}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

@@ -3,7 +3,7 @@
  * gen-pr-body.ts - Generate a structured PR body from commit message + diff
  * Usage: bun run scripts/gen-pr-body.ts "<commit message>"
  * Output: PR body markdown (stdout)
- * @version 1.1.3
+ * @version 1.1.4
  *
  * Behaviour:
  *   1. If `claude` CLI is available → ask Claude to write the PR body (AI mode)
@@ -17,7 +17,9 @@ import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 const commitMsg = process.argv.slice(2).join(' ');
 if (!commitMsg) {
   process.stderr.write('Usage: bun run scripts/gen-pr-body.ts "<commit message>"\n');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Language validation ───────────────────────────────────────────────────────
@@ -151,7 +153,9 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
     if (body) {
       validateLanguage(body, 'AI-generated PR body');
       process.stdout.write(body + '\n');
-      process.exit(0);
+      if (import.meta.main) {
+        process.exit(0);
+      }
     }
   } catch {
     // fall through to fallback

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.2.1
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -11,7 +11,7 @@ import {
 } from 'node:fs';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.js';
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -27,7 +27,9 @@ for (let i = 0; i < args.length; i++) {
     // Strict allowlist: only alphanumeric, dots, hyphens, underscores — no shell metacharacters
     if (!/^[a-zA-Z0-9._-]+$/.test(templateVer)) {
       console.error(`❌ Invalid --version value: '${templateVer}'. Only letters, numbers, dots, hyphens, underscores allowed.`);
-      process.exit(1);
+      if (import.meta.main) {
+        process.exit(1);
+      }
     }
     continue;
   }
@@ -38,24 +40,32 @@ for (let i = 0; i < args.length; i++) {
 
 if (!projectName) {
   console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Validate project name
 if (!/^[a-zA-Z0-9_/.\-]+$/.test(projectName) || projectName.includes('..')) {
   console.error(`❌ Invalid project name: '${projectName}'`);
   console.error('   Only letters, numbers, hyphens (-), underscores (_), and slashes (/) are allowed, without path traversal (..).');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 if (projectName.length > 64) {
   console.error(`❌ Project name too long (${projectName.length} chars). Maximum is 64 characters.`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Validate platform
 if (!['claude', 'antigravity', 'both'].includes(platform)) {
   console.error('❌ --platform must be: claude, antigravity, or both (default: both)');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Workspace root resolution ──────────────────────────────────────────────────
@@ -85,20 +95,26 @@ const validVariants = getValidVariants(tag || undefined);
 if (tag && validVariants.length === 0) {
   console.error(`❌ Could not detect variants from tag '${tag}'. Tag may not exist.`);
   console.error('   To list available tags: git tag --list \'template-v*\'');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (!variant) {
   console.error('\n[INFO] No variant specified. Please choose one:');
   validVariants.forEach(v => console.error(`   ${v}`));
   console.error(`\n   Usage: bun scripts/new-project.ts "${projectName}" --variant <variant>\n`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (!validVariants.includes(variant)) {
   console.error(`❌ Invalid variant: ${variant}`);
   console.error(`   Valid variants: ${validVariants.join(' ')}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Directory resolution (with optional git-tag extraction) ───────────────────
@@ -112,7 +128,9 @@ if (tag) {
   if (!tagCheck.stdout.trim()) {
     console.error(`❌ Template version not found: ${tag}`);
     console.error('   Run: bun scripts/list-template-versions.ts');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
   // Extract from tag into temp dir (shell-free: no bash -c interpolation)
   const mktemp = spawnSync('mktemp', ['-d'], { encoding: 'utf8' });
@@ -128,33 +146,43 @@ if (tag) {
   if (extract.status !== 0) {
     console.error(`❌ Failed to extract template version ${tag}`);
     if (tempDir) rmSync(tempDir, { recursive: true, force: true });
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
   commonDir = join(tempDir, 'templates', 'common');
   templatesDir = join(tempDir, 'templates', variant);
   if (!existsSync(templatesDir)) {
     console.error(`❌ Variant '${variant}' not found in template version ${tag}`);
     rmSync(tempDir, { recursive: true, force: true });
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
   console.log(`📦 Using template version: ${tag}`);
 }
 
 // Register cleanup on exit
 if (tempDir) {
-  process.on('exit', () => { try { rmSync(tempDir, { recursive: true, force: true }); } catch {} });
-  process.on('SIGINT', () => { rmSync(tempDir, { recursive: true, force: true }); process.exit(130); });
+  process.on('exit', () => { try { rmSync(tempDir, { recursive: true, force: true }); } catch (err) { console.error('[new-project] Error: ${err}'); } });
+  if (import.meta.main) {
+    process.on('SIGINT', () => { rmSync(tempDir, { recursive: true, force: true }); process.exit(130); });
+  }
 }
 
 // ── Pre-flight checks ──────────────────────────────────────────────────────────
 if (existsSync(projectDir)) {
   console.error(`❌ Directory already exists: ${projectDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 if (!existsSync(templatesDir)) {
   console.error(`❌ Template variant not found: ${templatesDir}`);
   console.error(`   Available variants: ${validVariants.join(' ')}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Variant status check
@@ -167,7 +195,9 @@ if (existsSync(variantJsonPath)) {
     const answer = prompt('   Continue anyway? [y/N] ') ?? '';
     if (!['y', 'Y'].includes(answer)) {
       console.log('Aborted.');
-      process.exit(1);
+      if (import.meta.main) {
+        process.exit(1);
+      }
     }
   }
 }
@@ -193,7 +223,9 @@ if (existsSync(join(workspaceRoot, 'scripts', 'validate-templates.ts')) && exist
     console.error(`\n❌ Lifecycle governance pre-check FAILED for variant '${variant}'.`);
     console.error('   Fix the issues above before creating a project from this variant.');
     console.error(`   Run: bun scripts/validate-templates.ts --variant ${variant}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
   console.log(`  ✅ Lifecycle governance pre-check passed (mandatory domains: ${mandatoryDomains})`);
 }
@@ -205,7 +237,9 @@ if (existsSync(templateValidationHelper)) {
   const result = spawnSync('bun', [templateValidationHelper, variant, commonDir, templatesDir], { encoding: 'utf8' });
   if (result.status !== 0) {
     console.error(result.stderr);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 }
 
@@ -234,7 +268,9 @@ function makeWritable(dir: string): void {
     try {
       const mode = statSync(f).mode;
       if (!(mode & 0o200)) chmodSync(f, mode | 0o200);
-    } catch { /* best-effort */ }
+    } catch (err) {
+      console.error('[new-project] Error: ${err}');
+    }
   }
 }
 
@@ -250,7 +286,9 @@ function* walkFiles(dir: string): Generator<string> {
 // ── 1. Copy common/ (shared infrastructure) ───────────────────────────────────
 if (!existsSync(commonDir)) {
   console.error(`❌ Common templates directory not found: ${commonDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 console.log(`🚀 Scaffolding new project: ${projectName}`);
@@ -322,7 +360,9 @@ if (existsSync(commonDocs)) {
 // ── 2. Overlay variant/ on top ────────────────────────────────────────────────
 if (!existsSync(templatesDir)) {
   console.error(`❌ Variant templates directory not found: ${templatesDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 console.log('📝 Copying variant templates...');
@@ -561,7 +601,9 @@ if (existsSync(projectScriptsDir)) {
         rmSync(scriptPath);
         console.log(`  🗑️  Excluded L1-only script: ${scriptName}`);
       }
-    } catch { /* skip unreadable files */ }
+    } catch (err) {
+      console.error('[new-project] Error: ${err}');
+    }
   }
 }
 
@@ -601,7 +643,9 @@ check('git core.hooksPath configured', hooksPathResult.stdout.includes('.githook
 if (!securityOk) {
   console.error('\n❌ Security bootstrap check FAILED. Fix the issues above before using this project.');
   console.error("   Run 'bun scripts/audit.ts' after fixing to verify.");
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 console.log('  ✅ All security bootstrap checks passed');
 

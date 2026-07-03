@@ -124,6 +124,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
+<!-- Language Policy Exception: Korean text below is intentional for Korean-language user communication templates. See AGENTS.md §Language Policy for exception rules. -->
 ```
 PM: 🔍 [Task Analysis] 이 작업은 [specialist] 전문 영역입니다.
    Task: [description]
@@ -160,6 +161,10 @@ All specialist agents below are dispatched ONLY through PM:
 | **security-expert** | 6 | "Security review", "Hook configuration", "Secret detection" |
 | **lifecycle-manager** | 5 | "Lifecycle finalization", "Governance record sync", "L0->L1 template publishing", "L1->L2 explicit skill/script sync" — invoked on-demand for governance changes; lifecycle finalization runs automatically via `/sync` (**Workspace root only — L0-only agent, NOT available in variant templates**) |
 | **auditor** | 6 | "Quality verification", "Documentation consistency check", "QA gate required" (Workspace root only) |
+
+## L0→L1→L2 PM Agent Architecture
+
+The PM Agent follows a three-level inheritance model. See [`agents/pm.md`](agents/pm.md) for the complete specification.
 
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 

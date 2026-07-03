@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -59,7 +59,9 @@ if (!existsSync(AGENTS_DIR)) {
   console.error(`        Current directory: ${ROOT}`);
   console.error(`        Expected: a directory containing agents/`);
   console.error(`        Usage: cd <workspace-root> && bun scripts/validate-agents.ts`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const args = process.argv.slice(2);

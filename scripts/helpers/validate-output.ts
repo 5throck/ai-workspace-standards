@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * validate-output.ts — Parse validate-templates.ts JSON output and filter mandatory domain errors
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/helpers/validate-output.ts <mandatory-domains-comma-separated> <json-string>
@@ -17,7 +17,9 @@ const jsonStr = args.slice(1).join(' '); // Rejoin remaining args in case JSON h
 
 if (!mandatoryStr || !jsonStr) {
   console.error('Usage: bun validate-output.ts <comma-separated-domains> <json-string>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const mandatoryDomains = mandatoryStr.split(',');
@@ -36,12 +38,18 @@ try {
     for (const err of mandatoryErrors) {
       console.error(`  ❌ ${err.message || err.check || 'unknown error'}`);
     }
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } catch (error) {
   // If parsing fails, don't block project creation
   console.warn(`WARN: Could not parse validation output: ${error}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }

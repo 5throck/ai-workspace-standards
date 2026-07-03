@@ -1,4 +1,4 @@
-// @version 1.3.1
+// @version 1.3.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -20,7 +20,9 @@ if (path.resolve(actualCwd) !== expectedRoot) {
     console.error(`   Expected: ${expectedRoot}`);
     console.error(`   Current:  ${actualCwd}`);
     console.error(`   Run from the workspace root: cd ${expectedRoot}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 const msg = process.argv.slice(2).join(' ') || "chore: update";
@@ -33,7 +35,9 @@ let gitStatus = "";
 try {
     const { stdout } = await $`git status --short`.quiet().nothrow();
     gitStatus = stdout.toString().trim();
-} catch {}
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
 
 let fileLines = "- N/A";
 if (gitStatus) {
@@ -83,7 +87,9 @@ if (fs.existsSync('CHANGELOG.md')) {
             console.log(`${RED}❌ CHANGELOG.md [Unreleased] section has no entries.${RESET}`);
             console.log(`${YELLOW}   Run: /changelog 'type: description' to add an entry before syncing.${RESET}`);
             console.log("");
-            process.exit(1);
+            if (import.meta.main) {
+              process.exit(1);
+            }
         }
     }
 }
@@ -136,7 +142,9 @@ if (fs.existsSync(specRegPath)) {
 const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 // 4.5. Generate VERSION_MANIFEST.md
@@ -146,7 +154,9 @@ if (fs.existsSync(genManifestTs)) {
     if (genRes.exitCode !== 0) {
         console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
         console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
-        process.exit(1);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
     console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
 }
@@ -162,7 +172,9 @@ if (isWorkspaceRoot) {
         if (publishRes.exitCode !== 0) {
             if (isL0Context) {
                 console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
-                process.exit(1);
+                if (import.meta.main) {
+                  process.exit(1);
+                }
             } else {
                 console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
             }
@@ -170,7 +182,9 @@ if (isWorkspaceRoot) {
     } catch (e) {
         if (isL0Context) {
             console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
-            process.exit(1);
+            if (import.meta.main) {
+              process.exit(1);
+            }
         } else {
             console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
         }
@@ -182,7 +196,9 @@ let currentBranch = "";
 try {
     const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
     currentBranch = stdout.toString().trim();
-} catch {}
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
 
 let branch = currentBranch;
 if (currentBranch === "main" || currentBranch === "master") {
@@ -199,7 +215,9 @@ if (currentBranch === "main" || currentBranch === "master") {
         await $`git checkout -b ${branch}`.nothrow();
     } catch {
         console.log(`${RED}❌ Failed to create branch '${branch}'${RESET}`);
-        process.exit(1);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
 } else {
     console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
@@ -215,16 +233,22 @@ try {
         console.log(`${RED}❌ Potentially sensitive untracked files detected - refusing git add -A:${RESET}`);
         sensitive.forEach(s => console.log(`   ${s}`));
         console.log(`${YELLOW}   Stage files explicitly with 'git add <file>' or add them to .gitignore.${RESET}`);
-        process.exit(1);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
-} catch {}
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
 
 try {
     const addRes = await $`git add -A`.nothrow();
     if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
 } catch (e) {
     console.log(`${RED}❌ git add failed: ${e}${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 const syncContext = crypto.randomUUID();
@@ -236,7 +260,9 @@ const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
 const tmpPath = repoRoot ? path.join(repoRoot, '.sync_context.tmp') : '.sync_context.tmp';
 fs.writeFileSync(tmpPath, syncContext);
 
-const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch {} };
+const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+} };
 process.on('exit', cleanupTmp);
 
 try {
@@ -246,7 +272,9 @@ try {
 } catch (e) {
     cleanupTmp();
     console.log(`${RED}❌ git commit failed: ${e}${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 const pushRetry = await withRetry(
@@ -258,7 +286,9 @@ const pushProc = pushRetry.result as { exitCode: number; stderr: { toString(): s
 if (!pushRetry.success) {
     const errMsg = pushProc?.stderr.toString().trim() || pushRetry.lastError?.message || 'unknown error';
     console.log(`${RED}❌ git push failed: ${errMsg}${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 // 7. Generate PR body and open PR
@@ -266,7 +296,9 @@ let prBody = "";
 try {
     const { stdout } = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
     prBody = stdout.toString().trim();
-} catch {}
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
 
 let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
 if (prBody) {
@@ -293,5 +325,7 @@ if (prBody) {
 if (!prCreateRetry.success) {
     const errMsg = prCreateRetry.lastError?.message || 'unknown error';
     console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * write-scripts-snapshot.ts — Write scripts-snapshot.json with L1 script version map
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>
@@ -20,7 +20,9 @@ const l1Source = args[3];
 
 if (!projectDir || !date || !variant || !l1Source) {
   console.error('Usage: bun write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const scriptsMdPath = join(process.cwd(), 'scripts', 'SCRIPTS.md');
@@ -59,8 +61,12 @@ try {
   writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n', 'utf-8');
   console.log(`  ✅ scripts-snapshot.json written (${Object.keys(scripts).length} scripts)`);
 
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } catch (error) {
   console.error(`Error: ${error}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

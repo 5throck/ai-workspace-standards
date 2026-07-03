@@ -10,7 +10,7 @@
  *
  * Tier 1 vs Tier 3 auto-detection: if variant.json exists in cwd, runs Tier 3 subset (E+F only).
  *
- * @version 1.1.1
+ * @version 1.1.2
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -186,5 +186,7 @@ async function main() {
 
 main().catch(err => {
   console.error(err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });
