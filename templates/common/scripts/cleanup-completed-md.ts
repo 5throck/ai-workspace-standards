@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // cleanup-completed-md.ts — Move completed task plans from memory/ to memory/completed/
 // Usage: bun scripts/cleanup-completed-md.ts
 
@@ -20,7 +20,9 @@ console.log('🧹 Cleaning up completed memory files...\n');
 
 if (!existsSync(memoryDir)) {
   console.log('ℹ️  memory/ directory not found — nothing to clean.');
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 mkdirSync(completedDir, { recursive: true });

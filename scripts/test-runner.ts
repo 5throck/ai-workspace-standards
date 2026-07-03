@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.0.2
+ * @version 1.0.3
  */
 import { spawnSync } from 'child_process';
 import { readdirSync } from 'fs';
@@ -78,15 +78,21 @@ export async function runTests(suiteName: string): Promise<boolean> {
           fs.rmSync('tests/.temp', { recursive: true, force: true });
         }
       });
-    } catch(e) {}
+    } catch(e) {
+      console.error('[test-runner] Error: ${e}');
+    }
   }
 }
 
 // CLI entrypoint
 const suiteName = process.argv[2] || 'integration';
 runTests(suiteName).then(success => {
-  process.exit(success ? 0 : 1);
+  if (import.meta.main) {
+    process.exit(success ? 0 : 1);
+  }
 }).catch(error => {
   console.error(error.message);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

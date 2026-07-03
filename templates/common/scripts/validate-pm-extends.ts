@@ -7,7 +7,7 @@
  * Validates pm.md extends chains for correctness and compliance.
  * Implements validation rules from ADR-0033.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @author automation-engineer
  *
  * Usage:
@@ -37,7 +37,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
-import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.js';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 
 /**
  * Returns true if the file was pre-resolved by resolve-variants.ts.

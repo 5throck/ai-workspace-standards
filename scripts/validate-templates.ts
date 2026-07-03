@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.9
+ * @version 1.5.10
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -16,8 +16,8 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
-import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.js';
-import { validatePropagationMap } from './lib/propagation-map-schema.js';
+import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
+import { validatePropagationMap } from './lib/propagation-map-schema.ts';
 
 interface VariantManifest {
   name: string;
@@ -63,7 +63,9 @@ const TEMPLATES_DIR = join(ROOT, 'templates');
 
 if (!existsSync(TEMPLATES_DIR)) {
   console.error(`\x1b[31m[ERROR] templates/ directory not found at: ${TEMPLATES_DIR}\x1b[0m`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const args = process.argv.slice(2);

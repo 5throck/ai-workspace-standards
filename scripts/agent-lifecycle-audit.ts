@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.3
+ * @version 1.1.4
  * @l2-propagate false
  * @last_updated 2026-06-02
  * @license MIT
@@ -499,7 +499,9 @@ Checks:
 
 Platform: ${PLATFORM}
   `);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 const result = auditAgents(jsonMode);
@@ -510,5 +512,7 @@ if (jsonMode) {
   printResults(result);
 }
 
-process.exit(result.errors.length > 0 ? 1 : 0);
+if (import.meta.main) {
+  process.exit(result.errors.length > 0 ? 1 : 0);
+}
 

@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Platform Parity Validator
  *
  * Validates cross-platform parity between .claude/ and .gemini/ directories.
  * Ensures structural equivalence, settings schema parity, and command/skill alignment.
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase 3: Platform Parity Validation
  *
  * Dependencies:
@@ -15,8 +15,8 @@
 
 import { join, relative, dirname } from 'path';
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { readUTF8File } from '../lib/encoding-utils.js';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
+import { readUTF8File } from '../lib/encoding-utils.ts';
+import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

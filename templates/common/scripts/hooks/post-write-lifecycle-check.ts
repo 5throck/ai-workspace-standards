@@ -10,7 +10,7 @@
  *   Gemini CLI       — not triggered (run bun scripts/audit.ts manually)
  *   Antigravity      — not triggered (run bun scripts/audit.ts manually)
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import { $ } from 'bun';
@@ -137,5 +137,7 @@ async function main() {
 
 main().catch(err => {
   console.error('Lifecycle check error:', err);
-  process.exit(0); // Non-blocking: never fail PostToolUse
+  if (import.meta.main) {
+    process.exit(0); // Non-blocking: never fail PostToolUse
+  }
 });

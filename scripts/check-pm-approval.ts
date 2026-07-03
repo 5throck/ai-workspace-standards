@@ -34,7 +34,9 @@ try {
   if (raw) payload = JSON.parse(raw);
 } catch {
   // stdin unavailable or not JSON — allow by default
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 const toolName = payload.tool_name ?? '';
@@ -50,13 +52,17 @@ const CHAIN_OPERATORS = /&&|\|\||;|\||\`|\$\(/;
 if (toolName === 'Bash' || toolName === 'bash') {
   const cmd = (toolInput.command ?? '').trim();
   if (READ_ONLY_PATTERN.test(cmd) && !CHAIN_OPERATORS.test(cmd)) {
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
 }
 
 // Check PM approval flag
 if (existsSync(join(process.cwd(), APPROVE_FLAG))) {
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 // Block — PM approval required
@@ -71,4 +77,6 @@ const response = {
 };
 
 process.stdout.write(JSON.stringify(response) + '\n');
-process.exit(1);
+if (import.meta.main) {
+  process.exit(1);
+}

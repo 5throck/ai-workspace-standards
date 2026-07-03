@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Auto-generates scripts/README.md from scripts/SCRIPTS.md (L0 SSOT)
- * @version 1.0.0
+ * @version 1.0.1
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,7 +15,9 @@ const TEMPLATE_README_MD = join(ROOT, 'templates', 'common', 'scripts', 'README.
 try {
   if (!existsSync(SCRIPTS_MD)) {
     console.log('SCRIPTS.md not found, skipping generation.');
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
 
   const content = readFileSync(SCRIPTS_MD, 'utf-8');
@@ -23,7 +25,9 @@ try {
   
   if (guideIndex === -1) {
     console.error('Could not find ## Guide in SCRIPTS.md');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
   // Extract from ## Guide until ## Version Bump Policy or end of file
@@ -108,5 +112,7 @@ ${staticFooter}`;
   console.log('✅ Generated scripts/README.md from SCRIPTS.md');
 } catch (e) {
   console.error('Failed to generate README.md:', e);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

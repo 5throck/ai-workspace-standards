@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // remove-project.ts — Project deletion helper (all platforms)
 // Usage: bun scripts/remove-project.ts <project-name-or-path>
 //
@@ -14,7 +14,9 @@ import * as readline from 'node:readline';
 const projectArg = process.argv[2];
 if (!projectArg) {
   console.error('[FAIL] Usage: bun scripts/remove-project.ts <project-path>');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Resolve absolute path
@@ -28,7 +30,9 @@ console.log('============================================================\n');
 
 if (!existsSync(projectDir)) {
   console.error(`[FAIL] Project directory not found: ${projectDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Process detection ─────────────────────────────────────────────────────────
@@ -55,7 +59,9 @@ if (running.length > 0) {
 
   if (answer.toLowerCase() !== 'y') {
     console.log('  Deletion cancelled.');
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
 }
 console.log('  [OK] Process check complete.');
@@ -71,5 +77,7 @@ try {
 } catch (err) {
   console.error(`  [FAIL] Could not delete: ${projectDir}`);
   console.error(`  Error: ${(err as Error).message}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

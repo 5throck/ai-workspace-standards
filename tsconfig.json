@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "declaration": false
+  },
+  "include": ["scripts/**/*.ts"],
+  "exclude": ["node_modules", "templates/", ".sandbox/", "temp/"]
+}

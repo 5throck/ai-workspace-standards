@@ -2,7 +2,7 @@
 /**
  * test-new-project.ts — E2E Test for new-project.sh / new-project.ps1
  *
- * @version 1.0.3
+ * @version 1.0.4
  * @last_updated 2026-05-31
  *
  * Cross-platform: detects OS and calls the appropriate script.
@@ -50,7 +50,9 @@ const platformArg = (() => { const i = args.indexOf('--platform'); return i !== 
 
 if (!projectName) {
   console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform both|claude|antigravity]');
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Due to new-project path traversal protection, the project name must be strictly alphanumeric.
@@ -170,7 +172,9 @@ try {
 
   if (!syntaxOk) {
     console.error('\n❌ Syntax errors found — remaining tests skipped.');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
   // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
@@ -191,7 +195,9 @@ try {
 
   if (!existsSync(testDir)) {
     console.error('\n❌ Project directory not found — remaining tests skipped.');
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 
   // ── Test 2: UTF-8 Integrity [maps to: step 5 (encoding)] ───────────────────
@@ -596,4 +602,6 @@ try {
   cleanup();
 }
 
-process.exit(allPassed ? 0 : 1);
+if (import.meta.main) {
+  process.exit(allPassed ? 0 : 1);
+}

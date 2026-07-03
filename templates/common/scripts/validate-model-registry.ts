@@ -2,7 +2,7 @@
 /**
  * validate-model-registry.ts
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block.
- * Level: L0 | Status: active | @version 1.0.1
+ * Level: L0 | Status: active | @version 1.0.2
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -103,18 +103,24 @@ try {
   schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
 } catch (err) {
   console.error(`ERROR: Could not read docs/workspace-schema.json at ${schemaPath}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (!schema.models) {
   console.error("ERROR: docs/workspace-schema.json is missing the 'models' block.");
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const missingPlatforms = PLATFORMS.filter((p) => !schema.models![p]);
 if (missingPlatforms.length > 0) {
   console.error(`ERROR: workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const models = schema.models as ModelsBlock;
@@ -128,12 +134,16 @@ try {
     .map((f) => join(agentsDir, f));
 } catch (err) {
   console.error(`ERROR: Could not read agents directory at ${agentsDir}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (agentFiles.length === 0) {
   console.log("✓ No agent files found. Nothing to validate.");
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 // Step 3-7: Validate each agent
@@ -177,12 +187,16 @@ for (const filePath of agentFiles) {
 
 if (mismatches.length === 0) {
   console.log("✓ All agent model names match registry");
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 } else {
   for (const m of mismatches) {
     console.error(
       `ERROR: ${m.file}\n  platform=${m.platform} tier=${m.tier}: declared="${m.declaredModel}" expected="${m.expectedModel}"`
     );
   }
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }

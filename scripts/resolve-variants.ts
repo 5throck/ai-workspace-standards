@@ -12,14 +12,14 @@
  * Usage:
  *   bun scripts/resolve-variants.ts [--force] [--variant co-develop]
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @phase L1-B: Variant Pre-Resolution
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, resolve as resolvePath } from 'path';
 import { load as yamlLoad } from 'js-yaml';
-import { readUTF8File, writeUTF8File } from './lib/encoding-utils.js';
+import { readUTF8File, writeUTF8File } from './lib/encoding-utils.ts';
 
 // ============================================================================
 // CONSTANTS
@@ -276,5 +276,7 @@ async function main() {
 
 main().catch(err => {
   console.error('\n❌ resolve-variants.ts failed:', err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

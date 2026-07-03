@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Status Synchronization Script
- * @version 1.0.0
+ * @version 1.0.1
  * Synchronizes skill status between SKILL.md and registry tables
  */
 
@@ -91,7 +91,9 @@ for (const dir of SKILL_DIRS) {
             console.log(`     Consider moving to ${dir}/_archive/ (run manually)`);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('[sync-skill-status] Error: ${e}');
+      }
     }
   }
 }

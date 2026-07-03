@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.6
+ * @version 1.5.7
  */
 
 import { $ } from "bun";
@@ -295,5 +295,7 @@ async function main() {
 
 main().catch(err => {
   console.error("Hook error:", err);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Integration Helpers
  *
@@ -8,7 +8,7 @@
  * - docs/templates/VERSION_REGISTRY.json
  * - AGENTS.md PM Dispatch table
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase 3: Workspace Integration
  *
  * Dependencies:
@@ -19,9 +19,9 @@
 
 import { join, dirname } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.js';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
-import type { VariantMetadata } from './generate-variant.js';
+import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
+import type { VariantMetadata } from './generate-variant.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

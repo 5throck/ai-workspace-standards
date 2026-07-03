@@ -1,7 +1,7 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 /**
  * Test script for ADR-0033 circular reference prevention implementation
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Tests the extends-validator.ts module with various scenarios:
  * - Normal extends chains (depth 2-3)
@@ -12,7 +12,7 @@
 
 import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
-import { safeValidateExtends } from './helpers/extends-validator.js';
+import { safeValidateExtends } from './helpers/extends-validator.ts';
 
 const TEST_DIR = resolve('.test-extends-validator-temp');
 

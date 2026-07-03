@@ -2,7 +2,7 @@
 // qa-gate.ts - QA Gate Automation - Phase 6
 // Run by Consistency Auditor to verify workspace standards
 
-/** @version 1.0.3 */
+/** @version 1.0.4 */
 
 import { $ } from 'bun';
 
@@ -21,7 +21,9 @@ const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
   console.log(`${RED}❌ FAIL: audit.sh failed${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 2. Project-specific tests (if package.json exists)
@@ -33,7 +35,9 @@ if (await pkgFile.exists()) {
     const testRes = await $`bun run test`.nothrow();
     if (testRes.exitCode !== 0) {
       console.log(`${RED}❌ FAIL: Tests failed${RESET}`);
-      process.exit(1);
+      if (import.meta.main) {
+        process.exit(1);
+      }
     }
   } else {
     console.log(`${YELLOW}⚠️  SKIP: No test script found in package.json${RESET}`);
@@ -46,7 +50,9 @@ console.log('Step 3: Checking documentation consistency...');
 // Check AGENTS.md exists
 if (!(await Bun.file('AGENTS.md').exists())) {
   console.log(`${RED}❌ FAIL: AGENTS.md not found${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Check README.md has Korean pair (for templates only)
@@ -54,7 +60,9 @@ const hasTemplateReadme = await Bun.file('templates/README.md').exists();
 const hasTemplateReadmeKo = await Bun.file('templates/README_ko.md').exists();
 if (hasTemplateReadme && !hasTemplateReadmeKo) {
   console.log(`${RED}❌ FAIL: templates/README.md exists but templates/README_ko.md missing${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 4. Verify Lifecycle Manager deployment
@@ -106,7 +114,9 @@ if (fs.existsSync(l0Skills) && fs.existsSync(l1Skills)) {
 }
 
 if (syncFailed) {
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 5. Validate variant.json schema
@@ -122,16 +132,22 @@ if (fs.existsSync(templatesDir)) {
         const skillExt = variantJson.skill_manifest?.external;
         if (skillExt && !Array.isArray(skillExt)) {
            console.log(`${RED}❌ FAIL: ${variant}/variant.json skill_manifest.external is not an array${RESET}`);
-           process.exit(1);
+           if (import.meta.main) {
+             process.exit(1);
+           }
         }
         const scriptExt = variantJson.script_manifest?.external;
         if (scriptExt && !Array.isArray(scriptExt)) {
            console.log(`${RED}❌ FAIL: ${variant}/variant.json script_manifest.external is not an array${RESET}`);
-           process.exit(1);
+           if (import.meta.main) {
+             process.exit(1);
+           }
         }
       } catch (e) {
         console.log(`${RED}❌ FAIL: Could not parse ${variantJsonPath}: ${e}${RESET}`);
-        process.exit(1);
+        if (import.meta.main) {
+          process.exit(1);
+        }
       }
     }
   }
@@ -139,4 +155,6 @@ if (fs.existsSync(templatesDir)) {
 
 console.log(`${GREEN}✔ QA PASS${RESET}`);
 console.log('==========');
-process.exit(0);
+if (import.meta.main) {
+  process.exit(0);
+}

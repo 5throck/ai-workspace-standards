@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Regenerates variant AGENTS.md from the L1 common template with variant-specific
  * VARIANT-*-START/END blocks filled in from agent frontmatter.
@@ -310,7 +310,9 @@ const MISALIGNED_VARIANTS = ['co-consult', 'co-work', 'co-security', 'co-design'
 
 if (!COMMON_AGENTS_TEMPLATE || !fs.existsSync(COMMON_AGENTS_TEMPLATE)) {
   console.error(`❌ L1 template not found: ${COMMON_AGENTS_TEMPLATE}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 if (allFlag) {
@@ -326,5 +328,7 @@ if (allFlag) {
   bun scripts/regenerate-agents-md.ts --dry-run --all    # Preview without writing
 
 Misaligned variants: ${MISALIGNED_VARIANTS.join(', ')}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }

@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Beta Lifecycle Manager
  *
  * Tracks beta variant lifecycle including engagements, bugs, and promotion eligibility.
  * Implements variant-weighted promotion criteria from governance rules.
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @phase 3: Beta Lifecycle Management
  *
  * Dependencies:
@@ -15,8 +15,8 @@
 
 import { join } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.js';
-import { PROMOTION_CRITERIA_BY_TYPE, checkPromotionEligibility } from './variant-governance-rules.js';
+import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
+import { PROMOTION_CRITERIA_BY_TYPE, checkPromotionEligibility } from './variant-governance-rules.ts';
 
 // ============================================================================
 // TYPES & INTERFACES

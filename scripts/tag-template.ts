@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // tag-template.ts - Publish a new template version git tag
 
 import { $ } from 'bun';
@@ -22,7 +22,9 @@ const versionFile = path.join(workspaceRoot, 'templates', 'VERSION');
 const vf = Bun.file(versionFile);
 if (!(await vf.exists())) {
   console.error(`${RED}✗ templates/VERSION not found at ${versionFile}${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 const version = (await vf.text()).trim();
 const tagName = `template-v${version}`;
@@ -32,7 +34,9 @@ const existingTags = await $`git -C ${workspaceRoot} tag -l ${tagName}`.quiet().
 const tagExists = existingTags.stdout.toString().trim() === tagName;
 if (tagExists) {
   console.log(`${GREEN}✅ tag ${tagName} already exists. Nothing to do.${RESET}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 // 3. List variant folders under templates/ (exclude non-variant entries)
@@ -65,7 +69,9 @@ console.log('');
 // 6. Dry-run exit
 if (isDryRun) {
   console.log(`${YELLOW}Dry run — no tag created.${RESET}`);
-  process.exit(0);
+  if (import.meta.main) {
+    process.exit(0);
+  }
 }
 
 // 7. Create and push the tag
@@ -73,7 +79,9 @@ const createResult = await $`git -C ${workspaceRoot} tag ${tagName}`.quiet().not
 if (createResult.exitCode !== 0) {
   const stderr = createResult.stderr.toString().trim();
   console.error(`${RED}✗ Failed to create tag ${tagName}: ${stderr}${RESET}`);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const pushResult = await $`git -C ${workspaceRoot} push origin ${tagName}`.quiet().nothrow();

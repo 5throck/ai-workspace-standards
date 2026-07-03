@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.3
+// @version 1.4.4
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -305,5 +305,7 @@ async function validateMarkdownLanguage(): Promise<void> {
 // Run validation
 validateMarkdownLanguage().catch((error) => {
   console.error("Validation error:", error);
-  process.exit(1);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 });

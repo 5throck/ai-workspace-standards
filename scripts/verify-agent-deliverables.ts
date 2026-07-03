@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-agent-deliverables.ts — Agent Execution Result Verification
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Purpose: Verify that files reported as "created" by agents actually exist.
  * Prevents "report forgery" where agents claim completion without actual deliverables.
@@ -121,5 +121,7 @@ async function main() {
 
 main().catch(err => {
     console.error("Verification error:", err);
-    process.exit(1);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 });

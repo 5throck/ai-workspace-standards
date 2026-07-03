@@ -1,4 +1,4 @@
-// @version 1.0.1
+// @version 1.0.2
 /**
  * project-to-variant.ts
  *
@@ -156,4 +156,6 @@ ${CYAN}=== Manual Review Checklist ===${RESET}
 Run bun scripts/audit.ts after completing the checklist.
 `);
 
-if (errored > 0) { console.error(`${RED}${errored} file(s) failed to copy${RESET}`); process.exit(1); }
+if (import.meta.main) {
+  if (errored > 0) { console.error(`${RED}${errored} file(s) failed to copy${RESET}`); process.exit(1); }
+}
