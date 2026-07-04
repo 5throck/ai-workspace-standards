@@ -169,9 +169,6 @@ function extractFileVersion(filePath: string): string | null {
 function runCheckA(): SyncIssue[] {
   const issues: SyncIssue[] = [];
 
-  // Check A is L0-only: verifies L0 scripts/SCRIPTS.md registry consistency
-  if (!IS_WORKSPACE_ROOT) return issues;
-
   if (!existsSync(SCRIPTS_MD)) {
     issues.push({
       level: 'error',

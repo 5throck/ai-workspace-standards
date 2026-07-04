@@ -335,17 +335,14 @@ function auditAgents(jsonMode = false): AuditResult {
       });
     }
 
-    // Check 5: Agent not registered in AGENTS.md (L0 workspace root — error;
-    // L1/L2 projects may not use AGENTS.md, so downgrade to informational)
+    // Check 5: Agent not registered in AGENTS.md
     if (!registeredAgents.has(agentName) && frontmatter.status !== 'archived') {
-      if (IS_WORKSPACE_ROOT) {
-        warnings.push({
-          level: 'warning',
-          file: relPath,
-          message: `Agent not registered in AGENTS.md`,
-          fix: `Add to AGENTS.md agent roster table`,
-        });
-      }
+      warnings.push({
+        level: 'warning',
+        file: relPath,
+        message: `Agent not registered in AGENTS.md`,
+        fix: `Add to AGENTS.md agent roster table`,
+      });
     }
 
     // Check 6: Deprecated agents with active skill references
@@ -406,19 +403,17 @@ function auditAgents(jsonMode = false): AuditResult {
     }
   }
 
-  // Check 8: Agents registered in AGENTS.md but files don't exist (L0 workspace root only)
-  if (IS_WORKSPACE_ROOT) {
-    for (const agentName of registeredAgents) {
-      const agentPath1 = join(ROOT, 'agents', `${agentName}.md`);
-      const agentPath2 = join(ROOT, '.claude', 'agents', `${agentName}.md`);
-      if (!existsSync(agentPath1) && !existsSync(agentPath2)) {
-        errors.push({
-          level: 'error',
-          file: `agents/${agentName}.md`,
-          message: 'Registered in AGENTS.md but file not found',
-          fix: `Create agents/${agentName}.md or remove from AGENTS.md`,
-        });
-      }
+  // Check 8: Agents registered in AGENTS.md but files don't exist
+  for (const agentName of registeredAgents) {
+    const agentPath1 = join(ROOT, 'agents', `${agentName}.md`);
+    const agentPath2 = join(ROOT, '.claude', 'agents', `${agentName}.md`);
+    if (!existsSync(agentPath1) && !existsSync(agentPath2)) {
+      errors.push({
+        level: 'error',
+        file: `agents/${agentName}.md`,
+        message: 'Registered in AGENTS.md but file not found',
+        fix: `Create agents/${agentName}.md or remove from AGENTS.md`,
+      });
     }
   }
 

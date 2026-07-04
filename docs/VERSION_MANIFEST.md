@@ -1,8 +1,8 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-03T12:14:20.215Z
+**Generated**: 2026-07-04T03:40:14.998Z
 **Manifest Version**: 1.0
-**Location**: docs/VERSION_MANIFEST.md
+**Location**: docs\VERSION_MANIFEST.md
 
 ---
 
