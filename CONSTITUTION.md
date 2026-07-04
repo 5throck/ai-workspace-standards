@@ -410,6 +410,32 @@ This is intentional — see ADR-0039 (L0→L1→L2 Hierarchy) and ADR-0040
 
 **Current L1 agent**: Only `pm.md` (uses `extends: ../../../agents/pm.md`).
 
+#### CONSTITUTION.md Non-Propagation
+
+`CONSTITUTION.md` is the L0 workspace-root governance document. It must **never** be
+present in L1 (`templates/common/`) or L2 (variant projects), and L1/L2 `.md` files
+must **not** contain references to it.
+
+**Rules**:
+- `CONSTITUTION.md` is on the blocklist in
+  [`docs/governance/variant-contract.md`](docs/governance/variant-contract.md) —
+  `validate-templates.ts` Check 0 blocks any copy in `templates/common/`.
+- L1 and L2 documentation (`.md` files, agent definitions, skill specs, CLAUDE.md,
+  GEMINI.md) must **not** reference `CONSTITUTION.md` by file path, section anchor,
+  or markdown link.
+- **L2 substitute**: generated projects use `docs/context.md` and
+  `<variant>.context.md` instead.
+- The session-start directive in CLAUDE.md / GEMINI.md ("read CONSTITUTION.md first")
+  is L0-only; `merge-frontmatter.ts` strips CONSTITUTION.md references from L2
+  output during scaffolding.
+
+**Enforcement**:
+- `audit.ts` L0 Leakage check scans all `.md` files under `templates/` for
+  unauthorized `CONSTITUTION.md` or `docs/constitution/` references.
+- The `intentional-duplicate` HTML comment is the sole escape hatch — it exempts
+  the containing file from the L0 Leakage check. Use it **only** when the file is
+  verified to be L1-only (i.e., never copied into L2 variants).
+
 #### Adding a New Common Agent or Skill
 1. Add the file to `templates/common/agents/` or `templates/common/skills/`.
 2. Register it in `docs/templates/common-contract.json`.
