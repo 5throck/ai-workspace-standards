@@ -106,7 +106,7 @@ The following files MUST NOT exist in `templates/common/`. If present, `validate
 
 | File | Reason |
 |------|--------|
-| `CONSTITUTION.md` | Workspace governance SSOT — projects reference via URL, not file copy |
+| `CONSTITUTION.md` | Workspace governance SSOT — never propagated to L1/L2. L1/L2 docs must NOT contain CONSTITUTION.md references (file path, section anchors, or markdown links). Use `docs/context.md` instead. |
 
 <!-- NOTE: CLAUDE.md and GEMINI.md are intentionally NOT on this blocklist.
      They are provided via the common layer (templates/common/) and inherited by all
