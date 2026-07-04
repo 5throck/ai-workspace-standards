@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-04T13:18:20.072Z
+**Generated**: 2026-07-04T15:39:20.756Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -69,7 +69,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.6 | scripts/audit.ts | bun |
+| audit.ts | 2.10.7 | scripts/audit.ts | bun |
 | beta-lifecycle.ts | 1.1.1 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
@@ -96,7 +96,7 @@
 | l2-to-variant-pipeline.ts | 1.8.3 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
-| lifecycle-sync-audit.ts | 1.4.2 | scripts/lifecycle-sync-audit.ts | N/A |
+| lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |

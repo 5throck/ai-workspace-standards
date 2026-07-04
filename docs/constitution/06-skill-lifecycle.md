@@ -44,6 +44,22 @@ skills/
 | `skills/<name>/` | Project-specific, shared | Claude Code, Gemini |
 | `.claude/skills/<name>/` | Claude Code-only | Claude Code only |
 
+#### 6.1.1 Skill Discovery & Registration (.agents/skills.json)
+
+For all AI tools (Claude Code, Gemini, and Antigravity) to automatically discover and load skills residing in the `skills/` directory, they must be registered in the workspace customizations configuration:
+- **File Location**: `.agents/skills.json` (at project/workspace root)
+- **Format**:
+```json
+{
+  "entries": [
+    {
+      "path": "../skills"
+    }
+  ]
+}
+```
+This configuration is automatically generated when scaffolding new projects and is committed to git in generated projects, ensuring out-of-the-box skill availability.
+
 #### 6.2 Skill File Format (Standard Frontmatter)
 
 ```yaml

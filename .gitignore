@@ -59,6 +59,7 @@ __pycache__/
 !.githooks/
 !.claude/
 !.gemini/
+!.agents/skills.json
 !scripts/
 !templates/
 !.editorconfig

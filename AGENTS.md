@@ -477,6 +477,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 > The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
 >
 > **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
+>
+> **Skill discovery & registration**: To make these workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered in `.agents/skills.json` at the root of the workspace.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
