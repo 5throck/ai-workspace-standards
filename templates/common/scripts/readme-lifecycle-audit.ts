@@ -242,21 +242,22 @@ function auditReadmes(jsonMode = false): AuditResult {
   for (const readmeFile of readmeFiles) {
     const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
     const isKorean = readmeFile.endsWith('README_ko.md');
-    // Only the workspace-root EN README requires specific sections;
+    // Only the L0 workspace-root EN README requires specific sections;
     // KO variants are checked via i18n consistency, templates/README.md has its own structure.
-    const isWorkspaceRoot = relPath === 'README.md';
+    // In L1/L2 projects (no CONSTITUTION.md), all READMEs use project-level requirements.
+    const isWorkspaceRootReadme = IS_WORKSPACE_ROOT && relPath === 'README.md';
     const sections = parseSections(readmeFile);
 
     // Check required sections (EN workspace root only — skip KO and templates/README)
-    const requiredSections = isWorkspaceRoot ? REQUIRED_SECTIONS_ROOT : REQUIRED_SECTIONS_PROJECT;
+    const requiredSections = isWorkspaceRootReadme ? REQUIRED_SECTIONS_ROOT : REQUIRED_SECTIONS_PROJECT;
     for (const section of requiredSections) {
       if (!Array.from(sections.keys()).some(s => s.includes(section))) {
-        const level = isWorkspaceRoot ? 'error' : 'warning';
+        const level = isWorkspaceRootReadme ? 'error' : 'warning';
         const issue = {
           level: level as 'error' | 'warning',
           file: relPath,
           message: `Missing required section: ${section}`,
-          fix: isWorkspaceRoot ? `Add '${section}' section to README` : `Consider adding '${section}' section`,
+          fix: isWorkspaceRootReadme ? `Add '${section}' section to README` : `Consider adding '${section}' section`,
         };
         if (level === 'error') {
           errors.push(issue);
