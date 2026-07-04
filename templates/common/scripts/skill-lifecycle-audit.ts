@@ -149,8 +149,10 @@ function findSkillFiles(dir: string, baseDir: string = ROOT): string[] {
       // Skip agent directories (they don't contain skills)
       if (entry.name === 'agents') continue;
 
-      // At workspace root: only scan known subdirectories
-      if (IS_WORKSPACE_ROOT && dir === ROOT) {
+      // At project root: only scan known subdirectories (skills/ and .claude/)
+      // This applies at both L0 workspace root and L1/L2 projects to avoid scanning
+      // unrelated directories like docs/, src/, etc.
+      if (dir === ROOT) {
         // Only recurse into skills/ and .claude/ directories
         if (entry.name !== 'skills' && entry.name !== '.claude') continue;
       }
