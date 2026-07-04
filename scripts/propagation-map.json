@@ -104,6 +104,15 @@
       "recursive": false,
       "exclude": [],
       "override_only": true
+    },
+    "workspace-customizations": {
+      "description": "L0 .agents/ → L1 templates/common/.agents/",
+      "source": ".agents",
+      "target": "templates/common/.agents",
+      "include_pattern": "*.json",
+      "recursive": false,
+      "exclude": [],
+      "override_only": true
     }
   }
 }

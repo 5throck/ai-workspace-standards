@@ -4,6 +4,8 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-05](2026-07-05.md) | feat: register workspace skills globally via .agents/skills.json and propagate to L1 |
+| [2026-07-04](2026-07-04.md) | feat(axis-001): add missing unit tests and update changelog for Phase C & D |
 | [2026-07-03](2026-07-03.md) | docs(co-deck): add theme system enhancement phase 2 implementation plan; project review improvement planning meeting |
 | [2026-07-02](2026-07-02.md) | fix(scripts): add isSuccess predicate and classifyError wiring to retry-handler.ts |
 | [2026-07-01](2026-07-01.md) | fix(deps): add js-yaml to templates/common/scripts/package.json for independent dependency resolution |

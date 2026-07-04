@@ -60,6 +60,7 @@ Standard directory layout for all projects in this workspace:
 | `CLAUDE.md` | Claude Code session behavior and slash commands |
 | `GEMINI.md` | Gemini CLI / Antigravity session behavior |
 | `AGENTS.md` | Canonical agent index (auto-loaded by Claude Code) |
+| `.agents/skills.json` | Customizations config registering skills/ |
 | `scripts/audit.ts` | Documentation audit (enforced on pre-commit) |
 | `scripts/dev-sync.ts` | Full sync pipeline (memlog → audit → commit → PR) |
 | `memory/MEMORY.md` | Development log index |

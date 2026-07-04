@@ -30,6 +30,7 @@ live there as **real, editable files** (not embedded strings).
 | `CLAUDE.md` / `GEMINI.md` | Platform-specific overrides | Add project-specific settings if needed |
 | `.claude/settings.json` | Hooks config (disabled by default - `{}`) | Enable PostToolUse if needed |
 | `.gemini/settings.json` | Gemini project settings | Ready to use (add settings as needed) |
+| `.agents/skills.json` | Customizations config registering skills/ | Ready to use (enables skill loading) |
 | `scripts/` | audit.ts, dev-sync.ts, sync-md.ts, validate-*.ts, verify-*.ts, etc. | Workspace-management scripts excluded (scope `L0` in SCRIPTS.md) |
 | `.githooks/` | pre-commit (audit gate) + pre-push (block main) | Ready to use |
 | `CHANGELOG.md` | User-visible change history | Ready to use |

@@ -198,7 +198,7 @@ L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VAR
 
 ### 6. Skill Lifecycle Management → [Full details](docs/constitution/06-skill-lifecycle.md)
 
-Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
+Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. To enable automated skill discovery by Claude, Gemini, and Antigravity, the `skills/` directory must be registered in the customizations configuration file `.agents/skills.json` at the root of the workspace or project. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
 
 ---
 
@@ -566,4 +566,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-07-01*
+*Last Updated: 2026-07-04*

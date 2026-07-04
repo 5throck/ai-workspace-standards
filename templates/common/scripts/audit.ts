@@ -1,4 +1,4 @@
-// @version 2.10.6
+// @version 2.10.7
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -161,7 +161,9 @@ if (!LIFECYCLE_ONLY) {
 
 function walkDir(dir: string, callback: (fPath: string) => void) {
     if (!fs.existsSync(dir)) return;
+    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
     for (const f of fs.readdirSync(dir)) {
+        if (SKIP_DIRS.has(f)) continue;
         const dirPath = path.join(dir, f);
         const isDirectory = fs.statSync(dirPath).isDirectory();
         if (isDirectory) {
@@ -1027,7 +1029,9 @@ if (fs.existsSync('templates')) {
 if (fs.existsSync('templates')) {
     let executableErrors = 0;
     const checkExecutable = (dir: string) => {
+        const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
         for (const item of fs.readdirSync(dir)) {
+            if (SKIP_DIRS.has(item)) continue;
             const itemPath = path.join(dir, item);
             const stat = fs.statSync(itemPath);
             if (stat.isDirectory()) {

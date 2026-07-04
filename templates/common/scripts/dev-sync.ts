@@ -11,11 +11,6 @@ const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
-// Workspace Root Detection Convention:
-// All lifecycle/audit scripts MUST use the canonical pattern:
-//   const IS_WORKSPACE_ROOT = existsSync('CONSTITUTION.md');
-// dev-sync.ts additionally checks templates/common for L0→L1 publish eligibility.
-
 // Workspace root guard — dev-sync must run from the workspace root it belongs to.
 // Using import.meta.dir (script location) prevents CWD mismatches when two clones exist.
 const expectedRoot = resolve(import.meta.dir, '..');
@@ -71,11 +66,8 @@ ${fileLines}
 
 fs.appendFileSync(memoryFile, template, 'utf8');
 
-// 2. Update MEMORY.md index (L0-only — sync-md.ts may not exist in L1/L2 projects)
-const syncMdTs = path.join('scripts', 'sync-md.ts');
-if (fs.existsSync(syncMdTs)) {
-    await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
-}
+// 2. Update MEMORY.md index
+await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
 
 
 // 2.5 Generate scripts/README.md
@@ -146,15 +138,12 @@ if (fs.existsSync(specRegPath)) {
     await $`bun scripts/audit.ts --spec-check --lifecycle-only`.quiet().nothrow();
 }
 
-// 4. Audit gate — call audit.ts directly (L0-only — audit.ts may not exist in L1/L2 projects)
-const auditTs = path.join('scripts', 'audit.ts');
-if (fs.existsSync(auditTs)) {
-    const auditRes = await $`bun scripts/audit.ts`.nothrow();
+// 4. Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
+const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
-    if (auditRes.exitCode !== 0) {
-        if (import.meta.main) {
-          process.exit(1);
-        }
+if (auditRes.exitCode !== 0) {
+    if (import.meta.main) {
+      process.exit(1);
     }
 }
 
@@ -173,10 +162,9 @@ if (fs.existsSync(genManifestTs)) {
 }
 
 // 4.7 L0→L1 publish (workspace root only)
-// Canonical L0 detection: CONSTITUTION.md exists at workspace root.
-// isWorkspaceRoot adds templates/common + propagation-map.json checks for L0→L1 publish eligibility.
+const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
+// L0 context: CONSTITUTION.md exists at workspace root — publish failures are fatal here.
 const isL0Context = fs.existsSync('CONSTITUTION.md');
-const isWorkspaceRoot = isL0Context && fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
     try {

@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.2
+ * @version 1.4.3
  * @last_updated 2026-06-21
  * @license MIT
  */
@@ -168,9 +168,6 @@ function extractFileVersion(filePath: string): string | null {
  */
 function runCheckA(): SyncIssue[] {
   const issues: SyncIssue[] = [];
-
-  // Check A is L0-only: verifies L0 scripts/SCRIPTS.md registry consistency
-  if (!IS_WORKSPACE_ROOT) return issues;
 
   if (!existsSync(SCRIPTS_MD)) {
     issues.push({
@@ -457,13 +454,13 @@ function runCheckD(): DuplicateEntry[] {
     }
 
     for (const item of items) {
-      if (EXCLUDED.includes(item.name)) continue;
+      if (item.name.startsWith('.') || EXCLUDED.includes(item.name)) continue;
 
       const fullPath = join(dir, item.name);
 
       if (item.isDirectory()) {
-        // Skip generated project directories at workspace root (have AGENTS.md or variant.json)
-        if (dir === ROOT && (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json')))) {
+        // Skip generated project directories (have AGENTS.md or variant.json)
+        if (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json'))) {
           continue;
         }
         walkDir(fullPath);
