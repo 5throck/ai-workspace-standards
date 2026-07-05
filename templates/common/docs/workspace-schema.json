@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12",
+  "version": "1.0.0",
+  "description": "Single Source of Truth for this project's invariants (model registry, i18n locale codes, root allowlist). Scaffolded from templates/common/docs/workspace-schema.json. Validated by scripts/validate-model-registry.ts and scripts/validate-md-language.ts.",
+  "agent_tiers": {
+    "pm":                  "high",
+    "architect":           "high",
+    "auditor":             "medium",
+    "docs-writer":         "medium",
+    "automation-engineer": "low",
+    "scaffolding-expert":  "low",
+    "lifecycle-manager":   "medium",
+    "security-expert":     "medium"
+  },
+  "models": {
+    "claude": {
+      "high":   "claude-opus-4-7",
+      "medium": "claude-sonnet-4-6",
+      "low":    "claude-haiku-4-5"
+    },
+    "gemini": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    },
+    "antigravity": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    },
+    "gemini-cli": {
+      "high":   "gemini-3.1-pro",
+      "medium": "gemini-3.5-flash",
+      "low":    "gemini-3.5-flash"
+    }
+  },
+  "i18n": {
+    "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",
+    "locale_codes": ["ko", "ja", "zh-CN", "zh-TW", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar"],
+    "translation_zone_patterns": [
+      "<lang-code>/",
+      "locales/<lang-code>/"
+    ],
+    "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
+  },
+  "rootAllowlist": {
+    "description": "Whitelist of files and directories permitted in this project's root. Anything not in these lists triggers a stray-artifact audit failure.",
+    "files": [
+      ".git",
+      ".gitignore",
+      ".gitattributes",
+      ".gitleaks.toml",
+      ".editorconfig",
+      ".env.sample",
+      ".mcp.json",
+      "README.md",
+      "README_ko.md",
+      "CLAUDE.md",
+      "GEMINI.md",
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "scripts-snapshot.json"
+    ],
+    "dirs": [
+      ".git",
+      ".claude",
+      ".gemini",
+      ".githooks",
+      ".github",
+      ".agents",
+      "agents",
+      "skills",
+      "docs",
+      "memory",
+      "scripts",
+      "node_modules"
+    ]
+  }
+}
