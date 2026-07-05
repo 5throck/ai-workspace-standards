@@ -213,7 +213,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
 
 - **High-tier**: Complex reasoning, architectural design, planning (claude-opus-4-7 / gemini-3.1-pro)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4.6 / gemini-3.5-flash)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4-6 / gemini-3.5-flash)
 - **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.5-flash)
 
 ### §3.7 Meeting Facilitation

@@ -196,7 +196,7 @@ Every execution plan MUST start with Row 0 (Design Gate — architect creates/up
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | claude-sonnet-4-6 | NEW |
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | claude-opus-4-7 | NEW |
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
 | N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 | |
 
@@ -217,9 +217,12 @@ Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. 
 Agent(
   description   = "Implement automation script",
   prompt        = "You are an automation engineer. [paste agents/automation-engineer.md content here]\n\nTask: Implement the script per the approved plan.",
-  subagent_type = "claude"   // platform agent type; embed the agents/<name>.md role definition in the prompt
+  subagent_type = "claude",  // platform agent type; embed the agents/<name>.md role definition in the prompt
+  model         = "haiku"    // automation-engineer is Low-tier (registry: claude-haiku-4-5) — see registry→model mapping below
 )
 ```
+
+> **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-4-7`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-4-7` → `model = "opus"`; Medium → `claude-sonnet-4-6` → `model = "sonnet"`; Low → `claude-haiku-4-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
 
 Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
 1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
@@ -231,7 +234,7 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 #### Cost Optimization (3-Tier Model Strategy)
 **Model Selection Overrides** (overridden per agent invocation when appropriate):
 - **High-tier (Design/Planning)** — `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
-- **Medium-tier (Review/QA)** — `claude-sonnet-4.6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
+- **Medium-tier (Review/QA)** — `claude-sonnet-4-6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
 - **Low-tier (Execution/Coding)** — `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
 
 <!-- COMMON-CLAUDE:START -->
@@ -296,7 +299,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-06-28 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
+*Last Updated: 2026-07-05 — inlined N-1/N execution plan boilerplate rows (enforcement parity); previous: 2026-06-11 added §5 Skill Resolution Priority, lifecycle-manager/auditor sequence, removed obsolete pm approval hooks*
 <!-- COMMON-CLAUDE:END -->
 
 
