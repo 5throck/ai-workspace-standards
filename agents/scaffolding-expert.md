@@ -3,10 +3,10 @@ name: Scaffolding Expert
 role: specialist
 status: active
 tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+  claude: low        # claude-haiku-4-5
+  gemini: low        # gemini-3.5-flash
+  antigravity: low   # gemini-3.5-flash
+  gemini-cli: low    # gemini-3.5-flash
 model: inherit
 color: orange
 description: 'New Project & Template Specialist. Use when: "Creating new projects", "Template validation", "Scaffolding tasks"'
