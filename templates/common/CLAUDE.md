@@ -194,11 +194,13 @@ For execution plan format, mandatory criteria, and templates, see **[AGENTS.md �
 
 Every execution plan MUST start with Row 0 (Design Gate — architect creates/updates design doc) and end with `/sync`. Between Row 0 and `/sync`, list implementation tasks.
 
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See §6 (Native Sub-agents) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | claude-opus-4-7 | NEW |
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | opus | NEW |
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 | |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet | |
 
 **Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
 

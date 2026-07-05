@@ -122,8 +122,10 @@ All PM execution plans MUST use the following table format (enforced in `CLAUDE.
 ```
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | ... | ... | Medium | claude-sonnet-4-6 | 2026-06-24-topic-slug |
+| 1 | ... | ... | Medium | sonnet | 2026-06-24-topic-slug |
 ```
+
+> **Note**: `Model` holds the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](../../CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table.
 
 - **Spec column**: References the spec ID from `docs/specs/registry.json`. A plan without a spec ID generates a PM Gateway warning (non-blocking). Spec IDs follow the format `YYYY-MM-DD-<topic-slug>`.
 - See [§9.7 Spec Registry](09-operations-workflow.md#97-spec-registry--design-gate) for the full spec lifecycle.
