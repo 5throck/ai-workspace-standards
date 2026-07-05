@@ -79,6 +79,13 @@
     }
   },
   "common_commands": {
+    "project-review": {
+      "source": ".claude/commands/project-review.md",
+      "gemini_source": ".gemini/commands/project-review.md",
+      "gemini-parity": "full",
+      "description": "Comprehensive parallel project review — dispatches specialist agents across 7 domains, synthesizes findings into prioritized improvement plan",
+      "propagated_to_common": true
+    },
     "commit-push-pr": {
       "source": ".claude/commands/commit-push-pr.md",
       "gemini_source": ".gemini/commands/commit-push-pr.md",

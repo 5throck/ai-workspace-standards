@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.12
+ * @version 1.5.13
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -653,10 +653,10 @@ function checkAgentsRoster(variant: string): void {
 function checkCommands(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  const allSharedCommands = ['changelog.md', 'meeting.md', 'memlog.md', 'new-task.md', 'sync.md'];
+  const allSharedCommands = ['changelog.md', 'meeting.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
 
   if (variant === 'common') {
-    // common/ must have all 5 shared commands in BOTH .claude/commands/ and .gemini/commands/
+    // common/ must have all 6 shared commands in BOTH .claude/commands/ and .gemini/commands/
     for (const platform of ['.claude', '.gemini']) {
       const commandsDir = join(TEMPLATES_DIR, 'common', platform, 'commands');
       if (!existsSync(commandsDir)) {

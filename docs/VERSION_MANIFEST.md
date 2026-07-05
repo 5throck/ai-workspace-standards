@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-05T09:54:31.446Z
+**Generated**: 2026-07-05T22:53:35.044Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -11,7 +11,7 @@
 - **Agents**: 8
 - **Skills**: 18
 - **Scripts**: 102
-- **Commands**: 6
+- **Commands**: 7
 
 ---
 
@@ -149,7 +149,7 @@
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.12 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.13 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
@@ -173,6 +173,7 @@
 | meeting | .claude/commands/meeting.md | both | N/A |
 | memlog | .claude/commands/memlog.md | both | N/A |
 | new-task | .claude/commands/new-task.md | both | N/A |
+| project-review | .claude/commands/project-review.md | both | N/A |
 | sync | .claude/commands/sync.md | both | N/A |
 
 ---
@@ -181,7 +182,7 @@
 
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
-- **Commands with parity**: 6 / 6
+- **Commands with parity**: 7 / 7
 - **Skills with parity**: 5 / 18
 
 ---
@@ -213,4 +214,5 @@
 - Command meeting not integrated as a skill
 - Command memlog not integrated as a skill
 - Command new-task not integrated as a skill
+- Command project-review not integrated as a skill
 - Command sync not integrated as a skill
