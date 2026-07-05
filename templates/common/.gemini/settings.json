@@ -1,14 +1,4 @@
 {
-  "mcpServers": {
-    "codegraph": {
-      "command": "npx",
-      "args": [
-        "@colbymchenry/codegraph@1.0.1",
-        "serve",
-        "--mcp"
-      ]
-    }
-  },
   "hooks": {
     "SessionStart": [
       {
