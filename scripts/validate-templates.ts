@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.11
+ * @version 1.5.12
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1721,15 +1721,19 @@ function checkCommonContract(): void {
       const hasExtends = 'extends' in variantFields;
 
       if (hasExtends) {
-        // Variant using extends should ONLY contain the extends field in frontmatter
-        // This is the new pattern — variant is a pure reference to skeleton
+        // Per ADR-0048 / docs/architecture/extends-pattern.md, the variant pm.md
+        // "Minimal pattern" REQUIRES `name`, `variant`, `version`, and `last_updated`
+        // alongside `extends` — it is not extends-only. validate-pm-extends.ts (the
+        // dedicated ADR-0033/0048 validator) already treats this schema as valid;
+        // only flag fields outside that documented schema.
+        const allowedWithExtends = new Set(['extends', 'name', 'variant', 'version', 'last_updated']);
         const fieldKeys = Object.keys(variantFields);
-        const nonExtendsKeys = fieldKeys.filter(k => k !== 'extends');
+        const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));
 
-        if (nonExtendsKeys.length > 0) {
+        if (unexpectedKeys.length > 0) {
           warn(variant, 'C-SK-02',
-            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has other frontmatter fields: ${nonExtendsKeys.join(', ')} — with extends, only the extends field should be present`,
-            `Remove extra frontmatter fields from variant file or remove extends and use additive override pattern`
+            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has unexpected frontmatter fields: ${unexpectedKeys.join(', ')} — see docs/architecture/extends-pattern.md for the allowed schema`,
+            `Remove the unexpected frontmatter fields, or add them to the schema in docs/architecture/extends-pattern.md if intentional`
           );
         }
 
