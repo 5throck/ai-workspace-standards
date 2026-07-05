@@ -448,13 +448,15 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 #### Example 1: Multi-Agent Platform Parity Update
 
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | Update agents/pm.md | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | claude-haiku-4-5 |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | claude-sonnet-4-6 |
-| 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | claude-sonnet-4-6 |
+| 1 | Update agents/pm.md | docs-writer | Medium | sonnet | <spec-id> |
+| 2 | Update scripts/audit.ts | automation-engineer | Low | haiku | <spec-id> |
+| 3 | Update CLAUDE.md §5 | docs-writer | Medium | sonnet | <spec-id> |
+| 4 | Update GEMINI.md §5 | docs-writer | Medium | sonnet | <spec-id> |
+| 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
@@ -462,8 +464,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | Update project README introduction | docs-writer | Medium | claude-sonnet-4-6 |
-| 2 | `/sync "docs: update project README introduction"` | pm | Medium | claude-sonnet-4-6 |
+| 1 | Update project README introduction | docs-writer | Medium | sonnet | <spec-id> |
+| 2 | `/sync "docs: update project README introduction"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential
 
