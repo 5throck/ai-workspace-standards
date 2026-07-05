@@ -1,5 +1,6 @@
 ---
 name: competitive-intelligence
+scope: co-consult
 description: >
   Guides the Strategy Analyst through systematic market and competitive analysis
   for consulting engagements. Includes market entry analysis module. Covers

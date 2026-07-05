@@ -1,5 +1,6 @@
 ---
 name: stakeholder-review-management
+scope: co-consult
 description: >
   Guides the Delivery Manager through managing stakeholder review cycles for
   consulting deliverables. Standardizes reviewer selection, feedback collection,

@@ -1,5 +1,6 @@
 ---
 name: project-delivery
+scope: co-consult
 description: >
   Guides the Delivery Manager through planning and managing consulting engagement
   delivery. Standardizes milestone design, issue logs, risk registers, and weekly

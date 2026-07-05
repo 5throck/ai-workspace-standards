@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Quality assurance and consistency validation
-- [x] Tier assignment: Medium-tier (claude-sonnet-4.6)
+- [x] Tier assignment: Medium-tier (claude-sonnet-4-6)
 - [x] QA responsibilities specified: Documentation validation, consistency checks
 - [x] Independent QA execution documented
 - [x] Maximum 2 iterations before PM escalation

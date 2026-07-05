@@ -1,5 +1,6 @@
 ---
 name: executive-presentation
+scope: co-consult
 description: >
   Guides Communications Lead through designing and building C-level strategy
   presentations and decision decks. Uses Pyramid Principle structure, "So What?"

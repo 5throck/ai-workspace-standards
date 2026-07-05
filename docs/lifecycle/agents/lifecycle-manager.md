@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Lifecycle governance specialist
-- [x] Tier assignment: Medium-tier (claude-sonnet-4.6)
+- [x] Tier assignment: Medium-tier (claude-sonnet-4-6)
 - [x] Lifecycle responsibilities specified: Phase transitions, validation
 - [x] Phase transition rules documented
 - [x] Successfully validated in lifecycle management workflows

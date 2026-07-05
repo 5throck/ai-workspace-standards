@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.3.0
+ * @version 1.3.1
  * @status active
  *
  * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
@@ -155,6 +155,10 @@ function _parseSkillLayersFromFrontmatter(skillsDir: string): Map<string, LayerV
           const scope = scopeMatch[1].trim().toLowerCase();
           if (scope === "workspace") layer = "L0";
           else if (scope === "common") layer = "L0+L1";
+          // Any other explicit scope value names the variant the skill belongs to
+          // (e.g. `scope: co-consult`) — a domain-only skill with a variant override
+          // and no templates/common/ base. See ADR-0032 §7 and skills/SKILLS.md.
+          else layer = "L0+L1+L2";
         }
         // l2_propagate: false overrides scope — skill stays in L0 only
         if (/^\s*l2_propagate\s*:\s*false\b/.test(fmLine)) {

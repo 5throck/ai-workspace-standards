@@ -1,5 +1,6 @@
 ---
 name: html-build
+scope: co-deck
 version: 1.5.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme

@@ -1,5 +1,6 @@
 ---
 name: solution-design
+scope: co-consult
 description: >
   Guides the Solutions Architect through converting business requirements into a
   full technical solution design. Covers requirements decomposition, architecture

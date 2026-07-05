@@ -1,5 +1,5 @@
 {
-  "_comment": "Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. These are intentional L2 variant settings.",
+  "_comment": "Variant-specific overrides vs L1 (templates/common): PostToolUse lifecycle check hook added. These are intentional L2 variant settings.",
   "hooks": {
     "SessionStart": [
       {

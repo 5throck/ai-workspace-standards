@@ -3,10 +3,10 @@ name: Automation Engineer
 role: specialist
 status: active
 tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+  claude: low        # claude-haiku-4-5
+  gemini: low        # gemini-3.5-flash
+  antigravity: low   # gemini-3.5-flash
+  gemini-cli: low    # gemini-3.5-flash
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-06-13

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-04T16:06:12.681Z
+**Generated**: 2026-07-05T03:59:27.696Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-07-03 |
-| auditor | agents/auditor.md | medium | inherit | 2026-07-03 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-07-03 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-07-03 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-07-03 |
-| pm | agents/pm.md | high | inherit | 2026-06-28 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-06-15 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-07-03 |
+| architect | agents/architect.md | high        # claude-opus-4-7 | inherit | 2026-07-05 |
+| auditor | agents/auditor.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
+| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-07-05 |
+| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
+| pm | agents/pm.md | high        # claude-opus-4-7 | inherit | 2026-07-05 |
+| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-07-05 |
+| security-expert | agents/security-expert.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
 
 ---
 
@@ -94,7 +94,7 @@
 | inject-skills.ts | 1.0.1 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.8.3 | scripts/l2-to-variant-pipeline.ts | fs, path |
-| layer-filter.ts | 1.3.0 | scripts/helpers/layer-filter.ts | fs, path |
+| layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -149,7 +149,7 @@
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.1 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.10 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.12 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |

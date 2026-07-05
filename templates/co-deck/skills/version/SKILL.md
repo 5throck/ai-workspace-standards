@@ -1,5 +1,6 @@
 ---
 name: version
+scope: co-deck
 version: 1.3.0
 description: >
   Manages version snapshots of lecture files. Auto-backs up files before edits

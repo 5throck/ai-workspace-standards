@@ -1,5 +1,6 @@
 ---
 name: change-impact-assessment
+scope: co-consult
 description: >
   Guides the Change Management Partner through systematically mapping how a
   proposed change affects specific organizational layers, processes, roles, and

@@ -3,10 +3,10 @@ name: pm
 role: orchestrator
 status: active
 tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+  claude: high        # claude-opus-4-7
+  gemini: high        # gemini-3.1-pro
+  antigravity: high   # gemini-3.1-pro
+  gemini-cli: high    # gemini-3.1-pro
 model: inherit
 color: yellow
 description: 'Orchestrates Phases 0, 2, 5, 6. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'

@@ -260,7 +260,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
 
 - **High-tier**: Complex reasoning, architectural design, planning (claude-opus-4-7 / gemini-3.1-pro)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4.6 / gemini-3.5-flash)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4-6 / gemini-3.5-flash)
 - **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.5-flash)
 
 ### §3.7 Meeting Facilitation
@@ -575,7 +575,7 @@ All agents, regardless of their role, must adhere to the following:
 - **Language**: All code, config, commit messages, and branch names - **English only**.
 - **UTF-8 Enforcement**: Always use UTF-8 encoding; prevent CP949 or other localized encoding corruptions.
 - **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`. Create all temporary code and scratch scripts in `tests/`.
-- **Search Tool Prioritization**: Prioritize MCP semantic search tools (e.g., codegraph) for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
+- **Search Tool Prioritization**: Prioritize MCP semantic search tools for AST-aware insights over basic file search. Use standard grep as a fallback if MCP tools are unavailable.
 - **Source Attribution**: When presenting research findings, external data, or factual claims, always cite the source using `[Source: URL/document]` inline or a `## References` section. If a source cannot be verified, explicitly mark it as `⚠️ Unverified` and recommend manual verification. Never present unverified information as established fact.
 - **Computational Integrity**: Never perform high-precision or safety-critical numerical calculations directly. For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.) via the `stack-setup` agent. Label any AI-generated numerical estimate explicitly as **approximate**.
 

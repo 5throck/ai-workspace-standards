@@ -1,5 +1,6 @@
 ---
 name: verify-authorization
+scope: co-security
 description: >
   Hard gate: confirms a signed authorization document exists and contains all required fields
   before allowing any Phase 1+ (recon, exploitation, patching) activity to proceed.

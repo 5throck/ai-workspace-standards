@@ -1,5 +1,6 @@
 ---
 name: theme-authoring
+scope: co-deck
 version: 1.0.1
 description: >
   Entry point for creating a new co-deck theme or style. PM dispatches

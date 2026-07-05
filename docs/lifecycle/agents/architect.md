@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Design phase specialist
-- [x] Tier assignment: Medium-tier (claude-sonnet-4.6)
+- [x] Tier assignment: High-tier (claude-opus-4-7)
 - [x] Design responsibilities specified: Implementation plans, ADRs, architectural standards
 - [x] Template structure design expertise documented
 - [x] User approval gate requirement documented

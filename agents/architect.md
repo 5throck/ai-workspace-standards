@@ -3,10 +3,10 @@ name: Template Architect
 role: specialist
 status: active
 tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+  claude: high        # claude-opus-4-7
+  gemini: high        # gemini-3.1-pro
+  antigravity: high   # gemini-3.1-pro
+  gemini-cli: high    # gemini-3.1-pro
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-06-13

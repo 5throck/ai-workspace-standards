@@ -140,10 +140,6 @@
     "shared": {
       "description": "Settings that both Claude Code and Antigravity support with the same intent. Must be present in both .claude/settings.json and .gemini/settings.json.",
       "keys": {
-        "mcpServers": {
-          "description": "MCP server definitions — both platforms support MCP",
-          "validation": "object"
-        },
         "hooks.SessionStart": {
           "description": "Session start hook — both platforms support SessionStart",
           "validation": "array"

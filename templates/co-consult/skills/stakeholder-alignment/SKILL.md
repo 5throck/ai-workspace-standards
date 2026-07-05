@@ -1,5 +1,6 @@
 ---
 name: stakeholder-alignment
+scope: co-consult
 description: >
   Guides the Change Management Partner through systematic stakeholder mapping,
   resistance analysis, influence-interest prioritization, and communication
