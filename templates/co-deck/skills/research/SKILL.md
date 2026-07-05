@@ -1,5 +1,6 @@
 ---
 name: research
+scope: co-deck
 version: 1.2.0
 description: >
   Source collection and ideation for lecture materials. After confirming

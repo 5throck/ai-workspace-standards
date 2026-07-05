@@ -1,5 +1,6 @@
 ---
 name: design
+scope: co-deck
 version: 1.2.0
 description: >
   Locks visual design style. Decides layout, color palette, font family and

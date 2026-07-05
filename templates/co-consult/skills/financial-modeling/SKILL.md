@@ -1,5 +1,6 @@
 ---
 name: financial-modeling
+scope: co-consult
 description: >
   Guides the Strategy Analyst through building a full business case for consulting
   recommendations. Covers ROI analysis, NPV/IRR/Payback Period calculation,

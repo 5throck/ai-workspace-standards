@@ -1,5 +1,6 @@
 ---
 name: narrative-framework
+scope: co-consult
 description: >
   Guides Communications Lead (and Solutions Architect for technical
   presentations) through constructing persuasive narrative structures for

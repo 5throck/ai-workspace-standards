@@ -1,5 +1,6 @@
 ---
 name: pdf-export
+scope: co-deck
 version: 2.1.0
 description: >
   Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sample

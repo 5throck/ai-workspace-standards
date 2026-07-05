@@ -1,5 +1,6 @@
 ---
 name: insight-synthesis
+scope: co-consult
 description: >
   Guides the Strategy Analyst through integrating outputs from multiple specialist
   analyses (competitive research, organizational diagnostics, technical assessments)

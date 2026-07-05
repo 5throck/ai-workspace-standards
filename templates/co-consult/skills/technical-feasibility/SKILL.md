@@ -1,5 +1,6 @@
 ---
 name: technical-feasibility
+scope: co-consult
 description: >
   Guides the Solutions Architect through evaluating whether a proposed solution
   is technically implementable. Produces complexity grades, key risk factors with

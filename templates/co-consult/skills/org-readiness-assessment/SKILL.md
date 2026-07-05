@@ -1,5 +1,6 @@
 ---
 name: org-readiness-assessment
+scope: co-consult
 description: >
   Guides the Change Management Partner through diagnosing an organization's
   capacity to absorb and sustain change. Produces readiness scores, capability

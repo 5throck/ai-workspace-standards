@@ -1,5 +1,6 @@
 ---
 name: consulting-report-writing
+scope: co-consult
 description: >
   Guides Communications Lead through writing McKinsey/BCG-style consulting
   reports. Covers issue tree structure, MECE principle application, slide/page

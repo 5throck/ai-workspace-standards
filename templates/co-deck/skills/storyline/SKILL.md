@@ -1,5 +1,6 @@
 ---
 name: storyline
+scope: co-deck
 version: 1.2.0
 description: >
   Designs lecture storyline and slide deck composition. Given research_notes.md

@@ -1,5 +1,6 @@
 ---
 name: measure
+scope: co-deck
 version: 1.3.0
 description: >
   Auto-measures HTML slides with Playwright to extract pixel coordinates, fonts,

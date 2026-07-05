@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.10
+ * @version 1.5.11
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2203,19 +2203,26 @@ function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<stri
 }
 
 // Check WS-06: Skills in templates/co-*/skills/ must be L0+L1+L2
-function checkVariantSkillsLayer(variant: string, skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L1+L2 in ${variant}/skills/ ===`);
 
   const variantSkillsDir = join(TEMPLATES_DIR, variant, 'skills');
   if (!existsSync(variantSkillsDir)) return;
 
+  // Domain-only skills live exclusively under templates/co-*/skills/ with no
+  // templates/common/skills/ base — their layer is declared in their own SKILL.md
+  // `scope:` frontmatter (see ADR-0032 §7, skills/SKILLS.md), not in the root
+  // skills/ registry. Read frontmatter directly from this variant's own directory
+  // rather than the workspace-root skill map, which never contains these files.
+  const variantSkillLayerMap = parseSkillLayers(variantSkillsDir);
+
   for (const entry of readdirSync(variantSkillsDir)) {
     if (entry === '_archive' || entry === 'local' || entry === 'external') continue;
     const fullPath = join(variantSkillsDir, entry);
     if (!statSync(fullPath).isDirectory()) continue;
-    const layer = getSkillLayer(entry, skillLayerMap);
+    const layer = getSkillLayer(entry, variantSkillLayerMap);
     if (layer !== 'L0+L1+L2') {
-      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not L0+L1+L2 — common skills belong in templates/common/skills/ only`, `Move templates/${variant}/skills/${entry}/ to templates/common/skills/${entry}/`);
+      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L1+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${entry}/ if it should be shared across all variants`);
     }
   }
 }
