@@ -454,13 +454,15 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 #### Example 1: Multi-Agent Platform Parity Update
 
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | Update agents/pm.md | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | claude-haiku-4-5 |
-| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 5 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 |
+| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet |
+| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku |
+| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet |
+| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet |
+| 5 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
@@ -468,8 +470,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
-| 1 | Update project README introduction | `[docs specialist]` | Medium | claude-sonnet-4-6 |
-| 2 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | claude-sonnet-4-6 |
+| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet |
+| 2 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
 
 **Execution Order**: Sequential
 
