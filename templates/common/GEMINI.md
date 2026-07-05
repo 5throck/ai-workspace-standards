@@ -144,8 +144,8 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 #### Cost Optimization (3-Tier Model Strategy)
 **Model Selection Overrides** (overridden per subagent invocation when appropriate):
 - **High-tier (Design/Planning)** — `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** — `gemini-3.5-flash` (Parameter: `thinking_level="medium"`): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** — `gemini-3.5-flash` (Parameter: `thinking_level="low"`): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
+- **Medium-tier (Review/QA)** — `gemini-3.5-flash` (no thinking parameter): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
+- **Low-tier (Execution/Coding)** — `gemini-3.5-flash` (no thinking parameter): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
 
 ---
 
@@ -191,9 +191,9 @@ Every execution plan MUST start with Row 0 (Design Gate — architect creates/up
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | gemini-3.1-pro | NEW |
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | gemini-3.5-flash | |
 
 **Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
 
@@ -300,7 +300,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-06-28 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-07-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

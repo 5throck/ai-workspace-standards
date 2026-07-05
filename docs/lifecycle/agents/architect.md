@@ -43,7 +43,7 @@
 
 **Can Lead Phases**: [2]
 **Can Support In**: [0, 6]
-**Tier**: medium
+**Tier**: high
 **Communication Style**: sync (requires user approval before implementation)
 
 ## Design Deliverables

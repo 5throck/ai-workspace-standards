@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Documentation specialist
-- [x] Tier assignment: Low-tier (claude-haiku-4-5) for documentation tasks
+- [x] Tier assignment: Medium-tier (claude-sonnet-4-6) for documentation tasks
 - [x] Documentation responsibilities specified: Markdown standardization, translations
 - [x] Successfully validated in documentation workflows
 
@@ -41,7 +41,7 @@
 
 **Can Lead Phases**: [4]
 **Can Support In**: [0, 2, 6]
-**Tier**: low (for documentation tasks)
+**Tier**: medium (for documentation tasks)
 **Communication Style**: async (can work independently on documentation)
 
 ## Documentation Types
