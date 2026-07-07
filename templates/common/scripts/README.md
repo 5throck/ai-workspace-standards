@@ -137,7 +137,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
-| `validate-model-registry.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.13 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -462,4 +462,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-07-05*
+*Last Updated: 2026-07-07*
