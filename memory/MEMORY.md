@@ -4,6 +4,8 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-07](2026-07-07.md) | chore: update |
+| [2026-07-06](2026-07-06.md) | feat(commands): add /project-review command and track .agents/ for skill discovery |
 | [2026-07-05](2026-07-05.md) | feat: register workspace skills globally via .agents/skills.json and propagate to L1 |
 | [2026-07-04](2026-07-04.md) | feat(axis-001): add missing unit tests and update changelog for Phase C & D |
 | [2026-07-03](2026-07-03.md) | docs(co-deck): add theme system enhancement phase 2 implementation plan; project review improvement planning meeting |
