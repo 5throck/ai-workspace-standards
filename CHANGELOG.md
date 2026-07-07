@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-07]**: fix(designs): relocate mcp-portal design doc from parent workspace to its own repo (`mcp-portal/docs/designs/mcp-portal-design.md`) — the design doc was mistakenly committed to `docs/designs/mcp-portal-design.md` in this parent repo by an earlier architect run; `mcp-portal/` is its own independent git repository per workspace convention, so the file is removed here and re-added there
 - **[2026-07-03]**: fix(project-review): comprehensive improvement plan from 7-agent parallel project review — Batch 1 (Critical): tsconfig.json creation, unused deps removal, import.meta.main guards (54 scripts), variant contract contradictions resolved, 5 skill lifecycle records created, VERSION_MANIFEST parsing fixed, 2 ghost lifecycle records removed; Batch 2 (High): L0→L1 propagation sync (6 scripts), pre-rebase bypass removed, CVE overrides documented, AGENTS.md heading + Language Policy exception + frontmatter standardization, docs/index.md created, shebang standardized (16 files), empty catches replaced with error logging (8 scripts), import extensions .js→.ts (25 files), 7 template lifecycle records created — 141 files changed
 
 ### Added
@@ -842,7 +843,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-05*
+*Last Updated: 2026-07-07*
 
 
 
