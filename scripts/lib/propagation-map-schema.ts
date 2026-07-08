@@ -2,7 +2,7 @@
 /**
  * propagation-map-schema.ts — JSON Schema for propagation-map.json
  * Validates domain entries at startup to catch config drift early.
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 export interface PropagationDomain {
@@ -19,6 +19,9 @@ export interface PropagationDomain {
   source_file?: string;
   marker?: string;
   target_variants?: string[];
+  // Intentionally inactive domain — declared but not processed by default
+  // (see propagate-to-templates.ts's --include-disabled escape hatch).
+  disabled?: boolean;
 }
 
 export interface PropagationMap {
@@ -89,6 +92,9 @@ export function validatePropagationMap(map: unknown): ValidationError[] {
       }
       if (d.recursive !== undefined && typeof d.recursive !== 'boolean') {
         errors.push({ domain: name, field: 'recursive', message: 'Must be a boolean if present' });
+      }
+      if (d.disabled !== undefined && typeof d.disabled !== 'boolean') {
+        errors.push({ domain: name, field: 'disabled', message: 'Must be a boolean if present' });
       }
     }
   }

@@ -124,14 +124,14 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `lib/propagation-map-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.10 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.1.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -417,6 +417,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
 | `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
+| `--include-disabled` | Opt-in override | Process domains marked `disabled: true` in propagation-map.json (e.g. `docs`) — for inspection only, does not un-disable the domain |
 
 **Typical workflow**:
 ```bash
@@ -426,7 +427,10 @@ bun scripts/propagate-to-templates.ts --governance-l1    # publish governance do
 bun scripts/propagate-to-templates.ts --docs             # inject COMMON markers into variants (Phase B)
 bun scripts/propagate-to-templates.ts --prune            # remove orphan files from L1
 bun scripts/propagate-to-templates.ts --check-drift      # report L1 vs L2 drift
+bun scripts/propagate-to-templates.ts --domain docs --include-disabled --dry-run  # inspect a disabled domain
 ```
+
+**Disabled domains**: a domain entry may carry `"disabled": true` in `propagation-map.json` to declare it *intentionally* inactive (as opposed to silently never having worked — see the `docs` domain's `note` field for the concrete incident this guards against). Default runs skip it and print why; `--include-disabled` is a read/inspect escape hatch, not a way to reactivate it — flip the flag in `propagation-map.json` itself once the underlying policy question is resolved.
 
 ---
 
