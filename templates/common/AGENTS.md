@@ -434,6 +434,18 @@ When a user request matches a skill trigger, apply this priority order — **enf
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
+**Common workspace-level skills** (see `docs/VERSION_MANIFEST.md` for versions):
+
+| Skill | Location | Purpose |
+|-------|----------|---------|
+| `sync` | `skills/sync/` | Sync pipeline — lifecycle, audit, publish, commit, push, PR |
+| `project-review` | `skills/project-review/` | Multi-agent parallel project review |
+| `audit-workspace` | `skills/audit-workspace/` | Workspace standards audit |
+| `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
+| `security-scan` | `skills/security-scan/` | Security and secret detection |
+| `create-variant` | `skills/create-variant/` | New variant scaffolding |
+| `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
+
 ### Platform Skills Registry
 
 | Skill | Location | Purpose |

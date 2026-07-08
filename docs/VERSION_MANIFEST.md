@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-08T00:53:32.770Z
+**Generated**: 2026-07-08T04:15:11.506Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 18
+- **Skills**: 19
 - **Scripts**: 119
 - **Commands**: 7
 
@@ -49,6 +49,7 @@
 | simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | N/A | scaffolding-expert |
 | simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
+| sync | 1.0.0 | skills/sync/SKILL.md | workspace | N/A | pm |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
@@ -200,7 +201,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 7 / 7
-- **Skills with parity**: 5 / 18
+- **Skills with parity**: 5 / 19
 
 ---
 
@@ -223,6 +224,7 @@
 - Skill simulate-project-creation has no triggers defined
 - Skill simulate-project-creation has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
+- Skill sync has no triggers defined
 - Skill team-builder has no triggers defined
 - Skill translate has no triggers defined
 - Skill validate-docs-links has no triggers defined
