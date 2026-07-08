@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-07-08",
+  "description": "Known issues baseline for L0-L2 deployment audit (Domain 6 input). Issues are maintained externally from the audit design document to avoid hardcoding.",
+  "issues": [
+    {
+      "id": "ISSUE-001",
+      "title": "VERSION_REGISTRY format mismatch between writers",
+      "severity": "Critical",
+      "location": "scripts/helpers/integration-helpers.ts:330, scripts/validate-templates.ts:1302",
+      "description": "integration-helpers.ts writes VERSION_REGISTRY variants as a flat array (VersionRegistryEntry[]). validate-templates.ts reads variants as a nested object keyed by name (Record<string, Record<string, unknown>>). Running integration-helpers.ts against the current file would corrupt the structure by replacing the nested object with an array.",
+      "expected_status": "Resolved"
+    },
+    {
+      "id": "ISSUE-002",
+      "title": "common.lifecycle.json missing co-deck and co-game from propagatedTo",
+      "severity": "Major",
+      "location": "docs/templates/common.lifecycle.json",
+      "description": "The propagatedTo array contains only 5 variants (co-develop, co-work, co-design, co-security, co-consult). co-deck and co-game are missing despite existing as beta variants in templates/.",
+      "expected_status": "Resolved"
+    },
+    {
+      "id": "ISSUE-003",
+      "title": "create-l2-scaffold.ts contains markdown fencing artifact on line 2",
+      "severity": "Minor",
+      "location": "scripts/create-l2-scaffold.ts:2",
+      "description": "Line 2 contains triple backticks followed by 'typescript' (```typescript). This is a spurious markdown code fence opener baked into the script file. It does not affect bun runtime execution but indicates an accidental artifact from documentation.",
+      "expected_status": "Resolved"
+    },
+    {
+      "id": "ISSUE-004",
+      "title": "deploy-to-l1.ts referenced in ADR-0040 but never implemented",
+      "severity": "Major",
+      "location": "scripts/deploy-to-l1.ts (does not exist), docs/adr/0040-l0-l1-deployment-strategy.md",
+      "description": "ADR-0040 defines a dedicated deploy-to-l1.ts for CLAUDE.md, GEMINI.md, and agents/pm.md L0-to-L1 deployment with section filtering and CONSTITUTION.md reference transforms. The script has never been created. Governance deployment currently relies on propagate-to-templates.ts --governance-l1.",
+      "expected_status": "Accepted"
+    },
+    {
+      "id": "ISSUE-005",
+      "title": "No rollback mechanism for L0-to-L1 propagation",
+      "severity": "Minor",
+      "location": "scripts/propagate-to-templates.ts",
+      "description": "propagate-to-templates.ts copies files from L0 to L1 without creating backups before writing. The --force flag always overwrites without confirmation. There is no transaction mechanism or snapshot-based rollback capability. If propagation fails mid-way, partially-written files remain.",
+      "expected_status": "Accepted"
+    },
+    {
+      "id": "ISSUE-006",
+      "title": "Variant Registry Architecture design document status is 'Proposed' despite implementation",
+      "severity": "Observation",
+      "location": "docs/designs/variant-registry-architecture-design.md",
+      "description": "The variant-registry architecture design document (5-layer architecture: SSOT Data, Procedural Behavior, Validation Rules, Workspace Integration, Pipeline) has status 'Proposed'. However, the following have been implemented: registries/ directory (4 files), plugins/ directory (3 files), validators/ directory (7+ files), and workspace-integration.ts. Status should be updated to reflect implementation progress.",
+      "expected_status": "Resolved"
+    },
+    {
+      "id": "ISSUE-007",
+      "title": "L2 variants cannot auto-sync with L1 improvements (by-design per ADR-0031)",
+      "severity": "Observation",
+      "location": "docs/adr/0031-l1-l2-fork-model.md",
+      "description": "ADR-0031 Fork Model Principle 2 intentionally prohibits automatic L1-to-L2 propagation after scaffold-time delivery. L2 variants can fall silently behind L1 improvements. The --check-drift flag provides read-only visibility but no remediation automation. This is an accepted architectural trade-off documented in the ADR.",
+      "expected_status": "Accepted"
+    }
+  ]
+}
