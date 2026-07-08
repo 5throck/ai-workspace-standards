@@ -1,4 +1,4 @@
-// @version 1.3.4
+// @version 1.3.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -351,49 +351,61 @@ if (!pushRetry.success) {
     }
 }
 
-// 7. Generate PR body and open PR
-// Note: msg already passed the language gate above, so a non-zero exit here means
-// gen-pr-body.ts hit a non-language failure (e.g. AI-generated body came back
-// non-English) — safe to fall back to the template/--fill paths below, but surface
-// the reason instead of silently swallowing it.
-let prBody = "";
-try {
-    const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
-    if (genRes.exitCode !== 0) {
-        console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
-        console.log(genRes.stderr.toString().trim());
-    }
-    prBody = genRes.stdout.toString().trim();
-} catch (err) {
-  console.error('[dev-sync] Error: ${err}');
-}
+// 7. Generate PR body and open PR — but skip creation if a PR already exists for
+// this branch (e.g. re-running /sync to push a follow-up commit onto an open PR).
+// The push above already updated it; calling `gh pr create` again would just fail
+// with "a pull request ... already exists", masking the fact that the commit/push
+// actually succeeded.
+const existingPrRes = await $`gh pr view ${branch} --json url --jq .url`.quiet().nothrow();
+const existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
 
-let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
-if (prBody) {
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
-} else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
-    const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
+if (existingPrUrl) {
+    console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);
+    console.log(`  ${existingPrUrl}`);
 } else {
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --fill`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
-}
+    // Note: msg already passed the language gate above, so a non-zero exit here means
+    // gen-pr-body.ts hit a non-language failure (e.g. AI-generated body came back
+    // non-English) — safe to fall back to the template/--fill paths below, but surface
+    // the reason instead of silently swallowing it.
+    let prBody = "";
+    try {
+        const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
+        if (genRes.exitCode !== 0) {
+            console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
+            console.log(genRes.stderr.toString().trim());
+        }
+        prBody = genRes.stdout.toString().trim();
+    } catch (err) {
+      console.error('[dev-sync] Error: ${err}');
+    }
 
-if (!prCreateRetry.success) {
-    const errMsg = prCreateRetry.lastError?.message || 'unknown error';
-    console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
+    let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
+    if (prBody) {
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    } else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
+        const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    } else {
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --fill`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    }
+
+    if (!prCreateRetry.success) {
+        const errMsg = prCreateRetry.lastError?.message || 'unknown error';
+        console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
 }
