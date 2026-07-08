@@ -16,7 +16,9 @@
 import { join } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
-import { PROMOTION_CRITERIA_BY_TYPE, checkPromotionEligibility } from './variant-governance-rules.ts';
+import type { VariantType } from './registries/variant-type-registry.ts';
+import { getPromotionPolicy } from './registries/promotion-policy.ts';
+import { checkPromotionEligibility } from './variant-governance-rules.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -164,7 +166,7 @@ function saveLifecycleState(state: BetaLifecycleState): void {
  */
 export function initializeBetaLifecycle(
   variantName: string,
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration'
+  variantType: VariantType
 ): BetaLifecycleState {
   console.log(`\n=== Initializing Beta Lifecycle ===`);
   console.log(`Variant: ${variantName}`);
@@ -248,7 +250,7 @@ export function recordEngagement(
   // Recalculate eligibility
   const eligibility = checkPromotionEligibility(
     variantName,
-    state.variantType as keyof typeof PROMOTION_CRITERIA_BY_TYPE,
+    state.variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
     state.completedChecks
@@ -373,7 +375,7 @@ export function recordCompletedCheck(
   // Recalculate eligibility
   const eligibility = checkPromotionEligibility(
     variantName,
-    state.variantType as keyof typeof PROMOTION_CRITERIA_BY_TYPE,
+    state.variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
     state.completedChecks
@@ -416,7 +418,7 @@ export function checkPromotionEligibilityDetails(
   // Check eligibility
   const eligibility = checkPromotionEligibility(
     variantName,
-    variantType as keyof typeof PROMOTION_CRITERIA_BY_TYPE,
+    variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
     state.completedChecks
@@ -430,25 +432,21 @@ export function checkPromotionEligibilityDetails(
   const recommendations: string[] = [];
 
   if (!eligibility.engagementsMet) {
-    const criteria = PROMOTION_CRITERIA_BY_TYPE[variantType];
-    if (criteria) {
-      const needed = criteria.minEngagements - state.betaEngagements;
-      recommendations.push(
-        `Record ${needed} more client engagement${needed > 1 ? 's' : ''} ` +
-        `(currently ${state.betaEngagements}/${criteria.minEngagements})`
-      );
-    }
+    const policy = getPromotionPolicy(variantType as VariantType);
+    const needed = policy.minEngagements - state.betaEngagements;
+    recommendations.push(
+      `Record ${needed} more client engagement${needed > 1 ? 's' : ''} ` +
+      `(currently ${state.betaEngagements}/${policy.minEngagements})`
+    );
   }
 
   if (!eligibility.betaDurationMet) {
-    const criteria = PROMOTION_CRITERIA_BY_TYPE[variantType];
-    if (criteria) {
-      const monthsNeeded = (criteria.minBetaMonths - state.betaAgeInMonths).toFixed(1);
-      recommendations.push(
-        `Wait ${monthsNeeded} more month${parseFloat(monthsNeeded) > 1 ? 's' : ''} ` +
-        `(currently ${state.betaAgeInMonths}/${criteria.minBetaMonths} months)`
-      );
-    }
+    const policy = getPromotionPolicy(variantType as VariantType);
+    const monthsNeeded = (policy.minBetaMonths - state.betaAgeInMonths).toFixed(1);
+    recommendations.push(
+      `Wait ${monthsNeeded} more month${parseFloat(monthsNeeded) > 1 ? 's' : ''} ` +
+      `(currently ${state.betaAgeInMonths}/${policy.minBetaMonths} months)`
+    );
   }
 
   if (eligibility.additionalChecksFailed.length > 0) {
@@ -537,7 +535,7 @@ async function main() {
   switch (command) {
     case 'init': {
       const variantName = args[1];
-      const variantType = args[2] as 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
+      const variantType = args[2] as VariantType;
 
       if (!variantName || !variantType) {
         console.error('Usage: bun scripts/helpers/beta-lifecycle.ts init <variant-name> <variant-type>');

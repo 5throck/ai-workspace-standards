@@ -66,6 +66,16 @@
       ],
       "security_advisories": [],
       "migration_guides": []
+    },
+    "co-game": {
+      "latest": "0.1.0",
+      "released": "2026-07-08",
+      "status": "beta",
+      "changelog": [],
+      "security_advisories": [],
+      "migration_guides": [],
+      "source_project": "Projects/co-game",
+      "promoted_via": "l2-to-variant-pipeline.ts"
     }
   },
   "schema_version": "1.0"

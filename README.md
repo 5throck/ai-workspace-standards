@@ -304,4 +304,11 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-06-20*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-08*
+
+## Variant: co-game
+
+**Type**: game
+**Status**: beta (v0.1.0)
+
+Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.

@@ -41,7 +41,9 @@
       "include_pattern": "*/SKILL.md",
       "recursive": true,
       "exclude": [],
-      "l0_exclude": ["simulate-project-creation"]
+      "l0_exclude": [
+        "simulate-project-creation"
+      ]
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -50,7 +52,9 @@
       "include_pattern": "*/SKILL.md",
       "recursive": true,
       "exclude": [],
-      "l0_exclude": ["simulate-project-creation"]
+      "l0_exclude": [
+        "simulate-project-creation"
+      ]
     },
     "gemini-settings": {
       "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
@@ -68,7 +72,9 @@
       "include_pattern": "**/*.md",
       "recursive": true,
       "exclude": [],
-      "exclude_prefixes": ["templates/"],
+      "exclude_prefixes": [
+        "templates/"
+      ],
       "note": "Propagates all markdown files from docs/ to templates/common/docs/. Excludes docs/templates/ subdirectory to avoid duplicate templates/ path."
     },
     "governance-agents": {
@@ -76,7 +82,15 @@
       "mode": "marker-inject",
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
-      "target_variants": ["co-consult", "co-deck", "co-design", "co-develop", "co-security", "co-work"]
+      "target_variants": [
+        "co-consult",
+        "co-deck",
+        "co-design",
+        "co-develop",
+        "co-security",
+        "co-work",
+        "co-game"
+      ]
     },
     "skills": {
       "description": "L0 skills/ → L1 templates/common/skills/",
@@ -84,7 +98,10 @@
       "target": "templates/common/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": ["local", "external"],
+      "exclude": [
+        "local",
+        "external"
+      ],
       "override_only": true
     },
     "claude-commands": {

@@ -1,0 +1,35 @@
+{
+  "name": "co-game",
+  "description": "Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.",
+  "variant_type": "game",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-07-08T00:02:24.154Z",
+  "lifecycle": {
+    "statusSince": "2026-07-08",
+    "lastTransition": "initial → beta on 2026-07-08",
+    "stablePromotedOn": null
+  },
+  "agents": [
+    { "name": "architect", "file": "agents/architect.md" },
+    { "name": "game-designer", "file": "agents/game-designer.md" },
+    { "name": "arcade-designer", "file": "agents/arcade-designer.md" },
+    { "name": "puzzle-designer", "file": "agents/puzzle-designer.md" },
+    { "name": "designer", "file": "agents/designer.md" },
+    { "name": "game-developer", "file": "agents/game-developer.md" },
+    { "name": "visual-artist", "file": "agents/visual-artist.md" },
+    { "name": "sound-designer", "file": "agents/sound-designer.md" },
+    { "name": "game-debugger", "file": "agents/game-debugger.md" },
+    { "name": "test-runner", "file": "agents/test-runner.md" },
+    { "name": "security-monitor", "file": "agents/security-monitor.md" },
+    { "name": "stack-setup", "file": "agents/stack-setup.md" }
+  ],
+  "skills": [],
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": ["architect", "game-designer", "arcade-designer", "puzzle-designer", "visual-artist", "sound-designer", "game-developer", "game-debugger", "test-runner", "security-monitor"],
+    "optional": ["designer", "stack-setup", "arcade-designer", "puzzle-designer"],
+    "notes": "arcade-designer: skip for non-arcade genres. puzzle-designer: skip for non-puzzle games. designer: skip if no UI/UX component. stack-setup: skip for projects with existing configured stack."
+  }
+}

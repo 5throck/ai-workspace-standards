@@ -16,27 +16,16 @@
  */
 
 import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
+import type { VariantType } from './registries/variant-type-registry.ts';
+import { getPromotionPolicy } from './registries/promotion-policy.ts';
+import type { PromotionPolicy } from './registries/promotion-policy.ts';
+
+// Re-export for downstream consumers
+export type { VariantType } from './registries/variant-type-registry.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
-
-/**
- * Variant promotion criteria by type
- * @version 1.1.0
- */
-export interface VariantPromotionCriteria {
-  /** Variant type identifier */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration';
-  /** Minimum number of client engagements required */
-  minEngagements: number;
-  /** Minimum beta duration in months */
-  minBetaMonths: number;
-  /** Additional validation checks required */
-  additionalChecks: string[];
-  /** Description of criteria rationale */
-  rationale: string;
-}
 
 /**
  * Variant dependency specification
@@ -62,7 +51,7 @@ export interface VariantDependency {
 export interface PromotionEligibility {
   eligible: boolean;
   variantType: string;
-  criteria: VariantPromotionCriteria;
+  criteria: PromotionPolicy;
   currentEngagements: number;
   currentBetaMonths: number;
   additionalChecksPassed: string[];
@@ -106,85 +95,12 @@ export interface L1MajorReconciliationPlan {
 // ============================================================================
 
 /**
- * Promotion criteria by variant type
+ * Promotion criteria are now sourced from the centralized promotion-policy registry.
+ * Use `getPromotionPolicy(type)` from `./registries/promotion-policy.ts` to look up
+ * criteria for a given variant type.
  *
- * Rationale:
- * - Security variants require highest engagement threshold (5 engagements / 6 months)
- *   due to critical nature and potential for security vulnerabilities
- * - Development variants require medium threshold (3 engagements / 3 months)
- *   for feature completeness and stability validation
- * - Consulting/Collaboration variants require lower threshold (2 engagements / 2 months)
- *   as they are process-focused and less code-intensive
- *
- * @version 1.1.0
+ * @see scripts/helpers/registries/promotion-policy.ts
  */
-export const PROMOTION_CRITERIA_BY_TYPE: Record<string, VariantPromotionCriteria> = {
-  security: {
-    variantType: 'security',
-    minEngagements: 5,
-    minBetaMonths: 6,
-    additionalChecks: [
-      'security_review_passed',
-      'penetration_testing_completed',
-      'compliance_validation_passed',
-      'incident_response_documented',
-      'audit_log_compliance_verified',
-    ],
-    rationale: 'Security variants require rigorous validation due to critical impact of security vulnerabilities and compliance requirements.',
-  },
-  development: {
-    variantType: 'development',
-    minEngagements: 3,
-    minBetaMonths: 3,
-    additionalChecks: [
-      'feature_coverage_complete',
-      'integration_tests_passed',
-      'performance_benchmarks_met',
-      'api_stability_verified',
-      'backward_compatibility_checked',
-    ],
-    rationale: 'Development variants require thorough validation of feature completeness and integration stability before promotion.',
-  },
-  design: {
-    variantType: 'design',
-    minEngagements: 2,
-    minBetaMonths: 2,
-    additionalChecks: [
-      'design_system_compliance',
-      'accessibility_standards_met',
-      'responsive_design_verified',
-      'cross_browser_testing_passed',
-      'design_system_documentation_complete',
-    ],
-    rationale: 'Design variants require visual and UX consistency validation across different contexts.',
-  },
-  consulting: {
-    variantType: 'consulting',
-    minEngagements: 2,
-    minBetaMonths: 2,
-    additionalChecks: [
-      'stakeholder_alignment_verified',
-      'documentation_complete',
-      'best_practices_documented',
-      'case_study_available',
-      'knowledge_transfer_material_ready',
-    ],
-    rationale: 'Consulting variants are process-focused and require validation of methodology and documentation quality.',
-  },
-  collaboration: {
-    variantType: 'collaboration',
-    minEngagements: 2,
-    minBetaMonths: 2,
-    additionalChecks: [
-      'team_workflow_validated',
-      'communication_channels_verified',
-      'collaboration_tools_tested',
-      'documentation_practices_checked',
-      'feedback_mechanisms_tested',
-    ],
-    rationale: 'Collaboration variants require validation of team workflows and communication patterns.',
-  },
-};
 
 /**
  * Check if variant is eligible for promotion from beta to stable
@@ -192,12 +108,12 @@ export const PROMOTION_CRITERIA_BY_TYPE: Record<string, VariantPromotionCriteria
  */
 export function checkPromotionEligibility(
   variantName: string,
-  variantType: keyof typeof PROMOTION_CRITERIA_BY_TYPE,
+  variantType: VariantType,
   currentEngagements: number,
   betaStartDate: Date,
   completedChecks: string[]
 ): PromotionEligibility {
-  const criteria = PROMOTION_CRITERIA_BY_TYPE[variantType];
+  const criteria = getPromotionPolicy(variantType);
 
   if (!criteria) {
     throw fatalError(
@@ -239,7 +155,8 @@ export function checkPromotionEligibility(
   }
 
   // Check additional validation criteria
-  for (const check of criteria.additionalChecks) {
+  const additionalChecks = criteria.additionalChecks ?? [];
+  for (const check of additionalChecks) {
     if (completedChecks.includes(check)) {
       additionalChecksPassed.push(check);
     } else {
@@ -249,10 +166,10 @@ export function checkPromotionEligibility(
 
   if (additionalChecksFailed.length > 0) {
     reasons.push(
-      `Additional checks not passed: ${additionalChecksFailed.length}/${criteria.additionalChecks.length}`
+      `Additional checks not passed: ${additionalChecksFailed.length}/${additionalChecks.length}`
     );
   } else {
-    reasons.push(`All additional checks passed: ${additionalChecksPassed.length}/${criteria.additionalChecks.length}`);
+    reasons.push(`All additional checks passed: ${additionalChecksPassed.length}/${additionalChecks.length}`);
   }
 
   const eligible = engagementsMet && betaMonthsMet && additionalChecksFailed.length === 0;
@@ -520,7 +437,7 @@ async function main() {
   switch (command) {
     case 'check-promotion': {
       const variantName = args[1];
-      const variantType = args[2] as keyof typeof PROMOTION_CRITERIA_BY_TYPE;
+      const variantType = args[2] as VariantType;
       const engagements = parseInt(args[3], 10);
       const betaStart = new Date(args[4]);
       const checks = args.slice(5);

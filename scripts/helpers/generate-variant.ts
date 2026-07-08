@@ -23,6 +23,9 @@ import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.ts';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.ts';
+import type { VariantType } from './registries/variant-type-registry.ts';
+import { getVariantTypeDefinition } from './registries/variant-type-registry.ts';
+import { getPromotionPolicy } from './registries/promotion-policy.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -34,7 +37,7 @@ export interface VariantMetadata {
   /** Variant description */
   description: string;
   /** Variant type for governance rules */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
+  variantType: VariantType;
   /** Lifecycle status - always beta for MVP */
   status: 'beta';
   /** Version - always 0.1.0 for MVP */
@@ -892,45 +895,24 @@ ${skillsList}
  * Get required engagements for variant type
  * @version 1.1.0
  */
-function getRequiredEngagements(variantType: string): number {
-  const requirements: Record<string, number> = {
-    security: 5,
-    development: 3,
-    design: 2,
-    consulting: 2,
-    collaboration: 2,
-  };
-  return requirements[variantType] || 2;
+function getRequiredEngagements(variantType: VariantType): number {
+  return getPromotionPolicy(variantType).minEngagements;
 }
 
 /**
  * Get required beta months for variant type
  * @version 1.1.0
  */
-function getRequiredBetaMonths(variantType: string): number {
-  const requirements: Record<string, number> = {
-    security: 6,
-    development: 3,
-    design: 2,
-    consulting: 2,
-    collaboration: 2,
-  };
-  return requirements[variantType] || 2;
+function getRequiredBetaMonths(variantType: VariantType): number {
+  return getPromotionPolicy(variantType).minBetaMonths;
 }
 
 /**
  * Get variant type description
  * @version 1.1.0
  */
-function getVariantTypeDescription(variantType: string): string {
-  const descriptions: Record<string, string> = {
-    security: 'Security-focused workflows, compliance validation, and vulnerability assessment',
-    development: 'Development workflows, feature implementation, and integration testing',
-    design: 'Design system compliance, accessibility standards, and UX consistency',
-    consulting: 'Consulting methodologies, stakeholder alignment, and knowledge transfer',
-    collaboration: 'Team workflows, communication patterns, and collaboration tools',
-  };
-  return descriptions[variantType] || 'custom workflows and capabilities';
+function getVariantTypeDescription(variantType: VariantType): string {
+  return getVariantTypeDefinition(variantType).description;
 }
 
 /**

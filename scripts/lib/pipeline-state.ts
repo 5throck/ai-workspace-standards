@@ -4,7 +4,7 @@
  * Rollback capability and intermediate state persistence.
  * Addresses Risk #5: Rollback Capability.
  *
- * @version 1.1.0
+ * @version 1.1.1
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
@@ -296,7 +296,7 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
  * Clear pipeline state
  * @version 1.1.0
  */
-export function clearState(): void {
+export async function clearState(): Promise<void> {
   if (existsSync(STATE_FILE)) {
     await $`rm ${STATE_FILE}`.quiet();
   }

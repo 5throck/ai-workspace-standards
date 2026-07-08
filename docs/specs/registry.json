@@ -18,6 +18,15 @@
       "source": "brainstorming",
       "created": "2026-06-28",
       "last_updated": "2026-06-28"
+    },
+    {
+      "id": "2026-07-08-variant-registry-architecture",
+      "title": "variant registry architecture",
+      "file": "docs/designs/variant-registry-architecture-design.md",
+      "status": "approved",
+      "source": "pm-orchestration",
+      "created": "2026-07-08",
+      "last_updated": "2026-07-08"
     }
   ]
 }
