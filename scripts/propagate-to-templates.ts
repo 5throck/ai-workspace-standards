@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.1.0
+ * @version 2.1.1
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -20,11 +20,15 @@
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
  *   --prune                Remove L0-only orphan scripts from templates/common/scripts/ tree
  *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
- *   --include-disabled     Also process domains marked `disabled: true` in the map
- *                          (e.g. for inspecting "docs" via --domain docs --dry-run).
- *                          Does not flip the map's own disabled flag — a domain
- *                          disabled pending a policy decision should stay that
- *                          way in default runs.
+ *   --include-disabled     Include domains marked `disabled: true` in the DRY-RUN
+ *                          report only (e.g. bun scripts/propagate-to-templates.ts
+ *                          --domain docs --include-disabled --dry-run). Rejects
+ *                          --apply outright (exit 1) rather than silently writing
+ *                          files for a domain someone disabled on purpose. Does
+ *                          not flip the map's own `disabled` flag — to actually
+ *                          activate a domain, remove that flag in
+ *                          propagation-map.json once its policy question is
+ *                          resolved.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
@@ -58,6 +62,18 @@ const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? 
 const INCLUDE_DISABLED = args.includes('--include-disabled');
 const workspaceRoot    = resolve(import.meta.dir, '..');
 
+// --include-disabled is inspection/report-only. collectDiffs() feeds both the
+// dry-run report AND the real --apply write step from the same array, so
+// allowing this combo would silently write files for a domain someone marked
+// `disabled: true` specifically to prevent that — refuse instead of guessing
+// which behavior the caller meant.
+if (INCLUDE_DISABLED && APPLY) {
+  console.error(`${C.red}❌ --include-disabled cannot be combined with --apply.${C.reset}`);
+  console.error(`${C.yellow}   Disabled domains are dry-run/report inspection only. To actually activate one,${C.reset}`);
+  console.error(`${C.yellow}   remove its "disabled": true entry in propagation-map.json first.${C.reset}`);
+  process.exit(1);
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Domain {
   description: string;
@@ -73,6 +89,8 @@ interface Domain {
   target_variants?: string[];
   exclude_prefixes?: string[];
   disabled?: boolean;
+  disabled_since?: string;
+  history?: string;
 }
 
 interface PropagationMap {

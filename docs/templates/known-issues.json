@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "last_updated": "2026-07-08",
   "description": "Known issues baseline for L0-L2 deployment audit (Domain 6 input). Issues are maintained externally from the audit design document to avoid hardcoding.",
   "issues": [
@@ -57,6 +57,14 @@
       "severity": "Observation",
       "location": "docs/adr/0031-l1-l2-fork-model.md",
       "description": "ADR-0031 Fork Model Principle 2 intentionally prohibits automatic L1-to-L2 propagation after scaffold-time delivery. L2 variants can fall silently behind L1 improvements. The --check-drift flag provides read-only visibility but no remediation automation. This is an accepted architectural trade-off documented in the ADR.",
+      "expected_status": "Accepted"
+    },
+    {
+      "id": "ISSUE-008",
+      "title": "scripts/propagation-map.json exists as an unused duplicate under templates/common/scripts/",
+      "severity": "Observation",
+      "location": "templates/common/scripts/propagation-map.json",
+      "description": "validate-templates.ts's glob-based L0/L1 script-parity fallback treats any same-named file present in both scripts/ and templates/common/scripts/ as required to match byte-for-byte, so this copy has to be kept mirrored — but nothing actually reads its content. The only two references to 'propagation-map.json' from code under templates/common/ (dev-sync.ts's isWorkspaceRoot check, and helpers/workspace-integration.ts's PROPAGATION_MAP_PATH) both resolve the path via process.cwd()/'scripts/propagation-map.json' at runtime, i.e. they read the workspace root's copy when invoked from the root, not this L1 copy specifically. templates/common/scripts/propagate-to-templates.ts (the only script that would meaningfully consume this file's domain definitions) does not even exist at L1 (it's registered L0-only in SCRIPTS.md). Net effect: a duplicated artifact with a synchronization burden and no identified reader. Left as-is (discovered 2026-07-08 while fixing an unrelated glob-matching bug in propagate-to-templates.ts) rather than resolved immediately — resolving it means either (a) adding propagation-map.json to the validate-templates.ts L0-only exception list so it stops being required to mirror, or (b) deleting the templates/common copy outright once (a) is confirmed to not break anything, both of which are small but deserve their own change rather than being folded into an unrelated fix.",
       "expected_status": "Accepted"
     }
   ]
