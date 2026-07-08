@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.0.10
+ * @version 2.1.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -20,6 +20,11 @@
  *   --check-drift          L1 vs L2 drift report (read-only, uses propagation-map.json)
  *   --prune                Remove L0-only orphan scripts from templates/common/scripts/ tree
  *   --skip-encoding-check  Skip CP949 corruption pre-check (not recommended)
+ *   --include-disabled     Also process domains marked `disabled: true` in the map
+ *                          (e.g. for inspecting "docs" via --domain docs --dry-run).
+ *                          Does not flip the map's own disabled flag — a domain
+ *                          disabled pending a policy decision should stay that
+ *                          way in default runs.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
@@ -50,6 +55,7 @@ const CHECK_DRIFT      = args.includes('--check-drift');
 const PRUNE            = args.includes('--prune');
 const domainIdx        = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
+const INCLUDE_DISABLED = args.includes('--include-disabled');
 const workspaceRoot    = resolve(import.meta.dir, '..');
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -66,6 +72,7 @@ interface Domain {
   marker?: string;
   target_variants?: string[];
   exclude_prefixes?: string[];
+  disabled?: boolean;
 }
 
 interface PropagationMap {
@@ -205,18 +212,58 @@ function padEnd(s: string, n: number): string {
 }
 
 /**
- * Glob files in a directory matching a simple pattern.
- * Supports patterns like "*.ts" and "* /SKILL.md" (recursive).
+ * Convert a glob pattern to a RegExp, matched against a forward-slash relative
+ * path from the domain's `source` dir. Supports:
+ *   star-dot-ext   — single segment, any chars up to the literal suffix
+ *   single star    — any chars within one path segment (never crosses a slash)
+ *   double star    — any chars across any number of path segments (crosses a slash)
+ *   double-star-slash — as above, but also matches zero directories (e.g. a top-level file)
+ * Everything else is escaped as a literal.
+ *
+ * This replaces an earlier implementation that only handled two hand-rolled
+ * shapes (a star-dot-ext suffix via String.endsWith, and a single-star-slash-name
+ * prefix via basename+equality) and silently matched ZERO files for any pattern
+ * with a wildcard in the filename component itself (e.g. double-star-slash-star-dot-md).
+ * basename() of such a pattern reduces to the literal string "star-dot-md", and an
+ * exact-equality check against that can never match a real filename. The `docs`
+ * domain in propagation-map.json used exactly that shape of pattern and had
+ * therefore never propagated a single file since it was declared.
+ */
+function globToRegExp(pattern: string): RegExp {
+  const SPECIAL = /[.+^${}()|[\]\\]/;
+  let out = '';
+  let i = 0;
+  while (i < pattern.length) {
+    if (pattern.startsWith('**/', i)) {
+      out += '(?:.*/)?';
+      i += 3;
+    } else if (pattern.startsWith('**', i)) {
+      out += '.*';
+      i += 2;
+    } else if (pattern[i] === '*') {
+      out += '[^/]*';
+      i += 1;
+    } else {
+      out += SPECIAL.test(pattern[i]) ? `\\${pattern[i]}` : pattern[i];
+      i += 1;
+    }
+  }
+  return new RegExp(`^${out}$`);
+}
+
+/**
+ * Glob files in a directory matching a pattern (see globToRegExp for supported
+ * syntax). `recursive` controls whether subdirectories are descended into at
+ * all; a pattern containing a "/" (e.g. star-slash-SKILL.md, or
+ * double-star-slash-star-dot-md) forces recursion regardless, since it can
+ * only match below the top level.
  */
 function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
   if (!existsSync(dir)) return [];
 
   const results: string[] = [];
-
-  // Parse pattern: supports "*.ext" or "*/filename"
-  const isRecursivePattern = pattern.includes('/');
-  const targetFilename = isRecursivePattern ? basename(pattern) : null;
-  const ext = !isRecursivePattern ? pattern.replace('*', '') : null; // e.g. ".ts"
+  const patternNeedsRecursion = pattern.includes('/');
+  const regex = globToRegExp(pattern);
 
   function walk(currentDir: string, relBase: string): void {
     let entries: string[];
@@ -237,20 +284,12 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
       }
 
       if (stat.isDirectory()) {
-        if (recursive || isRecursivePattern) {
+        if (recursive || patternNeedsRecursion) {
           walk(fullPath, relPath);
         }
       } else if (stat.isFile()) {
-        if (targetFilename !== null) {
-          // Recursive pattern like "*/SKILL.md"
-          if (entry === targetFilename) {
-            results.push(relPath);
-          }
-        } else if (ext !== null) {
-          // Extension pattern like "*.ts"
-          if (entry.endsWith(ext)) {
-            results.push(relPath);
-          }
+        if (regex.test(relPath)) {
+          results.push(relPath);
         }
       }
     }
@@ -275,8 +314,19 @@ function collectDiffs(mapPath: string): FileDiff[] {
     : map.domains;
 
   // Exclude marker-inject domains — handled by publishDocs()
+  // Exclude domains explicitly marked `disabled: true` — e.g. "docs" is declared
+  // in propagation-map.json but intentionally inactive pending a policy decision
+  // on what L0→L1 doc mirroring should actually include (see its `note` field).
+  // --include-disabled is an explicit escape hatch for inspecting a disabled
+  // domain's diff; it does not flip the map's own disabled flag.
+  const disabledSkipped = Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject' && d.disabled === true);
+  if (disabledSkipped.length > 0 && !INCLUDE_DISABLED) {
+    for (const [name, d] of disabledSkipped) {
+      console.log(`${C.dim}domain "${name}" is disabled — skipping (${d.note ?? 'see propagation-map.json'})${C.reset}`);
+    }
+  }
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject')
+    Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
@@ -362,8 +412,11 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
         Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
       )
     : map.domains;
+  // See collectDiffs() above — domains marked `disabled: true` (e.g. "docs") are
+  // intentionally inactive at L0→L1, so an L1→L2 drift report for them would just
+  // be noise about content that isn't supposed to exist in L1 yet.
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]: any) => d.mode !== 'marker-inject')
+    Object.entries(allDomains).filter(([_, d]: any) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
