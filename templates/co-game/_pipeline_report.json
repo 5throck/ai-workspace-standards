@@ -1,0 +1,139 @@
+{
+  "variantName": "co-game",
+  "variantType": "game",
+  "timestamp": "2026-07-08T00:02:24.287Z",
+  "phase": "4.5",
+  "summary": {
+    "totalFiles": 14,
+    "passedFiles": 9,
+    "failedFiles": 5
+  },
+  "gaps": [
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\arcade-designer.md",
+      "fileType": "agent",
+      "passed": false,
+      "missingSections": [
+        "## ⚠️ PM-ONLY INVOCATION",
+        "## Output Format",
+        "## Meeting Participation",
+        "## Dispatch Protocol"
+      ],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\architect.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\designer.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\game-debugger.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\game-designer.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\game-developer.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\puzzle-designer.md",
+      "fileType": "agent",
+      "passed": false,
+      "missingSections": [
+        "## ⚠️ PM-ONLY INVOCATION",
+        "## Output Format",
+        "## Meeting Participation",
+        "## Dispatch Protocol"
+      ],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\README_ko.md",
+      "fileType": "agent",
+      "passed": false,
+      "missingSections": [
+        "## Role",
+        "## ⚠️ PM-ONLY INVOCATION",
+        "## Responsibilities",
+        "## Output Format",
+        "## Constraints",
+        "## Meeting Participation",
+        "## Dispatch Protocol"
+      ],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\security-monitor.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\sound-designer.md",
+      "fileType": "agent",
+      "passed": false,
+      "missingSections": [
+        "## ⚠️ PM-ONLY INVOCATION",
+        "## Output Format",
+        "## Meeting Participation",
+        "## Dispatch Protocol"
+      ],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\stack-setup.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\test-runner.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\agents\\visual-artist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-game\\skills\\project-review\\SKILL.md",
+      "fileType": "skill",
+      "passed": false,
+      "missingSections": [
+        "## Context",
+        "## Execution Steps",
+        "## Output Format",
+        "## Related Skills"
+      ],
+      "extraSections": []
+    }
+  ]
+}

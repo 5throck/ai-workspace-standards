@@ -20,18 +20,11 @@
 import { join, basename } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { readUTF8File } from '../lib/encoding-utils.ts';
+import type { VariantType } from './registries/variant-type-registry.ts';
+import { getValidationPolicy } from './registries/validation-policy.ts';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type VariantType =
-  | 'security'
-  | 'development'
-  | 'design'
-  | 'consulting'
-  | 'collaboration'
-  | 'lecture';
+// Re-export for downstream consumers
+export type { VariantType } from './registries/variant-type-registry.ts';
 
 export interface GoldenStructure {
   /** Required sections present in all variants (Layer 1) */
@@ -88,20 +81,12 @@ export const SKILL_LAYER1_SECTIONS: string[] = [
 // ============================================================================
 
 /**
- * Hardcoded Layer 2 sections per variantType.
- * These are derived from reviewing existing variants; extend as new variants are added.
+ * Layer 2 sections are now sourced from the centralized validation-policy registry.
+ * Use `getValidationPolicy(type).optionalAgentSections` and
+ * `getValidationPolicy(type).optionalSkillSections` for per-type lookups.
+ *
+ * @see scripts/helpers/registries/validation-policy.ts
  */
-const LAYER2_AGENT_SECTIONS: Partial<Record<VariantType, string[]>> = {
-  development: ['## Phase Handoff Protocol'],
-  security: ['## Authorization Gate', '## Escalation Protocol'],
-  lecture: ['## Stage Gate Checklist'],
-  consulting: ['## Engagement Context', '## Deliverable Standards'],
-};
-
-const LAYER2_SKILL_SECTIONS: Partial<Record<VariantType, string[]>> = {
-  security: ['## Security Gate'],
-  consulting: ['## Prerequisites', '## Quality Criteria'],
-};
 
 // ============================================================================
 // DYNAMIC LAYER 2 LOADING
@@ -207,7 +192,8 @@ export function getAgentGoldenStructure(
   useDynamic = true,
 ): GoldenStructure {
   const layer1 = [...AGENT_LAYER1_SECTIONS];
-  const hardcoded = LAYER2_AGENT_SECTIONS[variantType] ?? [];
+  const validationPolicy = getValidationPolicy(variantType);
+  const hardcoded = [...(validationPolicy.optionalAgentSections ?? [])];
   const dynamic = useDynamic ? loadDynamicLayer2Agents(variantType) : [];
 
   // Merge hardcoded + dynamic, deduplicate, remove Layer 1 overlaps
@@ -226,7 +212,8 @@ export function getSkillGoldenStructure(
   useDynamic = true,
 ): GoldenStructure {
   const layer1 = [...SKILL_LAYER1_SECTIONS];
-  const hardcoded = LAYER2_SKILL_SECTIONS[variantType] ?? [];
+  const validationPolicy = getValidationPolicy(variantType);
+  const hardcoded = [...(validationPolicy.optionalSkillSections ?? [])];
   const dynamic = useDynamic ? loadDynamicLayer2Skills(variantType) : [];
 
   const layer2 = [...new Set([...hardcoded, ...dynamic])].filter(

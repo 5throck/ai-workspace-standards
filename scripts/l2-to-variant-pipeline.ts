@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.8.3
+ * @version 1.9.0
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -32,17 +32,25 @@
  *               · Verifies §-numbered structure (§1/§3) and all 6 VARIANT-*-START/END markers
  *               · BLOCKING if markers missing (Phase 4 injection silently fails without them)
  *               · Set autoFixAgentsMd:true to auto-call regenerate-agents-md.ts and continue
+ *   PHASE 3.7 — Plugin-based type validation — NEW in v1.9.0
+ *               · Registry integrity check (fatal on error)
+ *               · Required agents check (WARNING level)
+ *               · Required capabilities check (ERROR level)
+ *               · Plugin validation hooks (delegated to variant-type plugin)
+ *               · Runs after Phase 3.5 and before Phase 4
  *   PHASE 4.5 — Golden reference structural gap check — NEW in v1.7.0 (golden-reference-loader.ts)
  *               · Layer 1: verifies 7 required agent sections + 5 required skill sections
  *               · Layer 2: checks variantType-specific optional sections
- *               · Writes _pipeline_report.md in variant root; does NOT fail pipeline
+ *               · Writes _pipeline_report.md + _pipeline_report.json in variant root
  *               · Additional BLOCKING check: AGENTS.md VARIANT-* marker presence (double defense)
  *   PHASE 4.6 — Generated variant pm.md completion + context.md generation
  *               · Operates on GENERATED variant output (not L2 source)
  *               · Distinct from Phase 1.6 (source diagnosis)
  *   PHASE 5   — Beta lifecycle initialization
  *   PHASE 6   — Platform parity validation
- *   PHASE 7   — Workspace integration
+ *   PHASE 7   — Workspace integration (DEPRECATED in v1.9.0 — defaults OFF)
+ *               · Skipped by default; use --skip-integration=false to run
+ *               · Migrate to: bun scripts/helpers/workspace-integration.ts --name=<name> --type=<type>
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
  * See: docs/designs/variant-specialist-agent-structure.md
@@ -86,6 +94,8 @@ import { integrateVariantToWorkspace, IntegrationResult } from './helpers/integr
 import { validateDependencies } from './helpers/variant-governance-rules.ts';
 import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.ts';
 import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.ts';
+import type { VariantType } from './helpers/registries/variant-type-registry.ts';
+import { listVariantTypes, isVariantType } from './helpers/registries/variant-type-registry.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -97,7 +107,7 @@ export interface PipelineConfig {
   /** Variant name */
   variantName: string;
   /** Variant type */
-  variantType: 'security' | 'development' | 'design' | 'consulting' | 'collaboration' | 'lecture';
+  variantType: VariantType;
   /** Variant description */
   variantDescription: string;
   /** Skip platform parity validation */
@@ -443,6 +453,135 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
+  // PHASE 3.7: PLUGIN-BASED TYPE VALIDATION
+  // ============================================================================
+  // Runs after Phase 3.5 and before Phase 4. Validates the L2 source against
+  // the variant-type registry (integrity, required agents, required capabilities)
+  // and delegates to plugin-specific validation hooks when available.
+  //
+  // Fatal only on registry integrity failure; plugin issues are non-blocking.
+  // ============================================================================
+
+  let phaseLabel: string;
+  try {
+    phaseLabel = 'Phase 3.7: Plugin-Based Type Validation';
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 3.7: Plugin-Based Type Validation`);
+    console.log(`${'─'.repeat(60)}`);
+
+    // Eager imports used across 3.7b–3.7d
+    const { globSync } = await import('node:fs') as typeof import('node:fs');
+    const yaml = (await import('js-yaml')).default as typeof import('js-yaml');
+
+    // 3.7a: Registry integrity check
+    const { validateRegistryIntegrity } = await import('./helpers/registries/index.ts');
+    const integrity = validateRegistryIntegrity();
+    if (!integrity.passed) {
+      for (const err of integrity.errors) {
+        if (err.severity === 'error') {
+          console.error(`[3.7] Registry integrity error: ${err.message}`);
+        }
+      }
+      if (integrity.errors.some(e => e.severity === 'error')) {
+        throw fatalError(ErrorPhase.VALIDATION, 'REGISTRY_INTEGRITY_FAILED', 'Registry integrity check failed');
+      }
+    }
+
+    // 3.7b: Required agents check (WARNING level)
+    const { getValidationPolicy } = await import('./helpers/registries/index.ts');
+    const policy = getValidationPolicy(config.variantType);
+    if (policy.requiredAgents && policy.requiredAgents.length > 0) {
+      const agentsDir = join(config.l2ProjectPath, 'agents');
+      const agentFiles = globSync('*.md', { cwd: agentsDir }).map(f => basename(f, '.md'));
+      for (const required of policy.requiredAgents) {
+        if (!agentFiles.includes(required)) {
+          console.warn(`[3.7] WARNING: Required agent "${required}" not found for type "${config.variantType}"`);
+        }
+      }
+    }
+
+    // 3.7c: Required capabilities check (ERROR level)
+    if (policy.requiredCapabilities && policy.requiredCapabilities.length > 0) {
+      const { isCapability } = await import('./helpers/registries/index.ts');
+      const agentsDir37c = join(config.l2ProjectPath, 'agents');
+      const coveredCapabilities = new Set<string>();
+
+      for (const agentFile of globSync('*.md', { cwd: agentsDir37c })) {
+        const content = readFileSync(join(agentsDir37c, agentFile), 'utf-8');
+        const match = content.match(/^---\n([\s\S]*?)\n---/);
+        if (match) {
+          try {
+            const fm = yaml.load(match[1]) as Record<string, unknown>;
+            const caps = fm?.capabilities;
+            if (Array.isArray(caps)) {
+              for (const cap of caps) {
+                if (typeof cap === 'string') {
+                  coveredCapabilities.add(cap);
+                  if (!isCapability(cap)) {
+                    console.warn(`[3.7] WARNING: Unknown capability "${cap}" in ${agentFile}`);
+                  }
+                }
+              }
+            }
+          } catch { /* skip malformed frontmatter */ }
+        }
+      }
+
+      for (const required of policy.requiredCapabilities) {
+        if (!coveredCapabilities.has(required)) {
+          console.error(`[3.7] ERROR: Required capability "${required}" not covered by any agent`);
+        }
+      }
+    }
+
+    // 3.7d: Plugin validation hooks
+    const { getPlugin } = await import('./helpers/plugins/index.ts');
+    const plugin = getPlugin(config.variantType);
+    if (plugin?.validate) {
+      // Collect agent frontmatters for plugin context
+      const agentsDir37d = join(config.l2ProjectPath, 'agents');
+      const agentFrontmatters = globSync('*.md', { cwd: agentsDir37d }).map(f => {
+        const content = readFileSync(join(agentsDir37d, f), 'utf-8');
+        const match = content.match(/^---\n([\s\S]*?)\n---/);
+        const fm = match ? (yaml.load(match[1]) as Record<string, unknown>) : {};
+        return {
+          name: basename(f, '.md'),
+          capabilities: Array.isArray(fm?.capabilities) ? fm.capabilities as string[] : [],
+        };
+      });
+
+      const variantJsonPath = join(config.l2ProjectPath, 'variant.json');
+      const variantJson = existsSync(variantJsonPath) ? JSON.parse(readFileSync(variantJsonPath, 'utf-8')) : {};
+
+      const issues = await plugin.validate({
+        variantDir: config.l2ProjectPath,
+        variantType: config.variantType,
+        agentFrontmatters,
+        variantJson,
+      });
+
+      for (const issue of issues) {
+        if (issue.severity === 'error') {
+          console.error(`[3.7] Plugin validation error: ${issue.category}: ${issue.message}`);
+        } else if (issue.severity === 'warning') {
+          console.warn(`[3.7] Plugin validation warning: ${issue.category}: ${issue.message}`);
+        } else {
+          console.log(`[3.7] Plugin validation info: ${issue.category}: ${issue.message}`);
+        }
+      }
+    }
+
+    console.log(`✅ PHASE 3.7 COMPLETE`);
+  } catch (err) {
+    // Handle errors from registry integrity (fatal) or plugin validation (warn)
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'REGISTRY_INTEGRITY_FAILED') {
+      throw err;
+    }
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn(`⚠️  PHASE 3.7 WARNING: Plugin validation produced warnings (non-blocking): ${errorMsg}`);
+  }
+
+  // ============================================================================
   // PHASE 4: GENERATE VARIANT
   // ============================================================================
 
@@ -543,6 +682,29 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const reportPath = j(variantPath, '_pipeline_report.md');
     const { writeUTF8File: wu } = await import('./lib/encoding-utils.js');
     wu(reportPath, `# Pipeline Report\n\nGenerated: ${new Date().toISOString()}\n\n\`\`\`\n${gapReport}\n\`\`\`\n`);
+
+    // Write CI-friendly JSON report alongside the markdown report
+    const reportOutputPath = j(variantPath, '_pipeline_report.json');
+    const jsonReport = {
+      variantName: config.variantName,
+      variantType: config.variantType,
+      timestamp: new Date().toISOString(),
+      phase: '4.5',
+      summary: {
+        totalFiles: gapReports.length,
+        passedFiles: gapReports.filter(r => r.passed).length,
+        failedFiles: gapReports.filter(r => !r.passed).length,
+      },
+      gaps: gapReports.map(r => ({
+        filePath: r.filePath,
+        fileType: r.fileType,
+        passed: r.passed,
+        missingSections: r.missingSections ?? [],
+        extraSections: r.extraSections ?? [],
+      })),
+    };
+    wu(reportOutputPath, JSON.stringify(jsonReport, null, 2));
+    console.log(`  📄 CI-friendly JSON report: ${reportOutputPath}`);
 
     const failedCount = gapReports.filter(r => !r.passed).length;
     if (failedCount > 0) {
@@ -688,13 +850,20 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
-  // PHASE 7: WORKSPACE INTEGRATION
+  // PHASE 7: WORKSPACE INTEGRATION (DEPRECATED — OPT-IN ONLY)
+  // ============================================================================
+  // DEPRECATED: Phase 7 is being phased out in favor of separate
+  // workspace-integration.ts. Defaults to OFF (skipIntegration=true).
+  // To run it, explicitly pass --skip-integration=false.
   // ============================================================================
 
   if (!config.skipIntegration) {
+    console.log('\n[Phase 7] ⚠️  Workspace integration via pipeline is DEPRECATED.');
+    console.log('[Phase 7] Use: bun scripts/helpers/workspace-integration.ts --name=<name> --type=<type>');
+
     try {
       console.log(`\n${'─'.repeat(60)}`);
-      console.log(`PHASE 7: Integrating to Workspace`);
+      console.log(`PHASE 7: Integrating to Workspace (legacy)`);
       console.log(`${'─'.repeat(60)}`);
 
       const metadata: VariantMetadata = {
@@ -719,7 +888,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     }
   } else {
     console.log(`\n${'─'.repeat(60)}`);
-    console.log(`PHASE 7: Skipped (skipIntegration=true)`);
+    console.log(`PHASE 7: Skipped (default — use --skip-integration=false to run deprecated path)`);
     console.log(`${'─'.repeat(60)}`);
     phases.integrate = { success: true };
   }
@@ -869,17 +1038,19 @@ async function main() {
   const typeArg = args.find(arg => arg.startsWith('--type='));
   const descArg = args.find(arg => arg.startsWith('--description='));
   const skipParityArg = args.includes('--skip-parity');
-  const skipIntegrationArg = args.includes('--skip-integration');
+  const skipIntegrationFlag = args.find(arg => arg.startsWith('--skip-integration'));
+  // Phase 7 defaults to OFF (skipped). Only runs if explicitly --skip-integration=false
+  const skipIntegrationArg = skipIntegrationFlag ? skipIntegrationFlag !== '--skip-integration=false' : true;
   const outputArg = args.find(arg => arg.startsWith('--output='));
 
   if (!l2PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/pipeline/l2-to-variant-pipeline.ts \\');
     console.error('  --l2-path=<path-to-l2-project> \\');
     console.error('  --name=<variant-name> \\');
-    console.error('  --type=<security|development|design|consulting|collaboration|lecture> \\');
+    console.error(`  --type=<${listVariantTypes().join('|')}> \\`);
     console.error('  --description=<variant-description> \\');
     console.error('  [--skip-parity] \\');
-    console.error('  [--skip-integration] \\');
+    console.error('  [--skip-integration=false] (default: ON — Phase 7 is deprecated and skipped) \\');
     console.error('  [--output=<output-path>]');
     process.exit(1);
   }
@@ -890,10 +1061,17 @@ async function main() {
     throw new Error(`Invalid variant name: '${variantNameRaw}'. Must match co-[a-z][a-z0-9-]{1,30}`);
   }
 
+  // Validate --type= CLI arg against centralized registry
+  const variantTypeRaw = typeArg.split('=')[1];
+  if (!isVariantType(variantTypeRaw)) {
+    console.error(`Invalid variant type: '${variantTypeRaw}'. Must be one of: ${listVariantTypes().join(', ')}`);
+    process.exit(1);
+  }
+
   const config: PipelineConfig = {
     l2ProjectPath: l2PathArg.split('=')[1],
     variantName: variantNameRaw,
-    variantType: typeArg.split('=')[1] as any,
+    variantType: variantTypeRaw,
     variantDescription: descArg.split('=')[1],
     skipParityValidation: skipParityArg,
     skipIntegration: skipIntegrationArg,

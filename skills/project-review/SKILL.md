@@ -14,6 +14,7 @@ description: >
 owner: pm
 version: 1.0.0
 last_reviewed: 2026-05-30
+prerequisites: []
 metadata:
   type: process
   triggers:
