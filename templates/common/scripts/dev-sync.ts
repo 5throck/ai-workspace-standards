@@ -1,9 +1,10 @@
-// @version 1.3.2
+// @version 1.3.5
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { resolve } from 'node:path';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
+import { hasNonEnglish } from './lib/language-guard.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -26,6 +27,20 @@ if (path.resolve(actualCwd) !== expectedRoot) {
 }
 
 const msg = process.argv.slice(2).join(' ') || "chore: update";
+
+// Language gate — commit messages / PR titles must be English (CONSTITUTION.md §3).
+// Runs before any git mutation so a non-English message never reaches a commit or PR
+// (previously this was only checked late, inside gen-pr-body.ts, and its failure was
+// silently swallowed by the PR-creation fallback below). Shared detector also catches
+// Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
+if (hasNonEnglish(msg)) {
+    console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+    console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}
+
 const dateObj = new Date();
 const date = dateObj.toISOString().split('T')[0]; // yyyy-MM-dd
 
@@ -67,13 +82,26 @@ ${fileLines}
 fs.appendFileSync(memoryFile, template, 'utf8');
 
 // 2. Update MEMORY.md index
-await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
-
+try {
+    await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
+} catch (e) {
+    console.log(`${RED}❌ sync-md.ts failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}
 
 // 2.5 Generate scripts/README.md
 const genReadmeTs = path.join('scripts', 'generate-scripts-readme.ts');
 if (fs.existsSync(genReadmeTs)) {
-    await $`bun ${genReadmeTs}`;
+    try {
+        await $`bun ${genReadmeTs}`;
+    } catch (e) {
+        console.log(`${RED}❌ generate-scripts-readme.ts failed: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
 }
 
 // 3. Block if [Unreleased] section has no bullet items
@@ -223,14 +251,20 @@ if (currentBranch === "main" || currentBranch === "master") {
     console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
 }
 
-// 6. Guard against sensitive files
+// 6. Guard against sensitive files — checks both new (untracked) and modified
+// (already-tracked) files, since an already-tracked secret-like file that gets
+// edited would otherwise slip past a check that only looked at untracked paths.
 try {
-    const { stdout } = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
-    const untracked = stdout.toString().trim().split('\n').filter(Boolean);
-    const sensitive = untracked.filter(f => /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/.test(f));
-    
+    const untrackedRes = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
+    const modifiedRes = await $`git diff --name-only HEAD`.quiet().nothrow();
+    const untracked = untrackedRes.stdout.toString().trim().split('\n').filter(Boolean);
+    const modified = modifiedRes.stdout.toString().trim().split('\n').filter(Boolean);
+    const candidates = [...new Set([...untracked, ...modified])];
+    const sensitivePattern = /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
+    const sensitive = candidates.filter(f => sensitivePattern.test(f));
+
     if (sensitive.length > 0) {
-        console.log(`${RED}❌ Potentially sensitive untracked files detected - refusing git add -A:${RESET}`);
+        console.log(`${RED}❌ Potentially sensitive files detected (new or modified) - refusing git add -A:${RESET}`);
         sensitive.forEach(s => console.log(`   ${s}`));
         console.log(`${YELLOW}   Stage files explicitly with 'git add <file>' or add them to .gitignore.${RESET}`);
         if (import.meta.main) {
@@ -257,7 +291,33 @@ process.env.DEV_SYNC_CONTEXT = syncContext;
 // Write to git repo root — hooks run from there, not from CWD
 const repoRootResult = await $`git rev-parse --show-toplevel`.quiet().nothrow();
 const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
-const tmpPath = repoRoot ? path.join(repoRoot, '.sync_context.tmp') : '.sync_context.tmp';
+
+// Sweep stale sync-context files left behind by a killed/crashed run. Each run's
+// filename is unique (embeds its own UUID), so — unlike the old fixed-name scheme,
+// where the next run's write silently overwrote a stale leftover — an interrupted
+// run's file is never reclaimed on its own and would otherwise accumulate forever.
+const STALE_MS = 60 * 60 * 1000; // 1 hour — generous margin over any real sync run
+try {
+    const sweepDir = repoRoot || '.';
+    for (const entry of fs.readdirSync(sweepDir)) {
+        if (!/^\.sync_context\..+\.tmp$/.test(entry)) continue;
+        const entryPath = path.join(sweepDir, entry);
+        try {
+            if (Date.now() - fs.statSync(entryPath).mtimeMs > STALE_MS) {
+                fs.unlinkSync(entryPath);
+            }
+        } catch { /* another process may have already removed it — ignore */ }
+    }
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
+
+// Filename is unique per run (embeds the context UUID) — a shared fixed name
+// would race when two /sync runs overlap in the same repo (e.g. concurrent
+// Agent Teams teammates), letting one run's commit validate against another's token.
+const tmpFileName = `.sync_context.${syncContext}.tmp`;
+process.env.DEV_SYNC_CONTEXT_FILE = tmpFileName;
+const tmpPath = repoRoot ? path.join(repoRoot, tmpFileName) : tmpFileName;
 fs.writeFileSync(tmpPath, syncContext);
 
 const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (err) {
@@ -291,41 +351,61 @@ if (!pushRetry.success) {
     }
 }
 
-// 7. Generate PR body and open PR
-let prBody = "";
-try {
-    const { stdout } = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
-    prBody = stdout.toString().trim();
-} catch (err) {
-  console.error('[dev-sync] Error: ${err}');
-}
+// 7. Generate PR body and open PR — but skip creation if a PR already exists for
+// this branch (e.g. re-running /sync to push a follow-up commit onto an open PR).
+// The push above already updated it; calling `gh pr create` again would just fail
+// with "a pull request ... already exists", masking the fact that the commit/push
+// actually succeeded.
+const existingPrRes = await $`gh pr view ${branch} --json url --jq .url`.quiet().nothrow();
+const existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
 
-let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
-if (prBody) {
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
-} else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
-    const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
+if (existingPrUrl) {
+    console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);
+    console.log(`  ${existingPrUrl}`);
 } else {
-    prCreateRetry = await withRetry(
-        () => $`gh pr create --fill`.nothrow(),
-        { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
-        'gh pr create'
-    );
-}
+    // Note: msg already passed the language gate above, so a non-zero exit here means
+    // gen-pr-body.ts hit a non-language failure (e.g. AI-generated body came back
+    // non-English) — safe to fall back to the template/--fill paths below, but surface
+    // the reason instead of silently swallowing it.
+    let prBody = "";
+    try {
+        const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
+        if (genRes.exitCode !== 0) {
+            console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
+            console.log(genRes.stderr.toString().trim());
+        }
+        prBody = genRes.stdout.toString().trim();
+    } catch (err) {
+      console.error('[dev-sync] Error: ${err}');
+    }
 
-if (!prCreateRetry.success) {
-    const errMsg = prCreateRetry.lastError?.message || 'unknown error';
-    console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
+    let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
+    if (prBody) {
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    } else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
+        const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    } else {
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --fill`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    }
+
+    if (!prCreateRetry.success) {
+        const errMsg = prCreateRetry.lastError?.message || 'unknown error';
+        console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
     }
 }

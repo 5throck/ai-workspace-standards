@@ -2,11 +2,12 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.7
+ * @version 1.5.9
  */
 
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { hasNonEnglish } from "../lib/language-guard.ts";
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
@@ -23,8 +24,12 @@ async function main() {
     process.exit(1);
   }
 
+  // The context file name is unique per /sync run (embeds the context UUID) so that
+  // two overlapping runs (e.g. concurrent Agent Teams teammates) can't collide on a
+  // shared fixed filename and validate one run's commit against another's token.
   const expectedContext = process.env.DEV_SYNC_CONTEXT;
-  if (!expectedContext || !existsSync('.sync_context.tmp') || readFileSync('.sync_context.tmp', 'utf-8') !== expectedContext) {
+  const contextFile = process.env.DEV_SYNC_CONTEXT_FILE;
+  if (!expectedContext || !contextFile || !existsSync(contextFile) || readFileSync(contextFile, 'utf-8') !== expectedContext) {
     console.error("\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.");
     console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
     process.exit(1);
@@ -89,14 +94,18 @@ async function main() {
   // 2-B. Enforce English Only in PR Artifacts (CHANGELOG only)
   // Files ending in _ko.md are intentionally Korean — skip them
   // memory/ files are exempt (may contain Korean meeting transcripts and daily logs)
+  // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
+  // with dev-sync.ts and gen-pr-body.ts so the three enforcement points can't drift.
+  // Only newly *added* lines (via the staged diff) are checked — scanning the whole
+  // file would false-positive on pre-existing legitimate non-English content elsewhere
+  // in CHANGELOG.md (e.g. CJK glyph names quoted in an unrelated font-rendering fix).
   const docsToCheck = staged.filter(f => /^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')) && !/_ko\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
-    const content = readFileSync(file, 'utf-8');
-    // Strip fenced code blocks (``` ... ```) before Korean check — data samples may contain Korean values
-    const textOnly = content.replace(/```[\s\S]*?```/g, '');
-    if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(textOnly)) {
-      console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters (Korean) detected in ${file}`);
+    const diff = await $`git diff --cached -U0 -- ${file}`.text();
+    const addedLines = diff.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).map(l => l.slice(1)).join('\n');
+    if (hasNonEnglish(addedLines)) {
+      console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters detected in newly added lines of ${file}`);
       process.exit(1);
     }
   }
