@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043).",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -126,10 +126,39 @@
       "override_only": true
     },
     "workspace-customizations": {
-      "description": "L0 .agents/ → L1 templates/common/.agents/",
+      "description": "L0 .agents/ → L1 templates/common/.agents/ — flat JSON config files only",
       "source": ".agents",
       "target": "templates/common/.agents",
       "include_pattern": "*.json",
+      "recursive": false,
+      "exclude": [],
+      "override_only": true
+    },
+    "agents-skills": {
+      "description": "L0 .agents/skills/ → L1 templates/common/.agents/skills/ — Antigravity platform skills (shortcut wrappers)",
+      "source": ".agents/skills",
+      "target": "templates/common/.agents/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": [
+        "simulate-project-creation"
+      ],
+      "override_only": true
+    },
+    "claude-skills-json": {
+      "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
+      "source": ".claude",
+      "target": "templates/common/.claude",
+      "include_pattern": "skills.json",
+      "recursive": false,
+      "exclude": [],
+      "override_only": true
+    },
+    "gemini-skills-json": {
+      "description": "L0 .gemini/skills.json → L1 templates/common/.gemini/skills.json — Gemini skill path registration",
+      "source": ".gemini",
+      "target": "templates/common/.gemini",
+      "include_pattern": "skills.json",
       "recursive": false,
       "exclude": [],
       "override_only": true
