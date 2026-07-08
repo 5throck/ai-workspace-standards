@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-09](2026-07-09.md) | feat(skills): add cross-platform skill distribution infrastructure for Claude, Gemini, and Antigravity |
 | [2026-07-08](2026-07-08.md) | feat(variant-registry): centralized registries, plugin system, validator framework, workspace-integration + co-game variant (Phase A+B) |
 | [2026-07-07](2026-07-07.md) | chore: update |
 | [2026-07-06](2026-07-06.md) | feat(commands): add /project-review command and track .agents/ for skill discovery |
