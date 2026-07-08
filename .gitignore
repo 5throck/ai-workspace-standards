@@ -15,6 +15,7 @@
 # --- dev-sync pipeline temp files ---
 CHANGELOG_ENTRY.md
 .sync_context.tmp
+.sync_context.*.tmp
 
 # --- Secrets and local certs ---
 .env

@@ -10,7 +10,7 @@ bun scripts/dev-sync.ts "$ARGUMENTS"
 The pipeline will:
 1. Append a session entry to `memory/YYYY-MM-DD.md`
 2. Update `memory/MEMORY.md` index via `sync-md.ts`
-3. Auto-add `$ARGUMENTS` to `CHANGELOG.md [Unreleased]` if the section has no entries yet
+3. Check `CHANGELOG.md [Unreleased]` has at least one entry — **blocks and exits** if empty (dev-sync does not auto-write entries; run `/changelog "type: description"` first)
 4. Run `audit.ts` - must exit 0 before proceeding
 5. Create a new PR branch, commit all staged changes, push, and open a GitHub PR
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-08T04:15:11.506Z
+**Generated**: 2026-07-08T05:12:21.019Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -78,7 +78,7 @@
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | create-l2-scaffold.ts | 1.6.4 | scripts/create-l2-scaffold.ts | child_process, fs, path |
-| dev-sync.ts | 1.3.2 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.3.3 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -117,7 +117,7 @@
 | platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.1 | scripts/hooks/post-write-lifecycle-check.ts | bun |
-| pre-commit.ts | 1.5.7 | scripts/hooks/pre-commit.ts | bun |
+| pre-commit.ts | 1.5.8 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.4 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
 | promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |

@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.7
+ * @version 1.5.8
  */
 
 import { $ } from "bun";
@@ -23,8 +23,12 @@ async function main() {
     process.exit(1);
   }
 
+  // The context file name is unique per /sync run (embeds the context UUID) so that
+  // two overlapping runs (e.g. concurrent Agent Teams teammates) can't collide on a
+  // shared fixed filename and validate one run's commit against another's token.
   const expectedContext = process.env.DEV_SYNC_CONTEXT;
-  if (!expectedContext || !existsSync('.sync_context.tmp') || readFileSync('.sync_context.tmp', 'utf-8') !== expectedContext) {
+  const contextFile = process.env.DEV_SYNC_CONTEXT_FILE;
+  if (!expectedContext || !contextFile || !existsSync(contextFile) || readFileSync(contextFile, 'utf-8') !== expectedContext) {
     console.error("\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.");
     console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
     process.exit(1);

@@ -1,4 +1,4 @@
-// @version 1.3.2
+// @version 1.3.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -26,6 +26,20 @@ if (path.resolve(actualCwd) !== expectedRoot) {
 }
 
 const msg = process.argv.slice(2).join(' ') || "chore: update";
+
+// Language gate — commit messages / PR titles must be English (CONSTITUTION.md §3).
+// Runs before any git mutation so a non-English message never reaches a commit or PR
+// (previously this was only checked late, inside gen-pr-body.ts, and its failure was
+// silently swallowed by the PR-creation fallback below).
+const KOREAN_RANGE = /[가-힯ᄀ-ᇿ㄰-㆏]/;
+if (KOREAN_RANGE.test(msg)) {
+    console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+    console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}
+
 const dateObj = new Date();
 const date = dateObj.toISOString().split('T')[0]; // yyyy-MM-dd
 
@@ -67,13 +81,26 @@ ${fileLines}
 fs.appendFileSync(memoryFile, template, 'utf8');
 
 // 2. Update MEMORY.md index
-await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
-
+try {
+    await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
+} catch (e) {
+    console.log(`${RED}❌ sync-md.ts failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}
 
 // 2.5 Generate scripts/README.md
 const genReadmeTs = path.join('scripts', 'generate-scripts-readme.ts');
 if (fs.existsSync(genReadmeTs)) {
-    await $`bun ${genReadmeTs}`;
+    try {
+        await $`bun ${genReadmeTs}`;
+    } catch (e) {
+        console.log(`${RED}❌ generate-scripts-readme.ts failed: ${e}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
 }
 
 // 3. Block if [Unreleased] section has no bullet items
@@ -223,14 +250,20 @@ if (currentBranch === "main" || currentBranch === "master") {
     console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
 }
 
-// 6. Guard against sensitive files
+// 6. Guard against sensitive files — checks both new (untracked) and modified
+// (already-tracked) files, since an already-tracked secret-like file that gets
+// edited would otherwise slip past a check that only looked at untracked paths.
 try {
-    const { stdout } = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
-    const untracked = stdout.toString().trim().split('\n').filter(Boolean);
-    const sensitive = untracked.filter(f => /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/.test(f));
-    
+    const untrackedRes = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
+    const modifiedRes = await $`git diff --name-only HEAD`.quiet().nothrow();
+    const untracked = untrackedRes.stdout.toString().trim().split('\n').filter(Boolean);
+    const modified = modifiedRes.stdout.toString().trim().split('\n').filter(Boolean);
+    const candidates = [...new Set([...untracked, ...modified])];
+    const sensitivePattern = /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
+    const sensitive = candidates.filter(f => sensitivePattern.test(f));
+
     if (sensitive.length > 0) {
-        console.log(`${RED}❌ Potentially sensitive untracked files detected - refusing git add -A:${RESET}`);
+        console.log(`${RED}❌ Potentially sensitive files detected (new or modified) - refusing git add -A:${RESET}`);
         sensitive.forEach(s => console.log(`   ${s}`));
         console.log(`${YELLOW}   Stage files explicitly with 'git add <file>' or add them to .gitignore.${RESET}`);
         if (import.meta.main) {
@@ -257,7 +290,12 @@ process.env.DEV_SYNC_CONTEXT = syncContext;
 // Write to git repo root — hooks run from there, not from CWD
 const repoRootResult = await $`git rev-parse --show-toplevel`.quiet().nothrow();
 const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
-const tmpPath = repoRoot ? path.join(repoRoot, '.sync_context.tmp') : '.sync_context.tmp';
+// Filename is unique per run (embeds the context UUID) — a shared fixed name
+// would race when two /sync runs overlap in the same repo (e.g. concurrent
+// Agent Teams teammates), letting one run's commit validate against another's token.
+const tmpFileName = `.sync_context.${syncContext}.tmp`;
+process.env.DEV_SYNC_CONTEXT_FILE = tmpFileName;
+const tmpPath = repoRoot ? path.join(repoRoot, tmpFileName) : tmpFileName;
 fs.writeFileSync(tmpPath, syncContext);
 
 const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (err) {
@@ -292,10 +330,18 @@ if (!pushRetry.success) {
 }
 
 // 7. Generate PR body and open PR
+// Note: msg already passed the language gate above, so a non-zero exit here means
+// gen-pr-body.ts hit a non-language failure (e.g. AI-generated body came back
+// non-English) — safe to fall back to the template/--fill paths below, but surface
+// the reason instead of silently swallowing it.
 let prBody = "";
 try {
-    const { stdout } = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
-    prBody = stdout.toString().trim();
+    const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
+    if (genRes.exitCode !== 0) {
+        console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
+        console.log(genRes.stderr.toString().trim());
+    }
+    prBody = genRes.stdout.toString().trim();
 } catch (err) {
   console.error('[dev-sync] Error: ${err}');
 }

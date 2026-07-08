@@ -58,7 +58,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.6.4 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.3.3 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -112,7 +112,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `hooks/pre-commit.ts` | L0 | 1.5.7 | active | —| —| L0+L1 | —|
+| `hooks/pre-commit.ts` | L0 | 1.5.8 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.4 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
