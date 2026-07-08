@@ -1,9 +1,10 @@
-// @version 1.3.3
+// @version 1.3.4
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { resolve } from 'node:path';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
+import { hasNonEnglish } from './lib/language-guard.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -30,9 +31,9 @@ const msg = process.argv.slice(2).join(' ') || "chore: update";
 // Language gate — commit messages / PR titles must be English (CONSTITUTION.md §3).
 // Runs before any git mutation so a non-English message never reaches a commit or PR
 // (previously this was only checked late, inside gen-pr-body.ts, and its failure was
-// silently swallowed by the PR-creation fallback below).
-const KOREAN_RANGE = /[가-힯ᄀ-ᇿ㄰-㆏]/;
-if (KOREAN_RANGE.test(msg)) {
+// silently swallowed by the PR-creation fallback below). Shared detector also catches
+// Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
+if (hasNonEnglish(msg)) {
     console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
     console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
     if (import.meta.main) {
@@ -290,6 +291,27 @@ process.env.DEV_SYNC_CONTEXT = syncContext;
 // Write to git repo root — hooks run from there, not from CWD
 const repoRootResult = await $`git rev-parse --show-toplevel`.quiet().nothrow();
 const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
+
+// Sweep stale sync-context files left behind by a killed/crashed run. Each run's
+// filename is unique (embeds its own UUID), so — unlike the old fixed-name scheme,
+// where the next run's write silently overwrote a stale leftover — an interrupted
+// run's file is never reclaimed on its own and would otherwise accumulate forever.
+const STALE_MS = 60 * 60 * 1000; // 1 hour — generous margin over any real sync run
+try {
+    const sweepDir = repoRoot || '.';
+    for (const entry of fs.readdirSync(sweepDir)) {
+        if (!/^\.sync_context\..+\.tmp$/.test(entry)) continue;
+        const entryPath = path.join(sweepDir, entry);
+        try {
+            if (Date.now() - fs.statSync(entryPath).mtimeMs > STALE_MS) {
+                fs.unlinkSync(entryPath);
+            }
+        } catch { /* another process may have already removed it — ignore */ }
+    }
+} catch (err) {
+  console.error('[dev-sync] Error: ${err}');
+}
+
 // Filename is unique per run (embeds the context UUID) — a shared fixed name
 // would race when two /sync runs overlap in the same repo (e.g. concurrent
 // Agent Teams teammates), letting one run's commit validate against another's token.
