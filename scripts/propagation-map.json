@@ -1,6 +1,6 @@
 {
   "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043).",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -76,7 +76,9 @@
         "templates/"
       ],
       "disabled": true,
-      "note": "INTENTIONALLY DISABLED as of 2026-07-08 — this domain was declared to propagate all markdown files from docs/ to templates/common/docs/, but propagate-to-templates.ts's globFiles() never actually supported a wildcard-in-filename pattern like '**/*.md' (it silently matched zero files against the literal string '*.md'), so this rule had never executed once since it was added. globFiles() has since been fixed to handle it correctly, which would now activate ~143 previously-invisible file copies on the next --apply — including docs/constitution/ and other L0-only content that scripts/audit.ts's L0-leakage check explicitly forbids from appearing under templates/. templates/common/docs/ is today an independently-curated tree (context.md, adr/, variants/, workspace-schema.json — a different shape than root docs/), not a mirror, so activating a literal full mirror would be a policy change, not a bug fix. Do not remove this flag without first deciding (and likely writing an ADR for): should L1 docs/ be a full mirror, a whitelist of specific L0 docs, or stay independently managed as it is today? Re-run with --domain docs --include-disabled --dry-run to inspect what a mirror would actually copy."
+      "note": "Disabled until docs propagation policy is decided (ADR required). L1 docs/ is currently independently maintained, not a mirror of L0 docs/. Do not enable without resolving: full mirror vs. whitelist vs. stay independent. Inspect candidate output: --domain docs --include-disabled --dry-run.",
+      "disabled_since": "2026-07-08",
+      "history": "globFiles() never supported a wildcard within the filename component of a pattern — '**/*.md' reduced to the literal basename '*.md', which can never equal a real filename — so this domain silently matched zero files from the moment it was declared (confirmed 2026-07-08; templates/common/docs/ has 28 independently-authored files vs. 147 under root docs/). Fixed in propagate-to-templates.ts v2.1.0. Activating this domain as-is would copy ~143 previously-unmatched files on the next --apply, including L0-only content (e.g. docs/constitution/) that scripts/audit.ts's L0-leakage check forbids under templates/ — hence disabled rather than enabled by the fix."
     },
     "governance-agents": {
       "description": "L1 AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",

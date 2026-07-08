@@ -2,7 +2,7 @@
 /**
  * propagation-map-schema.ts — JSON Schema for propagation-map.json
  * Validates domain entries at startup to catch config drift early.
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 export interface PropagationDomain {
@@ -21,7 +21,12 @@ export interface PropagationDomain {
   target_variants?: string[];
   // Intentionally inactive domain — declared but not processed by default
   // (see propagate-to-templates.ts's --include-disabled escape hatch).
+  // `note` should stay a short reason + activation condition; put incident/
+  // investigation detail in `history` instead so `note` stays quick to read
+  // (and to grep) for anyone deciding whether it's still safe to leave disabled.
   disabled?: boolean;
+  disabled_since?: string;
+  history?: string;
 }
 
 export interface PropagationMap {
@@ -95,6 +100,12 @@ export function validatePropagationMap(map: unknown): ValidationError[] {
       }
       if (d.disabled !== undefined && typeof d.disabled !== 'boolean') {
         errors.push({ domain: name, field: 'disabled', message: 'Must be a boolean if present' });
+      }
+      if (d.disabled_since !== undefined && typeof d.disabled_since !== 'string') {
+        errors.push({ domain: name, field: 'disabled_since', message: 'Must be a string (date) if present' });
+      }
+      if (d.history !== undefined && typeof d.history !== 'string') {
+        errors.push({ domain: name, field: 'history', message: 'Must be a string if present' });
       }
     }
   }

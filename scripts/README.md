@@ -124,14 +124,14 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/propagation-map-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.1.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.1.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -417,7 +417,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
 | `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
-| `--include-disabled` | Opt-in override | Process domains marked `disabled: true` in propagation-map.json (e.g. `docs`) — for inspection only, does not un-disable the domain |
+| `--include-disabled` | Opt-in override | Include domains marked `disabled: true` (e.g. `docs`) in the dry-run report only — combining with `--apply` is a hard error (exit 1), not a silent write |
 
 **Typical workflow**:
 ```bash

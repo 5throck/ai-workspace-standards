@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-08T12:24:16.384Z
+**Generated**: 2026-07-08T12:37:00.981Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -122,8 +122,8 @@
 | pre-push.ts | 1.2.5 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
 | promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
-| propagate-to-templates.ts | 2.1.0 | scripts/propagate-to-templates.ts | N/A |
-| propagation-map-schema.ts | 1.1.0 | scripts/lib/propagation-map-schema.ts | N/A |
+| propagate-to-templates.ts | 2.1.1 | scripts/propagate-to-templates.ts | N/A |
+| propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.2 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.2.1 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
