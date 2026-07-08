@@ -78,12 +78,25 @@ git push origin hotfix/v1.2.1
 
 ### 1. Branch Protection
 
-**`main` branch protection**:
-- ✅ Require pull request before merging
-- ✅ Require status checks (tests, audit) to pass
-- ✅ Require 1 reviewer approval
-- ❌ Restrict pushes (maintainers only)
-- ❌ Do not allow bypassing rules
+**`main` branch protection** (actual configured state — applied via
+`bun scripts/setup-github-branch-protection.ts`, see script docstring for usage):
+- ✅ Require pull request before merging — enforced by `scripts/hooks/pre-push.ts`
+  blocking direct pushes to `main`/`master` (checked against the actual pushed
+  ref, not just the locally checked-out branch)
+- ✅ Require status checks (the repo's CI workflow job names) to pass before
+  merging — configured as GitHub required status checks so `gh pr merge --auto`
+  genuinely waits instead of merging immediately
+- ❌ Require reviewer approval — **not required**. This workspace is
+  maintained by a single owner whose commits are produced through the automated
+  `/sync` pipeline (see [pr-workflow.md](pr-workflow.md)); a mandatory second
+  reviewer has no one to satisfy it and would either block every PR or need a
+  manual admin override on every single merge. If a second maintainer joins,
+  add `required_pull_request_reviews` via the GitHub branch protection UI/API.
+- ❌ Restrict pushes (maintainers only) — not configured; redundant with the
+  direct-push-to-main block above for a single-maintainer repo
+- ❌ Do not allow bypassing rules — `enforce_admins` is left `false` so the
+  repo owner can still override in a genuine emergency; see Rollback Procedure
+  below
 
 ### 2. Branch Hygiene
 
@@ -130,12 +143,17 @@ git push origin <branch>
 
 ### 5. PR Merging
 
-**Merge methods**:
-- **Feature branches**: Merge commit (preserves history)
-- **Fix branches**: Squash and merge (clean history)
-- **Release/hotfix**: Merge commit (preserves release history)
+**Merge method**: Merge commit for every branch type, regardless of prefix
+(`feat/`, `fix/`, `release/`, `hotfix/`). This is what `scripts/dev-sync.ts`
+and `gh pr merge --merge` actually use, and matches this repo's entire commit
+history (`git log` shows "Merge pull request #N from ..." for every PR) — there
+is no squash-merge path in the pipeline today. If per-type merge methods are
+ever wanted, `dev-sync.ts` would need an explicit `--merge-method` decision
+based on branch prefix; until then, treat "merge commit for everything" as the
+actual rule, not the table that used to be here.
 
-**Auto-delete**: Delete branch after merge (automatic)
+**Auto-delete**: Delete branch after merge (`delete_branch_on_merge` repo
+setting — applied via `bun scripts/setup-github-branch-protection.ts`)
 
 ## Emergency Procedures
 
