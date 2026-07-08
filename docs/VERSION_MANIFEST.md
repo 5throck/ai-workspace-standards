@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-08T05:23:39.042Z
+**Generated**: 2026-07-08T05:32:44.294Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -119,7 +119,7 @@
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.1 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.4 | scripts/hooks/pre-push.ts | bun |
+| pre-push.ts | 1.2.5 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
 | promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
 | propagate-to-templates.ts | 2.0.10 | scripts/propagate-to-templates.ts | N/A |
