@@ -480,7 +480,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 >
 > **Skill structure specification**: See [CONSTITUTION.md §6 - Skills](CONSTITUTION.md#6-skills) for frontmatter format and session skill registration.
 >
-> **Skill discovery & registration**: To make these workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered in `.agents/skills.json` at the root of the workspace.
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (sync, meeting) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -522,6 +522,20 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
+
+### Platform Skills Distribution
+
+Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
+
+| Platform | Directory | Registration | Shortcut Skills |
+|----------|-----------|--------------|-----------------|
+| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync`, `meeting` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync`, `meeting` |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `meeting`, `source-command-commit-push-pr` |
+
+- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
+- **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
+- **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
 
 ---
 
