@@ -51,7 +51,7 @@ try {
     const { stdout } = await $`git status --short`.quiet().nothrow();
     gitStatus = stdout.toString().trim();
 } catch (err) {
-  console.error('[dev-sync] Error: ${err}');
+  console.error(`[dev-sync] Error: ${err}`);
 }
 
 let fileLines = "- N/A";
@@ -225,7 +225,7 @@ try {
     const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
     currentBranch = stdout.toString().trim();
 } catch (err) {
-  console.error('[dev-sync] Error: ${err}');
+  console.error(`[dev-sync] Error: ${err}`);
 }
 
 let branch = currentBranch;
@@ -272,7 +272,7 @@ try {
         }
     }
 } catch (err) {
-  console.error('[dev-sync] Error: ${err}');
+  console.error(`[dev-sync] Error: ${err}`);
 }
 
 try {
@@ -309,7 +309,7 @@ try {
         } catch { /* another process may have already removed it — ignore */ }
     }
 } catch (err) {
-  console.error('[dev-sync] Error: ${err}');
+  console.error(`[dev-sync] Error: ${err}`);
 }
 
 // Filename is unique per run (embeds the context UUID) — a shared fixed name
@@ -321,7 +321,7 @@ const tmpPath = repoRoot ? path.join(repoRoot, tmpFileName) : tmpFileName;
 fs.writeFileSync(tmpPath, syncContext);
 
 const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (err) {
-  console.error('[dev-sync] Error: ${err}');
+  console.error(`[dev-sync] Error: ${err}`);
 } };
 process.on('exit', cleanupTmp);
 
@@ -376,7 +376,7 @@ if (existingPrUrl) {
         }
         prBody = genRes.stdout.toString().trim();
     } catch (err) {
-      console.error('[dev-sync] Error: ${err}');
+      console.error(`[dev-sync] Error: ${err}`);
     }
 
     let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;

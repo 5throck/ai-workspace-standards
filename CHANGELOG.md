@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-09]**: fix(scripts): fix template literal bugs in dev-sync.ts — 6 `catch` blocks used single-quoted `'${err}'` instead of backtick template literals, silently swallowing error details
+- **[2026-07-09]**: feat(security): add lib/auth.ts (PBKDF2-HMAC-SHA256, 210K iterations, async) and lib/ssrf.ts (TOCTOU DNS rebinding protection, blocked CIDR validation, pre-resolved direct connection)
 - **[2026-07-08]**: docs(audit): add L0-L2 deployment audit design document and known issues baseline — `docs/designs/l0-l2-deployment-audit-design.md` (6 audit domains, capability-based PASS criteria, evidence collection, CI exit code policy, verification workflow) + `docs/templates/known-issues.json` (7 known issues for Domain 6 baseline)
 - **[2026-07-08]**: feat(skills): add sync skill wrapper for cross-platform discoverability — `skills/sync/SKILL.md` enables `Skill tool → sync` invocation on Claude, Gemini, and Antigravity; AGENTS.md §6 updated with common workspace-level skills table
 - **[2026-07-08]**: fix(skills): propagate sync skill to L1 and enable l2_propagate — `skills/sync/SKILL.md` l2_propagate changed to true, copied to `templates/common/skills/sync/`; sync, project-review, meeting now fully available on all 3 platforms (Claude, Gemini, Antigravity)
@@ -854,7 +856,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-08*
+*Last Updated: 2026-07-09*
 
 
 
