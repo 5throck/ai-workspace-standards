@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-08T22:26:37.048Z
+**Generated**: 2026-07-09T20:21:41.499Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 32
-- **Scripts**: 121
+- **Scripts**: 123
 - **Commands**: 7
 
 ---
@@ -84,6 +84,7 @@
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.10.7 | scripts/audit.ts | bun |
+| auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.1.1 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
@@ -151,6 +152,7 @@
 | skill-dependency-analysis.ts | 1.0.0 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.1.4 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
+| ssrf.ts | 1.0.0 | scripts/lib/ssrf.ts | N/A |
 | substitute-placeholders.ts | 1.1.1 | scripts/helpers/substitute-placeholders.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
