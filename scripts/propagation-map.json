@@ -1,6 +1,6 @@
 {
-  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043).",
-  "version": "1.4.0",
+  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043). l2_drift_eligible (default true): controls whether this domain participates in L1→L2 drift detection via --check-drift. Set false for domains whose L2 content is managed through the Fork Model scaffolding pipeline (create-variant / promote-variant per ADR-0031) — L2 variants receive this content during scaffolding/promotion, not through ongoing L1→L2 sync.",
+  "version": "1.5.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -8,7 +8,8 @@
       "target": "templates/common/scripts",
       "include_pattern": "*.ts",
       "recursive": false,
-      "note": "L0-only scripts excluded — they reference workspace-level files not available in L2 projects"
+      "l2_drift_eligible": false,
+      "note": "Fork Model — 5 of 7 L2 variants have no scripts/; L2 scripts are injected during scaffolding"
     },
     "scripts-hooks": {
       "description": "Git hook scripts",
@@ -16,7 +17,9 @@
       "target": "templates/common/scripts/hooks",
       "include_pattern": "*.ts",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "No L2 variant has scripts/hooks/"
     },
     "scripts-helpers": {
       "description": "Helper/utility scripts used by scaffolding",
@@ -24,7 +27,8 @@
       "target": "templates/common/scripts/helpers",
       "include_pattern": "*.ts",
       "recursive": false,
-      "note": "L0-only helper exclusion is handled by SCRIPTS.md layer column — publish-to-template.ts reads layer before copying"
+      "l2_drift_eligible": false,
+      "note": "No L2 variant has scripts/helpers/"
     },
     "scripts-lib": {
       "description": "Library/utility modules for scripts",
@@ -32,7 +36,8 @@
       "target": "templates/common/scripts/lib",
       "include_pattern": "*.ts",
       "recursive": false,
-      "note": "lib/ files have layer: common in SCRIPTS.md and are propagated L0→L1 via publish-to-template.ts"
+      "l2_drift_eligible": false,
+      "note": "No L2 variant has scripts/lib/"
     },
     "claude-skills": {
       "description": "Platform skills for Claude Code",
@@ -40,7 +45,9 @@
       "target": "templates/common/.claude/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Fork Model — reconcile strips 16/19 L1 skills during promotion; L2 has 3-5 variant-specific skills only"
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -48,7 +55,9 @@
       "target": "templates/common/.gemini/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Fork Model — same as claude-skills"
     },
     "gemini-settings": {
       "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
@@ -57,7 +66,7 @@
       "include_pattern": "settings.json",
       "recursive": false,
       "exclude": [],
-      "note": "Never include: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS, teammateMode, TeammateIdle, TaskCreated, TaskCompleted, permissions — all claude_only per common-contract.json platform_settings"
+      "note": "Only ongoing L1→L2 mirror — shared MCP server and hook config must stay identical across all tiers. All other domains use Fork Model (ADR-0031). Never include: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS, teammateMode, TeammateIdle, TaskCreated, TaskCompleted, permissions — all claude_only per common-contract.json platform_settings"
     },
     "docs": {
       "description": "Documentation and templates",
@@ -70,6 +79,7 @@
         "templates/"
       ],
       "disabled": true,
+      "l2_drift_eligible": false,
       "note": "Disabled until docs propagation policy is decided (ADR required). L1 docs/ is currently independently maintained, not a mirror of L0 docs/. Do not enable without resolving: full mirror vs. whitelist vs. stay independent. Inspect candidate output: --domain docs --include-disabled --dry-run.",
       "disabled_since": "2026-07-08",
       "history": "globFiles() never supported a wildcard within the filename component of a pattern — '**/*.md' reduced to the literal basename '*.md', which can never equal a real filename — so this domain silently matched zero files from the moment it was declared (confirmed 2026-07-08; templates/common/docs/ has 28 independently-authored files vs. 147 under root docs/). Fixed in propagate-to-templates.ts v2.1.0. Activating this domain as-is would copy ~143 previously-unmatched files on the next --apply, including L0-only content (e.g. docs/constitution/) that scripts/audit.ts's L0-leakage check forbids under templates/ — hence disabled rather than enabled by the fix."
@@ -95,10 +105,12 @@
       "target": "templates/common/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
+      "l2_drift_eligible": false,
       "exclude": [
         "local",
         "external"
-      ]
+      ],
+      "note": "Fork Model — L2 maintains domain-specific skills independently (e.g. co-consult: 13, co-deck: 9)"
     },
     "claude-commands": {
       "description": "L0 .claude/commands/ → L1 templates/common/.claude/commands/",
@@ -106,7 +118,9 @@
       "target": "templates/common/.claude/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Fork Model — L1 has 7 commands, only 3/7 L2 variants have 1 variant-specific command each"
     },
     "gemini-commands": {
       "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",
@@ -114,7 +128,9 @@
       "target": "templates/common/.gemini/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Fork Model — same as claude-commands"
     },
     "workspace-customizations": {
       "description": "L0 .agents/ → L1 templates/common/.agents/ — flat JSON config files only",
@@ -122,7 +138,9 @@
       "target": "templates/common/.agents",
       "include_pattern": "*.json",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "No L2 variant has .agents/*.json — workspace-root-only platform config"
     },
     "agents-skills": {
       "description": "L0 .agents/skills/ → L1 templates/common/.agents/skills/ — Antigravity platform skills (shortcut wrappers)",
@@ -130,9 +148,11 @@
       "target": "templates/common/.agents/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
+      "l2_drift_eligible": false,
       "exclude": [
         "simulate-project-creation"
-      ]
+      ],
+      "note": "No L2 variant has .agents/skills/ — workspace-root-only platform skills"
     },
     "claude-skills-json": {
       "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
@@ -140,7 +160,9 @@
       "target": "templates/common/.claude",
       "include_pattern": "skills.json",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "No L2 variant has .claude/skills.json — workspace-root-only registration"
     },
     "gemini-skills-json": {
       "description": "L0 .gemini/skills.json → L1 templates/common/.gemini/skills.json — Gemini skill path registration",
@@ -148,7 +170,9 @@
       "target": "templates/common/.gemini",
       "include_pattern": "skills.json",
       "recursive": false,
-      "exclude": []
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "No L2 variant has .gemini/skills.json — workspace-root-only registration"
     }
   }
 }
