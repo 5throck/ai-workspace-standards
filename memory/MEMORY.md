@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-11](2026-07-11.md) | fix(scripts): fix --check-drift false-positive L2 drift by adding l2_drift_eligible field |
 | [2026-07-10](2026-07-10.md) | fix(project-review): two-round project review with 51+ findings, 18 actioned fixes; project-review skill v1.1.0 (conditional base-map MCP); sync skill v1.1.0 (16-step pipeline docs) |
 | [2026-07-09](2026-07-09.md) | feat(skills): add cross-platform skill distribution infrastructure for Claude, Gemini, and Antigravity |
 | [2026-07-08](2026-07-08.md) | feat(variant-registry): centralized registries, plugin system, validator framework, workspace-integration + co-game variant (Phase A+B) |
