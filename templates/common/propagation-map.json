@@ -1,6 +1,6 @@
 {
-  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode.",
-  "version": "1.2.0",
+  "_comment": "Propagation map: L0 (workspace root) → L1 (templates/common/) for scripts/skills/commands; L1 (templates/common/) → L2 (templates/co-*/) for governance docs via marker-inject mode. Agents are intentionally excluded from L0→L1 propagation — only pm.md uses an explicit extends chain (ADR-0039, ADR-0040). Specialist agents are variant-defined (ADR-0043).",
+  "version": "1.4.0",
   "domains": {
     "scripts": {
       "description": "TypeScript automation scripts",
@@ -40,8 +40,7 @@
       "target": "templates/common/.claude/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": [],
-      "l0_exclude": ["simulate-project-creation"]
+      "exclude": []
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -49,8 +48,7 @@
       "target": "templates/common/.gemini/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": [],
-      "l0_exclude": ["simulate-project-creation"]
+      "exclude": []
     },
     "gemini-settings": {
       "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
@@ -68,29 +66,28 @@
       "include_pattern": "**/*.md",
       "recursive": true,
       "exclude": [],
-      "exclude_prefixes": ["templates/"],
-      "note": "Propagates all markdown files from docs/ to templates/common/docs/. Excludes docs/templates/ subdirectory to avoid duplicate templates/ path."
-    },
-    "governance-claude": {
-      "description": "L1 CLAUDE.md COMMON-CLAUDE section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
-      "mode": "marker-inject",
-      "source_file": "templates/common/CLAUDE.md",
-      "marker": "COMMON-CLAUDE",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
-    },
-    "governance-gemini": {
-      "description": "L1 GEMINI.md COMMON-GEMINI section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
-      "mode": "marker-inject",
-      "source_file": "templates/common/GEMINI.md",
-      "marker": "COMMON-GEMINI",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+      "exclude_prefixes": [
+        "templates/"
+      ],
+      "disabled": true,
+      "note": "Disabled until docs propagation policy is decided (ADR required). L1 docs/ is currently independently maintained, not a mirror of L0 docs/. Do not enable without resolving: full mirror vs. whitelist vs. stay independent. Inspect candidate output: --domain docs --include-disabled --dry-run.",
+      "disabled_since": "2026-07-08",
+      "history": "globFiles() never supported a wildcard within the filename component of a pattern — '**/*.md' reduced to the literal basename '*.md', which can never equal a real filename — so this domain silently matched zero files from the moment it was declared (confirmed 2026-07-08; templates/common/docs/ has 28 independently-authored files vs. 147 under root docs/). Fixed in propagate-to-templates.ts v2.1.0. Activating this domain as-is would copy ~143 previously-unmatched files on the next --apply, including L0-only content (e.g. docs/constitution/) that scripts/audit.ts's L0-leakage check forbids under templates/ — hence disabled rather than enabled by the fix."
     },
     "governance-agents": {
       "description": "L1 AGENTS.md COMMON-AGENTS section injection to all L2 variants (--docs mode only). Source is L1 (post-transformation) not L0.",
       "mode": "marker-inject",
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
-      "target_variants": ["co-consult", "co-design", "co-develop", "co-security", "co-work"]
+      "target_variants": [
+        "co-consult",
+        "co-deck",
+        "co-design",
+        "co-develop",
+        "co-security",
+        "co-work",
+        "co-game"
+      ]
     },
     "skills": {
       "description": "L0 skills/ → L1 templates/common/skills/",
@@ -98,8 +95,10 @@
       "target": "templates/common/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": ["local", "external"],
-      "override_only": true
+      "exclude": [
+        "local",
+        "external"
+      ]
     },
     "claude-commands": {
       "description": "L0 .claude/commands/ → L1 templates/common/.claude/commands/",
@@ -107,8 +106,7 @@
       "target": "templates/common/.claude/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     },
     "gemini-commands": {
       "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",
@@ -116,8 +114,41 @@
       "target": "templates/common/.gemini/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
+    },
+    "workspace-customizations": {
+      "description": "L0 .agents/ → L1 templates/common/.agents/ — flat JSON config files only",
+      "source": ".agents",
+      "target": "templates/common/.agents",
+      "include_pattern": "*.json",
+      "recursive": false,
+      "exclude": []
+    },
+    "agents-skills": {
+      "description": "L0 .agents/skills/ → L1 templates/common/.agents/skills/ — Antigravity platform skills (shortcut wrappers)",
+      "source": ".agents/skills",
+      "target": "templates/common/.agents/skills",
+      "include_pattern": "*/SKILL.md",
+      "recursive": true,
+      "exclude": [
+        "simulate-project-creation"
+      ]
+    },
+    "claude-skills-json": {
+      "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
+      "source": ".claude",
+      "target": "templates/common/.claude",
+      "include_pattern": "skills.json",
+      "recursive": false,
+      "exclude": []
+    },
+    "gemini-skills-json": {
+      "description": "L0 .gemini/skills.json → L1 templates/common/.gemini/skills.json — Gemini skill path registration",
+      "source": ".gemini",
+      "target": "templates/common/.gemini",
+      "include_pattern": "skills.json",
+      "recursive": false,
+      "exclude": []
     }
   }
 }

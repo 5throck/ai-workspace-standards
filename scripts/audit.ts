@@ -219,32 +219,7 @@ if (!LIFECYCLE_ONLY) {
         Warn('.env.sample not found - add one if this project uses environment variables');
     }
 
-    if (fs.existsSync('scripts')) {
-        const scriptFiles = fs.readdirSync('scripts');
-        const shFiles = scriptFiles.filter(f => f.endsWith('.sh') && !f.startsWith('test-'));
-        const ps1Files = scriptFiles.filter(f => f.endsWith('.ps1') && !f.startsWith('test-'));
-
-        // S-02: Bidirectional parity check — both directions, Fail (not Warn)
-        let parityOk = true;
-        for (const f of shFiles) {
-            const base = path.basename(f, '.sh');
-            if (!fs.existsSync(path.join('scripts', `${base}.ps1`))) {
-                Fail(`script parity: ${f} has no matching ${base}.ps1`);
-                parityOk = false;
-            }
-        }
-        for (const f of ps1Files) {
-            const base = path.basename(f, '.ps1');
-            if (!fs.existsSync(path.join('scripts', `${base}.sh`))) {
-                Fail(`script parity: ${f} has no matching ${base}.sh`);
-                parityOk = false;
-            }
-        }
-        if (parityOk) {
-            Pass(`script parity: all .sh/.ps1 pairs present (${shFiles.length} pairs, test-* excluded)`);
-        }
-
-    }
+    // S-02: .sh/.ps1 parity check removed (dead code after ADR-0036 TypeScript migration)
 
     // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
     // if (fs.existsSync('.githooks')) { ... }
@@ -594,7 +569,7 @@ function checkL2VariantIntegrity() {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
-      const lineCount = pmContent.split('\\n').length;
+      const lineCount = pmContent.split('\n').length;
       if (lineCount >= 200) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md has ${lineCount} lines (must be < 200 to prevent L0 duplication bug)`);
         missingCount++;
@@ -758,7 +733,7 @@ function checkStaleShellReferences() {
         'AGENTS.md',
         'GEMINI.md',
         'docs/constitution/09-operations-workflow.md',
-        '.githooks/pre-push.ps1',
+        '.githooks/pre-push',
         '.githooks/commit-msg',
     ];
 
@@ -1305,7 +1280,7 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
             const { stdout } = await $`git diff --name-only HEAD`.quiet().nothrow();
             changedFiles = stdout.toString().trim().split('\n').filter(Boolean);
         } catch (err) {
-          console.error('[audit] Error: ${err}');
+          console.error(`[audit] Error: ${err}`);
         }
 
         const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];

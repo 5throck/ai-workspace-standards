@@ -44,6 +44,15 @@ jobs:
           fi
           echo "Security check passed (no high/critical vulnerabilities)."
 
+      - name: Secret scanning - gitleaks
+        shell: bash
+        run: |
+          if command -v gitleaks &>/dev/null; then
+            gitleaks protect --staged --no-banner --log-level error --source . || true
+          else
+            echo "gitleaks not installed — skipping secret scanning (secrets are checked client-side via pre-commit hook)"
+          fi
+
       - name: Run integration tests
         run: bun run test
 

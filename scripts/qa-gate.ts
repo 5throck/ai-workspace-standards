@@ -20,7 +20,7 @@ console.log('Step 1: Workspace standards audit...');
 const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
-  console.log(`${RED}❌ FAIL: audit.sh failed${RESET}`);
+  console.log(`${RED}❌ FAIL: audit.ts failed${RESET}`);
   if (import.meta.main) {
     process.exit(1);
   }

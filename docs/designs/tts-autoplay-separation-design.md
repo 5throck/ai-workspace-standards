@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Design: TTS ↔ Auto-Advance Separation
 
 **Date**: 2026-06-23

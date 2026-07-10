@@ -12,6 +12,7 @@ import {
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
+import yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -164,7 +165,7 @@ if (tag) {
 
 // Register cleanup on exit
 if (tempDir) {
-  process.on('exit', () => { try { rmSync(tempDir, { recursive: true, force: true }); } catch (err) { console.error('[new-project] Error: ${err}'); } });
+  process.on('exit', () => { try { rmSync(tempDir, { recursive: true, force: true }); } catch (err) { console.error(`[new-project] Error: ${err}`); } });
   if (import.meta.main) {
     process.on('SIGINT', () => { rmSync(tempDir, { recursive: true, force: true }); process.exit(130); });
   }
@@ -269,7 +270,7 @@ function makeWritable(dir: string): void {
       const mode = statSync(f).mode;
       if (!(mode & 0o200)) chmodSync(f, mode | 0o200);
     } catch (err) {
-      console.error('[new-project] Error: ${err}');
+      console.error(`[new-project] Error: ${err}`);
     }
   }
 }
@@ -405,12 +406,11 @@ if (variant === 'co-consult') {
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
 const pmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(pmMd)) {
-  const yaml = require('js-yaml');
   let content = readFileSync(pmMd, 'utf8');
   content = content.replace(/^# @resolved-from:.*\n/m, '');
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
-    const fm: Record<string, unknown> = yaml.load(match[1]) || {};
+    const fm: Record<string, unknown> = yaml.load(match[1], { schema: yaml.DEFAULT_SCHEMA }) || {};
     delete fm.lifecycle;
     delete fm.formal_name;
     delete fm.variant;
@@ -602,7 +602,7 @@ if (existsSync(projectScriptsDir)) {
         console.log(`  🗑️  Excluded L1-only script: ${scriptName}`);
       }
     } catch (err) {
-      console.error('[new-project] Error: ${err}');
+      console.error(`[new-project] Error: ${err}`);
     }
   }
 }

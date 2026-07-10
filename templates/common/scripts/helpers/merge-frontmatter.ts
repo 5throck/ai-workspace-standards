@@ -1184,7 +1184,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         "## Role",
         "## ⚠️ ROLE CLARIFICATION",
         "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
-        "## ?좑툘 YOU ARE THE SINGLE ENTRY POINT",
+        "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
         "## Governance Workflow",
         "## Updated Role",
         "## Agent Roster",
@@ -1324,11 +1324,11 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     console.log(`🔍 Variant Level: ${variantLevel}, File: ${filePath}`);
     let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
 
-    // Debug: Check if CONSTITUTION.md was removed
-    if (variantLevel === 'L2' && processedFinalBody.includes('CONSTITUTION.md')) {
-      console.warn('⚠️  CONSTITUTION.md still present after removeL0OnlyContent!');
+    // Debug: Check if context.md was removed
+    if (variantLevel === 'L2' && processedFinalBody.includes('context.md')) {
+      console.warn('⚠️  context.md still present after removeL0OnlyContent!');
     } else if (variantLevel === 'L2') {
-      console.log('✅ CONSTITUTION.md successfully removed from L2 variant');
+      console.log('✅ context.md successfully removed from L2 variant');
     }
 
     const result = `---
@@ -1673,7 +1673,7 @@ ${processedContent}`;
  *
  * L0 CONTENT DUPLICATION FIX - v1.8.2:
  * - Fixed determineVariantLevel to handle relative paths without leading /
- * - Fixed removeL0OnlyContent to remove CONSTITUTION.md lines completely
+ * - Fixed removeL0OnlyContent to remove context.md lines completely
  * - Added L2-specific section removal in PM file handling
  */
 function removeL0OnlyContent(content: string, variantLevel: string): string {
@@ -1683,7 +1683,7 @@ function removeL0OnlyContent(content: string, variantLevel: string): string {
 
   let processed = content;
 
-  // Remove lines containing CONSTITUTION.md or docs/constitution/ path references
+  // Remove lines containing context.md or docs/constitution/ path references
   processed = processed.replace(
     /^.*(CONSTITUTION\.md|docs[\/\\]constitution[\/\\]).*$/gim,
     ''

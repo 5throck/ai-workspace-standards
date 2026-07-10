@@ -45,9 +45,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
-    "glob": "^11.1.0",
     "js-yaml": "^4.3.0",
-    "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
   "engines": {
@@ -56,9 +54,7 @@
   "workspace-scripts": true,
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "fast-xml-parser": "^5.9.3",
-    "semver": "^7.8.5",
-    "simple-git": "^3.36.0"
+    "semver": "^7.8.5"
   },
   "overrides": {
     "hono": ">=4.12.25",

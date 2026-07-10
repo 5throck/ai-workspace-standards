@@ -150,8 +150,8 @@ async function createAgent(options: AgentOptions): Promise<void> {
   console.log(`  1. Edit the agent file to add role-specific content`);
   console.log(`  2. Add the agent to AGENTS.md (Agent Roster table)`);
   console.log(`  3. Add the agent to Subagent Roster table in AGENTS.md`);
-  if (existsSync(path.join(projectRoot, "CONSTITUTION.md"))) {
-    console.log(`  4. Update CONSTITUTION.md §5.2 Role Groups if needed`);
+  if (existsSync(path.join(projectRoot, "context.md"))) {
+    console.log(`  4. Update context.md §5.2 Role Groups if needed`);
   } else {
     console.log(`  4. Update docs/context.md — Multi-Agent Architecture if needed`);
   }

@@ -47,7 +47,7 @@ function warn(check: string, msg: string, fix?: string) {
 function getSkillVersion(skillMdPath: string): string | null {
   if (!existsSync(skillMdPath)) return null;
   const content = readFileSync(skillMdPath, 'utf-8');
-  const match = content.match(/^version:\s*(\d+\.\d+\.\d+)/m);
+  const match = content.match(/^version:\s*"?(\d+\.\d+\.\d+)"?/m);
   return match ? match[1] : null;
 }
 

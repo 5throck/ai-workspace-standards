@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # PM.md Operations Design Guide
 
 ## Part 1: Quick Start & Status (NEW - 최상단)

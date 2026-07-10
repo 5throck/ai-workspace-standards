@@ -24,11 +24,11 @@ if (!commitMsg) {
 }
 
 // ── Language validation ───────────────────────────────────────────────────────
-// PR titles, bodies, and commit messages must be in English — see CONSTITUTION.md §3
-// (workspace root) or docs/context.md §3 (variant projects, which omit CONSTITUTION.md).
+// PR titles, bodies, and commit messages must be in English — see context.md §3
+// (workspace root) or docs/context.md §3 (variant projects, which omit context.md).
 // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
 // with dev-sync.ts and pre-commit.ts so the three enforcement points can't drift.
-const LANGUAGE_POLICY_REF = existsSync('CONSTITUTION.md') ? 'CONSTITUTION.md §3' : 'docs/context.md §3';
+const LANGUAGE_POLICY_REF = existsSync('context.md') ? 'context.md §3' : 'docs/context.md §3';
 
 function validateLanguage(text: string, label = 'PR body'): void {
   if (hasNonEnglish(text)) {
@@ -125,7 +125,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
 [concise bullet list of actual changes - be specific, not generic]
 
 ## Test Plan
-- [ ] \`bash scripts/audit.sh\` passes
+- [ ] \`bun scripts/audit.ts\` passes
 - [ ] [add relevant manual or automated test steps]
 
 ## Security Checklist
@@ -142,7 +142,7 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
   try {
     const claudeRetry = await withRetry(
       () => $`claude -p ${prompt}`.quiet().nothrow(),
-      { ...DEFAULT_CONFIG, maxRetries: 2, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+      { ...DEFAULT_CONFIG, maxRetries: 2, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
       'claude pr-body'
     );
     const claudeRes = claudeRetry.result;
@@ -154,7 +154,8 @@ Use EXACTLY this structure (keep all section headers, fill placeholders):
         process.exit(0);
       }
     }
-  } catch {
+  } catch (e) {
+    console.warn(`⚠️  AI PR body generation failed (${e instanceof Error ? e.message : String(e)}), using template fallback`);
     // fall through to fallback
   }
 }
@@ -167,7 +168,7 @@ ${commitMsg}
 ${fileList}
 
 ## Test Plan
-- [ ] \`bash scripts/audit.sh\` passes
+- [ ] \`bun scripts/audit.ts\` passes
 - [ ] CHANGELOG.md updated under \`[Unreleased]\`
 
 ## Security Checklist

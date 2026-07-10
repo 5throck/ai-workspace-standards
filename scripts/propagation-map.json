@@ -40,10 +40,7 @@
       "target": "templates/common/.claude/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": [],
-      "l0_exclude": [
-        "simulate-project-creation"
-      ]
+      "exclude": []
     },
     "gemini-skills": {
       "description": "Platform skills for Gemini CLI",
@@ -51,10 +48,7 @@
       "target": "templates/common/.gemini/skills",
       "include_pattern": "*/SKILL.md",
       "recursive": true,
-      "exclude": [],
-      "l0_exclude": [
-        "simulate-project-creation"
-      ]
+      "exclude": []
     },
     "gemini-settings": {
       "description": "Antigravity CLI settings file — shared items only (mcpServers, hooks.SessionStart, hooks.PostToolUse). Claude-only items excluded per platform_settings.claude_only in common-contract.json.",
@@ -104,8 +98,7 @@
       "exclude": [
         "local",
         "external"
-      ],
-      "override_only": true
+      ]
     },
     "claude-commands": {
       "description": "L0 .claude/commands/ → L1 templates/common/.claude/commands/",
@@ -113,8 +106,7 @@
       "target": "templates/common/.claude/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     },
     "gemini-commands": {
       "description": "L0 .gemini/commands/ → L1 templates/common/.gemini/commands/",
@@ -122,8 +114,7 @@
       "target": "templates/common/.gemini/commands",
       "include_pattern": "*.md",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     },
     "workspace-customizations": {
       "description": "L0 .agents/ → L1 templates/common/.agents/ — flat JSON config files only",
@@ -131,8 +122,7 @@
       "target": "templates/common/.agents",
       "include_pattern": "*.json",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     },
     "agents-skills": {
       "description": "L0 .agents/skills/ → L1 templates/common/.agents/skills/ — Antigravity platform skills (shortcut wrappers)",
@@ -142,8 +132,7 @@
       "recursive": true,
       "exclude": [
         "simulate-project-creation"
-      ],
-      "override_only": true
+      ]
     },
     "claude-skills-json": {
       "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
@@ -151,8 +140,7 @@
       "target": "templates/common/.claude",
       "include_pattern": "skills.json",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     },
     "gemini-skills-json": {
       "description": "L0 .gemini/skills.json → L1 templates/common/.gemini/skills.json — Gemini skill path registration",
@@ -160,8 +148,7 @@
       "target": "templates/common/.gemini",
       "include_pattern": "skills.json",
       "recursive": false,
-      "exclude": [],
-      "override_only": true
+      "exclude": []
     }
   }
 }

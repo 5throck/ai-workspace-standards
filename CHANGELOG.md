@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-10]**: fix(project-review): two-round project review — Round 1: 35 issues found and fixed; Round 2: 3 Critical + 16 High + 15 Moderate found, 18 actioned (Critical: L1 schema Phase 5/6, qa-gate Step 3.95, safeResolvePath; High: audit.ts split bug, dead parity check removal, IPv6 SSRF ranges, pre-commit gitleaks separation, 10 more; Moderate: common-contract.json new-project.ts). Moderate items M1-M15 deferred (no functional impact)
+- **[2026-07-10]**: feat(skills): project-review skill v1.1.0 — conditional base-map MCP integration (Step 0 detection, Step 4c cross-validation, graceful degradation when MCP unavailable); sync skill pipeline documentation expanded to full 16-step table with FATAL/non-fatal markers; sync skill owner updated to lifecycle-manager
+- **[2026-07-10]**: fix(security): expand SSRF protection — IPv6 blocked ranges added (::1/128, fc00::/7, fe80::/10, ::ffff:0:0/96, ff00::/8); IPv4 ranges added (0.0.0.0/8, 100.64.0.0/10, 198.18.0.0/15, 224.0.0.0/4, 240.0.0.0/4); ingest-security-frameworks.ts and ingest-external-skills.ts now validate URLs via ssrf.ts before fetch, add AbortController 30s timeout and 10MB content-size limit
+- **[2026-07-10]**: fix(scripts): multiple quality fixes — audit.ts `split('\\n')` → `split('\n')` bug; dead .sh/.ps1 parity check removed from audit.ts; stale .githooks/pre-push.ps1 reference fixed; pre-commit.ts gitleaks crash separated from secret detection (nothrow().quiet()); propagate-to-templates.ts `any` types replaced with proper interfaces; validate-templates.ts dead `checkScriptParity()` removed; new-project.ts `require('js-yaml')` → ESM import; create-l2-scaffold.ts markdown fence removed + fileURLToPath polyfill; dispatch.ts and team-builder.ts `any`/require removed; gen-pr-body.ts and qa-gate.ts `audit.sh` → `audit.ts`; tsconfig.json added noUnusedLocals/noUnusedParameters/noFallthroughCasesInSwitch
+- **[2026-07-10]**: fix(docs): governance document alignment — AGENTS.md §1/§2 deduplication resolved, §5.4→§5.5, anchor paths corrected to docs/constitution/; CONSTITUTION.md Phase 5/6 ordering corrected; workspace-schema.json Phase 5=Lifecycle Finalization synced to L1; .agents/commands/sync.md created for platform parity; common-contract.json `new-project.sh` → `new-project.ts`; variant.json phantom skills removed (co-develop, co-design)
 - **[2026-07-09]**: fix(scripts): fix template literal bugs in dev-sync.ts — 6 `catch` blocks used single-quoted `'${err}'` instead of backtick template literals, silently swallowing error details
 - **[2026-07-09]**: feat(security): add lib/auth.ts (PBKDF2-HMAC-SHA256, 210K iterations, async) and lib/ssrf.ts (TOCTOU DNS rebinding protection, blocked CIDR validation, pre-resolved direct connection)
 - **[2026-07-08]**: docs(audit): add L0-L2 deployment audit design document and known issues baseline — `docs/designs/l0-l2-deployment-audit-design.md` (6 audit domains, capability-based PASS criteria, evidence collection, CI exit code policy, verification workflow) + `docs/templates/known-issues.json` (7 known issues for Domain 6 baseline)
@@ -856,7 +861,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-09*
+*Last Updated: 2026-07-10*
 
 
 

@@ -340,6 +340,7 @@ registry.register({ type: "section_append", priority: 200, ... });
 
 **Proposal**: Multi-language YAML fields and error messages
 
+<!-- Korean text in code example is intentional source material -->
 ```typescript
 const LOCALES = {
   'en': { variant_sections: 'variant_sections', ... },

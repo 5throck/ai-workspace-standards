@@ -164,7 +164,12 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
     const l0Content = readFileSync(l0Path, "utf-8");
     const l1Content = readFileSync(l1Path, "utf-8");
 
-    if (l0Content !== l1Content) {
+    // CONSTITUTION.md references are intentionally scrubbed in L1 (templates/common/).
+    // Normalize both sides before comparison to avoid false drift on governance refs.
+    const l0Normalized = l0Content.replace(/CONSTITUTION\.md/g, 'context.md');
+    const l1Normalized = l1Content;
+
+    if (l0Normalized !== l1Normalized) {
       drifted.push({
         script: entry.script,
         l0Lines: l0Content.split("\n").length,

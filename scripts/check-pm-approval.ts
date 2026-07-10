@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * check-pm-approval.ts — PM Gateway Hook
- * @version 1.0.1
+ * @version 1.0.2
  * @status deprecated
  *
  * PreToolUse hook for Claude Code and Antigravity/Gemini CLI.

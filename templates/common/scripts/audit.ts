@@ -47,20 +47,20 @@ if (fs.existsSync('CHANGELOG.md')) {
     Fail('CHANGELOG.md missing');
 }
 
-// 2. CONSTITUTION.md must be accessible (workspace root / L1 template context only —
-//    L2 variant projects intentionally omit CONSTITUTION.md and use docs/context.md
+// 2. context.md must be accessible (workspace root / L1 template context only —
+//    L2 variant projects intentionally omit context.md and use docs/context.md
 //    instead; variant.json, when present, also marks a generated project copy)
-if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md')) {
-    Pass('CONSTITUTION.md accessible');
+if (fs.existsSync('context.md') || fs.existsSync('../context.md') || fs.existsSync('../../context.md')) {
+    Pass('context.md accessible');
 } else if (fs.existsSync('docs/context.md') || fs.existsSync('variant.json')) {
-    Pass('CONSTITUTION.md check skipped (L1/L2 project — uses docs/context.md)');
+    Pass('context.md check skipped (L1/L2 project — uses docs/context.md)');
 } else {
-    Fail('CONSTITUTION.md not found (expected at ./, ../, or ../../)');
+    Fail('context.md not found (expected at ./, ../, or ../../)');
 }
 
 // 2.5. Constitution section files must exist and be non-empty (workspace root only)
-if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('docs/constitution')) {
-    const content = fs.readFileSync('CONSTITUTION.md', 'utf-8');
+if (fs.existsSync('context.md') && fs.existsSync('docs/constitution')) {
+    const content = fs.readFileSync('context.md', 'utf-8');
     const regex = /docs\/constitution\/([\w.-]+\.md)/g;
     let match;
     while ((match = regex.exec(content)) !== null) {
@@ -219,32 +219,7 @@ if (!LIFECYCLE_ONLY) {
         Warn('.env.sample not found - add one if this project uses environment variables');
     }
 
-    if (fs.existsSync('scripts')) {
-        const scriptFiles = fs.readdirSync('scripts');
-        const shFiles = scriptFiles.filter(f => f.endsWith('.sh') && !f.startsWith('test-'));
-        const ps1Files = scriptFiles.filter(f => f.endsWith('.ps1') && !f.startsWith('test-'));
-
-        // S-02: Bidirectional parity check — both directions, Fail (not Warn)
-        let parityOk = true;
-        for (const f of shFiles) {
-            const base = path.basename(f, '.sh');
-            if (!fs.existsSync(path.join('scripts', `${base}.ps1`))) {
-                Fail(`script parity: ${f} has no matching ${base}.ps1`);
-                parityOk = false;
-            }
-        }
-        for (const f of ps1Files) {
-            const base = path.basename(f, '.ps1');
-            if (!fs.existsSync(path.join('scripts', `${base}.sh`))) {
-                Fail(`script parity: ${f} has no matching ${base}.sh`);
-                parityOk = false;
-            }
-        }
-        if (parityOk) {
-            Pass(`script parity: all .sh/.ps1 pairs present (${shFiles.length} pairs, test-* excluded)`);
-        }
-
-    }
+    // S-02: .sh/.ps1 parity check removed (dead code after ADR-0036 TypeScript migration)
 
     // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
     // if (fs.existsSync('.githooks')) { ... }
@@ -253,7 +228,7 @@ if (!LIFECYCLE_ONLY) {
     // Check: no non-standard .md files at project root (file organization policy)
     const STANDARD_ROOT_MD = new Set([
         'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
-        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'
+        'SECURITY.md', 'context.md', 'CLAUDE.md', 'GEMINI.md'
     ]);
     const rootMdFiles = fs.readdirSync('.')
         .filter(f => f.endsWith('.md') && !STANDARD_ROOT_MD.has(f));
@@ -372,7 +347,7 @@ if (hasBun) {
         else
             Pass("README lifecycle audit: all READMEs healthy");
     }
-    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md') && !SKIP_MEMORY) {
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('context.md') && !SKIP_MEMORY) {
         // explicitly skip any files located in memory/archive/
         const memoryFiles = fs.readdirSync('memory')
             .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
@@ -594,7 +569,7 @@ function checkL2VariantIntegrity() {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
         missingCount++;
       }
-      const lineCount = pmContent.split('\\n').length;
+      const lineCount = pmContent.split('\n').length;
       if (lineCount >= 200) {
         Fail(`L2 integrity: templates/${variant}/agents/pm.md has ${lineCount} lines (must be < 200 to prevent L0 duplication bug)`);
         missingCount++;
@@ -758,7 +733,7 @@ function checkStaleShellReferences() {
         'AGENTS.md',
         'GEMINI.md',
         'docs/constitution/09-operations-workflow.md',
-        '.githooks/pre-push.ps1',
+        '.githooks/pre-push',
         '.githooks/commit-msg',
     ];
 
@@ -816,9 +791,9 @@ checkVariantAgentSections();
 checkVariantSkillSections();
 }
 
-// Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
+// Workspace root detection: presence of context.md (and absence of variant.json)
 // distinguishes the governance root from generated project copies.
-const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('variant.json');
+const IS_WORKSPACE_ROOT = fs.existsSync('context.md') && !fs.existsSync('variant.json');
 
 // Check: Agent files must have a non-empty ## Required Tools section (workspace root only)
 if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
@@ -972,10 +947,10 @@ if (IS_WORKSPACE_ROOT) {
         Warn('Could not read docs/workspace-schema.json for stray-artifact check — skipping');
     }
 }
-// Check: L0 Leakage (CONSTITUTION.md references in templates)
+// Check: L0 Leakage (context.md references in templates)
 if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     let leakageErrors = 0;
-    // Matches: CONSTITUTION.md (literal), docs/constitution/ or docs\constitution\ path patterns
+    // Matches: context.md (literal), docs/constitution/ or docs\constitution\ path patterns
     const L0_LEAK_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
     const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
     const checkLeakage = (dir: string) => {
@@ -1305,7 +1280,7 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
             const { stdout } = await $`git diff --name-only HEAD`.quiet().nothrow();
             changedFiles = stdout.toString().trim().split('\n').filter(Boolean);
         } catch (err) {
-          console.error('[audit] Error: ${err}');
+          console.error(`[audit] Error: ${err}`);
         }
 
         const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];

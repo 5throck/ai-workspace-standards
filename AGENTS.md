@@ -47,33 +47,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 ## §2: Individual Agent Definitions
 
-### 🛠️ Orchestration & Audit Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) (L0) → [`templates/common/agents/pm.md`](templates/common/agents/pm.md) (L1) → [`templates/<variant>/agents/pm.md`](templates/co-design/agents/pm.md) (L2) | High | Three-level inheritance architecture: L0 (workspace root base) → L1 (common template pure-extends) → L2 (variant YAML overrides). Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** See [L0→L1→L2 PM Agent Architecture](#l0→l1→l2-pm-agent-architecture) for details. |
-| Consistency Auditor | [`agents/auditor.md`](agents/auditor.md) | Medium | Workspace-root-only cross-domain consistency auditor; detects structural inconsistencies scripts miss; NOT dispatched in variant projects |
-| **Lifecycle Manager** | [`agents/lifecycle-manager.md`](agents/lifecycle-manager.md) | Medium | **Workspace root only — L0-only agent**. Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers); core duties include L0->L1 template publishing and L1->L2 explicitly requested skill/script synchronization; syncs governance docs after changes. Lifecycle finalization is handled automatically by `/sync` — PM does NOT need a separate N-1 dispatch step. **NOT available in variant templates** — this agent operates exclusively at workspace root level. |
-
-### 📐 Design Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Template Architect | [`agents/architect.md`](agents/architect.md) | High | Overall project structure design expert; defines folder hierarchies and architectural standards; produces implementation plans and ADRs |
-
-### ⚙️ Execution Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
-| Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | **Medium** | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
-| Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
-
-### 🛡️ Security Agents
-
-| Agent | File | Tier | Role |
-|-------|------|------|------|
-| Security & Git Expert | [`agents/security-expert.md`](agents/security-expert.md) | Medium | Enforces Git Hooks; manages .gitleaks configurations; handles credential management; ensures secure dependency handling |
+See [§1 Agent Ecosystem Overview](#1-agent-ecosystem-overview) for the complete agent roster table. Individual agent definitions are in their respective files listed in that table.
 
 ---
 
@@ -332,13 +306,13 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 
 ---
 
 ### 4.2 Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [CONSTITUTION.md §5.4](CONSTITUTION.md#54-pm-governance-workflow-7-phases):
+Following the **PM governance workflow** defined in [CONSTITUTION.md §5.5](CONSTITUTION.md#55-pm-gateway-workflow):
 
 ```
 Phase 0 - Project Initiation (PM-owned)
@@ -592,13 +566,13 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Use the `agent-lifecycle-manager` skill to guide the process.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](CONSTITUTION.md#51-agent-file-format-standard-frontmatter).
+4. Ensure the agent file follows the frontmatter specification in [CONSTITUTION.md §5.1](docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
 1. Use the `skill-lifecycle-manager` skill to guide the process.
 2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](CONSTITUTION.md#62-skill-file-format-standard-frontmatter).
+3. Ensure the skill follows the frontmatter specification in [CONSTITUTION.md §6.2](docs/constitution/06-skill-lifecycle.md#62-skill-file-format-standard-frontmatter).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
 > **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [CONSTITUTION.md §1](CONSTITUTION.md#1-standard-folder-structure).
@@ -633,7 +607,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    - 🟡 Deprecated dependency usage → fix within 2 weeks
    - 🟢 Wording or example improvements → batch in next release cycle
 
-3. **Apply modifications** using the checklist at [docs/lifecycle/skills/skill-modification-checklist.md](docs/lifecycle/skills/skill-modification-checklist.md)
+3. **Apply modifications** following the review and triage steps defined inline in this section (§10)
 
 4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
 

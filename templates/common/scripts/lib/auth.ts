@@ -73,20 +73,16 @@ export async function hashPassword(
  * Verify a password against a stored hash (async, non-blocking).
  *
  * @param password - Plain-text password to verify
- * @param storedHash - Hex-encoded stored hash
- * @param storedSalt - Hex-encoded stored salt
- * @param iterations - Iteration count used during hashing (default: 210,000)
+ * @param hashResult - Stored HashResult containing salt, hash, and iterations
  * @returns true if password matches
  */
 export async function verifyPassword(
   password: string,
-  storedHash: string,
-  storedSalt: string,
-  iterations: number = PBKDF2_ITERATIONS,
+  hashResult: HashResult,
 ): Promise<boolean> {
-  const salt = Buffer.from(storedSalt, 'hex');
-  const hash = await asyncPbkdf2(password, salt, iterations);
-  return crypto.timingSafeEqual(hash, Buffer.from(storedHash, 'hex'));
+  const salt = Buffer.from(hashResult.salt, 'hex');
+  const hash = await asyncPbkdf2(password, salt, hashResult.iterations);
+  return crypto.timingSafeEqual(hash, Buffer.from(hashResult.hash, 'hex'));
 }
 
 // ============================================================================

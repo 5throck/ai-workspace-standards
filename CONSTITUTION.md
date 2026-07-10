@@ -120,7 +120,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 
 ### 5. Multi-Agent Architecture → [Full details](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Quality Assurance → Phase 6: Lifecycle Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-4-7, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-4-6, gemini-3.5-flash) for QA; Low-tier (claude-haiku-4-5, gemini-3.5-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 
@@ -186,7 +186,7 @@ Agents have three states: **active** (production use), **deprecated** (being pha
 
 ---
 
-### 5.8 Additive Template Architecture
+### 5.7 Additive Template Architecture
 
 L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VARIANT-SECTION: [id] -->` markers.
 
@@ -473,7 +473,7 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant
-One of six project archetypes: `co-develop`, `co-design`, `co-work`, `co-security`, `co-consult` (all stable), `co-deck` (beta). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+One of seven project archetypes: `co-develop`, `co-design`, `co-work`, `co-security`, `co-consult` (all stable), `co-deck` (beta), `co-game` (beta, game development — created 2026-07-08). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Three values:
@@ -566,4 +566,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-07-04*
+*Last Updated: 2026-07-10*
