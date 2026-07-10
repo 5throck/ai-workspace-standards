@@ -59,43 +59,43 @@ const PARITY_RULES: Record<string, ParityRule[]> = {
       section: 'Project Overview',
       tier: 'shared',
       description: 'General project description and workspace structure',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Development Guidelines',
       tier: 'shared',
       description: 'Core principles, workflow standards, and code review standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'File Management',
       tier: 'shared',
       description: 'Tool preferences and file handling rules',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Language Policy',
       tier: 'shared',
       description: 'Documentation language requirements',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Git Practices',
       tier: 'shared',
       description: 'Git workflow and commit standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Claude Code-Specific Behaviors',
       tier: 'shared',
       description: 'Shared configuration sections (hooks, commands, MCP)',
-      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'context.md', 'workspace standards'],
     },
     {
       section: 'Agent Dispatch Rules',
       tier: 'shared',
       description: 'PM Gateway and multi-agent workflow',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Antigravity Security Configuration',
@@ -124,43 +124,43 @@ const PARITY_RULES: Record<string, ParityRule[]> = {
       section: 'Project Overview',
       tier: 'shared',
       description: 'General project description and workspace structure',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Development Guidelines',
       tier: 'shared',
       description: 'Core principles, workflow standards, and code review standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'File Management',
       tier: 'shared',
       description: 'Tool preferences and file handling rules',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Language Policy',
       tier: 'shared',
       description: 'Documentation language requirements',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Git Practices',
       tier: 'shared',
       description: 'Git workflow and commit standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Claude Code-Specific Behaviors',
       tier: 'shared',
       description: 'Shared configuration sections (hooks, commands, MCP)',
-      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'context.md', 'workspace standards'],
     },
     {
       section: 'Agent Dispatch Rules',
       tier: 'shared',
       description: 'PM Gateway and multi-agent workflow',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
+      skipPatterns: ['context.md', 'workspace standards'],
     },
     {
       section: 'Antigravity Security Configuration',
@@ -177,7 +177,7 @@ const PARITY_RULES: Record<string, ParityRule[]> = {
       skipPatterns: [],
     },
     {
-      section: '## ?좑툘 YOU ARE THE SINGLE ENTRY POINT',
+      section: '## 🚨 YOU ARE THE SINGLE ENTRY POINT',
       tier: 'shared',
       description: 'PM as single entry point enforcement',
       skipPatterns: [],
@@ -618,7 +618,7 @@ async function main() {
     // Check L1
     const l1Path = join(process.cwd(), mappings.L1);
 
-    // For CLAUDE.md and GEMINI.md, L0→L1 check is informational only (L1 has intentional CONSTITUTION.md → workspace standards transformation)
+    // For CLAUDE.md and GEMINI.md, L0→L1 check is informational only (L1 has intentional context.md → workspace standards transformation)
     if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md') {
       // Just verify L1 file exists, don't compare content
       if (!existsSync(l1Path)) {

@@ -7,8 +7,8 @@
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 
-import { existsSync, mkdirSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, mkdirSync, unlinkSync } from "node:fs";
+import { join, dirname } from "node:path";
 
 // ─── ANSI Colors ────────────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ function loadCheckpoints(): Checkpoint[] {
       const raw = Bun.file(CHECKPOINT_FILE).textSync();
       return JSON.parse(raw) as Checkpoint[];
     } catch (err) {
-      console.error('[team-builder] Error: ${err}');
+      console.error(`[team-builder] Error: ${err}`);
       return initCheckpoints();
     }
   }
@@ -209,12 +209,8 @@ async function writeFile(path: string, content: string): Promise<void> {
   await Bun.write(path, content);
 }
 
-function deleteFile(path: string): void {
-  const { unlink } = require("fs");
-  try { unlink.call(null, path, () => {}); } catch (err) { console.error('[team-builder] Error: ${err}'); }
-  // use sync delete
-  const { unlinkSync } = require("fs");
-  try { unlinkSync(path); } catch (err) { console.error('[team-builder] Error: ${err}'); }
+function deleteFile(filePath: string): void {
+  try { unlinkSync(filePath); } catch (err) { console.error(`[team-builder] Error: ${err}`); }
 }
 
 // ─── Template generators ──────────────────────────────────────────────────────
@@ -1045,10 +1041,9 @@ ${G}Examples:${Z}
 
   // ── Cleanup & Summary ─────────────────────────────────────────────────────
   try {
-    const { unlinkSync } = require("fs");
     if (existsSync(CHECKPOINT_FILE)) unlinkSync(CHECKPOINT_FILE);
   } catch (err) {
-    console.error('[team-builder] Error: ${err}');
+    console.error(`[team-builder] Error: ${err}`);
   }
 
   console.log(`\n${G}╔══════════════════════════════════════════════╗`);

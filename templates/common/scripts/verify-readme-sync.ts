@@ -186,8 +186,9 @@ async function runDynamicAudit(): Promise<number> {
                     errors++;
                 }
             } else if (!enStaged && koStaged) {
-                console.error(`\x1b[31m[FAIL]\x1b[0m ${koFile} is staged, but ${enFile} is NOT staged!`);
-                errors++;
+                // README_ko.md changed alone is valid (e.g. translation-only fix).
+                // Warn but don't block — hash-sync tracking will catch stale translations.
+                console.warn(`\x1b[33m[WARN]\x1b[0m ${koFile} is staged, but ${enFile} is NOT staged — translation-only update assumed.`);
             } else {
                 // Both staged — verify content_hash == translated_from_hash
                 const enHash = getFrontmatterField(enFile, "content_hash");

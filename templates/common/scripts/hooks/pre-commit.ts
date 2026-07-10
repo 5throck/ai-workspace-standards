@@ -271,40 +271,58 @@ async function main() {
 
   // 7. Secret scan
   console.log("\n=== Secret scan ===");
-  try {
-    const hasGitleaks = await $`gitleaks version`.nothrow().quiet();
-    if (hasGitleaks.exitCode === 0) {
-      const configArg = existsSync('.gitleaks.toml') ? ['--config', '.gitleaks.toml'] : [];
-      await $`gitleaks protect --staged --no-banner --log-level error ${configArg}`;
-      console.log("\x1b[32m[PASS]\x1b[0m gitleaks: no secrets detected");
-    } else {
-      const diff = await $`git diff --cached -U0`.text();
-      const added = diff.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).join('\n');
-      const patterns = [
-        /(password|passwd|secret|api_key|apikey|access_token|auth_token)\s*=\s*['"][^'"]{8,}['"]/i,
-        /AKIA[0-9A-Z]{16}/,
-        /ghp_[0-9a-zA-Z]{36}/,
-        /sk-[0-9a-zA-Z]{48}/,
-        /sk-ant-[a-zA-Z0-9\-_]{95,}/,    // H-07: Anthropic API keys (sk-ant-api03-...)
-        /sk-proj-[a-zA-Z0-9\-_]{48,}/,   // H-07: Anthropic project keys
-      ];
+
+  // Regex fallback always runs for defense-in-depth
+  const regexScanPassed = (() => {
+    const diff = $`git diff --cached -U0`.nothrow().quiet();
+    // We need the text synchronously; use sync-safe approach
+    const patterns = [
+      /(password|passwd|secret|api_key|apikey|access_token|auth_token)\s*=\s*['"][^'"]{8,}['"]/i,
+      /AKIA[0-9A-Z]{16}/,
+      /ghp_[0-9a-zA-Z]{36}/,
+      /sk-[0-9a-zA-Z]{48}/,
+      /sk-ant-[a-zA-Z0-9\-_]{95,}/,    // H-07: Anthropic API keys (sk-ant-api03-...)
+      /sk-proj-[a-zA-Z0-9\-_]{48,}/,   // H-07: Anthropic project keys
+    ];
+    return async () => {
+      const diffText = await diff.text();
+      const added = diffText.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).join('\n');
       for (const p of patterns) {
         if (p.test(added)) {
-          console.error(`\x1b[31m[FAIL]\x1b[0m Possible secret detected by regex.`);
-          process.exit(1);
+          return false;
         }
       }
-      console.log("\x1b[32m[PASS]\x1b[0m Regex secret scan: nothing detected");
+      return true;
+    };
+  })();
+
+  // Check gitleaks availability
+  const gitleaksCheck = await $`which gitleaks 2>/dev/null`.nothrow().quiet();
+  if (gitleaksCheck.exitCode === 0) {
+    try {
+      const configArg = existsSync('.gitleaks.toml') ? ['--config', '.gitleaks.toml'] : [];
+      const gitleaksResult = await $`gitleaks protect --staged --no-banner --log-level error ${configArg[0] ?? ''} ${configArg[1] ?? ''}`.nothrow().quiet();
+      if (gitleaksResult.exitCode !== 0) {
+        console.error("\x1b[31m[FAIL]\x1b[0m Secrets detected by gitleaks! Commit blocked.");
+        process.exit(1);
+      }
+      console.log("\x1b[32m[PASS]\x1b[0m gitleaks: no secrets detected");
+    } catch (err) {
+      console.warn('\x1b[33m[WARN]\x1b[0m gitleaks execution error -- using regex fallback');
     }
-  } catch (e) {
-    console.error("\x1b[31m[FAIL]\x1b[0m Secret scan failed or secrets detected. Commit blocked.");
+  } else {
+    console.warn('\x1b[33m[WARN]\x1b[0m gitleaks not installed -- using regex fallback');
+  }
+
+  // Regex fallback runs regardless for defense-in-depth
+  if (!(await regexScanPassed())) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Possible secret detected by regex. Commit blocked.");
     process.exit(1);
   }
+  console.log("\x1b[32m[PASS]\x1b[0m Regex secret scan: nothing detected");
 }
 
 main().catch(err => {
   console.error("Hook error:", err);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 });

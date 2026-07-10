@@ -1,5 +1,6 @@
 ---
 name: "source-command-commit-push-pr"
+version: "1.0.0"
 description: "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
 ---
 

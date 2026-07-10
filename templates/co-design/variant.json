@@ -41,10 +41,7 @@
       "file": "agents/visual-designer.md"
     }
   ],
-  "skills": [
-    { "name": "service-design" },
-    { "name": "ui-ux-design-intelligence" }
-  ],
+  "skills": [],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [],

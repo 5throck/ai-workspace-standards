@@ -4,6 +4,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { validateUrl } from './lib/ssrf.ts';
 
 const CYAN   = '\x1b[36m';
 const RED    = '\x1b[31m';
@@ -45,9 +46,32 @@ async function ingest() {
     for (const skill of externalSkills) {
       console.log(`Ingesting ${skill.name} for ${variant}...`);
       try {
-        const response = await fetch(skill.source_url);
+        const ssrfCheck = await validateUrl(skill.source_url);
+        if (!ssrfCheck.allowed) {
+          console.error(`${YELLOW}SSRF check blocked ${skill.name}: ${ssrfCheck.reason}${RESET}`);
+          continue;
+        }
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        let response: Response;
+        try {
+          response = await fetch(skill.source_url, { signal: controller.signal, redirect: 'error' });
+          clearTimeout(timeout);
+        } catch (err) {
+          clearTimeout(timeout);
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            console.error(`${RED}Timeout fetching ${skill.name} (30s)${RESET}`);
+            continue;
+          }
+          throw err;
+        }
         if (!response.ok) {
           console.error(`${RED}Failed to fetch ${skill.source_url}: ${response.statusText}${RESET}`);
+          continue;
+        }
+        const contentLength = Number(response.headers.get('content-length'));
+        if (contentLength > 10 * 1024 * 1024) {
+          console.error(`${RED}Rejected ${skill.name}: content-length ${contentLength} exceeds 10MB limit${RESET}`);
           continue;
         }
         const content = await response.text();
@@ -63,9 +87,32 @@ async function ingest() {
     for (const script of externalScripts) {
       console.log(`Ingesting script ${script.name} for ${variant}...`);
       try {
-        const response = await fetch(script.source_url);
+        const ssrfCheck = await validateUrl(script.source_url);
+        if (!ssrfCheck.allowed) {
+          console.error(`${YELLOW}SSRF check blocked ${script.name}: ${ssrfCheck.reason}${RESET}`);
+          continue;
+        }
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        let response: Response;
+        try {
+          response = await fetch(script.source_url, { signal: controller.signal, redirect: 'error' });
+          clearTimeout(timeout);
+        } catch (err) {
+          clearTimeout(timeout);
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            console.error(`${RED}Timeout fetching ${script.name} (30s)${RESET}`);
+            continue;
+          }
+          throw err;
+        }
         if (!response.ok) {
           console.error(`${RED}Failed to fetch ${script.source_url}: ${response.statusText}${RESET}`);
+          continue;
+        }
+        const contentLength = Number(response.headers.get('content-length'));
+        if (contentLength > 10 * 1024 * 1024) {
+          console.error(`${RED}Rejected ${script.name}: content-length ${contentLength} exceeds 10MB limit${RESET}`);
           continue;
         }
         const content = await response.text();

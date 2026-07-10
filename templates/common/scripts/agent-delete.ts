@@ -57,8 +57,8 @@ async function deleteAgent(name: string, force: boolean = false): Promise<void> 
   console.log(`\n⚠️  Remember to:`);
   console.log(`  1. Remove the agent from AGENTS.md Agent Roster table`);
   console.log(`  2. Remove the agent from Subagent Roster table in AGENTS.md`);
-  if (existsSync(path.join(projectRoot, "CONSTITUTION.md"))) {
-    console.log(`  3. Update CONSTITUTION.md §5.2 Role Groups if needed`);
+  if (existsSync(path.join(projectRoot, "context.md"))) {
+    console.log(`  3. Update context.md §5.2 Role Groups if needed`);
   } else {
     console.log(`  3. Update docs/context.md — Multi-Agent Architecture if needed`);
   }

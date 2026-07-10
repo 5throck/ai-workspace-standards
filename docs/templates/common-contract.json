@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
   "version": "1.2.0",
-  "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.sh and may declare overrides in their variant.json.",
+  "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json.",
   "governance": {
     "anti_swelling_threshold": 0.5,
     "anti_swelling_note": "If >= 50% of variants override the same agent, the common definition should be updated instead",
@@ -76,6 +76,24 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Validates documentation cross-references and link integrity"
+    },
+    "sync": {
+      "source": "skills/sync/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Runs the full project sync pipeline"
+    },
+    "team-builder": {
+      "source": "skills/team-builder/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Guides building a new AI agent team"
+    },
+    "translate": {
+      "source": "skills/translate/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Translation helper for README and documentation files"
     }
   },
   "common_commands": {

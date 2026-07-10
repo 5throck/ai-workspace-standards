@@ -177,7 +177,7 @@ const PARITY_RULES: Record<string, ParityRule[]> = {
       skipPatterns: [],
     },
     {
-      section: '## ?좑툘 YOU ARE THE SINGLE ENTRY POINT',
+      section: '## 🚨 YOU ARE THE SINGLE ENTRY POINT',
       tier: 'shared',
       description: 'PM as single entry point enforcement',
       skipPatterns: [],

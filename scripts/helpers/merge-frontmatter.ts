@@ -1184,7 +1184,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         "## Role",
         "## ⚠️ ROLE CLARIFICATION",
         "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
-        "## ?좑툘 YOU ARE THE SINGLE ENTRY POINT",
+        "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
         "## Governance Workflow",
         "## Updated Role",
         "## Agent Roster",

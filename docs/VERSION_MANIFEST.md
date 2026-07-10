@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-09T20:21:41.499Z
+**Generated**: 2026-07-10T14:52:38.584Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 32
+- **Skills**: 33
 - **Scripts**: 123
 - **Commands**: 7
 
@@ -46,8 +46,8 @@
 | meeting-facilitation | 1.4.0 | .claude/skills/meeting-facilitation/SKILL.md | both | N/A | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | N/A | pm |
-| project-review | 1.0.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
-| project-review | 1.0.0 | .claude/skills/project-review/SKILL.md | both | N/A | pm |
+| project-review | 1.1.0 | skills/project-review/SKILL.md | workspace | N/A | pm |
+| project-review | 1.1.0 | .claude/skills/project-review/SKILL.md | both | N/A | pm |
 | promote-variant | 1.0.1 | skills/promote-variant/SKILL.md | workspace | N/A | pm |
 | promote-variant | 1.0.1 | .claude/skills/promote-variant/SKILL.md | both | N/A | pm |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | N/A | pm |
@@ -58,8 +58,9 @@
 | simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | skill-lifecycle-manager | 1.2.0 | .claude/skills/skill-lifecycle-manager/SKILL.md | both | N/A | pm |
-| sync | 1.0.0 | skills/sync/SKILL.md | workspace | N/A | pm |
-| sync | 1.0.0 | .claude/skills/sync/SKILL.md | both | N/A | pm |
+| source-command-commit-push-pr | 1.0.0 | .claude/skills/source-command-commit-push-pr/SKILL.md | both | N/A | N/A |
+| sync | 1.1.0 | skills/sync/SKILL.md | workspace | N/A | lifecycle-manager |
+| sync | 1.1.0 | .claude/skills/sync/SKILL.md | both | N/A | lifecycle-manager |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | N/A | pm |
 | team-builder | 1.1.0 | .claude/skills/team-builder/SKILL.md | both | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
@@ -88,10 +89,10 @@
 | beta-lifecycle.ts | 1.1.1 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
-| check-pm-approval.ts | 1.0.1 | scripts/check-pm-approval.ts | N/A |
+| check-pm-approval.ts | 1.0.2 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| create-l2-scaffold.ts | 1.6.4 | scripts/create-l2-scaffold.ts | child_process, fs, path |
+| create-l2-scaffold.ts | 1.6.4 | scripts/create-l2-scaffold.ts | N/A |
 | dev-sync.ts | 1.3.5 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
@@ -113,7 +114,7 @@
 | index.ts | 1.0.0 | scripts/validators/index.ts | N/A |
 | ingest-external-skills.ts | 1.0.2 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.0.1 | scripts/ingest-security-frameworks.ts | N/A |
-| inject-global-plugins.ts | 1.0.1 | scripts/helpers/inject-global-plugins.ts | N/A |
+| inject-global-plugins.ts | 1.0.2 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.1 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.9.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
@@ -124,7 +125,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.2.1 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.2.1 | scripts/new-project.ts | js-yaml |
 | normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
@@ -160,7 +161,7 @@
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.1.0 | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.1 | scripts/tag-template.ts | bun |
-| team-builder.ts | 1.2.1 | scripts/team-builder.ts | fs, path |
+| team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
 | template-utils.ts | 1.0.0 | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | 1.0.2 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
@@ -218,7 +219,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 7 / 7
-- **Skills with parity**: 18 / 32
+- **Skills with parity**: 19 / 33
 
 ---
 
@@ -250,6 +251,7 @@
 - Skill simulate-project-creation has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
+- Skill source-command-commit-push-pr has no triggers defined
 - Skill sync has no triggers defined
 - Skill sync has no triggers defined
 - Skill team-builder has no triggers defined

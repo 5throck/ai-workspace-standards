@@ -60,7 +60,7 @@ const colors = {
 
 const ROOT = cwd();
 const AGENTS_FILE = join(ROOT, 'AGENTS.md');
-const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+const CONSTITUTION_FILE = join(ROOT, 'context.md');
 
 // Detect if we're at workspace root or in a sub-project
 const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);

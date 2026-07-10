@@ -689,42 +689,7 @@ function checkCommands(variant: string): void {
   }
 }
 
-// Check 7: scripts and .githooks parity
-function checkScriptParity(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check 7: scripts parity in ${variant} ===`);
-
-  // Only check common/ for script parity
-  if (variant !== 'common') return;
-
-  // 7a: scripts/ bidirectional .sh/.ps1 parity (Fail)
-  const scriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
-  if (!existsSync(scriptsDir)) {
-    warn('common', 'scripts-dir', 'templates/common/scripts/ not found');
-  } else {
-    const files = readdirSync(scriptsDir);
-    const shNames = new Set(files.filter(f => f.endsWith('.sh') && !f.startsWith('test-')).map(f => f.replace('.sh', '')));
-    const ps1Names = new Set(files.filter(f => f.endsWith('.ps1') && !f.startsWith('test-')).map(f => f.replace('.ps1', '')));
-
-    const missingPs1 = [...shNames].filter(n => !ps1Names.has(n));
-    const missingSh = [...ps1Names].filter(n => !shNames.has(n));
-
-    if (missingPs1.length > 0) {
-      fail('common', 'script-parity', `Missing .ps1 counterparts: ${missingPs1.map(n => n + '.sh').join(', ')}`, 'Create matching .ps1 files');
-    }
-    if (missingSh.length > 0) {
-      fail('common', 'script-parity', `Missing .sh counterparts: ${missingSh.map(n => n + '.ps1').join(', ')}`, 'Create matching .sh files');
-    }
-    if (missingPs1.length === 0 && missingSh.length === 0) {
-      pass(`common/scripts: .sh/.ps1 parity OK (${shNames.size} pairs, test-* excluded)`);
-    }
-  }
-
-  // 7b: .githooks/ parity — Removed since hooks are now TS wrappers without .ps1 equivalents
-  const hooksDir = join(TEMPLATES_DIR, 'common', '.githooks');
-  if (existsSync(hooksDir)) {
-    pass(`common/.githooks: present`);
-  }
-}
+// Check 7: scripts and .githooks parity — removed (dead code after ADR-0036 TypeScript migration)
 
 // Check 8: Shared file sync warning
 function checkSharedFileSync(): void {
@@ -892,6 +857,8 @@ function checkL0L1ScriptParity() {
   for (const script of commonScripts) {
     // Skip helper sub-paths and non-file entries that may appear in the registry
     if (script.includes('/')) continue;
+    // Skip non-script config files (JSON, etc.) — they are data, not executable scripts
+    if (!script.endsWith('.ts') && !script.endsWith('.md')) continue;
 
     const l1Path = join(L1_SCRIPTS, script);
     const l0Path = join(L0_SCRIPTS, script);
@@ -900,7 +867,9 @@ function checkL0L1ScriptParity() {
       const l1Content = readFileSync(l1Path, 'utf-8');
       const l0Content = readFileSync(l0Path, 'utf-8');
 
-      if (normalize(l1Content) !== normalize(l0Content)) {
+      // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
+      const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');
+      if (normalize(l1Content) !== l0Normalized) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
@@ -945,7 +914,9 @@ function checkL0L1ScriptParity() {
       const l0Content = readFileSync(l0FilePath, 'utf-8');
       const l1Content = readFileSync(l1FilePath, 'utf-8');
 
-      if (normalize(l0Content) !== normalize(l1Content)) {
+      // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
+      const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');
+      if (l0Normalized !== normalize(l1Content)) {
         const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
         const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;
         if (level === 'error') {
@@ -2276,7 +2247,7 @@ function main() {
 
   // Check common/ commands and parity
   checkCommands('common');
-  checkScriptParity('common');
+  // Script parity check removed (dead code after ADR-0036 TypeScript migration)
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {
@@ -2297,7 +2268,7 @@ function main() {
       checkPlatformSettingsParity(variant);
       checkDocumentCommonSections(variant);
       checkCommands(variant);
-      checkScriptParity(variant);
+      // Script parity check removed (dead code after ADR-0036 TypeScript migration)
       checkContextSync(variant);
       checkReadmePresence(variant);
       variantsChecked++;

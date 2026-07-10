@@ -1,12 +1,12 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.0.0
-last_reviewed: 2026-07-08
+version: 1.1.0
+last_reviewed: 2026-07-10
 status: active
 scope: common
 l2_propagate: true
-owner: pm
+owner: lifecycle-manager
 prerequisites: Bun runtime
 metadata:
   type: process
@@ -30,13 +30,27 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
    bun scripts/dev-sync.ts "$ARGUMENTS"
    ```
 
-2. The pipeline will:
-   - Append a session entry to `memory/YYYY-MM-DD.md`
-   - Update `memory/MEMORY.md` index via `sync-md.ts`
-   - Auto-add arguments to `CHANGELOG.md [Unreleased]` if the section has no entries yet
-   - Run `audit.ts` — must exit 0 before proceeding
-   - Publish L0→L1 (scripts, skills, commands, docs) via `propagate-to-templates.ts`
-   - Create a new PR branch, commit all staged changes, push, and open a GitHub PR
+2. The pipeline executes the following steps in order:
+
+| Step | Name | Fatal? | Description |
+|------|------|:------:|-------------|
+| 0 | CWD Guard | **FATAL** | Verifies script runs from workspace root; exits if CWD mismatches `import.meta.dir/..` |
+| 1 | Language Gate | **FATAL** | Commit message / PR title must be English (CONSTITUTION.md S3); blocks non-English via `language-guard.ts` |
+| 2 | Memory Session Entry | **FATAL** | Appends session summary (changes, decisions, open issues) to `memory/YYYY-MM-DD.md` |
+| 2 | MEMORY.md Index Sync | **FATAL** | Updates `memory/MEMORY.md` index via `sync-md.ts` |
+| 2.5 | scripts/README.md Generation | **FATAL** | Regenerates `scripts/README.md` via `generate-scripts-readme.ts` if the script exists |
+| 3 | CHANGELOG.md Check | **FATAL** | Checks `CHANGELOG.md [Unreleased]` — **blocks and exits** if empty (agent must add entries first via `/changelog` or manual edit) |
+| 3.6 | Deprecated Script Warnings | non-fatal | Scans `SCRIPTS.md` for deprecated scripts and prints warnings |
+| 3.7 | L0/L1 Script Drift Check | non-fatal | Runs `verify-scripts.ts --check-drift` to detect drift between L0 and L1 script copies |
+| 3.8 | Memory File Archival | non-fatal | Runs `archive-memory.ts` to archive old memory files |
+| 3.9 | Spec Registry Check | non-fatal | Runs `audit.ts --spec-check --lifecycle-only` to warn about stale specs |
+| 4 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding |
+| 4.5 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
+| 4.7 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via `propagate-to-templates.ts --apply`; fatal only in L0 context (CONSTITUTION.md present) |
+| 4.8 | Skill Sync to Platforms | non-fatal | Runs `sync-skills.ts` to distribute skills to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`; warnings only |
+| 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
+| 6 | Sensitive File Guard + Git Add/Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; runs `git add -A`, `git commit`, `git push` |
+| 7 | PR Creation | **FATAL** | Generates PR body via `gen-pr-body.ts`, opens PR via `gh pr create`; idempotent — updates existing PR if one already exists for the branch |
 
 3. If audit fails, fix the reported issue before re-running.
 

@@ -27,15 +27,15 @@ const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
 // Resolve workspace root (this script lives in scripts/ or templates/common/scripts/).
-// CONSTITUTION.md marks the L0 workspace root; variant.json / docs/context.md mark a
-// generated L1/L2 project root (no CONSTITUTION.md there by design). If this script is
+// context.md marks the L0 workspace root; variant.json / docs/context.md mark a
+// generated L1/L2 project root (no context.md there by design). If this script is
 // running standalone with none of these markers present, fall back to the directory
 // containing this script's own scripts/ folder.
 function findWorkspaceRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 6; i++) {
     if (
-      existsSync(join(dir, "CONSTITUTION.md")) ||
+      existsSync(join(dir, "context.md")) ||
       existsSync(join(dir, "variant.json")) ||
       existsSync(join(dir, "docs", "context.md"))
     ) {
@@ -164,7 +164,12 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
     const l0Content = readFileSync(l0Path, "utf-8");
     const l1Content = readFileSync(l1Path, "utf-8");
 
-    if (l0Content !== l1Content) {
+    // context.md references are intentionally scrubbed in L1 (templates/common/).
+    // Normalize both sides before comparison to avoid false drift on governance refs.
+    const l0Normalized = l0Content.replace(/CONSTITUTION\.md/g, 'context.md');
+    const l1Normalized = l1Content;
+
+    if (l0Normalized !== l1Normalized) {
       drifted.push({
         script: entry.script,
         l0Lines: l0Content.split("\n").length,

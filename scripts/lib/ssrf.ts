@@ -28,8 +28,10 @@ import * as URL from 'node:url';
 
 /** Blocked IP ranges (private, loopback, link-local, metadata endpoints) */
 const BLOCKED_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string }> = [
-  // Loopback
+  // Loopback (127.0.0.0/8)
   { start: 0x7f000000n, end: 0x7fffffffn, reason: 'loopback' },
+  // Current network (0.0.0.0/8)
+  { start: 0x00000000n, end: 0x0fffffffn, reason: 'current-network' },
   // Private (10.0.0.0/8)
   { start: 0x0a000000n, end: 0x0fffffffn, reason: 'private-10' },
   // Private (172.16.0.0/12)
@@ -38,6 +40,14 @@ const BLOCKED_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string 
   { start: 0xc0a80000n, end: 0xc0a8ffffn, reason: 'private-192' },
   // Link-local (169.254.0.0/16) — AWS/GCP metadata endpoints
   { start: 0xa9fe0000n, end: 0xa9feffffn, reason: 'link-local-metadata' },
+  // Carrier-grade NAT / shared address space (100.64.0.0/10)
+  { start: 0x64400000n, end: 0x647fffffn, reason: 'carrier-grade-nat' },
+  // Network benchmarking (198.18.0.0/15)
+  { start: 0xc6120000n, end: 0xc613ffffn, reason: 'network-benchmarking' },
+  // Multicast (224.0.0.0/4)
+  { start: 0xe0000000n, end: 0xefffffffn, reason: 'multicast' },
+  // Reserved (240.0.0.0/4)
+  { start: 0xf0000000n, end: 0xffffffffn, reason: 'reserved' },
   // IPv4-mapped IPv6 loopback (::ffff:127.0.0.0/104)
   { start: 0xffff7f000000n, end: 0xffff7fffffffn, reason: 'ipv6-mapped-loopback' },
 ];
@@ -141,8 +151,25 @@ function isBlockedIp(ip: string): string | null {
     if (v4Match) {
       return isBlockedIp(v4Match[1]);
     }
-    // For now, allow non-mapped IPv6 addresses
-    // TODO: Add full IPv6 blocked range checks if needed
+    // Full IPv6 blocked range checks
+    const ipv6Num = ipv6ToBigInt(ip);
+    const BLOCKED_IPV6_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string }> = [
+      // Loopback (::1/128)
+      { start: 1n, end: 1n, reason: 'ipv6-loopback' },
+      // Unique local (fc00::/7)
+      { start: 0xfc00000000000000n, end: 0xfdffffffffffffffn, reason: 'ipv6-unique-local' },
+      // Link-local (fe80::/10)
+      { start: 0xfe80000000000000n, end: 0xfebfffffffffffffn, reason: 'ipv6-link-local' },
+      // IPv4-mapped (::ffff:0:0/96)
+      { start: 0xffff000000000000n, end: 0xffffffffffffffffn, reason: 'ipv6-mapped' },
+      // Multicast (ff00::/8)
+      { start: 0xff00000000000000n, end: 0xffffffffffffffffn, reason: 'ipv6-multicast' },
+    ];
+    for (const range of BLOCKED_IPV6_CIDRS) {
+      if (ipv6Num >= range.start && ipv6Num <= range.end) {
+        return range.reason;
+      }
+    }
     return null;
   } else {
     return 'invalid-ip-format';
@@ -155,4 +182,29 @@ function isBlockedIp(ip: string): string | null {
   }
 
   return null;
+}
+
+/**
+ * Convert an IPv6 address string to a 128-bit bigint for CIDR comparison.
+ */
+function ipv6ToBigInt(ip: string): bigint {
+  const groups = ip.split(':');
+  let expanded: number[] = [];
+
+  // Handle :: expansion
+  const doubleColonIdx = groups.indexOf('');
+  if (doubleColonIdx !== -1) {
+    const before = groups.slice(0, doubleColonIdx).map(g => parseInt(g, 16) || 0);
+    const after = groups.slice(doubleColonIdx + 1).map(g => parseInt(g, 16) || 0);
+    const missing = 8 - before.length - after.length;
+    expanded = [...before, ...new Array(missing).fill(0), ...after];
+  } else {
+    expanded = groups.map(g => parseInt(g, 16) || 0);
+  }
+
+  let result = 0n;
+  for (const group of expanded) {
+    result = (result << 16n) | BigInt(group);
+  }
+  return result;
 }

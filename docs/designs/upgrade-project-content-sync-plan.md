@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # upgrade-project.ts 확장 계획 — agents/docs/skills/scripts 업그레이드 지원
 
 ## 배경

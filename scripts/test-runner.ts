@@ -79,7 +79,7 @@ export async function runTests(suiteName: string): Promise<boolean> {
         }
       });
     } catch(e) {
-      console.error('[test-runner] Error: ${e}');
+      console.error(`[test-runner] Error: ${e}`);
     }
   }
 }

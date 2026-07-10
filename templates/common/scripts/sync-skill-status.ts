@@ -92,7 +92,7 @@ for (const dir of SKILL_DIRS) {
           }
         }
       } catch (e) {
-        console.error('[sync-skill-status] Error: ${e}');
+        console.error(`[sync-skill-status] Error: ${e}`);
       }
     }
   }

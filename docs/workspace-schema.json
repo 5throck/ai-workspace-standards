@@ -6,15 +6,15 @@
     "phases": {
       "canonical": ["0", "1-2", "3", "4", "5", "6"],
       "count": 6,
-      "pm_owned": ["0", "1-2", "5", "6"],
-      "autonomous": ["1-2", "3", "4", "5"],
+      "pm_owned": ["0", "1-2", "5"],
+      "autonomous": ["3", "4", "6"],
       "definitions": {
         "0":   "Project Initiation",
         "1-2": "Planning & Architecture",
         "3":   "Design Handoff",
         "4":   "Execution",
-        "5":   "Quality Assurance",
-        "6":   "Lifecycle Finalization"
+        "5":   "Lifecycle Finalization",
+        "6":   "Quality Assurance & Finalization"
       }
     }
   },
@@ -124,10 +124,6 @@
       ".github",
       "Projects",
       ".pipeline-state",
-      "test-project",
-      "test-cleanup",
-      "test-proj2",
-      "test-proj3",
       "co-develop",
       ".agent",
       ".agents",
@@ -139,7 +135,6 @@
       "abap_vibe_coding",
       "abap_vibe_coding_mig",
       "abap_vibe_coding_plugin",
-      "ai_workspace",
       "artifacts",
       "Crypto-Agent",
       "daniel-lightrag-mcp",
@@ -152,11 +147,7 @@
       "Product-Planning",
       "quickdl",
       "scratch",
-      "vibing-steampunk",
-      "co-conult2",
-      "co-deck2",
-      "co-deck3",
-      "co-develop2"
+      "vibing-steampunk"
     ]
   },
   "variant_extensions": {

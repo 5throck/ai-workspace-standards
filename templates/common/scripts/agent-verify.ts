@@ -2,7 +2,7 @@
 /**
  * Agent Verification Script for Workspace Root
  * @version 1.0.1
- * Verifies synchronization between agents/ directory and documentation (AGENTS.md, CONSTITUTION.md)
+ * Verifies synchronization between agents/ directory and documentation (AGENTS.md, context.md)
  *
  * Usage:
  *   bun scripts/agent-verify.ts
@@ -17,7 +17,7 @@ const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
 const agentsDir = path.join(projectRoot, "agents");
 const agentsMdPath = path.join(projectRoot, "AGENTS.md");
-const constitutionMdPath = path.join(projectRoot, "CONSTITUTION.md");
+const constitutionMdPath = path.join(projectRoot, "context.md");
 
 interface VerificationIssue {
   type: "missing_file" | "missing_docs" | "metadata_mismatch";

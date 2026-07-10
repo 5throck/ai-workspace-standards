@@ -1,6 +1,5 @@
-// @version 1.6.4
-```typescript
 #!/usr/bin/env bun
+// @version 1.6.4
 /**
  * create-l2-scaffold.ts
  *
@@ -18,9 +17,13 @@
  * @docs/VERSION_MANIFEST.md 1.5.0
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { execFileSync } from "child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { includeScriptInL2 } from './helpers/layer-filter.ts';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 
@@ -471,7 +474,7 @@ _${TODAY}에 `scripts/create-l2-scaffold.ts`로 스캐폴딩됨. 출처는 `_ORI
 
 > **Canonical agent index** for the ${displayName} variant.
 > Full agent definitions live in `agents/`.
-> **Agent architecture and governance rules**: See the workspace [CONSTITUTION.md §5 — Multi-Agent Architecture].
+> **Agent architecture and governance rules**: See the project governance documentation.
 
 ---
 
@@ -646,7 +649,7 @@ function bunInstall(projectDir: string): void {
 }
 
 function runSetup(projectDir: string): void {
-  const setupSh = path.join(COMMON_SCRIPTS_DIR, "setup.sh").replace(/\/g, "/");
+  const setupSh = path.join(COMMON_SCRIPTS_DIR, "setup.sh").replace(/\\/g, "/");
   log("⚙️  Running setup.sh …");
   try {
     runNoShell("bash", [setupSh, "--skip-commit", "--skip-license-check"], {
@@ -781,4 +784,3 @@ function main(): void {
 }
 
 main();
-```

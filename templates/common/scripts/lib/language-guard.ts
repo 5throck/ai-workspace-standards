@@ -2,7 +2,7 @@
  * Language Guard Library
  *
  * Shared non-English detection for commit messages, PR titles, PR bodies, and
- * CHANGELOG.md entries. CONSTITUTION.md §3 requires these to be English-only —
+ * CHANGELOG.md entries. context.md §3 requires these to be English-only —
  * this was previously enforced by independent, Korean-only regexes duplicated
  * across dev-sync.ts, gen-pr-body.ts, and pre-commit.ts, which both drifted from
  * each other and missed non-Korean non-English text (e.g. Japanese, Chinese).

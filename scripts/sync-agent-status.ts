@@ -88,7 +88,7 @@ for (const file of agentFiles) {
           }
         }
       } catch (e) {
-        console.error('[sync-agent-status] Error: ${e}');
+        console.error(`[sync-agent-status] Error: ${e}`);
       }
     }
   }

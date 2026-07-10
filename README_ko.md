@@ -66,6 +66,20 @@ gh --version     # 선택 사항: PR 자동화
 
 ## 빠른 시작 (Quick Start)
 
+### 0. 사전 요구 사항 설치 (필요한 경우)
+
+```bash
+# Bun 설치 (필수) — https://bun.sh/docs/installation
+curl -fsSL https://bun.sh/install | bash   # Unix/Linux/macOS
+powershell -c "irm bun.sh/install.ps1 | iex"  # Windows
+
+# 설치 확인
+git --version
+bun --version
+```
+
+> **참고**: `scripts/install-bun.sh` 및 `install-bun.ps1`은 제거되었습니다. 워크스페이스 스크립트를 사용하기 전에 [bun.sh](https://bun.sh)에서 직접 Bun을 설치하세요.
+
 ### 1. 워크스페이스 루트로 클론
 
 ```bash
@@ -76,7 +90,15 @@ git clone https://github.com/5throck/ai-workspace-standards.git C:\git
 git clone https://github.com/5throck/ai-workspace-standards.git ~/git
 ```
 
-### 2. 첫 번째 프로젝트 생성
+### 2. Claude Code 열기 (또는 선호하는 AI 도구)
+
+```bash
+claude
+```
+
+> Git 훅 (`.githooks/`)은 `.claude/settings.json`의 `SessionStart` 훅을 통해 첫 Claude 세션 시작 시 자동으로 구성됩니다 — 별도의 `git config`가 필요하지 않습니다.
+
+### 3. 첫 번째 프로젝트 생성
 
 ```bash
 # 기본값 (최신 템플릿, co-develop variant) — 모든 플랫폼 동일
@@ -95,7 +117,7 @@ bun scripts/new-project.ts "my-project-name" --version 0.5.0
 
 각 새 프로젝트는 선택한 template variant를 기반으로 `docs/context.md`, `AGENTS.md`, `agents/pm.md` 및 모든 필수 설정 파일과 함께 생성됩니다. 사용된 템플릿 버전과 variant는 추적 가능성을 위해 `docs/context.md`에 기록됩니다.
 
-### 3. 새 프로젝트로 이동 및 PM 킥오프 시작
+### 4. 새 프로젝트로 이동 및 PM 킥오프 시작
 
 **중요 (CRITICAL)**: 프로젝트 생성이 완료되면 반드시 현재 AI 세션을 종료하고, 방금 생성한 프로젝트 폴더 내부로 이동하여 새로운 AI 세션을 시작해야 합니다. 루트 폴더(최상단)에 계속 머물러 있으면, AI가 프로젝트 전용 환경 설정 파일을 읽지 못해 PM 킥오프 미팅이 생략됩니다.
 
@@ -281,4 +303,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-08*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-10*

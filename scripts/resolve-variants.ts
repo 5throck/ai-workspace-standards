@@ -18,7 +18,7 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, resolve as resolvePath } from 'path';
-import { load as yamlLoad } from 'js-yaml';
+import { load as yamlLoad, dump as yamlDump } from 'js-yaml';
 import { readUTF8File, writeUTF8File } from './lib/encoding-utils.ts';
 
 // ============================================================================
@@ -81,8 +81,7 @@ function parseFrontmatter(content: string): FrontmatterResult {
 
 function stringifyFrontmatter(fm: Record<string, unknown>, body: string): string {
   // Use js-yaml dump for clean YAML output
-  const { dump } = require('js-yaml') as typeof import('js-yaml');
-  const yamlStr = dump(fm, { lineWidth: 120, quotingType: '"', forceQuotes: false }).trimEnd();
+  const yamlStr = yamlDump(fm, { lineWidth: 120, quotingType: '"', forceQuotes: false }).trimEnd();
   return `---\n${yamlStr}\n---\n${body}`;
 }
 
@@ -149,8 +148,7 @@ function resolveExtendsFile(filePath: string): string | null {
   // Add @resolved-from comment before the frontmatter
   const resolvedFromComment = `${RESOLVED_MARKER} ${extendsPath}\n`;
 
-  const { dump } = require('js-yaml') as typeof import('js-yaml');
-  const yamlStr = dump(mergedFm, { lineWidth: 120 }).trimEnd();
+  const yamlStr = yamlDump(mergedFm, { lineWidth: 120 }).trimEnd();
   return `${resolvedFromComment}---\n${yamlStr}\n---\n${resolvedBody}`;
 }
 

@@ -20,6 +20,10 @@ import { $ } from "bun";
 import { readFileSync, existsSync } from "fs";
 import path, { join } from "path";
 import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface SectionChange {
     type: "new" | "modified" | "deleted";

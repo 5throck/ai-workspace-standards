@@ -25,6 +25,7 @@ A new helper inserted after Wave 1 (scan) and before Wave 2 (reconcile). It oper
 **Agent file processing:**
 1. Parse frontmatter to read `required_skills` — validate that referenced skill slugs exist.
 2. Detect skill content patterns in the body with confidence levels:
+<!-- Korean text in code example is intentional source material -->
    - **HIGH** (`## Step N`, `## 절차`, `Next Step:`, `## Process Steps`): auto-extract to `skills/<slug>/SKILL.md` draft.
    - **MEDIUM** (`## Process`, `## How To`, 3+ sequential bullet items): flag in normalization report, require user approval before extraction.
    - **LOW** (`## Tools`, `## Output`): ignore (valid in both agent and skill bodies).

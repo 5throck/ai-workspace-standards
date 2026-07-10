@@ -3,16 +3,9 @@ name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
 version: 1.0.0
 owner: pm
-tier:
-  claude: medium
-  antigravity: medium
-  gemini-cli: medium
-lifecycle:
-  phase: production
-  created: 2026-05-30
-  last_updated: 2026-05-30
 status: active
 last_reviewed: 2026-06-13
+last_updated: 2026-05-30
 scope: common
 metadata:
   type: process

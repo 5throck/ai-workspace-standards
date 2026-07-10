@@ -32,7 +32,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
-import { join, dirname, basename, extname, resolve } from 'node:path';
+import { join, dirname, basename, extname, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
@@ -434,7 +434,7 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
   // intentionally inactive at L0→L1, so an L1→L2 drift report for them would just
   // be noise about content that isn't supposed to exist in L1 yet.
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]: any) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
+    Object.entries(allDomains).filter(([_, d]: [string, Domain]) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
@@ -465,7 +465,7 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
         continue;
       }
 
-      const excludePrefixes = (domain as any).exclude_prefixes ?? [];
+      const excludePrefixes = domain.exclude_prefixes ?? [];
       // relPath is relative to L1 source dir — "templates/" correctly excludes docs/templates/ subdir
       if (excludePrefixes.some((prefix: string) => relPath.startsWith(prefix))) {
         continue;
@@ -541,19 +541,46 @@ function printTable(diffs: FileDiff[]): void {
   console.log(`${C.dim}${sep}${C.reset}\n`);
 }
 
+/** Scrub CONSTITUTION.md references for L1+ targets (no longer L0 context). */
+function scrubConstitutionRefs(content: string): string {
+  // A-1. Header line — handles both backtick and plain variants.
+  content = content.replace(
+    /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
+    '> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**'
+  );
+  // A-2. Full markdown links where link text mentions CONSTITUTION.md.
+  content = content.replace(
+    /\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g,
+    '[docs/context.md](docs/context.md)'
+  );
+  // A-3. Remaining markdown link targets that still point at CONSTITUTION.md.
+  content = content.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
+  // A-4. Plain-text mentions.
+  content = content.replace(/CONSTITUTION\.md/g, 'context.md');
+  return content;
+}
+
 function applyDiffs(diffs: FileDiff[]): number {
   let copied = 0;
   for (const d of diffs) {
-    if (d.status === 'in-sync' && !FORCE) continue;
-
     const targetDir = dirname(d.targetPath);
     if (!existsSync(targetDir)) {
       mkdirSync(targetDir, { recursive: true });
     }
 
-    const content = readFileSync(d.sourcePath, 'utf-8');
+    let content = readFileSync(d.sourcePath, 'utf-8');
+    // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
+    const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
+    if (needsScrub) {
+      content = scrubConstitutionRefs(content);
+    }
+
+    // For in-sync files: still write if scrub changed the content.
+    if (d.status === 'in-sync' && !FORCE && !needsScrub) continue;
+
     writeFileSync(d.targetPath, content, 'utf-8');
-    console.log(`${C.green}  copied${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
+    const label = (d.status === 'in-sync' && needsScrub) ? 'scrubbed' : 'copied';
+    console.log(`${C.green}  ${label}${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
     copied++;
   }
   return copied;
@@ -612,8 +639,8 @@ function publishDocs(isDryRun: boolean): void {
   const map = JSON.parse(mapRaw);
 
   const govDomains = Object.entries(map.domains)
-    .filter(([_, d]: any) => d.mode === 'marker-inject')
-    .map(([_, d]: any) => ({
+    .filter(([_, d]: [string, Domain]) => d.mode === 'marker-inject')
+    .map(([_, d]: [string, Domain]) => ({
       sourceFile: d.source_file as string,   // relative to workspaceRoot (L1 path)
       marker: d.marker as string,
       variants: d.target_variants as string[],
@@ -691,29 +718,7 @@ const GOVERNANCE_L1_FILES = [
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
 function applyGovernanceTransforms(content: string, filename: string): string {
   // ── Phase A: CONSTITUTION.md reference replacement ───────────────────────
-
-  // A-1. Header line — must run first, before general replacements destroy the match pattern.
-  //      Handles both backtick and plain variants; removes "Required Reading" clause.
-  content = content.replace(
-    /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
-    '> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**'
-  );
-
-  // A-2. Full markdown links where the link text mentions CONSTITUTION.md:
-  //      [CONSTITUTION.md ...](any-href) → [docs/context.md](docs/context.md)
-  //      Catches cases where href is docs/constitution/... rather than CONSTITUTION.md directly.
-  content = content.replace(
-    /\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g,
-    '[docs/context.md](docs/context.md)'
-  );
-
-  // A-3. Remaining markdown link targets that still point at CONSTITUTION.md:
-  //      ](CONSTITUTION.md...) → ](docs/context.md)
-  content = content.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
-
-  // A-4. Plain-text mentions in lists/sentences (after markdown links handled):
-  //      CONSTITUTION.md → context.md
-  content = content.replace(/CONSTITUTION\.md/g, 'context.md');
+  content = scrubConstitutionRefs(content);
 
   // ── Phase B: workspace root-specific content removal / replacement ────────
   if (filename === 'CLAUDE.md' || filename === 'GEMINI.md') {
@@ -1156,11 +1161,19 @@ console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
 console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
 
 if (APPLY) {
-  if (outOfSync.length === 0 && !FORCE) {
+  // Check if any in-sync files need CONSTITUTION scrubbing.
+  const needsScrubInSync = inSync.filter(d => {
+    if (!d.targetPath.includes('templates' + sep)) return false;
+    try {
+      return readFileSync(d.sourcePath, 'utf-8').includes('CONSTITUTION.md');
+    } catch { return false; }
+  });
+  if (outOfSync.length === 0 && needsScrubInSync.length === 0 && !FORCE) {
     console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
   } else {
     const toApply = FORCE ? diffs : outOfSync;
-    console.log(`\n${C.cyan}Applying ${toApply.length} file(s)...${C.reset}`);
+    const total = toApply.length + needsScrubInSync.length;
+    console.log(`\n${C.cyan}Applying ${total} file(s)...${C.reset}`);
     const copied = applyDiffs(diffs);
     console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
   }

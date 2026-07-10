@@ -17,6 +17,32 @@ import path from "node:path";
 const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
 
+// ─── Minimal interfaces (matching dispatch-parallel.ts / dispatch-serial.ts) ───
+
+interface ParallelAgentTask {
+  description: string;
+  role: string;
+  task: string;
+  context?: string[];
+  outputFormat?: string;
+  priority?: 'high' | 'medium' | 'low';
+}
+
+interface SerialAgentTask {
+  description: string;
+  role: string;
+  task: string;
+  dependsOn?: string;
+  verifyOutput?: boolean;
+  continueOnError?: boolean;
+}
+
+interface SerialExecutionOptions {
+  stopOnError?: boolean;
+  verbose?: boolean;
+  dryRun?: boolean;
+}
+
 interface CliOptions {
   mode: string;
   args: string[];
@@ -106,7 +132,7 @@ async function runParallel(args: string[]): Promise<void> {
   console.log('🚀 Parallel Dispatch Mode\n');
 
   // Build task list from --task arguments
-  const tasks: any[] = [];
+  const tasks: ParallelAgentTask[] = [];
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' && args[i + 1]) {
@@ -140,7 +166,7 @@ async function runParallel(args: string[]): Promise<void> {
 async function runSerial(args: string[]): Promise<void> {
   console.log('🔄 Serial Dispatch Mode\n');
 
-  const options: any = {
+  const options: SerialExecutionOptions = {
     stopOnError: !args.includes('--continue-on-error'),
     verbose: args.includes('--verbose') || args.includes('-v'),
     dryRun: args.includes('--dry-run')
@@ -148,7 +174,7 @@ async function runSerial(args: string[]): Promise<void> {
 
   // Check for custom pipeline
   const pipelineIndex = args.indexOf('--pipeline');
-  let pipeline: any;
+  let pipeline: SerialAgentTask[] | undefined;
 
   if (pipelineIndex >= 0 && args[pipelineIndex + 1]) {
     const pipelinePath = path.resolve(projectRoot, args[pipelineIndex + 1]);

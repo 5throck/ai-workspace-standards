@@ -22,6 +22,16 @@ CHANGELOG_ENTRY.md
 *.pem
 *.key
 *.cmd
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+*.cert
+*.crt
+credentials.json
+*_credentials*
+.env.*.local
 
 # --- Node (workspace-level package.json artifacts) ---
 node_modules/

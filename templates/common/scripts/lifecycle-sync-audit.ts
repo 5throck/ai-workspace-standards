@@ -62,8 +62,8 @@ const ROOT = cwd();
 const SCRIPTS_MD = join(ROOT, 'scripts', 'SCRIPTS.md');
 const TEMPLATE_SCRIPTS_MD = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPTS.md');
 
-// Detect workspace root by presence of CONSTITUTION.md
-const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'CONSTITUTION.md'));
+// Detect workspace root by presence of context.md
+const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'context.md'));
 
 interface RegistryEntry {
   version: string;
@@ -443,7 +443,7 @@ function runCheckD(): DuplicateEntry[] {
   const entries: DuplicateEntry[] = [];
   const PATTERN = /<!--\s*intentional-duplicate:\s*([^—\n]+)\s*—\s*([^;>\n]+)/g;
   const EXCLUDED = ['node_modules', '.git', '_archive', 'memory'];
-  // Skip CONSTITUTION.md itself (contains the annotation definition/example, not a real duplicate)
+  // Skip context.md itself (contains the annotation definition/example, not a real duplicate)
 
   function walkDir(dir: string): void {
     let items: ReturnType<typeof readdirSync>;
@@ -465,8 +465,8 @@ function runCheckD(): DuplicateEntry[] {
         }
         walkDir(fullPath);
       } else if (item.isFile() && item.name.endsWith('.md')) {
-        // Skip CONSTITUTION.md (contains definition example, not a real duplicate)
-        if (item.name === 'CONSTITUTION.md') continue;
+        // Skip context.md (contains definition example, not a real duplicate)
+        if (item.name === 'context.md') continue;
         let content: string;
         try {
           content = readFileSync(fullPath, 'utf-8');

@@ -11,6 +11,12 @@ scope: common
 owner: pm
 prerequisites: none
 last_reviewed: 2026-06-13
+metadata:
+  triggers:
+    - build new agent team
+    - create agent team
+    - agent team setup
+    - team builder
 ---
 
 ## Overview

@@ -14,8 +14,8 @@ This document defines the standard workflow phases used across all variants. Eac
 | 2 | Design Review & Approval | Gate Keeper | PM + senior specialist agents |
 | 3 | Execution / Creation | Coordinator | Specialist agents (variant-defined) |
 | 4 | Delivery / Integration | Coordinator | Specialist agents (variant-defined) |
-| 5 | Quality Assurance | Owner | PM (runs audit scripts) |
-| 6 | PR & Handoff | Owner | PM (runs /sync, creates PR) |
+| 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, /sync, creates PR) |
 
 ---
 
@@ -59,19 +59,22 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 - Project coordinators manage stakeholder communication
 - **Output**: delivered and integrated work product
 
-### Phase 5 — Quality Assurance
-**PM owns**: runs audit scripts directly.
+### Phase 5 — Lifecycle Finalization
+**PM owns**: updates governance records for any changed artifacts.
+- PM updates governance documents for agent/skill/script changes
+- PM logs decisions to `memory/YYYY-MM-DD.md`
+- Lifecycle state synced for any modified lifecycle-tracked artifacts
+- **Output**: governance records updated, drift report or "no drift" confirmation
+
+### Phase 6 — Quality Assurance & Finalization
+**PM owns**: finalizes the session.
 - PM runs `audit-workspace` skill
 - PM runs `validate-docs-links` skill
 - Maximum 2 fix iterations before escalating to user
-- **Output**: passing audit report
-
-### Phase 6 — PR & Handoff
-**PM owns**: finalizes the session.
 - PM runs `/sync` pipeline
 - PR opened with English title and description
 - Memory log updated
-- **Output**: merged PR or open PR link
+- **Output**: passing audit report, merged PR or open PR link
 
 ---
 
@@ -100,5 +103,5 @@ The PM role and Phase 0/5/6 structure are identical across all variants. Variant
 | 2 | Present findings for approval | — | Decision + approved plan |
 | 3 | Hand off approved plan | Intervene if off-plan | Quality review |
 | 4 | Confirm delivery targets | Track completion | Delivery confirmation |
-| 5 | Run audit scripts | Fix issues (max 2 iterations) | Audit pass report |
-| 6 | Run /sync | — | PR link |
+| 5 | Update governance records | Verify lifecycle drift | Drift report or "no drift" confirmation |
+| 6 | Run audit + /sync | Fix issues (max 2 iterations) | Audit pass report + PR link |

@@ -2,7 +2,7 @@
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { resolve } from 'node:path';
+import * as crypto from 'node:crypto';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
 
@@ -14,9 +14,9 @@ const RESET = '\x1b[0m';
 
 // Workspace root guard — dev-sync must run from the workspace root it belongs to.
 // Using import.meta.dir (script location) prevents CWD mismatches when two clones exist.
-const expectedRoot = resolve(import.meta.dir, '..');
-const actualCwd = process.cwd();
-if (path.resolve(actualCwd) !== expectedRoot) {
+	const expectedRoot = path.resolve(import.meta.dir, '..');
+	const actualCwd = process.cwd();
+	if (path.resolve(actualCwd) !== expectedRoot) {
     console.error(`${RED}❌ dev-sync: CWD mismatch.${RESET}`);
     console.error(`   Expected: ${expectedRoot}`);
     console.error(`   Current:  ${actualCwd}`);
@@ -123,8 +123,8 @@ if (fs.existsSync('CHANGELOG.md')) {
 }
 
 // 3.6 Warn about deprecated scripts
-if (fs.existsSync('SCRIPTS.md')) {
-    const content = fs.readFileSync('SCRIPTS.md', 'utf-8');
+if (fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+    const content = fs.readFileSync(path.join('scripts', 'SCRIPTS.md'), 'utf-8');
     const lines = content.split('\n');
     let hasDeprecated = false;
     for (const line of lines) {
@@ -157,7 +157,10 @@ if (hasBun) {
 // 3.8 Archive old memory files
 const archiveMemoryTs = path.join('scripts', 'archive-memory.ts');
 if (fs.existsSync(archiveMemoryTs)) {
-    await $`bun ${archiveMemoryTs}`;
+    const archiveRes = await $`bun ${archiveMemoryTs}`.nothrow();
+    if (archiveRes.exitCode !== 0) {
+        console.warn(`⚠️  Memory archival had issues (non-blocking, exit ${archiveRes.exitCode})`);
+    }
 }
 
 // 3.9 Spec registry check (non-blocking — warns if approved specs are stale or code has no spec)
@@ -166,30 +169,28 @@ if (fs.existsSync(specRegPath)) {
     await $`bun scripts/audit.ts --spec-check --lifecycle-only`.quiet().nothrow();
 }
 
-// 4. Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
-const auditRes = await $`bun scripts/audit.ts`.nothrow();
-
-if (auditRes.exitCode !== 0) {
-    if (import.meta.main) {
-      process.exit(1);
-    }
-}
-
-// 4.5. Generate VERSION_MANIFEST.md
-const genManifestTs = path.join('scripts', 'generate-version-manifest.ts');
-if (fs.existsSync(genManifestTs)) {
-    const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
-    if (genRes.exitCode !== 0) {
-        console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
-        console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
+// 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)
+console.log('📋 Step 3.95: QA pre-checks...');
+// Check 1: Project tests
+if (fs.existsSync('package.json')) {
+    try {
+        const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+        if (pkg.scripts?.test) {
+            const testResult = await $`bun test`.nothrow();
+            if (testResult.exitCode !== 0) {
+                console.warn(`⚠️  Project tests failed (non-blocking, exit ${testResult.exitCode})`);
+                if (testResult.stderr) console.warn(testResult.stderr.trim());
+            }
         }
-    }
-    console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+    } catch { /* ignore parse errors */ }
+}
+// Check 2: README_ko pair
+if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
+    console.warn('⚠️  README_ko.md missing (non-blocking)');
 }
 
-// 4.7 L0→L1 publish (workspace root only)
+// 4.5 L0→L1 publish — must run BEFORE audit gate so that CONSTITUTION scrub
+//     is applied to templates/common/ files before the L0-leakage check.
 const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
 // L0 context: CONSTITUTION.md exists at workspace root — publish failures are fatal here.
 const isL0Context = fs.existsSync('CONSTITUTION.md');
@@ -219,6 +220,39 @@ if (isWorkspaceRoot) {
     }
 }
 
+// 4.6 Skill sync to platform directories — must run BEFORE audit gate so
+//     that templates/common/ platform skills are current.
+console.log('📋 Step 4.6: Syncing skills to platform directories...');
+const syncSkillsResult = await $`bun scripts/sync-skills.ts`.nothrow();
+if (syncSkillsResult.exitCode !== 0) {
+    console.warn(`⚠️  Skill sync had warnings (exit ${syncSkillsResult.exitCode}), continuing...`);
+    if (syncSkillsResult.stderr) console.warn(syncSkillsResult.stderr.trim());
+}
+
+// 4. Generate VERSION_MANIFEST.md
+const genManifestTs = path.join('scripts', 'generate-version-manifest.ts');
+if (fs.existsSync(genManifestTs)) {
+    const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
+    if (genRes.exitCode !== 0) {
+        console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
+        console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+}
+
+// 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
+//     Runs AFTER publish + skill sync so templates/common/ is up-to-date with scrub.
+const auditRes = await $`bun scripts/audit.ts`.nothrow();
+
+if (auditRes.exitCode !== 0) {
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}
+
 // 5. Branch -> commit -> push -> PR
 let currentBranch = "";
 try {
@@ -240,7 +274,12 @@ if (currentBranch === "main" || currentBranch === "master") {
     
     branch = `pr/${timestamp}-${slug}`;
     try {
-        await $`git checkout -b ${branch}`.nothrow();
+        const branchExists = (await $`git show-ref --verify refs/heads/${branch}`.quiet().nothrow()).exitCode === 0;
+        if (branchExists) {
+            await $`git checkout ${branch}`.nothrow();
+        } else {
+            await $`git checkout -b ${branch}`.nothrow();
+        }
     } catch {
         console.log(`${RED}❌ Failed to create branch '${branch}'${RESET}`);
         if (import.meta.main) {
@@ -339,7 +378,7 @@ try {
 
 const pushRetry = await withRetry(
     () => $`git push -u origin ${branch}`.nothrow(),
-    { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+    { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
     'git push'
 );
 const pushProc = pushRetry.result as { exitCode: number; stderr: { toString(): string } } | undefined;
@@ -383,20 +422,20 @@ if (existingPrUrl) {
     if (prBody) {
         prCreateRetry = await withRetry(
             () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
             'gh pr create'
         );
     } else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
         const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
         prCreateRetry = await withRetry(
             () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
             'gh pr create'
         );
     } else {
         prCreateRetry = await withRetry(
             () => $`gh pr create --fill`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: any) => r.exitCode === 0 },
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
             'gh pr create'
         );
     }

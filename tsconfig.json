@@ -6,7 +6,10 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
-    "declaration": false
+    "declaration": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["scripts/**/*.ts"],
   "exclude": ["node_modules", "templates/", ".sandbox/", "temp/"]

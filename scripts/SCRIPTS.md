@@ -449,4 +449,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-11 — ADR-0036: all sh/ps1 scripts migrated to TypeScript (Bun). `install-bun.*` deleted. File permission-setting code removed.*
+*Last updated: 2026-07-10 — Two-round project review fixes: audit.ts split bug, dead parity check removal, SSRF IPv6 ranges, pre-commit gitleaks separation, `any` type cleanup, validate-templates dead code removal, ESM import fixes, tsconfig strict options.*
