@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.1.1
+ * @version 2.2.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -74,6 +74,14 @@ if (INCLUDE_DISABLED && APPLY) {
   process.exit(1);
 }
 
+// --check-drift is an independent read-only command. It cannot be combined with
+// write-mode flags (--apply, --governance-l1, --docs, --prune).
+if (CHECK_DRIFT && (APPLY || GOVERNANCE_L1 || DOCS || PRUNE)) {
+  console.error(`${C.red}❌ --check-drift cannot be combined with --apply, --governance-l1, --docs, or --prune.${C.reset}`);
+  console.error(`${C.yellow}   --check-drift is an independent read-only command.${C.reset}`);
+  process.exit(1);
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Domain {
   description: string;
@@ -91,6 +99,9 @@ interface Domain {
   disabled?: boolean;
   disabled_since?: string;
   history?: string;
+  /** Controls whether this domain participates in L1→L2 drift detection (--check-drift).
+   *  Set false for domains managed through Fork Model scaffolding (ADR-0031). */
+  l2_drift_eligible?: boolean;
 }
 
 interface PropagationMap {
@@ -418,8 +429,17 @@ function collectDiffs(mapPath: string): FileDiff[] {
   return diffs;
 }
 
+// ── L1→L2 drift eligibility ───────────────────────────────────────────────────
+/** Returns true if a domain should participate in L1→L2 drift detection. */
+export function isL2DriftEligible(domain: Domain): boolean {
+  if (domain.mode === 'marker-inject') return false;
+  if (domain.disabled && !INCLUDE_DISABLED) return false;
+  if (domain.l2_drift_eligible === false) return false;
+  return true;
+}
+
 // ── L1→L2 drift report (--check-drift) ──────────────────────────────────────────
-function collectDiffsL1L2(mapPath: string): FileDiff[] {
+export function collectDiffsL1L2(mapPath: string): FileDiff[] {
   const raw = readFileSync(mapPath, 'utf-8');
   const map: PropagationMap = JSON.parse(raw);
 
@@ -430,11 +450,9 @@ function collectDiffsL1L2(mapPath: string): FileDiff[] {
         Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
       )
     : map.domains;
-  // See collectDiffs() above — domains marked `disabled: true` (e.g. "docs") are
-  // intentionally inactive at L0→L1, so an L1→L2 drift report for them would just
-  // be noise about content that isn't supposed to exist in L1 yet.
+  // Filter domains: marker-inject, disabled, and l2_drift_eligible=false excluded.
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]: [string, Domain]) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
+    Object.entries(allDomains).filter(([_, d]: [string, Domain]) => isL2DriftEligible(d))
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
@@ -1110,14 +1128,13 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
 }
 
 
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Main dispatch ──────────────────────────────────────────────────────────────
+if (import.meta.main) {
 const MAP_PATH = join('scripts', 'propagation-map.json');
 
 if (!existsSync(MAP_PATH)) {
   console.error(`${C.red}Error: propagation-map.json not found at ${MAP_PATH}${C.reset}`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
+  process.exit(1);
 }
 
 // Encoding gate — only on --apply (not dry-run or governance/docs modes)
@@ -1140,79 +1157,89 @@ if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
     for (const v of allViolations) {
       console.log(`   ${v.file}  [${v.count}×] ${v.pattern}`);
     }
-    if (import.meta.main) {
-      process.exit(1);
-    }
+    process.exit(1);
   }
-}
-
-console.log(`${C.cyan}=== propagate-to-templates.ts — L0→L1 sync ===${C.reset}`);
-if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
-console.log(`${C.dim}Mode: ${APPLY ? 'apply' : 'dry-run'}${FORCE ? ' (--force)' : ''}${C.reset}`);
-
-const diffs = collectDiffs(MAP_PATH);
-printTable(diffs);
-
-const outOfSync = diffs.filter(d => d.status !== 'in-sync');
-const inSync    = diffs.filter(d => d.status === 'in-sync');
-
-console.log(`Total files checked : ${diffs.length}`);
-console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
-console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
-
-if (APPLY) {
-  // Check if any in-sync files need CONSTITUTION scrubbing.
-  const needsScrubInSync = inSync.filter(d => {
-    if (!d.targetPath.includes('templates' + sep)) return false;
-    try {
-      return readFileSync(d.sourcePath, 'utf-8').includes('CONSTITUTION.md');
-    } catch { return false; }
-  });
-  if (outOfSync.length === 0 && needsScrubInSync.length === 0 && !FORCE) {
-    console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
-  } else {
-    const toApply = FORCE ? diffs : outOfSync;
-    const total = toApply.length + needsScrubInSync.length;
-    console.log(`\n${C.cyan}Applying ${total} file(s)...${C.reset}`);
-    const copied = applyDiffs(diffs);
-    console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
-  }
-} else {
-  // dry-run mode
-  if (outOfSync.length > 0) {
-    console.log(`\n${C.yellow}Run with --apply to sync these files.${C.reset}`);
-    process.exitCode = 1;
-  } else {
-    console.log(`\n${C.green}All files in sync.${C.reset}`);
-  }
-}
-
-if (GOVERNANCE_L1) {
-  publishGovernanceL1(DRY_RUN);
-}
-
-if (DOCS) {
-  publishDocs(DRY_RUN);
 }
 
 if (CHECK_DRIFT) {
-  console.log(`\n${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
-  const drifts = collectDiffsL1L2(MAP_PATH);
+  runCheckDrift(MAP_PATH);
+} else {
+  runL0L1Sync(MAP_PATH);
+  // Side-commands: can combine with --apply or --dry-run
+  if (GOVERNANCE_L1) publishGovernanceL1(DRY_RUN);
+  if (DOCS) publishDocs(DRY_RUN);
+  if (PRUNE) pruneL1Scripts(MAP_PATH, DRY_RUN);
+}
+
+// ── runCheckDrift: independent L1→L2 drift report ─────────────────────────────
+function runCheckDrift(mapPath: string): void {
+  console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+
+  // Early UX: if user filtered to an ineligible domain, explain instead of
+  // returning silently with 0 results.
+  if (DOMAIN_FILTER) {
+    const map: PropagationMap = JSON.parse(readFileSync(mapPath, 'utf-8'));
+    const filteredDomain = map.domains[DOMAIN_FILTER];
+    if (filteredDomain && !isL2DriftEligible(filteredDomain)) {
+      console.log(`${C.dim}ℹ️  Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031).${C.reset}`);
+      console.log(`${C.dim}    L2 variants receive this content through scaffolding/promotion, not ongoing sync.${C.reset}`);
+      console.log(`\nTotal checked: 0, Out of sync: 0`);
+      return; // exit 0 — not an error, just not applicable
+    }
+  }
+
+  const drifts = collectDiffsL1L2(mapPath);
   printTable(drifts);
   const outOfSyncDrift = drifts.filter(d => d.status !== 'in-sync');
   console.log(`Total checked: ${drifts.length}, Out of sync: ${outOfSyncDrift.length}`);
   if (outOfSyncDrift.length > 0) {
-    const variantDrifts = outOfSyncDrift.filter(d => /\/templates\/co-[^/]+\//.test(d.targetPath));
-    const l2ProjectDrifts = outOfSyncDrift.filter(d => !/\/templates\/co-[^/]+\//.test(d.targetPath));
-    if (variantDrifts.length > 0) {
-      console.log(`\nℹ️  L1 variant drift may be intentional (variant-specific overrides). Review above before applying.`);
-    }
-    if (l2ProjectDrifts.length > 0) {
-      console.log(`\nℹ️  L2 project drift is expected under Fork Model (ADR-0031) — L2 projects are independent after creation.`);
-    }
+    console.log(`\nℹ️  Detected drift in a domain configured for L2 drift checking. Review whether this change is intentional before synchronizing.`);
+    process.exitCode = 1;
   }
 }
 
-if (PRUNE) {
-  pruneL1Scripts(MAP_PATH, DRY_RUN);
+// ── runL0L1Sync: L0→L1 dry-run or apply ──────────────────────────────────────
+function runL0L1Sync(mapPath: string): void {
+  console.log(`${C.cyan}=== propagate-to-templates.ts — L0→L1 sync ===${C.reset}`);
+  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+  console.log(`${C.dim}Mode: ${APPLY ? 'apply' : 'dry-run'}${FORCE ? ' (--force)' : ''}${C.reset}`);
+
+  const diffs = collectDiffs(mapPath);
+  printTable(diffs);
+
+  const outOfSync = diffs.filter(d => d.status !== 'in-sync');
+  const inSync    = diffs.filter(d => d.status === 'in-sync');
+
+  console.log(`Total files checked : ${diffs.length}`);
+  console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
+  console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
+
+  if (APPLY) {
+    // Check if any in-sync files need CONSTITUTION scrubbing.
+    const needsScrubInSync = inSync.filter(d => {
+      if (!d.targetPath.includes('templates' + sep)) return false;
+      try {
+        return readFileSync(d.sourcePath, 'utf-8').includes('CONSTITUTION.md');
+      } catch { return false; }
+    });
+    if (outOfSync.length === 0 && needsScrubInSync.length === 0 && !FORCE) {
+      console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
+    } else {
+      const toApply = FORCE ? diffs : outOfSync;
+      const total = toApply.length + needsScrubInSync.length;
+      console.log(`\n${C.cyan}Applying ${total} file(s)...${C.reset}`);
+      const copied = applyDiffs(diffs);
+      console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
+    }
+  } else {
+    // dry-run mode
+    if (outOfSync.length > 0) {
+      console.log(`\n${C.yellow}Run with --apply to sync these files.${C.reset}`);
+      process.exitCode = 1;
+    } else {
+      console.log(`\n${C.green}All files in sync.${C.reset}`);
+    }
+  }
 }
+} // end import.meta.main
