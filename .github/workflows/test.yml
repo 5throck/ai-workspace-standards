@@ -45,13 +45,20 @@ jobs:
           echo "Security check passed (no high/critical vulnerabilities)."
 
       - name: Secret scanning - gitleaks
-        shell: bash
-        run: |
-          if command -v gitleaks &>/dev/null; then
-            gitleaks protect --staged --no-banner --log-level error --source . || true
-          else
-            echo "gitleaks not installed — skipping secret scanning (secrets are checked client-side via pre-commit hook)"
-          fi
+        # Docker-container action — Linux runners only, hence the ubuntu-only
+        # condition below (this job's matrix also includes windows/macos).
+        # PR-diff scan only (the action's default mode compares against the PR's
+        # base ref); full-history secret scanning is a separate, heavier security
+        # audit and is not covered here. Not yet pinned to a commit SHA like the
+        # other steps in this file — this action's SHA has not been independently
+        # verified in this environment; pin it once that verification is done.
+        if: matrix.os == 'ubuntu-latest'
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate templates
+        run: bun run validate-templates
 
       - name: Run integration tests
         run: bun run test
