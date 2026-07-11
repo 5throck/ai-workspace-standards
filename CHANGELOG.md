@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-11]**: docs(governance): consolidate Execution Plan boilerplate and 3-tier strategy duplication, fix rule conflict — per `docs/reports/governance-docs-diet-analysis.md`, the Execution Plan table/rules (previously duplicated 5x across CLAUDE.md/GEMINI.md/CONSTITUTION.md/AGENTS.md) and the 3-tier model strategy concept (6x, including two non-identical versions within AGENTS.md itself) are now single-sourced in `AGENTS.md` §5.1 and §3.6 respectively, with CLAUDE.md/GEMINI.md/CONSTITUTION.md linking out and retaining only their genuinely platform-specific content (model-ID mappings, thinking_level notes); fixes an active rule conflict where CONSTITUTION.md said to "always include Lifecycle Update and Final QA Audit as the final two steps" while AGENTS.md said the opposite ("no separate rows needed — /sync handles both") — only the correct, current AGENTS.md rule remains; also fixes a pre-existing `MAP_PATH is not defined` crash in `propagate-to-templates.ts` `publishDocs()` (block-scoped const referenced from an outer-scope function) discovered while propagating this change, which was silently blocking the `--docs` L1→L2 governance sync step entirely; propagated to templates/common and all 7 L2 variants
 - **[2026-07-11]**: fix(scripts): fix --check-drift false-positive L2 drift — `collectDiffsL1L2()` flagged 933 "missing" files across 13 Fork Model domains (ADR-0031) that don't exist in L2 variants; added `l2_drift_eligible` field to `propagation-map.json` (v1.5.0) with `isL2DriftEligible()` helper in `propagate-to-templates.ts` (v2.2.0); `gemini-settings` is the sole ongoing L1→L2 mirror; `--check-drift` now an independent read-only command with conflict detection rejecting `--apply`/`--governance-l1`/`--docs`/`--prune` combinations; CI drift check step updated to allow known gemini-settings overrides while failing on unexpected drift; 13 unit+integration tests added
 - **[2026-07-10]**: fix(project-review): two-round project review — Round 1: 35 issues found and fixed; Round 2: 3 Critical + 16 High + 15 Moderate found, 18 actioned (Critical: L1 schema Phase 5/6, qa-gate Step 3.95, safeResolvePath; High: audit.ts split bug, dead parity check removal, IPv6 SSRF ranges, pre-commit gitleaks separation, 10 more; Moderate: common-contract.json new-project.ts). Moderate items M1-M15 deferred (no functional impact)
 - **[2026-07-10]**: feat(skills): project-review skill v1.1.0 — conditional base-map MCP integration (Step 0 detection, Step 4c cross-validation, graceful degradation when MCP unavailable); sync skill pipeline documentation expanded to full 16-step table with FATAL/non-fatal markers; sync skill owner updated to lifecycle-manager
@@ -862,7 +863,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-11*
 
 
 

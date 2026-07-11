@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-10T16:09:56.822Z
+**Generated**: 2026-07-11T08:37:50.850Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -137,7 +137,7 @@
 | pre-push.ts | 1.2.5 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
 | promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
-| propagate-to-templates.ts | 2.2.0 | scripts/propagate-to-templates.ts | N/A |
+| propagate-to-templates.ts | 2.2.1 | scripts/propagate-to-templates.ts | N/A |
 | propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.2 | scripts/readme-lifecycle-audit.ts | N/A |

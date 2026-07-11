@@ -1,6 +1,7 @@
 # GEMINI.md
 
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
+<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference context.md — see context.md §7.5 context.md Non-Propagation. merge-frontmatter.ts strips context.md lines from L2 output. -->
 
 ---
 
@@ -142,10 +143,10 @@ See [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster) for the complete ag
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Cost Optimization (3-Tier Model Strategy)
-**Model Selection Overrides** (overridden per subagent invocation when appropriate):
-- **High-tier (Design/Planning)** — `gemini-3.1-pro` (Parameter: `thinking_level="medium"`): Complex reasoning, architectural design, planning, and PM orchestration.
-- **Medium-tier (Review/QA)** — `gemini-3.5-flash` (no thinking parameter): Code review, testing, PR review, and quality gates (`verification-before-completion`). Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** — `gemini-3.5-flash` (no thinking parameter): Fast, repetitive coding, boilerplate generation, or strictly scoped sub-agent tasks.
+The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Gemini/Antigravity's model-ID mapping (overridden per subagent invocation when appropriate):
+- **High-tier** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`)
+- **Medium-tier** → `gemini-3.5-flash` (no thinking parameter)
+- **Low-tier** → `gemini-3.5-flash` (no thinking parameter)
 
 ---
 
@@ -182,20 +183,9 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 <!-- COMMON-GEMINI:START -->
 ## Execution Plan Boilerplate
 
-For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
+The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](AGENTS.md#511-design-gate-exemptions)** — do not restate them here.
 
-> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
-> L2 variant projects are exempt — they manage their own design workflow.
-
-Every execution plan MUST start with Row 0 (Design Gate — architect creates/updates design doc) and end with `/sync`. Between Row 0 and `/sync`, list implementation tasks.
-
-| # | Task | Agent | Tier | Model | Spec |
-|---|------|-------|------|-------|------|
-| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | gemini-3.1-pro | NEW |
-| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | gemini-3.5-flash | |
-
-**Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
+> **Note (Antigravity-specific)**: Use the literal Gemini model ID (e.g. `gemini-3.1-pro`) in the `Model` column, not a Claude-style short alias.
 
 **Antigravity execution**: Use `invoke_subagent` for specialist dispatch. See §3 (Subagent Instantiation & Async Orchestration) in this file.
 <!-- COMMON-GEMINI:END -->
@@ -300,7 +290,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-07-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-07-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

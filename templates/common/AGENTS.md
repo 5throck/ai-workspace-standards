@@ -21,7 +21,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
-     Each row: | Agent Name | agents/name.md (link) | Tier | Role description |
+     Each row: | Agent Name | [`agents/name.md`](agents/name.md) | Tier | Role description |
      See docs/context.md for agent frontmatter specification. -->
 <!-- VARIANT-AGENTS-END -->
 ---
@@ -83,6 +83,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
+<!-- Language Policy Exception: Korean text below is intentional for Korean-language user communication templates. See AGENTS.md §Language Policy for exception rules. -->
 ```
 PM: 🔍 [Task Analysis] 이 작업은 [specialist] 전문 영역입니다.
    Task: [description]
@@ -119,7 +120,7 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [AGENTS.md §5](AGENTS.md#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#§5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.5 Phase Determination (Deliverable-Type Gate)
 
@@ -215,6 +216,11 @@ lang_reason: legal   # legal | source-material | proper-noun
 - All PR descriptions: English
 - All branch names: English
 - Code comments: English (unless documenting locale-specific logic)
+
+### Pluggable Variant Audit Hooks and Integrity Protection
+- **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
+- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
+- **Integrity Enforcement**: During template reconciliation (`l2-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -244,11 +250,7 @@ Request received
 
 #### Cost Optimization (3-Tier Strategy)
 
-The PM uses a 3-tier model strategy to optimize cost and quality:
-
-- **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
-- **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
-- **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
 
 **Tier Adjustment Rules:**
 - The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
@@ -277,7 +279,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 <!-- Add project-specific specialist agents here. Format:
-     | Agent Name | agents/name.md (path) | High/Medium/Low | parallel conditions | write scope |
+     | Agent Name | `agents/name.md` | High/Medium/Low | parallel conditions | write scope |
      See §1 for the agent roster and docs/context.md for frontmatter specification. -->
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
@@ -343,27 +345,50 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ### 5.1 Standard Execution Plan Template
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] |
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | |
 
 **Execution Order**: [Parallel | Sequential]
 
 **Key points**:
+- **Row 0 (Design Gate) is MANDATORY** for L0/L1 — design document must be created/updated before implementation
 - Tier column is MANDATORY (High/Medium/Low)
-- End every plan with the `/sync` row — it covers lifecycle update, audit, commit, push, and PR
+- `/sync` is always the final step — it covers lifecycle update, full audit, commit, push, and PR creation
+- No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
+
+### 5.1.1 Design Gate Exemptions
+
+When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
+
+| Category | ID | Description | Row 0 Format |
+|----------|----|-------------|--------------|
+| memory-log | E1 | Session log entry in `memory/YYYY-MM-DD.md` | `── EXEMPT: memory-log ──` |
+| changelog | E2 | `CHANGELOG.md` update only | `── EXEMPT: changelog ──` |
+| hotfix-typo | E3 | Typo fix, single-line change, trivial fix | `── EXEMPT: hotfix-typo ──` |
+| pure-readme | E4 | README.md body text only (no structural/design change) | `── EXEMPT: pure-readme ──` |
+| sync-only | E5 | `/sync` execution only (lifecycle finalization) | `── EXEMPT: sync-only ──` |
+
+**Rules**:
+- Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
+- Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
+- Abuse of exemptions is a governance violation
 
 ### 5.2 Platform Parity Considerations
 
 When modifying files that affect both CLAUDE.md and GEMINI.md:
 
-| # | Task | Agent | Tier | Model | Platform |
+| # | Task | Agent | Tier | Model | Spec | Platform |
 |---|------|-------|------|---------|----------|
 | 1 | [task] | [specialist] | [tier] | [model] | Both |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [model] | Both |
+| N | `/sync "type(scope): message"` | pm | Medium | [model] | Both |
 
 **Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
 
@@ -375,22 +400,22 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 > **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet |
-| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku |
-| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet |
-| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet |
-| 5 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku | <spec-id> |
+| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
 
 #### Example 2: Single Specialist Task
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet |
-| 2 | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 2 | `/sync "docs: update project README introduction"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential
 
@@ -404,6 +429,8 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 > The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
 >
 > **Skill structure specification**: See [docs/context.md](docs/context.md) for frontmatter format and session skill registration.
+>
+> **Skill discovery & registration**: To make workspace-level skills discoverable and loadable by Claude, Gemini, and Antigravity, the `skills/` folder is registered via `skills.json` files in each platform directory: `.claude/skills.json`, `.gemini/skills.json`, and `.agents/skills.json`. The script `scripts/sync-skills.ts` distributes SSOT skills from `skills/` to `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/`, and back-syncs shortcut skills (sync, meeting) from `.agents/skills/` to `.claude/skills/` and `.gemini/skills/`.
 
 > **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
@@ -446,11 +473,19 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
 
-### Platform Skills Registry
+### Platform Skills Distribution
 
-| Skill | Location | Purpose |
-|-------|----------|---------|
-| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
+Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
+
+| Platform | Directory | Registration | Shortcut Skills |
+|----------|-----------|--------------|-----------------|
+| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync`, `meeting` |
+| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync`, `meeting` |
+| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `meeting`, `source-command-commit-push-pr` |
+
+- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
+- **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
+- **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
 
 ---
 
@@ -548,7 +583,7 @@ When a new skill is created in `skills/` or `.claude/skills/`:
    - 🟡 Deprecated dependency usage → fix within 2 weeks
    - 🟢 Wording or example improvements → batch in next release cycle
 
-3. **Apply modifications** using the checklist at [docs/lifecycle/skills/skill-modification-checklist.md](docs/lifecycle/skills/skill-modification-checklist.md)
+3. **Apply modifications** following the review and triage steps defined inline in this section (§10)
 
 4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
 
