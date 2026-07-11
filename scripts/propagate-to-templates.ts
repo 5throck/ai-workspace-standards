@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.2.0
+ * @version 2.3.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -36,6 +36,7 @@ import { join, dirname, basename, extname, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
+import * as yaml from 'js-yaml';
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
 const C = {
@@ -236,6 +237,30 @@ function sha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
+/**
+ * Reads the `scope` field from a SKILL.md frontmatter block, returned
+ * lowercased and trimmed (e.g. 'workspace'). Returns undefined if there is
+ * no frontmatter, the YAML fails to parse, or `scope` is absent — callers
+ * treat undefined the same as "no scope restriction" (never throws).
+ *
+ * Replaces a prior inline regex (`/^---\n([\s\S]*?)\n---/`) that required
+ * LF-only line endings and silently failed to match CRLF-normalized files
+ * (a common Windows checkout artifact) — M4.
+ */
+export function extractSkillFrontmatterScope(content: string): string | undefined {
+  const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+  if (!fmMatch) return undefined;
+
+  try {
+    const doc = yaml.load(fmMatch[1]);
+    if (!doc || typeof doc !== 'object') return undefined;
+    const scope = (doc as Record<string, unknown>).scope;
+    return scope !== undefined ? String(scope).trim().toLowerCase() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function padEnd(s: string, n: number): string {
   return s.length >= n ? s : s + ' '.repeat(n - s.length);
 }
@@ -402,11 +427,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
         const skillMdPath = join(domain.source, skillName, 'SKILL.md');
         if (existsSync(skillMdPath)) {
           const content = readFileSync(skillMdPath, 'utf-8');
-          const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-          if (fmMatch) {
-            const scopeMatch = fmMatch[1].match(/^\s*scope\s*:\s*(.+)$/m);
-            if (scopeMatch && scopeMatch[1].trim().toLowerCase() === 'workspace') continue;
-          }
+          if (extractSkillFrontmatterScope(content) === 'workspace') continue;
         }
       }
 
