@@ -348,9 +348,6 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 > **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
 > L2 variant projects are exempt — they manage their own design workflow.
 
-> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
-> L2 variant projects are exempt — they manage their own design workflow.
-
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
 | 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
@@ -366,8 +363,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
+- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [docs/context.md](docs/context.md) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
 
-### 5.1.1 Design Gate Exemptions
+### §5.1.1 Design Gate Exemptions
 
 When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
 
@@ -384,7 +382,7 @@ When a task falls into an exempt category, Row 0 is replaced with an exemption m
 - Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
 - Abuse of exemptions is a governance violation
 
-### 5.2 Platform Parity Considerations
+### §5.2 Platform Parity Considerations
 
 When modifying files that affect both CLAUDE.md and GEMINI.md:
 

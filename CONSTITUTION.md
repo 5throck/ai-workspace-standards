@@ -108,7 +108,7 @@ Every session that produces changes must be logged in `memory/YYYY-MM-DD.md` usi
 
 ### 3. GitHub PR Workflow → [Full details](docs/constitution/03-pr-workflow.md)
 
-All changes reach `main` via Pull Request—never by direct push. The `/sync` pipeline enforces this: memlog → MEMORY.md → CHANGELOG → audit → branch → commit → push → PR. All Git artifacts (commits, PR titles/bodies, branch names, comments) must be in English. Follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.). Active branches follow pattern `pr/<YYYYMMDD-HHmmss>-<slug>`. Run `git config core.hooksPath .githooks` to bind pre-commit and pre-push hooks.
+All changes reach `main` via Pull Request—never by direct push. The `/sync` pipeline enforces this: memlog → MEMORY.md → CHANGELOG → audit → branch → commit → push → PR. All Git artifacts (commits, PR titles/bodies, branch names, comments) must be in English. Follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.). Active branches follow pattern `pr/<YYYYMMDD-HHmmss>-<slug>`. Run `git config core.hooksPath .githooks` to bind pre-commit and pre-push hooks. **Sequential Branch Dependency Rule** (§3.3 in the full details doc): merge a prior open PR before branching for the next task, unless the new work is explicitly justified as safe to run in parallel — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so parallel unmerged branches conflict by default, not by exception.
 
 ---
 
