@@ -67,6 +67,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/beta-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.7.2 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -97,6 +99,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/scan-l2-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | Safe cleanup of a partially-scaffolded project dir on new-project.ts failure (M13) |
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -129,12 +132,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/ssrf.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.2.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
-| `qa-gate.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
+| `propagate-to-templates.ts` | L0 | 2.3.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `qa-gate.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
@@ -145,7 +148,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
-| `sync-skills.ts` | L0 | 1.1.0 | active | — | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.3.0 | active | — | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|

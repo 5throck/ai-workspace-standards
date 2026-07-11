@@ -1,27 +1,14 @@
 ---
-name: "source-command-commit-push-pr"
-version: "1.0.1"
-description: "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
-metadata:
-  type: process
-  triggers:
-    - commit-push-pr
-    - commit and push
-    - create PR
+description: Redirects commit+push+PR requests to the /sync pipeline (Gemini/Antigravity enforcement)
 ---
-
-# source-command-commit-push-pr
-
-Use this skill when the user asks to run the migrated source command `commit-push-pr`.
-
-## Command Template
 
 # Commit, Push, and Create PR
 
 > **This workspace requires all commits and PRs to go through `/sync`.**
 
-Do NOT use direct `git commit` or `git push` commands. The pre-commit hook blocks any
-`git commit` not originating from `dev-sync.ts` (`SYNC_ACTIVE` gate).
+Do NOT issue `git commit` or `git push` via `run_command` directly. The pre-commit hook
+blocks any `git commit` not originating from `dev-sync.ts` (`SYNC_ACTIVE` gate).
+Subagents dispatched via `invoke_subagent` must NOT issue git commits directly.
 
 ## Use /sync instead
 
