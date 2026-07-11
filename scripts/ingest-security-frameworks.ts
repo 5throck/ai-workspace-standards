@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 // ingest-security-frameworks.ts - Phase 4 variant-specific security frameworks ingestion
-// @version 1.0.1
+// @version 1.1.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { validateUrl } from './lib/ssrf.ts';
+import { safeFetch, SSRFBlockedError } from './lib/ssrf.ts';
 
 const CYAN   = '\x1b[36m';
 const RED    = '\x1b[31m';
@@ -45,19 +45,20 @@ async function ingest() {
     for (const item of externalSecurity) {
       console.log(`Ingesting ${item.name} for ${variant}...`);
       try {
-        const ssrfCheck = await validateUrl(item.source_url);
-        if (!ssrfCheck.allowed) {
-          console.error(`${YELLOW}SSRF check blocked ${item.name}: ${ssrfCheck.reason}${RESET}`);
-          continue;
-        }
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         let response: Response;
         try {
-          response = await fetch(item.source_url, { signal: controller.signal, redirect: 'error' });
+          // safeFetch() validates and connects to the pre-validated address in
+          // one step — no separate validateUrl()+fetch() TOCTOU window.
+          response = await safeFetch(item.source_url, { signal: controller.signal });
           clearTimeout(timeout);
         } catch (err) {
           clearTimeout(timeout);
+          if (err instanceof SSRFBlockedError) {
+            console.error(`${YELLOW}SSRF check blocked ${item.name}: ${err.reason}${RESET}`);
+            continue;
+          }
           if (err instanceof DOMException && err.name === 'AbortError') {
             console.error(`${RED}Timeout fetching ${item.name} (30s)${RESET}`);
             continue;

@@ -227,7 +227,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 
 ## §4: Other Workflows
 
-### 4.1 PM Subagent Dispatch Protocol
+### §4.1 PM Subagent Dispatch Protocol
 
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
@@ -287,7 +287,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ---
 
-### 4.2 Harness Engineering Workflow
+### §4.2 Harness Engineering Workflow
 
 Following the **PM governance workflow** defined in [docs/context.md](docs/context.md):
 
@@ -325,25 +325,28 @@ Phase 6 - Quality Assurance & Finalization (PM-owned)
 
 ---
 
-### 4.3 Role Boundary Matrix
+### §4.3 Role Boundary Matrix
 
 Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
+| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
+| Write or modify automation scripts (.ts, package.json) per ADR-0036 | `automation-engineer` | `architect` |
+| Update documentation files | `docs-writer` | `architect` |
+| Create new project from template | `scaffolding-expert` | `automation-engineer` |
+| Security review, Git hooks configuration | `security-expert` | `architect` |
+| Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
-
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-<!-- Add project-specific role boundary rules here. Example:
-     | Design implementation approach | `[design specialist]` | `[implementation specialist]` |
-     | Write or modify documentation | `[docs specialist]` | `[design specialist]` | -->
-<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 
 ## §5: Execution Plan Templates
 
-### 5.1 Standard Execution Plan Template
+### §5.1 Standard Execution Plan Template
+
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
 
 > **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
 > L2 variant projects are exempt — they manage their own design workflow.
@@ -394,7 +397,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 **Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
 
-### 5.3 Example Execution Plans
+### §5.3 Example Execution Plans
 
 #### Example 1: Multi-Agent Platform Parity Update
 

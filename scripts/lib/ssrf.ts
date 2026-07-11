@@ -14,13 +14,26 @@
  * 2. Connecting to the resolved IP directly (bypassing second DNS lookup)
  * 3. Validating TLS certificates match the original hostname
  *
- * @version 1.0.0
+ * IMPORTANT: validateUrl() alone does NOT close the TOCTOU window — it only
+ * tells you whether a hostname's *current* resolution is safe. If a caller
+ * validates, then separately calls the global fetch(url), fetch() performs
+ * its own independent DNS lookup, which can legitimately return a different
+ * (attacker-controlled) address for a rebinding domain. Use safeFetch() (or
+ * fetchPinned() directly) to actually eliminate the second lookup — Bun/Node's
+ * global fetch() does not support a custom DNS resolver, so the pinned
+ * connection is made via http.request()/https.request()'s `lookup` option
+ * instead (verified empirically: fetch()'s `dns` init option is silently
+ * ignored, while http(s).request()'s `lookup` option is honored).
+ *
+ * @version 1.1.0
  * @security Production hardening — TOCTOU DNS rebinding mitigation
  */
 
 import * as dns from 'node:dns';
 import * as net from 'node:net';
 import * as URL from 'node:url';
+import * as http from 'node:http';
+import * as https from 'node:https';
 
 // ============================================================================
 // CONSTANTS
@@ -129,6 +142,121 @@ export async function validateUrl(
   }
 
   return { allowed: true, resolvedAddresses: addresses, hostname };
+}
+
+/** Thrown by safeFetch() when validateUrl() rejects the target. */
+export class SSRFBlockedError extends Error {
+  constructor(public readonly reason: string, public readonly hostname: string) {
+    super(`SSRF check blocked ${hostname}: ${reason}`);
+    this.name = 'SSRFBlockedError';
+  }
+}
+
+/**
+ * Connects directly to one of `pinnedAddresses` — never re-resolves
+ * `targetUrl`'s hostname — using http(s).request()'s `lookup` override. The
+ * original hostname is still used for the Host header and (on https) the
+ * TLS SNI/certificate hostname, so only the socket-level DNS step is pinned.
+ *
+ * Does not follow redirects (rejects instead) — matching the `redirect:
+ * 'error'` behavior the previous fetch()-based call sites relied on.
+ *
+ * @param portOverride - Test-only seam: connect to this port instead of the
+ *   URL's own port, while keeping the original hostname for Host/SNI. Lets
+ *   tests point a fake, non-resolvable hostname at a real local test server.
+ */
+export async function fetchPinned(
+  targetUrl: string,
+  pinnedAddresses: string[],
+  portOverride?: number,
+  init: { signal?: AbortSignal } = {},
+): Promise<Response> {
+  const parsed = new URL.URL(targetUrl);
+  const isHttps = parsed.protocol === 'https:';
+  const requestFn = isHttps ? https.request : http.request;
+
+  const lookup: net.LookupFunction = (_hostname, options, callback) => {
+    const results = pinnedAddresses.map((address) => ({
+      address,
+      family: net.isIPv6(address) ? 6 : 4,
+    }));
+    if ((options as dns.LookupOneOptions)?.all) {
+      // @ts-expect-error — Node's LookupFunction overload for all:true
+      callback(null, results);
+    } else {
+      // @ts-expect-error — Node's LookupFunction overload for all:false (default)
+      callback(null, results[0].address, results[0].family);
+    }
+  };
+
+  return new Promise<Response>((resolve, reject) => {
+    const req = requestFn(
+      {
+        protocol: parsed.protocol,
+        hostname: parsed.hostname,
+        port: portOverride ?? (parsed.port || (isHttps ? 443 : 80)),
+        path: `${parsed.pathname}${parsed.search}`,
+        method: 'GET',
+        lookup,
+        // TLS: keep servername/cert validation pinned to the original hostname.
+        ...(isHttps ? { servername: parsed.hostname } : {}),
+      },
+      (res) => {
+        const status = res.statusCode ?? 0;
+        if (status >= 300 && status < 400) {
+          res.resume();
+          reject(new Error(`fetchPinned: refusing to follow redirect (status ${status}, location: ${res.headers.location ?? 'unknown'})`));
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+        res.on('data', (chunk) => chunks.push(chunk));
+        res.on('end', () => {
+          const headers = new Headers();
+          for (const [key, value] of Object.entries(res.headers)) {
+            if (value === undefined) continue;
+            headers.set(key, Array.isArray(value) ? value.join(', ') : String(value));
+          }
+          resolve(new Response(Buffer.concat(chunks), {
+            status,
+            statusText: res.statusMessage ?? '',
+            headers,
+          }));
+        });
+        res.on('error', reject);
+      },
+    );
+
+    req.on('error', reject);
+    if (init.signal) {
+      if (init.signal.aborted) {
+        req.destroy();
+        reject(new DOMException('Aborted', 'AbortError'));
+      } else {
+        init.signal.addEventListener('abort', () => {
+          req.destroy();
+          reject(new DOMException('Aborted', 'AbortError'));
+        }, { once: true });
+      }
+    }
+    req.end();
+  });
+}
+
+/**
+ * Validates `targetUrl` via validateUrl() and, if allowed, fetches it with
+ * the DNS resolution pinned to the addresses that were just validated —
+ * closing the TOCTOU window that a bare `validateUrl()` + `fetch()` pair
+ * leaves open (see module doc comment).
+ *
+ * @throws {SSRFBlockedError} if validateUrl() rejects the target.
+ */
+export async function safeFetch(targetUrl: string, init: { signal?: AbortSignal } = {}): Promise<Response> {
+  const check = await validateUrl(targetUrl);
+  if (!check.allowed) {
+    throw new SSRFBlockedError(check.reason ?? 'blocked', check.hostname);
+  }
+  return fetchPinned(targetUrl, check.resolvedAddresses!, undefined, init);
 }
 
 // ============================================================================

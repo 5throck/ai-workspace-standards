@@ -98,8 +98,8 @@
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
 | index.ts | 1.0.0 | scripts/helpers/registries/index.ts | N/A |
 | index.ts | 1.0.0 | scripts/validators/index.ts | N/A |
-| ingest-external-skills.ts | 1.0.2 | scripts/ingest-external-skills.ts | N/A |
-| ingest-security-frameworks.ts | 1.0.1 | scripts/ingest-security-frameworks.ts | N/A |
+| ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
+| ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.2 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.1 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
@@ -140,7 +140,7 @@
 | skill-dependency-analysis.ts | 1.0.0 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.1.4 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
-| ssrf.ts | 1.0.0 | scripts/lib/ssrf.ts | N/A |
+| ssrf.ts | 1.1.0 | scripts/lib/ssrf.ts | N/A |
 | substitute-placeholders.ts | 1.1.1 | scripts/helpers/substitute-placeholders.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
