@@ -116,8 +116,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.5 | active | —| —| L0+L1 | —|
-| `ingest-external-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `ingest-security-frameworks.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.9.0 | active | —| —| L0 | Phase 1.6 (pm.md pre-flight), Phase 3.5 (AGENTS.md §-structure check + BLOCKING gate), Phase 3.7 (plugin validation), Phase 4.5 (JSON report)|
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | Regenerates variant AGENTS.md from L1 common template; fixes missing VARIANT-* markers|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -128,7 +128,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `lib/ssrf.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `new-project.ts` | L0 | 1.2.1 | active | —| —| L0 | —|

@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 // ingest-external-skills.ts - Phase 4 variant-specific external skills ingestion
-// @version 1.0.2
+// @version 1.1.0
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { validateUrl } from './lib/ssrf.ts';
+import { safeFetch, SSRFBlockedError } from './lib/ssrf.ts';
 
 const CYAN   = '\x1b[36m';
 const RED    = '\x1b[31m';
@@ -46,19 +46,20 @@ async function ingest() {
     for (const skill of externalSkills) {
       console.log(`Ingesting ${skill.name} for ${variant}...`);
       try {
-        const ssrfCheck = await validateUrl(skill.source_url);
-        if (!ssrfCheck.allowed) {
-          console.error(`${YELLOW}SSRF check blocked ${skill.name}: ${ssrfCheck.reason}${RESET}`);
-          continue;
-        }
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         let response: Response;
         try {
-          response = await fetch(skill.source_url, { signal: controller.signal, redirect: 'error' });
+          // safeFetch() validates and connects to the pre-validated address in
+          // one step — no separate validateUrl()+fetch() TOCTOU window.
+          response = await safeFetch(skill.source_url, { signal: controller.signal });
           clearTimeout(timeout);
         } catch (err) {
           clearTimeout(timeout);
+          if (err instanceof SSRFBlockedError) {
+            console.error(`${YELLOW}SSRF check blocked ${skill.name}: ${err.reason}${RESET}`);
+            continue;
+          }
           if (err instanceof DOMException && err.name === 'AbortError') {
             console.error(`${RED}Timeout fetching ${skill.name} (30s)${RESET}`);
             continue;
@@ -87,19 +88,20 @@ async function ingest() {
     for (const script of externalScripts) {
       console.log(`Ingesting script ${script.name} for ${variant}...`);
       try {
-        const ssrfCheck = await validateUrl(script.source_url);
-        if (!ssrfCheck.allowed) {
-          console.error(`${YELLOW}SSRF check blocked ${script.name}: ${ssrfCheck.reason}${RESET}`);
-          continue;
-        }
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         let response: Response;
         try {
-          response = await fetch(script.source_url, { signal: controller.signal, redirect: 'error' });
+          // safeFetch() validates and connects to the pre-validated address in
+          // one step — no separate validateUrl()+fetch() TOCTOU window.
+          response = await safeFetch(script.source_url, { signal: controller.signal });
           clearTimeout(timeout);
         } catch (err) {
           clearTimeout(timeout);
+          if (err instanceof SSRFBlockedError) {
+            console.error(`${YELLOW}SSRF check blocked ${script.name}: ${err.reason}${RESET}`);
+            continue;
+          }
           if (err instanceof DOMException && err.name === 'AbortError') {
             console.error(`${RED}Timeout fetching ${script.name} (30s)${RESET}`);
             continue;
