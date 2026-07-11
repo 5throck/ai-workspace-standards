@@ -12,6 +12,17 @@
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
 
+# --- Beta lifecycle raw tracking state (local operational data — must not be
+# committed: holds per-engagement client identifiers and bug descriptions).
+# Already caught by the /*/  rule above; documented explicitly here so this
+# exclusion is never mistaken for an oversight (see tests/ un-ignore fix in
+# 2026-07-11 history for why that distinction matters). The DURABLE aggregate
+# (counts, eligibility, missing criteria — no per-engagement detail) is
+# mirrored into the already-tracked templates/<variant>/variant.json under
+# betaLifecycleSummary by scripts/helpers/beta-lifecycle.ts — see that file
+# for the sync mechanism. ---
+.pipeline-state/
+
 # --- dev-sync pipeline temp files ---
 CHANGELOG_ENTRY.md
 .sync_context.tmp
@@ -91,6 +102,7 @@ __pycache__/
 !templates/co-develop/
 !templates/co-security/
 !templates/co-work/
+!tests/
 
 # --- CodeGraph Index ---
 .codegraph/
