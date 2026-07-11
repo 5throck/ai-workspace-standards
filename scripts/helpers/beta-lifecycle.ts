@@ -5,7 +5,7 @@
  * Tracks beta variant lifecycle including engagements, bugs, and promotion eligibility.
  * Implements variant-weighted promotion criteria from governance rules.
  *
- * @version 1.1.1
+ * @version 1.2.0
  * @phase 3: Beta Lifecycle Management
  *
  * Dependencies:
@@ -157,6 +157,42 @@ function saveLifecycleState(state: BetaLifecycleState): void {
       error instanceof Error ? error.message : String(error),
       'Check directory permissions and disk space'
     );
+  }
+
+  syncSummaryToVariantJson(state);
+}
+
+/**
+ * `.pipeline-state/beta-lifecycle/*.json` is intentionally git-ignored (see
+ * `.gitignore`) — it holds per-engagement client identifiers and bug
+ * descriptions, which are treated as local operational data, not durable
+ * governance state. But the *aggregate* counts are exactly what
+ * `promote-variant` decisions are based on, so they are mirrored into the
+ * already-tracked `templates/<variantName>/variant.json` under
+ * `betaLifecycleSummary` — durable across machines/sessions without
+ * committing the underlying per-engagement detail. Non-fatal: a missing
+ * variant.json (e.g. in a unit test fixture) only logs a warning.
+ */
+export function syncSummaryToVariantJson(state: BetaLifecycleState, workspaceRoot: string = WORKSPACE_ROOT): void {
+  const variantJsonPath = join(workspaceRoot, 'templates', state.variantName, 'variant.json');
+  if (!existsSync(variantJsonPath)) {
+    console.warn(`⚠️  Skipping betaLifecycleSummary sync — not found: ${variantJsonPath}`);
+    return;
+  }
+
+  try {
+    const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+    variantJson.betaLifecycleSummary = {
+      betaEngagements: state.betaEngagements,
+      betaBugs: state.betaBugs,
+      betaAgeInMonths: state.betaAgeInMonths,
+      promotionEligible: state.promotionEligible,
+      missingCriteria: state.missingCriteria,
+      lastSynced: new Date().toISOString(),
+    };
+    writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + '\n', 'utf-8');
+  } catch (error) {
+    console.warn(`⚠️  Failed to sync betaLifecycleSummary to ${variantJsonPath}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
