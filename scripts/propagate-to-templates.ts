@@ -669,12 +669,12 @@ function replaceCommonSection(
   return { content: variantContent, changed: false };
 }
 
-function publishDocs(isDryRun: boolean): void {
+function publishDocs(isDryRun: boolean, mapPath: string): void {
   console.log(`\n${C.cyan}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${C.reset}`);
   if (isDryRun) console.log(`${C.dim}(dry-run mode)${C.reset}`);
 
   // Read governance-* domains from propagation-map.json
-  const mapRaw = readFileSync(MAP_PATH, 'utf-8');
+  const mapRaw = readFileSync(mapPath, 'utf-8');
   const map = JSON.parse(mapRaw);
 
   const govDomains = Object.entries(map.domains)
@@ -1188,7 +1188,7 @@ if (CHECK_DRIFT) {
   runL0L1Sync(MAP_PATH);
   // Side-commands: can combine with --apply or --dry-run
   if (GOVERNANCE_L1) publishGovernanceL1(DRY_RUN);
-  if (DOCS) publishDocs(DRY_RUN);
+  if (DOCS) publishDocs(DRY_RUN, MAP_PATH);
   if (PRUNE) pruneL1Scripts(MAP_PATH, DRY_RUN);
 }
 

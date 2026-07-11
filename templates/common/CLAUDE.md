@@ -196,6 +196,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 <!-- COMMON-CLAUDE:START -->
 ## Execution Plan Boilerplate
 
+The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](AGENTS.md#511-design-gate-exemptions)** — do not restate them here.
 For execution plan format, mandatory criteria, and templates, see **[AGENTS.md §3 and §5](AGENTS.md)**.
 
 > **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
@@ -212,7 +213,8 @@ Every execution plan MUST start with Row 0 (Design Gate — architect creates/up
 | 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
 | N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet | |
 
-**Exempt tasks** (E1–E5): Replace Row 0 with `── EXEMPT: <category> ──`. See [AGENTS.md §5.1.1](AGENTS.md#511-design-gate-exemptions).
+> **Note (Claude Code-specific)**: The `Model` column shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See §6 (Native Sub-agents) below for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent note).
+<!-- Note: `fable` is a forward-looking alias not yet registered in docs/workspace-schema.json; do not use until added to the schema -->
 
 **Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
 <!-- COMMON-CLAUDE:END -->
@@ -244,10 +246,10 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 > Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
 
 #### Cost Optimization (3-Tier Model Strategy)
-**Model Selection Overrides** (overridden per agent invocation when appropriate):
-- **High-tier (Design/Planning)** — `claude-opus-4-7`: Complex analysis, architectural refactoring, or PM orchestration.
-- **Medium-tier (Review/QA)** — `claude-sonnet-4-6`: Code review, testing, standard implementation logic, and quality gates. Supervises the Low-tier.
-- **Low-tier (Execution/Coding)** — `claude-haiku-4-5`: Simple transformations, boilerplate generation, or strictly scoped sub-agent tasks.
+The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
+- **High-tier** → `claude-opus-4-7`
+- **Medium-tier** → `claude-sonnet-4-6`
+- **Low-tier** → `claude-haiku-4-5`
 
 <!-- COMMON-CLAUDE:START -->
 ### 7. Native Plan Mode (`EnterPlanMode`)

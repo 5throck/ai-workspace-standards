@@ -250,11 +250,7 @@ Request received
 
 #### Cost Optimization (3-Tier Strategy)
 
-The PM uses a 3-tier model strategy to optimize cost and quality:
-
-- **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
-- **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
-- **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
 
 **Tier Adjustment Rules:**
 - The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
