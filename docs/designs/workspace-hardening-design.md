@@ -1,7 +1,7 @@
 # Design: Workspace Hardening (M-item cleanup, drift-noise removal, tests, CI, variant/docs analysis)
 
 **Date**: 2026-07-11
-**Status**: Approved
+**Status**: Completed
 **Spec ID**: 2026-07-11-workspace-hardening
 **Scope**: scripts/generate-version-manifest.ts, scripts/sync-skills.ts, scripts/qa-gate.ts, scripts/new-project.ts, scripts/propagate-to-templates.ts, scripts/dev-sync.ts, package.json, .agents/, tests/unit/, .github/workflows/, docs/reports/
 
@@ -80,9 +80,9 @@ Severity convention introduced: drift issues are now prefixed `[ERROR]` (frontma
 
 ## 8. Acceptance Criteria
 
-- [ ] PR1: parser tests pass; VERSION_MANIFEST regenerates with clean Drift Detection (no triggers noise, no duplicates); sync-skills and version-manifest both idempotent (empty git diff on 2nd run); bun.lock diff limited to 3 pinned packages; M1 branch decision documented; bun scripts/audit.ts all PASS.
-- [ ] PR2: test.yml performs real gitleaks PR-diff scan plus validate-templates step; weekly-health-check.yml runs on schedule and manually; all referenced bun run scripts exist in package.json.
-- [ ] PR3: both reports cite verified repository state (e.g., git ls-files output), are English-only, live under docs/reports/, and end with a Summary section (Findings / Recommended Actions / Deferred Items).
+- [x] PR1: parser tests pass; VERSION_MANIFEST regenerates with clean Drift Detection (no triggers noise, no duplicates); sync-skills and version-manifest both idempotent (empty git diff on 2nd run); bun.lock diff limited to 3 pinned packages; M1 branch decision documented; bun scripts/audit.ts all PASS. — Verified 2026-07-12: merged via PRs #394/#398/#400/#402; 26 tests pass across the 4 target suites; audit.ts all PASS.
+- [x] PR2: test.yml performs real gitleaks PR-diff scan plus validate-templates step; weekly-health-check.yml runs on schedule and manually; all referenced bun run scripts exist in package.json. — Verified 2026-07-12: merged via PR #395 (+ #400 fetch-depth fix); weekly-health-check.yml cron confirmed present.
+- [x] PR3: both reports cite verified repository state (e.g., git ls-files output), are English-only, live under docs/reports/, and end with a Summary section (Findings / Recommended Actions / Deferred Items). — Verified 2026-07-12: merged via PR #396; both reports present under docs/reports/.
 
 ## 9. Open Questions
 
