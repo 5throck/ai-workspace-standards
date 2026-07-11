@@ -65,7 +65,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.1.5 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.7.2 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -487,4 +487,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-11*
