@@ -383,6 +383,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 - No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
+- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [CONSTITUTION.md §3.3 Sequential Branch Dependency Rule](docs/constitution/03-pr-workflow.md#33-sequential-branch-dependency-rule) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
 
 ### §5.1.1 Design Gate Exemptions
 
