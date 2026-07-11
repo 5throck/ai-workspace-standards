@@ -1,0 +1,39 @@
+name: Weekly Health Check
+
+# Implements CONSTITUTION.md §9 Weekly Health Check (PM, every Friday):
+# lifecycle audits + deprecated-item review. Runs on a schedule and can also
+# be triggered manually for on-demand verification.
+on:
+  schedule:
+    - cron: '0 0 * * 5' # Every Friday at 00:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Agent lifecycle audit
+        run: bun run agent-lifecycle-audit
+
+      - name: Skill lifecycle audit
+        run: bun run skill-lifecycle-audit
+
+      - name: Skill dependency analysis (full health report)
+        run: bun scripts/skill-dependency-analysis.ts --report
+
+      - name: Verify scripts registry
+        run: bun run verify-scripts
