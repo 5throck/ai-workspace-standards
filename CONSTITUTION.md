@@ -141,16 +141,9 @@ The PM Gateway operates at **4 enforcement levels** (see [§5 Multi-Agent Archit
 
 #### Mandatory Execution Plan Display
 
-Before dispatching any specialist agents (Level 2 tasks), PM **must** output an execution plan table in the user's active language:
+Before dispatching any specialist agents (Level 2 tasks), PM **must** output an execution plan table in the user's active language. The table format and its rules are the Single Source of Truth in [AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template) — do not restate it here; that section owns the mandatory table shape, the Design Gate row, and the `/sync`-as-final-step rule.
 
-| # | Task | Agent | Tier | Model |
-|---|------|-------|------|-------|
-| 1 | [task description] | [agent name] | High/Medium/Low | opus/sonnet/haiku |
-| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [Model] |
-
-**Rules**:
-- Declare execution order (parallel vs sequential) below the table
-- Always include Lifecycle Update and Final QA Audit as the final two steps
+**Rules specific to this enforcement level**:
 - The Agent tool MUST NOT be called until this table is visible to the user
 - At workspace root, dispatch `lifecycle-manager` and `auditor`; in variant projects, PM handles both directly
 
@@ -566,4 +559,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-11*

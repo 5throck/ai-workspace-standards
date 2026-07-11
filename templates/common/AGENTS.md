@@ -250,11 +250,7 @@ Request received
 
 #### Cost Optimization (3-Tier Strategy)
 
-The PM uses a 3-tier model strategy to optimize cost and quality:
-
-- **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
-- **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
-- **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
+The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
 
 **Tier Adjustment Rules:**
 - The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.
@@ -352,6 +348,9 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 > **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
 > L2 variant projects are exempt — they manage their own design workflow.
 
+> **Design Gate (Row 0)**: Workspace root (L0) and common template (L1) only.
+> L2 variant projects are exempt — they manage their own design workflow.
+
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
 | 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
@@ -368,7 +367,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 
-### §5.1.1 Design Gate Exemptions
+### 5.1.1 Design Gate Exemptions
 
 When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
 
@@ -385,7 +384,7 @@ When a task falls into an exempt category, Row 0 is replaced with an exemption m
 - Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
 - Abuse of exemptions is a governance violation
 
-### §5.2 Platform Parity Considerations
+### 5.2 Platform Parity Considerations
 
 When modifying files that affect both CLAUDE.md and GEMINI.md:
 

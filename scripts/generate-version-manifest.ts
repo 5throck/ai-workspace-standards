@@ -1,7 +1,8 @@
-// @version 1.0.2
+// @version 1.1.0
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
+import * as yaml from 'js-yaml';
 
 const MANIFEST_PATH = path.join('docs', 'VERSION_MANIFEST.md');
 const MANIFEST_VERSION = '1.0';
@@ -10,7 +11,7 @@ const GREEN = '\x1b[32m';
 const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
-interface AgentInfo {
+export interface AgentInfo {
     name: string;
     file: string;
     tier: string;
@@ -18,23 +19,24 @@ interface AgentInfo {
     last_modified: string;
 }
 
-interface SkillInfo {
+export interface SkillInfo {
     name: string;
     version: string;
     location: string;
     platform: string;
     triggers: string[];
     owner: string;
+    parseError?: string;
 }
 
-interface ScriptInfo {
+export interface ScriptInfo {
     name: string;
     version: string;
     location: string;
     dependencies: string[];
 }
 
-interface CommandInfo {
+export interface CommandInfo {
     name: string;
     file: string;
     platform: string;
@@ -63,20 +65,37 @@ function parseAgentFrontmatter(content: string): { tier?: string; model?: string
     };
 }
 
-function parseSkillFrontmatter(content: string): { version?: string; triggers?: string[]; owner?: string } {
-    const versionMatch = /^version:\s*['"]?([\d.]+)['"]?$/m.exec(content);
-    const triggersMatch = /^triggers:\s*\[(.*?)\]$/m.exec(content);
-    const ownerMatch = /^owner:\s*(.+)$/m.exec(content);
+function extractFrontmatterBlock(content: string): string | null {
+    const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+    return match ? match[1] : null;
+}
 
-    let triggers: string[] = [];
-    if (triggersMatch) {
-        triggers = triggersMatch[1].split(',').map(t => t.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+export function parseSkillFrontmatter(content: string): { version?: string; triggers?: string[]; owner?: string; parseError?: string } {
+    const block = extractFrontmatterBlock(content);
+    if (!block) {
+        return { parseError: 'No YAML frontmatter block found' };
     }
 
+    let doc: any;
+    try {
+        doc = yaml.load(block);
+    } catch (err) {
+        return { parseError: err instanceof Error ? err.message : String(err) };
+    }
+
+    if (!doc || typeof doc !== 'object') {
+        return { parseError: 'Frontmatter did not parse to an object' };
+    }
+
+    const rawTriggers = doc.metadata?.triggers ?? doc.triggers;
+    const triggers = Array.isArray(rawTriggers)
+        ? rawTriggers.map((t: unknown) => String(t).trim()).filter(Boolean)
+        : [];
+
     return {
-        version: versionMatch ? versionMatch[1].trim() : undefined,
+        version: doc.version !== undefined ? String(doc.version).trim() : undefined,
         triggers,
-        owner: ownerMatch ? ownerMatch[1].trim() : undefined,
+        owner: doc.owner !== undefined ? String(doc.owner).trim() : undefined,
     };
 }
 
@@ -110,6 +129,10 @@ function extractScriptDependencies(content: string): string[] {
     return Array.from(deps).sort();
 }
 
+// Simple, single-action commands with no orchestration logic — intentionally
+// have no dedicated SKILL.md. See detectDrift() for rationale.
+const COMMAND_SKILL_EXEMPT = new Set(['changelog', 'memlog', 'new-task']);
+
 function hasGeminiParitySkip(content: string): boolean {
     return /^gemini-parity:\s*skip/m.test(content);
 }
@@ -137,37 +160,47 @@ async function collectAgents(): Promise<AgentInfo[]> {
     return agents.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function collectSkills(): Promise<SkillInfo[]> {
-    const skills: SkillInfo[] = [];
-    const skillDirs = ['skills', path.join('.claude', 'skills')];
+// Priority order matches AGENTS.md §6 Skill Resolution Priority: workspace-level
+// skills/ is the SSOT; .claude/skills/ carries platform-specific-only skills.
+// Each unique skill name is reported exactly once (fixes duplicate drift-issue
+// reporting that previously emitted one row/issue per distribution copy).
+const SKILL_SCAN_DIRS = ['skills', path.join('.claude', 'skills')];
 
-    for (const skillsDir of skillDirs) {
+async function collectSkills(): Promise<SkillInfo[]> {
+    const seen = new Map<string, SkillInfo>();
+
+    for (const skillsDir of SKILL_SCAN_DIRS) {
         if (!fs.existsSync(skillsDir)) continue;
         for (const dir of fs.readdirSync(skillsDir)) {
+            if (seen.has(dir)) continue; // already recorded from a higher-priority dir
             const skillPath = path.join(skillsDir, dir);
             if (!fs.statSync(skillPath).isDirectory()) continue;
             const skillMd = path.join(skillPath, 'SKILL.md');
             if (!fs.existsSync(skillMd)) continue;
 
             const content = fs.readFileSync(skillMd, 'utf-8');
-            const { version, triggers, owner } = parseSkillFrontmatter(content);
-            const isInGemini = fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md'));
+            const { version, triggers, owner, parseError } = parseSkillFrontmatter(content);
+
+            const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'));
+            const inClaude = fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md'));
+            const inGemini = fs.existsSync(path.join('.gemini', 'skills', dir, 'SKILL.md'));
 
             let platform = 'workspace';
-            if (skillsDir === path.join('.claude', 'skills') && isInGemini) platform = 'both';
-            else if (skillsDir === path.join('.claude', 'skills')) platform = 'claude';
+            if (!inWorkspace && inClaude && inGemini) platform = 'both';
+            else if (!inWorkspace && inClaude) platform = 'claude';
 
-            skills.push({
+            seen.set(dir, {
                 name: dir,
                 version: version || 'N/A',
                 location: normalizePath(skillMd),
                 platform,
                 triggers: triggers || [],
                 owner: owner || 'N/A',
+                parseError,
             });
         }
     }
-    return skills.sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 async function collectScripts(): Promise<ScriptInfo[]> {
@@ -224,34 +257,64 @@ async function collectCommands(): Promise<CommandInfo[]> {
     return commands.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: CommandInfo[]): string[] {
-    const issues: string[] = [];
+/**
+ * Detects drift issues, each prefixed with a severity level:
+ * - [ERROR]: data is unrecoverable (e.g. frontmatter failed to parse) — a
+ *   future CI gate can fail the build on ERROR-level drift.
+ * - [WARNING]: data parsed successfully but a field is incomplete (e.g. no
+ *   triggers defined) — informational, not build-blocking.
+ * Issues are deduplicated by their exact text (dedup of skill-name based
+ * checks is already guaranteed upstream by collectSkills() returning one
+ * entry per unique skill name).
+ */
+export function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: CommandInfo[]): string[] {
+    const issues = new Set<string>();
 
     // Check for agents without tier/model metadata
     for (const agent of agents) {
         if (agent.tier === 'N/A' || agent.model === 'N/A') {
-            issues.push(`Agent ${agent.name} missing tier or model metadata`);
+            issues.add(`[WARNING] Agent ${agent.name} missing tier or model metadata`);
         }
     }
 
-    // Check for skills without version
+    // Check for skills with unparseable frontmatter or incomplete metadata
     for (const skill of skills) {
+        if (skill.parseError) {
+            issues.add(`[ERROR] Skill ${skill.name} frontmatter YAML parse error: ${skill.parseError}`);
+            continue; // version/triggers are unreliable if frontmatter didn't parse
+        }
         if (skill.version === 'N/A') {
-            issues.push(`Skill ${skill.name} missing version`);
+            issues.add(`[WARNING] Skill ${skill.name} missing version`);
         }
         if (skill.triggers.length === 0) {
-            issues.push(`Skill ${skill.name} has no triggers defined`);
+            issues.add(`[WARNING] Skill ${skill.name} has no triggers defined`);
         }
     }
 
-    // Check for command-skill integration drift
+    // Check for command-skill integration drift. Per CLAUDE.md §2, every
+    // .claude/commands/<name>.md file is automatically registered as a
+    // <name> Skill — so integration is verified by name match against the
+    // collected skills list, not by an in-file "> Skill: ..." annotation
+    // (no command file in this repo uses that annotation format, which made
+    // the previous check a permanent false positive for every command).
+    // Migrated Antigravity source commands are registered under a
+    // `source-command-<name>` skill directory (see .claude/skills/source-command-commit-push-pr) —
+    // that alias also counts as integrated.
+    // COMMAND_SKILL_EXEMPT lists commands that are intentionally simple,
+    // single-action helpers (memory-log append, single changelog edit, task
+    // creation) with no orchestration logic — they don't warrant a dedicated
+    // SKILL.md, so their lack of a matching skill is an accepted state, not
+    // drift, and is excluded from the report rather than re-flagged every run.
+    const skillNames = new Set(skills.map(s => s.name));
     for (const cmd of commands) {
-        if (cmd.skill_integration === 'N/A') {
-            issues.push(`Command ${cmd.name} not integrated as a skill`);
+        if (COMMAND_SKILL_EXEMPT.has(cmd.name)) continue;
+        const integrated = skillNames.has(cmd.name) || skillNames.has(`source-command-${cmd.name}`);
+        if (!integrated) {
+            issues.add(`[WARNING] Command ${cmd.name} has no matching skill of the same name`);
         }
     }
 
-    return issues;
+    return Array.from(issues);
 }
 
 async function generateManifest() {
@@ -376,4 +439,6 @@ async function generateManifest() {
     }
 }
 
-generateManifest().catch(console.error);
+if (import.meta.main) {
+    generateManifest().catch(console.error);
+}

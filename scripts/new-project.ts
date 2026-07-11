@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.1
+// @version 1.3.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -12,6 +12,7 @@ import {
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
+import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -294,6 +295,21 @@ if (!existsSync(commonDir)) {
 
 console.log(`🚀 Scaffolding new project: ${projectName}`);
 mkdirSync(projectDir, { recursive: true });
+
+// M13: from this point on, any failure (explicit process.exit(1) — of which
+// this script has many — or an uncaught exception) must not leave a broken,
+// half-scaffolded project directory behind. Node/Bun's 'exit' event fires
+// synchronously in both cases, making it a single, low-risk hook point
+// without restructuring the rest of this script's control flow.
+if (import.meta.main) {
+  process.on('exit', (code) => {
+    if (code === 0) return;
+    const result = rollbackPartialProject(projectDir, workspaceRoot);
+    if (result.rolledBack) {
+      console.error(`🧹 Rolled back partially-created project directory: ${projectDir}`);
+    }
+  });
+}
 
 // Workspace-only files that must NOT be copied into new projects
 const WORKSPACE_ONLY_FILES = ['package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'propagation-map.json', 'variant.json'];
