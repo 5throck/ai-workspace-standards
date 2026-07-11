@@ -288,13 +288,18 @@ lang_reason: legal   # legal | source-material | proper-noun
 - All PR descriptions: English
 - All branch names: English
 - Code comments: English (unless documenting locale-specific logic)
+
+### Pluggable Variant Audit Hooks and Integrity Protection
+- **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
+- **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
+- **Integrity Enforcement**: During template reconciliation (`l2-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
 <!-- COMMON-AGENTS:END -->
 
 ---
 
 ## §4: Other Workflows
 
-### 4.1 PM Subagent Dispatch Protocol
+### §4.1 PM Subagent Dispatch Protocol
 
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
@@ -362,7 +367,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ---
 
-### 4.2 Harness Engineering Workflow
+### §4.2 Harness Engineering Workflow
 
 Following the **PM governance workflow** defined in [docs/context.md](docs/context.md):
 
@@ -400,7 +405,7 @@ Phase 6 - Quality Assurance & Finalization (PM-owned)
 
 ---
 
-### 4.3 Role Boundary Matrix
+### §4.3 Role Boundary Matrix
 
 Use this to resolve ambiguity when multiple agents could handle a request.
 
@@ -422,7 +427,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 ## §5: Execution Plan Templates
 
-### 5.1 Standard Execution Plan Template
+### §5.1 Standard Execution Plan Template
 
 | # | Task | Agent | Tier | Model |
 |---|------|-------|------|-------|
@@ -437,7 +442,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 - State parallel vs sequential order below the table
 - "pm (direct)" is FORBIDDEN - PM never executes directly
 
-### 5.2 Platform Parity Considerations
+### §5.2 Platform Parity Considerations
 
 When modifying files that affect both CLAUDE.md and GEMINI.md:
 
@@ -450,7 +455,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 **Note**: See execution plan boilerplate in CLAUDE.md §5, GEMINI.md §5, and agents/pm.md for the Platform column definition.
 
-### 5.3 Example Execution Plans
+### §5.3 Example Execution Plans
 
 #### Example 1: Multi-Agent Platform Parity Update
 

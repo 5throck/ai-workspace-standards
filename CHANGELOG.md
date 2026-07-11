@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-11]**: fix(docs): M11/M12 — fix AGENTS.md heading §-prefix inconsistency across SSOT and all 7 variants — root `AGENTS.md` had `§3.1`-`§3.8` prefixed but `4.1`-`5.3` unprefixed; the "co-design AGENTS.md format cleanup" deferred item was actually this same root SSOT inconsistency, inherited by every variant via propagation, not a co-design-local issue; fixed root + propagated to templates/common via `propagate:governance`/`propagate:docs`, then directly fixed the 7 variant copies (the `§4`/`§5` region is not covered by the `COMMON-AGENTS` marker-inject block, so it required a direct per-variant fix); verified anchor links (e.g. `AGENTS.md#51-standard-execution-plan-template` added in the prior governance-docs-consolidation change) are unaffected since GitHub's slug generation strips `§` identically whether present or not; also re-fixed the `MAP_PATH is not defined` crash in `propagate-to-templates.ts` `publishDocs()` found again on `main` (same bug as the pending fix in an unmerged PR, reapplied here since this session's work needed it)
 - **[2026-07-11]**: fix(scripts): fix --check-drift false-positive L2 drift — `collectDiffsL1L2()` flagged 933 "missing" files across 13 Fork Model domains (ADR-0031) that don't exist in L2 variants; added `l2_drift_eligible` field to `propagation-map.json` (v1.5.0) with `isL2DriftEligible()` helper in `propagate-to-templates.ts` (v2.2.0); `gemini-settings` is the sole ongoing L1→L2 mirror; `--check-drift` now an independent read-only command with conflict detection rejecting `--apply`/`--governance-l1`/`--docs`/`--prune` combinations; CI drift check step updated to allow known gemini-settings overrides while failing on unexpected drift; 13 unit+integration tests added
 - **[2026-07-10]**: fix(project-review): two-round project review — Round 1: 35 issues found and fixed; Round 2: 3 Critical + 16 High + 15 Moderate found, 18 actioned (Critical: L1 schema Phase 5/6, qa-gate Step 3.95, safeResolvePath; High: audit.ts split bug, dead parity check removal, IPv6 SSRF ranges, pre-commit gitleaks separation, 10 more; Moderate: common-contract.json new-project.ts). Moderate items M1-M15 deferred (no functional impact)
 - **[2026-07-10]**: feat(skills): project-review skill v1.1.0 — conditional base-map MCP integration (Step 0 detection, Step 4c cross-validation, graceful degradation when MCP unavailable); sync skill pipeline documentation expanded to full 16-step table with FATAL/non-fatal markers; sync skill owner updated to lifecycle-manager
@@ -862,7 +863,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-11*
 
 
 
