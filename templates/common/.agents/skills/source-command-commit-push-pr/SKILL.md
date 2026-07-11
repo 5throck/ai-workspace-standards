@@ -1,7 +1,13 @@
 ---
 name: "source-command-commit-push-pr"
-version: "1.0.0"
+version: "1.0.1"
 description: "Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)"
+metadata:
+  type: process
+  triggers:
+    - commit-push-pr
+    - commit and push
+    - create PR
 ---
 
 # source-command-commit-push-pr

@@ -91,6 +91,7 @@ __pycache__/
 !templates/co-develop/
 !templates/co-security/
 !templates/co-work/
+!tests/
 
 # --- CodeGraph Index ---
 .codegraph/
