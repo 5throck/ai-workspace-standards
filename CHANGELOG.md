@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-11]**: docs(reports): variant promotion roadmap and governance docs diet analysis — `docs/reports/variant-promotion-roadmap-2026-07.md` assesses co-deck and co-game against `promotion-policy.ts` beta-to-stable criteria (both hold: 0 logged engagements against 2-3 required, well under required beta duration); confirms `Projects/co-deck_prototype.zip` is untracked (no git cleanup needed); `docs/reports/governance-docs-diet-analysis.md` measures ~2,150 lines of mandatory session-start reading and identifies the Execution Plan boilerplate table (5 occurrences across 4 files) and three-tier model strategy description (6 occurrences) as the highest-volume duplication, with consolidation recommendations
 - **[2026-07-11]**: fix(scripts): fix --check-drift false-positive L2 drift — `collectDiffsL1L2()` flagged 933 "missing" files across 13 Fork Model domains (ADR-0031) that don't exist in L2 variants; added `l2_drift_eligible` field to `propagation-map.json` (v1.5.0) with `isL2DriftEligible()` helper in `propagate-to-templates.ts` (v2.2.0); `gemini-settings` is the sole ongoing L1→L2 mirror; `--check-drift` now an independent read-only command with conflict detection rejecting `--apply`/`--governance-l1`/`--docs`/`--prune` combinations; CI drift check step updated to allow known gemini-settings overrides while failing on unexpected drift; 13 unit+integration tests added
 - **[2026-07-10]**: fix(project-review): two-round project review — Round 1: 35 issues found and fixed; Round 2: 3 Critical + 16 High + 15 Moderate found, 18 actioned (Critical: L1 schema Phase 5/6, qa-gate Step 3.95, safeResolvePath; High: audit.ts split bug, dead parity check removal, IPv6 SSRF ranges, pre-commit gitleaks separation, 10 more; Moderate: common-contract.json new-project.ts). Moderate items M1-M15 deferred (no functional impact)
 - **[2026-07-10]**: feat(skills): project-review skill v1.1.0 — conditional base-map MCP integration (Step 0 detection, Step 4c cross-validation, graceful degradation when MCP unavailable); sync skill pipeline documentation expanded to full 16-step table with FATAL/non-fatal markers; sync skill owner updated to lifecycle-manager
@@ -862,7 +863,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-11*
 
 
 
