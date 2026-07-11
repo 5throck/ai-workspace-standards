@@ -24,6 +24,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          # gitleaks-action diffs the head commit against its immediate parent;
+          # the default shallow (depth-1) clone has no parent to diff against,
+          # which fails with "ambiguous argument ...^..." on pull_request events.
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
