@@ -1,6 +1,7 @@
 # GEMINI.md
 
 > **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**
+<!-- L0-ONLY: This instruction targets the workspace root (L0). L1/L2 projects must NOT reference context.md — see context.md §7.5 context.md Non-Propagation. merge-frontmatter.ts strips context.md lines from L2 output. -->
 
 ---
 
@@ -300,7 +301,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-07-05 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-07-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 
