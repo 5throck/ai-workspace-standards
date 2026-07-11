@@ -12,26 +12,74 @@
     "stablePromotedOn": null
   },
   "agents": [
-    { "name": "pm",              "file": "agents/pm.md" },
-    { "name": "version",          "file": "agents/version.md" },
-    { "name": "research",         "file": "agents/research.md" },
-    { "name": "source-verifier",  "file": "agents/source-verifier.md" },
-    { "name": "storyline",        "file": "agents/storyline.md" },
-    { "name": "design",           "file": "agents/design.md" },
-    { "name": "image-curator",      "file": "agents/image-curator.md" },
-    { "name": "diagram-specialist", "file": "agents/diagram-specialist.md" },
-    { "name": "html-build",         "file": "agents/html-build.md" },
-    { "name": "measure",          "file": "agents/measure.md", "role": "PDF layout preparation (Playwright-free)" },
-    { "name": "pdf-export",       "file": "agents/pdf-export.md" }
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "version",
+      "file": "agents/version.md"
+    },
+    {
+      "name": "research",
+      "file": "agents/research.md"
+    },
+    {
+      "name": "source-verifier",
+      "file": "agents/source-verifier.md"
+    },
+    {
+      "name": "storyline",
+      "file": "agents/storyline.md"
+    },
+    {
+      "name": "design",
+      "file": "agents/design.md"
+    },
+    {
+      "name": "image-curator",
+      "file": "agents/image-curator.md"
+    },
+    {
+      "name": "diagram-specialist",
+      "file": "agents/diagram-specialist.md"
+    },
+    {
+      "name": "html-build",
+      "file": "agents/html-build.md"
+    },
+    {
+      "name": "measure",
+      "file": "agents/measure.md",
+      "role": "PDF layout preparation (Playwright-free)"
+    },
+    {
+      "name": "pdf-export",
+      "file": "agents/pdf-export.md"
+    }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [
-      "version", "research", "source-verifier", "storyline", "design",
-      "image-curator", "diagram-specialist", "html-build", "measure", "pdf-export"
+      "version",
+      "research",
+      "source-verifier",
+      "storyline",
+      "design",
+      "image-curator",
+      "diagram-specialist",
+      "html-build",
+      "measure",
+      "pdf-export"
     ],
-    "optional": ["source-verifier", "image-curator", "diagram-specialist"],
-    "skippable": ["source-verifier"],
+    "optional": [
+      "source-verifier",
+      "image-curator",
+      "diagram-specialist"
+    ],
+    "skippable": [
+      "source-verifier"
+    ],
     "retry_policy": {
       "source-verifier": {
         "on_fail": "research",
@@ -42,27 +90,72 @@
     "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < trust_score_thresholds.pass (90%) or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied. diagram-specialist: skip if no visual_spec fields exist in slide_deck.md. image-curator and diagram-specialist run in parallel at Stage 3.5."
   },
   "skills": [
-    { "name": "version" },
-    { "name": "research" },
-    { "name": "storyline" },
-    { "name": "design" },
-    { "name": "html-build" },
-    { "name": "prep-pdf" },
-    { "name": "pdf-export" }
+    {
+      "name": "version"
+    },
+    {
+      "name": "research"
+    },
+    {
+      "name": "storyline"
+    },
+    {
+      "name": "design"
+    },
+    {
+      "name": "html-build"
+    },
+    {
+      "name": "prep-pdf"
+    },
+    {
+      "name": "pdf-export"
+    }
   ],
   "script_manifest": {
     "variant_scripts_dir": "scripts/co-deck",
     "local": [
-      { "name": "snapshot",                   "path": "scripts/co-deck/snapshot.ts" },
-      { "name": "download-font",              "path": "scripts/co-deck/download-font.ts" },
-      { "name": "gen-slides-pdf",             "path": "scripts/co-deck/gen-slides-pdf.ts" },
-      { "name": "measure-layout",             "path": "scripts/co-deck/measure-layout.ts", "status": "deprecated" },
-      { "name": "estimate-layout",           "path": "scripts/co-deck/estimate-layout.ts" },
-      { "name": "auto-calibrate",           "path": "scripts/co-deck/auto-calibrate.ts" },
-      { "name": "validate-theme-styles",      "path": "scripts/co-deck/validate-theme-styles.ts" },
-      { "name": "validate-image-manifest",    "path": "scripts/co-deck/validate-image-manifest.ts" },
-      { "name": "generate-themes-manifest",   "path": "scripts/co-deck/generate-themes-manifest.ts" },
-      { "name": "scaffold-theme-style",       "path": "scripts/co-deck/scaffold-theme-style.ts" }
+      {
+        "name": "snapshot",
+        "path": "scripts/co-deck/snapshot.ts"
+      },
+      {
+        "name": "download-font",
+        "path": "scripts/co-deck/download-font.ts"
+      },
+      {
+        "name": "gen-slides-pdf",
+        "path": "scripts/co-deck/gen-slides-pdf.ts"
+      },
+      {
+        "name": "measure-layout",
+        "path": "scripts/co-deck/measure-layout.ts",
+        "status": "deprecated"
+      },
+      {
+        "name": "estimate-layout",
+        "path": "scripts/co-deck/estimate-layout.ts"
+      },
+      {
+        "name": "auto-calibrate",
+        "path": "scripts/co-deck/auto-calibrate.ts"
+      },
+      {
+        "name": "validate-theme-styles",
+        "path": "scripts/co-deck/validate-theme-styles.ts"
+      },
+      {
+        "name": "validate-image-manifest",
+        "path": "scripts/co-deck/validate-image-manifest.ts"
+      },
+      {
+        "name": "generate-themes-manifest",
+        "path": "scripts/co-deck/generate-themes-manifest.ts"
+      },
+      {
+        "name": "scaffold-theme-style",
+        "path": "scripts/co-deck/scaffold-theme-style.ts"
+      }
     ],
     "external": []
   },
@@ -71,7 +164,13 @@
     "base_css": "docs/html-themes/styles/base.css",
     "styles_dir": "docs/html-themes/styles",
     "shared_layout_base": "docs/html-themes/themes/_shared/layout_base.json",
-    "available": ["premium-dark", "classic", "minimal", "visual-heavy", "academic"],
+    "available": [
+      "premium-dark",
+      "classic",
+      "minimal",
+      "visual-heavy",
+      "academic"
+    ],
     "default": "premium-dark",
     "notes": "Shared style/color pool (ADR-0045 Decision B): each style is styles/<name>/{style.css, pdf_color_spec.json}; styles live in the shared styles/ pool, NOT nested under themes. CSS Load Order (injected by html-build): styles/base.css -> themes/_shared/ppt-engine.css (PPT themes only) -> themes/<theme>/theme.css -> styles/<style>/style.css. Each theme declares css_base + css_theme + optionally css_ppt_engine in theme.json. Region-based pdf_layout_spec.json (v1.2.0): regions.* = {x_pct,y_pct,w_pct,h_pct,fit?} or null; slide_types[type].regions declares which regions each slide type uses; themes/_shared/layout_base.json is Layer 0 (region skeleton all-null + 16:9 page + print defaults). gen-slides-pdf.ts (v1.7.0) is theme-agnostic — dispatch by declared slide_types, not theme name; 4-layer deepMerge (shared -> theme -> style -> project); required regions resolving to null throw (no silent fallback). PPT-transformed themes (outline/pitch-enhanced/zen/vertical v3.0.0) share _shared/ppt-engine.css + _shared/ppt-engine.js: thumbnails, transitions (fade/push/zoom), presenter timer, speaker notes. Original pitch v1.0.0 preserved unchanged. Default theme is pitch-enhanced. All PPT themes compatible with all 5 styles (visual-heavy: partial). preview/themes-manifest.js is AUTO-GENERATED by generate-themes-manifest.ts — regenerate after adding/removing themes or styles. premium-dark is the DEFAULT style (2026-06-22): dark navy + gold accent + MaruBuri/Noto Serif KR + soft gold title glow; compatible with all themes; derived from the kyobo_ax_2026 executive deck. classic/pdf_color_spec.json was corrected to a LIGHT palette (previously held a dark palette — drift fix)."
   },
@@ -89,5 +188,13 @@
     "pass": 0.9,
     "warn": 0.7,
     "escalate": 0.7
+  },
+  "betaLifecycleSummary": {
+    "betaEngagements": 0,
+    "betaBugs": 0,
+    "betaAgeInMonths": 0,
+    "promotionEligible": false,
+    "missingCriteria": [],
+    "lastSynced": "2026-07-11T08:21:33.185Z"
   }
 }

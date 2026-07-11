@@ -1,5 +1,6 @@
 # VERSION_MANIFEST.md
 
+**Generated**: 2026-07-11T08:25:58.848Z
 **Generated**: 2026-07-11T08:11:09.384Z
 **Generated**: 2026-07-11T10:08:38.159Z
 **Generated**: 2026-07-11T08:00:24.190Z
@@ -74,7 +75,7 @@
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.10.7 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
-| beta-lifecycle.ts | 1.1.1 | scripts/helpers/beta-lifecycle.ts | fs, path |
+| beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
 | check-pm-approval.ts | 1.0.2 | scripts/check-pm-approval.ts | N/A |
