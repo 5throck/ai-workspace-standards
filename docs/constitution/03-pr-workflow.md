@@ -53,3 +53,15 @@ Edit code
 - Workflow scripts must avoid interactive prompts to prevent terminal hangs during automated agent runs.
 - `/changelog` is **optional** - run it before syncing when your change needs a user-visible entry in `CHANGELOG.md`. Skip it for internal refactors, formatting, or tooling changes.
 - Project-specific PR settings live in `.gemini/settings.json` or `.claude/settings.json` - kept version-controlled and shared with the team.
+
+#### 3.3 Sequential Branch Dependency Rule
+
+**Before creating a new PR branch from `main`, confirm any previously-created-but-unmerged PR branch is either merged first, or explicitly justified as safe to leave open in parallel.**
+
+**Why this matters**: `dev-sync.ts` touches shared pipeline files on *every* commit regardless of which workstream a PR belongs to — `CHANGELOG.md` (`[Unreleased]` section), `memory/YYYY-MM-DD.md`, `docs/VERSION_MANIFEST.md`, `scripts/README.md`, and `templates/common/scripts/README.md`. If two PR branches are both created from the same stale `main` (i.e., neither has merged), both will edit the same lines in these shared files relative to the same merge-base — producing a real git merge conflict on *every* such PR, regardless of what order they are later merged in. Merging in sequence does not undo this: the conflict is baked in at branch-creation time, not merge time, because each branch's diff is computed against whichever `main` existed when it was created.
+
+**Rule**:
+1. Before running `dev-sync.ts` to open a new PR while a prior PR from the same session is still open and unmerged, check whether the new branch's work will touch any of the shared pipeline files above (it almost always will, since every `/sync` run does).
+2. If so, merge the prior PR **first** — do not fan out multiple parallel branches from the same stale `main`.
+3. If genuinely parallel work is required (e.g., a large multi-workstream execution plan), state explicitly in the plan/design doc why the specific PRs are safe to leave open simultaneously (e.g., a documented list of files each touches, confirmed disjoint) — an unstated assumption of independence is not sufficient, since the shared pipeline files above make near-total overlap the default case, not the exception.
+4. For a PM-orchestrated multi-row execution plan (per §5.1 in AGENTS.md) that spans more than one PR, treat "merge the prior PR" as an implicit step between PR-producing rows unless the plan's Trade-offs section explicitly justifies parallel branching.
