@@ -1044,7 +1044,7 @@ async function main() {
   const outputArg = args.find(arg => arg.startsWith('--output='));
 
   if (!l2PathArg || !nameArg || !typeArg || !descArg) {
-    console.error('Usage: bun scripts/pipeline/l2-to-variant-pipeline.ts \\');
+    console.error('Usage: bun scripts/l2-to-variant-pipeline.ts \\');
     console.error('  --l2-path=<path-to-l2-project> \\');
     console.error('  --name=<variant-name> \\');
     console.error(`  --type=<${listVariantTypes().join('|')}> \\`);

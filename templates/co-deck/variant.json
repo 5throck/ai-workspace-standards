@@ -155,6 +155,30 @@
       {
         "name": "scaffold-theme-style",
         "path": "scripts/co-deck/scaffold-theme-style.ts"
+      },
+      {
+        "name": "build-theme-deck",
+        "path": "scripts/co-deck/build-theme-deck.ts"
+      },
+      {
+        "name": "build-theme-preview",
+        "path": "scripts/co-deck/build-theme-preview.ts"
+      },
+      {
+        "name": "diagram-helpers",
+        "path": "scripts/co-deck/diagram-helpers.ts"
+      },
+      {
+        "name": "extract-slidedata",
+        "path": "scripts/co-deck/extract_slidedata.mjs"
+      },
+      {
+        "name": "gen-visual-images",
+        "path": "scripts/co-deck/gen-visual-images.ts"
+      },
+      {
+        "name": "verify-new-theme",
+        "path": "scripts/co-deck/verify-new-theme.ts"
       }
     ],
     "external": []
