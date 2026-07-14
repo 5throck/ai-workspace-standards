@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-14T13:22:52.167Z
+**Generated**: 2026-07-14T13:28:09.797Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -81,7 +81,7 @@
 | check-pm-approval.ts | 1.0.2 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| create-l2-scaffold.ts | 1.6.5 | scripts/create-l2-scaffold.ts | N/A |
+| create-l2-scaffold.ts | 1.6.6 | scripts/create-l2-scaffold.ts | N/A |
 | dev-sync.ts | 1.3.5 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
@@ -161,7 +161,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
 | update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.4.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.5.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.1 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.4 | scripts/validate-md-language.ts | fs |

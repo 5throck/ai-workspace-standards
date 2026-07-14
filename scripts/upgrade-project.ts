@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
@@ -274,8 +274,24 @@ function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PAT
 }
 
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
-  const tplContent = readFileSync(templateFile, 'utf8');
-  const tplManaged = findManagedBlocks(tplContent);
+  let tplContent = readFileSync(templateFile, 'utf8');
+  let tplManaged = findManagedBlocks(tplContent);
+
+  // If variant template has no managed markers, fall back to common template
+  // (variant may be an extends-only file that shadows the marker-rich common version).
+  if (tplManaged.length === 0 && templateFile.startsWith(templatesDir)) {
+    const commonFile = join(commonDir, rel);
+    if (existsSync(commonFile)) {
+      const commonContent = readFileSync(commonFile, 'utf8');
+      const commonManaged = findManagedBlocks(commonContent);
+      if (commonManaged.length > 0) {
+        console.log(`    INFO: Variant template has no markers for ${rel}, using common template`);
+        tplContent = commonContent;
+        tplManaged = commonManaged;
+      }
+    }
+  }
+
   if (tplManaged.length === 0) {
     console.log(`    INFO: Template has no managed markers — skipping ${rel}`);
     return;

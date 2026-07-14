@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.6.5
+// @version 1.6.6
 /**
  * create-l2-scaffold.ts
  *
@@ -655,6 +655,10 @@ function bunInstall(projectDir: string): void {
 
 function runSetup(projectDir: string): void {
   const setupSh = path.join(COMMON_SCRIPTS_DIR, "setup.sh").replace(/\\/g, "/");
+  if (!fs.existsSync(setupSh)) {
+    log("⚙️  setup.sh not found — skipping (legacy bootstrap step)");
+    return;
+  }
   log("⚙️  Running setup.sh …");
   try {
     runNoShell("bash", [setupSh, "--skip-commit", "--skip-license-check"], {
