@@ -41,11 +41,31 @@ export {
 
 import { registerPlugin } from './variant-plugin.ts';
 import { GamePlugin } from './game-plugin.ts';
+import { SecurityPlugin } from './security-plugin.ts';
+import { DevelopmentPlugin } from './development-plugin.ts';
+import { DesignPlugin } from './design-plugin.ts';
+import { ConsultingPlugin } from './consulting-plugin.ts';
+import { CollaborationPlugin } from './collaboration-plugin.ts';
+import { LecturePlugin } from './lecture-plugin.ts';
 
 // Register the game variant plugin.
 // The 'game' type is defined in variant-type-registry.ts.
 registerPlugin(new GamePlugin());
 
-// Future plugins:
-// import { SecurityPlugin } from './security-plugin.ts';
-// registerPlugin(new SecurityPlugin());
+// Register the security variant plugin.
+registerPlugin(new SecurityPlugin());
+
+// Register the development variant plugin.
+registerPlugin(new DevelopmentPlugin());
+
+// Register the design variant plugin.
+registerPlugin(new DesignPlugin());
+
+// Register the consulting variant plugin.
+registerPlugin(new ConsultingPlugin());
+
+// Register the collaboration variant plugin.
+registerPlugin(new CollaborationPlugin());
+
+// Register the lecture variant plugin.
+registerPlugin(new LecturePlugin());

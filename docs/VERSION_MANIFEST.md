@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-14T13:28:09.797Z
+**Generated**: 2026-07-14T13:47:24.870Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 22
-- **Scripts**: 124
+- **Scripts**: 130
 - **Commands**: 7
 
 ---
@@ -81,8 +81,12 @@
 | check-pm-approval.ts | 1.0.2 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
+| collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
+| consulting-plugin.ts | 1.0.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
 | create-l2-scaffold.ts | 1.6.6 | scripts/create-l2-scaffold.ts | N/A |
+| design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
 | dev-sync.ts | 1.3.5 | scripts/dev-sync.ts | bun |
+| development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -109,6 +113,7 @@
 | l2-to-variant-pipeline.ts | 1.9.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
+| lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -137,6 +142,7 @@
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | rollback-partial-project.ts | 1.0.0 | scripts/helpers/rollback-partial-project.ts | N/A |
 | scan-l2-project.ts | 1.1.1 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
+| security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
 | security-validator.test.ts | 1.0.1 | scripts/helpers/security-validator.test.ts | bun:test |
 | security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
@@ -161,7 +167,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
 | update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.5.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.6.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.1 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.4 | scripts/validate-md-language.ts | fs |

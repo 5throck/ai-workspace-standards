@@ -90,6 +90,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | Barrel exports + integrity check |
 | `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Plugin interface + registry |
 | `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Game variant plugin |
+| `helpers/plugins/security-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Security variant plugin |
+| `helpers/plugins/development-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Development variant plugin |
+| `helpers/plugins/design-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Design variant plugin |
+| `helpers/plugins/consulting-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Consulting variant plugin |
+| `helpers/plugins/collaboration-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Collaboration variant plugin |
+| `helpers/plugins/lecture-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Lecture variant plugin |
 | `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | Explicit plugin registration |
 | `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | Transactional variant registration |
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
@@ -154,7 +160,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.6.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|

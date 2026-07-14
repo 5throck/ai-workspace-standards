@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
 //           removed stale agent MERGE references and CONSTITUTION.md
+// v1.6.0: Added --prune-removed, --rollback, conflict detection for SYNC files, auto-discovery for script subdirs
 //
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -20,17 +21,21 @@ let projectPath = '';
 let variant = '';
 let platform = 'both';
 let dryRun = false;
+let pruneRemoved = false;
+let rollback = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
   if (args[i] === '--dry-run') { dryRun = true; continue; }
+  if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
+  if (args[i] === '--rollback') { rollback = true; continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -171,12 +176,32 @@ console.log(`  To      : ${currentVersion}`);
 console.log('========================================================\n');
 
 // ── Pre-upgrade snapshot ───────────────────────────────────────────────────────
+
+// G12: --rollback convenience flag
+if (rollback) {
+  console.log('--- Rolling back last upgrade ---');
+  const stashList = spawnSync('git', ['-C', projectDir, 'stash', 'list'], { encoding: 'utf8' });
+  const preUpgradeStash = stashList.stdout.split('\n').find(l => l.includes('pre-upgrade-snapshot'));
+  if (preUpgradeStash) {
+    const stashIdx = preUpgradeStash.match(/^stash@\{(\d+)\}/)?.[1] ?? '0';
+    const pop = spawnSync('git', ['-C', projectDir, 'stash', 'pop', `stash@{${stashIdx}}`], { encoding: 'utf8' });
+    if (pop.status === 0) {
+      console.log('✅ Pre-upgrade stash restored successfully.');
+    } else {
+      console.error(`ERROR: Failed to restore stash: ${pop.stderr}`);
+    }
+  } else {
+    console.log('INFO: No pre-upgrade stash found. Nothing to rollback.');
+  }
+  if (import.meta.main) process.exit(0);
+}
+
 if (!dryRun) {
   console.log('--- Creating pre-upgrade git stash snapshot ---');
   const snapDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const stash = spawnSync('git', ['-C', projectDir, 'stash', 'push', '-m', `pre-upgrade-snapshot-${snapDate}`], { encoding: 'utf8' });
   if (stash.status === 0 && !stash.stdout.includes('No local changes')) {
-    console.log('Snapshot saved. To revert: git stash pop');
+    console.log('Snapshot saved. To revert: git stash pop or --rollback');
   } else {
     console.log('INFO: Nothing to stash (working tree clean) — snapshot skipped.');
   }
@@ -346,6 +371,13 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 }
 
+/** Check if a project file has local modifications (via git status). */
+function isLocallyModified(filePath: string): boolean {
+  const rel = relative(projectDir, filePath);
+  const status = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '--', rel], { encoding: 'utf8' });
+  return status.stdout.trim().length > 0;
+}
+
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
 
 // ── LOCKED files ───────────────────────────────────────────────────────────────
@@ -455,7 +487,19 @@ console.log('');
 
 // ── SYNC_IF_NEWER: scripts/ ───────────────────────────────────────────────────
 console.log('--- SYNC_IF_NEWER: scripts/ ---');
-const scriptSubDirs = ['', 'hooks', 'lib', 'helpers'];
+
+// G11: Auto-discover script subdirectories from template instead of hardcoding.
+const tplScriptsRoot = join(commonDir, 'scripts');
+const scriptSubDirs = [''];  // root scripts/ always included
+if (existsSync(tplScriptsRoot)) {
+  for (const entry of readdirSync(tplScriptsRoot)) {
+    const fullPath = join(tplScriptsRoot, entry);
+    if (statSync(fullPath).isDirectory() && !entry.startsWith('.') && entry !== 'node_modules' && entry !== 'temp') {
+      scriptSubDirs.push(entry);
+    }
+  }
+}
+
 for (const subDir of scriptSubDirs) {
   const tplScriptsDir = join(commonDir, 'scripts', subDir);
   if (!existsSync(tplScriptsDir)) continue;
@@ -475,7 +519,12 @@ for (const subDir of scriptSubDirs) {
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
-      console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      // G05: Warn if project file has local modifications.
+      if (existsSync(projFile) && isLocallyModified(projFile)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+      } else {
+        console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      }
       if (!dryRun) copyFileSync(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
@@ -518,7 +567,12 @@ for (const agentsDir of tplAgentsDirs) {
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
-      console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      // G05: Warn if project file has local modifications.
+      if (isLocallyModified(projFile)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+      } else {
+        console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+      }
       if (!dryRun) copyFileSync(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
@@ -557,7 +611,12 @@ if (existsSync(tplSkillsDir)) {
         console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
         syncChanged++;
       } else if (semverGt(tplVer, projVer)) {
-        console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}`);
+        // G05: Warn if project file has local modifications.
+        if (isLocallyModified(projSkillFile)) {
+          console.log(`  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}  (local modifications exist)`);
+        } else {
+          console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}`);
+        }
         if (!dryRun) copyFileSync(tplSkillFile, projSkillFile);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/SKILL.md`);
         syncChanged++;
@@ -617,6 +676,59 @@ for (const fname of DOCS_PRESERVE) {
 }
 console.log('');
 
+// ── G10: --prune-removed (files in project but absent from template) ─────────────
+let prunedCount = 0;
+if (pruneRemoved) {
+  console.log('--- PRUNE REMOVED: files present in project but absent from template ---');
+  // Check scripts/
+  const pruneCategories = [
+    { projDir: join(projectDir, 'scripts'), tplDirs: [join(commonDir, 'scripts')], ext: '.ts', label: 'scripts/' },
+    { projDir: join(projectDir, 'agents'), tplDirs: [join(templatesDir, 'agents'), join(commonDir, 'agents')], ext: '.md', label: 'agents/', skipFiles: ['README.md', 'README_ko.md', '_COMMON.md'] },
+    { projDir: join(projectDir, 'skills'), tplDirs: [join(commonDir, 'skills')], ext: '/SKILL.md', label: 'skills/', isSkill: true },
+  ];
+  for (const cat of pruneCategories) {
+    if (!existsSync(cat.projDir)) continue;
+    // Collect all template file basenames
+    const tplBasenames = new Set<string>();
+    for (const td of cat.tplDirs) {
+      if (!existsSync(td)) continue;
+      if (cat.isSkill) {
+        for (const d of readdirSync(td)) {
+          if (existsSync(join(td, d, 'SKILL.md'))) tplBasenames.add(d);
+        }
+      } else {
+        for (const f of readdirSync(td)) {
+          if (f.endsWith(cat.ext)) tplBasenames.add(f);
+        }
+      }
+    }
+    // Walk project dir recursively (for scripts/) or shallowly
+    if (cat.isSkill) {
+      for (const d of readdirSync(cat.projDir)) {
+        if (!tplBasenames.has(d) && existsSync(join(cat.projDir, d, 'SKILL.md'))) {
+          console.log(`  PRUNE  ${cat.label}${d}/`);
+          if (!dryRun) {
+            spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' });
+          }
+          prunedCount++;
+        }
+      }
+    } else {
+      for (const f of readdirSync(cat.projDir)) {
+        if (f.endsWith(cat.ext) && !tplBasenames.has(f) && !(cat.skipFiles || []).includes(f)) {
+          console.log(`  PRUNE  ${cat.label}${f}`);
+          if (!dryRun) {
+            spawnSync('git', ['-C', projectDir, 'rm', '-f', `${cat.label}${f}`], { encoding: 'utf8' });
+          }
+          prunedCount++;
+        }
+      }
+    }
+  }
+  if (prunedCount === 0) console.log('  (no stale files found)');
+  console.log('');
+}
+
 // ── Post-upgrade: write template-version.txt ───────────────────────────────────
 if (!dryRun) {
   mkdirSync(join(projectDir, '.claude'), { recursive: true });
@@ -665,5 +777,6 @@ console.log(`  Locked files updated : ${lockedChanged}`);
 console.log(`  Merge files processed: ${mergeChanged}`);
 console.log(`  Sync files updated   : ${syncChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
+if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');
