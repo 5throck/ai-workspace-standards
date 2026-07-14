@@ -501,7 +501,7 @@ A pair of HTML comment markers used in MERGE-tier files to delimit sections mana
 Rules:
 - Content between these markers is automatically replaced by `upgrade-project.ts` during upgrades.
 - Content outside the markers is user-owned and is never modified by upgrade scripts.
-- `bun scripts/audit.ts` verifies that these markers exist in expected files.
+- `upgrade-project.ts` supports three marker patterns: `<!-- WORKSPACE-MANAGED -->`, `<!-- COMMON-CLAUDE:START -->`, and `<!-- COMMON-GEMINI:START -->`.
 - Do **not** remove or reorder these markers manually.
 
 #### File Upgrade Tiers (LOCKED / MERGE / PRESERVE)
@@ -511,7 +511,7 @@ Used by `upgrade-project.ts` to classify every project file during a template up
 | Tier | Behavior | Examples |
 |------|----------|---------|
 | **LOCKED** | Always overwritten; diff shown before overwrite | `.githooks/*`, `.gitattributes`, `.gitleaks.toml` |
-| **MERGE** | Only `WORKSPACE-MANAGED` sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `CONSTITUTION.md`, `.gitignore`, `agents/*.md` |
+| **MERGE** | Only managed sections replaced; rest preserved | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md` |
 | **PRESERVE** | Never touched; listed in upgrade report only | `README.md`, `src/`, `docs/context.md`, project-specific files |
 
 #### Platform Documentation Parity
@@ -559,4 +559,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-07-11*
+*Last Updated: 2026-07-14*

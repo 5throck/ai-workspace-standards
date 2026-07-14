@@ -73,5 +73,15 @@
     "pipeline_order": [],
     "optional": [],
     "notes": "Agents are dispatched by PM based on engagement phase. No strict sequential dependency — PM activates specialists as the consulting engagement requires."
+  },
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/co-consult",
+    "local": [
+      {
+        "name": "md-to-report",
+        "path": "scripts/co-consult/md-to-report.ts"
+      }
+    ],
+    "external": []
   }
 }

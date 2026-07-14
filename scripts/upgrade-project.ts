@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.2.2
+// @version 1.3.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
+// v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
+//           removed stale agent MERGE references and CONSTITUTION.md
 //
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -241,15 +243,38 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
   return { removed: n - lcs, added: m - lcs };
 }
 
+/** Marker patterns supported by mergeWorkspaceManaged. */
+const MANAGED_PATTERNS: Array<{ open: string; close: string; label: string }> = [
+  { open: '<!-- WORKSPACE-MANAGED -->', close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
+  { open: '<!-- COMMON-CLAUDE:START -->', close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
+  { open: '<!-- COMMON-GEMINI:START -->', close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
+];
+
+/**
+ * Find all managed blocks in the given content.
+ * Returns an array of { pattern, blocks: [{start, end, matched}] }.
+ */
+function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> {
+  const results: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> = [];
+  for (const p of MANAGED_PATTERNS) {
+    const regex = new RegExp(p.open.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + p.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    const blocks: Array<{ start: number; end: number; matched: string }> = [];
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      blocks.push({ start: match.index, end: match.index + match[0].length, matched: match[0] });
+    }
+    if (blocks.length > 0) results.push({ pattern: p, blocks });
+  }
+  return results;
+}
+
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
   const tplContent = readFileSync(templateFile, 'utf8');
-  if (!tplContent.includes('<!-- WORKSPACE-MANAGED -->')) {
-    console.log(`    INFO: Template has no WORKSPACE-MANAGED markers — skipping ${rel}`);
+  const tplManaged = findManagedBlocks(tplContent);
+  if (tplManaged.length === 0) {
+    console.log(`    INFO: Template has no managed markers — skipping ${rel}`);
     return;
   }
-
-  const tplBlockMatch = tplContent.match(/<!-- WORKSPACE-MANAGED -->[\s\S]*?<!-- \/WORKSPACE-MANAGED -->/);
-  const tplBlock = tplBlockMatch?.[0] ?? '';
 
   if (!existsSync(projectFile)) {
     console.log('    INFO: Project file does not exist, will create with template content');
@@ -262,17 +287,40 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 
   const projContent = readFileSync(projectFile, 'utf8');
-  if (projContent.includes('<!-- WORKSPACE-MANAGED -->')) {
-    if (!dryRun) {
-      const updated = projContent.replace(/<!-- WORKSPACE-MANAGED -->[\s\S]*?<!-- \/WORKSPACE-MANAGED -->/, tplBlock);
-      writeFileSync(projectFile, updated, 'utf8');
+  const projManaged = findManagedBlocks(projContent);
+
+  // Strategy: merge each managed block from template into project.
+  // For each pattern type in the template, replace matching blocks in the project.
+  let updated = projContent;
+  let merged = false;
+
+  for (const { pattern, blocks: tplBlocks } of tplManaged) {
+    for (const tplBlock of tplBlocks) {
+      const regex = new RegExp(pattern.open.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      if (regex.test(updated)) {
+        if (!dryRun) {
+          updated = updated.replace(regex, tplBlock.matched);
+        }
+        merged = true;
+        console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
+      } else {
+        // No matching block in project — append
+        if (!dryRun) {
+          updated = updated + '\n\n' + tplBlock.matched + '\n';
+        }
+        merged = true;
+        console.log(`    ${dryTag}APPENDED ${pattern.label} block to: ${rel}`);
+      }
     }
-    console.log(`    ${dryTag}MERGED managed section in: ${rel}`);
-  } else {
-    console.log(`    WARNING: ${rel} has no WORKSPACE-MANAGED markers.`);
-    console.log('             Appending managed block at end of file.');
-    if (!dryRun) writeFileSync(projectFile, projContent + '\n\n' + tplBlock + '\n', 'utf8');
-    console.log(`    ${dryTag}APPENDED managed block to: ${rel}`);
+  }
+
+  if (projManaged.length === 0 && !merged) {
+    console.log(`    WARNING: ${rel} has no managed markers in project.`);
+    console.log('             Appending template managed blocks at end of file.');
+    if (!dryRun) writeFileSync(projectFile, updated, 'utf8');
+    console.log(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
+  } else if (!dryRun && merged) {
+    writeFileSync(projectFile, updated, 'utf8');
   }
 }
 
@@ -306,9 +354,7 @@ const MERGE_FILES: string[] = [];
 if (platform === 'claude' || platform === 'both') MERGE_FILES.push('CLAUDE.md');
 if (platform === 'antigravity' || platform === 'both') MERGE_FILES.push('GEMINI.md');
 MERGE_FILES.push(
-  'CONSTITUTION.md', '.gitignore', 'agents/pm.md', 'agents/architect.md',
-  'agents/automation-engineer.md', 'agents/docs-writer.md',
-  'agents/scaffolding-expert.md', 'agents/security-expert.md',
+  '.gitignore', 'agents/pm.md',
 );
 for (const rel of MERGE_FILES) {
   const src = resolveTemplate(rel);

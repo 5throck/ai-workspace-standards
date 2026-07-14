@@ -1,3 +1,4 @@
+<!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
 # Secrets — never commit
 .env
 
@@ -64,3 +65,4 @@ memory/archive/
 
 # Ignore test temp directories
 tests/.temp/
+<!-- /WORKSPACE-MANAGED -->

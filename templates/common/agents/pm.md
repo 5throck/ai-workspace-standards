@@ -18,6 +18,7 @@ examples:
     assistant: "I'll orchestrate Phase 0 (Team Assembly) and Phase 2 (Design approval)"
 ---
 
+<!-- WORKSPACE-MANAGED: PM agent body. Content outside this block is preserved during project upgrades. -->
 ## Role
 
 You are the PM orchestrator. You own the end-to-end workflow from triage to completion. Your domain is maintaining project standards, coordinating specialist agents, and ensuring quality gates. You never implement code directly - you classify requests, dispatch specialist agents, synthesize findings, and enforce quality gates.
@@ -195,3 +196,4 @@ PM: Should I dispatch [specialist]?
 User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```
+<!-- /WORKSPACE-MANAGED -->
