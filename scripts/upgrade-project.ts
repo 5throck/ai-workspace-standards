@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
@@ -243,11 +243,14 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
   return { removed: n - lcs, added: m - lcs };
 }
 
-/** Marker patterns supported by mergeWorkspaceManaged. */
-const MANAGED_PATTERNS: Array<{ open: string; close: string; label: string }> = [
-  { open: '<!-- WORKSPACE-MANAGED -->', close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
-  { open: '<!-- COMMON-CLAUDE:START -->', close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
-  { open: '<!-- COMMON-GEMINI:START -->', close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
+/** Marker patterns supported by mergeWorkspaceManaged.
+ *  Each entry supports raw regex in `open`/`close` fields — NOT literal strings.
+ *  WORKSPACE-MANAGED open pattern accepts an optional `: description` suffix.
+ */
+const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = [
+  { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
+  { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
+  { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
 ];
 
 /**
@@ -257,7 +260,9 @@ const MANAGED_PATTERNS: Array<{ open: string; close: string; label: string }> = 
 function findManagedBlocks(content: string): Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> {
   const results: Array<{ pattern: typeof MANAGED_PATTERNS[number]; blocks: Array<{ start: number; end: number; matched: string }> }> = [];
   for (const p of MANAGED_PATTERNS) {
-    const regex = new RegExp(p.open.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + p.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    // p.open is already a RegExp; p.close is a literal string that needs escaping.
+    const closeEscaped = p.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(p.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
     const blocks: Array<{ start: number; end: number; matched: string }> = [];
     let match: RegExpExecArray | null;
     while ((match = regex.exec(content)) !== null) {
@@ -296,7 +301,8 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
 
   for (const { pattern, blocks: tplBlocks } of tplManaged) {
     for (const tplBlock of tplBlocks) {
-      const regex = new RegExp(pattern.open.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
       if (regex.test(updated)) {
         if (!dryRun) {
           updated = updated.replace(regex, tplBlock.matched);
