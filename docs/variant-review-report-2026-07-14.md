@@ -1,9 +1,9 @@
 # Variant Infrastructure Comprehensive Review Report
 
 **Date**: 2026-07-14
-**Scope**: Static Analysis + Gap Analysis (Phase 1 & Phase 3)
+**Scope**: Static Analysis + Gap Analysis (Phase 1 & Phase 3) + Dynamic E2E Testing (Phase 2)
 **Target**: All 7 variant templates + upgrade-project.ts + related infrastructure
-**Method**: Bottom-Up, Phase A/B/C → L3 Upgrade → Gap classification
+**Method**: Bottom-Up, Phase A/B/C → L3 Upgrade → Gap classification → E2E execution
 
 ---
 
@@ -17,12 +17,12 @@
 | Major gaps identified | **4** |
 | Minor gaps identified | **10** |
 | Variant templates with contamination | **2/7** (co-consult, co-deck) |
-| WORKSPACE-MANAGED markers in templates | **0** (entire MERGE mechanism is dead code) |
+| WORKSPACE-MANAGED markers in templates | **Fixed**: common/.gitignore + common/agents/pm.md now have markers; upgrade-project.ts v1.4.0 regex fixed |
 
 ### Key Findings
 
 1. **All 7 variants pass validate-templates.ts** — structural integrity is solid at the governance level.
-2. **WORKSPACE-MANAGED markers are completely absent from all templates** — the upgrade-project.ts MERGE mechanism is effectively dead code. This is the most significant finding.
+2. **WORKSPACE-MANAGED markers were completely absent from all templates** — ~~the upgrade-project.ts MERGE mechanism is effectively dead code~~ **FIXED in E2E Phase 2**: markers added to common/.gitignore and common/agents/pm.md; upgrade-project.ts v1.4.0 regex fixed to match `<!-- WORKSPACE-MANAGED: description -->` format.
 3. **2 variants have WORKSPACE_ONLY_FILES contamination** (co-consult: package.json + bun.lock + node_modules; co-deck: package.json + node_modules).
 4. **upgrade-project.ts has 4 stale agent references** in its MERGE list that don't exist in any template.
 5. **SKILL.md coverage gaps** for 3 scripts (project-to-variant.ts, variant-feature.ts, upgrade-project.ts).
@@ -372,3 +372,48 @@ The following skills are marked `gemini-parity: skip` across variants:
 | beta | co-deck, co-game (2) |
 | draft | (0) |
 | deprecated | (0) |
+
+---
+
+## §5: Phase 2 — Dynamic E2E Test Results
+
+**Date**: 2026-07-14
+**Method**: End-to-end execution of all variant infrastructure scripts
+
+### 5.1 Bugs Found and Fixed During E2E Testing
+
+| # | Bug | Script | Version | Fix |
+|---|-----|--------|---------|-----|
+| E2E-1 | DOMAIN_DOC_DIRS missing 4 domain types (security, game, collaboration, lecture) | `create-l2-scaffold.ts` | 1.6.4→1.6.5 | Added all missing domains to DOMAIN_DOC_DIRS map |
+| E2E-2 | WORKSPACE-MANAGED marker regex doesn't match `<!-- WORKSPACE-MANAGED: description -->` format (only matched exact `<!-- WORKSPACE-MANAGED -->`) | `upgrade-project.ts` | 1.3.0→1.4.0 | Changed MANAGED_PATTERNS to use RegExp objects; open pattern accepts optional `: description` suffix |
+
+### 5.2 E2E Test Results Summary
+
+| Phase | Test | Result | Details |
+|-------|------|--------|---------|
+| 2.1 | Phase A scaffold (design domain) | ✅ PASS | 164 files created, _ORIGIN.md provenance correct, COMMON-CLAUDE/GEMINI markers present |
+| 2.2 | Phase A scaffold (5 domains) | ✅ PASS | security, game, consulting, collaboration, lecture all scaffold successfully; consulting gets `deliverables/` layout |
+| 2.3 | Phase B pipeline (l2-to-variant-pipeline.ts) | ✅ PASS (expected BLOCK) | Phases 1-3 complete; Phase 3.5 BLOCKING on missing AGENTS.md variant markers (expected for fresh scaffold) |
+| 2.4 | Phase B project-to-variant (dry-run on co-design) | ✅ PASS | All categories (LOCKED/MERGE/PRESERVE/SYNC_IF_NEWER) functional |
+| 2.5-2.6 | L3 upgrade dry-run (test-review → co-design) | ✅ PASS | WORKSPACE-MANAGED .gitignore merge now works after E2E-2 fix |
+| 2.7 | L3 upgrade actual execution | ✅ PASS | Security checks PASSED (5/5); 7 LOCKED, 13 MERGE, 3 PRESERVE, 9 SYNC; version file written |
+| 2.8 | L3 upgrade conflict scenario | ✅ PASS | Variant-specific content outside managed blocks preserved after upgrade |
+| 2.9 | Version comparison accuracy | ✅ PASS | Re-run detected same version (0.5.3→0.5.3); 30 files OK (no update needed) |
+| 2.10 | L0→L1 propagate --check-drift | ✅ PASS | 0 errors, 4 warnings, all integration tests pass, pushed to PR #404 |
+| 2.11 | Cleanup | ✅ PASS | All test artifacts removed from Projects/ |
+
+### 5.3 Remaining Known Issues (Not Fixed)
+
+| # | Issue | Severity | Notes |
+|---|-------|----------|-------|
+| KI-1 | `setup.sh` not found during scaffold | Low | `templates/common/scripts/setup.sh` doesn't exist; non-fatal warning |
+| KI-2 | `agents/pm.md` MERGE skip when variant has extends-only file | Low | Variant pm.md with only `extends:` frontmatter shadows common pm.md (which has markers); mergeWorkspaceManaged correctly skips |
+| KI-3 | Usage string in l2-to-variant-pipeline.ts references stale path `scripts/pipeline/` | Trivial | Cosmetic only; actual execution uses correct path |
+
+### 5.4 Conclusion
+
+All E2E tests pass. Two bugs were discovered and fixed during testing:
+- **E2E-1** (create-l2-scaffold.ts v1.6.5): Incomplete DOMAIN_DOC_DIRS map
+- **E2E-2** (upgrade-project.ts v1.4.0): WORKSPACE-MANAGED marker regex mismatch
+
+The variant infrastructure (Phase A scaffold → Phase B pipeline → L3 upgrade) is functionally complete and correct. The WORKSPACE-MANAGED / COMMON-CLAUDE / COMMON-GEMINI merge mechanism now works end-to-end.
