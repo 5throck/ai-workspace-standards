@@ -402,18 +402,28 @@ The following skills are marked `gemini-parity: skip` across variants:
 | 2.10 | L0→L1 propagate --check-drift | ✅ PASS | 0 errors, 4 warnings, all integration tests pass, pushed to PR #404 |
 | 2.11 | Cleanup | ✅ PASS | All test artifacts removed from Projects/ |
 
-### 5.3 Remaining Known Issues (Not Fixed)
+### 5.3 Remaining Known Issues — ALL RESOLVED
 
-| # | Issue | Severity | Notes |
-|---|-------|----------|-------|
-| KI-1 | `setup.sh` not found during scaffold | Low | `templates/common/scripts/setup.sh` doesn't exist; non-fatal warning |
-| KI-2 | `agents/pm.md` MERGE skip when variant has extends-only file | Low | Variant pm.md with only `extends:` frontmatter shadows common pm.md (which has markers); mergeWorkspaceManaged correctly skips |
-| KI-3 | Usage string in l2-to-variant-pipeline.ts references stale path `scripts/pipeline/` | Trivial | Cosmetic only; actual execution uses correct path |
+All known issues from E2E testing (KI-1 through KI-3) and all remaining gaps (G05, G08, G10-G13) have been resolved.
+
+| # | Issue | Fix | Version |
+|---|-------|-----|---------|
+| KI-1 | `setup.sh` not found during scaffold | Added existence check — clean skip message | create-l2-scaffold.ts v1.6.6 |
+| KI-2 | `agents/pm.md` MERGE skip | Common template fallback when variant has no markers | upgrade-project.ts v1.5.0 |
+| KI-3 | Stale usage path `scripts/pipeline/` | Fixed to `scripts/` | l2-to-variant-pipeline.ts |
+| G05 | No conflict detection for SYNC files | Added `isLocallyModified()` check + ⚠️ CONFLICT warning | upgrade-project.ts v1.6.0 |
+| G08 | Plugin system 1/7 only | Implemented all 6 remaining variant-type plugins (7/7) | plugins/*.ts v1.0.0 |
+| G10 | No handling of deleted template files | Added `--prune-removed` flag (scripts/, agents/, skills/) | upgrade-project.ts v1.6.0 |
+| G11 | Hardcoded script subdirectory list | Auto-discovery from template scripts/ directory | upgrade-project.ts v1.6.0 |
+| G12 | No `--rollback` convenience flag | Added `--rollback` to restore pre-upgrade stash | upgrade-project.ts v1.6.0 |
+| G13 | Empty .claude/commands/ in 4 variants | Removed all empty commands/ directories | — |
 
 ### 5.4 Conclusion
 
-All E2E tests pass. Two bugs were discovered and fixed during testing:
-- **E2E-1** (create-l2-scaffold.ts v1.6.5): Incomplete DOMAIN_DOC_DIRS map
-- **E2E-2** (upgrade-project.ts v1.4.0): WORKSPACE-MANAGED marker regex mismatch
+All 15 gaps identified in §3.1 are now **fully resolved**. The variant infrastructure is complete:
 
-The variant infrastructure (Phase A scaffold → Phase B pipeline → L3 upgrade) is functionally complete and correct. The WORKSPACE-MANAGED / COMMON-CLAUDE / COMMON-GEMINI merge mechanism now works end-to-end.
+- **Scaffold**: 6/6 domain types, clean setup.sh handling (create-l2-scaffold.ts v1.6.6)
+- **Pipeline**: Full Phase A→B lifecycle with correct markers (l2-to-variant-pipeline.ts)
+- **Upgrade**: LOCKED/MERGE/PRESERVE/SYNC all functional, conflict detection, prune, rollback (upgrade-project.ts v1.6.0)
+- **Plugins**: 7/7 variant-type plugins registered with 3-tier validation + golden references
+- **E2E verification**: 11/11 test phases PASS
