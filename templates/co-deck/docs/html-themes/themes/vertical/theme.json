@@ -14,7 +14,15 @@
     "max_bullets_per_slide": 5,
     "max_title_chars": 28,
     "recommended_slide_count": "30-60",
-    "notes": "Vertical scroll suits long-form content. Titles up to 28 chars. Max 5 bullets per slide. All slide types supported. Works well with 30+ slides for deep-dive presentations. Keyboard: ArrowUp/Down, PageUp/PageDown, Home/End, Space."
+    "notes": "Vertical scroll suits long-form content. Titles up to 28 chars. Max 5 bullets per slide. All slide types supported. Works well with 30+ slides for deep-dive presentations. Keyboard: ArrowUp/Down, PageUp/PageDown, Home/End, Space.",
+    "slide_type_usage": {
+      "standard": "All content slides (mandatory)",
+      "punchline": "Last content slide only — single-statement message (≤1 line, no bullets)",
+      "divider": "Chapter/part boundaries only",
+      "profile": "Speaker intro only",
+      "title": "First slide (cover) only",
+      "contact": "Final slide only"
+    }
   },
   "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
   "partial_styles": [],

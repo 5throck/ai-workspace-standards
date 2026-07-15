@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-07-16]**: feat(co-deck): propagate Uniform Layout Principle from co-deck1 to templates/co-deck — all content slides must use `standard` type; special types (`punchline`, `divider`, `profile`) reserved for designated structural purpose only; applied to 9 files: agents/storyline.md (type-to-purpose table + self-check rule), skills/storyline/SKILL.md (warning block + balance check), .claude/skills/storyline/SKILL.md, .gemini/skills/storyline/SKILL.md (platform copies), docs/co-deck.context.md (Content Rules item 6 + Template Provenance), skills/theme-authoring/SKILL.md (slide_type_usage in content_rules schema), and 5 theme.json files (outline, pitch, pitch-enhanced, vertical, zen — slide_type_usage object in content_rules)
 - **[2026-07-12]**: docs(designs): mark `workspace-hardening-design.md` Acceptance Criteria complete and Status: Completed — verified all three PRs (parser/M-item fixes, CI gitleaks + weekly health check, variant roadmap/docs-diet reports) were already merged to `main` (PRs #394-#400, #402); the design doc's checkboxes had been left unchecked despite the work being done, so this closes that documentation gap without any code change
 - **[2026-07-11]**: docs(governance): add Sequential Branch Dependency Rule (§3.3) to workspace root and project templates — codifies a lesson from this session's PR merge process: 6 PR branches were all created from the same stale `main` commit without merging any first, so every one conflicted on shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) that `dev-sync.ts` touches on every commit regardless of workstream; sequential *merge* order could not resolve this since the conflicts were baked in at branch-*creation* time; new rule requires merging a prior open PR before branching for the next task unless parallel branching is explicitly justified in the plan's Trade-offs section; added to `docs/constitution/03-pr-workflow.md` (summary in `CONSTITUTION.md` §3, cross-reference in `AGENTS.md` §5.1) **and propagated to `templates/common/CLAUDE.md`/`GEMINI.md`** so projects scaffolded via `new-project.ts` inherit the discipline from day one
 - **[2026-07-11]**: test(security): recreate `tests/unit/ssrf-safe-fetch.test.ts` (M15 regression suite) — discovered missing from `main` despite the corresponding `scripts/lib/ssrf.ts` `safeFetch()`/`fetchPinned()`/`SSRFBlockedError` changes having merged via PR #399; the test file was never actually included in that commit; 5 tests covering blocked-range rejection, redirect refusal, and the core TOCTOU-closing property (pinned connection succeeds against a non-resolvable hostname, proving no fresh DNS lookup occurs)
@@ -874,7 +875,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-07-11*
+*Last Updated: 2026-07-15*
 
 
 

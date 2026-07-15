@@ -13,7 +13,15 @@
     "max_bullets_per_slide": 3,
     "max_title_chars": 30,
     "recommended_slide_count": "15-25",
-    "notes": "Presentation Zen style. Titles up to 30 chars. Max 3 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration."
+    "notes": "Presentation Zen style. Titles up to 30 chars. Max 3 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration.",
+    "slide_type_usage": {
+      "standard": "All content slides (mandatory)",
+      "punchline": "Last content slide only — single-statement message (≤1 line, no bullets)",
+      "divider": "Chapter/part boundaries only",
+      "profile": "Speaker intro only",
+      "title": "First slide (cover) only",
+      "contact": "Final slide only"
+    }
   },
   "compatible_styles": ["classic", "minimal", "premium-dark", "academic"],
   "partial_styles": [],

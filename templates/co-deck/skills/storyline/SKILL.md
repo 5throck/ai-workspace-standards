@@ -115,6 +115,8 @@ Repeat this structure for every slide. Dividers include part number and descript
 > - Definition of AX (AI Transformation)
 > ```
 
+> ⚠️ **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
+
 ---
 
 ### Step 4: Balance Check
@@ -126,6 +128,7 @@ Self-review after writing both files:
 - No more than 3 consecutive slides without visuals?
 - Does every slide have a `script` field with narration text?
 - If multi-language narration is requested, do translated script fields exist?
+- **Uniform Layout check**: Do ALL content slides (between cover and closing) use `type: standard`? If any content slide uses `punchline` or another non-standard type, convert it to `standard`.
 
 ---
 
