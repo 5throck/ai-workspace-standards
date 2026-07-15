@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-06-28
+# Last Updated: 2026-07-15
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -437,6 +437,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
+6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
 
 ### Design Rules
 1. 8-role color palette: defined in design_spec.md CSS variable block
@@ -558,3 +559,8 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 ---
 
 *co-deck.context.md version: 4.2 — updated 2026-06-28: FullscreenManager (F key + footer button) + @media print (Ctrl+P one slide per page) for all 5 themes; G1+G2 Tier 1 preview enhancements.*
+
+## Template Provenance
+
+- **Template-Version**: 0.5.3
+- **Template-Variant**: co-deck

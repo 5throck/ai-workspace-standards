@@ -12,7 +12,15 @@
     "max_bullets_per_slide": 4,
     "max_title_chars": 28,
     "recommended_slide_count": "20-50",
-    "notes": "Same content rules as pitch. Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets. Divider slides must have a compelling image. Punchline type supported for impactful closing statements."
+    "notes": "Same content rules as pitch. Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets. Divider slides must have a compelling image. Punchline type supported for impactful closing statements.",
+    "slide_type_usage": {
+      "standard": "All content slides (mandatory)",
+      "punchline": "Last content slide only — single-statement message (≤1 line, no bullets)",
+      "divider": "Chapter/part boundaries only",
+      "profile": "Speaker intro only",
+      "title": "First slide (cover) only",
+      "contact": "Final slide only"
+    }
   },
   "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
   "incompatible_styles": [],

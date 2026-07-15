@@ -85,15 +85,22 @@ After drafting the outline but **before writing the full `slide_deck.md`**, pres
 
 Slide types: `cover` · `speaker intro` · `divider` · `punchline` · `standard` · `contact`
 
-**Theme-specific slide type rules:**
-> **SSOT**: Read `slide_types` from `docs/html-themes/themes/<theme>/theme.json` at runtime. Each theme declares which slide types it supports (e.g., `"punchline": true` or `"punchline": false`). Do NOT hardcode theme-specific rules here — the theme.json is the single source of truth.
->
-> Common patterns:
-> - `isPunchline: true` — use for impact/summary slides (large-font single-statement emphasis). Supported when `theme.json` declares `"punchline": true`.
-> - `isDividerSlide: true` — use for chapter/part boundaries. Supported when `theme.json` declares `"divider": true`.
-> - `isProfileSlide: true` — speaker intro slide. Supported when `theme.json` declares `"profile": true`.
->
-> Available themes and compatibility: see `docs/html-themes/THEMES.md` registry.
+**⚠️ Uniform Layout Principle — Single slide type for all content slides:**
+
+Within a single HTML presentation, ALL content slides MUST use the same slide type (`standard`). Special slide types (`punchline`, `divider`, `profile`) may only be used for their designated structural purpose (see table below). **Mixing `standard` and `punchline` (or any other non-standard type) for content slides within the same deck is PROHIBITED.**
+
+> **Rationale**: Each slide type has a distinct CSS layout (2-column grid vs center-aligned single-column). Mixing types causes visual inconsistency that breaks the audience's reading rhythm. The audience expects a uniform layout for all content slides.
+
+| Slide Type | Allowed Usage | Layout Pattern | Content Limit |
+|------------|--------------|----------------|---------------|
+| `standard` | **ALL content slides** (mandatory) | 2-column: text left + visual right | 3–4 bullets per slide |
+| `title` | First slide (cover) only | Full-bleed background, centered text | Title + subtitle |
+| `punchline` | **Last content slide only** — single-statement closing (≤1 line) | Center-aligned, large font, no bullets | 1 key message |
+| `divider` | Chapter/part boundaries only | 2-column: text + image | Part label + title + short description |
+| `profile` | Speaker intro slide only | Centered, avatar + name + affiliation | Name, title, bio |
+| `contact` | Final slide only | 2-column: text left + visual right | Contact info + closing |
+
+**Self-check rule**: Before finalizing `slide_deck.md`, verify that ALL content slides (everything between cover and closing) have `type: standard`. If any content slide uses `punchline` or `divider`, convert it to `standard`.
 
 ### slide_deck.md — Image Fields (per slide)
 

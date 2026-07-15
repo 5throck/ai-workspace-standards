@@ -105,6 +105,14 @@ design authors `docs/html-themes/themes/<name>/theme.json`:
     "max_bullets_per_slide": N,
     "max_title_chars": N,
     "recommended_slide_count": "X-Y",
+    "slide_type_usage": {
+      "standard": "All content slides (mandatory)",
+      "punchline": "Last content slide only — single-statement message (≤1 line, no bullets)",
+      "divider": "Chapter/part boundaries only",
+      "profile": "Speaker intro only",
+      "title": "First slide (cover) only",
+      "contact": "Final slide only"
+    },
     "notes": "..."
   },
   "compatible_styles": ["classic", "minimal"],
