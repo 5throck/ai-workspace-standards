@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-16](2026-07-16.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
 | [2026-07-15](2026-07-15.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
 | [2026-07-14](2026-07-14.md) | chore: update |
 | [2026-07-11](2026-07-11.md) | fix(scripts): fix --check-drift false-positive L2 drift by adding l2_drift_eligible field |
