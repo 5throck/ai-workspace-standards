@@ -34,8 +34,8 @@
     "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
-    "glob": "^11.0.0",
     "js-yaml": "^4.1.0",
     "typescript": "^5.0.0"
   },

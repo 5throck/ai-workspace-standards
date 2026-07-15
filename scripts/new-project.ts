@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -312,7 +312,7 @@ if (import.meta.main) {
 }
 
 // Workspace-only files that must NOT be copied into new projects
-const WORKSPACE_ONLY_FILES = ['package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'propagation-map.json', 'variant.json'];
+const WORKSPACE_ONLY_FILES = ['package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'propagation-map.json', 'variant.json'];
 copyDir(commonDir, projectDir);
 // Ensure all copied files are user-writable (template storage may set read-only bits)
 makeWritable(projectDir);
@@ -321,7 +321,35 @@ for (const f of WORKSPACE_ONLY_FILES) {
   if (existsSync(fp)) { rmSync(fp); console.log(`  🗑️  Excluded workspace-only file: ${f}`); }
 }
 
-// L1-only agent files
+// ── 2.5c. Generate project root package.json ─────────────────────────────
+// Self-contained projects use a single root package.json as SSOT.
+// All runtime dependencies (js-yaml, etc.) and scripts are resolved from root.
+const templatePkg = join(commonDir, 'package.json');
+if (!existsSync(templatePkg)) {
+  throw new Error(`Template package.json not found: ${templatePkg}`);
+}
+const pkg = JSON.parse(readFileSync(templatePkg, 'utf-8'));
+// Slugify: lowercase, non-alphanumeric → hyphen, collapse, trim edges
+let slug = projectName
+  .toLowerCase()
+  .replace(/[^a-z0-9-]/g, '-')
+  .replace(/-+/g, '-')
+  .replace(/^-|-$/g, '');
+// Fallback priority: projectName → basename(projectDir) → "workspace" (with warning)
+// Note: "workspace" can collide if multiple non-Latin-named projects exist in same workspace
+if (!slug) {
+  slug = basename(projectDir)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'workspace';
+  console.log(`  ⚠️  Project name "${projectName}" produced no valid slug — using "${slug}"`);
+}
+pkg.name = slug;
+writeFileSync(join(projectDir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+console.log(`  ✅ Root package.json generated (name: ${pkg.name})`);
+
+// ── L1-only agent files ──────────────────────────────────────────────────
 const L1_ONLY_AGENTS = ['agents/lifecycle-manager.md', 'agents/_COMMON.md', 'agents/pm.md.backup'];
 for (const a of L1_ONLY_AGENTS) {
   const fp = join(projectDir, a);
@@ -493,15 +521,6 @@ if (existsSync(scriptsMd)) {
   }
 }
 
-// ── 5.5d. Merge workspace scripts into package.json ───────────────────────────
-const pkgJson = join(projectDir, 'package.json');
-if (existsSync(pkgJson)) {
-  const helper = join(workspaceRoot, 'scripts', 'helpers', 'merge-package-scripts.ts');
-  if (existsSync(helper)) {
-    spawnSync('bun', [helper, projectDir], { stdio: 'inherit' });
-  }
-}
-
 // ── 5.5. Record template provenance ───────────────────────────────────────────
 const versionFile = join(workspaceRoot, 'templates', 'VERSION');
 const templateVersion = templateVer || (existsSync(versionFile) ? readFileSync(versionFile, 'utf8').trim() : 'unknown');
@@ -634,6 +653,39 @@ if (!emailCheck.stdout.trim()) {
   spawnSync('git', ['config', 'user.email', 'scaffold-bot@local']);
   spawnSync('git', ['config', 'user.name', 'Scaffold Bot']);
 }
+
+// ── 7.5. Install dependencies ──────────────────────────────────────────────
+// Self-contained projects install all dependencies at root level.
+// Scripts resolve modules from root node_modules/ — no separate scripts/ install needed.
+function bunInstall(dir: string): void {
+  const pkgPath = join(dir, 'package.json');
+  if (!existsSync(pkgPath)) {
+    console.log('  ⚠️  package.json missing — skipping bun install');
+    return;
+  }
+  try {
+    // Verify bun is available (ENOENT guard for environments without bun)
+    const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+    if (bunCheck.error || bunCheck.status !== 0) {
+      console.log('  ⚠️  bun not available — skipping dependency installation');
+      console.log(`       Manual retry: cd "${dir}" && bun install`);
+      return;
+    }
+    console.log('  📦 Running bun install …');
+    const result = spawnSync('bun', ['install'], { stdio: 'inherit', cwd: dir });
+    if (result.status !== 0) {
+      console.log('  ⚠️  bun install failed (non-fatal — scripts may fail)');
+      console.log(`       Manual retry: cd "${dir}" && bun install`);
+    } else {
+      console.log('  ✅ bun install complete');
+    }
+  } catch (err) {
+    // Catch ENOENT (bun not installed) or permission errors
+    console.log(`  ⚠️  bun not available (${(err as Error).message}) — skipping install`);
+    console.log(`       Manual retry: cd "${dir}" && bun install`);
+  }
+}
+bunInstall(projectDir);
 
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
 console.log('\nRunning security bootstrap verification…');

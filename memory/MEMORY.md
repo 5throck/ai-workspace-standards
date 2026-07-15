@@ -4,6 +4,8 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-16](2026-07-16.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
+| [2026-07-15](2026-07-15.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
 | [2026-07-14](2026-07-14.md) | chore: update |
 | [2026-07-11](2026-07-11.md) | fix(scripts): fix --check-drift false-positive L2 drift by adding l2_drift_eligible field |
 | [2026-07-10](2026-07-10.md) | fix(project-review): two-round project review with 51+ findings, 18 actioned fixes; project-review skill v1.1.0 (conditional base-map MCP); sync skill v1.1.0 (16-step pipeline docs) |
