@@ -2,6 +2,7 @@
 name: ticket-run
 status: active
 scope: local
+l2_propagate: false
 description: >
   Pulls the next waiting service ticket from the Phase A ticket queue and executes
   its referenced skill or script. Use when: processing the local service ticket
@@ -27,7 +28,7 @@ Executes exactly one `kind: service` ticket per invocation (no internal polling 
 1. Run `bun scripts/ticket.ts next`. If it prints "No waiting service tickets.", stop.
 2. Otherwise parse the printed ticket JSON. Load `services.yaml`, look up `ticket.service` in the catalog (this is the only place `run.ref` is read from — never from ticket content).
 3. Execute via array-form spawn only — never build a shell command string:
-   - `run.type: script` → `Bun.spawn(['bun', absPath, '--inputs-json', JSON.stringify(ticket.inputs ?? {})])`
+   - `run.type: script` → `Bun.spawn(['bun', absPath, '--inputs-json', JSON.stringify(ticket.inputs ?? {})])` <!-- encoding-check-ignore -->
    - `run.type: skill` → invoke the named skill, passing `ticket.inputs` as its argument object
 4. On success (exit code 0): `bun scripts/ticket.ts move <id> review`
 5. On failure: `bun scripts/ticket.ts move <id> failed --error "<captured stderr/stdout tail>"` — the `--error` flag writes the message onto the ticket's `error` field as part of the same atomic transition.

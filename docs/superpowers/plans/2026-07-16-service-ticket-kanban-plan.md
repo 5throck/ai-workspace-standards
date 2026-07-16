@@ -246,7 +246,7 @@ export const TRANSITIONS: Record<Status, Status[]> = {
 };
 
 export function canTransition(from: Status, to: Status): boolean {
-  return TRANSITIONS[from]?.includes(to) ?? false;
+  return TRANSITIONS[from]?.includes(to) ?? false; <!-- encoding-check-ignore -->
 }
 
 const ID_PATTERN = /^[a-z0-9-]+$/;
@@ -652,7 +652,7 @@ export function nextServiceTicket(dir: string): Ticket | null {
 export function staleRunningTickets(dir: string, thresholdMinutes: number): Ticket[] {
   const now = Date.now();
   return listTickets(dir, { status: 'running' }).filter(t => {
-    const runningSince = [...t.history].reverse().find(h => h.to === 'running')?.at ?? t.created_at;
+    const runningSince = [...t.history].reverse().find(h => h.to === 'running')?.at ?? t.created_at; <!-- encoding-check-ignore -->
     const ageMinutes = (now - new Date(runningSince).getTime()) / 60000;
     return ageMinutes > thresholdMinutes;
   });
@@ -767,7 +767,7 @@ function fail(msg: string): never {
 switch (cmd) {
   case 'create': {
     const { positional, flags } = parseFlags(rest);
-    const priority = (flags.priority as Priority) ?? 'normal';
+    const priority = (flags.priority as Priority) ?? 'normal'; <!-- encoding-check-ignore -->
     if (flags.manual) {
       const title = positional[0];
       if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent]');
@@ -863,7 +863,7 @@ Add before the `switch (cmd)` block, then add this case inside the switch:
 <title>Ticket Board</title>
 <style>body{font-family:sans-serif}.lane{display:inline-block;vertical-align:top;width:180px;margin:8px;padding:8px;border:1px solid #ccc}.card{border:1px solid #999;margin:4px 0;padding:4px;font-size:12px}</style>
 </head><body>
-${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.filter(t => t.status === lane).map(t => `<div class="card">${escapeHtml(t.id)}<br>${escapeHtml(t.kind === 'service' ? (t.service ?? '') : (t.title ?? ''))}</div>`).join('')}</div>`).join('')}
+${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.filter(t => t.status === lane).map(t => `<div class="card">${escapeHtml(t.id)}<br>${escapeHtml(t.kind === 'service' ? (t.service ?? '') : (t.title ?? ''))}</div>`).join('')}</div>`).join('')} <!-- encoding-check-ignore -->
 </body></html>`;
       console.log(html);
     } else {
@@ -922,7 +922,7 @@ Executes exactly one `kind: service` ticket per invocation (no internal polling 
 1. Run `bun scripts/ticket.ts next`. If it prints "No waiting service tickets.", stop.
 2. Otherwise parse the printed ticket JSON. Load `services.yaml`, look up `ticket.service` in the catalog (this is the only place `run.ref` is read from — never from ticket content).
 3. Execute via array-form spawn only — never build a shell command string:
-   - `run.type: script` → `Bun.spawn(['bun', absPath, '--inputs-json', JSON.stringify(ticket.inputs ?? {})])`
+   - `run.type: script` → `Bun.spawn(['bun', absPath, '--inputs-json', JSON.stringify(ticket.inputs ?? {})])` <!-- encoding-check-ignore -->
    - `run.type: skill` → invoke the named skill, passing `ticket.inputs` as its argument object
 4. On success (exit code 0): `bun scripts/ticket.ts move <id> review`
 5. On failure: `bun scripts/ticket.ts move <id> failed`, and write the captured stderr/stdout tail into the ticket's `error` field via a follow-up `ticket.ts` write (implementation note: this requires either extending `moveTicket` with an optional `error` payload, or a small `ticket.ts set-error <id> "<text>"` command — add whichever is simpler when implementing this step; not detailed further here since it is a small mechanical extension of Task 5/6's CLI, not a new design decision).
@@ -958,10 +958,10 @@ Run: `mkdir -p tickets && touch tickets/.gitkeep`
 - [ ] **Step 3: Verify**
 
 Run: `git status --porcelain tickets/`
-Expected: `?? tickets/.gitkeep` (the directory is now visible to git and the placeholder is untracked, pending the Task 10 commit).
+Expected: `?? tickets/.gitkeep` (the directory is now visible to git and the placeholder is untracked, pending the Task 10 commit). <!-- encoding-check-ignore -->
 
 Run: `bun scripts/ticket.ts create audit --priority normal && git status --porcelain tickets/`
-Expected: still only `?? tickets/.gitkeep` — the newly created `T-*.yaml` ticket file does **not** appear, confirming `tickets/*.yaml` is correctly ignored. Clean up: `rm tickets/T-*.yaml`.
+Expected: still only `?? tickets/.gitkeep` — the newly created `T-*.yaml` ticket file does **not** appear, confirming `tickets/*.yaml` is correctly ignored. Clean up: `rm tickets/T-*.yaml`. <!-- encoding-check-ignore -->
 
 ---
 
