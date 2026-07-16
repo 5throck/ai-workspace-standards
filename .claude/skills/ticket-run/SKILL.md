@@ -1,7 +1,7 @@
 ---
 name: ticket-run
 status: active
-scope: local
+scope: workspace
 l2_propagate: false
 description: >
   Pulls the next waiting service ticket from the Phase A ticket queue and executes

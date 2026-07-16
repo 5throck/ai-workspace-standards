@@ -126,7 +126,7 @@ bun scripts/ticket.ts doctor                     # flags stale `running` tickets
 
 ### 2.7 `skills/ticket-run/SKILL.md`
 
-- `scope: local` (not `common` — this is L0-only for Phase A).
+- `scope: workspace` (not `common` — this is the repo's established convention for skills that must never propagate to L1/L2, confirmed by precedent in `skills/upgrade-project`, `skills/simulate-project-creation`, etc.) plus `l2_propagate: false` for defense-in-depth across all propagation domains.
 - Frontmatter includes `metadata.triggers`; must not collide with existing skill triggers (checked against `new-task`, `memlog`, etc. at implementation time).
 - Behavior: `ticket.ts next` → if a `kind: service` ticket is returned, resolve its `service` against `services.yaml`, execute per §2.5, move to `review` on success or `failed` (with `error` + `attempts++`) on failure. Does not touch `kind: manual` tickets. One invocation processes exactly one ticket and exits (no internal polling loop); repeated processing is the caller's responsibility (Phase C, roadmap §3.5 covers Human/pull invocation).
 - Relationship to `scripts/dispatch.ts`: `dispatch.ts` is the existing session-scoped, ad-hoc multi-agent fan-out tool with no persistent state. It is **not superseded** by this design and is not the same layer. If a ticket's referenced service itself requires multi-agent work, `ticket-run` may invoke `dispatch.ts` as an implementation detail of executing that one ticket — the ticket queue is the new persistent layer that `dispatch.ts` never had.

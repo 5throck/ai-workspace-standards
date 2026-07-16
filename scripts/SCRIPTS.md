@@ -144,7 +144,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.3.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.3.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
