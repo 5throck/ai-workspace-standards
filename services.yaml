@@ -1,0 +1,7 @@
+schemaVersion: 1
+services:
+  - id: audit
+    name: Workspace Audit
+    description: Run the workspace QA gate (scripts/audit.ts)
+    run: { type: script, ref: scripts/audit.ts }
+schedule: []

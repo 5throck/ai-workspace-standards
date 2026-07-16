@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-15T22:29:56.903Z
+**Generated**: 2026-07-16T07:33:04.575Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 22
-- **Scripts**: 130
+- **Skills**: 23
+- **Scripts**: 133
 - **Commands**: 7
 
 ---
@@ -52,6 +52,7 @@
 | source-command-commit-push-pr | 1.0.1 | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
 | sync | 1.1.0 | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | lifecycle-manager |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
+| ticket-run | 1.0.0 | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | translate, translation, localize, Korean translation | pm |
 | upgrade-project | 1.0.0 | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | docs-writer |
@@ -164,6 +165,9 @@
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.0.3 | scripts/test-runner.ts | child_process, fs, path |
+| ticket-schema.ts | 1.0.0 | scripts/helpers/ticket-schema.ts | N/A |
+| ticket-store.ts | 1.0.0 | scripts/helpers/ticket-store.ts | js-yaml |
+| ticket.ts | 1.0.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
 | update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
@@ -215,7 +219,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 7 / 7
-- **Skills with parity**: 5 / 22
+- **Skills with parity**: 5 / 23
 
 ---
 

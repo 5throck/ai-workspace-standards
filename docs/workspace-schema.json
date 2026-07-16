@@ -101,6 +101,7 @@
       ".mcp.json",
       ".sync_context.tmp",
       "propagation-map.json",
+      "services.yaml",
       "fix.mjs",
       ".DS_Store"
     ],
@@ -113,6 +114,7 @@
       "docs",
       "memory",
       "templates",
+      "tickets",
       ".claude",
       ".gemini",
       ".githooks",
