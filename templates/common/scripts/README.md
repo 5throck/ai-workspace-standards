@@ -108,6 +108,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `helpers/ticket-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/ticket-store.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -140,7 +142,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.3.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.3.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -160,6 +162,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.6.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -494,4 +497,4 @@ Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
 ```
 
 ---
-*Last Updated: 2026-07-15*
+*Last Updated: 2026-07-16*

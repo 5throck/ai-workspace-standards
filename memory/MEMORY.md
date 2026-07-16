@@ -94,7 +94,7 @@
 | 2026-05-28 | Unified lifecycle governance structure across workspace root and templates | [meeting-2026-05-28-lifecycle-governance-structure.md](archive/meeting-2026-05-28-lifecycle-governance-structure.md) |
 | 2026-05-28 | Template lifecycle ↔ Script lifecycle integration review | [meeting-2026-05-28-lifecycle-integration-review.md](archive/meeting-2026-05-28-lifecycle-integration-review.md) |
 | 2026-05-28 | Variant structural gaps improvement plan meeting | [meeting-2026-05-28-variant-structural-gaps.md](archive/meeting-2026-05-28-variant-structural-gaps.md) |
-| 2026-05-28 | Kanban process and system design for current and new projects | [meeting-2026-05-28-kanban-process-design.md](archive/meeting-2026-05-28-kanban-process-design.md) |
+| 2026-05-28 | Kanban process and system design for current and new projects — **SUPERSEDED 2026-07-16** by the Service Ticket + Kanban design, see [meeting-2026-07-16-ticket-kanban-design-review.md](meeting-2026-07-16-ticket-kanban-design-review.md) | [meeting-2026-05-28-kanban-process-design.md](archive/meeting-2026-05-28-kanban-process-design.md) |
 | 2026-05-28 | Encoding and README sync review | [meeting-2026-05-28-encoding-readme-sync.md](archive/meeting-2026-05-28-encoding-readme-sync.md) |
 | 2026-05-28 | Implementation direction for platform parity, upgrade-project, and team role changes | [meeting-2026-05-28-implementation-direction.md](archive/meeting-2026-05-28-implementation-direction.md) |
 | 2026-05-28 | Team composition review and project improvement roadmap meeting | [meeting-2026-05-28-team-composition-improvement.md](archive/meeting-2026-05-28-team-composition-improvement.md) |
