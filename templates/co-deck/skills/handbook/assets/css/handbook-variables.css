@@ -22,6 +22,7 @@
   /* Text */
   --text:       #1f2328;
   --text-dim:   #636c76;
+  --text-inverse: #fff;
 
   /* Accent palette (GitHub Primer) */
   --accent:     #0969da;    /* Primary — blue */
@@ -33,7 +34,9 @@
 
   /* Backward-compatible aliases (deprecated — use semantic names) */
   --accent2: var(--accent-green);
+  --accent3: var(--accent-amber);
   --accent4: var(--accent-purple);
+  --accent5: var(--accent-red);
   --accent6: var(--accent-dark);
 
   /* Semantic callout backgrounds */
@@ -42,6 +45,8 @@
   --bg-warn:      #fff1c5;
   --bg-success:   #dafbe1;
   --bg-error:     #ffebe9;
+  --bg-situation: #fffbf0;
+  --bg-video:     #f0f6ff;
 
   /* Semantic callout borders */
   --border-info:    #0969da;
@@ -49,6 +54,8 @@
   --border-warn:    #9a6700;
   --border-success: #1a7f37;
   --border-error:   #cf222e;
+  --border-situation: #f2c97d;
+  --border-video:     #d0e8ff;
 
   /* Code */
   --code-bg:      #f6f8fa;
@@ -57,6 +64,27 @@
   /* Tags / Chips */
   --tag-bg:       #ddf4ff;
   --tag-text:     #0550ae;
+
+  /* Platform colors */
+  --platform-claude: #d97706;
+  --platform-claudeapp: #f59e0b;
+  --platform-agy: #0550ae;
+  --platform-antigravity: #6639ba;
+
+  /* Badge palettes */
+  --badge-green-bg: #dafbe1;  --badge-green-fg: #1a7f37;  --badge-green-border: #a2d9b1;
+  --badge-blue-bg: #ddf4ff;   --badge-blue-fg: #0550ae;   --badge-blue-border: #a5d5f7;
+  --badge-purple-bg: #fbefff; --badge-purple-fg: #6639ba;  --badge-purple-border: #d2b3f7;
+  --badge-amber-bg: #fff8e1;  --badge-amber-fg: #92400e;  --badge-amber-border: #f5d88a;
+  --badge-orange-bg: #fff3e0; --badge-orange-fg: #e65100; --badge-orange-border: #ffcc80;
+  --badge-indigo-bg: #e3f2fd; --badge-indigo-fg: #0d47a1; --badge-indigo-border: #90caf9;
+  --badge-violet-bg: #f3e5f5; --badge-violet-fg: #6a1b9a; --badge-violet-border: #ce93d8;
+  --badge-red-bg: #ffebe9;    --badge-red-fg: #cf222e;
+  --badge-lab-bg: #e8f5e9;   --badge-lab-fg: #2e7d32;    --badge-lab-border: #a5d6a7;
+
+  /* Compare box */
+  --compare-without-bg: #fff8f8;  --compare-without-border: #ffc1bc;
+  --compare-with-bg: #f0fff4;     --compare-with-border: #a2d9b1;
 
   /* Shadows */
   --shadow-sm:    0 1px 2px rgba(0,0,0,.06);
@@ -92,6 +120,7 @@
 
     --text:       #e6edf3;
     --text-dim:   #8b949e;
+    --text-inverse: #fff;
 
     --accent:       #58a6ff;
     --accent-green:  #3fb950;
@@ -105,18 +134,40 @@
     --bg-warn:      #3b2000;
     --bg-success:   #0f5323;
     --bg-error:     #490202;
+    --bg-situation: #3b2e00;
+    --bg-video:     #0d2240;
 
     --border-info:    #58a6ff;
     --border-note:    #d29922;
     --border-warn:    #d29922;
     --border-success: #3fb950;
     --border-error:   #f85149;
+    --border-situation: #d29922;
+    --border-video:     #58a6ff;
 
     --code-bg:      #161b22;
     --code-border:  #30363d;
 
     --tag-bg:       #0d2240;
     --tag-text:     #58a6ff;
+
+    --platform-claude: #f0883e;
+    --platform-claudeapp: #f59e0b;
+    --platform-agy: #58a6ff;
+    --platform-antigravity: #bc8cff;
+
+    --badge-green-bg: #0f5323;  --badge-green-fg: #3fb950;  --badge-green-border: #238636;
+    --badge-blue-bg: #0d2240;   --badge-blue-fg: #58a6ff;   --badge-blue-border: #388bfd;
+    --badge-purple-bg: #2d1539; --badge-purple-fg: #bc8cff;  --badge-purple-border: #8b949e;
+    --badge-amber-bg: #3b2000;  --badge-amber-fg: #d29922;  --badge-amber-border: #8b6914;
+    --badge-orange-bg: #3b2000; --badge-orange-fg: #f0883e; --badge-orange-border: #8b6914;
+    --badge-indigo-bg: #0d2240; --badge-indigo-fg: #58a6ff; --badge-indigo-border: #388bfd;
+    --badge-violet-bg: #2d1539; --badge-violet-fg: #bc8cff; --badge-violet-border: #8b949e;
+    --badge-red-bg: #490202;    --badge-red-fg: #f85149;
+    --badge-lab-bg: #0f5323;   --badge-lab-fg: #3fb950;    --badge-lab-border: #238636;
+
+    --compare-without-bg: #3b1219;  --compare-without-border: #f85149;
+    --compare-with-bg: #0f5323;     --compare-with-border: #3fb950;
 
     --shadow-sm:    0 1px 2px rgba(0,0,0,.3);
     --shadow-md:    0 4px 14px rgba(0,0,0,.3);
@@ -133,6 +184,7 @@
 
   --text:       #e6edf3;
   --text-dim:   #8b949e;
+  --text-inverse: #fff;
 
   --accent:       #58a6ff;
   --accent-green:  #3fb950;
@@ -146,18 +198,40 @@
   --bg-warn:      #3b2000;
   --bg-success:   #0f5323;
   --bg-error:     #490202;
+  --bg-situation: #3b2e00;
+  --bg-video:     #0d2240;
 
   --border-info:    #58a6ff;
   --border-note:    #d29922;
   --border-warn:    #d29922;
   --border-success: #3fb950;
   --border-error:   #f85149;
+  --border-situation: #d29922;
+  --border-video:     #58a6ff;
 
   --code-bg:      #161b22;
   --code-border:  #30363d;
 
   --tag-bg:       #0d2240;
   --tag-text:     #58a6ff;
+
+  --platform-claude: #f0883e;
+  --platform-claudeapp: #f59e0b;
+  --platform-agy: #58a6ff;
+  --platform-antigravity: #bc8cff;
+
+  --badge-green-bg: #0f5323;  --badge-green-fg: #3fb950;  --badge-green-border: #238636;
+  --badge-blue-bg: #0d2240;   --badge-blue-fg: #58a6ff;   --badge-blue-border: #388bfd;
+  --badge-purple-bg: #2d1539; --badge-purple-fg: #bc8cff;  --badge-purple-border: #8b949e;
+  --badge-amber-bg: #3b2000;  --badge-amber-fg: #d29922;  --badge-amber-border: #8b6914;
+  --badge-orange-bg: #3b2000; --badge-orange-fg: #f0883e; --badge-orange-border: #8b6914;
+  --badge-indigo-bg: #0d2240; --badge-indigo-fg: #58a6ff; --badge-indigo-border: #388bfd;
+  --badge-violet-bg: #2d1539; --badge-violet-fg: #bc8cff; --badge-violet-border: #8b949e;
+  --badge-red-bg: #490202;    --badge-red-fg: #f85149;
+  --badge-lab-bg: #0f5323;   --badge-lab-fg: #3fb950;    --badge-lab-border: #238636;
+
+  --compare-without-bg: #3b1219;  --compare-without-border: #f85149;
+  --compare-with-bg: #0f5323;     --compare-with-border: #3fb950;
 
   --shadow-sm:    0 1px 2px rgba(0,0,0,.3);
   --shadow-md:    0 4px 14px rgba(0,0,0,.3);
