@@ -117,7 +117,8 @@ handbook/
 │   ├── course-overview.html
 │   ├── instructor-guide.html
 │   └── assets/
-│       ├── css/handbook-theme.css
+│       ├── css/handbook-variables.css
+│       ├── css/handbook-components.css
 │       ├── js/site-search.js
 │       ├── js/inpage-search.js
 │       ├── js/dark-mode-toggle.js

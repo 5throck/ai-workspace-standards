@@ -665,17 +665,32 @@ The index is the entry point for the entire handbook. Include the following stru
 
 ### 22-2. Required CSS Variables
 
-All colors used in HTML files must be referenced only through these CSS variables:
+All colors used in HTML files must be referenced only through these CSS variables.
+Variables are defined in `assets/css/handbook-variables.css` (theme file, overwritten by `apply-handbook-theme.ts`);
+structural rules live in `assets/css/handbook-components.css` (never overwritten).
+
+**Semantic accent names (preferred):**
 
 ```css
 :root {
   --bg: #ffffff;       --bg2: #f6f8fa;     --bg3: #eef1f4;
   --border: #d0d7de;   --text: #1f2328;    --text-dim: #636c76;
-  --accent: #0969da;   --accent2: #1a7f37;  --accent4: #6639ba;
-  --accent6: #0550ae;  --bg-info: #ddf4ff;  --bg-note: #fff8c5;
-  --bg-warn: #fff1c5;  --bg-success: #dafbe1; --bg-error: #ffebe9;
+  --accent: #0969da;
+  --accent-green: #1a7f37;  --accent-purple: #6639ba;
+  --accent-dark: #0550ae;   --accent-amber: #953800;   --accent-red: #cf222e;
+  --bg-info: #ddf4ff;  --bg-note: #fff8c5;  --bg-warn: #fff1c5;
+  --bg-success: #dafbe1; --bg-error: #ffebe9;
+  --border-info: #0969da; --border-note: #9a6700;
+  --border-warn: #9a6700; --border-success: #1a7f37; --border-error: #cf222e;
+  --code-bg: #f6f8fa;  --code-border: #d0d7de;
+  --tag-bg: #ddf4ff;   --tag-text: #0550ae;
 }
 ```
+
+**Backward-compatible aliases** (legacy files still work):
+- `--accent2` → `var(--accent-green)`
+- `--accent4` → `var(--accent-purple)`
+- `--accent6` → `var(--accent-dark)`
 
 ### 22-3. Prohibitions
 

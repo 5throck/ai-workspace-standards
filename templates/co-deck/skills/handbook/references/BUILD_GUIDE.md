@@ -166,10 +166,16 @@ Choose from built-in themes: **azure**, **graphite**, **teal**, **amber**, **ind
 bun run apply-theme --project . --theme azure
 ```
 
-This generates `assets/css/handbook-theme.css` with:
+This generates `assets/css/handbook-variables.css` with:
 - `:root` — light mode variables
 - `@media (prefers-color-scheme: dark)` — auto-detect dark
 - `.dark` — manual toggle dark
+
+> **CSS Architecture**: The theme system uses a 2-file split:
+> - `handbook-variables.css` — Theme variables only (overwritten by `apply-handbook-theme.ts`)
+> - `handbook-components.css` — Structural CSS rules (never overwritten)
+>
+> Both files are linked in every HTML template.
 
 ### Step 3: Generate Search Index
 Update `assets/js/site-search.js` DOCS array to include all HTML files:
