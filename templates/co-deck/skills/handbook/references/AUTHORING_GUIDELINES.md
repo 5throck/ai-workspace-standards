@@ -673,23 +673,49 @@ structural rules live in `assets/css/handbook-components.css` (never overwritten
 
 ```css
 :root {
+  /* Backgrounds & text */
   --bg: #ffffff;       --bg2: #f6f8fa;     --bg3: #eef1f4;
   --border: #d0d7de;   --text: #1f2328;    --text-dim: #636c76;
+  --text-inverse: #fff;
+
+  /* Accent palette */
   --accent: #0969da;
   --accent-green: #1a7f37;  --accent-purple: #6639ba;
   --accent-dark: #0550ae;   --accent-amber: #953800;   --accent-red: #cf222e;
+
+  /* Semantic callout backgrounds & borders */
   --bg-info: #ddf4ff;  --bg-note: #fff8c5;  --bg-warn: #fff1c5;
   --bg-success: #dafbe1; --bg-error: #ffebe9;
   --border-info: #0969da; --border-note: #9a6700;
   --border-warn: #9a6700; --border-success: #1a7f37; --border-error: #cf222e;
+
+  /* Code blocks & tags */
   --code-bg: #f6f8fa;  --code-border: #d0d7de;
   --tag-bg: #ddf4ff;   --tag-text: #0550ae;
+
+  /* Platform colors (Claude, Claude App, AGY, Antigravity) */
+  --platform-claude: #d97706;   --platform-claudeapp: #f59e0b;
+  --platform-agy: #0550ae;      --platform-antigravity: #6639ba;
+
+  /* Badge palettes (bg/fg/border per color) */
+  --badge-green-bg/fg/border;   --badge-blue-bg/fg/border;
+  --badge-purple-bg/fg/border;  --badge-amber-bg/fg/border;
+  --badge-orange-bg/fg/border;  --badge-indigo-bg/fg/border;
+  --badge-violet-bg/fg/border;  --badge-red-bg/fg;
+  --badge-lab-bg/fg/border;
+
+  /* Compare boxes & situation/video */
+  --compare-without-bg/border;  --compare-with-bg/border;
+  --bg-situation;  --border-situation;
+  --bg-video;      --border-video;
 }
 ```
 
 **Backward-compatible aliases** (legacy files still work):
 - `--accent2` → `var(--accent-green)`
+- `--accent3` → `var(--accent-amber)`
 - `--accent4` → `var(--accent-purple)`
+- `--accent5` → `var(--accent-red)`
 - `--accent6` → `var(--accent-dark)`
 
 ### 22-3. Prohibitions

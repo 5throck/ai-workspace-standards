@@ -159,7 +159,7 @@ bun run validate-nav --docs-dir docs
 **Theme is a domain decision step**, not just an asset operation.
 
 ### Step 1: Select Theme
-Choose from built-in themes: **azure**, **graphite**, **teal**, **amber**, **indigo**.
+Choose from built-in themes: **azure**, **graphite**, **teal**, **amber**, **indigo**, **native**.
 
 ### Step 2: Apply Theme
 ```bash

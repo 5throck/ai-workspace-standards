@@ -92,7 +92,7 @@ Dispatch `handbook-reviewer` agent to run:
 ### H-6: Apply Theme
 
 Theme is a **domain decision step** (not just an asset):
-1. Select theme from built-in options (azure, graphite, teal, amber, indigo)
+1. Select theme from built-in options (azure, graphite, teal, amber, indigo, native)
 2. Run `bun run apply-theme --theme <name>`
 3. Generate CSS with 3-layer dark mode
 4. Update `site-search.js` DOCS array

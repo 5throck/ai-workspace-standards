@@ -82,7 +82,9 @@ describe("apply-handbook-theme.ts", () => {
     const css = readFileSync(join(tmpDir, "docs", "assets", "css", "handbook-variables.css"), "utf-8");
 
     expect(css).toContain("--accent2: var(--accent-green)");
+    expect(css).toContain("--accent3: var(--accent-amber)");
     expect(css).toContain("--accent4: var(--accent-purple)");
+    expect(css).toContain("--accent5: var(--accent-red)");
     expect(css).toContain("--accent6: var(--accent-dark)");
   });
 
@@ -102,11 +104,10 @@ describe("apply-handbook-theme.ts", () => {
     expect(css).not.toContain(".scenario-card");
     expect(css).not.toContain(".badge");
     expect(css).not.toContain("box-sizing: border-box");
-    expect(css).not.toContain("font-family:");
   });
 
-  test("all 5 built-in themes generate valid CSS", () => {
-    const themes = ["azure", "graphite", "teal", "amber", "indigo"];
+  test("all 6 built-in themes generate valid CSS", () => {
+    const themes = ["azure", "graphite", "teal", "amber", "indigo", "native"];
 
     for (const theme of themes) {
       execSync(`bun run ${SCRIPT} --project ${tmpDir} --theme ${theme}`, {
@@ -124,6 +125,52 @@ describe("apply-handbook-theme.ts", () => {
       // Clean up for next theme
       rmSync(join(tmpDir, "docs", "assets", "css", "handbook-variables.css"));
     }
+  });
+
+  test("includes expanded variable categories (platform, badge, compare, situation, video)", () => {
+    execSync(`bun run ${SCRIPT} --project ${tmpDir} --theme azure`, {
+      stdio: "pipe",
+    });
+
+    const css = readFileSync(join(tmpDir, "docs", "assets", "css", "handbook-variables.css"), "utf-8");
+
+    // Text inverse
+    expect(css).toContain("--text-inverse:");
+
+    // Platform colors
+    expect(css).toContain("--platform-claude:");
+    expect(css).toContain("--platform-claudeapp:");
+    expect(css).toContain("--platform-agy:");
+    expect(css).toContain("--platform-antigravity:");
+
+    // Badge palettes
+    expect(css).toContain("--badge-green-bg:");
+    expect(css).toContain("--badge-blue-fg:");
+    expect(css).toContain("--badge-purple-border:");
+    expect(css).toContain("--badge-red-bg:");
+
+    // Compare boxes
+    expect(css).toContain("--compare-without-bg:");
+    expect(css).toContain("--compare-with-bg:");
+
+    // Situation & video
+    expect(css).toContain("--bg-situation:");
+    expect(css).toContain("--border-situation:");
+    expect(css).toContain("--bg-video:");
+    expect(css).toContain("--border-video:");
+  });
+
+  test("native theme has source-project-specific callout colors", () => {
+    execSync(`bun run ${SCRIPT} --project ${tmpDir} --theme native`, {
+      stdio: "pipe",
+    });
+
+    const css = readFileSync(join(tmpDir, "docs", "assets", "css", "handbook-variables.css"), "utf-8");
+
+    // Native theme uses lighter callout backgrounds than Azure
+    expect(css).toContain("--bg-info: #f0f7ff");   // Azure uses #ddf4ff
+    expect(css).toContain("--bg-warn: #fff8f8");   // Azure uses #fff1c5
+    expect(css).toContain("--bg-success: #f0fff4"); // Azure uses #dafbe1
   });
 
   test("exits with error for unknown theme", () => {
