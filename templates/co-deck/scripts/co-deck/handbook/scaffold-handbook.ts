@@ -37,7 +37,8 @@ const TEMPLATE_FILES: { src: string; dest: string }[] = [
   { src: "templates/course-overview.html", dest: "course-overview.html" },
   { src: "templates/instructor-guide.html", dest: "instructor-guide.html" },
   // Assets
-  { src: "assets/css/handbook-theme.css", dest: "assets/css/handbook-theme.css" },
+  { src: "assets/css/handbook-variables.css", dest: "assets/css/handbook-variables.css" },
+  { src: "assets/css/handbook-components.css", dest: "assets/css/handbook-components.css" },
   { src: "assets/js/site-search.js", dest: "assets/js/site-search.js" },
   { src: "assets/js/inpage-search.js", dest: "assets/js/inpage-search.js" },
   { src: "assets/js/dark-mode-toggle.js", dest: "assets/js/dark-mode-toggle.js" },
