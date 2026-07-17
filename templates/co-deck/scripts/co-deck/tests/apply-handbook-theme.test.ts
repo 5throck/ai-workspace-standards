@@ -62,7 +62,7 @@ describe("apply-handbook-theme.ts", () => {
     expect(css).toContain("--tag-text:");
   });
 
-  test("includes 3-layer dark mode structure", () => {
+  test("includes 2-layer dark mode structure (:root + .dark)", () => {
     execSync(`bun run ${SCRIPT} --project ${tmpDir} --theme azure`, {
       stdio: "pipe",
     });
@@ -70,7 +70,8 @@ describe("apply-handbook-theme.ts", () => {
     const css = readFileSync(join(tmpDir, "docs", "assets", "css", "handbook-variables.css"), "utf-8");
 
     expect(css).toMatch(/:root\s*\{/);
-    expect(css).toContain("@media (prefers-color-scheme: dark)");
+    // No @media block — JS handles OS preference via .dark class toggle
+    expect(css).not.toContain("@media (prefers-color-scheme: dark)");
     expect(css).toMatch(/\.dark\s*\{/);
   });
 

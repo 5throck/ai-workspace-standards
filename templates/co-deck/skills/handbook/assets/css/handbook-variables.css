@@ -1,6 +1,9 @@
 /* ==========================================================================
    handbook-variables.css — Theme Variables Only
-   3-layer dark mode: :root (light) → @media prefers-color-scheme: dark → .dark
+   2-layer dark mode: :root (light) → .dark (toggle via dark-mode-toggle.js)
+
+   dark-mode-toggle.js reads OS preference and localStorage to apply/remove
+   .dark class on <html>. No @media block needed — JS handles OS detection.
 
    This file contains ONLY CSS custom property declarations.
    Structural rules live in handbook-components.css (never overwritten by themes).
@@ -109,72 +112,7 @@
   --line-height: 1.85;
 }
 
-/* ---------- Layer 2: OS-level dark preference ---------- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:         #0d1117;
-    --bg2:        #161b22;
-    --bg3:        #21262d;
-
-    --border:     #30363d;
-
-    --text:       #e6edf3;
-    --text-dim:   #8b949e;
-    --text-inverse: #fff;
-
-    --accent:       #58a6ff;
-    --accent-green:  #3fb950;
-    --accent-purple: #bc8cff;
-    --accent-dark:   #1f6feb;
-    --accent-amber:  #d29922;
-    --accent-red:    #f85149;
-
-    --bg-info:      #0d2240;
-    --bg-note:      #3b2e00;
-    --bg-warn:      #3b2000;
-    --bg-success:   #0f5323;
-    --bg-error:     #490202;
-    --bg-situation: #3b2e00;
-    --bg-video:     #0d2240;
-
-    --border-info:    #58a6ff;
-    --border-note:    #d29922;
-    --border-warn:    #d29922;
-    --border-success: #3fb950;
-    --border-error:   #f85149;
-    --border-situation: #d29922;
-    --border-video:     #58a6ff;
-
-    --code-bg:      #161b22;
-    --code-border:  #30363d;
-
-    --tag-bg:       #0d2240;
-    --tag-text:     #58a6ff;
-
-    --platform-claude: #f0883e;
-    --platform-claudeapp: #f59e0b;
-    --platform-agy: #58a6ff;
-    --platform-antigravity: #bc8cff;
-
-    --badge-green-bg: #0f5323;  --badge-green-fg: #3fb950;  --badge-green-border: #238636;
-    --badge-blue-bg: #0d2240;   --badge-blue-fg: #58a6ff;   --badge-blue-border: #388bfd;
-    --badge-purple-bg: #2d1539; --badge-purple-fg: #bc8cff;  --badge-purple-border: #8b949e;
-    --badge-amber-bg: #3b2000;  --badge-amber-fg: #d29922;  --badge-amber-border: #8b6914;
-    --badge-orange-bg: #3b2000; --badge-orange-fg: #f0883e; --badge-orange-border: #8b6914;
-    --badge-indigo-bg: #0d2240; --badge-indigo-fg: #58a6ff; --badge-indigo-border: #388bfd;
-    --badge-violet-bg: #2d1539; --badge-violet-fg: #bc8cff; --badge-violet-border: #8b949e;
-    --badge-red-bg: #490202;    --badge-red-fg: #f85149;
-    --badge-lab-bg: #0f5323;   --badge-lab-fg: #3fb950;    --badge-lab-border: #238636;
-
-    --compare-without-bg: #3b1219;  --compare-without-border: #f85149;
-    --compare-with-bg: #0f5323;     --compare-with-border: #3fb950;
-
-    --shadow-sm:    0 1px 2px rgba(0,0,0,.3);
-    --shadow-md:    0 4px 14px rgba(0,0,0,.3);
-  }
-}
-
-/* ---------- Layer 3: Manual toggle via .dark class ---------- */
+/* ---------- Dark mode via .dark class (JS-managed) ---------- */
 .dark {
   --bg:         #0d1117;
   --bg2:        #161b22;

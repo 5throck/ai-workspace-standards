@@ -1,1 +1,0 @@
-Ignoring 7 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["C:/git/ai_workspace"].hasTrustDialogAccepted: true in C:\Users\USER\.claude.json.
