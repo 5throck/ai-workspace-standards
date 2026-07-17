@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-07-15
+# Last Updated: 2026-07-17
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -84,6 +84,7 @@ Three flags control agent execution in the co-deck pipeline:
 | prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
 | theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
+| handbook | `skills/handbook/SKILL.md` | handbook-writer, handbook-reviewer | active |
 <!-- END VARIANT-INJECT -->
 
 > `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).
@@ -520,9 +521,10 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 | `presentations/assets/icons/` | **Shared icon pool** |
 | `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
 | `presentations/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
-| `agents/` | Agent role definitions (10 agents) |
+| `agents/` | Agent role definitions (13 agents) |
 | `skills/` | Skill trigger descriptors |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
+| `skills/handbook/` | Handbook skill — H-Stage pipeline, templates, assets, examples |
 | `docs/html-themes/styles/base.css` | Shared CSS structural foundation + default variables (Layer 1 of CSS Load Order) |
 | `docs/html-themes/styles/<name>/style.css` | Per-style CSS variable overrides (shared style/color pool — `style.css` + `pdf_color_spec.json` per folder; NOT nested under themes) |
 | `docs/html-themes/themes/_shared/layout_base.json` | Layer 0 — region skeleton (all null) + 16:9 page + print defaults |
@@ -555,6 +557,42 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
 16. **UTF-8 without BOM (LF)**: All co-deck files — source templates, generated HTML, scripts, markdown, JSON — MUST use UTF-8 encoding without BOM and LF line endings. html-build agent must verify `<meta charset="UTF-8">` in generated HTML. On Windows (Korean locale), ensure `chcp 65001` is set before any file write to prevent CP949 corruption. See `docs/html-themes/THEMES.md → File Encoding Standard` for enforcement details.
 17. **Background image system (v1.7.0)**: `lecture-profile.md` has an independent `background_image` section (not inside pdf_color_spec.json) with fields: `enabled`, `scope` (all/divider-cover/individual), `source` (download/svg), `overlay` (color + opacity), `keywords`, `fallback_color`. Stage 0 prompts the user for background image preference. Image-curator downloads `bg-deck.<ext>` (atmospheric landscape, ~1920×1080) and adds a global entry (`slide_index: -1`, `scope: "global"`) to `image-manifest.json`. Html-build binds `backgroundImage` into slideData. Template.html sets `--slide-bg-image` CSS variable for HTML rendering. Pdf-export reads config and renders full-bleed + overlay. <!-- END VARIANT-INJECT -->
+
+### H-Stage Pipeline (Handbook — Document Production)
+
+When user requests **"create a handbook"**, **"create a course site"**, or **"create a companion handbook"**, enter the H-Stage pipeline (independent from the 11-Stage slide pipeline):
+
+```
+H-0: PM — Confirm: topic, language, output dir, companion mode
+H-1: research — Web research (reuse existing agent)
+     [Companion: Skip — reuse research_notes.md + images + diagrams + references + versions]
+H-2: handbook-writer — Propose section types + chapter structure
+H-3: handbook-writer — Write chapter content (SECTION_TYPES + AUTHORING_GUIDELINES)
+H-4: handbook-writer — Generate Course Overview + Instructor Guide
+H-5: handbook-reviewer — handbook-doctor.ts + check-authoring.ts → fix
+H-6: PM/automation — Apply Theme (domain step) → Generate CSS → Search index → Meta
+H-7: PM — Secret scan + deploy + verify
+```
+
+**Companion Mode Cache Reuse**:
+| Pipeline Output | Reuse Source |
+|-----------------|-------------|
+| Research Package | `research_notes.md` from prior slide project |
+| Images | `image-manifest.json` entries from shared pool |
+| Diagrams | `presentations/assets/diagrams/*.svg` |
+| References | `source-verification.md` validated URLs |
+| Versions | `presentations/<project>/_versions/` snapshots |
+
+### Handbook Domain Rules
+
+1. **Dark mode is auto** — 3-layer CSS: `:root` (light) → `@media (prefers-color-scheme: dark)` (auto) → `.dark` class (manual toggle via localStorage). No H-0 preference prompt needed.
+2. **CSS variables only** — ALL colors must use `var(--bg)`, `var(--text)`, `var(--accent)`, etc. Zero hardcoded hex values in HTML files.
+3. **Multi-language file convention** — Separate files per language: `chapter.html` (default), `chapter_ko.html`, `chapter_en.html`. Language switcher uses AI-friendly filename convention.
+4. **6 section types**: Manual, Chapter, Examples, Quiz, CourseOverview, InstructorGuide — each with prescribed HTML structure per SECTION_TYPES.md.
+5. **Companion mode skips H-1** — When building a companion handbook from an existing slide project, reuse all cached pipeline outputs (research, images, diagrams, references, versions) instead of re-researching.
+6. **Theme is a domain step** (H-6) — Select built-in theme (azure/graphite/teal/amber/indigo) → run `apply-handbook-theme.ts` → generate CSS → update `site-search.js` DOCS array → update meta tags.
+7. **examples/ are CI regression fixtures** — `check-authoring.ts --examples-dir` validates all examples/ files on every PR. Examples must pass all authoring checks.
+8. **handbook-doctor runs 12 static analysis checks** — sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1.
 
 ---
 

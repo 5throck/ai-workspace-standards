@@ -10,7 +10,7 @@ sync_version: 1
 
 ---
 
-Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 10 specialized agents covering research, source verification, content, design, image curation, HTML build (5 themes), layout measurement, and PDF export.
+Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 12 specialized agents covering research, source verification, content, design, image curation, HTML build (5 themes), layout measurement, PDF export, and handbook document production.
 
 ## Quick Start
 
@@ -38,13 +38,13 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 **Type**: lecture
 
-This variant focuses on lecture and presentation material production — from research to print-ready PDF.
+This variant focuses on lecture and presentation material production — from research to print-ready PDF — and searchable, themed handbooks as static sites (standalone, companion, or full course site).
 
 ## Agent Roster
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| pm | Orchestrates 11-stage pipeline; single user entry point | High | inherit |
+| pm | Orchestrates 11-stage pipeline + H-Stage handbook pipeline; single user entry point | High | inherit |
 | research | Gathers web sources; loads lecture-profile.md | Medium | inherit |
 | source-verifier | Validates research URLs → source-verification.md + Trust Score | Medium | inherit |
 | storyline | Writes storyline.md and slide_deck.md with image_role/image_query fields | Medium | inherit |
@@ -55,6 +55,8 @@ This variant focuses on lecture and presentation material production — from re
 | measure | Auto-measures slide layout with Playwright; downloads TTF fonts | Medium | inherit |
 | pdf-export | Generates sample and full PDF from measured layout data | Medium | inherit |
 | version | Snapshots files before every edit; restores prior states | Low | inherit |
+| handbook-writer | Writes handbook content — chapter structure, prose, course materials (H-2~H-4) | Medium | inherit |
+| handbook-reviewer | Quality gate — runs handbook-doctor, check-authoring, applies fixes (H-5) | Medium | inherit |
 
 ## Skills
 
@@ -68,6 +70,7 @@ This variant focuses on lecture and presentation material production — from re
 - **measure**: Layout measurement — runs Playwright to extract coordinates and downloads TTF fonts
 - **pdf-export**: PDF generation — generates sample (5 slides) and full PDF via pdf-lib
 - **version**: Version snapshots — backs up files before edits; restores prior states on demand
+- **handbook**: Handbook document production — H-Stage pipeline (H-0~H-7); standalone, companion, or full course site; dark mode (3-layer CSS), i18n, 6 section types, 5 built-in themes
 
 ---
 

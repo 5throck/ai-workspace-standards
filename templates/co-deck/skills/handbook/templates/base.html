@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- PAGE_TITLE --> | co-deck Handbook</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+  <style>
+    /* ===== Base Layout ===== */
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #6e6e73;
+      --border: #d2d2d7;
+      --accent: #0066cc;
+      --accent-hover: #004499;
+      --bg-info: #e8f4fd;
+      --bg-note: #fffbe6;
+      --bg-warn: #fff3e0;
+      --bg-success: #e8f5e9;
+      --bg-error: #fdecea;
+      --sidebar-width: 220px;
+      --header-height: 56px;
+      --code-bg: #f5f5f7;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --radius: 6px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1a1a2e;
+      --bg2: #16213e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #333355;
+      --accent: #4da6ff;
+      --accent-hover: #80bfff;
+      --bg-info: #1a3a5c;
+      --bg-note: #3d3520;
+      --bg-warn: #3d2e1a;
+      --bg-success: #1a3d2e;
+      --bg-error: #3d1a1a;
+      --code-bg: #0f0f23;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* ===== Header ===== */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background-color: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 100;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .site-header .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+      text-decoration: none;
+      margin-right: 24px;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+
+    .site-header .search-input {
+      flex: 0 1 320px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--bg2);
+      color: var(--text);
+      font-size: 0.875rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .site-header .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .site-header .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dark-mode-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.875rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .dark-mode-toggle:hover {
+      background-color: var(--bg2);
+    }
+
+    .lang-switcher {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--bg2);
+      color: var(--text);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+      background-color: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+    }
+
+    .sidebar nav ul li a {
+      display: block;
+      padding: 8px 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .sidebar nav ul li a:hover,
+    .sidebar nav ul li a.active {
+      color: var(--accent);
+      background-color: var(--bg);
+    }
+
+    /* SIDEBAR-LINKS */
+
+    /* ===== Main Content ===== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--header-height);
+      padding: 32px 40px 60px;
+      min-height: calc(100vh - var(--header-height));
+    }
+
+    .main-content article {
+      max-width: 900px;
+    }
+
+    /* MAIN-CONTENT */
+
+    /* ===== Footer ===== */
+    .site-footer {
+      margin-left: var(--sidebar-width);
+      padding: 24px 40px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-align: center;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .site-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content,
+      .site-footer {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="logo">co-deck</a>
+    <input type="search" class="search-input" placeholder="Search handbook..." id="site-search">
+    <div class="header-actions">
+      <button class="dark-mode-toggle" id="dark-mode-toggle" aria-label="Toggle dark mode">&#9790;</button>
+      <select class="lang-switcher" id="lang-switcher">
+        <option value="ko" selected>KR</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <!-- SIDEBAR-LINKS -->
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="course-overview.html">Course Overview</a></li>
+        <li><a href="chapter.html">Chapters</a></li>
+        <li><a href="manual.html">Reference</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="instructor-guide.html">Instructor Guide</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <article>
+      <!-- MAIN-CONTENT -->
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; <!-- YEAR --> co-deck. All rights reserved.</p>
+    <p>Powered by <a href="#">co-deck</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/site-search.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>

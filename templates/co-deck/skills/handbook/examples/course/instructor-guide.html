@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructor Guide — Course Example</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-brand">📚 Course Example</a>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="course-overview.html">Course Overview</a></li>
+      <li><a href="instructor-guide.html" style="color:var(--accent);">Instructor Guide</a></li>
+      <li><a href="chapter_01.html">1장 Foundations</a></li>
+      <li><a href="chapter_02.html">2장 Applications</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <select id="lang-switcher" style="font-size:12px;padding:4px;border-radius:4px;">
+        <option value="" selected>Language</option>
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+      </select>
+      <button id="dark-toggle" title="Toggle dark mode" style="font-size:16px;cursor:pointer;background:none;border:none;">☀️</button>
+    </div>
+  </nav>
+
+  <main>
+    <article style="max-width:720px;">
+      <h1>Instructor Guide</h1>
+
+      <!-- 사전 준비물 체크리스트 -->
+      <h2 id="prerequisites">사전 준비물 체크리스트</h2>
+      <ul>
+        <li>☐ 참가자 개발 환경 설치 완료 확인</li>
+        <li>☐ Git 계정 생성 완료</li>
+        <li>☐ 사전 설치 체크리스트 참가자에게 1일 전 공지</li>
+        <li>☐ 실습용 프로젝트 템플릿 준비</li>
+      </ul>
+
+      <!-- 시간 배분표 -->
+      <h2 id="schedule">시간 배분표</h2>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:8px;">시간</th>
+            <th style="text-align:left;padding:8px;">장/주제</th>
+            <th style="text-align:left;padding:8px;">형태</th>
+            <th style="text-align:left;padding:8px;">예상 소요</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">09:00</td><td style="padding:8px;">1장 Foundations §1</td><td style="padding:8px;">강의</td><td style="padding:8px;">45분</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">09:45</td><td style="padding:8px;">1장 Foundations §2</td><td style="padding:8px;">실습</td><td style="padding:8px;">45분</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">10:30</td><td style="padding:8px;">휴식</td><td style="padding:8px;">—</td><td style="padding:8px;">15분</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">10:45</td><td style="padding:8px;">2장 Applications §1</td><td style="padding:8px;">강의</td><td style="padding:8px;">45분</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">11:30</td><td style="padding:8px;">2장 Applications §2</td><td style="padding:8px;">토론</td><td style="padding:8px;">30분</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">12:00</td><td style="padding:8px;">점심</td><td style="padding:8px;">—</td><td style="padding:8px;">60분</td></tr>
+          <tr><td style="padding:8px;">13:00</td><td style="padding:8px;">실습 프로젝트</td><td style="padding:8px;">실습</td><td style="padding:8px;">90분</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 장별 강사 노트 -->
+      <h2 id="notes">장별 강사 노트</h2>
+
+      <h3 id="ch1-notes">1장 Foundations</h3>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;width:120px;">위치와 역할</td><td style="padding:6px;">강의 첫 번째 세션. 기초 개념을 확립하는 단계.</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">핵심 전달점</td><td style="padding:6px;">3가지 핵심 개념. 나머지는 시간에 따라 생략 가능.</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">참가자 활동</td><td style="padding:6px;">용어 정의 짝 활동 (10분)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">시간 부족 시</td><td style="padding:6px;">§2 실습을 시연으로 대체. 실습 코드를 화면 공유로 보여줌.</td></tr>
+          <tr><td style="padding:6px;font-weight:bold;">경고</td><td style="padding:6px;color:var(--bg-warn);"> irreversible operation은 강사만 실행.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="ch2-notes">2장 Applications</h3>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;width:120px;">위치와 역할</td><td style="padding:6px;">강의 두 번째 세션. 실무 적용을 다룸.</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">핵심 전달점</td><td style="padding:6px;">실무 사례 2개. 토론을 통한 심화 이해.</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">참가자 활동</td><td style="padding:6px;">사례 분석 토론 (15분)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;font-weight:bold;">시간 부족 시</td><td style="padding:6px;">토론을 짧게 (5분) 축소. 질문은 개별 방과 후 응답.</td></tr>
+          <tr><td style="padding:6px;font-weight:bold;">경고</td><td style="padding:6px;">해당 없음.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 장별 확인 질문 -->
+      <h2 id="questions">장별 확인 질문</h2>
+
+      <h3>1장 확인 질문</h3>
+      <ol>
+        <li style="margin:8px 0;">핵심 개념 3가지 중 하나를 선택해, 우리 팀 업무에 어떻게 적용될까 설명해보세요.</li>
+        <li style="margin:8px 0;">이 개념이 다른 도구에서는 어떻게 구현되는지 아는 방법이 있나요?</li>
+      </ol>
+
+      <h3>2장 확인 질문</h3>
+      <ol>
+        <li style="margin:8px 0;">사례 분석에서 발견한 문제를 어떻게 해결하시겠습니까?</li>
+        <li style="margin:8px 0;">1장에서 다룬 개념과 이번 장의 실무 적용 사이의 연결점은 무엇인가요?</li>
+      </ol>
+
+      <!-- 데모 순서 -->
+      <h2 id="demos">데모 순서</h2>
+      <ol>
+        <li style="margin:8px 0;"><strong>환경 설정 데모</strong> (5분) — 개발 환경 확인</li>
+        <li style="margin:8px 0;"><strong>핵심 기능 데모</strong> (10분) — 주요 기능 시연</li>
+        <li style="margin:8px 0;"><strong>문제 해결 데모</strong> (10분) — 에러 해결 과정 시연</li>
+      </ol>
+
+      <!-- 평가 기준 -->
+      <h2 id="evaluation">평가 기준</h2>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:8px;">기준</th>
+            <th style="text-align:left;padding:8px;">우수</th>
+            <th style="text-align:left;padding:8px;">양호</th>
+            <th style="text-align:left;padding:8px;">개선 필요</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;">개념 이해</td>
+            <td style="padding:8px;">3가지 모두 정확히 설명</td>
+            <td style="padding:8px;">2가지 정확히 설명</td>
+            <td style="padding:8px;">1가지 이하</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;">실무 적용</td>
+            <td style="padding:8px;">독창적 적용 제안</td>
+            <td style="padding:8px;">제시된 사례 적용</td>
+            <td style="padding:8px;">적용 시도 없음</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;">실습 완료</td>
+            <td style="padding:8px;">모든 단계 완료 + 추가 탐색</td>
+            <td style="padding:8px;">모든 필수 단계 완료</td>
+            <td style="padding:8px;">일부 단계 미완료</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </main>
+
+  <footer><p>© 2026 co-deck handbook.</p></footer>
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+</body>
+</html>

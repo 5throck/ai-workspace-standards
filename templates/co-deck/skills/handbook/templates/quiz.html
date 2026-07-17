@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz | co-deck Handbook</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #6e6e73;
+      --border: #d2d2d7;
+      --accent: #0066cc;
+      --accent-hover: #004499;
+      --bg-info: #e8f4fd;
+      --bg-note: #fffbe6;
+      --bg-warn: #fff3e0;
+      --bg-success: #e8f5e9;
+      --bg-error: #fdecea;
+      --sidebar-width: 220px;
+      --header-height: 56px;
+      --code-bg: #f5f5f7;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --radius: 6px;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1a2e;
+      --bg2: #16213e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #333355;
+      --accent: #4da6ff;
+      --accent-hover: #80bfff;
+      --bg-info: #1a3a5c;
+      --bg-note: #3d3520;
+      --bg-warn: #3d2e1a;
+      --bg-success: #1a3d2e;
+      --bg-error: #3d1a1a;
+      --code-bg: #0f0f23;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg); color: var(--text); line-height: 1.6;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* ===== Header ===== */
+    .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 100; transition: background-color 0.2s, color 0.2s; }
+    .site-header .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 24px; white-space: nowrap; transition: color 0.2s; }
+    .site-header .search-input { flex: 0 1 320px; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .site-header .search-input::placeholder { color: var(--text-muted); }
+    .site-header .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .dark-mode-toggle { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; cursor: pointer; color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .dark-mode-toggle:hover { background-color: var(--bg2); }
+    .lang-switcher { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+
+    /* ===== Sidebar ===== */
+    .sidebar { position: fixed; top: var(--header-height); left: 0; width: var(--sidebar-width); height: calc(100vh - var(--header-height)); overflow-y: auto; background-color: var(--bg2); border-right: 1px solid var(--border); padding: 16px 0; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul { list-style: none; }
+    .sidebar nav ul li a { display: block; padding: 8px 20px; color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul li a:hover, .sidebar nav ul li a.active { color: var(--accent); background-color: var(--bg); }
+
+    /* ===== Main Content ===== */
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 32px 40px 60px; min-height: calc(100vh - var(--header-height)); }
+    .main-content article { max-width: 860px; }
+
+    /* ===== Score Summary ===== */
+    .score-summary {
+      background-color: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      margin-bottom: 32px; text-align: center;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .score-summary .score-value {
+      font-size: 2.5rem; font-weight: 800;
+      color: var(--accent); transition: color 0.2s;
+    }
+    .score-summary .score-label {
+      font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* ===== Q&A (Details/Summary) ===== */
+    .qa-item {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 16px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .qa-item summary {
+      padding: 16px 20px; font-weight: 600; font-size: 0.9375rem;
+      cursor: pointer; color: var(--text);
+      background-color: var(--bg2);
+      transition: background-color 0.2s, color 0.2s;
+      list-style: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .qa-item summary::before {
+      content: "Q"; display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background-color: var(--accent); color: var(--bg);
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .qa-item summary::-webkit-details-marker { display: none; }
+    .qa-item[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+    .qa-item .qa-body {
+      padding: 20px;
+    }
+    .qa-item .qa-body p {
+      margin-bottom: 12px; color: var(--text); transition: color 0.2s;
+    }
+
+    /* ===== Model Answer Section (hidden by default) ===== */
+    .model-answer {
+      background-color: var(--bg-success); border-radius: var(--radius);
+      padding: 16px 20px; margin-top: 12px;
+      transition: background-color 0.2s;
+    }
+    .model-answer summary {
+      font-weight: 600; font-size: 0.875rem;
+      color: var(--text); cursor: pointer;
+      list-style: none;
+      transition: color 0.2s;
+    }
+    .model-answer summary::-webkit-details-marker { display: none; }
+    .model-answer .model-answer-content {
+      margin-top: 12px; font-size: 0.9375rem;
+      color: var(--text); transition: color 0.2s;
+    }
+
+    /* ===== Rubric/Marking Criteria ===== */
+    .rubric-section {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; margin: 32px 0;
+      transition: border-color 0.2s;
+    }
+    .rubric-section summary {
+      padding: 16px 20px; font-weight: 700; font-size: 1rem;
+      cursor: pointer; background-color: var(--bg2); color: var(--text);
+      transition: background-color 0.2s, color 0.2s;
+      list-style: none;
+    }
+    .rubric-section summary::-webkit-details-marker { display: none; }
+    .rubric-section .rubric-body {
+      padding: 20px;
+    }
+    .rubric-table {
+      width: 100%; border-collapse: collapse; font-size: 0.875rem;
+    }
+    .rubric-table th {
+      text-align: left; padding: 10px 12px;
+      background-color: var(--bg2); color: var(--text);
+      border: 1px solid var(--border); font-weight: 600;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .rubric-table td {
+      padding: 10px 12px; border: 1px solid var(--border);
+      color: var(--text); transition: color 0.2s, border-color 0.2s;
+    }
+    .rubric-table tr:hover td { background-color: var(--bg2); transition: background-color 0.2s; }
+
+    /* ===== Chapter Nav ===== */
+    .chapter-nav { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); transition: border-color 0.2s; }
+    .chapter-nav a { padding: 10px 20px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--accent); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+    .chapter-nav a:hover { background-color: var(--bg2); }
+
+    /* ===== Footer ===== */
+    .site-footer { margin-left: var(--sidebar-width); padding: 24px 40px; border-top: 1px solid var(--border); font-size: 0.8125rem; color: var(--text-muted); text-align: center; transition: background-color 0.2s, color 0.2s; }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content, .site-footer { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="logo">co-deck</a>
+    <input type="search" class="search-input" placeholder="Search handbook..." id="site-search">
+    <div class="header-actions">
+      <button class="dark-mode-toggle" id="dark-mode-toggle" aria-label="Toggle dark mode">&#9790;</button>
+      <select class="lang-switcher" id="lang-switcher">
+        <option value="ko" selected>KR</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="course-overview.html">Course Overview</a></li>
+        <li><a href="chapter.html">Chapters</a></li>
+        <li><a href="manual.html">Reference</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="quiz.html" class="active">Quiz</a></li>
+        <li><a href="instructor-guide.html">Instructor Guide</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <article>
+      <h1><!-- QUIZ_TITLE: Quiz &amp; Q&amp;A --></h1>
+
+      <!-- Score Summary -->
+      <div class="score-summary">
+        <div class="score-value">0 / <!-- TOTAL_QUESTIONS --></div>
+        <div class="score-label">Correct Answers</div>
+      </div>
+
+      <!-- Question 1 -->
+      <details class="qa-item">
+        <summary><!-- QUESTION_1 --></summary>
+        <div class="qa-body">
+          <p><!-- QUESTION_HINT_OR_CONTEXT --></p>
+
+          <!-- Model Answer (hidden by default) -->
+          <details class="model-answer">
+            <summary>Show Model Answer</summary>
+            <div class="model-answer-content">
+              <p><!-- MODEL_ANSWER_1 --></p>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <!-- Question 2 -->
+      <details class="qa-item">
+        <summary><!-- QUESTION_2 --></summary>
+        <div class="qa-body">
+          <p><!-- QUESTION_HINT_OR_CONTEXT --></p>
+
+          <details class="model-answer">
+            <summary>Show Model Answer</summary>
+            <div class="model-answer-content">
+              <p><!-- MODEL_ANSWER_2 --></p>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <!-- Question N (repeat as needed) -->
+      <!-- TEMPLATE_ITERATE: qa_items -->
+
+      <!-- Rubric / Marking Criteria -->
+      <details class="rubric-section">
+        <summary>Rubric / Marking Criteria</summary>
+        <div class="rubric-body">
+          <table class="rubric-table">
+            <thead>
+              <tr>
+                <th>Criteria</th>
+                <th>Excellent</th>
+                <th>Good</th>
+                <th>Needs Improvement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><!-- CRITERIA_NAME --></td>
+                <td><!-- EXCELLENT_DESC --></td>
+                <td><!-- GOOD_DESC --></td>
+                <td><!-- NEEDS_IMPROVEMENT_DESC --></td>
+              </tr>
+              <!-- Repeat rows as needed -->
+              <!-- TEMPLATE_ITERATE: rubric_rows -->
+              <tr>
+                <td>Criterion placeholder</td>
+                <td>Excellent description</td>
+                <td>Good description</td>
+                <td>Needs improvement description</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- Chapter Nav -->
+      <nav class="chapter-nav">
+        <a href="examples.html">&laquo; Previous</a>
+        <a href="instructor-guide.html">Next &raquo;</a>
+      </nav>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 co-deck. All rights reserved.</p>
+    <p>Powered by <a href="#">co-deck</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/site-search.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>
