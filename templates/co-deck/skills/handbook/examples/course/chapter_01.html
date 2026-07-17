@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1장 Foundations — Course Example</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-brand">📚 Course Example</a>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="course-overview.html">Course Overview</a></li>
+      <li><a href="instructor-guide.html">Instructor Guide</a></li>
+      <li><a href="chapter_01.html" style="color:var(--accent);">1장 Foundations</a></li>
+      <li><a href="chapter_02.html">2장 Applications</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <select id="lang-switcher" style="font-size:12px;padding:4px;border-radius:4px;">
+        <option value="" selected>Language</option>
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+      </select>
+      <button id="dark-toggle" title="Toggle dark mode" style="font-size:16px;cursor:pointer;background:none;border:none;">☀️</button>
+    </div>
+  </nav>
+
+  <main>
+    <article style="max-width:720px;">
+      <span class="chapter-eyebrow" style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;">1장</span>
+      <h1>Foundations</h1>
+
+      <p>This chapter covers the foundational concepts required for the course.</p>
+
+      <div class="callout callout--info" style="background:var(--bg-info);border-left:3px solid var(--accent);padding:16px 20px;margin:20px 0;border-radius:4px;">
+        <strong>Key Point:</strong> These 3 concepts are the foundation for everything in 2장.
+      </div>
+
+      <h2 id="concept-1">Concept 1</h2>
+      <p>Description of the first core concept with a visual element.</p>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        <thead><tr style="border-bottom:2px solid var(--border);"><th style="text-align:left;padding:8px;">Aspect</th><th style="text-align:left;padding:8px;">Detail</th></tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Definition</td><td style="padding:8px;">First concept explanation</td></tr>
+          <tr><td style="padding:8px;">Application</td><td style="padding:8px;">How it applies in practice</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="concept-2">Concept 2</h2>
+      <p>Description of the second core concept.</p>
+
+      <div class="callout callout--warn" style="background:var(--bg-warn);border-left:3px solid var(--accent);padding:16px 20px;margin:20px 0;border-radius:4px;">
+        <strong>Warning:</strong> This concept has common misconceptions.
+      </div>
+
+      <h2 id="concept-3">Concept 3</h2>
+      <p>Description of the third core concept.</p>
+    </article>
+
+    <nav class="chapter-nav" style="display:flex;justify-content:space-between;margin-top:40px;padding-top:20px;border-top:1px solid var(--border);">
+      <a href="index.html" class="prev" style="text-decoration:none;color:var(--text);">
+        <div style="font-size:12px;color:var(--text-dim);">← 이전</div>
+        <div>Course Home</div>
+      </a>
+      <a href="chapter_02.html" class="next" style="text-decoration:none;color:var(--text);text-align:right;">
+        <div style="font-size:12px;color:var(--text-dim);">다음 →</div>
+        <div>2장 Applications</div>
+      </a>
+    </nav>
+  </main>
+
+  <footer><p>© 2026 co-deck handbook.</p></footer>
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>

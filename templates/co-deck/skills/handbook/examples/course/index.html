@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Example — Handbook</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-brand">📚 Course Example</a>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="course-overview.html">Course Overview</a></li>
+      <li><a href="instructor-guide.html">Instructor Guide</a></li>
+      <li><a href="chapter_01.html">1장 Foundations</a></li>
+      <li><a href="chapter_02.html">2장 Applications</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <select id="lang-switcher" style="font-size:12px;padding:4px;border-radius:4px;">
+        <option value="" selected>Language</option>
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+      </select>
+      <button id="dark-toggle" title="Toggle dark mode" style="font-size:16px;cursor:pointer;background:none;border:none;">☀️</button>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <h1>Course Example</h1>
+      <p>This example demonstrates a full course site with Course Overview, Instructor Guide, and narrative chapters.</p>
+
+      <h2 style="margin-top:32px;">Course Materials</h2>
+      <div class="card-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:24px 0;">
+        <a href="course-overview.html" class="card" style="border:1px solid var(--border);border-radius:8px;padding:20px;text-decoration:none;color:var(--text);">
+          <span class="card-number" style="font-size:12px;color:var(--accent);font-weight:700;">📋</span>
+          <h2 style="font-size:16px;margin:4px 0;">Course Overview</h2>
+          <p style="font-size:14px;color:var(--text-dim);">Course introduction with learning objectives.</p>
+        </a>
+        <a href="instructor-guide.html" class="card" style="border:1px solid var(--border);border-radius:8px;padding:20px;text-decoration:none;color:var(--text);">
+          <span class="card-number" style="font-size:12px;color:var(--accent);font-weight:700;">🎓</span>
+          <h2 style="font-size:16px;margin:4px 0;">Instructor Guide</h2>
+          <p style="font-size:14px;color:var(--text-dim);">Instructor operations guide with timing and notes.</p>
+        </a>
+      </div>
+
+      <h2 style="margin-top:32px;">Chapters</h2>
+      <div class="card-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:24px 0;">
+        <a href="chapter_01.html" class="card" style="border:1px solid var(--border);border-radius:8px;padding:20px;text-decoration:none;color:var(--text);">
+          <span class="card-number" style="font-size:12px;color:var(--accent);font-weight:700;">1</span>
+          <h2 style="font-size:16px;margin:4px 0;">Foundations</h2>
+          <p style="font-size:14px;color:var(--text-dim);">Core concepts and terminology.</p>
+        </a>
+        <a href="chapter_02.html" class="card" style="border:1px solid var(--border);border-radius:8px;padding:20px;text-decoration:none;color:var(--text);">
+          <span class="card-number" style="font-size:12px;color:var(--accent);font-weight:700;">2</span>
+          <h2 style="font-size:16px;margin:4px 0;">Applications</h2>
+          <p style="font-size:14px;color:var(--text-dim);">Practical applications and exercises.</p>
+        </a>
+      </div>
+    </article>
+  </main>
+
+  <footer><p>© 2026 co-deck handbook.</p></footer>
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/site-search.js"></script>
+</body>
+</html>

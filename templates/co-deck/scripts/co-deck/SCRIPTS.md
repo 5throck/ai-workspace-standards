@@ -70,6 +70,33 @@ iterative calibration loop. Pre-built native binaries, no build step required.
 | `build-theme-preview.ts` | 0.1.0 | active | Build preview iframe from production renderer: reads preview-data.json + buildThemeDeck(), outputs per-theme×style HTML decks into preview/decks/ | `bun scripts/co-deck/build-theme-preview.ts [--root <path>] [--all]` |
 | `verify-new-theme.ts` | 1.0.0 | active | Composite registration gate: 5 checks (structural validation, manifest freshness, THEMES.md markers, fixture build + extraction round-trip, PDF generation); `--fast` skips checks 4–5; `--json` for CI; target <30s full / <3s fast | `bun scripts/co-deck/verify-new-theme.ts <name> [--style <name>] [--fast] [--json]` |
 
+### Handbook Scripts
+
+Handbook validation and tooling scripts in `scripts/co-deck/handbook/`:
+
+| script | version | status | description | cli-usage |
+|--------|---------|--------|-------------|-----------|
+| `handbook/nav-utils.ts` | 1.0.0 | active | Shared HTML parsing utilities for navigation validation — configurable `--docs-dir`; zero external deps | (library — imported by validate-nav checks) |
+| `handbook/validate-nav.ts` | 1.0.0 | active | Navigation integrity validator — runs 4 checks (broken links, prev/next symmetry, label match, DOCS sync) and exits code 1 on failure | `bun scripts/co-deck/handbook/validate-nav.ts [--docs-dir docs]` |
+| `handbook/check-links.ts` | 1.0.0 | active | Check ①: Verify all internal `<a href>` targets resolve to existing files | (library — imported by validate-nav) |
+| `handbook/check-symmetry.ts` | 1.0.0 | active | Check ②: If A's chapter-nav next → B, then B's prev → A | (library — imported by validate-nav) |
+| `handbook/check-labels.ts` | 1.0.0 | active | Check ③: chapter-nav link labels match target title/h1 (Korean chapter numbers) | (library — imported by validate-nav) |
+| `handbook/check-search.ts` | 1.0.0 | active | Check ④: site-search.js DOCS array must match actual HTML files | (library — imported by validate-nav) |
+| `handbook/scaffold-handbook.ts` | 1.0.0 | active | Generate handbook project scaffold — copies templates+assets+scripts, creates package.json and CI workflow | `bun scripts/co-deck/handbook/scaffold-handbook.ts --project <path> [--output handbook/] [--lang ko]` |
+| `handbook/check-authoring.ts` | 1.0.0 | active | AUTHORING_GUIDELINES compliance checker — 10 checks (visual elements, copy buttons, sidebar nav, chapter-nav, flex min-width, mid-word strong, course overview, CSS variables, language pairs, instructor guide); supports `--examples-dir` for regression fixture validation | `bun scripts/co-deck/handbook/check-authoring.ts --project <path> [--lang ko] [--examples-dir <path>]` |
+| `handbook/apply-handbook-theme.ts` | 1.0.0 | active | CSS theme applicator — 5 built-in themes (azure, graphite, teal, amber, indigo), each with 3-layer dark mode | `bun scripts/co-deck/handbook/apply-handbook-theme.ts --project <path> --theme <name>` |
+| `handbook/handbook-doctor.ts` | 1.0.0 | active | Enhanced static analyzer — 12 checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, course overview, instructor guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | `bun scripts/co-deck/handbook/handbook-doctor.ts --project <path> [--severity warn\|error]` |
+
+```bash
+# Handbook workflow
+bun scripts/co-deck/handbook/scaffold-handbook.ts --project . --output handbook --lang ko
+cd handbook && bun install
+bun run handbook-doctor
+bun run check-authoring --lang ko
+bun run validate-nav
+bun run apply-theme --theme azure
+```
+
 Also available in `scripts/` root (not co-deck specific):
 
 | script | version | status | description |
@@ -127,4 +154,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** ADR-0033 · Script Lifecycle §6.5
 
-*Last Updated: 2026-07-14 — verify-new-theme.ts v1.0.0 (composite registration gate); scaffold-theme-style.ts v2.0.0 (--from derivation, minimally valid stubs); added tests for verify-new-theme and scaffold-theme-style*
+*Last Updated: 2026-07-17 — handbook scripts (validate-nav + scaffold + check-authoring + apply-theme + handbook-doctor); design doc v4*

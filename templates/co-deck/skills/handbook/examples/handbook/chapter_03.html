@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3장 Practice — Handbook Example</title>
+  <link rel="stylesheet" href="assets/css/handbook-theme.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-brand">📚 Handbook Example</a>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="chapter_01.html">1장 Concepts</a></li>
+      <li><a href="chapter_02.html">2장 Reference Manual</a></li>
+      <li><a href="chapter_03.html" style="color:var(--accent);">3장 Practice</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <select id="lang-switcher" style="font-size:12px;padding:4px;border-radius:4px;">
+        <option value="" selected>Language</option>
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+      </select>
+      <button id="dark-toggle" title="Toggle dark mode" style="font-size:16px;cursor:pointer;background:none;border:none;">☀️</button>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <h1>3장 Practice</h1>
+      <p>This chapter demonstrates the <strong>Examples</strong> section type — hands-on exercises with difficulty badges.</p>
+
+      <h2 id="exercise-1">Exercise 1: Create a Chapter</h2>
+      <span class="badge" style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--bg-success);color:var(--text);">beginner</span>
+
+      <ol class="step-list" style="list-style:none;padding:0;counter-reset:step;">
+        <li style="display:flex;gap:16px;margin:16px 0;">
+          <span style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">1</span>
+          <div class="step-content" style="flex:1;min-width:0;">
+            Create a new HTML file:
+            <pre style="background:var(--bg3);padding:12px;border-radius:6px;overflow-x:auto;font-size:13px;"><code>touch docs/chapters/chapter_04.html</code></pre>
+          </div>
+        </li>
+        <li style="display:flex;gap:16px;margin:16px 0;">
+          <span style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">2</span>
+          <div class="step-content" style="flex:1;min-width:0;">
+            Add the chapter template structure:
+            <pre style="background:var(--bg3);padding:12px;border-radius:6px;overflow-x:auto;font-size:13px;"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;&lt;title&gt;4장 New Chapter&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;main&gt;&lt;article&gt;
+  &lt;h1&gt;New Chapter&lt;/h1&gt;
+  &lt;p&gt;Content here.&lt;/p&gt;
+&lt;/article&gt;&lt;/main&gt;&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+        </li>
+      </ol>
+
+      <h2 id="exercise-2">Exercise 2: Apply Dark Mode</h2>
+      <span class="badge" style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--bg-warn);color:var(--text);">intermediate</span>
+
+      <p>Run the theme applicator to generate CSS with dark mode support:</p>
+      <pre style="background:var(--bg3);padding:12px;border-radius:6px;overflow-x:auto;font-size:13px;"><code>bun run apply-theme --project . --theme azure</code></pre>
+
+      <!-- Visual element: comparison grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;">
+        <div style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg2);">
+          <h3 style="font-size:14px;color:var(--accent);">Light Mode</h3>
+          <p style="font-size:13px;color:var(--text-dim);">Default <code>:root</code> variables</p>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg3);">
+          <h3 style="font-size:14px;color:var(--accent);">Dark Mode</h3>
+          <p style="font-size:13px;color:var(--text-dim);"><code>@media</code> + <code>.dark</code> overrides</p>
+        </div>
+      </div>
+    </article>
+
+    <nav class="chapter-nav" style="display:flex;justify-content:space-between;margin-top:40px;padding-top:20px;border-top:1px solid var(--border);">
+      <a href="chapter_02.html" class="prev" style="text-decoration:none;color:var(--text);">
+        <div style="font-size:12px;color:var(--text-dim);">← 이전</div>
+        <div>2장 Reference Manual</div>
+      </a>
+    </nav>
+  </main>
+
+  <footer><p>© 2026 co-deck handbook.</p></footer>
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>

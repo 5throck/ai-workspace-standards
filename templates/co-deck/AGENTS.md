@@ -30,6 +30,8 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Validates URLs in research_notes.md → source-verification.md + Trust Score |
 | **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md with image_role/image_query fields |
 | **version** | [`agents/version.md`](agents/version.md) | Low | Snapshots files before every edit; restores prior states on demand |
+| **handbook-writer** | [`agents/handbook-writer.md`](agents/handbook-writer.md) | Medium | Writes handbook chapters, course overview, and instructor guide — H-Stages 2-4 |
+| **handbook-reviewer** | [`agents/handbook-reviewer.md`](agents/handbook-reviewer.md) | Medium | Validates handbook HTML against AUTHORING_GUIDELINES.md — H-Stage 5 |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -233,6 +235,8 @@ All specialist agents below are dispatched ONLY through PM:
 | `source-verifier` | Phase 1.5 | "verify sources", "check URLs", "validate research links", "run source check" |
 | `storyline` | Phase 2, Phase 3 | "create storyline", "compose slide deck", "structure chapters" |
 | `version` | Phase 0–6 | "snapshot before edit", "backup file", "restore prior version" |
+| `handbook-writer` | H-2, H-3, H-4 | "write handbook chapters", "create course overview", "generate instructor guide" |
+| `handbook-reviewer` | H-5 | "validate handbook", "run quality checks", "check authoring compliance" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -265,6 +269,34 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | storyline.md + slide_deck.md (narrative and per-slide content) | Phase 2 | `storyline` | medium | |
 | _versions/ snapshots (pre-edit backups of lecture files) | Phase 0–6 | `version` | low | cross-cutting |
 <!-- VARIANT-PHASE-GATE-END -->
+
+<!-- VARIANT-HSTAGE-PIPELINE -->
+### H-Stage Pipeline (Handbook Document Production)
+
+When user requests **"make handbook"**, **"create handbook"**, **"build course site"**, or **"companion handbook"**, enter the H-Stage pipeline instead of the 11-Stage slide pipeline:
+
+```
+H-0: PM — Confirm: topic, language, output dir, companion mode
+     Dark mode: auto (no preference needed)
+H-1: research — Web research (standalone only)
+     [Companion: Skip — reuse research_notes.md + images + diagrams + references + versions]
+H-2: handbook-writer — Propose section types + chapter structure
+H-3: handbook-writer — Write chapter content (SECTION_TYPES + AUTHORING_GUIDELINES)
+H-4: handbook-writer — Generate Course Overview + Instructor Guide
+H-5: handbook-reviewer — handbook-doctor.ts + check-authoring.ts → fix
+H-6: PM/automation — Apply Theme (domain step) → Generate CSS → Search index → Meta
+H-7: PM — Secret scan + deploy + verify
+```
+
+**Companion mode**: When companion=true, H-1 is skipped and the following cached outputs are reused:
+- `research_notes.md` (Research Package)
+- `assets/images/` from `image-manifest.json` (Image cache)
+- `assets/diagrams/*.svg` (Diagram cache)
+- References from `source-verification.md` (Reference cache)
+- `_versions/` snapshots (Version cache)
+
+For complete H-Stage spec, see `skills/handbook/SKILL.md`.
+<!-- END VARIANT-HSTAGE-PIPELINE -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
 
@@ -416,6 +448,8 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | source-verifier | `agents/source-verifier.md` | Medium | ⚠️ sequential preferred | project files |
 | storyline | `agents/storyline.md` | Medium | ⚠️ sequential preferred | project files |
 | version | `agents/version.md` | Low | ✅ | project files |
+| handbook-writer | `agents/handbook-writer.md` | Medium | ⚠️ sequential preferred | project files |
+| handbook-reviewer | `agents/handbook-reviewer.md` | Medium | ⚠️ sequential preferred | project files |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-17](2026-07-17.md) | chore: update |
 | [2026-07-16](2026-07-16.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
 | [2026-07-15](2026-07-15.md) | fix(new-project): add root package.json generation and bun install to new-project.ts |
 | [2026-07-14](2026-07-14.md) | chore: update |
