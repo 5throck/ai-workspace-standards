@@ -1,10 +1,9 @@
 /**
  * dark-mode-toggle.js — Dark mode toggle for the Co-Deck Handbook
  *
- * 3-layer strategy:
- *   1. :root          — CSS variables for light mode (default)
- *   2. @media         — Respects OS-level prefers-color-scheme: dark
- *   3. .dark class    — Manual toggle overrides everything
+ * 2-layer strategy (CSS has :root light + .dark dark only; no @media block):
+ *   1. :root              — CSS variables for light mode (default)
+ *   2. .dark class on <html> — JS applies/removes this based on OS pref or manual toggle
  *
  * Behaviour:
  * - On load: reads localStorage('theme') first, then falls back to
