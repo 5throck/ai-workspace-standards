@@ -134,13 +134,13 @@ export function extractH1(html: string): string {
   return m ? m[1].trim() : "";
 }
 
-/** Parse the DOCS array from site-search.js. Returns { path, title }[]. */
-export function parseDocsArray(jsContent: string): { path: string; title: string }[] {
-  const entries: { path: string; title: string }[] = [];
-  const re = /\{\s*path:\s*'([^']*)'\s*,\s*title:\s*'([^']*)'\s*\}/g;
+/** Parse the DOCS array from site-search.js. Returns { path, title, lang? }[]. */
+export function parseDocsArray(jsContent: string): { path: string; title: string; lang?: string }[] {
+  const entries: { path: string; title: string; lang?: string }[] = [];
+  const re = /\{\s*path:\s*'([^']*)'\s*,\s*title:\s*'([^']*)'\s*(?:,\s*lang:\s*'([^']*)')?\s*\}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(jsContent)) !== null) {
-    entries.push({ path: m[1], title: m[2] });
+    entries.push({ path: m[1], title: m[2], lang: m[3] || undefined });
   }
   return entries;
 }

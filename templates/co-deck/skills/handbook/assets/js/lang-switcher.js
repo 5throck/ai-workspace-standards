@@ -38,6 +38,12 @@
      ----------------------------------------------------------------------- */
   var availabilityCache = {};
 
+  // file:// protocol guard: under file://, fetch HEAD fails (opaque-origin
+  // CORS), so every variant probe rejects and every non-default option would
+  // be disabled. Optimistically treat every variant as available to keep the
+  // switcher usable during local file:// testing.
+  var IS_FILE_PROTOCOL = window.location.protocol === 'file:';
+
   /* -----------------------------------------------------------------------
      Configuration
      ----------------------------------------------------------------------- */
@@ -65,6 +71,13 @@
     available: function (pageUrl, langCode) {
       // Default language (no suffix) is always available
       if (langCode === '') {
+        return Promise.resolve(true);
+      }
+
+      // Under file://, fetch HEAD always rejects (see IS_FILE_PROTOCOL above),
+      // so treat every variant as available rather than disabling every
+      // non-default option during local testing.
+      if (IS_FILE_PROTOCOL) {
         return Promise.resolve(true);
       }
 
@@ -116,6 +129,13 @@
 
     // Strip known language suffixes (_en, _ko, _ja, etc.) and the extension
     var base = filename.replace(/(?:_[a-z]{2})?\.html$/i, '');
+
+    // Directory index (e.g. ".../"): no filename stem to anchor the language
+    // suffix on, so switching language would build "<dir>_en.html" which 404s.
+    // Treat an empty stem as 'index' so we form index_en.html / index_ko.html.
+    if (!base) {
+      base = 'index';
+    }
 
     return { dir: dir, base: base };
   }

@@ -14,9 +14,9 @@ export interface LabelError {
   targetH1: string;
 }
 
-/** Extract chapter number from a label (e.g. "3장" or "8장 §1"). */
+/** Extract chapter number from a label (e.g. "3장", "Ch.3", "Chapter 8", "12章"). */
 function extractChapterNum(s: string): string | null {
-  const m = s.match(/(\d+)\s*장/);
+  const m = s.match(/(\d+)\s*(장|Ch\.?|Chapter|章)/i);
   return m ? m[1] : null;
 }
 
