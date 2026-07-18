@@ -25,13 +25,18 @@
  *
  * Configuration:
  *   LANG_CONFIG.languages — ordered array of { code, label } objects.
- *   LANG_CONFIG.available  — optional function(page, lang) → boolean
- *     to restrict which language variants actually exist for a page.
- *     Defaults to assuming all variants exist.
+ *   LANG_CONFIG.available  — function(pageUrl, langCode) → Promise<boolean>
+ *     to check whether a language variant exists. Uses HEAD-request
+ *     detection with caching by default.
  */
 
 (function () {
   'use strict';
+
+  /* -----------------------------------------------------------------------
+     Availability cache — avoids repeated HEAD requests for the same URL
+     ----------------------------------------------------------------------- */
+  var availabilityCache = {};
 
   /* -----------------------------------------------------------------------
      Configuration
@@ -48,16 +53,37 @@
 
     /**
      * Determine whether a given language variant exists for the current page.
-     * Replace this function with a real check (e.g., fetch probe, index lookup)
-     * if you want to hide unavailable variants.
+     * Uses HEAD-request detection with result caching. Returns a Promise
+     * that resolves to true (available) or false (not available).
      *
-     * @param {string} pageUrl  — base URL of the current page (no lang suffix)
+     * The default language (empty langCode) is always available without a fetch.
+     *
+     * @param {string} pageUrl  — full URL of the variant page to check
      * @param {string} langCode — language code suffix (empty string for default)
-     * @returns {boolean}
+     * @returns {Promise<boolean>}
      */
     available: function (pageUrl, langCode) {
-      // Default: assume all variants exist
-      return true;
+      // Default language (no suffix) is always available
+      if (langCode === '') {
+        return Promise.resolve(true);
+      }
+
+      // Return cached result if available
+      if (availabilityCache.hasOwnProperty(pageUrl)) {
+        return Promise.resolve(availabilityCache[pageUrl]);
+      }
+
+      // Issue HEAD request to check if the page exists
+      return fetch(pageUrl, { method: 'HEAD' })
+        .then(function (response) {
+          var ok = response.ok;
+          availabilityCache[pageUrl] = ok;
+          return ok;
+        })
+        .catch(function () {
+          availabilityCache[pageUrl] = false;
+          return false;
+        });
     }
   };
 
@@ -139,20 +165,38 @@
   /* -----------------------------------------------------------------------
      Populate dropdown and bind events
      ----------------------------------------------------------------------- */
+  /**
+   * Asynchronously check each non-default language variant and disable
+   * the corresponding <option> if the page does not exist.
+   *
+   * @param {HTMLSelectElement} selectEl — the <select> element
+   * @param {HTMLOptionElement[]} options — all <option> elements
+   */
+  function updateAvailability(selectEl, options) {
+    options.forEach(function (opt) {
+      var langCode = opt.getAttribute('data-lang');
+      if (langCode === '') return; // default always available
+      LANG_CONFIG.available(opt.getAttribute('data-url'), langCode).then(function (ok) {
+        if (!ok) opt.disabled = true;
+      });
+    });
+  }
+
   (function init() {
     var pageInfo   = parseCurrentPage();
     var currentLang = detectCurrentLang();
 
-    // Populate <option> elements
+    // Populate <option> elements — always render ALL options regardless
+    // of availability; unavailable ones are disabled asynchronously.
+    var allOptions = [];
     LANG_CONFIG.languages.forEach(function (lang) {
       var pageUrl = buildVariantUrl(pageInfo.base, pageInfo.dir, lang.code);
-
-      // Optionally skip unavailable variants
-      if (!LANG_CONFIG.available(pageUrl, lang.code)) return;
 
       var option = document.createElement('option');
       option.value = lang.code;
       option.textContent = lang.label;
+      option.setAttribute('data-lang', lang.code);
+      option.setAttribute('data-url', pageUrl);
 
       // Pre-select the current language
       if (lang.code === currentLang) {
@@ -160,7 +204,12 @@
       }
 
       selectEl.appendChild(option);
+      allOptions.push(option);
     });
+
+    // Asynchronously check which variants actually exist and disable
+    // those that are unavailable.
+    updateAvailability(selectEl, allOptions);
 
     // If the user has a stored preference that differs from the current
     // page suffix, we do NOT auto-redirect — the current page was likely
