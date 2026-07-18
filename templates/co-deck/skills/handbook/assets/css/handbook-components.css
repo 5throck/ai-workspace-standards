@@ -333,7 +333,7 @@ blockquote {
 }
 
 /* Tables */
-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: calc(var(--spacing-unit) * 4) 0; font-size: var(--font-size-compact); line-height: var(--line-height-compact); }
+table { width: 100%; border-collapse: collapse; table-layout: auto; margin: calc(var(--spacing-unit) * 4) 0; font-size: var(--font-size-compact); line-height: var(--line-height-compact); }
 th, td { padding: var(--table-cell-padding); border: 1px solid var(--border); text-align: left; vertical-align: top; color: var(--text); transition: border-color .2s; overflow-wrap: anywhere; }
 th { background: var(--bg3); font-weight: 600; font-size: var(--font-size-label); text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); }
 tr:nth-child(even) td { background: var(--bg2); }
@@ -352,9 +352,13 @@ p + table,
 h2 + table, h3 + table { margin-top: calc(var(--spacing-unit) * 1.5); }
 table + table { margin-top: calc(var(--spacing-unit) * 3); }
 
-/* Table type: Compare (4-6 columns, fixed layout for balanced columns) */
+/* Table layout: fixed — 비교표, 코드표, 비율 고정표 공통 */
+.table-fixed table,
+.table-compare table,
+.table-code table { table-layout: fixed; margin: 0; }
+
+/* Table type: Compare (4-6 columns, balanced columns) */
 .table-compare { overflow-x: auto; margin: calc(var(--spacing-unit) * 4) 0; }
-.table-compare table { table-layout: fixed; margin: 0; width: 100%; }
 .table-compare th:first-child { width: auto; }
 
 /* Table type: Schedule (compact, content-driven column sizing) */
@@ -364,9 +368,8 @@ table + table { margin-top: calc(var(--spacing-unit) * 3); }
 .table-schedule td:nth-child(1),
 .table-schedule td:nth-child(n+3) { white-space: nowrap; }
 
-/* Table type: Code (fixed layout, code cell handling) */
+/* Table type: Code (code cell handling) */
 .table-code { overflow-x: auto; margin: calc(var(--spacing-unit) * 4) 0; }
-.table-code table { table-layout: fixed; margin: 0; }
 .table-code th,
 .table-code td { padding: var(--table-cell-padding-compact); }
 .table-code code { font-size: var(--font-size-label); white-space: normal; word-break: break-all; }
