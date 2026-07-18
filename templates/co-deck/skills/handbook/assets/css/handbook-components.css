@@ -333,10 +333,43 @@ blockquote {
 }
 
 /* Tables */
-table { width: 100%; border-collapse: collapse; margin: calc(var(--spacing-unit) * 4) 0; }
-th, td { padding: calc(var(--spacing-unit) * 2); border: 1px solid var(--border); text-align: left; color: var(--text); transition: border-color .2s; }
-th { background: var(--bg3); font-weight: 600; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: calc(var(--spacing-unit) * 4) 0; font-size: var(--font-size-compact); line-height: var(--line-height-compact); }
+th, td { padding: var(--table-cell-padding); border: 1px solid var(--border); text-align: left; vertical-align: top; color: var(--text); transition: border-color .2s; overflow-wrap: anywhere; }
+th { background: var(--bg3); font-weight: 600; font-size: var(--font-size-label); text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); }
 tr:nth-child(even) td { background: var(--bg2); }
+
+/* First column: header nowrap, data auto-wrap (all tables) */
+th:first-child { white-space: nowrap; }
+td:first-child { width: auto; }
+
+/* Table adjacency spacing */
+table + p,
+table + .note, table + .warn, table + .flow-box,
+table + .tip-box, table + .warning-box, table + .prompt-box,
+table + blockquote { margin-top: calc(var(--spacing-unit) * 2); }
+p + table,
+.note + table, .warn + table { margin-top: calc(var(--spacing-unit) * 2); }
+h2 + table, h3 + table { margin-top: calc(var(--spacing-unit) * 1.5); }
+table + table { margin-top: calc(var(--spacing-unit) * 3); }
+
+/* Table type: Compare (4-6 columns, fixed layout for balanced columns) */
+.table-compare { overflow-x: auto; margin: calc(var(--spacing-unit) * 4) 0; }
+.table-compare table { table-layout: fixed; margin: 0; width: 100%; }
+.table-compare th:first-child { width: auto; }
+
+/* Table type: Schedule (compact, content-driven column sizing) */
+.table-schedule table { table-layout: auto; margin: calc(var(--spacing-unit) * 2) 0; }
+.table-schedule th,
+.table-schedule td { padding: var(--table-cell-padding-compact); }
+.table-schedule td:nth-child(1),
+.table-schedule td:nth-child(n+3) { white-space: nowrap; }
+
+/* Table type: Code (fixed layout, code cell handling) */
+.table-code { overflow-x: auto; margin: calc(var(--spacing-unit) * 4) 0; }
+.table-code table { table-layout: fixed; margin: 0; }
+.table-code th,
+.table-code td { padding: var(--table-cell-padding-compact); }
+.table-code code { font-size: var(--font-size-label); white-space: normal; word-break: break-all; }
 
 /* ==========================================================================
    E. Chapter Navigation

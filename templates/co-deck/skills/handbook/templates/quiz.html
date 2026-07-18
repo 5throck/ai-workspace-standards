@@ -152,20 +152,6 @@
     .rubric-section .rubric-body {
       padding: 20px;
     }
-    .rubric-table {
-      width: 100%; border-collapse: collapse; font-size: 0.875rem;
-    }
-    .rubric-table th {
-      text-align: left; padding: 10px 12px;
-      background-color: var(--bg2); color: var(--text);
-      border: 1px solid var(--border); font-weight: 600;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-    .rubric-table td {
-      padding: 10px 12px; border: 1px solid var(--border);
-      color: var(--text); transition: color 0.2s, border-color 0.2s;
-    }
-    .rubric-table tr:hover td { background-color: var(--bg2); transition: background-color 0.2s; }
 
     /* ===== Chapter Nav ===== */
     .chapter-nav { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); transition: border-color 0.2s; }
@@ -260,7 +246,7 @@
       <details class="rubric-section">
         <summary>Rubric / Marking Criteria</summary>
         <div class="rubric-body">
-          <table class="rubric-table">
+          <div class="table-compare"><table>
             <thead>
               <tr>
                 <th>Criteria</th>
@@ -285,7 +271,7 @@
                 <td>Needs improvement description</td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </details>
 

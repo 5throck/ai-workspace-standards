@@ -123,24 +123,6 @@
     }
 
     /* Reference Table */
-    .ref-table {
-      width: 100%; border-collapse: collapse;
-      margin: 16px 0 24px;
-      font-size: 0.875rem;
-    }
-    .ref-table th {
-      text-align: left; padding: 10px 12px;
-      background-color: var(--bg2); color: var(--text);
-      border: 1px solid var(--border); font-weight: 600;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-    .ref-table td {
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      color: var(--text); transition: color 0.2s, border-color 0.2s;
-    }
-    .ref-table tr:hover td { background-color: var(--bg2); transition: background-color 0.2s; }
-
     .ref-table code {
       background-color: var(--code-bg); padding: 2px 6px;
       border-radius: 3px; font-size: 0.8125rem;
@@ -224,7 +206,7 @@
         <p><!-- SECTION_CONTENT --></p>
 
         <!-- Reference Table Example -->
-        <table class="ref-table">
+        <div class="table-compare"><table class="ref-table">
           <thead>
             <tr>
               <th>Property</th>
@@ -240,7 +222,7 @@
             </tr>
             <!-- Repeat rows as needed -->
           </tbody>
-        </table>
+        </table></div>
 
         <h2 id="section-2"><!-- SECTION_TITLE --></h2>
         <p><!-- SECTION_CONTENT --></p>

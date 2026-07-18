@@ -116,29 +116,6 @@
       accent-color: var(--accent);
     }
 
-    /* ===== Schedule Table ===== */
-    .schedule-table {
-      width: 100%; border-collapse: collapse;
-      margin: 16px 0; font-size: 0.875rem;
-    }
-    .schedule-table th {
-      text-align: left; padding: 10px 12px;
-      background-color: var(--accent); color: var(--bg);
-      border: 1px solid var(--border); font-weight: 600;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-    .schedule-table td {
-      padding: 10px 12px; border: 1px solid var(--border);
-      color: var(--text); transition: color 0.2s, border-color 0.2s;
-    }
-    .schedule-table tr:nth-child(even) td {
-      background-color: var(--bg2); transition: background-color 0.2s;
-    }
-    .schedule-table .time-block {
-      font-weight: 600; white-space: nowrap; color: var(--accent);
-      transition: color 0.2s;
-    }
-
     /* ===== Chapter Notes Panel ===== */
     .chapter-notes {
       border: 1px solid var(--border); border-radius: var(--radius);
@@ -192,21 +169,6 @@
     .danger-box strong { color: var(--text-error); transition: color 0.2s; }
 
     /* ===== Evaluation Criteria Table ===== */
-    .eval-table {
-      width: 100%; border-collapse: collapse;
-      margin: 16px 0; font-size: 0.875rem;
-    }
-    .eval-table th {
-      text-align: left; padding: 10px 12px;
-      background-color: var(--bg2); color: var(--text);
-      border: 1px solid var(--border); font-weight: 600;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-    .eval-table td {
-      padding: 10px 12px; border: 1px solid var(--border);
-      color: var(--text); transition: color 0.2s, border-color 0.2s;
-    }
-    .eval-table tr:hover td { background-color: var(--bg2); transition: background-color 0.2s; }
     .eval-table .weight {
       font-weight: 700; text-align: center; color: var(--accent);
       transition: color 0.2s;
@@ -312,7 +274,7 @@
       <!-- Section: 시간 배분표 -->
       <section class="guide-section">
         <h2>시간 배분표</h2>
-        <table class="schedule-table">
+        <div class="table-schedule"><table>
           <thead>
             <tr>
               <th>Day</th>
@@ -354,7 +316,7 @@
             <!-- Repeat rows as needed -->
             <!-- TEMPLATE_ITERATE: time_allocation -->
           </tbody>
-        </table>
+        </table></div>
       </section>
 
       <!-- Section: 장별 강사 노트 -->
@@ -480,7 +442,7 @@
       <!-- Section: 평가 기준 -->
       <section class="guide-section">
         <h2>평가 기준</h2>
-        <table class="eval-table">
+        <div class="table-compare"><table class="eval-table">
           <thead>
             <tr>
               <th>Criteria</th>
@@ -512,7 +474,7 @@
             <!-- Repeat rows as needed -->
             <!-- TEMPLATE_ITERATE: eval_criteria -->
           </tbody>
-        </table>
+        </table></div>
       </section>
 
       <!-- Chapter Nav -->

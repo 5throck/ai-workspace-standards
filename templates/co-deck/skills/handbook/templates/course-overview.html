@@ -98,29 +98,6 @@
       margin-bottom: 4px; font-size: 0.9375rem;
     }
 
-    /* ===== Schedule Table ===== */
-    .schedule-table {
-      width: 100%; border-collapse: collapse;
-      margin: 16px 0; font-size: 0.875rem;
-    }
-    .schedule-table th {
-      text-align: left; padding: 10px 12px;
-      background-color: var(--accent); color: var(--bg);
-      border: 1px solid var(--border); font-weight: 600;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-    .schedule-table td {
-      padding: 10px 12px; border: 1px solid var(--border);
-      color: var(--text); transition: color 0.2s, border-color 0.2s;
-    }
-    .schedule-table tr:nth-child(even) td {
-      background-color: var(--bg2); transition: background-color 0.2s;
-    }
-    .schedule-table .time-block {
-      font-weight: 600; white-space: nowrap; color: var(--accent);
-      transition: color 0.2s;
-    }
-
     /* ===== Topic Tags ===== */
     .topic-tags {
       display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
@@ -221,7 +198,7 @@
       <!-- Section 6: 강의 일정 -->
       <div class="overview-card">
         <h2><span class="card-number">6</span> 강의 일정</h2>
-        <table class="schedule-table">
+        <div class="table-schedule"><table>
           <thead>
             <tr>
               <th>Day</th>
@@ -258,7 +235,7 @@
             <!-- Repeat rows for additional days/sessions -->
             <!-- TEMPLATE_ITERATE: schedule_rows -->
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       <!-- Section 7: 다루는 주제 -->
