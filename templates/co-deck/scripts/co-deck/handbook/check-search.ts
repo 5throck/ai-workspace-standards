@@ -28,6 +28,9 @@ export function checkSearchIndex(): SearchIndexError[] {
 
   for (const entry of docsEntries) {
     if (!actualFiles.has(entry.path)) {
+      // Skip non-primary missing translation files (English is the primary
+      // language in co-deck; other locale variants may not exist yet).
+      if (entry.lang && entry.lang !== 'en') continue;
       errors.push({
         type: "missing-file",
         path: entry.path,
@@ -39,6 +42,10 @@ export function checkSearchIndex(): SearchIndexError[] {
   for (const file of actualFiles) {
     if (file === "index.html") continue;
     if (file.startsWith("assets/")) continue;
+
+    // Allow locale-variant HTML files to exist without being in the DOCS array
+    // (they are reached via the language switcher, not the search index).
+    if (/_en\.html$|_ja\.html$|_ko\.html$/.test(file)) continue;
 
     if (!docsPaths.has(file)) {
       errors.push({

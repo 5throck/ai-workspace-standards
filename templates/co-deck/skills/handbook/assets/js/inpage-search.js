@@ -95,8 +95,22 @@
 
     let count = 0;
 
-    // TreeWalker finds only text nodes
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    // TreeWalker finds only text nodes, rejecting SCRIPT/STYLE, already-highlighted
+    // spans, and SVG-namespace nodes (wrapping matches would corrupt inline SVG
+    // diagrams). Adapted from the multi-agent-harness-handbook inpage-search.js.
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p = n.parentNode;
+        if (p && (p.nodeName === 'SCRIPT' || p.nodeName === 'STYLE')) return NodeFilter.FILTER_REJECT;
+        // Reject already-highlighted nodes (target wraps matches in <span class="HIGHLIGHT_CLASS">)
+        if (p && p.classList && p.classList.contains(HIGHLIGHT_CLASS)) return NodeFilter.FILTER_REJECT;
+        // SVG protection: wrapping matches would corrupt inline SVG <text> elements
+        if (p && p.namespaceURI === 'http://www.w3.org/2000/svg') return NodeFilter.FILTER_REJECT;
+        regex.lastIndex = 0;
+        return regex.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    }, false);
     const textNodes = [];
     while (walker.nextNode()) {
       textNodes.push(walker.currentNode);
@@ -271,5 +285,20 @@
       openToolbar();
     }
   });
+
+  /* -----------------------------------------------------------------------
+     ?q= bridge — opened from site-search.js result links
+     When the page is opened with ?q=<term> in the URL, open the toolbar,
+     pre-fill the term, and trigger the debounced search. If the URL also
+     has a hash, skip auto-search so the browser's hash scroll takes priority.
+     ----------------------------------------------------------------------- */
+  var initialQuery = new URLSearchParams(window.location.search).get('q');
+  if (initialQuery) {
+    openToolbar();
+    inputEl.value = initialQuery;
+    if (!window.location.hash) {
+      inputEl.dispatchEvent(new Event('input'));
+    }
+  }
 
 })();
