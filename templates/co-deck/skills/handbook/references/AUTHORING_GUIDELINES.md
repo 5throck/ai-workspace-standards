@@ -767,6 +767,27 @@ const DOCS = [
 ];
 ```
 
+### 23-4. No Links to Untranslated Pages
+
+**Principle**: Never add an `_en`/`_ja` link (in an index page, nav, or sidebar) until the target `_en.html`/`_ja.html` file actually exists.
+
+- **Why**: A prior handbook shipped translated `index_en.html`/`index_ja.html` landing pages that linked to ~28 chapter pages before those chapters were translated. `check-links.ts` had a hardcoded exemption that skipped any missing `_en.html`/`_ja.html` target, so CI reported "PASS" while every translated chapter link 404'd.
+- **Rule**: `check-links.ts` treats missing `_en.html`/`_ja.html` targets as errors like any other broken link — do not reintroduce an exemption for them. Translate a language track chapter-by-chapter (or hold the index/nav links for that language until the full set of pages exists); never publish a language's landing page ahead of its content pages.
+
+### 23-5. Partial Translation Navigation
+
+**Principle**: When some pages in a language track are untranslated, navigation MUST remain consistent within the existing set.
+
+- **Why**: A handbook may grow chapter-by-chapter across languages. Users navigating a partially-translated language track must never encounter broken links or dead-end navigation.
+
+- **Sidebar rule**: Every translated page's sidebar lists ONLY pages that exist in that language. Do NOT link to untranslated pages.
+
+- **Chapter-nav rule**: If prev/next target is untranslated, link to the default-language version instead, with a visual indicator (e.g., "(KO)" badge).
+
+- **DOCS array rule**: Add entries to site-search.js DOCS array as each translation is completed. Do not batch — each commit that adds a translated file must also add its DOCS entry.
+
+- **Index page rule**: Card links in index pages must only point to existing translated files. Hide cards for untranslated chapters or show them grayed out with "Coming soon" label.
+
 ---
 
 ## 24. Instructor Guide Requirements
