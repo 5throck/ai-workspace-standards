@@ -5,6 +5,8 @@ sync_version: 1
 
 # co-deck
 
+**Language**: [English](README.md) · **한국어**
+
 > **⚠️ 베타 변형** - 상태: beta (v0.2.0)
 > 이 변형은 활발히 개발 중이며 프로덕션 환경에서 사용해서는 안 됩니다.
 

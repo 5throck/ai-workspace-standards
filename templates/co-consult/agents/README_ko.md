@@ -16,14 +16,31 @@
 | Workstream Lead | `workstream-lead.md` | 워크스트림 관리, 팀 조율, 진행 추적 | Medium |
 | Delivery Manager | `delivery-manager.md` | 프로젝트 인도, 운영 조율, 일정 관리 | Low |
 | Technology Specialist | `technology-specialist.md` | M365 플랫폼, 워크플로우 자동화, 디지털 전환 지원 | Low |
-| Data Analyst | `data-analyst.md` | 통계 분석, 데이터 모델링, 시각화 | Low |
+| Data Analyst | `data-analyst.md` | 통계 분석, 데이터 모델링, 시각화, 한국 DART 재무제표 분석 | Low |
 
 ## 에이전트 생성
 
 ```bash
 bun run agent:create <name> --role "표시 이름" --group <그룹>
+
+# 예시:
+bun run agent:create risk-analyst --role "Risk Analyst" --group Strategy
+bun run agent:create legal-advisor --role "Legal Advisor" --group Expert
 ```
 
 에이전트 생성 후 `AGENTS.md`와 `docs/co-consult.context.md § Agents`를 업데이트하세요.
 
-전체 워크플로우는 `AGENTS.md`를 참고하세요.
+## 에이전트 목록 조회
+
+```bash
+bun run agent:list
+bun run agent:list --group Strategy
+```
+
+## 에이전트 삭제
+
+```bash
+bun run agent:delete <name>
+```
+
+전체 워크플로우 및 디스패치 프로토콜은 `AGENTS.md`를 참고하세요.

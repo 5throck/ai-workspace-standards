@@ -1,5 +1,7 @@
 # co-security User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 > Practical, task-oriented guide to running a security engagement with this AI agent team.
 > For team overview and mission, see [`../README.md`](../README.md). For agent role definitions, see [`../AGENTS.md`](../AGENTS.md).
 

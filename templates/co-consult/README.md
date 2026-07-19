@@ -5,6 +5,8 @@ content_hash: TBD
 
 # {{PROJECT_NAME}}
 
+**Language**: **English** · [한국어](README_ko.md)
+
 > **Status**: ✅ Stable — v1.0.0
 
 Welcome to the **Co-Consult** workspace—your dedicated AI strategy consulting and analysis agent team. Optimized for collaborative work with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to support your projects from day one.

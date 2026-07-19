@@ -1,5 +1,7 @@
 # co-game User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 Practical, task-oriented guide for building HTML5 Canvas games (Vanilla TypeScript) with the co-game agent team. For a team overview see [README.md](../README.md); for the full agent/skill registry and governance rules see [AGENTS.md](../AGENTS.md).
 
 ---

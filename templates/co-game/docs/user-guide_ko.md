@@ -1,6 +1,8 @@
 # co-game 사용자 가이드
 
-co-game 에이전트 팀으로 HTML5 캔버스 게임(Vanilla TypeScript)을 만들기 위한 실용적인 작업 중심 가이드입니다. 팀 개요는 [README.md](../README.md)를, 전체 에이전트/스킬 레지스트리와 거버넌스 규칙은 [AGENTS.md](../AGENTS.md)를 참고하세요.
+**Language**: [English](user-guide.md) · **한국어**
+
+co-game 에이전트 팀으로 HTML5 캔버스 게임(Vanilla TypeScript)을 만들기 위한 실용적인 작업 중심 가이드입니다. 팀 개요는 [README_ko.md](../README_ko.md)를, 전체 에이전트/스킬 레지스트리와 거버넌스 규칙은 [AGENTS.md](../AGENTS.md)를 참고하세요.
 
 ---
 

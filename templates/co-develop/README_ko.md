@@ -5,6 +5,8 @@ sync_version: 1
 
 # co-develop
 
+**Language**: [English](README.md) · **한국어**
+
 > **상태**: 안정화 (v1.0.0)
 
 ---

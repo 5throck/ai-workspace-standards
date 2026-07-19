@@ -16,7 +16,7 @@ This directory contains agent definition files for the co-consult engagement wor
 | Workstream Lead | `workstream-lead.md` | Workstream management, team coordination, progress tracking | Medium |
 | Delivery Manager | `delivery-manager.md` | Project delivery, operations coordination, resource allocation | Low |
 | Technology Specialist | `technology-specialist.md` | Collaboration platforms, workflow automation, digital transformation | Low |
-| Data Analyst | `data-analyst.md` | Statistical analysis, data modeling, visualization | Low |
+| Data Analyst | `data-analyst.md` | Statistical analysis, data modeling, visualization, Korean DART financial statement analysis | Low |
 
 ## Creating New Agents
 

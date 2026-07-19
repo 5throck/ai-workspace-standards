@@ -1,6 +1,8 @@
 # co-develop 사용자 가이드
 
-> co-develop 에이전트 팀 사용을 위한 실전 중심 가이드입니다. 팀 개요와 구성원 목록은 [README.md](../README.md)를, 거버넌스 및 디스패치 규칙은 [AGENTS.md](../AGENTS.md) 및 [CLAUDE.md](../CLAUDE.md) / [GEMINI.md](../GEMINI.md)를 참고하세요.
+**Language**: [English](user-guide.md) · **한국어**
+
+> co-develop 에이전트 팀 사용을 위한 실전 중심 가이드입니다. 팀 개요와 구성원 목록은 [README_ko.md](../README_ko.md)를, 거버넌스 및 디스패치 규칙은 [AGENTS.md](../AGENTS.md) 및 [CLAUDE.md](../CLAUDE.md) / [GEMINI.md](../GEMINI.md)를 참고하세요.
 
 ---
 
