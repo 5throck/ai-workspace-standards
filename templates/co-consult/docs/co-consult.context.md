@@ -62,6 +62,7 @@
 | **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle and validation |
 | **Project Review** | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the project |
 | **Team Builder** | `skills/team-builder/SKILL.md` | Build new agent team: requirements interview, benchmarking, proposal generation, approval gate |
+| **Company Intelligence** | `skills/company-intelligence/SKILL.md` | Comprehensive company and corporate group intelligence gathering and analysis |
 
 **Phase 1 — Research & Analysis**
 
@@ -70,6 +71,7 @@
 | **Competitive Intelligence** | `skills/competitive-intelligence/SKILL.md` | strategy-analyst |
 | **Financial Modeling** | `skills/financial-modeling/SKILL.md` | strategy-analyst |
 | **Insight Synthesis** | `skills/insight-synthesis/SKILL.md` | strategy-analyst |
+| **k-dart** | `skills/k-dart/SKILL.md` | strategy-analyst |
 | **Stakeholder Alignment** | `skills/stakeholder-alignment/SKILL.md` | change-management-partner |
 | **Org Readiness Assessment** | `skills/org-readiness-assessment/SKILL.md` | change-management-partner |
 
