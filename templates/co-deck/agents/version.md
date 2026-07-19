@@ -59,7 +59,7 @@ Snapshot commands, restore examples, storage layout, and collaboration pattern: 
 - `--workspace` is required on every invocation — never snapshot without scoping to the project
 - Restore always auto-backs up the current state before restoring
 - HTML files are large — snapshot only when layout changes, not for content-only edits
-- `fonts/` does not require snapshots (re-downloadable)
+- `presentations/assets/fonts/` does not require snapshots (re-downloadable)
 - `layout_spec.json` and `pdf_layout_spec.md` must be snapshotted together with the HTML they were measured from
 
 ## Meeting Participation

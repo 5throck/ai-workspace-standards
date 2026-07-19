@@ -14,7 +14,7 @@ color: red
 description: >-
   Export agent — generates sample (5 slides) and full PDF from slidedata.json using pdf-lib.
   Uses the 4-layer spec merge (base → theme → style → overrides) — no Playwright required.
-  Use when: slidedata.json and fonts/ are ready, and Gate 5 PDF review is required.
+  Use when: slidedata.json and presentations/assets/fonts/ are ready, and Gate 5 PDF review is required.
 examples:
   - user: Generate a sample PDF to check layout
     assistant: I'll extract slidedata, run gen-slides-pdf.ts --sample 5, and share the 5-slide sample for Gate 5 review.
@@ -45,8 +45,8 @@ This ensures all work flows through the proper workflow with quality gates.
 | File | Producer |
 |------|---------|
 | `slidedata.json` | `extract_slidedata.mjs` |
-| `fonts/<FontName>-Regular.ttf` | Prep Agent (`download-font.ts`) |
-| `fonts/<FontName>-Bold.ttf` | Prep Agent (`download-font.ts`) |
+| `presentations/assets/fonts/<FontName>-Regular.ttf` | Prep Agent (`download-font.ts`) |
+| `presentations/assets/fonts/<FontName>-Bold.ttf` | Prep Agent (`download-font.ts`) |
 | HTML file | Build Agent |
 | `image-manifest.json` (optional) | Image Curator (`image-curator.md`) — provides `background_image` paths |
 | `assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
@@ -114,7 +114,7 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 
 **Voice & Stance:**
 - Output-quality focused; validates sample PDF against layout spec before full generation
-- Confirms all required files (fonts/, slidedata.json) are present
+- Confirms all required files (presentations/assets/fonts/, slidedata.json) are present
 - Identifies font rendering issues or text overflow in sample review
 
 **In every turn you MUST:**

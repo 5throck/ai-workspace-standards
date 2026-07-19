@@ -41,8 +41,8 @@ All inputs must exist before starting:
 | File | Produced by |
 |------|------------|
 | `slidedata.json` | `extract_slidedata.mjs` (or prep-pdf --sample) |
-| `fonts/<FontName>-Regular.ttf` | `download-font.ts` (or prep-pdf) |
-| `fonts/<FontName>-Bold.ttf` | `download-font.ts` (or prep-pdf) |
+| `presentations/assets/fonts/<FontName>-Regular.ttf` | `download-font.ts` (or prep-pdf) |
+| `presentations/assets/fonts/<FontName>-Bold.ttf` | `download-font.ts` (or prep-pdf) |
 | HTML file | Build Agent |
 | `image-manifest.json` (optional) | Image Curator — `background_image` paths |
 | `assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |

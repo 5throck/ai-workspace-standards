@@ -1541,7 +1541,7 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir fonts/] [--data path/to/slidedata.json]');
+    console.error('Usage: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir presentations/assets/fonts/] [--data path/to/slidedata.json]');
     console.error('       bun scripts/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>');
     process.exit(1);
   }

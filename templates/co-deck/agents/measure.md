@@ -51,7 +51,7 @@ This ensures all work flows through the proper workflow with quality gates.
 ## Output Format
 
 - `presentations/<project>/layout_summary.md` — 4-layer spec merge summary
-- `presentations/<project>/fonts/*.ttf` — TTF files for PDF generation
+- `presentations/assets/fonts/*.ttf` — TTF files for PDF generation
 - `presentations/<project>/sample_5slides.pdf` — optional sample for Gate 5 review
 
 Prep script details and auto-calibrate usage: see `skills/prep-pdf/SKILL.md`.
