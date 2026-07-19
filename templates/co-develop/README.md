@@ -33,19 +33,28 @@ This variant focuses on software development workflows, feature implementation, 
 
 | Agent | Role | Tier |
 |-------|------|------|
-| architect | System design and architecture planning | Medium |
+| architect | System design and architecture planning | High |
 | code-writer | Feature implementation | Low |
-| designer | UI/UX and component design | Low |
+| designer | UI/UX and component design | Medium |
 | security-monitor | Security review and compliance | Medium |
-| test-runner | Testing and QA validation | Low |
+| stack-setup | Unknown stack identification and secure setup procedure | Low |
+| test-runner | Testing and QA validation | Medium |
 
 ## Skills
 
-No variant-specific skills. Uses shared skills from `templates/common/skills/`.
+Variant-specific skills (defined in `templates/co-develop/skills/`):
+
+| Skill | Purpose |
+|-------|---------|
+| `code-review` | Thorough code review for correctness, maintainability, security, and best practices |
+| `refactoring` | Systematic code restructuring while preserving behavior |
+| `test-driven-development` | Red-green-refactor TDD workflow for new features and bug fixes |
+
+All other skills are inherited from `templates/common/skills/`.
 
 ---
 
 **Promoted to Stable**: 2026-06-13
 **Template Version**: 1.0.0
 
-*Last Updated: 2026-06-15*
+*Last Updated: 2026-07-19*

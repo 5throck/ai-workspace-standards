@@ -21,7 +21,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role & Capabilities |
 |-------|---------------------|
-| **Engagement Leader** | Orchestrates engagement phases, manages client interface |
+| **Engagement Leader (PM)** | Orchestrates engagement phases, manages client interface |
 | **Strategy Analyst** | Market analysis, competitive research, financial modeling |
 | **Industry Expert** | Industry-specific insights, regulatory landscape |
 | **Change Management Partner** | Organizational transformation, stakeholder alignment |
@@ -31,9 +31,17 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **Workstream Lead** | Workstream management, team coordination |
 | **Delivery Manager** | Project delivery, operations coordination |
 | **Technology Specialist** | Digital transformation support |
-| **Data Analyst** | Statistical analysis, data modeling, business insights |
+| **Data Analyst** | Statistical analysis, data modeling, business insights, Korean DART financial analysis |
 
-## 3. How to Collaborate with This Team
+## 3. Key Skills
+
+Beyond the core consulting frameworks (`competitive-intelligence`, `financial-modeling`, `solution-design`, `executive-presentation`, `stakeholder-alignment`, `org-readiness-assessment`, and others — 13 skills in total), the team includes two Korean-market research capabilities:
+
+- **`k-dart`** — queries the Korean Financial Supervisory Service (FSS) DART OpenAPI for corporate disclosures, company profiles, financial statements, and major event reports.
+- **`company-intelligence`** — comprehensive company/corporate-group intelligence gathering; dispatches 5 parallel research agents (overview, financials, products/markets, analyst coverage, leadership/governance) into one consolidated report.
+- **`financial-statement-analysis`** — a full Korean financial statement analysis pipeline: DART collection → validation → normalization → KPI extraction → ROIC value driver tree → Markdown report. Run via `bun scripts/co-consult/financial-pipeline.ts`. See [`docs/user-guide.md`](docs/user-guide.md) for a step-by-step walkthrough.
+
+## 4. How to Collaborate with This Team
 
 Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
 
@@ -53,5 +61,9 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
 - `/meeting` — Run a structured, inline multi-agent discussion.
+
+### D. Practical Guide
+
+For task-oriented guidance (which agent/skill to use for a given consulting question, the financial-statement-analysis pipeline walkthrough, engagement phases, and deliverable locations), see [`docs/user-guide.md`](docs/user-guide.md).
 
 Let's build something great together!

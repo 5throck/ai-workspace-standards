@@ -29,6 +29,18 @@ translated_from_hash: TBD
 | **Storyteller** | 내러티브 구성, 프레젠테이션 구조 기획 |
 | **MS365 Expert** | Microsoft 365 플랫폼 활용, 워크플로 자동화, 템플릿 관리 |
 
+### 주요 스킬
+
+팀이 사용할 수 있는 variant 전용 스킬 (전체 목록은 `skills/SKILLS.md` 참고):
+
+| 스킬 | 목적 |
+|------|------|
+| **api-documentation** | REST/GraphQL/SDK 문서를 위한 엔드포인트, 파라미터, 인증, 요청/응답 스키마 및 코드 예시 |
+| **documentation-writing** | 기술 및 비기술 독자를 위한 명확하고 접근하기 쉬운 문서와 커뮤니케이션 작성 |
+| **research-analysis** | 의사결정 및 문서화를 지원하는 체계적인 리서치, 데이터 종합, 증거 기반 분석 |
+
+추가적인 플랫폼 중립 스킬은 `templates/common/skills/`에서 상속됩니다.
+
 ## 3. 이 팀과의 협업 방법
 
 우리와의 작업은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 다음은 우리의 표준 워크플로입니다:
