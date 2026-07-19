@@ -2,7 +2,7 @@
 // Playwright-free PDF layout preparation — replaces measure-layout.ts.
 // Reads lecture-profile.md, resolves the 4-layer spec merge, validates fonts,
 // and outputs a summary for review. Optionally triggers a sample PDF.
-// Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir fonts/]
+// Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir presentations/assets/fonts/]
 // No Playwright dependency required.
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -328,12 +328,12 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir fonts/]');
+    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--font-dir presentations/assets/fonts/]');
     console.error('');
     console.error('Options:');
     console.error('  --project    Project folder (relative to workspace root)');
     console.error('  --sample     Generate a 5-slide sample PDF after estimation');
-    console.error('  --font-dir   Custom font directory (default: fonts/)');
+    console.error('  --font-dir   Custom font directory (default: presentations/assets/fonts/)');
     process.exit(1);
   }
 
@@ -418,7 +418,7 @@ async function main() {
   }
 
   // ── Check fonts ───────────────────────────────────────────────────────────
-  const fontDir = resolve(workspaceRoot, fontDirArg ?? 'fonts');
+  const fontDir = resolve(workspaceRoot, fontDirArg ?? 'presentations/assets/fonts');
   const fontStatus = checkFonts(fontDir);
   const preferred = fontStatus.find(f => f.regular && f.bold);
 

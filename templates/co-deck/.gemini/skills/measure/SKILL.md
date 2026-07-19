@@ -88,7 +88,7 @@ bun scripts/co-deck/download-font.ts <font_name> [output_dir]
 | `nanumsquareneo` | NanumSquare Neo (Naver, sans-serif) |
 | `pretendard` | Pretendard (open source, sans-serif) |
 
-TTF files are saved to `fonts/`.
+TTF files are saved to `presentations/assets/fonts/`.
 
 **After measurement:** share `pdf_layout_spec.md` with the user to confirm measurements match the actual HTML. Cross-check any oddities against the saved screenshots.
 
@@ -98,7 +98,7 @@ TTF files are saved to `fonts/`.
 
 - `presentations/<project>/layout_spec.json` — machine-readable pixel coordinates for PDF scripts
 - `presentations/<project>/pdf_layout_spec.md` — human-readable measurement report with screenshots
-- `fonts/<FontName>-Regular.ttf` / `fonts/<FontName>-Bold.ttf` — downloaded font files
+- `presentations/assets/fonts/<FontName>-Regular.ttf` / `presentations/assets/fonts/<FontName>-Bold.ttf` — downloaded font files
 
 ## Related Skills
 

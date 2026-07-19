@@ -1,5 +1,5 @@
 // @version 2.0.0 — OS-aware font directory defaults + system font detection.
-// Download Korean TTF fonts for PDF generation — saves to fonts/ directory.
+// Download Korean TTF fonts for PDF generation — saves to presentations/assets/fonts/ directory.
 // Auto-detects OS to set default font directory; skips download if fonts are already
 // installed system-wide.
 // Usage: bun scripts/download-font.ts <font_name> [output_dir]
@@ -84,8 +84,8 @@ function getDefaultFontDir(): string {
   const home = homedir();
 
   if (p === 'win32') {
-    // Windows: use project-relative fonts/ (system font install requires admin)
-    return 'fonts';
+    // Windows: use project-relative presentations/assets/fonts/ (system font install requires admin)
+    return 'presentations/assets/fonts';
   } else if (p === 'darwin') {
     // macOS: user font directory (no admin needed)
     return join(home, 'Library/Fonts');

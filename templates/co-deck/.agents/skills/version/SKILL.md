@@ -131,7 +131,7 @@ Each snapshot auto-appends an entry to `presentations/<project>/VERSIONS.md` wit
 **Caveats:**
 - Add `_versions/` to `.gitignore` — large folders make Git inefficient
 - HTML files are 100KB–several MB; snapshot only on layout changes
-- `fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
+- `presentations/assets/fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
 - Snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes (they become invalid if HTML changes)
 
 ## Related Skills
