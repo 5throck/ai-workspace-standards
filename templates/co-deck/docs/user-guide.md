@@ -1,5 +1,7 @@
 # co-deck User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 A practical, task-oriented guide to producing lecture decks and handbooks with the co-deck agent team. For the roster overview and marketing-style summary, see [README.md](../README.md). For governance and pipeline internals, see [AGENTS.md](../AGENTS.md).
 
 ## 1. Quick Start

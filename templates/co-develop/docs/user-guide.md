@@ -1,5 +1,7 @@
 # co-develop User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 > Practical, task-oriented guide for using the co-develop agent team. For the team overview and roster, see [README.md](../README.md). For governance and dispatch rules, see [AGENTS.md](../AGENTS.md) and [CLAUDE.md](../CLAUDE.md) / [GEMINI.md](../GEMINI.md).
 
 ---

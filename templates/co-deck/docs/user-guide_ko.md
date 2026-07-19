@@ -1,6 +1,8 @@
 # co-deck 사용자 가이드
 
-co-deck 에이전트 팀으로 강연 자료와 핸드북을 제작하기 위한 실전 중심 가이드입니다. 로스터 개요와 소개 성격의 요약은 [README.md](../README.md)를 참고하세요. 거버넌스와 파이프라인 내부 구조는 [AGENTS.md](../AGENTS.md)를 참고하세요.
+**Language**: [English](user-guide.md) · **한국어**
+
+co-deck 에이전트 팀으로 강연 자료와 핸드북을 제작하기 위한 실전 중심 가이드입니다. 로스터 개요와 소개 성격의 요약은 [README_ko.md](../README_ko.md)를 참고하세요. 거버넌스와 파이프라인 내부 구조는 [AGENTS.md](../AGENTS.md)를 참고하세요.
 
 ## 1. Quick Start
 

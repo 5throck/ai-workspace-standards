@@ -1,5 +1,7 @@
 # Co-Work User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 > A practical, task-oriented guide to actually using this team day-to-day. For the team roster and mission overview, see [`README.md`](../README.md). For the full governance/agent specification, see [`AGENTS.md`](../AGENTS.md).
 
 ## 1. Quick Start

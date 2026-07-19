@@ -1,7 +1,9 @@
 # co-security 사용자 가이드
 
+**Language**: [English](user-guide.md) · **한국어**
+
 > 이 AI 에이전트 팀과 함께 보안 인게이지먼트를 진행하기 위한 실무 중심 가이드입니다.
-> 팀 개요 및 미션은 [`../README.md`](../README.md)를, 에이전트 역할 정의는 [`../AGENTS.md`](../AGENTS.md)를 참고하세요.
+> 팀 개요 및 미션은 [`../README_ko.md`](../README_ko.md)를, 에이전트 역할 정의는 [`../AGENTS.md`](../AGENTS.md)를 참고하세요.
 
 ---
 

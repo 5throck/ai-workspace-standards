@@ -1,5 +1,7 @@
 # Co-Consult — User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 > **For**: Engagement leads, analysts, and clients using this AI strategy-consulting team
 > **Architecture**: PM Gateway → specialist agents → skills → deliverables/
 

@@ -1,5 +1,7 @@
 # Co-Design User Guide
 
+**Language**: **English** · [한국어](user-guide_ko.md)
+
 > A practical, task-oriented companion to [README.md](../README.md). Where the README introduces the team, this guide shows you how to actually get work done: how to start an engagement, who to ask for what, and where the results land.
 
 ---

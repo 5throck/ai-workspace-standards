@@ -18,8 +18,25 @@
 
 ```bash
 bun run agent:create <name> --role "표시 이름" --group <그룹>
+
+# 예시:
+bun run agent:create data-analyst --role "Data Analyst" --group Research
+bun run agent:create ux-writer --role "UX Writer" --group Content
 ```
 
 에이전트 생성 후 `AGENTS.md`와 `docs/co-work.context.md § Agents`를 업데이트하세요.
 
-전체 워크플로우는 `AGENTS.md`를 참고하세요.
+## 에이전트 목록 조회
+
+```bash
+bun run agent:list
+bun run agent:list --group Research
+```
+
+## 에이전트 삭제
+
+```bash
+bun run agent:delete <name>
+```
+
+전체 워크플로우 및 디스패치 프로토콜은 `AGENTS.md`를 참고하세요.

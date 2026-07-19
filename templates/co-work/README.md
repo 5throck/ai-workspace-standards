@@ -5,6 +5,8 @@ content_hash: TBD
 
 # {{PROJECT_NAME}}
 
+**Language**: **English** · [한국어](README_ko.md)
+
 > **Status**: ✅ Stable — v1.0.0
 
 Welcome to the **Co-Work** workspace—your dedicated AI general collaboration and documentation agent team. Optimized for collaborative work with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to support your projects from day one.

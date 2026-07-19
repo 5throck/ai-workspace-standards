@@ -19,8 +19,25 @@
 
 ```bash
 bun run agent:create <name> --role "표시 이름" --group <그룹>
+
+# 예시:
+bun run agent:create motion-designer --role "Motion Designer" --group Design
+bun run agent:create accessibility-expert --role "Accessibility Expert" --group Design
 ```
 
 에이전트 생성 후 `AGENTS.md`와 `docs/co-design.context.md § Agents`를 업데이트하세요.
 
-전체 워크플로우는 `AGENTS.md`를 참고하세요.
+## 에이전트 목록 조회
+
+```bash
+bun run agent:list
+bun run agent:list --group Design
+```
+
+## 에이전트 삭제
+
+```bash
+bun run agent:delete <name>
+```
+
+전체 워크플로우 및 디스패치 프로토콜은 `AGENTS.md`를 참고하세요.

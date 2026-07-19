@@ -5,6 +5,8 @@ translated_from_hash: TBD
 
 # {{PROJECT_NAME}}
 
+**Language**: [English](README.md) · **한국어**
+
 > **Status**: Beta — v0.2.0
 
 **Co-Security** 워크스페이스에 오신 것을 환영합니다. 이곳은 여러분의 전담 AI 레드팀 및 위협 모델링 에이전트 팀입니다. Claude 및 Gemini AI 어시스턴트와의 협업에 최적화된 이 템플릿은 프로젝트 첫날부터 여러분을 지원할 전문 AI 에이전트 팀을 제공합니다.

@@ -5,6 +5,8 @@ sync_version: 1
 
 # co-deck
 
+**Language**: **English** · [한국어](README_ko.md)
+
 > **⚠️ BETA VARIANT** - Status: beta (v0.2.0)
 > This variant is in active development and should not be used in production environments.
 
