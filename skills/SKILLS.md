@@ -23,13 +23,13 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `project-review` | 1.1.0 | active | pm | 2026-07-10 | — | — |
 | `promote-variant` | 1.0.1 | active | pm | 2026-06-05 | — | Workspace operator only — not deployed to L2 |
 | `script-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | — |
-| `security-scan` | 1.0.0 | active | security-expert | 2026-05-30 | — | — |
+| `security-scan` | 1.0.0 | active | pm | 2026-07-19 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `simulate-project-creation` | 1.0.0 | active | scaffolding-expert | 2026-05-30 | — | Workspace scaffolding test only |
 | `skill-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | — |
-| `sync` | 1.1.0 | active | lifecycle-manager | 2026-07-10 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR |
+| `sync` | 1.1.0 | active | pm | 2026-07-19 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
 | `team-builder` | 1.1.0 | active | pm | 2026-06-06 | — | — |
 | `translate` | 1.0.0 | active | pm | 2026-06-06 | — | — |
-| `validate-docs-links` | 1.0.0 | active | docs-writer | 2026-05-30 | — | — |
+| `validate-docs-links` | 1.0.0 | active | pm | 2026-07-19 | — | Reassigned from docs-writer — same orphan cause as security-scan |
 
 ### Variant-Exclusive Skills
 

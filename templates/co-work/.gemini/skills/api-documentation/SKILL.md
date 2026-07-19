@@ -5,6 +5,11 @@ description: >
   request/response schemas, and code examples. Use when: documenting REST APIs, GraphQL
   interfaces, SDKs, or developer-facing technical specifications.
 version: 1.0.0
+scope: co-work
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: implementation
@@ -18,11 +23,11 @@ metadata:
     - sdk documentation
 ---
 
-## Overview
+## Context
 
 This skill provides systematic API documentation capabilities, creating comprehensive developer resources that enable API integration and adoption. It ensures documentation is accurate, complete, and developer-friendly.
 
-## When to Use This Skill
+## When to Use
 
 **API Documentation**:
 - Trigger: "Document the API" or "Create API reference"
@@ -41,6 +46,8 @@ This skill provides systematic API documentation capabilities, creating comprehe
 - Use Case: Helping developers integrate with APIs successfully
 
 ---
+
+## Execution Steps
 
 ## Step 1: API Analysis and Structure
 
@@ -288,9 +295,10 @@ Retrieves a list of users with optional filtering.
 
 **Code Example Template**:
 ```python
+import os
 import requests
 
-API_KEY = "your_api_key"
+API_KEY = os.environ["API_KEY"]  # never hardcode credentials
 BASE_URL = "https://api.example.com/v1"
 
 def get_users(limit=20, offset=0):
@@ -436,7 +444,7 @@ def get_users(limit=20, offset=0):
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For REST API Documentation**:
 - Complete API reference with all endpoints

@@ -5,6 +5,11 @@ description: >
   best practices. Use when: reviewing pull requests, evaluating code quality, providing
   constructive feedback, or ensuring code standards compliance.
 version: 1.0.0
+scope: co-game
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: process
@@ -17,11 +22,11 @@ metadata:
     - code inspection
 ---
 
-## Overview
+## Context
 
 This skill provides systematic code review capabilities, ensuring code changes are correct, maintainable, secure, and follow best practices. It balances thoroughness with efficiency, providing actionable feedback while maintaining team velocity.
 
-## When to Use This Skill
+## When to Use
 
 **Pull Request Reviews**:
 - Trigger: "Review this PR" or "Check pull request"
@@ -40,6 +45,8 @@ This skill provides systematic code review capabilities, ensuring code changes a
 - Use Case: Ensuring code follows project conventions and best practices
 
 ---
+
+## Execution Steps
 
 ## Step 1: Review Preparation
 
@@ -266,7 +273,7 @@ This skill provides systematic code review capabilities, ensuring code changes a
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Pull Request Reviews**:
 - Comprehensive code review feedback

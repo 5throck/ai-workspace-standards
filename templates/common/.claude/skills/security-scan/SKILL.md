@@ -5,7 +5,7 @@ version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
 scope: common
-owner: security-expert
+owner: pm
 prerequisites: gitleaks
 metadata:
   type: process

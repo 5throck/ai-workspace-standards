@@ -1,65 +1,61 @@
 ---
 name: executive-presentation
+scope: co-consult
 description: >
-  Creates compelling executive presentations for consulting client delivery.
-  Use when: structuring slide decks, developing board presentations, creating
-  management briefings, or preparing final consulting deliverable presentations.
+  Guides Communications Lead through designing and building C-level strategy
+  presentations and decision decks. Uses Pyramid Principle structure, "So What?"
+  message extraction, and one-page summary design. The business case section
+  requires inputs from all three prerequisite skills.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - executive presentation
-    - slide deck
-    - board presentation
-    - management briefing
-    - client presentation
-    - deck structure
+last_reviewed: 2026-06-13
+status: active
+owner: communications-lead
+prerequisites: technical-feasibility, org-readiness-assessment, financial-modeling
 ---
 
-## Overview
+## Context
 
-This skill provides a structured approach to building and delivering executive presentations that communicate consulting recommendations with clarity, impact, and persuasive logic.
+Use in Phase 3 when producing the primary client-facing presentation. Prerequisites (technical-feasibility, org-readiness-assessment, financial-modeling) must be complete before this skill is invoked.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Build the deck" or "Executive presentation" or "Client presentation"
-- Use Case: Preparing and structuring final consulting deliverable presentations
-- Phase: Phase 3 (Deliverable Creation), Phase 4 (Implementation & Delivery)
+Invoke this skill when the Communications Lead is ready to design and build the executive strategy deck for C-level stakeholders. All three prerequisite skill outputs must be available before execution begins.
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Presentation Objectives
-- Clarify the decision or action expected from the audience
-- Identify key questions the audience will ask
-- Determine time constraints and format requirements
+1. **Confirm Prerequisites**: Verify outputs from technical-feasibility, org-readiness-assessment, and financial-modeling are available
+2. **Define the Decision**: What single decision must the executive audience make after this presentation?
+3. **Pyramid Principle Structure**: SCQA framework
+   - Situation: What is the current context the audience already knows?
+   - Complication: What has changed or is threatening?
+   - Question: What does this situation force us to ask?
+   - Answer: The recommendation (stated upfront, not at the end)
+4. **Slide Architecture** (standard executive deck):
+   - Title slide + Agenda (1 slide)
+   - Executive Summary / Recommendation (1-2 slides) — written last
+   - Context and Problem (2-3 slides)
+   - Analysis and Findings (3-5 slides, sourced from insight-synthesis)
+   - Business Case (2-3 slides, sourced from financial-modeling + technical-feasibility + org-readiness-assessment):
+     - Investment summary
+     - Expected returns (NPV/IRR)
+     - Key risks and mitigations
+     - Change management cost summary
+   - Recommended Path Forward (2-3 slides)
+   - Next Steps and Decision Request (1 slide)
+5. **One-Page Summary Design**: Distill entire presentation into 1 page: Situation (2 sentences), Recommendation (1 sentence), Business Case (3 bullets), Next Step (1 action)
+6. **Executive Language Check**: No jargon, every number has context, every slide has one message, no slide exceeds 5 bullet points
 
-### Step 2: Structure the Deck
-- Cover slide, agenda, executive summary
-- 3-5 key insight slides with supporting evidence
-- Recommendations slide with clear next steps
-- Appendix for detailed data and methodology
+## Output Format
 
-### Step 3: Design Each Slide
-- One key message per slide (title states the insight)
-- Supporting visuals: charts, frameworks, matrices
-- Consistent formatting and visual hierarchy
-- Minimal text — visuals carry the argument
+- Slide deck (outline with: slide title, key message per slide, supporting evidence, visual recommendation)
+- One-Page Executive Summary (standalone)
+- Speaker notes for key slides
 
-### Step 4: Rehearse and Refine
-- Anticipate key objections and prepare responses
-- Time the presentation for the allotted slot
-- Refine based on internal review feedback
-- Prepare leave-behind version if needed
-
-## Expected Outputs
-
-- Presentation deck (structured outline or slides)
-- Speaker notes
-- Anticipated Q&A document
+> **Save Output To**: See Output Destination Mapping in `docs/co-consult.context.md` for destination folder and naming convention. Create the folder if it does not exist. Do not hard-code output paths.
 
 ## Related Skills
 
 - narrative-framework
 - consulting-report-writing
+- financial-modeling
 - insight-synthesis

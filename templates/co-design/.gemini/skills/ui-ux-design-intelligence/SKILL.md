@@ -6,6 +6,11 @@ description: >
   building design systems, creating visual designs, designing UI components, or establishing
   design specifications.
 version: 1.0.0
+scope: co-design
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: implementation
@@ -19,11 +24,11 @@ metadata:
     - interface design
 ---
 
-## Overview
+## Context
 
 This skill provides end-to-end UI/UX design capabilities, from design system architecture through component specification. It combines design thinking, visual design principles, and systematic approaches to create cohesive, scalable user interfaces.
 
-## When to Use This Skill
+## When to Use
 
 **Design System Creation:**
 - Trigger: "Create design system" or "Establish design tokens"
@@ -42,6 +47,8 @@ This skill provides end-to-end UI/UX design capabilities, from design system arc
 - Use Case: Documenting design decisions for handoff to developers
 
 ---
+
+## Execution Steps
 
 ## Step 1: Design System Architecture
 
@@ -247,7 +254,7 @@ This skill provides end-to-end UI/UX design capabilities, from design system arc
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Design System Creation**:
 - Complete design token system (color, typography, spacing, borders, shadows)

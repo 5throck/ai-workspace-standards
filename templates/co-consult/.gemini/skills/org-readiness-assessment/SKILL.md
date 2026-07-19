@@ -1,64 +1,69 @@
 ---
 name: org-readiness-assessment
+scope: co-consult
 description: >
-  Assesses an organization's readiness to adopt change or implement new solutions.
-  Use when: evaluating capability gaps, cultural readiness, structural barriers,
-  or leadership alignment ahead of transformation initiatives.
+  Guides the Change Management Partner through diagnosing an organization's
+  capacity to absorb and sustain change. Produces readiness scores, capability
+  gap analysis, and change management cost estimates that feed into
+  financial-modeling.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - org readiness
-    - organizational readiness
-    - readiness assessment
-    - capability gaps
-    - change readiness
-    - transformation readiness
+last_reviewed: 2026-06-13
+status: active
+owner: change-management-partner
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill provides a structured framework for diagnosing organizational readiness across leadership, culture, process, and technology dimensions.
+Use in Phase 1 alongside competitive and technical analyses. The change management cost estimates produced here are mandatory inputs for the financial-modeling skill.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Readiness assessment" or "Is the organization ready?"
-- Use Case: Pre-transformation assessment to guide change strategy
-- Phase: Phase 1 (Discovery & Analysis)
+- When beginning a consulting engagement that involves organizational transformation
+- Before any financial modeling that must account for change management costs
+- When leadership asks for a realistic assessment of the organization's change capacity
+- When resistance probability needs to be quantified for schedule planning
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Readiness Dimensions
-- Leadership alignment and sponsorship
-- Cultural openness to change
-- Process maturity and adaptability
-- Technology infrastructure readiness
-- People capability and skills
+1. **Define Change Scope**: Clarify the nature and scale of the proposed change
 
-### Step 2: Data Gathering
-- Conduct stakeholder interviews and surveys
-- Review existing process documentation
-- Benchmark against industry standards
+2. **Leadership Alignment Assessment**:
+   - Are senior leaders aligned on the need for change? (Score 1-5)
+   - Is there a visible, committed executive sponsor? (Score 1-5)
+   - Are middle managers equipped to lead change? (Score 1-5)
 
-### Step 3: Readiness Scoring
-- Score each dimension (1-5 scale)
-- Identify critical gaps vs. acceptable gaps
-- Map risks associated with low readiness areas
+3. **Cultural Readiness Assessment**:
+   - Does the organizational culture support experimentation and adaptation? (Score 1-5)
+   - Are there past change failures that may create skepticism? (Yes/No + context)
+   - What are the dominant cultural values and how do they align with the proposed change?
 
-### Step 4: Recommendations
-- Prioritize readiness gaps by impact on transformation success
-- Define pre-conditions for change launch
-- Recommend readiness-building activities
+4. **Capability Gap Analysis**:
+   - What skills/competencies are required by the change?
+   - What is the current capability level? (Gap = Required - Current)
+   - What training or hiring is needed?
 
-## Expected Outputs
+5. **Change Management Cost Estimation**:
+   - Training and upskilling cost range
+   - Change agent/program management resource cost
+   - Communication campaign budget
+   - Schedule delay buffer (weeks × team cost, given resistance probability)
+   - **Total change management cost range** (this is the mandatory output for financial-modeling)
 
-- Readiness scorecard by dimension
-- Gap analysis and risk register
-- Recommended readiness actions
+6. **Overall Readiness Score**: Weighted average across dimensions.
+   - Low: < 3.0
+   - Medium: 3.0–3.9
+   - High: ≥ 4.0
+
+## Output Format
+
+- **Readiness Scorecard**: Dimension, Score (1-5), Key Evidence, Risk Flag
+- **Capability Gap Table**: Competency, Required Level, Current Level, Gap, Recommended Action
+- **Change Management Cost Estimate**: Category, Low Estimate, High Estimate, Assumptions
+- **Overall Readiness Summary**: Score, Interpretation, Top 3 Risks, Recommended Change Approach
 
 ## Related Skills
 
 - stakeholder-alignment
 - change-impact-assessment
-- org-design
+- financial-modeling

@@ -142,12 +142,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.1.4 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
-| `sync-skills.ts` | L0 | 1.3.0 | active | — | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
@@ -292,9 +292,11 @@ deprecated agent references, missing fields.
 
 #### `skill-lifecycle-audit.ts`
 **Purpose**: Full skill lifecycle audit —owner validation, orphaned skills, deprecated
-skills still being modified, dependency graph, circular dependencies.
+skills still being modified, dependency graph, circular dependencies, `scope` field validity.
 **Usage**: `bun scripts/skill-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `skills/**` files are staged.
+**v1.2.0**: `scope` validation now accepts `workspace | common | variant | <current project's own directory name>`; `docs/_examples/skills/**` excluded from scanning. Run once per location (workspace root + each `templates/co-*/` variant + `templates/common/`).
+
 
 #### `readme-lifecycle-audit.ts`
 **Purpose**: Validates README.md / README_ko.md pairing in `templates/` directories.
@@ -325,10 +327,13 @@ Detects running Claude Code / Antigravity processes with user confirmation befor
 **Note**: L0 script.
 
 #### `sync-skills.ts`
-**Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
-(`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
-`templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
-**Usage**: `bun run sync-skills`
+**Purpose**: Distributes skills from a project's SSOT (`skills/`) to its runtime locations
+(`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`). Run after any change to `skills/`
+to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
+**Usage**:
+- `bun run sync-skills` — workspace root only (default, unchanged from prior versions)
+- `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
+- `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
 
 #### `sync-skills-to-l2.ts`
 **Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.

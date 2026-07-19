@@ -6,7 +6,7 @@ last_reviewed: 2026-07-10
 status: active
 scope: common
 l2_propagate: true
-owner: lifecycle-manager
+owner: pm
 prerequisites: Bun runtime
 metadata:
   type: process

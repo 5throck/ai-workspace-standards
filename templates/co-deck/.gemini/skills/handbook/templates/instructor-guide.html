@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructor Guide | co-deck Handbook</title>
+  <link rel="stylesheet" href="assets/css/handbook-variables.css">
+  <link rel="stylesheet" href="assets/css/handbook-components.css">
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #6e6e73;
+      --border: #d2d2d7;
+      --accent: #0066cc;
+      --accent-hover: #004499;
+      --bg-info: #e8f4fd;
+      --bg-note: #fffbe6;
+      --bg-warn: #fff3e0;
+      --bg-success: #e8f5e9;
+      --bg-error: #fdecea;
+      --sidebar-width: 220px;
+      --header-height: 56px;
+      --code-bg: #f5f5f7;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --radius: 6px;
+      --text-warn: #e65100;
+      --text-error: #c62828;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1a2e;
+      --bg2: #16213e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #333355;
+      --accent: #4da6ff;
+      --accent-hover: #80bfff;
+      --bg-info: #1a3a5c;
+      --bg-note: #3d3520;
+      --bg-warn: #3d2e1a;
+      --bg-success: #1a3d2e;
+      --bg-error: #3d1a1a;
+      --code-bg: #0f0f23;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --text-warn: #ffb74d;
+      --text-error: #ef5350;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg); color: var(--text); line-height: 1.6;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* ===== Header ===== */
+    .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 100; transition: background-color 0.2s, color 0.2s; }
+    .site-header .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 24px; white-space: nowrap; transition: color 0.2s; }
+    .site-header .search-input { flex: 0 1 320px; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .site-header .search-input::placeholder { color: var(--text-muted); }
+    .site-header .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .dark-mode-toggle { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; cursor: pointer; color: var(--text); font-size: 0.875rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+    .dark-mode-toggle:hover { background-color: var(--bg2); }
+    .lang-switcher { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg2); color: var(--text); font-size: 0.875rem; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+
+    /* ===== Sidebar ===== */
+    .sidebar { position: fixed; top: var(--header-height); left: 0; width: var(--sidebar-width); height: calc(100vh - var(--header-height)); overflow-y: auto; background-color: var(--bg2); border-right: 1px solid var(--border); padding: 16px 0; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul { list-style: none; }
+    .sidebar nav ul li a { display: block; padding: 8px 20px; color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, color 0.2s; }
+    .sidebar nav ul li a:hover, .sidebar nav ul li a.active { color: var(--accent); background-color: var(--bg); }
+
+    /* ===== Main Content ===== */
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 32px 40px 60px; min-height: calc(100vh - var(--header-height)); }
+    .main-content article { max-width: 960px; }
+
+    /* ===== Section Styling ===== */
+    .guide-section {
+      margin-bottom: 40px;
+    }
+    .guide-section h2 {
+      font-size: 1.375rem; font-weight: 700;
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+      color: var(--text); transition: color 0.2s, border-color 0.2s;
+    }
+    .guide-section h3 {
+      font-size: 1.0625rem; font-weight: 600;
+      margin: 20px 0 10px; color: var(--text); transition: color 0.2s;
+    }
+    .guide-section p {
+      margin-bottom: 12px; color: var(--text); transition: color 0.2s;
+    }
+
+    /* ===== Checklist ===== */
+    .checklist {
+      list-style: none; padding: 0;
+    }
+    .checklist li {
+      position: relative; padding: 10px 12px 10px 36px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 6px; background-color: var(--bg2);
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .checklist li::before {
+      content: "";
+      position: absolute; left: 12px; top: 12px;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border); border-radius: 3px;
+      transition: border-color 0.2s;
+    }
+    .checklist li input[type="checkbox"] {
+      position: absolute; left: 12px; top: 12px;
+      width: 16px; height: 16px; margin: 0;
+      accent-color: var(--accent);
+    }
+
+    /* ===== Chapter Notes Panel ===== */
+    .chapter-notes {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 20px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .chapter-notes summary {
+      padding: 14px 20px; font-weight: 600; font-size: 0.9375rem;
+      cursor: pointer; background-color: var(--bg2); color: var(--text);
+      transition: background-color 0.2s, color 0.2s;
+      list-style: none; display: flex; align-items: center; gap: 8px;
+    }
+    .chapter-notes summary::-webkit-details-marker { display: none; }
+    .chapter-notes summary .chapter-label {
+      font-size: 0.75rem; font-weight: 700;
+      background-color: var(--accent); color: var(--bg);
+      padding: 2px 8px; border-radius: 3px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .chapter-notes .notes-body {
+      padding: 20px;
+    }
+    .chapter-notes .notes-body h4 {
+      font-size: 0.875rem; font-weight: 700;
+      color: var(--text); margin: 12px 0 6px;
+      transition: color 0.2s;
+    }
+    .chapter-notes .notes-body h4:first-child { margin-top: 0; }
+    .chapter-notes .notes-body ul {
+      padding-left: 20px; margin-bottom: 8px;
+    }
+    .chapter-notes .notes-body li {
+      font-size: 0.875rem; margin-bottom: 4px;
+      color: var(--text); transition: color 0.2s;
+    }
+
+    /* ===== Warning Box ===== */
+    .warning-box {
+      background-color: var(--bg-warn); border-left: 4px solid var(--text-warn);
+      border-radius: var(--radius); padding: 12px 16px; margin: 8px 0;
+      font-size: 0.875rem; transition: background-color 0.2s, border-color 0.2s;
+    }
+    .warning-box strong { color: var(--text-warn); transition: color 0.2s; }
+
+    /* ===== Danger Box (Irreversible) ===== */
+    .danger-box {
+      background-color: var(--bg-error); border-left: 4px solid var(--text-error);
+      border-radius: var(--radius); padding: 12px 16px; margin: 8px 0;
+      font-size: 0.875rem; transition: background-color 0.2s, border-color 0.2s;
+    }
+    .danger-box strong { color: var(--text-error); transition: color 0.2s; }
+
+    /* ===== Evaluation Criteria Table ===== */
+    .eval-table .weight {
+      font-weight: 700; text-align: center; color: var(--accent);
+      transition: color 0.2s;
+    }
+
+    /* ===== Demo Sequence ===== */
+    .demo-step {
+      display: flex; gap: 16px; padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .demo-step:last-child { border-bottom: none; }
+    .demo-step .step-num {
+      flex-shrink: 0; width: 32px; height: 32px; line-height: 32px;
+      text-align: center; border-radius: 50%;
+      background-color: var(--accent); color: var(--bg);
+      font-size: 0.8125rem; font-weight: 700;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .demo-step .step-content h4 {
+      font-size: 0.9375rem; font-weight: 600;
+      color: var(--text); margin-bottom: 4px;
+      transition: color 0.2s;
+    }
+    .demo-step .step-content p {
+      font-size: 0.875rem; color: var(--text-muted); margin: 0;
+      transition: color 0.2s;
+    }
+
+    /* ===== Confirmation Questions ===== */
+    .confirmation-q {
+      padding: 12px 16px; margin-bottom: 8px;
+      background-color: var(--bg2); border-radius: var(--radius);
+      border-left: 3px solid var(--accent);
+      font-size: 0.9375rem; color: var(--text);
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    /* ===== Chapter Nav ===== */
+    .chapter-nav { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); transition: border-color 0.2s; }
+    .chapter-nav a { padding: 10px 20px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--accent); text-decoration: none; font-size: 0.875rem; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+    .chapter-nav a:hover { background-color: var(--bg2); }
+
+    /* ===== Footer ===== */
+    .site-footer { margin-left: var(--sidebar-width); padding: 24px 40px; border-top: 1px solid var(--border); font-size: 0.8125rem; color: var(--text-muted); text-align: center; transition: background-color 0.2s, color 0.2s; }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content, .site-footer { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="logo">co-deck</a>
+    <input type="search" class="search-input" placeholder="Search handbook..." id="site-search">
+    <div class="header-actions">
+      <button class="dark-mode-toggle" id="dark-mode-toggle" aria-label="Toggle dark mode">&#9790;</button>
+      <select class="lang-switcher" id="lang-switcher">
+        <option value="ko" selected>KR</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="course-overview.html">Course Overview</a></li>
+        <li><a href="chapter.html">Chapters</a></li>
+        <li><a href="manual.html">Reference</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="instructor-guide.html" class="active">Instructor Guide</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <article>
+      <h1>Instructor Guide</h1>
+
+      <!-- Section: 사전 준비물 체크리스트 -->
+      <section class="guide-section">
+        <h2>사전 준비물 체크리스트</h2>
+        <ul class="checklist">
+          <li><input type="checkbox"> <!-- PREP_ITEM_1 --></li>
+          <li><input type="checkbox"> <!-- PREP_ITEM_2 --></li>
+          <li><input type="checkbox"> <!-- PREP_ITEM_3 --></li>
+          <li><input type="checkbox"> <!-- PREP_ITEM_4 --></li>
+          <li><input type="checkbox"> <!-- PREP_ITEM_5 --></li>
+          <!-- Repeat checklist items as needed -->
+          <!-- TEMPLATE_ITERATE: prep_checklist -->
+          <li><input type="checkbox"> Preparation item placeholder</li>
+        </ul>
+      </section>
+
+      <!-- Section: 시간 배분표 -->
+      <section class="guide-section">
+        <h2>시간 배분표</h2>
+        <div class="table-schedule"><table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Chapter / Topic</th>
+              <th>Duration</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">09:00 - 09:30</td>
+              <td><!-- CHAPTER_TOPIC --></td>
+              <td>30 min</td>
+              <td>Lecture</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">09:30 - 11:00</td>
+              <td><!-- CHAPTER_TOPIC --></td>
+              <td>90 min</td>
+              <td>Hands-on</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">11:15 - 12:30</td>
+              <td><!-- CHAPTER_TOPIC --></td>
+              <td>75 min</td>
+              <td>Lecture + Lab</td>
+            </tr>
+            <tr>
+              <td>Day 1</td>
+              <td class="time-block">13:30 - 15:00</td>
+              <td><!-- CHAPTER_TOPIC --></td>
+              <td>90 min</td>
+              <td>Hands-on</td>
+            </tr>
+            <!-- Repeat rows as needed -->
+            <!-- TEMPLATE_ITERATE: time_allocation -->
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- Section: 장별 강사 노트 -->
+      <section class="guide-section">
+        <h2>장별 강사 노트</h2>
+
+        <!-- Chapter 1 Notes -->
+        <details class="chapter-notes">
+          <summary>
+            <span class="chapter-label">Ch.1</span>
+            <!-- CHAPTER_TITLE -->
+          </summary>
+          <div class="notes-body">
+            <h4>Location / Role</h4>
+            <p><!-- LOCATION_ROLE: e.g. Classroom, instructor leads demo --></p>
+
+            <h4>Key Points</h4>
+            <ul>
+              <li><!-- KEY_POINT_1 --></li>
+              <li><!-- KEY_POINT_2 --></li>
+            </ul>
+
+            <h4>Participant Activities</h4>
+            <ul>
+              <li><!-- ACTIVITY_1 --></li>
+              <li><!-- ACTIVITY_2 --></li>
+            </ul>
+
+            <h4>Time-Shortcut Alternatives</h4>
+            <p><!-- TIME_SHORTCUT: What to skip if running behind --></p>
+
+            <h4>Irreversible Operation Warnings</h4>
+            <div class="danger-box">
+              <strong>Warning:</strong> <!-- IRREVERSIBLE_WARNING -->
+            </div>
+            <div class="warning-box">
+              <strong>Note:</strong> <!-- CAUTIONARY_NOTE -->
+            </div>
+          </div>
+        </details>
+
+        <!-- Chapter 2 Notes (repeat per chapter) -->
+        <!-- TEMPLATE_ITERATE: chapter_notes -->
+        <details class="chapter-notes">
+          <summary>
+            <span class="chapter-label">Ch.2</span>
+            Chapter Title Placeholder
+          </summary>
+          <div class="notes-body">
+            <h4>Location / Role</h4>
+            <p>Location and role description.</p>
+            <h4>Key Points</h4>
+            <ul>
+              <li>Key point placeholder</li>
+            </ul>
+            <h4>Participant Activities</h4>
+            <ul>
+              <li>Activity placeholder</li>
+            </ul>
+            <h4>Time-Shortcut Alternatives</h4>
+            <p>Time shortcut placeholder.</p>
+            <h4>Irreversible Operation Warnings</h4>
+            <div class="danger-box">
+              <strong>Warning:</strong> Irreversible operation placeholder.
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Section: 장별 확인 질문 -->
+      <section class="guide-section">
+        <h2>장별 확인 질문</h2>
+
+        <!-- Chapter 1 Questions -->
+        <h3>Chapter 1: <!-- CHAPTER_TITLE --></h3>
+        <div class="confirmation-q">
+          <!-- OPEN_ENDED_QUESTION_1 -->
+        </div>
+        <div class="confirmation-q">
+          <!-- OPEN_ENDED_QUESTION_2 -->
+        </div>
+
+        <!-- Repeat per chapter -->
+        <!-- TEMPLATE_ITERATE: confirmation_questions -->
+        <h3>Chapter 2: Chapter Title Placeholder</h3>
+        <div class="confirmation-q">
+          Open-ended confirmation question placeholder.
+        </div>
+      </section>
+
+      <!-- Section: 데모 순서 -->
+      <section class="guide-section">
+        <h2>데모 순서</h2>
+
+        <div class="demo-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4><!-- DEMO_STEP_TITLE --></h4>
+            <p><!-- DEMO_STEP_DESCRIPTION --></p>
+          </div>
+        </div>
+
+        <div class="demo-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4><!-- DEMO_STEP_TITLE --></h4>
+            <p><!-- DEMO_STEP_DESCRIPTION --></p>
+          </div>
+        </div>
+
+        <div class="demo-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4><!-- DEMO_STEP_TITLE --></h4>
+            <p><!-- DEMO_STEP_DESCRIPTION --></p>
+          </div>
+        </div>
+
+        <!-- Repeat demo steps as needed -->
+        <!-- TEMPLATE_ITERATE: demo_steps -->
+      </section>
+
+      <!-- Section: 평가 기준 -->
+      <section class="guide-section">
+        <h2>평가 기준</h2>
+        <div class="table-compare"><table class="eval-table">
+          <thead>
+            <tr>
+              <th>Criteria</th>
+              <th>Description</th>
+              <th>Weight</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><!-- EVAL_CRITERIA_1 --></td>
+              <td><!-- EVAL_DESCRIPTION_1 --></td>
+              <td class="weight">30%</td>
+            </tr>
+            <tr>
+              <td><!-- EVAL_CRITERIA_2 --></td>
+              <td><!-- EVAL_DESCRIPTION_2 --></td>
+              <td class="weight">25%</td>
+            </tr>
+            <tr>
+              <td><!-- EVAL_CRITERIA_3 --></td>
+              <td><!-- EVAL_DESCRIPTION_3 --></td>
+              <td class="weight">25%</td>
+            </tr>
+            <tr>
+              <td><!-- EVAL_CRITERIA_4 --></td>
+              <td><!-- EVAL_DESCRIPTION_4 --></td>
+              <td class="weight">20%</td>
+            </tr>
+            <!-- Repeat rows as needed -->
+            <!-- TEMPLATE_ITERATE: eval_criteria -->
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- Chapter Nav -->
+      <nav class="chapter-nav">
+        <a href="quiz.html">&laquo; Previous</a>
+        <a href="index.html">Next &raquo;</a>
+      </nav>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 co-deck. All rights reserved.</p>
+    <p>Powered by <a href="#">co-deck</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/dark-mode-toggle.js"></script>
+  <script src="assets/js/site-search.js"></script>
+  <script src="assets/js/lang-switcher.js"></script>
+  <script src="assets/js/inpage-search.js"></script>
+</body>
+</html>

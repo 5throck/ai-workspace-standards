@@ -5,6 +5,11 @@ description: >
   cycle. Use when: developing new features, fixing bugs with tests, or ensuring code
   reliability through test-first approach.
 version: 1.0.0
+scope: co-develop
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: process
@@ -17,11 +22,11 @@ metadata:
     - test coverage
 ---
 
-## Overview
+## Context
 
 This skill provides systematic Test-Driven Development (TDD) workflow, ensuring code quality and reliability through the red-green-refactor cycle. It emphasizes writing tests before implementation, leading to more maintainable, better-designed code.
 
-## When to Use This Skill
+## When to Use
 
 **Feature Development**:
 - Trigger: "Implement feature using TDD" or "Test-first development"
@@ -40,6 +45,8 @@ This skill provides systematic Test-Driven Development (TDD) workflow, ensuring 
 - Use Case: Building confidence in code correctness and preventing regressions
 
 ---
+
+## Execution Steps
 
 ## Step 1: Red - Write a Failing Test
 
@@ -276,7 +283,7 @@ Unit Tests (many)
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Feature Development**:
 - Comprehensive test suite for new feature

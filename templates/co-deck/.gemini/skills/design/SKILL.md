@@ -1,11 +1,11 @@
 ---
 name: design
+scope: co-deck
 version: 1.2.0
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
-  design", "pick colors/fonts", "make design spec" (Korean: "디자인 잡아줘",
-  "컬러 정해줘", "폰트 골라줘", "레이아웃 구성해줘"). Stage 4 of the workflow.
+  design", "pick colors/fonts", "make design spec" . Stage 4 of the workflow.
 status: active
 owner: design
 last_reviewed: 2026-06-19
@@ -19,7 +19,7 @@ Locks the visual design — layout, colors, and fonts — into `design_spec.md`.
 ## When to Use
 
 - PM Agent dispatches after Gate 2 approval (storyline locked)
-- User says "lock design" / "디자인 잡아줘" / "컬러 정해줘"
+- User says "lock design"
 - User wants to change visual direction mid-project
 
 ---

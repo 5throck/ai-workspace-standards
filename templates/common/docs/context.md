@@ -145,6 +145,8 @@ lang_reason: legal # legal | source-material | proper-noun
 ```
 *(This exception is NOT available for operational files like agents, skills, and context files)*
 
+**Skills needing non-English reference data**: since `skills/*.md` can never carry the `lang: ko` exception, store terminology glossaries or source-language excerpts in a non-Markdown file under `skills/<name>/references/` (e.g. `references/terms-ko.json`) instead — language validation only scans `.md` files. `SKILL.md` stays English-only and links to it.
+
 ### File Encoding
 
 All text files (Markdown, scripts) must be saved as **UTF-8 (without BOM)**.

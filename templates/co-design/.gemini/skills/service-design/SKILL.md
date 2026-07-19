@@ -5,6 +5,11 @@ description: >
   and operational processes. Use when: mapping customer experiences, optimizing touchpoints,
   aligning frontstage and backstage operations, or improving service delivery.
 version: 1.0.0
+scope: co-design
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: process
@@ -18,11 +23,11 @@ metadata:
     - operational alignment
 ---
 
-## Overview
+## Context
 
 This skill provides comprehensive service design capabilities, focusing on the entire service ecosystem beyond digital interfaces. It connects customer experiences with operational processes, ensuring holistic, consistent service delivery across all touchpoints.
 
-## When to Use This Skill
+## When to Use
 
 **Customer Experience Design**:
 - Trigger: "Design customer journey" or "Map service experience"
@@ -41,6 +46,8 @@ This skill provides comprehensive service design capabilities, focusing on the e
 - Use Case: Enhancing specific customer interaction points
 
 ---
+
+## Execution Steps
 
 ## Step 1: Service Discovery
 
@@ -292,7 +299,7 @@ Backstage:
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Service Design**:
 - Customer journey maps with pain points and opportunities

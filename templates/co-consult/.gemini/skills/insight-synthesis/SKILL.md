@@ -1,62 +1,51 @@
 ---
 name: insight-synthesis
+scope: co-consult
 description: >
-  Synthesizes research findings and data into clear, actionable consulting insights.
-  Use when: distilling complex analysis into key messages, forming strategic recommendations,
-  or translating data into executive-level conclusions.
+  Guides the Strategy Analyst through integrating outputs from multiple specialist
+  analyses (competitive research, organizational diagnostics, technical assessments)
+  into a single unified strategic insight. Includes a mandatory cultural filtering
+  step to ensure organizational context is not omitted.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - insight synthesis
-    - synthesize findings
-    - key messages
-    - strategic conclusions
-    - so what analysis
-    - pyramid principle
+last_reviewed: 2026-06-13
+status: active
+owner: strategy-analyst
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill translates raw analysis and research into structured insights using consulting frameworks such as the Pyramid Principle and MECE logic.
+Use at the end of Phase 1 / start of Phase 2 when multiple agent analyses are complete and need to be synthesized into a coherent strategic narrative for the Engagement Leader's approval gate.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Synthesize findings" or "What are the key insights?"
-- Use Case: Converting Phase 1 analysis into Phase 3 deliverable recommendations
-- Phase: Phase 1 (Discovery & Analysis), Phase 3 (Deliverable Creation)
+- Multiple Phase 1 analyses complete and need integration
+- Preparing for Phase 2 design review
+- Conflicting findings from different analyses need reconciliation
 
-## Steps
+## Execution Steps
 
-### Step 1: Gather Raw Findings
-- Collect all research, data, and analysis outputs
-- Identify the core question being answered
-- Group findings by theme
+1. **Collect Analysis Outputs**: Gather all completed Phase 1 reports (competitive-intelligence, org-readiness-assessment, technical-feasibility outputs, industry expert input if available)
+2. **Identify Themes**: Extract 3-5 cross-cutting strategic themes that appear across multiple analyses
+3. **Cultural Filtering Step** (mandatory):
+   - Review findings through organizational culture lens (from change-management-partner inputs)
+   - Flag any recommendation that is analytically sound but culturally unviable
+   - Annotate each key finding with: "Cultural enabler / Cultural barrier / Neutral"
+4. **Resolve Conflicts**: Where analyses disagree, document the tension explicitly rather than forcing consensus. Classify as: (a) resolvable with more data, (b) context-dependent, (c) genuine strategic trade-off
+5. **Synthesize Strategic Narrative**:
+   - One overarching "So What?" statement (max 2 sentences)
+   - 3-5 supporting findings with evidence
+   - Key risks and dependencies
+   - Recommended strategic direction
+6. **Prepare for Phase 2 Gate**: Structure output as decision-ready briefing for Engagement Leader
 
-### Step 2: Apply MECE Structure
-- Ensure finding categories are mutually exclusive and collectively exhaustive
-- Eliminate redundancy
-- Identify gaps requiring additional analysis
+## Output Format
 
-### Step 3: Develop Key Messages
-- Derive "so what" insight from each finding cluster
-- Build supporting evidence pyramid
-- Prioritize by client impact and relevance
-
-### Step 4: Validate Storyline
-- Test logical flow from insights to recommendations
-- Confirm alignment with client's strategic priorities
-- Refine language for clarity and impact
-
-## Expected Outputs
-
-- Insight summary (3-5 key messages)
-- Supporting evidence map
-- Recommendation framework
+- Strategic Synthesis Brief: Situation Summary, Key Findings (cross-referenced to source analyses), Cultural Compatibility Assessment, Strategic Options (max 3), Recommended Direction with Rationale, Key Risks
 
 ## Related Skills
 
 - competitive-intelligence
-- narrative-framework
-- consulting-report-writing
+- org-readiness-assessment
+- technical-feasibility
+- financial-modeling

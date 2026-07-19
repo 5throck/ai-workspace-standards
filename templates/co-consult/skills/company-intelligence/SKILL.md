@@ -305,6 +305,11 @@ For the full output template with formatting examples, read `references/output-t
 - Report body: English (per workspace language policy), with Korean proper nouns preserved in parentheses where helpful
 - Exception: If the user explicitly requests the report in Korean, write in Korean
 
+## Reference Material
+
+- `references/output-template.md`: full report output template with formatting examples.
+- `references/terms-ko.json`: Korean-original company-research terminology (corporate structure, filing/source names, credit rating agencies, leadership titles, financial terms). Non-Markdown reference asset, exempt from the workspace English-only doc policy — see the Language Policy Exception in `context.md`.
+
 ## Related Skills
 
 - k-dart

@@ -1,62 +1,58 @@
 ---
 name: solution-design
+scope: co-consult
 description: >
-  Designs structured solutions to client business problems in consulting engagements.
-  Use when: developing solution architectures, designing operating models, creating
-  transformation roadmaps, or defining future-state configurations.
+  Guides the Solutions Architect through converting business requirements into a
+  full technical solution design. Covers requirements decomposition, architecture
+  option comparison, trade-off analysis, and implementation roadmap with explicit
+  dependency mapping and risk levels. Mandatory output includes dependency map
+  and risk register for handoff to delivery-manager.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - solution design
-    - operating model
-    - future state design
-    - transformation roadmap
-    - solution architecture
-    - target model
+last_reviewed: 2026-06-13
+status: active
+owner: solutions-architect
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill provides a structured approach to designing consulting solutions that address client business challenges with clear logic, feasibility assessment, and implementation path.
+Use in Phase 3 after Phase 2 approval. The implementation roadmap produced here must include dependency mapping and risk levels to enable Delivery Manager to build the execution plan directly.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Design the solution" or "Future state" or "Operating model"
-- Use Case: Developing Phase 3 solution deliverables for client engagements
-- Phase: Phase 3 (Deliverable Creation)
+Invoke this skill when Phase 2 has been approved and the Solutions Architect is ready to translate business requirements into a concrete technical design and implementation roadmap.
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Problem and Constraints
-- Clarify the problem being solved
-- Document constraints (budget, timeline, technology, regulatory)
-- Align solution scope with client's strategic priorities
+1. **Requirements Decomposition**:
+   - Functional requirements (what the solution must do)
+   - Non-functional requirements (performance, scalability, security, compliance)
+   - Constraints (budget, timeline, existing technology stack, organizational capabilities)
+2. **Architecture Options**: Define 2-3 viable technical approaches. For each:
+   - High-level architecture description
+   - Technology stack / components
+   - Integration points with existing systems
+   - Pros and cons
+3. **Trade-off Analysis**: Compare options on: cost, complexity, time-to-value, risk, maintainability, vendor dependency
+4. **Recommended Architecture**: Select and justify the recommended option
+5. **Implementation Roadmap**:
+   - Phase-by-phase breakdown (each phase: objective, deliverables, duration estimate)
+   - **Dependency Map** (mandatory for Delivery Manager):
+     - List all task dependencies (what must be complete before each phase starts)
+     - External dependencies (vendor contracts, data availability, regulatory approval)
+   - **Risk Register** (mandatory for Delivery Manager):
+     - Risk, probability (H/M/L), impact (H/M/L), risk level, mitigation action, owner
+6. **Handoff Package**: Structured output ready for Delivery Manager to convert to execution plan
 
-### Step 2: Generate Solution Options
-- Develop 2-3 viable solution alternatives
-- Evaluate options against client criteria
-- Apply design thinking and analogues from comparable engagements
+## Output Format
 
-### Step 3: Design Recommended Solution
-- Define the future-state model (process, organization, technology)
-- Specify design principles guiding the solution
-- Identify dependencies and integration points
-
-### Step 4: Create Implementation Roadmap
-- Sequence solution components into implementation phases
-- Define quick wins vs. longer-term builds
-- Map solution to required capabilities and enablers
-
-## Expected Outputs
-
-- Solution design document
-- Options comparison matrix
-- High-level implementation roadmap
+- Architecture Decision Record (ADR): Context, Options Considered, Decision, Consequences
+- Implementation Roadmap: Phase, Objective, Deliverables, Duration, Dependencies, Owner
+- Dependency Map (table or diagram)
+- Risk Register: Risk, Probability, Impact, Level, Mitigation, Owner
 
 ## Related Skills
 
 - technical-feasibility
-- financial-modeling
 - project-delivery
+- narrative-framework

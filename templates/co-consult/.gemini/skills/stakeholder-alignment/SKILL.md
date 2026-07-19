@@ -1,60 +1,66 @@
 ---
 name: stakeholder-alignment
+scope: co-consult
 description: >
-  Maps and aligns stakeholders to support organizational change and consulting engagements.
-  Use when: identifying stakeholder groups, analyzing influence/interest dynamics, planning
-  engagement approaches, or managing resistance to change.
+  Guides the Change Management Partner through systematic stakeholder mapping,
+  resistance analysis, influence-interest prioritization, and communication
+  strategy development for consulting engagements.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - stakeholder alignment
-    - stakeholder mapping
-    - stakeholder engagement
-    - manage resistance
-    - influence analysis
+last_reviewed: 2026-06-13
+status: active
+owner: change-management-partner
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill provides structured tools for stakeholder analysis and engagement planning, ensuring consulting recommendations gain organizational buy-in and support.
+Use in Phase 1 to establish the stakeholder landscape before any recommendations are made. The outputs directly feed into communications-lead's messaging strategy.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Stakeholder alignment" or "Stakeholder map"
-- Use Case: Engagement planning and change management support
-- Phase: Phase 1 (Discovery & Analysis), Phase 2 (Solution Design)
+- At the start of any consulting engagement before recommendations are drafted
+- When navigating complex organizational dynamics with multiple affected groups
+- When communication planning requires audience segmentation
+- When leadership alignment or resistance risks need to be surfaced early
 
-## Steps
+## Execution Steps
 
-### Step 1: Stakeholder Identification
-- List all affected groups (internal and external)
-- Categorize by role: decision-makers, influencers, implementers, affected parties
+1. **Stakeholder Identification**: List all individuals and groups affected by the engagement
 
-### Step 2: Influence/Interest Mapping
-- Plot stakeholders on influence vs. interest matrix
-- Identify champions, blockers, and neutral parties
-- Assess current vs. desired alignment level
+2. **Stakeholder Profiling**: For each stakeholder document:
+   - Role and organizational level
+   - Key concerns and interests
+   - Current stance (Champion / Supporter / Neutral / Skeptic / Blocker)
+   - Preferred communication channel and frequency
+   - Influence level (High/Medium/Low) and Interest level (High/Medium/Low)
 
-### Step 3: Engagement Strategy
-- Define engagement approach per stakeholder segment
-- Determine communication channels and frequency
-- Assign relationship owners
+3. **Influence-Interest Matrix**: Plot stakeholders in 2x2 grid:
+   - High Influence / High Interest → Manage closely
+   - High Influence / Low Interest → Keep satisfied
+   - Low Influence / High Interest → Keep informed
+   - Low Influence / Low Interest → Monitor
 
-### Step 4: Alignment Tracking
-- Monitor stakeholder sentiment over project lifecycle
-- Adjust engagement approach based on feedback
-- Escalate critical blockers to engagement leadership
+4. **Resistance Analysis**: For skeptics and blockers, document:
+   - Root cause of resistance
+   - What would change their stance
+   - Risk level if not addressed
 
-## Expected Outputs
+5. **Communication Strategy**: For each quadrant, define:
+   - Message theme
+   - Channel
+   - Frequency
+   - Owner
 
-- Stakeholder map with influence/interest ratings
-- Engagement plan per segment
-- Alignment status tracker
+6. **Handoff**: Pass structured output to communications-lead for message development
+
+## Output Format
+
+- **Stakeholder Map (table)**: Name, Role, Stance, Influence, Interest, Key Concerns, Preferred Channel
+- **Resistance Risk Register**: Stakeholder, Resistance Cause, Risk Level, Mitigation Action
+- **Communication Strategy Matrix**: Quadrant, Message Theme, Channel, Frequency, Owner
 
 ## Related Skills
 
 - org-readiness-assessment
 - change-impact-assessment
-- stakeholder-review-management
+- executive-presentation

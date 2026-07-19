@@ -10,13 +10,13 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.4
- * @last_updated 2026-06-02
+ * @version 1.2.0
+ * @last_updated 2026-07-19
  * @license MIT
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 
 interface SkillFrontmatter {
@@ -65,6 +65,15 @@ const colors = {
 const ROOT = cwd();
 const AGENTS_FILE = join(ROOT, 'AGENTS.md');
 const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+
+// A skill's `scope` may be 'workspace' (L0-only), 'common' (L0+L1, shared across
+// all variants), or the literal name of the variant it belongs to (L0+L1+L2) —
+// see scripts/helpers/layer-filter.ts. `variant` itself is also accepted as a
+// generic placeholder for skills not yet tied to one specific variant name.
+const CURRENT_VARIANT_NAME = basename(ROOT);
+function isValidScope(scope: string): boolean {
+  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME].includes(scope);
+}
 
 // Detect if we're at workspace root or in a sub-project
 const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
@@ -148,6 +157,9 @@ function findSkillFiles(dir: string, baseDir: string = ROOT): string[] {
       if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
       // Skip agent directories (they don't contain skills)
       if (entry.name === 'agents') continue;
+      // Skip documentation/teaching example trees — illustrative SKILL.md
+      // samples under docs/_examples/ are not real, lifecycle-managed skills.
+      if (entry.name === '_examples' && basename(dir) === 'docs') continue;
 
       // At workspace root: only scan known subdirectories
       if (IS_WORKSPACE_ROOT && dir === ROOT) {
@@ -333,15 +345,12 @@ function auditSkills(jsonMode = false): AuditResult {
         file: relPath,
         message: `scope field missing in SKILL.md frontmatter — declare scope: workspace | common | variant`,
       });
-    } else {
-      const validScopes = ['workspace', 'common', 'variant'];
-      if (!validScopes.includes(scopeMatch[1])) {
-        warnings.push({
-          level: 'warning',
-          file: relPath,
-          message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant`,
-        });
-      }
+    } else if (!isValidScope(scopeMatch[1])) {
+      warnings.push({
+        level: 'warning',
+        file: relPath,
+        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME}`,
+      });
     }
 
     if (frontmatter.requires && frontmatter.requires.length > 0) {

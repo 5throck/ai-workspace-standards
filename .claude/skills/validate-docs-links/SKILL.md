@@ -5,7 +5,7 @@ version: 1.0.0
 last_reviewed: 2026-05-30
 status: active
 scope: common
-owner: docs-writer
+owner: pm
 prerequisites: Python or grep
 metadata:
   type: process

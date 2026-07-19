@@ -37,7 +37,11 @@
       "file": "agents/test-runner.md"
     }
   ],
-  "skills": [],
+  "skills": [
+    { "name": "code-review" },
+    { "name": "refactoring" },
+    { "name": "test-driven-development" }
+  ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": ["architect", "designer", "stack-setup", "code-writer", "test-runner", "security-monitor"],

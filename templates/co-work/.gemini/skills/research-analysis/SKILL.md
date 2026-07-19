@@ -5,6 +5,11 @@ description: >
   decision-making and documentation. Use when: analyzing topics, synthesizing research,
   gathering evidence, or investigating questions for documentation or strategy.
 version: 1.0.0
+scope: co-work
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: process
@@ -18,11 +23,11 @@ metadata:
     - literature review
 ---
 
-## Overview
+## Context
 
 This skill provides a structured approach to conducting systematic research, analyzing information, and synthesizing findings into actionable insights. It ensures research is thorough, well-documented, and focused on answering specific questions or solving particular problems.
 
-## When to Use This Skill
+## When to Use
 
 **Information Gathering**:
 - Trigger: "Research X topic" or "Gather information on Y"
@@ -41,6 +46,8 @@ This skill provides a structured approach to conducting systematic research, ana
 - Use Case: Understanding landscape and positioning
 
 ---
+
+## Execution Steps
 
 ## Step 1: Define Research Objectives
 
@@ -235,7 +242,7 @@ This skill provides a structured approach to conducting systematic research, ana
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Research Tasks**:
 - Research objectives and questions defined
