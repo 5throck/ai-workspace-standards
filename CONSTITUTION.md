@@ -555,6 +555,16 @@ The allowable values for `lang_reason` are:
 Exception is NOT available for: agents/*.md, skills/*.md, CONSTITUTION.md,
 CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.
 
+#### Non-English Reference Material in Skills
+
+Because the `lang: ko` exception is unavailable inside `skills/*.md`, a skill that genuinely needs non-English reference material — a terminology glossary, a mapping of official source-language field/status names, source-language excerpts — MUST NOT embed that content in `SKILL.md` or any other `.md` file under the skill directory. Instead:
+
+- Store the non-English content in a **non-Markdown reference file** (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`) under `skills/<name>/references/`. `bun scripts/validate-md-language.ts` only scans `*.md` files, so non-Markdown reference assets fall outside the English-only policy and may contain the source language directly, without frontmatter.
+- `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").
+- This is the general mechanism for any skill needing source-language reference data — not specific to Korean.
+
+See [docs/constitution/06-skill-lifecycle.md](docs/constitution/06-skill-lifecycle.md) for the skill-lifecycle registration details.
+
 #### Pluggable Variant Audit Hook
 
 A mechanism that allows variant-specific validation checks to be executed during the synchronization and validation pipeline without modifying core script files (e.g., `dev-sync.ts`, `audit.ts`). Variant-specific audits are placed in `scripts/audit-variant.ts`. If this script is present, the core validation runner (`audit.ts`) dynamically detects and executes it. Any non-zero exit code from `audit-variant.ts` will fail the audit gate.

@@ -142,7 +142,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.1.4 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
@@ -292,9 +292,11 @@ deprecated agent references, missing fields.
 
 #### `skill-lifecycle-audit.ts`
 **Purpose**: Full skill lifecycle audit —owner validation, orphaned skills, deprecated
-skills still being modified, dependency graph, circular dependencies.
+skills still being modified, dependency graph, circular dependencies, `scope` field validity.
 **Usage**: `bun scripts/skill-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `skills/**` files are staged.
+**v1.2.0**: `scope` validation now accepts `workspace | common | variant | <current project's own directory name>`; `docs/_examples/skills/**` excluded from scanning. Run once per location (workspace root + each `templates/co-*/` variant + `templates/common/`).
+
 
 #### `readme-lifecycle-audit.ts`
 **Purpose**: Validates README.md / README_ko.md pairing in `templates/` directories.

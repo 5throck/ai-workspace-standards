@@ -74,6 +74,8 @@ version: 1.0.0
 ---
 ```
 
+**`scope` allowed values**: `workspace` (L0-only), `common` (L0+L1, shared unmodified across all variants), `variant` (generic placeholder), or the **literal name of the variant the skill belongs to** (e.g. `scope: co-consult`) — a domain-only skill with a variant override and no `templates/common/` base. `scripts/helpers/layer-filter.ts` treats any value other than `workspace`/`common` as a variant-name marker and propagates the skill to L0+L1+L2. `scripts/skill-lifecycle-audit.ts` validates `scope` against `workspace | common | variant | <current project's own directory name>` — run the audit from inside the variant directory (e.g. `cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts`) so it can resolve the variant name correctly.
+
 #### L2 Propagation Control
 
 Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propagate-to-templates.ts`, and then snapshot-copied to generated projects (L2) at `new-project` time. Skills with `l2_propagate: false` are **excluded at the L0→L1 propagation stage** — they never enter `templates/common/` and therefore never reach L2 projects.
@@ -205,6 +207,19 @@ The audit checks for:
 - ✅ Deprecated skills still being modified
 - ✅ Missing dependencies (requires field)
 - ✅ Circular dependencies
+- ✅ `scope` field validity (see §6.2)
+
+**Run it in every location that matters, not just the workspace root**: the audit only resolves agents and scope relative to its own `cwd`. Run it once at the workspace root, and once from inside each variant directory:
+
+```bash
+bun scripts/skill-lifecycle-audit.ts                                   # workspace root (skills/, .claude/skills/)
+cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts  # repeat per templates/co-*/ variant
+cd templates/common && bun scripts/skill-lifecycle-audit.ts            # L1 common layer
+```
+
+> `docs/_examples/skills/**` is excluded from scanning — those `SKILL.md` files are illustrative documentation samples, not lifecycle-managed skills.
+
+**Common-scope skill owner pitfall**: a `scope: common` skill is used by every variant, but `templates/common/agents/` intentionally contains only `pm.md` — L0 specialist agents (`security-expert`, `lifecycle-manager`, `docs-writer`, etc.) are **not** propagated there (ADR-0043; see `agents/_COMMON.md`), and individual variants are not guaranteed to define them either. A `scope: common` skill whose `owner` names one of those specialist roles will audit clean at the workspace root (where the specialist agents genuinely exist) while showing up as **orphaned in every variant** that inherits it. Set `owner: pm` for any `scope: common` skill unless every variant is confirmed to define the specialist agent itself — verify with the multi-location audit loop above before assigning a specialist owner to a common-scope skill.
 
 ##### Agent Configuration Change Workflow
 
@@ -246,6 +261,14 @@ If audit fails:
 - Reassign orphaned skills to valid agents
 - Archive deprecated skills to `skills/_archive/`
 
+
+#### 6.7 Non-English Reference Material
+
+`skills/*.md` is a protected path under the workspace Language Policy — the `lang: ko` frontmatter exception never applies there, regardless of `lang_reason` (see [CONSTITUTION.md — Non-English Reference Material in Skills](../../CONSTITUTION.md#non-english-reference-material-in-skills)).
+
+When a skill needs source-language reference data (a terminology glossary, official field/status name mappings, source-language excerpts), place it in a **non-Markdown** file under `skills/<name>/references/` (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`). `validate-md-language.ts` only scans `*.md`, so these reference assets are exempt from the English-only policy and may contain the source language directly. `SKILL.md` stays English-only and links to the reference file.
+
+**Registration Checklist addition**: if a skill adds a `references/` reference asset, note it in the skill's `SKILLS.md` `notes` column (e.g. `notes: ko glossary in references/terms-ko.json`).
 
 ---
 

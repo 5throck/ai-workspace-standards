@@ -46,6 +46,10 @@ Use in Phase 1 when a consulting engagement requires Korean corporate financial 
 - Financial statements: revenue / operating profit / net income / total assets / total liabilities / total equity (key items)
 - Major event reports: summary of key decisions and dates
 
+## Reference Material
+
+- `references/terms-ko.json`: Korean-original DART terminology mapping (report types, corporate actions, financial statement line items, audit opinions, entity classes, status messages). Non-Markdown reference asset, exempt from the workspace English-only doc policy — see the Language Policy Exception in `context.md`.
+
 ## Related Skills
 
 - financial-modeling
