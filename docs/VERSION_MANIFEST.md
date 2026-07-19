@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-19T02:00:17.468Z
+**Generated**: 2026-07-19T03:23:28.131Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -54,7 +54,7 @@
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | translate, translation, localize, Korean translation | pm |
-| upgrade-project | 1.0.0 | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
+| upgrade-project | 1.1.0 | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
 | variant-feature | 1.0.0 | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
 
@@ -171,7 +171,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
 | update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.6.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.7.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.1 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-md-language.ts | 1.4.4 | scripts/validate-md-language.ts | fs |

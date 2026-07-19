@@ -1,10 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
 //           removed stale agent MERGE references and CONSTITUTION.md
 // v1.6.0: Added --prune-removed, --rollback, conflict detection for SYNC files, auto-discovery for script subdirs
+// v1.7.0: Added DOCS_MERGE (variant/common docs), VARIANT_DOCS_SYNC, COMMANDS_SYNC;
+//           extended managed block markers (VARIANT-INJECT, COMMON-AGENTS, DYNAMIC_SKILLS);
+//           added sync-skills.ts post-invoke for platform skill distribution
 //
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -271,11 +274,16 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
 /** Marker patterns supported by mergeWorkspaceManaged.
  *  Each entry supports raw regex in `open`/`close` fields — NOT literal strings.
  *  WORKSPACE-MANAGED open pattern accepts an optional `: description` suffix.
+ *  VARIANT-INJECT uses asymmetric open/close naming (open: VARIANT-INJECT, close: END VARIANT-INJECT).
+ *  COMMON-AGENTS and DYNAMIC_SKILLS use asymmetric START/END naming.
  */
 const MANAGED_PATTERNS: Array<{ open: RegExp; close: string; label: string }> = [
   { open: /<!-- WORKSPACE-MANAGED(?::[^\-]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
   { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
   { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
+  { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: '<!-- END VARIANT-INJECT -->', label: 'VARIANT-INJECT' },
+  { open: /<!-- COMMON-AGENTS:START -->/, close: '<!-- COMMON-AGENTS:END -->', label: 'COMMON-AGENTS' },
+  { open: /<!-- DYNAMIC_SKILLS_START -->/, close: '<!-- DYNAMIC_SKILLS_END -->', label: 'DYNAMIC_SKILLS' },
 ];
 
 /**
@@ -420,9 +428,159 @@ for (const rel of MERGE_FILES) {
 }
 console.log('');
 
+// ── Inline version parsing utility ──────────────────────────────────────────────
+function extractInlineVersion(filePath: string): string {
+  if (!existsSync(filePath)) return '';
+  const content = readFileSync(filePath, 'utf8');
+  const fname = basename(filePath).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return content.match(new RegExp(`\\*${fname}\\s+version:\\s*(\\d+\\.\\d+)`, 'm'))?.[1] ?? '';
+}
+
+function parseInlineVersion(ver: string): [number, number] {
+  const parts = ver.split('.').map(Number);
+  return [(parts[0] ?? 0), (parts[1] ?? 0)];
+}
+
+function inlineVersionGt(a: string, b: string): boolean {
+  const [amajor, aminor] = parseInlineVersion(a);
+  const [bmajor, bminor] = parseInlineVersion(b);
+  return amajor > bmajor || (amajor === bmajor && aminor > bminor);
+}
+
+// ── DOCS_MERGE: common/variant docs with managed blocks ───────────────────────
+console.log('--- DOCS_MERGE: common and variant docs (managed blocks) ---');
+const DOCS_MERGE_FILES: string[] = [
+  'docs/context.md',
+  'AGENTS.md',
+];
+// Auto-discover variant-specific context file
+const variantContextRel = `docs/${variant}.context.md`;
+if (existsSync(join(templatesDir, variantContextRel)) || existsSync(join(commonDir, 'docs', `${variant}.context.md`))) {
+  DOCS_MERGE_FILES.push(variantContextRel);
+}
+// Common docs without managed blocks → plain overwrite
+const DOCS_OVERWRITE_FILES: string[] = [
+  'docs/phase-definitions.md',
+];
+
+for (const rel of DOCS_MERGE_FILES) {
+  const src = resolveTemplate(rel);
+  const dest = join(projectDir, rel);
+  if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
+  console.log(`  MERGE: ${rel}`);
+  mergeWorkspaceManaged(dest, src, rel);
+  mergeChanged++;
+}
+for (const rel of DOCS_OVERWRITE_FILES) {
+  const src = resolveTemplate(rel);
+  const dest = join(projectDir, rel);
+  if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
+  if (!existsSync(dest)) {
+    console.log(`  NEW    ${rel}`);
+  } else {
+    diffSummary(dest, src);
+  }
+  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+  console.log(`  ${dryTag}WROTE: ${rel}`);
+  mergeChanged++;
+}
+console.log('');
+
+// ── VARIANT_DOCS_SYNC: variant-specific docs (version/hash based) ──────────────
+console.log('--- VARIANT_DOCS_SYNC: variant documentation (version/hash based) ---');
+const VARIANT_DOCS_SYNC: string[] = [
+  'docs/engagement-orchestration.md',
+  'docs/team-configuration-guide.md',
+];
+for (const rel of VARIANT_DOCS_SYNC) {
+  const src = join(templatesDir, rel);
+  const dest = join(projectDir, rel);
+  if (!existsSync(src)) { console.log(`  SKIP (no template): ${rel}`); continue; }
+
+  const tplInlineVer = extractInlineVersion(src);
+  if (!existsSync(dest)) {
+    console.log(`  NEW    ${rel}  ${tplInlineVer ? `(v${tplInlineVer})` : '(hash-based)'}`);
+    if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+    console.log(`  ${dryTag}COPIED: ${rel}`);
+    syncChanged++;
+  } else if (tplInlineVer) {
+    const projInlineVer = extractInlineVersion(dest);
+    if (!projInlineVer) {
+      console.log(`  UPDATE ${rel}  (no version) → v${tplInlineVer}`);
+      if (!dryRun) copyFileSync(src, dest);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else if (inlineVersionGt(tplInlineVer, projInlineVer)) {
+      if (isLocallyModified(dest)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  v${projInlineVer} → v${tplInlineVer}  (local modifications exist)`);
+      } else {
+        console.log(`  UPDATE ${rel}  v${projInlineVer} → v${tplInlineVer}`);
+      }
+      if (!dryRun) copyFileSync(src, dest);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else {
+      console.log(`  OK     ${rel}  v${projInlineVer}`);
+    }
+  } else {
+    // No inline version — hash-based
+    const tplHash = fileHash(src);
+    const projHash = fileHash(dest);
+    if (tplHash !== projHash) {
+      if (isLocallyModified(dest)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  (content changed, local modifications exist)`);
+      } else {
+        console.log(`  UPDATE ${rel}  (content changed)`);
+      }
+      if (!dryRun) copyFileSync(src, dest);
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else {
+      console.log(`  OK     ${rel}  (hash match)`);
+    }
+  }
+}
+console.log('');
+
+// ── COMMANDS_SYNC: platform command files (.claude/commands, .gemini/commands) ──
+console.log('--- COMMANDS_SYNC: platform commands (hash-based) ---');
+const COMMANDS_DIRS: string[] = [];
+if (platform === 'claude' || platform === 'both') COMMANDS_DIRS.push('.claude/commands');
+if (platform === 'antigravity' || platform === 'both') COMMANDS_DIRS.push('.gemini/commands');
+
+for (const cmdDir of COMMANDS_DIRS) {
+  // Check variant template first, then common
+  const tplCmdDir = existsSync(join(templatesDir, cmdDir)) ? join(templatesDir, cmdDir) : join(commonDir, cmdDir);
+  if (!existsSync(tplCmdDir)) { console.log(`  SKIP (no template): ${cmdDir}/`); continue; }
+  for (const fname of readdirSync(tplCmdDir)) {
+    if (!fname.endsWith('.md')) continue;
+    const rel = `${cmdDir}/${fname}`;
+    const src = join(tplCmdDir, fname);
+    const dest = join(projectDir, rel);
+    if (!existsSync(dest)) {
+      console.log(`  NEW    ${rel}`);
+      if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+      console.log(`  ${dryTag}COPIED: ${rel}`);
+      syncChanged++;
+    } else {
+      const tplHash = fileHash(src);
+      const projHash = fileHash(dest);
+      if (tplHash !== projHash) {
+        diffSummary(dest, src);
+        if (!dryRun) copyFileSync(src, dest);
+        console.log(`  ${dryTag}COPIED: ${rel}`);
+        syncChanged++;
+      } else {
+        console.log(`  OK     ${rel}`);
+      }
+    }
+  }
+}
+console.log('');
+
 // ── PRESERVE files ─────────────────────────────────────────────────────────────
 console.log('--- PRESERVE files (listed only, not modified) ---');
-const PRESERVE_FILES = ['README.md', 'README_ko.md', 'docs/context.md'];
+const PRESERVE_FILES = ['README.md', 'README_ko.md'];
 for (const rel of PRESERVE_FILES) {
   if (existsSync(join(projectDir, rel))) { console.log(`  PRESERVE: ${rel}`); preserveListed++; }
 }
@@ -769,6 +927,24 @@ if (hooksPath === '.githooks') {
   }
 }
 console.log('');
+
+// ── Post-upgrade: sync-skills.ts for platform skill distribution ──────────────
+const syncSkillsScript = join(projectDir, 'scripts', 'sync-skills.ts');
+if (syncChanged > 0 && existsSync(syncSkillsScript)) {
+  console.log('--- Post-upgrade: Running sync-skills.ts for platform skill distribution ---');
+  if (!dryRun) {
+    const syncResult = spawnSync('bun', ['scripts/sync-skills.ts'], { cwd: projectDir, encoding: 'utf8', timeout: 30000 });
+    if (syncResult.status === 0) {
+      console.log('  ✅ sync-skills.ts completed successfully');
+    } else {
+      console.log(`  ⚠️  sync-skills.ts exited with status ${syncResult.status}`);
+      if (syncResult.stderr) console.log(`  STDERR: ${syncResult.stderr.trim()}`);
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: bun scripts/sync-skills.ts');
+  }
+  console.log('');
+}
 
 // ── Summary ────────────────────────────────────────────────────────────────────
 console.log('========================================================');
