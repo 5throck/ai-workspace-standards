@@ -206,6 +206,8 @@ grep "^## " GEMINI.md
 
 > **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
 
+- [ ] Run `bun scripts/verify-scripts.ts --verify` in the L2 project — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
+
 ---
 
 ## Next Step

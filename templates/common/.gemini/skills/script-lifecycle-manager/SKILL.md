@@ -72,3 +72,5 @@ Run the `generate-scripts-readme.ts` script to ensure `README.md` is synchronize
 
 ### Step 4: Verification
 Run `bun scripts/verify-scripts.ts` (if available) to ensure dependencies are valid and no circular dependencies exist.
+
+> **L2 Projects**: When registering a new script in an L2 project's `scripts/SCRIPTS.md`, use `source: L2` and `layer: L0+L1` (not `L0`). Scripts placed in `scripts/<variant>/` subdirectories should be registered in the sub-registry at `scripts/<variant>/SCRIPTS.md`, not the main registry. See §6.5 Script Lifecycle Management for Tier 3 filtering details.
