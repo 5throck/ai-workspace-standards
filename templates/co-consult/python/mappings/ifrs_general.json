@@ -1,0 +1,188 @@
+{
+  "_metadata": {
+    "version": "1.0.0",
+    "description": "IFRS general industry account mapping for Korean DART data",
+    "industry": "general",
+    "industries_excluded": ["banking", "insurance", "securities"],
+    "source": "fnlttSinglAcntAll API",
+    "notes": "Maps Korean DART account_nm (exact match) to canonical English financial model field names. Priority 1 = primary name, Priority 2 = alternative/fallback name."
+  },
+  "mappings": {
+    "revenue": {
+      "account_nm_patterns": ["수익(매출액)", "매출액", "영업수익", "수익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "cogs": {
+      "account_nm_patterns": ["매출원가"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "gross_profit": {
+      "account_nm_patterns": ["매출총이익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "sg_and_a": {
+      "account_nm_patterns": ["판매비와관리비", "판매비및일반관리비 총계", "판매비와 일반관리비"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "rd_expense": {
+      "account_nm_patterns": ["연구개발비"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "depreciation": {
+      "account_nm_patterns": ["감가상각비"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "operating_income": {
+      "account_nm_patterns": ["영업이익(손실)", "영업이익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "ebt": {
+      "account_nm_patterns": ["법인세비용차감전순이익(손실)", "법인세차감전순이익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "tax_expense": {
+      "account_nm_patterns": ["법인세비용", "법인세비용(수익)"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "net_income": {
+      "account_nm_patterns": ["당기순이익(손실)", "당기순이익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "fin_expense": {
+      "account_nm_patterns": ["금융비용", "금융원가"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "fin_income": {
+      "account_nm_patterns": ["금융수익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "equity_method_income": {
+      "account_nm_patterns": ["지분법손익"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "minority_interest_ni": {
+      "account_nm_patterns": ["비지배지분에 귀속되는 당기순이익(손실)", "비지배지분"],
+      "sj_div": ["CIS"],
+      "priority": 1
+    },
+    "ebitda": {
+      "account_nm_patterns": ["영업현금흐름"],
+      "sj_div": ["CIS"],
+      "priority": 2,
+      "notes": "EBITDA is rarely reported directly in DART. This entry captures '영업현금흐름' as a loose proxy. Prefer computing EBITDA = operating_income + depreciation."
+    },
+    "operating_cf": {
+      "account_nm_patterns": ["영업활동현금흐름", "영업에서 창출된 현금흐름", "영업으로부터 창출된 현금흐름"],
+      "sj_div": ["CF"],
+      "priority": 1
+    },
+    "investing_cf": {
+      "account_nm_patterns": ["투자활동현금흐름"],
+      "sj_div": ["CF"],
+      "priority": 1
+    },
+    "financing_cf": {
+      "account_nm_patterns": ["재무활동현금흐름"],
+      "sj_div": ["CF"],
+      "priority": 1
+    },
+    "dividends_paid": {
+      "account_nm_patterns": ["배당금지급"],
+      "sj_div": ["CF"],
+      "priority": 1
+    },
+    "total_assets": {
+      "account_nm_patterns": ["자산총계"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "current_assets": {
+      "account_nm_patterns": ["유동자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "cash": {
+      "account_nm_patterns": ["현금및현금성자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "receivables": {
+      "account_nm_patterns": ["매출채권", "유동매출채권"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "inventory": {
+      "account_nm_patterns": ["재고자산", "유동재고자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "non_current_assets": {
+      "account_nm_patterns": ["비유동자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "ppe": {
+      "account_nm_patterns": ["유형자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "intangible_assets": {
+      "account_nm_patterns": ["무형자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "total_liabilities": {
+      "account_nm_patterns": ["부채총계"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "current_liabilities": {
+      "account_nm_patterns": ["유동부채"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "st_debt": {
+      "account_nm_patterns": ["단기차입금", "유동 차입금", "유동 차입금(사채 포함)"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "lt_debt": {
+      "account_nm_patterns": ["장기차입금", "비유동차입금(사채 포함)의 비유동성 부분"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "lease_liabilities": {
+      "account_nm_patterns": ["리스부채"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "right_of_use_assets": {
+      "account_nm_patterns": ["사용권자산"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "total_equity": {
+      "account_nm_patterns": ["자본총계"],
+      "sj_div": ["BS"],
+      "priority": 1
+    },
+    "retained_earnings": {
+      "account_nm_patterns": ["이익잉여금(결손금)"],
+      "sj_div": ["BS"],
+      "priority": 1
+    }
+  }
+}

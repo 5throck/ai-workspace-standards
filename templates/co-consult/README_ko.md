@@ -21,7 +21,7 @@ translated_from_hash: TBD
 
 | 에이전트 | 역할 및 역량 |
 |----------|--------------|
-| **Engagement Leader** | 컨설팅 단계 조율, 클라이언트 인터페이스 관리 |
+| **Engagement Leader (PM)** | 컨설팅 단계 조율, 클라이언트 인터페이스 관리 |
 | **Strategy Analyst** | 시장 분석, 경쟁사 리서치, 재무 모델링 |
 | **Industry Expert** | 산업별 심층 인사이트, 규제 환경 분석 |
 | **Change Management Partner** | 조직 변화 관리, 이해관계자 조율 |
@@ -31,9 +31,17 @@ translated_from_hash: TBD
 | **Workstream Lead** | 워크스트림 관리, 팀 조율 |
 | **Delivery Manager** | 프로젝트 딜리버리, 운영 조율 |
 | **Technology Specialist** | 디지털 트랜스포메이션 지원 |
-| **Data Analyst** | 통계 분석, 데이터 모델링, 비즈니스 인사이트 |
+| **Data Analyst** | 통계 분석, 데이터 모델링, 비즈니스 인사이트, 한국 DART 재무 분석 |
 
-## 3. 이 팀과의 협업 방법
+## 3. 핵심 스킬
+
+핵심 컨설팅 프레임워크(`competitive-intelligence`, `financial-modeling`, `solution-design`, `executive-presentation`, `stakeholder-alignment`, `org-readiness-assessment` 등 — 총 13개 스킬) 외에도, 이 팀은 두 가지 한국 시장 리서치 역량을 갖추고 있습니다.
+
+- **`k-dart`** — 한국 금융감독원(FSS) 전자공시시스템(DART) OpenAPI를 조회하여 기업 공시, 기업 개황, 재무제표, 주요사항보고서를 제공합니다.
+- **`company-intelligence`** — 종합적인 기업/기업집단 인텔리전스 수집. 5개의 병렬 리서치 에이전트(개요, 재무, 제품/시장, 애널리스트 커버리지, 리더십/거버넌스)를 투입하여 하나의 통합 보고서로 정리합니다.
+- **`financial-statement-analysis`** — 한국 재무제표 분석을 위한 전체 파이프라인: DART 수집 → 검증 → 정규화 → KPI 추출 → ROIC 밸류 드라이버 트리 → Markdown 보고서. `bun scripts/co-consult/financial-pipeline.ts`로 실행합니다. 단계별 안내는 [`docs/user-guide_ko.md`](docs/user-guide_ko.md)를 참고하세요.
+
+## 4. 이 팀과의 협업 방법
 
 우리와의 작업은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 다음은 우리의 표준 워크플로입니다:
 
@@ -53,5 +61,9 @@ translated_from_hash: TBD
 - `/changelog "..."` — `CHANGELOG.md`에 항목을 추가합니다.
 - `/memlog "summary"` — 오늘 세션 로그에 요약을 추가합니다.
 - `/meeting` — 구조화된 인라인 멀티 에이전트 토론을 실행합니다.
+
+### D. 실용 가이드
+
+특정 컨설팅 질문에 어떤 에이전트/스킬을 사용해야 하는지, financial-statement-analysis 파이프라인 안내, 인게이지먼트 단계, 산출물 저장 위치 등 작업 중심 안내는 [`docs/user-guide_ko.md`](docs/user-guide_ko.md)를 참고하세요.
 
 함께 훌륭한 결과물을 만들어 봅시다!

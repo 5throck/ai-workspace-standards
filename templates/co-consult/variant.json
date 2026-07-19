@@ -68,7 +68,8 @@
     { "name": "stakeholder-review-management" },
     { "name": "technical-feasibility" },
     { "name": "k-dart" },
-    { "name": "company-intelligence" }
+    { "name": "company-intelligence" },
+    { "name": "financial-statement-analysis" }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
@@ -82,6 +83,30 @@
       {
         "name": "md-to-report",
         "path": "scripts/co-consult/md-to-report.ts"
+      },
+      {
+        "name": "financial-pipeline",
+        "path": "scripts/co-consult/financial-pipeline.ts"
+      },
+      {
+        "name": "financial-validate",
+        "path": "scripts/co-consult/financial-validate.ts"
+      },
+      {
+        "name": "financial-normalize",
+        "path": "scripts/co-consult/financial-normalize.ts"
+      },
+      {
+        "name": "financial-kpi",
+        "path": "scripts/co-consult/financial-kpi.ts"
+      },
+      {
+        "name": "financial-driver-tree",
+        "path": "scripts/co-consult/financial-driver-tree.ts"
+      },
+      {
+        "name": "financial-report",
+        "path": "scripts/co-consult/financial-report.ts"
       }
     ],
     "external": []

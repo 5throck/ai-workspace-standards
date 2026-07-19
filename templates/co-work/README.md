@@ -29,6 +29,18 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **Storyteller** | Narrative construction, presentation structure |
 | **MS365 Expert** | Microsoft 365 platforms, workflow automation, template management |
 
+### Key Skills
+
+Variant-specific skills available to the team (see `skills/SKILLS.md` for the full registry):
+
+| Skill | Purpose |
+|-------|---------|
+| **api-documentation** | Endpoints, parameters, authentication, request/response schemas, and code examples for REST/GraphQL/SDK docs |
+| **documentation-writing** | Clear, accessible documentation and communications for technical and non-technical audiences |
+| **research-analysis** | Systematic research, data synthesis, and evidence-based analysis to support decisions and documentation |
+
+Additional platform-neutral skills are inherited from `templates/common/skills/`.
+
 ## 3. How to Collaborate with This Team
 
 Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:

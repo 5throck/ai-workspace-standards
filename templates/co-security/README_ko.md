@@ -42,11 +42,22 @@ translated_from_hash: TBD
 4. **조치 및 보고:** **Patch Engineer**가 패치를 배포하고 **Report Writer**가 결과를 문서화합니다.
 5. **리뷰 및 동기화:** `/sync "커밋 메시지"`를 사용하여 안전하게 커밋하고 PR을 엽니다.
 
-### C. 사용 가능한 명령어
+### C. 주요 스킬
+- **`verify-authorization`** (`skills/verify-authorization/SKILL.md`) — 필수 사전 점검 게이트입니다. Phase 1 이상(정찰, 취약점 공격, 패치) 작업을 진행하기 전에 서명된 승인 문서와 범위 문서가 존재하는지 확인합니다. `security-gate: true`.
+
+### D. 사용 가능한 명령어
 우리의 일상 업무는 슬래시 명령어로 진행됩니다 (Claude Code 및 Gemini CLI 스킬로 등록됨):
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목을 추가합니다.
 - `/memlog "summary"` — 오늘 세션 로그에 요약을 추가합니다.
 - `/meeting` — 구조화된 인라인 멀티 에이전트 토론을 실행합니다.
+
+### E. 산출물 위치
+- `docs/threat-models/` — STRIDE 표, 공격 트리, MITRE ATT&CK 매핑.
+- `docs/findings/` — CVSS 점수가 포함된 취약점 발견 티켓 (`FIND-NNNN.md`).
+- `docs/reports/` — 모의 해킹 보고서 및 요약 보고서.
+- `PATCH_LOG.md` — 적용된 조치 사항의 감사 로그.
+
+작업 중심의 사용 안내(시나리오 → 에이전트 조회, 단계 구조, 산출물 경로)는 [`docs/user-guide_ko.md`](docs/user-guide_ko.md)를 참고하세요.
 
 함께 훌륭한 결과물을 만들어 봅시다!

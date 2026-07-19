@@ -42,11 +42,22 @@ Always start your requests by talking to the **PM**. Do not invoke specialist ag
 4. **Remediation & Reporting:** The **Patch Engineer** deploys fixes and the **Report Writer** documents findings.
 5. **Review & Sync:** We use `/sync "commit message"` to safely commit and open a PR.
 
-### C. Available Commands
+### C. Key Skills
+- **`verify-authorization`** (`skills/verify-authorization/SKILL.md`) — the mandatory pre-flight gate. Confirms a signed authorization document and scope doc exist before any Phase 1+ (recon, exploitation, patching) activity may proceed. `security-gate: true`.
+
+### D. Available Commands
 Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
 - `/meeting` — Run a structured, inline multi-agent discussion.
+
+### E. Deliverable Locations
+- `docs/threat-models/` — STRIDE tables, attack trees, MITRE ATT&CK mappings.
+- `docs/findings/` — Vulnerability finding tickets (`FIND-NNNN.md`) with CVSS scores.
+- `docs/reports/` — Pentest reports and executive summaries.
+- `PATCH_LOG.md` — Audit log of applied remediations.
+
+For a task-oriented walkthrough (scenario → agent lookup, phase structure, deliverable paths), see [`docs/user-guide.md`](docs/user-guide.md).
 
 Let's build something great together!

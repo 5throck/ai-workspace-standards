@@ -51,4 +51,15 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/memlog "summary"` — Append a summary to today's session log.
 - `/meeting` — Run a structured, inline multi-agent discussion.
 
+## 4. Domain Skills
+
+Beyond the agent roster, the team draws on dedicated skills for deep, repeatable design methodology:
+
+| Skill | Purpose |
+|-------|---------|
+| **service-design** | End-to-end service ecosystem design — customer journey mapping, service blueprints, touchpoint design, and frontstage/backstage process alignment |
+| **ui-ux-design-intelligence** | Design system architecture — design tokens, component specification, visual hierarchy, WCAG accessibility compliance, and design handoff documentation |
+
+See [docs/user-guide.md](docs/user-guide.md) for a practical, task-oriented walkthrough of when to use each agent and skill, the workflow phases, and where deliverables are saved.
+
 Let's build something great together!

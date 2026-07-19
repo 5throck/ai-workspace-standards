@@ -33,17 +33,28 @@ sync_version: 1
 
 | 에이전트 | 역할 | 티어 |
 |---------|------|------|
-| architect | 시스템 설계 및 아키텍처 계획 | Medium |
+| architect | 시스템 설계 및 아키텍처 계획 | High |
 | code-writer | 기능 구현 | Low |
-| designer | UI/UX 및 컴포넌트 설계 | Low |
+| designer | UI/UX 및 컴포넌트 설계 | Medium |
 | security-monitor | 보안 검토 및 컴플라이언스 | Medium |
-| test-runner | 테스트 및 QA 검증 | Low |
+| stack-setup | 미확인 기술 스택 식별 및 안전한 설정 절차 | Low |
+| test-runner | 테스트 및 QA 검증 | Medium |
 
 ## 스킬
 
-Variant 전용 스킬 없음. `templates/common/skills/`의 공유 스킬을 사용합니다.
+Variant 전용 스킬 (`templates/co-develop/skills/`에 정의됨):
+
+| 스킬 | 목적 |
+|------|------|
+| `code-review` | 정확성, 유지보수성, 보안, 모범 사례 관점의 철저한 코드 리뷰 |
+| `refactoring` | 동작을 보존하면서 코드 구조를 체계적으로 재구성 |
+| `test-driven-development` | 신규 기능 및 버그 수정을 위한 red-green-refactor TDD 워크플로우 |
+
+그 외 모든 스킬은 `templates/common/skills/`에서 상속됩니다.
 
 ---
 
 **안정화 승격일**: 2026-06-13
 **템플릿 버전**: 1.0.0
+
+*최종 업데이트: 2026-07-19*
