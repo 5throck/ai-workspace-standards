@@ -201,6 +201,8 @@ bun run agent:verify
 - [ ] `.gemini/commands/` mirrors `.claude/commands/` (or gemini-parity: skip declared)
 - [ ] `.gemini/skills/` mirrors `.claude/skills/` (or gemini-parity: skip declared)
 - [ ] All `agents/*.md` have Section C: Antigravity Integration
+- [ ] L2 project `scripts/SCRIPTS.md` passes `bun scripts/verify-scripts.ts --verify` (no ghost entries, no PAIR MISSING)
+- [ ] Variant `scripts/<variant>/SCRIPTS.md` sub-registry exists and lists all variant-specific scripts
 
 ---
 

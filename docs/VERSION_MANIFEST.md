@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-19T06:54:30.602Z
+**Generated**: 2026-07-19T07:20:01.816Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -84,7 +84,7 @@
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
 | consulting-plugin.ts | 1.0.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
-| create-l2-scaffold.ts | 1.6.6 | scripts/create-l2-scaffold.ts | N/A |
+| create-l2-scaffold.ts | 1.7.0 | scripts/create-l2-scaffold.ts | N/A |
 | design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
 | dev-sync.ts | 1.3.5 | scripts/dev-sync.ts | bun |
 | development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |

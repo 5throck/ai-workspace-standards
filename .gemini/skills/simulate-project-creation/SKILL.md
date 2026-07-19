@@ -29,3 +29,4 @@ This skill is designed to be used by the `scaffolding-expert` or `architect` age
 3. Verify that the output files exist in `e2e-test-scaffold/` and match the `templates/` directory layout.
 4. Verify file encoding (ensure `.ps1` and `.md` files contain UTF-8 characters without CP949 corruption).
 5. Clean up: Delete the test folder after verification `rm -rf scripts/temp/e2e-test-scaffold`.
+6. **SCRIPTS.md consistency**: Run `bun scripts/verify-scripts.ts --verify` in the scaffolded project — must exit 0 with 0 errors (confirms L0-only registry entries were filtered out).

@@ -59,7 +59,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.6.6 | active | —| —| L0 | —|
+| `create-l2-scaffold.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.3.5 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|

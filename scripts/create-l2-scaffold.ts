@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.6.6
+// @version 1.7.0
 /**
  * create-l2-scaffold.ts
  *
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { includeScriptInL2 } from './helpers/layer-filter.ts';
+import { includeScriptInL2, parseScriptLayers } from './helpers/layer-filter.ts';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -210,6 +210,55 @@ function copyCommonOverlay(projectDir: string): void {
     copyItem(path.join(COMMON_SCRIPTS_DIR, entry), path.join(dstScripts, entry));
   }
   log(`  ✅ scripts/ copied (Tier 3 bootstrap/setup scripts excluded)`);
+
+  // ── Filter SCRIPTS.md for L2 ───────────────────────────────────────────────
+  // copyCommonOverlay copies SCRIPTS.md verbatim from L1, which includes L0-only
+  // registry rows.  Strip those rows so the project's SCRIPTS.md accurately
+  // reflects what's on disk (matches new-project.ts §6.5 behavior).
+  const projectScriptsMd = path.join(dstScripts, "SCRIPTS.md");
+  if (fs.existsSync(projectScriptsMd)) {
+    const layers = parseScriptLayers(projectScriptsMd);
+    const mdContent = fs.readFileSync(projectScriptsMd, "utf-8");
+    const lines = mdContent.split("\n");
+    const out: string[] = [];
+    let inRegistry = false;
+    let headerParsed = false;
+    let removed = 0;
+
+    for (const line of lines) {
+      if (/^## Registry/.test(line)) { inRegistry = true; headerParsed = false; out.push(line); continue; }
+      if (inRegistry && /^## /.test(line)) { inRegistry = false; out.push(line); continue; }
+      if (inRegistry) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("|-")) { out.push(line); continue; }
+        if (!trimmed.startsWith("|")) { out.push(line); continue; }
+        const cols = trimmed.split("|").slice(1, -1).map((c: string) => c.trim());
+        if (cols.length < 6) { out.push(line); continue; }
+        if (!headerParsed) { headerParsed = true; out.push(line); continue; }
+        const scriptName = cols[0].replace(/`/g, "");
+        const layer = layers.get(scriptName) ?? "L0+L1";
+        if (layer === "L0") { removed++; continue; }
+      }
+      out.push(line);
+    }
+
+    const rewritten = out.join("\n")
+      .replace(
+        "> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).\n" +
+        "> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n" +
+        "> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.",
+        "> This file is a **project-level snapshot** (Tier 3) of the scripts that were scaffolded\n" +
+        "> from the common template. L0-only entries have been stripped.\n" +
+        "> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`."
+      )
+      .replace(
+        "*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*",
+        "*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*"
+      );
+
+    fs.writeFileSync(projectScriptsMd, rewritten, "utf-8");
+    log(`  📝 Filtered SCRIPTS.md: removed ${removed} L0-only registry entries`);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

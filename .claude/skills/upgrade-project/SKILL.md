@@ -103,3 +103,14 @@ git stash pop stash@{0}
 - [Project Upgrade Guide](docs/project-upgrade-guide.md)
 - [Variant Conversion Guide](docs/variant-conversion-guide.md)
 - [Fork Model (ADR-0031)](docs/adr/0031-l1-l2-fork-model.md)
+
+## Post-Upgrade Verification
+
+After upgrading, run the following to confirm script registry consistency:
+
+```bash
+cd <project-directory>
+bun scripts/verify-scripts.ts --verify
+```
+
+Must exit 0 with 0 errors. If ghost entries appear, the project's `scripts/SCRIPTS.md` may need manual cleanup (see Constitution §6.5 [Tier 3 SCRIPTS.md Filtering](docs/constitution/06.5-script-lifecycle.md#tier-3-script-md-filtering)).
