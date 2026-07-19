@@ -62,6 +62,7 @@
 | **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle and validation |
 | **Project Review** | `.claude/skills/project-review/SKILL.md` | Comprehensive parallel review of the project |
 | **Team Builder** | `skills/team-builder/SKILL.md` | Build new agent team: requirements interview, benchmarking, proposal generation, approval gate |
+| **Company Intelligence** | `skills/company-intelligence/SKILL.md` | Comprehensive company and corporate group intelligence gathering and analysis |
 
 **Phase 1 — Research & Analysis**
 
@@ -70,6 +71,7 @@
 | **Competitive Intelligence** | `skills/competitive-intelligence/SKILL.md` | strategy-analyst |
 | **Financial Modeling** | `skills/financial-modeling/SKILL.md` | strategy-analyst |
 | **Insight Synthesis** | `skills/insight-synthesis/SKILL.md` | strategy-analyst |
+| **k-dart** | `skills/k-dart/SKILL.md` | strategy-analyst |
 | **Stakeholder Alignment** | `skills/stakeholder-alignment/SKILL.md` | change-management-partner |
 | **Org Readiness Assessment** | `skills/org-readiness-assessment/SKILL.md` | change-management-partner |
 
@@ -232,7 +234,8 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 |--------|---------|
 | `deliverables/reports/` | Final deliverables, client-ready reports |
 | `deliverables/drafts/` | Work-in-progress documents and drafts |
-| `deliverables/research/` | Research notes, source materials, data |
+| `deliverables/research/` | Research findings, analytical outputs, data analysis results |
+| `deliverables/references/` | Reference materials, source archives, citations, supporting documents |
 | `deliverables/presentations/` | Client presentation decks |
 | `memory/` | Session logs, meeting transcripts |
 
@@ -248,10 +251,15 @@ Each agent must save its deliverables to the designated folder with the specifie
 |-------|-------------|-------------|-------------------|
 | Industry Expert | Industry analysis reports, trend briefings | `deliverables/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}_ko.md` |
 | Industry Expert | Regulatory overviews | `deliverables/research/` | `{topic}-regulatory-{YYYY-MM-DD}_ko.md` |
+| Industry Expert | Source archives, regulatory documents | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
 | Strategy Analyst | Research findings, competitive analyses, financial models | `deliverables/research/` | `{topic}-{report-type}-{YYYY-MM-DD}_ko.md` |
+| Strategy Analyst | Source data, financial filings, analyst reports | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
 | Data Analyst | Data analysis reports, model outputs | `deliverables/research/` | `{topic}-data-analysis-{YYYY-MM-DD}_ko.md` |
+| Data Analyst | Raw data sources, dataset references | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
 | Subject Matter Expert | Functional analysis reports, benchmarking | `deliverables/research/` | `{topic}-{function}-analysis-{YYYY-MM-DD}_ko.md` |
+| Subject Matter Expert | Reference documents, benchmarks | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
 | Change Management Partner | Culture statements, readiness assessments | `deliverables/research/` | `{topic}-change-assessment-{YYYY-MM-DD}_ko.md` |
+| Change Management Partner | Assessment references | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
 | Communications Lead | Consulting reports, stakeholder comms | `deliverables/reports/` | `{deliverable-type}-{YYYY-MM-DD}_ko.md` |
 | Communications Lead | Executive presentations | `deliverables/presentations/` | `{deck-title}-{YYYY-MM-DD}_ko.md` |
 | Solutions Architect | Architecture documents, feasibility assessments | `deliverables/reports/` | `{topic}-architecture-{YYYY-MM-DD}_ko.md` |

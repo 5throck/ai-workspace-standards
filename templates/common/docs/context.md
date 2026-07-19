@@ -45,9 +45,13 @@ Standard directory layout for all projects in this workspace:
 ├── scripts/      # Automation scripts (TypeScript, .ts via bun)
 ├── memory/       # Session logs (MEMORY.md index + daily logs)
 ├── agents/       # Role-based agent definitions
-├── skills/       # Reusable workflow skills
-└── .claude/      # Claude Code settings and slash commands
+├── skills/       # Reusable workflow skills (SSOT for all platforms)
+├── .claude/      # Claude Code / Claude App settings and slash commands
+├── .gemini/      # Gemini CLI settings and slash commands
+└── .agents/      # Antigravity / Antigravity CLI settings and slash commands
 ```
+
+**Cross-Platform Skill Availability**: `skills/` is the Single Source of Truth (SSOT) for all skill definitions. Every skill MUST be available on all AI platforms (Claude Code, Claude App, Gemini CLI, Antigravity, Antigravity CLI). Platform distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) are derived copies — they MUST NOT be the sole location of any skill.
 
 ---
 
@@ -60,7 +64,9 @@ Standard directory layout for all projects in this workspace:
 | `CLAUDE.md` | Claude Code session behavior and slash commands |
 | `GEMINI.md` | Gemini CLI / Antigravity session behavior |
 | `AGENTS.md` | Canonical agent index (auto-loaded by Claude Code) |
-| `.agents/skills.json` | Customizations config registering skills/ |
+| `.claude/skills.json` | Claude Code/App skill discovery config (registers `skills/` SSOT) |
+| `.gemini/skills.json` | Gemini CLI skill discovery config (registers `skills/` SSOT) |
+| `.agents/skills.json` | Antigravity/Antigravity CLI skill discovery config (registers `skills/` SSOT) |
 | `scripts/audit.ts` | Documentation audit (enforced on pre-commit) |
 | `scripts/dev-sync.ts` | Full sync pipeline (memlog → audit → commit → PR) |
 | `memory/MEMORY.md` | Development log index |

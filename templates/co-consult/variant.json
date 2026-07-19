@@ -66,7 +66,9 @@
     { "name": "solution-design" },
     { "name": "stakeholder-alignment" },
     { "name": "stakeholder-review-management" },
-    { "name": "technical-feasibility" }
+    { "name": "technical-feasibility" },
+    { "name": "k-dart" },
+    { "name": "company-intelligence" }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
