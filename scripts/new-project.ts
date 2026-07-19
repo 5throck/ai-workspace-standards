@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -640,6 +640,77 @@ if (existsSync(projectScriptsDir)) {
       console.error(`[new-project] Error: ${err}`);
     }
   }
+}
+
+// ── 6.5 Filter SCRIPTS.md for L2 ─────────────────────────────────────────────
+// The bulk copy from templates/common/ brings the full L0+L1 registry into the
+// project.  After L0-only .ts files are removed above, SCRIPTS.md still contains
+// their rows — causing "Ghost entry" errors in verify-scripts.ts.  Strip those
+// rows and rewrite the header to reflect the L2 snapshot context.
+const projectScriptsMd = join(projectScriptsDir, 'SCRIPTS.md');
+if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
+  const mdContent = readFileSync(projectScriptsMd, 'utf-8');
+  const l0Set = new Set(l0Scripts.map(s => s.replace(/`/g, '')));
+
+  const lines = mdContent.split('\n');
+  const out: string[] = [];
+  let inRegistry = false;
+  let headerParsed = false;
+  let removed = 0;
+
+  for (const line of lines) {
+    // Track registry boundaries (same delimiters verify-scripts.ts uses)
+    if (/^## Registry/.test(line)) {
+      inRegistry = true;
+      headerParsed = false;
+      out.push(line);
+      continue;
+    }
+    if (inRegistry && /^## /.test(line)) {
+      inRegistry = false;
+      out.push(line);
+      continue;
+    }
+
+    if (inRegistry) {
+      const trimmed = line.trim();
+      // Skip separator row
+      if (trimmed.startsWith('|-')) { out.push(line); continue; }
+      if (!trimmed.startsWith('|')) { out.push(line); continue; }
+
+      // Extract script name (first column, between pipes)
+      const cols = trimmed.split('|').slice(1, -1).map(c => c.trim());
+      if (cols.length < 6) { out.push(line); continue; }
+
+      if (!headerParsed) { headerParsed = true; out.push(line); continue; }
+
+      const scriptName = cols[0].replace(/`/g, '');
+      if (l0Set.has(scriptName)) {
+        removed++;
+        continue; // drop L0-only row
+      }
+    }
+
+    out.push(line);
+  }
+
+  // Rewrite header to reflect L2 snapshot context
+  const rewritten = out.join('\n')
+    .replace(
+      '> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).\n' +
+      '> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n' +
+      '> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.',
+      '> This file is a **project-level snapshot** (Tier 3) of the scripts that were scaffolded\n' +
+      '> from the common template at `new-project` time. L0-only entries have been stripped.\n' +
+      '> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`.'
+    )
+    .replace(
+      '*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*',
+      '*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*'
+    );
+
+  writeFileSync(projectScriptsMd, rewritten, 'utf-8');
+  console.log(`  📝 Filtered SCRIPTS.md: removed ${removed} L0-only registry entries`);
 }
 
 // ── 7. Initialize git ──────────────────────────────────────────────────────────

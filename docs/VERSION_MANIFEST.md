@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-19T06:32:01.539Z
+**Generated**: 2026-07-19T06:54:30.602Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -120,7 +120,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.4.0 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.5.0 | scripts/new-project.ts | js-yaml |
 | normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
@@ -192,7 +192,7 @@
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.2.2 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.3.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 | workspace-integration.ts | 1.0.0 | scripts/helpers/workspace-integration.ts | crypto, fs, path |

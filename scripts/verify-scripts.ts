@@ -1,10 +1,13 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.2.2
+ * @version 1.3.0
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
+ *
+ * Layer-aware: auto-detects L0 (workspace root) vs L1/L2 (project) context and
+ * skips L0-only registry entries when running in an L2 project.
  *
  * Usage:
  *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
@@ -53,6 +56,22 @@ const workspaceRoot = findWorkspaceRoot(scriptDir);
 const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT
 const l1TemplateDir = join(workspaceRoot, "templates", "common", "scripts");  // L1 snapshot
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
+
+// ── Layer Detection ──────────────────────────────────────────────────────────
+// Determine the current execution context so that checks can be scoped.
+// L0 = workspace root (CONSTITUTION.md), full verification.
+// L1 = template (variant.json without CONSTITUTION.md), skip L0-only entries.
+// L2 = scaffolded project (docs/context.md only), skip L0-only entries.
+
+type ContextLayer = "L0" | "L1" | "L2";
+
+function detectContextLayer(): ContextLayer {
+  if (existsSync(join(workspaceRoot, "CONSTITUTION.md"))) return "L0";
+  if (existsSync(join(workspaceRoot, "variant.json"))) return "L1";
+  return "L2";
+}
+
+const contextLayer = detectContextLayer();
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -139,6 +158,18 @@ function getActualScripts(): string[] {
   return walkScripts(scriptsDir)
     .map((absPath) => relative(scriptsDir, absPath).replace(/\\/g, "/"))
     .sort();
+}
+
+// ── Layer-Aware Filtering ────────────────────────────────────────────────────
+// In L1/L2 context, L0-only entries are irrelevant (their .ts files are
+// intentionally absent).  Returns true when the entry should be checked.
+
+const L0_ONLY_LAYERS = new Set(["L0", "L0-only"]);
+
+function isLayerRelevant(entry: RegistryEntry): boolean {
+  if (contextLayer === "L0") return true;
+  // In L1/L2, skip entries whose layer marks them as workspace-only
+  return !L0_ONLY_LAYERS.has(entry.layer);
 }
 
 // ── Drift Detection ──────────────────────────────────────────────────────────
@@ -264,15 +295,20 @@ function verify(): boolean {
   }
 
   // Check 1: Scripts on disk but not in registry
+  // In L1/L2, build a set of relevant (non-L0-only) registered names only
+  const relevantRegisteredNames = contextLayer === "L0"
+    ? registeredNames
+    : new Set(registry.filter(isLayerRelevant).map((e) => e.script));
   for (const script of actualScripts) {
-    if (!registeredNames.has(script)) {
+    if (!relevantRegisteredNames.has(script)) {
       errors.push(`Unregistered script: \`${script}\` — add to SCRIPTS.md Registry`);
     }
   }
 
   // Check 2: Scripts in registry but not on disk
-  // All scripts (L0 and L1) live in workspace scripts/ (L0 SSOT)
+  // In L0, check all entries. In L1/L2, skip L0-only entries (intentionally absent).
   for (const entry of registry) {
+    if (!isLayerRelevant(entry)) continue;
     if (!existsSync(join(scriptsDir, entry.script))) {
       errors.push(
         `Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`
@@ -280,12 +316,15 @@ function verify(): boolean {
     }
   }
 
-  // Check 6: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
-  const { drifted } = detectDrift(registry);
-  for (const d of drifted) {
-    warnings.push(
-      `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines.`
-    );
+  // Check 6a: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
+  // In L2, skip entirely — templates/common/scripts/ does not exist in project scope.
+  if (contextLayer === "L0" || contextLayer === "L1") {
+    const { drifted } = detectDrift(registry);
+    for (const d of drifted) {
+      warnings.push(
+        `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines.`
+      );
+    }
   }
 
   // Check 3: Security advisories — hard block
@@ -373,7 +412,8 @@ function verify(): boolean {
 
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
-  console.log(`Registry: ${scriptsMdPath} (L0 SSOT)`);
+  console.log(`Context: ${contextLayer} (${contextLayer === "L0" ? "workspace root — full verification" : contextLayer === "L1" ? "template — L0-only entries skipped" : "project — L0-only entries skipped"})`);
+  console.log(`Registry: ${scriptsMdPath}`);
   console.log(`Scripts dir: ${scriptsDir}\n`);
 
   if (warnings.length > 0) {
