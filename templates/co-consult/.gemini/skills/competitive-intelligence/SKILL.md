@@ -1,62 +1,54 @@
 ---
 name: competitive-intelligence
+scope: co-consult
 description: >
-  Conducts structured competitive intelligence analysis for consulting engagements.
-  Use when: analyzing market competitors, benchmarking client position, researching
-  industry landscape, or building competitive strategy frameworks.
+  Guides the Strategy Analyst through systematic market and competitive analysis
+  for consulting engagements. Includes market entry analysis module. Covers
+  framework selection (Porter's Five Forces, SWOT, PESTEL, etc.), competitor
+  profiling, market sizing, and opportunity assessment.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - competitive intelligence
-    - competitor analysis
-    - market analysis
-    - benchmarking
-    - industry landscape
-    - competitive positioning
+last_reviewed: 2026-06-13
+status: active
+owner: strategy-analyst
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill provides a structured approach to gathering, analyzing, and synthesizing competitive intelligence to support strategic consulting recommendations.
+Use at the start of Phase 1 whenever a consulting engagement requires understanding the competitive landscape, market dynamics, or industry structure.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Analyze competitors" or "Competitive landscape"
-- Use Case: Market positioning analysis for client strategy engagements
-- Phase: Phase 1 (Discovery & Analysis)
+- Market entry or expansion analysis
+- Competitive benchmarking
+- Industry attractiveness assessment
+- Opportunity sizing
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Competitive Scope
-- Identify direct and indirect competitors
-- Define competitive dimensions (price, product, market share, capabilities)
-- Align scope with client's strategic questions
+1. **Define Research Scope**: Clarify industry boundaries, geographic scope, and time horizon with Engagement Leader
+2. **Select Frameworks**: Choose 2-3 appropriate frameworks based on engagement type:
+   - Porter's Five Forces (industry attractiveness)
+   - SWOT (internal/external factors)
+   - PESTEL (macro-environment)
+   - Competitive Positioning Map (relative market position)
+3. **Competitor Profiling**: For each key competitor document: market share, positioning, strengths/weaknesses, strategic moves, financial health indicators
+4. **Market Sizing**: TAM → SAM → SOM calculation with methodology documented
+5. **Market Entry Module** (when applicable):
+   - Regulatory and compliance requirements
+   - Entry barriers and success factors
+   - Recommended entry mode (organic, partnership, acquisition)
+   - Go-to-market timeline
+6. **Synthesis**: Produce structured findings with executive summary, methodology, key findings, implications, and recommendations
+7. **Handoff**: Pass findings to `insight-synthesis` for integration with other analyses
 
-### Step 2: Data Collection
-- Gather public filings, press releases, and industry reports
-- Analyze product offerings, pricing, and positioning
-- Identify key differentiators and weaknesses
+## Output Format
 
-### Step 3: Competitive Mapping
-- Create competitive positioning matrix
-- Map strengths/weaknesses per competitor
-- Identify white space opportunities
-
-### Step 4: Strategic Implications
-- Synthesize findings into client-relevant insights
-- Develop competitive response options
-- Prioritize recommendations by impact
-
-## Expected Outputs
-
-- Competitive landscape summary
-- Positioning matrix
-- Strategic implications memo
+- Competitive Analysis Report with: Executive Summary, Methodology, Industry Overview, Competitor Profiles (table), Market Sizing, Strategic Implications, Recommendations
+- Optional: Market Entry Assessment addendum
 
 ## Related Skills
 
 - insight-synthesis
 - financial-modeling
-- narrative-framework
+- research-analysis

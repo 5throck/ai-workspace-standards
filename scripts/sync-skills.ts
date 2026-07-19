@@ -12,7 +12,16 @@
  * source (dirsEqual()); unchanged skills are left untouched on repeat runs
  * (no needless mtime churn or filesystem writes).
  *
- * @version 1.3.0
+ * By default operates on the workspace root. Pass `--dir <path>` to target a single
+ * project root instead (e.g. a `templates/co-*` variant or `templates/common`), or
+ * `--all-variants` to run once per `templates/co-*` directory plus `templates/common`
+ * — this is how per-variant `.agents/skills/` (Antigravity CLI) drift gets caught and
+ * fixed; the default workspace-root run does NOT touch variant directories.
+ *
+ * `security-gate: true` skills (validate-templates.ts Check B-03) are excluded from
+ * Phase 1 distribution entirely — they must remain platform-neutral (`skills/` only).
+ *
+ * @version 1.4.1
  */
 
 import * as fs from 'node:fs';
@@ -21,10 +30,30 @@ import * as path from 'node:path';
 const scriptDir     = import.meta.dir;
 const workspaceRoot = path.resolve(scriptDir, '..');
 
-const ssotSkills   = path.join(workspaceRoot, 'skills');
-const claudeSkills = path.join(workspaceRoot, '.claude', 'skills');
-const geminiSkills = path.join(workspaceRoot, '.gemini', 'skills');
-const agentsSkills = path.join(workspaceRoot, '.agents', 'skills');
+function resolveTargetRoots(): string[] {
+    const args = process.argv.slice(2);
+    const dirArgIndex = args.indexOf('--dir');
+    if (dirArgIndex !== -1 && args[dirArgIndex + 1]) {
+        return [path.resolve(workspaceRoot, args[dirArgIndex + 1])];
+    }
+    if (args.includes('--all-variants')) {
+        const templatesDir = path.join(workspaceRoot, 'templates');
+        const variants = fs.readdirSync(templatesDir, { withFileTypes: true })
+            .filter(d => d.isDirectory() && d.name.startsWith('co-'))
+            .map(d => path.join(templatesDir, d.name));
+        return [...variants, path.join(templatesDir, 'common')];
+    }
+    return [workspaceRoot];
+}
+
+function dirsFor(root: string): SkillSyncDirs {
+    return {
+        ssotSkills:   path.join(root, 'skills'),
+        claudeSkills: path.join(root, '.claude', 'skills'),
+        geminiSkills: path.join(root, '.gemini', 'skills'),
+        agentsSkills: path.join(root, '.agents', 'skills'),
+    };
+}
 
 export interface SkillSyncDirs {
     ssotSkills: string;
@@ -78,6 +107,7 @@ function defaultCopyDir(src: string, dest: string): void {
 export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = {}): Promise<{ errors: string[] }> {
     const copyDir = opts.copyDir ?? defaultCopyDir;
     const { ssotSkills, claudeSkills, geminiSkills, agentsSkills } = dirs;
+    const root = path.dirname(ssotSkills);
 
     fs.mkdirSync(claudeSkills, { recursive: true });
     fs.mkdirSync(geminiSkills, { recursive: true });
@@ -95,8 +125,16 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
             const itemPath = path.join(ssotSkills, item);
             const stat = fs.statSync(itemPath);
             if (!stat.isDirectory()) continue;
+            const skillMdSrc = path.join(itemPath, 'SKILL.md');
             // Skip non-skill files (README.md, SKILLS.md, etc.)
-            if (!fs.existsSync(path.join(itemPath, 'SKILL.md'))) continue;
+            if (!fs.existsSync(skillMdSrc)) continue;
+
+            // `security-gate: true` skills are a platform-neutral-only hard gate
+            // (validate-templates.ts Check B-03) — they must never be mirrored into
+            // .claude/skills/, .gemini/skills/, or .agents/skills/, only skills/.
+            if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
+                continue;
+            }
 
             for (const targetDir of [claudeSkills, geminiSkills, agentsSkills]) {
                 const target = path.join(targetDir, item);
@@ -104,13 +142,13 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                     continue; // idempotent skip — content already matches
                 }
                 copyDir(itemPath, target);
-                console.log(`  -> Synced ${item} to ${path.relative(workspaceRoot, targetDir)}/`);
+                console.log(`  -> Synced ${item} to ${path.relative(root, targetDir)}/`);
             }
 
             // Special logic for commands derived from skills
             if (item === 'meeting-facilitation') {
-                const claudeCmdDir = path.join(workspaceRoot, '.claude', 'commands');
-                const geminiCmdDir = path.join(workspaceRoot, '.gemini', 'commands');
+                const claudeCmdDir = path.join(root, '.claude', 'commands');
+                const geminiCmdDir = path.join(root, '.gemini', 'commands');
                 fs.mkdirSync(claudeCmdDir, { recursive: true });
                 fs.mkdirSync(geminiCmdDir, { recursive: true });
 
@@ -152,7 +190,7 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
                     continue; // idempotent skip
                 }
                 copyDir(source, target);
-                console.log(`  -> Synced shortcut ${item} to ${path.relative(workspaceRoot, targetDir)}/`);
+                console.log(`  -> Synced shortcut ${item} to ${path.relative(root, targetDir)}/`);
             }
         } catch (err) {
             const msg = (err instanceof Error) ? err.message : String(err);
@@ -165,12 +203,19 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
 }
 
 if (import.meta.main) {
-    console.log(`Syncing skills from SSOT (${ssotSkills})...`);
-    const { errors } = await syncSkills({ ssotSkills, claudeSkills, geminiSkills, agentsSkills });
+    const targetRoots = resolveTargetRoots();
+    const allErrors: string[] = [];
 
-    if (errors.length > 0) {
-        console.error(`\n❌ ${errors.length} error(s) during skill synchronization:`);
-        for (const e of errors) console.error(`  - ${e}`);
+    for (const root of targetRoots) {
+        const dirs = dirsFor(root);
+        console.log(`Syncing skills from SSOT (${dirs.ssotSkills})...`);
+        const { errors } = await syncSkills(dirs);
+        allErrors.push(...errors);
+    }
+
+    if (allErrors.length > 0) {
+        console.error(`\n❌ ${allErrors.length} error(s) during skill synchronization:`);
+        for (const e of allErrors) console.error(`  - ${e}`);
         process.exitCode = 1;
     }
 

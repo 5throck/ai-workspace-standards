@@ -5,6 +5,11 @@ description: >
   refactoring techniques. Use when: cleaning up code, reducing duplication, improving
   maintainability, or paying down technical debt.
 version: 1.0.0
+scope: co-develop
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: process
@@ -18,11 +23,11 @@ metadata:
     - improve design
 ---
 
-## Overview
+## Context
 
 This skill provides systematic refactoring capabilities, transforming code into better designs while ensuring behavior remains unchanged. It emphasizes safety, test coverage, and incremental improvements.
 
-## When to Use This Skill
+## When to Use
 
 **Code Cleanup**:
 - Trigger: "Refactor this code" or "Clean up implementation"
@@ -41,6 +46,8 @@ This skill provides systematic refactoring capabilities, transforming code into 
 - Use Case: Ensuring code remains easy to understand and modify
 
 ---
+
+## Execution Steps
 
 ## Step 1: Refactoring Preparation
 
@@ -352,7 +359,7 @@ Identify Issue → Plan Refactoring → Apply Change → Run Tests → Commit �
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Code Cleanup**:
 - Cleaner, more organized code

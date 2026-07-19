@@ -1,62 +1,69 @@
 ---
 name: change-impact-assessment
+scope: co-consult
 description: >
-  Assesses the people, process, and technology impacts of proposed organizational changes.
-  Use when: quantifying change scope, identifying affected groups, analyzing disruption risk,
-  or building change management plans for consulting deliverables.
+  Guides the Change Management Partner through systematically mapping how a
+  proposed change affects specific organizational layers, processes, roles, and
+  individuals. Produces layer-by-layer impact maps that feed directly into
+  communications-lead's stakeholder messaging strategy.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - change impact
-    - impact assessment
-    - change scope
-    - disruption analysis
-    - people impact
-    - process impact
+last_reviewed: 2026-06-13
+status: active
+owner: change-management-partner
+prerequisites: org-readiness-assessment
 ---
 
-## Overview
+## Context
 
-This skill provides a structured methodology for assessing and quantifying the impact of organizational change across people, process, and technology dimensions.
+Use in Phase 3 after the solution direction is approved in Phase 2. The impact maps inform how Communications Lead frames messages for each affected group.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Impact assessment" or "Change impact"
-- Use Case: Scoping change management effort and identifying high-risk areas
-- Phase: Phase 3 (Deliverable Creation)
+- After solution scope is confirmed in Phase 2
+- When preparing targeted communications for different organizational groups
+- When identifying which teams need the most change management support
+- When building an implementation roadmap that accounts for transition complexity
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Change Scope
-- Document what is changing (process, system, structure, behavior)
-- Identify the change drivers and strategic rationale
-- Determine go-live timeline and phases
+1. **Define Change Parameters**: Confirm approved solution scope from Phase 2
 
-### Step 2: Identify Affected Groups
-- Map which roles, departments, and locations are impacted
-- Quantify headcount per affected group
-- Classify by degree of impact (high/medium/low)
+2. **Organizational Layer Mapping**: For each layer assess impact:
+   - Executive / Senior Leadership
+   - Middle Management
+   - Frontline Employees
+   - Support Functions (HR, Finance, IT, etc.)
+   - External stakeholders (customers, partners, regulators)
 
-### Step 3: Assess Impact Dimensions
-- Process changes: new workflows, eliminated steps, new handoffs
-- Technology changes: new systems, retraining needs
-- Behavioral changes: new skills, mindset shifts, cultural expectations
+3. **Process Impact Mapping**: For each affected process:
+   - Current state description
+   - Future state description
+   - Gap / change required
+   - Transition complexity (Low/Medium/High)
 
-### Step 4: Prioritize and Plan
-- Rank impacts by severity and urgency
-- Define change management interventions per group
-- Align with overall project plan and milestones
+4. **Role Impact Mapping**:
+   - Roles significantly changed (responsibilities shift >50%)
+   - Roles moderately changed (10–50%)
+   - Roles minimally changed (<10%)
+   - New roles required
+   - Roles potentially eliminated
 
-## Expected Outputs
+5. **Impact Severity Rating**: For each combination of layer × process:
+   - Critical / Significant / Moderate / Minor
 
-- Change impact heat map
-- Affected population analysis
-- Change management intervention plan
+6. **Readiness Gap per Group**: Cross-reference with org-readiness-assessment to identify which groups are least ready for their assigned impact level
+
+7. **Handoff to Communications Lead**: Structure output as "group → impact → key message needed" mapping
+
+## Output Format
+
+- **Impact Heatmap**: Layer × Process matrix with severity ratings
+- **Role Change Summary**: Role, Change Type, Impact Level, Affected Headcount
+- **Group Readiness Gap Table**: Group, Impact Level, Readiness Level, Gap, Priority
+- **Communications Brief per Group**: Group, Key Impact, Emotional Response Expected, Core Message Needed
 
 ## Related Skills
 
 - org-readiness-assessment
 - stakeholder-alignment
-- project-delivery
+- executive-presentation

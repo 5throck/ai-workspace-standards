@@ -37,7 +37,11 @@
       "file": "agents/technical-writer.md"
     }
   ],
-  "skills": [],
+  "skills": [
+    { "name": "api-documentation" },
+    { "name": "documentation-writing" },
+    { "name": "research-analysis" }
+  ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [],

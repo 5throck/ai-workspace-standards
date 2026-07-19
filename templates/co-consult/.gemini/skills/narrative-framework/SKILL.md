@@ -1,63 +1,60 @@
 ---
 name: narrative-framework
+scope: co-consult
 description: >
-  Builds compelling consulting narratives using structured storytelling frameworks.
-  Use when: developing storyline for client presentations, framing recommendations,
-  constructing executive summaries, or creating change communication messages.
+  Guides Communications Lead (and Solutions Architect for technical
+  presentations) through constructing persuasive narrative structures for
+  client deliverables. Converts analytical findings into compelling stories
+  using proven storytelling frameworks. Shared skill between
+  communications-lead and solutions-architect.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - narrative framework
-    - storyline
-    - consulting narrative
-    - executive summary
-    - communication framing
-    - message architecture
+last_reviewed: 2026-06-13
+status: active
+owner: communications-lead
+prerequisites: none
 ---
 
-## Overview
+## Context
 
-This skill applies proven consulting storytelling frameworks (Pyramid Principle, SCQA, situation-complication-resolution) to build persuasive and clear narratives for client deliverables.
+Use in Phase 3 before drafting any major client deliverable. The narrative structure created here is the skeleton that consulting-report-writing and executive-presentation build upon.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Build the narrative" or "Storyline structure"
-- Use Case: Structuring client presentation decks and executive communications
-- Phase: Phase 3 (Deliverable Creation)
+- Before writing any executive-facing deliverable
+- When technical solutions need to be explained to non-technical audiences
+- When data and analysis need to be converted into a persuasive recommendation
+- When the audience needs to make a decision and the narrative must guide them toward it
 
-## Steps
+## Execution Steps
 
-### Step 1: Define the Audience and Purpose
-- Who is the primary audience (board, C-suite, management)?
-- What decision or action is needed after this communication?
-- What is the desired emotional and intellectual response?
+1. **Identify Audience and Decision**: Who will read this? What decision do they need to make?
 
-### Step 2: Apply SCQA Framework
-- **Situation**: Establish shared context and background
-- **Complication**: Identify the tension or problem
-- **Question**: Surface the key question the audience is asking
-- **Answer**: State the core recommendation upfront
+2. **Choose Narrative Pattern**: Select the most appropriate structure:
+   - **Situation-Complication-Resolution (SCR)**: For strategic recommendations
+   - **Before-After-Bridge**: For transformation stories
+   - **Problem-Solution-Benefit**: For solution proposals
+   - **Minto Pyramid (SCQA)**: Situation → Complication → Question → Answer — for executive briefings
 
-### Step 3: Build Supporting Argument
-- Apply Pyramid Principle: conclusion first, then supporting evidence
-- Ensure MECE grouping of supporting points
-- Limit to 3-5 key messages per section
+3. **Extract the "So What?"**: Write the core message in one sentence. Test: "If the audience forgets everything else, what must they remember?"
 
-### Step 4: Refine for Tone and Impact
-- Calibrate formality and directness to audience
-- Use concrete language and avoid jargon
-- Test narrative flow with internal team before client delivery
+4. **Build the Evidence Spine**: Identify 3-5 supporting arguments that prove the core message. Each argument needs:
+   - Claim
+   - Evidence
+   - Implication
 
-## Expected Outputs
+5. **Tension and Resolution Arc**: Establish what is at stake if action is not taken. Frame the recommendation as the resolution to a real tension the client feels.
 
-- Narrative outline (SCQA structure)
-- Key message architecture
-- Communication tone guide
+6. **Technical Translation** (for Solutions Architect use): Map technical concepts to business outcomes. Rule: every technical statement must be followed by its business impact.
+
+7. **Flow Check**: Read the narrative aloud. Each section should answer: "So what does this mean for me?" from the audience's perspective.
+
+## Output Format
+
+- **Narrative Blueprint**: Core Message, Structure Pattern Used, Section-by-Section Flow (each with: heading, key point, supporting evidence, so-what statement)
+- **One-Page Story Map**: Visual representation of the narrative arc
 
 ## Related Skills
 
-- insight-synthesis
-- consulting-report-writing
 - executive-presentation
+- consulting-report-writing
+- insight-synthesis

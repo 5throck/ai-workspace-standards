@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-19T01:28:08.738Z
+**Generated**: 2026-07-19T02:00:17.468Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -156,7 +156,7 @@
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.3.0 | scripts/sync-skills.ts | N/A |
+| sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.1 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
 | template-utils.ts | 1.0.0 | scripts/helpers/template-utils.ts | N/A |

@@ -4,9 +4,12 @@ This directory contains variant-specific skills for the `co-design` template.
 
 ## Available Skills
 
-No variant-specific skills are currently defined for co-design.
+| skill | version | status | owner | last_reviewed | removal-date | notes |
+|-------|---------|--------|-------|---------------|--------------|-------|
+| `service-design` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `ui-ux-design-intelligence` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 
-All skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
+All other skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
 
 ## Adding Variant-Specific Skills
 

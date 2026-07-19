@@ -1,62 +1,64 @@
 ---
 name: financial-modeling
+scope: co-consult
 description: >
-  Builds and interprets financial models to support consulting engagement analysis.
-  Use when: developing business cases, analyzing financial scenarios, projecting ROI,
-  or structuring investment/cost-benefit analyses.
+  Guides the Strategy Analyst through building a full business case for consulting
+  recommendations. Covers ROI analysis, NPV/IRR/Payback Period calculation,
+  scenario sensitivity analysis, and explicitly includes change management cost
+  category. Designed to work iteratively with technical-feasibility (max 2 loops).
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - financial model
-    - business case
-    - ROI analysis
-    - cost-benefit
-    - financial projections
-    - scenario analysis
+last_reviewed: 2026-06-13
+status: active
+owner: strategy-analyst
+prerequisites: technical-feasibility, org-readiness-assessment
 ---
 
-## Overview
+## Context
 
-This skill provides a structured approach to financial modeling for strategy consulting, enabling data-driven recommendations backed by rigorous quantitative analysis.
+Use in Phase 1-2 after technical-feasibility and org-readiness-assessment have produced outputs. Converts complexity grades and risk factors into a complete financial business case for client decision-making.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Build a financial model" or "ROI analysis" or "Business case"
-- Use Case: Quantifying strategic options for client decision-making
-- Phase: Phase 1 (Discovery & Analysis)
+- Building investment justification for a recommended solution
+- Comparing financial impact of multiple strategic options
+- Presenting business case to C-level stakeholders
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Model Scope
-- Clarify decision being supported
-- Identify required financial outputs (NPV, IRR, payback, etc.)
-- Define time horizon and key assumptions
+1. **Gather Inputs**:
+   - Solution definition (from Engagement Leader brief)
+   - `technical-feasibility` outputs: complexity grade, risk cost range lookup values, preconditions
+   - `org-readiness-assessment` outputs: change management cost estimates, training requirements
+2. **Build Cost Model**:
+   - Implementation costs (use technical-feasibility complexity grade as basis)
+   - Change management costs (explicitly include — sourced from org-readiness-assessment):
+     - Training and capability building
+     - Change agent resourcing
+     - Schedule delay buffer for resistance
+   - Ongoing operational costs (year 1-3)
+   - Risk contingency (apply technical-feasibility cost range percentages)
+3. **Build Benefit Model**:
+   - Revenue uplift (quantified where possible)
+   - Cost reduction / efficiency gains
+   - Risk mitigation value
+4. **Financial Metrics**: Calculate NPV, IRR, Payback Period, ROI
+5. **Scenario Analysis**:
+   - Base case, optimistic, pessimistic
+   - Sensitivity table: top 3 variables that most impact NPV
+6. **Iteration Protocol**:
+   - **Entry condition**: Budget constraint confirmed mismatched with cost model
+   - **Max iterations**: 2 loops with technical-feasibility
+   - **Exit condition**: Cost range fits client budget OR Engagement Leader escalates to client after loop 2
+7. **Output**: Pass complete business case to `executive-presentation`
 
-### Step 2: Structure the Model
-- Outline revenue, cost, and investment drivers
-- Define scenarios (base, optimistic, pessimistic)
-- Map data sources and assumptions
+## Output Format
 
-### Step 3: Build and Validate
-- Develop model with clear logic and formulas
-- Sensitivity analysis on key variables
-- Validate against benchmarks or comparable data
-
-### Step 4: Interpret and Present
-- Summarize key findings and implications
-- Highlight critical assumptions and risks
-- Format for executive consumption
-
-## Expected Outputs
-
-- Financial model (structured analysis)
-- Scenario comparison table
-- Key assumptions register
+- Business Case Document: Executive Summary, Investment Overview, Cost Breakdown (incl. change management), Benefit Projections, NPV/IRR/Payback, Scenario Analysis, Recommendation
+- Excel-compatible data table for sensitivity analysis
 
 ## Related Skills
 
-- competitive-intelligence
+- technical-feasibility
+- org-readiness-assessment
 - insight-synthesis
-- solution-design
+- executive-presentation

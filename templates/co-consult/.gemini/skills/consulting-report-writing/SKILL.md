@@ -1,64 +1,78 @@
 ---
 name: consulting-report-writing
+scope: co-consult
 description: >
-  Writes professional consulting reports, memos, and strategic documents.
-  Use when: drafting engagement reports, writing strategic memos, creating
-  executive briefings, or producing structured client deliverables.
+  Guides Communications Lead through writing McKinsey/BCG-style consulting
+  reports. Covers issue tree structure, MECE principle application, slide/page
+  design logic, and recommendation framing with impact-feasibility assessment.
+  Sets the quality floor for all client-facing deliverables.
 version: 1.0.0
-gemini-parity: required
-metadata:
-  type: process
-  triggers:
-    - consulting report
-    - strategic memo
-    - engagement report
-    - client deliverable
-    - executive briefing
-    - written deliverable
+last_reviewed: 2026-06-13
+status: active
+owner: communications-lead
+prerequisites: narrative-framework
 ---
 
-## Overview
+## Context
 
-This skill provides a structured approach to writing high-quality consulting documents that communicate complex analysis clearly and persuasively to client stakeholders.
+Use in Phase 3 whenever a formal consulting deliverable (strategy report, assessment, recommendation memo) is being produced. The narrative-framework skill should be completed before this skill is invoked.
 
-## When to Use This Skill
+## When to Use
 
-- Trigger: "Write the report" or "Draft the memo" or "Client deliverable"
-- Use Case: Creating written consulting deliverables for client review
-- Phase: Phase 3 (Deliverable Creation)
+- When producing any formal client-facing consulting deliverable
+- When structuring a strategy report, assessment, or recommendation memo
+- When recommendations need to be prioritized and sequenced for a client
+- When the engagement reaches the deliverable production stage in Phase 3
 
-## Steps
+## Execution Steps
 
-### Step 1: Define Document Purpose and Audience
-- Clarify the primary question being answered
-- Identify reader's level of familiarity with subject
-- Determine document type (memo, report, briefing note)
+1. **Apply Issue Tree Structure**:
+   - Start from the central question (the client's decision)
+   - Decompose into MECE sub-questions (Mutually Exclusive, Collectively Exhaustive)
+   - Each section of the report answers one branch of the issue tree
 
-### Step 2: Outline Structure
-- Apply narrative framework (SCQA or Pyramid Principle)
-- Define sections: executive summary, findings, recommendations, appendix
-- Ensure logical flow from problem to recommendation
+2. **Section Architecture** (standard consulting report structure):
+   - Executive Summary (1-2 pages): findings, conclusions, recommendations — written last, placed first
+   - Situation / Context (1-2 pages): what is true today
+   - Complication / Problem (1-2 pages): why the status quo is not acceptable
+   - Resolution / Recommendations (3-5 pages): what should be done, in what order
+   - Implementation Roadmap (1-2 pages): phased actions with owners and timelines
+   - Appendix: supporting data, methodology, detailed analysis
 
-### Step 3: Draft Content
-- Lead with conclusions in each section
-- Use short paragraphs and clear transitions
-- Support every claim with evidence or data reference
-- Use headers, bullets, and visuals appropriately
+3. **MECE Check**: Review each section. Ask: Do the sections overlap? Do they together cover the full scope?
 
-### Step 4: Review and Refine
-- Check logical consistency and argument strength
-- Verify all data and citations are accurate
-- Calibrate length to audience (shorter for executives)
-- Apply professional tone and formatting standards
+4. **Recommendation Framing**: Each recommendation must have:
+   - What (specific action)
+   - Why (evidence-backed rationale)
+   - How (implementation approach)
+   - Who (owner)
+   - When (timeline)
+   - Impact-Feasibility Matrix: plot each recommendation on a 2x2 (Impact × Feasibility) to prioritize
 
-## Expected Outputs
+5. **Language Standards**:
+   - Active voice, present tense for recommendations
+   - Quantify every claim where possible ("20% cost reduction" not "significant cost reduction")
+   - One idea per paragraph, topic sentence first
+   - No jargon without definition
 
-- Draft report or memo
-- Executive summary
-- Supporting appendices
+6. **Visual Communication**: Every data point should have a chart or table. Every complex argument should have a visual framework.
+
+7. **Quality Checks**:
+   - MECE compliance across all sections
+   - So-What statement present per section
+   - Evidence backing every claim
+   - Executive summary matches body conclusions
+
+## Output Format
+
+- **Full consulting report** in the section structure above
+- **Recommendation Prioritization Matrix** (Impact × Feasibility)
+- **Executive Summary** (standalone, max 2 pages)
+
+> **Save Output To**: See Output Destination Mapping in `docs/co-consult.context.md` for destination folder and naming convention. Create the folder if it does not exist. Do not hard-code output paths.
 
 ## Related Skills
 
 - narrative-framework
-- insight-synthesis
 - executive-presentation
+- insight-synthesis

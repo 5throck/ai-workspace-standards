@@ -5,6 +5,11 @@ description: >
   Use when: writing guides, creating documentation, drafting communications, or synthesizing
   complex information for technical and non-technical audiences.
 version: 1.0.0
+scope: co-work
+status: active
+owner: pm
+last_reviewed: 2026-07-19
+prerequisites: none
 gemini-parity: skip
 metadata:
   type: implementation
@@ -18,11 +23,11 @@ metadata:
     - technical writing
 ---
 
-## Overview
+## Context
 
 This skill provides comprehensive documentation writing capabilities, from technical guides to user-friendly manuals. It ensures documentation is clear, well-structured, accessible, and appropriately targeted to the intended audience.
 
-## When to Use This Skill
+## When to Use
 
 **Technical Documentation**:
 - Trigger: "Write technical documentation" or "Create API reference"
@@ -41,6 +46,8 @@ This skill provides comprehensive documentation writing capabilities, from techn
 - Use Case: Sharing information with stakeholders or teams
 
 ---
+
+## Execution Steps
 
 ## Step 1: Audience Analysis
 
@@ -283,7 +290,7 @@ This skill provides comprehensive documentation writing capabilities, from techn
 
 ---
 
-## Expected Outputs
+## Output Format
 
 **For Technical Documentation**:
 - API references with parameters and responses

@@ -156,7 +156,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
-| `sync-skills.ts` | L0 | 1.3.0 | active | — | — | L0+L1 | — |
+| `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
@@ -336,10 +336,14 @@ Detects running Claude Code / Antigravity processes with user confirmation befor
 **Note**: L0 script.
 
 #### `sync-skills.ts`
-**Purpose**: Distributes skills from the L1 SSOT (`skills/`) to runtime locations
-(`.claude/skills/` and `.gemini/skills/`). Run after any change to `skills/` or
-`templates/common/skills/` to ensure Claude Code and Gemini CLI pick up the update.
-**Usage**: `bun run sync-skills`
+**Purpose**: Distributes skills from a project's SSOT (`skills/`) to its runtime locations
+(`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`). Run after any change to `skills/`
+to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
+**Usage**:
+- `bun run sync-skills` — workspace root only (default, unchanged from prior versions)
+- `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
+- `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
+**v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
 
 #### `sync-skills-to-l2.ts`
 **Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
