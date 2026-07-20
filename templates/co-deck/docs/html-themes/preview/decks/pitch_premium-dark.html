@@ -466,8 +466,10 @@
 
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'   || e.key === 'PageUp')   changeSlide(-1);
+      if (e.key === 'Home') { e.preventDefault(); showSlide(0); }
+      if (e.key === 'End')  { e.preventDefault(); showSlide(document.querySelectorAll('.slide').length - 1); }
       if (e.key === 'Escape') {
         if (document.fullscreenElement) { document.exitFullscreen(); return; }
         closeTOC();

@@ -1137,13 +1137,22 @@ document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
     e.preventDefault();
     changeSlide(-1);
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(0);
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    var slides = document.querySelectorAll('.slide');
+    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
