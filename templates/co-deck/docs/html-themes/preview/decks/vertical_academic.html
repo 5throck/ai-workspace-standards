@@ -176,18 +176,65 @@
     /*
   ppt-engine.js — PPT-style common runtime engine
   ================================================
-  Shared JavaScript for all PPT-transformed themes. Inlined into each template.html.
+  Shared JavaScript for all PPT-transformed themes. Inlined into each template.html
+  at build time by theme-builder.ts (step 10). No <script src> references to this file
+  should exist in generated output — the builder replaces a placeholder comment block
+  in each template.html with the full contents of this file.
+
   Provides:
+    - DOM helpers: escapeText, el, imgEl, appendInline, renderVisualDisplay
     - TransitionEngine: fade / push / zoom transitions with direction awareness
     - PresenterTools: speaker script panel + presentation timer
     - TOCBuilder: slide-out TOC drawer with headline navigation
-    - NarrationEngine v2.2: Web Speech API TTS narration with auto-advance; _onSlideChanged now fires on isAutoAdvance as well as isPlaying
+    - ThumbnailNav: thumbnail-panel sidebar for supported themes
+    - FullscreenManager: browser Fullscreen API toggle via F key or button
+    - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
+    - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
+
+  ─── Shared Runtime Contract ─────────────────────────────────────────────
+
+  This file is the SINGLE shared runtime for all PPT-engine themes
+  (outline, pitch-enhanced, vertical, zen). The builder inlines this file
+  verbatim into each theme's template.html output, replacing a placeholder
+  comment block (marked "ppt-engine.js inline") in each template.
+
+  After build:
+    ✓ ppt-engine.js content is inlined (TransitionEngine, initPPT, etc. present)
+    ✓ No <script src="...ppt-engine..."> references in generated HTML
+    ✓ Each theme's own renderSlide() and initSlides() remain in the output
+
+  ─── renderSlide() — Per-Theme, NOT Shared ───────────────────────────────
+
+  renderSlide(data, index) and initSlides() are intentionally NOT part of this
+  shared runtime. Each theme defines its own renderSlide() inline in its
+  template.html because DOM vocabulary differs between theme families:
+
+  PPT-engine family (outline, pitch-enhanced, vertical, zen):
+    - Structure:  .slide-header + .slide-card (header bar + content card)
+    - Cover type: data-type="cover"
+    - Layout:     Flexbox (column-direction, header + scrollable card)
+    - CSS:        ppt-engine.css + theme.css
+    - Runtime:    this shared ppt-engine.js (inlined)
+
+  Pitch family (pitch):
+    - Structure:  .slide-content > .slide-left + .right-panel (two-column grid)
+    - Cover type: data-type="title"
+    - Layout:     CSS Grid (auto-fit: 3fr 2fr or 2fr 3fr per slide type)
+    - CSS:        theme.css only (no ppt-engine.css)
+    - Runtime:    fully self-contained in pitch/template.html (no ppt-engine.js)
+
+  The two families share the concept of slideData-driven rendering and slide
+  navigation, but their DOM structures are incompatible — hence renderSlide()
+  lives per-theme, while shared concerns (transitions, TOC, narration, timer)
+  live in this shared runtime.
 
   Usage in template.html:
     1. Include this script block after slideData injection
-    2. Call initPPT(slideData, containerId, options) from DOMContentLoaded
-    3. Options: { transition: 'fade'|'push'|'zoom', timer: true|false,
-                  showTOC: true|false, verticalMode: false }
+    2. Define per-theme renderSlide() and initSlides() AFTER this block
+    3. Call initSlides() and initPPT() from DOMContentLoaded
+    4. Options: { transition: 'fade'|'push'|'zoom', timer: true|false,
+                  showTOC: true|false, verticalMode: false,
+                  narration: narrationConfig, autoAdvance: autoAdvanceConfig }
 */
 
 // ── DOM helpers (shared with theme renderers) ──────────────────────────────
@@ -1265,13 +1312,22 @@ document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
     e.preventDefault();
     changeSlide(-1);
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(0);
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    var slides = document.querySelectorAll('.slide');
+    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
