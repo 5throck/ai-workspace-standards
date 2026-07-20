@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "_comment": "outlook theme PDF layout — v2.0.0: horizontal scroll presentation, full-width content area, no right-panel. Corporate dark-mode aesthetic with larger typography for keynote-style output.",
+  "page": {
+    "width_mm": 338.7,
+    "height_mm": 190.5,
+    "margin_mm": 5.0,
+    "aspect_ratio": "16:9"
+  },
+  "calibration": {
+    "viewport_px": 720,
+    "font_px_to_pt": 0.85,
+    "_viewport_px_note": "Slide height in px (1280x720). Used for region px→mm/pt conversion."
+  },
+  "regions": {
+    "header":  { "x_pct": 0.025, "y_pct": 0.030, "w_pct": 0.950, "h_pct": 0.041 },
+    "title":   { "x_pct": 0.06, "y_pct": 0.115, "w_pct": 0.88, "h_pct": 0.12 },
+    "content": { "x_pct": 0.06, "y_pct": 0.26, "w_pct": 0.88, "h_pct": 0.68 },
+    "visual":  null,
+    "meta":    { "x_pct": 0.88, "y_pct": 0.030, "w_pct": 0.08, "h_pct": 0.041 },
+    "toc":     null
+  },
+  "slide_types": {
+    "title":     { "regions": ["title", "subtitle", "meta"] },
+    "punchline": { "regions": ["title", "subtitle"] },
+    "standard":  { "regions": ["header", "title", "content"] },
+    "profile":   { "regions": ["title", "content"] },
+    "contact":   { "regions": ["title", "content"] },
+    "divider":   { "regions": ["title", "subtitle"] }
+  },
+  "slide_type_overrides": {
+    "title": {
+      "title":    { "x_pct": 0.06, "y_pct": 0.38, "w_pct": 0.88, "h_pct": 0.22 },
+      "subtitle": { "x_pct": 0.06, "y_pct": 0.62, "w_pct": 0.88, "h_pct": 0.12 },
+      "meta":     { "x_pct": 0.06, "y_pct": 0.30, "w_pct": 0.88, "h_pct": 0.07 }
+    },
+    "punchline": {
+      "title":    { "x_pct": 0.06, "y_pct": 0.30, "w_pct": 0.88, "h_pct": 0.24 },
+      "subtitle": { "x_pct": 0.06, "y_pct": 0.58, "w_pct": 0.88, "h_pct": 0.14 }
+    },
+    "profile": {
+      "title":   { "x_pct": 0.06, "y_pct": 0.30, "w_pct": 0.88, "h_pct": 0.14 },
+      "content": { "x_pct": 0.06, "y_pct": 0.48, "w_pct": 0.88, "h_pct": 0.40 }
+    },
+    "divider": {
+      "title":    { "x_pct": 0.10, "y_pct": 0.20, "w_pct": 0.80, "h_pct": 0.40 },
+      "subtitle": { "x_pct": 0.10, "y_pct": 0.62, "w_pct": 0.80, "h_pct": 0.12 }
+    },
+    "contact": {
+      "title":   { "x_pct": 0.06, "y_pct": 0.30, "w_pct": 0.88, "h_pct": 0.16 },
+      "content": { "x_pct": 0.06, "y_pct": 0.50, "w_pct": 0.88, "h_pct": 0.36 }
+    }
+  },
+  "fonts": {
+    "section_px": 13,
+    "slide_num_px": 13,
+    "title_px": 40,
+    "bullet_px": 19,
+    "punchline_px": 42
+  },
+  "line_heights": {
+    "title_px": 50,
+    "bullet_px": 33.25,
+    "bullet_gap_px": 16,
+    "punchline_px": 58.8
+  },
+  "image_zones": {},
+  "toc": null,
+  "content_constraints": {
+    "standard": {
+      "max_bullets": 8,
+      "max_title_chars": 40,
+      "max_body_chars": 200
+    },
+    "punchline": {
+      "max_title_chars": 40,
+      "max_subtitle_chars": 80
+    },
+    "profile": {
+      "max_bullets": 8,
+      "max_bio_chars": 200
+    }
+  },
+  "print": {
+    "bleed_mm": 0.0,
+    "crop_marks": false,
+    "page_numbers": true,
+    "page_number_position": "bottom-right"
+  }
+}

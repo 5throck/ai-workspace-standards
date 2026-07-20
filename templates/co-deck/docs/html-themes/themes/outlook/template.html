@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!--
+  outlook/template.html — co-deck Outlook Theme (Horizontal Scroll Presentation)
+  ==========================================================================
+  Rendering paradigm: All slides in a horizontal scroll track with CSS scroll-snap
+  and IntersectionObserver-based active-slide tracking. Corporate dark-mode
+  aesthetic with gold accents, badge system, stat cards, and rich typography.
+
+  HOW TO USE:
+    html-build reads this template and:
+    1. Injects <html data-theme="outlook" data-style="<style>"> attributes
+    2. Replaces [INJECT:CSS] with base.css + ppt-engine.css + theme.css + style.css links
+    3. Replaces [INJECT:slideData] with: const slideData = [...];
+    4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
+
+  NAVIGATION:
+    - Horizontal scroll with CSS scroll-snap (scroll-snap-type: x mandatory)
+    - Mouse wheel (vertical deltaY → horizontal scrollLeft)
+    - Keyboard: ArrowLeft/Right, PageUp/PageDown, Space, Home/End, F, T, P, A
+    - Footer prev/next buttons
+    - TOC overlay panel (slides in from left with backdrop)
+
+  CONTENT RULES (from theme.json):
+    - max 8 bullets per slide, max 40 chars in title
+    - All 5 styles compatible
+    - Supports: cover, divider, standard, punchline, profile, contact
+
+  STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
+-->
+<html lang="ko" data-theme="outlook" data-style="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- INJECT:title --></title>
+  <!-- INJECT:CSS -->
+  <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/outlook/theme.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
+  -->
+</head>
+<body>
+
+  <!-- Progress bar (3px gold, top) -->
+  <div class="outlook-progress">
+    <div class="outlook-progress-fill" id="outlook-progress-fill"></div>
+  </div>
+
+  <!-- TOC overlay backdrop -->
+  <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
+
+  <!-- TOC drawer (slide-out from left) -->
+  <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
+    <div class="toc-header">
+      <span class="toc-title">슬라이드 목차</span>
+      <button class="toc-close-btn" onclick="closeTOC()" aria-label="닫기">&times;</button>
+    </div>
+    <ul class="toc-list" id="toc-list">
+      <!-- Populated by TOCBuilder.init() -->
+    </ul>
+  </div>
+
+  <!-- TOC toggle button (left edge) -->
+  <button class="outlook-toc-toggle" id="outlook-toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기" title="목차 (T)">&#8249;</button>
+
+  <!-- Note panel (bottom-right overlay) -->
+  <div class="outlook-note-panel" id="outlook-note-panel">
+    <div class="outlook-note-label">발표자 노트</div>
+    <div class="outlook-note-text" id="outlook-note-text"></div>
+  </div>
+
+  <!-- Horizontal slide track -->
+  <div class="outlook-root">
+    <div class="outlook-wrap" id="outlook-wrap">
+      <!-- INJECT:slides -->
+    </div>
+  </div>
+
+  <!-- Footer bar (PPT-style controls) -->
+  <footer class="ppt-footer" id="ppt-footer">
+    <div class="footer-left">
+      <button class="footer-btn" id="toc-btn" onclick="toggleTOC()" aria-label="슬라이드 목차" title="목차 (T)">☰ 목차</button>
+      <span class="slide-counter" id="slide-counter">1 / 1</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <button class="transition-btn" data-mode="fade" onclick="TransitionEngine.setMode('fade')" title="Fade 전환">Fade</button>
+      <button class="transition-btn" data-mode="push" onclick="TransitionEngine.setMode('push')" title="Push 전환">Push</button>
+      <button class="transition-btn" data-mode="zoom" onclick="TransitionEngine.setMode('zoom')" title="Zoom 전환">Zoom</button>
+      <button class="footer-btn" id="outlook-note-btn" onclick="toggleNotePanel()" aria-label="발표자 노트" title="발표자 노트">📝 노트</button>
+      <!-- TTS controls group -->
+      <div class="footer-tts-group">
+        <div class="narration-dropdown-wrap">
+          <button class="footer-btn" id="voice-lang-btn" onclick="NarrationEngine._toggleLanguageDropdown()" aria-label="언어 선택" title="언어 선택">KR ▾</button>
+          <div class="voice-lang-dropdown" id="voice-lang-dropdown"></div>
+        </div>
+        <button class="footer-btn" id="narration-play-btn" onclick="NarrationEngine.togglePlay()" aria-label="음성 재생" title="음성 재생 (P)">▶ Play</button>
+        <div class="narration-dropdown-wrap">
+          <button class="footer-btn" id="voice-select-btn" onclick="NarrationEngine._toggleVoiceDropdown()" aria-label="음성 선택" title="음성 선택">🎤 Default</button>
+          <div class="voice-select-dropdown" id="voice-select-dropdown"></div>
+        </div>
+      </div>
+      <!-- Slide advance controls group -->
+      <div class="footer-slide-group">
+        <button class="footer-btn" id="narration-auto-advance-btn" onclick="NarrationEngine.toggleAutoAdvance()" aria-label="자동 넘기기" title="자동 넘기기 (A)">⏸ Manual</button>
+      </div>
+      <button class="footer-btn" id="fullscreen-btn" onclick="FullscreenManager.toggle()" aria-label="전체화면" title="전체화면 (F)">⤢</button>
+      <span class="presenter-timer" id="timer-display">00:00</span>
+      <button class="footer-btn" id="timer-btn" onclick="PresenterTools.toggleTimer()" aria-label="타이머" title="타이머">⏱</button>
+      <button class="nav-btn" onclick="scrollToSlide(currentSlide - 1)" aria-label="이전 슬라이드">&#8592;</button>
+      <button class="nav-btn" onclick="scrollToSlide(currentSlide + 1)" aria-label="다음 슬라이드">&#8594;</button>
+    </div>
+  </footer>
+
+  <script>
+    // <!-- INJECT:slideData -->
+    // const slideData = [ ... ];  <-- replaced by html-build
+
+    // ── ppt-engine.js inline (common PPT runtime) ─────────────────────────
+    // NOTE: The shared ppt-engine.js functions (TOCBuilder, TransitionEngine,
+    // PresenterTools, toggleTOC, closeTOC, showSlide, changeSlide, initPPT, el, escapeText,
+    // imgEl, appendInline) are loaded via <script> inclusion or inlined here.
+    // Each template includes the full ppt-engine.js before theme-specific code.
+
+    // ── Outlook slide renderer ────────────────────────────────────────
+    // Horizontal scroll presentation: all slides in DOM, scroll-snap track.
+    // Uses outlook DOM classes: outlook-num, outlook-kicker, outlook-tag,
+    // outlook-card, outlook-grid, outlook-badge, outlook-stat-big, etc.
+    // Maps slideData fields to the corporate presentation layout.
+
+    function slideType(d) {
+      if (d.isPunchlineSlide) return 'punchline';
+      if (d.isTitleSlide)    return 'cover';
+      if (d.isDividerSlide)  return 'divider';
+      if (d.isProfileSlide)   return 'profile';
+      if (d.isContactSlide)  return 'contact';
+      return 'standard';
+    }
+
+    function renderSlide(data, index) {
+      var type = slideType(data);
+      var slide = el('div', 'slide' + (index === 0 ? ' active' : ''));
+      slide.id = 'slide-' + index;
+      slide.dataset.type = type;
+      slide.dataset.index = index;
+
+      if (data.backgroundImage) {
+        slide.style.backgroundImage = 'url(' + data.backgroundImage + ')';
+        slide.style.backgroundSize = 'cover';
+        slide.style.backgroundPosition = 'center';
+      }
+
+      var section = data.section || '';
+      var title = data.title || data.headline || '';
+      var subtitle = data.subtitle || '';
+      var meta = data.meta || '';
+
+      // ── Cover slide ───────────────────────────────────────────────
+      if (type === 'cover') {
+        slide.classList.add('center', 'act-cover');
+        if (section) slide.appendChild(el('div', 'outlook-tag', section));
+        slide.appendChild(el('h1', '', title));
+        if (subtitle) slide.appendChild(el('p', 'outlook-lead', subtitle));
+        var divider = el('div', 'outlook-divider');
+        divider.style.margin = '28px auto';
+        slide.appendChild(divider);
+        if (meta) {
+          var metaEl = el('p', '');
+          metaEl.style.fontSize = '12px';
+          metaEl.style.letterSpacing = '2px';
+          metaEl.style.color = 'var(--text-muted, #9AA5B8)';
+          metaEl.textContent = meta;
+          slide.appendChild(metaEl);
+        }
+        return slide;
+      }
+
+      // ── Divider slide ─────────────────────────────────────────────
+      if (type === 'divider') {
+        slide.classList.add('center', 'act-cover');
+        if (data.partNum) {
+          var actLabel = el('div', 'outlook-act-label', data.partNum);
+          slide.appendChild(actLabel);
+        }
+        if (section) slide.appendChild(el('div', 'outlook-tag', section));
+        slide.appendChild(el('h1', '', title));
+        if (data.desc) {
+          slide.appendChild(el('p', 'outlook-lead', data.desc));
+        } else if (subtitle) {
+          slide.appendChild(el('p', 'outlook-lead', subtitle));
+        }
+        return slide;
+      }
+
+      // ── Punchline slide ────────────────────────────────────────────
+      if (type === 'punchline') {
+        slide.classList.add('center');
+        slide.appendChild(el('h1', 'outlook-final-tag', title));
+        if (subtitle) slide.appendChild(el('p', 'outlook-lead', subtitle));
+        return slide;
+      }
+
+      // ── Profile slide ──────────────────────────────────────────────
+      if (type === 'profile') {
+        if (section) slide.appendChild(el('div', 'outlook-num', section));
+        if (data.visualImage) {
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || data.profileName || title));
+          avatar.className = 'profile-avatar';
+          slide.appendChild(avatar);
+        }
+        slide.appendChild(el('h2', '', data.speakerName || data.profileName || title));
+        if (data.speakerTitle || data.profileTitle) {
+          slide.appendChild(el('p', '', data.speakerTitle || data.profileTitle));
+        }
+        if (data.speakerBio) {
+          var bioEl = el('p', 'outlook-lead', data.speakerBio);
+          bioEl.style.marginTop = '16px';
+          slide.appendChild(bioEl);
+        }
+        // Build credential cards from bullets
+        if (data.bullets && data.bullets.length) {
+          var grid = el('div', 'outlook-grid outlook-g2');
+          grid.style.marginTop = '8px';
+          var card = el('div', 'outlook-card');
+          var ul = el('ul', 'outlook-clean');
+          data.bullets.forEach(function(b) {
+            var li = el('li');
+            appendInline(li, b);
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          grid.appendChild(card);
+          slide.appendChild(grid);
+        }
+        return slide;
+      }
+
+      // ── Contact slide ─────────────────────────────────────────────
+      if (type === 'contact') {
+        slide.classList.add('center');
+        slide.appendChild(el('h1', '', title));
+        if (data.contactEmail) slide.appendChild(el('p', '', data.contactEmail));
+        if (data.contactLinkedIn) slide.appendChild(el('p', '', data.contactLinkedIn));
+        if (data.contactPhone) slide.appendChild(el('p', '', data.contactPhone));
+        if (data.contactWebsite) slide.appendChild(el('p', '', data.contactWebsite));
+        return slide;
+      }
+
+      // ── Standard slide ────────────────────────────────────────────
+      if (section) slide.appendChild(el('div', 'outlook-num', section));
+      if (data.kicker) {
+        slide.appendChild(el('div', 'outlook-kicker', data.kicker));
+      }
+      slide.appendChild(el('h2', '', title));
+
+      if (data.subtitle) {
+        var subP = el('p', 'outlook-lead');
+        subP.textContent = data.subtitle;
+        subP.style.marginTop = '8px';
+        slide.appendChild(subP);
+      }
+
+      // Bullets as lead paragraphs (outlook style)
+      if (data.bullets && data.bullets.length) {
+        data.bullets.forEach(function(b) {
+          var p = el('p', 'outlook-lead');
+          appendInline(p, b);
+          slide.appendChild(p);
+        });
+      }
+
+      return slide;
+    }
+
+    function initSlides() {
+      var container = document.getElementById('outlook-wrap');
+      if (!container || typeof slideData === 'undefined') return;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      slideData.forEach(function(d, i) {
+        container.appendChild(renderSlide(d, i));
+      });
+    }
+
+    // ── Note panel toggle ────────────────────────────────────────────
+    var notePanelVisible = false;
+    function toggleNotePanel() {
+      var panel = document.getElementById('outlook-note-panel');
+      var btn = document.getElementById('outlook-note-btn');
+      if (!panel) return;
+      notePanelVisible = !notePanelVisible;
+      panel.classList.toggle('open', notePanelVisible);
+      if (btn) btn.classList.toggle('active', notePanelVisible);
+      if (notePanelVisible) refreshNotePanel();
+    }
+
+    function refreshNotePanel() {
+      var textEl = document.getElementById('outlook-note-text');
+      if (!textEl || typeof slideData === 'undefined') return;
+      var data = slideData[currentSlide];
+      var text = '';
+      if (data) {
+        text = data.script || data.subtitle || '';
+        if (!text && data.bullets && data.bullets.length) {
+          text = data.bullets.join('\n');
+        }
+      }
+      textEl.textContent = text;
+    }
+
+    // ── Progress bar (horizontal scroll position) ────────────────────
+    function updateProgress() {
+      var wrap = document.getElementById('outlook-wrap');
+      var fill = document.getElementById('outlook-progress-fill');
+      if (!wrap || !fill) return;
+      var max = wrap.scrollWidth - wrap.clientWidth;
+      var pct = max > 0 ? (wrap.scrollLeft / max) * 100 : 0;
+      fill.style.width = pct + '%';
+    }
+
+    // ── Horizontal scroll navigation helpers ─────────────────────────
+
+    function scrollToSlide(index) {
+      var slides = document.querySelectorAll('#outlook-wrap .slide');
+      if (index < 0 || index >= slides.length) return;
+      slides[index].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    }
+
+    // ── IntersectionObserver (active-slide tracking) ──────────────────
+    var ScrollTracker = {
+      observer: null,
+
+      init: function() {
+        var wrap = document.getElementById('outlook-wrap');
+        var slides = document.querySelectorAll('#outlook-wrap .slide');
+        if (!wrap || !slides.length) return;
+
+        var self = this;
+        this.observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+              var idx = parseInt(entry.target.dataset.index || entry.target.id.replace('slide-', ''), 10);
+              if (!isNaN(idx) && idx !== currentSlide) {
+                showSlide(idx);
+              }
+            }
+          });
+        }, {
+          root: wrap,
+          threshold: [0.6]
+        });
+
+        slides.forEach(function(slide) {
+          self.observer.observe(slide);
+        });
+      },
+
+      destroy: function() {
+        if (this.observer) {
+          this.observer.disconnect();
+          this.observer = null;
+        }
+      }
+    };
+
+    // ── Wheel-to-horizontal conversion ──────────────────────────────
+    function setupWheelConversion() {
+      var wrap = document.getElementById('outlook-wrap');
+      if (!wrap) return;
+      wrap.addEventListener('wheel', function(e) {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          wrap.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    }
+
+    // ── Horizontal keyboard overrides ───────────────────────────────
+    // Override ppt-engine.js defaults: ArrowRight/Space → next, ArrowLeft → prev
+    function setupHorizontalKeyboard() {
+      document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          scrollToSlide(currentSlide + 1);
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          scrollToSlide(currentSlide - 1);
+        }
+        if (e.key === 'Home') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          scrollToSlide(0);
+        }
+        if (e.key === 'End') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          var slides = document.querySelectorAll('#outlook-wrap .slide');
+          scrollToSlide(slides.length - 1);
+        }
+      }, true);  // capture phase to override ppt-engine.js handlers
+    }
+
+    // ── TOC toggle button position sync ─────────────────────────────
+    function setupTOCToggleSync() {
+      var tocToggle = document.getElementById('outlook-toc-toggle');
+      if (!tocToggle) return;
+      // Observe TOC drawer open/close state to slide the toggle button
+      var observer = new MutationObserver(function() {
+        var drawer = document.getElementById('toc-drawer');
+        if (drawer && drawer.classList.contains('open')) {
+          tocToggle.style.left = '260px';
+        } else {
+          tocToggle.style.left = '0';
+        }
+      });
+      var drawer = document.getElementById('toc-drawer');
+      if (drawer) observer.observe(drawer, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      initSlides();
+      showSlide(0);
+
+      // Override NarrationEngine.onSlideAdvance to scroll instead of changeSlide
+      NarrationEngine.onSlideAdvance = function() {
+        scrollToSlide(currentSlide + 1);
+      };
+
+      // Override TOC click handler to scroll (keep TOC open after click)
+      TOCBuilder._scrollOnClick = true;
+
+      // Set up horizontal-specific features
+      setupWheelConversion();
+      setupHorizontalKeyboard();
+      setupTOCToggleSync();
+
+      // Progress bar tracking
+      var wrap = document.getElementById('outlook-wrap');
+      if (wrap) {
+        wrap.addEventListener('scroll', updateProgress);
+        window.addEventListener('resize', updateProgress);
+        updateProgress();
+      }
+
+      // Initialize PPT engine
+      initPPT({ transition: 'fade', showTimer: true });
+
+      // Start IntersectionObserver after slides are rendered
+      requestAnimationFrame(function() {
+        ScrollTracker.init();
+      });
+    });
+  </script>
+</body>
+</html>

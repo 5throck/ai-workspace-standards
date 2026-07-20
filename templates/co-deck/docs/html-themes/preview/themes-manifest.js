@@ -14,6 +14,17 @@ window.__THEMES_MANIFEST__ = {
       "partial_styles": []
     },
     {
+      "name": "outlook",
+      "styles": [
+        "classic",
+        "minimal",
+        "premium-dark",
+        "academic",
+        "visual-heavy"
+      ],
+      "partial_styles": []
+    },
+    {
       "name": "pitch",
       "styles": [
         "classic",
