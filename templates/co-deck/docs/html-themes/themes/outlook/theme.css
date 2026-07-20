@@ -1,0 +1,503 @@
+/*
+  outlook/theme.css — co-deck Outlook Theme (Horizontal Scroll Presentation)
+  ========================================================================
+  Horizontal scroll track with CSS scroll-snap, all slides in DOM.
+  Corporate dark-mode aesthetic with gold accent, badge system, stat cards.
+  Loaded after base.css and ppt-engine.css.
+
+  Visual identity:
+    - 3px gold progress bar at top
+    - TOC overlay panel (left side, slides over content)
+    - Footer bar (PPT-style controls)
+    - Note panel (bottom-right overlay)
+    - Section numbers (.num), kickers (.kicker), lead text (.lead)
+    - Grid system (.g2, .g3, .g4), cards, badges, stat displays
+    - Act-cover gradient with watermark act numbers
+*/
+
+/* ── Disable base.css right-panel (no side image panel) ──────────── */
+.right-panel {
+  display: none !important;
+}
+
+/* ── Base layout: prevent body scroll ────────────────────────────── */
+html, body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── App wrapper ─────────────────────────────────────────────────── */
+.outlook-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ── Progress bar (top, fixed) ───────────────────────────────────── */
+.outlook-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--border-color, rgba(255,255,255,0.1));
+  z-index: 20;
+}
+.outlook-progress-fill {
+  height: 100%;
+  background: var(--accent, #C9A24B);
+  width: 0%;
+  transition: width 0.25s ease;
+}
+
+/* ── TOC toggle button (left edge) ───────────────────────────────── */
+.outlook-toc-toggle {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 31;
+  width: 22px;
+  height: 48px;
+  border-radius: 0 8px 8px 0;
+  background: var(--glass-bg, rgba(20,27,41,0.92));
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-left: none;
+  color: var(--accent-soft, #E8D5A0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: left 0.25s ease, background 0.15s ease;
+  font-size: 12px;
+}
+.outlook-toc-toggle:hover {
+  background: var(--hover-bg, rgba(255,255,255,0.05));
+}
+
+/* ── Note panel (bottom-right overlay) ───────────────────────────── */
+.outlook-note-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 70px;
+  width: 340px;
+  max-height: 280px;
+  background: var(--card-bg, var(--slide-bg, #141B29));
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: 12px;
+  padding: 18px;
+  z-index: 26;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  display: none;
+}
+.outlook-note-panel.open {
+  display: block;
+}
+.outlook-note-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent, #C9A24B);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.outlook-note-text {
+  font-size: 13.5px;
+  color: var(--text-muted, #9AA5B8);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* ── Horizontal slide track ──────────────────────────────────────── */
+.outlook-wrap {
+  position: relative;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Slide (section) base ────────────────────────────────────────── */
+.outlook-wrap .slide {
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 6vw 84px;
+  position: relative;
+  border-right: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  overflow-y: auto;
+}
+
+/* ── Active slide transitions ────────────────────────────────────── */
+.outlook-wrap .slide.active {
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+/* ── Centered slide variant ─────────────────────────────────────── */
+.outlook-wrap .slide.center {
+  align-items: center;
+  text-align: center;
+}
+
+/* ── Section number (top-left label) ─────────────────────────────── */
+.outlook-num {
+  position: absolute;
+  top: 30px;
+  left: 6vw;
+  font-size: 13px;
+  color: var(--text-muted, #9AA5B8);
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+/* ── Kicker (small accent label above title) ──────────────────────── */
+.outlook-kicker {
+  font-size: 14px;
+  color: var(--accent, #C9A24B);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+/* ── Tag (top-level section label) ───────────────────────────────── */
+.outlook-tag {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--accent, #C9A24B);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+/* ── Typography ──────────────────────────────────────────────────── */
+.outlook-wrap .slide h1 {
+  font-size: 50px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.outlook-wrap .slide h2 {
+  font-size: 36px;
+  line-height: 1.3;
+  font-weight: 800;
+  margin-bottom: 18px;
+  letter-spacing: -0.5px;
+}
+.outlook-wrap .slide h3 {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--accent-soft, #E8D5A0);
+  margin-bottom: 8px;
+}
+
+/* ── Text elements ───────────────────────────────────────────────── */
+.outlook-wrap .slide p {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-muted, #9AA5B8);
+  max-width: 900px;
+}
+.outlook-lead {
+  font-size: 19px;
+  color: var(--text-primary, #EEF1F6);
+  max-width: 820px;
+  line-height: 1.7;
+}
+.outlook-quote {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.5;
+  max-width: 960px;
+  color: var(--accent-soft, #E8D5A0);
+}
+.outlook-quote-src {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-muted, #9AA5B8);
+  letter-spacing: 1px;
+}
+
+/* ── Grid system ─────────────────────────────────────────────────── */
+.outlook-grid {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  max-width: 1180px;
+}
+.outlook-g2 { grid-template-columns: 1fr 1fr; }
+.outlook-g3 { grid-template-columns: 1fr 1fr 1fr; }
+.outlook-g4 { grid-template-columns: repeat(4, 1fr); }
+
+/* ── Card ────────────────────────────────────────────────────────── */
+.outlook-card {
+  background: var(--card-bg, var(--vis-bg, #141B29));
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: 12px;
+  padding: 22px;
+}
+.outlook-card.dashed {
+  border: 1.5px dashed var(--accent, #C9A24B);
+  background: var(--panel-2, var(--hover-bg, rgba(255,255,255,0.05)));
+}
+
+/* ── Badge system ────────────────────────────────────────────────── */
+.outlook-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.outlook-badge.confirmed {
+  background: rgba(111,174,127,0.15);
+  color: var(--green, #6FAE7F);
+  border: 1px solid rgba(111,174,127,0.4);
+}
+.outlook-badge.mid {
+  background: rgba(201,162,75,0.15);
+  color: var(--accent, #C9A24B);
+  border: 1px solid rgba(201,162,75,0.4);
+}
+.outlook-badge.low {
+  background: rgba(200,90,79,0.15);
+  color: var(--red, #C85A4F);
+  border: 1px solid rgba(200,90,79,0.4);
+}
+.outlook-badge.discuss {
+  background: rgba(201,162,75,0.1);
+  color: var(--accent, #C9A24B);
+  border: 1px solid rgba(201,162,75,0.35);
+}
+
+/* ── Stat display ────────────────────────────────────────────────── */
+.outlook-stat-big {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--accent-soft, #E8D5A0);
+  line-height: 1;
+}
+.outlook-stat-label {
+  font-size: 13px;
+  color: var(--text-muted, #9AA5B8);
+  margin-top: 8px;
+}
+
+/* ── Divider accent bar ──────────────────────────────────────────── */
+.outlook-divider {
+  width: 56px;
+  height: 3px;
+  background: var(--accent, #C9A24B);
+  margin: 20px 0;
+}
+
+/* ── Act cover (gradient background for dividers) ─────────────────── */
+.outlook-wrap .slide.act-cover {
+  background: linear-gradient(160deg,
+    var(--header-bg, var(--bg-dark, var(--bg-color, #0F1420))) 0%,
+    var(--slide-bg, var(--bg-color, #0A0E14)) 70%);
+}
+.outlook-act-label {
+  font-size: 100px;
+  font-weight: 900;
+  color: rgba(201,162,75,0.09);
+  position: absolute;
+  top: 50%;
+  right: 6vw;
+  transform: translateY(-50%);
+  letter-spacing: -4px;
+  pointer-events: none;
+}
+
+/* ── Disclaimer block ────────────────────────────────────────────── */
+.outlook-disclaim {
+  font-size: 12px;
+  color: var(--text-muted, #9AA5B8);
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent, #C9A24B);
+  background: rgba(201,162,75,0.05);
+}
+
+/* ── Echo (speaker personal commentary) ──────────────────────────── */
+.outlook-echo {
+  font-size: 13px;
+  color: var(--accent-soft, #E8D5A0);
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* ── Split layout (two columns with divider) ─────────────────────── */
+.outlook-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  width: 100%;
+  max-width: 1180px;
+}
+.outlook-split .outlook-col {
+  border-left: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  padding-left: 22px;
+}
+.outlook-split .outlook-col:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+
+/* ── Clean bullet list ──────────────────────────────────────────── */
+ul.outlook-clean {
+  list-style: none;
+}
+ul.outlook-clean li {
+  font-size: 15px;
+  color: var(--text-muted, #9AA5B8);
+  padding: 9px 0 9px 24px;
+  position: relative;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.12));
+}
+ul.outlook-clean li::before {
+  content: '\2014';
+  position: absolute;
+  left: 0;
+  color: var(--accent, #C9A24B);
+}
+
+/* ── Table ───────────────────────────────────────────────────────── */
+.outlook-table {
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 1180px;
+}
+.outlook-table th,
+.outlook-table td {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.12));
+}
+.outlook-table th {
+  color: var(--accent, #C9A24B);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.outlook-table td {
+  color: var(--text-muted, #9AA5B8);
+}
+.outlook-table td.hl {
+  color: var(--text-primary, #EEF1F6);
+  font-weight: 600;
+}
+
+/* ── Final tagline (closing slide) ────────────────────────────────── */
+.outlook-final-tag {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--accent-soft, #E8D5A0);
+  line-height: 1.4;
+}
+
+/* ── SVG styling ─────────────────────────────────────────────────── */
+.outlook-wrap svg text {
+  font-family: var(--font-family, 'Pretendard', 'Malgun Gothic', -apple-system, sans-serif);
+}
+
+/* ── Footer bar overrides (reuse ppt-engine footer classes) ─────────── */
+.ppt-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 54px;
+  background: var(--header-bg, var(--bg-dark, var(--bg-color, #0F1420)));
+  border-top: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  z-index: 25;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+/* ── Slide type specific overrides ────────────────────────────────── */
+
+/* Cover slide: larger title */
+.outlook-wrap .slide[data-type="cover"] h1 {
+  font-size: 50px;
+}
+
+/* Divider slide: centered with gradient */
+.outlook-wrap .slide[data-type="divider"] {
+  text-align: center;
+  align-items: center;
+}
+
+/* Punchline slide: centered with large quote */
+.outlook-wrap .slide[data-type="punchline"] {
+  text-align: center;
+  align-items: center;
+}
+
+/* Profile slide */
+.outlook-wrap .slide[data-type="profile"] .profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border: 2px solid var(--accent, #C9A24B);
+}
+
+/* ── Slide page number (bottom-left, subtle) ─────────────────────── */
+.outlook-wrap .slide .slide-page-num {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 0.65rem;
+  color: var(--text-muted, rgba(255,255,255,0.3));
+  z-index: 5;
+}
+
+/* ── Print ────────────────────────────────────────────────────────── */
+@media print {
+  .outlook-progress,
+  .outlook-toc-toggle,
+  .ppt-footer,
+  .outlook-note-panel,
+  .toc-overlay,
+  .toc-drawer {
+    display: none !important;
+  }
+  .outlook-wrap {
+    overflow: visible;
+    height: auto;
+    display: block;
+  }
+  .outlook-wrap .slide {
+    min-width: 100%;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    page-break-after: always;
+    border-right: none;
+  }
+}

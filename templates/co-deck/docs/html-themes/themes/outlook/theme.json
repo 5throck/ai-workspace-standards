@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "_comment": "outlook theme (Horizontal Scroll Presentation) — all slides in a horizontal scroll track with CSS scroll-snap and IntersectionObserver-based active-slide tracking. Inspired by corporate/keynote dark-mode aesthetics with gold accents, badge system, stat cards, and three-tier text hierarchy. Uses ppt-engine.js for shared TOC, transitions, narration, fullscreen, and timer. v1.0.0: initial release.",
+  "name": "outlook",
+  "description": "Horizontal scroll presentation theme with corporate dark-mode aesthetic. All slides laid out in a horizontal track with CSS scroll-snap and IntersectionObserver tracking. Features a 3px gold progress bar, TOC overlay panel, and PPT-style footer controls. Designed for visual, data-driven presentations with badge systems, stat cards, and rich typography hierarchy. Ideal for business strategy, corporate briefings, and keynote-style content.",
+  "rendering": {
+    "paradigm": "horizontal-scroll",
+    "slides_in_dom": "all (scrollable)",
+    "navigation": "TOC overlay panel + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls, auto-play",
+    "progress_indicator": "progress bar (top, 3px gold accent) + slide counter + IntersectionObserver active tracking"
+  },
+  "content_rules": {
+    "max_bullets_per_slide": 8,
+    "max_title_chars": 40,
+    "recommended_slide_count": "20-60",
+    "notes": "Horizontal scroll suits data-rich, visually driven presentations. Titles up to 40 chars. Max 8 bullets per slide. All slide types supported including cover with gradient background, divider with act-number watermark, and standard slides with cards/grids/badges. Mouse wheel converted to horizontal scroll. Keyboard: ArrowLeft/Right, PageUp/PageDown, Home/End, Space, F (fullscreen), T (TOC).",
+    "slide_type_usage": {
+      "standard": "All content slides (mandatory) — supports cards, grids, badges, stat displays, tables",
+      "punchline": "Last content slide only — single-statement message with large centered text",
+      "divider": "Chapter/part boundaries — gradient background with act-number watermark",
+      "profile": "Speaker intro with avatar, credentials, and lead text",
+      "title": "First slide (cover) only — centered with tag, title, lead, and divider",
+      "contact": "Final slide only — contact information items"
+    }
+  },
+  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
+  "partial_styles": [],
+  "incompatible_styles": [],
+  "recommended_structure": {
+    "pattern": "Cover → Speaker Intro → [Hook] × N → [Act Divider → 6-12 Content → Act Closing] × N → Call to Action → Thank You",
+    "audience_fit": ["executive", "practitioner", "graduate"],
+    "notes": "Optimized for corporate/consulting presentations with narrative arc structure. Three-act storytelling pattern. Each act has a divider with gradient background. Supports rich visual elements: inline SVGs, stat cards, badge indicators, grid layouts, and data tables."
+  },
+  "requires_slideData": true,
+  "toc_required": false,
+  "slide_types": {
+    "title": true,
+    "divider": true,
+    "punchline": true,
+    "profile": true,
+    "standard": true,
+    "contact": true
+  },
+  "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
+  "css_theme": "docs/html-themes/themes/outlook/theme.css",
+  "added": "2026-07-20",
+  "modified": "2026-07-20",
+  "author": "co-deck",
+  "based_on": "soosan-group-2026 presentation"
+}
