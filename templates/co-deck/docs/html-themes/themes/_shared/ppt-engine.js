@@ -966,25 +966,6 @@ var NarrationEngine = {
       btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
       var badge = document.createElement('span');
       badge.className = 'voice-badge';
-      badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
-
-      option.appendChild(nameSpan);
-      option.appendChild(badge);
-      option.title = voice.name + ' — ' + voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
-      option.onclick = function(e) {
-        e.stopPropagation();
-        self._selectVoiceInDropdown(voice.name, voice.lang, voice.localService);
-        self._toggleVoiceDropdown();
-      };
-      dropdown.appendChild(option);
-    });
-
-    // Update button label with compact info
-    if (currentVoice) {
-      btn.textContent = '';
-      btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
-      var badge = document.createElement('span');
-      badge.className = 'voice-badge';
       badge.textContent = currentVoice.lang;
       btn.appendChild(badge);
     } else {
@@ -1204,20 +1185,27 @@ document.addEventListener('keydown', function(e) {
 function initPPT(options) {
   options = options || {};
 
-  // Read tocStyle from URL search params or options
+  // Read tocStyle from URL search params or options — validated against the
+  // same allowlist as the postMessage handler below (otherwise a crafted
+  // ?tocStyle=... link would fully bypass that check).
+  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   try {
     var p = new URLSearchParams(window.location.search);
     var tocStyleParam = p.get('tocStyle') || (options && options.tocStyle);
-    if (tocStyleParam) {
+    if (tocStyleParam && ALLOWED_TOC_STYLES.indexOf(tocStyleParam) >= 0) {
       document.documentElement.setAttribute('data-toc-style', tocStyleParam);
     }
   } catch (e) {}
 
-  // Listen for postMessage from parent frame (for live switching in preview.html)
+  // Listen for postMessage from parent frame (for live switching in preview.html).
+  // Origin checks are unreliable for file:// (origin is the string "null" in
+  // most browsers), so instead we verify the message actually came from the
+  // embedding parent frame and validate the payload shape before applying it.
   window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === '__set_toc_style__') {
-      document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
-    }
+    if (event.source !== window.parent || event.source === window) return;
+    if (!event.data || event.data.type !== '__set_toc_style__') return;
+    if (ALLOWED_TOC_STYLES.indexOf(event.data.tocStyle) < 0) return;
+    document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
   });
 
   TransitionEngine.init(options.transition || 'fade');
