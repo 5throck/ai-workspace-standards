@@ -274,10 +274,11 @@ This workspace follows explicit lifecycle management practices for Agents, Skill
 - Full lifecycle rules are defined in the workspace `workspace standards` section files
 - Audit commands exist for each domain: `agent-lifecycle-audit.ts`, `skill-lifecycle-audit.ts`, `verify-scripts.ts`
 
-For full lifecycle procedures:
-- **Agent Lifecycle**: See `workspace standards` → [§5.6 Agent Lifecycle Management](../../workspace standards#agent-lifecycle-management)
-- **Skill Lifecycle**: See `workspace standards` → [§6 Skill Lifecycle Management](../../workspace standards#skills)
-- **Script Lifecycle**: See `workspace standards` → [§6.5 Script Lifecycle Management](../../workspace standards#script-lifecycle-management)
+For full lifecycle procedures, see the workspace governance documentation (not part of this
+template — this variant does not depend on workspace-root-only files):
+- **Agent Lifecycle**: workspace governance docs → §5.6 Agent Lifecycle Management
+- **Skill Lifecycle**: workspace governance docs → §6 Skill Lifecycle Management
+- **Script Lifecycle**: workspace governance docs → §6.5 Script Lifecycle Management
 
 ---
 
