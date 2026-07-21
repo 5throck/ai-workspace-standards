@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-22](2026-07-22.md) | fix(templates/co-deck): fix broken lifecycle-doc reference in docs/context.md and add missing html-to-pdf.ts script copy |
 | [2026-07-21](2026-07-21.md) | fix(templates): sync pitch theme migration and preview fixes |
 | [2026-07-20](2026-07-20.md) | chore: update |
 | [2026-07-19](2026-07-19.md) | feat(co-consult): add deliverables folder, k-dart and company-intelligence skills, cross-platform skill availability principle |

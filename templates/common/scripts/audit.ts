@@ -1,4 +1,4 @@
-// @version 2.10.7
+// @version 2.10.8
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -922,7 +922,7 @@ if (IS_WORKSPACE_ROOT) {
                         // Must use bash rm, not fs.unlinkSync — Bun maps "nul" to the Windows
                         // NUL device on Windows, so the Node.js fs API cannot unlink it.
                         try {
-                            const rmResult = spawnSync('bash', ['-c', `rm -f -- "${item}"`], { encoding: 'utf-8' });
+                            const rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
                             if (rmResult.status === 0) {
                                 Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
                             } else {

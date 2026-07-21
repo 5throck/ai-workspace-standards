@@ -221,7 +221,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
 - **No Cross-Modification**: Modifying workspace root files and template files in a single task or session is forbidden. Keep workspace root changes and template changes completely isolated.
 
-> For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](CONSTITUTION.md#9-operations-workflow) and [CONSTITUTION.md §10](CONSTITUTION.md#10-terminology--canonical-definitions).
+> For L1-L2 Fork Model and lifecycle management rules, see [CONSTITUTION.md §9](docs/constitution/09-operations-workflow.md) and [CONSTITUTION.md §10](CONSTITUTION.md#10-terminology--canonical-definitions).
 <!-- COMMON-GEMINI:END -->
 
 ---
@@ -291,7 +291,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-07-11 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-07-21 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

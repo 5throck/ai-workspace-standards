@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Auto-generates scripts/README.md from scripts/SCRIPTS.md (L0 SSOT)
- * @version 1.0.1
+ * @version 1.0.2
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -21,8 +21,9 @@ try {
   }
 
   const content = readFileSync(SCRIPTS_MD, 'utf-8');
-  const guideIndex = content.indexOf('## Guide');
-  
+  const guideHeadingMatch = content.match(/^## Guide$/m);
+  const guideIndex = guideHeadingMatch ? guideHeadingMatch.index! : -1;
+
   if (guideIndex === -1) {
     console.error('Could not find ## Guide in SCRIPTS.md');
     if (import.meta.main) {
@@ -43,15 +44,13 @@ try {
 
 ### Create a New Project
 \`\`\`bash
-bash scripts/new-project.sh "my-project"
+bun scripts/new-project.ts "my-project"
 cd my-project
 \`\`\`
 
 ### Run Development Sync
 \`\`\`bash
-bash scripts/dev-sync.sh "feat: description"
-# or
-.\\scripts\\dev-sync.ps1 "feat: description"
+bun scripts/dev-sync.ts "feat: description"
 \`\`\`
 
 ### Run Agent Scripts (from project directory)
@@ -81,9 +80,9 @@ bun scripts/skill-lifecycle-audit.ts
 
 All scripts MUST be saved as **UTF-8 (without BOM)**.
 
-PowerShell scripts must explicitly specify encoding for outputs:
-\`\`\`powershell
-Add-Content -Path "file.txt" -Value "content" -Encoding UTF8
+TypeScript scripts writing files must explicitly specify UTF-8 encoding:
+\`\`\`typescript
+writeFileSync('file.txt', content, 'utf-8');
 \`\`\`
 
 ---

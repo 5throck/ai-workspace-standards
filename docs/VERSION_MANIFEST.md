@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-21T15:35:08.279Z
+**Generated**: 2026-07-21T17:36:04.485Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -74,7 +74,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.7 | scripts/audit.ts | bun |
+| audit.ts | 2.10.8 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
@@ -99,7 +99,7 @@
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
 | gen-pr-body.ts | 1.1.5 | scripts/gen-pr-body.ts | bun |
-| generate-scripts-readme.ts | 1.0.1 | scripts/generate-scripts-readme.ts | N/A |
+| generate-scripts-readme.ts | 1.0.2 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.0.1 | scripts/helpers/golden-reference-loader.ts | fs, path |
@@ -129,7 +129,7 @@
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.0.1 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.5 | scripts/hooks/pre-push.ts | bun |
+| pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
 | promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
 | propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
