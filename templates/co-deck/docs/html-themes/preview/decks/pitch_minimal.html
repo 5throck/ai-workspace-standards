@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="../../styles/minimal/style.css">
   <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
   <link rel="stylesheet" href="../../styles/base.css">
-  <link rel="stylesheet" href="../../themes/_shared/ppt-engine.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
   <link rel="stylesheet" href="../../themes/pitch/theme.css">
   <link rel="stylesheet" href="../../styles/classic/style.css">
   -->
@@ -1209,25 +1209,6 @@ var NarrationEngine = {
       btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
       var badge = document.createElement('span');
       badge.className = 'voice-badge';
-      badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
-
-      option.appendChild(nameSpan);
-      option.appendChild(badge);
-      option.title = voice.name + ' — ' + voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
-      option.onclick = function(e) {
-        e.stopPropagation();
-        self._selectVoiceInDropdown(voice.name, voice.lang, voice.localService);
-        self._toggleVoiceDropdown();
-      };
-      dropdown.appendChild(option);
-    });
-
-    // Update button label with compact info
-    if (currentVoice) {
-      btn.textContent = '';
-      btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
-      var badge = document.createElement('span');
-      badge.className = 'voice-badge';
       badge.textContent = currentVoice.lang;
       btn.appendChild(badge);
     } else {
@@ -1456,11 +1437,16 @@ function initPPT(options) {
     }
   } catch (e) {}
 
-  // Listen for postMessage from parent frame (for live switching in preview.html)
+  // Listen for postMessage from parent frame (for live switching in preview.html).
+  // Origin checks are unreliable for file:// (origin is the string "null" in
+  // most browsers), so instead we verify the message actually came from the
+  // embedding parent frame and validate the payload shape before applying it.
+  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === '__set_toc_style__') {
-      document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
-    }
+    if (event.source !== window.parent || event.source === window) return;
+    if (!event.data || event.data.type !== '__set_toc_style__') return;
+    if (ALLOWED_TOC_STYLES.indexOf(event.data.tocStyle) < 0) return;
+    document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
   });
 
   TransitionEngine.init(options.transition || 'fade');

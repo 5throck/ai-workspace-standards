@@ -1,4 +1,4 @@
-// @version 0.1.0
+// @version 0.1.2
 // build-theme-deck.ts — CLI wrapper for deterministic theme deck builder.
 //
 // Reads a project's lecture-profile.md for theme/style/title,
@@ -11,7 +11,7 @@
 //   bun scripts/co-deck/build-theme-deck.ts --project presentations/<project> --output output.html --version v2
 
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
 import { buildThemeDeck } from './lib/theme-builder.js';
 import { getCliArg, resolveWorkspaceRoot } from './lib/theme-utils.js';
 import { readJson } from './lib/theme-utils.js';
@@ -107,6 +107,7 @@ function main(): void {
   const presentation = frontmatter.presentation || {};
   const theme = presentation.theme;
   const style = presentation.style;
+  const tocStyle = presentation.tocStyle;
   const title = presentation.title || '';
 
   if (!theme) {
@@ -140,6 +141,7 @@ function main(): void {
     projectPath,
     theme,
     style,
+    tocStyle,
     title,
     slideData,
     outputPath: outputArg ? resolve(ROOT, outputArg) : undefined,

@@ -1,3 +1,4 @@
+// @version 0.2.0
 // theme-builder.ts — deterministic HTML theme deck builder.
 //
 // Reads a theme package (template.html + theme.json), replaces INJECT markers
@@ -16,6 +17,7 @@ export interface BuildOptions {
   projectPath: string;    // path to presentations/<project>
   theme: string;          // theme name (e.g. "pitch-enhanced")
   style: string;          // style name (e.g. "premium-dark")
+  tocStyle?: 'glass-drawer' | 'solid-drawer'; // optional TOC style (defaults to "glass-drawer")
   title: string;          // slide deck title (replaces INJECT:title)
   slideData: any[];       // strict-JSON slide data array
   outputPath?: string;    // optional output path (defaults to <project>/lecture_v1.html)
@@ -220,16 +222,39 @@ export function buildThemeDeck(options: BuildOptions): BuildResult {
     }
   }
 
-  // 12. Set <html> attributes: data-theme, data-style
+  // 11.5. Validate every inline <script> block in the assembled HTML parses
+  // as syntactically valid JS. Catches errors introduced by inlining
+  // ppt-engine.js (step 10) or slideData (step 9) before they ship.
+  // HTML comments are stripped first — template doc-comments sometimes
+  // mention the literal text "<script>" in prose, which would otherwise be
+  // mistaken for a real opening tag and swallow everything up to the next
+  // real </script> as bogus "script content".
+  const htmlWithoutComments = html.replace(/<!--[\s\S]*?-->/g, '');
+  const scriptBlockRe = /<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g;
+  let scriptMatch: RegExpExecArray | null;
+  while ((scriptMatch = scriptBlockRe.exec(htmlWithoutComments)) !== null) {
+    const scriptContent = scriptMatch[1];
+    if (!scriptContent.trim()) continue;
+    try {
+      new Function(scriptContent);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`Generated <script> block contains a JS syntax error: ${message}`);
+    }
+  }
+
+  // 12. Set <html> attributes: data-theme, data-style, data-toc-style
+  const tocStyle = options.tocStyle ?? 'glass-drawer';
   html = html.replace(
     /<html\s+([^>]*)>/,
     (_match, attrs: string) => {
-      // Remove existing data-theme and data-style
+      // Remove existing data-theme, data-style, and data-toc-style
       let cleanAttrs = attrs
         .replace(/\s*data-theme="[^"]*"/, '')
-        .replace(/\s*data-style="[^"]*"/, '');
-      // Add new data-theme and data-style
-      cleanAttrs = `data-theme="${options.theme}" data-style="${options.style}" ${cleanAttrs}`.trim();
+        .replace(/\s*data-style="[^"]*"/, '')
+        .replace(/\s*data-toc-style="[^"]*"/, '');
+      // Add new data-theme, data-style, and data-toc-style
+      cleanAttrs = `data-theme="${options.theme}" data-style="${options.style}" data-toc-style="${tocStyle}" ${cleanAttrs}`.trim();
       return `<html ${cleanAttrs}>`;
     },
   );

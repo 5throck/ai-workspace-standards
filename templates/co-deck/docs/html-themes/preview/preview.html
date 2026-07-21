@@ -255,6 +255,11 @@
       function applyTocStyleAttr() {
         try {
           if (iframe.contentWindow) {
+            // Target origin must stay '*': under file://, each loaded document
+            // is an opaque origin, so any literal targetOrigin string would
+            // silently fail to deliver. The receiving deck (ppt-engine.js)
+            // validates event.source === window.parent and the payload shape
+            // instead, which is the correct defense for this architecture.
             iframe.contentWindow.postMessage({ type: '__set_toc_style__', tocStyle: tocStyle }, '*');
           }
         } catch (e) {}
