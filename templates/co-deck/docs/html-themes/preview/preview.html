@@ -84,13 +84,13 @@
 
     /* ── Loading state ────────────────────────────────────────────────────── */
     #loading-indicator {
-      display: none;
       position: fixed; top: 40px; left: 0; right: 0; bottom: 0;
       background: #111; color: #888;
       display: flex; align-items: center; justify-content: center;
       font-size: 16px; flex-direction: column; gap: 12px;
+      z-index: 100;
     }
-    #loading-indicator.hidden { display: none; }
+    #loading-indicator.hidden { display: none !important; }
     .spinner {
       width: 32px; height: 32px;
       border: 3px solid #333; border-top-color: #888;
@@ -107,12 +107,17 @@
     <select id="theme-select" onchange="applyParams()"></select>
     <label>Style:</label>
     <select id="style-select" onchange="applyParams()"></select>
+    <label>TOC Style:</label>
+    <select id="toc-style-select" onchange="applyParams()">
+      <option value="glass-drawer">glass-drawer</option>
+      <option value="solid-drawer">solid-drawer</option>
+    </select>
     <span id="compat-badge"></span>
-    <span class="hint">preview.html?theme=pitch-enhanced&amp;style=classic</span>
+    <span class="hint">preview.html?theme=pitch-enhanced&amp;style=classic&amp;tocStyle=solid-drawer</span>
   </div>
 
   <div id="preview-frame-container">
-    <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+    <iframe id="preview-iframe"></iframe>
   </div>
 
   <div id="error-panel">
@@ -176,7 +181,11 @@
     // ── URL parameter handling ────────────────────────────────────────────
     function getParams() {
       var p = new URLSearchParams(location.search);
-      return { theme: p.get('theme') || 'outline', style: p.get('style') || 'classic' };
+      return {
+        theme: p.get('theme') || 'outline',
+        style: p.get('style') || 'classic',
+        tocStyle: p.get('tocStyle') || 'glass-drawer'
+      };
     }
 
     function applyParams() {
@@ -187,22 +196,25 @@
         populateStyleSelect(theme);
       }
       var style = document.getElementById('style-select').value;
+      var tocStyle = document.getElementById('toc-style-select').value;
 
       // Update URL
       var url = new URL(location.href);
       url.searchParams.set('theme', theme);
       url.searchParams.set('style', style);
+      url.searchParams.set('tocStyle', tocStyle);
       history.replaceState(null, '', url);
 
-      loadPreview(theme, style);
+      loadPreview(theme, style, tocStyle);
     }
 
     // ── Load preview deck into iframe ─────────────────────────────────────
-    function loadPreview(theme, style) {
+    function loadPreview(theme, style, tocStyle) {
       var errorPanel = document.getElementById('error-panel');
       var iframe = document.getElementById('preview-iframe');
       var loading = document.getElementById('loading-indicator');
       var badge = document.getElementById('compat-badge');
+      tocStyle = tocStyle || (document.getElementById('toc-style-select') ? document.getElementById('toc-style-select').value : 'glass-drawer');
 
       // Reset state
       errorPanel.classList.remove('visible');
@@ -236,32 +248,62 @@
         badge.innerHTML = '';
       }
 
-      // Determine iframe src
-      var deckSrc = 'decks/' + encodeURIComponent(theme) + '_' + encodeURIComponent(style) + '.html';
+      // Determine iframe src with tocStyle parameter
+      var baseDeckSrc = 'decks/' + encodeURIComponent(theme) + '_' + encodeURIComponent(style) + '.html';
+      var deckSrc = baseDeckSrc + '?tocStyle=' + encodeURIComponent(tocStyle);
+
+      function applyTocStyleAttr() {
+        try {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: '__set_toc_style__', tocStyle: tocStyle }, '*');
+          }
+        } catch (e) {}
+        try {
+          if (iframe.contentDocument && iframe.contentDocument.documentElement) {
+            iframe.contentDocument.documentElement.setAttribute('data-toc-style', tocStyle);
+          }
+        } catch (e) {}
+      }
+
+      // If iframe already loaded this theme & style, postMessage directly to change TOC style in real time
+      if (iframe.src && iframe.src.indexOf(baseDeckSrc) >= 0) {
+        applyTocStyleAttr();
+        document.title = 'co-deck Preview \u2014 theme:' + theme + ' style:' + style + ' tocStyle:' + tocStyle;
+        return;
+      }
 
       // Show loading
       loading.classList.remove('hidden');
-      iframe.style.display = 'none';
+      iframe.style.display = 'block';
 
       // Listen for errors from the iframe
       window.removeEventListener('message', onIframeMessage);
       window.addEventListener('message', onIframeMessage);
 
-      // Set iframe load/error handlers
-      iframe.onload = function() {
+      var isFinished = false;
+      function finishLoading() {
+        if (isFinished) return;
+        isFinished = true;
         loading.classList.add('hidden');
         iframe.style.display = 'block';
-      };
+        applyTocStyleAttr();
+      }
+
+      // Set iframe load/error handlers
+      iframe.onload = finishLoading;
       iframe.onerror = function() {
-        loading.classList.add('hidden');
+        finishLoading();
         showError('Failed to load preview deck: ' + deckSrc,
           ['Iframe failed to load ' + deckSrc], currentErrorDetails.runtime);
       };
 
+      // Safety fallback: ensure loading overlay disappears after 200ms even if onload is delayed
+      setTimeout(finishLoading, 200);
+
       // Load the deck
       iframe.src = deckSrc;
 
-      document.title = 'co-deck Preview \u2014 theme:' + theme + ' style:' + style;
+      document.title = 'co-deck Preview \u2014 theme:' + theme + ' style:' + style + ' tocStyle:' + tocStyle;
     }
 
     // ── Iframe message handler (runtime error capture) ───────────────────
@@ -373,10 +415,11 @@
     }
 
     // ── Init ───────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
+    function initPreview() {
       var params = getParams();
       var theme = params.theme;
       var style = params.style;
+      var tocStyle = params.tocStyle;
 
       // Resolve against the manifest so a stale URL param never references a
       // theme/style that no longer exists.
@@ -394,9 +437,18 @@
       }
       document.getElementById('style-select').value = style;
 
+      if (['glass-drawer', 'solid-drawer'].indexOf(tocStyle) < 0) tocStyle = 'glass-drawer';
+      document.getElementById('toc-style-select').value = tocStyle;
+
       currentTheme = theme;
-      loadPreview(theme, style);
-    });
+      loadPreview(theme, style, tocStyle);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPreview);
+    } else {
+      initPreview();
+    }
   </script>
 </body>
 </html>

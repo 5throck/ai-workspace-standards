@@ -53,6 +53,7 @@
   --border-subtle:        rgba(255, 255, 255, 0.08);
   --glass-bg:             rgba(10, 10, 30, 0.88);
   --toc-drawer-bg:        var(--glass-bg);
+  --toc-drawer-bg-solid:  #0a0a1e;
   --footer-bg:            var(--glass-bg);
   --hover-bg:             rgba(255, 255, 255, 0.06);
   --text-dim:             rgba(255, 255, 255, 0.4);

@@ -1,3 +1,4 @@
+// @version 1.1.0
 // ppt-engine-integration.test.ts — builder-side integration tests for the shared PPT runtime.
 //
 // Validates the ppt-engine.js inline-at-build-time contract (Task 7, Parts A & C):
@@ -29,10 +30,11 @@ const pptEnginePath = join(ROOT, 'docs', 'html-themes', 'themes', '_shared', 'pp
 const SLIDE_DATA = JSON.parse(readFileSync(slideDataPath, 'utf-8')) as any[];
 
 // PPT-engine themes (those with css_ppt_engine in theme.json)
-const PPT_THEMES = ['outline', 'pitch-enhanced', 'vertical', 'zen'];
+// pitch migrated from self-contained to ppt-engine on 2026-07-21
+const PPT_THEMES = ['outline', 'pitch', 'pitch-enhanced', 'vertical', 'zen'];
 
-// Non-PPT themes (pitch family — self-contained runtime)
-const NON_PPT_THEMES = ['pitch'];
+// Non-PPT themes (none currently — pitch has been migrated)
+const NON_PPT_THEMES: string[] = [];
 
 // ── Helper ────────────────────────────────────────────────────────────
 
@@ -123,22 +125,25 @@ describe('ppt-engine inline contract — inlined for PPT themes', () => {
   }
 });
 
-// ── Part A.3: ppt-engine.js is NOT inlined for pitch ──────────────────
+// ── Part A.3: ppt-engine.js IS inlined for pitch (post-migration) ─────
 
-describe('ppt-engine inline contract — NOT inlined for pitch', () => {
-  it('should NOT inline ppt-engine.js for pitch theme', () => {
+describe('ppt-engine inline contract — inlined for pitch (post-migration)', () => {
+  it('should inline ppt-engine.js for pitch theme', () => {
     const result = buildThemeDeck(makeOpts({ theme: 'pitch', style: 'classic' }));
     expect(result.errors).toHaveLength(0);
 
-    // PPT-engine functions should NOT be present
-    expect(result.html).not.toContain('var TransitionEngine');
-    expect(result.html).not.toContain('var TOCBuilder');
-    expect(result.html).not.toContain('var NarrationEngine');
-    expect(result.html).not.toContain('function initPPT(options)');
+    // PPT-engine functions MUST be present after migration
+    expect(result.html).toContain('var TransitionEngine');
+    expect(result.html).toContain('var TOCBuilder');
+    expect(result.html).toContain('var NarrationEngine');
+    expect(result.html).toContain('function initPPT(options)');
 
-    // But slideData and renderSlide should still be present (pitch has its own runtime)
+    // Pitch keeps its own slide renderer
     expect(result.html).toContain('const slideData');
     expect(result.html).toContain('function renderSlide(data, index)');
+
+    // Placeholder should NOT remain
+    expect(result.html).not.toMatch(/ppt-engine\.js inline \(common PPT runtime\) ─+$/m);
   });
 });
 
@@ -194,10 +199,10 @@ describe('ppt-engine CSS link contract', () => {
     });
   }
 
-  it('should NOT include ppt-engine.css link for pitch theme', () => {
+  it('should include ppt-engine.css link for pitch theme (post-migration)', () => {
     const result = buildThemeDeck(makeOpts({ theme: 'pitch', style: 'classic' }));
     expect(result.errors).toHaveLength(0);
-    expect(result.html).not.toContain('ppt-engine.css');
+    expect(result.html).toContain('ppt-engine.css');
   });
 });
 

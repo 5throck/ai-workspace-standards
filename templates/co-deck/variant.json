@@ -1,6 +1,6 @@
 {
   "name": "co-deck",
-  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 11 agents (1 PM orchestrator + 10 specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, and PDF export.",
+  "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.",
   "variant_type": "lecture",
   "status": "beta",
   "version": "0.2.0",
@@ -56,6 +56,14 @@
     {
       "name": "pdf-export",
       "file": "agents/pdf-export.md"
+    },
+    {
+      "name": "handbook-writer",
+      "file": "agents/handbook-writer.md"
+    },
+    {
+      "name": "handbook-reviewer",
+      "file": "agents/handbook-reviewer.md"
     }
   ],
   "agent_manifest": {
@@ -88,6 +96,16 @@
       }
     },
     "notes": "optional[]: omit agent entirely from workflow. skippable[]: run but --skip-verify flag makes failure non-blocking. retry_policy: on trust_score < trust_score_thresholds.pass (90%) or any Core Message source failure, return to research (max 2 retries before PM escalation). image-curator: skip if all slides use image_role: none or images are pre-supplied. diagram-specialist: skip if no visual_spec fields exist in slide_deck.md. image-curator and diagram-specialist run in parallel at Stage 3.5."
+  },
+  "handbook_pipeline": {
+    "description": "H-Stage pipeline (H-0 through H-7) for standalone handbooks, lecture companions, and full course sites. Independent from the 11-Stage slide pipeline above — does not participate in agent_manifest.pipeline_order.",
+    "variant_agents_dir": "agents",
+    "agents": [
+      "handbook-writer",
+      "handbook-reviewer"
+    ],
+    "entry_skill": "skills/handbook",
+    "notes": "handbook-writer authors chapter structure/prose per AUTHORING_GUIDELINES; handbook-reviewer runs validation scripts (validate-nav, check-authoring, handbook-doctor) and applies fixes. Triggered via the handbook skill, not the 11-Stage slide agent_manifest."
   },
   "skills": [
     {
@@ -179,6 +197,10 @@
       {
         "name": "verify-new-theme",
         "path": "scripts/co-deck/verify-new-theme.ts"
+      },
+      {
+        "name": "html-to-pdf",
+        "path": "scripts/co-deck/html-to-pdf.ts"
       }
     ],
     "external": []

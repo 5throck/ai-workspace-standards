@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-07-21](2026-07-21.md) | fix(templates): sync pitch theme migration and preview fixes |
 | [2026-07-20](2026-07-20.md) | chore: update |
 | [2026-07-19](2026-07-19.md) | feat(co-consult): add deliverables folder, k-dart and company-intelligence skills, cross-platform skill availability principle |
 | [2026-07-18](2026-07-18.md) | fix(dark-mode): remove @media block — use 2-layer :root + .dark strategy in template/co-deck |

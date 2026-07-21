@@ -68,7 +68,7 @@ sync_version: 1
 - **design**: 시각 디자인 확정 — 레이아웃, 색상 팔레트, 폰트 패밀리 결정 및 design_spec.md 저장
 - **image-curator**: 이미지 확보 — Pixabay(키 불필요), Unsplash URL, Pexels/Unsplash API; 모든 소스 상업적 사용 무제한
 - **diagram-specialist**: 다이어그램/차트 생성 — 6개 컨셉 다이어그램 유형(cycle/flow/matrix/pyramid/timeline/comparison) + 3개 SVG 차트 유형(bar/line/pie); HTML의 기본 전달 형식은 SVG이며, PNG는 선택 사항으로 PDF 출력 시에만 필요
-- **html-build**: HTML 슬라이드 생성 — `data-theme` 속성 적용; base.css + 오버라이드 CSS 주입; 5개 테마(outline, pitch, pitch-enhanced, vertical, zen)
+- **html-build**: HTML 슬라이드 생성 — `data-theme` 속성 적용; base.css + 오버라이드 CSS 주입; 6개 테마(outline, outlook, pitch, pitch-enhanced, vertical, zen); `glass-drawer` 및 `solid-drawer` 목차 스타일 지원
 - **measure**: 레이아웃 측정 (deprecated) — Playwright로 좌표를 추출하고 TTF 폰트 다운로드; **prep-pdf**로 대체됨
 - **prep-pdf**: Playwright 불필요한 PDF 준비 — 4계층 스펙 병합(base → theme → style → overrides) 해석, 폰트 검증, 레이아웃 요약 출력; Stage 9-10에서 `measure`를 대체
 - **pdf-export**: PDF 생성 — pdf-lib을 통한 샘플(5슬라이드) 및 전체 PDF 생성

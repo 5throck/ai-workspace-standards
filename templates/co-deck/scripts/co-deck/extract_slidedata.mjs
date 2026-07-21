@@ -16,6 +16,7 @@
  *   v1.2.0 — JS→JSON transform 제거; html-build strict-JSON 계약(Stage C) 적용 후 단순화 (A-04).
  */
 
+// @version 1.2.0
 import { readFileSync, writeFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 

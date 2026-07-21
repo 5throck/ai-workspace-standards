@@ -164,11 +164,11 @@ Consistent pattern applied across all font-consuming scripts:
 
 | Platform | Font directories searched |
 |----------|--------------------------|
-| **Windows** (`win32`) | `fonts/` (project), `C:/Windows/Fonts/` |
-| **macOS** (`darwin`) | `fonts/` (project), `~/Library/Fonts/`, `/Library/Fonts/` |
-| **Linux** | `fonts/` (project), `~/.local/share/fonts/`, `/usr/share/fonts/` |
+| **Windows** (`win32`) | `presentations/assets/fonts/` (project), `C:/Windows/Fonts/` |
+| **macOS** (`darwin`) | `presentations/assets/fonts/` (project), `~/Library/Fonts/`, `/Library/Fonts/` |
+| **Linux** | `presentations/assets/fonts/` (project), `~/.local/share/fonts/`, `/usr/share/fonts/` |
 
-Each script searches the project `fonts/` directory first, then OS-specific system directories. Font family candidates vary by platform (e.g., Windows includes malgun/HANDotum, macOS includes system Noto/PingFang).
+Each script searches the project `presentations/assets/fonts/` directory first, then OS-specific system directories. Font family candidates vary by platform (e.g., Windows includes malgun/HANDotum, macOS includes system Noto/PingFang).
 
 ### Files Changed (Phase 2)
 

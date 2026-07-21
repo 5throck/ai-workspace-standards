@@ -1,17 +1,13 @@
+// @version 1.0.1
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
 import { existsSync, readFileSync, rmSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 
-const SCRIPT = join(
-  "templates",
-  "co-deck",
-  "scripts",
-  "co-deck",
-  "handbook",
-  "apply-handbook-theme.ts"
-);
+const SCRIPT = existsSync(join("scripts", "co-deck", "handbook", "apply-handbook-theme.ts"))
+  ? join("scripts", "co-deck", "handbook", "apply-handbook-theme.ts")
+  : join("templates", "co-deck", "scripts", "co-deck", "handbook", "apply-handbook-theme.ts");
 
 describe("apply-handbook-theme.ts", () => {
   let tmpDir: string;

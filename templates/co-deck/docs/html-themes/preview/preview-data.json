@@ -4,12 +4,18 @@
     "type": "cover",
     "bullets": ["Welcome to the theme preview"],
     "visualTitle": "Theme Preview",
-    "visualDisplay": "Exploring the rendering capabilities"
+    "visualDisplay": "Exploring the rendering capabilities",
+    "script": "안녕하세요. 테마 미리보기 표지 슬라이드 발표를 시작합니다.",
+    "scriptEn": "Hello and welcome to the theme preview title slide presentation.",
+    "scriptJa": " me? こんにちは。テーマプレビューのタイトルスライドへようこそ。"
   },
   {
     "headline": "Section One",
     "type": "divider",
-    "bullets": []
+    "bullets": [],
+    "script": "첫 번째 섹션으로 이동합니다. 주요 개념을 살펴보겠습니다.",
+    "scriptEn": "Moving on to Section One. Let us explore the key concepts.",
+    "scriptJa": "セクション1に進みます。主要な概念を見ていきましょう。"
   },
   {
     "headline": "Standard Slide",
@@ -17,7 +23,10 @@
     "bullets": ["First bullet point", "Second bullet point", "Third bullet point"],
     "imagePath": "",
     "visualTitle": "Visual Title",
-    "visualDisplay": "Supporting detail text"
+    "visualDisplay": "Supporting detail text",
+    "script": "일반 슬라이드입니다. 세 가지 핵심 항목에 대해 설명합니다.",
+    "scriptEn": "This is a standard slide explaining three key bullet points.",
+    "scriptJa": " standard スライドです。3つの主要なポイントを説明します。"
   },
   {
     "headline": "Content with Image",
@@ -25,13 +34,18 @@
     "bullets": ["Key insight one", "Key insight two"],
     "imagePath": "../assets/diagrams/sample-diagram.svg",
     "visualTitle": "Image Slide",
-    "visualDisplay": "Visual content alongside text"
+    "visualDisplay": "Visual content alongside text",
+    "script": "이미지 및 다이어그램이 포함된 슬라이드입니다.",
+    "scriptEn": "This slide demonstrates visual diagram content alongside text.",
+    "scriptJa": "画像と図表が含まれるスライドです。"
   },
   {
     "headline": "Key Takeaway",
     "type": "punchline",
     "bullets": ["Remember this important point"],
-    "script": "This is the narration script for the punchline slide."
+    "script": "가장 중요한 핵심 요약 메시지입니다.",
+    "scriptEn": "This is the primary key takeaway message.",
+    "scriptJa": "最も重要なキーメッセージです。"
   },
   {
     "headline": "Presenter Profile",
@@ -39,7 +53,13 @@
     "bullets": ["Expert in their field", "10 years of experience"],
     "profileName": "Dr. Jane Smith",
     "profileTitle": "Senior Researcher",
-    "profileAvatar": ""
+    "profileAvatar": "",
+    "speakerName": "Dr. Jane Smith",
+    "speakerTitle": "Senior Researcher",
+    "speakerBio": "Expert in their field with 10 years of experience.",
+    "script": "발표자 소개 슬라이드입니다. 연구 경력 및 분야를 소개합니다.",
+    "scriptEn": "This is the presenter profile slide introducing Dr. Jane Smith.",
+    "scriptJa": "発表者プロファイルスライドです。"
   },
   {
     "headline": "Contact Information",
@@ -47,17 +67,26 @@
     "bullets": [],
     "contactEmail": "jane.smith@example.com",
     "contactPhone": "+1-555-0123",
-    "contactWebsite": "https://example.com"
+    "contactWebsite": "https://example.com",
+    "script": "연락처 및 문의 사항 슬라이드입니다.",
+    "scriptEn": "Contact information slide for further inquiries.",
+    "scriptJa": "連絡先およびお問い合わせ情報スライドです。"
   },
   {
     "headline": "Another Section",
     "type": "divider",
-    "bullets": []
+    "bullets": [],
+    "script": "두 번째 섹션으로 이동합니다.",
+    "scriptEn": "Moving to the second section.",
+    "scriptJa": "第2セクションへ移動します。"
   },
   {
     "headline": "Visual Heavy Slide",
     "type": "standard",
     "bullets": ["Background image slide"],
-    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E"
+    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E",
+    "script": "배경 이미지가 적용된 비주얼 슬라이드입니다.",
+    "scriptEn": "Visual slide with full background image.",
+    "scriptJa": "背景画像が適用されたビジュアルスライドです。"
   }
 ]

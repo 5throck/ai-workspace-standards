@@ -1,3 +1,4 @@
+// @version 1.1.0
 // theme-builder.test.ts — tests for the deterministic theme deck builder.
 //
 // Uses real theme packages from the workspace and a minimal slideData array.
@@ -135,22 +136,30 @@ describe('theme-builder', () => {
     });
   });
 
-  // 5. CSS load order for pitch: NO ppt-engine.css
+  // 5. CSS load order for pitch: NOW includes ppt-engine.css (migrated to ppt-engine)
   describe('CSS load order for pitch theme', () => {
-    it('should NOT include ppt-engine.css link for pitch theme', () => {
+    it('should include ppt-engine.css link for pitch theme (post-migration)', () => {
       const result = buildThemeDeck(makeOpts({
         theme: 'pitch',
         style: 'classic',
       }));
       expect(result.errors).toHaveLength(0);
 
-      // Should have base, theme, and style CSS
+      // Should have base, ppt-engine, theme, and style CSS (in order)
       expect(result.html).toContain('../../docs/html-themes/styles/base.css');
+      expect(result.html).toContain('../../docs/html-themes/themes/_shared/ppt-engine.css');
       expect(result.html).toContain('../../docs/html-themes/themes/pitch/theme.css');
       expect(result.html).toContain('../../docs/html-themes/styles/classic/style.css');
 
-      // Should NOT have ppt-engine.css
-      expect(result.html).not.toContain('ppt-engine.css');
+      // Verify load order: strip comments first to avoid false matches from template docs
+      const htmlNoComments = result.html.replace(/<!--[\s\S]*?-->/g, '');
+      const baseIdx   = htmlNoComments.indexOf('styles/base.css');
+      const engineIdx = htmlNoComments.indexOf('ppt-engine.css');
+      const themeIdx  = htmlNoComments.indexOf('themes/pitch/theme.css');
+      const styleIdx  = htmlNoComments.indexOf('styles/classic/style.css');
+      expect(baseIdx).toBeLessThan(engineIdx);
+      expect(engineIdx).toBeLessThan(themeIdx);
+      expect(themeIdx).toBeLessThan(styleIdx);
     });
   });
 
@@ -255,7 +264,7 @@ describe('theme-builder', () => {
     });
   });
 
-  // Additional: data-theme and data-style attributes
+  // Additional: data-theme, data-style, and data-toc-style attributes
   describe('html attributes', () => {
     it('should set data-theme and data-style on <html> element', () => {
       const result = buildThemeDeck(makeOpts({
@@ -265,6 +274,23 @@ describe('theme-builder', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.html).toMatch(/<html\s+[^>]*data-theme="outline"[^>]*>/);
       expect(result.html).toMatch(/<html\s+[^>]*data-style="premium-dark"[^>]*>/);
+    });
+
+    it('should set data-toc-style on <html> element (default glass-drawer vs solid-drawer)', () => {
+      const defaultResult = buildThemeDeck(makeOpts({
+        theme: 'outline',
+        style: 'premium-dark',
+      }));
+      expect(defaultResult.errors).toHaveLength(0);
+      expect(defaultResult.html).toMatch(/<html\s+[^>]*data-toc-style="glass-drawer"[^>]*>/);
+
+      const solidResult = buildThemeDeck(makeOpts({
+        theme: 'outline',
+        style: 'premium-dark',
+        tocStyle: 'solid-drawer',
+      }));
+      expect(solidResult.errors).toHaveLength(0);
+      expect(solidResult.html).toMatch(/<html\s+[^>]*data-toc-style="solid-drawer"[^>]*>/);
     });
   });
 
@@ -286,14 +312,22 @@ describe('theme-builder', () => {
       expect(result.html).not.toContain('ppt-engine.js inline (common PPT runtime)');
     });
 
-    it('should NOT inline ppt-engine.js for pitch theme', () => {
+    it('should inline ppt-engine.js for pitch theme (post-migration)', () => {
       const result = buildThemeDeck(makeOpts({
         theme: 'pitch',
         style: 'classic',
       }));
       expect(result.errors).toHaveLength(0);
 
-      // Pitch theme doesn't have ppt-engine functions
+      // Pitch theme now uses ppt-engine — all shared engine functions present
+      expect(result.html).toContain('TransitionEngine');
+      expect(result.html).toContain('PresenterTools');
+      expect(result.html).toContain('TOCBuilder');
+      expect(result.html).toContain('NarrationEngine');
+
+      // The placeholder comment should NOT remain
+      expect(result.html).not.toContain('ppt-engine.js inline (common PPT runtime)');
+
       // The slideData should still be present
       expect(result.html).toContain('const slideData');
     });

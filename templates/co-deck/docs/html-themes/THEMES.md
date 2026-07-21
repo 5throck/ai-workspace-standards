@@ -15,7 +15,7 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 |------|---------|--------|----------|-----------|-----|-------------------|--------|
 | `outline` | 3.0.0 | active | outline | TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls | Optional | classic, minimal, premium-dark, academic, visual-heavy | `themes/outline/` |
 | `outlook` | 1.0.0 | active | horizontal-scroll | TOC overlay panel + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls, auto-play | Optional | classic, minimal, premium-dark, academic, visual-heavy | `themes/outlook/` |
-| `pitch` | 1.0.0 | active | pitch | bottom footer bar — prev/next buttons + TOC drawer + script toggle | Optional | classic, minimal, premium-dark | `themes/pitch/` |
+| `pitch` | 1.0.0 | active | ppt-engine | bottom footer bar — prev/next buttons + TOC drawer + Fade/Push/Zoom transitions + TTS | Optional | classic, minimal, premium-dark | `themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | active | ppt-presenter | PPT footer bar — prev/next + transition mode selector (fade/push/zoom) + TOC drawer + script toggle + timer | Optional | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
 | `vertical` | 3.0.0 | active | vertical-scroll | sticky top bar — TOC drawer + prev/next arrows + TTS controls + auto-advance + timer + progress bar | Required | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
 | `zen` | 3.0.0 | active | zen | TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls | Optional | classic, minimal, premium-dark, academic | `themes/zen/` |
@@ -53,7 +53,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
 | **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for per-engine UI visibility; 4 combinations: both on, narrator only, auto-slide only, both off; language dropdown (extensible); voice selector dropdown (filtered by language, localStorage persistence); configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing** |
 | **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 5 themes supported; Escape exits fullscreen first before closing overlays** |
-| Keyboard shortcuts | Arrow keys, Space, PageUp/PageDown (navigate), Home/End (jump to first/last slide), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). |
+| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Vertical theme also: PageUp/PageDown, Home/End. |
 | **@media print** | **Ctrl+P renders one slide per page in landscape; all UI chrome hidden; slide cards flow as block with page-break-after** |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + **fullscreen button** + nav buttons |
 
@@ -296,6 +296,14 @@ docs/html-themes/
 ```
 
 > Styles stay in the shared `styles/` pool — they are NOT nested under individual themes. Any theme can pair with any compatible style. `themes/_shared/` is the Layer 0 base, not a theme itself (excluded from the theme scan).
+
+---
+
+## TOC Styles
+
+`presentation.tocStyle` in `lecture-profile.md` controls the table-of-contents visual style across all themes:
+- `glass-drawer` (default): 320px translucent glass-morphism drawer with in-panel header and close button.
+- `solid-drawer`: 260px opaque drawer with side chevron toggle button (`›`/`‹`) and CSS `transform` slide animation.
 
 ---
 
