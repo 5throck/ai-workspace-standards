@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-07-17
+# Last Updated: 2026-07-21
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -31,20 +31,79 @@
 
 ## Agents
 
-<!-- VARIANT-INJECT: agents -->
-| Agent | File | Stage | Role | Status |
-|-------|------|-------|------|--------|
-| PM (Orchestrator) | `agents/pm.md` | — | Single entry point; reads project_state.json; dispatches all specialists | active |
-| Version | `agents/version.md` | cross-cutting | Snapshots files before every edit; cross-cutting safety net | active |
-| Research | `agents/research.md` | 1 | Web research, source collection → research_notes.md; loads lecture-profile.md | active |
-| Source Verifier | `agents/source-verifier.md` | 1.5 | URL accessibility check + content cross-validation → source-verification.md | active |
-| Storyline | `agents/storyline.md` | 2-3 | storyline.md + slide_deck.md with image_role/image_query fields; cover/divider confirmation | active |
-| Design | `agents/design.md` | 4 | design_spec.md (colors, fonts, layout) | active |
-| Image Curator | `agents/image-curator.md` | 3.5 | License-clear image search/download → assets/images/ + image-manifest.json | active |
-| Diagram Specialist | `agents/diagram-specialist.md` | 3.5 | SVG concept diagrams + data charts from visual_spec → assets/diagrams/ (SVG primary for HTML; PNG optional for PDF) | active |
-| Build | `agents/html-build.md` | 5-8 | lecture_vN.html with theme injection, image binding, data-theme attribute | active |
-| Measure | `agents/measure.md` | 9-10 | layout_summary.md via estimate-layout.ts (Playwright-free); optional auto-calibrate loop | active |
-| Export | `agents/pdf-export.md` | 11 | sample PDF → Gate 5 → full PDF | active |
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+## Presentation Production Guidelines
+
+### Content Rules
+1. Research must cover both Korean and English sources
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: pitch-enhanced → max 4 bullets, 28 char title
+3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
+4. Speaker intro (slide 2) and contact (last slide) are mandatory
+5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
+6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
+
+### Design Rules
+1. 8-role color palette: defined in design_spec.md CSS variable block
+2. Font: Korean-compatible (MaruBuri, NanumSquare Neo, or Noto Sans KR)
+3. Layout: determined by `presentation.style` (classic = two-panel; minimal = text only; visual-heavy = full image)
+4. No hardcoded color or font values in HTML — CSS variables only
+5. Verify `presentation.theme × presentation.style` compatibility in `docs/html-themes/THEMES.md` before generating HTML
+
+### Build Rules
+1. Always call Version Agent before editing any file
+2. HTML must embed `slideData` array for PDF extraction
+3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
+5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
+
+### Visual Diagram Pipeline
+
+For slides that use concept diagrams (not stock photos), the pipeline is:
+
+```
+presentations/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
+        ↓ dynamic import
+gen-visual-images.ts (infrastructure dispatcher)
+        ↓
+presentations/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
+presentations/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
+        ↓
+slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen-visual-images.ts v3.2.0)
+        ↓ HTML: template buildSlideChildren() injects <img src="...svg"> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts imgPath() auto-derives "../assets/diagrams/<stem>.png" from the SVG path
+```
+
+**Architecture (v3.2.0)**:
+- `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
+- `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
+- Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
+- If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
+- **Unified output path**: SVG and PNG are both saved to `presentations/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
+
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG is generated alongside as a PDF sibling; the PDF pipeline (`gen-slides-pdf.ts`) auto-derives the `.png` path from the `.svg` path in `imgPath()` — no manual path switching required.
+
+**Rules**:
+1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
+2. Both SVG and PNG artifacts MUST exist in the shared pool — SVG for HTML, PNG for PDF
+3. `slidedata.json` `visualImage` field MUST reference the SVG path (e.g. `"../assets/diagrams/slide-03.svg"`); gen-visual-images.ts v3.2.0 enforces this automatically
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
+6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.svg`)
+8. **Diagram orientation** (`flow`/`timeline` only): set `orientation: horizontal | vertical | auto` in `visual_spec`. Default is `auto` — diagram-specialist resolves layout direction by element count and label length. Other diagram types (`cycle`, `matrix`, `pyramid`, `comparison`) ignore this field. See `agents/diagram-specialist.md §Orientation Resolution`.
+
+### Image Rules
+1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
+2. `image_query` must be in English — even for Korean lectures
+3. `visual-heavy` style requires `image_role: background` on most slides
+4. image-curator checks shared pool before downloading — reuse existing slugs when possible
+5. API keys are optional — keyless Pixabay is the default
+
+### Approval Gate Rules
+- Gates 2, 5 are **MANDATORY** — PM must NOT advance without user approval
+- Gate 1.5, 3, and 4 are optional — PM may ask user or auto-advance (Gate 1 is retired)
+- Gate 5: always generate 5-slide sample first; full PDF only after approval
+- Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
 
 > **Pipeline order** (variant.json `agent_manifest.pipeline_order`):
@@ -72,19 +131,79 @@ Three flags control agent execution in the co-deck pipeline:
 
 ## Skills
 
-<!-- VARIANT-INJECT: skills -->
-| Skill | File | Used By | Status |
-|-------|------|---------|--------|
-| version | `skills/version/SKILL.md` | version | active |
-| research | `skills/research/SKILL.md` | research | active |
-| storyline | `skills/storyline/SKILL.md` | storyline | active |
-| design | `skills/design/SKILL.md` | design | active |
-| html-build | `skills/html-build/SKILL.md` | html-build | active |
-| measure | `skills/measure/SKILL.md` | measure | active |
-| prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
-| pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
-| theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
-| handbook | `skills/handbook/SKILL.md` | handbook-writer, handbook-reviewer | active |
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+## Presentation Production Guidelines
+
+### Content Rules
+1. Research must cover both Korean and English sources
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: pitch-enhanced → max 4 bullets, 28 char title
+3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
+4. Speaker intro (slide 2) and contact (last slide) are mandatory
+5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
+6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
+
+### Design Rules
+1. 8-role color palette: defined in design_spec.md CSS variable block
+2. Font: Korean-compatible (MaruBuri, NanumSquare Neo, or Noto Sans KR)
+3. Layout: determined by `presentation.style` (classic = two-panel; minimal = text only; visual-heavy = full image)
+4. No hardcoded color or font values in HTML — CSS variables only
+5. Verify `presentation.theme × presentation.style` compatibility in `docs/html-themes/THEMES.md` before generating HTML
+
+### Build Rules
+1. Always call Version Agent before editing any file
+2. HTML must embed `slideData` array for PDF extraction
+3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
+5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
+
+### Visual Diagram Pipeline
+
+For slides that use concept diagrams (not stock photos), the pipeline is:
+
+```
+presentations/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
+        ↓ dynamic import
+gen-visual-images.ts (infrastructure dispatcher)
+        ↓
+presentations/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
+presentations/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
+        ↓
+slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen-visual-images.ts v3.2.0)
+        ↓ HTML: template buildSlideChildren() injects <img src="...svg"> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts imgPath() auto-derives "../assets/diagrams/<stem>.png" from the SVG path
+```
+
+**Architecture (v3.2.0)**:
+- `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
+- `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
+- Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
+- If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
+- **Unified output path**: SVG and PNG are both saved to `presentations/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
+
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG is generated alongside as a PDF sibling; the PDF pipeline (`gen-slides-pdf.ts`) auto-derives the `.png` path from the `.svg` path in `imgPath()` — no manual path switching required.
+
+**Rules**:
+1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
+2. Both SVG and PNG artifacts MUST exist in the shared pool — SVG for HTML, PNG for PDF
+3. `slidedata.json` `visualImage` field MUST reference the SVG path (e.g. `"../assets/diagrams/slide-03.svg"`); gen-visual-images.ts v3.2.0 enforces this automatically
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
+6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.svg`)
+8. **Diagram orientation** (`flow`/`timeline` only): set `orientation: horizontal | vertical | auto` in `visual_spec`. Default is `auto` — diagram-specialist resolves layout direction by element count and label length. Other diagram types (`cycle`, `matrix`, `pyramid`, `comparison`) ignore this field. See `agents/diagram-specialist.md §Orientation Resolution`.
+
+### Image Rules
+1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
+2. `image_query` must be in English — even for Korean lectures
+3. `visual-heavy` style requires `image_role: background` on most slides
+4. image-curator checks shared pool before downloading — reuse existing slugs when possible
+5. API keys are optional — keyless Pixabay is the default
+
+### Approval Gate Rules
+- Gates 2, 5 are **MANDATORY** — PM must NOT advance without user approval
+- Gate 1.5, 3, and 4 are optional — PM may ask user or auto-advance (Gate 1 is retired)
+- Gate 5: always generate 5-slide sample first; full PDF only after approval
+- Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
 
 > `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).
@@ -95,22 +214,79 @@ Three flags control agent execution in the co-deck pipeline:
 
 ## Scripts
 
-<!-- VARIANT-INJECT: scripts -->
-| Script | Location | Purpose | Status |
-|--------|----------|---------|--------|
-| `snapshot.ts` | `scripts/co-deck/` | File versioning / restore per project | active |
-| `measure-layout.ts` | `scripts/co-deck/` | **deprecated** — Playwright layout measurement replaced by `estimate-layout.ts` | deprecated |
-| `estimate-layout.ts` | `scripts/co-deck/` | Playwright-free PDF layout preparation: reads lecture-profile.md, resolves 4-layer spec merge, validates fonts, outputs layout_summary.md | active |
-| `auto-calibrate.ts` | `scripts/co-deck/` | Iterative auto-calibration loop: sample PDF → PNG → numerical validation → auto-adjust layout_overrides | active |
-| `download-font.ts` | `scripts/co-deck/` | Korean font TTF download (MaruBuri, Noto Sans KR, etc.); OS-aware system font detection | active |
-| `gen-slides-pdf.ts` | `scripts/co-deck/` | PDF generation from slidedata.json (region-based layout, background images, CJK fallback) | active |
-| `diagram-helpers.ts` | `scripts/co-deck/` | Shared SVG utilities library: `svgWrap`, `svgToPng`, `wrapText`, colour palettes | active |
-| `gen-visual-images.ts` | `scripts/co-deck/` | Infrastructure-only dispatcher: reads slidedata.json, renders SVG+PNG via diagram-defs.ts | active |
-| `validate-theme-styles.ts` | `scripts/co-deck/` | Validate html-themes structure: region schema, shared pool, slide_type↔region cross-check | active |
-| `validate-image-manifest.ts` | `scripts/co-deck/` | Gate 3.5 image validation: content-hash dedup, pixel dimensions, aspect-ratio check | active |
-| `generate-themes-manifest.ts` | `scripts/co-deck/` | Regenerate preview/themes-manifest.js for preview.html dropdowns | active |
-| `scaffold-theme-style.ts` | `scripts/co-deck/` | Scaffold new theme or style with correct file layout | active |
-| `extract_slidedata.mjs` | `scripts/co-deck/` | HTML slideData → slidedata.json (bracket-depth state machine, strict-JSON required) | active |
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+## Presentation Production Guidelines
+
+### Content Rules
+1. Research must cover both Korean and English sources
+2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: pitch-enhanced → max 4 bullets, 28 char title
+3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
+4. Speaker intro (slide 2) and contact (last slide) are mandatory
+5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
+6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
+
+### Design Rules
+1. 8-role color palette: defined in design_spec.md CSS variable block
+2. Font: Korean-compatible (MaruBuri, NanumSquare Neo, or Noto Sans KR)
+3. Layout: determined by `presentation.style` (classic = two-panel; minimal = text only; visual-heavy = full image)
+4. No hardcoded color or font values in HTML — CSS variables only
+5. Verify `presentation.theme × presentation.style` compatibility in `docs/html-themes/THEMES.md` before generating HTML
+
+### Build Rules
+1. Always call Version Agent before editing any file
+2. HTML must embed `slideData` array for PDF extraction
+3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
+4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
+5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
+
+### Visual Diagram Pipeline
+
+For slides that use concept diagrams (not stock photos), the pipeline is:
+
+```
+presentations/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
+        ↓ dynamic import
+gen-visual-images.ts (infrastructure dispatcher)
+        ↓
+presentations/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
+presentations/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
+        ↓
+slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen-visual-images.ts v3.2.0)
+        ↓ HTML: template buildSlideChildren() injects <img src="...svg"> into .right-panel
+        ↓ PDF:  gen-slides-pdf.ts imgPath() auto-derives "../assets/diagrams/<stem>.png" from the SVG path
+```
+
+**Architecture (v3.2.0)**:
+- `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
+- `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
+- Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
+- If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
+- **Unified output path**: SVG and PNG are both saved to `presentations/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
+
+**Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG is generated alongside as a PDF sibling; the PDF pipeline (`gen-slides-pdf.ts`) auto-derives the `.png` path from the `.svg` path in `imgPath()` — no manual path switching required.
+
+**Rules**:
+1. `gen-visual-images.ts` must be run before `html-build` and `pdf-export` stages whenever concept diagrams change
+2. Both SVG and PNG artifacts MUST exist in the shared pool — SVG for HTML, PNG for PDF
+3. `slidedata.json` `visualImage` field MUST reference the SVG path (e.g. `"../assets/diagrams/slide-03.svg"`); gen-visual-images.ts v3.2.0 enforces this automatically
+4. HTML template `buildSlideChildren()` checks `data.visualImage`: if truthy, injects `<img>` into `.right-panel`; if falsy, renders `.slide-visual` text panel (`visualTitle` + `visualDisplay`)
+5. Slides without a `.right-panel` (e.g. title, contact) are inherently skipped by the visual-image branch
+6. Korean text rendering in SVG requires Malgun Gothic (`C:/Windows/Fonts/malgun.ttf`) loaded explicitly via `@resvg/resvg-js` `font.fontFiles`
+7. GENERATOR key = image filename stem (e.g. `"slide-03-nested-layers"` for `../assets/diagrams/slide-03-nested-layers.svg`)
+8. **Diagram orientation** (`flow`/`timeline` only): set `orientation: horizontal | vertical | auto` in `visual_spec`. Default is `auto` — diagram-specialist resolves layout direction by element count and label length. Other diagram types (`cycle`, `matrix`, `pyramid`, `comparison`) ignore this field. See `agents/diagram-specialist.md §Orientation Resolution`.
+
+### Image Rules
+1. Only use commercial-use unlimited sources (Pixabay, Pexels, Unsplash)
+2. `image_query` must be in English — even for Korean lectures
+3. `visual-heavy` style requires `image_role: background` on most slides
+4. image-curator checks shared pool before downloading — reuse existing slugs when possible
+5. API keys are optional — keyless Pixabay is the default
+
+### Approval Gate Rules
+- Gates 2, 5 are **MANDATORY** — PM must NOT advance without user approval
+- Gate 1.5, 3, and 4 are optional — PM may ask user or auto-advance (Gate 1 is retired)
+- Gate 5: always generate 5-slide sample first; full PDF only after approval
+- Gate 1.5: if Trust Score < 70% (derived from `trust_score_thresholds.escalate` in `variant.json`), hold for re-research before advancing to storyline
 <!-- END VARIANT-INJECT -->
 
 ### Bun Dependencies
@@ -400,9 +576,13 @@ No `.env` required by default. API keys for image sources are optional and store
 ## Development Workflow
 
 <!-- VARIANT-INJECT: development-workflow -->
+`co-deck` defines 4 first-class production workflows managed by PM:
+
 ```
-User: "make a lecture about X"          → PM 11-Stage pipeline (see table below)
-User: "create a new theme/style"        → PM T-Stage / Style Workflow (see skills/theme-authoring/SKILL.md)
+1. Presentation Production Workflow  → 11-Stage Slide Pipeline (Stages 0~11: Slide Deck HTML & PDF)
+2. Handbook Production Workflow      → H-Stage Pipeline (H-0~H-7: Searchable Handbook & Course Site)
+3. Theme Authoring Workflow         → T-Stage Pipeline (T-0~T-4: Theme Package Creation)
+4. Style Authoring Workflow         → Style Workflow (S-0~S-2: Visual Palette Variant Creation)
 ```
 
 **11-Stage pipeline**:
@@ -596,9 +776,109 @@ H-7: PM — Secret scan + deploy + verify
 
 ---
 
-*co-deck.context.md version: 4.2 — updated 2026-06-28: FullscreenManager (F key + footer button) + @media print (Ctrl+P one slide per page) for all 5 themes; G1+G2 Tier 1 preview enhancements.*
+## Architecture Principles
+
+### Why Multi-Agent?
+
+A single LLM session could technically produce a slide deck end-to-end, but a multi-agent approach solves three real problems:
+
+1. **Context window limits.** A full 60-slide HTML file, research notes, and design spec together exceed what a single session can reason over reliably. Splitting by stage keeps each agent's context focused and manageable.
+2. **Approval gates.** Lecture production requires human judgment at key branch points (content direction, visual style, PDF quality). A multi-agent pipeline makes these checkpoints explicit and structural rather than ad-hoc.
+3. **Rework cost asymmetry.** A wrong design direction discovered after HTML generation requires redoing all downstream stages. Mandatory gates at content and design lock prevent expensive cascades. PM Agent tracks which stages need re-running when a file changes upstream.
+
+### File-Based Harness
+
+The system uses a **file-based harness** instead of a plugin or tool-based installation:
+
+```
+Claude / Gemini session starts
+    ↓
+CLAUDE.md (or GEMINI.md) auto-loaded
+    ↓
+Reads AGENTS.md — workflow index, R&R
+    ↓
+Reads agents/<name>.md as needed — full per-agent instructions
+```
+
+No installation required. Any AI with file read access can run the full pipeline. Agents and skills reference each other by file path, not by tool ID.
+
+### Layer Separation
+
+Three tiers of abstraction exist, each with strict scope:
+
+| Layer | Files | Contains | Does NOT contain |
+|-------|-------|----------|-----------------|
+| **System** | `agents/*.md`, `skills/*/SKILL.md`, `scripts/` | Process logic, schemas, tool usage | Project values |
+| **Context** | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `co-deck.context.md` | Workspace paths, workflow summary, agent index | Project values |
+| **Project** | `presentations/<project>/` | Design values, content, measurements | Process logic |
+
+**Critical invariant**: No color, font, or size value appears outside `presentations/<project>/`. The system layer defines schemas and contracts; the context layer defines the workflow; the project layer holds project-specific values.
+
+### AI Neutrality
+
+Agents and skills use generic language for tool references:
+
+- "web search" not `mcp__WebSearch__*`
+- "browser tool" not `mcp__Claude_in_Chrome__*`
+- "file read/write" not `Read`/`Write`/`Edit` (Claude-specific tool names)
+
+This ensures the same `agents/*.md` files work under Claude, Gemini, and any future AI. The only AI-specific content lives in `CLAUDE.md` and `GEMINI.md`.
+
+---
+
+## Architecture Principles
+
+### Why Multi-Agent?
+
+A single LLM session could technically produce a slide deck end-to-end, but a multi-agent approach solves three real problems:
+
+1. **Context window limits.** A full 60-slide HTML file, research notes, and design spec together exceed what a single session can reason over reliably. Splitting by stage keeps each agent's context focused and manageable.
+2. **Approval gates.** Lecture production requires human judgment at key branch points (content direction, visual style, PDF quality). A multi-agent pipeline makes these checkpoints explicit and structural rather than ad-hoc.
+3. **Rework cost asymmetry.** A wrong design direction discovered after HTML generation requires redoing all downstream stages. Mandatory gates at content and design lock prevent expensive cascades. PM Agent tracks which stages need re-running when a file changes upstream.
+
+### File-Based Harness
+
+The system uses a **file-based harness** instead of a plugin or tool-based installation:
+
+```
+Claude / Gemini session starts
+    ↓
+CLAUDE.md (or GEMINI.md) auto-loaded
+    ↓
+Reads AGENTS.md — workflow index, R&R
+    ↓
+Reads agents/<name>.md as needed — full per-agent instructions
+```
+
+No installation required. Any AI with file read access can run the full pipeline. Agents and skills reference each other by file path, not by tool ID.
+
+### Layer Separation
+
+Three tiers of abstraction exist, each with strict scope:
+
+| Layer | Files | Contains | Does NOT contain |
+|-------|-------|----------|-----------------|
+| **System** | `agents/*.md`, `skills/*/SKILL.md`, `scripts/` | Process logic, schemas, tool usage | Project values |
+| **Context** | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `co-deck.context.md` | Workspace paths, workflow summary, agent index | Project values |
+| **Project** | `presentations/<project>/` | Design values, content, measurements | Process logic |
+
+**Critical invariant**: No color, font, or size value appears outside `presentations/<project>/`. The system layer defines schemas and contracts; the context layer defines the workflow; the project layer holds project-specific values.
+
+### AI Neutrality
+
+Agents and skills use generic language for tool references:
+
+- "web search" not `mcp__WebSearch__*`
+- "browser tool" not `mcp__Claude_in_Chrome__*`
+- "file read/write" not `Read`/`Write`/`Edit` (Claude-specific tool names)
+
+This ensures the same `agents/*.md` files work under Claude, Gemini, and any future AI. The only AI-specific content lives in `CLAUDE.md` and `GEMINI.md`.
+
+---
+
+*co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
 
 ## Template Provenance
 
-- **Template-Version**: 0.5.3
+- **Template-Version**: 0.5.4
 - **Template-Variant**: co-deck

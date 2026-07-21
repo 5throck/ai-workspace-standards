@@ -36,6 +36,7 @@
 <body class="transition-fade">
 
   <!-- TOC drawer -->
+  <button class="toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기"><span class="chev">›</span></button>
   <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
   <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
     <div class="toc-header">
@@ -125,6 +126,10 @@
     }
 
     function slideType(d) {
+      if (d.type) {
+        if (d.type === 'title') return 'cover';
+        return d.type;
+      }
       if (d.isPunchlineSlide) return "punchline";
       if (d.isTitleSlide)     return "cover";
       if (d.isDividerSlide)   return "divider";
@@ -141,7 +146,7 @@
     function buildSlideChildren(slide, data, index) {
       var type = slideType(data);
       var section = data.section || "";
-      var title = data.title || "";
+      var title = data.title || data.headline || "";
 
       if (type === "punchline") {
         var card = el("div", "slide-card");
@@ -178,13 +183,13 @@
         var card = el("div", "slide-card");
         var content = el("div", "slide-content");
         if (data.visualImage) {
-          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || data.profileName || title));
           avatar.className = "profile-avatar";
           content.appendChild(avatar);
         }
-        content.appendChild(el("h1", "slide-title", data.speakerName || title));
-        if (data.speakerTitle != null) content.appendChild(el("p", "slide-subtitle", data.speakerTitle));
-        if (data.speakerBio != null) content.appendChild(el("p", "slide-subtitle", data.speakerBio));
+        content.appendChild(el("h1", "slide-title", data.speakerName || data.profileName || title));
+        if (data.speakerTitle || data.profileTitle) content.appendChild(el("p", "slide-subtitle", data.speakerTitle || data.profileTitle));
+        if (data.speakerBio) content.appendChild(el("p", "slide-subtitle", data.speakerBio));
         card.appendChild(content);
         slide.appendChild(card);
         return;
@@ -233,11 +238,16 @@
     }
 
     // ── Init ───────────────────────────────────────
-    document.addEventListener("DOMContentLoaded", function() {
+    function initAll() {
       initSlides();
       showSlide(0);
       initPPT({ transition: "fade", showTimer: true });
-    });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initAll);
+    } else {
+      initAll();
+    }
   </script>
 </body>
 </html>

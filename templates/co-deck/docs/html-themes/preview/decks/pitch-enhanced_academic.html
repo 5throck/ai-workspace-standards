@@ -9,7 +9,7 @@
 
   HOW TO USE:
     html-build reads this template and:
-    1. Injects <html data-theme="pitch-enhanced" data-style="academic"  data-style="<style>"> attributes
+    1. Injects <html data-theme="pitch-enhanced" data-style="academic" data-toc-style="glass-drawer"  data-style="<style>"> attributes
     2. Replaces [INJECT:CSS] with base.css + ppt-engine.css + theme.css + style.css links
     3. Replaces [INJECT:slideData] with: const slideData = [...];
     4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
@@ -39,7 +39,8 @@
 </head>
 <body class="transition-fade">
 
-  <!-- TOC drawer (slide headline navigation) -->
+  <!-- TOC drawer -->
+  <button class="toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기"><span class="chev">›</span></button>
   <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
   <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
     <div class="toc-header">
@@ -110,12 +111,18 @@
       "Welcome to the theme preview"
     ],
     "visualTitle": "Theme Preview",
-    "visualDisplay": "Exploring the rendering capabilities"
+    "visualDisplay": "Exploring the rendering capabilities",
+    "script": "안녕하세요. 테마 미리보기 표지 슬라이드 발표를 시작합니다.",
+    "scriptEn": "Hello and welcome to the theme preview title slide presentation.",
+    "scriptJa": " me? こんにちは。テーマプレビューのタイトルスライドへようこそ。"
   },
   {
     "headline": "Section One",
     "type": "divider",
-    "bullets": []
+    "bullets": [],
+    "script": "첫 번째 섹션으로 이동합니다. 주요 개념을 살펴보겠습니다.",
+    "scriptEn": "Moving on to Section One. Let us explore the key concepts.",
+    "scriptJa": "セクション1に進みます。主要な概念を見ていきましょう。"
   },
   {
     "headline": "Standard Slide",
@@ -127,7 +134,10 @@
     ],
     "imagePath": "",
     "visualTitle": "Visual Title",
-    "visualDisplay": "Supporting detail text"
+    "visualDisplay": "Supporting detail text",
+    "script": "일반 슬라이드입니다. 세 가지 핵심 항목에 대해 설명합니다.",
+    "scriptEn": "This is a standard slide explaining three key bullet points.",
+    "scriptJa": " standard スライドです。3つの主要なポイントを説明します。"
   },
   {
     "headline": "Content with Image",
@@ -138,7 +148,10 @@
     ],
     "imagePath": "../assets/diagrams/sample-diagram.svg",
     "visualTitle": "Image Slide",
-    "visualDisplay": "Visual content alongside text"
+    "visualDisplay": "Visual content alongside text",
+    "script": "이미지 및 다이어그램이 포함된 슬라이드입니다.",
+    "scriptEn": "This slide demonstrates visual diagram content alongside text.",
+    "scriptJa": "画像と図表が含まれるスライドです。"
   },
   {
     "headline": "Key Takeaway",
@@ -146,7 +159,9 @@
     "bullets": [
       "Remember this important point"
     ],
-    "script": "This is the narration script for the punchline slide."
+    "script": "가장 중요한 핵심 요약 메시지입니다.",
+    "scriptEn": "This is the primary key takeaway message.",
+    "scriptJa": "最も重要なキーメッセージです。"
   },
   {
     "headline": "Presenter Profile",
@@ -157,7 +172,13 @@
     ],
     "profileName": "Dr. Jane Smith",
     "profileTitle": "Senior Researcher",
-    "profileAvatar": ""
+    "profileAvatar": "",
+    "speakerName": "Dr. Jane Smith",
+    "speakerTitle": "Senior Researcher",
+    "speakerBio": "Expert in their field with 10 years of experience.",
+    "script": "발표자 소개 슬라이드입니다. 연구 경력 및 분야를 소개합니다.",
+    "scriptEn": "This is the presenter profile slide introducing Dr. Jane Smith.",
+    "scriptJa": "発表者プロファイルスライドです。"
   },
   {
     "headline": "Contact Information",
@@ -165,12 +186,18 @@
     "bullets": [],
     "contactEmail": "jane.smith@example.com",
     "contactPhone": "+1-555-0123",
-    "contactWebsite": "https://example.com"
+    "contactWebsite": "https://example.com",
+    "script": "연락처 및 문의 사항 슬라이드입니다.",
+    "scriptEn": "Contact information slide for further inquiries.",
+    "scriptJa": "連絡先およびお問い合わせ情報スライドです。"
   },
   {
     "headline": "Another Section",
     "type": "divider",
-    "bullets": []
+    "bullets": [],
+    "script": "두 번째 섹션으로 이동합니다.",
+    "scriptEn": "Moving to the second section.",
+    "scriptJa": "第2セクションへ移動します。"
   },
   {
     "headline": "Visual Heavy Slide",
@@ -178,7 +205,10 @@
     "bullets": [
       "Background image slide"
     ],
-    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E"
+    "backgroundImage": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23334155' width='1280' height='720'/%3E%3Ctext x='640' y='360' text-anchor='middle' fill='%23fff' font-size='48'%3EBackground Image Placeholder%3C/text%3E%3C/svg%3E",
+    "script": "배경 이미지가 적용된 비주얼 슬라이드입니다.",
+    "scriptEn": "Visual slide with full background image.",
+    "scriptJa": "背景画像が適用されたビジュアルスライドです。"
   }
 ];
     // const slideData = [ ... ];  <-- replaced by html-build
@@ -459,13 +489,27 @@ var TransitionEngine = {
   },
 
   setMode: function(mode) {
+    if (!this._body) this._body = document.body;
+    // If clicking the currently active mode, deactivate transition!
+    if (this.mode === mode) {
+      this.mode = 'none';
+      this._body.classList.remove('transition-fade', 'transition-push', 'transition-zoom');
+      document.querySelectorAll('.transition-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      return;
+    }
+
     this.mode = mode || 'fade';
     this._body.classList.remove('transition-fade', 'transition-push', 'transition-zoom');
-    this._body.classList.add('transition-' + this.mode);
+    if (this.mode !== 'none') {
+      this._body.classList.add('transition-' + this.mode);
+    }
 
     // Update button states
+    var self = this;
     document.querySelectorAll('.transition-btn').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.mode === mode);
+      btn.classList.toggle('active', btn.dataset.mode === self.mode);
     });
   },
 
@@ -523,24 +567,17 @@ var PresenterTools = {
     var panel = document.getElementById('script-panel');
     var textEl = document.getElementById('script-text');
     if (!panel || !textEl) return;
-    var data = typeof slideData !== 'undefined' ? slideData[index] : null;
-    var script = data && data.script ? data.script : '';
-    textEl.textContent = script;
-    if (!script && this.scriptVisible) {
-      panel.classList.remove('show');
-    } else if (this.scriptVisible && script) {
-      panel.classList.add('show');
-    }
+    var script = NarrationEngine.getScript(index);
+    textEl.textContent = script || '(작성된 발표자 노트가 없습니다)';
+    panel.classList.toggle('show', this.scriptVisible);
   },
 
   toggleScript: function() {
     var panel = document.getElementById('script-panel');
     var btn = document.getElementById('script-btn');
     if (!panel) return;
-    var data = typeof slideData !== 'undefined' ? slideData[currentSlide] : null;
-    var hasScript = data && data.script;
     this.scriptVisible = !this.scriptVisible;
-    panel.classList.toggle('show', this.scriptVisible && !!hasScript);
+    this.updateScript(currentSlide);
     if (btn) btn.classList.toggle('active', this.scriptVisible);
   },
 
@@ -1022,31 +1059,16 @@ var NarrationEngine = {
       var langInfo = self.LANGUAGES[lang];
       if (!langInfo) return;
 
-      // Check if any slide has script for this language (v2.4: uses _scriptLanguage)
-      var hasScript = false;
-      if (typeof slideData !== 'undefined') {
-        for (var i = 0; i < slideData.length; i++) {
-          var s = slideData[i].script || '';
-          if (lang === self._scriptLanguage) s = slideData[i].script || '';
-          else if (lang === 'en') s = slideData[i].scriptEn || '';
-          else if (lang === 'ja') s = slideData[i].scriptJa || '';
-          else s = '';
-          if (s) { hasScript = true; break; }
-        }
-      }
-
       var option = document.createElement('div');
-      option.className = 'voice-lang-option' + (lang === self.language ? ' active' : '') + (!hasScript ? ' disabled' : '');
+      option.className = 'voice-lang-option' + (lang === self.language ? ' active' : '');
       option.textContent = langInfo.label + ' (' + langInfo.shortLabel + ')';
       option.dataset.lang = lang;
 
-      if (hasScript) {
-        option.onclick = function(e) {
-          e.stopPropagation();
-          self.setLanguage(lang);
-          self._toggleLanguageDropdown();
-        };
-      }
+      option.onclick = function(e) {
+        e.stopPropagation();
+        self.setLanguage(lang);
+        self._toggleLanguageDropdown();
+      };
 
       dropdown.appendChild(option);
     });
@@ -1087,6 +1109,11 @@ var NarrationEngine = {
     // Rebuild voice dropdown for new language
     this._updateVoiceDropdown();
 
+    // Update speaker notes if PresenterTools is available
+    if (typeof PresenterTools !== 'undefined') {
+      PresenterTools.updateScript(currentSlide);
+    }
+
     // Restart speech with new language if playing
     if (this.isPlaying) {
       speechSynthesis.cancel();
@@ -1107,14 +1134,22 @@ var NarrationEngine = {
     while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
 
     var voices = this._getVoicesForLanguage(this.language);
+    if (voices.length === 0 && typeof speechSynthesis !== 'undefined') {
+      voices = speechSynthesis.getVoices();
+    }
     var currentVoice = this._findVoice(this.language);
 
+    btn.style.display = ''; // ALWAYS ensure button is visible
+
     if (voices.length === 0) {
-      btn.style.display = 'none';
+      var opt = document.createElement('div');
+      opt.className = 'voice-option disabled';
+      opt.textContent = '🎤 (시스템 음성 로딩 중 / 기본 음성 사용)';
+      dropdown.appendChild(opt);
+      btn.textContent = '🎤 기본 음성';
+      if (wasOpen) dropdown.classList.add('show');
       return;
     }
-
-    btn.style.display = '';
 
     var self = this;
     voices.forEach(function(voice) {
@@ -1125,6 +1160,25 @@ var NarrationEngine = {
       nameSpan.className = 'voice-name';
       nameSpan.textContent = voice.name;
 
+      var badge = document.createElement('span');
+      badge.className = 'voice-badge';
+      badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
+
+      option.appendChild(nameSpan);
+      option.appendChild(badge);
+      option.title = voice.name + ' — ' + voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
+      option.onclick = function(e) {
+        e.stopPropagation();
+        self._selectVoiceInDropdown(voice.name, voice.lang, voice.localService);
+        self._toggleVoiceDropdown();
+      };
+      dropdown.appendChild(option);
+    });
+
+    // Update button label with compact info
+    if (currentVoice) {
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
       var badge = document.createElement('span');
       badge.className = 'voice-badge';
       badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
@@ -1322,22 +1376,13 @@ document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
     e.preventDefault();
     changeSlide(-1);
-  }
-  if (e.key === 'Home') {
-    e.preventDefault();
-    showSlide(0);
-  }
-  if (e.key === 'End') {
-    e.preventDefault();
-    var slides = document.querySelectorAll('.slide');
-    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
@@ -1373,6 +1418,23 @@ document.addEventListener('keydown', function(e) {
 //            narration: narrationConfig, autoAdvance: autoAdvanceConfig }
 function initPPT(options) {
   options = options || {};
+
+  // Read tocStyle from URL search params or options
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var tocStyleParam = p.get('tocStyle') || (options && options.tocStyle);
+    if (tocStyleParam) {
+      document.documentElement.setAttribute('data-toc-style', tocStyleParam);
+    }
+  } catch (e) {}
+
+  // Listen for postMessage from parent frame (for live switching in preview.html)
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === '__set_toc_style__') {
+      document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
+    }
+  });
+
   TransitionEngine.init(options.transition || 'fade');
   FullscreenManager.init();
 
@@ -1431,6 +1493,10 @@ function initPPT(options) {
     }
 
     function slideType(d) {
+      if (d.type) {
+        if (d.type === 'cover') return 'title';
+        return d.type;
+      }
       if (d.isPunchlineSlide) return 'punchline';
       if (d.isTitleSlide)    return 'title';
       if (d.isDividerSlide)  return 'divider';
@@ -1442,7 +1508,7 @@ function initPPT(options) {
     function buildSlideChildren(slide, data, index) {
       var type = slideType(data);
       var section = data.section || '';
-      var title = data.title || '';
+      var title = data.title || data.headline || '';
 
       if (type === 'punchline') {
         slide.appendChild(el('div', 'slide-eyebrow', section));
@@ -1485,13 +1551,13 @@ function initPPT(options) {
       if (type === 'profile') {
         slide.appendChild(el('div', 'profile-eyebrow', section));
         if (data.visualImage) {
-          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || data.profileName || title));
           avatar.className = 'profile-avatar';
           slide.appendChild(avatar);
         }
-        slide.appendChild(el('div', 'profile-name', data.speakerName || title));
-        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
-        if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
+        slide.appendChild(el('div', 'profile-name', data.speakerName || data.profileName || title));
+        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || data.profileTitle || ''));
+        if (data.speakerBio) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
         return;
       }
       if (type === 'contact') {
@@ -1561,11 +1627,16 @@ function initPPT(options) {
     }
 
     // ── Init ────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
+    function initAll() {
       initSlides();
       showSlide(0);
       initPPT({ transition: 'fade', showTimer: true, showThumbnails: false });
-    });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+      initAll();
+    }
   </script>
 </body>
 </html>

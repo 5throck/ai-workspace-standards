@@ -68,7 +68,7 @@ This variant focuses on lecture and presentation material production — from re
 - **design**: Visual design lock — decides layout, color palette, font family and saves design_spec.md
 - **image-curator**: Image acquisition — Pixabay (keyless), Unsplash URL, Pexels/Unsplash API; all sources commercial-use unlimited
 - **diagram-specialist**: Diagram and chart generation — 6 concept diagram types (cycle/flow/matrix/pyramid/timeline/comparison) + 3 SVG chart types (bar/line/pie); SVG is primary delivery format for HTML; PNG is optional, required only for PDF export
-- **html-build**: HTML slide generation — applies `data-theme` attribute; injects base.css + override CSS; 5 themes (outline, pitch, pitch-enhanced, vertical, zen)
+- **html-build**: HTML slide generation — applies `data-theme` attribute; injects base.css + override CSS; 6 themes (outline, outlook, pitch, pitch-enhanced, vertical, zen); supports `glass-drawer` or `solid-drawer` TOC style
 - **measure**: Layout measurement (deprecated) — runs Playwright to extract coordinates and downloads TTF fonts; superseded by **prep-pdf**
 - **prep-pdf**: Playwright-free PDF preparation — resolves the 4-layer spec merge (base → theme → style → overrides), validates fonts, outputs a layout summary; replaces `measure` for Stages 9-10
 - **pdf-export**: PDF generation — generates sample (5 slides) and full PDF via pdf-lib

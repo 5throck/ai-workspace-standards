@@ -3,24 +3,16 @@
   "version": "1.0.0",
   "description": "Floating-card presenter deck with bottom navigation bar, speaker script panel, and slide-out TOC drawer. Cards are viewport-relative (not fixed 1280×720); each slide transitions with scale+translateY animation. Optimised for live presentations where the presenter needs access to speaking notes.",
   "rendering": {
-    "paradigm": "pitch",
+    "paradigm": "ppt-engine",
     "slides_in_dom": "all (one active)",
-    "navigation": "bottom footer bar — prev/next buttons + TOC drawer + script toggle",
+    "navigation": "bottom footer bar — prev/next buttons + TOC drawer + Fade/Push/Zoom transitions + TTS",
     "progress_indicator": "progress bar (bottom) + slide counter (footer)"
   },
   "content_rules": {
     "max_bullets_per_slide": 4,
     "max_title_chars": 28,
     "recommended_slide_count": "20-50",
-    "notes": "Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets; each bullet should be a concise takeaway. Divider slides must have a compelling image on the right panel. Script field is shown in the presenter panel — keep it to 2-3 sentences.",
-    "slide_type_usage": {
-      "standard": "All content slides (mandatory)",
-      "punchline": "Last content slide only — single-statement message (≤1 line, no bullets)",
-      "divider": "Chapter/part boundaries only",
-      "profile": "Speaker intro only",
-      "title": "First slide (cover) only",
-      "contact": "Final slide only"
-    }
+    "notes": "Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets; each bullet should be a concise takeaway. Divider slides must have a compelling image on the right panel. Script field is shown in the presenter panel — keep it to 2-3 sentences."
   },
   "compatible_styles": ["classic", "minimal", "premium-dark"],
   "incompatible_styles": [
@@ -49,6 +41,7 @@
     "contact": true
   },
   "css_base": "docs/html-themes/styles/base.css",
+  "css_ppt_engine": "docs/html-themes/themes/_shared/ppt-engine.css",
   "css_theme": "docs/html-themes/themes/pitch/theme.css",
   "added": "2026-06-22",
   "author": "co-deck"

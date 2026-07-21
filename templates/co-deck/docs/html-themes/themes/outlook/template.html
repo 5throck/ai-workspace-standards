@@ -47,6 +47,8 @@
     <div class="outlook-progress-fill" id="outlook-progress-fill"></div>
   </div>
 
+  <!-- TOC drawer -->
+  <button class="toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기"><span class="chev">›</span></button>
   <!-- TOC overlay backdrop -->
   <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
 
@@ -132,6 +134,10 @@
     // Maps slideData fields to the corporate presentation layout.
 
     function slideType(d) {
+      if (d.type) {
+        if (d.type === 'title') return 'cover';
+        return d.type;
+      }
       if (d.isPunchlineSlide) return 'punchline';
       if (d.isTitleSlide)    return 'cover';
       if (d.isDividerSlide)  return 'divider';
@@ -425,7 +431,7 @@
     }
 
     // ── Init ─────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
+    function initAll() {
       initSlides();
       showSlide(0);
 
@@ -457,7 +463,12 @@
       requestAnimationFrame(function() {
         ScrollTracker.init();
       });
-    });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+      initAll();
+    }
   </script>
 </body>
 </html>

@@ -34,7 +34,7 @@ Use this lookup table to see which agent + skill PM will route your request to. 
 | Theme/visual design — color palette, fonts, layout lock | `design` | `design` | Produces `design_spec.md`; Stage 4; can analyze reference URLs/images |
 | Find and download slide images (Pixabay/Unsplash/Pexels) | `image-curator` | (no dedicated SKILL.md; agent-only) | Outputs `assets/images/` + `image-manifest.json`; Stage 3.5, optional, runs parallel with diagram-specialist |
 | Generate SVG concept diagrams or data charts | `diagram-specialist` | (no dedicated SKILL.md; agent-only) | 6 diagram types (cycle/flow/matrix/pyramid/timeline/comparison) + 3 chart types (bar/line/pie); Stage 3.5, optional |
-| Build/generate the actual HTML slide deck | `html-build` | `html-build` | Applies `data-theme`, injects images, speaker intro, contact slide; Stages 5-8 |
+| Build/generate the actual HTML slide deck | `html-build` | `html-build` | Applies `data-theme`, supports 6 themes (`outline`, `outlook`, `pitch`, `pitch-enhanced`, `vertical`, `zen`) and 2 TOC drawer styles (`glass-drawer`, `solid-drawer`), injects images, speaker intro, contact slide; Stages 5-8 |
 | Measure rendered layout for PDF export (legacy, Playwright) | `measure` | `measure` | **Deprecated** — superseded by `prep-pdf` |
 | Prepare for PDF export without Playwright | `pdf-export` | `prep-pdf` | Resolves the 4-layer spec merge (base → theme → style → overrides); Stages 9-10 |
 | Generate the sample or final print-ready PDF | `pdf-export` | `pdf-export` | Sample (5 slides) then full PDF via `pdf-lib`; Stage 11 |
@@ -99,17 +99,15 @@ presentations/<project-name>/
   research_notes.md           # Stage 1 output
   source-verification.md      # Stage 1.5 output (Trust Score)
   storyline.md                # Stage 2 output
-  slide_deck.md                # Stage 2-3 output (per-slide content + image_role/image_query)
-  design_spec.md               # Stage 4 output (colors/fonts/layout)
-  assets/images/                # Stage 3.5 output (image-curator)
-  image-manifest.json           # Stage 3.5 output
-  assets/diagrams/*.svg (+.png)  # Stage 3.5 output (diagram-specialist)
-  diagram-manifest.json          # Stage 3.5 output
-  lecture_vN.html                # Stage 5-8 output (html-build)
-  pdf_layout_spec.md / layout summary  # Stage 9-10 output
-  sample_5slides.pdf             # Stage 11 sample output (Gate 5)
-  <project-name>.pdf              # Stage 11 final print-ready output
-  _versions/                      # version-agent snapshots (cross-cutting)
+  slide_deck.md               # Stage 3 output
+  design_spec.md              # Stage 4 output
+  assets/                     # Stage 3.5 images and diagrams
+  lecture_<name>_vN.html      # Stage 5-8 output (production deck)
+  slidedata.json              # Stage 8 output (extracted slide JSON for PDF engine)
+  pdf_layout_spec.json        # Stage 9-10 output (merged coordinate spec)
+  lecture_<name>_vN_sample5.pdf # Stage 11 sample PDF
+  lecture_<name>_vN.pdf       # Stage 11 final print-ready PDF
+  _versions/                  # version-agent snapshots (cross-cutting)
 ```
 
 Shared, project-independent assets live under `docs/`:
@@ -121,3 +119,25 @@ Shared, project-independent assets live under `docs/`:
 Handbook deliverables (H-Stage) are written to the output directory you confirm at H-0 (standalone handbook, lecture companion, or full course site) and deployed as a static site per H-6/H-7.
 
 Automation scripts backing all of the above live in `scripts/co-deck/` (see `scripts/co-deck/SCRIPTS.md` for the full manifest) — you generally don't call these directly; the dispatched specialist agents run them for you.
+
+---
+
+## 6. Theme × Style Previewer (`preview.html`)
+
+co-deck includes an interactive, browser-based Theme × Style previewer at `docs/html-themes/preview/preview.html`. It uses the exact production rendering pipeline (`buildThemeDeck`) to render all supported theme × style combinations.
+
+### How to Use:
+1. Open `docs/html-themes/preview/preview.html` directly in your browser (supports both `file://` protocol and local HTTP servers).
+2. Select a **Theme** and **Style** from the top bar dropdowns (e.g. `theme=pitch-enhanced&style=premium-dark`).
+3. You can also pass URL query parameters directly:
+   `docs/html-themes/preview/preview.html?theme=outlook&style=classic`
+
+### Regenerating Preview Assets:
+When adding or modifying themes or styles, update the preview assets via CLI:
+```bash
+# Regenerate the manifest (themes-manifest.js)
+bun scripts/co-deck/generate-themes-manifest.ts
+
+# Regenerate all 27 preview HTML decks in docs/html-themes/preview/decks/
+bun scripts/co-deck/build-theme-preview.ts
+```

@@ -57,10 +57,12 @@ instructor:
 #   - minimal      : text-only, clean whitespace
 #   - visual-heavy : full-bleed images with text overlay (partial for PPT themes)
 #   - academic     : dense layout for research/thesis (all themes except pitch)
+# tocStyle — Table-of-contents visual style (glass-drawer | solid-drawer, default: glass-drawer)
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:
   theme: pitch-enhanced
   style: premium-dark
+  tocStyle: glass-drawer
 
 # Keywords used by research agent to focus search queries
 # Add 5-10 domain-specific terms

@@ -70,6 +70,7 @@
   --border-subtle:        rgba(0, 0, 0, 0.07);
   --glass-bg:             rgba(248, 246, 240, 0.95);
   --toc-drawer-bg:        var(--glass-bg);
+  --toc-drawer-bg-solid:  #f8f6f0;
   --footer-bg:            var(--glass-bg);
   --hover-bg:             rgba(0, 0, 0, 0.04);
   --text-dim:             rgba(0, 0, 0, 0.35);

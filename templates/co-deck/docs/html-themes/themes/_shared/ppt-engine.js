@@ -274,13 +274,27 @@ var TransitionEngine = {
   },
 
   setMode: function(mode) {
+    if (!this._body) this._body = document.body;
+    // If clicking the currently active mode, deactivate transition!
+    if (this.mode === mode) {
+      this.mode = 'none';
+      this._body.classList.remove('transition-fade', 'transition-push', 'transition-zoom');
+      document.querySelectorAll('.transition-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      return;
+    }
+
     this.mode = mode || 'fade';
     this._body.classList.remove('transition-fade', 'transition-push', 'transition-zoom');
-    this._body.classList.add('transition-' + this.mode);
+    if (this.mode !== 'none') {
+      this._body.classList.add('transition-' + this.mode);
+    }
 
     // Update button states
+    var self = this;
     document.querySelectorAll('.transition-btn').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.mode === mode);
+      btn.classList.toggle('active', btn.dataset.mode === self.mode);
     });
   },
 
@@ -338,24 +352,17 @@ var PresenterTools = {
     var panel = document.getElementById('script-panel');
     var textEl = document.getElementById('script-text');
     if (!panel || !textEl) return;
-    var data = typeof slideData !== 'undefined' ? slideData[index] : null;
-    var script = data && data.script ? data.script : '';
-    textEl.textContent = script;
-    if (!script && this.scriptVisible) {
-      panel.classList.remove('show');
-    } else if (this.scriptVisible && script) {
-      panel.classList.add('show');
-    }
+    var script = NarrationEngine.getScript(index);
+    textEl.textContent = script || '(작성된 발표자 노트가 없습니다)';
+    panel.classList.toggle('show', this.scriptVisible);
   },
 
   toggleScript: function() {
     var panel = document.getElementById('script-panel');
     var btn = document.getElementById('script-btn');
     if (!panel) return;
-    var data = typeof slideData !== 'undefined' ? slideData[currentSlide] : null;
-    var hasScript = data && data.script;
     this.scriptVisible = !this.scriptVisible;
-    panel.classList.toggle('show', this.scriptVisible && !!hasScript);
+    this.updateScript(currentSlide);
     if (btn) btn.classList.toggle('active', this.scriptVisible);
   },
 
@@ -837,31 +844,16 @@ var NarrationEngine = {
       var langInfo = self.LANGUAGES[lang];
       if (!langInfo) return;
 
-      // Check if any slide has script for this language (v2.4: uses _scriptLanguage)
-      var hasScript = false;
-      if (typeof slideData !== 'undefined') {
-        for (var i = 0; i < slideData.length; i++) {
-          var s = slideData[i].script || '';
-          if (lang === self._scriptLanguage) s = slideData[i].script || '';
-          else if (lang === 'en') s = slideData[i].scriptEn || '';
-          else if (lang === 'ja') s = slideData[i].scriptJa || '';
-          else s = '';
-          if (s) { hasScript = true; break; }
-        }
-      }
-
       var option = document.createElement('div');
-      option.className = 'voice-lang-option' + (lang === self.language ? ' active' : '') + (!hasScript ? ' disabled' : '');
+      option.className = 'voice-lang-option' + (lang === self.language ? ' active' : '');
       option.textContent = langInfo.label + ' (' + langInfo.shortLabel + ')';
       option.dataset.lang = lang;
 
-      if (hasScript) {
-        option.onclick = function(e) {
-          e.stopPropagation();
-          self.setLanguage(lang);
-          self._toggleLanguageDropdown();
-        };
-      }
+      option.onclick = function(e) {
+        e.stopPropagation();
+        self.setLanguage(lang);
+        self._toggleLanguageDropdown();
+      };
 
       dropdown.appendChild(option);
     });
@@ -902,6 +894,11 @@ var NarrationEngine = {
     // Rebuild voice dropdown for new language
     this._updateVoiceDropdown();
 
+    // Update speaker notes if PresenterTools is available
+    if (typeof PresenterTools !== 'undefined') {
+      PresenterTools.updateScript(currentSlide);
+    }
+
     // Restart speech with new language if playing
     if (this.isPlaying) {
       speechSynthesis.cancel();
@@ -922,14 +919,22 @@ var NarrationEngine = {
     while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
 
     var voices = this._getVoicesForLanguage(this.language);
+    if (voices.length === 0 && typeof speechSynthesis !== 'undefined') {
+      voices = speechSynthesis.getVoices();
+    }
     var currentVoice = this._findVoice(this.language);
 
+    btn.style.display = ''; // ALWAYS ensure button is visible
+
     if (voices.length === 0) {
-      btn.style.display = 'none';
+      var opt = document.createElement('div');
+      opt.className = 'voice-option disabled';
+      opt.textContent = '🎤 (시스템 음성 로딩 중 / 기본 음성 사용)';
+      dropdown.appendChild(opt);
+      btn.textContent = '🎤 기본 음성';
+      if (wasOpen) dropdown.classList.add('show');
       return;
     }
-
-    btn.style.display = '';
 
     var self = this;
     voices.forEach(function(voice) {
@@ -940,6 +945,25 @@ var NarrationEngine = {
       nameSpan.className = 'voice-name';
       nameSpan.textContent = voice.name;
 
+      var badge = document.createElement('span');
+      badge.className = 'voice-badge';
+      badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
+
+      option.appendChild(nameSpan);
+      option.appendChild(badge);
+      option.title = voice.name + ' — ' + voice.lang + ' (' + (voice.localService ? 'local' : 'network') + ')';
+      option.onclick = function(e) {
+        e.stopPropagation();
+        self._selectVoiceInDropdown(voice.name, voice.lang, voice.localService);
+        self._toggleVoiceDropdown();
+      };
+      dropdown.appendChild(option);
+    });
+
+    // Update button label with compact info
+    if (currentVoice) {
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('🎤 ' + currentVoice.name + ' '));
       var badge = document.createElement('span');
       badge.className = 'voice-badge';
       badge.textContent = voice.lang + ' · ' + (voice.localService ? 'L' : 'N');
@@ -1137,22 +1161,13 @@ document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
     e.preventDefault();
     changeSlide(-1);
-  }
-  if (e.key === 'Home') {
-    e.preventDefault();
-    showSlide(0);
-  }
-  if (e.key === 'End') {
-    e.preventDefault();
-    var slides = document.querySelectorAll('.slide');
-    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
@@ -1188,6 +1203,23 @@ document.addEventListener('keydown', function(e) {
 //            narration: narrationConfig, autoAdvance: autoAdvanceConfig }
 function initPPT(options) {
   options = options || {};
+
+  // Read tocStyle from URL search params or options
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var tocStyleParam = p.get('tocStyle') || (options && options.tocStyle);
+    if (tocStyleParam) {
+      document.documentElement.setAttribute('data-toc-style', tocStyleParam);
+    }
+  } catch (e) {}
+
+  // Listen for postMessage from parent frame (for live switching in preview.html)
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === '__set_toc_style__') {
+      document.documentElement.setAttribute('data-toc-style', event.data.tocStyle);
+    }
+  });
+
   TransitionEngine.init(options.transition || 'fade');
   FullscreenManager.init();
 

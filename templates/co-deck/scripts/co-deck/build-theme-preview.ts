@@ -1,3 +1,4 @@
+// @version 0.1.0
 // build-theme-preview.ts — generates preview HTML decks for all theme×style combinations.
 //
 // Reads preview-data.json and themes-manifest.js data, calls buildThemeDeck() for each

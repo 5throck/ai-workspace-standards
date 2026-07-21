@@ -35,7 +35,8 @@
 </head>
 <body>
 
-  <!-- TOC drawer (slide headline navigation) -->
+  <!-- TOC drawer -->
+  <button class="toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기"><span class="chev">›</span></button>
   <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
   <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
     <div class="toc-header">
@@ -115,6 +116,10 @@
     }
 
     function slideType(d) {
+      if (d.type) {
+        if (d.type === 'title') return 'cover';
+        return d.type;
+      }
       if (d.isPunchlineSlide) return 'punchline';
       if (d.isTitleSlide)    return 'cover';
       if (d.isDividerSlide)  return 'divider';
@@ -132,7 +137,7 @@
     function buildSlideChildren(slide, data, index) {
       var type = slideType(data);
       var section = data.section || '';
-      var title = data.title || '';
+      var title = data.title || data.headline || '';
 
       if (type === 'punchline') {
         buildHeader(slide, section);
@@ -163,13 +168,13 @@
         buildHeader(slide, section);
         var card = el('div', 'slide-card');
         if (data.visualImage) {
-          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || data.profileName || title));
           avatar.className = 'profile-avatar';
           card.appendChild(avatar);
         }
-        card.appendChild(el('h1', 'slide-title', data.speakerName || title));
-        if (data.speakerTitle != null) card.appendChild(el('p', 'slide-subtitle', data.speakerTitle));
-        if (data.speakerBio != null) card.appendChild(el('p', 'slide-subtitle', data.speakerBio));
+        card.appendChild(el('h1', 'slide-title', data.speakerName || data.profileName || title));
+        if (data.speakerTitle || data.profileTitle) card.appendChild(el('p', 'slide-subtitle', data.speakerTitle || data.profileTitle));
+        if (data.speakerBio) card.appendChild(el('p', 'slide-subtitle', data.speakerBio));
         slide.appendChild(card);
         return;
       }
@@ -306,7 +311,7 @@
     });
 
     // ── Init ────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
+    function initAll() {
       initSlides();
       showSlide(0);
 
@@ -325,7 +330,12 @@
       requestAnimationFrame(function () {
         ScrollTracker.init();
       });
-    });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+      initAll();
+    }
   </script>
 </body>
 </html>

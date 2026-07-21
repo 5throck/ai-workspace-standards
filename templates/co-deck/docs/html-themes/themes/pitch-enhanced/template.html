@@ -36,7 +36,8 @@
 </head>
 <body class="transition-fade">
 
-  <!-- TOC drawer (slide headline navigation) -->
+  <!-- TOC drawer -->
+  <button class="toc-toggle" onclick="toggleTOC()" aria-label="목차 열기/닫기"><span class="chev">›</span></button>
   <div class="toc-overlay" id="toc-overlay" onclick="closeTOC()"></div>
   <div class="toc-drawer" id="toc-drawer" aria-label="슬라이드 목차">
     <div class="toc-header">
@@ -126,6 +127,10 @@
     }
 
     function slideType(d) {
+      if (d.type) {
+        if (d.type === 'cover') return 'title';
+        return d.type;
+      }
       if (d.isPunchlineSlide) return 'punchline';
       if (d.isTitleSlide)    return 'title';
       if (d.isDividerSlide)  return 'divider';
@@ -137,7 +142,7 @@
     function buildSlideChildren(slide, data, index) {
       var type = slideType(data);
       var section = data.section || '';
-      var title = data.title || '';
+      var title = data.title || data.headline || '';
 
       if (type === 'punchline') {
         slide.appendChild(el('div', 'slide-eyebrow', section));
@@ -180,13 +185,13 @@
       if (type === 'profile') {
         slide.appendChild(el('div', 'profile-eyebrow', section));
         if (data.visualImage) {
-          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || title));
+          var avatar = imgEl(data.visualImage, escapeText(data.speakerName || data.profileName || title));
           avatar.className = 'profile-avatar';
           slide.appendChild(avatar);
         }
-        slide.appendChild(el('div', 'profile-name', data.speakerName || title));
-        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || ''));
-        if (data.speakerBio != null) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
+        slide.appendChild(el('div', 'profile-name', data.speakerName || data.profileName || title));
+        slide.appendChild(el('div', 'profile-affiliation', data.speakerTitle || data.profileTitle || ''));
+        if (data.speakerBio) slide.appendChild(el('div', 'profile-bio', data.speakerBio));
         return;
       }
       if (type === 'contact') {
@@ -256,11 +261,16 @@
     }
 
     // ── Init ────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
+    function initAll() {
       initSlides();
       showSlide(0);
       initPPT({ transition: 'fade', showTimer: true, showThumbnails: false });
-    });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+      initAll();
+    }
   </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.4.1
 /**
  * sync-skills.ts
  * Distributes skills from the SSOT (skills/) to .claude/skills/, .gemini/skills/, and .agents/skills/.
