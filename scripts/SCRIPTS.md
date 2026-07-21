@@ -1,6 +1,6 @@
 # SCRIPTS.md —Script Lifecycle Registry
 
-> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).
+> This file is the Single Source of Truth (Tier 1 SSOT) for all directly-invokable scripts in `scripts/` (workspace root) — i.e. scripts run via `bun scripts/<name>.ts` or `bun run <alias>`. Internal library/helper modules under `scripts/lib/` and `scripts/helpers/` that are imported by other scripts but never run standalone (e.g. `auth.ts`, `security-validator.ts`, `pipeline-state.ts`) are intentionally excluded — they have no independent CLI usage to register.
 > Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.
 > Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.
 >
@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.7 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.8 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -66,7 +66,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.1.5 | active | —| —| L0+L1 | —|
-| `generate-scripts-readme.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `generate-scripts-readme.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.7.2 | active | —| —| L0 | —|
@@ -124,7 +124,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.2.5 | active | —| —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `l2-to-variant-pipeline.ts` | L0 | 1.9.0 | active | —| —| L0 | —|

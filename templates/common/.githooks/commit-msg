@@ -52,7 +52,7 @@ fi
 
 # ── Auto-append memory log in mandatory 4-section format ─────────────────────
 # (skip if dev-sync already wrote an entry for this commit message today)
-if ! grep -qF "$COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
+if ! grep -qxF "$COMMIT_MSG" "memory/$TODAY.md" 2>/dev/null; then
   SEPARATOR=""
   [ -f "memory/$TODAY.md" ] && SEPARATOR=$'\n---\n\n'
 

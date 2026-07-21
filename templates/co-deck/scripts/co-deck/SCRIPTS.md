@@ -86,6 +86,7 @@ Handbook validation and tooling scripts in `scripts/co-deck/handbook/`:
 | `handbook/check-authoring.ts` | 1.0.0 | active | AUTHORING_GUIDELINES compliance checker — 10 checks (visual elements, copy buttons, sidebar nav, chapter-nav, flex min-width, mid-word strong, course overview, CSS variables, language pairs, instructor guide); supports `--examples-dir` for regression fixture validation | `bun scripts/co-deck/handbook/check-authoring.ts --project <path> [--lang ko] [--examples-dir <path>]` |
 | `handbook/apply-handbook-theme.ts` | 1.0.0 | active | CSS theme applicator — 5 built-in themes (azure, graphite, teal, amber, indigo), each with 3-layer dark mode | `bun scripts/co-deck/handbook/apply-handbook-theme.ts --project <path> --theme <name>` |
 | `handbook/handbook-doctor.ts` | 1.0.0 | active | Enhanced static analyzer — 12 checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, course overview, instructor guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | `bun scripts/co-deck/handbook/handbook-doctor.ts --project <path> [--severity warn\|error]` |
+| `html-to-pdf.ts` | 1.1.0 | active | Generate PDF from self-contained HTML slide deck using Puppeteer (system Chrome/Edge, WebSocket transport) — captures each `<section>` as a full-page PDF | `bun scripts/co-deck/html-to-pdf.ts --html presentations/<project>/lecture_vN.html [--out output.pdf] [--width 1920] [--height 1080] [--scale 1.5] [--pages N]` |
 
 ```bash
 # Handbook workflow
@@ -154,4 +155,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** ADR-0033 · Script Lifecycle §6.5
 
-*Last Updated: 2026-07-19 — handbook scripts (validate-nav + scaffold + check-authoring + apply-theme + handbook-doctor); design doc v4*
+*Last Updated: 2026-07-21 — handbook scripts (validate-nav + scaffold + check-authoring + apply-theme + handbook-doctor); design doc v4*

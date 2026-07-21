@@ -13,15 +13,7 @@
     "max_bullets_per_slide": 8,
     "max_title_chars": 40,
     "recommended_slide_count": "20-60",
-    "notes": "Horizontal scroll suits data-rich, visually driven presentations. Titles up to 40 chars. Max 8 bullets per slide. All slide types supported including cover with gradient background, divider with act-number watermark, and standard slides with cards/grids/badges. Mouse wheel converted to horizontal scroll. Keyboard: ArrowLeft/Right, PageUp/PageDown, Home/End, Space, F (fullscreen), T (TOC).",
-    "slide_type_usage": {
-      "standard": "All content slides (mandatory) — supports cards, grids, badges, stat displays, tables",
-      "punchline": "Last content slide only — single-statement message with large centered text",
-      "divider": "Chapter/part boundaries — gradient background with act-number watermark",
-      "profile": "Speaker intro with avatar, credentials, and lead text",
-      "title": "First slide (cover) only — centered with tag, title, lead, and divider",
-      "contact": "Final slide only — contact information items"
-    }
+    "notes": "Horizontal scroll suits data-rich, visually driven presentations. Titles up to 40 chars. Max 8 bullets per slide. All slide types supported including cover with gradient background, divider with act-number watermark, and standard slides with cards/grids/badges. Mouse wheel converted to horizontal scroll. Keyboard: ArrowLeft/Right, PageUp/PageDown, Home/End, Space, F (fullscreen), T (TOC)."
   },
   "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "visual-heavy"],
   "partial_styles": [],
