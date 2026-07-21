@@ -1,4 +1,4 @@
-// @version 1.3.5
+// @version 1.3.6
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -41,8 +41,16 @@ if (hasNonEnglish(msg)) {
     }
 }
 
+// Use local calendar date, not toISOString() (which is UTC) — on hosts west of
+// UTC, a run in the evening local time would otherwise land on the *next* UTC
+// day, and a run just after local midnight could still resolve to the
+// *previous* UTC day, misfiling (or duplicating) the memlog entry.
 const dateObj = new Date();
-const date = dateObj.toISOString().split('T')[0]; // yyyy-MM-dd
+const date = [
+  dateObj.getFullYear(),
+  String(dateObj.getMonth() + 1).padStart(2, '0'),
+  String(dateObj.getDate()).padStart(2, '0'),
+].join('-'); // yyyy-MM-dd (local)
 
 if (!fs.existsSync('memory')) fs.mkdirSync('memory');
 

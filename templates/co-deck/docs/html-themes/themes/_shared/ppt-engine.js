@@ -1185,11 +1185,14 @@ document.addEventListener('keydown', function(e) {
 function initPPT(options) {
   options = options || {};
 
-  // Read tocStyle from URL search params or options
+  // Read tocStyle from URL search params or options — validated against the
+  // same allowlist as the postMessage handler below (otherwise a crafted
+  // ?tocStyle=... link would fully bypass that check).
+  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   try {
     var p = new URLSearchParams(window.location.search);
     var tocStyleParam = p.get('tocStyle') || (options && options.tocStyle);
-    if (tocStyleParam) {
+    if (tocStyleParam && ALLOWED_TOC_STYLES.indexOf(tocStyleParam) >= 0) {
       document.documentElement.setAttribute('data-toc-style', tocStyleParam);
     }
   } catch (e) {}
@@ -1198,7 +1201,6 @@ function initPPT(options) {
   // Origin checks are unreliable for file:// (origin is the string "null" in
   // most browsers), so instead we verify the message actually came from the
   // embedding parent frame and validate the payload shape before applying it.
-  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   window.addEventListener('message', function(event) {
     if (event.source !== window.parent || event.source === window) return;
     if (!event.data || event.data.type !== '__set_toc_style__') return;

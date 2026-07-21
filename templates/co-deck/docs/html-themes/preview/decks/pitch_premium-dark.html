@@ -9,7 +9,7 @@
 
   HOW TO USE:
     html-build reads this template and:
-    1. Injects <html data-theme="pitch" data-style="premium-dark" data-toc-style="glass-drawer"  data-style="<style>"> attributes
+    1. Injects <html data-theme="pitch" data-style="<style>"> attributes
     2. Replaces [INJECT:CSS] with base.css + ppt-engine.css + theme.css + style.css <link> tags
     3. Replaces [INJECT:slideData] with: const slideData = [...];
     4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
@@ -23,7 +23,7 @@
 
   STYLE VARIABLES: all visual values come from CSS variables — never hardcode.
 -->
-<html lang="ko" data-theme="pitch" data-style="classic">
+<html data-theme="pitch" data-style="premium-dark" data-toc-style="glass-drawer" lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,10 +33,10 @@
   <link rel="stylesheet" href="../../themes/pitch/theme.css">
   <link rel="stylesheet" href="../../styles/premium-dark/style.css">
   <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
-  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
   <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
-  <link rel="stylesheet" href="../../themes/pitch/theme.css">
-  <link rel="stylesheet" href="../../styles/classic/style.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/pitch/theme.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
   -->
 </head>
 <body class="transition-fade">
@@ -1428,11 +1428,14 @@ document.addEventListener('keydown', function(e) {
 function initPPT(options) {
   options = options || {};
 
-  // Read tocStyle from URL search params or options
+  // Read tocStyle from URL search params or options — validated against the
+  // same allowlist as the postMessage handler below (otherwise a crafted
+  // ?tocStyle=... link would fully bypass that check).
+  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   try {
     var p = new URLSearchParams(window.location.search);
     var tocStyleParam = p.get('tocStyle') || (options && options.tocStyle);
-    if (tocStyleParam) {
+    if (tocStyleParam && ALLOWED_TOC_STYLES.indexOf(tocStyleParam) >= 0) {
       document.documentElement.setAttribute('data-toc-style', tocStyleParam);
     }
   } catch (e) {}
@@ -1441,7 +1444,6 @@ function initPPT(options) {
   // Origin checks are unreliable for file:// (origin is the string "null" in
   // most browsers), so instead we verify the message actually came from the
   // embedding parent frame and validate the payload shape before applying it.
-  var ALLOWED_TOC_STYLES = ['glass-drawer', 'solid-drawer'];
   window.addEventListener('message', function(event) {
     if (event.source !== window.parent || event.source === window) return;
     if (!event.data || event.data.type !== '__set_toc_style__') return;
@@ -1605,16 +1607,8 @@ function initPPT(options) {
 
     // ── Init ──────────────────────────────────────────────────────────────────
     function initAll() {
-      try {
-        var p = new URLSearchParams(window.location.search);
-        var ts = p.get('tocStyle');
-        if (ts) document.documentElement.setAttribute('data-toc-style', ts);
-      } catch(e) {}
-      window.addEventListener('message', function(e) {
-        if (e.data && e.data.type === '__set_toc_style__') {
-          document.documentElement.setAttribute('data-toc-style', e.data.tocStyle);
-        }
-      });
+      // tocStyle URL-param + postMessage handling is done by initPPT() below
+      // (shared, validated implementation) — do not duplicate it here.
       initSlides();
       showSlide(0);
       initPPT({ transition: 'none', showTimer: true });

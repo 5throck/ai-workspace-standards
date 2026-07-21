@@ -1,4 +1,4 @@
-// @version 0.2.0
+// @version 0.2.1
 // theme-builder.ts — deterministic HTML theme deck builder.
 //
 // Reads a theme package (template.html + theme.json), replaces INJECT markers
@@ -243,10 +243,16 @@ export function buildThemeDeck(options: BuildOptions): BuildResult {
     }
   }
 
-  // 12. Set <html> attributes: data-theme, data-style, data-toc-style
+  // 12. Set <html> attributes: data-theme, data-style, data-toc-style.
+  // Anchored to line-start (^, multiline) so this only matches the real
+  // opening <html> tag — template.html doc-comments describe the injection
+  // in prose like `Injects <html data-theme="..." data-style="<style>">`,
+  // which is NOT at column 0 and would otherwise be matched first (a plain
+  // non-global replace only touches the first match), silently leaving the
+  // real tag with its unreplaced source placeholder values.
   const tocStyle = options.tocStyle ?? 'glass-drawer';
   html = html.replace(
-    /<html\s+([^>]*)>/,
+    /^<html\s+([^>]*)>/m,
     (_match, attrs: string) => {
       // Remove existing data-theme, data-style, and data-toc-style
       let cleanAttrs = attrs

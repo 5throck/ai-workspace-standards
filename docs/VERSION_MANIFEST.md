@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-21T22:26:19.223Z
+**Generated**: 2026-07-21T22:51:26.758Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -86,7 +86,7 @@
 | consulting-plugin.ts | 1.0.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
 | create-l2-scaffold.ts | 1.7.0 | scripts/create-l2-scaffold.ts | N/A |
 | design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
-| dev-sync.ts | 1.3.5 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.3.6 | scripts/dev-sync.ts | bun |
 | development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
@@ -99,7 +99,7 @@
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
 | gen-pr-body.ts | 1.1.5 | scripts/gen-pr-body.ts | bun |
-| generate-scripts-readme.ts | 1.0.2 | scripts/generate-scripts-readme.ts | N/A |
+| generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.0.1 | scripts/helpers/golden-reference-loader.ts | fs, path |

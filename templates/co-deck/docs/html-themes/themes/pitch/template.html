@@ -30,10 +30,10 @@
   <title><!-- INJECT:title --></title>
   <!-- INJECT:CSS -->
   <!-- Load order (replaced by html-build): base.css → ppt-engine.css → theme.css → style.css.
-  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
   <link rel="stylesheet" href="../../docs/html-themes/themes/_shared/ppt-engine.css">
-  <link rel="stylesheet" href="../../themes/pitch/theme.css">
-  <link rel="stylesheet" href="../../styles/classic/style.css">
+  <link rel="stylesheet" href="../../docs/html-themes/themes/pitch/theme.css">
+  <link rel="stylesheet" href="../../docs/html-themes/styles/classic/style.css">
   -->
 </head>
 <body class="transition-fade">
@@ -255,16 +255,8 @@
 
     // ── Init ──────────────────────────────────────────────────────────────────
     function initAll() {
-      try {
-        var p = new URLSearchParams(window.location.search);
-        var ts = p.get('tocStyle');
-        if (ts) document.documentElement.setAttribute('data-toc-style', ts);
-      } catch(e) {}
-      window.addEventListener('message', function(e) {
-        if (e.data && e.data.type === '__set_toc_style__') {
-          document.documentElement.setAttribute('data-toc-style', e.data.tocStyle);
-        }
-      });
+      // tocStyle URL-param + postMessage handling is done by initPPT() below
+      // (shared, validated implementation) — do not duplicate it here.
       initSlides();
       showSlide(0);
       initPPT({ transition: 'none', showTimer: true });
