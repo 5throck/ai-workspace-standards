@@ -9,4 +9,5 @@ All notable changes to this project will be documented in this file.
 - **[2026-06-23]**: feat(co-deck): improve TTS voice selection UX — fix Chrome async voice loading timing; add voice-info badge UI (voice-name + voice-badge with lang · L/N tags)
 ### Changed
 ### Fixed
+- fix(docs/context.md): repair broken `../../workspace standards` lifecycle links — point to `AGENTS.md §8 Lifecycle Management` instead
 ### Removed

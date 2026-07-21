@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.1.4
+ * @version 1.1.5
  * @l2-propagate false
  * @last_updated 2026-06-02
  * @license MIT
@@ -83,7 +83,8 @@ function getRegisteredAgents(): Set<string> {
     return agents;
   }
 
-  const content = readFileSync(AGENTS_FILE, 'utf-8');
+  // Strip HTML comments so placeholder/example rows (e.g. VARIANT-AGENTS scaffolding) aren't mistaken for real registrations
+  const content = readFileSync(AGENTS_FILE, 'utf-8').replace(/<!--[\s\S]*?-->/g, '');
 
   // Extract agent names from markdown table links
   const matches = content.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g);
