@@ -158,7 +158,7 @@ for (const file of htmlFiles) {
   }
 }
 if (!hasInstructorGuide) {
-  allIssues.push({ file: "docs/", check: "instructor-guide", detail: "No instructor-guide.html found (§24 requirement for course handbooks)", severity: "warn" });
+  allIssues.push({ file: "docs/", check: "instructor-guide", detail: "No instructor-guide.html found (§20 requirement for course handbooks)", severity: "warn" });
 }
 
 // --- Check 9: Unused assets ---

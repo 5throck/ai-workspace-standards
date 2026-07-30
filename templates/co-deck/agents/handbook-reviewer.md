@@ -56,8 +56,8 @@ This ensures all work flows through the proper H-Stage workflow with quality gat
 
 | Tool | Checks | Source |
 |------|--------|--------|
-| handbook-doctor | 12 (nav, links, dark palette, lang pair, visual, course overview, instructor guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | §21, §22, §23, §24 |
-| check-authoring | 10 (visual element, copy buttons, sidebar nav, chapter-nav, min-width, mid-word strong, course overview, CSS variables, language pairs, instructor guide) | §2, §10, §11, §14, §22, §23, §24 |
+| handbook-doctor | 12 (nav, links, dark palette, lang pair, visual, course overview, instructor guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | §21, §22, §23, §20 |
+| check-authoring | 10 (visual element, copy buttons, sidebar nav, chapter-nav, min-width, mid-word strong, course overview, CSS variables, language pairs, instructor guide) | §2, §10, §11, §14, §22, §23, §20 |
 | validate-nav | 4 (broken links, prev/next symmetry, label match, search DOCS sync) | §21-4 |
 
 ## Output Format

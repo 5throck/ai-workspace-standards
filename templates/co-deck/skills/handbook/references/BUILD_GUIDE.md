@@ -80,7 +80,7 @@ cp presentations/<project>/source-verification.md handbook/docs/references.md
 Dispatch `handbook-writer` agent to:
 1. **Propose chapter structure** — section types per SECTION_TYPES.md, chapter count, section distribution
 2. **Write chapter HTML** — each chapter as a separate HTML file following the chapter template
-3. **Follow AUTHORING_GUIDELINES.md** — all 21 sections + §22 (Dark Mode) + §23 (Multi-Language)
+3. **Follow AUTHORING_GUIDELINES.md** — all sections including §22 (Dark Mode) and §23 (Multi-Language)
 
 ### Section Types
 Reference `SECTION_TYPES.md` for the 6 available types:
@@ -89,45 +89,25 @@ Reference `SECTION_TYPES.md` for the 6 available types:
 - **Examples** — practice exercises with A/B platform split
 - **Quiz** — Q&A with model answers and rubrics
 - **CourseOverview** — course introduction (§14)
-- **InstructorGuide** — instructor operations guide (§24)
+- **InstructorGuide** — instructor operations guide (§20)
 
 ### Content Rules
-- ALL colors via CSS variables (§22)
-- At least 1 visual element per section (§10)
-- Sidebar nav + chapter-nav on every page (§21)
-- Plain form (`~다`) writing style (§12-1)
-- Korean(English) on first use, English only thereafter (§12-2)
+All content rules are defined in `AUTHORING_GUIDELINES.md`. Key references:
+- §10: At least 1 visual element per section
+- §12: Writing style consistency (formal plain register, term glossing)
+- §18: A/B platform split when implementation differs
+- §21: Sidebar nav + chapter-nav on every page
+- §22: ALL colors via CSS variables (no hardcoded hex)
 
 ---
 
 ## §4: Course Overview + Instructor Guide
 
 ### Course Overview (§14)
-Required for course mode. Must include all 9 items:
+Required for course mode. See `AUTHORING_GUIDELINES.md §14` for the 9 required items (one-line summary, learning objectives, target audience, prerequisites, format, schedule, topics covered, post-completion outcomes, instructor information).
 
-| # | Item | Required |
-|---|------|----------|
-| 1 | One-line summary | ✅ |
-| 2 | Learning objectives | ✅ |
-| 3 | Target audience | ✅ |
-| 4 | Prerequisites | ✅ |
-| 5 | Format | ✅ |
-| 6 | Schedule | ✅ |
-| 7 | Topics covered | ✅ |
-| 8 | Post-completion outcomes | ✅ |
-| 9 | Instructor information | ✅ |
-
-### Instructor Guide (§24)
-Required for course mode. Must include:
-
-| Section | Content |
-|---------|---------|
-| Pre-course preparation checklist | What participants must prepare before the lecture |
-| Time allocation table | Daily/chapter schedule with time allocation |
-| Per-chapter instructor notes | Per-chapter: location/role, key points, participant activities, time-shortcut alternatives, irreversible operation warnings |
-| Per-chapter check questions | Per-chapter: 2-3 open-ended understanding questions |
-| Demo sequence | Demo sequence for live demonstrations |
-| Evaluation criteria | Evaluation criteria and rubrics |
+### Instructor Guide (§20)
+Required for course mode. See `AUTHORING_GUIDELINES.md §20` for the 6 required sections and per-chapter note format.
 
 ---
 
