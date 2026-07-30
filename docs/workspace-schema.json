@@ -91,6 +91,7 @@
       ".gitleaks.toml",
       "README.md",
       "README_ko.md",
+      "README_es.md",
       "CLAUDE.md",
       "GEMINI.md",
       "AGENTS.md",
