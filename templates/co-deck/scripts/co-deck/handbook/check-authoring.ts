@@ -212,7 +212,7 @@ function checkLanguagePairs(htmlFiles: string[], baseDir: string): AuthoringIssu
   return issues;
 }
 
-/** Check 10: §24 — Instructor Guide completeness */
+/** Check 10: §20 — Instructor Guide completeness */
 function checkInstructorGuide(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
   if (!/instructor-guide/.test(file)) return issues;
@@ -225,7 +225,7 @@ function checkInstructorGuide(html: string, file: string): AuthoringIssue[] {
   for (const section of requiredSections) {
     if (!html.includes(section)) {
       issues.push({
-        file, rule: "instructor-guide-section", section: "§24",
+        file, rule: "instructor-guide-section", section: "§20",
         detail: `Missing required section: "${section}"`,
         severity: "warn",
       });

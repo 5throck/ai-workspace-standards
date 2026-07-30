@@ -2,6 +2,8 @@
 
 > Comprehensive validation checklist for handbook HTML files.
 > Covers automated checks (scripts) and manual review items.
+> For authoring principles (why each rule exists), see `AUTHORING_GUIDELINES.md`.
+> For the complete manual pre-ship checklist, see `AUTHORING_GUIDELINES.md §A`.
 
 ---
 
@@ -9,12 +11,23 @@
 
 ### validate-nav (4 checks)
 
-| # | Check | Tool | Description |
-|---|-------|------|-------------|
-| ① | Broken links | `check-links.ts` | All internal `<a href>` targets resolve to existing files |
-| ② | prev/next symmetry | `check-symmetry.ts` | A→next→B implies B→prev→A |
-| ③ | Label match | `check-labels.ts` | chapter-nav labels match target title/h1 |
-| ④ | DOCS sync | `check-search.ts` | site-search.js DOCS array matches actual HTML files |
+| # | Check | Section | Description |
+|---|-------|---------|-------------|
+| ① | Broken links | §21-4 | All internal `<a href>` targets resolve to existing files |
+| ② | prev/next symmetry | §21-4 | A→next→B implies B→prev→A |
+| ③ | Label match | §21-4 | chapter-nav labels match target title/h1 |
+| ④ | DOCS sync | §23-4 | site-search.js DOCS array matches actual HTML files |
+
+**Implementation details**: All 4 checks share `nav-utils.ts` for HTML parsing. See `validation/NAV_VALIDATION.md` for the full specification including shared utilities, error conditions, and CI integration.
+
+**Running**:
+```bash
+# From handbook root
+bun run validate-nav
+
+# With custom docs directory
+bun scripts/validate-nav.ts --docs-dir path/to/docs
+```
 
 ### check-authoring (10 checks)
 
@@ -25,11 +38,11 @@
 | 3 | Sidebar nav | §21-1 | All pages have sidebar navigation |
 | 4 | Chapter-nav | §21-1 | Content pages have prev/next navigation |
 | 5 | min-width: 0 | §11-1 | step-content has flex overflow prevention |
-| 6 | No mid-word strong | §11 | No short Korean words wrapped in `<strong>` |
+| 6 | No mid-word strong | §11 | No short words wrapped in `<strong>` causing line breaks |
 | 7 | Course Overview items | §14 | course-overview.html has all 9 required items |
 | 8 | CSS variables | §22 | No hardcoded hex colors in inline styles |
 | 9 | Language pairs | §23 | Language variants have base file counterparts |
-| 10 | Instructor Guide | §24 | instructor-guide.html has required sections |
+| 10 | Instructor Guide | §20 | instructor-guide.html has required sections |
 
 ### handbook-doctor (12 checks)
 
@@ -101,9 +114,12 @@ If examples fail, the check exits with code 1 and blocks the PR.
 
 ---
 
-## Manual Review Checklist (Appendix A)
+## Manual Review Checklist
 
-### Content Quality (§1-§7)
+> For the complete manual pre-ship checklist (35 items with per-section verification), see **`AUTHORING_GUIDELINES.md §A`**.
+> The checklist below is a condensed summary grouped by area for quick scanning during review sessions.
+
+### Content Quality (§1–§7)
 
 - [ ] §1 Concept explanations include analogies and reasoning
 - [ ] §2 All code blocks have copy buttons; one step = one action
@@ -124,10 +140,10 @@ If examples fail, the check exits with code 1 and blocks the PR.
 
 ### Writing Style (§12, §16)
 
-- [ ] §12-1 Plain form (`~다`) consistently
-- [ ] §12-2 English terms: Korean(English) first use, English only after
-- [ ] §12-2 `<title>`, `<h1>`, nav labels: English only (no Korean, no parenthetical)
-- [ ] §12-3 Cross-references: `N장 §M` format
+- [ ] §12-1 Formal plain register consistently
+- [ ] §12-2 Technical terms: `local_term(English)` first use, English only after
+- [ ] §12-2 Headings: English technical terms only, no parenthetical glosses
+- [ ] §12-3 Cross-references in standard format
 - [ ] §12-4 em-dash minimized
 
 ### Visual & Navigation (§8, §10, §21)
@@ -135,35 +151,36 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §8 All learner-facing content is HTML (not Markdown)
 - [ ] §10 Each section has at least 1 visual element
 - [ ] §10-2 SVGs use `viewBox` + `width="100%"` for responsiveness
-- [ ] §21-1 All pages have sidebar nav
-- [ ] §21-1 Content pages have chapter-nav
-- [ ] §21-2 Index page grouped by day/type with instructor materials section
-- [ ] §21-4 prev/next mutual symmetry verified
+- [ ] §21 All pages have sidebar nav and chapter-nav
+- [ ] §21-4 prev/next mutual symmetry verified (on renumbering)
 
 ### Course Materials (§14, §15, §20)
 
 - [ ] §14 Course Overview has all 9 required items
 - [ ] §14 Learning objectives map 1:1 to actual chapter sections
 - [ ] §15-1 Last chapter has "Next Steps" section
-- [ ] §20 Instructor Guide has 4 required sections
-- [ ] §20-2 Instructor Guide matches Course Overview (schedule, order, timing)
+- [ ] §20 Instructor Guide has all 6 required sections
+- [ ] §20-4 Instructor Guide matches Course Overview (schedule, order, timing)
 
 ### Dark Mode (§22)
 
 - [ ] §22 All colors use CSS variables — zero hardcoded hex
 - [ ] §22 Theme CSS has `:root` (light) + `@media dark` + `.dark` (toggle)
-- [ ] §22 Dark toggle JS loaded and functional
 - [ ] §22 SVGs use CSS variables or neutral colors
 
 ### Multi-Language (§23)
 
-- [ ] §23 Language variants follow naming convention (base, base_ko, base_en)
-- [ ] §23 Language switcher dropdown present in header
-- [ ] §23 All language variants have matching structure
-- [ ] §23 Language preference stored in localStorage
+- [ ] §23 Language variants follow naming convention (base, base_en, base_ja, base_es)
+- [ ] §23 No links to untranslated pages (§23-6)
+- [ ] §23 Partial translation navigation is consistent (§23-7)
+
+### Video References (§17)
+
+- [ ] §17 Video links styled with `.video-refs` pattern
+- [ ] §17-4 Video trust verification (5 stages) applied; all videos TRUSTWORTHY
 
 ### Final Proofreading (§19)
 
-- [ ] §19 Read entire document checking: typos, awkward phrasing, numbering
-- [ ] §19 Check cross-references point to correct chapter/section
-- [ ] §19 Verify logical flow between sections (no causality reversal)
+- [ ] §19 Read entire document: typos, awkward phrasing, numbering
+- [ ] §19 Cross-references point to correct chapter/section
+- [ ] §19 Logical flow between sections (no causality reversal)

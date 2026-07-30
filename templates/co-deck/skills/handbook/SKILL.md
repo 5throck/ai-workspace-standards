@@ -79,7 +79,7 @@ Dispatch `handbook-writer` agent to write chapter content following AUTHORING_GU
 
 ### H-4: Generate Course Materials
 
-Dispatch `handbook-writer` agent to generate Course Overview (§14 — 9 required items) and Instructor Guide (§24 — lecture flow, expected questions, timing, frequent mistakes, demo order, evaluation criteria).
+Dispatch `handbook-writer` agent to generate Course Overview (§14 — 9 required items) and Instructor Guide (§20 — lecture flow, expected questions, timing, frequent mistakes, demo order, evaluation criteria).
 
 ### H-5: Quality Verification
 

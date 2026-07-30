@@ -643,9 +643,9 @@ After splitting is complete, verify the following:
 
 ---
 
-## 20. Lecture Guide Structure
+## 20. Lecture / Instructor Guide Structure
 
-**Principle**: The Lecture Guide provides instructors with all the information needed to run the course, consolidated in one place. Together with the Course Overview principle (§14), these form the two pillars of course materials.
+**Principle**: The Lecture Guide (also called Instructor Guide — `instructor-guide.html`) provides instructors with all the information needed to run the course, consolidated in one place. Together with the Course Overview principle (§14), these form the two pillars of course materials.
 
 - **Why**: Instructors must navigate content across multiple chapters, so per-chapter instructor notes, time allocation tables, and check questions must be gathered in a single document for real-time reference. Additionally, the Course Overview (for participants) and the Lecture Guide (for instructors) must be consistent in content, order, and timing.
 - **How to apply**:
@@ -663,18 +663,7 @@ The Lecture Guide must include **all** of the following sections.
 | Demo sequence | Recommended order for live demonstrations | Reflect inter-chapter dependencies |
 | Evaluation criteria | Rubrics for participant assessment | Focused on practical application ability |
 
-### 20-2. Consistency with Course Overview
-
-The Lecture Guide must be **consistent** with the Course Overview in §14 for the following items:
-
-- Daily course order (chapter placement)
-- Per-chapter estimated time
-- Per-chapter content description
-- Total duration
-
-When one side is modified, the other must always be synchronized.
-
-### 20-3. Per-Chapter Instructor Notes Format
+### 20-2. Per-Chapter Instructor Notes Format
 
 Each chapter's instructor notes should include:
 
@@ -684,7 +673,7 @@ Each chapter's instructor notes should include:
 - **Time-short alternatives**: Which parts can be replaced with demos when time is insufficient
 - **Irreversible operation warnings**: Operations that affect the environment irreversibly — things all participants should not do simultaneously
 
-### 20-4. Check Question Format
+### 20-3. Check Question Format
 
 - Write **2–3** open-ended questions per chapter.
 - Compose questions that invite participants to **"explain in their own words"** rather than "guess the right answer."
@@ -692,6 +681,17 @@ Each chapter's instructor notes should include:
 - Examples:
   - "How could this concept be applied to our team's work?" (practical application)
   - "What is the difference between ~ covered in Chapter N and ~ in this chapter?" (inter-chapter connection)
+
+### 20-4. Consistency with Course Overview
+
+The Lecture Guide must be **consistent** with the Course Overview in §14 for the following items:
+
+- Daily course order (chapter placement)
+- Per-chapter estimated time
+- Per-chapter content description
+- Total duration
+
+When one side is modified, the other must always be synchronized.
 
 ---
 
@@ -897,38 +897,6 @@ Run `bun run scripts/validate-nav.ts` to automatically verify link integrity. Tr
 
 ---
 
-## 24. Instructor Guide Requirements
-
-**Principle**: The Instructor Guide (`instructor-guide.html`) provides instructors with all the information needed to run the course, consolidated in one place.
-
-- **Why**: Instructors must navigate content across multiple chapters, so per-chapter instructor notes, time allocation tables, and check questions must be gathered in a single document for real-time reference.
-
-### 24-1. Required Sections
-
-| Section | Content | Notes |
-|---------|---------|-------|
-| Pre-course preparation checklist | What participants must prepare before the course | Announce at least one day before |
-| Time allocation table | Daily/chapter breakdown, format, estimated time | Breaks calculated separately |
-| Per-chapter instructor notes | Tips, participant activities, demo notes per chapter | Include time-short alternatives |
-| Per-chapter check questions | Comprehension questions at the end of each chapter | Designed to elicit explanations |
-| Demo sequence | Recommended order for live demonstrations | Reflect inter-chapter dependencies |
-| Evaluation criteria | Rubrics for participant assessment | Focused on practical application ability |
-
-### 24-2. Per-Chapter Instructor Notes Items
-
-Each chapter's instructor notes should include:
-- **Position and role**: Where in the overall course this chapter falls
-- **Key delivery points**: Concepts that must be delivered
-- **Participant activities**: Discussions, polls, pair activities, etc.
-- **Time-short alternatives**: Parts that can be replaced with demos
-- **Irreversible operation warnings**: Operations with irreversible environmental impact
-
-### 24-3. Consistency with Course Overview
-
-The Lecture Guide must be consistent with the Course Overview in §14 regarding schedule, order, and timing. When one side is modified, the other must always be synchronized.
-
----
-
 ## A. Pre-Ship Checklist
 
 After completing the draft, verify each item below one by one.
@@ -969,8 +937,8 @@ After completing the draft, verify each item below one by one.
 - [ ] §18: Does branch navigation connect from the common area to both A and B?
 - [ ] §18: Are inter-links between A and B files consistent?
 - [ ] §19: Has the entire text been re-read for typos, awkward phrasing, and number mismatches?
-- [ ] §20: Has the Lecture Guide been written, and are all required sections included?
-- [ ] §20: Is the Lecture Guide consistent with the Course Overview in schedule, order, and timing?
+- [ ] §20: Has the Lecture/Instructor Guide been written, and are all 6 required sections included?
+- [ ] §20-4: Is the Lecture Guide consistent with the Course Overview in schedule, order, and timing?
 - [ ] §21: Do all chapter files have sidebars and inter-chapter navigation?
 - [ ] §21: Is the index page grouped by day and type?
 - [ ] §21: Do chapter files and index cards have consistent chapter numbers, titles, and links?

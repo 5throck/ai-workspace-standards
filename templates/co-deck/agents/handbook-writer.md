@@ -53,7 +53,7 @@ This ensures all work flows through the proper H-Stage workflow with quality gat
 
 ### H-3: Write Content
 - Write chapter HTML files following the approved structure
-- Follow AUTHORING_GUIDELINES.md all 21 sections + §22 (Dark Mode) + §23 (Multi-Language) + §24 (Instructor Guide)
+- Follow AUTHORING_GUIDELINES.md all 21 sections + §22 (Dark Mode) + §23 (Multi-Language) + §20 (Lecture/Instructor Guide Structure)
 - Include visual elements per §10 (at least 1 per section)
 - Use CSS variables for all colors (§22)
 - Include sidebar nav and chapter-nav (§21)
@@ -61,7 +61,7 @@ This ensures all work flows through the proper H-Stage workflow with quality gat
 
 ### H-4: Generate Course Materials
 - Write `course-overview.html` with 9 required items per §14
-- Write `instructor-guide.html` with required sections per §20/§24
+- Write `instructor-guide.html` with required sections per §20
 - Ensure course overview and instructor guide are internally consistent
 
 ## Output Format
@@ -70,7 +70,7 @@ This ensures all work flows through the proper H-Stage workflow with quality gat
 - `handbook/docs/chapters/chapter_XX_ko.html` — Korean language variant (optional)
 - `handbook/docs/chapters/chapter_XX_en.html` — English language variant (optional)
 - `handbook/docs/course-overview.html` — course introduction (§14)
-- `handbook/docs/instructor-guide.html` — instructor operations guide (§24)
+- `handbook/docs/instructor-guide.html` — instructor operations guide (§20)
 
 ## Constraints
 
