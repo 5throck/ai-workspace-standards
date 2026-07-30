@@ -255,34 +255,53 @@ When placing a badge, title, and description side by side inside `.level-header`
 
 ### 12-1. Sentence Endings
 
-Use **plain form (`~다`/`~한다`/`~이다`)** uniformly across all body text, subheadings, and descriptions. Polite form (`~습니다`/`~해요`) is only permitted in UI button labels.
+Use the **formal plain register** for the document's language uniformly across all body text, subheadings, and descriptions. Polite register is only permitted in UI button labels and error messages (user-facing interaction elements).
 
-```
-✗ "이 핸드북은 다르게 구성되어 달라집니다."  (polite form)
-✓ "이 핸드북은 다르게 구성되어 달라진다."     (plain form)
-```
+| Language | Body text style | Disallowed style | Notes |
+|----------|----------------|-------------------|-------|
+| Korean | Plain form ("haera-che": `~da`/`~handa`/`~ida`) | Polite form (`~seumnida`/`~haeyo`) | Maintain didactic tone |
+| Japanese | `da/dearu` form (plain form) | `desu/masu` form (polite form) | Academic style |
+| English | Declarative (no contractions in prose) | Informal/casual | Academic technical prose |
+| Spanish | Registro neutro/formal (usted) | Registro informal (tuteo/voseo) | Academic tone |
+
+Each edition applies the register rules for its own language. See the Korean-language source (`AUTHORING_GUIDELINES.md` in the handbook repository) for language-specific examples.
 
 ### 12-2. English Technical Term Notation
 
-When using English technical terms in body text, add a **Korean (English) parenthetical gloss only on first appearance within the document**. On subsequent appearances within the same document, use the English term alone. Code, filenames, and CLI identifiers are marked with `<code>` tags; conceptual terms distinct from code use parenthetical glosses.
+When using English technical terms in body text, add a **parenthetical gloss only on first appearance within the document**, formatted as `local_term(English)` for non-English editions. On subsequent appearances within the same document, use the English term alone. Code, filenames, and CLI identifiers are marked with `<code>` tags; conceptual terms distinct from code use parenthetical glosses.
+
+| Language | First-appearance gloss format | Example |
+|----------|-------------------------------|---------|
+| Korean | Korean(English) | e.g., `hookeul(hook)` |
+| Japanese | Japanese(English) | e.g., `fukku(hook)` |
+| English | *(no parenthetical — English-only)* | `hook` |
+| Spanish | Spanish(English) *(if translated)* or English-only *(if untranslated)* | e.g., `enlace(hook)` / `hook` |
+
+Note: The English edition requires no parenthetical glosses since English is the source language. For Spanish, conventionally-translated terms (hook→enlace, branch→rama) receive glosses; non-conventionalized terms remain English-only.
 
 ```
-✗ "hook은 셸 명령 실행 전후에 호출된다."                     (first appearance with English only — no gloss)
-✗ "<code>hook</code>은 셸 명령 실행 전후에 호출된다."          (replaced with code tag — conceptual term styled as code)
-✓ "훅(hook)은 셸 명령 실행 전후에 호출된다. ... 이후 문단에서
-   hook이 실패하면 커밋이 중단된다."                          (gloss only on first appearance, English alone after)
-✗ "... 이후 문단에서 훅(hook)이 실패하면 ..."                 (continued glossing from second appearance onward — unnecessary repetition)
+KO example (glossed correctly on first appearance, English alone after):
+  [OK] "hookeul(hook) is called before and after shell command execution. ... In subsequent paragraphs,
+        hook failure halts the commit."
+  [NO]  "hook is called ..."  (first appearance without gloss)
+  [NO]  "<code>hook</code> is called ..."  (conceptual term styled as code)
+  [NO]  "... hookeul(hook) is called ..."  (continued glossing from second appearance onward)
+
+EN edition: no glosses needed — "hook" appears as-is throughout.
 ```
 
 This rule applies **per document (file)** — in a different document, the first appearance in that document becomes the new baseline (e.g., if a term was glossed in Chapter 4, it must be glossed again on first appearance in Chapter 8).
 
-**Headings are exempt.** Text serving as headings — such as `<title>`, `<h1>`, `chapter-eyebrow`, and nav chapter titles — uses **English words only** without parenthetical glosses (and no Korean-only labels either).
+**Headings are exempt.** Text serving as headings — such as `<title>`, `<h1>`, `chapter-eyebrow`, and nav chapter titles — uses **English words only** without parenthetical glosses (and no monolingual labels in other languages either). This applies to all language editions.
 
-```
-✗ <h1>신규 베리언트(variant) 만들기</h1>   (parenthetical gloss in heading)
-✗ <h1>신규 베리언트 만들기</h1>            (Korean-only label in heading)
-✓ <h1>신규 variant 만들기</h1>             (English only in heading)
-```
+| Language | Heading format | Example pattern |
+|----------|---------------|-----------------|
+| Korean | Korean structure words + English technical terms | `<h1>structure-words + variant</h1>` |
+| Japanese | Japanese structure words + English technical terms | `<h1>structure-words + variant</h1>` |
+| English | English only | `<h1>Creating a New Variant</h1>` |
+| Spanish | Spanish structure words + English technical terms | `<h1>structure-words + variant</h1>` |
+
+Common rule: No parenthetical glosses in headings. Only English technical terms appear in heading text, combined with local-language structure words (articles, prepositions, etc.).
 
 ### 12-3. Chapter/Section Reference Format
 
@@ -365,9 +384,9 @@ Use em-dashes **minimally**, only where supplementary explanation is unavoidable
 
 ## 16. Language Policy
 
-- Course body text, hands-on instructions, and UI copy are written in **the course's primary language** (e.g., Korean for Korean-language educational materials).
-- However, **code comments, identifiers, commit messages, PR titles/bodies, and branch names** are always in English.
-- File names follow English kebab/snake case conventions.
+- Course body text, hands-on instructions, and UI copy are written in **the course's primary language** (e.g., Korean for Korean-language educational materials). Each translated edition uses its own language (KO/JA/EN/ES respectively).
+- However, **code comments, identifiers, commit messages, PR titles/bodies, and branch names** are always in English across all language editions.
+- File names follow English kebab/snake case conventions (common to all language editions).
 
 ---
 
@@ -380,10 +399,15 @@ Use em-dashes **minimally**, only where supplementary explanation is unavoidable
 ### 17-1. Video Selection Criteria
 
 - **Official sources preferred**: Anthropic, Google DeepMind, DeepLearning.AI, and other official channels take priority.
-- **Language**: Search for videos in the course's primary language first; if unavailable, link English videos and indicate the language.
+- **Language**: In each translated edition, prioritize videos in that edition's language first (e.g., Korean videos for the KO edition, Japanese videos for the JA edition, Spanish videos for the ES edition). If no suitable video exists in the target language, include EN videos as common content. Use `video-badge` to indicate the language of each video.
 - **Length**: Prefer videos under 20 minutes. Provide timestamps for longer videos.
 - **Recency**: Prefer videos published within the last 2 years.
 - **Free access**: Only link videos published on platforms anyone can access (YouTube, etc.).
+- **Channel trustworthiness**: Use YouTube oEmbed API (`youtube.com/oembed`) to verify video existence and channel information. Trustworthiness criteria:
+  - **TRUSTWORTHY**: Official channels (Anthropic, Google, etc.), or channels with 10,000+ subscribers, or videos with 10,000+ views
+  - **QUESTIONABLE**: Does not meet subscriber/view thresholds but content is relevant — review and find alternative or remove
+  - **BROKEN**: oEmbed 404 response (deleted/private/invalid ID) — remove immediately
+  - Official channels (Anthropic, Google, etc.) are TRUSTWORTHY regardless of subscriber count
 
 ### 17-2. Video Link Placement
 
@@ -409,7 +433,7 @@ CSS:
   margin: 28px 0;
   padding: 16px 20px;
   background: var(--bg-info);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-info);
   border-radius: 8px;
 }
 .video-refs h3 {
@@ -426,12 +450,14 @@ CSS:
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 3px;
-  color: #fff;
+  color: var(--text-inverse);
   vertical-align: middle;
   margin-right: 6px;
 }
-.video-badge.en { background: #0969da; }
-.video-badge.ko { background: #1a7f37; }
+.video-badge.en { background: var(--accent); }
+.video-badge.ko { background: var(--accent-green); }
+.video-badge.ja { background: var(--accent-red); }
+.video-badge.es { background: var(--accent-amber); }
 .video-meta { font-size: 12px; color: var(--text-dim); }
 ```
 
@@ -448,6 +474,78 @@ Below is an applied placement example. For new courses, judge using the same cri
 | Comparison chapter | Tool comparison, per-platform differences | Each platform's official channels |
 
 Verify video URLs at time of writing and reflect them. Do not force-add videos to sections where no official video exists.
+
+### 17-4. Video Trust Verification Procedure
+
+All videos included in the handbook should be periodically verified — or batch-verified when videos are added or modified in bulk. Verification proceeds in 5 stages.
+
+#### Stage 1: Existence Check (oEmbed)
+
+Query all videos against the YouTube oEmbed API to confirm public availability.
+
+```
+GET https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={VIDEO_ID}&format=json
+```
+
+| Response | Meaning | Action |
+|----------|---------|--------|
+| HTTP 200 + JSON body | Public video, metadata available | Proceed to Stage 2 |
+| HTTP 404 | Deleted / private / invalid ID | **BROKEN** verdict — remove immediately |
+
+Extract from the oEmbed response:
+- `title` — actual video title
+- `author_name` — channel name
+- `author_url` — channel URL (includes `@handle`)
+- `thumbnail_url` — thumbnail (for existence confirmation)
+
+#### Stage 2: Metadata Match Check
+
+Compare oEmbed metadata with handbook records.
+
+| Check field | Comparison target | Mismatch action |
+|-------------|-------------------|-----------------|
+| **Title** | oEmbed `title` vs HTML `<a>` text | Correct to oEmbed original title. If HTML contains a translated title, restore to the actual language's original title |
+| **Channel name** | oEmbed `author_name` vs source notation in the section | Correct to actual channel name if mismatched |
+| **Badge language** | `video-badge` class (en/ko/ja/es) vs video's actual language | Correct to proper language badge (e.g., English video with `ko` badge → change to `en`) |
+| **Typos** | Title and description spelling | Correct to proper spelling |
+
+> **Real example**: During a prior verification, 2 English videos were found with incorrect `video-badge ko` badges — corrected to `en`. Additionally, 3 Korean titles contained typos that were fixed.
+
+#### Stage 3: Content Relevance Check
+
+Verify that each video topic aligns with its section. Criteria:
+- Video topic must be directly related to the concept covered in the section
+- Tutorial videos must match the hands-on content and tools
+- Comparison videos must cover the tools/platforms compared in the handbook
+
+Non-matching videos receive **QUESTIONABLE** verdict.
+
+#### Stage 4: Channel Trustworthiness Evaluation
+
+Evaluate channels of videos that passed stages 1–3 using the following criteria.
+
+| Verdict | Criteria |
+|---------|----------|
+| **TRUSTWORTHY** | Meets one of: (a) official channel (Anthropic, Google, etc.), (b) 10,000+ subscribers, (c) 10,000+ views on the specific video |
+| **QUESTIONABLE** | Does not meet (a)–(c) but content is relevant |
+
+Subscriber/view counts can be verified via YouTube search results, channel pages, or third-party tools. Since YouTube pages require JavaScript rendering, oEmbed + web search results serve as supplementary verification methods.
+
+#### Stage 5: Action and Follow-up
+
+Take action based on verification results.
+
+| Result | Action |
+|--------|--------|
+| **BROKEN** | Delete the `<li>` item from the HTML |
+| **TRUSTWORTHY** | Keep (apply metadata fixes discovered in Stage 2) |
+| **QUESTIONABLE** | Search for a trustworthy alternative video in the same language. The replacement must also satisfy §17-1 criteria and undergo the same 5-stage verification. If no replacement found, delete the item. If another language's TRUSTWORTHY video already exists for the same section, deletion takes priority |
+
+#### Verification Execution Guide
+
+- For batch verification, run language-specific agents in parallel (KO / EN / JA / ES independently)
+- After verification, commit all corrections in a single commit for consistency
+- Record verification results in table format by section and language
 
 ---
 
@@ -743,38 +841,47 @@ body, header, main, footer, nav, .sidebar {
 
 ### 23-1. Filename Pattern
 
-| Type | Filename | Example |
-|------|----------|---------|
-| Default (single language) | `chapter_01.html` | Default file for the handbook's primary language |
-| Korean explicit | `chapter_01_ko.html` | Korean version, separated from default |
-| English | `chapter_01_en.html` | English translation |
-| Japanese | `chapter_01_ja.html` | Japanese translation |
+| Language | Suffix | Example |
+|----------|--------|---------|
+| Korean (default) | *(none)* | `01_Why_AI_Chapter.html` |
+| English | `_en` | `01_Why_AI_Chapter_en.html` |
+| Japanese | `_ja` | `01_Why_AI_Chapter_ja.html` |
+| Spanish | `_es` | `01_Why_AI_Chapter_es.html` |
 
-### 23-2. Language Switcher
+Index pages follow the same pattern: `index.html` / `index_en.html` / `index_ja.html` / `index_es.html`.
 
-Place a language switcher dropdown in every page header:
-- Detect `_XX` suffix in the current filename to extract the base name
-- Navigate to the selected language file on selection
-- Save user selection to `localStorage('lang')`
+### 23-2. Page Structure Requirements
 
-### 23-3. Search Index
+Translated files must be **complete copies** of the original. Each file must include:
+- `<html lang="en">`, `<html lang="ja">`, or `<html lang="es">` attribute
+- Its own sidebar navigation (linking to other files in the same language)
+- `<script src="../assets/lang-switcher.js">` included
+- Code blocks, file paths, URLs, and technical identifiers must NOT be translated
 
-The `DOCS` array in `site-search.js` includes all language variants:
+### 23-3. Translate vs. Do Not Translate
+
+**Translate:** Titles, h1, body text, sidebar labels, meta description, card descriptions, note/warning box text
+**Do NOT translate:** Code block contents, file/directory paths, CLI commands, URLs, CSS class names, technical identifiers (orchestrator, handoff contract, etc.), text inside SVG diagrams
+
+### 23-4. Search Index
+
+The `DOCS` array in `site-search.js` includes entries for all language variants. Add entries as each translation is completed — do not batch:
 ```javascript
-const DOCS = [
-  { path: 'chapters/chapter_01.html', title: 'Chapter 1 Introduction' },
-  { path: 'chapters/chapter_01_en.html', title: 'Chapter 1 Introduction (EN)' },
-];
+{ path: 'intro/01_Why_AI_Chapter_en.html', title: 'Ch.1 · Business Innovation in the AI Era', lang: 'en' },
 ```
 
-### 23-4. No Links to Untranslated Pages
+### 23-5. Verification
+
+Run `bun run scripts/validate-nav.ts` to automatically verify link integrity. Translation completeness across language sets (KO/EN/JA/ES for each chapter) must be verified manually.
+
+### 23-6. No Links to Untranslated Pages
 
 **Principle**: Never add an `_en`/`_ja` link (in an index page, nav, or sidebar) until the target `_en.html`/`_ja.html` file actually exists.
 
 - **Why**: A prior handbook shipped translated `index_en.html`/`index_ja.html` landing pages that linked to ~28 chapter pages before those chapters were translated. `check-links.ts` had a hardcoded exemption that skipped any missing `_en.html`/`_ja.html` target, so CI reported "PASS" while every translated chapter link 404'd.
 - **Rule**: `check-links.ts` treats missing `_en.html`/`_ja.html` targets as errors like any other broken link — do not reintroduce an exemption for them. Translate a language track chapter-by-chapter (or hold the index/nav links for that language until the full set of pages exists); never publish a language's landing page ahead of its content pages.
 
-### 23-5. Partial Translation Navigation
+### 23-7. Partial Translation Navigation
 
 **Principle**: When some pages in a language track are untranslated, navigation MUST remain consistent within the existing set.
 
@@ -844,9 +951,9 @@ After completing the draft, verify each item below one by one.
 - [ ] §11-1: Do flex children `.step-content` have `min-width: 0`, and do text boxes have `overflow-wrap: break-word`?
 - [ ] §11-1: Do text boxes inside `.platform-block` have negative margin compensation?
 - [ ] §11-2: Do fixed elements (badges, titles) inside flex containers have `flex-shrink: 0`?
-- [ ] §12-1: Are sentence endings unified in plain form?
-- [ ] §12-2: Are English technical terms glossed with Korean(English) only on first appearance in the document, and English-only thereafter?
-- [ ] §12-2: Do `<title>`/`<h1>`/`chapter-eyebrow`/nav heading text use English only, without parenthetical glosses or Korean-only labels?
+- [ ] §12-1: Are sentence endings unified in the formal plain register for the document's language?
+- [ ] §12-2: Are English technical terms glossed with `language_term(English)` only on first appearance in the document, and English-only thereafter?
+- [ ] §12-2: Do `<title>`/`<h1>`/`chapter-eyebrow`/nav heading text use English technical terms only, without parenthetical glosses or monolingual-only labels, across all language editions?
 - [ ] §12-3: Are chapter/section references in `N장 §M` format throughout?
 - [ ] §12-4: Are em-dashes minimized?
 - [ ] §13: Are tool comparisons free from misunderstanding, with no missing items, and visually balanced?
@@ -854,9 +961,10 @@ After completing the draft, verify each item below one by one.
 - [ ] §14: Do the Course Overview's learning objectives map 1:1 to body sections?
 - [ ] §15: Does each chapter connect to the next, and are all supplementary documents present?
 - [ ] §15-1: Does the last chapter have a "Next Steps" section?
-- [ ] §16: Is the body in the course's primary language, and code/identifiers/commits in English?
+- [ ] §16: Is the body in the course's primary language, and code/identifiers/commits in English across all editions?
 - [ ] §17: Do sections with available official videos have a "Video References" block?
 - [ ] §17: Are video links styled consistently with the `.video-refs` pattern?
+- [ ] §17-4: Has the video trust verification procedure (5 stages) been applied? Are all videos TRUSTWORTHY?
 - [ ] §18: Have A/B splits been applied to sections with platform-specific implementation differences?
 - [ ] §18: Does branch navigation connect from the common area to both A and B?
 - [ ] §18: Are inter-links between A and B files consistent?
