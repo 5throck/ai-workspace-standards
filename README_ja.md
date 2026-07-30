@@ -3,6 +3,10 @@ translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
+**言語**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
+
+---
+
 # AI ワークスペース標準 (AI Workspace Standards)
 
 > **すべてのAIコーディングツールにおけるVibe CodingおよびHarness Engineeringのマスター設定。**
