@@ -3,6 +3,10 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
+**Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
+
+---
+
 # AI Workspace Standards
 
 > **Master configuration for Vibe Coding and Harness Engineering across all AI coding tools.**
@@ -307,4 +311,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-08*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-30*
