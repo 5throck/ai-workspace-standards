@@ -289,6 +289,20 @@ bun scripts/validate-templates.ts
 
 ---
 
+## 📚 학습 리소스 (Learning Resources)
+
+본 워크스페이스의 멀티 에이전트 워크플로를 습득하려는 실무자를 위한 종합 교육 핸드북이 제공됩니다:
+
+**[Multi-Agent Harness Engineering 핸드북](https://5throck.github.io/multi-agent-harness-handbook/)**
+
+이 핸드북은 2일간의 집중 커리큘럼으로 구성되어 있습니다:
+- **Day 1 — 일반 사용자**: 핵심 AI 개념, Vibe Coding vs. Harness Engineering 원칙, 가드레일, 권한 모델, 기본적인 멀티 에이전트 조작
+- **Day 2 — IT 전문가**: 아키텍처 심층 해설 (SSOT 계층 L0→L1→L2), 엔터프라이즈 배포 전략, 커스텀 바리안트 엔지니어링 (Phase A/B), 종합 실습 프로젝트
+
+모든 개념은 4가지 주요 플랫폼 (Claude Code, Claude App, Antigravity CLI, Antigravity 2.0)에서 시연됩니다.
+
+---
+
 ## 기여하기 (Contributing)
 
 이 저장소는 **공개 저장소(Public Repository)**입니다. 누구나 Pull Request를 통해 기여할 수 있습니다.
