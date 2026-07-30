@@ -3,6 +3,10 @@ translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
+**Idiomas**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
+
+---
+
 # Estándares del Espacio de Trabajo de IA (AI Workspace Standards)
 
 > **Configuración maestra para Vibe Coding y Harness Engineering en todas las herramientas de codificación de IA.**
