@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 /**
  * post-write-lifecycle-check.ts — Real-time lifecycle WARN on file changes.
- * Triggered by PostToolUse (Write|Edit) in Claude Code CLI only.
- * Non-blocking: emits WARNs, never exits with error.
+ * Triggered by PostToolUse (Write|Edit) in Claude Code CLI, and AfterTool in
+ * Gemini CLI. Non-blocking: emits WARNs, never exits with error.
  *
  * Platform coverage:
- *   Claude Code CLI  — automatic via PostToolUse hook
- *   Claude Code App  — not triggered (run bun scripts/audit.ts manually)
- *   Gemini CLI       — not triggered (run bun scripts/audit.ts manually)
- *   Antigravity      — not triggered (run bun scripts/audit.ts manually)
+ *   Claude Code CLI  — automatic via PostToolUse hook (async)
+ *   Claude Desktop App — should fire via bundled CLI (fallback: prompt)
+ *   Gemini CLI       — automatic via AfterTool hook (--platform gemini)
+ *   Antigravity      — hooks do not fire (prompt enforcement)
  *
- * @version 1.0.1
+ * @version 1.1.0
  */
 
 import { $ } from 'bun';
@@ -30,15 +30,6 @@ function pass(msg: string) {
   console.log(`${GREEN}[LIFECYCLE-OK]${RESET}  ${DIM}${msg}${RESET}`);
 }
 
-async function getChangedFiles(): Promise<string[]> {
-  try {
-    const { stdout } = await $`git diff --name-only`.quiet().nothrow();
-    return stdout.toString().split('\n').filter(Boolean).map(f => f.replace(/\\/g, '/'));
-  } catch {
-    return [];
-  }
-}
-
 function hasVersionField(filePath: string): boolean {
   try {
     const content = readFileSync(filePath, 'utf-8');
@@ -48,14 +39,10 @@ function hasVersionField(filePath: string): boolean {
   }
 }
 
-async function main() {
-  const changed = await getChangedFiles();
-  if (changed.length === 0) {
-    // Also run audit.ts as normal
-    await $`bun scripts/audit.ts`.nothrow();
-    return;
-  }
-
+/**
+ * Run the 5 lifecycle checks against a list of changed files.
+ */
+function checkFiles(changed: string[]): number {
   let lifecycleIssues = 0;
 
   // Check 1: .claude/skills/*/SKILL.md — must have version: field
@@ -65,7 +52,6 @@ async function main() {
       warn(`${f} — missing 'version: X.Y.Z' in frontmatter. Add version: 1.0.0 for new skills.`);
       lifecycleIssues++;
     } else if (existsSync(f)) {
-      // Check propagation to templates/common
       const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/');
       if (!existsSync(commonPath)) {
         warn(`${f} — not propagated to ${commonPath}. Run platform-skill-lifecycle-manager skill.`);
@@ -125,19 +111,77 @@ async function main() {
     }
   }
 
+  return lifecycleIssues;
+}
+
+async function main() {
+  // Determine platform from CLI flag
+  const args = process.argv.slice(2);
+  const platformIdx = args.indexOf('--platform');
+  const isGemini = platformIdx !== -1 && args[platformIdx + 1] === 'gemini';
+
+  let changed: string[];
+
+  if (isGemini) {
+    // Gemini AfterTool mode: read specific file from stdin JSON
+    let stdinJson: string;
+    try {
+      stdinJson = readFileSync(0, 'utf-8'); // fd 0 = stdin
+    } catch {
+      // Cannot read stdin — silently exit (non-blocking)
+      return;
+    }
+
+    let data: { tool_name?: string; tool_input?: Record<string, unknown> };
+    try {
+      data = JSON.parse(stdinJson) as typeof data;
+    } catch {
+      // Malformed JSON — silently exit
+      return;
+    }
+
+    // Extract file path from Gemini AfterTool tool_input
+    const toolInput = data.tool_input ?? {};
+    const filePath = (toolInput.path as string | undefined)?.replace(/\\/g, '/');
+
+    if (!filePath) return;
+
+    changed = [filePath];
+  } else {
+    // Claude PostToolUse mode: get all changed files from git diff
+    try {
+      const { stdout } = await $`git diff --name-only`.quiet().nothrow();
+      changed = stdout.toString().split('\n').filter(Boolean).map(f => f.replace(/\\/g, '/'));
+    } catch {
+      changed = [];
+    }
+  }
+
+  if (changed.length === 0) {
+    // No changed files — run audit.ts as normal and exit
+    if (!isGemini) {
+      await $`bun scripts/audit.ts`.nothrow();
+    }
+    return;
+  }
+
+  const lifecycleIssues = checkFiles(changed);
+
   if (lifecycleIssues === 0) {
     pass('Lifecycle check passed — no issues detected in changed files.');
   } else {
     console.log(`\n${YELLOW}${lifecycleIssues} lifecycle issue(s) detected. Fix before running /sync.${RESET}`);
   }
 
-  // Always run audit.ts as well
-  await $`bun scripts/audit.ts`.nothrow();
+  // Always run audit.ts as well (Claude mode only — Gemini has no async audit hook)
+  if (!isGemini) {
+    await $`bun scripts/audit.ts`.nothrow();
+  }
 }
 
 main().catch(err => {
   console.error('Lifecycle check error:', err);
   if (import.meta.main) {
-    process.exit(0); // Non-blocking: never fail PostToolUse
+    process.exit(0); // Non-blocking: never fail PostToolUse/AfterTool
   }
 });

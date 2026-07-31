@@ -10,7 +10,7 @@
  *   Gemini CLI       — automatic via BeforeTool hook (deny mode)
  *   Antigravity      — hooks do not fire (prompt enforcement)
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { readFileSync } from 'node:fs';
@@ -69,10 +69,11 @@ function isSafePath(filePath: string): boolean {
 function findImporters(moduleName: string): string[] {
   // Build ERE pattern covering common import/require syntaxes.
   // git grep uses POSIX extended regex by default with -E.
+  // Allow optional .ts/.js/.tsx extension between module name and closing quote.
   const extRegex =
-    `from ['\"].*${moduleName}['\"]` +
-    `|require\\(['\"].*${moduleName}['\"]\\)` +
-    `|import ['\"].*${moduleName}['\"]`;
+    `from ['\"].*${moduleName}(\\.[tj]sx?)?['\"]` +
+    `|require\\(['\"].*${moduleName}(\\.[tj]sx?)?['\"]\\)` +
+    `|import ['\"].*${moduleName}(\\.[tj]sx?)?['\"]`;
 
   const args: string[] = ['grep', '-l', '-E', extRegex];
   for (const glob of GIT_GREP_GLOBS) {
@@ -114,11 +115,14 @@ function findImporters(moduleName: string): string[] {
 // ---------------------------------------------------------------------------
 
 function main(): void {
-  // 1. Determine platform from CLI flag
+  // 1. Determine platform and mode from CLI flags
   const args = process.argv.slice(2);
   const platformIdx = args.indexOf('--platform');
   const platform: 'claude' | 'gemini' =
     platformIdx !== -1 && args[platformIdx + 1] === 'gemini' ? 'gemini' : 'claude';
+  const modeIdx = args.indexOf('--mode');
+  const mode: 'ask' | 'deny' =
+    modeIdx !== -1 && args[modeIdx + 1] === 'deny' ? 'deny' : 'ask';
 
   // 2. Read all of stdin synchronously
   let stdinJson: string;
@@ -183,20 +187,22 @@ function main(): void {
     return;
   }
 
-  // 8. Importers found — block or ask depending on platform
+  // 8. Importers found — block or ask depending on platform and mode
   const importerList = importers.join(', ');
   const reason = `${GATEKEEP_TAG} First edit to '${normalizedFile}'. Found ${importers.length} importer(s): ${importerList}. Investigate importers before proceeding.`;
 
-  if (platform === 'claude') {
-    // Claude: ask mode — output JSON to stdout, exit 0
-    const response = { decision: 'ask' as const, reason };
-    process.stdout.write(JSON.stringify(response) + '\n');
-    process.exit(0);
-  } else {
-    // Gemini: deny mode — output JSON to stdout, exit 2
+  // Gemini always uses deny mode regardless of --mode flag
+  // Claude defaults to ask mode; --mode deny overrides to hard block
+  if (platform === 'gemini' || mode === 'deny') {
+    // Hard block — output deny JSON to stdout, exit 2
     const response = { decision: 'deny' as const, reason };
     process.stdout.write(JSON.stringify(response) + '\n');
     process.exit(2);
+  } else {
+    // Claude ask mode (default) — output ask JSON to stdout, exit 0
+    const response = { decision: 'ask' as const, reason };
+    process.stdout.write(JSON.stringify(response) + '\n');
+    process.exit(0);
   }
 }
 

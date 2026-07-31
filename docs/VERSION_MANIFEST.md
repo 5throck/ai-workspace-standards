@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-31T21:20:47.525Z
+**Generated**: 2026-07-31T21:35:42.218Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -101,7 +101,7 @@
 | extends-validator.ts | 1.0.1 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
-| gateguard-fact-force.ts | 1.0.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
+| gateguard-fact-force.ts | 1.1.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
 | gen-pr-body.ts | 1.1.5 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |
@@ -131,7 +131,7 @@
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
 | pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
-| post-write-lifecycle-check.ts | 1.0.1 | scripts/hooks/post-write-lifecycle-check.ts | bun |
+| post-write-lifecycle-check.ts | 1.1.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
@@ -147,7 +147,7 @@
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | rollback-partial-project.ts | 1.0.0 | scripts/helpers/rollback-partial-project.ts | N/A |
 | scan-l2-project.ts | 1.1.1 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
-| schema-validator.ts | 1.0.0 | scripts/validators/schema-validator.ts | fs, js-yaml, path |
+| schema-validator.ts | 1.1.0 | scripts/validators/schema-validator.ts | fs, js-yaml, path |
 | security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
 | security-validator.test.ts | 1.0.1 | scripts/helpers/security-validator.test.ts | bun:test |
 | security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |

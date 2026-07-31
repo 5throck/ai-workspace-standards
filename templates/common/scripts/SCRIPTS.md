@@ -67,8 +67,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.1.5 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `helpers/beta-lifecycle.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.7.2 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
@@ -82,45 +82,57 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.test.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/merge-package-scripts.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `helpers/merge-package-scripts.ts` | L0 | 1.0.1 | deprecated | 2026-12-31 | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | Variant type SSOT (7 types) |
-| `helpers/registries/capability-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | 21 capabilities |
-| `helpers/registries/promotion-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | Promotion rules per variant type |
-| `helpers/registries/validation-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | Validation rules per variant type |
-| `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | Barrel exports + integrity check |
-| `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Plugin interface + registry |
-| `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | Game variant plugin |
-| `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | Explicit plugin registration |
-| `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | Transactional variant registration |
+| `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/capability-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/promotion-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/validation-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/security-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/development-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/design-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/consulting-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/collaboration-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/lecture-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/reconcile-with-l0-l1.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
 | `helpers/normalize-agent-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/scan-l2-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | Validator context, result, report types |
-| `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | Validates variant.json required fields |
-| `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | Wraps extends-validator.ts for pipeline |
-| `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | Scans agent capabilities[] coverage |
-| `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | Checks handoff_to/required_skills refs |
-| `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | Checks duplicate agent names |
-| `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | Checks .claude ↔ .gemini parity |
-| `validators/index.ts` | L0 | 1.0.0 | active | —| —| L0 | runAllValidators() + generateReport() |
+| `helpers/ticket-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/ticket-store.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | command schema support |
+| `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `validators/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
-| `hooks/gateguard-fact-force.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `hooks/gateguard-fact-force.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | --mode ask|deny, importer regex fix |
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | Gemini AfterTool support |
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
-| `ingest-external-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `ingest-security-frameworks.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.9.1 | active | —| —| L0 | Phase 1.6 (pm.md pre-flight), Phase 3.5 (AGENTS.md §-structure check + BLOCKING gate), Phase 3.7 (plugin validation), Phase 4.5 (JSON report)|
-| `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | Regenerates variant AGENTS.md from L1 common template; fixes missing VARIANT-* markers|
+| `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.9.1 | active | —| —| L0 | —|
+| `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/encoding-utils.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -128,15 +140,15 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/propagation-map-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.5.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.0.10 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.3.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -156,7 +168,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `upgrade-project.ts` | L0 | 1.2.2 | active | —| —| L0 | —|
+| `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.7.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -296,8 +309,7 @@ deprecated agent references, missing fields.
 skills still being modified, dependency graph, circular dependencies, `scope` field validity.
 **Usage**: `bun scripts/skill-lifecycle-audit.ts`
 **Runs automatically**: pre-commit hook when `skills/**` files are staged.
-**v1.2.0**: `scope` validation now accepts `workspace | common | variant | <current project's own directory name>`; `docs/_examples/skills/**` excluded from scanning. Run once per location (workspace root + each `templates/co-*/` variant + `templates/common/`).
-
+**v1.2.0**: `scope` validation now accepts `workspace | common | variant | <current project's own directory name>` (was previously only the literal string `variant`, which incorrectly flagged legitimate variant-name scope values like `scope: co-consult`); `docs/_examples/skills/**` excluded from scanning (illustrative documentation, not real skills). Run once per location (workspace root + each `templates/co-*/` variant + `templates/common/`) since agent/scope resolution is relative to `cwd`.
 
 #### `readme-lifecycle-audit.ts`
 **Purpose**: Validates README.md / README_ko.md pairing in `templates/` directories.
@@ -335,6 +347,7 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 - `bun run sync-skills` — workspace root only (default, unchanged from prior versions)
 - `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
 - `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
+**v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
 
 #### `sync-skills-to-l2.ts`
 **Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
@@ -427,6 +440,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
 | `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
+| `--include-disabled` | Opt-in override | Include domains marked `disabled: true` (e.g. `docs`) in the dry-run report only — combining with `--apply` is a hard error (exit 1), not a silent write |
 
 **Typical workflow**:
 ```bash
@@ -436,7 +450,10 @@ bun scripts/propagate-to-templates.ts --governance-l1    # publish governance do
 bun scripts/propagate-to-templates.ts --docs             # inject COMMON markers into variants (Phase B)
 bun scripts/propagate-to-templates.ts --prune            # remove orphan files from L1
 bun scripts/propagate-to-templates.ts --check-drift      # report L1 vs L2 drift
+bun scripts/propagate-to-templates.ts --domain docs --include-disabled --dry-run  # inspect a disabled domain
 ```
+
+**Disabled domains**: a domain entry may carry `"disabled": true` in `propagation-map.json` to declare it *intentionally* inactive (as opposed to silently never having worked — see the `docs` domain's `note` field for the concrete incident this guards against). Default runs skip it and print why; `--include-disabled` is a read/inspect escape hatch, not a way to reactivate it — flip the flag in `propagation-map.json` itself once the underlying policy question is resolved.
 
 ---
 
@@ -451,4 +468,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-06-11 — ADR-0036: all sh/ps1 scripts migrated to TypeScript (Bun). `install-bun.*` deleted. File permission-setting code removed.*
+*Last updated: 2026-07-10 — Two-round project review fixes: audit.ts split bug, dead parity check removal, SSRF IPv6 ranges, pre-commit gitleaks separation, `any` type cleanup, validate-templates dead code removal, ESM import fixes, tsconfig strict options.*

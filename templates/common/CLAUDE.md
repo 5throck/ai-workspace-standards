@@ -53,8 +53,9 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 |------|-------------|:-------:|-------|
 | SessionStart (git hooks) | Claude Code CLI | ✅ | runs `git config core.hooksPath .githooks` |
 | SessionStart (git hooks) | Claude Code Desktop App | ✅ | hooks don't fire; run manually |
-| PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
-| PostToolUse (audit) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/audit.ts` manually |
+| PostToolUse (lifecycle check) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async after every Write/Edit |
+| PostToolUse (lifecycle check) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/hooks/post-write-lifecycle-check.ts` manually |
+| Gemini CLI equivalent | — | — | Gemini AfterTool fires the same script with `--platform gemini` |
 | PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
 | PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
