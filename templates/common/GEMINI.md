@@ -239,7 +239,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Gemini-specif
 <!-- COMMON-GEMINI:END -->
 
 <!-- COMMON-GEMINI:START -->
-## Pre-Edit Quality Gate (Gemini CLI + Antigravity)
+## Pre-Edit Quality Gate (All Platforms)
 
 Before editing any file for the **FIRST time in a session**, the agent MUST:
 

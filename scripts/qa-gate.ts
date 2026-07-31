@@ -2,7 +2,7 @@
 // qa-gate.ts - QA Gate Automation - Phase 6
 // Run by Consistency Auditor to verify workspace standards
 
-/** @version 1.1.0 */
+/** @version 1.2.0 */
 
 import { $ } from 'bun';
 import { createHash } from 'node:crypto';
@@ -13,9 +13,9 @@ const YELLOW = '\x1b[33m';
 const GREEN  = '\x1b[32m';
 const RESET  = '\x1b[0m';
 
-/** Normalizes CRLF to LF so line-ending differences don't register as content drift. */
+/** Normalizes CRLF to LF and CONSTITUTION.md refs so line-ending and template transforms don't register as content drift. */
 export function normalizeLineEndings(content: string): string {
-  return content.replace(/\r\n/g, '\n');
+  return content.replace(/\r\n/g, '\n').replace(/CONSTITUTION\.md/g, 'context.md');
 }
 
 /** SHA256 of CRLF-normalized content — used to compare L0/L1 file pairs without false positives from line-ending differences (M5). */
