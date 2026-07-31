@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-31T21:35:42.218Z
+**Generated**: 2026-07-31T22:03:48.908Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -65,8 +65,8 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| _test-consumer.ts | 1.0.0 | scripts/hooks/_test-consumer.ts | N/A |
-| _test-module.ts | 1.0.0 | scripts/hooks/_test-module.ts | N/A |
+| _test-consumer.ts | N/A | scripts/hooks/_test-consumer.ts | N/A |
+| _test-module.ts | N/A | scripts/hooks/_test-module.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.5 | scripts/agent-lifecycle-audit.ts | N/A |
@@ -95,13 +95,13 @@
 | dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
 | duplicate-validator.ts | 1.0.0 | scripts/validators/duplicate-validator.ts | fs, path |
-| encoding-utils.ts | 1.0.0 | scripts/lib/encoding-utils.ts | fs, path |
+| encoding-utils.ts | 1.1.0 | scripts/lib/encoding-utils.ts | fs, path |
 | error-handling.ts | 1.1.0 | scripts/lib/error-handling.ts | N/A |
 | extends-validator-wrapper.ts | 1.0.0 | scripts/validators/extends-validator-wrapper.ts | fs, js-yaml, path |
 | extends-validator.ts | 1.0.1 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
-| gateguard-fact-force.ts | 1.1.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
+| gateguard-fact-force.ts | 1.2.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
 | gen-pr-body.ts | 1.1.5 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |

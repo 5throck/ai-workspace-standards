@@ -6,6 +6,7 @@ import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import * as url from 'node:url';
+import { detectEncoding, detectHomoglyphs, detectZeroWidthChars } from './lib/encoding-utils.ts';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -190,6 +191,136 @@ for (const dir of searchDirs) {
 }
 if (bomErrors === 0) { Pass('UTF-8 BOM check: all markdown files are clean'); }
 else { errors += bomErrors; }
+
+// 3.6. CRLF line ending check for source files
+if (!LIFECYCLE_ONLY) {
+    let crlfFound = 0;
+    const CRLF_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const CRLF_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml']);
+    const CRLF_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of CRLF_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!CRLF_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (CRLF_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const detection = detectEncoding(filePath);
+                if (detection.lineEndings === 'crlf' || detection.lineEndings === 'mixed') {
+                    // WARN during initial rollout — workspace has widespread CRLF on Windows.
+                    // Upgrade to FAIL after bulk normalization is complete.
+                    Warn(`CRLF/Mixed line endings in ${filePath} — use LF only`);
+                    crlfFound++;
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (crlfFound === 0) {
+        Pass('CRLF line ending check: all source files use LF');
+    }
+}
+
+// 3.7. Homoglyph detection for source files
+if (!LIFECYCLE_ONLY) {
+    let homoglyphErrors = 0;
+    const HOMOGLYPH_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const HOMOGLYPH_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx']);
+    const HOMOGLYPH_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of HOMOGLYPH_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!HOMOGLYPH_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (HOMOGLYPH_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const content = fs.readFileSync(filePath, 'utf-8');
+                const matches = detectHomoglyphs(content);
+                if (matches.length > 0) {
+                    // Report first 5 matches per file to avoid spam
+                    const shown = matches.slice(0, 5);
+                    for (const m of shown) {
+                        Fail(`Homoglyph (${m.range}) in ${filePath}:${m.line}:${m.column} — '${m.char}' (${m.codePoint})`);
+                    }
+                    if (matches.length > 5) {
+                        Fail(`... and ${matches.length - 5} more homoglyph(s) in ${filePath}`);
+                    }
+                    homoglyphErrors += matches.length;
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (homoglyphErrors === 0) {
+        Pass('Homoglyph check: no confusable Unicode characters found');
+    }
+    errors += homoglyphErrors;
+}
+
+// 3.8. Zero-width character detection
+if (!LIFECYCLE_ONLY) {
+    let zwErrors = 0;
+    const ZW_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const ZW_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml']);
+    const ZW_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of ZW_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!ZW_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (ZW_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const content = fs.readFileSync(filePath, 'utf-8');
+                const matches = detectZeroWidthChars(content);
+                // U+FEFF (BOM) and U+2060 (word joiner) have legitimate uses in
+                // source code (BOM-stripping regexes, code-fence escapes).
+                // Report as WARN, not FAIL. All other zero-width chars are FAIL.
+                const BENIGN_CODEPOINTS = new Set(['U+FEFF', 'U+2060']);
+                if (matches.length > 0) {
+                    const shown = matches.slice(0, 5);
+                    for (const m of shown) {
+                        if (BENIGN_CODEPOINTS.has(m.codePoint)) {
+                            Warn(`Zero-width char in ${filePath}:${m.line}:${m.column} — ${m.description} (${m.codePoint})`);
+                        } else {
+                            Fail(`Zero-width char in ${filePath}:${m.line}:${m.column} — ${m.description} (${m.codePoint})`);
+                            zwErrors++;
+                        }
+                    }
+                    if (matches.length > 5) {
+                        Fail(`... and ${matches.length - 5} more zero-width char(s) in ${filePath}`);
+                        zwErrors += matches.length - 5;
+                    }
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (zwErrors === 0) {
+        Pass('Zero-width character check: no invisible Unicode characters found');
+    }
+    errors += zwErrors;
+}
 }
 
 // 4. AGENTS.md must exist

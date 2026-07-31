@@ -297,12 +297,12 @@ This workspace uses a 3-layer enforcement model (Hook → Prompt → Skill) to e
 ### GateGuard Pre-Edit Quality Gate
 
 Before editing any file for the first time in a session, you MUST:
-1. Search for all files that import or require the target file
+1. Search for all files that import or require (code files) or reference (config files) the target file
 2. Identify data schemas, interfaces, and type definitions the file exports
 3. Review the user's instructions for explicit scope constraints
 4. Briefly summarize findings (1-3 sentences) before proceeding
 
-This is enforced automatically via hooks on Claude Code CLI (configurable `--mode ask|deny`) and Gemini CLI (always `deny`). On Antigravity (where hooks don't fire), you must self-enforce this process.
+This is enforced automatically via hooks on Claude Code CLI (configurable `--mode ask|deny`) and Gemini CLI (always `deny`). State persists across hook spawns via PID-keyed file. On Antigravity (where hooks don't fire), you must self-enforce this process.
 
 ### Prompt Defense
 
