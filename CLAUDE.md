@@ -21,10 +21,11 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` currently has **two active hook types**:
+The workspace `.claude/settings.json` currently has **three active hook types**:
 
+- **PreToolUse (GateGuard)** — fires `bun scripts/hooks/gateguard-fact-force.ts` (sync) before Edit/Write/MultiEdit. Blocks first edit per file per session until importers are investigated (ask mode).
 - **SessionStart** — runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
-- **PostToolUse** is **enabled** — fires `bun scripts/hooks/post-write-lifecycle-check.ts` (async) after every Write/Edit on the CLI.
+- **PostToolUse** — fires `bun scripts/hooks/post-write-lifecycle-check.ts` (async) after every Write/Edit on the CLI.
 
 To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
 
@@ -46,7 +47,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/hooks/post-write-lifecycle-check.ts` manually before committing.
+> **Desktop App Hook Status**: Per Anthropic documentation, Claude Code Desktop App uses the bundled CLI and hooks should fire. However, workspace testing (2026-05) observed intermittent behavior. If hooks appear non-functional in the Desktop App, run `bun scripts/hooks/post-write-lifecycle-check.ts` manually as fallback.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
@@ -54,6 +55,8 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 | SessionStart (git hooks) | Claude Code Desktop App | ✅ | hooks don't fire; run manually |
 | PostToolUse (lifecycle check) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async after every Write/Edit |
 | PostToolUse (lifecycle check) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/hooks/post-write-lifecycle-check.ts` manually |
+| PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
+| PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
 | TeammateIdle (lifecycle) | Claude Code Desktop App | ✅ | Hooks don't fire; run manually |
 | TaskCompleted (QA gate) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async when a task is marked complete |
@@ -62,6 +65,26 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
+
+### 2. Pre-Edit Quality Gate (All Platforms)
+
+Before editing any file for the **FIRST time in a session**, the agent MUST:
+
+1. Search for all files that import or require the target file (`grep` for filename patterns)
+2. Identify data schemas, interfaces, and type definitions the file exports
+3. Review the user's instructions for explicit scope constraints
+4. Briefly summarize findings (1-3 sentences) before proceeding
+
+| Platform | Enforcement | Details |
+|----------|:-----------:|---------|
+| Claude Code CLI | ✅ Hook (automatic) | PreToolUse `ask` mode — agent must acknowledge before proceeding |
+| Claude Desktop App | ✅* Hook + Prompt | Should fire via bundled CLI; fallback: self-enforcement |
+| Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — agent must re-attempt after investigation |
+| Antigravity | ✅ Prompt (manual) | Hooks do not fire in Antigravity — agent self-enforces |
+
+*Claude Desktop App: Uses bundled CLI per Anthropic docs. Workspace testing (2026-05) observed intermittent hook behavior.
+
+If the hook is not active (Antigravity, or Desktop App fallback), agents must still follow the 4-step process above before making first edits.
 
 #### Agent Teams (Experimental)
 
@@ -301,7 +324,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-07-21 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-07-31 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 

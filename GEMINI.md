@@ -231,11 +231,29 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr-workflow). Gemini-specific additions:
 
-- **PostToolUse Limitation**: PostToolUse hooks are **disabled** in Gemini/Antigravity sessions. Manually execute `bun scripts/hooks/post-write-lifecycle-check.ts` after each file edit (the same script Claude Code's PostToolUse hook runs automatically), and `bun scripts/audit.ts` at task boundaries before committing via `/sync` — these are two distinct scripts covering different stages (see CLAUDE.md §1 hook table for the full mapping).
+- **Platform Hook Support**: Gemini CLI supports BeforeTool/AfterTool/PreCompress hooks (stdin(JSON) → stdout(JSON)). Antigravity does NOT fire hooks (VS Code extension limitation). Claude Desktop App uses bundled CLI (hooks should fire per Anthropic docs, but workspace testing observed intermittent behavior). If hooks are not firing in your environment, run `bun scripts/hooks/post-write-lifecycle-check.ts` manually before committing.
 - **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via `run_command` are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. If you see `[FAIL] Direct git commits are restricted`, run `/sync \"type: description\"` instead. **`--no-verify` is forbidden** — it bypasses secret scanning and all quality gates.
 - **Sequential Branch Dependency Rule**: Before running `/sync` to open a new PR while a prior PR from the same session is still open and unmerged, merge the prior PR first (or explicitly justify parallel branching in a plan/design doc). `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default, not by exception. Full rule: CONSTITUTION.md §3.3.
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 - **Windows: Git Bash required**: `.githooks/` hook files are Unix shell scripts. Windows users must have Git Bash installed. Run `git config core.hooksPath .githooks` to activate hooks. All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
+<!-- COMMON-GEMINI:END -->
+
+<!-- COMMON-GEMINI:START -->
+## Pre-Edit Quality Gate (All Platforms)
+
+Before editing any file for the **FIRST time in a session**, the agent MUST:
+
+1. Search for all files that import or require the target file
+2. Identify data schemas, interfaces, and type definitions the file exports
+3. Review the user's instructions for explicit scope constraints
+4. Briefly summarize findings (1-3 sentences) before proceeding
+
+| Platform | Enforcement | Details |
+|----------|:-----------:|---------|
+| Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — blocked until agent investigates |
+| Antigravity | ✅ Prompt (manual) | Hooks do not fire — agent self-enforces |
+
+If the hook is not active (Antigravity), agents must still follow the 4-step process before making first edits.
 <!-- COMMON-GEMINI:END -->
 
 ## Agent Teams vs. Antigravity Agent Manager
@@ -291,7 +309,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-07-21 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-07-31 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 
 

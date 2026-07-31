@@ -28,15 +28,27 @@ Adopt a **3-tier classification** for platform settings, declared in `docs/templ
 
 **Current classification:**
 
-*Shared:* `mcpServers`, `hooks.SessionStart`, `hooks.PostToolUse`
+| Shared | Claude Code | Gemini CLI | Classification |
+|---------|-------------|------------|---------------|
+| Session Init | `hooks.SessionStart` | `hooks.SessionStart` | **shared** |
+| Pre-Tool Gate | `hooks.PreToolUse` | `hooks.BeforeTool` | claude_only / gemini_only |
+| Post-Tool Audit | `hooks.PostToolUse` | `hooks.AfterTool` | claude_only / gemini_only |
+| Pre-Compress | `hooks.PreCompact` | `hooks.PreCompress` | claude_only / gemini_only |
 
-*Claude-only:* `permissions`, `env` (including `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), `teammateMode`, `hooks.TeammateIdle`, `hooks.TaskCreated`, `hooks.TaskCompleted`
+**Shared:** `mcpServers`, `hooks.SessionStart`
 
-*Gemini-only:* (none currently)
+**Claude-only:** `permissions`, `env` (including `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), `teammateMode`, `hooks.PreToolUse`, `hooks.PostToolUse`, `hooks.PreCompact`, `hooks.TeammateIdle`, `hooks.TaskCreated`, `hooks.TaskCompleted`, `hooks.WorktreeCreate`
+
+**Gemini-only:** `hooks.BeforeTool`, `hooks.AfterTool`, `hooks.PreCompress`
+
+> **Platform Hook Advisories:**
+> - **Claude Desktop App**: Uses bundled CLI. Hooks configured in `.claude/settings.json` should fire per Anthropic documentation. However, workspace testing (2026-05) observed that some hooks did not fire. Treat Desktop App hook support as "verified by Anthropic, conditionally supported in practice."
+> - **Antigravity (VS Code extension)**: Does NOT fire hooks. Shares `.gemini/settings.json` with Gemini CLI, but hooks are not executed in the Antigravity runtime.
+> - **Gemini CLI**: Supports BeforeTool, AfterTool, and PreCompress hooks with stdin(JSON) → stdout(JSON) protocol.
 
 The governing principle is **Functional Equivalence** — each platform implements equivalent *intent* using its own capabilities, not identical file content.
 
-`validate-templates.ts` Check VA-04 enforces this policy automatically: it reads `platform_settings.shared` from `common-contract.json` and warns when a shared key is missing from either settings file. Claude-only keys absent from `.gemini/settings.json` do not trigger a warning.
+`validate-templates.ts` Check VA-04 enforces this policy automatically: it reads `platform_settings.shared` from `common-contract.json` and warns when a shared key is missing from either settings file. Claude-only keys absent from `.gemini/settings.json` do not trigger a warning. Gemini-only keys absent from `.claude/settings.json` also do not trigger a warning.
 
 The lifecycle table in `CLAUDE.md §10` was updated to document four propagation rules for `.claude/settings.json` changes: (1) shared items propagate to `.gemini/settings.json`; (2) claude_only items do not; (3) propagate to `templates/common/.claude/settings.json`; (4) propagate to all 4 variant `.claude/settings.json` files.
 
@@ -46,4 +58,4 @@ The lifecycle table in `CLAUDE.md §10` was updated to document four propagation
 - `common-contract.json` becomes the single source of truth for platform capability boundaries
 - New settings additions require explicit tier classification before implementation
 - VA-04 provides automated enforcement — settings parity is no longer enforced by human memory
-- The `gemini_only` tier is intentionally empty but reserved for future Antigravity-exclusive settings
+- The `gemini_only` tier contains Gemini CLI hook events (`BeforeTool`, `AfterTool`, `PreCompress`) that have no Claude Code equivalent. Note: Antigravity (VS Code extension) shares `.gemini/settings.json` but does NOT fire hooks.

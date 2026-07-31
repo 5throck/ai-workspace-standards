@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "type": "command",

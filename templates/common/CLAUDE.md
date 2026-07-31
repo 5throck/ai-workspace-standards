@@ -21,10 +21,11 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 ## Claude Code-Specific Behaviors
 
 ### 1. Automated Hooks (`.claude/settings.json`)
-The workspace `.claude/settings.json` currently has **two active hook types**:
+The workspace `.claude/settings.json` currently has **three active hook types**:
 
+- **PreToolUse (GateGuard)** — fires `bun scripts/hooks/gateguard-fact-force.ts` (sync) before Edit/Write/MultiEdit. Blocks first edit per file per session until importers are investigated (ask mode).
 - **SessionStart** — runs `git config core.hooksPath .githooks` (async) to ensure git hooks are configured at the start of each session.
-- **PostToolUse** is **enabled** — fires `bun scripts/audit.ts` (async) after every Write/Edit on the CLI.
+- **PostToolUse** — fires `bun scripts/hooks/post-write-lifecycle-check.ts` (async) after every Write/Edit on the CLI.
 
 To disable the PostToolUse hook, remove the following block from `.claude/settings.json`:
 
@@ -37,7 +38,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/audit.ts"
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts"
           }
         ]
       }
@@ -46,7 +47,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> ⚠️ **Desktop App limitation**: `PostToolUse` hooks do **not** fire in the Claude Code Desktop App even when configured. After any Write or Edit in the Desktop App, run `bun scripts/audit.ts` manually before committing.
+> **Desktop App Hook Status**: Per Anthropic documentation, Claude Code Desktop App uses the bundled CLI and hooks should fire. However, workspace testing (2026-05) observed intermittent behavior. If hooks appear non-functional in the Desktop App, run `bun scripts/hooks/post-write-lifecycle-check.ts` manually as fallback.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
@@ -54,6 +55,8 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 | SessionStart (git hooks) | Claude Code Desktop App | ✅ | hooks don't fire; run manually |
 | PostToolUse (audit) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async after every Write/Edit |
 | PostToolUse (audit) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/audit.ts` manually |
+| PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
+| PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
 | TeammateIdle (lifecycle) | Claude Code Desktop App | ✅ | Hooks don't fire; run manually |
 | TaskCompleted (QA gate) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async when a task is marked complete |
@@ -300,7 +303,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-07-11 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-07-31 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 
