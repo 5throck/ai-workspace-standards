@@ -30,6 +30,10 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `team-builder` | 1.1.0 | active | pm | 2026-06-06 | — | — |
 | `translate` | 1.0.0 | active | pm | 2026-06-06 | — | — |
 | `validate-docs-links` | 1.0.0 | active | pm | 2026-07-19 | — | Reassigned from docs-writer — same orphan cause as security-scan |
+| `project-to-variant` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Convert existing standalone project into official variant template |
+| `upgrade-project` | 1.1.0 | active | pm | 2026-07-31 | — | Upgrade existing L2/L3 project to current template version |
+| `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
+| `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
 
 ### Variant-Exclusive Skills
 

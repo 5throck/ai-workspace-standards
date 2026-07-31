@@ -9,7 +9,7 @@ tier:
   gemini-cli: medium    # gemini-3.5-flash
 model: inherit
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 color: red
 description: 'Enforces Git Hooks, manages security. Phase 5 Security QA. Use when: "Security review", "Hook configuration", "Secret detection"'
 examples:

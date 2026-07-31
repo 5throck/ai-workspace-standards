@@ -68,6 +68,9 @@ __pycache__/
 .claude/settings.local.json
 # --- Claude Code worktrees (ephemeral, agent-created) ---
 .claude/worktrees/
+# --- Claude Code runtime artifacts (not shared) ---
+.claude/launch.json
+.claude/post-checkout.log
 
 # --- Explicitly TRACK these workspace-level files ---
 # (gitignore negations — override the /*/  rule above)

@@ -110,6 +110,34 @@
       "gemini-parity": "partial",
       "description": "Redirects commit+push+PR requests to /sync pipeline — enforces CHANGELOG, memlog, and audit gates",
       "propagated_to_common": true
+    },
+    "changelog": {
+      "source": ".claude/commands/changelog.md",
+      "gemini_source": ".gemini/commands/changelog.md",
+      "gemini-parity": "full",
+      "description": "Generates or updates CHANGELOG.md entries following Keep a Changelog format",
+      "propagated_to_common": true
+    },
+    "meeting": {
+      "source": ".claude/commands/meeting.md",
+      "gemini_source": ".gemini/commands/meeting.md",
+      "gemini-parity": "full",
+      "description": "Facilitates structured multi-agent meetings with configurable rounds and agent participants",
+      "propagated_to_common": true
+    },
+    "memlog": {
+      "source": ".claude/commands/memlog.md",
+      "gemini_source": ".gemini/commands/memlog.md",
+      "gemini-parity": "full",
+      "description": "Creates or updates daily memory log entry in memory/YYYY-MM-DD.md",
+      "propagated_to_common": true
+    },
+    "new-task": {
+      "source": ".claude/commands/new-task.md",
+      "gemini_source": ".gemini/commands/new-task.md",
+      "gemini-parity": "full",
+      "description": "Creates a new task definition file with standardized template",
+      "propagated_to_common": true
     }
   },
   "common_platform_skills": {

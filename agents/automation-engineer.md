@@ -9,7 +9,7 @@ tier:
   gemini-cli: low    # gemini-3.5-flash
 model: inherit
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 color: green
 description: 'Scripting and tools expert. Phase 4 Lead Agent. Use when: "Creating scripts", "Cross-platform automation", "Implementation tasks"'
 examples:

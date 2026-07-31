@@ -98,13 +98,12 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 **User Communication for Specialist Tasks**:
 When work requires specialist delegation, PM uses the following template:
-<!-- Language Policy Exception: Korean text below is intentional for Korean-language user communication templates. See AGENTS.md §Language Policy for exception rules. -->
 ```
-PM: 🔍 [Task Analysis] 이 작업은 [specialist] 전문 영역입니다.
+PM: 🔍 [Task Analysis] This task falls within the [specialist] domain of expertise.
    Task: [description]
    Specialist: [specialist name]
    Reason: [why specialist needed]
-PM: [specialist]를 dispatch할까요?
+PM: Shall I dispatch [specialist]?
 User: "Yes"
 PM: ▶️ [specialist] dispatch...
 ```

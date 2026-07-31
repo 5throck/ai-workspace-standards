@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.9.0
+ * @version 1.9.1
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -1058,7 +1058,8 @@ async function main() {
   // C-09: Validate --name= CLI arg before use in path construction
   const variantNameRaw = nameArg.split('=')[1];
   if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(variantNameRaw)) {
-    throw new Error(`Invalid variant name: '${variantNameRaw}'. Must match co-[a-z][a-z0-9-]{1,30}`);
+    console.error(`Invalid variant name: '${variantNameRaw}'. Must match co-[a-z][a-z0-9-]{1,30}`);
+    process.exit(1);
   }
 
   // Validate --type= CLI arg against centralized registry

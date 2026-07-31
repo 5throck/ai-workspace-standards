@@ -24,16 +24,13 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
      Non-Propagation. In variant projects (L2), PM handles lifecycle duties directly. -->
 | `docs/{variant}.context.md` | Project-specific context file (name is variant-dependent) |
 | `.claude/settings.json` | Shared Claude Code settings (MCP servers, hooks) |
-| `.claude/commands/changelog.md` | `/changelog` slash command |
-| `.claude/commands/memlog.md` | `/memlog` slash command |
-| `.claude/commands/new-task.md` | `/new-task` slash command |
-| `.claude/commands/sync.md` | `/sync` slash command |
-| `.claude/commands/meeting.md` | `/meeting` slash command |
 | `.gemini/settings.json` | Shared Antigravity settings (mirrors `.claude/settings.json`) |
-| `.gemini/commands/changelog.md` | Gemini `/changelog` command |
-| `.gemini/commands/memlog.md` | Gemini `/memlog` command |
-| `.gemini/commands/new-task.md` | Gemini `/new-task` command |
-| `.gemini/commands/sync.md` | Gemini `/sync` command |
+
+### Commands (Inherited from Common)
+
+Variants **MUST NOT** include shared commands (`changelog.md`, `memlog.md`, `new-task.md`, `sync.md`, `meeting.md`) in their overlay directories. These are inherited from `templates/common/` during scaffolding via `new-project.ts`. If a variant places these files in `.claude/commands/` or `.gemini/commands/`, `validate-templates.ts` Check 6 will fail validation.
+
+Domain-specific commands (e.g., `security-check.md` for co-develop, co-security) are **optional** extensions listed in the Optional Files table below.
 
 ## Optional Files (Domain Extensions)
 

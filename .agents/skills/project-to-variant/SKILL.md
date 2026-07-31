@@ -5,11 +5,14 @@ version: "1.0.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
-triggers:
-  - convert project to variant
-  - create variant from project
-  - project to template
-  - promote project to variant
+last_reviewed: 2026-07-31
+metadata:
+  type: scaffolding
+  triggers:
+    - convert project to variant
+    - create variant from project
+    - project to template
+    - promote project to variant
 ---
 
 # Project to Variant
