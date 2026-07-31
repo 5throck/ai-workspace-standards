@@ -12,6 +12,9 @@
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
 
+# --- GateGuard PID-keyed state persistence (session-local) ---
+.gateguard-state/
+
 # --- Beta lifecycle raw tracking state (local operational data — must not be
 # committed: holds per-engagement client identifiers and bug descriptions).
 # Already caught by the /*/  rule above; documented explicitly here so this

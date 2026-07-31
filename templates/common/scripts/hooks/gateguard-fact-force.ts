@@ -10,11 +10,14 @@
  *   Gemini CLI       — automatic via BeforeTool hook (deny mode)
  *   Antigravity      — hooks do not fire (prompt enforcement)
  *
- * @version 1.1.0
+ * State persistence: PID-keyed file in .gateguard-state/ directory.
+ * Survives across hook process spawns within the same Claude/Gemini session.
+ *
+ * @version 1.2.0
  */
 
-import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
+import { basename, join } from 'node:path';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -25,17 +28,86 @@ const GATEKEEP_TAG = '[GATEGUARD]';
 // Paths that are safe to edit without importer investigation
 const SAFE_PATH_PREFIXES = ['memory/', 'CHANGELOG.md', '.git/', 'node_modules/'];
 
+// High-value non-code files that should be gated via reference search.
+// Lighter gating: searches for filename references instead of importers.
+const GOVERNED_CONFIG_PATHS = [
+  'CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'context.md', 'package.json',
+];
+
 // Glob patterns passed to git grep to limit file types
 const GIT_GREP_GLOBS = ['*.ts', '*.tsx', '*.js', '*.jsx'];
 
 // Timeout for git grep: 3 seconds
 const GREP_TIMEOUT_MS = 3000;
 
+// State directory for PID-keyed persistence
+const STATE_DIR = join(process.cwd(), '.gateguard-state');
+
 // ---------------------------------------------------------------------------
 // Module-level state — tracks first edit per file per process
 // ---------------------------------------------------------------------------
 
 const _firstEditSeen = new Map<string, boolean>();
+
+/** PID-keyed state file path. null if state persistence is unavailable. */
+let _stateFile: string | null = null;
+
+// ---------------------------------------------------------------------------
+// State persistence helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Initialize state persistence. Loads prior state if this PID was used before
+ * (rare: PID reuse), otherwise starts fresh. Registers exit cleanup.
+ */
+function initState(): void {
+  try {
+    if (!existsSync(STATE_DIR)) {
+      mkdirSync(STATE_DIR, { recursive: true });
+    }
+    _stateFile = join(STATE_DIR, `${process.pid}.json`);
+
+    // Load existing state if file exists (e.g., PID was reused)
+    if (existsSync(_stateFile)) {
+      try {
+        const content = readFileSync(_stateFile, 'utf-8');
+        const entries = JSON.parse(content) as Record<string, boolean>;
+        for (const [key, val] of Object.entries(entries)) {
+          _firstEditSeen.set(key, val);
+        }
+      } catch {
+        // Corrupt or unreadable state file — start fresh
+      }
+    }
+
+    // Cleanup on exit (normal or signal)
+    const cleanup = (): void => {
+      if (_stateFile) {
+        try { unlinkSync(_stateFile); } catch { /* already gone */ }
+      }
+    };
+    process.on('exit', cleanup);
+    process.on('SIGINT', cleanup);
+    process.on('SIGTERM', cleanup);
+  } catch {
+    // State directory creation failed — proceed without persistence
+    _stateFile = null;
+  }
+}
+
+/** Persist current _firstEditSeen state to PID-keyed file. */
+function persistState(): void {
+  if (!_stateFile) return;
+  try {
+    const obj: Record<string, boolean> = {};
+    for (const [key, val] of _firstEditSeen.entries()) {
+      obj[key] = val;
+    }
+    writeFileSync(_stateFile, JSON.stringify(obj), 'utf-8');
+  } catch {
+    // Write failed — non-critical, in-memory state still works
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -58,6 +130,12 @@ function moduleFromPath(filePath: string): string {
 function isSafePath(filePath: string): boolean {
   const normalized = normalizePath(filePath);
   return SAFE_PATH_PREFIXES.some(prefix => normalized.startsWith(prefix));
+}
+
+/** Check if the file is a governed config file (non-code, reference-based gating). */
+function isGovernedConfig(filePath: string): boolean {
+  const normalized = normalizePath(filePath);
+  return GOVERNED_CONFIG_PATHS.some(name => normalized.endsWith('/' + name) || normalized === name);
 }
 
 /**
@@ -110,11 +188,50 @@ function findImporters(moduleName: string): string[] {
   return importers;
 }
 
+/**
+ * Reference-based search for governed config files.
+ * Searches for filename references (e.g., "CLAUDE.md" appearing in source code).
+ * Returns array of referencing file paths.
+ */
+function findConfigReferences(filePath: string): string[] {
+  const b = basename(filePath);
+  // Remove extension for broader matching (e.g., "CONSTITUTION" not just "context.md")
+  const baseName = b.includes('.') ? b.slice(0, b.indexOf('.')) : b;
+
+  const args: string[] = ['grep', '-l', '-F', b];
+  for (const glob of [...GIT_GREP_GLOBS, '*.md', '*.json', '*.yaml', '*.yml']) {
+    args.push('--', glob);
+  }
+
+  const result = Bun.spawnSync(['git', ...args], {
+    cwd: process.cwd(),
+    timeout: GREP_TIMEOUT_MS,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  });
+
+  if (!result.success) return [];
+  if (result.exitCode === 1 || result.exitCode === 128 || result.exitCode === 129) return [];
+
+  const stdout = result.stdout as Uint8Array;
+  const output = new TextDecoder().decode(stdout);
+  if (!output.trim()) return [];
+
+  return output
+    .split('\n')
+    .filter(Boolean)
+    .map(p => normalizePath(p))
+    .filter(p => normalizePath(p) !== normalizePath(filePath)); // Exclude self
+}
+
 // ---------------------------------------------------------------------------
 // Main — fully synchronous
 // ---------------------------------------------------------------------------
 
 function main(): void {
+  // 0. Initialize state persistence
+  initState();
+
   // 1. Determine platform and mode from CLI flags
   const args = process.argv.slice(2);
   const platformIdx = args.indexOf('--platform');
@@ -176,20 +293,33 @@ function main(): void {
 
   // Mark as seen
   _firstEditSeen.set(normalizedFile, true);
+  persistState();
 
-  // 7. First edit — search for importers
-  const moduleName = moduleFromPath(normalizedFile);
-  const importers = findImporters(moduleName);
+  // 7. First edit — determine gating strategy
+  const isConfig = isGovernedConfig(normalizedFile);
+  let references: string[];
+  let refLabel: string;
 
-  if (importers.length === 0) {
-    // No importers — pass through, no investigation needed
+  if (isConfig) {
+    // Governed config file — use reference-based search
+    references = findConfigReferences(normalizedFile);
+    refLabel = 'reference(s)';
+  } else {
+    // Code file — use importer search
+    const moduleName = moduleFromPath(normalizedFile);
+    references = findImporters(moduleName);
+    refLabel = 'importer(s)';
+  }
+
+  if (references.length === 0) {
+    // No references/importers — pass through, no investigation needed
     process.exit(0);
     return;
   }
 
-  // 8. Importers found — block or ask depending on platform and mode
-  const importerList = importers.join(', ');
-  const reason = `${GATEKEEP_TAG} First edit to '${normalizedFile}'. Found ${importers.length} importer(s): ${importerList}. Investigate importers before proceeding.`;
+  // 8. References found — block or ask depending on platform and mode
+  const refList = references.join(', ');
+  const reason = `${GATEKEEP_TAG} First edit to '${normalizedFile}'. Found ${references.length} ${refLabel}: ${refList}. Investigate ${refLabel} before proceeding.`;
 
   // Gemini always uses deny mode regardless of --mode flag
   // Claude defaults to ask mode; --mode deny overrides to hard block

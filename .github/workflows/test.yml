@@ -66,6 +66,9 @@ jobs:
       - name: Run integration tests
         run: bun run test
 
+      - name: Hook reliability tests
+        run: bun test tests/unit/hook-gateguard.test.ts tests/unit/hook-post-write-lifecycle.test.ts
+
       - name: Run E2E scenario tests
         shell: pwsh
         run: |

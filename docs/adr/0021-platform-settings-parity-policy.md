@@ -90,3 +90,29 @@ Fixed importer search regex to handle `.ts`/`.js`/`.tsx`/`.jsx` extensions in im
 ### A1.5 Command Frontmatter JSON Schema
 
 New `schemas/command.schema.json` (lenient, all optional) validates command frontmatter when present. No classification impact on ADR-0021.
+
+## Amendment 2 (2026-08-01) — ECC Phase 3 Maturation
+
+### A2.1 GateGuard State Persistence
+
+`gateguard-fact-force.ts` (v1.2.0) now persists `_firstEditSeen` state across hook process spawns using a PID-keyed file (`.gateguard-state/<pid>.json`). Previously, each hook invocation spawned a fresh process with an empty in-memory Map, meaning the "first edit per file" gate never persisted. The state file is cleaned up on process exit. No classification impact.
+
+### A2.2 GateGuard Non-Code File Scope
+
+`gateguard-fact-force.ts` (v1.2.0) adds `GOVERNED_CONFIG_PATHS` for high-value non-code files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `CONSTITUTION.md`, `package.json`). These files use reference-based gating (`git grep -l '<filename>'`) instead of importer search. No classification impact.
+
+### A2.3 Encoding Vigilance Automated Enforcement
+
+`audit.ts` adds three new audit sections for automated encoding vigilance:
+
+| Section | Check | Severity |
+|---------|-------|----------|
+| 3.6 | CRLF line endings | WARN (initial rollout) |
+| 3.7 | Homoglyph detection (Cyrillic/Greek/Fullwidth) | FAIL |
+| 3.8 | Zero-width character detection | FAIL |
+
+`encoding-utils.ts` (v1.1.0) provides `detectHomoglyphs()` and `detectZeroWidthChars()` functions. No classification impact on ADR-0021.
+
+### A2.4 Claude Desktop App Hook Status — Unchanged
+
+No new Anthropic documentation confirms or denies Desktop App hook support. The 2026-05 observation remains on record. Re-verification deferred to next Claude Code release.

@@ -91,7 +91,7 @@
 | 2026-05-29 | Docs folder restructure | [meeting-2026-05-29-docs-folder-restructure.md](archive/meeting-2026-05-29-docs-folder-restructure.md) |
 | 2026-05-29 | Gemini transcript and PM plan display | [meeting-2026-05-29-gemini-transcript-and-pm-plan-display.md](archive/meeting-2026-05-29-gemini-transcript-and-pm-plan-display.md) |
 | 2026-05-29 | New project test sync | [meeting-2026-05-29-new-project-test-sync.md](archive/meeting-2026-05-29-new-project-test-sync.md) |
-| 2026-05-29 | NTRC execution conflict analysis | [meeting-2026-05-29-ntrс-execution-conflict-analysis.md](archive/meeting-2026-05-29-ntrс-execution-conflict-analysis.md) |
+| 2026-05-29 | NTRC execution conflict analysis | [meeting-2026-05-29-ntrc-execution-conflict-analysis.md](archive/meeting-2026-05-29-ntrc-execution-conflict-analysis.md) |
 | 2026-05-29 | PM mandatory gateway policy | [meeting-2026-05-29-pm-mandatory-gateway-policy.md](archive/meeting-2026-05-29-pm-mandatory-gateway-policy.md) |
 | 2026-05-29 | Script conversion strategy | [meeting-2026-05-29-script-conversion-strategy.md](archive/meeting-2026-05-29-script-conversion-strategy.md) |
 | 2026-05-29 | Script policy violation and template cleanup | [meeting-2026-05-29-script-policy-violation-and-template-cleanup.md](archive/meeting-2026-05-29-script-policy-violation-and-template-cleanup.md) |
