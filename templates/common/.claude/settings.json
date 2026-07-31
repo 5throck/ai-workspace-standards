@@ -13,6 +13,19 @@
   },
   "teammateMode": "auto",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts",
+            "timeout": 30,
+            "statusMessage": "GateGuard: checking first-edit importers..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",

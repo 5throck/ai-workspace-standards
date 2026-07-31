@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-31T01:56:03.250Z
+**Generated**: 2026-07-31T21:20:47.525Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,9 +9,9 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 23
-- **Scripts**: 133
-- **Commands**: 7
+- **Skills**: 24
+- **Scripts**: 137
+- **Commands**: 8
 
 ---
 
@@ -38,6 +38,7 @@
 | audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
 | create-variant | 1.0.1 | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
+| gateguard | 1.0.0 | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | meeting | 1.4.0 | .claude/skills/meeting/SKILL.md | both | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
@@ -64,6 +65,8 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
+| _test-consumer.ts | 1.0.0 | scripts/hooks/_test-consumer.ts | N/A |
+| _test-module.ts | 1.0.0 | scripts/hooks/_test-module.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.5 | scripts/agent-lifecycle-audit.ts | N/A |
@@ -98,6 +101,7 @@
 | extends-validator.ts | 1.0.1 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
+| gateguard-fact-force.ts | 1.0.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
 | gen-pr-body.ts | 1.1.5 | scripts/gen-pr-body.ts | bun |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |
@@ -143,6 +147,7 @@
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | rollback-partial-project.ts | 1.0.0 | scripts/helpers/rollback-partial-project.ts | N/A |
 | scan-l2-project.ts | 1.1.1 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
+| schema-validator.ts | 1.0.0 | scripts/validators/schema-validator.ts | fs, js-yaml, path |
 | security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
 | security-validator.test.ts | 1.0.1 | scripts/helpers/security-validator.test.ts | bun:test |
 | security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |
@@ -206,6 +211,7 @@
 |------|------|----------|-------------------|
 | changelog | .claude/commands/changelog.md | both | N/A |
 | commit-push-pr | .claude/commands/commit-push-pr.md | both | N/A |
+| gateguard | .claude/commands/gateguard.md | both | N/A |
 | meeting | .claude/commands/meeting.md | both | N/A |
 | memlog | .claude/commands/memlog.md | both | N/A |
 | new-task | .claude/commands/new-task.md | both | N/A |
@@ -218,8 +224,8 @@
 
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
-- **Commands with parity**: 7 / 7
-- **Skills with parity**: 5 / 23
+- **Commands with parity**: 8 / 8
+- **Skills with parity**: 5 / 24
 
 ---
 

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-01](2026-08-01.md) | feat(governance): ECC Phase 1 — GateGuard, Prompt Defense, JSON Schema, Platform Parity |
 | [2026-07-31](2026-07-31.md) | chore: update |
 | [2026-07-30](2026-07-30.md) | chore: update |
 | [2026-07-22](2026-07-22.md) | fix(templates/co-deck): fix broken lifecycle-doc reference in docs/context.md and add missing html-to-pdf.ts script copy |

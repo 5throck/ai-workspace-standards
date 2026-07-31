@@ -29,6 +29,7 @@ import { capabilityValidator } from './capability-validator.ts';
 import { orphanReferenceValidator } from './orphan-reference-validator.ts';
 import { duplicateValidator } from './duplicate-validator.ts';
 import { platformParityValidator } from './platform-parity-validator.ts';
+import { schemaValidator } from './schema-validator.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Execution Order
@@ -45,6 +46,7 @@ import { platformParityValidator } from './platform-parity-validator.ts';
  *   capability      → [variant-json]
  *   orphan-reference → [variant-json, extends]
  *   platform-parity → [variant-json, extends]
+ *   schema-validator → [variant-json]
  */
 const ALL_VALIDATORS: readonly ValidatorDefinition[] = [
   variantJsonValidator,
@@ -53,6 +55,7 @@ const ALL_VALIDATORS: readonly ValidatorDefinition[] = [
   capabilityValidator,
   orphanReferenceValidator,
   platformParityValidator,
+  schemaValidator,
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -65,6 +68,7 @@ export { capabilityValidator } from './capability-validator.ts';
 export { orphanReferenceValidator } from './orphan-reference-validator.ts';
 export { duplicateValidator } from './duplicate-validator.ts';
 export { platformParityValidator } from './platform-parity-validator.ts';
+export { schemaValidator } from './schema-validator.ts';
 export type {
   ValidatorContext,
   ValidationIssue,

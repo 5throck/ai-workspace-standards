@@ -188,7 +188,7 @@
     }
   },
   "platform_settings": {
-    "description": "Classifies .claude/settings.json and .gemini/settings.json keys into tiers. SSOT for platform settings parity governance. Tier definitions: shared=required in both, claude_only=Claude Code exclusive (absent from .gemini is correct), gemini_only=Antigravity exclusive (absent from .claude is correct).",
+    "description": "Classifies .claude/settings.json and .gemini/settings.json keys into tiers. SSOT for platform settings parity governance. Tier definitions: shared=required in both, claude_only=Claude Code exclusive (absent from .gemini is correct), gemini_only=Gemini CLI exclusive (absent from .claude is correct). Note: Antigravity (VS Code extension) shares .gemini/settings.json but does NOT fire hooks.",
     "parity_principle": "functional_equivalence",
     "shared": {
       "description": "Settings that both Claude Code and Antigravity support with the same intent. Must be present in both .claude/settings.json and .gemini/settings.json.",
@@ -196,15 +196,11 @@
         "hooks.SessionStart": {
           "description": "Session start hook — both platforms support SessionStart",
           "validation": "array"
-        },
-        "hooks.PostToolUse": {
-          "description": "Post-tool-use hook — both platforms support PostToolUse",
-          "validation": "array"
         }
       }
     },
     "claude_only": {
-      "description": "Settings exclusive to Claude Code. Antigravity does not support these. Absent from .gemini/settings.json is CORRECT behavior, not a parity violation.",
+      "description": "Settings exclusive to Claude Code. Gemini CLI does not support these. Absent from .gemini/settings.json is CORRECT behavior, not a parity violation.",
       "keys": {
         "permissions": {
           "description": "Claude Code permission allowlist (allow/deny tool patterns)",
@@ -229,12 +225,41 @@
         "hooks.TaskCompleted": {
           "description": "Fires when an Agent Teams task is marked complete",
           "reason_excluded": "TaskCompleted event does not exist in Antigravity"
+        },
+        "hooks.PreToolUse": {
+          "description": "Pre-tool-use hook — fires before Claude Code executes a tool. Supports permissionDecision (allow/deny/ask/defer) and updatedInput.",
+          "reason_excluded": "Gemini CLI uses BeforeTool event instead"
+        },
+        "hooks.PostToolUse": {
+          "description": "Post-tool-use hook — fires after Claude Code executes Write/Edit tools. Moved from shared to claude_only since Gemini CLI uses AfterTool.",
+          "reason_excluded": "Gemini CLI uses AfterTool event instead"
+        },
+        "hooks.PreCompact": {
+          "description": "Pre-compaction hook — fires before Claude Code compacts conversation context",
+          "reason_excluded": "Gemini CLI uses PreCompress event instead"
+        },
+        "hooks.WorktreeCreate": {
+          "description": "Fires when a Claude Code git worktree is created",
+          "reason_excluded": "WorktreeCreate event does not exist in Gemini CLI"
         }
       }
     },
     "gemini_only": {
-      "description": "Settings exclusive to Antigravity CLI. Claude Code does not support these. Absent from .claude/settings.json is CORRECT behavior, not a parity violation.",
-      "keys": {}
+      "description": "Settings exclusive to Gemini CLI / Antigravity. Claude Code does not support these. Absent from .claude/settings.json is CORRECT behavior, not a parity violation. Note: Antigravity (VS Code extension) shares .gemini/settings.json but does NOT fire hooks.",
+      "keys": {
+        "hooks.BeforeTool": {
+          "description": "Pre-tool-use hook — fires before Gemini CLI executes a tool. stdin(JSON) → stdout(JSON), exit 2 = block.",
+          "reason_excluded": "Claude Code uses PreToolUse event instead"
+        },
+        "hooks.AfterTool": {
+          "description": "Post-tool-use hook — fires after Gemini CLI executes a tool. stdin(JSON) → stdout(JSON).",
+          "reason_excluded": "Claude Code uses PostToolUse event instead"
+        },
+        "hooks.PreCompress": {
+          "description": "Pre-compression hook — fires before Gemini CLI compresses conversation context",
+          "reason_excluded": "Claude Code uses PreCompact event instead"
+        }
+      }
     }
   }
 }

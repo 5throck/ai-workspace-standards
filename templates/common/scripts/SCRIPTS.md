@@ -113,6 +113,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validators/index.ts` | L0 | 1.0.0 | active | —| —| L0 | runAllValidators() + generateReport() |
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | sed script for agent frontmatter parsing fix; predates ADR-0036 TypeScript migration |
+| `hooks/gateguard-fact-force.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|

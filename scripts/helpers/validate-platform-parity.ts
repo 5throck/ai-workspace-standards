@@ -68,12 +68,21 @@ export interface PlatformFileManifest {
 
 const WORKSPACE_ROOT = process.cwd();
 const SETTINGS_JSON_SCHEMA = {
-  // Common tier (shared) - must be identical
-  shared: ['mcpServers', 'hooks.SessionStart', 'hooks.PostToolUse'],
+  // Common tier (shared) - must be present in both .claude/settings.json and .gemini/settings.json
+  shared: ['mcpServers', 'hooks.SessionStart'],
   // Claude-only tier (no .gemini parity required)
-  claude_only: ['permissions', 'env', 'teammateMode', 'hooks.TeammateIdle', 'hooks.TaskCreated', 'hooks.TaskCompleted'],
+  // PostToolUse moved from shared: Gemini CLI uses AfterTool instead
+  // PreToolUse, PreCompact, WorktreeCreate are Claude Code-only events
+  claude_only: [
+    'permissions', 'env', 'teammateMode',
+    'hooks.PreToolUse', 'hooks.PostToolUse', 'hooks.PreCompact',
+    'hooks.TeammateIdle', 'hooks.TaskCreated', 'hooks.TaskCompleted',
+    'hooks.WorktreeCreate',
+  ],
   // Gemini-only tier (no .claude parity required)
-  gemini_only: [], // TBD - add when Gemini-specific settings emerge
+  // Gemini CLI hook events: BeforeTool=PreToolUse, AfterTool=PostToolUse, PreCompress=PreCompact
+  // Note: Antigravity (VS Code extension) does NOT fire hooks despite sharing .gemini/settings.json
+  gemini_only: ['hooks.BeforeTool', 'hooks.AfterTool', 'hooks.PreCompress'],
 };
 
 // ============================================================================
@@ -322,7 +331,7 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
         platform: 'both',
         severity: 'fatal',
         description: mismatch,
-        remediation: 'Ensure shared tier settings (mcpServers, hooks.SessionStart, hooks.PostToolUse) are identical in both files',
+        remediation: 'Ensure shared tier settings (mcpServers, hooks.SessionStart) are identical in both files',
       });
     }
   } catch (error) {
