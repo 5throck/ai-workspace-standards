@@ -287,9 +287,9 @@ This workspace uses a 3-layer enforcement model (Hook → Prompt → Skill) to e
 
 | Platform | Hooks Fire? | Pre-Tool Gate | Post-Tool Audit |
 |----------|:-----------:|:-------------:|:---------------:|
-| Claude Code CLI | ✅ Yes | `PreToolUse` | `PostToolUse` |
-| Claude Desktop App | ✅\* (bundled CLI) | `PreToolUse` | `PostToolUse` |
-| Gemini CLI | ✅ Yes | `BeforeTool` | `AfterTool` |
+| Claude Code CLI | ✅ Yes | `PreToolUse` (GateGuard `ask`/`deny`) | `PostToolUse` |
+| Claude Desktop App | ✅\* (bundled CLI) | `PreToolUse` (GateGuard `ask`/`deny`) | `PostToolUse` |
+| Gemini CLI | ✅ Yes | `BeforeTool` (GateGuard `deny`) | `AfterTool` (lifecycle check) |
 | Antigravity | ❌ No | — | — |
 
 \* Claude Desktop App: documented by Anthropic but workspace testing (2026-05) observed intermittent behavior.
@@ -302,7 +302,7 @@ Before editing any file for the first time in a session, you MUST:
 3. Review the user's instructions for explicit scope constraints
 4. Briefly summarize findings (1-3 sentences) before proceeding
 
-This is enforced automatically via hooks on Claude Code CLI and Gemini CLI. On Antigravity (where hooks don't fire), you must self-enforce this process.
+This is enforced automatically via hooks on Claude Code CLI (configurable `--mode ask|deny`) and Gemini CLI (always `deny`). On Antigravity (where hooks don't fire), you must self-enforce this process.
 
 ### Prompt Defense
 

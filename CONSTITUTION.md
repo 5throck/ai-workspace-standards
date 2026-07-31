@@ -596,8 +596,8 @@ Governance rules are enforced at three layers, ensuring coverage across all 4 su
 
 Before the first edit of any file per session, agents MUST investigate importers, data schemas, and scope constraints. Enforced via:
 
-- **Claude Code**: PreToolUse hook (`scripts/hooks/gateguard-fact-force.ts`) — `ask` mode
-- **Gemini CLI**: BeforeTool hook (same script, `--platform gemini`) — `deny` mode
+- **Claude Code**: PreToolUse hook (`scripts/hooks/gateguard-fact-force.ts`) — `ask` mode (default; `--mode deny` available)
+- **Gemini CLI**: BeforeTool hook (same script, `--platform gemini`) — `deny` mode (always, ignores `--mode` flag)
 - **Claude Desktop App**: Should fire via bundled CLI; fallback: agent self-enforces via prompt
 - **Antigravity**: Hooks do not fire — agent self-enforces via prompt
 - **Manual**: `/gateguard` command or `gateguard` skill invocation
@@ -617,14 +617,13 @@ All agents must enforce two universal security behaviors (see AGENTS.md §7):
 
 #### 11.4 JSON Schema Validation
 
-Agent and skill frontmatter structures are validated against JSON Schemas in `schemas/` directory. Enforcement: `audit.ts` → `scripts/validators/schema-validator.ts`.
+Agent, skill, and command frontmatter structures are validated against JSON Schemas in `schemas/` directory. Enforcement: `audit.ts` → `scripts/validators/schema-validator.ts`.
 
 | Schema | File | Required Fields |
 |--------|------|----------------|
-| Agent | `schemas/agent.schema.json` | name, role, status, version, last_updated, tier, phases |
+| Agent | `schemas/agent.schema.json` | name, role, status, version, last_reviewed, tier, lifecycle |
 | Skill | `schemas/skill.schema.json` | name, status, description, owner, version |
-
-Phase 1 covers agent + skill schemas. Command schemas are deferred to Phase 2.
+| Command | `schemas/command.schema.json` | None (lenient — validates only when frontmatter present) |
 
 ---
 

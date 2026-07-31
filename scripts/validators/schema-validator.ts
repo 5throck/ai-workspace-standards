@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 /**
- * Schema Validator — Validates agent and skill frontmatter against JSON Schemas
- * @version 1.0.0
+ * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
+ * @version 1.1.0
  *
- * Reads each agent and skill file, parses YAML frontmatter, and manually
+ * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
  *
  * Checks performed:
@@ -11,10 +11,12 @@
  *      tier value enums, version semver pattern, description min-length,
  *      lifecycle required fields and phase enum
  *   2. Skill frontmatter: required fields, status enum, metadata.type enum
+ *   3. Command frontmatter: optional fields only; validates gemini-parity enum,
+ *      description min-length, version semver, scope enum (lenient — no frontmatter = skip)
  */
 
 import { join, basename } from 'path';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import * as yaml from 'js-yaml';
 import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
 
@@ -57,6 +59,12 @@ const VALID_LIFECYCLE_PHASES = ['production', 'development', 'retired'] as const
 
 /** Valid metadata.type values for skills. */
 const VALID_METADATA_TYPES = ['process', 'security', 'quality', 'lifecycle'] as const;
+
+/** Valid gemini-parity values for commands. */
+const VALID_GEMINI_PARITY_VALUES = ['full', 'partial', 'skip'] as const;
+
+/** Valid scope values for commands. */
+const VALID_COMMAND_SCOPE_VALUES = ['common', 'claude-only', 'gemini-only'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Agent Validation
@@ -285,17 +293,86 @@ function validateSkillFrontmatter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Command Validation (Lenient — all optional)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Validate a single command file's parsed frontmatter.
+ * Lenient: if no frontmatter is present, no issues are raised.
+ * Only validates fields that exist — missing fields are not errors.
+ */
+function validateCommandFrontmatter(
+  fm: Record<string, any>,
+  commandFile: string,
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const cmdName = basename(commandFile, '.md');
+
+  // ── description min length (if present) ────────────────────────────────
+  if (typeof fm.description === 'string' && fm.description.trim().length < 10) {
+    issues.push({
+      severity: 'error',
+      category: 'constraint-violation',
+      message: `Command "${cmdName}" description must be at least 10 characters (currently ${fm.description.trim().length})`,
+      file: commandFile,
+    });
+  }
+
+  // ── gemini-parity enum (if present) ─────────────────────────────────────
+  if (typeof fm['gemini-parity'] === 'string' && !VALID_GEMINI_PARITY_VALUES.includes(fm['gemini-parity'] as any)) {
+    issues.push({
+      severity: 'error',
+      category: 'invalid-enum',
+      message: `Command "${cmdName}" gemini-parity has invalid value "${fm['gemini-parity']}" — must be one of: ${VALID_GEMINI_PARITY_VALUES.join(', ')}`,
+      file: commandFile,
+    });
+  }
+
+  // ── version semver (if present) ──────────────────────────────────────────
+  if (typeof fm.version === 'string' && !SEMVER_PATTERN.test(fm.version)) {
+    issues.push({
+      severity: 'error',
+      category: 'invalid-format',
+      message: `Command "${cmdName}" version "${fm.version}" does not match semver pattern (MAJOR.MINOR.PATCH)`,
+      file: commandFile,
+    });
+  }
+
+  // ── scope enum (if present) ────────────────────────────────────────────
+  if (typeof fm.scope === 'string' && !VALID_COMMAND_SCOPE_VALUES.includes(fm.scope as any)) {
+    issues.push({
+      severity: 'error',
+      category: 'invalid-enum',
+      message: `Command "${cmdName}" scope has invalid value "${fm.scope}" — must be one of: ${VALID_COMMAND_SCOPE_VALUES.join(', ')}`,
+      file: commandFile,
+    });
+  }
+
+  // ── status enum (if present) ─────────────────────────────────────────────
+  if (typeof fm.status === 'string' && !VALID_STATUSES.includes(fm.status)) {
+    issues.push({
+      severity: 'error',
+      category: 'invalid-enum',
+      message: `Command "${cmdName}" has invalid status "${fm.status}" — must be one of: ${VALID_STATUSES.join(', ')}`,
+      file: commandFile,
+    });
+  }
+
+  return issues;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Validator Definition
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Validates agent and skill frontmatter against JSON Schema requirements.
+ * Validates agent, skill, and command frontmatter against JSON Schema requirements.
  * Uses manual validation (no ajv) — checks required fields, enums, patterns,
- * and structural constraints.
+ * and structural constraints. Commands are validated leniently (all optional).
  */
 export const schemaValidator: ValidatorDefinition = {
   name: 'schema-validator',
-  description: 'Validates agent and skill frontmatter against JSON Schemas',
+  description: 'Validates agent, skill, and command frontmatter against JSON Schemas',
   prerequisites: ['variant-json'],
 
   validate(ctx: ValidatorContext): ValidatorResult {
@@ -353,6 +430,40 @@ export const schemaValidator: ValidatorDefinition = {
       const skillIssues = validateSkillFrontmatter(frontmatter, relativePath);
       checks += skillIssues.length;
       issues.push(...skillIssues);
+    }
+
+    // ── Validate command files (lenient — skip if no frontmatter) ─────────
+    const commandDirs = [
+      join(ctx.variantDir, '.claude', 'commands'),
+      join(ctx.variantDir, '.gemini', 'commands'),
+    ];
+
+    for (const cmdDir of commandDirs) {
+      if (!existsSync(cmdDir)) continue;
+      let entries: string[];
+      try {
+        entries = readdirSync(cmdDir).filter(f => f.endsWith('.md'));
+      } catch {
+        continue;
+      }
+
+      for (const cmdFile of entries) {
+        const cmdPath = join(cmdDir, cmdFile);
+        const relativePath = cmdPath.replace(ctx.variantDir + '/', '');
+        checks++;
+
+        const content = readFileSync(cmdPath, 'utf-8');
+        const frontmatter = parseFrontmatter(content);
+
+        if (Object.keys(frontmatter).length === 0) {
+          // No frontmatter — skip (lenient, no error)
+          continue;
+        }
+
+        const cmdIssues = validateCommandFrontmatter(frontmatter, relativePath);
+        checks += cmdIssues.length;
+        issues.push(...cmdIssues);
+      }
     }
 
     return {

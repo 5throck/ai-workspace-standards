@@ -1,5 +1,5 @@
 ---
-status: Accepted
+status: Accepted (Amended 2026-08-01)
 date: 2026-06-02
 author: PM + Architect + Auditor
 ---
@@ -59,3 +59,34 @@ The lifecycle table in `CLAUDE.md §10` was updated to document four propagation
 - New settings additions require explicit tier classification before implementation
 - VA-04 provides automated enforcement — settings parity is no longer enforced by human memory
 - The `gemini_only` tier contains Gemini CLI hook events (`BeforeTool`, `AfterTool`, `PreCompress`) that have no Claude Code equivalent. Note: Antigravity (VS Code extension) shares `.gemini/settings.json` but does NOT fire hooks.
+
+## Amendment 1 (2026-08-01) — ECC Phase 2 Hardening
+
+### A1.1 AfterTool Lifecycle Hook Activation
+
+`post-write-lifecycle-check.ts` (v1.1.0) now supports `--platform gemini` for Gemini CLI AfterTool events. Previously this hook was Claude-only (PostToolUse). The `.gemini/settings.json` `AfterTool` hook block has been added, mirroring Claude's `PostToolUse` block.
+
+**Classification unchanged** — `AfterTool` remains `gemini_only`. This amendment activates an existing classification, not a new one.
+
+### A1.2 GateGuard Configurable Mode
+
+`gateguard-fact-force.ts` (v1.1.0) adds a `--mode ask|deny` CLI flag:
+
+| Mode | Claude Behavior | Gemini Behavior |
+|------|----------------|-----------------|
+| `ask` (default) | `{"decision":"ask"}`, exit 0 | Ignored — always deny |
+| `deny` | `{"decision":"deny"}`, exit 2 | `{"decision":"deny"}`, exit 2 |
+
+The default `ask` mode preserves backward compatibility. Users may opt into `deny` mode for stricter enforcement. Classification of `PreToolUse`/`BeforeTool` remains unchanged.
+
+### A1.3 GateGuard Importer Regex Fix
+
+Fixed importer search regex to handle `.ts`/`.js`/`.tsx`/`.jsx` extensions in import paths (e.g., `from './lib/ssrf.ts'`). Previous regex only matched bare module names, causing false negatives.
+
+### A1.4 Claude Desktop App Hook Status — Unchanged
+
+2026-05 observation of intermittent hook non-firing remains on record. No new evidence to change classification. Re-verification recommended with next Claude Code release.
+
+### A1.5 Command Frontmatter JSON Schema
+
+New `schemas/command.schema.json` (lenient, all optional) validates command frontmatter when present. No classification impact on ADR-0021.

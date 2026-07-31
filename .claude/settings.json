@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/hooks/gateguard-fact-force.ts",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --mode ask",
             "timeout": 30,
             "statusMessage": "GateGuard: checking first-edit importers..."
           }
