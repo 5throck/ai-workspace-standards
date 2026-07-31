@@ -1,0 +1,60 @@
+Audit returns **all-pass** — so this is a user-requested review (trigger T-01), not a QA escalation. But the working-tree state is the real story. Here is my Phase 0 kickoff.
+
+---
+
+# 🚀 PM Kickoff — `fix/project-review-2026-07-31`
+
+## Phase 0 — Context Announcement
+
+| Item | Value |
+|---|---|
+| **Project type** | Workspace root (L0) — no `docs/context.md`; governs 7 variants in `templates/co-*/` + `templates/common/` |
+| **Available agents (8)** | pm, architect, auditor, automation-engineer, docs-writer, lifecycle-manager, scaffolding-expert, security-expert |
+| **base-map MCP** | ✅ Available (`ask_local_llm`, `review_code`) — will use for cross-validation |
+| **Audit baseline** | ✅ All checks pass (template-v0.5.3, 311 docs scanned, 7 variants intact) |
+| **Trigger** | T-01 (user request), **not** QA escalation |
+
+## 🚨 Critical finding — uncommitted WIP carried into this branch
+
+The session-start snapshot said "clean," but the working tree on this branch carries **40 uncommitted changes that are not mine and not backed by an approved plan**:
+
+| Cluster | Files | Read |
+|---|---|---|
+| **Modified governance docs** (unstaged) | `docs/governance/variant-contract.md`, `docs/templates/common-contract.json`, `docs/workspace-schema.json` | Looks like a **contract/schema edit in progress** |
+| **Deletions — `templates/co-consult/`** (15) | `.editorconfig`, `.env.sample`, `.gitattributes`, `.gitignore`, `.gitleaks.toml`, `.githooks/*` (×5), `.github/*` (×4), `.claude/template-version.txt` | Standard scaffolding **dotfiles stripped** |
+| **Deletions — `templates/co-game/`** (21) | All `.claude/skills/*` + `.gemini/skills/*` SKILL.md (×18) + `_pipeline_report.{json,md}` | Platform-skill dirs **emptied** |
+| **Untracked** (1) | `templates/co-consult/.agents/skills/financial-statement-analysis/` | New skill **not yet added** |
+| **Branch position** | `0 ahead / 0 behind main` — nothing committed yet | Pure working-tree state |
+
+This pattern — governance docs edited + dotfiles stripped from `co-consult` + `.claude/.gemini` skills removed from `co-game` + a new `.agents/skills/` entry — looks like **mid-flight variant restructuring** (likely migrating toward `.agents/` as the canonical skills home). The audit passes *despite* it only because the automated checks don't verify those specific files.
+
+**My PM recommendation:** Do **not** ignore this. A "project review" branch that sidesteps 40 uncommitted structural changes on its own working tree would be theatre. The restructuring *is* the highest-priority thing to evaluate. I propose folding it explicitly into the review scope (see Domain 1 + Domain 7 below), rather than stashing or discarding it blind.
+
+## Proposed Phase 1 plan — parallel read-only review
+
+Per `AGENTS.md` §4.1, read-only research = **parallel dispatch in one message**. All seven are read-only (no writes); `run_in_background: true`.
+
+| # | Domain | Agent | Tier | Model | Focus |
+|---|---|---|---|---|---|
+| 1 | Architecture | architect | High | opus | **Co-consult/co-game restructuring correctness**; variant contracts; phase consistency; the 3 governance-doc edits |
+| 2 | Standards | auditor | Medium | sonnet | Re-run targeted audit on dirty tree; `validate-templates.ts`; SCRIPTS.md; what the passing-audit *misses* |
+| 3 | Automation | automation-engineer | Low | haiku | Hooks, `scripts/*.ts`, `package.json`, CI — incl. deleted `.githooks/*` & `.github/workflows/ci.yml` |
+| 4 | Documentation | docs-writer | Medium | sonnet | Cross-links, language policy, references — incl. the new untracked skill |
+| 5 | Security | security-expert | Medium | sonnet | Secrets, CI perms, injection — incl. stripped `.gitleaks.toml` |
+| 6 | Lifecycle | lifecycle-manager | Medium | sonnet | Agent/skill/script health; L0→L1→L2 sync parity; the `.agents/` migration |
+| 7 | Scaffolding | scaffolding-expert | Low | haiku | Template structure; is the dotfile/skill removal a contract violation? |
+
+> Tier note: `automation-engineer` is **Low** per `AGENTS.md` §1 (the skill's "Medium" would breach the Tier Ceiling Rule). Scaffolding = Low. All others per roster.
+
+After parallel return: cross-domain dedup → base-map cross-validation → prioritized report (🔴/🟡/🟢/✅) → **implementation plan** (which, for any real fix, goes through the §5.1 Row 0 design gate before a single write).
+
+## ⛔ Gate — I need your decision before dispatching 7 agents
+
+**Q1 — the WIP:** How should I treat the 40 uncommitted changes?
+- **(A) Fold into review** *(my recommendation)* — review evaluates whether the restructuring is correct & complete.
+- **(B) Set aside** — I stash it, review clean `HEAD`, you handle the WIP separately.
+- **(C) Discard** — `git restore` it (only if it's unwanted trash).
+
+**Q2 — the dispatch:** Approve the 7-agent parallel plan above, or adjust scope (e.g., drop a domain, narrow to just the restructuring)?
+
+I'll create the task list and launch the moment you confirm.

@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# pre-commit wrapper: routes to TS logic
-bun run scripts/hooks/pre-commit.ts

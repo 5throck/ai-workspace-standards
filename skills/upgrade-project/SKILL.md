@@ -5,12 +5,15 @@ version: "1.1.0"
 status: active
 scope: workspace
 owner: pm
-triggers:
-  - upgrade project
-  - upgrade template
-  - sync project with template
-  - refresh project
-  - update project infrastructure
+last_reviewed: 2026-07-31
+metadata:
+  type: scaffolding
+  triggers:
+    - upgrade project
+    - upgrade template
+    - sync project with template
+    - refresh project
+    - update project infrastructure
 ---
 
 # Upgrade Project

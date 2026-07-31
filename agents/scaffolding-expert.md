@@ -14,7 +14,7 @@ examples:
   - user: "Create a new project"
     assistant: "I'll scaffold a new project following workspace standards"
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 lifecycle:
   phase: production
   created: 2026-05-29

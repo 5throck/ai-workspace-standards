@@ -1,9 +1,9 @@
 # AI Workspace Templates
 
-![Template Version](https://img.shields.io/badge/version-0.5.0-blue)
+![Template Version](https://img.shields.io/badge/version-0.5.3-blue)
 
 This directory contains template variants for scaffolding new AI-assisted projects.
-Select a variant when running `bash scripts/new-project.sh <name> --variant <variant>`.
+Select a variant when running `bun scripts/new-project.ts <name> --variant <variant>`.
 
 ## Template Structure
 
@@ -18,7 +18,9 @@ templates/
 ├── co-design/           # Design workflow variant
 ├── co-work/             # Collaboration variant
 ├── co-security/         # Security engagement variant
-└── co-consult/          # Strategy consulting variant
+├── co-consult/          # Strategy consulting variant
+├── co-deck/             # Lecture/presentation variant (beta)
+└── co-game/             # Game development variant (beta)
 ```
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
@@ -28,19 +30,24 @@ templates/
 | Variant | Status | Description |
 |---------|--------|-------------|
 | [`co-develop`](co-develop/) | ✅ Stable | Software development workflow with 7 agents (pm, architect, code-writer, etc.) |
-| [`co-design`](co-design/) | ✅ Stable | UI/UX design workflow with 5 agents (design pm, design-lead, ux-researcher, visual-designer, prototype-engineer) |
-| [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 4 agents (collaboration pm, analyst, content-writer, project-coordinator) |
-| [`co-security`](co-security/) | 🔶 Beta | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, patch-engineer, report-writer) |
-| [`co-consult`](co-consult/) | ✅ Stable | Strategy consulting workflow with 11 specialized agents (Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, and more) |
+| [`co-design`](co-design/) | ✅ Stable | Design workflow with 7 agents (design pm, service-design, ui-ux-design-intelligence, etc.) |
+| [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 7 agents |
+| [`co-security`](co-security/) | ✅ Stable | Security engagement workflow with 6 agents |
+| [`co-consult`](co-consult/) | ✅ Stable | Strategy consulting with 15 agents and 16 domain skills |
+| [`co-deck`](co-deck/) | 🔶 Beta | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
+| [`co-game`](co-game/) | 🔶 Beta | Game development for HTML5 Canvas with Vanilla TypeScript and 12 agents |
 
 ## Usage
 
 ```bash
 # Default (co-develop)
-bash scripts/new-project.sh my-project
+bun scripts/new-project.ts my-project
 
 # Explicit variant
-bash scripts/new-project.sh my-project --variant co-develop
+bun scripts/new-project.ts my-project --variant co-design
+
+# Specify version tag
+bun scripts/new-project.ts my-project --variant co-develop --version 0.5.3
 ```
 
 ## Shared File Sync Rule
@@ -62,4 +69,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-06-15*
+*Last Updated: 2026-07-31*

@@ -13,10 +13,6 @@
   },
   "agents": [
     {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
       "name": "version",
       "file": "agents/version.md"
     },

@@ -9,7 +9,7 @@ tier:
   gemini-cli: medium    # gemini-3.5-flash
 model: inherit
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 color: purple
 description: 'Standardizes Markdown documentation. Use when: "Updating documentation", "README creation", "CHANGELOG updates"'
 examples:

@@ -9,7 +9,7 @@ tier:
   gemini-cli: high    # gemini-3.1-pro
 model: inherit
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 color: blue
 description: 'Produces implementation plans and ADRs. Use when: "Architecture design needed", "Project structure planning", "Technical decision making"'
 examples:

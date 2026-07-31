@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-07-30T23:16:41.630Z
+**Generated**: 2026-07-31T01:56:03.250Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high        # claude-opus-4-7 | inherit | 2026-07-05 |
-| auditor | agents/auditor.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
-| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-07-05 |
-| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
-| pm | agents/pm.md | high        # claude-opus-4-7 | inherit | 2026-07-21 |
-| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-07-05 |
-| security-expert | agents/security-expert.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-05 |
+| architect | agents/architect.md | high        # claude-opus-4-7 | inherit | 2026-07-31 |
+| auditor | agents/auditor.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-31 |
+| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-07-31 |
+| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-31 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-31 |
+| pm | agents/pm.md | high        # claude-opus-4-7 | inherit | 2026-07-31 |
+| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-07-31 |
+| security-expert | agents/security-expert.md | medium        # claude-sonnet-4-6 | inherit | 2026-07-31 |
 
 ---
 
@@ -74,7 +74,7 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.8 | scripts/audit.ts | bun |
+| audit.ts | 2.10.9 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
@@ -111,7 +111,7 @@
 | inject-global-plugins.ts | 1.0.2 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.1 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.9.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.9.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
@@ -120,7 +120,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
-| new-project.ts | 1.5.0 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.5.1 | scripts/new-project.ts | js-yaml |
 | normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |

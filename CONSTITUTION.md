@@ -124,7 +124,7 @@ Every project uses role-based agents defined in `agents/*.md` with YAML frontmat
 
 ---
 
-### 5.5 PM Gateway Workflow → [Full details](CLAUDE.md#5-agent-dispatch-rules)
+### 5.5 PM Gateway Workflow → [Full details](AGENTS.md#5-execution-plan-templates) | [Platform dispatch: CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) / [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules)
 
 All specialist agent dispatch MUST go through the PM orchestrator. The PM Gateway enforces governance consistency across multi-agent tasks through a mandatory execution plan display.
 
@@ -453,7 +453,7 @@ must **not** contain references to it.
 
 ### 8. Coding Behavior Guidelines → [Full details](docs/constitution/08-coding-guidelines.md)
 
-Behavior guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: default to Korean conversational, but all Git/PR artifacts must be English. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
+Behavior guidelines to reduce common LLM coding mistakes. **Think Before Coding**: state assumptions, surface tradeoffs, ask when uncertain. **Simplicity First**: minimum code, no speculative features, no premature abstractions. **Surgical Changes**: touch only what you must, match existing style, clean up only your own orphans. **Goal-Driven Execution**: define verifiable success criteria, loop until confirmed. **Secrets Management**: never hardcode credentials—use `.env.sample` template. **Open-Source Policy**: prefer OSI-approved licenses (MIT, Apache-2.0, BSD), audit after install. **Response Language**: English (all documentation, commit messages, PR artifacts per AGENTS.md §Language Policy). Bilingual READMEs (README.md + README_ko.md) are the designated Korean-language zone. **File Encoding**: all text files UTF-8 without BOM. **Hybrid Scripting**: Tier 1 (Bootstrap) in Native Shell, Tier 2 (Ops/Automation) in Bun/TS + package.json. **Bilingual README**: `templates/*` and workspace root require `README.md` and `README_ko.md` synced via `sync_version: <int>` YAML frontmatter. Other folders like `scripts/` require only English `README.md`.
 
 ---
 
@@ -571,4 +571,4 @@ A mechanism that allows variant-specific validation checks to be executed during
 
 ---
 
-*Last Updated: 2026-07-19*
+*Last Updated: 2026-07-31*

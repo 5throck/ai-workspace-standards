@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.5.1
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -7,8 +7,9 @@
 
 import {
   existsSync, mkdirSync, rmSync, readdirSync, statSync,
-  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync,
+  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync, mkdtempSync,
 } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
@@ -134,14 +135,14 @@ if (tag) {
       process.exit(1);
     }
   }
-  // Extract from tag into temp dir (shell-free: no bash -c interpolation)
-  const mktemp = spawnSync('mktemp', ['-d'], { encoding: 'utf8' });
-  tempDir = mktemp.stdout.trim();
+  // Extract from tag into temp dir (cross-platform: uses Node.js fs, no mktemp/tar dependency)
+  tempDir = mkdtempSync(join(tmpdir(), 'new-project-'));
   const archivePath = join(tempDir, '_archive.tar');
   const archiveRes = spawnSync(
     'git', ['-C', workspaceRoot, 'archive', '--output', archivePath, tag, 'templates/common/', `templates/${variant}/`],
     { encoding: 'utf8' }
   );
+  // tar is available on modern Windows 10/11, macOS, and Linux
   const extract = archiveRes.status === 0
     ? spawnSync('tar', ['-x', '-C', tempDir, '-f', archivePath], { encoding: 'utf8' })
     : archiveRes;

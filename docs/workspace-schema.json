@@ -180,6 +180,18 @@
     "co-security": {
       "agent_manifest": { "$ref": "_shared.agent_manifest" }
     },
+    "co-game": {
+      "agent_manifest": {
+        "description": "Game development pipeline order with optional and skippable agents",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order"],
+        "notes": "pipeline_order defines the sequential game development workflow. optional[] lists agents that can be omitted depending on genre (arcade, puzzle, etc.)."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": ["betaEngagements", "betaBugs", "betaAgeInMonths", "promotionEligible", "missingCriteria", "lastSynced"]
+      }
+    },
     "co-deck": {
       "agent_manifest": {
         "description": "Strict pipeline order, optional flags, skippable flags, and retry policy for lecture workflow agents",

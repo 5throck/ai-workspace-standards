@@ -5,12 +5,15 @@ version: "1.0.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
-triggers:
-  - add feature to variant
-  - extend variant
-  - variant feature
-  - add agent to variant
-  - add skill to variant
+last_reviewed: 2026-07-31
+metadata:
+  type: scaffolding
+  triggers:
+    - add feature to variant
+    - extend variant
+    - variant feature
+    - add agent to variant
+    - add skill to variant
 ---
 
 # Variant Feature

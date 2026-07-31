@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.8 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.9 | active | —| —| L0+L1 | —|
 | `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -127,7 +127,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.9.0 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.9.1 | active | —| —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -140,7 +140,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `new-project.ts` | L0 | 1.5.0 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.5.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|

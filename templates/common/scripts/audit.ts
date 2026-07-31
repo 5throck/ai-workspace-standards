@@ -1,4 +1,4 @@
-// @version 2.10.8
+// @version 2.10.9
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -922,7 +922,18 @@ if (IS_WORKSPACE_ROOT) {
                         // Must use bash rm, not fs.unlinkSync — Bun maps "nul" to the Windows
                         // NUL device on Windows, so the Node.js fs API cannot unlink it.
                         try {
-                            const rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                            // Must use bash rm on Windows — Bun maps "nul" to the Windows
+                            // NUL device, so Node.js fs.unlinkSync cannot unlink it.
+                            // On Windows, try bash first (Git Bash), fall back to PowerShell.
+                            let rmResult;
+                            if (process.platform === 'win32') {
+                                rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                                if (rmResult.status !== 0) {
+                                    rmResult = spawnSync('powershell', ['-Command', `Remove-Item -Force -LiteralPath '${item}'`], { encoding: 'utf-8' });
+                                }
+                            } else {
+                                rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                            }
                             if (rmResult.status === 0) {
                                 Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
                             } else {
@@ -1057,7 +1068,7 @@ if (fs.existsSync('templates')) {
         : [];
     if (shFiles.length > 0) {
         try {
-            execFileSync('which', ['shellcheck'], { stdio: 'ignore' });
+            execFileSync(process.platform === 'win32' ? 'where' : 'which', ['shellcheck'], { stdio: 'ignore' });
             // shellcheck available
             let scErrors = 0;
             for (const shFile of shFiles) {

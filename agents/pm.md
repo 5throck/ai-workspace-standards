@@ -14,7 +14,7 @@ examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Project Initiation) and Phase 1-2 (Planning & Architecture, including design approval)"
 version: 1.0.0
-last_reviewed: 2026-06-13
+last_reviewed: 2026-07-31
 lifecycle:
   phase: production
   created: 2026-05-29T00:00:00.000Z
