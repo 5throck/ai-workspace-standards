@@ -67,6 +67,26 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
+### 2. Pre-Edit Quality Gate (All Platforms)
+
+Before editing any file for the **FIRST time in a session**, the agent MUST:
+
+1. Search for all files that import or require the target file (`grep` for filename patterns)
+2. Identify data schemas, interfaces, and type definitions the file exports
+3. Review the user's instructions for explicit scope constraints
+4. Briefly summarize findings (1-3 sentences) before proceeding
+
+| Platform | Enforcement | Details |
+|----------|:-----------:|---------|
+| Claude Code CLI | ✅ Hook (automatic) | PreToolUse `ask` mode — agent must acknowledge before proceeding |
+| Claude Desktop App | ✅* Hook + Prompt | Should fire via bundled CLI; fallback: self-enforcement |
+| Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode — agent must re-attempt after investigation |
+| Antigravity | ✅ Prompt (manual) | Hooks do not fire in Antigravity — agent self-enforces |
+
+*Claude Desktop App: Uses bundled CLI per Anthropic docs. Workspace testing (2026-05) observed intermittent hook behavior.
+
+If the hook is not active (Antigravity, or Desktop App fallback), agents must still follow the 4-step process above before making first edits.
+
 #### Agent Teams (Experimental)
 
 Agent Teams allow multiple Claude Code instances to work in parallel with a shared task list and direct inter-agent messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`.
