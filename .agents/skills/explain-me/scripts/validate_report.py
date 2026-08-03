@@ -1,254 +1,440 @@
 #!/usr/bin/env python3
-"""ReportMe 산출 HTML 정합성 점검 스크립트.
-
-섹션·탭을 옮기거나 편집한 뒤 짝(pair)이 깨지는 문제를 잡는다 — AI 편집 후 필수 실행.
-표준 라이브러리만 사용(의존성 없음).
-
-검사 항목
-  E1  상단 탭 data-p ↔ 패널 id 짝 (누락·고아·중복)
-  E2  .tab.active / .panel.active 정확히 1개씩 + 서로 같은 짝
-  E3  .ref[data-ref] 키가 REFS 객체에 존재 (W: REFS에만 있고 본문에 없는 키)
-  E4  .sidewrap마다 .subtab data-sp ↔ .subpanel data-sp 짝 + active 1쌍
-  E5  중복 id
-  E6  플레이스홀더 잔존 ({{…}}, [설명: …])
-  E7  외부 리소스 (script/link/img/iframe의 http(s) src·href — 단일 파일 원칙 위반)
-  W1  스크립트 내 fetch(/XMLHttpRequest (file://에서 실패)
-  W2  <html lang> 미설정
-  W3  외부 <a href> 링크 0개 — 출처가 평문 텍스트뿐일 가능성 (§5 출처 하이퍼링크 규칙)
-
-사용:  python3 validate_report.py <report.html>
-종료코드: 0 = 통과(경고만 허용), 1 = 오류 존재, 2 = 사용법/파일 오류
 """
+HTML structural validator for explain-me single-file reports.
+
+Validates tab/panel pairing, reference integrity, sub-tab consistency,
+placeholder cleanup, and the single-file principle so that reports
+open correctly from disk (file://) without a server.
+
+Checks
+  E1  Top-level tab data-p <-> panel id pairing (missing, orphan, duplicate)
+  E2  Exactly one .tab.active and one .panel.active, and they must match
+  E3  Every .ref[data-ref] key must exist in the JS REFS object
+       (also warns about keys in REFS not referenced in the body)
+  E4  Each .sidewrap must have matching .subtab data-sp <-> .subpanel data-sp
+       with exactly one active sub-tab and one active sub-panel
+  E5  No duplicate id attributes anywhere in the document
+  E6  No remaining {{PLACEHOLDER}} patterns or [Note: ...] descriptions
+  E7  No external resources (script/link/img/iframe with http(s) URLs)
+
+Warnings
+  W1  Script contains fetch() or XMLHttpRequest (fails on file://)
+  W2  <html lang> not set or still contains a placeholder
+  W3  Zero external <a href> links -- sources may be plain text
+
+Usage:  python3 validate_report.py <report.html>
+Exit:   0 = pass (warnings allowed), 1 = errors found, 2 = usage/file error
+"""
+
 import re
 import sys
 from collections import Counter
 from html.parser import HTMLParser
 
-VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-        'link', 'meta', 'param', 'source', 'track', 'wbr'}
+# HTML void elements -- they never have closing tags and must not affect depth
+# tracking for sidewrap scope detection.
+VOID_ELEMENTS = frozenset({
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+})
 
 
 class Scan(HTMLParser):
+    """Walks through the HTML and collects structural data for validation."""
+
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.tabs = []        # (data-p, active여부)
-        self.panels = []      # (id, active여부)
-        self.refs = []        # 본문 .ref[data-ref] 키
+        # Each entry: (data-p value or None, is_active bool)
+        self.tabs = []
+        # Each entry: (id value or None, is_active bool)
+        self.panels = []
+        # Keys referenced by .ref[data-ref] elements in the body
+        self.refs = []
+        # Every id attribute found in the document
         self.ids = []
-        self.sidewraps = []   # {'subtabs':[(sp,active)], 'subpanels':[(sp,active)]}
-        self.externals = []   # (태그, URL)
-        self.ext_links = 0    # 외부로 나가는 <a href="http…"> 개수 (출처 링크)
+        # Per-sidewrap containers of sub-tab / sub-panel data
+        # Each entry: {"subtabs": [(sp, active)], "subpanels": [(sp, active)]}
+        self.sidewraps = []
+        # External resource violations: (tag_name, url)
+        self.externals = []
+        # Count of external anchor links (http/https href on <a>)
+        self.ext_link_count = 0
+        # Value of <html lang="..."> or None if not found
         self.html_lang = None
-        self.script_text = []
-        self._wrap_stack = [] # (sidewraps 인덱스, 열린 깊이)
+        # Concatenated script text for REFS extraction and fetch/XHR detection
+        self.script_chunks = []
+
+        # Internal bookkeeping
         self._depth = 0
         self._in_script = False
+        # Stack of (sidewraps index, depth at which the sidewrap was opened)
+        self._sidewrap_stack = []
+
+    # -- HTMLParser callbacks ------------------------------------------------
 
     def handle_starttag(self, tag, attrs):
-        a = dict(attrs)
-        cls = (a.get('class') or '').split()
-        if tag not in VOID:
+        attrs_dict = dict(attrs)
+        classes = (attrs_dict.get("class") or "").split()
+
+        # Track nesting depth (skip void elements)
+        if tag not in VOID_ELEMENTS:
             self._depth += 1
-        if tag == 'html':
-            self.html_lang = a.get('lang')
-        if tag == 'script':
+
+        # Capture the language attribute on the root element
+        if tag == "html":
+            self.html_lang = attrs_dict.get("lang")
+
+        # Flag when we are inside a <script> so we can collect its text
+        if tag == "script":
             self._in_script = True
-        if a.get('id'):
-            self.ids.append(a['id'])
-        if tag == 'button' and 'tab' in cls:
-            self.tabs.append((a.get('data-p'), 'active' in cls))
-        if 'panel' in cls:
-            self.panels.append((a.get('id'), 'active' in cls))
-        if 'ref' in cls and a.get('data-ref'):
-            self.refs.append(a['data-ref'])
-        if 'sidewrap' in cls:
-            self.sidewraps.append({'subtabs': [], 'subpanels': []})
-            self._wrap_stack.append((len(self.sidewraps) - 1, self._depth))
-        if self._wrap_stack:
-            wi = self._wrap_stack[-1][0]
-            if 'subtab' in cls:
-                self.sidewraps[wi]['subtabs'].append((a.get('data-sp'), 'active' in cls))
-            if 'subpanel' in cls:
-                self.sidewraps[wi]['subpanels'].append((a.get('data-sp'), 'active' in cls))
-        src = a.get('src', '') or ''
-        href = a.get('href', '') or ''
-        if tag in ('script', 'img', 'iframe') and src.startswith(('http://', 'https://', '//')):
+
+        # Record every id we encounter (E5 duplicate check)
+        element_id = attrs_dict.get("id")
+        if element_id:
+            self.ids.append(element_id)
+
+        # Collect top-level tab buttons
+        if tag == "button" and "tab" in classes:
+            self.tabs.append((attrs_dict.get("data-p"), "active" in classes))
+
+        # Collect top-level panels
+        if "panel" in classes:
+            self.panels.append((attrs_dict.get("id"), "active" in classes))
+
+        # Collect reference chip keys
+        if "ref" in classes and attrs_dict.get("data-ref"):
+            self.refs.append(attrs_dict["data-ref"])
+
+        # Open a new sidewrap scope
+        if "sidewrap" in classes:
+            self.sidewraps.append({"subtabs": [], "subpanels": []})
+            self._sidewrap_stack.append((len(self.sidewraps) - 1, self._depth))
+
+        # If we are inside a sidewrap, collect its sub-tabs and sub-panels
+        if self._sidewrap_stack:
+            wrap_index = self._sidewrap_stack[-1][0]
+            if "subtab" in classes:
+                self.sidewraps[wrap_index]["subtabs"].append(
+                    (attrs_dict.get("data-sp"), "active" in classes)
+                )
+            if "subpanel" in classes:
+                self.sidewraps[wrap_index]["subpanels"].append(
+                    (attrs_dict.get("data-sp"), "active" in classes)
+                )
+
+        # Detect external resources that break the single-file principle (E7)
+        src = attrs_dict.get("src", "") or ""
+        href = attrs_dict.get("href", "") or ""
+
+        if tag in ("script", "img", "iframe") and src.startswith(
+            ("http://", "https://", "//")
+        ):
             self.externals.append((tag, src))
-        if tag == 'link' and href.startswith(('http://', 'https://', '//')):
+        if tag == "link" and href.startswith(("http://", "https://", "//")):
             self.externals.append((tag, href))
-        if tag == 'a' and href.startswith(('http://', 'https://')):
-            self.ext_links += 1
+
+        # Count external anchor links for the W3 warning
+        if tag == "a" and href.startswith(("http://", "https://")):
+            self.ext_link_count += 1
 
     def handle_startendtag(self, tag, attrs):
+        # Self-closing tags are treated as start tags for data collection,
+        # but they do not increase nesting depth (except void elements which
+        # are already excluded). For non-void self-closing tags the depth
+        # was bumped in handle_starttag, so undo it here.
         self.handle_starttag(tag, attrs)
-        if tag not in VOID:
+        if tag not in VOID_ELEMENTS:
             self._depth -= 1
 
     def handle_endtag(self, tag):
-        if tag in VOID:
+        if tag in VOID_ELEMENTS:
             return
-        if tag == 'script':
+
+        if tag == "script":
             self._in_script = False
-        if self._wrap_stack and self._depth == self._wrap_stack[-1][1]:
-            self._wrap_stack.pop()
+
+        # Close sidewrap scope when we return to the depth at which it opened
+        if self._sidewrap_stack and self._depth == self._sidewrap_stack[-1][1]:
+            self._sidewrap_stack.pop()
+
         self._depth -= 1
 
     def handle_data(self, data):
         if self._in_script:
-            self.script_text.append(data)
+            self.script_chunks.append(data)
 
 
-def refs_keys(js):
-    """const REFS = { … } 의 최상위 키만 추출. 문자열(html 값) 내부의 중괄호·따옴표는 건너뜀."""
-    m = re.search(r'\bREFS\s*=\s*\{', js)
-    if m is None:
+def extract_refs_keys(js_text):
+    """Extract the top-level keys from a ``const REFS = { ... }`` object.
+
+    Uses a character-by-character parser that correctly handles:
+      - Single-quoted, double-quoted, and backtick strings (skipping their
+        contents so braces inside strings do not confuse nesting)
+      - Escape sequences within strings
+      - Block comments (/* ... */) and line comments (// ...) that might
+        contain example key names we should not extract
+      - Nested objects (only depth-1 keys are collected)
+
+    Returns a list of key strings, or None if the REFS object was not found.
+    """
+    match = re.search(r"\bREFS\s*=\s*\{", js_text)
+    if match is None:
         return None
-    i = m.end() - 1
-    depth = 0
-    in_str = None
-    esc = False
+
+    pos = match.end() - 1          # point at the opening '{'
+    brace_depth = 0
+    in_string = None               # None or (quote_char, start_index)
+    escape_next = False
     keys = []
-    pend = None  # 방금 닫힌 depth==1 문자열 (다음 비공백이 ':'면 키)
-    j = i
-    while j < len(js):
-        c = js[j]
-        if in_str:
-            if esc:
-                esc = False
-            elif c == '\\':
-                esc = True
-            elif c == in_str[0]:
-                if depth == 1:
-                    pend = js[in_str[1] + 1:j]
-                in_str = None
-            j += 1
+    pending_key = None             # set to the last closed string at depth 1;
+                                   # confirmed as a key if the next non-space
+                                   # character is ':'
+
+    while pos < len(js_text):
+        ch = js_text[pos]
+
+        # -- Inside a string literal: only look for the closing quote --------
+        if in_string is not None:
+            if escape_next:
+                escape_next = False
+            elif ch == "\\":
+                escape_next = True
+            elif ch == in_string[0]:
+                # String closed -- remember the text if we are at depth 1
+                if brace_depth == 1:
+                    pending_key = js_text[in_string[1] + 1 : pos]
+                in_string = None
+            pos += 1
             continue
-        if c == '/' and js[j:j + 2] == '/*':          # JS 블록 주석 건너뜀 (주석 속 예시 키 오탐 방지)
-            e = js.find('*/', j + 2)
-            j = len(js) if e < 0 else e + 2
+
+        # -- Outside strings -------------------------------------------------
+
+        # Skip block comments (protects against example keys in comments)
+        if ch == "/" and js_text[pos : pos + 2] == "/*":
+            end = js_text.find("*/", pos + 2)
+            pos = len(js_text) if end < 0 else end + 2
             continue
-        if c == '/' and js[j:j + 2] == '//':          # 줄 주석 건너뜀
-            e = js.find('\n', j + 2)
-            j = len(js) if e < 0 else e + 1
+
+        # Skip line comments
+        if ch == "/" and js_text[pos : pos + 2] == "//":
+            end = js_text.find("\n", pos + 2)
+            pos = len(js_text) if end < 0 else end + 1
             continue
-        if pend is not None and not c.isspace():
-            if c == ':':
-                keys.append(pend)
-            pend = None
-        if c in ('"', "'", '`'):
-            in_str = (c, j)
-        elif c == '{':
-            depth += 1
-        elif c == '}':
-            depth -= 1
-            if depth == 0:
-                return keys
-        j += 1
-    return keys  # 닫는 중괄호를 못 찾아도 수집분 반환
+
+        # If we just closed a string at depth 1, check whether the next
+        # non-whitespace character is ':' to confirm it is a key.
+        if pending_key is not None and not ch.isspace():
+            if ch == ":":
+                keys.append(pending_key)
+            pending_key = None
+
+        if ch in ('"', "'", "`"):
+            in_string = (ch, pos)
+        elif ch == "{":
+            brace_depth += 1
+        elif ch == "}":
+            brace_depth -= 1
+            if brace_depth == 0:
+                return keys  # end of the REFS object
+
+        pos += 1
+
+    # If we exhaust the text without finding the closing brace, return
+    # whatever keys we collected so far.
+    return keys
 
 
 def main():
+    """Parse the report HTML, run all checks, print results, and return exit code."""
     if len(sys.argv) != 2:
         print(__doc__)
         return 2
-    path = sys.argv[1]
+
+    filepath = sys.argv[1]
     try:
-        html = open(path, encoding='utf-8').read()
-    except OSError as e:
-        print(f'⛔ 파일을 읽을 수 없음: {e}')
+        html_source = open(filepath, encoding="utf-8").read()
+    except OSError as exc:
+        print(f"Error: cannot read file -- {exc}")
         return 2
 
-    s = Scan()
-    s.feed(html)
-    errors, warns = [], []
+    # ---- Parse the document ------------------------------------------------
+    scanner = Scan()
+    scanner.feed(html_source)
 
-    # E1/E2 — 탭 ↔ 패널
-    tab_ps = [p for p, _ in s.tabs]
-    panel_ids = [i for i, _ in s.panels]
-    for p in tab_ps:
-        if not p:
-            errors.append('탭 버튼에 data-p 누락')
-        elif p not in panel_ids:
-            errors.append(f'탭 data-p="{p}" 에 대응하는 <section class="panel" id="{p}"> 없음')
-    for i in panel_ids:
-        if i not in tab_ps:
-            errors.append(f'패널 id="{i}" 를 여는 탭(data-p) 없음')
-    for name, items in (('탭(data-p)', tab_ps), ('패널(id)', panel_ids)):
-        for k, n in Counter(items).items():
-            if k and n > 1:
-                errors.append(f'{name} "{k}" 중복 {n}회')
-    act_tabs = [p for p, a in s.tabs if a]
-    act_panels = [i for i, a in s.panels if a]
-    if len(act_tabs) != 1:
-        errors.append(f'.tab.active 가 {len(act_tabs)}개 (정확히 1개여야 함)')
-    if len(act_panels) != 1:
-        errors.append(f'.panel.active 가 {len(act_panels)}개 (정확히 1개여야 함)')
-    if len(act_tabs) == 1 and len(act_panels) == 1 and act_tabs[0] != act_panels[0]:
-        errors.append(f'active 탭("{act_tabs[0]}")과 active 패널("{act_panels[0]}")이 다름')
+    errors = []
+    warnings = []
 
-    # E3 — .ref ↔ REFS
-    js = ''.join(s.script_text)
-    keys = refs_keys(js)
-    if s.refs and keys is None:
-        errors.append('.ref 칩이 있는데 REFS 객체를 찾지 못함')
-    elif keys is not None:
-        for r in sorted(set(s.refs)):
-            if r not in keys:
-                errors.append(f'.ref data-ref="{r}" 가 REFS 에 없음 (드로어 안 열림)')
-        for k in keys:
-            if k not in s.refs:
-                warns.append(f'REFS 키 "{k}" 를 여는 .ref 칩이 본문에 없음 (죽은 데이터)')
+    # ---- E1 / E2: top-level tab <-> panel pairing -------------------------
 
-    # E4 — 서브탭
-    for n, w in enumerate(s.sidewraps, 1):
-        st = [k for k, _ in w['subtabs']]
-        sp = [k for k, _ in w['subpanels']]
-        for k in st:
-            if k not in sp:
-                errors.append(f'sidewrap#{n}: subtab data-sp="{k}" 에 대응 subpanel 없음')
-        for k in sp:
-            if k not in st:
-                errors.append(f'sidewrap#{n}: subpanel data-sp="{k}" 를 여는 subtab 없음')
-        a_st = [k for k, a in w['subtabs'] if a]
-        a_sp = [k for k, a in w['subpanels'] if a]
-        if len(a_st) != 1 or len(a_sp) != 1:
-            errors.append(f'sidewrap#{n}: active subtab {len(a_st)}개 / active subpanel {len(a_sp)}개 (각 1개여야 함)')
-        elif a_st[0] != a_sp[0]:
-            errors.append(f'sidewrap#{n}: active subtab("{a_st[0]}")과 active subpanel("{a_sp[0]}")이 다름')
+    tab_params = [p for p, _ in scanner.tabs]
+    panel_ids = [i for i, _ in scanner.panels]
 
-    # E5 — 중복 id
-    for k, n in Counter(s.ids).items():
-        if n > 1:
-            errors.append(f'id "{k}" 중복 {n}회')
+    for param in tab_params:
+        if not param:
+            errors.append("Tab button is missing data-p attribute")
+        elif param not in panel_ids:
+            errors.append(
+                f'Tab data-p="{param}" has no matching '
+                f'<section class="panel" id="{param}">'
+            )
 
-    # E6 — 플레이스홀더 잔존
-    ph = sorted(set(re.findall(r'\{\{[A-Z0-9_]+\}\}', html)))
-    if ph:
-        errors.append(f'플레이스홀더 잔존 {len(ph)}종: ' + ', '.join(ph[:8]) + (' …' if len(ph) > 8 else ''))
-    n_desc = html.count('[설명:')
-    if n_desc:
-        errors.append(f'"[설명: …]" 잔존 {n_desc}곳')
+    for pid in panel_ids:
+        if pid not in tab_params:
+            errors.append(f'Panel id="{pid}" has no tab button to open it')
 
-    # E7 — 외부 리소스
-    for tag, url in s.externals:
-        errors.append(f'외부 리소스 <{tag}> → {url} (단일 파일 원칙 위반 — 인라인으로)')
+    # Detect duplicates among tabs and panels
+    for label, items in (("Tab (data-p)", tab_params), ("Panel (id)", panel_ids)):
+        for value, count in Counter(items).items():
+            if value and count > 1:
+                errors.append(f'{label} "{value}" appears {count} times (duplicate)')
 
-    # W1/W2
-    if re.search(r'\bfetch\s*\(|XMLHttpRequest', js):
-        warns.append('스크립트에 fetch()/XHR 사용 — file:// 에서 실패함(데이터는 인라인으로)')
-    if not s.html_lang or s.html_lang.startswith('{{'):
-        warns.append('<html lang> 미설정 — LANG 코드(ko/en/ja …)로 지정')
-    if s.ext_links == 0:
-        warns.append('외부 <a href> 링크 0개 — 출처가 평문 텍스트일 가능성. 출처 표·드로어 근거를 하이퍼링크로(§5)')
+    # Active state validation
+    active_tab_params = [p for p, active in scanner.tabs if active]
+    active_panel_ids = [i for i, active in scanner.panels if active]
+
+    if len(active_tab_params) != 1:
+        errors.append(
+            f"Found {len(active_tab_params)} .tab.active (expected exactly 1)"
+        )
+    if len(active_panel_ids) != 1:
+        errors.append(
+            f"Found {len(active_panel_ids)} .panel.active (expected exactly 1)"
+        )
+    if (
+        len(active_tab_params) == 1
+        and len(active_panel_ids) == 1
+        and active_tab_params[0] != active_panel_ids[0]
+    ):
+        errors.append(
+            f'Active tab ("{active_tab_params[0]}") does not match '
+            f'active panel ("{active_panel_ids[0]}")'
+        )
+
+    # ---- E3: .ref[data-ref] keys <-> REFS object ---------------------------
+
+    js_source = "".join(scanner.script_chunks)
+    refs_dict_keys = extract_refs_keys(js_source)
+
+    if scanner.refs and refs_dict_keys is None:
+        errors.append(
+            ".ref chips exist in the body but no REFS object was found in script"
+        )
+    elif refs_dict_keys is not None:
+        refs_set = set(scanner.refs)
+        keys_set = set(refs_dict_keys)
+        for ref_key in sorted(refs_set):
+            if ref_key not in keys_set:
+                errors.append(
+                    f'.ref data-ref="{ref_key}" not found in REFS (drawer will not open)'
+                )
+        for js_key in keys_set:
+            if js_key not in refs_set:
+                warnings.append(
+                    f'REFS key "{js_key}" has no .ref chip in the body (dead data)'
+                )
+
+    # ---- E4: sidewrap sub-tab <-> sub-panel pairing -----------------------
+
+    for wrap_num, wrap_data in enumerate(scanner.sidewraps, 1):
+        subtab_keys = [k for k, _ in wrap_data["subtabs"]]
+        subpanel_keys = [k for k, _ in wrap_data["subpanels"]]
+
+        for key in subtab_keys:
+            if key not in subpanel_keys:
+                errors.append(
+                    f"sidewrap #{wrap_num}: subtab data-sp=\"{key}\" "
+                    f"has no matching subpanel"
+                )
+        for key in subpanel_keys:
+            if key not in subtab_keys:
+                errors.append(
+                    f"sidewrap #{wrap_num}: subpanel data-sp=\"{key}\" "
+                    f"has no subtab to open it"
+                )
+
+        active_subtab_keys = [k for k, a in wrap_data["subtabs"] if a]
+        active_subpanel_keys = [k for k, a in wrap_data["subpanels"] if a]
+
+        if len(active_subtab_keys) != 1 or len(active_subpanel_keys) != 1:
+            errors.append(
+                f"sidewrap #{wrap_num}: active subtab count={len(active_subtab_keys)}, "
+                f"active subpanel count={len(active_subpanel_keys)} "
+                f"(expected exactly 1 each)"
+            )
+        elif active_subtab_keys[0] != active_subpanel_keys[0]:
+            errors.append(
+                f'sidewrap #{wrap_num}: active subtab ("{active_subtab_keys[0]}") '
+                f'does not match active subpanel ("{active_subpanel_keys[0]}")'
+            )
+
+    # ---- E5: duplicate id attributes -------------------------------------
+
+    for elem_id, count in Counter(scanner.ids).items():
+        if count > 1:
+            errors.append(f'id="{elem_id}" appears {count} times (duplicate)')
+
+    # ---- E6: leftover placeholders and note descriptions ------------------
+
+    placeholder_matches = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html_source)))
+    if placeholder_matches:
+        display = ", ".join(placeholder_matches[:8])
+        if len(placeholder_matches) > 8:
+            display += " ..."
+        errors.append(
+            f"Placeholder patterns remain ({len(placeholder_matches)} types): {display}"
+        )
+
+    note_count = html_source.count("[Note:")
+    if note_count:
+        errors.append(f'"[Note: ...]" description fragments remain ({note_count} occurrences)')
+
+    # ---- E7: external resources violating single-file principle ------------
+
+    for tag_name, url in scanner.externals:
+        errors.append(
+            f"External resource <{tag_name}> -> {url} "
+            f"(single-file principle violation -- inline the resource)"
+        )
+
+    # ---- W1: fetch / XMLHttpRequest usage ----------------------------------
+
+    if re.search(r"\bfetch\s*\(|XMLHttpRequest", js_source):
+        warnings.append(
+            "Script uses fetch() or XMLHttpRequest -- will fail on file:// "
+            "(embed all data inline instead)"
+        )
+
+    # ---- W2: html lang attribute -------------------------------------------
+
+    if not scanner.html_lang or scanner.html_lang.startswith("{{"):
+        warnings.append(
+            '<html lang> is not set -- specify a language code (e.g. en, ko, ja)'
+        )
+
+    # ---- W3: zero external links ------------------------------------------
+
+    if scanner.ext_link_count == 0:
+        warnings.append(
+            "No external <a href> links found -- sources may be plain text "
+            "instead of hyperlinks (linkify per section 5 source rules)"
+        )
+
+    # ---- Output results ----------------------------------------------------
 
     for msg in errors:
-        print(f'  ✗ {msg}')
-    for msg in warns:
-        print(f'  ⚠ {msg}')
-    print(f'— 검사 완료: 오류 {len(errors)} · 경고 {len(warns)} '
-          f'(탭 {len(s.tabs)} · 패널 {len(s.panels)} · ref {len(set(s.refs))} · sidewrap {len(s.sidewraps)})')
+        print(f"  E  {msg}")
+    for msg in warnings:
+        print(f"  W  {msg}")
+
+    unique_refs = len(set(scanner.refs))
+    print(
+        f"-- Done: {len(errors)} error(s), {len(warnings)} warning(s) "
+        f"(tabs={len(scanner.tabs)}, panels={len(scanner.panels)}, "
+        f"refs={unique_refs}, sidewraps={len(scanner.sidewraps)})"
+    )
+
     return 1 if errors else 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

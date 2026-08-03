@@ -1,6 +1,6 @@
 # Explain Me — Single-File Interactive Report Build Instructions (Generic, Multi-Language, Self-Contained)
 
-Based on [beret21/reportme](https://github.com/beret21/reportme) v0.4.1, MIT license. Translated and adapted for multi-platform use.
+Inspired by [beret21/reportme](https://github.com/beret21/reportme) v0.4.1 (MIT license). All code is self-authored.
 
 > This document is a **"report generation engine"** not tied to any specific topic or language.
 > Swap in the topic (`TOPIC`), user data (`SOURCE_DATA`), and language (`LANG`) to produce

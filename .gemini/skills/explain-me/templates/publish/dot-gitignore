@@ -1,1 +1,13 @@
-404: Not Found
+# GitHub Pages publish directory — copy this file as .gitignore in the target repo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

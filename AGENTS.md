@@ -492,7 +492,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (based on beret21/reportme) |
+| `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 ### Platform Skills Distribution
 

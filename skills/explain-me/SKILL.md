@@ -6,7 +6,7 @@ description: >
   in-page search, a light/dark theme toggle, and multilingual support.
   Use when: user says "/explain-me", "/reportme", "make a report", "create report",
   "explain this topic".
-  Based on beret21/reportme (MIT license).
+  Inspired by beret21/reportme.
 version: 1.0.0
 last_reviewed: 2026-08-03
 status: experimental
@@ -14,6 +14,10 @@ scope: common
 l2_propagate: true
 owner: pm
 prerequisites: Python 3 (for validate_report.py), git + gh (for optional publish)
+attribution:
+  source: https://github.com/beret21/reportme
+  license: MIT
+  note: "Inspired by beret21/reportme. All code is self-authored."
 metadata:
   type: process
   triggers:
@@ -30,7 +34,7 @@ metadata:
 
 Generates a **single self-contained interactive HTML report** from a topic (research mode) or existing materials (render mode). The entire output is one HTML file with all CSS, JS, and data inlined — it opens directly from disk (`file://`) with no server or build process required.
 
-Based on [beret21/reportme](https://github.com/beret21/reportme) v0.4.1, adapted for all 4 workspace platforms: Claude CLI, Claude Desktop App, Antigravity (VS Code), and Antigravity CLI (Gemini CLI).
+Inspired by [beret21/reportme](https://github.com/beret21/reportme) v0.4.1 (MIT license). All code is self-authored. Supports all 4 workspace platforms: Claude CLI, Claude Desktop App, Antigravity (VS Code), and Antigravity CLI (Gemini CLI).
 
 ## Subcommands
 
