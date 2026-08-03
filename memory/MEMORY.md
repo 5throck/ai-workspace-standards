@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-04](2026-08-04.md) | fix(sync): align sync command files with agent-written PR body flow |
 | [2026-08-03](2026-08-03.md) | feat(skills): add explain-me skill — single-file interactive HTML report generation |
 | [2026-08-01](2026-08-01.md) | feat(governance): ECC Phase 1 — GateGuard, Prompt Defense, JSON Schema, Platform Parity |
 | [2026-07-31](2026-07-31.md) | chore: update |
