@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="{{LANG}}"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{REPORT_TITLE}}</title>
+<style>
+/* ─────────────────────────────────────────────────────────────────────
+   디자인 토큰 — 이 색만 사용(테마 일관성). 인라인 hex 직접 지정 금지.
+   라이트/다크 두 테마가 같은 토큰 이름을 공유한다 — 컴포넌트 CSS는 var()만 참조.
+   테마 전환: 헤더 토글(자동→라이트→다크)이 <html data-theme>를 바꾼다. 외부 CSS 없음(단일 파일).
+   ───────────────────────────────────────────────────────────────────── */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --border:#d0d7de; --even:#f6f8fa; --gray-bg:#eaeef2;
+  --accent:#0969da; --green:#1a7f37; --amber:#9a6700; --red:#cf222e; --purple:#6e40c9;
+  --card:#ffffff; --accent-soft:#ddf4ff;
+  --key-bg:#eafbe7; --warn-bg:#ffebe9; --note-bg:#fff8c5;
+  --fit2-bg:#ffec99; --fit2-fg:#533f03; --fit1-fg:#57606a;
+  --hit:#fff3a3; --hit-active:#ffd43b; --hit-line:#f08c00;
+  --chip-u:#8c959f; --shadow:rgba(0,0,0,.12);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --border:#3d444d; --even:#151b23; --gray-bg:#262c36;
+  --accent:#4493f8; --green:#3fb950; --amber:#d29922; --red:#f85149; --purple:#ab7df8;
+  --card:#151b23; --accent-soft:#1f3a5f;
+  --key-bg:#132a1d; --warn-bg:#301a1d; --note-bg:#2e2a12;
+  --fit2-bg:#3b2e00; --fit2-fg:#e3b341; --fit1-fg:#9198a1;
+  --hit:#5c4d00; --hit-active:#9e6a03; --hit-line:#e3b341;
+  --chip-u:#57606a; --shadow:rgba(0,0,0,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]){
+    color-scheme:dark;
+    --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --border:#3d444d; --even:#151b23; --gray-bg:#262c36;
+    --accent:#4493f8; --green:#3fb950; --amber:#d29922; --red:#f85149; --purple:#ab7df8;
+    --card:#151b23; --accent-soft:#1f3a5f;
+    --key-bg:#132a1d; --warn-bg:#301a1d; --note-bg:#2e2a12;
+    --fit2-bg:#3b2e00; --fit2-fg:#e3b341; --fit1-fg:#9198a1;
+    --hit:#5c4d00; --hit-active:#9e6a03; --hit-line:#e3b341;
+    --chip-u:#57606a; --shadow:rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",sans-serif;color:var(--fg);background:var(--bg);font-size:14px;line-height:1.65}
+
+/* 헤더 */
+.head{padding:16px 24px 8px}
+h1{font-size:21px;margin:0 0 2px}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.meta{color:var(--muted);font-size:12px;margin:6px 0 0}
+/* 다국어 스위처(선택) — 언어별 "파일"로 링크(상대경로 — file://·정적 호스트 모두 동작). 단일 언어면 블록 삭제 */
+.lang-switch{display:flex;gap:6px;margin:8px 0 0;flex-wrap:wrap}
+.lang-switch a{border:1px solid var(--border);border-radius:14px;padding:1px 10px;font-size:12px;color:var(--muted);text-decoration:none;background:var(--card)}
+.lang-switch a.cur{color:var(--accent);border-color:var(--accent);font-weight:600}
+.lang-switch a:hover{color:var(--fg);border-color:var(--accent)}
+
+/* 상단 탭 (sticky) — 시그니처 네비게이션 */
+.tabs{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--border);display:flex;gap:4px;padding:0 24px;flex-wrap:wrap}
+.tab{padding:10px 16px;border:none;background:none;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--fg)}
+/* 테마 토글 — JS가 .tabs 오른쪽 끝에 주입(자동→라이트→다크 순환, localStorage 기억) */
+.theme-btn{margin-left:auto;align-self:center;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:14px;padding:2px 10px;font-size:13px;line-height:1.5;cursor:pointer;white-space:nowrap}
+.theme-btn:hover{color:var(--fg);border-color:var(--accent)}
+
+/* 패널 */
+.panel{display:none;padding:18px 24px 60px;max-width:1180px}
+.panel.active{display:block}
+h2{font-size:17px;margin:22px 0 8px;border-top:1px solid var(--border);padding-top:14px}
+h2:first-child{border-top:none;padding-top:0}
+h3{font-size:14.5px;margin:16px 0 4px}
+p{margin:8px 0}
+b,strong{font-weight:700}
+.muted{color:var(--muted)}
+code{background:var(--even);padding:0 4px;border-radius:3px;font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+a{color:var(--accent)}
+
+/* 표 */
+table{border-collapse:separate;border-spacing:0;font-size:12.5px;width:100%;margin:8px 0}
+th,td{border-bottom:1px solid var(--border);padding:5px 8px;text-align:left;vertical-align:top;word-break:keep-all}
+thead th{background:var(--even);font-weight:700}
+tbody tr:nth-child(even){background:var(--even)}   /* ⚠️ 어두운 배경 금지 — 가독성 */
+td.c,th.c{text-align:center}
+/* 넓은 표 래퍼 — 칼럼이 많거나 셀이 긴 표는 이걸로 감싼다: 칼럼 눌림 대신 가로 스크롤 */
+.tbl-wrap{overflow-x:auto;margin:8px 0}
+.tbl-wrap>table{margin:0;min-width:560px}
+th.nw,td.nw{white-space:nowrap}   /* 수치·라벨 칼럼 줄바꿈 방지 */
+/* KV(키-값) 표 */
+.kv{margin-top:8px}
+.kv th{width:120px;background:var(--even);font-weight:600;white-space:nowrap}
+
+/* 콜아웃 */
+blockquote{margin:12px 0;padding:8px 14px;border-radius:6px;font-size:13px}
+blockquote.key{background:var(--key-bg);border-left:4px solid var(--green)}
+blockquote.warn{background:var(--warn-bg);border-left:4px solid var(--red)}
+blockquote.note{background:var(--note-bg);border-left:4px solid var(--amber)}
+blockquote p{margin:4px 0}
+
+/* 카드 그리드 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+@media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.card{border:1px solid var(--border);border-radius:9px;padding:12px 14px;background:var(--card)}
+.card.tint{border-top:3px solid var(--accent)}
+.card h4{margin:0 0 6px;font-size:14px}
+.card p{margin:5px 0;font-size:12.5px}
+
+/* 블록/세부 카드 (day/section 스타일) */
+.block{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0;background:var(--card)}
+.block-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.block-n{background:var(--accent);color:#fff;font-weight:700;border-radius:6px;padding:1px 10px;font-size:13px}
+.block-title{font-size:16px;font-weight:700}
+.block-tag{color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:12px;padding:0 8px}
+.blocks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0 6px}
+@media(max-width:820px){.blocks{grid-template-columns:1fr}}
+.blk{border:1px solid var(--border);border-radius:8px;padding:9px 11px;background:var(--even)}
+.blk p{margin:5px 0 0;font-size:12.5px}
+.blk-l{font-weight:700;font-size:11px;color:#fff;padding:1px 8px;border-radius:10px;display:inline-block}
+.blk-l.t{background:var(--purple)}.blk-l.d{background:var(--accent)}.blk-l.p{background:var(--green)}
+
+/* 상태 칩 */
+.chip{display:inline-flex;align-items:center;gap:3px;font-weight:700;padding:0 7px;border-radius:20px;font-size:11px;color:#fff;white-space:nowrap}
+.chip.g{background:var(--green)}.chip.a{background:var(--amber)}.chip.r{background:var(--red)}.chip.b{background:var(--accent)}.chip.u{background:var(--chip-u)}
+
+/* 참조 칩 → 우측 드로어 (시그니처 인터랙션) */
+.ref{display:inline-block;border:1px solid var(--border);border-radius:14px;padding:1px 9px;margin:1px 2px;cursor:pointer;white-space:nowrap;background:var(--card);transition:.1s;font-size:12.5px}
+.ref:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ref::before{content:"›";color:var(--accent);font-weight:700;margin-right:3px}
+
+/* 히트맵 / 매칭 표 */
+.legend{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:16px;margin:6px 0 12px;align-items:center}
+.legend .box{display:inline-block;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:5px;border:1px solid var(--border)}
+.hm-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+.hm{font-size:12px;margin:0}
+.hm th,.hm td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px 6px;text-align:center}
+.hm thead th{background:var(--even)}
+.hm .rowhead{position:sticky;left:0;background:var(--even);text-align:left;min-width:140px;font-weight:600}
+.hm tbody tr:nth-child(even){background:transparent}
+td.fit3{background:var(--green);color:#fff;font-weight:700}
+td.fit2{background:var(--fit2-bg);color:var(--fit2-fg);font-weight:700}
+td.fit1{background:var(--gray-bg);color:var(--fit1-fg)}
+
+/* SVG 도식 */
+.svgwrap{margin:14px 0;overflow-x:auto}
+.dgm{max-width:100%;height:auto;border:1px solid var(--border);border-radius:8px;background:var(--card);padding:6px;display:block;margin:0 auto}
+figure{margin:14px 0}
+figcaption{font-size:11.5px;color:var(--muted);margin:6px 0 0;text-align:center}
+
+/* 출처 */
+.src{font-size:11px;color:var(--muted);margin:4px 0 0}
+
+/* 중첩 서브탭 — 탭 안을 다시 2단계로 (탭 → 서브탭 → 서브패널) */
+.sidewrap{display:flex;align-items:flex-start;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0;background:var(--card)}
+.sidetabs{position:sticky;top:96px;display:flex;flex-direction:column;gap:2px;padding:12px 6px;border-right:1px solid var(--border);min-width:152px;flex:none;background:var(--bg);align-self:flex-start}
+.subtab{padding:8px 12px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;text-align:left;border-radius:0 6px 6px 0;white-space:nowrap}
+.subtab.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft)}
+.subtab:hover{color:var(--fg)}
+.sidepanels{flex:1;min-width:0;padding:6px 20px 30px}
+.subpanel{display:none}.subpanel.active{display:block}
+/* 모바일 서브탭 접힘 — 좁은 화면에서 좌측 패널을 "현재 항목 ▾" 버튼으로 접는다(JS가 버튼 주입) */
+.subtab-toggle{display:none;width:100%;align-items:center;justify-content:space-between;gap:8px;border:none;border-bottom:1px solid var(--border);background:var(--even);color:var(--fg);font-size:13px;font-weight:600;padding:10px 14px;cursor:pointer;text-align:left}
+.subtab-toggle .tgl-arrow{color:var(--accent);font-size:11px;transition:transform .15s}
+.sidewrap.nav-open .subtab-toggle .tgl-arrow{transform:rotate(180deg)}
+@media(max-width:720px){
+  .sidewrap{flex-direction:column}
+  .subtab-toggle{display:flex}
+  .sidetabs{display:none;flex-direction:column;position:static;border-right:none;border-bottom:1px solid var(--border);min-width:0;width:100%;padding:8px}
+  .sidewrap.nav-open .sidetabs{display:flex}
+  .subtab{border-radius:6px}
+}
+
+/* 아코디언 — HTML5 <details> (JS 불필요, file://·인쇄 모두 동작) */
+details.acc{border:1px solid var(--border);border-radius:8px;margin:8px 0;background:var(--card);overflow:hidden}
+details.acc>summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:13.5px;background:var(--even);list-style:none;display:flex;align-items:center;gap:8px}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::before{content:"▸";color:var(--accent);font-size:11px;transition:transform .15s}
+details.acc[open]>summary::before{transform:rotate(90deg)}
+details.acc>summary:hover{background:var(--gray-bg)}
+details.acc .acc-body{padding:10px 14px}
+details.acc .acc-body>*:first-child{margin-top:0}
+
+/* 페이지 내 검색창 */
+.ip-search{padding:8px 24px 10px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:41px;z-index:29}
+.ip-search .ip-row{position:relative;display:flex;align-items:center;max-width:420px}
+.ip-search input{width:100%;padding:7px 28px 7px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--fg);outline:none}
+.ip-search input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(9,105,218,.15)}
+.ip-search .ip-clear{position:absolute;right:6px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;display:none;padding:2px 4px}
+.ip-search .ip-count{margin-top:5px;font-size:11px;color:var(--muted);min-height:13px}
+mark.ip-hit{background:var(--hit);color:inherit;border-radius:2px;padding:0 1px}
+mark.ip-hit.ip-active{background:var(--hit-active);outline:1px solid var(--hit-line)}
+
+/* 우측 드로어 */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;visibility:hidden;transition:.2s;z-index:40}
+.overlay.open{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100%;width:440px;max-width:92vw;background:var(--card);border-left:1px solid var(--border);box-shadow:-6px 0 24px var(--shadow);transform:translateX(100%);transition:.22s;z-index:50;overflow-y:auto;padding:18px 20px}
+.drawer.open{transform:translateX(0)}
+.drawer-x{position:absolute;top:12px;right:14px;border:none;background:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer}
+.drawer h3{margin:2px 40px 8px 0;font-size:16px}
+.drawer .d-body{margin-top:10px;border-top:2px solid var(--border);padding-top:10px}
+.drawer .d-body h4{font-size:13px;margin:10px 0 4px}
+.drawer .d-body p,.drawer .d-body li{font-size:12.5px}
+.drawer .d-body ul{margin:4px 0 4px 16px;padding:0}
+
+@media print{.tabs,.ip-search,.drawer,.overlay{display:none!important}.panel{display:block!important}}
+</style></head>
+<body>
+
+<!-- ══ 헤더 ══ -->
+<div class="head">
+  <h1>{{REPORT_TITLE}}</h1>
+  <p class="sub">{{REPORT_SUBTITLE}}</p>
+  <p class="meta">작성 <strong>{{REPORT_DATE}}</strong> · 근거 <span>{{SOURCES_SUMMARY}}</span></p>
+  <!-- (선택) 다국어 스위처 — 언어마다 완결된 "별도 파일"을 만들고 여기서 상대경로로 잇는다(BUILD_GUIDE §2-C).
+       현재 파일의 언어에 class="cur". 언어 수만큼 <a> 복제. 단일 언어 보고서면 이 <nav> 블록을 통째로 삭제. -->
+  <nav class="lang-switch" aria-label="language">
+    <a class="cur" href="{{SELF_FILE}}">{{SELF_LANG_LABEL}}</a>
+    <a href="{{LANG2_FILE}}">{{LANG2_LABEL}}</a>
+  </nav>
+</div>
+
+<!-- ══ 상단 탭 ══  (탭 수만큼 button 복제. data-p 는 아래 panel 의 id 와 일치) -->
+<div class="tabs" role="tablist">
+  <button class="tab active" data-p="overview">{{TAB1_LABEL}}</button>
+  <button class="tab" data-p="analysis">{{TAB2_LABEL}}</button>
+  <button class="tab" data-p="appendix">{{TAB3_LABEL}}</button>
+</div>
+
+<!-- ══ 페이지 내 검색 (JS가 이 자리에 주입 — 수정 불필요) ══ -->
+
+<!-- ══════════ 패널 1: 개요 ══════════ -->
+<section class="panel active" id="overview">
+  <h2>{{SECTION_1_1_HEADING}}</h2>
+  <p>[설명: 이 보고서가 다루는 대상·목적·핵심 결론을 2~4문장. 리서치로 확인한 사실만.]</p>
+
+  <!-- 핵심 요약 콜아웃 -->
+  <blockquote class="key"><p><strong>핵심:</strong> [설명: 한 줄 결론 — 독자가 이것만 읽어도 되는 문장.]</p></blockquote>
+
+  <!-- 메타 KV 표 -->
+  <table class="kv"><tbody>
+    <tr><th>{{KV_1_KEY}}</th><td>{{KV_1_VAL}}</td></tr>
+    <tr><th>{{KV_2_KEY}}</th><td>{{KV_2_VAL}}</td></tr>
+    <tr><th>{{KV_3_KEY}}</th><td>{{KV_3_VAL}}</td></tr>
+  </tbody></table>
+
+  <h2>{{SECTION_1_2_HEADING}}</h2>
+  <!-- 카드 그리드 (grid2/grid3/grid4 중 택) -->
+  <div class="grid3">
+    <div class="card tint"><h4>{{CARD_1_TITLE}}</h4><p>[설명: 항목 요지 1~2문장.]</p></div>
+    <div class="card tint"><h4>{{CARD_2_TITLE}}</h4><p>[설명: …]</p></div>
+    <div class="card tint"><h4>{{CARD_3_TITLE}}</h4><p>[설명: …]</p></div>
+  </div>
+</section>
+
+<!-- ══════════ 패널 2: 분석 ══════════ -->
+<section class="panel" id="analysis">
+  <h2>{{SECTION_2_1_HEADING}}</h2>
+
+  <!-- 상세 블록 카드 (선택) -->
+  <div class="block">
+    <div class="block-h">
+      <span class="block-n">{{BLOCK_NUM}}</span>
+      <span class="block-title">{{BLOCK_TITLE}}</span>
+      <span class="block-tag">{{BLOCK_TAG}}</span>
+    </div>
+    <p class="one">[설명: 이 블록의 한 줄 요지.]</p>
+    <div class="blocks">
+      <div class="blk"><span class="blk-l t">{{BLK_L1}}</span><p>[설명: …]</p></div>
+      <div class="blk"><span class="blk-l d">{{BLK_L2}}</span><p>[설명: …]</p></div>
+      <div class="blk"><span class="blk-l p">{{BLK_L3}}</span><p>[설명: …]</p></div>
+    </div>
+  </div>
+
+  <!-- 참조 칩 사용 예: 본문 용어를 클릭하면 우측 드로어에 상세가 뜬다. data-ref 는 REFS 키와 일치 -->
+  <p>본문에서 <span class="ref" data-ref="term-a">{{REF_TERM_A}}</span> 처럼 용어를 누르면 상세·출처가 우측에 열립니다.</p>
+
+  <h2>{{SECTION_2_2_HEADING}} — 비교/적합도 매트릭스</h2>
+  <div class="legend">
+    <span><span class="box" style="background:var(--green)"></span>높음</span>
+    <span><span class="box" style="background:var(--fit2-bg)"></span>중간</span>
+    <span><span class="box" style="background:var(--gray-bg)"></span>낮음</span>
+  </div>
+  <div class="hm-wrap">
+    <table class="hm"><thead><tr>
+      <th class="rowhead">항목</th><th>{{COL_1}}</th><th>{{COL_2}}</th><th>{{COL_3}}</th>
+    </tr></thead><tbody>
+      <tr><th class="rowhead">{{ROW_1}}</th><td class="fit3">{{V}}</td><td class="fit2">{{V}}</td><td class="fit1">{{V}}</td></tr>
+      <tr><th class="rowhead">{{ROW_2}}</th><td class="fit2">{{V}}</td><td class="fit3">{{V}}</td><td class="fit1">{{V}}</td></tr>
+    </tbody></table>
+  </div>
+  <p class="src">출처: [설명: 데이터 근거·수집일.]</p>
+</section>
+
+<!-- ══════════ 패널 3: 부록 · 계보 ══════════ -->
+<section class="panel" id="appendix">
+  <h2>{{SECTION_3_1_HEADING}}</h2>
+
+  <!-- SVG 도식 (흐름·구조·비교일 때만. 인라인 SVG·디자인 토큰 색만·접근성 title/desc) -->
+  <figure>
+    <div class="svgwrap">
+      <svg class="dgm" viewBox="0 0 640 160" width="100%" height="auto" role="img" style="max-width:640px">
+        <title>{{FIG_TITLE}}</title><desc>{{FIG_DESC}}</desc>
+        <!-- [설명: SVG 전문 디자이너 서브에이전트가 채움 — 노드·화살표. 배지/라벨 겹침 금지]
+             색은 반드시 style="fill:var(--토큰)" 형태로 — 속성 fill="var()"는 동작하지 않고, hex 고정은 다크 테마를 깬다. -->
+        <rect x="20" y="60" width="140" height="40" rx="6" style="fill:var(--key-bg);stroke:var(--green)"/>
+        <text x="90" y="85" text-anchor="middle" font-size="13" style="fill:var(--fg)">{{NODE_1}}</text>
+        <line x1="160" y1="80" x2="240" y2="80" stroke-width="1.5" style="stroke:var(--muted)" marker-end="url(#arw)"/>
+        <rect x="240" y="60" width="140" height="40" rx="6" style="fill:var(--accent-soft);stroke:var(--accent)"/>
+        <text x="310" y="85" text-anchor="middle" font-size="13" style="fill:var(--fg)">{{NODE_2}}</text>
+        <defs><marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:var(--muted)"/></marker></defs>
+      </svg>
+    </div>
+    <figcaption>그림 1. {{FIG_CAPTION}}</figcaption>
+  </figure>
+
+  <h2>{{SECTION_3_2_HEADING}} — 중첩 서브탭 (긴 탭을 2단계로 · 선택)</h2>
+  <!-- 탭 안을 다시 좌측 세로 서브탭으로 분할. subtab 과 subpanel 의 data-sp 가 짝이며, .sidewrap 안에서 독립 동작.
+       한 탭에 담을 게 많을 때만 쓴다(짧으면 그냥 h2 섹션). 안 쓰면 이 블록을 통째로 삭제. -->
+  <div class="sidewrap">
+    <div class="sidetabs" role="tablist">
+      <button class="subtab active" data-sp="s1">{{SUBTAB_1}}</button>
+      <button class="subtab" data-sp="s2">{{SUBTAB_2}}</button>
+      <button class="subtab" data-sp="s3">{{SUBTAB_3}}</button>
+    </div>
+    <div class="sidepanels">
+      <div class="subpanel active" data-sp="s1"><h3>{{SUBTAB_1}}</h3><p>[설명: …]</p></div>
+      <div class="subpanel" data-sp="s2"><h3>{{SUBTAB_2}}</h3><p>[설명: …]</p></div>
+      <div class="subpanel" data-sp="s3"><h3>{{SUBTAB_3}}</h3><p>[설명: …]</p></div>
+    </div>
+  </div>
+
+  <h2>{{SECTION_3_3_HEADING}} — 접이식 아코디언 (부록·FAQ · 선택)</h2>
+  <!-- HTML5 <details> — 자바스크립트 없이 클릭 토글. 긴 목록·FAQ·상세 근거 접기용.
+       기본 닫힘. 처음부터 펼치려면 <details class="acc" open>. 검색으로 찾으면 자동으로 펼쳐진다. 안 쓰면 삭제. -->
+  <details class="acc"><summary>{{ACC_1_Q}}</summary><div class="acc-body"><p>[설명: 답/상세.]</p></div></details>
+  <details class="acc"><summary>{{ACC_2_Q}}</summary><div class="acc-body"><p>[설명: …]</p></div></details>
+
+  <h2>참고 · 출처</h2>
+  <!-- 출처는 반드시 실제 하이퍼링크(<a href>)로 — 도메인/평문 URL 텍스트만 적지 말 것(BUILD_GUIDE §5).
+       링크는 클릭할 때만 네트워크를 쓰므로 단일 파일 원칙(§1)과 충돌하지 않는다. URL이 없는 출처(비공개 자료 등)만 평문 허용. -->
+  <table><thead><tr><th>항목</th><th>출처</th><th>수집일</th></tr></thead><tbody>
+    <tr><td>{{SRC_1}}</td><td><a href="{{SRC_1_URL}}" target="_blank" rel="noopener">{{SRC_1_LABEL}}</a></td><td>{{SRC_1_DATE}}</td></tr>
+  </tbody></table>
+</section>
+
+<!-- ══ 우측 드로어 (참조 상세) ══ -->
+<div class="overlay" id="overlay" onclick="closeRef()"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="참조 상세">
+  <button class="drawer-x" onclick="closeRef()" aria-label="닫기">×</button>
+  <h3 id="drawer-title"></h3>
+  <div class="d-body" id="drawer-body"></div>
+</aside>
+
+<script>
+/* ══ 참조 데이터 — 각 키의 상세를 여기 인라인. 본문 .ref[data-ref] 와 키가 일치해야 열림 ══
+   html 은 신뢰된 자체 콘텐츠만(사용자 입력 삽입 금지). */
+const REFS = {
+  "term-a": {
+    title: "{{REF_TERM_A}}",
+    html: "<p>[설명: 이 용어의 정의·상세.]</p><h4>근거</h4><ul><li><a href=\"[출처 URL]\" target=\"_blank\" rel=\"noopener\">[출처명]</a> · [수집일]</li></ul>"
+  }
+  /* , "term-b": { title:"…", html:"…" }  ← 항목마다 복제해 추가 */
+};
+
+/* ══ 테마 전환(자동→라이트→다크 순환) — 외부 CSS 없이 <html data-theme>로 토큰만 전환(단일 파일 원칙).
+   선택은 localStorage에 기억(file://에서 막히는 환경 대비 try/catch). 라벨은 아이콘이라 LANG 무관. ══ */
+(function(){
+  var KEY='report-theme', root=document.documentElement, modes=['auto','light','dark'], icons={auto:'◐',light:'☀',dark:'🌙'};
+  var cur; try{ cur=localStorage.getItem(KEY); }catch(e){}
+  if(modes.indexOf(cur)<0) cur='auto';
+  var btn=document.createElement('button'); btn.type='button'; btn.className='theme-btn';
+  function apply(){
+    if(cur==='auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme',cur);
+    btn.textContent=icons[cur]; btn.title='theme: '+cur; btn.setAttribute('aria-label','theme: '+cur);
+    try{ localStorage.setItem(KEY,cur); }catch(e){}
+  }
+  btn.addEventListener('click', function(){ cur=modes[(modes.indexOf(cur)+1)%modes.length]; apply(); });
+  document.querySelector('.tabs').appendChild(btn); apply();
+})();
+
+/* 탭 전환 */
+function tab(id){
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b.dataset.p === id); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('active', p.id === id); });
+}
+document.querySelectorAll('.tab').forEach(function(b){ b.addEventListener('click', function(){ tab(b.dataset.p); }); });
+
+/* 중첩 서브탭 — .sidewrap 안에서만 전환(여러 sidewrap 독립). subtab/subpanel 의 data-sp 로 짝.
+   전환하면 모바일 접힘 패널을 닫고 토글 라벨을 현재 항목으로 갱신 */
+function subtab(wrap, key){
+  wrap.querySelectorAll('.subtab').forEach(function(b){ b.classList.toggle('active', b.dataset.sp === key); });
+  wrap.querySelectorAll('.subpanel').forEach(function(p){ p.classList.toggle('active', p.dataset.sp === key); });
+  wrap.classList.remove('nav-open');
+  if(wrap._syncToggle) wrap._syncToggle();
+}
+document.addEventListener('click', function(e){
+  var st = e.target.closest('.subtab'); if(!st) return;
+  var wrap = st.closest('.sidewrap'); if(wrap) subtab(wrap, st.dataset.sp);
+});
+
+/* 모바일 서브탭 접힘 — 각 .sidewrap 앞에 "현재 항목 ▾" 토글 버튼 주입(좁은 화면에서만 보임) */
+document.querySelectorAll('.sidewrap').forEach(function(w){
+  var side = w.querySelector('.sidetabs'); if(!side) return;
+  var btn = document.createElement('button'); btn.type='button'; btn.className='subtab-toggle';
+  btn.innerHTML = '<span class="tgl-label"></span><span class="tgl-arrow">▾</span>';
+  w.insertBefore(btn, side);
+  w._syncToggle = function(){
+    var a = w.querySelector('.subtab.active');
+    btn.querySelector('.tgl-label').textContent = a ? a.textContent : '';
+    btn.setAttribute('aria-expanded', w.classList.contains('nav-open') ? 'true' : 'false');
+  };
+  btn.addEventListener('click', function(){ w.classList.toggle('nav-open'); w._syncToggle(); });
+  w._syncToggle();
+});
+
+/* 참조 드로어 */
+function openRef(key){
+  var r = REFS[key]; if(!r) return;
+  document.getElementById('drawer-title').textContent = r.title || '';
+  document.getElementById('drawer-body').innerHTML = r.html || '';
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeRef(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  var r = e.target.closest('.ref'); if(r && r.dataset.ref){ openRef(r.dataset.ref); }
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeRef(); });
+
+/* ══ 페이지 내 검색 — 모든 패널 대상, 하이라이트+개수+Enter 이동. SVG 라벨·드로어·탭 제외 ══ */
+(function(){
+  function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  var tabsEl = document.querySelector('.tabs');
+  var box = document.createElement('div');
+  box.className = 'ip-search';
+  box.innerHTML = '<div class="ip-row"><input type="search" placeholder="이 보고서에서 검색…" aria-label="이 보고서에서 검색"><button class="ip-clear" type="button" aria-label="지우기">×</button></div><div class="ip-count"></div>';
+  tabsEl.parentNode.insertBefore(box, tabsEl.nextSibling);
+  var input = box.querySelector('input'), clearBtn = box.querySelector('.ip-clear'), countEl = box.querySelector('.ip-count');
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  var hits = [], activeIdx = -1;
+
+  function clearMarks(){
+    panels.forEach(function(main){
+      var marks = main.querySelectorAll('mark.ip-hit');
+      for(var i=0;i<marks.length;i++){ var m=marks[i]; m.parentNode.replaceChild(document.createTextNode(m.textContent), m); }
+      main.normalize();
+    });
+  }
+  function highlight(q){
+    clearMarks(); hits=[]; activeIdx=-1; if(!q) return;
+    var re = new RegExp(escRe(q),'gi');
+    panels.forEach(function(main){
+      var walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT, { acceptNode:function(n){
+        if(!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentNode;
+        if(p && (p.nodeName==='SCRIPT'||p.nodeName==='STYLE'||p.nodeName==='MARK')) return NodeFilter.FILTER_REJECT;
+        if(p && p.namespaceURI==='http://www.w3.org/2000/svg') return NodeFilter.FILTER_REJECT; /* SVG 라벨 보호 */
+        re.lastIndex=0; return re.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }});
+      var targets=[], node; while((node=walker.nextNode())) targets.push(node);
+      targets.forEach(function(n){
+        re.lastIndex=0; var frag=document.createDocumentFragment(), s=n.nodeValue, last=0, m;
+        while((m=re.exec(s))){
+          if(m.index>last) frag.appendChild(document.createTextNode(s.slice(last,m.index)));
+          var mk=document.createElement('mark'); mk.className='ip-hit'; mk.textContent=m[0];
+          frag.appendChild(mk); hits.push(mk); last=m.index+m[0].length;
+          if(m.index===re.lastIndex) re.lastIndex++;
+        }
+        if(last<s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+        n.parentNode.replaceChild(frag,n);
+      });
+    });
+  }
+  function reveal(node){
+    var pnl=node.closest('.panel'); if(pnl && !pnl.classList.contains('active')) tab(pnl.id);   /* 숨은 탭이면 전환 */
+    var sp=node.closest('.subpanel');                                                            /* 숨은 서브탭이면 전환 */
+    if(sp && !sp.classList.contains('active')){ var w=sp.closest('.sidewrap'); if(w) subtab(w, sp.dataset.sp); }
+    var el=node.parentElement; while(el){ if(el.tagName==='DETAILS') el.open=true; el=el.parentElement; } /* 접힌 아코디언 펼침 */
+  }
+  function setActive(i){
+    if(!hits.length) return;
+    if(activeIdx>=0 && hits[activeIdx]) hits[activeIdx].classList.remove('ip-active');
+    activeIdx=(i+hits.length)%hits.length;
+    var hit=hits[activeIdx]; hit.classList.add('ip-active');
+    reveal(hit);
+    hit.scrollIntoView({block:'center',behavior:'smooth'});
+  }
+  function apply(scrollFirst){
+    var q=input.value.trim(); clearBtn.style.display=q?'block':'none'; highlight(q);
+    if(!q){ countEl.textContent=''; return; }
+    countEl.textContent=hits.length?(hits.length+'개 일치 · Enter로 이동'):'일치 없음';
+    if(hits.length && scrollFirst) setActive(0);
+  }
+  var t;
+  input.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(function(){ apply(true); },120); });
+  input.addEventListener('keydown', function(e){
+    if(e.key==='Enter'){ e.preventDefault(); if(hits.length) setActive(activeIdx+(e.shiftKey?-1:1)); }
+    else if(e.key==='Escape'){ input.value=''; apply(false); input.blur(); }
+  });
+  clearBtn.addEventListener('click', function(){ input.value=''; apply(false); input.focus(); });
+})();
+</script>
+</body></html>
