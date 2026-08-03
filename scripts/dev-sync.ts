@@ -1,4 +1,4 @@
-// @version 1.3.6
+// @version 1.4.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -26,7 +26,25 @@ const RESET = '\x1b[0m';
     }
 }
 
-const msg = process.argv.slice(2).join(' ') || "chore: update";
+// ── Argument parsing ──────────────────────────────────────────────────────────
+// --body-file <path> (or --body-file=<path>) is consumed here and removed from
+// the commit-message args. The agent invoking /sync writes the PR body itself to
+// that file (see skills/sync/SKILL.md); when absent, the PR-creation fallback
+// chain below still applies.
+const rawArgs = process.argv.slice(2);
+let bodyFilePath = '';
+const msgArgs: string[] = [];
+for (let i = 0; i < rawArgs.length; i++) {
+  const arg = rawArgs[i];
+  if (arg === '--body-file') {
+    bodyFilePath = rawArgs[++i] ?? '';
+  } else if (arg.startsWith('--body-file=')) {
+    bodyFilePath = arg.slice('--body-file='.length);
+  } else {
+    msgArgs.push(arg);
+  }
+}
+const msg = msgArgs.join(' ') || "chore: update";
 
 // Language gate — commit messages / PR titles must be English (CONSTITUTION.md §3).
 // Runs before any git mutation so a non-English message never reaches a commit or PR
@@ -410,24 +428,61 @@ if (existingPrUrl) {
     console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);
     console.log(`  ${existingPrUrl}`);
 } else {
-    // Note: msg already passed the language gate above, so a non-zero exit here means
-    // gen-pr-body.ts hit a non-language failure (e.g. AI-generated body came back
-    // non-English) — safe to fall back to the template/--fill paths below, but surface
-    // the reason instead of silently swallowing it.
+    // PR body selection:
+    //   1. --body-file provided by the agent (skills/sync/SKILL.md) → validate
+    //      English, submit via `gh pr create --body-file` (no shell escaping).
+    //   2. gen-pr-body.ts template fallback (commit message + file list).
+    //   3. .github/pull_request_template.md.
+    //   4. gh pr create --fill.
     let prBody = "";
-    try {
-        const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
-        if (genRes.exitCode !== 0) {
-            console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
-            console.log(genRes.stderr.toString().trim());
+    let bodySourceFile = "";
+    if (bodyFilePath) {
+        if (!fs.existsSync(bodyFilePath)) {
+            console.log(`${YELLOW}⚠️  --body-file not found (${bodyFilePath}) — falling back to template/--fill${RESET}`);
+        } else {
+            const agentBody = fs.readFileSync(bodyFilePath, 'utf-8').trim();
+            if (!agentBody) {
+                console.log(`${YELLOW}⚠️  --body-file is empty — falling back to template/--fill${RESET}`);
+            } else {
+                // Same English gate as the commit message above.
+                if (hasNonEnglish(agentBody)) {
+                    console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
+                    console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
+                    if (import.meta.main) {
+                        process.exit(1);
+                    }
+                }
+                prBody = agentBody;
+                bodySourceFile = bodyFilePath;
+            }
         }
-        prBody = genRes.stdout.toString().trim();
-    } catch (err) {
-      console.error(`[dev-sync] Error: ${err}`);
+    }
+
+    if (!prBody) {
+        // Note: msg already passed the language gate above, so a non-zero exit here
+        // means gen-pr-body.ts hit a non-language failure — safe to fall back to the
+        // template/--fill paths below, but surface the reason instead of silently
+        // swallowing it.
+        try {
+            const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
+            if (genRes.exitCode !== 0) {
+                console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
+                console.log(genRes.stderr.toString().trim());
+            }
+            prBody = genRes.stdout.toString().trim();
+        } catch (err) {
+            console.error(`[dev-sync] Error: ${err}`);
+        }
     }
 
     let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
-    if (prBody) {
+    if (bodySourceFile) {
+        prCreateRetry = await withRetry(
+            () => $`gh pr create --title ${msg} --body-file ${bodySourceFile}`.nothrow(),
+            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },
+            'gh pr create'
+        );
+    } else if (prBody) {
         prCreateRetry = await withRetry(
             () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
             { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: { exitCode: number }) => r.exitCode === 0 },

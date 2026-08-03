@@ -60,12 +60,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.3.6 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `gen-pr-body.ts` | L0 | 1.1.5 | active | —| —| L0+L1 | —|
+| `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
@@ -256,7 +256,7 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Usage**: Called automatically by `bun run dev-sync`. Rarely invoked directly.
 
 #### `gen-pr-body.ts`
-**Purpose**: Generates PR body from commit log and memory log. Called by `dev-sync.ts`.
+**Purpose**: Generates a structured template PR body from commit message + file list — template fallback for `dev-sync.ts`. (AI-mode generation via `claude -p` was removed in 1.2.0; the agent writes the PR body itself per `skills/sync/SKILL.md`.)
 **Usage**: Invoked automatically. Can be called standalone: `bun run gen-pr-body "msg"`
 
 #### `generate-scripts-readme.ts`
