@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-03T14:44:24.602Z
+**Generated**: 2026-08-03T14:59:18.855Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -185,7 +185,7 @@
 | validate-output.ts | 1.0.1 | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
-| validate-skills.ts | 1.0.1 | scripts/validate-skills.ts | N/A |
+| validate-skills.ts | 1.0.2 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.5.13 | scripts/validate-templates.ts | js-yaml |
 | validation-policy.ts | 1.0.0 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
