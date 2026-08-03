@@ -17,6 +17,22 @@ This document tracks approved external references, repositories, and frameworks 
   - **Description**: Production-grade engineering skills for AI coding agents (TDD, refactoring, code review, etc.).
   - **Usage**: Converted into local `SKILL.md` format and statically added to the `co-develop/skills/` directory to provide robust engineering workflows.
 
+## Reporting & Presentation (Common)
+- **[beret21/reportme](https://github.com/beret21/reportme)**
+  - **Description**: Single-file interactive HTML report generation skill for AI agents.
+  - **License**: MIT (Copyright © 2026 beret21)
+  - **Usage**: Inspired the `skills/explain-me/` skill. Design system concepts (single-file
+    interactive HTML with tabs, drawers, heatmaps, search, theme switching) were adapted.
+    All code is self-authored.
+
+## Handbook & Course Materials (`co-deck`)
+- **[beret21/teachme](https://github.com/beret21/teachme)**
+  - **Description**: Themed, searchable handbook/study material generation skill for AI agents.
+  - **License**: MIT (Copyright © 2026 beret21)
+  - **Usage**: Inspired the `templates/co-deck/skills/handbook/` skill. Multi-stage
+    handbook generation with multi-agent verification concept was adapted.
+    All code is self-authored; built from scratch.
+
 ## Security & DevSecOps (`co-security`)
 - **[awesome-cyber-security](https://github.com/okhosting/awesome-cyber-security)**
   - **Description**: A comprehensive directory of cybersecurity tools, frameworks, and methodologies.

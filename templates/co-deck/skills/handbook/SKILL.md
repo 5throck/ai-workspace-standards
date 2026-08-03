@@ -13,6 +13,10 @@ status: active
 owner: pm
 last_reviewed: 2026-07-17
 prerequisites: research (optional — standalone mode has no prerequisites)
+attribution:
+  source: https://github.com/beret21/teachme
+  license: MIT
+  note: "Inspired by beret21/teachme. Built from scratch — no original code copied."
 ---
 
 ## Context

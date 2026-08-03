@@ -1,0 +1,23 @@
+# Third-Party Notices
+
+This project incorporates concepts from the following third-party works.
+All code is self-authored; no original source code was copied.
+
+## beret21/reportme v0.4.1
+- **Author**: beret21
+- **License**: MIT
+- **Source**: https://github.com/beret21/reportme
+- **Location**: `skills/explain-me/`
+- **Relationship**: Inspired by. The explain-me skill's design system (single-file
+  interactive HTML reports with tabs, drawers, heatmaps, search, and theme
+  switching) was influenced by reportme's architecture. All code, templates,
+  and validation scripts are self-authored.
+
+## beret21/teachme v0.3.1
+- **Author**: beret21
+- **License**: MIT
+- **Source**: https://github.com/beret21/teachme
+- **Location**: `templates/co-deck/skills/handbook/`
+- **Relationship**: Inspired by. The co-deck handbook skill's concept of
+  multi-stage handbook generation with multi-agent verification was
+  influenced by teachme. All code is self-authored; built from scratch.

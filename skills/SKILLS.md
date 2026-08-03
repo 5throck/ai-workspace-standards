@@ -34,6 +34,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `upgrade-project` | 1.1.0 | active | pm | 2026-07-31 | — | Upgrade existing L2/L3 project to current template version |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
+| `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
 
 ### Variant-Exclusive Skills
 
