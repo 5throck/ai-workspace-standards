@@ -24,7 +24,7 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Usage**: Called automatically by `bun run dev-sync`. Rarely invoked directly.
 
 #### `gen-pr-body.ts`
-**Purpose**: Generates PR body from commit log and memory log. Called by `dev-sync.ts`.
+**Purpose**: Generates a structured template PR body from commit message + file list — template fallback for `dev-sync.ts`. (AI-mode generation via `claude -p` was removed in 1.2.0; the agent writes the PR body itself per `skills/sync/SKILL.md`.)
 **Usage**: Invoked automatically. Can be called standalone: `bun run gen-pr-body "msg"`
 
 #### `generate-scripts-readme.ts`

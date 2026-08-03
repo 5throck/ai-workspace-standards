@@ -27,15 +27,14 @@ if [ "${AI_AUTOSTART:-1}" = "0" ]; then
   exit 0
 fi
 
-# Lock guard: prevent concurrent Claude background processes.
-# Note: the Claude process only reads/analyzes and writes to the log file
-# (.claude/post-checkout.log), so file conflicts are unlikely. The lock
-# primarily prevents redundant parallel AI sessions when the user checks
-# out multiple branches in quick succession.
-LOCK_FILE="/tmp/post-checkout-claude.lock"
+# Lock guard: prevent concurrent background AI sessions when the user checks out
+# multiple branches in quick succession. The AI process only reads/analyzes and
+# writes to the log file, so file conflicts are unlikely — the lock primarily
+# prevents redundant parallel sessions.
+LOCK_FILE="/tmp/post-checkout-ai.lock"
 
 if [ -f "$LOCK_FILE" ]; then
-  echo "[post-checkout] Claude analysis already running, skipping."
+  echo "[post-checkout] AI session already running, skipping."
   exit 0
 fi
 
@@ -53,13 +52,18 @@ if [[ "$BRANCH_NAME" == "feat/"* || "$BRANCH_NAME" == "feature/"* || "$BRANCH_NA
     # Build prompt from safe, validated branch name
     PROMPT="A new branch '${BRANCH_NAME}' was created. Please lead a PM kickoff meeting with all agents to derive improvement plans and create an implementation plan for this branch. Reference Phase 0/1."
 
-    # Log directory for background process output
-    mkdir -p .claude
-    LOG_FILE=".claude/post-checkout.log"
+    # Log location for the background process output — inside .git/, never committed.
+    LOG_FILE="$(git rev-parse --git-dir)/post-checkout-ai.log"
 
+    # Platform-neutral AI CLI detection — uses whichever CLI is installed:
+    # Claude Code, Gemini CLI, Antigravity CLI, or Codex.
     if command -v claude &> /dev/null; then
         claude -p "$PROMPT" > "$LOG_FILE" 2>&1 &
         echo "✅ Claude Code launched in the background."
+        echo "   Output log: $LOG_FILE"
+    elif command -v gemini &> /dev/null; then
+        gemini -p "$PROMPT" > "$LOG_FILE" 2>&1 &
+        echo "✅ Gemini CLI launched in the background."
         echo "   Output log: $LOG_FILE"
     elif command -v antigravity &> /dev/null; then
         antigravity pm --prompt "$PROMPT" > "$LOG_FILE" 2>&1 &
@@ -70,7 +74,7 @@ if [[ "$BRANCH_NAME" == "feat/"* || "$BRANCH_NAME" == "feature/"* || "$BRANCH_NA
         echo "✅ Codex CLI launched in the background."
         echo "   Output log: $LOG_FILE"
     else
-        echo "⚠️ No supported AI CLI found (claude, antigravity, codex)."
+        echo "⚠️ No supported AI CLI found (claude, gemini, antigravity, codex)."
         echo "   Please run the kickoff manually:"
         echo "   'Let's start the PM agent kickoff meeting for this project.'"
     fi
