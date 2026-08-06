@@ -19,6 +19,18 @@ function usage(): never {
 }
 
 /**
+ * Quote a path argument for safe interpolation into the Windows shell.
+ * Used because spawn() is invoked with `shell: true` on win32 (see comment
+ * on runPythonScript below) — that shell resolution otherwise passes
+ * user-derived path arguments to cmd.exe without escaping, which is a
+ * shell-injection-shaped risk if a path contains shell metacharacters.
+ * No-op on non-Windows platforms where shell:false is used.
+ */
+function winQuote(path: string): string {
+  return process.platform === "win32" ? `"${path.replace(/"/g, '\\"')}"` : path;
+}
+
+/**
  * Spawn a Python script and capture its stdout.
  * On Windows, uses `shell: true` because Bun strips backslashes from spawn args,
  * and Windows AppExecutionAlias stubs require shell resolution.
@@ -31,7 +43,8 @@ function runPythonScript(
     const scriptDir = dirname(process.argv[1]);
     const scriptPath = resolve(scriptDir, "..", "..", "python", scriptName);
     const pythonBin = process.platform === "win32" ? "python" : "python3";
-    const proc = spawn(pythonBin, [scriptPath, ...args], {
+    const quotedArgs = args.map(winQuote);
+    const proc = spawn(pythonBin, [scriptPath, ...quotedArgs], {
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env },
       shell: process.platform === "win32",

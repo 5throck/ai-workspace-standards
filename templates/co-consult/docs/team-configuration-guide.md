@@ -210,4 +210,4 @@ Regardless of scenario size, always include:
 
 - [AGENTS.md](../AGENTS.md) — Full agent roster with file references
 - [docs/phase-definitions.md](phase-definitions.md) — Phase-by-phase workflow detail
-- [agents/engagement-leader.md](../agents/engagement-leader.md) — PM/Engagement Leader governance rules
+- [agents/pm.md](../agents/pm.md) — PM/Engagement Leader governance rules

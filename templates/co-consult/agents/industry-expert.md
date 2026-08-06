@@ -18,7 +18,7 @@ examples:
   - user: "Provide healthcare industry expertise for the digital transformation strategy"
     assistant: "Applying healthcare industry expertise: analyzing regulatory landscape, competitive dynamics, technology adoption patterns, and strategic implications."
 phases: [1, 2]
-handoff_to: [pm, project-consultant]
+handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [research-analysis, competitive-intelligence]
 version: "1.0.0"

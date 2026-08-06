@@ -23,6 +23,7 @@ This directory contains variant-specific skills for the `co-consult` template.
 | Company Intelligence | `company-intelligence/` | Comprehensive company and corporate group intelligence gathering and analysis |
 | DART Disclosure Parser | `dart-disclosure-parser/` | Real-time DART Open API corporate disclosure and financial statement parsing rules |
 | MECE Logic Auditor | `mece-logic-auditor/` | MECE issue tree auditing and strategic reasoning evaluation rules |
+| Financial Statement Analysis | `financial-statement-analysis/` | End-to-end Korean financial statement analysis pipeline — DART collection, validation, normalization, KPI extraction, and ROIC value driver tree |
 
 
 ## Usage

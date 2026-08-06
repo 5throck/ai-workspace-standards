@@ -18,8 +18,8 @@ examples:
   - user: "Our team culture feels fragmented. What should our values be?"
     assistant: "Synthesizing team input, organizational history, and aspirational goals to craft a coherent culture narrative."
 phases: [1, 2]
-handoff_to: [engagement-leader]
-handoff_from: [engagement-leader]
+handoff_to: [pm]
+handoff_from: [pm]
 required_skills: [stakeholder-alignment, org-readiness-assessment, change-impact-assessment]
 version: "1.0.0"
 last_updated: "2026-06-02"

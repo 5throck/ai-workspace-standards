@@ -498,8 +498,8 @@ function findLibreOffice(): string | null {
 
   if (platform === 'win32') {
     const candidates = [
-      'C:\Program Files\LibreOffice\program\soffice.exe',
-      'C:\Program Files (x86)\LibreOffice\program\soffice.exe',
+      'C:/Program Files/LibreOffice/program/soffice.exe',
+      'C:/Program Files (x86)/LibreOffice/program/soffice.exe',
     ];
     for (const p of candidates) {
       if (existsSync(p)) return p;
@@ -529,6 +529,20 @@ function findLibreOffice(): string | null {
   return null;
 }
 
+/**
+ * Escape a path for safe interpolation inside a double-quoted shell argument.
+ * execSync always spawns via a shell, so user/session-derived paths (outDir,
+ * docxPath) must have embedded double-quotes escaped before interpolation to
+ * avoid a shell-injection-shaped risk. (execFileSync array-form was considered
+ * instead of shell interpolation, but Bun strips backslashes from array-form
+ * spawn args on Windows — see the runPythonScript comment in
+ * financial-pipeline.ts — which would corrupt these backslash-separated
+ * Windows paths. Escaped string interpolation is the safer choice here.)
+ */
+function shellEscapePath(path: string): string {
+  return path.replace(/"/g, '\\"');
+}
+
 async function convertDocxToPdf(docxPath: string, outDir: string): Promise<string | null> {
   const soffice = findLibreOffice();
   if (!soffice) {
@@ -537,7 +551,10 @@ async function convertDocxToPdf(docxPath: string, outDir: string): Promise<strin
   }
 
   try {
-    execSync(`"${soffice}" --headless --convert-to pdf --outdir "${outDir}" "${docxPath}"`, {
+    const safeOutDir = shellEscapePath(outDir);
+    const safeDocxPath = shellEscapePath(docxPath);
+    const sofficeCommand = ['"' + soffice + '"', '--headless', '--convert-to', 'pdf', '--outdir', '"' + safeOutDir + '"', '"' + safeDocxPath + '"'].join(' ');
+    execSync(sofficeCommand, {
       encoding: 'utf8',
       stdio: 'pipe',
       timeout: 60_000,
