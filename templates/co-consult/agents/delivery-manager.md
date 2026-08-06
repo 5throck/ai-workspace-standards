@@ -18,8 +18,8 @@ examples:
   - user: "Coordinate stakeholder reviews for the documentation draft"
     assistant: "Managing stakeholder review cycle: identifying reviewers, setting deadlines, tracking feedback, and consolidating input for communications-lead."
 phases: [4]
-handoff_to: [engagement-leader]
-handoff_from: [engagement-leader]
+handoff_to: [pm]
+handoff_from: [pm]
 required_skills: [project-delivery, stakeholder-review-management]
 version: "1.0.0"
 last_updated: "2026-06-02"

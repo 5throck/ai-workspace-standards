@@ -18,6 +18,18 @@ function usage(): never {
   process.exit(1);
 }
 
+/**
+ * Quote a path argument for safe interpolation into the Windows shell.
+ * Used because spawn() is invoked with `shell: true` on win32 (see comment
+ * in financial-pipeline.ts) — that shell resolution otherwise passes
+ * user-derived path arguments to cmd.exe without escaping, which is a
+ * shell-injection-shaped risk if a path contains shell metacharacters.
+ * No-op on non-Windows platforms where shell:false is used.
+ */
+function winQuote(path: string): string {
+  return process.platform === "win32" ? `"${path.replace(/"/g, '\\"')}"` : path;
+}
+
 function main() {
   const args = process.argv.slice(2);
   if (args.length === 0) usage();
@@ -41,7 +53,7 @@ function main() {
   const scriptPath = resolve(scriptDir, "..", "..", "python", "normalize.py");
   const pythonBin = process.platform === "win32" ? "python" : "python3";
 
-  const proc = spawn(pythonBin, [scriptPath, dartPath, mappingPath], {
+  const proc = spawn(pythonBin, [scriptPath, winQuote(dartPath), winQuote(mappingPath)], {
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env },
     shell: process.platform === "win32",

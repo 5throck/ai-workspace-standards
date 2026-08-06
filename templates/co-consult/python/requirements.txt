@@ -1,0 +1,7 @@
+# Python dependencies for templates/co-consult/python/ (normalize.py, validate.py,
+# kpi.py, driver_tree.py). These scripts perform the Class A Computational Integrity
+# financial calculations for the financial-statement-analysis pipeline (see
+# scripts/co-consult/financial-pipeline.ts and skills/financial-statement-analysis/SKILL.md).
+#
+# Install with: pip install -r requirements.txt
+pandas>=2.0,<3.0

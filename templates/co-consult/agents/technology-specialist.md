@@ -18,7 +18,7 @@ examples:
   - user: "How do I create a shared Excel workbook for team budget tracking?"
     assistant: "Guiding on Excel co-authoring setup, sharing permissions, version control, and integration with SharePoint for real-time collaboration."
 phases: [4]
-handoff_to: [engagement-leader]
+handoff_to: [pm]
 handoff_from: [communications-lead, solutions-architect]
 required_skills: [technical-feasibility, solution-design]
 version: "1.0.0"

@@ -207,15 +207,15 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|------------------|
-| `change-management-partner` | Phase 1 | "change management partner", "change management", "organizational transformation", "stakeholder" |
+| `change-management-partner` | Phase 1, 2 | "change management partner", "change management", "organizational transformation", "stakeholder" |
 | `communications-lead` | Phase 3 | "communications lead", "strategy", "strategic analysis", "communicate", "presentation" |
-| `data-analyst` | Phase 1 | "data analyst", "research", "analyze", "investigate", "data analysis" |
+| `data-analyst` | Phase 1, 3 | "data analyst", "research", "analyze", "investigate", "data analysis" |
 | `delivery-manager` | Phase 4 | "delivery manager", "schedule", "coordinate", "track progress" |
-| `industry-expert` | Phase 1 | "industry expert", "industry", "market landscape", "competitive analysis" |
-| `sme` | Phase 1 | "sme", "design", "create design", "subject matter", "functional expertise" |
+| `industry-expert` | Phase 1, 2 | "industry expert", "industry", "market landscape", "competitive analysis" |
+| `sme` | Phase 1, 2, 3 | "sme", "design", "create design", "subject matter", "functional expertise" |
 | `solutions-architect` | Phase 3 | "solutions architect", "design", "create design", "solution design", "architecture" |
 | `strategy-analyst` | Phase 1 | "strategy analyst", "research", "analyze", "investigate", "strategy" |
-| `technology-specialist` | Phase 4 | "technology specialist", "change management", "organizational transformation", "stakeholder" |
+| `technology-specialist` | Phase 4 | "technology specialist", "technology platform", "digital transformation", "collaboration tools" |
 | `workstream-lead` | Phase 4 | "workstream lead", "schedule", "coordinate", "track progress", "workstream" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
@@ -546,9 +546,9 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` | General-purpose development workflows |
 
 **Location Rules**:
-- **Single location requirement**: Workspace-level skills should exist **only** in `skills/` folder (priority 1). Do not duplicate these in `.claude/skills/` or `.gemini/skills/`.
-- **Platform-specific skills**: `.claude/skills/` and `.gemini/skills/` are reserved for platform-specific hooks, commands, and lifecycle management tools that differ between Claude Code and Gemini CLI.
-- **No cross-duplication**: Avoid duplicating the same skill across multiple locations. Choose the single most appropriate location based on the skill's purpose.
+- **Canonical source**: `skills/<name>/SKILL.md` (priority 1) is the single source of truth for skill content. Edits are made there, never directly in a mirror.
+- **Variant-specific skills are mirrored, not duplicated content**: any skill declared in `variant.json`'s `skill_manifest.variant_specific` is intentionally mirrored byte-for-byte into `.claude/skills/<name>/` and `.gemini/skills/<name>/` for platform-native discovery — `scripts/validate-templates.ts` requires this mirror to exist for every `skill_manifest.variant_specific` entry. This is not "cross-duplication" in the sense of divergent content; it's a required propagation step, kept in sync with the `skills/` source.
+- **True platform-only skills**: `.claude/skills/` and `.gemini/skills/` may also contain skills that exist ONLY there (not in `skills/`) — reserved for platform-specific hooks, commands, and lifecycle tools that genuinely differ between Claude Code and Gemini CLI (e.g. `finishing-a-development-branch`, `platform-command-lifecycle-manager`).
 
 **Resolution Rule**: If a higher-priority skill's `metadata.triggers` matches the user request, use it — do **not** fall through to lower-priority skills with overlapping intent.
 
