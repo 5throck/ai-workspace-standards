@@ -37,16 +37,26 @@ templates/
 | [`co-deck`](co-deck/) | 🔶 Beta | 13개 에이전트 및 다중 테마 HTML-to-PDF 파이프라인을 갖춘 강의/발표 자료 제작 워크플로우 |
 | [`co-game`](co-game/) | 🔶 Beta | Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 13개 에이전트 워크플로우 |
 
-## Phase 1 고도화 기능
+## Phase 1, 2 & 3 고도화 기능
 
-다음 Phase 1 기능들이 템플릿 variant 전반에 통합되었습니다:
+다음 2026 Q3–Q4 로드맵 고도화 기능들이 템플릿 variant 전반에 통합되었습니다:
 
-- **`generate-ide-rules.ts`**: 스캐폴딩 시 프로젝트 컨텍스트에 맞춰 `.cursorrules` 및 `.clauderules` IDE 규칙 파일을 자동 생성.
+- **`generate-ide-rules.ts`**: 스캐폴딩 시 프로젝트 컨텍스트에 맞춰 `.cursorrules` 및 `.clauderules` IDE 규칙 파일을 자동 생성 (`co-develop`).
 - **`zod-contract-gate`**: `co-develop`의 내부 API 계약 경계에서 Zod 런타임 스키마 검증 강제.
+- **`swe-solve`**: `co-develop`의 자율 4단계 문제 해결 파이프라인 (탐색 & 진단 → 국소화 & 계획 → 코드 수정 & 테스트 → 리뷰 & PR).
+- **`compile-tokens.ts`**: `co-design`에서 `tokens.json` 디자인 토큰을 CSS 커스텀 속성 및 TypeScript 타입으로 컴파일.
+- **`accessibility-audit`**: `co-design`에서 axe-core 기반 자동화된 WCAG 2.1 AA 접근성 평가.
+- **`dart-disclosure-parser`**: `co-consult`에서 대한민국 DART Open API 실시간 기업 공시 및 재무제표 파서.
+- **`mece-logic-auditor`**: `co-consult`에서 ME/CE/Logic 스코어카드를 갖춘 구조적 MECE 이슈 트리 감사 스킬.
 - **`presenter-mode`**: `co-deck`에서 BroadcastChannel 동기화 기반의 경량 HTML5 이중 창 발표자 모드 제공.
 - **`render-pdf-deck.ts`**: `co-deck`에서 CSS `@page` 인쇄 규칙을 준수하는 Playwright 기반 페이징 미디어 PDF 렌더러.
+- **`ecs-core.ts`**: `co-game`에서 150줄 분량의 Zero-dependency TypeScript Entity Component System 코어 엔진.
+- **`sound-synth`**: `co-game`에서 Web Audio API 및 jsfxr 파라미터 기반 절차적 8-bit 레트로 사운드 이펙트 생성기.
 - **`stride-threat-matrix`**: `co-security`에서 DREAD 위험 평가를 포함한 자동화된 STRIDE 위협 모델링 템플릿.
-- **`sarif-exporter`**: `co-security`에서 보안 점검 결과를 GitHub PR Check에 즉시 게시할 수 있는 SARIF 리포트 내보내기.
+- **`sarif-exporter`**: `co-security`에서 보안 점검 결과를 GitHub PR Check에 즉시 게시할 수 있는 SARIF v2.1.0 리포트 내보내기.
+- **`md-to-ooxml.ts`**: `co-work`에서 Markdown 문서를 MS Office OOXML (`.docx` / `.xlsx`) 구조로 컴파일.
+- **`standup-synthesizer`**: `co-work`에서 24시간 범위의 일일 스탠드업 다이제스트 자동 합성 스킬.
+
 
 ## 사용법
 

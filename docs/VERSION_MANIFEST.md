@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-06T13:53:06.564Z
+**Generated**: 2026-08-06T14:01:36.021Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 33
-- **Scripts**: 140
+- **Skills**: 35
+- **Scripts**: 141
 - **Commands**: 8
 
 ---
@@ -58,7 +58,9 @@
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
 | sound-synth | 1.0.0 | skills/sound-synth/SKILL.md | workspace | sound-synth, /sound-synth, procedural sound generation, 8-bit retro sound effects, jsfxr sound synth | sound-designer |
 | source-command-commit-push-pr | 1.0.1 | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
+| standup-synthesizer | 1.0.0 | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | stride-threat-matrix | 1.0.0 | skills/stride-threat-matrix/SKILL.md | workspace | stride-threat-matrix, /stride-threat-matrix, threat modeling, dread risk scoring, stride matrix | security-expert |
+| swe-solve | 1.0.0 | skills/swe-solve/SKILL.md | workspace | swe-solve, solve issue, autonomous issue resolution, issue to pr | pm |
 | sync | 1.2.0 | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
@@ -133,6 +135,7 @@
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
+| md-to-ooxml.ts | 1.0.0 | scripts/md-to-ooxml.ts | fs, path |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
 | new-project.ts | 1.5.1 | scripts/new-project.ts | js-yaml |
@@ -237,7 +240,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 5 / 33
+- **Skills with parity**: 5 / 35
 
 ---
 

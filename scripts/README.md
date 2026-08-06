@@ -57,6 +57,10 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Purpose**: Playwright paged-media presentation PDF renderer. Converts HTML presentation decks into paginated PDF files respecting `@page` print rules using Playwright headless Chromium.
 **Usage**: `bun scripts/render-pdf-deck.ts [--input <file>] [--output <file>] [--check]`
 
+#### `md-to-ooxml.ts`
+**Purpose**: Markdown to Microsoft Office OOXML (`.docx` / `.xlsx`) compiler script for `co-work`. Compiles Markdown source files into native Microsoft Office Open XML structures.
+**Usage**: `bun scripts/md-to-ooxml.ts --input <file.md> [--output <file>] [--type docx|xlsx] [--check]`
+
 ---
 
 ### Installation

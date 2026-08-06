@@ -37,16 +37,26 @@ templates/
 | [`co-deck`](co-deck/) | 🔶 Beta | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
 | [`co-game`](co-game/) | 🔶 Beta | Game development for HTML5 Canvas with Vanilla TypeScript and 13 agents |
 
-## Phase 1 Advancements
+## Phase 1, 2 & 3 Advancements
 
-The following Phase 1 features have been integrated across template variants:
+The following 2026 Q3–Q4 roadmap enhancements have been integrated across template variants:
 
-- **`generate-ide-rules.ts`**: Automatically generates `.cursorrules` and `.clauderules` context rules during scaffolding to sync IDE coding agents with project context.
+- **`generate-ide-rules.ts`**: Automatically generates `.cursorrules` and `.clauderules` context rules during scaffolding to sync IDE coding agents with project context (`co-develop`).
 - **`zod-contract-gate`**: Mandates Zod runtime schema validation across internal API contract boundaries in `co-develop`.
-- **`presenter-mode`**: Provides lightweight HTML5 dual-window presentation mode with BroadcastChannel synchronization in `co-deck`.
+- **`swe-solve`**: Autonomous 4-stage problem-solving workflow (Ingest & Inspect → Localization & Plan → Mutation & Test → Review & PR) in `co-develop`.
+- **`compile-tokens.ts`**: Compiles `tokens.json` design tokens to CSS custom properties and TypeScript types in `co-design`.
+- **`accessibility-audit`**: Automated WCAG 2.1 AA accessibility evaluation using axe-core in `co-design`.
+- **`dart-disclosure-parser`**: Real-time South Korean DART Open API corporate disclosure and financial statement parser in `co-consult`.
+- **`mece-logic-auditor`**: Structural MECE issue tree auditor with ME/CE/Logic scorecards in `co-consult`.
+- **`presenter-mode`**: Dual-window HTML5 presenter display with BroadcastChannel synchronization in `co-deck`.
 - **`render-pdf-deck.ts`**: Playwright-based paged-media presentation PDF renderer supporting CSS `@page` print rules in `co-deck`.
+- **`ecs-core.ts`**: Zero-dependency 150-line TypeScript Entity Component System core engine in `co-game`.
+- **`sound-synth`**: Web Audio API procedural retro 8-bit sound effect generator (`jsfxr`) in `co-game`.
 - **`stride-threat-matrix`**: Automated STRIDE threat modeling template with DREAD risk scoring in `co-security`.
-- **`sarif-exporter`**: Exports security findings in SARIF format for posting directly to GitHub PR checks in `co-security`.
+- **`sarif-exporter`**: Exports security findings in SARIF v2.1.0 format for GitHub PR security checks in `co-security`.
+- **`md-to-ooxml.ts`**: Markdown to native Microsoft Office OOXML (`.docx` / `.xlsx`) compiler script in `co-work`.
+- **`standup-synthesizer`**: Automated 24-hour daily standup digest synthesizer in `co-work`.
+
 
 ## Usage
 

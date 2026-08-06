@@ -145,6 +145,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `md-to-ooxml.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.5.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -291,6 +292,10 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 #### `render-pdf-deck.ts`
 **Purpose**: Playwright paged-media presentation PDF renderer. Converts HTML presentation decks into paginated PDF files respecting `@page` print rules using Playwright headless Chromium.
 **Usage**: `bun scripts/render-pdf-deck.ts [--input <file>] [--output <file>] [--check]`
+
+#### `md-to-ooxml.ts`
+**Purpose**: Markdown to Microsoft Office OOXML (`.docx` / `.xlsx`) compiler script for `co-work`. Compiles Markdown source files into native Microsoft Office Open XML structures.
+**Usage**: `bun scripts/md-to-ooxml.ts --input <file.md> [--output <file>] [--type docx|xlsx] [--check]`
 
 ---
 
