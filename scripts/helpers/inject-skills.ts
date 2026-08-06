@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * inject-skills.ts
- * @version 1.0.1
+ * @version 1.0.2
  * inject-skills.ts — Inject AGENTS.md Skills table into context.md
  *
  * Usage:
@@ -25,7 +25,10 @@ if (!projectDir) {
 }
 
 // Try to find variant context file
-const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult'];
+// Keep in sync with templates/co-*/docs/<variant>.context.md files that use the
+// <!-- DYNAMIC_SKILLS_START --> / <!-- DYNAMIC_SKILLS_END --> marker pattern.
+// co-deck is intentionally excluded: it maintains a static skills table, not the marker.
+const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult', 'co-game'];
 let contextMdPath: string | null = null;
 
 for (const variant of variants) {

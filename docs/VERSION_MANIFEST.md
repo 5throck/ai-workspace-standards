@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-06T14:11:20.060Z
+**Generated**: 2026-08-06T23:18:57.710Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -126,7 +126,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-global-plugins.ts | 1.0.2 | scripts/helpers/inject-global-plugins.ts | N/A |
-| inject-skills.ts | 1.0.1 | scripts/helpers/inject-skills.ts | N/A |
+| inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.9.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
@@ -200,7 +200,7 @@
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.2 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.13 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.14 | scripts/validate-templates.ts | js-yaml |
 | validation-policy.ts | 1.0.0 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |

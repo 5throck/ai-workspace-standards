@@ -214,7 +214,7 @@
       "theme_manifest": {
         "description": "HTML theme definitions for lecture slides",
         "required_fields": ["themes_dir", "base_css", "available", "default", "overrides_dir"],
-        "notes": "CSS variable override themes. DOM structure immutable across all themes."
+        "notes": "CSS variable override themes. DOM structure immutable across all themes. overrides_dir accepts either on-disk layout per theme: flat (<overrides_dir>/<theme>.css) or nested (<overrides_dir>/<theme>/style.css, e.g. co-deck's shared styles/ pool) — validate-templates.ts B-04 checks both before failing."
       },
       "lecture_profile": {
         "description": "Lecture profile template metadata",
