@@ -22,9 +22,9 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 <!-- VARIANT-AGENTS-START -->
 | **analyst** | [`agents/analyst.md`](agents/analyst.md) | Medium | Systematic investigation, data synthesis, and evidence gathering specialist |
 | **content-writer** | [`agents/content-writer.md`](agents/content-writer.md) | Medium | Research-to-documentation transformation and communications specialist |
-| **ms365-expert** | [`agents/ms365-expert.md`](agents/ms365-expert.md) | Low | Microsoft 365 platform expertise for productivity and collaboration tools |
+| **ms365-expert** (optional) | [`agents/ms365-expert.md`](agents/ms365-expert.md) | Low | Microsoft 365 platform expertise for productivity and collaboration tools |
 | **project-coordinator** | [`agents/project-coordinator.md`](agents/project-coordinator.md) | Low | Schedule management, stakeholder communication, and delivery logistics specialist |
-| **storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Organizational culture, change narratives, and institutional knowledge specialist |
+| **storyteller** (optional) | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Organizational culture, change narratives, and institutional knowledge specialist |
 | **technical-writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | API documentation, technical guides, and developer resources creator |
 <!-- VARIANT-AGENTS-END -->
 ---
@@ -168,10 +168,10 @@ All specialist agents below are dispatched ONLY through PM:
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|------------------|
 | `analyst` | Phase 1 | "analyst", "research", "analyze", "investigate", "data analysis" |
-| `content-writer` | Phase 3 | "content writer", "research", "analyze", "investigate", "write" |
-| `ms365-expert` | Phase 4 | "ms365 expert", "microsoft 365", "sharepoint", "teams", "outlook" |
-| `project-coordinator` | Phase 4 | "project coordinator", "communicate", "presentation", "narrative", "schedule" |
-| `storyteller` | Phase 1 | "storyteller", "communicate", "presentation", "narrative" |
+| `content-writer` | Phase 3 | "content writer", "documentation", "write content", "write" |
+| `ms365-expert` (optional) | Phase 4 | "ms365 expert", "microsoft 365", "sharepoint", "teams", "outlook" |
+| `project-coordinator` | Phase 4 | "project coordinator", "communicate", "schedule", "logistics", "delivery timeline" |
+| `storyteller` (optional) | Phase 1 | "storyteller", "communicate", "presentation", "narrative" |
 | `technical-writer` | Phase 3 | "technical writer", "write", "document", "draft" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
