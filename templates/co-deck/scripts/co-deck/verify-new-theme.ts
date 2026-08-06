@@ -19,7 +19,7 @@
 //
 // Exit codes: 0 = all checks pass, 1 = any check fails
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync, unlinkSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { resolveWorkspaceRoot, getArg, listThemeDirs } from './lib/theme-utils.js';
@@ -83,8 +83,9 @@ function check1_structuralValidation(): CheckResult {
   const start = Date.now();
   try {
     const script = join(dirname(import.meta.path), 'validate-theme-styles.ts');
-    const stdout = execSync(
-      `bun "${script}" --root "${workspaceRoot}"`,
+    const stdout = execFileSync(
+      'bun',
+      [script, '--root', workspaceRoot],
       { encoding: 'utf-8', timeout: 15000, stdio: ['pipe', 'pipe', 'pipe'] },
     );
     return {
@@ -111,8 +112,9 @@ function check2_manifestFreshness(): CheckResult {
   const start = Date.now();
   try {
     const script = join(dirname(import.meta.path), 'generate-themes-manifest.ts');
-    const stdout = execSync(
-      `bun "${script}" --root "${workspaceRoot}" --check`,
+    const stdout = execFileSync(
+      'bun',
+      [script, '--root', workspaceRoot, '--check'],
       { encoding: 'utf-8', timeout: 10000, stdio: ['pipe', 'pipe', 'pipe'] },
     );
     return {
@@ -341,8 +343,9 @@ function check4_fixtureBuild(): CheckResult {
 
     try {
       const extractScript = join(dirname(import.meta.path), 'extract_slidedata.mjs');
-      execSync(
-        `bun "${extractScript}" "${outputHtml}" "${extractedJson}"`,
+      execFileSync(
+        'bun',
+        [extractScript, outputHtml, extractedJson],
         { encoding: 'utf-8', timeout: 10000, stdio: ['pipe', 'pipe', 'pipe'] },
       );
       if (existsSync(extractedJson)) {
@@ -574,8 +577,9 @@ presentation:
     // Run gen-slides-pdf.ts --sample 5
     const pdfScript = join(dirname(import.meta.path), 'gen-slides-pdf.ts');
     const projectRelPath = `scripts/co-deck/tests/tmp/_verify-pdf-${themeName}`;
-    const stdout = execSync(
-      `bun "${pdfScript}" --project "${projectRelPath}" --sample 5 --out verify-sample.pdf`,
+    const stdout = execFileSync(
+      'bun',
+      [pdfScript, '--project', projectRelPath, '--sample', '5', '--out', 'verify-sample.pdf'],
       { encoding: 'utf-8', timeout: 30000, cwd: workspaceRoot, stdio: ['pipe', 'pipe', 'pipe'] },
     );
 

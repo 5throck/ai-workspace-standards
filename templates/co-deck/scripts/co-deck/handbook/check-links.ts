@@ -1,3 +1,4 @@
+// @version 1.0.0
 // scripts/co-deck/handbook/check-links.ts
 // Check ①: Verify all internal a href targets resolve to existing files.
 // Adapted from Handbooks/multi-agent-harness-handbook/scripts/check-links.ts

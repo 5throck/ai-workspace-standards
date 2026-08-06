@@ -120,12 +120,105 @@
       "name": "html-build"
     },
     {
+      "name": "measure"
+    },
+    {
       "name": "prep-pdf"
     },
     {
       "name": "pdf-export"
+    },
+    {
+      "name": "theme-authoring"
+    },
+    {
+      "name": "handbook"
+    },
+    {
+      "name": "presenter-mode"
     }
   ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "version",
+        "layer": "workspace",
+        "used_by_agents": ["design", "html-build", "image-curator", "diagram-specialist", "measure", "pdf-export", "research", "source-verifier", "storyline", "handbook-writer", "handbook-reviewer"],
+        "phases": [0, 1, 2, 3, 4, 5, 6],
+        "platform_parity": "required"
+      },
+      {
+        "name": "research",
+        "layer": "workspace",
+        "used_by_agents": ["research"],
+        "phases": [1],
+        "platform_parity": "required"
+      },
+      {
+        "name": "storyline",
+        "layer": "workspace",
+        "used_by_agents": ["storyline"],
+        "phases": [2, 3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "design",
+        "layer": "workspace",
+        "used_by_agents": ["design"],
+        "phases": [3],
+        "platform_parity": "required"
+      },
+      {
+        "name": "html-build",
+        "layer": "workspace",
+        "used_by_agents": ["html-build"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "measure",
+        "layer": "workspace",
+        "used_by_agents": ["measure"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "prep-pdf",
+        "layer": "workspace",
+        "used_by_agents": ["measure", "pdf-export"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "pdf-export",
+        "layer": "workspace",
+        "used_by_agents": ["pdf-export"],
+        "phases": [4, 5],
+        "platform_parity": "required"
+      },
+      {
+        "name": "theme-authoring",
+        "layer": "workspace",
+        "used_by_agents": ["pm"],
+        "phases": [],
+        "platform_parity": "required"
+      },
+      {
+        "name": "handbook",
+        "layer": "workspace",
+        "used_by_agents": ["handbook-writer", "handbook-reviewer"],
+        "phases": ["H-2", "H-3", "H-4", "H-5"],
+        "platform_parity": "required"
+      },
+      {
+        "name": "presenter-mode",
+        "layer": "workspace",
+        "used_by_agents": ["html-build"],
+        "phases": [4],
+        "platform_parity": "required"
+      }
+    ]
+  },
   "script_manifest": {
     "variant_scripts_dir": "scripts/co-deck",
     "local": [
@@ -197,6 +290,46 @@
       {
         "name": "html-to-pdf",
         "path": "scripts/co-deck/html-to-pdf.ts"
+      },
+      {
+        "name": "apply-handbook-theme",
+        "path": "scripts/co-deck/handbook/apply-handbook-theme.ts"
+      },
+      {
+        "name": "check-authoring",
+        "path": "scripts/co-deck/handbook/check-authoring.ts"
+      },
+      {
+        "name": "check-labels",
+        "path": "scripts/co-deck/handbook/check-labels.ts"
+      },
+      {
+        "name": "check-links",
+        "path": "scripts/co-deck/handbook/check-links.ts"
+      },
+      {
+        "name": "check-search",
+        "path": "scripts/co-deck/handbook/check-search.ts"
+      },
+      {
+        "name": "check-symmetry",
+        "path": "scripts/co-deck/handbook/check-symmetry.ts"
+      },
+      {
+        "name": "handbook-doctor",
+        "path": "scripts/co-deck/handbook/handbook-doctor.ts"
+      },
+      {
+        "name": "nav-utils",
+        "path": "scripts/co-deck/handbook/nav-utils.ts"
+      },
+      {
+        "name": "scaffold-handbook",
+        "path": "scripts/co-deck/handbook/scaffold-handbook.ts"
+      },
+      {
+        "name": "validate-nav",
+        "path": "scripts/co-deck/handbook/validate-nav.ts"
       }
     ],
     "external": []
@@ -205,6 +338,7 @@
     "themes_dir": "docs/html-themes",
     "base_css": "docs/html-themes/styles/base.css",
     "styles_dir": "docs/html-themes/styles",
+    "overrides_dir": "docs/html-themes/styles",
     "shared_layout_base": "docs/html-themes/themes/_shared/layout_base.json",
     "available": [
       "premium-dark",

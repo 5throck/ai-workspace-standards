@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# co-deck
+# {{PROJECT_NAME}}
 
 **Language**: **English** · [한국어](README_ko.md)
 
@@ -12,7 +12,7 @@ sync_version: 1
 
 ---
 
-Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage pipeline for handbook/course-site production. Includes 12 specialized agents covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook document production.
+Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage pipeline for handbook/course-site production. Includes 12 specialized agents covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (6 themes), layout measurement, PDF export, and handbook document production.
 
 ## Quick Start
 
@@ -53,7 +53,7 @@ This variant focuses on lecture and presentation material production — from re
 | design | Locks visual design style into design_spec.md | Medium | inherit |
 | image-curator | Searches and downloads commercial-use images (Pixabay/Unsplash/Pexels) | Medium | inherit |
 | diagram-specialist | Generates SVG concept diagrams and data charts from visual_spec; SVG primary for HTML, PNG optional for PDF | Medium | inherit |
-| html-build | Generates HTML slides with theme injection (`data-theme`); 5 themes | Medium | inherit |
+| html-build | Generates HTML slides with theme injection (`data-theme`); 6 themes | Medium | inherit |
 | measure | Auto-measures slide layout with Playwright; downloads TTF fonts | Medium | inherit |
 | pdf-export | Generates sample and full PDF from measured layout data | Medium | inherit |
 | version | Snapshots files before every edit; restores prior states | Low | inherit |
@@ -63,11 +63,8 @@ This variant focuses on lecture and presentation material production — from re
 ## Skills
 
 - **research**: Source collection and ideation — confirms topic/audience, loads lecture-profile.md, writes research_notes.md
-- **source-verifier**: URL validation — Level 1 HTTP check + Level 2 content cross-check; outputs Trust Score
 - **storyline**: Storyline design — produces storyline.md and slide_deck.md with image_role/image_query; handles cover/divider confirmation
 - **design**: Visual design lock — decides layout, color palette, font family and saves design_spec.md
-- **image-curator**: Image acquisition — Pixabay (keyless), Unsplash URL, Pexels/Unsplash API; all sources commercial-use unlimited
-- **diagram-specialist**: Diagram and chart generation — 6 concept diagram types (cycle/flow/matrix/pyramid/timeline/comparison) + 3 SVG chart types (bar/line/pie); SVG is primary delivery format for HTML; PNG is optional, required only for PDF export
 - **html-build**: HTML slide generation — applies `data-theme` attribute; injects base.css + override CSS; 6 themes (outline, outlook, pitch, pitch-enhanced, vertical, zen); supports `glass-drawer` or `solid-drawer` TOC style
 - **measure**: Layout measurement (deprecated) — runs Playwright to extract coordinates and downloads TTF fonts; superseded by **prep-pdf**
 - **prep-pdf**: Playwright-free PDF preparation — resolves the 4-layer spec merge (base → theme → style → overrides), validates fonts, outputs a layout summary; replaces `measure` for Stages 9-10
@@ -75,6 +72,7 @@ This variant focuses on lecture and presentation material production — from re
 - **version**: Version snapshots — backs up files before edits; restores prior states on demand
 - **handbook**: Handbook document production — H-Stage pipeline (H-0~H-7); standalone, companion, or full course site; dark mode (3-layer CSS), i18n, 6 section types, 5 built-in themes
 - **theme-authoring**: Entry point for creating a new co-deck theme (T-Stage, 5 steps) or style (lightweight, 3 steps); updates `docs/html-themes/THEMES.md` registry
+- **presenter-mode**: Dual-window presenter state synchronization using browser BroadcastChannel API, syncing slide index, speaker notes, timer, current/next slide preview
 
 ---
 

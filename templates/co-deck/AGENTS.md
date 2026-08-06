@@ -24,7 +24,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
 | **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Medium | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
 | **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Generates SVG concept diagrams and data charts from visual_spec → assets/diagrams/; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
+| **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Validates the 4-layer spec merge (base → theme → style → overrides) and checks font availability via the `prep-pdf` skill (Playwright-free) |
 | **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | Generates sample and full PDF from slidedata.json and layout_spec.json |
 | **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md; loads lecture-profile.md |
 | **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Validates URLs in research_notes.md → source-verification.md + Trust Score |
@@ -65,7 +65,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/measure.md`](agents/measure.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | Auto-measures slide layout with Playwright; downloads TTF fonts for PDF |
+| **Role** | Validates the 4-layer spec merge (base → theme → style → overrides), checks font availability, and optionally generates a sample PDF — via the `prep-pdf` skill, no Playwright required |
 
 ### pdf-export
 
@@ -129,6 +129,24 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Tier** | low |
 | **Phases** | 0, 1, 2, 3, 4, 5, 6 |
 | **Role** | Snapshots files before every edit; restores prior states on demand |
+
+### handbook-writer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/handbook-writer.md`](agents/handbook-writer.md) |
+| **Tier** | medium |
+| **Phases** | H-2, H-3, H-4 |
+| **Role** | Writes handbook chapter HTML, course-overview.html, and instructor-guide.html per AUTHORING_GUIDELINES.md and SECTION_TYPES.md; reads research_notes.md (standalone) or slide_deck.md (companion mode) |
+
+### handbook-reviewer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/handbook-reviewer.md`](agents/handbook-reviewer.md) |
+| **Tier** | medium |
+| **Phases** | H-5 |
+| **Role** | Runs handbook-doctor.ts, check-authoring.ts, and validate-nav.ts against handbook HTML; applies fixes and reports unresolved issues to PM before theme application |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -229,7 +247,7 @@ All specialist agents below are dispatched ONLY through PM:
 | `html-build` | Phase 4 | "generate HTML slides", "build presentation", "create lecture HTML" |
 | `image-curator` | Phase 3.5 | "find images for slides", "download slide images", "search Pixabay", "curate images" |
 | `diagram-specialist` | Phase 3.5 | "generate diagrams", "create chart", "draw flow diagram", "visualize data", "SVG diagram" |
-| `measure` | Phase 4 | "measure slide layout", "prepare for PDF", "extract coordinates" |
+| `measure` | Phase 4 | "prep for PDF", "validate spec merge", "check fonts" |
 | `pdf-export` | Phase 4, Phase 5 | "generate PDF", "export to PDF", "create sample PDF" |
 | `research` | Phase 1 | "research the topic", "collect sources", "write research notes" |
 | `source-verifier` | Phase 1.5 | "verify sources", "check URLs", "validate research links", "run source check" |
@@ -262,7 +280,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
 | image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
 | assets/diagrams/*.svg (+ optional *.png) + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| pdf_layout_spec.md (pixel coordinates for PDF engine) | Phase 4 | `measure` | medium | |
+| layout_summary.md (4-layer spec merge validation + font check) | Phase 4 | `measure` | medium | |
 | <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |
 | research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |
 | source-verification.md (URL accessibility + Trust Score) | Phase 1.5 | `source-verifier` | medium | optional: --skip-verify |
@@ -458,16 +476,18 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 ### 4.1.5 Phase Summary
 
+> **Note**: The "Phase" column in this table tracks the 11-stage **pipeline STAGE numbers** referenced in each agent's body text (e.g. design.md: "You own Stage 4"). It is NOT the same as the `phases:` frontmatter field on each agent file, which is a separate, coarser grouping used for dispatch/role-boundary bookkeeping (e.g. design.md declares `phases: [3]`). Do not conflate the two when cross-referencing agent files against this table.
+
 | Phase | Name | PM Role | Specialist Agents |
 |-------|------|---------|-------------------|
 | 0 | Project Initiation | Owner — reads lecture-profile.md, initializes project_state.json | — |
 | 1 | Research | Direct handoff (Gate 1 retired) | `research` |
 | 1.5 | Source Verification | Gate 1.5 reviewer — checks Trust Score, configured at Stage 0 | `source-verifier` (optional) |
 | 2-3 | Storyline | Gate 2 approver — reviews storyline.md and slide_deck.md | `storyline` |
-| 4 | Design | Gate 3 reviewer — optional design spec review | `design` |
 | 3.5 | Image Curation + Diagram Generation | Observer — reviews image-manifest.json + diagram-manifest.json | `image-curator` ‖ `diagram-specialist` (both optional, run parallel) |
+| 4 | Design | Gate 3 reviewer — optional design spec review | `design` |
 | 5-8 | HTML Build | Gate 4 reviewer — optional HTML preview before measure | `html-build` |
-| 9-10 | Layout Measure | Observer — reviews pdf_layout_spec.md | `measure` |
+| 9-10 | PDF Prep | Observer — reviews layout_summary.md | `measure` |
 | 11 | PDF Export | Gate 5 approver — reviews sample PDF before full PDF | `pdf-export` |
 
 > Gates 2, 5 are **mandatory** — PM must obtain explicit user approval before advancing.
@@ -559,12 +579,14 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Generate or update lecture_vN.html from slide_deck.md | `html-build` | `pm` |
 | Search and download images (Pixabay/Unsplash/Pexels) for slides | `image-curator` | `pm` |
 | Generate SVG concept diagrams or data charts from visual_spec | `diagram-specialist` | `pm` |
-| Run Playwright measurement or download TTF fonts | `measure` | `pm` |
+| Validate 4-layer spec merge or check/download TTF fonts for PDF prep | `measure` | `pm` |
 | Generate sample PDF or full PDF output | `pdf-export` | `pm` |
 | Search web and write research_notes.md | `research` | `pm` |
 | Validate URLs and cross-check research sources | `source-verifier` | `pm` |
 | Write or revise storyline.md or slide_deck.md | `storyline` | `pm` |
 | Snapshot any lecture file before editing | `version` | `pm` |
+| Write handbook chapters, course overview, or instructor guide | `handbook-writer` | `pm` |
+| Run handbook validation scripts and apply fixes | `handbook-reviewer` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
@@ -663,6 +685,12 @@ When a user request matches a skill trigger, apply this priority order — **enf
 
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
+### Platform Skills Registry
+
+| Skill | Location | Purpose |
+|-------|----------|---------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
 
 ---
 

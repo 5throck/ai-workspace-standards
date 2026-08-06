@@ -358,9 +358,9 @@ async function main() {
 
     // ── Step 2: Generate 5-slide sample PDF ─────────────────────────────
     console.log(`📄 Generating 5-slide sample PDF...`);
-    const { execSync } = await import('child_process');
+    const { execFileSync } = await import('child_process');
     try {
-      execSync(`bun scripts/co-deck/gen-slides-pdf.ts --project ${projectArg} --sample 5`, {
+      execFileSync('bun', ['scripts/co-deck/gen-slides-pdf.ts', '--project', projectArg, '--sample', '5'], {
         cwd: workspaceRoot,
         stdio: 'pipe',
       });
