@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-06T14:01:36.021Z
+**Generated**: 2026-08-06T14:11:20.060Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -135,7 +135,7 @@
 | lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
-| md-to-ooxml.ts | 1.0.0 | scripts/md-to-ooxml.ts | fs, path |
+| md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
 | new-project.ts | 1.5.1 | scripts/new-project.ts | js-yaml |

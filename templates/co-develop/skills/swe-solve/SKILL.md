@@ -4,7 +4,7 @@ description: Autonomous 4-stage issue-to-PR resolution pipeline for software eng
 version: 1.0.0
 last_reviewed: 2026-08-06
 status: active
-scope: common
+scope: co-develop
 owner: pm
 prerequisites: Bun runtime, test-runner.ts
 metadata:
