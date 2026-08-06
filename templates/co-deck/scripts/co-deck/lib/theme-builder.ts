@@ -7,6 +7,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { join, resolve, dirname, basename } from 'path';
+import { Script } from 'vm';
 import { loadThemePackage, validateThemePackage } from './theme-contract.js';
 import { readJson, normalizeStyleEntry } from './theme-utils.js';
 
@@ -236,7 +237,12 @@ export function buildThemeDeck(options: BuildOptions): BuildResult {
     const scriptContent = scriptMatch[1];
     if (!scriptContent.trim()) continue;
     try {
-      new Function(scriptContent);
+      // Syntax-only check: vm.Script compiles (parses) the source without
+      // executing it. We intentionally never call `.runInContext()` on the
+      // result, so the source is never invoked (unlike the previous
+      // `new Function(...)` approach, which both compiled AND returned a
+      // callable — a build-time-arbitrary-execution risk if ever invoked).
+      new Script(scriptContent);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       errors.push(`Generated <script> block contains a JS syntax error: ${message}`);

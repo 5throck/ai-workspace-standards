@@ -475,9 +475,9 @@ async function main() {
       const htmlFile = htmlFiles.find(f => existsSync(join(projectDir, f)));
       if (htmlFile) {
         console.log(`\n📊 Extracting slide data from ${htmlFile}...`);
-        const { execSync } = await import('child_process');
+        const { execFileSync } = await import('child_process');
         try {
-          execSync(`bun scripts/co-deck/extract_slidedata.mjs "${join(projectDir, htmlFile)}"`, {
+          execFileSync('bun', ['scripts/co-deck/extract_slidedata.mjs', join(projectDir, htmlFile)], {
             cwd: workspaceRoot,
             stdio: 'inherit',
           });
@@ -492,9 +492,9 @@ async function main() {
     }
 
     console.log(`\n📄 Generating 5-slide sample PDF...`);
-    const { execSync } = await import('child_process');
+    const { execFileSync } = await import('child_process');
     try {
-      execSync(`bun scripts/co-deck/gen-slides-pdf.ts --project ${projectArg} --sample 5`, {
+      execFileSync('bun', ['scripts/co-deck/gen-slides-pdf.ts', '--project', projectArg, '--sample', '5'], {
         cwd: workspaceRoot,
         stdio: 'inherit',
       });

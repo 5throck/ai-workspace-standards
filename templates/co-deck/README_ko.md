@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# co-deck
+# {{PROJECT_NAME}}
 
 **Language**: [English](README.md) · **한국어**
 
@@ -12,7 +12,7 @@ sync_version: 1
 
 ---
 
-강연 및 발표 자료 제작 변형 — 리서치부터 인쇄용 PDF까지 이어지는 11단계 AI 워크플로우, 그리고 핸드북/코스 사이트 제작을 위한 독립적인 H-Stage 파이프라인. 리서치, 출처 검증, 콘텐츠, 디자인, 이미지 큐레이션, 다이어그램/차트 생성, HTML 빌드(5개 테마), 레이아웃 측정, PDF 출력, 핸드북 문서 제작을 담당하는 12개의 전문 에이전트를 포함합니다.
+강연 및 발표 자료 제작 변형 — 리서치부터 인쇄용 PDF까지 이어지는 11단계 AI 워크플로우, 그리고 핸드북/코스 사이트 제작을 위한 독립적인 H-Stage 파이프라인. 리서치, 출처 검증, 콘텐츠, 디자인, 이미지 큐레이션, 다이어그램/차트 생성, HTML 빌드(6개 테마), 레이아웃 측정, PDF 출력, 핸드북 문서 제작을 담당하는 12개의 전문 에이전트를 포함합니다.
 
 ## Quick Start
 
@@ -53,7 +53,7 @@ sync_version: 1
 | design | 시각 디자인 스타일을 design_spec.md로 확정 | Medium | inherit |
 | image-curator | 상업적 사용 가능 이미지 검색·다운로드 (Pixabay/Unsplash/Pexels) | Medium | inherit |
 | diagram-specialist | visual_spec으로부터 SVG 컨셉 다이어그램과 데이터 차트 생성; HTML은 SVG가 우선, PDF는 PNG 선택 | Medium | inherit |
-| html-build | 테마 주입(`data-theme`)을 포함한 HTML 슬라이드 생성; 5개 테마 | Medium | inherit |
+| html-build | 테마 주입(`data-theme`)을 포함한 HTML 슬라이드 생성; 6개 테마 | Medium | inherit |
 | measure | Playwright로 슬라이드 레이아웃 자동 측정; TTF 폰트 다운로드 | Medium | inherit |
 | pdf-export | 측정된 레이아웃 데이터로부터 샘플/전체 PDF 생성 | Medium | inherit |
 | version | 모든 수정 전 파일 스냅샷; 이전 상태 복원 | Low | inherit |
@@ -63,11 +63,8 @@ sync_version: 1
 ## Skills
 
 - **research**: 소스 수집 및 아이디어 발굴 — 주제/대상 확인, lecture-profile.md 로드, research_notes.md 작성
-- **source-verifier**: URL 검증 — Level 1 HTTP 체크 + Level 2 콘텐츠 교차 검증; Trust Score 출력
 - **storyline**: 스토리라인 설계 — image_role/image_query를 포함한 storyline.md, slide_deck.md 작성; 커버/구분 슬라이드 확인 처리
 - **design**: 시각 디자인 확정 — 레이아웃, 색상 팔레트, 폰트 패밀리 결정 및 design_spec.md 저장
-- **image-curator**: 이미지 확보 — Pixabay(키 불필요), Unsplash URL, Pexels/Unsplash API; 모든 소스 상업적 사용 무제한
-- **diagram-specialist**: 다이어그램/차트 생성 — 6개 컨셉 다이어그램 유형(cycle/flow/matrix/pyramid/timeline/comparison) + 3개 SVG 차트 유형(bar/line/pie); HTML의 기본 전달 형식은 SVG이며, PNG는 선택 사항으로 PDF 출력 시에만 필요
 - **html-build**: HTML 슬라이드 생성 — `data-theme` 속성 적용; base.css + 오버라이드 CSS 주입; 6개 테마(outline, outlook, pitch, pitch-enhanced, vertical, zen); `glass-drawer` 및 `solid-drawer` 목차 스타일 지원
 - **measure**: 레이아웃 측정 (deprecated) — Playwright로 좌표를 추출하고 TTF 폰트 다운로드; **prep-pdf**로 대체됨
 - **prep-pdf**: Playwright 불필요한 PDF 준비 — 4계층 스펙 병합(base → theme → style → overrides) 해석, 폰트 검증, 레이아웃 요약 출력; Stage 9-10에서 `measure`를 대체
@@ -75,6 +72,7 @@ sync_version: 1
 - **version**: 버전 스냅샷 — 수정 전 파일 백업; 요청 시 이전 상태 복원
 - **handbook**: 핸드북 문서 제작 — H-Stage 파이프라인(H-0~H-7); 단독형/컴패니언/전체 코스 사이트; 다크 모드(3계층 CSS), i18n, 6개 섹션 유형, 5개 기본 테마
 - **theme-authoring**: 새 co-deck 테마(T-Stage, 5단계) 또는 스타일(경량, 3단계) 생성의 진입점; `docs/html-themes/THEMES.md` 레지스트리 업데이트
+- **presenter-mode**: 브라우저 BroadcastChannel API를 사용한 듀얼 윈도우 발표자 상태 동기화 — 슬라이드 인덱스, 발표자 노트, 타이머, 현재/다음 슬라이드 미리보기 동기화
 
 ---
 

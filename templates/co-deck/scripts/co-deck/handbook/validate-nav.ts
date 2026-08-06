@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/co-deck/handbook/validate-nav.ts
 // Navigation integrity validator — runs all 4 checks and exits with code 1 on failure.
 // Adapted from Handbooks/multi-agent-harness-handbook/scripts/validate-nav.ts

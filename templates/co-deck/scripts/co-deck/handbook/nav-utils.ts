@@ -1,3 +1,4 @@
+// @version 1.0.0
 // scripts/co-deck/handbook/nav-utils.ts
 // HTML parsing helpers for navigation validation — zero external deps.
 // Adapted from Handbooks/multi-agent-harness-handbook/scripts/nav-utils.ts

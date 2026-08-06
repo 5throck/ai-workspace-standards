@@ -112,9 +112,9 @@ Do **NOT** hand-author `<div class="slide">` markup, and do **NOT** implement `r
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). **slideData MUST be strict JSON** — all keys double-quoted, all string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax (template literals, unquoted keys, comments) will break the PDF pipeline.
 
-Available themes: `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
+Available themes: `outline` | `outlook` | `pitch` | `pitch-enhanced` | `vertical` | `zen` — Available styles: `classic` | `minimal` | `visual-heavy` | `academic` | `premium-dark`
 
-> **Theme guide**: All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide` (except `outline` which ignores visual panels). PPT-engine themes (outline, pitch-enhanced, zen, vertical) share `ppt-engine.css`/`ppt-engine.js` for TOC drawer, transitions (fade/push/zoom), timer, and speaker notes. The `vertical` theme uses IntersectionObserver for scroll tracking and a sticky top bar (no footer). The original `pitch` theme uses its own layout (TOC drawer, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
+> **Theme guide**: All 6 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide` (except `outline` which ignores visual panels). PPT-engine themes (outline, pitch-enhanced, zen, vertical) share `ppt-engine.css`/`ppt-engine.js` for TOC drawer, transitions (fade/push/zoom), timer, and speaker notes. The `vertical` theme uses IntersectionObserver for scroll tracking and a sticky top bar (no footer). The original `pitch` theme uses its own layout (TOC drawer, no transitions). `pitch-enhanced` is the recommended choice for pitch aesthetics with full PPT features and style compatibility.
 
 ## Builder Boundary (Theme System Roadmap Task 4)
 
