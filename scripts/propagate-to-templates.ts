@@ -438,7 +438,11 @@ function collectDiffs(mapPath: string): FileDiff[] {
       if (!existsSync(targetPath)) {
         status = 'missing';
       } else {
-        const srcContent = readFileSync(sourcePath, 'utf-8');
+        let srcContent = readFileSync(sourcePath, 'utf-8');
+        const isTemplateTarget = targetPath.includes('templates/') || targetPath.includes('templates\\') || targetPath.includes('templates' + sep);
+        if (isTemplateTarget && srcContent.includes('CONSTITUTION.md')) {
+          srcContent = scrubConstitutionRefs(srcContent);
+        }
         const tgtContent = readFileSync(targetPath, 'utf-8');
         status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
       }

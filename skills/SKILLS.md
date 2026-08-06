@@ -35,6 +35,18 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
+| `zod-contract-gate` | 1.0.0 | active | architect | 2026-08-06 | — | Defines Zod runtime schema validation patterns and contract safety rules |
+| `presenter-mode` | 1.0.0 | active | presentation-architect | 2026-08-06 | — | Dual-window presenter state synchronization using browser BroadcastChannel API |
+| `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | Automated STRIDE threat matrix generation and DREAD risk scoring framework |
+| `sarif-exporter` | 1.0.0 | active | security-expert | 2026-08-06 | — | Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 JSON format |
+| `accessibility-audit` | 1.0.0 | active | pm | 2026-08-06 | — | Automated WCAG 2.1 AA accessibility evaluation using axe-core |
+| `dart-disclosure-parser` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | Real-time DART Open API corporate disclosure and financial statement parsing rules |
+| `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | MECE issue tree auditing and strategic reasoning evaluation rules |
+| `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
+| `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
+| `swe-solve` | 1.0.0 | active | pm | 2026-08-06 | — | Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks |
+
+
 
 ### Variant-Exclusive Skills
 

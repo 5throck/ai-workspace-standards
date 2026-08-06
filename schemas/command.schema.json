@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://templates.circuit.stream/common/schemas/command.schema.json",
+  "title": "Command Frontmatter Schema",
+  "description": "Lenient schema for slash-command .md file frontmatter. All fields are optional — validation only applies when frontmatter is present.",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Human-readable description of the command's purpose, min 10 characters"
+    },
+    "gemini-parity": {
+      "type": "string",
+      "enum": ["full", "partial", "skip"],
+      "description": "Whether this Claude-only command has a Gemini equivalent. 'skip' = Claude-only command, no parity check."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Semantic version (MAJOR.MINOR.PATCH)"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["common", "claude-only", "gemini-only"],
+      "description": "Scope of the command"
+    },
+    "name": {
+      "type": "string",
+      "description": "Machine-readable command name (usually matches filename)"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Agent or team that owns this command"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "archived"],
+      "description": "Current lifecycle status of the command"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date of last review (YYYY-MM-DD)"
+    }
+  },
+  "additionalProperties": true
+}

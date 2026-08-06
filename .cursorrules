@@ -1,0 +1,26 @@
+# Cursor Rules — Project AI Context & Agent Guidance
+# Generated dynamically by bun scripts/generate-ide-rules.ts (v1.0.0)
+
+## 1. Project Context
+- **Project**: ai-workspace-scripts
+- **Description**: AI Workspace - Utility scripts for template maintenance and agent management
+- **Runtime**: Bun (TypeScript-first per ADR-0036)
+- **Contract Gate**: Zod Runtime Contract Safety Gate (skills/zod-contract-gate)
+
+## 2. Active Agent Roster
+- **Medium**: Low
+- **scaffolding-expert**: 
+- **2**: Platform-specific hooks, commands, and lifecycle management
+- **architect**: Specialist Agent
+- **auditor**: Specialist Agent
+- **automation-engineer**: Specialist Agent
+- **docs-writer**: Project Name
+- **lifecycle-manager**: Specialist Agent
+- **pm**: Specialist Agent
+- **security-expert**: Specialist Agent
+
+## 3. Core Development Rules
+- **TypeScript-First**: All scripts in `scripts/` are TypeScript (`.ts`) executed via Bun (`bun scripts/<name>.ts`). No shell scripts (`.sh`/`.ps1`) per ADR-0036.
+- **Runtime Contract Validation**: Enforce Zod schema validation for all API inputs, inter-agent IPC payloads, and configuration files.
+- **Idempotency & Quality Gates**: All file modifications must be idempotent. Run test runner and audit checks (`bun scripts/audit.ts`) before claiming task completion.
+- **Cross-Platform & UTF-8**: Ensure code and script logging format outputs clean UTF-8 text compatible across Windows, Linux, and macOS.

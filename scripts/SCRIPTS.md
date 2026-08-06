@@ -59,13 +59,15 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
@@ -143,6 +145,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `md-to-ooxml.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.5.1 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -150,6 +153,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `propagate-to-templates.ts` | L0 | 2.3.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -165,13 +169,14 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-runner.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.7.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
@@ -246,9 +251,22 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`
 
 #### `dev-sync.ts`
-**Purpose**: Full sync pipeline —session log —MEMORY.md index —CHANGELOG auto-add —audit gate —sensitive file check —branch creation —commit —push —PR.
+**Purpose**: Full sync pipeline — pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`) — session log — MEMORY.md index — CHANGELOG auto-add — audit gate — sensitive file check — branch creation — commit — push — PR.
 **Usage**: `bun run dev-sync "feat: description"`
 **Claude Code / Gemini**: `/sync "feat: description"`
+**v1.5.0**: Added pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`) executed before git operations to ensure all documentation links resolve.
+
+#### `test-runner.ts`
+**Purpose**: Test suite execution framework supporting `unit`, `integration`, `scenarios`, and `scripts` suites. Features parallel test execution with worker pool concurrency, worker temp directory isolation (`TEST_TEMP_DIR`), automatic fallback to sequential execution on failure, and per-suite timeouts.
+**Usage**:
+- `bun scripts/test-runner.ts [suite] [flags]` (default suite: `integration`)
+- Via `package.json` aliases: `bun run test`, `bun run test:unit`, `bun run test:e2e`, `bun run test:full`
+**CLI Flags**:
+- `--parallel`: Enable parallel execution across test files (default when > 1 test file)
+- `--sequential`: Force sequential test file execution
+- `--concurrency <n>`: Set worker pool concurrency level (default: CPU core count up to 4)
+- `--timeout <ms>`: Set per-test execution timeout in milliseconds
+**v1.1.0**: Documented parallel execution capabilities, worker pool temp directory isolation (`tests/.temp/worker-<id>`), automatic sequential fallback, and CLI flags (`--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>`).
 
 #### `sync-md.ts`
 **Purpose**: Updates `memory/MEMORY.md` index with today's session entry.
@@ -262,6 +280,22 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Purpose**: Auto-generates scripts/README.md from SCRIPTS.md registry.
 **Usage**: `bun scripts/generate-scripts-readme.ts`
 **Runs automatically**: `bun run dev-sync`
+
+#### `compile-tokens.ts`
+**Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency.
+**Usage**: `bun scripts/compile-tokens.ts [--input <path>] [--out-css <path>] [--out-ts <path>] [--watch] [--check]`
+
+#### `generate-ide-rules.ts`
+**Purpose**: IDE context rules generator for `.cursorrules` and `.clauderules`. Generates IDE-specific context rules dynamically based on workspace context and agent rosters.
+**Usage**: `bun scripts/generate-ide-rules.ts [--check] [--force] [--dir <path>]`
+
+#### `render-pdf-deck.ts`
+**Purpose**: Playwright paged-media presentation PDF renderer. Converts HTML presentation decks into paginated PDF files respecting `@page` print rules using Playwright headless Chromium.
+**Usage**: `bun scripts/render-pdf-deck.ts [--input <file>] [--output <file>] [--check]`
+
+#### `md-to-ooxml.ts`
+**Purpose**: Markdown to Microsoft Office OOXML (`.docx` / `.xlsx`) compiler script for `co-work`. Compiles Markdown source files into native Microsoft Office Open XML structures.
+**Usage**: `bun scripts/md-to-ooxml.ts --input <file.md> [--output <file>] [--type docx|xlsx] [--check]`
 
 ---
 

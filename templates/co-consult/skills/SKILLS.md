@@ -21,6 +21,9 @@ This directory contains variant-specific skills for the `co-consult` template.
 | Technical Feasibility | `technical-feasibility/` | Assess technical feasibility of proposed solutions |
 | k-dart | `k-dart/` | Query DART OpenAPI for Korean financial disclosures, company profiles, financial statements, and major event reports |
 | Company Intelligence | `company-intelligence/` | Comprehensive company and corporate group intelligence gathering and analysis |
+| DART Disclosure Parser | `dart-disclosure-parser/` | Real-time DART Open API corporate disclosure and financial statement parsing rules |
+| MECE Logic Auditor | `mece-logic-auditor/` | MECE issue tree auditing and strategic reasoning evaluation rules |
+
 
 ## Usage
 

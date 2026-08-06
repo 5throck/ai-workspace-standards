@@ -15,9 +15,22 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Runs automatically**: pre-commit hook, pre-push hook, `bun run dev-sync`
 
 #### `dev-sync.ts`
-**Purpose**: Full sync pipeline —session log —MEMORY.md index —CHANGELOG auto-add —audit gate —sensitive file check —branch creation —commit —push —PR.
+**Purpose**: Full sync pipeline — pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`) — session log — MEMORY.md index — CHANGELOG auto-add — audit gate — sensitive file check — branch creation — commit — push — PR.
 **Usage**: `bun run dev-sync "feat: description"`
 **Claude Code / Gemini**: `/sync "feat: description"`
+**v1.5.0**: Added pre-flight markdown link validation gate (`bun scripts/validate-docs-links.ts`) executed before git operations to ensure all documentation links resolve.
+
+#### `test-runner.ts`
+**Purpose**: Test suite execution framework supporting `unit`, `integration`, `scenarios`, and `scripts` suites. Features parallel test execution with worker pool concurrency, worker temp directory isolation (`TEST_TEMP_DIR`), automatic fallback to sequential execution on failure, and per-suite timeouts.
+**Usage**:
+- `bun scripts/test-runner.ts [suite] [flags]` (default suite: `integration`)
+- Via `package.json` aliases: `bun run test`, `bun run test:unit`, `bun run test:e2e`, `bun run test:full`
+**CLI Flags**:
+- `--parallel`: Enable parallel execution across test files (default when > 1 test file)
+- `--sequential`: Force sequential test file execution
+- `--concurrency <n>`: Set worker pool concurrency level (default: CPU core count up to 4)
+- `--timeout <ms>`: Set per-test execution timeout in milliseconds
+**v1.1.0**: Documented parallel execution capabilities, worker pool temp directory isolation (`tests/.temp/worker-<id>`), automatic sequential fallback, and CLI flags (`--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>`).
 
 #### `sync-md.ts`
 **Purpose**: Updates `memory/MEMORY.md` index with today's session entry.
@@ -31,6 +44,22 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Purpose**: Auto-generates scripts/README.md from SCRIPTS.md registry.
 **Usage**: `bun scripts/generate-scripts-readme.ts`
 **Runs automatically**: `bun run dev-sync`
+
+#### `compile-tokens.ts`
+**Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency.
+**Usage**: `bun scripts/compile-tokens.ts [--input <path>] [--out-css <path>] [--out-ts <path>] [--watch] [--check]`
+
+#### `generate-ide-rules.ts`
+**Purpose**: IDE context rules generator for `.cursorrules` and `.clauderules`. Generates IDE-specific context rules dynamically based on workspace context and agent rosters.
+**Usage**: `bun scripts/generate-ide-rules.ts [--check] [--force] [--dir <path>]`
+
+#### `render-pdf-deck.ts`
+**Purpose**: Playwright paged-media presentation PDF renderer. Converts HTML presentation decks into paginated PDF files respecting `@page` print rules using Playwright headless Chromium.
+**Usage**: `bun scripts/render-pdf-deck.ts [--input <file>] [--output <file>] [--check]`
+
+#### `md-to-ooxml.ts`
+**Purpose**: Markdown to Microsoft Office OOXML (`.docx` / `.xlsx`) compiler script for `co-work`. Compiles Markdown source files into native Microsoft Office Open XML structures.
+**Usage**: `bun scripts/md-to-ooxml.ts --input <file.md> [--output <file>] [--type docx|xlsx] [--check]`
 
 ---
 

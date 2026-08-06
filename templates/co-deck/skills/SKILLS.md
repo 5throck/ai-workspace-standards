@@ -16,6 +16,7 @@ This directory contains variant-specific skills for the `co-deck` template.
 | PDF Export | `pdf-export/` | PDF generation from measured layout spec |
 | Theme Authoring | `theme-authoring/` | T-Stage pipeline — create new themes (template.html + theme.json) and styles (CSS variables) |
 | Handbook | `handbook/` | H-Stage pipeline — searchable, themed handbooks as static sites (standalone, companion, course) with dark mode and i18n |
+| Presenter Mode | `presenter-mode/` | Dual-window presenter state synchronization using browser BroadcastChannel API |
 
 ## Usage
 

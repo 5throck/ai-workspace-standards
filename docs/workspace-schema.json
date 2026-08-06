@@ -106,7 +106,9 @@
       "propagation-map.json",
       "services.yaml",
       "fix.mjs",
-      ".DS_Store"
+      ".DS_Store",
+      ".cursorrules",
+      ".clauderules"
     ],
     "dirs": [
       ".git",
@@ -118,6 +120,7 @@
       "memory",
       "templates",
       "tickets",
+      "schemas",
       ".claude",
       ".gemini",
       ".githooks",
