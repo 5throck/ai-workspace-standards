@@ -34,6 +34,8 @@
     }
   ],
   "skills": [
+    { "name": "sarif-exporter" },
+    { "name": "stride-threat-matrix" },
     { "name": "verify-authorization" }
   ],
   "agent_manifest": {

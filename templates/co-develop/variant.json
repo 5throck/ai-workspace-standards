@@ -40,6 +40,7 @@
   "skills": [
     { "name": "code-review" },
     { "name": "refactoring" },
+    { "name": "swe-solve" },
     { "name": "test-driven-development" }
   ],
   "agent_manifest": {
