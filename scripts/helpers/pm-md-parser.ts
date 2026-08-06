@@ -18,7 +18,7 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types

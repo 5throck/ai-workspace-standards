@@ -192,8 +192,14 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
 
     if (!existsSync(l0Path) || !existsSync(l1Path)) continue;
 
-    const l0Content = readFileSync(l0Path, "utf-8");
-    const l1Content = readFileSync(l1Path, "utf-8");
+    let l0Content: string, l1Content: string;
+    try {
+      l0Content = readFileSync(l0Path, "utf-8");
+      l1Content = readFileSync(l1Path, "utf-8");
+    } catch (err) {
+      console.warn(`⚠️ Warning: Failed to read ${entry.script} (${err}). Skipping.`);
+      continue;
+    }
 
     // CONSTITUTION.md references are intentionally scrubbed in L1 (templates/common/).
     // Normalize both sides before comparison to avoid false drift on governance refs.
