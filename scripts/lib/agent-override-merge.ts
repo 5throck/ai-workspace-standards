@@ -14,7 +14,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 const [,, commonDir, variantDir, projectDir] = process.argv;
 

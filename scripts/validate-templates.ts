@@ -864,8 +864,14 @@ function checkL0L1ScriptParity() {
     const l0Path = join(L0_SCRIPTS, script);
 
     if (existsSync(l1Path) && existsSync(l0Path)) {
-      const l1Content = readFileSync(l1Path, 'utf-8');
-      const l0Content = readFileSync(l0Path, 'utf-8');
+      let l1Content: string, l0Content: string;
+      try {
+        l1Content = readFileSync(l1Path, 'utf-8');
+        l0Content = readFileSync(l0Path, 'utf-8');
+      } catch (err) {
+        warn('common', 'l0-l1-script-parity', `Failed to read ${script} in L0 or L1: ${err}`, `Check file permissions or OS file locks.`);
+        continue;
+      }
 
       // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
       const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');
@@ -911,8 +917,14 @@ function checkL0L1ScriptParity() {
         continue;
       }
 
-      const l0Content = readFileSync(l0FilePath, 'utf-8');
-      const l1Content = readFileSync(l1FilePath, 'utf-8');
+      let l0Content: string, l1Content: string;
+      try {
+        l0Content = readFileSync(l0FilePath, 'utf-8');
+        l1Content = readFileSync(l1FilePath, 'utf-8');
+      } catch (err) {
+        warn('common', 'l0-l1-subdir-parity', `Failed to read scripts/${subdir}/${file} in L0 or L1: ${err}`, `Check file permissions or OS file locks.`);
+        continue;
+      }
 
       // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
       const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');

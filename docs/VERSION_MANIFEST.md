@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-03T15:28:59.217Z
+**Generated**: 2026-08-06T01:18:11.575Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 25
-- **Scripts**: 137
+- **Scripts**: 136
 - **Commands**: 8
 
 ---
@@ -150,7 +150,6 @@
 | scan-l2-project.ts | 1.1.1 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
 | schema-validator.ts | 1.1.0 | scripts/validators/schema-validator.ts | fs, js-yaml, path |
 | security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
-| security-validator.test.ts | 1.0.1 | scripts/helpers/security-validator.test.ts | bun:test |
 | security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.0 | scripts/skill-dependency-analysis.ts | N/A |

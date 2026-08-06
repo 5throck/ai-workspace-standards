@@ -80,7 +80,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
-| `helpers/security-validator.test.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-package-scripts.ts` | L0 | 1.0.1 | deprecated | 2026-12-31 | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|

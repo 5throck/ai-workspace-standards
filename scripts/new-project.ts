@@ -14,7 +14,7 @@ import { resolve, join, dirname, basename, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -498,7 +498,7 @@ for (const f of walkFiles(projectDir)) {
 // ── 5. Substitute placeholders ────────────────────────────────────────────────
 const substitutePlaceholders = join(workspaceRoot, 'scripts', 'helpers', 'substitute-placeholders.ts');
 if (existsSync(substitutePlaceholders)) {
-  spawnSync('bun', [substitutePlaceholders, projectDir, projectName, 'A new project', '', variant], { stdio: 'inherit' });
+  spawnSync('bun', [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant], { stdio: 'inherit' });
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
 }

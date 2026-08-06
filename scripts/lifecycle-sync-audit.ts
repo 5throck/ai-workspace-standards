@@ -155,9 +155,13 @@ function parseScriptsMdRegistry(
 function extractFileVersion(filePath: string): string | null {
   if (!existsSync(filePath)) return null;
 
-  const content = readFileSync(filePath, 'utf-8');
-  const match = content.match(/@version\s+([\d.]+)/);
-  return match ? match[1] : null;
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const match = content.match(/@version\s+([\d.]+)/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -406,7 +410,12 @@ function runCheckX(): SyncIssue[] {
   const tsFiles = collectTsFiles(templateScriptsDir);
 
   for (const file of tsFiles) {
-    const content = readFileSync(file, 'utf-8');
+    let content: string;
+    try {
+      content = readFileSync(file, 'utf-8');
+    } catch {
+      continue;
+    }
     for (const scriptName of l0OnlyScripts) {
       // Match: bun run scripts/<name>, bun scripts/<name>, import from '.../<name>' or '.../<name>.js'
       const patterns = [
