@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 /**
- * @version 1.0.0
- * @description Compiles Markdown documentation into native Microsoft Office Open XML (.docx / .xlsx) structures or XML/HTML-based Office packages.
+ * @version 1.1.0
+ * @description Compiles Markdown documentation into native Microsoft Office Open XML (.docx / .xlsx) structures (WordML / SpreadsheetML).
  * @usage bun scripts/md-to-ooxml.ts [--input <path>] [--output <path>] [--type docx|xlsx] [--check] [--help]
  */
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { resolve, extname, dirname } from "path";
+import { resolve, extname } from "path";
 
 const args = process.argv.slice(2);
 
@@ -67,8 +67,17 @@ const content = readFileSync(resolvedInput, "utf-8");
 console.log(`📄 Parsing Markdown source: ${resolvedInput}`);
 console.log(`🎯 Target output format: ${targetType.toUpperCase()}`);
 
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 /**
- * Generates an XML-based Word / Excel Document structure (WordML / SpreadsheetML).
+ * Generates Microsoft Word WordML structure (.docx XML package).
  */
 function compileToWordML(mdText: string): string {
   const lines = mdText.split("\n");
@@ -100,13 +109,49 @@ function compileToWordML(mdText: string): string {
 </w:wordDocument>`;
 }
 
-function escapeXml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+/**
+ * Generates Microsoft Excel SpreadsheetML structure (.xlsx XML package).
+ */
+function compileToSpreadsheetML(mdText: string): string {
+  const lines = mdText.split("\n");
+  const rows: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+      // Markdown table row
+      const cells = trimmed
+        .split("|")
+        .slice(1, -1)
+        .map((c) => c.trim());
+
+      // Skip separator rows like |---|---|
+      if (cells.every((c) => /^:?-+:?$/.test(c))) continue;
+
+      const cellXml = cells
+        .map((val) => `<Cell><Data ss:Type="String">${escapeXml(val)}</Data></Cell>`)
+        .join("");
+      rows.push(`<Row>${cellXml}</Row>`);
+    } else {
+      // General text line mapped to single cell row
+      rows.push(`<Row><Cell><Data ss:Type="String">${escapeXml(trimmed)}</Data></Cell></Row>`);
+    }
+  }
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="Sheet1">
+    <Table>
+      ${rows.join("\n      ")}
+    </Table>
+  </Worksheet>
+</Workbook>`;
 }
 
 if (isCheck) {
@@ -114,8 +159,8 @@ if (isCheck) {
   process.exit(0);
 }
 
-const compiledOutput = compileToWordML(content);
+const compiledOutput = targetType === "xlsx" ? compileToSpreadsheetML(content) : compileToWordML(content);
 const targetFile = outputPath ? resolve(process.cwd(), outputPath) : resolvedInput.replace(/\.md$/, `.${targetType}`);
 
 writeFileSync(targetFile, compiledOutput, "utf-8");
-console.log(`✅ Successfully compiled Office OOXML package: ${targetFile}`);
+console.log(`✅ Successfully compiled Office OOXML package (${targetType.toUpperCase()}): ${targetFile}`);

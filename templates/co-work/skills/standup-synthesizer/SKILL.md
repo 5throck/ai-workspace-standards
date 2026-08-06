@@ -4,7 +4,7 @@ description: Automated daily standup digest synthesizer aggregating git commit l
 version: 1.0.0
 last_reviewed: 2026-08-06
 status: active
-scope: common
+scope: co-work
 owner: pm
 prerequisites: Bun runtime, git
 metadata:
