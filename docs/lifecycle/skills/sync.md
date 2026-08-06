@@ -22,6 +22,22 @@ Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, co
 - `scripts/propagate-to-templates.ts` — L0→L1 publish
 - `scripts/lifecycle-sync-audit.ts` — lifecycle drift detection
 
+## Phase History
+
+| Date | From | To | Reason | Approver |
+|------|------|-----|---------|----------|
+| 2026-07-08 | - | production | Skill extracted from inline /sync command to standalone SKILL.md | pm |
+| 2026-07-19 | production | production | Reassigned owner to pm and updated pipeline sync steps | pm |
+
+## Acceptance Criteria
+
+### Production Phase
+
+- [x] Skill SKILL.md exists at `skills/sync/SKILL.md`
+- [x] Frontmatter valid: name, description, status, scope, version, owner populated
+- [x] Full pipeline sync tests pass via `dev-sync.ts`
+- [x] Idempotent PR update verified
+
 ## Notes
 - SKILL.md is distributed to `.claude/skills/sync/` and `.gemini/skills/` via sync-skills.ts Phase 1
 - Pipeline is idempotent: re-running /sync on the same branch updates the existing PR
