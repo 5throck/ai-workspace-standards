@@ -64,7 +64,8 @@
   "skills": [
     { "name": "code-review" },
     { "name": "refactoring" },
-    { "name": "test-driven-development" }
+    { "name": "test-driven-development" },
+    { "name": "sound-synth" }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",

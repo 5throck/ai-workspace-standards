@@ -1,6 +1,17 @@
 {
-  "_comment": "Variant-specific overrides vs L1 (templates/common): PostToolUse lifecycle check hook added. Security policies (terminal.executionPolicy, mcp.toolApproval, terminal.denyList) explicitly set for co-work projects.",
   "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "type": "command",
@@ -8,14 +19,14 @@
         "statusMessage": "Configuring git hooks..."
       }
     ],
-    "PostToolUse": [
+    "AfterTool": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "write_file|replace_file_content|multi_replace_file_content",
         "hooks": [
           {
             "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "statusMessage": "Running post-edit lifecycle check..."
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts --platform gemini",
+            "timeout": 5000
           }
         ]
       }

@@ -69,6 +69,9 @@
 
 | Date | Topic | File |
 |------|-------|------|
+| 2026-08-06 | Variant Templates GitHub Benchmarking & Advancement Plan | [meeting-2026-08-06-variant-benchmarking-advancement-plan.md](meeting-2026-08-06-variant-benchmarking-advancement-plan.md) |
+| 2026-08-06 | Templates (<variant>) Status Assessment & Improvement Plan | [meeting-2026-08-06-variant-templates-review.md](meeting-2026-08-06-variant-templates-review.md) |
+| 2026-08-06 | Workspace Status Review & Improvement Plan | [meeting-2026-08-06-workspace-improvement-plan.md](meeting-2026-08-06-workspace-improvement-plan.md) |
 | 2026-07-02 | withRetry + .nothrow() masks gh pr create failures in dev-sync.ts | [meeting-2026-07-02-withretry-nothrow-masks-gh-pr-create-fai.md](meeting-2026-07-02-withretry-nothrow-masks-gh-pr-create-fai.md) |
 | 2026-05-31 | Model name SSOT dispersion problem resolution — agents/*.md as SSOT, workspace-schema.json models block planned | [meeting-2026-05-31-model-name-ssot.md](archive/meeting-2026-05-31-model-name-ssot.md) |
 | 2026-05-30 | Command Documentation Inconsistency | [meeting-2026-05-30-command-doc-inconsistency.md](archive/meeting-2026-05-30-command-doc-inconsistency.md) |

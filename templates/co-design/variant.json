@@ -42,6 +42,7 @@
     }
   ],
   "skills": [
+    { "name": "accessibility-audit" },
     { "name": "service-design" },
     { "name": "ui-ux-design-intelligence" }
   ],

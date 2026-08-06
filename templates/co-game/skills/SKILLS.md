@@ -9,6 +9,8 @@ This directory contains variant-specific skills for the `co-game` template.
 | `code-review` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `refactoring` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `test-driven-development` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
+
 
 All other skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
 

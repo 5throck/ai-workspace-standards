@@ -1,0 +1,26 @@
+# Claude Rules — Workspace Context & Agent Ecosystem Guidance
+# Generated dynamically by bun scripts/generate-ide-rules.ts (v1.0.0)
+
+## 1. Workspace Context
+- **Workspace Project**: ai-workspace-scripts
+- **Description**: AI Workspace - Utility scripts for template maintenance and agent management
+- **Development Runtime**: Bun (TypeScript-first per ADR-0036)
+- **Contract Safety Standard**: Zod runtime schema validation gate enabled
+
+## 2. Agent Ecosystem Roster
+- **Medium**: Low
+- **scaffolding-expert**: 
+- **2**: Platform-specific hooks, commands, and lifecycle management
+- **architect**: Specialist Agent
+- **auditor**: Specialist Agent
+- **automation-engineer**: Specialist Agent
+- **docs-writer**: Project Name
+- **lifecycle-manager**: Specialist Agent
+- **pm**: Specialist Agent
+- **security-expert**: Specialist Agent
+
+## 3. Execution & Workflow Guidelines
+- **TypeScript Operational Scripts**: Execute automation via `bun scripts/<script>.ts`. Do not invoke obsolete shell scripts.
+- **Contract Boundaries**: Use Zod schemas (`skills/zod-contract-gate`) to validate inter-agent payload contracts, configuration parsing, and public function interfaces.
+- **Specialist Agent Delegation**: Respect single-responsibility specialist agent roles (`pm`, `architect`, `code-writer`, `designer`, `security-monitor`, `stack-setup`, `test-runner`).
+- **Empirical Verification**: Always verify changes via build, lint, and test runner outputs before finalizing work.

@@ -30,7 +30,7 @@ You have an existing standalone project with:
 
 - The project must be a git repository
 - The project should have a clean, well-organized structure
-- You should understand the [3-Layer Architecture](docs/constitution/07-new-project.md)
+- You should understand the [3-Layer Architecture](constitution/07-new-project.md)
 
 ### Tool
 
@@ -241,9 +241,8 @@ bun scripts/validate-skills.ts  # Verify skills
 
 ## §6: Related Documentation
 
-- [Project Upgrade Guide](docs/project-upgrade-guide.md) — Upgrading variant-based projects
-- [Variant Creation Skill](skills/create-variant/SKILL.md) — Phase A: New variant scaffolding
-- [Variant Promotion Skill](skills/promote-variant/SKILL.md) — Phase B: Promoting prototypes
-- [Fork Model (ADR-0031)](docs/adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
-- [New Project Scaffolding](docs/constitution/07-new-project.md) — L3 project creation
-- [Variant Review Report (2026-07-14)](docs/variant-review-report-2026-07-14.md) — Infrastructure audit results
+- [Project Upgrade Guide](project-upgrade-guide.md) — Upgrading variant-based projects
+- [Creating a Variant Guide](creating-a-variant.md) — Creating new variants from scratch
+- [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
+- [New Project Scaffolding](constitution/07-new-project.md) — L3 project creation
+- [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results

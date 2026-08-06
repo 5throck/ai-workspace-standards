@@ -1,4 +1,4 @@
-// @version 1.4.0
+// @version 1.5.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -57,6 +57,20 @@ if (hasNonEnglish(msg)) {
     if (import.meta.main) {
       process.exit(1);
     }
+}
+
+// Pre-flight Link Validation Gate — ensures markdown documentation links resolve.
+try {
+  const { exitCode } = await $`bun scripts/validate-docs-links.ts`.nothrow();
+  if (exitCode !== 0) {
+    console.error(`${RED}❌ Documentation link validation failed.${RESET}`);
+    console.error(`${YELLOW}   Fix broken markdown links before syncing.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+} catch (err) {
+  console.error(`[dev-sync] Link validation check warning: ${err}`);
 }
 
 // Use local calendar date, not toISOString() (which is UTC) — on hosts west of

@@ -251,8 +251,8 @@ The tool will prompt for confirmation before proceeding. This is expected for pr
 
 ## §8: Related Documentation
 
-- [Variant Creation Guide](skills/create-variant/SKILL.md) — Phase A: Creating new variants
-- [Variant Promotion Guide](skills/promote-variant/SKILL.md) — Phase B: Promoting variants
-- [New Project Scaffolding](docs/constitution/07-new-project.md) — Creating new L3 projects
-- [Fork Model (ADR-0031)](docs/adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
-- [Variant Review Report (2026-07-14)](docs/variant-review-report-2026-07-14.md) — Infrastructure audit results
+- [Variant Creation Guide](../.agents/skills/create-variant/SKILL.md) — Phase A: Creating new variants
+- [Variant Promotion Guide](../.agents/skills/promote-variant/SKILL.md) — Phase B: Promoting variants
+- [New Project Scaffolding](constitution/07-new-project.md) — Creating new L3 projects
+- [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
+- [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results
