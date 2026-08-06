@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.13
+ * @version 1.5.14
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -343,11 +343,19 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         }
         if (themeManifest.overrides_dir && Array.isArray(themeManifest.available)) {
           for (const theme of themeManifest.available) {
-            const themeCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, `${theme}.css`);
-            if (!existsSync(themeCssPath)) {
-              fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${themeManifest.overrides_dir}/${theme}.css`, `Create the file at templates/${dir}/${themeManifest.overrides_dir}/${theme}.css`);
+            // Two supported on-disk layouts for theme override CSS:
+            //   flat:   <overrides_dir>/<theme>.css
+            //   nested: <overrides_dir>/<theme>/style.css  (e.g. co-deck's shared styles/ pool)
+            const flatRelPath = `${themeManifest.overrides_dir}/${theme}.css`;
+            const nestedRelPath = `${themeManifest.overrides_dir}/${theme}/style.css`;
+            const flatCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, `${theme}.css`);
+            const nestedCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, theme, 'style.css');
+            if (existsSync(flatCssPath)) {
+              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${flatRelPath} ✓`);
+            } else if (existsSync(nestedCssPath)) {
+              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${nestedRelPath} ✓`);
             } else {
-              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${themeManifest.overrides_dir}/${theme}.css ✓`);
+              fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`, `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`);
             }
           }
         }
