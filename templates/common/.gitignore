@@ -19,6 +19,8 @@ build/
 # OS artifacts
 .DS_Store
 Thumbs.db
+nul
+NUL
 
 # IDE
 .idea/

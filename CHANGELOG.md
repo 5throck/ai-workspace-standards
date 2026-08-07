@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-07]**: feat(governance): facilitate multi-agent meeting on preventing unnecessary `nul` file creation on Windows/Git Bash — established 4-layer defense strategy (standardized shell redirection `> /dev/null 2>&1` & `$null`, banned `> nul` redirects, added `nul`/`NUL` to `.gitignore` and `templates/common/.gitignore`, updated `scripts/audit.ts` to auto-delete `WINDOWS_DEVICE_NAMES` regardless of git tracking status). Recorded meeting transcript in `memory/meeting-2026-08-07-prevent-nul-file-creation.md`. Verified `bun scripts/audit.ts` (all checks passed).
+
 - **[2026-08-07]**: fix(encoding): workspace-wide normalization of CRLF/mixed line endings to LF and replacement of literal zero-width U+FEFF characters — normalized 101 files with CRLF/mixed line endings to LF; replaced 6 literal zero-width U+FEFF characters inside `normalizeContent()` regexes with explicit `\uFEFF` escape code (`scripts/validate-agents.ts`, `validate-skills.ts`, `validate-templates.ts`, `skill-dependency-analysis.ts` + L1 mirrors). Verified `bun scripts/scratch/scan-encoding.ts` (0 BOM, 0 CRLF, 0 zero-width), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/audit.ts` (all checks passed).
 
 - **[2026-08-07]**: fix(scripts): resolve `PAIR MISSING` warnings in `scripts/SCRIPTS.md` registry — corrected non-pair descriptive text entries to `—` for 4 TypeScript scripts (`validators/schema-validator.ts`, `hooks/gateguard-fact-force.ts`, `hooks/post-write-lifecycle-check.ts`, `lib/encoding-utils.ts`), reducing `verify-scripts.ts` warnings from 7 to 3 (only scheduled deprecations remain). Verified `bun scripts/verify-scripts.ts --verify` (142 scripts verified).

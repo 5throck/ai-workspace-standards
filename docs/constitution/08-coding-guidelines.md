@@ -105,3 +105,9 @@ When adding or recommending dependencies:
   └── README_ko.md   # Korean version (translation of README.md)
   ```
 - **Verification**: The `audit.ts` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
+
+#### 8.10 Cross-Platform Shell Redirection & Windows Device Safeguard (`nul` Avoidance)
+- **Unix/Git Bash (`.sh`, `.githooks`, `bash -c`)**: Output suppression MUST use `> /dev/null 2>&1`.
+- **PowerShell (`.ps1`, `powershell -Command`)**: Output suppression MUST use `> $null` or `| Out-Null`.
+- **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child process calls on Windows creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative file path. Node.js/Bun `fs` APIs cannot delete physical `nul` files due to Win32 device mapping.
+- **Git Ignore & Audit Protection**: All repository `.gitignore` templates MUST include `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts regardless of tracking status.

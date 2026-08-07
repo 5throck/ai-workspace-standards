@@ -1,4 +1,4 @@
-// @version 2.10.9
+// @version 2.10.10
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -1027,9 +1027,33 @@ if (IS_WORKSPACE_ROOT) {
 
         // Only scan git-tracked top-level items — ignore untracked local directories (e.g. test projects)
         const gitLsResult = spawnSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
-        const trackedItems = new Set((gitLsResult.stdout || '').trim().split('\n').filter(Boolean).map(f => f.split('/')[0]));
         const items = fs.readdirSync('.');
         for (const item of items) {
+            // Check and auto-delete Windows device name artifacts regardless of tracking status
+            if (WINDOWS_DEVICE_NAMES.has(item)) {
+                try {
+                    let rmResult;
+                    if (process.platform === 'win32') {
+                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                        if (rmResult.status !== 0) {
+                            rmResult = spawnSync('powershell', ['-Command', `Remove-Item -Force -LiteralPath '${item}'`], { encoding: 'utf-8' });
+                        }
+                    } else {
+                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                    }
+                    if (rmResult.status === 0) {
+                        Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
+                        continue;
+                    } else {
+                        Fail(`Windows device name artifact '${item}' could not be deleted: ${rmResult.stderr}`);
+                        strayFound++;
+                    }
+                } catch (e) {
+                    Fail(`Windows device name artifact '${item}' could not be deleted: ${e}`);
+                    strayFound++;
+                }
+            }
+
             // Skip untracked local items entirely
             if (!trackedItems.has(item)) continue;
             const isDir = fs.statSync(item).isDirectory();
@@ -1047,38 +1071,8 @@ if (IS_WORKSPACE_ROOT) {
                 }
             } else {
                 if (!allowedFiles.includes(item)) {
-                    if (WINDOWS_DEVICE_NAMES.has(item)) {
-                        // Auto-delete: Windows device name artifact created by external tools
-                        // (e.g. codegraph or antivirus running "cmd > nul" in Git Bash context).
-                        // Must use bash rm, not fs.unlinkSync — Bun maps "nul" to the Windows
-                        // NUL device on Windows, so the Node.js fs API cannot unlink it.
-                        try {
-                            // Must use bash rm on Windows — Bun maps "nul" to the Windows
-                            // NUL device, so Node.js fs.unlinkSync cannot unlink it.
-                            // On Windows, try bash first (Git Bash), fall back to PowerShell.
-                            let rmResult;
-                            if (process.platform === 'win32') {
-                                rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
-                                if (rmResult.status !== 0) {
-                                    rmResult = spawnSync('powershell', ['-Command', `Remove-Item -Force -LiteralPath '${item}'`], { encoding: 'utf-8' });
-                                }
-                            } else {
-                                rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
-                            }
-                            if (rmResult.status === 0) {
-                                Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
-                            } else {
-                                Fail(`Windows device name artifact '${item}' could not be deleted: ${rmResult.stderr}`);
-                                strayFound++;
-                            }
-                        } catch (e) {
-                            Fail(`Windows device name artifact '${item}' could not be deleted: ${e}`);
-                            strayFound++;
-                        }
-                    } else {
-                        Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
-                        strayFound++;
-                    }
+                    Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
+                    strayFound++;
                 }
             }
         }

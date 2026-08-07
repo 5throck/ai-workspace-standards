@@ -12,6 +12,10 @@
 # --- PM gateway approval flag (session-local, must not be committed) ---
 .pm-approved
 
+# --- Windows reserved device name artifacts (prevent accidental tracking) ---
+nul
+NUL
+
 # --- GateGuard PID-keyed state persistence (session-local) ---
 .gateguard-state/
 
