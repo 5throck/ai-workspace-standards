@@ -174,12 +174,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.7.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
-| `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `validate-agents.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-skills.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.13 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|

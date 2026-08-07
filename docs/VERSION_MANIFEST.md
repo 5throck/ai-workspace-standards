@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-07T00:11:49.613Z
+**Generated**: 2026-08-07T00:21:37.629Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -166,7 +166,7 @@
 | security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
 | security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
-| skill-dependency-analysis.ts | 1.0.0 | scripts/skill-dependency-analysis.ts | N/A |
+| skill-dependency-analysis.ts | 1.0.1 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.2.0 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
 | ssrf.ts | 1.1.0 | scripts/lib/ssrf.ts | N/A |
@@ -191,7 +191,7 @@
 | types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
 | update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
 | upgrade-project.ts | 1.7.0 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.0.1 | scripts/validate-agents.ts | N/A |
+| validate-agents.ts | 1.0.2 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.4.4 | scripts/validate-md-language.ts | fs |
@@ -199,8 +199,8 @@
 | validate-output.ts | 1.0.1 | scripts/helpers/validate-output.ts | N/A |
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
-| validate-skills.ts | 1.0.2 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.14 | scripts/validate-templates.ts | js-yaml |
+| validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
+| validate-templates.ts | 1.5.15 | scripts/validate-templates.ts | js-yaml |
 | validation-policy.ts | 1.0.0 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |
