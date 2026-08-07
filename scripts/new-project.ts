@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.1
+// @version 1.5.2
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -195,7 +195,8 @@ if (existsSync(variantJsonPath)) {
   if (vj.status && vj.status !== 'stable') {
     console.log(`⚠️  Variant '${variant}' has status: ${vj.status}`);
     console.log('   This variant may not be fully implemented.');
-    const answer = prompt('   Continue anyway? [y/N] ') ?? '';
+    const autoYes = process.argv.includes('--yes') || process.argv.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
+    const answer = autoYes ? 'y' : (prompt('   Continue anyway? [y/N] ') ?? '');
     if (!['y', 'Y'].includes(answer)) {
       console.log('Aborted.');
       if (import.meta.main) {

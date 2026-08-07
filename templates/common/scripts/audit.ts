@@ -1,4 +1,4 @@
-// @version 2.10.10
+// @version 2.10.11
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -162,15 +162,20 @@ if (!LIFECYCLE_ONLY) {
 
 function walkDir(dir: string, callback: (fPath: string) => void) {
     if (!fs.existsSync(dir)) return;
-    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
+    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
     for (const f of fs.readdirSync(dir)) {
         if (SKIP_DIRS.has(f)) continue;
         const dirPath = path.join(dir, f);
-        const isDirectory = fs.statSync(dirPath).isDirectory();
-        if (isDirectory) {
-            walkDir(dirPath, callback);
-        } else {
-            callback(dirPath);
+        if (!fs.existsSync(dirPath)) continue;
+        try {
+            const isDirectory = fs.statSync(dirPath).isDirectory();
+            if (isDirectory) {
+                walkDir(dirPath, callback);
+            } else {
+                callback(dirPath);
+            }
+        } catch {
+            // Ignore transient files deleted during concurrent test runs
         }
     }
 }
