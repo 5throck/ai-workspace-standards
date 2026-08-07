@@ -56,7 +56,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.10.10 | active | —| —| L0+L1 | —|
-| `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -75,7 +74,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/inject-global-plugins.ts` | L0 | 1.0.2 | deprecated | 2026-09-21| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/layer-filter.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
@@ -83,7 +81,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/merge-package-scripts.ts` | L0 | 1.0.1 | deprecated | 2026-12-31 | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|

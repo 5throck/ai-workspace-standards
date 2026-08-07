@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-07T00:52:44.212Z
+**Generated**: 2026-08-07T00:57:00.204Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 35
-- **Scripts**: 141
+- **Scripts**: 138
 - **Commands**: 8
 
 ---
@@ -93,7 +93,6 @@
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
-| check-pm-approval.ts | 1.0.2 | scripts/check-pm-approval.ts | N/A |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
@@ -125,7 +124,6 @@
 | index.ts | 1.0.0 | scripts/validators/index.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| inject-global-plugins.ts | 1.0.2 | scripts/helpers/inject-global-plugins.ts | N/A |
 | inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.9.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
@@ -137,7 +135,6 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
-| merge-package-scripts.ts | 1.0.1 | scripts/helpers/merge-package-scripts.ts | N/A |
 | new-project.ts | 1.5.1 | scripts/new-project.ts | js-yaml |
 | normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
