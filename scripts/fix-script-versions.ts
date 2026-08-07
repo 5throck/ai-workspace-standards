@@ -45,10 +45,8 @@ const SCRIPTS_TO_FIX = [
   // Helpers
   'helpers/lifecycle-governance.ts',
   'helpers/template-validation.ts',
-  'helpers/inject-global-plugins.ts',
   'helpers/inject-skills.ts',
   'helpers/merge-frontmatter.ts',
-  'helpers/merge-package-scripts.ts',
   'helpers/substitute-placeholders.ts',
   'helpers/update-variant-lifecycle.ts',
   'helpers/validate-output.ts',
