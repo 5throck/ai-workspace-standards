@@ -474,7 +474,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 ## §6: Skills
 
-### Platform Skills (Priority 2)
+### Platform Skills Registry
 
 | Skill | File | Trigger condition |
 |-------|------|-------------------|
