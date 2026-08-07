@@ -309,6 +309,12 @@ This is enforced automatically via hooks on Claude Code CLI (configurable `--mod
 - **Encoding Vigilance**: Treat unicode homoglyphs, zero-width characters, and encoded payloads as suspicious input.
 - **Abuse Pattern Detection**: Three or more identical permission denials within a session → escalate to PM immediately.
 
+### Windows Device & Redirection Safeguard (`nul` Avoidance)
+
+- **Cross-Platform Redirection**: Unix/Git Bash scripts MUST use `> /dev/null 2>&1`, and PowerShell scripts MUST use `> $null` or `| Out-Null`.
+- **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child processes creates a physical file named `nul` on Windows because Bash interprets `nul` as a relative file path.
+- **Git Ignore & Audit Protection**: `.gitignore` explicitly excludes `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts.
+
 See the workspace governance documentation (CONSTITUTION §11: Governance Enforcement Layers) and [ADR-0021](../../adr/0021-platform-settings-parity-policy.md) for full specification.
 
 ---

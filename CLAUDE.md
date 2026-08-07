@@ -67,6 +67,10 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel sessions.
 
+#### ⚠️ Windows Reserved Device Name (nul) Redirection Safeguard
+In Git Bash on Windows, writing to `> nul` or `2> nul` creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative path rather than the Win32 OS NUL device. Node.js / Bun `fs` APIs cannot delete physical `nul` files on Windows.
+- **Rule**: NEVER use `> nul` or `2> nul` in shell commands or scripts. Use `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell. All `.gitignore` templates MUST include `nul` and `NUL`.
+
 ### 2. Pre-Edit Quality Gate (All Platforms)
 
 Before editing any file for the **FIRST time in a session**, the agent MUST:
@@ -325,7 +329,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-07-31 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-08-07 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 
