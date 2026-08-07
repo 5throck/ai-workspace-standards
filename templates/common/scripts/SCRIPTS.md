@@ -56,7 +56,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.10.10 | active | —| —| L0+L1 | —|
-| `check-pm-approval.ts` | L0 | 1.0.2 | deprecated | 2026-11-30 | —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -75,15 +74,13 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/inject-global-plugins.ts` | L0 | 1.0.2 | deprecated | 2026-09-21| —| L0 | —|
-| `helpers/inject-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `helpers/inject-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/layer-filter.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/merge-package-scripts.ts` | L0 | 1.0.1 | deprecated | 2026-12-31 | —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -117,7 +114,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | command schema support |
+| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -126,8 +123,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
-| `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | state persistence, config gating |
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | Gemini AfterTool support |
+| `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -136,7 +133,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | homoglyph + zero-width detection |
+| `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
@@ -156,7 +153,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
-| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `skill-dependency-analysis.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -180,7 +177,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.13 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.15 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
