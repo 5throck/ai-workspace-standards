@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Dependency Analysis Script (SC-02)
- * @version 1.0.0
+ * @version 1.0.1
  * Analyzes /skill invocation references within SKILL.md files to detect:
  *   - Circular dependencies (A → B → A)
  *   - Orphaned references (skill calls a non-existent or archived skill)
@@ -53,7 +53,7 @@ interface AnalysisIssue {
 }
 
 function normalizeContent(raw: string): string {
-  return raw.replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
 function parseStatus(content: string): string {

@@ -156,7 +156,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
-| `skill-dependency-analysis.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `skill-dependency-analysis.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -174,13 +174,13 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.7.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
-| `validate-agents.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `validate-agents.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-skills.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.14 | active | —| —| L0 | —|
+| `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `validate-templates.ts` | L0 | 1.5.15 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|

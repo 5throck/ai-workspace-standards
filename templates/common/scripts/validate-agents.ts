@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.1
+ * @version 1.0.2
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -92,7 +92,7 @@ function warn(file: string, check: string, msg: string, fix?: string) {
 
 // Normalize content: strip BOM and normalize line endings
 function normalizeContent(raw: string): string {
-  return raw.replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
 // Parse frontmatter fields from markdown
