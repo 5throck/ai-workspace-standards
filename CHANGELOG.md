@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-07]**: feat(templates/co-game): add Arcade & Puzzle ECS reference components and systems (`arcade-puzzle-template.ts`) + unit test suite (`arcade-puzzle-template.test.ts`) covering GridSystem, CollisionSystem, and ScoreManager (13 tests passing, 0 fails). Verified `bun test templates/co-game/tests/` (13 pass), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/audit.ts` (all checks passed).
+
 - **[2026-08-07]**: fix(templates): resolve project-review findings across co-design, co-develop, co-game, and co-security variants — fixed `sync` skill governance doc (`docs/lifecycle/skills/sync.md`) by adding missing `Phase History` and `Acceptance Criteria` sections (resolving `validate-skills.ts` error); aligned variant manifests (`variant.json`) for `co-security` (registered `sarif-exporter` & `stride-threat-matrix`) and `co-develop` (registered `swe-solve`); cleaned up redundant `README.md`/`README_ko.md` in `co-security/skills/`. Verified `bun scripts/validate-skills.ts` (0 errors), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/audit.ts` (all checks passed).
 
 - **[2026-08-07]**: fix(templates/co-work): project-review fixes for the co-work variant — rewrote `skills/SKILLS.md` from scratch for the 4 real co-work skills (`api-documentation`, `documentation-writing`, `research-analysis`, `standup-synthesizer`) in the co-consult table format (the prior content listed non-existent skills); mirrored `standup-synthesizer` to `.claude/`/`.gemini/`/`.agents/skills/` and replaced its broken `../sync/SKILL.md` & `../meeting-facilitation/SKILL.md` links with plain-text "global skill" references; added `standup-synthesizer` to `variant.json` `skills` array with a `skill_manifest.variant_specific` section; fixed copy-pasted dispatch triggers in `AGENTS.md` (`content-writer`: removed analyze/investigate, added documentation/write content; `project-coordinator`: removed presentation/narrative, added logistics/delivery timeline; marked `ms365-expert`/`storyteller` as optional); created `docs/phase-definitions.md` (phases 0–6 from agent frontmatter) and `.agents/skills.json` pointer file. Verified `bun scripts/audit.ts` (all checks passed), `bun scripts/validate-templates.ts` (0 errors).
@@ -908,7 +910,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-06*
+*Last Updated: 2026-08-07*
 
 
 
