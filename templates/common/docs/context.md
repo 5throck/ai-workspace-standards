@@ -315,6 +315,11 @@ This is enforced automatically via hooks on Claude Code CLI (configurable `--mod
 - **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child processes creates a physical file named `nul` on Windows because Bash interprets `nul` as a relative file path.
 - **Git Ignore & Audit Protection**: `.gitignore` explicitly excludes `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts.
 
+### Sequential Branch Dependency & Pipeline Integrity (ADR-0038)
+
+- **Sequential PR Merge Rule**: Before executing `/sync` to open a new PR while a prior PR from the same session is unmerged, merge the prior PR first. Shared pipeline files (`CHANGELOG.md`, `memory/YYYY-MM-DD.md`, `VERSION_MANIFEST.md`) are updated on every commit, so parallel branches conflict by default.
+- **Pluggable Variant Audit Hook**: Core scripts (`scripts/dev-sync.ts`, `scripts/audit.ts`) are immutable across variants. Projects requiring custom validation rules must implement them in `scripts/audit-variant.ts`.
+
 See the workspace governance documentation (CONSTITUTION §11: Governance Enforcement Layers) and [ADR-0021](../../adr/0021-platform-settings-parity-policy.md) for full specification.
 
 ---
