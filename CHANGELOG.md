@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-07]**: fix(scripts): resolve `PAIR MISSING` warnings in `scripts/SCRIPTS.md` registry — corrected non-pair descriptive text entries to `—` for 4 TypeScript scripts (`validators/schema-validator.ts`, `hooks/gateguard-fact-force.ts`, `hooks/post-write-lifecycle-check.ts`, `lib/encoding-utils.ts`), reducing `verify-scripts.ts` warnings from 7 to 3 (only scheduled deprecations remain). Verified `bun scripts/verify-scripts.ts --verify` (142 scripts verified).
+
 - **[2026-08-07]**: feat(templates/co-game): add Arcade & Puzzle ECS reference components and systems (`arcade-puzzle-template.ts`) + unit test suite (`arcade-puzzle-template.test.ts`) covering GridSystem, CollisionSystem, and ScoreManager (13 tests passing, 0 fails). Verified `bun test templates/co-game/tests/` (13 pass), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/audit.ts` (all checks passed).
 
 - **[2026-08-07]**: fix(templates): resolve project-review findings across co-design, co-develop, co-game, and co-security variants — fixed `sync` skill governance doc (`docs/lifecycle/skills/sync.md`) by adding missing `Phase History` and `Acceptance Criteria` sections (resolving `validate-skills.ts` error); aligned variant manifests (`variant.json`) for `co-security` (registered `sarif-exporter` & `stride-threat-matrix`) and `co-develop` (registered `swe-solve`); cleaned up redundant `README.md`/`README_ko.md` in `co-security/skills/`. Verified `bun scripts/validate-skills.ts` (0 errors), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/audit.ts` (all checks passed).

@@ -117,7 +117,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/capability-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | command schema support |
+| `validators/schema-validator.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `validators/orphan-reference-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/duplicate-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -126,8 +126,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
-| `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | state persistence, config gating |
-| `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | Gemini AfterTool support |
+| `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -136,7 +136,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | homoglyph + zero-width detection |
+| `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
