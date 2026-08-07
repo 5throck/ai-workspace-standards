@@ -4,10 +4,11 @@ status: active
 scope: common
 description: >
   Scans, updates, and upgrades Bun dependencies and packages across the AI workspace (L0)
-  or standalone project (L1/L2) while ensuring lockfile consistency and security compliance.
-  Use when: updating bun dependencies, upgrading packages, checking outdated packages in workspace or templates.
+  or standalone project (L1/L2) while ensuring lockfile consistency, package.json version bumps,
+  and security compliance.
+  Use when: updating bun dependencies, upgrading packages to @latest, checking outdated packages in workspace or templates.
 owner: pm
-version: 1.1.0
+version: 1.2.0
 last_reviewed: 2026-08-07
 metadata:
   type: process
@@ -30,7 +31,8 @@ This skill provides a layer-aware methodology for auditing, updating, and upgrad
 
 ## When to Use This Skill
 
-- **Routine Maintenance**: Regular dependency updates (patch & minor releases).
+- **Routine Maintenance**: Regular dependency updates (`bun update` for in-range semver updates).
+- **Major Upgrades**: Upgrading pinned exact versions or major releases to `@latest` (`bun add <package>@latest` / `bun add -d <package>@latest`).
 - **Security Patches**: Upgrading vulnerable packages reported by security advisories (`gitleaks`, `bun audit`, CVEs).
 - **Template Synchronization (L0 Mode)**: Aligning package versions between workspace root (`package.json`) and `templates/common/package.json`.
 - **Project Dependency Refresh (L1/L2 Mode)**: Refreshing dependencies in scaffolded or variant-based projects.
@@ -79,9 +81,8 @@ fi
    ```
 
 3. **Categorize Update Types**:
-   - **Patch updates** (`x.y.Z` → `x.y.Z+1`): Bug fixes, non-breaking. Auto-approved.
-   - **Minor updates** (`x.Y.z` → `x.Y+1.z`): New features, backward-compatible. Auto-approved after testing.
-   - **Major updates** (`X.y.z` → `X+1.y.z`): Breaking API changes. Require manual code compatibility review.
+   - **In-Range Semver Updates** (`bun update`): Updates within existing caret/tilde ranges (e.g. `^4.3.0` → `4.3.1`).
+   - **Major / Pinned Upgrades** (`bun add <pkg>@latest`): Note that exact pinned versions in `package.json` (without `^` or `~`) are ignored by `bun update`. They require explicit `bun add <pkg>@latest` or `package.json` version string edits to upgrade to `@latest`.
 
 ---
 
@@ -104,21 +105,28 @@ fi
 ## Step 3: Execute Package Updates & Lockfile Sync
 
 ### L0 Workspace Root Mode
-1. **Execute Bun Update**:
+1. **In-Range Update**:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun update
    ```
-2. **Align Common Template**:
+2. **Major / Pinned Upgrade to `@latest`**:
+   To upgrade pinned dependencies to their latest releases (e.g. `js-yaml`, `typescript`, `@types/node`):
+   ```bash
+   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun add <package-name>@latest
+   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun add -d <dev-package-name>@latest
+   ```
+3. **Align Common Template**:
    Sync shared dependency version strings in `./templates/common/package.json`.
-3. **Propagate to Templates**:
+4. **Propagate to Templates**:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun run propagate:apply
    ```
 
 ### L1/L2 Standalone Project Mode
-1. **Execute Bun Update**:
+1. **In-Range & Pinned Update**:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun update
+   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun add <package-name>@latest
    ```
 2. **Lockfile Refresh**:
    ```bash
@@ -145,7 +153,7 @@ fi
    ```
 4. Execute `/sync` pipeline:
    ```bash
-   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun scripts/dev-sync.ts --body-file ".git/sync-pr-body.md" "chore(deps): update bun packages and sync templates"
+   $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun scripts/dev-sync.ts --body-file ".git/sync-pr-body.md" "chore(deps): update bun packages to @latest and sync templates"
    ```
 
 ### L1/L2 Standalone Project Mode
