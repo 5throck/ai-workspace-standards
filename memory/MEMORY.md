@@ -26,6 +26,7 @@ Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README 
 - Governance docs: clarify Phase A (self-service, no CI gate) vs Phase B (WS-08 hard-enforced on templates/co-*/ only). |
 | [2026-08-10](2026-08-10.md) | feat(skills): promote k-dart and create k-law as L1 common skills, remove co-consult duplicates |
 | [2026-08-09](2026-08-09.md) | fix(pipeline): resolve remaining l2-to-variant-pipeline issues for co-export promotion |
+| [2026-08-08](2026-08-08.md) | fix(scripts): resolve bare 'bun' spawnSync ENOENT in new-project.ts governance/orchestration calls |
 | [2026-08-07](2026-08-07.md) | fix(scripts): validate-templates B-04 supports nested theme CSS layout; inject-skills registers co-game |
 | [2026-08-06](2026-08-06.md) | fix(scripts): resolve audit and scaffolding test issues |
 | [2026-08-04](2026-08-04.md) | fix(sync): align sync command files with agent-written PR body flow |

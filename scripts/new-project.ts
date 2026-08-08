@@ -210,17 +210,17 @@ if (existsSync(variantJsonPath)) {
 const governanceJson = join(workspaceRoot, 'docs', 'templates', 'lifecycle-governance.json');
 if (existsSync(join(workspaceRoot, 'scripts', 'validate-templates.ts')) && existsSync(governanceJson)) {
   console.log(`\nRunning lifecycle governance pre-check for variant '${variant}'…`);
-  const govResult = spawnSync('bun', [join(workspaceRoot, 'scripts', 'helpers', 'lifecycle-governance.ts')], { encoding: 'utf8' });
+  const govResult = spawnSync(process.execPath, [join(workspaceRoot, 'scripts', 'helpers', 'lifecycle-governance.ts')], { encoding: 'utf8' });
   const mandatoryDomains = govResult.status === 0 ? govResult.stdout.trim() : 'variant,agent,skill';
 
   const validateResult = spawnSync(
-    'bun', [join(workspaceRoot, 'scripts', 'validate-templates.ts'), '--variant', variant, '--json'],
+    process.execPath, [join(workspaceRoot, 'scripts', 'validate-templates.ts'), '--variant', variant, '--json'],
     { encoding: 'utf8' }
   );
   const validateOutput = validateResult.stdout || '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}';
 
   const validateCheck = spawnSync(
-    'bun', [join(workspaceRoot, 'scripts', 'helpers', 'validate-output.ts'), mandatoryDomains, validateOutput],
+    process.execPath, [join(workspaceRoot, 'scripts', 'helpers', 'validate-output.ts'), mandatoryDomains, validateOutput],
     { encoding: 'utf8' }
   );
   if (validateCheck.status !== 0) {
@@ -238,7 +238,7 @@ if (existsSync(join(workspaceRoot, 'scripts', 'validate-templates.ts')) && exist
 const templateValidationHelper = join(workspaceRoot, 'scripts', 'helpers', 'template-validation.ts');
 if (existsSync(templateValidationHelper)) {
   console.log('Validating template integrity…');
-  const result = spawnSync('bun', [templateValidationHelper, variant, commonDir, templatesDir], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [templateValidationHelper, variant, commonDir, templatesDir], { encoding: 'utf8' });
   if (result.status !== 0) {
     console.error(result.stderr);
     if (import.meta.main) {
@@ -546,7 +546,7 @@ for (const f of walkFiles(projectDir)) {
 // ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ──────────────────
 if (existsSync(variantJsonPath)) {
   const agentOverrideMerge = join(workspaceRoot, 'scripts', 'lib', 'agent-override-merge.ts');
-  spawnSync('bun', [agentOverrideMerge, commonDir, templatesDir, projectDir], {
+  spawnSync(process.execPath, [agentOverrideMerge, commonDir, templatesDir, projectDir], {
     encoding: 'utf8',
     stdio: 'inherit',
   });
@@ -560,7 +560,7 @@ for (const f of walkFiles(projectDir)) {
 // ── 5. Substitute placeholders ────────────────────────────────────────────────
 const substitutePlaceholders = join(workspaceRoot, 'scripts', 'helpers', 'substitute-placeholders.ts');
 if (existsSync(substitutePlaceholders)) {
-  spawnSync('bun', [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant], { stdio: 'inherit' });
+  spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant], { stdio: 'inherit' });
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
 }
@@ -571,7 +571,7 @@ const projVariantJson = join(projectDir, 'variant.json');
 if (existsSync(projVariantJson)) {
   const helper = join(workspaceRoot, 'scripts', 'helpers', 'update-variant-lifecycle.ts');
   if (existsSync(helper)) {
-    spawnSync('bun', [helper, projectDir, projectDate, variant], { stdio: 'inherit' });
+    spawnSync(process.execPath, [helper, projectDir, projectDate, variant], { stdio: 'inherit' });
   }
 }
 
@@ -580,7 +580,7 @@ const scriptsMd = join(workspaceRoot, 'scripts', 'SCRIPTS.md');
 if (existsSync(scriptsMd)) {
   const helper = join(workspaceRoot, 'scripts', 'helpers', 'write-scripts-snapshot.ts');
   if (existsSync(helper)) {
-    spawnSync('bun', [helper, projectDir, projectDate, variant, 'templates/common/scripts'], { stdio: 'inherit' });
+    spawnSync(process.execPath, [helper, projectDir, projectDate, variant, 'templates/common/scripts'], { stdio: 'inherit' });
   }
 }
 
@@ -618,7 +618,7 @@ writeFileSync(
 // ── 5.6b. Inject AGENTS.md Skills into docs/context.md ───────────────────────
 const injectSkills = join(workspaceRoot, 'scripts', 'helpers', 'inject-skills.ts');
 if (existsSync(injectSkills)) {
-  spawnSync('bun', [injectSkills, projectDir], { stdio: 'inherit' });
+  spawnSync(process.execPath, [injectSkills, projectDir], { stdio: 'inherit' });
 }
 
 // ── 5.7. Protect context.md from accidental overwrites ────────────────────────
@@ -636,7 +636,7 @@ if (existsSync(gitattributes)) {
 const layerFilter = join(workspaceRoot, 'scripts', 'helpers', 'layer-filter.ts');
 let l0Scripts: string[] = [];
 if (existsSync(layerFilter)) {
-  const result = spawnSync('bun', [layerFilter, '--scripts-l0-only', '--format=list'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [layerFilter, '--scripts-l0-only', '--format=list'], { encoding: 'utf8' });
   if (result.status === 0) {
     l0Scripts = result.stdout.split('\n').filter(Boolean);
   }
@@ -857,7 +857,7 @@ console.log('\nRunning post-scaffold audit…');
 const projectAuditScript = join(projectDir, 'scripts', 'audit.ts');
 const workspaceAuditScript = join(workspaceRoot, 'scripts', 'audit.ts');
 const auditScript = existsSync(projectAuditScript) ? projectAuditScript : workspaceAuditScript;
-const auditResult = spawnSync('bun', [auditScript, '--skip-memory'], { stdio: 'inherit', cwd: projectDir });
+const auditResult = spawnSync(process.execPath, [auditScript, '--skip-memory'], { stdio: 'inherit', cwd: projectDir });
 
 if (auditResult.status === 0) {
   console.log(`\n✅ Project '${projectName}' scaffolded and verified at: ${projectDir}`);
@@ -870,7 +870,7 @@ console.log('\nRunning environment setup…');
 const setupTs = join(projectDir, 'scripts', 'setup.ts');
 const setupSh = join(projectDir, 'scripts', 'setup.sh');
 if (existsSync(setupTs)) {
-  const result = spawnSync('bun', [setupTs], { stdio: 'inherit', cwd: projectDir });
+  const result = spawnSync(process.execPath, [setupTs], { stdio: 'inherit', cwd: projectDir });
   if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bun scripts/setup.ts' manually to retry.");
 } else if (existsSync(setupSh)) {
   // Pass relative path to bash to avoid Windows path separator issues
