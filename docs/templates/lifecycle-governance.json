@@ -46,9 +46,9 @@
     }
   },
   "variantValidationPolicy": {
-    "description": "Which domain checks are mandatory for new-project.ts to allow project creation",
+    "description": "Controls validate-templates.ts check severity and new-project.ts project-creation gating. mandatoryBeforeProjectCreation lists DOMAIN names that new-project.ts treats as hard gates. warningOnly lists DOMAIN names and/or CHECK CODES (e.g. WS-08) that validate-templates.ts emits as non-blocking WARN instead of FAIL — used to roll out new checks without breaking the gate.",
     "mandatoryBeforeProjectCreation": ["variant", "agent", "skill"],
-    "warningOnly": ["script", "readme"]
+    "warningOnly": ["script", "readme", "WS-08"]
   },
   "newVariantChecklist": [
     "Create variant directory under templates/",

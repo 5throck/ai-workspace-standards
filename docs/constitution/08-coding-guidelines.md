@@ -105,6 +105,7 @@ When adding or recommending dependencies:
   └── README_ko.md   # Korean version (translation of README.md)
   ```
 - **Verification**: The `audit.ts` script will check for orphaned `README.md` files without corresponding `README_ko.md` in the `templates/` directory and report them as documentation violations.
+- **Standardized Structure (variant READMEs)**: Every variant `README.md` / `README_ko.md` MUST conform to the unified README Standard — the 7 required top-level sections (EN: `Overview · Quick Start · Team Mission · Meet the AI Team · Skills · How to Collaborate · Variant Type`; KO: `개요 · 빠른 시작 · 팀 미션 · AI 팀 소개 · 스킬 · 협업 방법 · 변형 유형`), a `> **Status**: (✅ Stable|⚠️ Beta) — vX.Y.Z` blockquote, the language-selector line, and the 4-column agent roster table. The structural SSOT is `templates/common/docs/README.template.md` (+KO); enforced by `validate-templates.ts` Check **WS-08** (see `docs/governance/variant-contract.md` "README Standard").
 
 #### 8.10 Cross-Platform Shell Redirection & Windows Device Safeguard (`nul` Avoidance)
 - **Unix/Git Bash (`.sh`, `.githooks`, `bash -c`)**: Output suppression MUST use `> /dev/null 2>&1`.

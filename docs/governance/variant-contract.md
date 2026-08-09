@@ -36,6 +36,47 @@ Domain-specific commands (e.g., `security-check.md` for co-develop, co-security)
 
 Variants **MUST NOT** include their own `docs/context.md`. The immutable project context is owned solely by `templates/common/docs/context.md` (L1) and is copied into every project at scaffold time; a variant-level `docs/context.md` would overwrite that canonical copy because the variant overlay runs *after* the common copy. Variant-specific content belongs in `docs/{variant}.context.md` (which extends `context.md`). If a variant places `docs/context.md` in its overlay, `validate-templates.ts` Check **WS-07** will fail validation.
 
+### README Standard
+
+Every variant's `README.md` and `README_ko.md` MUST follow ONE unified structure. The structural SSOT is `templates/common/docs/README.template.md` (+ `README_ko.template.md`), rendered by `scripts/helpers/generate-variant.ts` via `applyTemplate()`. Stable, hand-maintained variants keep their authored prose but conform to the section skeleton; beta/generated variants are produced entirely by the generator. `validate-templates.ts` Check **WS-08** enforces conformance.
+
+**Required top-level (`##`) sections — identical set in EN and KO, in this order:**
+
+| # | English (`README.md`) | Korean (`README_ko.md`) |
+|---|-----------------------|-------------------------|
+| 1 | `## Overview` | `## 개요` |
+| 2 | `## Quick Start` | `## 빠른 시작` |
+| 3 | `## Team Mission` | `## 팀 미션` |
+| 4 | `## Meet the AI Team` | `## AI 팀 소개` |
+| 5 | `## Skills` | `## 스킬` |
+| 6 | `## How to Collaborate` | `## 협업 방법` |
+| 7 | `## Variant Type` | `## 변형 유형` |
+
+No other top-level (`##`) sections are permitted; extra content must live under `###` subsections (e.g. `### A. The PM Gateway` / `### A. PM 게이트웨이` under *How to Collaborate*).
+
+**Status line** — a blockquote immediately under the H1, same format in both files (only the label word differs):
+
+```
+> **Status**: ✅ Stable — vX.Y.Z        # English
+> **상태**: ✅ Stable — vX.Y.Z           # Korean (label localized; value identical)
+```
+
+(`⚠️ Beta — vX.Y.Z` for beta variants.)
+
+**Language selector** — the blockquote links to the other-language README; the current language is bolded:
+- EN: `> **Language**: **English** · [한국어](README_ko.md)`
+- KO: `> **언어**: [English](README.md) · **한국어**`
+
+**Agent roster table** — a 4-column schema under *Meet the AI Team*:
+
+| English header | Korean header |
+|----------------|---------------|
+| `\| Agent \| Role \| Tier \| Model \|` | `\| 에이전트 \| 역할 \| 티어 \| 모델 \|` |
+
+**Frontmatter** — `README.md` carries `content_hash`; `README_ko.md` carries `translated_from_hash` (mirroring the EN hash). Presence is checked by Check 11 (`checkReadmePresence`); hash freshness by `scripts/verify-readme-sync.ts`.
+
+**Severity policy** — WS-08 consults `variantValidationPolicy.warningOnly` in `docs/templates/lifecycle-governance.json`. While `"WS-08"` is listed there, non-conformance is a non-blocking **WARN** (rollout phase); remove the entry to make WS-08 a hard **FAIL**. This is the only check that reads `warningOnly` for per-check severity.
+
 ## Optional Files (Domain Extensions)
 
 | File / Path | Used by |
