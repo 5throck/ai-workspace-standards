@@ -1,71 +1,103 @@
 ---
 sync_version: 1
-translated_from_hash: PLACEHOLDER
+translated_from_hash: 7bbe7039fbcd19b54968443b4542854f63dc846f6841c01052fecf00ffb0e1be
+lang: ko
+lang_reason: source-material
 ---
 
 # co-export
 
-> **Status**: 🔶 Beta — v0.1.0
-> 이 변형은 활발히 개발 중이며, 프로덕션 환경에서 사용해서는 안 됩니다.
+> **언어**: [English](README.md) · **한국어**
+> **상태**: ⚠️ Beta — v0.1.0
+> Import/export trade consulting variant
+
+## 개요
+
+구조화된 무역 컨설팅 참여 방법론(4단계交付): (1) 규제 정보 수집 및 HS/FTA 분류, (2) 수출 통제 및 해외 규제 스크리닝을 통한 컴플라이언스 교차 검증, (3) 시장 진입 전략 정교화 및 무역 서류 준비, (4) 물류 조정 및 출하 후 관세 환급 청구. 각 단계는 실행으로 진행하기 전에 클라이언트 승인 게이트를 포함합니다.
 
 ## 빠른 시작
 
-이것은 워크스페이스 템플릿의 베타 변형(variant)입니다. `templates/common`에서 상속받으며, 변형별 맞춤 설정을 포함합니다.
+이것은 워크스페이스 템플릿의 베타 변형입니다. `templates/common`에서 상속받으며 변형별 맞춤 설정을 포함합니다.
 
 ### Claude Code 사용자:
 
-자세한 지침은 `CLAUDE.md`를 참조하세요.
+자세한 지침은 `CLAUDE.md`를 참고하세요.
 
 ### Gemini CLI 사용자:
 
-자세한 지침은 `GEMINI.md`를 참조하세요.
+자세한 지침은 `GEMINI.md`를 참고하세요.
 
-## 베타 상태
+## 팀 미션
 
-이 변형은 현재 **베타** 상태이며 다음 조건이 필요합니다:
+**미션:** 수출입 무역 컨설팅 변형
 
-- **클라이언트 인게이지먼트(Client Engagements)**: 0/2 (변형 거버넌스 규칙 참조)
-- **베타 기간(Beta Duration)**: 0/2개월
-- **추가 검사(Additional Checks)**: 대기 중(Pending)
+## AI 팀 소개
 
-프로모션 기준은 워크스페이스의 L2-to-variant 파이프라인이 관리합니다. 전체 정책은 워크스페이스 루트의 `scripts/helpers/variant-governance-rules.ts`(이 템플릿에는 포함되지 않음)를 참조하세요.
+당신의 파트너는 각기 고유한 역할을 가진 전문 에이전트들입니다. **프로젝트 매니저(PM)**가 유일한 진입점이며 나머지 팀을 조율합니다.
 
-## 1. 팀 미션
+| 에이전트 | 역할 | 티어 | 모델 |
+|---------|------|------|------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
+| **customs-duty-drawback-specialist** | Duty drawback specialist for co-export | high | inherit |
+| **export-control-compliance-specialist** | Strategic items export control and sanctions screening specialist | high | inherit |
+| **foreign-regulatory-intelligence-analyst** | Monitors US/China/EU import regulation, tariff, and trade-defense changes | medium | inherit |
+| **fta-origin-analyst** | FTA rules-of-origin analysis and origin certification specialist | high | inherit |
+| **hs-classification-specialist** | HS code classification, customs valuation, and tariff rate specialist | high | inherit |
+| **logistics-coordinator** | Incoterms selection, freight/forwarding, and bonded warehouse logistics | low | inherit |
+| **market-entry-strategist** | Overseas market entry strategy, buyer discovery, and market research | medium | inherit |
+| **trade-documentation-specialist** | Trade documentation and customs clearance paperwork specialist | medium | inherit |
 
-**미션:** Import/export trade consulting variant
+## 스킬
 
-## 2. AI 팀 소개
+- **customs-duty-drawback-workflow**: Guides the Customs Duty Drawback Specialist through refund-eligible raw material determination, individual refund vs. simplified fixed-rate refund method selection, usage-rate calculation support, and refund-application deadline tracking under the Act on Special Cases Concerning the Refund of Customs Duties Levied on Raw Materials for Export. Keeps drawback claims clearly separated from ordinary Customs Act erroneous-payment refunds.
+- **export-control-screening**: Guides the Export Control & Sanctions Screening Specialist through strategic-item classification, catch-all end-use/end-user assessment, and denied-party/sanctions screening. The highest-consequence workflow on the team — escalation discipline is mandatory.
+- **foreign-regulation-monitoring**: Guides the Foreign Regulatory Intelligence Analyst through tracking US/China/EU import regulation, tariff, and trade-defense changes, with strict source attribution and staleness disclosure so downstream compliance work isn't built on outdated destination-market context.
+- **fta-origin-determination**: Guides the FTA/Origin Analyst through determining whether goods qualify for preferential tariff treatment under a specific Free Trade Agreement — origin criterion selection, non-originating material assessment, and origin certification method identification.
+- **hs-classification-workflow**: Guides the HS Classification Specialist through GRI-ordered Harmonized System classification, customs valuation basis determination, and tariff rate lookup. Ensures classification reasoning is reproducible and defensible under a customs post-clearance audit.
+- **logistics-coordination**: Guides the Logistics Coordinator through Incoterms 2020 term selection, freight mode/forwarder comparison, and bonded-warehouse/customs clearance logistics planning, ending in final engagement delivery handoff.
+- **market-entry-strategy**: Guides the Market Entry Strategist through destination-market demand assessment, competitive landscape analysis, entry channel comparison, and buyer/distributor discovery — synthesized with compliance findings into a single go-to-market recommendation.
+- **trade-documentation-checklist**: Guides the Trade Documentation Specialist through assembling a complete, internally consistent trade document package (invoice, packing list, B/L, certificate of origin) and reviewing letter-of-credit terms against UCP 600 for discrepancy risk.
 
-| 에이전트 | 파일 | 역할 |
-|---------|------|------|
-| **customs-duty-drawback-specialist** | `agents/customs-duty-drawback-specialist.md` | Duty drawback specialist for co-export. Determines whether raw materials used in an export are eligible for duty refund under the Act on Special Cases Concerning the Refund of Customs Duties Levied on Raw Materials for Export (the Duty Drawback Act), selects the applicable refund method (individual refund vs. simplified fixed-rate refund), and supports usage-rate calculation and refund-application deadline tracking. Distinct from ordinary Customs Act erroneous-payment refunds and from HS classification. Use when: duty drawback, customs duty refund, individual refund method, simplified fixed-rate refund method, usage-rate statement, or raw-material refund eligibility is required. |
-| **export-control-compliance-specialist** | `agents/export-control-compliance-specialist.md` | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods, technology, or destinations trigger Korean export control licensing requirements, and screens counterparties against US OFAC / EAR and equivalent restricted-party lists for parallel exposure when the transaction touches US-origin technology or a sanctioned destination. Use when: strategic items classification, export license requirement determination, or sanctions/denied-party screening is required. |
-| **foreign-regulatory-intelligence-analyst** | `agents/foreign-regulatory-intelligence-analyst.md` | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) changes affecting client shipments for co-export. Provides destination-market regulatory context that Korea-based compliance agents (HS classification, FTA/origin, export control) use as an input, but does not itself issue compliance determinations. Use when: destination-country import regulation research, tariff-change monitoring, or trade-defense measure screening is required. |
-| **fta-origin-analyst** | `agents/fta-origin-analyst.md` | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for co-export. Determines whether goods qualify for preferential tariff treatment under a specific FTA, identifies the applicable origin criterion (wholly obtained / CTC / RVC / specific process), and defines the origin certificate/declaration requirements per the Foreign Trade Act and the relevant FTA text. Use when: FTA preferential eligibility, rules-of-origin qualification, or origin certificate requirements need to be determined. |
-| **hs-classification-specialist** | `agents/hs-classification-specialist.md` | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods under the Harmonized System per the Korea Customs Act and the WCO HS nomenclature, determines applicable tariff rates, and flags classification ambiguity requiring a formal customs ruling from the Customs Valuation and Classification Institute. Use when: HS code classification, tariff rate lookup, customs valuation, or classification dispute/ambiguity is required. |
-| **logistics-coordinator** | `agents/logistics-coordinator.md` | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for co-export. Advises on Incoterms 2020 term selection, coordinates freight mode and forwarder selection trade-offs, and plans bonded-warehouse/customs clearance logistics. Finalizes delivery handoff at the end of the engagement. Use when: Incoterms selection, freight/forwarding coordination, or bonded warehouse logistics planning is required. |
-| **market-entry-strategist** | `agents/market-entry-strategist.md` | Overseas market entry strategy, buyer discovery, and market research lead for co-export. Assesses target-market demand, competitive landscape, and entry channel options (direct export, local distributor/agent, e-commerce, local incorporation), and synthesizes compliance findings from other specialists into a client-facing go-to-market recommendation. Use when: overseas market entry strategy, buyer/distributor discovery, or destination-market demand and competitive research is required. |
-| **trade-documentation-specialist** | `agents/trade-documentation-specialist.md` | Trade documentation and customs clearance paperwork specialist for co-export. Prepares templates and checklists for letters of credit (L/C), commercial invoices, packing lists, bills of lading, certificates of origin, and customs declaration documents, consistent with the classification, origin, and control findings produced by the compliance specialists. Use when: trade document preparation, L/C terms review, or customs clearance paperwork checklist is required. |
+## 협업 방법
 
-## 3. 스킬
+협업 방식은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 표준 워크플로는 다음과 같습니다:
 
-- **customs-duty-drawback-workflow**: customs-duty-drawback-workflow 스킬
-- **export-control-screening**: export-control-screening 스킬
-- **foreign-regulation-monitoring**: foreign-regulation-monitoring 스킬
-- **fta-origin-determination**: fta-origin-determination 스킬
-- **hs-classification-workflow**: hs-classification-workflow 스킬
-- **logistics-coordination**: logistics-coordination 스킬
-- **market-entry-strategy**: market-entry-strategy 스킬
-- **trade-documentation-checklist**: trade-documentation-checklist 스킬
+### A. PM 게이트웨이
 
-## 4. 스크립트 안내
+항상 요청을 시작할 때 **PM**과 먼저 대화하세요. 전문 에이전트를 직접 호출하지 마세요. PM이 요청을 분석하고 적절한 전문가를 불러옵니다.
 
-`templates/co-export/scripts/` 디렉터리는 별도로 존재하지 않습니다. 워크스페이스 자동화 스크립트(`dev-sync.ts`, `test-runner.ts` 등)는 스캐폴딩 시점에 `templates/common/scripts/`에서 상속받아 사용됩니다. 프로모션 기준은 워크스페이스 루트의 `scripts/helpers/variant-governance-rules.ts`(이 템플릿에는 포함되지 않음)가 관리합니다.
+### B. 표준 워크플로 단계
 
-## 5. 의존성 설치
+1. **팀 구성:** PM이 필요한 전문 에이전트/스킬을 생성합니다.
+2. **분류:** PM이 요청을 분류하고 읽기 전용 에이전트를 병렬로 배치합니다.
+3. **분석:** PM이 조사 결과를 요구사항 + 완료 기준으로 종합합니다.
+4. **설계:** 아키텍트가 구현 계획 + ADR을 작성합니다.
+5. **구현:** 전문가가 구현하고, PM은 실패 시 최대 3회까지 반복합니다.
+6. **마무리:** PM이 결정을 기록하고 `/sync`를 실행한 뒤 PR을 엽니다.
 
-```bash
-bun --version   # audit.ts, dev-sync.ts 실행에 필요
-```
+### C. 사용 가능한 명령어
 
-*Last Updated: 2026-08-09 — co-export variant template*
+일상적인 작업은 슬래시 명령어(Claude Code 및 Gemini CLI에서 Skill로 등록됨)로 구동됩니다:
+
+- `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
+- `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
+- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+
+## 변형 유형
+
+**유형**: consulting
+
+이 변형은 AI 지원 무역 및 규제 컴플라이언스 컨설팅 참여에 중점을 둡니다.
+
+> **⚠️ 베타 변형** — 프로덕션 용도가 아닙니다.
+
+- **클라이언트 참여**: 0/2 (변형 거버넌스 규칙 참조)
+- **베타 기간**: 0/2개월
+- **추가 검증**: 대기 중
+
+승급 기준은 `scripts/helpers/variant-governance-rules.ts`를 참조하세요.
+
+---
+
+*최근 업데이트: 2026-08-09*
