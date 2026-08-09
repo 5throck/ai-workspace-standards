@@ -330,13 +330,10 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
-| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
-| Write or modify automation scripts (.ts, package.json) per ADR-0036 | `automation-engineer` | `architect` |
-| Update documentation files | `docs-writer` | `architect` |
-| Create new project from template | `scaffolding-expert` | `automation-engineer` |
-| Security review, Git hooks configuration | `security-expert` | `architect` |
-| Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
+
+<!-- VARIANT-ROLE-BOUNDARY-START -->
+<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 

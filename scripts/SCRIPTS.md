@@ -55,7 +55,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.11 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.12 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -70,7 +70,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.7.2 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.7.3 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
@@ -81,12 +81,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `helpers/pm-md-parser.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `helpers/pm-md-parser.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/registries/capability-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/capability-registry.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/registries/promotion-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/registries/validation-policy.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/registries/validation-policy.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -129,7 +129,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.9.1 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.9.2 | active | —| —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -498,4 +498,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-07-10 — Two-round project review fixes: audit.ts split bug, dead parity check removal, SSRF IPv6 ranges, pre-commit gitleaks separation, `any` type cleanup, validate-templates dead code removal, ESM import fixes, tsconfig strict options.*
+*Last updated: 2026-08-09 — l2-to-variant-pipeline & create-variant improvements: shared CRLF-safe agent-roster parsing (extractAgentRoster → parseAgentFile), blocking Phase 3.7 capability/plugin and Phase 6 parity validation, --version/--status CLI overrides, import.meta.main guard, dynamic custom-field preservation, context.md append-only Phase 4.6, scaffold variant_type/inherits_common/README_ko/context.md stubs.*

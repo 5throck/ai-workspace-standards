@@ -23,6 +23,20 @@ metadata:
 
 Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single mandatory pathway for all workspace commits — it handles lifecycle finalization, audit gating, L0→L1 template propagation, git branch creation, commit, push, and PR creation in one orchestrated flow.
 
+## When to Use
+
+- After completing any set of file changes that should be committed, pushed, and PR'd
+- When the user says "commit", "push", "create PR", "/sync", or "finish this branch"
+- At the end of any execution plan row or multi-agent task
+- As the final step in any workspace governance workflow (Phase 5/6 of the Harness Engineering Workflow)
+
+## Output Format
+
+- A git branch `pr/<timestamp>-<slug>` created (or reused) from `main`
+- A commit with all staged changes and a conventional commit message
+- An open GitHub PR with the agent-written body (Why / What Changed / Test Plan / Security Checklist / Notes)
+- Console output listing each pipeline step and its result
+
 ## Execution Steps
 
 1. **Write the PR body** (the agent writes it — never shell out to an LLM CLI):
@@ -79,6 +93,12 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.
+
+## Related Skills
+
+- `scripts/dev-sync.ts` — Core sync pipeline implementation
+- `skills/gateguard/SKILL.md` — Pre-edit quality gate (run before edits that lead to sync)
+- `context.md §3` — PR workflow and branch rules
 
 ## PR Language Rule
 

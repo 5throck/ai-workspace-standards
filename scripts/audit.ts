@@ -1,4 +1,4 @@
-// @version 2.10.11
+// @version 2.10.12
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -364,7 +364,8 @@ if (!LIFECYCLE_ONLY) {
     // Check: no non-standard .md files at project root (file organization policy)
     const STANDARD_ROOT_MD = new Set([
         'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
-        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md'
+        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md',
+        'PROMOTION_CHECKLIST.md', '_ORIGIN.md', '_COMMON_VERSION.md'
     ]);
     const rootMdFiles = fs.readdirSync('.')
         .filter(f => f.endsWith('.md') && !STANDARD_ROOT_MD.has(f));

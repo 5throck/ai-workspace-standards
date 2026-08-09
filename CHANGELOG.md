@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-09]**: fix(pipeline): resolve l2-to-variant-pipeline issues and post-pipeline audit failures for co-export promotion — fixed `path`/`fs` namespace bug in pm-md-parser.ts, added custom field merge to preserve engagement_methodology/deliverable_template in generated variant.json, unified pinned codegraph version across Claude/Gemini settings generators, added Layer 1 golden-reference sections (When to Use, Output Format, Related Skills) to gateguard/sync skills in L0/L1/common, expanded consulting capability registry with 4 new capabilities (CLIENT_ENGAGEMENT, ANALYSIS, REPORTING, PRESENTATION), added PROMOTION_CHECKLIST.md/_ORIGIN.md/_COMMON_VERSION.md to audit .md whitelist, removed L0-only `lifecycle:` frontmatter from co-export pm.md, removed CONSTITUTION.md references from co-export context.md (L0 leakage), added VARIANT-INJECT: guidelines to co-export.context.md. Pipeline passes all 6 phases; audit passes all checks. Verified `bun scripts/l2-to-variant-pipeline.ts --l2-path=./Projects/co-export --name=co-export --type=consulting` (6/6 clean), `bun scripts/audit.ts` (all checks passed).
+
+- **[2026-08-09]**: fix(pipeline): comprehensive l2-to-variant-pipeline and create-variant improvements — replaced hand-rolled agent-roster regex with shared CRLF-safe `parseAgentFile()` and normalized Windows backslash scan paths (root cause of empty README agent/skill tables), filtered generated skills to `skill_manifest.variant_specific`, made Phase 3.7 capability/plugin validation errors and Phase 6 parity violations blocking, added `--version`/`--status` CLI overrides and `import.meta.main` guard, replaced hardcoded custom-field allowlist with dynamic canonical-schema diffing, fixed CRLF-unsafe frontmatter regex in pm-md-parser.ts, switched pm-md-parser.ts/reconcile-with-l0-l1.ts to UTF-8 utilities, made Phase 4.6 context.md append-only (preserves Phase 4 template content), fixed create-l2-scaffold.ts (`type`→`variant_type` auto-filled from domain, `inherits_common` path, lecture domain check, agents/README_ko.md + context.md stubs), completed VARIANT_TYPE_TO_DIR map (design/collaboration/game), O(1) capability lookup, structural consulting-plugin checks, registry-aligned create-variant domain list, populated co-export variant.json agents/skills + skill manifest (customs-duty-drawback-workflow), agent READMEs (customs-duty-drawback-specialist, README_ko.md), removed Korean content from co-export context.md, synced audit.ts v2.10.12 and pm-md-parser.ts to L1/co-export, created docs/lifecycle/templates/co-export.md, added VERSION_REGISTRY.json changelog, deduplicated memory/2026-08-09.md. Verified pipeline 6/6 phases, `bun scripts/audit.ts` (all checks passed), `bun scripts/validate-templates.ts` (0 errors), `bun scripts/verify-scripts.ts` (0 warnings).
+
 - **[2026-08-07]**: chore(co-deck): upgrade Projects/co-deck to template v0.5.3 — synced workspace-managed blocks, updated core scripts (audit.ts v2.10.11, dev-sync.ts v1.5.0, validate-docs-links.ts v1.0.0), platform commands, and skills. Verified `bun scripts/audit.ts Projects/co-deck` (all checks passed).
 
 - **[2026-08-07]**: feat(governance): facilitate multi-agent meeting on preventing unnecessary `nul` file creation on Windows/Git Bash — established 4-layer defense strategy (standardized shell redirection `> /dev/null 2>&1` & `$null`, banned `> nul` redirects, added `nul`/`NUL` to `.gitignore` and `templates/common/.gitignore`, updated `scripts/audit.ts` to auto-delete `WINDOWS_DEVICE_NAMES` regardless of git tracking status). Recorded meeting transcript in `memory/meeting-2026-08-07-prevent-nul-file-creation.md`. Verified `bun scripts/audit.ts` (all checks passed).
@@ -918,7 +922,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-07*
+*Last Updated: 2026-08-09*
 
 
 

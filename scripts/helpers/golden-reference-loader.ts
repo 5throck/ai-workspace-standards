@@ -102,6 +102,9 @@ const VARIANT_TYPE_TO_DIR: Partial<Record<VariantType, string>> = {
   security: 'co-security',
   consulting: 'co-consult',
   lecture: 'co-deck',
+  design: 'co-design',
+  collaboration: 'co-work',
+  game: 'co-game',
 };
 
 /**

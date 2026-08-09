@@ -43,6 +43,25 @@ This is the **manual/skill layer** of the 3-layer enforcement model. The hook la
 
 \* Claude Desktop App: documented by Anthropic but workspace testing (2026-05) observed intermittent behavior.
 
+## When to Use
+
+- Before editing any TypeScript, JSON, or configuration file that may be imported by other files
+- When a user request involves modifying shared utilities, type definitions, or script infrastructure
+- When the agent is unsure whether a change is safe to make without investigating dependencies
+- As a pre-check before any architectural modification to workspace scripts, helpers, or registries
+
+## Output Format
+
+```
+[GATEGUARD] Pre-edit investigation complete
+  Target: <file-path>
+  Importers: <list of importing files, or "none">
+  Exported schemas: <list of interfaces/types/classes, or "none">
+  Scope constraints: <user-imposed constraints, or "none">
+  Risk level: low | medium | high
+  Recommendation: proceed | proceed with caution | escalate to architect
+```
+
 ## Execution Steps
 
 When invoked (via `/gateguard <file-path>` or trigger match):
@@ -63,7 +82,7 @@ When invoked (via `/gateguard <file-path>` or trigger match):
 
 After completing the GateGuard investigation, the agent may proceed with the edit. If importers were found, the agent should verify that changes won't break downstream consumers.
 
-## Related
+## Related Skills
 
 - CONSTITUTION.md §11.2 — GateGuard specification
 - `scripts/hooks/gateguard-fact-force.ts` — Hook layer implementation
