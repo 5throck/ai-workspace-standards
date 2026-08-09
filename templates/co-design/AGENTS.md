@@ -177,13 +177,13 @@ All specialist agents below are dispatched ONLY through PM:
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
 | Agent | Phase | Dispatch Trigger |
 |-------|-------|------------------|
-| `design-lead` | Phase 2 | "design lead", "design", "create design", "strategy", "strategic analysis" |
-| `prototype-engineer` | Phase 4 | "prototype engineer", "design", "create design", "prototype", "build" |
+| `design-lead` | Phase 2 | "design lead", "design system", "design tokens", "design direction", "design strategy" |
+| `prototype-engineer` | Phase 4 | "prototype engineer", "interactive prototype", "clickable prototype", "prototype testing", "build prototype" |
 | `service-designer` | Phase 3 | "service designer", "design", "create design", "service design", "customer journey" |
-| `storyteller` | Phase 1 | "storyteller", "design", "create design", "communicate", "presentation" |
+| `storyteller` | Phase 1 | "storyteller", "design philosophy", "brand narrative", "narrative coherence", "brand identity" |
 | `typography-expert` | Phase 3 | "typography expert", "visual", "typography", "font" |
 | `ux-researcher` | Phase 1 | "ux researcher", "research", "analyze", "investigate", "user research" |
-| `visual-designer` | Phase 3 | "visual designer", "design", "create design", "visual", "typography" |
+| `visual-designer` | Phase 3 | "visual designer", "visual design", "UI mockup", "screen design", "design specification" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 

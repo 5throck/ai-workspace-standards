@@ -38,6 +38,24 @@
     { "name": "stride-threat-matrix" },
     { "name": "verify-authorization" }
   ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "stride-threat-matrix",
+        "layer": "workspace",
+        "used_by_agents": ["threat-modeler"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sarif-exporter",
+        "layer": "workspace",
+        "used_by_agents": ["pentester", "report-writer"],
+        "phases": [3, 5],
+        "platform_parity": "required"
+      }
+    ]
+  },
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": ["red-team-lead", "threat-modeler", "pentester", "patch-engineer", "report-writer"],

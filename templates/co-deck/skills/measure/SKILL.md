@@ -7,8 +7,10 @@ description: >
   and colors for PDF generation. Downloads required TTF fonts. Responds to
   "measure layout", "prep for PDF", "extract coordinates" . Stages 9-10
   of the lecture workflow.
-status: active
+status: deprecated
 owner: measure
+superseded_by: prep-pdf
+removal-date: 2026-09-08
 last_reviewed: 2026-06-20
 prerequisites: html-build
 ---

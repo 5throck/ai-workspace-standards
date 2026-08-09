@@ -3,7 +3,7 @@ content_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# {{PROJECT_NAME}}
+# co-deck
 
 **Language**: **English** · [한국어](README_ko.md)
 

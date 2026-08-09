@@ -39,6 +39,7 @@
 | Arcade Designer | `agents/arcade-designer.md` | Retro arcade game design: entity AI, wave systems, scoring, level layout | active |
 | Puzzle Designer | `agents/puzzle-designer.md` | Puzzle/board game design: matching logic, turn systems, difficulty generation | active |
 | Game Developer | `agents/game-developer.md` | Canvas engine, entity systems, gameplay implementation | active |
+| Designer | `agents/designer.md` | UI/UX design: wireframes, component specs, design tokens | active |
 | Visual Artist | `agents/visual-artist.md` | Sprite/animation specs, board/tile visuals, background, HUD elements | active |
 | Sound Designer | `agents/sound-designer.md` | Procedural audio design: SFX, BGM loops, audio effects, Web Audio API | active |
 | Game Debugger | `agents/game-debugger.md` | Bug analysis, fix proposals, bug pattern documentation | active |

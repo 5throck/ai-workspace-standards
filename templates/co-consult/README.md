@@ -3,7 +3,7 @@ sync_version: 1
 content_hash: TBD
 ---
 
-# {{PROJECT_NAME}}
+# co-consult
 
 **Language**: **English** · [한국어](README_ko.md)
 

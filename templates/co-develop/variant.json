@@ -43,6 +43,38 @@
     { "name": "swe-solve" },
     { "name": "test-driven-development" }
   ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "code-review",
+        "layer": "workspace",
+        "used_by_agents": ["code-writer"],
+        "phases": [4],
+        "platform_parity": "skip"
+      },
+      {
+        "name": "refactoring",
+        "layer": "workspace",
+        "used_by_agents": ["code-writer"],
+        "phases": [4],
+        "platform_parity": "skip"
+      },
+      {
+        "name": "swe-solve",
+        "layer": "workspace",
+        "used_by_agents": ["pm"],
+        "phases": [4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "test-driven-development",
+        "layer": "workspace",
+        "used_by_agents": ["test-runner"],
+        "phases": [4],
+        "platform_parity": "skip"
+      }
+    ]
+  },
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": ["architect", "designer", "stack-setup", "code-writer", "test-runner", "security-monitor"],
