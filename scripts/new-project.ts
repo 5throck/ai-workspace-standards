@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.2
+// @version 1.5.3
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -413,8 +413,17 @@ if (!existsSync(templatesDir)) {
 }
 
 console.log('📝 Copying variant templates...');
+// Files a variant MUST NOT overlay — owned by templates/common/ (copied at L318) and
+// sacred to the project. A variant-level docs/context.md would clobber the canonical
+// immutable context that was just laid down (see CONSTITUTION.md §10; validate-templates.ts
+// WS-07 forbids the variant from carrying it in the first place — this is defense-in-depth).
+const VARIANT_OVERLAY_SKIP = new Set(['docs/context.md']);
 for (const srcFile of walkFiles(templatesDir)) {
-  const relPath = relative(templatesDir, srcFile);
+  const relPath = relative(templatesDir, srcFile).replace(/\\/g, '/');
+  if (VARIANT_OVERLAY_SKIP.has(relPath)) {
+    console.log(`  ⏭️  Skipped variant overlay (owned by templates/common/): ${relPath}`);
+    continue;
+  }
   const destFile = join(projectDir, relPath);
   mkdirSync(dirname(destFile), { recursive: true });
   copyFileSync(srcFile, destFile);
