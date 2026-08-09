@@ -38,9 +38,9 @@ Phase 4.5 always runs `README_ko.md` (Korean README present in several variants)
 
 ### A.2 — JSON report field name mismatch (`extraSections` vs `missingOptionalSections`)
 
-**Finding**: Line ~810 writes `extraSections: r.extraSections ?? []` into the CI-facing `_pipeline_report.json`. `StructuralGapReport` (defined in `golden-reference-loader.ts`) has no `extraSections` field; the real field is `missingOptionalSections`. `r.extraSections` is always `undefined`, so the JSON always reports `extraSections: []` regardless of actual Layer-2 gaps — silently dropping that information from the CI-facing artifact (the markdown report via `formatGapReport()` is unaffected, since it reads `missingOptionalSections` directly).
+**Finding**: Line ~810 writes `extraSections: r.extraSections` (falling back to an empty array when undefined) into the CI-facing `_pipeline_report.json`. `StructuralGapReport` (defined in `golden-reference-loader.ts`) has no `extraSections` field; the real field is `missingOptionalSections`. `r.extraSections` is always `undefined`, so the JSON always reports `extraSections: []` regardless of actual Layer-2 gaps — silently dropping that information from the CI-facing artifact (the markdown report via `formatGapReport()` is unaffected, since it reads `missingOptionalSections` directly).
 
-**Decision**: Fix the field name to match the real type: `missingOptionalSections: r.missingOptionalSections ?? []`.
+**Decision**: Fix the field name to match the real type: `missingOptionalSections: r.missingOptionalSections` (with the same empty-array fallback).
 
 **Files touched**:
 - `scripts/l2-to-variant-pipeline.ts` line ~810.

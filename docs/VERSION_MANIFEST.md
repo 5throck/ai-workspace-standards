@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T04:17:43.929Z
+**Generated**: 2026-08-09T04:42:08.032Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -180,7 +180,7 @@
 | template-utils.ts | 1.0.0 | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | 1.0.2 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l2-promotion.ts | 1.0.0 | scripts/test-l2-promotion.ts | bun |
+| test-l2-promotion.ts | 1.0.1 | scripts/test-l2-promotion.ts | bun |
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |

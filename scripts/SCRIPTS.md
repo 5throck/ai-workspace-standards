@@ -166,7 +166,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `test-l2-promotion.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `test-l2-promotion.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|

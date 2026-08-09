@@ -2,7 +2,7 @@
 /**
  * test-l2-promotion.ts — E2E smoke test for the L2 scaffold → variant promotion path
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @last_updated 2026-08-09
  *
  * Backs the `simulate-l2-promotion` skill (skills/simulate-l2-promotion/SKILL.md).
@@ -49,6 +49,12 @@ const L2_FIXTURE_PATH = join(WORKSPACE_ROOT, 'Projects', SCAFFOLD_VARIANT_NAME);
 // parent), so this must live inside the workspace root (path-traversal guard)
 // but well away from templates/.
 const PIPELINE_OUTPUT_PATH = join(WORKSPACE_ROOT, 'tests', '.temp', `l2-promotion-pipeline-${RUN_ID}`);
+// regenerate-agents-md.ts hardcodes its lookup to templates/<variant>/ (no --path
+// flag), so to regenerate the fixture's AGENTS.md we stage its variant.json under
+// a disposable templates/ subdirectory, run the script against that, then copy
+// the regenerated AGENTS.md back onto the fixture (see Test 2.5 below).
+const AGENTS_MD_STAGING_NAME = `${SCAFFOLD_VARIANT_NAME}-agentsmd-stage`;
+const AGENTS_MD_STAGING_PATH = join(WORKSPACE_ROOT, 'templates', AGENTS_MD_STAGING_NAME);
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -59,7 +65,7 @@ function pass(label: string) { console.log(`  ✅ ${label}`); testsPassed++; tes
 function fail(label: string, reason: string) { console.error(`  ❌ ${label}: ${reason}`); allPassed = false; testsRun++; }
 
 function cleanup(): void {
-  for (const p of [L2_FIXTURE_PATH, PIPELINE_OUTPUT_PATH]) {
+  for (const p of [L2_FIXTURE_PATH, PIPELINE_OUTPUT_PATH, AGENTS_MD_STAGING_PATH]) {
     if (existsSync(p)) {
       try { rmSync(p, { recursive: true, force: true }); } catch { /* ignore */ }
     }
@@ -116,6 +122,72 @@ try {
 
       pass('Test 2 PASSED: README_ko.md and incomplete-agent.md injected');
     } catch (e) { fail('Test 2', String(e)); }
+
+    // ── Test 2.5: Regenerate AGENTS.md with VARIANT-* marker structure ──────
+    // create-l2-scaffold.ts's stub AGENTS.md doesn't have the VARIANT-*-START/END
+    // marker structure l2-to-variant-pipeline.ts's Phase 3.5 "AGENTS.md
+    // §-Structure Pre-flight Check" requires — it BLOCKS before the pipeline
+    // ever reaches the assertions this harness cares about (Test 4). In the real
+    // template-based promotion flow, the pipeline's autoFixAgentsMd option
+    // auto-regenerates via regenerate-agents-md.ts, but only when the L2 path is
+    // under templates/ (isInTemplates check). This fixture lives under Projects/,
+    // so that auto-fix doesn't apply; regenerate explicitly here to mirror what
+    // the real flow would do.
+    console.log('\nTest 2.5: regenerate-agents-md.ts AGENTS.md marker regeneration');
+    try {
+      mkdirSync(AGENTS_MD_STAGING_PATH, { recursive: true });
+      const variantJsonSrc = join(L2_FIXTURE_PATH, 'variant.json');
+      if (!existsSync(variantJsonSrc)) {
+        fail('Test 2.5', `variant.json not found at ${variantJsonSrc} — cannot stage for regeneration`);
+      } else {
+        writeFileSync(
+          join(AGENTS_MD_STAGING_PATH, 'variant.json'),
+          readFileSync(variantJsonSrc, 'utf8'),
+          'utf8',
+        );
+        const res = await $`bun scripts/regenerate-agents-md.ts --variant ${AGENTS_MD_STAGING_NAME}`.cwd(WORKSPACE_ROOT).nothrow();
+        const stagedAgentsMd = join(AGENTS_MD_STAGING_PATH, 'AGENTS.md');
+        if (res.exitCode !== 0 || !existsSync(stagedAgentsMd)) {
+          fail('Test 2.5', `regenerate-agents-md.ts exit code ${res.exitCode} / AGENTS.md not generated at ${stagedAgentsMd}`);
+        } else {
+          const regenerated = readFileSync(stagedAgentsMd, 'utf8');
+          writeFileSync(join(L2_FIXTURE_PATH, 'AGENTS.md'), regenerated, 'utf8');
+          pass('Test 2.5 PASSED: fixture AGENTS.md regenerated with VARIANT-* marker structure');
+        }
+      }
+    } catch (e) { fail('Test 2.5', String(e)); }
+
+    // ── Test 2.6: Inject capability-coverage fixture agent (Phase 3.7) ──────
+    // l2-to-variant-pipeline.ts's Phase 3.7 "Plugin-Based Type Validation" runs
+    // a per-variantType plugin (scripts/helpers/plugins/collaboration-plugin.ts
+    // for variantType: 'collaboration', used below in Test 3) that BLOCKS
+    // unless some agent's frontmatter `capabilities:` list collectively covers
+    // the type's required capabilities. The scaffolded fixture's only real
+    // agent (agents/pm.md) carries no `capabilities:` frontmatter, so without
+    // this, Phase 3.7 would block before the pipeline ever writes
+    // _pipeline_report.json — the same class of problem Test 2.5 fixes for
+    // Phase 3.5, just one phase later. Inject a disposable fixture agent that
+    // satisfies the four required collaboration capabilities so the harness
+    // can actually reach Test 4's assertions.
+    console.log('\nTest 2.6: Inject capability-coverage fixture agent for Phase 3.7');
+    try {
+      writeFileSync(
+        join(agentsDir, 'e2e-fixture-collab-agent.md'),
+        [
+          '---',
+          'name: e2e-fixture-collab-agent',
+          'capabilities: [communication, task-management, documentation, knowledge-sharing]',
+          '---',
+          '',
+          '# e2e-fixture-collab-agent',
+          '',
+          'Disposable fixture agent — Phase 3.7 collaboration capability-coverage bait, not a real agent.',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+      pass('Test 2.6 PASSED: capability-coverage fixture agent injected');
+    } catch (e) { fail('Test 2.6', String(e)); }
 
     // ── Test 3: Run the pipeline programmatically (A.3 regression check) ────
     // Importing executeL2ToVariantPipeline() directly (rather than shelling out)
