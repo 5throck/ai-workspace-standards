@@ -1,4 +1,4 @@
-// @version 2.10.12
+// @version 2.10.13
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -1033,6 +1033,7 @@ if (IS_WORKSPACE_ROOT) {
 
         // Only scan git-tracked top-level items — ignore untracked local directories (e.g. test projects)
         const gitLsResult = spawnSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
+        const trackedItems = new Set((gitLsResult.stdout || '').trim().split('\n').filter(Boolean).map(f => f.split('/')[0]));
         const items = fs.readdirSync('.');
         for (const item of items) {
             // Check and auto-delete Windows device name artifacts regardless of tracking status

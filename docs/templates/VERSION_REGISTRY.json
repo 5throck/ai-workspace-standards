@@ -56,7 +56,7 @@
       "migration_guides": []
     },
     "co-deck": {
-      "latest": "0.2.0",
+      "latest": "0.2.1",
       "released": "2026-06-17",
       "status": "beta",
       "source_project": "Projects/co-deck_prototype",

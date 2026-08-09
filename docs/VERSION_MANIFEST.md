@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T15:10:38.546Z
+**Generated**: 2026-08-09T15:46:15.147Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -32,45 +32,45 @@
 
 ## Skills
 
-| Name | Version | Location | Platform | Triggers | Owner |
-|------|---------|----------|----------|----------|-------|
-| accessibility-audit | 1.0.0 | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
-| agent-lifecycle-manager | 1.0.0 | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
-| audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
-| create-variant | 1.1.0 | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
-| dart-disclosure-parser | 1.0.0 | skills/dart-disclosure-parser/SKILL.md | workspace | dart-disclosure-parser, /dart-disclosure-parser, DART parsing, DART OpenAPI parse, financial statement parser, corporate disclosure parser | strategy-analyst |
-| explain-me | 1.0.0 | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
-| finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
-| gateguard | 1.0.0 | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
-| mece-logic-auditor | 1.0.0 | skills/mece-logic-auditor/SKILL.md | workspace | mece-logic-auditor, /mece-logic-auditor, MECE audit, issue tree audit, logic auditor, strategic reasoning evaluation | strategy-analyst |
-| meeting | 1.4.0 | .claude/skills/meeting/SKILL.md | both | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
-| meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
-| platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
-| platform-skill-lifecycle-manager | 1.0.0 | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
-| presenter-mode | 1.0.0 | skills/presenter-mode/SKILL.md | workspace | presenter-mode, /presenter-mode, dual-window sync, presenter view | presentation-architect |
-| project-review | 1.1.0 | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
-| project-to-variant | 1.0.0 | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
-| promote-variant | 1.0.1 | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
-| sarif-exporter | 1.0.0 | skills/sarif-exporter/SKILL.md | workspace | sarif-exporter, /sarif-exporter, sarif export, export sarif report, sarif format | security-expert |
-| script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
-| security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
-| simulate-l2-promotion | 1.0.0 | skills/simulate-l2-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l2-scaffold | automation-engineer |
-| simulate-project-creation | 1.0.1 | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
-| skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
-| sound-synth | 1.0.0 | skills/sound-synth/SKILL.md | workspace | sound-synth, /sound-synth, procedural sound generation, 8-bit retro sound effects, jsfxr sound synth | sound-designer |
-| source-command-commit-push-pr | 1.0.1 | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
-| standup-synthesizer | 1.0.0 | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
-| stride-threat-matrix | 1.0.0 | skills/stride-threat-matrix/SKILL.md | workspace | stride-threat-matrix, /stride-threat-matrix, threat modeling, dread risk scoring, stride matrix | security-expert |
-| swe-solve | 1.0.0 | skills/swe-solve/SKILL.md | workspace | swe-solve, solve issue, autonomous issue resolution, issue to pr | pm |
-| sync | 1.2.0 | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
-| team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
-| ticket-run | 1.0.0 | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
-| translate | 1.0.0 | skills/translate/SKILL.md | workspace | translate, translation, localize, Korean translation | pm |
-| update-bun-packages | 1.2.0 | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
-| upgrade-project | 1.1.0 | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
-| validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
-| variant-feature | 1.0.0 | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
-| zod-contract-gate | 1.0.0 | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
+| Name | Version | Status | Location | Platform | Triggers | Owner |
+|------|---------|--------|----------|----------|----------|-------|
+| accessibility-audit | 1.0.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
+| agent-lifecycle-manager | 1.0.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
+| audit-workspace | 1.0.0 | active | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
+| create-variant | 1.1.0 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
+| dart-disclosure-parser | 1.0.0 | deprecated | skills/dart-disclosure-parser/SKILL.md | workspace | dart-disclosure-parser, /dart-disclosure-parser, DART parsing, DART OpenAPI parse, financial statement parser, corporate disclosure parser | strategy-analyst |
+| explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
+| finishing-a-development-branch | 1.0.0 | active | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
+| gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
+| mece-logic-auditor | 1.0.0 | active | skills/mece-logic-auditor/SKILL.md | workspace | mece-logic-auditor, /mece-logic-auditor, MECE audit, issue tree audit, logic auditor, strategic reasoning evaluation | strategy-analyst |
+| meeting | 1.4.0 | active | .claude/skills/meeting/SKILL.md | both | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
+| meeting-facilitation | 1.4.0 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
+| platform-command-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
+| platform-skill-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
+| presenter-mode | 1.0.0 | active | skills/presenter-mode/SKILL.md | workspace | presenter-mode, /presenter-mode, dual-window sync, presenter view | presentation-architect |
+| project-review | 1.1.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
+| project-to-variant | 1.0.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
+| promote-variant | 1.0.1 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
+| sarif-exporter | 1.0.0 | active | skills/sarif-exporter/SKILL.md | workspace | sarif-exporter, /sarif-exporter, sarif export, export sarif report, sarif format | security-expert |
+| script-lifecycle-manager | 1.2.0 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
+| security-scan | 1.0.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
+| simulate-l2-promotion | 1.0.0 | active | skills/simulate-l2-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l2-scaffold | automation-engineer |
+| simulate-project-creation | 1.0.1 | active | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
+| skill-lifecycle-manager | 1.2.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
+| sound-synth | 1.0.0 | active | skills/sound-synth/SKILL.md | workspace | sound-synth, /sound-synth, procedural sound generation, 8-bit retro sound effects, jsfxr sound synth | sound-designer |
+| source-command-commit-push-pr | 1.0.1 | active | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
+| standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
+| stride-threat-matrix | 1.0.0 | active | skills/stride-threat-matrix/SKILL.md | workspace | stride-threat-matrix, /stride-threat-matrix, threat modeling, dread risk scoring, stride matrix | security-expert |
+| swe-solve | 1.0.0 | active | skills/swe-solve/SKILL.md | workspace | swe-solve, solve issue, autonomous issue resolution, issue to pr | pm |
+| sync | 1.2.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
+| team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
+| ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
+| translate | 1.0.0 | active | skills/translate/SKILL.md | workspace | translate, translation, localize, Korean translation | pm |
+| update-bun-packages | 1.2.0 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
+| upgrade-project | 1.1.0 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
+| validate-docs-links | 1.0.0 | active | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
+| variant-feature | 1.0.0 | active | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
+| zod-contract-gate | 1.0.0 | active | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
 
 ---
 
@@ -90,7 +90,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.12 | scripts/audit.ts | bun |
+| audit.ts | 2.10.13 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
 | capability-registry.ts | 1.0.2 | scripts/helpers/registries/capability-registry.ts | N/A |
