@@ -1,12 +1,12 @@
 ---
 sync_version: 1
-content_hash: 1fbfe4537ac4be94c4a9bb8542ba33328d841cc92c8360417089cf35ac3f516c
+content_hash: e3f726c62adb910f59394a5d40a64b769cd238367e27804815a0137c61d437d6
 ---
 
 # co-deck
 
 > **Language**: **English** · [한국어](README_ko.md)
-> **Status**: ⚠️ Beta — v0.2.0
+> **Status**: ⚠️ Beta — v0.2.1
 > Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.
 
 ## Overview

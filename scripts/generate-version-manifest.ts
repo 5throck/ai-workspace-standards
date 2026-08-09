@@ -26,6 +26,7 @@ export interface SkillInfo {
     platform: string;
     triggers: string[];
     owner: string;
+    status?: string;
     parseError?: string;
 }
 
@@ -70,7 +71,7 @@ function extractFrontmatterBlock(content: string): string | null {
     return match ? match[1] : null;
 }
 
-export function parseSkillFrontmatter(content: string): { version?: string; triggers?: string[]; owner?: string; parseError?: string } {
+export function parseSkillFrontmatter(content: string): { version?: string; triggers?: string[]; owner?: string; status?: string; parseError?: string } {
     const block = extractFrontmatterBlock(content);
     if (!block) {
         return { parseError: 'No YAML frontmatter block found' };
@@ -96,6 +97,7 @@ export function parseSkillFrontmatter(content: string): { version?: string; trig
         version: doc.version !== undefined ? String(doc.version).trim() : undefined,
         triggers,
         owner: doc.owner !== undefined ? String(doc.owner).trim() : undefined,
+        status: doc.status !== undefined ? String(doc.status).trim() : undefined,
     };
 }
 
@@ -179,7 +181,7 @@ async function collectSkills(): Promise<SkillInfo[]> {
             if (!fs.existsSync(skillMd)) continue;
 
             const content = fs.readFileSync(skillMd, 'utf-8');
-            const { version, triggers, owner, parseError } = parseSkillFrontmatter(content);
+            const { version, triggers, owner, status, parseError } = parseSkillFrontmatter(content);
 
             const inWorkspace = fs.existsSync(path.join('skills', dir, 'SKILL.md'));
             const inClaude = fs.existsSync(path.join('.claude', 'skills', dir, 'SKILL.md'));
@@ -196,6 +198,7 @@ async function collectSkills(): Promise<SkillInfo[]> {
                 platform,
                 triggers: triggers || [],
                 owner: owner || 'N/A',
+                status,
                 parseError,
             });
         }
@@ -361,12 +364,12 @@ async function generateManifest() {
 
 ## Skills
 
-| Name | Version | Location | Platform | Triggers | Owner |
-|------|---------|----------|----------|----------|-------|
+| Name | Version | Status | Location | Platform | Triggers | Owner |
+|------|---------|--------|----------|----------|----------|-------|
 `;
 
     for (const skill of skills) {
-        markdown += `| ${skill.name} | ${skill.version} | ${skill.location} | ${skill.platform} | ${skill.triggers.join(', ') || 'N/A'} | ${skill.owner} |\n`;
+        markdown += `| ${skill.name} | ${skill.version} | ${skill.status || 'active'} | ${skill.location} | ${skill.platform} | ${skill.triggers.join(', ') || 'N/A'} | ${skill.owner} |\n`;
     }
 
     markdown += `
