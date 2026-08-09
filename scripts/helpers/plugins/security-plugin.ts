@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -36,7 +35,6 @@ import type {
  * import { SecurityPlugin } from './helpers/plugins/security-plugin.ts';
  * const plugin = new SecurityPlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class SecurityPlugin implements VariantPlugin {
@@ -118,40 +116,5 @@ export class SecurityPlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for security variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * security variants. Agent files require standard sections (Role, Responsibilities,
-   * Security Protocol) plus security-specific optional sections (Threat Model,
-   * Compliance Requirements, Audit Procedures).
-   *
-   * @returns The golden reference for security variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Security Protocol',
-        ],
-        optional: [
-          '## Threat Model',
-          '## Compliance Requirements',
-          '## Audit Procedures',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

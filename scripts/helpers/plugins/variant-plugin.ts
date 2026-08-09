@@ -95,30 +95,6 @@ export interface WorkspaceRegistration {
 }
 
 /**
- * Golden reference structure for a variant type.
- *
- * Defines the expected section headings for agent files and skill files.
- * Validators compare actual template content against this reference to
- * ensure structural completeness.
- */
-export interface GoldenReference {
-  /** Expected agent file section headings. */
-  readonly agentSections: {
-    /** Sections that MUST be present in every agent file. */
-    readonly required: readonly string[];
-    /** Sections that SHOULD be present but are not mandatory. */
-    readonly optional: readonly string[];
-  };
-  /** Expected skill file section headings. */
-  readonly skillSections: {
-    /** Sections that MUST be present in every skill file. */
-    readonly required: readonly string[];
-    /** Sections that SHOULD be present but are not mandatory. */
-    readonly optional: readonly string[];
-  };
-}
-
-/**
  * Result of a promotion evaluation.
  *
  * Indicates whether a variant type is eligible for promotion from beta
@@ -162,7 +138,7 @@ export interface Engagement {
  *   - Validation:  beforeValidation → validate → afterValidation
  *   - Generation:  beforeGeneration → afterGeneration
  *   - Registration: beforeRegistration → afterRegistration
- *   - Data:        goldenReference, evaluatePromotion
+ *   - Data:        evaluatePromotion
  */
 export interface VariantPlugin {
   /** The variant type this plugin handles (e.g., 'game', 'security'). */
@@ -238,15 +214,6 @@ export interface VariantPlugin {
   // --- Type-Specific Data ---
 
   /**
-   * Returns the golden reference structure for this variant type.
-   * Used by the golden-reference-validator to check structural completeness
-   * of agent and skill files.
-   *
-   * @returns The golden reference for this variant type.
-   */
-  goldenReference?(): GoldenReference;
-
-  /**
    * Evaluates whether a variant of this type is eligible for promotion
    * from beta to stable.
    *
@@ -304,8 +271,8 @@ export function registerPlugin(plugin: VariantPlugin): void {
  * @example
  * ```typescript
  * const plugin = getPlugin('game');
- * if (plugin?.goldenReference) {
- *   const ref = plugin.goldenReference();
+ * if (plugin?.validate) {
+ *   const issues = await plugin.validate(ctx);
  * }
  * ```
  */

@@ -33,6 +33,17 @@ export interface GoldenStructure {
   optionalSections: string[];
 }
 
+/**
+ * Files under an `agents/` directory that are NOT specialist agent files and
+ * must be excluded from golden-structure comparisons (pm.md is orchestration,
+ * README*.md are documentation — neither has the required agent sections).
+ *
+ * Single source of truth — consolidates three previously-independent copies
+ * (Phase 4.5's inline filter, the roster extractor, and loadDynamicLayer2Agents()).
+ * See: docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md Issue A.1
+ */
+export const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
+
 export interface StructuralGapReport {
   /** File path that was checked */
   filePath: string;
@@ -119,7 +130,7 @@ function loadDynamicLayer2Agents(variantType: VariantType): string[] {
   if (!existsSync(agentsDir)) return [];
 
   const agentFiles = readdirSync(agentsDir)
-    .filter(f => f.endsWith('.md') && !['pm.md', 'README.md'].includes(f));
+    .filter(f => f.endsWith('.md') && !SKIP_AGENT_FILES.has(f));
 
   if (agentFiles.length === 0) return [];
 

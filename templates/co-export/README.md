@@ -32,7 +32,7 @@ This variant is currently in **beta** and requires:
 - **Beta Duration**: 0/2 months
 - **Additional Checks**: Pending
 
-See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
+Promotion criteria are governed by the workspace's L2-to-variant pipeline; see `scripts/helpers/variant-governance-rules.ts` in the workspace root (not shipped inside this template) for the full policy.
 
 ## Variant Type
 
@@ -63,6 +63,12 @@ This variant focuses on Strategy consulting for AI-assisted business consulting 
 - **logistics-coordination**: 
 - **market-entry-strategy**: 
 - **trade-documentation-checklist**: 
+
+## Scripts
+
+`templates/co-export/scripts/` does not exist as its own directory. Workspace automation scripts
+(`dev-sync.ts`, `test-runner.ts`, and the other shared helpers) are inherited from
+`templates/common/scripts/` at scaffold time — this variant does not maintain its own copies.
 
 ---
 

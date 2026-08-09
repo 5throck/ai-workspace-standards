@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T03:17:23.969Z
+**Generated**: 2026-08-09T04:42:08.032Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,8 +9,8 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 36
-- **Scripts**: 138
+- **Skills**: 37
+- **Scripts**: 139
 - **Commands**: 8
 
 ---
@@ -37,7 +37,7 @@
 | accessibility-audit | 1.0.0 | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
 | agent-lifecycle-manager | 1.0.0 | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
 | audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
-| create-variant | 1.0.1 | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
+| create-variant | 1.1.0 | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
 | dart-disclosure-parser | 1.0.0 | skills/dart-disclosure-parser/SKILL.md | workspace | dart-disclosure-parser, /dart-disclosure-parser, DART parsing, DART OpenAPI parse, financial statement parser, corporate disclosure parser | strategy-analyst |
 | explain-me | 1.0.0 | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
@@ -54,7 +54,8 @@
 | sarif-exporter | 1.0.0 | skills/sarif-exporter/SKILL.md | workspace | sarif-exporter, /sarif-exporter, sarif export, export sarif report, sarif format | security-expert |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
-| simulate-project-creation | 1.0.0 | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
+| simulate-l2-promotion | 1.0.0 | skills/simulate-l2-promotion/SKILL.md | workspace | simulate l2 promotion, test l2 pipeline, dry run variant promotion, test create-l2-scaffold | automation-engineer |
+| simulate-project-creation | 1.0.1 | skills/simulate-project-creation/SKILL.md | workspace | simulate project, test scaffolding, dry run project creation | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills | pm |
 | sound-synth | 1.0.0 | skills/sound-synth/SKILL.md | workspace | sound-synth, /sound-synth, procedural sound generation, 8-bit retro sound effects, jsfxr sound synth | sound-designer |
 | source-command-commit-push-pr | 1.0.1 | .claude/skills/source-command-commit-push-pr/SKILL.md | both | commit-push-pr, commit and push, create PR | N/A |
@@ -99,7 +100,7 @@
 | collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | consulting-plugin.ts | 1.1.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
-| create-l2-scaffold.ts | 1.8.0 | scripts/create-l2-scaffold.ts | N/A |
+| create-l2-scaffold.ts | 1.8.1 | scripts/create-l2-scaffold.ts | N/A |
 | design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
 | dev-sync.ts | 1.5.0 | scripts/dev-sync.ts | bun |
 | development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
@@ -127,7 +128,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.10.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.10.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
@@ -179,6 +180,7 @@
 | template-utils.ts | 1.0.0 | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | 1.0.2 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
+| test-l2-promotion.ts | 1.0.1 | scripts/test-l2-promotion.ts | bun |
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |
@@ -238,7 +240,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 5 / 36
+- **Skills with parity**: 5 / 37
 
 ---
 

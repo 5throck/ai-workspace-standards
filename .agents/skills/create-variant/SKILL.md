@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.0.1
+version: 1.1.0
 owner: pm
-last_reviewed: 2026-06-05
+last_reviewed: 2026-08-09
 metadata:
   type: process
   triggers:

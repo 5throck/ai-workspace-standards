@@ -27,6 +27,15 @@
       "source": "pm-orchestration",
       "created": "2026-07-08",
       "last_updated": "2026-07-08"
+    },
+    {
+      "id": "2026-08-09-l2-pipeline-governance-fixes",
+      "title": "l2 pipeline governance fixes",
+      "file": "docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md",
+      "status": "proposed",
+      "source": "architect",
+      "created": "2026-08-09",
+      "last_updated": "2026-08-09"
     }
   ]
 }

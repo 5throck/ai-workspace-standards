@@ -26,7 +26,6 @@ export {
   type ValidationIssue,
   type VariantMetadata,
   type WorkspaceRegistration,
-  type GoldenReference,
   type PromotionEvaluation,
   type Engagement,
   registerPlugin,
