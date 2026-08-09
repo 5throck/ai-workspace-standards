@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.7.3
+ * @version 1.8.0
  * @phase 3: Variant Generation
  *
  * Dependencies:

@@ -1,11 +1,11 @@
 {
   "variantName": "co-export",
   "variantType": "consulting",
-  "timestamp": "2026-08-09T02:47:01.744Z",
+  "timestamp": "2026-08-09T03:13:04.024Z",
   "phase": "4.5",
   "summary": {
-    "totalFiles": 19,
-    "passedFiles": 18,
+    "totalFiles": 17,
+    "passedFiles": 16,
     "failedFiles": 1
   },
   "gaps": [
@@ -109,13 +109,6 @@
       "extraSections": []
     },
     {
-      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\gateguard\\SKILL.md",
-      "fileType": "skill",
-      "passed": true,
-      "missingSections": [],
-      "extraSections": []
-    },
-    {
       "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\hs-classification-workflow\\SKILL.md",
       "fileType": "skill",
       "passed": true,
@@ -131,13 +124,6 @@
     },
     {
       "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\market-entry-strategy\\SKILL.md",
-      "fileType": "skill",
-      "passed": true,
-      "missingSections": [],
-      "extraSections": []
-    },
-    {
-      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\sync\\SKILL.md",
       "fileType": "skill",
       "passed": true,
       "missingSections": [],

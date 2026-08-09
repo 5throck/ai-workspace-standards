@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T02:54:05.138Z
+**Generated**: 2026-08-09T03:17:23.969Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -86,20 +86,20 @@
 | agent-override-merge.ts | 1.0.1 | scripts/lib/agent-override-merge.ts | js-yaml |
 | agent-promote.ts | 0.1.1 | scripts/helpers/agent-promote.ts | N/A |
 | agent-similarity-analyzer.ts | 1.1.1 | scripts/helpers/agent-similarity-analyzer.ts | fs, path |
-| agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
+| agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.10.12 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
-| capability-registry.ts | 1.0.1 | scripts/helpers/registries/capability-registry.ts | N/A |
+| capability-registry.ts | 1.0.2 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
-| consulting-plugin.ts | 1.0.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
-| create-l2-scaffold.ts | 1.7.0 | scripts/create-l2-scaffold.ts | N/A |
+| consulting-plugin.ts | 1.1.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
+| create-l2-scaffold.ts | 1.8.0 | scripts/create-l2-scaffold.ts | N/A |
 | design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
 | dev-sync.ts | 1.5.0 | scripts/dev-sync.ts | bun |
 | development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
@@ -117,9 +117,9 @@
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.7.3 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.8.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
-| golden-reference-loader.ts | 1.0.1 | scripts/helpers/golden-reference-loader.ts | fs, path |
+| golden-reference-loader.ts | 1.1.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
 | index.ts | 1.0.0 | scripts/helpers/registries/index.ts | N/A |
 | index.ts | 1.0.0 | scripts/validators/index.ts | N/A |
@@ -127,7 +127,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.9.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.10.0 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
@@ -142,7 +142,7 @@
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
-| pm-md-parser.ts | 1.0.3 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
+| pm-md-parser.ts | 1.1.0 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.1.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
@@ -152,7 +152,7 @@
 | propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.2 | scripts/readme-lifecycle-audit.ts | N/A |
-| reconcile-with-l0-l1.ts | 1.2.1 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
+| reconcile-with-l0-l1.ts | 1.2.2 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.0 | scripts/render-pdf-deck.ts | N/A |
