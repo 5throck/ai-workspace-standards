@@ -17,6 +17,7 @@ Agent definition files for the **co-export** trade consulting team. Each agent f
 | Foreign Regulatory Intelligence Analyst | `foreign-regulatory-intelligence-analyst.md` | Medium | US/China/EU import regulation & tariff-change monitoring |
 | Market Entry Strategist | `market-entry-strategist.md` | Medium | Market research, entry channel strategy, buyer discovery |
 | Trade Documentation Specialist | `trade-documentation-specialist.md` | Medium | L/C, invoice, packing list, B/L, customs clearance docs |
+| Customs Duty Drawback Specialist | `customs-duty-drawback-specialist.md` | High | Duty drawback eligibility, refund-method selection, usage-rate calculation |
 | Logistics Coordinator | `logistics-coordinator.md` | Low | Incoterms, freight/forwarding, bonded warehouse logistics |
 
 See [`AGENTS.md`](../AGENTS.md) for the canonical roster, dispatch triggers, and

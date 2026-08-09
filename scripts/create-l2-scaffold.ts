@@ -290,10 +290,10 @@ function generateStubs(
     name: `co-${variant}`,
     displayName,
     description: "TODO: describe this variant",
-    type: "TODO: security|development|design|consulting|collaboration",
+    variant_type: domain ?? "TODO",
     status: "beta",
     version: "0.1.0",
-    inherits_common: commonVersion,
+    inherits_common: "templates/common",
     agent_overrides: {
       pm: {
         type: "additive",
@@ -310,7 +310,7 @@ function generateStubs(
       stablePromotedOn: null,
     },
     // Lecture-type extension fields
-    ...(variant === 'deck' ? {
+    ...(domain === 'lecture' ? {
       agent_manifest: {
         variant_agents_dir: "agents",
         pipeline_order: ["version", "research", "source-verifier", "storyline", "design", "image-curator", "html-build", "measure", "pdf-export"],
@@ -339,6 +339,31 @@ function generateStubs(
     path.join(projectDir, "variant.json"),
     JSON.stringify(variantJson, null, 2) + "\n",
   );
+
+  // docs/<variant>.context.md stub
+  const contextMd = `# ${variant} Context
+
+> Auto-generated scaffold stub — update after Phase A.
+
+## Overview
+
+<!-- Describe the variant's purpose and domain scope -->
+
+## Agents
+
+<!-- List agent roster with tier and model -->
+
+## Skills
+
+<!-- List variant-specific skills -->
+
+## Domain Configuration
+
+<!-- Domain-specific settings and workflows -->
+`;
+  const docsDir = path.join(projectDir, "docs");
+  if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir, { recursive: true });
+  writeFile(path.join(docsDir, `${variant}.context.md`), contextMd);
 
   // _ORIGIN.md
   const domainAddendum = domain
@@ -594,6 +619,20 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
 `;
   writeFile(path.join(projectDir, "agents", "README.md"), agentsReadme);
 
+  // agents/README_ko.md — Korean placeholder
+  const agentsReadmeKo = `# agents/
+
+> TODO: 이 variant의 에이전트 정의 파일을 여기에 추가하세요.
+>
+> 각 에이전트 파일은 3-Section 구조를 따라야 합니다:
+> 1. **Legal Basis** — 역할의 권한/법적 근거
+> 2. **Role** — 책임과 범위
+> 3. **Protocols** — 운영 절차와 디스패치 규칙
+>
+> ${BT}AGENTS.md${BT}에 각 에이전트를 등록하고 ${BT}bun run agent:verify${BT}를 실행하세요.
+`;
+  writeFile(path.join(projectDir, "agents", "README_ko.md"), agentsReadmeKo);
+
   const displayName = toDisplayName(variant);
 
   // pm.md additive skeleton with variant_overrides support
@@ -824,7 +863,7 @@ function main(): void {
   createDomainDocs(projectDir, args.domain, args.variant);
 
   // Step 6.5: lecture-type specific setup (html-themes + presentations/)
-  if (args.variant === 'deck') {
+  if (args.domain === 'lecture') {
     createLectureScaffold(projectDir);
   }
 

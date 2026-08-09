@@ -69,6 +69,7 @@
 
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { readUTF8File } from './lib/encoding-utils.ts';
 import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.ts';
 import {
   normalizeAgentSkills,
@@ -83,7 +84,7 @@ import {
   StructuralGapReport,
 } from './helpers/golden-reference-loader.ts';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.ts';
-import { generateVariant, GeneratedVariant, VariantMetadata } from './helpers/generate-variant.ts';
+import { generateVariant, GeneratedVariant, VariantMetadata, parseAgentFile } from './helpers/generate-variant.ts';
 import {
   initializeBetaLifecycle,
   checkPromotionEligibilityDetails,
@@ -124,6 +125,10 @@ export interface PipelineConfig {
   autoFixAgentsMd?: boolean;
   /** Output path for variant (optional) */
   outputPath?: string;
+  /** Variant version (default: '0.1.0') */
+  version?: string;
+  /** Variant lifecycle status (default: 'beta') */
+  status?: string;
 }
 
 export interface PipelineResult {
@@ -563,7 +568,8 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       }
     }
 
-    // 3.7c: Required capabilities check (ERROR level)
+    // 3.7c: Required capabilities check (ERROR level — blocking)
+    let hasCapabilityErrors = false;
     if (policy.requiredCapabilities && policy.requiredCapabilities.length > 0) {
       const { isCapability } = await import('./helpers/registries/index.ts');
       const agentsDir37c = join(config.l2ProjectPath, 'agents');
@@ -590,11 +596,14 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       for (const required of policy.requiredCapabilities) {
         if (!coveredCapabilities.has(required)) {
           console.error(`[3.7] ERROR: Required capability "${required}" not covered by any agent`);
+          errors.push({ phase: 'capabilities', error: `Required capability "${required}" not covered by any agent` });
+          hasCapabilityErrors = true;
         }
       }
     }
 
-    // 3.7d: Plugin validation hooks
+    // 3.7d: Plugin validation hooks (ERROR level — blocking)
+    let hasPluginErrors = false;
     const { getPlugin } = await import('./helpers/plugins/index.ts');
     const plugin = getPlugin(config.variantType);
     if (plugin?.validate) {
@@ -622,12 +631,19 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       for (const issue of issues) {
         if (issue.severity === 'error') {
           console.error(`[3.7] Plugin validation error: ${issue.category}: ${issue.message}`);
+          errors.push({ phase: 'plugin-validation', error: `${issue.category}: ${issue.message}` });
+          hasPluginErrors = true;
         } else if (issue.severity === 'warning') {
           console.warn(`[3.7] Plugin validation warning: ${issue.category}: ${issue.message}`);
         } else {
           console.log(`[3.7] Plugin validation info: ${issue.category}: ${issue.message}`);
         }
       }
+    }
+
+    if (hasCapabilityErrors || hasPluginErrors) {
+      console.error(`\n❌ PHASE 3.7 BLOCKING: Capability or plugin validation errors found.`);
+      return buildFailureResult(phases, errors, startTime);
     }
 
     console.log(`✅ PHASE 3.7 COMPLETE`);
@@ -657,8 +673,8 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       name: config.variantName,
       description: config.variantDescription,
       variantType: config.variantType,
-      status: 'beta',
-      version: '0.1.0',
+      status: (config.status as VariantMetadata['status']) ?? 'beta',
+      version: (config.version as VariantMetadata['version']) ?? '0.1.0',
       inherits_common: 'templates/common',
       agentRoster,
       skills,
@@ -686,17 +702,25 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       if (efs(l2VariantPath)) {
         try {
           const l2Variant = JSON.parse(rfs(l2VariantPath, 'utf-8'));
-          // Known custom fields to preserve beyond the canonical schema
-          const customFields: string[] = [
-            'engagement_methodology', 'deliverable_template',
-            'agent_overrides', 'skill_manifest', 'promotionChecklist',
-          ];
-          for (const field of customFields) {
-            if (l2Variant[field] !== undefined) {
+          // Canonical schema keys — anything NOT in this set is a custom field to preserve
+          const CANONICAL_KEYS = new Set([
+            'name', 'description', 'variant_type', 'variantType', 'type',
+            'status', 'version', 'inherits_common',
+            'agents', 'skills', 'agentRoster', 'skillDefinitions',
+            'agent_manifest', 'theme_manifest', 'lecture_profile',
+          ]);
+          const customFields: string[] = [];
+          for (const field of Object.keys(l2Variant)) {
+            if (!CANONICAL_KEYS.has(field) && l2Variant[field] !== undefined) {
               (metadata as Record<string, unknown>)[field] = l2Variant[field];
+              customFields.push(field);
             }
           }
-          console.log(`  ✅ Merged custom fields from L2 variant.json`);
+          if (customFields.length > 0) {
+            console.log(`  ✅ Merged custom fields from L2 variant.json: ${customFields.join(', ')}`);
+          } else {
+            console.log(`  ✅ No custom fields to merge from L2 variant.json`);
+          }
         } catch {
           console.warn(`  ⚠️  Could not parse L2 variant.json — custom fields skipped`);
         }
@@ -911,7 +935,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       phases.parity = { success: !parityResult.hasParityViolations, result: parityResult };
 
       if (parityResult.hasParityViolations) {
-        console.warn(`⚠️  PHASE 6 COMPLETE WITH VIOLATIONS`);
+        console.error(`❌ PHASE 6 FAILED: Platform parity violations found`);
         errors.push({
           phase: 'parity',
           error: `Platform parity violations found: ${parityResult.violations.length}`,
@@ -930,6 +954,10 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`PHASE 6: Skipped (skipParityValidation=true)`);
     console.log(`${'─'.repeat(60)}`);
     phases.parity = { success: true };
+  }
+
+  if (!phases.parity.success) {
+    return buildFailureResult(phases, errors, startTime);
   }
 
   // ============================================================================
@@ -953,8 +981,8 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         name: config.variantName,
         description: config.variantDescription,
         variantType: config.variantType,
-        status: 'beta',
-        version: '0.1.0',
+        status: (config.status as VariantMetadata['status']) ?? 'beta',
+        version: (config.version as VariantMetadata['version']) ?? '0.1.0',
         inherits_common: 'templates/common',
         agentRoster: [],
         skills: [],
@@ -1025,6 +1053,13 @@ function buildFailureResult(
 }
 
 /**
+ * Normalize scan relative paths to forward slashes (Windows uses backslashes).
+ */
+function normalizeRelPath(relativePath: string): string {
+  return relativePath.replaceAll('\\', '/');
+}
+
+/**
  * Extract agent roster from L2 scan result.
  * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
  * @version 1.3.0
@@ -1034,75 +1069,62 @@ function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRos
   const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
 
   const agentFiles = scanResult.files.filter(f => {
-    if (!f.relativePath.startsWith('agents/') || !f.relativePath.endsWith('.md')) return false;
-    const fileName = f.relativePath.split('/').pop() ?? '';
+    const relPath = normalizeRelPath(f.relativePath);
+    if (!relPath.startsWith('agents/') || !relPath.endsWith('.md')) return false;
+    const fileName = relPath.split('/').pop() ?? '';
     return !SKIP_AGENT_FILES.has(fileName) && !fileName.includes('handoff-spec');
   });
 
-  return agentFiles.map(file => {
-    const name = file.relativePath.replace('agents/', '').replace('.md', '');
-    const absPath = join(l2ProjectPath, file.relativePath);
-
-    let tier: 'high' | 'medium' | 'low' = 'medium';
-    let model = 'inherit';
-    let description = `${name} specialist agent`;
-
-    if (existsSync(absPath)) {
-      try {
-        const content = readFileSync(absPath, 'utf-8');
-        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-        if (fmMatch) {
-          const fm = fmMatch[1];
-          // Read tier.claude (nested) or flat tier
-          const tierClaudeMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
-          if (tierClaudeMatch) {
-            tier = tierClaudeMatch[1] as 'high' | 'medium' | 'low';
-          } else {
-            const tierFlatMatch = fm.match(/^tier:\s*(high|medium|low)/m);
-            if (tierFlatMatch) tier = tierFlatMatch[1] as 'high' | 'medium' | 'low';
-          }
-          // Read block-scalar description (>- form: next indented line)
-          const descBlockMatch = fm.match(/^description:\s*>-?\n\s+(.+)/m);
-          if (descBlockMatch) {
-            description = descBlockMatch[1].trim().substring(0, 120);
-          } else {
-            const descInlineMatch = fm.match(/^description:\s*(.+)/m);
-            if (descInlineMatch) description = descInlineMatch[1].trim().substring(0, 120);
-          }
-          // Read model (skip 'inherit' placeholder)
-          const modelMatch = fm.match(/^model:\s*(.+)/m);
-          if (modelMatch && modelMatch[1].trim() !== 'inherit') {
-            model = modelMatch[1].trim();
-          }
-        }
-      } catch {
-        // fallback to defaults already set above
-      }
-    }
-
-    return { name, tier, model, description };
-  });
+  return agentFiles
+    .map(file => {
+      const absPath = join(l2ProjectPath, file.relativePath);
+      return parseAgentFile(absPath);
+    })
+    .filter((agent): agent is NonNullable<typeof agent> => agent !== null);
 }
 
 /**
  * Extract variant-specific skills from L2 scan result.
  * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
- * @version 1.3.0
+ * When the L2 variant.json declares `skill_manifest.variant_specific`, only those skills are included;
+ * otherwise falls back to all skill directories under skills/.
+ * @version 1.4.0
  */
 function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
+  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
+
+  // Variant-specific skills from L2 variant.json manifest (preferred)
+  let variantSpecificNames: Set<string> | undefined;
+  const variantJsonPath = join(l2ProjectPath, 'variant.json');
+  if (existsSync(variantJsonPath)) {
+    try {
+      const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+      const manifest = variantJson?.skill_manifest?.variant_specific;
+      if (Array.isArray(manifest) && manifest.length > 0) {
+        variantSpecificNames = new Set(
+          manifest
+            .map((s: { name?: unknown }) => (typeof s?.name === 'string' ? s.name : null))
+            .filter((n: string | null): n is string => n !== null),
+        );
+      }
+    } catch {
+      // Ignore malformed variant.json — fall back to directory scan
+    }
+  }
+
   const skillFiles = scanResult.files.filter(f =>
-    f.relativePath.startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
+    normalizeRelPath(f.relativePath).startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
   );
 
   const skills: VariantMetadata['skills'] = [];
   const processedSkills = new Set<string>();
 
   for (const file of skillFiles) {
-    const match = file.relativePath.match(/skills\/([^/]+)\//);
-    if (match && !processedSkills.has(match[1])) {
-      skills.push({ name: match[1] });
-      processedSkills.add(match[1]);
-    }
+    const match = normalizeRelPath(file.relativePath).match(/skills\/([^/]+)\//);
+    if (!match || processedSkills.has(match[1])) continue;
+    if (variantSpecificNames && !variantSpecificNames.has(match[1])) continue;
+    skills.push({ name: match[1] });
+    processedSkills.add(match[1]);
   }
 
   return skills;
@@ -1125,6 +1147,8 @@ async function main() {
   // Phase 7 defaults to OFF (skipped). Only runs if explicitly --skip-integration=false
   const skipIntegrationArg = skipIntegrationFlag ? skipIntegrationFlag !== '--skip-integration=false' : true;
   const outputArg = args.find(arg => arg.startsWith('--output='));
+  const versionArg = args.find(arg => arg.startsWith('--version='));
+  const statusArg = args.find(arg => arg.startsWith('--status='));
 
   if (!l2PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/l2-to-variant-pipeline.ts \\');
@@ -1134,7 +1158,9 @@ async function main() {
     console.error('  --description=<variant-description> \\');
     console.error('  [--skip-parity] \\');
     console.error('  [--skip-integration=false] (default: ON — Phase 7 is deprecated and skipped) \\');
-    console.error('  [--output=<output-path>]');
+    console.error('  [--output=<output-path>] \\');
+    console.error('  [--version=<semver>] (default: 0.1.0) \\');
+    console.error('  [--status=<beta|stable|deprecated>] (default: beta)');
     process.exit(1);
   }
 
@@ -1160,6 +1186,8 @@ async function main() {
     skipParityValidation: skipParityArg,
     skipIntegration: skipIntegrationArg,
     outputPath: outputArg?.split('=')[1],
+    version: versionArg?.split('=')[1],
+    status: statusArg?.split('=')[1],
   };
 
   try {
@@ -1179,5 +1207,7 @@ async function main() {
   }
 }
 
-// Always run main when executed
-main().catch(console.error);
+// Run main only when executed directly (not when imported as a module)
+if (import.meta.main) {
+  main().catch(console.error);
+}

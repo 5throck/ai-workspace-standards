@@ -88,32 +88,31 @@ export class ConsultingPlugin implements VariantPlugin {
       }
     }
 
-    // --- Check 2: Engagement methodology mention ---
-    // Consulting variants should reference an engagement methodology in their documentation.
+    // --- Check 2: Engagement methodology field ---
+    // Consulting variants should declare an engagement methodology in variant.json.
     // A structured methodology ensures consistent and repeatable client delivery.
-    const variantContent = JSON.stringify(ctx.variantJson);
     if (
-      !variantContent.toLowerCase().includes('engagement methodology')
+      !ctx.variantJson.engagement_methodology
     ) {
       issues.push({
         severity: 'warning',
         category: 'engagement-methodology',
         message:
-          'Consulting variant should reference an engagement methodology',
+          'Consulting variant should declare engagement_methodology in variant.json',
       });
     }
 
-    // --- Check 3: Deliverable template mention ---
+    // --- Check 3: Deliverable template field ---
     // Standard deliverable template documentation for consulting contexts.
     // This is informational; not all consulting contexts require explicit deliverable template docs.
     if (
-      !variantContent.toLowerCase().includes('deliverable template')
+      !ctx.variantJson.deliverable_template
     ) {
       issues.push({
         severity: 'info',
         category: 'deliverable-template',
         message:
-          'Consider documenting deliverable template standards',
+          'Consider documenting deliverable_template in variant.json',
       });
     }
 

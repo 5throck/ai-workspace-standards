@@ -20,7 +20,7 @@ import { join, basename } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { FileClassification, L2ScanResult } from './scan-l2-project.ts';
 import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
-import { readUTF8File } from '../lib/encoding-utils.ts';
+import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -493,7 +493,7 @@ export async function reconcileWithL0L1(
     summary,
   };
 
-  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+  writeUTF8File(manifestPath, JSON.stringify(manifest, null, 2));
   console.log(`\n✅ Manifest saved to: ${manifestPath}`);
 
   return manifest;

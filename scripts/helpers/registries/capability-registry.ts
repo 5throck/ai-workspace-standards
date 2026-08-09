@@ -64,6 +64,16 @@ export type Capability = (typeof CAPABILITY_REGISTRY)[keyof typeof CAPABILITY_RE
  * @param value - The string value to check.
  * @returns `true` if the value is a registered capability.
  */
+/** Lazily-created Set for O(1) capability lookups */
+let _capabilitySet: Set<string> | undefined;
+
+function getCapabilitySet(): Set<string> {
+  if (!_capabilitySet) {
+    _capabilitySet = new Set(Object.values(CAPABILITY_REGISTRY));
+  }
+  return _capabilitySet;
+}
+
 export function isCapability(value: string): value is Capability {
-  return Object.values(CAPABILITY_REGISTRY).includes(value as Capability);
+  return getCapabilitySet().has(value);
 }

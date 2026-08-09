@@ -1,5 +1,5 @@
 {
-  "_comment": "Variant-specific overrides vs L1 (templates/common): codegraph MCP server added for co-export. These are intentional L2 variant settings.",
+  "_comment": "Variant-specific overrides vs L1 (templates/common). These are intentional L2 variant settings.",
   "mcpServers": {
     "codegraph": {
       "command": "npx",

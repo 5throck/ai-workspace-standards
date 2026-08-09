@@ -1,20 +1,77 @@
 {
   "name": "co-export",
-  "description": "Import/export trade consulting variant with regulatory compliance, FTA analysis, and market-entry strategy",
+  "description": "Import/export trade consulting variant",
   "variant_type": "consulting",
   "status": "beta",
   "version": "0.1.0",
   "inherits_common": "templates/common",
-  "created_at": "2026-08-09T01:40:26.000Z",
+  "created_at": "2026-08-09T02:47:01.670Z",
   "lifecycle": {
-    "statusSince": "2026-08-09",
-    "lastTransition": "initial → beta on 2026-08-09",
+    "statusSince": "2026-08-08",
+    "lastTransition": "initial → beta on 2026-08-08",
     "stablePromotedOn": null
   },
-  "agents": [],
-  "skills": [],
-  "engagement_methodology": "Structured trade-consulting engagement methodology with 4-phase delivery: (1) Regulatory intelligence gathering and HS/FTA classification, (2) Compliance cross-check with export-control and foreign-regulatory screening, (3) Market-entry strategy refinement and trade-documentation preparation, (4) Logistics coordination and post-shipment drawback filing. Each phase includes a client sign-off gate before proceeding to execution.",
-  "deliverable_template": "Standard deliverable template standards per phase: Phase 1 — Classification Memorandum (HS code + GRI reasoning), FTA Origin Analysis Report (WH/RVC/CTC determination); Phase 2 — Export Control Screening Certificate, Foreign Regulatory Intelligence Brief; Phase 3 — Market Entry Strategy Deck (compliance-cost-integrated landed-cost model), Trade Documentation Package (invoice, packing list, COO, FTA certificate); Phase 4 — Shipment Execution Report, Duty Drawback Filing Package.",
+  "agents": [
+    {
+      "name": "customs-duty-drawback-specialist",
+      "file": "agents/customs-duty-drawback-specialist.md"
+    },
+    {
+      "name": "export-control-compliance-specialist",
+      "file": "agents/export-control-compliance-specialist.md"
+    },
+    {
+      "name": "foreign-regulatory-intelligence-analyst",
+      "file": "agents/foreign-regulatory-intelligence-analyst.md"
+    },
+    {
+      "name": "fta-origin-analyst",
+      "file": "agents/fta-origin-analyst.md"
+    },
+    {
+      "name": "hs-classification-specialist",
+      "file": "agents/hs-classification-specialist.md"
+    },
+    {
+      "name": "logistics-coordinator",
+      "file": "agents/logistics-coordinator.md"
+    },
+    {
+      "name": "market-entry-strategist",
+      "file": "agents/market-entry-strategist.md"
+    },
+    {
+      "name": "trade-documentation-specialist",
+      "file": "agents/trade-documentation-specialist.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "customs-duty-drawback-workflow"
+    },
+    {
+      "name": "export-control-screening"
+    },
+    {
+      "name": "foreign-regulation-monitoring"
+    },
+    {
+      "name": "fta-origin-determination"
+    },
+    {
+      "name": "hs-classification-workflow"
+    },
+    {
+      "name": "logistics-coordination"
+    },
+    {
+      "name": "market-entry-strategy"
+    },
+    {
+      "name": "trade-documentation-checklist"
+    }
+  ],
+  "displayName": "Co Export",
   "agent_overrides": {
     "pm": {
       "type": "additive",
@@ -98,9 +155,23 @@
           3,
           4
         ]
+      },
+      {
+        "name": "customs-duty-drawback-workflow",
+        "used_by_agents": [
+          "customs-duty-drawback-specialist"
+        ],
+        "phases": [
+          3,
+          4
+        ]
       }
     ]
   },
+  "engagement_methodology": "Structured trade-consulting engagement methodology with 4-phase delivery: (1) Regulatory intelligence gathering and HS/FTA classification, (2) Compliance cross-check with export-control and foreign-regulatory screening, (3) Market-entry strategy refinement and trade-documentation preparation, (4) Logistics coordination and post-shipment drawback filing. Each phase includes a client sign-off gate before proceeding to execution.",
+  "deliverable_template": "Standard deliverable template standards per phase: Phase 1 — Classification Memorandum (HS code + GRI reasoning), FTA Origin Analysis Report (WH/RVC/CTC determination); Phase 2 — Export Control Screening Certificate, Foreign Regulatory Intelligence Brief; Phase 3 — Market Entry Strategy Deck (compliance-cost-integrated landed-cost model), Trade Documentation Package (invoice, packing list, COO, FTA certificate); Phase 4 — Shipment Execution Report, Duty Drawback Filing Package.",
+  "createdAt": "2026-08-08",
+  "phaseAComplete": false,
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "betaLifecycleSummary": {
     "betaEngagements": 0,
@@ -108,6 +179,6 @@
     "betaAgeInMonths": 0,
     "promotionEligible": false,
     "missingCriteria": [],
-    "lastSynced": "2026-08-09T01:40:26.091Z"
+    "lastSynced": "2026-08-09T02:47:01.753Z"
   }
 }

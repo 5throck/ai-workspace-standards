@@ -10,7 +10,7 @@ sync_version: 1
 
 ---
 
-Import/export trade consulting variant with regulatory compliance, FTA analysis, and market-entry strategy
+Import/export trade consulting variant
 
 ## Quick Start
 
@@ -44,13 +44,27 @@ This variant focuses on Strategy consulting for AI-assisted business consulting 
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-
+| customs-duty-drawback-specialist | Duty drawback specialist for co-export | high | inherit |
+| export-control-compliance-specialist | Strategic items export control and sanctions/denied-party screening specialist f | high | inherit |
+| foreign-regulatory-intelligence-analyst | Monitors and reports on US, China, and EU import regulation, tariff, and trade-d | medium | inherit |
+| fta-origin-analyst | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification spe | high | inherit |
+| hs-classification-specialist | HS code classification, customs valuation, and tariff rate determination special | high | inherit |
+| logistics-coordinator | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordina | low | inherit |
+| market-entry-strategist | Overseas market entry strategy, buyer discovery, and market research lead for co | medium | inherit |
+| trade-documentation-specialist | Trade documentation and customs clearance paperwork specialist for co-export | medium | inherit |
 
 ## Skills
 
-_(no variant-specific skills — see `.claude/skills/` for platform skills)_
+- **customs-duty-drawback-workflow**: 
+- **export-control-screening**: 
+- **foreign-regulation-monitoring**: 
+- **fta-origin-determination**: 
+- **hs-classification-workflow**: 
+- **logistics-coordination**: 
+- **market-entry-strategy**: 
+- **trade-documentation-checklist**: 
 
 ---
 
-**Generated**: 2026-08-09T01:40:26.013Z
+**Generated**: 2026-08-09T02:47:01.680Z
 **MVP Wave 3** - L2-to-Variant Pipeline

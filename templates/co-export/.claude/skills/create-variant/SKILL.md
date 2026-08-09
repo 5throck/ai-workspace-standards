@@ -40,7 +40,7 @@ A variant is a domain-specific AI team configuration built on the workspace comm
 
 - [ ] Variant name is unique: check `Projects/` and `templates/` — no existing `co-<name>`
 - [ ] Variant name format: lowercase, alphanumeric + hyphens only (e.g., `safety-os`, `legal-ai`)
-- [ ] Domain type decided: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | (custom)
+- [ ] Domain type decided: `ehs` | `development` | `design` | `consulting` | `collaboration` | (custom)
 
 ### Step 1: Run scaffold script
 
@@ -144,7 +144,7 @@ Common skills from `templates/common/skills/` are already present — only creat
 
 Edit `Projects/<variant-name>/variant.json`:
 - `description`: clear description of the variant's purpose
-- `variant_type`: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game`
+- `type`: `security` | `development` | `design` | `consulting` | `collaboration`
 - `agent_overrides.pm.reason`: describe the PM role override
 - `skill_manifest.variant_specific`: list domain skills with `used_by_agents` and `phases`
 

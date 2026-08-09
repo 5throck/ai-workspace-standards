@@ -21,6 +21,7 @@ lang_reason: source-material
 | 해외 규제 인텔리전스 분석가 | `foreign-regulatory-intelligence-analyst.md` | Medium | 미국/중국/EU 수입 규제 및 관세 변동 모니터링 |
 | 시장 진출 전략가 | `market-entry-strategist.md` | Medium | 시장 조사, 진출 채널 전략, 바이어 발굴 |
 | 무역 서류 전문가 | `trade-documentation-specialist.md` | Medium | 신용장, 송장, 패킹리스트, B/L, 통관 서류 |
+| 관세 환급 전문가 | `customs-duty-drawback-specialist.md` | High | 환급 자격 판정, 환급방법 선택, 사용률 산정 |
 | 물류 코디네이터 | `logistics-coordinator.md` | Low | 인코텀즈, 화물/포워딩, 보세창고 물류 |
 
 전체 로스터, 디스패치 트리거는 [`AGENTS.md`](../AGENTS.md)를,

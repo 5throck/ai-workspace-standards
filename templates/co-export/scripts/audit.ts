@@ -1,4 +1,4 @@
-// @version 2.10.11
+// @version 2.10.12
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';

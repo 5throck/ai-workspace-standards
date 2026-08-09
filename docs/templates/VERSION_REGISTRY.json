@@ -82,7 +82,10 @@
       "status": "beta",
       "released": "2026-08-09",
       "security_advisories": [],
-      "migration_guides": []
+      "migration_guides": [],
+      "changelog": [
+        "2026-08-09: Initial release as beta variant (v0.1.0)"
+      ]
     }
   },
   "schema_version": "1.0"

@@ -498,4 +498,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-07-10 — Two-round project review fixes: audit.ts split bug, dead parity check removal, SSRF IPv6 ranges, pre-commit gitleaks separation, `any` type cleanup, validate-templates dead code removal, ESM import fixes, tsconfig strict options.*
+*Last updated: 2026-08-09 — l2-to-variant-pipeline & create-variant improvements: shared CRLF-safe agent-roster parsing (extractAgentRoster → parseAgentFile), blocking Phase 3.7 capability/plugin and Phase 6 parity validation, --version/--status CLI overrides, import.meta.main guard, dynamic custom-field preservation, context.md append-only Phase 4.6, scaffold variant_type/inherits_common/README_ko/context.md stubs.*

@@ -1,12 +1,12 @@
 {
   "variantName": "co-export",
   "variantType": "consulting",
-  "timestamp": "2026-08-09T01:40:26.086Z",
+  "timestamp": "2026-08-09T02:47:01.744Z",
   "phase": "4.5",
   "summary": {
-    "totalFiles": 18,
+    "totalFiles": 19,
     "passedFiles": 18,
-    "failedFiles": 0
+    "failedFiles": 1
   },
   "gaps": [
     {
@@ -56,6 +56,21 @@
       "fileType": "agent",
       "passed": true,
       "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\README_ko.md",
+      "fileType": "agent",
+      "passed": false,
+      "missingSections": [
+        "## Role",
+        "## ⚠️ PM-ONLY INVOCATION",
+        "## Responsibilities",
+        "## Output Format",
+        "## Constraints",
+        "## Meeting Participation",
+        "## Dispatch Protocol"
+      ],
       "extraSections": []
     },
     {

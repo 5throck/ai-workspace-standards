@@ -38,10 +38,10 @@ export interface VariantMetadata {
   description: string;
   /** Variant type for governance rules */
   variantType: VariantType;
-  /** Lifecycle status - always beta for MVP */
-  status: 'beta';
-  /** Version - always 0.1.0 for MVP */
-  version: '0.1.0';
+  /** Lifecycle status — defaults to 'beta' for new variants */
+  status: string;
+  /** Version — defaults to '0.1.0' for new variants */
+  version: string;
   /** Inherits from templates/common */
   inherits_common: string;
   /** Agent roster from L2 project */
@@ -162,7 +162,7 @@ function createDirectory(dirPath: string): void {
  * @version 1.0.0
  */
 export function normalizeAgentFrontmatter(content: string): string {
-  const fmMatch = content.match(/^(---\n)([\s\S]*?)(\n---)([\s\S]*)$/);
+  const fmMatch = content.match(/^(---\r?\n)([\s\S]*?)(\r?\n---)([\s\S]*)$/);
   if (!fmMatch) return content;
 
   const [, open, fm, close, body] = fmMatch;
@@ -439,8 +439,9 @@ function generateSkillDirectories(
 /**
  * Parse YAML frontmatter from agent .md file content.
  * Handles: scalars, inline arrays, list items, nested objects, block scalars (> and |).
+ * CRLF-safe regex.
  */
-function parseAgentFrontmatter(content: string): Record<string, unknown> {
+export function parseAgentFrontmatter(content: string): Record<string, unknown> {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
   const lines = match[1].split(/\r?\n/);
@@ -519,8 +520,9 @@ function parseAgentFrontmatter(content: string): Record<string, unknown> {
 /**
  * Extract AgentDefinition from an agent .md file.
  * Reads name, tier (claude platform), model, description, phases, handoffTo, handoffFrom.
+ * Uses CRLF-safe parseAgentFrontmatter internally.
  */
-function parseAgentFile(filePath: string): AgentDefinition | null {
+export function parseAgentFile(filePath: string): AgentDefinition | null {
   if (!existsSync(filePath)) return null;
   const content = readUTF8File(filePath);
   const fm = parseAgentFrontmatter(content);
@@ -945,7 +947,7 @@ function generateReadmeKo(variantPath: string, metadata: VariantMetadata): strin
 
   const content = `---
 sync_version: 1
-translated_from_hash: TBD
+translated_from_hash: PLACEHOLDER
 ---
 
 # ${metadata.name}
@@ -1202,7 +1204,7 @@ function generateGeminiSettings(variantPath: string): string {
   const settingsPath = join(variantPath, '.gemini', 'settings.json');
   const settings: Record<string, unknown> = {
     _comment:
-      'Variant-specific overrides vs L1 (templates/common): codegraph MCP server added for co-export. These are intentional L2 variant settings.',
+      'Variant-specific overrides vs L1 (templates/common). These are intentional L2 variant settings.',
     mcpServers: {
       codegraph: {
         command: 'npx',
