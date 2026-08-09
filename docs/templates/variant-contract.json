@@ -1,7 +1,9 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "required": [
     "variant.json",
+    "README.md",
+    "README_ko.md",
     "CLAUDE.md",
     "GEMINI.md",
     "AGENTS.md",
@@ -12,8 +14,6 @@
     ".gemini/settings.json"
   ],
   "optional": [
-    "README.md",
-    "README_ko.md",
     ".claude/commands/security-check.md",
     ".gemini/commands/security-check.md"
   ],

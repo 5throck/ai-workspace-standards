@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T07:05:26.287Z
+**Generated**: 2026-08-09T13:26:02.704Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -118,7 +118,7 @@
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.8.1 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.9.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.1.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
@@ -152,7 +152,7 @@
 | propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
 | propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
-| readme-lifecycle-audit.ts | 1.0.2 | scripts/readme-lifecycle-audit.ts | N/A |
+| readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |
 | reconcile-with-l0-l1.ts | 1.2.2 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
@@ -177,7 +177,7 @@
 | sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.1 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
-| template-utils.ts | 1.0.0 | scripts/helpers/template-utils.ts | N/A |
+| template-utils.ts | 1.1.0 | scripts/helpers/template-utils.ts | N/A |
 | template-validation.ts | 1.0.2 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l2-promotion.ts | 1.0.1 | scripts/test-l2-promotion.ts | bun |
@@ -200,7 +200,7 @@
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.16 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.17 | scripts/validate-templates.ts | js-yaml |
 | validation-policy.ts | 1.0.1 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |

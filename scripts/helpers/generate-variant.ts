@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.8.1
+ * @version 1.9.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -22,7 +22,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from
 import { ReconciledManifest, ReconciledFile } from './reconcile-with-l0-l1.ts';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
-import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.ts';
+import { applyContextTemplate, applyTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './template-utils.ts';
 import type { VariantType } from './registries/variant-type-registry.ts';
 import { getVariantTypeDefinition } from './registries/variant-type-registry.ts';
 import { getPromotionPolicy } from './registries/promotion-policy.ts';
@@ -69,6 +69,16 @@ export interface VariantMetadata {
     template_path: string;
     required_fields: string[];
     notes?: string;
+  };
+  /** Optional: README narrative prose for hand-authored (stable) variants. When omitted,
+   *  the generator renders generic default prose for each narrative section. */
+  readmeNarrative?: {
+    overview?: string;
+    mission?: string;
+    teamIntro?: string;
+    howToIntro?: string;
+    workflowPhases?: string;
+    quickStartBody?: string;
   };
   /** Optional: Custom fields from L2 source variant.json (engagement_methodology, etc.) */
   [key: string]: unknown;
@@ -823,87 +833,147 @@ function generateGeminiMd(variantPath: string, metadata: VariantMetadata, manife
   return geminiMdPath;
 }
 
+// ============================================================================
+// README RENDERING (from templates/common/docs/README.template.md)
+// The template IS the structural SSOT (validated by validate-templates.ts WS-08);
+// these helpers only supply values. Default prose is used for generated/beta
+// variants; hand-authored (stable) variants override via metadata.readmeNarrative.
+// ============================================================================
+
+/** Generic 5-phase workflow list used when a variant supplies no custom prose. */
+const DEFAULT_WORKFLOW_PHASES = [
+  '1. **Team Assembly:** The PM creates specialized agents/skills if required.',
+  '2. **Triage:** The PM classifies the request; dispatches read-only agents in parallel.',
+  '3. **Analysis:** The PM synthesizes findings into requirements + acceptance criteria.',
+  '4. **Design:** An architect produces an implementation plan + ADR.',
+  '5. **Implementation:** Specialists implement; the PM loops up to 3× on failures.',
+  '6. **Finalization:** The PM logs decisions; runs `/sync`; opens a PR.',
+].join('\n');
+
+const DEFAULT_WORKFLOW_PHASES_KO = [
+  '1. **팀 구성:** PM이 필요한 전문 에이전트/스킬을 생성합니다.',
+  '2. **분류:** PM이 요청을 분류하고 읽기 전용 에이전트를 병렬로 배치합니다.',
+  '3. **분석:** PM이 조사 결과를 요구사항 + 완료 기준으로 종합합니다.',
+  '4. **설계:** 아키텍트가 구현 계획 + ADR을 작성합니다.',
+  '5. **구현:** 전문가가 구현하고, PM은 실패 시 최대 3회까지 반복합니다.',
+  '6. **마무리:** PM이 결정을 기록하고 `/sync`를 실행한 뒤 PR을 엽니다.',
+].join('\n');
+
+/** Render the unified status line for both stable and beta variants. */
+function renderStatusLine(status: string, version: string): string {
+  return status.toLowerCase() === 'stable'
+    ? `✅ Stable — v${version}`
+    : `⚠️ Beta — v${version}`;
+}
+
+/** Render the 4-column agent roster rows (PM fallback when roster is empty). */
+function renderAgentRosterRows4Col(roster: AgentDefinition[]): string {
+  const rows = roster.map(a => {
+    const role = a.description
+      ? a.description.split('.')[0].trim().substring(0, 80)
+      : `${a.name} specialist`;
+    return `| **${a.name}** | ${role} | ${a.tier} | ${a.model || 'inherit'} |`;
+  });
+  if (rows.length === 0) {
+    rows.push('| **PM (Project Manager)** | Workflow management, dispatch, quality gates | high | inherit |');
+  }
+  return rows.join('\n');
+}
+
+/** Render the Skills section body (bullet list, or placeholder when empty). */
+function renderSkillsBlock(skills: SkillDefinition[]): string {
+  if (skills.length === 0) {
+    return '_(no variant-specific skills — see `.claude/skills/` for platform skills)_';
+  }
+  return skills.map(s => {
+    const desc = s.description || (s.triggers ? s.triggers.join(', ') : '');
+    return `- **${s.name}**: ${desc}`;
+  }).join('\n');
+}
+
+/** Render the beta-status block (engagement/months) for beta variants; empty for stable. */
+function renderBetaBlock(variantType: VariantType, status: string, locale: 'en' | 'ko' = 'en'): string {
+  if (status.toLowerCase() !== 'beta') return '';
+  const engagements = getRequiredEngagements(variantType);
+  const months = getRequiredBetaMonths(variantType);
+  if (locale === 'ko') {
+    return [
+      '> **⚠️ 베타 변형** — 프로덕션 용도가 아닙니다.',
+      '',
+      `- **클라이언트 참여**: 0/${engagements} (변형 거버넌스 규칙 참조)`,
+      `- **베타 기간**: 0/${months}개월`,
+      '- **추가 검증**: 대기 중',
+      '',
+      '승급 기준은 `scripts/helpers/variant-governance-rules.ts`를 참조하세요.',
+    ].join('\n');
+  }
+  return [
+    '> **⚠️ Beta variant** — not for production use.',
+    '',
+    `- **Client Engagements**: 0/${engagements} (see variant governance rules)`,
+    `- **Beta Duration**: 0/${months} months`,
+    '- **Additional Checks**: Pending',
+    '',
+    'See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.',
+  ].join('\n');
+}
+
 /**
- * Generate README.md with beta warning
- * @version 1.1.0
+ * Build the README substitution map from VariantMetadata, applying readmeNarrative
+ * overrides when present (stable/hand-authored variants) and generic default prose
+ * otherwise (beta/generated variants). Shared by EN and KO rendering.
+ * @version 1.0.0
+ */
+function buildReadmeSubstitutions(metadata: VariantMetadata, locale: 'en' | 'ko'): Record<string, string> {
+  const n = metadata.readmeNarrative ?? {};
+  const ko = locale === 'ko';
+  return {
+    VARIANT_NAME: metadata.name,
+    STATUS_LINE: renderStatusLine(metadata.status, metadata.version),
+    TAGLINE: metadata.description,
+    NARRATIVE_OVERVIEW: n.overview ?? (ko
+      ? `${metadata.description}. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.`
+      : `${metadata.description}. See docs/context.md for full architecture and standards.`),
+    QUICK_START_BODY: n.quickStartBody ?? (ko
+      ? `이것은 워크스페이스 템플릿의 ${metadata.status} 변형입니다. \`${metadata.inherits_common}\`에서 상속하며 변형별 맞춤 설정을 포함합니다.`
+      : `This is a ${metadata.status} variant of the workspace template. It inherits from \`${metadata.inherits_common}\` and includes variant-specific customizations.`),
+    NARRATIVE_MISSION: n.mission ?? (ko ? `**미션:** ${metadata.description}` : `**Mission:** ${metadata.description}`),
+    TEAM_INTRO_PROSE: n.teamIntro ?? (ko
+      ? `당신의 파트너는 각기 고유한 역할을 가진 전문 에이전트들입니다. **프로젝트 매니저(PM)**가 유일한 진입점이며 나머지 팀을 조율합니다.`
+      : `Your partners consist of specialized agents, each with a distinct role. The **Project Manager (PM)** is your single point of entry—they orchestrate the rest of the team.`),
+    AGENT_ROSTER_ROWS: renderAgentRosterRows4Col(metadata.agentRoster),
+    SKILLS_BLOCK: renderSkillsBlock(metadata.skills),
+    NARRATIVE_HOWTO_INTRO: n.howToIntro ?? (ko
+      ? `협업 방식은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 표준 워크플로는 다음과 같습니다:`
+      : `Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:`),
+    NARRATIVE_WORKFLOW_PHASES: n.workflowPhases ?? (ko ? DEFAULT_WORKFLOW_PHASES_KO : DEFAULT_WORKFLOW_PHASES),
+    VARIANT_TYPE: metadata.variantType,
+    VARIANT_TYPE_DESCRIPTION: getVariantTypeDescription(metadata.variantType),
+    BETA_STATUS_BLOCK: renderBetaBlock(metadata.variantType, metadata.status, locale),
+    LAST_UPDATED: new Date().toISOString().split('T')[0],
+  };
+}
+
+/**
+ * Generate README.md by rendering templates/common/docs/README.template.md.
+ * The template IS the structural SSOT; this function only supplies values.
+ * @version 2.0.0
  */
 function generateReadme(variantPath: string, metadata: VariantMetadata): string {
+  const templatePath = join(COMMON_TEMPLATE, 'docs', 'README.template.md');
+
+  if (!existsSync(templatePath)) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'README_TEMPLATE_NOT_FOUND',
+      `README.template.md not found at: ${templatePath}`,
+      undefined,
+      'Ensure templates/common/docs/README.template.md exists'
+    );
+  }
+
   const readmePath = join(variantPath, 'README.md');
-
-  const agentRosterRows = metadata.agentRoster.map(agent => {
-    const role = agent.description
-      ? agent.description.split('.')[0].trim().substring(0, 80)
-      : `${agent.name} specialist`;
-    return `| ${agent.name} | ${role} | ${agent.tier} | ${agent.model} |`;
-  }).join('\n');
-
-  const skillsList = metadata.skills.length > 0
-    ? metadata.skills.map(skill => {
-        const desc = skill.description || (skill.triggers ? skill.triggers.join(', ') : '');
-        return `- **${skill.name}**: ${desc}`;
-      }).join('\n')
-    : '_(no variant-specific skills — see `.claude/skills/` for platform skills)_';
-
-  const content = `---
-content_hash: PLACEHOLDER
-sync_version: 1
----
-
-# ${metadata.name}
-
-> **⚠️ BETA VARIANT** - Status: ${metadata.status} (v${metadata.version})
-> This variant is in active development and should not be used in production environments.
-
----
-
-${metadata.description}
-
-## Quick Start
-
-This is a beta variant of the workspace template. It inherits from \`${metadata.inherits_common}\` and includes variant-specific customizations.
-
-### For Claude Code users:
-
-See \`CLAUDE.md\` for detailed instructions.
-
-### For Gemini CLI users:
-
-See \`GEMINI.md\` for detailed instructions.
-
-## Beta Status
-
-This variant is currently in **beta** and requires:
-
-- **Client Engagements**: 0/${getRequiredEngagements(metadata.variantType)} (see variant governance rules)
-- **Beta Duration**: 0/${getRequiredBetaMonths(metadata.variantType)} months
-- **Additional Checks**: Pending
-
-See \`scripts/helpers/variant-governance-rules.ts\` for promotion criteria.
-
-## Variant Type
-
-**Type**: ${metadata.variantType}
-
-This variant focuses on ${getVariantTypeDescription(metadata.variantType)}.
-
-## Agent Roster
-
-| Agent | Role | Tier | Model |
-|-------|------|------|-------|
-${agentRosterRows}
-
-## Skills
-
-${skillsList}
-
----
-
-**Generated**: ${new Date().toISOString()}
-**MVP Wave 3** - L2-to-Variant Pipeline
-`;
-
-  writeUTF8File(readmePath, content);
-  return readmePath;
+  return applyTemplate(templatePath, readmePath, buildReadmeSubstitutions(metadata, 'en'));
 }
 
 /**
@@ -931,54 +1001,25 @@ function getVariantTypeDescription(variantType: VariantType): string {
 }
 
 /**
- * Generate README_ko.md (Korean README) for the variant
- * @version 1.0.0
+ * Generate README_ko.md by rendering templates/common/docs/README_ko.template.md.
+ * Korean mirror of generateReadme(); shares buildReadmeSubstitutions() with locale='ko'.
+ * @version 2.0.0
  */
 function generateReadmeKo(variantPath: string, metadata: VariantMetadata): string {
+  const templatePath = join(COMMON_TEMPLATE, 'docs', 'README_ko.template.md');
+
+  if (!existsSync(templatePath)) {
+    throw fatalError(
+      ErrorPhase.VARIANT_GENERATION,
+      'README_KO_TEMPLATE_NOT_FOUND',
+      `README_ko.template.md not found at: ${templatePath}`,
+      undefined,
+      'Ensure templates/common/docs/README_ko.template.md exists'
+    );
+  }
+
   const readmeKoPath = join(variantPath, 'README_ko.md');
-
-  const agentTable = metadata.agentRoster
-    .map(a => `| **${a.name}** | \`agents/${a.name}.md\` | ${a.description || `${a.name} 전문 에이전트`} |`)
-    .join('\n');
-
-  const skillList = metadata.skills
-    .map(s => `- **${s.name}**: ${s.description || `${s.name} 스킬`}`)
-    .join('\n');
-
-  const content = `---
-sync_version: 1
-translated_from_hash: PLACEHOLDER
----
-
-# ${metadata.name}
-
-> **Status**: 🔶 Beta — v${metadata.version}
-
-## 1. 팀 미션
-
-**미션:** ${metadata.description}
-
-## 2. AI 팀 소개
-
-| 에이전트 | 파일 | 역할 |
-|---------|------|------|
-${agentTable}
-
-## 3. 스킬
-
-${skillList}
-
-## 4. 의존성 설치
-
-\`\`\`bash
-bun --version   # audit.ts, dev-sync.ts 실행에 필요
-\`\`\`
-
-*Last Updated: ${new Date().toISOString().split('T')[0]} — ${metadata.name} variant template*
-`;
-
-  writeUTF8File(readmeKoPath, content);
-  return readmeKoPath;
+  return applyTemplate(templatePath, readmeKoPath, buildReadmeSubstitutions(metadata, 'ko'));
 }
 
 /**

@@ -2,7 +2,7 @@
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-06-15
+> Last Updated: 2026-08-09
 
 ---
 
@@ -128,22 +128,23 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 
 ### 5. README Domain
 
-**What it tracks:** Each `README.md` must have required sections (Overview, Usage, Prerequisites), a paired `README_ko.md` for i18n consistency, and a `Last Updated` date that is not stale (threshold: 90 days).
+**What it tracks:** Each variant `README.md` / `README_ko.md` must conform to the unified README Standard (see `docs/governance/variant-contract.md` "README Standard") — the 7 required top-level sections, a `> **Status**: (✅ Stable|⚠️ Beta) — vX.Y.Z` blockquote, the language-selector line, and the 4-column agent roster table — plus a paired translation and a non-stale `Last Updated` date (threshold: 90 days).
 
 **Lifecycle states:**
 - `pass` — all checks green
 - `stale` — Last Updated date older than threshold
-- `missing-sections` — required sections absent
+- `missing-sections` — required standard sections absent
 - `i18n-drift` — `README.md` and `README_ko.md` section count divergence exceeds tolerance
 - `missing-pair` — one language file exists without the other
 
-**Validating tool:** `scripts/readme-lifecycle-audit.ts`
+**Validating tools:**
+- `scripts/validate-templates.ts` Check **WS-08** — structural-conformance SSOT for L1b (`templates/co-*/`). The only validator that enforces the standard section set; consults `variantValidationPolicy.warningOnly` for WARN/FAIL severity. `scripts/readme-lifecycle-audit.ts` deliberately skips `templates/` to avoid a second, drifting copy of the header list.
+- `scripts/readme-lifecycle-audit.ts` — freshness and pairing for L0 / L1a / L2.
 
-**Applicable layers:** L0, L1a (partial), L1b, L2.
+**Applicable layers:** L0, L1a (partial), L1b (structural via WS-08), L2.
 
 **Current gaps:**
 - `audit.ts` at L0 does not call `readme-lifecycle-audit.ts`.
-- `templates/co-*/README.md` files are explicitly excluded from the current audit scope in `readme-lifecycle-audit.ts`.
 - L2 projects do not have `readme-lifecycle-audit.ts` wired into their local `audit.ts` copies.
 
 ---
@@ -153,14 +154,14 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 | Orchestrator | Layer | Domains Currently Enforced | Domains Missing |
 |---|---|---|---|
 | `scripts/audit.ts` | L0 Workspace Root | agent, skill, memory | script, readme |
-| `scripts/validate-templates.ts` | L1b co-* Variants | variant (partial) | agent, skill, script, readme |
+| `scripts/validate-templates.ts` | L1b co-* Variants | variant (partial), readme (WS-08) | agent, skill, script |
 | `scripts/audit.ts` (project copy) | L2 Projects | agent, skill | script (optional), readme (optional) |
 | *(none)* | L1a templates/common | *(none)* | variant, script, readme |
 
 ### Remediation Priority
 
 1. **High — add `verify-scripts.ts` to `audit.ts` (L0):** Prevents undocumented scripts from accumulating. One-line addition to `audit.ts`.
-2. **High — remove README exclusion in `readme-lifecycle-audit.ts` for L1b:** Template READMEs are the most widely copied — staleness there propagates to all derived projects.
+2. **~~High — remove README exclusion in `readme-lifecycle-audit.ts` for L1b~~ (resolved by WS-08):** L1b variant-README structural conformance is now enforced by `validate-templates.ts` Check WS-08 (single enforcer, no drifting header list). `readme-lifecycle-audit.ts` keeps skipping `templates/` by design; freshness for L0/L1a/L2 remains an open gap.
 3. **Medium — wire agent + skill audits into `validate-templates.ts`:** Run per-variant subdirectory scans before approving a variant as `active`.
 4. **Medium — add script registry to `validate-templates.ts`:** Variants with scripts not listed in any registry are a drift source.
 5. **Low — add `common.lifecycle.json` to `templates/common/`:** Gives the shared base layer a version and status anchor.
@@ -181,8 +182,8 @@ Use this checklist when creating a new `templates/co-<name>/` variant. Steps are
 - [ ] Create `.claude/commands/meeting.md` (copy from `templates/common/.claude/commands/meeting.md`)
 - [ ] Create `.gemini/commands/meeting.md` (copy from `templates/common/.gemini/commands/meeting.md`)
 - [ ] Create `docs/<variant>.context.md` with architecture overview
-- [ ] Create `README.md` (English) with sections: Overview, Usage, Prerequisites, Last Updated
-- [ ] Create `README_ko.md` (Korean) with matching section structure
+- [ ] Create `README.md` (English) following the README Standard — 7 required sections: Overview, Quick Start, Team Mission, Meet the AI Team, Skills, How to Collaborate, Variant Type (see `docs/governance/variant-contract.md` "README Standard")
+- [ ] Create `README_ko.md` (Korean) mirroring the same 7 sections (`개요 · 빠른 시작 · 팀 미션 · AI 팀 소개 · 스킬 · 협업 방법 · 변형 유형`)
 - [ ] Add variant entry to workspace `templates/common/VERSION_REGISTRY.json` if applicable
 - [ ] Run `bun scripts/validate-templates.ts --variant co-<name>` — all mandatory checks must pass
 - [ ] Promote `variant.json` `status` from `"draft"` to `"beta"` once validation passes

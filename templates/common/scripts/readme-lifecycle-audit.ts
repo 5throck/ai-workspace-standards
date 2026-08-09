@@ -9,7 +9,7 @@
  *   bun scripts/readme-lifecycle-audit.ts
  *   bun scripts/readme-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @last_updated 2026-06-02
  * @license MIT
  */
@@ -130,7 +130,11 @@ function findReadmeFiles(dir: string): string[] {
         continue;
       }
 
-      // Skip templates subdirectories (already handled separately)
+      // Skip templates subdirectories.
+      // README *standard* conformance (required sections, status line, agent-table schema,
+      // EN/KO parity) for templates/co-* variants is owned SOLELY by validate-templates.ts
+      // Check WS-08 — see docs/governance/variant-contract.md "README Standard". This audit
+      // intentionally skips templates/ to avoid a second, drifting copy of the header list.
       if (IS_WORKSPACE_ROOT && dir.startsWith(join(ROOT, 'templates'))) {
         continue;
       }

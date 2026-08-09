@@ -32,6 +32,7 @@
 | `.claude/commands/*.md` | Workspace Root | `templates/common/.claude/commands/` + `.gemini/commands/` | Manual propagation |
 | `variant.json` | `templates/co-*/` | (None) | Variant itself is the source |
 | `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L2 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
+| `README.md` / `README_ko.md` | `templates/common/docs/README.template.md` (+KO) | `templates/co-*/README.md` + `Projects/<name>/README.md` | `generate-variant.ts` `applyTemplate()` + `validate-templates.ts` WS-08 + `verify-readme-sync.ts` |
 
 #### Three Types of Flows
 

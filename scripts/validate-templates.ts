@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.16
+ * @version 1.5.17
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2234,6 +2234,83 @@ function checkNoVariantLocalContextMd(variant: string): void {
   }
 }
 
+// Check WS-08: README standard conformance (README.md + README_ko.md)
+// Enforces the unified README skeleton defined in docs/governance/variant-contract.md
+// "README Standard" and rendered by templates/common/docs/README.template.md (+KO).
+// The FIRST check to consult governance.variantValidationPolicy: when WS-08 is listed
+// in `warningOnly` it emits WARN (non-blocking, used during rollout); otherwise FAIL.
+// H2 parity between EN/KO is transitively enforced — both files are checked against a
+// required set of equal size (7), so individual missing/extra conformance implies parity.
+// Frontmatter hash presence is delegated to Check 11 (checkReadmePresence).
+function checkReadmeStandard(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-08: README standard conformance in ${variant} ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-08') ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, 'WS-08', msg, fix);
+    else fail(variant, 'WS-08', msg, fix);
+  };
+
+  const EN_H2 = ['Overview', 'Quick Start', 'Team Mission', 'Meet the AI Team', 'Skills', 'How to Collaborate', 'Variant Type'];
+  const KO_H2 = ['개요', '빠른 시작', '팀 미션', 'AI 팀 소개', '스킬', '협업 방법', '변형 유형'];
+  const STATUS_RE_EN = /^> \*\*Status\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
+  const STATUS_RE_KO = /^> \*\*상태\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
+
+  const readmePath = join(TEMPLATES_DIR, variant, 'README.md');
+  const readmeKoPath = join(TEMPLATES_DIR, variant, 'README_ko.md');
+  if (!existsSync(readmePath) && !existsSync(readmeKoPath)) return; // presence is Check 11's concern
+
+  let issuesFound = 0;
+  const checkFile = (
+    path: string, label: string, h2Required: string[], statusRe: RegExp,
+    statusLabel: string, langSelector: string, agentHeader: string,
+  ): void => {
+    const c = readFileSync(path, 'utf-8');
+    const h2 = [...c.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+    const h2Set = new Set(h2);
+    const missing = h2Required.filter(h => !h2Set.has(h));
+    const extra = h2.filter(h => !h2Required.includes(h));
+    if (missing.length) {
+      report(`templates/${variant}/${label} is missing required section(s): ${missing.join(', ')}`,
+        `Add the missing ## section(s) per the README standard (docs/governance/variant-contract.md "README Standard"). Required: ${h2Required.join(' · ')}`);
+      issuesFound++;
+    }
+    if (extra.length) {
+      report(`templates/${variant}/${label} has non-standard top-level section(s): ${extra.join(', ')}`,
+        `Remove or demote (to ###) the non-standard ## section(s); only the 7 standard top-level sections are allowed`);
+      issuesFound++;
+    }
+    if (!statusRe.test(c)) {
+      report(`templates/${variant}/${label} status line must match '> **${statusLabel}**: (✅ Stable|⚠️ Beta) — vX.Y.Z'`,
+        `Normalize the status line, e.g. '> **${statusLabel}**: ✅ Stable — v1.0.0'`);
+      issuesFound++;
+    }
+    if (!c.includes(langSelector)) {
+      report(`templates/${variant}/${label} is missing the standard language-selector line`,
+        `Add the language-selector blockquote linking to the other-language README`);
+      issuesFound++;
+    }
+    if (!c.includes(agentHeader)) {
+      report(`templates/${variant}/${label} agent table must use the 4-column header '${agentHeader}'`,
+        `Convert the agent roster table to the 4-column schema (Agent | Role | Tier | Model)`);
+      issuesFound++;
+    }
+  };
+
+  if (existsSync(readmePath)) {
+    checkFile(readmePath, 'README.md', EN_H2, STATUS_RE_EN, 'Status',
+      '**English** · [한국어](README_ko.md)', '| Agent | Role | Tier | Model |');
+  }
+  if (existsSync(readmeKoPath)) {
+    checkFile(readmeKoPath, 'README_ko.md', KO_H2, STATUS_RE_KO, '상태',
+      '[English](README.md) · **한국어**', '| 에이전트 | 역할 | 티어 | 모델 |');
+  }
+
+  if (issuesFound === 0) {
+    pass(`WS-08: ${variant} README conforms to the standard${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+  }
+}
+
 // Main
 // A-10: propagation-map.json schema validation
 function checkPropagationMapSchema(): void {
@@ -2313,13 +2390,14 @@ function main() {
     if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
   }
 
-  // WS-04, WS-05, WS-06, WS-07: Reverse-direction layer checks for co-* variants
+  // WS-04, WS-05, WS-06, WS-07, WS-08: Reverse-direction layer checks for co-* variants
   for (const [variant] of manifests) {
     if (!variant.startsWith('co-')) continue;
     checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
     checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
     checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
     checkNoVariantLocalContextMd(variant);                       // WS-07
+    checkReadmeStandard(variant);                                // WS-08
   }
 
   checkSharedFileSync();
