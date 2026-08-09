@@ -1,9 +1,9 @@
 ---
-content_hash: PLACEHOLDER
+translated_from_hash: PLACEHOLDER
 sync_version: 1
 ---
 
-# {{PROJECT_NAME}}
+# co-deck
 
 **Language**: [English](README.md) · **한국어**
 

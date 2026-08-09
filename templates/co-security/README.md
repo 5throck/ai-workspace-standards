@@ -3,11 +3,11 @@ sync_version: 1
 content_hash: TBD
 ---
 
-# {{PROJECT_NAME}}
+# co-security
 
 **Language**: **English** · [한국어](README_ko.md)
 
-> **Status**: Beta — v0.2.0
+> **Status**: ✅ Stable — v1.0.0
 
 Welcome to the **Co-Security** workspace—your dedicated AI red team and threat modeling agent team. Optimized for collaborative work with Claude and Gemini AI assistants, this template gives you a full team of specialized AI agents ready to support your projects from day one.
 

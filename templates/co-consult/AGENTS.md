@@ -210,13 +210,13 @@ All specialist agents below are dispatched ONLY through PM:
 | `change-management-partner` | Phase 1, 2 | "change management partner", "change management", "organizational transformation", "stakeholder" |
 | `communications-lead` | Phase 3 | "communications lead", "strategy", "strategic analysis", "communicate", "presentation" |
 | `data-analyst` | Phase 1, 3 | "data analyst", "research", "analyze", "investigate", "data analysis" |
-| `delivery-manager` | Phase 4 | "delivery manager", "schedule", "coordinate", "track progress" |
+| `delivery-manager` | Phase 4 | "delivery manager", "stakeholder review", "review cycle", "logistics", "engagement milestones" |
 | `industry-expert` | Phase 1, 2 | "industry expert", "industry", "market landscape", "competitive analysis" |
-| `sme` | Phase 1, 2, 3 | "sme", "design", "create design", "subject matter", "functional expertise" |
+| `sme` | Phase 1, 2, 3 | "sme", "subject matter expert", "functional expertise", "functional analysis", "domain expertise" |
 | `solutions-architect` | Phase 3 | "solutions architect", "design", "create design", "solution design", "architecture" |
 | `strategy-analyst` | Phase 1 | "strategy analyst", "research", "analyze", "investigate", "strategy" |
 | `technology-specialist` | Phase 4 | "technology specialist", "technology platform", "digital transformation", "collaboration tools" |
-| `workstream-lead` | Phase 4 | "workstream lead", "schedule", "coordinate", "track progress", "workstream" |
+| `workstream-lead` | Phase 4 | "workstream lead", "workstream", "team coordination", "task assignment", "progress tracking" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 

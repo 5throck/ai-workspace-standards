@@ -37,6 +37,7 @@
 | Test Runner | `agents/test-runner.md` | Test authoring and execution | active |
 | Security Monitor | `agents/security-monitor.md` | Security review, hook enforcement | active |
 | Designer | `agents/designer.md` | UI/UX specs and component definitions | active |
+| Stack Setup | `agents/stack-setup.md` | Unknown tech stack identification, risk-assessed setup plan, security-reviewed environment bootstrap | active |
 
 > Lifecycle management: `bun scripts/agent-lifecycle-audit.ts`
 > After any agent change, update AGENTS.md and this table.

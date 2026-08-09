@@ -6,6 +6,29 @@ translated_from_hash: PLACEHOLDER
 # co-export
 
 > **Status**: 🔶 Beta — v0.1.0
+> 이 변형은 활발히 개발 중이며, 프로덕션 환경에서 사용해서는 안 됩니다.
+
+## 빠른 시작
+
+이것은 워크스페이스 템플릿의 베타 변형(variant)입니다. `templates/common`에서 상속받으며, 변형별 맞춤 설정을 포함합니다.
+
+### Claude Code 사용자:
+
+자세한 지침은 `CLAUDE.md`를 참조하세요.
+
+### Gemini CLI 사용자:
+
+자세한 지침은 `GEMINI.md`를 참조하세요.
+
+## 베타 상태
+
+이 변형은 현재 **베타** 상태이며 다음 조건이 필요합니다:
+
+- **클라이언트 인게이지먼트(Client Engagements)**: 0/2 (변형 거버넌스 규칙 참조)
+- **베타 기간(Beta Duration)**: 0/2개월
+- **추가 검사(Additional Checks)**: 대기 중(Pending)
+
+프로모션 기준은 워크스페이스의 L2-to-variant 파이프라인이 관리합니다. 전체 정책은 워크스페이스 루트의 `scripts/helpers/variant-governance-rules.ts`(이 템플릿에는 포함되지 않음)를 참조하세요.
 
 ## 1. 팀 미션
 

@@ -194,12 +194,14 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- VARIANT-PHASE-GATE-START -->
 ### Phase Gate (co-develop)
 
-| # | Phase | Gate Criteria |
-|---|-------|---------------|
-| 0 | Initiation | Project scaffolded, dev environment verified, CI pipeline configured |
-| 1-2 | Planning | Architecture review approved, tech stack confirmed, sprint plan defined |
-| 4 | Execution | Code review passed, tests green, no critical lint errors |
-| 5 | Finalization | Deployment verified, documentation updated, retrospective completed |
+| Deliverable Type | Phase | Agent | Tier | Notes |
+|-------------------|-------|-------|------|-------|
+| Unknown stack identification, risk-assessed environment setup | Phase 0-1 | `stack-setup` | Low | Optional — skip when the stack is already configured; requires explicit user approval before executing any setup command |
+| Security baseline scan, pre-PR advisory check | Phase 0, Phase 5 | `security-monitor` | Medium | Detection/reporting only — never modifies source or dependency files |
+| Implementation plan, ADR, data model / API surface design | Phase 1-2 | `architect` | High | Must precede implementation; produces plans only, never application code |
+| UI/UX spec, wireframe, component/design tokens | Phase 3 | `designer` | Medium | Optional — skip when no UI/UX component is in scope |
+| Source file creation/modification per approved plan | Phase 4 | `code-writer` | Low | Implements exactly what the approved plan specifies — no scope creep |
+| Test suite execution, acceptance criteria verification, QA gate | Phase 4 | `test-runner` | Medium | QA gate passes only when audit script exits 0 and all acceptance criteria are met |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
@@ -405,12 +407,14 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
-| Implement user stories | development-agent | architect (too high-level) |
-| Code review and PR feedback | review-agent | development-agent (self-review) |
-| Set up CI/CD pipeline | devops-agent | development-agent (scope creep) |
-| Database schema design | architect | development-agent (design vs implementation) |
-| Write unit tests | development-agent | qa-agent (wrong lifecycle stage) |
-| Debug production issues | development-agent | architect (wrong tier) |
+| Implementation plans, ADRs, architectural trade-offs | architect | code-writer (too low-level, no design authority) |
+| Write, modify, or delete source files from an approved plan | code-writer | architect (produces plans only, never application code) |
+| UI/UX specs, wireframes, component/design tokens | designer | code-writer (implements, does not design) |
+| Unknown tech stack identification and risk-assessed setup | stack-setup | code-writer (setup requires research + security review first) |
+| Run test suite, verify acceptance criteria, QA gate | test-runner | code-writer (self-verification conflict) |
+| Vulnerability scans, secret leak detection, security advisories | security-monitor | code-writer (detection/reporting only role, not implementation) |
+| Set up CI/CD or environment for a new/unrecognized stack | stack-setup | architect (scope is setup procedure, not system design) |
+| Database schema / API surface design | architect | designer (data/API is architect's domain, not UI/UX) |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
@@ -474,21 +478,6 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 ## §6: Skills
 
-### Platform Skills Registry
-
-| Skill | File | Trigger condition |
-|-------|------|-------------------|
-| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
-
-> **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
->
-> All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
-> The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
->
-> **Skill structure specification**: See [docs/context.md](docs/context.md) for frontmatter format and session skill registration.
-
-> **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
-
 ### Skill Resolution Priority
 
 When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
@@ -515,6 +504,21 @@ When a user request matches a skill trigger, apply this priority order — **enf
 
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+
+### Platform Skills Registry
+
+| Skill | File | Trigger condition |
+|-------|------|-------------------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
+
+> **📌 VERSION_MANIFEST is the Single Source of Truth (SSOT)**
+>
+> All skill versions, status, and lifecycle metadata are maintained in [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
+> The table below provides skill names and locations only. For current versions, status, and detailed metadata, always reference VERSION_MANIFEST.
+>
+> **Skill structure specification**: See [docs/context.md](docs/context.md) for frontmatter format and session skill registration.
+
+> **`owner` field definition**: The `owner` field in `SKILL.md` frontmatter identifies the **maintainer responsibility** for that skill — the agent or role accountable for keeping the skill current. It does NOT require that agent to exist in the current project, and does NOT mean that agent is the only one who can invoke the skill.
 
 ---
 
