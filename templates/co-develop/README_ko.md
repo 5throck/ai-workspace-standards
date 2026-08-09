@@ -1,62 +1,89 @@
 ---
-translated_from_hash: PLACEHOLDER
 sync_version: 1
+translated_from_hash: c4d28a89fa885f0d489c733c4c6798f37cdb96181ac41f7f0d19aa8221e4652e
+lang: ko
+lang_reason: source-material
 ---
 
 # co-develop
 
-**Language**: [English](README.md) · **한국어**
+> **언어**: [English](README.md) · **한국어**
+> **상태**: ✅ Stable — v1.0.0
+> Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
 
-> **상태**: 안정화 (v1.0.0)
+## 개요
 
----
-
-소프트웨어 개발 워크플로우 — PM, Architect, Designer, Code Writer, Test Runner, Security Monitor로 구성된 전체 에이전트 팀.
+Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
 
 ## 빠른 시작
 
-이 variant는 `templates/common`을 상속하며 소프트웨어 개발을 위한 6단계 선형 거버넌스 파이프라인을 제공합니다.
+이것은 워크스페이스 템플릿의 안정적인 변형입니다. `templates/common`에서 상속하며 변형별 맞춤 설정을 포함합니다.
 
 ### Claude Code 사용자:
 
-`CLAUDE.md`에서 상세 안내를 확인하세요.
+자세한 지침은 `CLAUDE.md`를 참고하세요.
 
-### Gemini Code 사용자:
+### Gemini CLI 사용자:
 
-`GEMINI.md`에서 상세 안내를 확인하세요.
+자세한 지침은 `GEMINI.md`를 참고하세요.
 
-## Variant 유형
+## 팀 미션
 
-**유형**: development
+**미션:** Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
 
-이 variant는 소프트웨어 개발 워크플로우, 기능 구현 및 통합 테스트에 중점을 둡니다.
+## AI 팀 소개
 
-## 에이전트 구성
+당신의 파트너는 각기 고유한 역할을 가진 전문 에이전트들입니다. **프로젝트 매니저(PM)**가 유일한 진입점이며 나머지 팀을 조율합니다.
 
-| 에이전트 | 역할 | 티어 |
-|---------|------|------|
-| architect | 시스템 설계 및 아키텍처 계획 | High |
-| code-writer | 기능 구현 | Low |
-| designer | UI/UX 및 컴포넌트 설계 | Medium |
-| security-monitor | 보안 검토 및 컴플라이언스 | Medium |
-| stack-setup | 미확인 기술 스택 식별 및 안전한 설정 절차 | Low |
-| test-runner | 테스트 및 QA 검증 | Medium |
+| 에이전트 | 역할 | 티어 | 모델 |
+|---------|------|------|------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
+| **architect** | Design agent - produces implementation plans and technical specs | high | inherit |
+| **code-writer** | Implementation agent - writes code from an approved plan | low | inherit |
+| **designer** | UI/UX design agent - produces wireframes, component specs, and design tokens | medium | inherit |
+| **security-monitor** | Security monitor - scans for vulnerabilities, advisories, and secret leaks | medium | inherit |
+| **stack-setup** | Stack Setup Specialist | low | inherit |
+| **test-runner** | QA and verification agent - runs tests and validates acceptance criteria | medium | inherit |
 
 ## 스킬
 
-Variant 전용 스킬 (`templates/co-develop/skills/`에 정의됨):
+- **code-review**: Conducts thorough code reviews focusing on correctness, maintainability, security, and best practices. Use when: reviewing pull requests, evaluating code quality, providing constructive feedback, or ensuring code standards compliance.
+- **refactoring**: Improves code structure and design while preserving behavior using systematic refactoring techniques. Use when: cleaning up code, reducing duplication, improving maintainability, or paying down technical debt.
+- **swe-solve**: Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation and pull-request synthesis.
+- **test-driven-development**: Implements software using Test-Driven Development (TDD) methodology with red-green-refactor cycle. Use when: developing new features, fixing bugs with tests, or ensuring code reliability through test-first approach.
 
-| 스킬 | 목적 |
-|------|------|
-| `code-review` | 정확성, 유지보수성, 보안, 모범 사례 관점의 철저한 코드 리뷰 |
-| `refactoring` | 동작을 보존하면서 코드 구조를 체계적으로 재구성 |
-| `test-driven-development` | 신규 기능 및 버그 수정을 위한 red-green-refactor TDD 워크플로우 |
+## 협업 방법
 
-그 외 모든 스킬은 `templates/common/skills/`에서 상속됩니다.
+협업 방식은 품질을 극대화하고 충돌을 방지하도록 구조화되어 있습니다. 표준 워크플로는 다음과 같습니다:
+
+### A. PM 게이트웨이
+
+항상 요청을 시작할 때 **PM**과 먼저 대화하세요. 전문 에이전트를 직접 호출하지 마세요. PM이 요청을 분석하고 적절한 전문가를 불러옵니다.
+
+### B. 표준 워크플로 단계
+
+1. **팀 구성:** PM이 필요한 전문 에이전트/스킬을 생성합니다.
+2. **분류:** PM이 요청을 분류하고 읽기 전용 에이전트를 병렬로 배치합니다.
+3. **분석:** PM이 조사 결과를 요구사항 + 완료 기준으로 종합합니다.
+4. **설계:** 아키텍트가 구현 계획 + ADR을 작성합니다.
+5. **구현:** 전문가가 구현하고, PM은 실패 시 최대 3회까지 반복합니다.
+6. **마무리:** PM이 결정을 기록하고 `/sync`를 실행한 뒤 PR을 엽니다.
+
+### C. 사용 가능한 명령어
+
+일상적인 작업은 슬래시 명령어(Claude Code 및 Gemini CLI에서 Skill로 등록됨)로 구동됩니다:
+
+- `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
+- `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
+- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+
+## 변형 유형
+
+**유형**: development
+
+이 변형은 소프트웨어 개발 워크플로, 기능 구현, 통합 테스트에 중점을 둡니다.
 
 ---
 
-**안정화 승격일**: 2026-06-13
-**템플릿 버전**: 1.0.0
-
-*최종 업데이트: 2026-07-19*
+*최근 업데이트: 2026-08-09*

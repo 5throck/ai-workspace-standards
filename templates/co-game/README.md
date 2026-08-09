@@ -1,18 +1,17 @@
 ---
-content_hash: PLACEHOLDER
 sync_version: 1
+content_hash: 57b9c9c5107cbe394519f980f89661d285488ee63e69b109ab4a34a422657837
 ---
 
 # co-game
 
-**Language**: **English** · [한국어](README_ko.md)
+> **Language**: **English** · [한국어](README_ko.md)
+> **Status**: ⚠️ Beta — v0.1.0
+> Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
 
-> **⚠️ BETA VARIANT** - Status: beta (v0.1.0)
-> This variant is in active development and should not be used in production environments.
+## Overview
 
----
-
-Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
+Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
@@ -26,9 +25,70 @@ See `CLAUDE.md` for detailed instructions.
 
 See `GEMINI.md` for detailed instructions.
 
-## Beta Status
+## Team Mission
 
-This variant is currently in **beta** and requires:
+**Mission:** Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
+
+## Meet the AI Team
+
+Your partners consist of specialized agents, each with a distinct role. The **Project Manager (PM)** is your single point of entry—they orchestrate the rest of the team.
+
+| Agent | Role | Tier | Model |
+|-------|------|------|-------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
+| **architect** | Design agent — produces implementation plans and technical specs. | high | inherit |
+| **game-designer** | Universal game design agent — core loop, difficulty curves, rewards. | high | inherit |
+| **arcade-designer** | Arcade specialist — entity AI, wave/stage systems, scoring, items. | high | inherit |
+| **puzzle-designer** | Puzzle/board specialist — matching logic, turn systems, difficulty. | high | inherit |
+| **designer** | UI/UX design agent — wireframes, component specs, design tokens. | medium | inherit |
+| **game-developer** | Game implementation — Canvas engine, game loop, collision, entities. | low | inherit |
+| **visual-artist** | Visual asset specs — sprites, animation frames, tile/board visuals. | medium | inherit |
+| **sound-designer** | Procedural audio design — SFX, BGM loops, Web Audio effect chains. | medium | inherit |
+| **game-debugger** | Game debugger — root-causes bugs, proposes fixes, repro tests. | medium | inherit |
+| **test-runner** | QA and verification — runs tests, validates acceptance criteria. | medium | inherit |
+| **security-monitor** | Security monitor — scans vulnerabilities, advisories, secret leaks. | medium | inherit |
+| **stack-setup** | Stack setup — environment config, build setup, stack recovery. | low | inherit |
+
+## Skills
+
+- **code-review**: Conducts thorough code reviews focusing on correctness, maintainability, security, and best practices.
+- **refactoring**: Improves code structure and design while preserving behavior using systematic refactoring techniques.
+- **test-driven-development**: Implements software using Test-Driven Development (TDD) methodology with red-green-refactor cycle.
+- **sound-synth**: Procedural 8-bit retro sound effect and audio synthesis rules using Web Audio API and jsfxr parameter specifications for games and interactive web apps.
+
+## How to Collaborate
+
+Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
+
+### A. The PM Gateway
+
+Always start your requests by talking to the **PM**. Do not invoke specialist agents directly. The PM will analyze your request and bring in the right experts.
+
+### B. Standard Workflow Phases
+
+1. **Team Assembly:** The PM creates specialized agents/skills if required.
+2. **Triage:** The PM classifies the request; dispatches read-only agents in parallel.
+3. **Analysis:** The PM synthesizes findings into requirements + acceptance criteria.
+4. **Design:** An architect produces an implementation plan + ADR.
+5. **Implementation:** Specialists implement; the PM loops up to 3× on failures.
+6. **Finalization:** The PM logs decisions; runs `/sync`; opens a PR.
+
+### C. Available Commands
+
+Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
+
+- `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
+- `/changelog "..."` — Add an entry to `CHANGELOG.md`.
+- `/memlog "summary"` — Append a summary to today's session log.
+- `/meeting` — Run a structured, inline multi-agent discussion.
+
+## Variant Type
+
+**Type**: game
+
+This variant focuses on HTML5 Canvas game development using Vanilla TypeScript with genre-specialized design agents.
+
+> **⚠️ Beta variant** — not for production use.
 
 - **Client Engagements**: 0/3 (see variant governance rules)
 - **Beta Duration**: 0/3 months
@@ -36,44 +96,6 @@ This variant is currently in **beta** and requires:
 
 See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
-## Variant Type
-
-**Type**: game
-
-This variant focuses on Game development for HTML5 Canvas games using Vanilla TypeScript.
-
-## Agent Roster
-
-| Agent | Role | Tier | Model |
-|-------|------|------|-------|
-| **architect** | Design agent — produces implementation plans and technical specs. | Medium | claude-sonnet-4-6 |
-| **game-designer** | Universal game design agent — core game loop, difficulty curves, reward systems, tutorial/onboarding. | Medium | claude-sonnet-4-6 |
-| **arcade-designer** | Arcade game design specialist — entity AI patterns, wave/stage systems, item/power-up mechanics, scoring. | Medium | claude-sonnet-4-6 |
-| **puzzle-designer** | Puzzle/board game design specialist — matching/link logic, turn-based systems, difficulty generation. | Medium | claude-sonnet-4-6 |
-| **designer** | UI/UX design agent — wireframes, component specs, design tokens. | Medium | claude-sonnet-4-6 |
-| **game-developer** | Game implementation agent — Canvas rendering engine, game loop, collision detection, entity systems. | Medium | claude-sonnet-4-6 |
-| **visual-artist** | Visual asset specification agent — sprite sheet layouts, animation frames, board/tile visuals, backgrounds. | Medium | claude-sonnet-4-6 |
-| **sound-designer** | Procedural audio design specialist — SFX specs, BGM loop structures, Web Audio API effect chains. | Medium | claude-sonnet-4-6 |
-| **game-debugger** | Game debugger agent — root-causes bugs, proposes fixes, writes reproduction tests. | Medium | claude-sonnet-4-6 |
-| **test-runner** | QA and verification agent — runs tests, validates acceptance criteria, QA gate. | Medium | claude-sonnet-4-6 |
-| **security-monitor** | Security monitor — scans for vulnerabilities, advisories, and secret leaks. | Medium | claude-sonnet-4-6 |
-| **stack-setup** | Stack Setup Specialist — environment setup, build configuration, unrecognized-stack recovery. | Medium | claude-sonnet-4-6 |
-
-> **PM Gateway**: `agents/pm.md` (High tier) orchestrates all specialist dispatch — see [AGENTS.md](AGENTS.md) for the full PM Gateway workflow and dispatch triggers.
-> **Genre routing**: `arcade-designer` handles reaction/timing-based arcade games (maze, shooter, breakout, snake); `puzzle-designer` handles turn-based/grid games (match-3, logic puzzles, board/card games); `designer` and `stack-setup` are optional/skip-if-not-needed.
-
-## Skills
-
-| Skill | Location | Purpose |
-|-------|----------|---------|
-| `code-review` | `skills/code-review/` | Systematic PR/code quality, security, and standards review |
-| `refactoring` | `skills/refactoring/` | Safe, test-backed structural code improvement |
-| `test-driven-development` | `skills/test-driven-development/` | Red-green-refactor TDD workflow |
-
-Additional platform skills (agent lifecycle, security scanning, meeting facilitation, script/skill lifecycle management, etc.) are available under `.claude/skills/` — see [AGENTS.md §6](AGENTS.md#§6-skills) for the full resolution order and registry.
-
 ---
 
-**Generated**: 2026-07-08T00:02:24.182Z
-**MVP Wave 3** - L2-to-Variant Pipeline
-**Updated**: 2026-07-19 — agent roster and skills corrected to match variant.json/AGENTS.md current state
+*Last Updated: 2026-08-09*
