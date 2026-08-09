@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.9.2
+ * @version 1.10.0
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:

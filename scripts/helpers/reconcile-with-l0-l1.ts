@@ -5,7 +5,7 @@
  * Compares L2 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.2.1
+ * @version 1.2.2
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:

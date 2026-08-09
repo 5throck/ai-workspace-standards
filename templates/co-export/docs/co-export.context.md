@@ -124,7 +124,6 @@ per the standard phase schema in `docs/phase-definitions.md`:
 This section replaces the workspace PM's governance workflow with variant-specific logic.
 <!-- END VARIANT-SECTION -->
 
-
 ### Agent Roster
 
 <!-- VARIANT-SECTION: agent-roster -->
@@ -135,7 +134,6 @@ See [AGENTS.md § Agent Roster](../AGENTS.md) for the canonical table (8 special
 destination table. This section replaces the workspace PM's agent roster with variant-specific
 agents.
 <!-- END VARIANT-SECTION -->
-
 
 ### Dispatch Protocol
 

@@ -6,7 +6,7 @@
  * specialist agent and skill files. Used by generate-variant.ts to detect
  * structural gaps in generated files.
  *
- * @version 1.0.1
+ * @version 1.1.0
  * @phase 3: Variant Generation (structural comparison)
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md

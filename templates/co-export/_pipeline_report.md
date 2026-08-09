@@ -1,12 +1,12 @@
 # Pipeline Report
 
-Generated: 2026-08-09T02:47:01.744Z
+Generated: 2026-08-09T03:13:04.023Z
 
 ```
 === Wave 3 — Golden Reference Structural Gap Report ===
 
-Files checked : 19
-Passed        : 18
+Files checked : 17
+Passed        : 16
 Warnings      : 1
 
 [WARN] C:\git\ai_workspace\templates\co-export\agents\README_ko.md (agent)
@@ -21,8 +21,4 @@ Warnings      : 1
 [INFO] C:\git\ai_workspace\templates\co-export\agents\README_ko.md: Missing Layer 2 section: "## Deliverable Standards"
 [INFO] C:\git\ai_workspace\templates\co-export\agents\README_ko.md: Missing Layer 2 section: "## Special Instructions"
 [INFO] C:\git\ai_workspace\templates\co-export\agents\README_ko.md: Missing Layer 2 section: "## Output Destination"
-[INFO] C:\git\ai_workspace\templates\co-export\skills\gateguard\SKILL.md: Missing Layer 2 section: "## Prerequisites"
-[INFO] C:\git\ai_workspace\templates\co-export\skills\gateguard\SKILL.md: Missing Layer 2 section: "## Quality Criteria"
-[INFO] C:\git\ai_workspace\templates\co-export\skills\sync\SKILL.md: Missing Layer 2 section: "## Prerequisites"
-[INFO] C:\git\ai_workspace\templates\co-export\skills\sync\SKILL.md: Missing Layer 2 section: "## Quality Criteria"
 ```

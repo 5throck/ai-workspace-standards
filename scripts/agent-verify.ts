@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Verification Script for Workspace Root
- * @version 1.0.1
+ * @version 1.0.2
  * Verifies synchronization between agents/ directory and documentation (AGENTS.md, CONSTITUTION.md)
  *
  * Usage:
@@ -64,7 +64,7 @@ async function verifyAgents(): Promise<VerificationResult> {
   let agentFiles: string[] = [];
   try {
     const files = await fs.readdir(agentsDir);
-    agentFiles = files.filter((f) => f.endsWith(".md") && f !== "handoff-spec.md");
+    agentFiles = files.filter((f) => f.endsWith(".md") && !["handoff-spec.md", "README.md", "README_ko.md"].includes(f));
     stats.totalAgents = agentFiles.length;
   } catch {
     return { pass: false, issues: [{ type: "missing_file", agent: "N/A", message: "agents/ directory not found" }], stats };

@@ -267,6 +267,10 @@ function classifyFile(
 
     if (matchesL0 && matchesL1) {
       classification = 'identical';
+    } else if (matchesL1) {
+      // L2 matches L1 (variant's inheritance source) even when L0 differs —
+      // the variant inherits this file from templates/common, so the L2 copy is redundant.
+      classification = 'identical';
     } else if (!matchesL0 && !matchesL1) {
       // Check if L0 and L1 are identical (then it's a true modification)
       if (hashL0 === hashL1) {
@@ -276,7 +280,7 @@ function classifyFile(
         classification = 'conflict';
       }
     } else {
-      // Matches one but not the other - L0/L1 divergence
+      // Matches L0 but not L1 - variant cannot inherit from common
       classification = 'conflict';
     }
   }

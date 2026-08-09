@@ -5,7 +5,7 @@
  * Parses YAML frontmatter from pm.md files and extracts variant_overrides.
  * Handles both L0 (workspace root), L1 (templates/common), and L2 (templates/co-*) pm.md files.
  *
- * @version 1.0.3
+ * @version 1.1.0
  * @author automation-engineer
  *
  * Usage:

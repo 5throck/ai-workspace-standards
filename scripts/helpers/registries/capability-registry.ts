@@ -1,5 +1,5 @@
 // scripts/helpers/registries/capability-registry.ts
-// @version 1.0.1
+// @version 1.0.2
 // SSOT for capability definitions
 
 /**

@@ -1,6 +1,6 @@
 /**
  * @file Consulting Plugin Implementation
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Implements the VariantPlugin interface for the 'consulting' variant type.
  * Provides consulting-specific validation logic and golden reference structure.
