@@ -1,0 +1,1482 @@
+// @version 2.10.11
+import { $ } from 'bun';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import * as url from 'node:url';
+import { detectEncoding, detectHomoglyphs, detectZeroWidthChars } from './lib/encoding-utils.ts';
+
+// Check for --lifecycle-only flag
+const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
+const SKIP_MEMORY = process.argv.includes('--skip-memory');
+const SPEC_CHECK = process.argv.includes('--spec-check');
+
+// Project context path (used in multiple checks)
+const projectCtxPath = path.join('docs', 'context.md');
+
+// Color helpers
+const GREEN = '\x1b[32m';
+const RED = '\x1b[31m';
+const YELLOW = '\x1b[33m';
+const CYAN = '\x1b[36m';
+const RESET = '\x1b[0m';
+
+let errors = 0;
+
+function Pass(msg: string) {
+    console.log(`${GREEN}[PASS] ${msg}${RESET}`);
+}
+function Fail(msg: string) {
+    console.error(`${RED}[FAIL] ${msg}${RESET}`);
+    errors++;
+}
+function Warn(msg: string) {
+    console.log(`${YELLOW}[WARN] ${msg}${RESET}`);
+}
+
+console.log(`${CYAN}=== audit.ts - workspace standards check ===${RESET}`);
+if (LIFECYCLE_ONLY) {
+    console.log(`${CYAN}Running lifecycle-only checks (fast pre-commit mode)${RESET}\n`);
+}
+
+// 1. CHANGELOG.md must exist
+if (fs.existsSync('CHANGELOG.md')) {
+    Pass('CHANGELOG.md exists');
+} else {
+    Fail('CHANGELOG.md missing');
+}
+
+// 2. context.md must be accessible (workspace root / L1 template context only —
+//    L2 variant projects intentionally omit context.md and use docs/context.md
+//    instead; variant.json, when present, also marks a generated project copy)
+if (fs.existsSync('context.md') || fs.existsSync('../context.md') || fs.existsSync('../../context.md')) {
+    Pass('context.md accessible');
+} else if (fs.existsSync('docs/context.md') || fs.existsSync('variant.json')) {
+    Pass('context.md check skipped (L1/L2 project — uses docs/context.md)');
+} else {
+    Fail('context.md not found (expected at ./, ../, or ../../)');
+}
+
+// 2.5. Constitution section files must exist and be non-empty (workspace root only)
+if (fs.existsSync('context.md') && fs.existsSync('docs/constitution')) {
+    const content = fs.readFileSync('context.md', 'utf-8');
+    const regex = /docs\/constitution\/([\w.-]+\.md)/g;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+        const ref = match[1];
+        const filePath = path.join('docs', 'constitution', ref);
+        if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
+            Pass(`constitution section: ${ref}`);
+        } else {
+            Fail(`constitution section missing or empty: ${filePath}`);
+        }
+    }
+}
+
+// 2.6. Web URL link validation
+if (!LIFECYCLE_ONLY) {
+    // Collect all files to scan for web URLs
+    const urlCheckFiles: string[] = [];
+    if (fs.existsSync('AGENTS.md')) urlCheckFiles.push('AGENTS.md');
+    const ctxPath = path.join('templates', 'common', 'docs', 'context.md');
+    if (fs.existsSync(ctxPath)) urlCheckFiles.push(ctxPath);
+
+    // Add variant AGENTS.md files (templates/co-*/AGENTS.md)
+    const templateDir = path.join('templates');
+    if (fs.existsSync(templateDir)) {
+        for (const entry of fs.readdirSync(templateDir, { withFileTypes: true })) {
+            if (entry.isDirectory() && entry.name.startsWith('co-')) {
+                const variantAgents = path.join(templateDir, entry.name, 'AGENTS.md');
+                if (fs.existsSync(variantAgents)) urlCheckFiles.push(variantAgents);
+            }
+        }
+    }
+
+    // Add constitution docs (docs/constitution/*.md)
+    const constitutionDir = path.join('docs', 'constitution');
+    if (fs.existsSync(constitutionDir)) {
+        for (const entry of fs.readdirSync(constitutionDir, { withFileTypes: true })) {
+            if (!entry.isDirectory() && entry.name.endsWith('.md')) {
+                urlCheckFiles.push(path.join(constitutionDir, entry.name));
+            }
+        }
+    }
+
+    if (urlCheckFiles.length > 0) {
+        let linkErrors = 0;
+        const urlRegex = /https:\/\/raw\.githubusercontent\.com\/5throck\/ai-workspace-standards\/main\/CONSTITUTION\.md#[\w-]+/g;
+
+        for (const filePath of urlCheckFiles) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            let match;
+            while ((match = urlRegex.exec(content)) !== null) {
+                const url = match[0];
+                try {
+                    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+                    if (!response.ok) throw new Error('Bad status');
+                } catch {
+                    linkErrors++;
+                    errors++;
+                    console.log(`${RED}FAIL${RESET} Dead link detected in ${filePath}: ${url}`);
+                }
+            }
+            urlRegex.lastIndex = 0;
+        }
+
+        if (linkErrors === 0) {
+            Pass('Web URL validation: all external links resolve');
+        }
+    }
+}
+
+// 3. CHANGELOG.md must have [Unreleased] section
+if (fs.existsSync('CHANGELOG.md')) {
+    const cl = fs.readFileSync('CHANGELOG.md', 'utf-8');
+    if (cl.includes('[Unreleased]')) {
+        Pass('CHANGELOG.md has [Unreleased] section');
+    } else {
+        Fail("CHANGELOG.md is missing '[Unreleased]' section");
+    }
+}
+
+// 3.5. UTF-8 BOM check for Markdown files
+if (!LIFECYCLE_ONLY) {
+    let bomErrors = 0;
+    let searchDirs = ['.'];
+    if (!fs.existsSync(projectCtxPath) && fs.existsSync('templates')) {
+    searchDirs = ['agents', 'docs', 'memory', 'scripts', 'skills', 'templates', '.claude'];
+    if (fs.existsSync('.')) {
+        for (const file of fs.readdirSync('.')) {
+            if (file.endsWith('.md')) {
+                const buf = fs.readFileSync(file);
+                if (buf.length >= 3 && buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) {
+                    Fail(`UTF-8 BOM found in ${file} - files must be UTF-8 without BOM`);
+                    bomErrors++;
+                }
+            }
+        }
+    }
+}
+
+function walkDir(dir: string, callback: (fPath: string) => void) {
+    if (!fs.existsSync(dir)) return;
+    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
+    for (const f of fs.readdirSync(dir)) {
+        if (SKIP_DIRS.has(f)) continue;
+        const dirPath = path.join(dir, f);
+        if (!fs.existsSync(dirPath)) continue;
+        try {
+            const isDirectory = fs.statSync(dirPath).isDirectory();
+            if (isDirectory) {
+                walkDir(dirPath, callback);
+            } else {
+                callback(dirPath);
+            }
+        } catch {
+            // Ignore transient files deleted during concurrent test runs
+        }
+    }
+}
+
+for (const dir of searchDirs) {
+    if (fs.existsSync(dir)) {
+        walkDir(dir, (filePath) => {
+            if (filePath.replace(/\\/g, '/').includes('memory/archive/')) return;
+            if (filePath.endsWith('.md') && !filePath.includes('node_modules') && !filePath.includes('.git')) {
+                const buf = fs.readFileSync(filePath);
+                if (buf.length >= 3 && buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) {
+                    Fail(`UTF-8 BOM found in ${filePath} - files must be UTF-8 without BOM`);
+                    bomErrors++;
+                }
+            }
+        });
+    }
+}
+if (bomErrors === 0) { Pass('UTF-8 BOM check: all markdown files are clean'); }
+else { errors += bomErrors; }
+
+// 3.6. CRLF line ending check for source files
+if (!LIFECYCLE_ONLY) {
+    let crlfFound = 0;
+    const CRLF_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const CRLF_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml']);
+    const CRLF_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of CRLF_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!CRLF_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (CRLF_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const detection = detectEncoding(filePath);
+                if (detection.lineEndings === 'crlf' || detection.lineEndings === 'mixed') {
+                    // WARN during initial rollout — workspace has widespread CRLF on Windows.
+                    // Upgrade to FAIL after bulk normalization is complete.
+                    Warn(`CRLF/Mixed line endings in ${filePath} — use LF only`);
+                    crlfFound++;
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (crlfFound === 0) {
+        Pass('CRLF line ending check: all source files use LF');
+    }
+}
+
+// 3.7. Homoglyph detection for source files
+if (!LIFECYCLE_ONLY) {
+    let homoglyphErrors = 0;
+    const HOMOGLYPH_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const HOMOGLYPH_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx']);
+    const HOMOGLYPH_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of HOMOGLYPH_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!HOMOGLYPH_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (HOMOGLYPH_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const content = fs.readFileSync(filePath, 'utf-8');
+                const matches = detectHomoglyphs(content);
+                if (matches.length > 0) {
+                    // Report first 5 matches per file to avoid spam
+                    const shown = matches.slice(0, 5);
+                    for (const m of shown) {
+                        Fail(`Homoglyph (${m.range}) in ${filePath}:${m.line}:${m.column} — '${m.char}' (${m.codePoint})`);
+                    }
+                    if (matches.length > 5) {
+                        Fail(`... and ${matches.length - 5} more homoglyph(s) in ${filePath}`);
+                    }
+                    homoglyphErrors += matches.length;
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (homoglyphErrors === 0) {
+        Pass('Homoglyph check: no confusable Unicode characters found');
+    }
+    errors += homoglyphErrors;
+}
+
+// 3.8. Zero-width character detection
+if (!LIFECYCLE_ONLY) {
+    let zwErrors = 0;
+    const ZW_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
+    const ZW_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml']);
+    const ZW_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+
+    for (const dir of ZW_DIRS) {
+        if (!fs.existsSync(dir)) continue;
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) continue;
+
+        walkDir(dir, (filePath) => {
+            const ext = path.extname(filePath);
+            if (!ZW_EXTENSIONS.has(ext)) return;
+
+            const normalizedPath = filePath.replace(/\\/g, '/');
+            if (ZW_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
+
+            try {
+                const content = fs.readFileSync(filePath, 'utf-8');
+                const matches = detectZeroWidthChars(content);
+                // U+FEFF (BOM) and U+2060 (word joiner) have legitimate uses in
+                // source code (BOM-stripping regexes, code-fence escapes).
+                // Report as WARN, not FAIL. All other zero-width chars are FAIL.
+                const BENIGN_CODEPOINTS = new Set(['U+FEFF', 'U+2060']);
+                if (matches.length > 0) {
+                    const shown = matches.slice(0, 5);
+                    for (const m of shown) {
+                        if (BENIGN_CODEPOINTS.has(m.codePoint)) {
+                            Warn(`Zero-width char in ${filePath}:${m.line}:${m.column} — ${m.description} (${m.codePoint})`);
+                        } else {
+                            Fail(`Zero-width char in ${filePath}:${m.line}:${m.column} — ${m.description} (${m.codePoint})`);
+                            zwErrors++;
+                        }
+                    }
+                    if (matches.length > 5) {
+                        Fail(`... and ${matches.length - 5} more zero-width char(s) in ${filePath}`);
+                        zwErrors += matches.length - 5;
+                    }
+                }
+            } catch { /* skip unreadable files */ }
+        });
+    }
+
+    if (zwErrors === 0) {
+        Pass('Zero-width character check: no invisible Unicode characters found');
+    }
+    errors += zwErrors;
+}
+}
+
+// 4. AGENTS.md must exist
+if (fs.existsSync('AGENTS.md')) { Pass('AGENTS.md exists'); }
+else { Fail('AGENTS.md missing (required for agent-first projects)'); }
+
+// 5. At least one agent file must exist in agents/
+if (fs.existsSync('agents') && fs.readdirSync('agents').some(f => f.endsWith('.md'))) {
+    Pass('agents/ has agent files');
+} else {
+    Fail('agents/ is empty or missing - create at least agents/pm.md');
+}
+
+// 6-8. Project-level checks
+if (!LIFECYCLE_ONLY) {
+    if (fs.existsSync(projectCtxPath)) {
+    const ctx = fs.readFileSync(projectCtxPath, 'utf-8');
+    if (/^## Coding Guidelines/m.test(ctx)) {
+        Pass('docs/context.md has ## Coding Guidelines');
+    } else {
+        Fail("docs/context.md is missing '## Coding Guidelines' section");
+    }
+
+    if (fs.existsSync('.env.sample')) {
+        Pass('.env.sample exists');
+    } else {
+        Warn('.env.sample not found - add one if this project uses environment variables');
+    }
+
+    // S-02: .sh/.ps1 parity check removed (dead code after ADR-0036 TypeScript migration)
+
+    // S-03: .githooks parity check - Suppressed (Git Bash assumed on Windows)
+    // if (fs.existsSync('.githooks')) { ... }
+
+
+    // Check: no non-standard .md files at project root (file organization policy)
+    const STANDARD_ROOT_MD = new Set([
+        'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
+        'SECURITY.md', 'context.md', 'CLAUDE.md', 'GEMINI.md',
+        'PROMOTION_CHECKLIST.md', '_ORIGIN.md', '_COMMON_VERSION.md'
+    ]);
+    const rootMdFiles = fs.readdirSync('.')
+        .filter(f => f.endsWith('.md') && !STANDARD_ROOT_MD.has(f));
+    if (rootMdFiles.length > 0) {
+        Fail(`Non-standard .md files found at project root: ${rootMdFiles.join(', ')} — move to docs/ or memory/ per File Organization Policy`);
+    } else {
+        Pass('Project root: no non-standard .md files (File Organization Policy compliant)');
+    }
+
+    // Check: docs/research/*.md files should have a ## References section (Research Standards)
+    const researchDir = path.join('docs', 'research');
+    if (fs.existsSync(researchDir)) {
+        const researchFiles = fs.readdirSync(researchDir).filter(f => f.endsWith('.md'));
+        const missingRefs = researchFiles.filter(f => {
+            const content = fs.readFileSync(path.join(researchDir, f), 'utf-8');
+            return !content.includes('## References') && !content.includes('## Sources');
+        });
+        if (missingRefs.length > 0) {
+            Warn(`Research files missing ## References section: ${missingRefs.join(', ')} — add citations per Research Standards policy`);
+        } else if (researchFiles.length > 0) {
+            Pass('docs/research/: all research files have ## References section');
+        }
+    }
+} else {
+    Warn('docs/context.md not found - skipping project-level checks (workspace root)');
+}
+}
+
+// S-04: Script modification parity check based on SCRIPTS.md
+if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+    const statusOutput = (await $`git status --porcelain scripts/`.quiet().nothrow()).text();
+    const modifiedScripts = new Set<string>();
+    for (const line of statusOutput.split('\n')) {
+        if (line.length < 4) continue;
+        const fileStr = line.substring(3);
+        const files = fileStr.split(' -> ');
+        const filePath = files[files.length - 1].trim().replace(/^"|"$/g, '');
+        if (filePath.startsWith('scripts/')) {
+            modifiedScripts.add(filePath.substring(8));
+        }
+    }
+
+    if (modifiedScripts.size > 0) {
+        const scriptsMd = fs.readFileSync(path.join('scripts', 'SCRIPTS.md'), 'utf-8');
+        const registryLines = scriptsMd.split('\n').filter(l => l.startsWith('| `'));
+        
+        let pairErrors = 0;
+        for (const line of registryLines) {
+            const parts = line.split('|').map(p => p.trim());
+            if (parts.length >= 9) {
+                const scriptName = parts[1].replace(/`/g, '');
+                const pairField = parts[8];
+                
+                if (modifiedScripts.has(scriptName) && pairField.startsWith('pair: ')) {
+                    const pairName = pairField.substring(6).trim();
+                    if (!modifiedScripts.has(pairName)) {
+                        Fail(`script modification parity: ${scriptName} is modified but its pair ${pairName} is not`);
+                        pairErrors++;
+                    }
+                }
+            }
+        }
+        if (pairErrors === 0) {
+            Pass('script modification parity: all paired scripts are modified together');
+        }
+    }
+}
+
+// Skills registry cross-check
+for (const skillsDir of ['skills', path.join('.claude', 'skills')]) {
+    if (fs.existsSync(skillsDir)) {
+        for (const dir of fs.readdirSync(skillsDir)) {
+            const fullDir = path.join(skillsDir, dir);
+            if (fs.statSync(fullDir).isDirectory()) {
+                const skillMd = path.join(fullDir, 'SKILL.md');
+                if (fs.existsSync(skillMd)) {
+                    Pass(`skill exists: ${skillMd}`);
+                } else {
+                    Fail(`skill directory missing SKILL.md: ${fullDir}${path.sep}`);
+                }
+            }
+        }
+    }
+}
+
+// Lifecycle Audits
+const hasBun = (await $`bun --version`.quiet().nothrow()).exitCode === 0;
+if (hasBun) {
+    if (fs.existsSync(path.join('scripts', 'agent-lifecycle-audit.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'agent-lifecycle-audit.ts')} --json`.quiet().nothrow();
+        if (/"errors":\s*\[\]/.test(out.text())) {
+            Pass('Agent audit: all agents healthy');
+        } else {
+            Fail("Agent audit detected issues (run 'bun scripts/agent-lifecycle-audit.ts' to see details)");
+        }
+    }
+    if (fs.existsSync(path.join('scripts', 'skill-lifecycle-audit.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'skill-lifecycle-audit.ts')} --json`.quiet().nothrow();
+        if (/"errors":\s*\[\]/.test(out.text())) {
+            Pass('Skill audit: all skills healthy');
+        } else {
+            Fail("Skill audit detected issues (run 'bun scripts/skill-lifecycle-audit.ts' to see details)");
+        }
+    }
+    if (fs.existsSync(path.join('scripts', 'verify-scripts.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'verify-scripts.ts')} --verify`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Script registry detected issues (run 'bun scripts/verify-scripts.ts --verify' to see details)");
+        else
+            Pass("Script registry: all scripts verified");
+    }
+    if (fs.existsSync(path.join('scripts', 'readme-lifecycle-audit.ts')) && fs.existsSync('templates')) {
+        const out = await $`bun ${path.join('scripts', 'readme-lifecycle-audit.ts')} --json`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("README lifecycle audit detected issues (run 'bun scripts/readme-lifecycle-audit.ts' to see details)");
+        else
+            Pass("README lifecycle audit: all READMEs healthy");
+    }
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('context.md') && !SKIP_MEMORY) {
+        // explicitly skip any files located in memory/archive/
+        const memoryFiles = fs.readdirSync('memory')
+            .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
+            .map(f => path.join('memory', f));
+
+        // We do not pass explicit files to verify-memory.ts to avoid triggering its pre-commit mode (which only checks the last entry),
+        // but verify-memory.ts natively only reads files in memory/ directly.
+        const out = await $`bun ${path.join('scripts', 'verify-memory.ts')}`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Warn("Memory log format issues detected (run 'bun scripts/verify-memory.ts' to see details)");
+        else
+            Pass("Memory logs: format valid");
+    } else if (SKIP_MEMORY) {
+        // Skip memory check when --skip-memory flag is provided
+        Pass("Memory logs: check skipped (--skip-memory flag)");
+    }
+    if (fs.existsSync(path.join('scripts', 'lifecycle-sync-audit.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'lifecycle-sync-audit.ts')} --json`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Lifecycle sync audit detected issues (run 'bun scripts/lifecycle-sync-audit.ts' to see details)");
+        else
+            Pass("Lifecycle sync audit: all artifacts in sync");
+    }
+    // Platform lifecycle verification (Check E/F/G/H)
+    if (fs.existsSync(path.join('scripts', 'verify-platform-lifecycle.ts'))) {
+        try {
+            await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
+        } catch { /* non-blocking */ }
+    }
+
+    // Script lifecycle verification: version headers
+    if (fs.existsSync('scripts') && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+        const versionHeaderPass = verifyScriptVersionHeaders();
+        if (!versionHeaderPass) {
+            errors++;
+        }
+    }
+
+    // Script lifecycle verification: registry consistency
+    if (fs.existsSync('scripts') && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
+        const registryConsistencyPass = verifyScriptRegistryConsistency();
+        if (!registryConsistencyPass) {
+            errors++;
+        }
+    }
+} else {
+    Warn('Bun not installed - skipping lifecycle audits');
+}
+
+/**
+ * Verify that all TypeScript scripts have @version headers
+ */
+function verifyScriptVersionHeaders(): boolean {
+    const scriptsDir = path.join('scripts');
+    if (!fs.existsSync(scriptsDir)) {
+        return true; // Not applicable
+    }
+
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts'));
+    for (const script of scripts) {
+        const scriptPath = path.join(scriptsDir, script);
+        const content = fs.readFileSync(scriptPath, 'utf-8');
+        if (!content.match(/@version\s+\d+\.\d+\.\d+/)) {
+            Fail(`Missing @version header in ${script}`);
+            return false;
+        }
+    }
+    Pass('All scripts have version headers');
+    return true;
+}
+
+/**
+ * Verify that SCRIPTS.md matches actual script versions
+ */
+function verifyScriptRegistryConsistency(): boolean {
+    const scriptsDir = path.join('scripts');
+    const scriptsMdPath = path.join(scriptsDir, 'SCRIPTS.md');
+
+    if (!fs.existsSync(scriptsMdPath)) {
+        return true; // Not applicable
+    }
+
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts') && !f.startsWith('test-'));
+    const scriptsMdContent = fs.readFileSync(scriptsMdPath, 'utf-8');
+
+    for (const script of scripts) {
+        const scriptPath = path.join(scriptsDir, script);
+        const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
+        const versionMatch = scriptContent.match(/@version\s+(\d+\.\d+\.\d+)/);
+
+        if (!versionMatch) {
+            Fail(`${script} has no version`);
+            return false;
+        }
+
+        const version = versionMatch[1];
+        const scriptName = path.basename(script);
+
+        // Check if script is mentioned in SCRIPTS.md
+        if (!scriptsMdContent.includes(scriptName)) {
+            Fail(`${scriptName} not found in SCRIPTS.md`);
+            return false;
+        }
+
+        // Check if version is mentioned in SCRIPTS.md
+        if (!scriptsMdContent.includes(version)) {
+            Fail(`${scriptName} @${version} not found in SCRIPTS.md`);
+            return false;
+        }
+    }
+    Pass('SCRIPTS.md consistency verified');
+    return true;
+}
+
+// 3.7. Language validation: Korean-only markdown files outside ko/ and locales/ko/
+if (!LIFECYCLE_ONLY) {
+    console.log(""); // Add spacing before language validation output
+    const langValidate = await $`bun ${path.join('scripts', 'validate-md-language.ts')}`.nothrow();
+if (langValidate.exitCode === 0) {
+    Pass('Language validation: no Korean-only markdown files found');
+} else {
+    Fail('Language validation: Korean-only markdown files detected');
+    errors++;
+}
+}
+
+// Agent/Skill State Synchronization Check
+if (!LIFECYCLE_ONLY && fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
+    let syncErrors = 0;
+    const agentsContent = fs.readFileSync('AGENTS.md', 'utf-8');
+    
+    for (const file of fs.readdirSync('agents')) {
+        if (!file.endsWith('.md')) continue;
+        const agentFile = path.join('agents', file);
+        const agentName = path.basename(file, '.md');
+        const content = fs.readFileSync(agentFile, 'utf-8');
+        
+        const statusMatch = /^status:\s*(.+)$/m.exec(content);
+        if (statusMatch) {
+            const fileStatus = statusMatch[1].trim();
+            const agentsRegex = new RegExp(`\`${agentName}\\.md\`[\\s\\S]*?status:\\s*(\\w+)`);
+            const agentsMatch = agentsRegex.exec(agentsContent);
+            if (agentsMatch) {
+                const agentsMdStatus = agentsMatch[1].trim();
+                if (fileStatus !== agentsMdStatus) {
+                    Fail(`Agent state mismatch: ${agentName} (file=${fileStatus}, AGENTS.md=${agentsMdStatus})`);
+                    syncErrors++;
+                }
+            }
+        }
+    }
+    
+    if (syncErrors === 0) {
+        Pass('Agent state synchronization: all agents in sync');
+    } else {
+        errors += syncErrors;
+    }
+}
+
+// Cross-Platform Command Parity Check
+const claudeCommandsDir = path.join('.claude', 'commands');
+if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
+    let parityWarnings = 0;
+    for (const file of fs.readdirSync(claudeCommandsDir)) {
+        if (!file.endsWith('.md')) continue;
+        const filePath = path.join(claudeCommandsDir, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        if (/^gemini-parity:\s*skip/m.test(content)) continue;
+        
+        const geminiCmd = path.join('.gemini', 'commands', file);
+        if (!fs.existsSync(geminiCmd)) {
+            Warn(`Command parity gap: .claude/commands/${file} has no matching .gemini/commands/${file} (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)`);
+            parityWarnings++;
+        }
+    }
+    if (parityWarnings === 0) {
+        Pass('Command parity: all .claude/commands/ files have matching .gemini/commands/ files');
+    }
+}
+
+// L2 variant structural integrity check
+function checkL2VariantIntegrity() {
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  // Required files every L2 variant must have
+  const requiredFiles = [
+    'AGENTS.md',
+    'README.md',
+    'variant.json',
+    'agents',          // directory
+    '.claude/settings.json',
+    '.gemini/settings.json',
+  ];
+
+  let missingCount = 0;
+  for (const variant of variants) {
+    const variantDir = path.join(templatesDir, variant);
+    for (const required of requiredFiles) {
+      const fullPath = path.join(variantDir, required);
+      if (!fs.existsSync(fullPath)) {
+        Warn(`L2 integrity: templates/${variant}/${required} is missing`);
+        missingCount++;
+      }
+    }
+
+    const pmMdPath = path.join(variantDir, 'agents', 'pm.md');
+    if (fs.existsSync(pmMdPath)) {
+      const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
+      const hasVariantOverrides = pmContent.includes('variant_overrides:');
+      const hasExtendsPattern = pmContent.includes('extends:');
+      const isResolved = pmContent.startsWith('# @resolved-from:');
+      if (!hasVariantOverrides && !hasExtendsPattern && !isResolved && !pmContent.includes('<!-- VARIANT-SECTION: governance-workflow -->')) {
+        Fail(`L2 integrity: templates/${variant}/agents/pm.md is missing '<!-- VARIANT-SECTION: governance-workflow -->' block`);
+        missingCount++;
+      }
+      const lineCount = pmContent.split('\n').length;
+      if (lineCount >= 200) {
+        Fail(`L2 integrity: templates/${variant}/agents/pm.md has ${lineCount} lines (must be < 200 to prevent L0 duplication bug)`);
+        missingCount++;
+      }
+    }
+  }
+
+  if (missingCount === 0) {
+    Pass(`L2 variant integrity: all ${variants.length} variants have required structure`);
+  }
+}
+
+// Check: Variant context.md guidelines section
+function checkVariantContextGuidelinesSection() {
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const missing: string[] = [];
+  for (const variant of variants) {
+    const docsDir = path.join(templatesDir, variant, 'docs');
+    if (!fs.existsSync(docsDir)) continue;
+    for (const file of fs.readdirSync(docsDir)) {
+      if (!file.endsWith('.context.md')) continue;
+      const filePath = path.join(docsDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      if (!content.includes('VARIANT-INJECT: guidelines [REQUIRED]')) {
+        missing.push(`templates/${variant}/docs/${file}`);
+      }
+    }
+  }
+
+  if (missing.length === 0) {
+    const total = variants.reduce((count, variant) => {
+      const docsDir = path.join(templatesDir, variant, 'docs');
+      if (!fs.existsSync(docsDir)) return count;
+      return count + fs.readdirSync(docsDir).filter(f => f.endsWith('.context.md')).length;
+    }, 0);
+    Pass(`Variant guidelines section: all ${total} variant context.md files have VARIANT-INJECT: guidelines [REQUIRED]`);
+  } else {
+    Fail(`Variant guidelines section: missing VARIANT-INJECT: guidelines [REQUIRED] in:\n${missing.map(f => `  - ${f}`).join('\n')}`);
+  }
+}
+
+// Check: Variant specialist agent files have all 7 required Layer 1 sections
+function checkVariantAgentSections() {
+  const REQUIRED_SECTIONS = [
+    '## Role',
+    '## ⚠️ PM-ONLY INVOCATION',
+    '## Responsibilities',
+    '## Output Format',
+    '## Constraints',
+    '## Meeting Participation',
+    '## Dispatch Protocol',
+  ];
+
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const failures: string[] = [];
+  for (const variant of variants) {
+    const agentsDir = path.join(templatesDir, variant, 'agents');
+    if (!fs.existsSync(agentsDir)) continue;
+    const agentFiles = fs.readdirSync(agentsDir)
+      .filter(f => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('_') && !f.startsWith('README'));
+    for (const file of agentFiles) {
+      const filePath = path.join(agentsDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const missing = REQUIRED_SECTIONS.filter(s => !content.includes(s));
+      if (missing.length > 0) {
+        failures.push(`templates/${variant}/agents/${file}: missing ${missing.map(s => `"${s}"`).join(', ')}`);
+      }
+    }
+  }
+
+  if (failures.length === 0) {
+    Pass('Variant agent sections: all specialist agents have required Layer 1 sections');
+  } else {
+    // Warn (not Fail) until all variants complete migration to canonical agent structure
+    failures.forEach(f => Warn(`Variant agent sections: ${f}`));
+  }
+}
+
+// Check: Variant skill SKILL.md files have all 5 required sections and 7 required frontmatter fields
+function checkVariantSkillSections() {
+  const REQUIRED_SECTIONS = [
+    '## Context',
+    '## When to Use',
+    '## Execution Steps',
+    '## Output Format',
+    '## Related Skills',
+  ];
+  const REQUIRED_FRONTMATTER = ['name', 'description', 'version', 'status', 'owner', 'last_reviewed', 'prerequisites'];
+
+  const templatesDir = 'templates';
+  if (!fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  const sectionFailures: string[] = [];
+  const frontmatterFailures: string[] = [];
+
+  for (const variant of variants) {
+    const skillsDir = path.join(templatesDir, variant, 'skills');
+    if (!fs.existsSync(skillsDir)) continue;
+    const slugs = fs.readdirSync(skillsDir)
+      .filter(d => fs.statSync(path.join(skillsDir, d)).isDirectory());
+    for (const slug of slugs) {
+      const skillPath = path.join(skillsDir, slug, 'SKILL.md');
+      if (!fs.existsSync(skillPath)) continue;
+      const content = fs.readFileSync(skillPath, 'utf-8');
+
+      // Skip files marked with audit_exception (e.g., PM reference cards that use a different structure)
+      if (/^audit_exception:/m.test(content)) continue;
+
+      const missingSections = REQUIRED_SECTIONS.filter(s => !content.includes(s));
+      if (missingSections.length > 0) {
+        sectionFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: missing ${missingSections.map(s => `"${s}"`).join(', ')}`);
+      }
+
+      const fmMatch = content.match(/^---\n([\s\S]+?)\n---/);
+      if (fmMatch) {
+        const fm = fmMatch[1];
+        const missingFields = REQUIRED_FRONTMATTER.filter(f => !new RegExp(`^${f}:`, 'm').test(fm));
+        if (missingFields.length > 0) {
+          frontmatterFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: missing frontmatter fields: ${missingFields.join(', ')}`);
+        }
+      } else {
+        frontmatterFailures.push(`templates/${variant}/skills/${slug}/SKILL.md: no YAML frontmatter found`);
+      }
+    }
+  }
+
+  const allFailures = [...sectionFailures, ...frontmatterFailures];
+  if (allFailures.length === 0) {
+    Pass('Variant skill sections: all skills have required sections and frontmatter');
+  } else {
+    allFailures.forEach(f => Fail(`Variant skill sections: ${f}`));
+    errors += allFailures.length;
+  }
+}
+
+// Stale shell/script reference check
+if (!LIFECYCLE_ONLY) {
+function checkStaleShellReferences() {
+    const filesToScan: string[] = [
+        'CLAUDE.md',
+        'README.md',
+        'AGENTS.md',
+        'GEMINI.md',
+        'docs/constitution/09-operations-workflow.md',
+        '.githooks/pre-push',
+        '.githooks/commit-msg',
+    ];
+
+    // Add any .md files in docs/governance/
+    const govDir = path.join('docs', 'governance');
+    if (fs.existsSync(govDir)) {
+        for (const f of fs.readdirSync(govDir)) {
+            if (f.endsWith('.md')) filesToScan.push(path.join(govDir, f));
+        }
+    }
+
+    // Add any SKILL.md files in skills/*/
+    if (fs.existsSync('skills')) {
+        for (const dir of fs.readdirSync('skills')) {
+            const skillMd = path.join('skills', dir, 'SKILL.md');
+            if (fs.existsSync(skillMd)) filesToScan.push(skillMd);
+        }
+    }
+
+    let staleErrors = 0;
+    for (const filePath of filesToScan) {
+        if (!fs.existsSync(filePath)) continue;
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const lines = content.split('\n');
+        lines.forEach((line, idx) => {
+            // Skip lines that are documentation examples (e.g. anti-pattern tables with backtick-quoted examples)
+            // A line is an example if the pattern only appears inside backticks
+            const strippedLine = line.replace(/`[^`]*`/g, '');
+            const re = /(?:bash|node)\s+scripts\/([\w.-]+\.(sh|ps1|ts))/g;
+            let match: RegExpExecArray | null;
+            while ((match = re.exec(strippedLine)) !== null) {
+                const refFile = match[1];
+                const refExt = match[2];
+                // For .ts files, only flag when invoked with 'node' (bun is fine)
+                const runner = match[0].split(' ')[0];
+                if (refExt === 'ts' && runner !== 'node') continue;
+                const scriptPath = path.join('scripts', refFile);
+                if (!fs.existsSync(scriptPath)) {
+                    Fail(`Stale shell reference: ${filePath}:${idx + 1} references non-existent scripts/${refFile}`);
+                    staleErrors++;
+                }
+            }
+        });
+    }
+
+    if (staleErrors === 0) {
+        Pass('Stale shell reference check: no stale references found');
+    }
+}
+checkStaleShellReferences();
+// Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
+checkL2VariantIntegrity();
+checkVariantContextGuidelinesSection();
+checkVariantAgentSections();
+checkVariantSkillSections();
+}
+
+// Workspace root detection: presence of context.md (and absence of variant.json)
+// distinguishes the governance root from generated project copies.
+const IS_WORKSPACE_ROOT = fs.existsSync('context.md') && !fs.existsSync('variant.json');
+
+// Check: Agent files must have a non-empty ## Required Tools section (workspace root only)
+if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
+    const agentFiles = fs.readdirSync('agents').filter(f =>
+        f.endsWith('.md') && f !== '_COMMON.md' && f !== 'README.md'
+    );
+    let missingSection = 0;
+    let emptySection = 0;
+    for (const file of agentFiles) {
+        const filePath = path.join('agents', file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const sectionIdx = content.indexOf('## Required Tools');
+        if (sectionIdx === -1) {
+            Fail(`Agent file missing Required Tools section: ${file}`);
+            missingSection++;
+        } else {
+            // Check if the section has any table rows: look for a '|' line after the header
+            const afterSection = content.slice(sectionIdx + '## Required Tools'.length);
+            const hasTableRow = /^\|[^|]+\|/m.test(afterSection.split(/^##\s/m)[0]);
+            if (!hasTableRow) {
+                Warn(`Agent Required Tools section is empty: ${file}`);
+                emptySection++;
+            }
+        }
+    }
+    if (missingSection === 0 && emptySection === 0) {
+        Pass('Agent Required Tools sections: all present');
+    }
+    errors += missingSection;
+}
+
+// Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md (workspace root only)
+if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
+    const agentsMdContent = fs.readFileSync('AGENTS.md', 'utf-8');
+    const hasPmScope = agentsMdContent.includes('### PM Direct Execution Scope');
+    if (hasPmScope) {
+        const templatesDir = 'templates';
+        let syncWarnings = 0;
+        let checkedVariants = 0;
+        if (fs.existsSync(templatesDir)) {
+            for (const entry of fs.readdirSync(templatesDir)) {
+                if (!entry.startsWith('co-')) continue;
+                const variantAgentsMd = path.join(templatesDir, entry, 'AGENTS.md');
+                if (!fs.existsSync(variantAgentsMd)) continue;
+                const variantContent = fs.readFileSync(variantAgentsMd, 'utf-8');
+                // Only check variants that have a pm agent entry
+                const hasPmEntry = /\|\s*pm\s*\|/.test(variantContent)
+                    || /pm\.md/.test(variantContent)
+                    || /\*\*pm\*\*/.test(variantContent);
+                if (!hasPmEntry) continue;
+                checkedVariants++;
+                if (!variantContent.includes('### PM Direct Execution Scope')) {
+                    Warn(`AGENTS.md PM Direct Execution Scope not synced to: templates/${entry}/AGENTS.md`);
+                    syncWarnings++;
+                }
+                // Check for §-numbered structure and VARIANT-* placeholder markers (required for l2-to-variant-pipeline.ts injection)
+                const requiredMarkers = [
+                    'VARIANT-AGENTS-START',
+                    'VARIANT-AGENT-DETAILS-START',
+                    'VARIANT-DISPATCH-TRIGGERS-START',
+                    'VARIANT-PHASE-GATE-START',
+                    'VARIANT-SUBAGENT-ROSTER-START',
+                    'VARIANT-ROLE-BOUNDARY-START',
+                ];
+                const missingMarkers = requiredMarkers.filter(m => !variantContent.includes(`<!-- ${m} -->`));
+                if (missingMarkers.length > 0) {
+                    Fail(`templates/${entry}/AGENTS.md missing VARIANT-* markers: ${missingMarkers.join(', ')} — regenerate using L0 workspace script: regenerate-agents-md.ts --variant ${entry}`);
+                    syncWarnings++;
+                }
+                if (!variantContent.includes('## §1:') || !variantContent.includes('## §3:') || !variantContent.includes('## §5:')) {
+                    Fail(`templates/${entry}/AGENTS.md missing §-numbered section structure (§1/§3/§5) — regenerate using L0 workspace script: regenerate-agents-md.ts --variant ${entry}`);
+                    syncWarnings++;
+                }
+            }
+        }
+        if (syncWarnings === 0) {
+            Pass('AGENTS.md PM Direct Scope: synced');
+        }
+    }
+}
+
+// Check: Workspace root should not contain stray test artifacts or unauthorized files
+if (IS_WORKSPACE_ROOT) {
+    // Windows reserved device names that external tools (codegraph, antivirus, etc.)
+    // can create as files when run inside Git Bash (where > nul writes a file, not the device).
+    const WINDOWS_DEVICE_NAMES = new Set([
+        'nul', 'NUL', 'con', 'CON', 'prn', 'PRN', 'aux', 'AUX',
+        'com1','com2','com3','com4','com5','com6','com7','com8','com9',
+        'COM1','COM2','COM3','COM4','COM5','COM6','COM7','COM8','COM9',
+        'lpt1','lpt2','lpt3','lpt4','lpt5','lpt6','lpt7','lpt8','lpt9',
+        'LPT1','LPT2','LPT3','LPT4','LPT5','LPT6','LPT7','LPT8','LPT9',
+    ]);
+
+    let strayFound = 0;
+    try {
+        const schemaRaw = fs.readFileSync(path.join('docs', 'workspace-schema.json'), 'utf-8');
+        const schema = JSON.parse(schemaRaw);
+        const allowedFiles: string[] = schema?.rootAllowlist?.files ?? [];
+        const allowedDirs: string[] = schema?.rootAllowlist?.dirs ?? [];
+
+        // Only scan git-tracked top-level items — ignore untracked local directories (e.g. test projects)
+        const gitLsResult = spawnSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
+        const items = fs.readdirSync('.');
+        for (const item of items) {
+            // Check and auto-delete Windows device name artifacts regardless of tracking status
+            if (WINDOWS_DEVICE_NAMES.has(item)) {
+                try {
+                    let rmResult;
+                    if (process.platform === 'win32') {
+                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                        if (rmResult.status !== 0) {
+                            rmResult = spawnSync('powershell', ['-Command', `Remove-Item -Force -LiteralPath '${item}'`], { encoding: 'utf-8' });
+                        }
+                    } else {
+                        rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                    }
+                    if (rmResult.status === 0) {
+                        Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
+                        continue;
+                    } else {
+                        Fail(`Windows device name artifact '${item}' could not be deleted: ${rmResult.stderr}`);
+                        strayFound++;
+                    }
+                } catch (e) {
+                    Fail(`Windows device name artifact '${item}' could not be deleted: ${e}`);
+                    strayFound++;
+                }
+            }
+
+            // Skip untracked local items entirely
+            if (!trackedItems.has(item)) continue;
+            const isDir = fs.statSync(item).isDirectory();
+            if (isDir) {
+                if (!allowedDirs.includes(item)) {
+                    // Exception: valid project directories (have AGENTS.md or variant.json)
+                    const hasAgentsMd = fs.existsSync(path.join(item, 'AGENTS.md'));
+                    const hasVariantJson = fs.existsSync(path.join(item, 'variant.json'));
+                    if (hasAgentsMd || hasVariantJson) {
+                        // Valid project directory — skip
+                        continue;
+                    }
+                    Fail(`Stray directory in workspace root: ${item} (not in rootAllowlist — check workspace-schema.json)`);
+                    strayFound++;
+                }
+            } else {
+                if (!allowedFiles.includes(item)) {
+                    Fail(`Stray file in workspace root: ${item} (not in rootAllowlist — move to tests/ or scripts/)`);
+                    strayFound++;
+                }
+            }
+        }
+        if (strayFound === 0) {
+            Pass('Workspace root is clean from stray test artifacts');
+        }
+    } catch (_e) {
+        Warn('Could not read docs/workspace-schema.json for stray-artifact check — skipping');
+    }
+}
+// Check: L0 Leakage (context.md references in templates)
+if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
+    let leakageErrors = 0;
+    // Matches: context.md (literal), docs/constitution/ or docs\constitution\ path patterns
+    const L0_LEAK_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+    const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
+    const checkLeakage = (dir: string) => {
+        for (const item of fs.readdirSync(dir)) {
+            const itemPath = path.join(dir, item);
+            const stat = fs.statSync(itemPath);
+            if (stat.isDirectory()) {
+                if (SKIP_DIRS.has(item)) continue;
+                checkLeakage(itemPath);
+            } else if (stat.isFile() && itemPath.endsWith('.md')) {
+                const content = fs.readFileSync(itemPath, 'utf-8');
+                if (L0_LEAK_PATTERN.test(content) && !content.includes('intentional-duplicate')) {
+                    Fail(`L0 Leakage: ${itemPath} contains unauthorized reference to CONSTITUTION`);
+                    leakageErrors++;
+                }
+            }
+        }
+    };
+    checkLeakage('templates');
+    if (leakageErrors === 0) {
+        Pass('L0 Leakage check: no unauthorized CONSTITUTION references in templates');
+    }
+}
+
+// Check: L0-only agent files should not exist in templates/co-*/agents/
+if (fs.existsSync('templates')) {
+    const L0_ONLY_AGENTS = ['lifecycle-manager.md'];
+    let l0OnlyErrors = 0;
+    const templatesDir = 'templates';
+
+    for (const entry of fs.readdirSync(templatesDir)) {
+        if (!entry.startsWith('co-')) continue;
+        const variantAgentsDir = path.join(templatesDir, entry, 'agents');
+        if (!fs.existsSync(variantAgentsDir)) continue;
+
+        for (const l0OnlyAgent of L0_ONLY_AGENTS) {
+            const agentPath = path.join(variantAgentsDir, l0OnlyAgent);
+            if (fs.existsSync(agentPath)) {
+                Fail(`L0-only agent: ${l0OnlyAgent} found in templates/${entry}/agents/ - this agent should only exist at workspace root (agents/)`);
+                l0OnlyErrors++;
+            }
+        }
+    }
+
+    if (l0OnlyErrors === 0) {
+        Pass('L0-only agent check: no L0-only agents found in templates/co-*/agents/');
+    }
+}
+
+// Check: Template scripts must retain executable bit
+if (fs.existsSync('templates')) {
+    let executableErrors = 0;
+    const checkExecutable = (dir: string) => {
+        const SKIP_DIRS = new Set(['node_modules', '.git', '.bun']);
+        for (const item of fs.readdirSync(dir)) {
+            if (SKIP_DIRS.has(item)) continue;
+            const itemPath = path.join(dir, item);
+            const stat = fs.statSync(itemPath);
+            if (stat.isDirectory()) {
+                checkExecutable(itemPath);
+            } else if (stat.isFile()) {
+                if (item.endsWith('.sh') || item.endsWith('.ps1')) {
+                    try {
+                        const out = execFileSync('git', ['ls-files', '--stage', itemPath.replace(/\\/g, '/')], { encoding: 'utf-8' });
+                        if (out.startsWith('100644')) {
+                            Fail(`Template script lost executable bit: ${itemPath}`);
+                            executableErrors++;
+                        }
+                    } catch (e) {
+                        // Ignore if file is untracked or git command fails
+                    }
+                }
+            }
+        }
+    };
+    checkExecutable('templates');
+    if (executableErrors === 0) {
+        Pass('Templates executable bit check: all scripts retain executable bit');
+    }
+}
+
+// Check: templates/VERSION must have a corresponding git tag
+if (fs.existsSync('templates')) {
+    const versionFile = 'templates/VERSION';
+    if (fs.existsSync(versionFile)) {
+        try {
+            const version = fs.readFileSync(versionFile, 'utf-8').trim();
+            const tagOut = execFileSync('git', ['tag', '-l', `template-v${version}`], { encoding: 'utf-8' }).trim();
+            if (tagOut === '') {
+                Warn(`Template version ${version} in templates/VERSION has no corresponding git tag. Run: bun scripts/tag-template.ts`);
+            } else {
+                Pass(`Template version tag: template-v${version} published`);
+            }
+        } catch (e) {
+            Warn(`Could not verify template version tag: ${e}`);
+        }
+    }
+}
+
+// Check: shellcheck on .sh files (optional — warn only if shellcheck not installed)
+{
+    const shFiles = fs.existsSync('scripts')
+        ? fs.readdirSync('scripts').filter(f => f.endsWith('.sh')).map(f => `scripts/${f}`)
+        : [];
+    if (shFiles.length > 0) {
+        try {
+            execFileSync(process.platform === 'win32' ? 'where' : 'which', ['shellcheck'], { stdio: 'ignore' });
+            // shellcheck available
+            let scErrors = 0;
+            for (const shFile of shFiles) {
+                try {
+                    execFileSync('shellcheck', ['--shell=bash', shFile], { encoding: 'utf-8', stdio: 'pipe' });
+                } catch (e: any) {
+                    Fail(`shellcheck: ${shFile}\n${e.stdout || e.message}`);
+                    scErrors++;
+                }
+            }
+            if (scErrors === 0) Pass(`shellcheck: all ${shFiles.length} shell scripts passed`);
+        } catch {
+            Warn('shellcheck not installed — skipping shell lint (install via: brew install shellcheck)');
+        }
+    }
+}
+
+// Check: Platform parity (ADR-0033) - L0 → L1/L2 file synchronization
+if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'test-platform-parity.ts'))) {
+    const parityCheck = await $`bun ${path.join('scripts', 'test-platform-parity.ts')}`.quiet().nothrow();
+    if (parityCheck.exitCode === 0) {
+        Pass('Platform parity: L0 → L1/L2 files in sync');
+    } else if (parityCheck.exitCode === 2) {
+        Warn('Platform parity: warnings detected (run with --verbose for details)');
+    } else {
+        Fail('Platform parity: L0 → L1/L2 files out of sync (run: bun scripts/test-platform-parity.ts --verbose)');
+        errors++;
+    }
+}
+
+// Check: pm.md consistency (L0 → L1 → L2 alignment)
+if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
+    function checkPmConsistency(): boolean {
+        const l0PmPath = 'agents/pm.md';
+        const l1PmPath = 'templates/common/agents/pm.md';
+
+        if (!fs.existsSync(l0PmPath) || !fs.existsSync(l1PmPath)) {
+            return true; // Not applicable
+        }
+
+        const l0Content = fs.readFileSync(l0PmPath, 'utf-8');
+        const l1Content = fs.readFileSync(l1PmPath, 'utf-8');
+
+        // Extract YAML frontmatter sections
+        const extractYamlSection = (content: string, sectionStart: string, sectionEnd: string): string => {
+            const startIdx = content.indexOf(sectionStart);
+            if (startIdx === -1) return '';
+            const endIdx = content.indexOf(sectionEnd, startIdx);
+            if (endIdx === -1) return '';
+            return content.slice(startIdx, endIdx + sectionEnd.length);
+        };
+
+        // Extract core YAML fields from L0 (excluding L0-only fields)
+        const l0YamlMatch = l0Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l0YamlMatch) {
+            Fail('L0 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l0Yaml = l0YamlMatch[1];
+
+        // L1 YAML should have L1-only fields: formal_name, multi-line description
+        const l1YamlMatch = l1Content.match(/^---\n([\s\S]+?)\n---/);
+        if (!l1YamlMatch) {
+            Fail('L1 pm.md: missing YAML frontmatter');
+            return false;
+        }
+        const l1Yaml = l1YamlMatch[1];
+
+        // Check for L1-only fields presence
+        if (!l1Yaml.includes('formal_name:')) {
+            Fail('L1 pm.md: missing L1-only field "formal_name"');
+            return false;
+        }
+
+        // Check that L0-only fields are NOT in L1
+        const l0OnlyFields = ['lifecycle:', 'role:'];
+        for (const field of l0OnlyFields) {
+            const fieldRegex = new RegExp(`^${field}`, 'm');
+            if (fieldRegex.test(l1Yaml)) {
+                Fail(`L1 pm.md: contains L0-only field "${field}" - should be removed`);
+                return false;
+            }
+        }
+
+        // L1 extends pattern validation (ADR-0033)
+        // L1 can use pure YAML extends pattern OR VARIANT-SECTION markers
+        const l1Parsed = parsePmMd(l1PmPath);
+
+        // Define required variant sections for L2 validation (used below)
+        const requiredVariantSections = [
+            'governance-workflow',
+            'agent-roster',
+            'dispatch-protocol'
+        ];
+
+        if (l1Parsed.isValid && l1Parsed.extendsPath) {
+            // L1 uses new extends pattern - validate YAML fields only
+            Pass('L1 pm.md: uses YAML extends pattern (ADR-0033)');
+
+            // Check that extends points to L0
+            // l1Parsed.extendsPath is absolute path, extract filename to check
+            const extendsBasename = path.basename(l1Parsed.extendsPath);
+            if (extendsBasename !== 'pm.md' || !l1Parsed.extendsPath.includes('agents')) {
+                Fail(`L1 pm.md: extends should point to "../../agents/pm.md" or "../../../agents/pm.md"`);
+                return false;
+            }
+
+            // Check for remove_sections if present
+            if (Object.keys(l1Parsed.variantOverrides).length > 0) {
+                Pass('L1 pm.md: has remove_sections configured');
+            }
+        } else {
+            // Legacy L1 pattern - require VARIANT-SECTION markers
+            for (const section of requiredVariantSections) {
+                const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                const endMarker = `<!-- END VARIANT-SECTION -->`;
+                if (!l1Content.includes(marker) || !l1Content.includes(endMarker)) {
+                    Fail(`L1 pm.md: missing VARIANT-SECTION markers for "${section}"`);
+                    return false;
+                }
+            }
+        }
+
+        // Check L2 variants
+        const templatesDir = 'templates';
+        if (fs.existsSync(templatesDir)) {
+            const variants = fs.readdirSync(templatesDir)
+                .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+            for (const variant of variants) {
+                const l2PmPath = path.join(templatesDir, variant, 'agents', 'pm.md');
+                if (!fs.existsSync(l2PmPath)) continue;
+
+                const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
+
+                const hasVariantOverrides = l2Content.includes('variant_overrides:');
+                const hasExtendsPattern = l2Content.includes('extends:');
+                const isResolved = l2Content.startsWith('# @resolved-from:');
+                if (!hasVariantOverrides && !hasExtendsPattern && !isResolved) {
+                    // L2 should have VARIANT-SECTION markers (if not using extends: skeleton)
+                    for (const section of requiredVariantSections) {
+                        const marker = `<!-- VARIANT-SECTION: ${section} -->`;
+                        if (!l2Content.includes(marker)) {
+                            Fail(`L2 ${variant}/agents/pm.md: missing VARIANT-SECTION marker for "${section}"`);
+                            return false;
+                        }
+                    }
+                }
+
+                // L2 should NOT have full L0 content (line count check)
+                const l2Lines = l2Content.split('\n').length;
+                if (l2Lines >= 200) {
+                    Fail(`L2 ${variant}/agents/pm.md: ${l2Lines} lines (too long - may contain L0 duplication bug)`);
+                    return false;
+                }
+
+                // L2 YAML should NOT have L0-only fields
+                const l2YamlMatch = l2Content.match(/^---\n([\s\S]+?)\n---/);
+                if (l2YamlMatch) {
+                    const l2Yaml = l2YamlMatch[1];
+                    for (const field of l0OnlyFields) {
+                        const fieldRegex = new RegExp(`^${field}`, 'm');
+                        if (fieldRegex.test(l2Yaml)) {
+                            Fail(`L2 ${variant}/agents/pm.md: contains L0-only field "${field}"`);
+                            return false;
+                        }
+                    }
+
+                    // L2 YAML variant_overrides validation (if present)
+                    if (l2Yaml.includes('variant_overrides:')) {
+                        const parsed = parsePmMd(l2PmPath);
+                        if (parsed.isValid && Object.keys(parsed.variantOverrides).length > 0) {
+                            Pass(`L2 ${variant}/agents/pm.md: has valid variant_overrides`);
+
+                            // With YAML variant_overrides, VARIANT-SECTION markers are no longer required
+                            // in L2 files, so we don't warn about them missing.
+                        } else {
+                            Warn(`L2 ${variant}/agents/pm.md: variant_overrides field present but parsing failed`);
+                        }
+                    }
+                }
+            }
+        }
+
+        Pass('pm.md consistency: L0 → L1 → L2 alignment verified');
+        return true;
+    }
+
+    const pmConsistencyPass = checkPmConsistency();
+    if (!pmConsistencyPass) {
+        errors++;
+    }
+}
+
+// 27. Variant-specific audit checks
+const variantAuditPath = path.join('scripts', 'audit-variant.ts');
+if (fs.existsSync(variantAuditPath)) {
+    console.log(`\n${CYAN}🔄 Running variant-specific audit checks via ${variantAuditPath}...${RESET}`);
+    try {
+        execFileSync('bun', [variantAuditPath], { stdio: 'inherit' });
+        Pass('Variant-specific audit checks passed');
+    } catch (e) {
+        Fail('Variant-specific audit checks failed');
+    }
+}
+
+// ── Spec Registry Checks (--spec-check mode, warn-only) ─────────────────────
+if (SPEC_CHECK && !LIFECYCLE_ONLY) {
+    const SPEC_REGISTRY = path.join('docs', 'specs', 'registry.json');
+    if (!fs.existsSync(SPEC_REGISTRY)) {
+        Warn('Spec registry not found at docs/specs/registry.json — run: bun scripts/spec-register.ts to initialize');
+    } else {
+        interface SpecEntry { id: string; file: string; status: string; created: string; last_updated: string; }
+        interface Registry { specs: SpecEntry[]; }
+        const registry: Registry = JSON.parse(fs.readFileSync(SPEC_REGISTRY, 'utf-8'));
+
+        // Check 1: modified code files with no associated spec
+        let changedFiles: string[] = [];
+        try {
+            const { stdout } = await $`git diff --name-only HEAD`.quiet().nothrow();
+            changedFiles = stdout.toString().trim().split('\n').filter(Boolean);
+        } catch (err) {
+          console.error(`[audit] Error: ${err}`);
+        }
+
+        const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];
+        const changedCode = changedFiles.filter(f => codeChangedDirs.some(d => f.startsWith(d)));
+        if (changedCode.length > 0) {
+            const registeredFiles = new Set(registry.specs.map(s => s.file));
+            // Loose check: any approved/draft spec is sufficient (no file-level mapping required)
+            const hasActiveSpec = registry.specs.some(s => s.status === 'approved' || s.status === 'implemented');
+            if (!hasActiveSpec) {
+                Warn(`Spec check: ${changedCode.length} code file(s) changed but no approved/implemented spec found in registry — consider running brainstorming skill or spec-register.ts`);
+            } else {
+                Pass(`Spec check: code changes covered by spec registry (${registry.specs.filter(s => s.status === 'approved' || s.status === 'implemented').length} active spec(s))`);
+            }
+        }
+
+        // Check 2: stale approved specs (approved but not implemented after 14 days)
+        const STALE_DAYS = 14;
+        const now = Date.now();
+        const staleSpecs = registry.specs.filter(s => {
+            if (s.status !== 'approved') return false;
+            const created = Date.parse(s.created);
+            return !isNaN(created) && (now - created) > STALE_DAYS * 86400 * 1000;
+        });
+        if (staleSpecs.length > 0) {
+            for (const s of staleSpecs) {
+                Warn(`Spec check: "${s.id}" has been approved for >${STALE_DAYS} days without implementation — update status or implement`);
+            }
+        } else if (registry.specs.length > 0) {
+            Pass('Spec check: no stale approved specs');
+        }
+
+        // Check 3: spec file existence
+        let missingSpecFiles = 0;
+        for (const s of registry.specs) {
+            if (!fs.existsSync(s.file)) {
+                Warn(`Spec check: registered spec file missing: ${s.file} (id: ${s.id})`);
+                missingSpecFiles++;
+            }
+        }
+        if (missingSpecFiles === 0 && registry.specs.length > 0) {
+            Pass(`Spec check: all ${registry.specs.length} spec file(s) exist`);
+        }
+    }
+}
+
+console.log("");
+if (errors === 0) {
+    console.log(`${GREEN}✅ All checks passed.${RESET}`);
+    if (import.meta.main) {
+      process.exit(0);
+    }
+} else {
+    console.log(`${RED}❌ ${errors} check(s) failed. Fix before committing.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+}

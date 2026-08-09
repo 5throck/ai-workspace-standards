@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-09](2026-08-09.md) | fix(pipeline): resolve remaining l2-to-variant-pipeline issues for co-export promotion |
 | [2026-08-07](2026-08-07.md) | fix(scripts): validate-templates B-04 supports nested theme CSS layout; inject-skills registers co-game |
 | [2026-08-06](2026-08-06.md) | fix(scripts): resolve audit and scaffolding test issues |
 | [2026-08-04](2026-08-04.md) | fix(sync): align sync command files with agent-written PR body flow |

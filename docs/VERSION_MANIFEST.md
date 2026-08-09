@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-07T01:49:24.488Z
+**Generated**: 2026-08-09T02:19:24.900Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -89,10 +89,10 @@
 | agent-verify.ts | 1.0.1 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.11 | scripts/audit.ts | bun |
+| audit.ts | 2.10.12 | scripts/audit.ts | bun |
 | auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
 | beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
-| capability-registry.ts | 1.0.0 | scripts/helpers/registries/capability-registry.ts | N/A |
+| capability-registry.ts | 1.0.1 | scripts/helpers/registries/capability-registry.ts | N/A |
 | capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -117,7 +117,7 @@
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.7.2 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.7.3 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.0.1 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
@@ -127,7 +127,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.9.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.9.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
@@ -142,7 +142,7 @@
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
 | platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
 | platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
-| pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
+| pm-md-parser.ts | 1.0.3 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
 | post-write-lifecycle-check.ts | 1.1.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
 | pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
 | pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
@@ -199,7 +199,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.5.15 | scripts/validate-templates.ts | js-yaml |
-| validation-policy.ts | 1.0.0 | scripts/helpers/registries/validation-policy.ts | N/A |
+| validation-policy.ts | 1.0.1 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |
 | variant-json-validator.ts | 1.0.0 | scripts/validators/variant-json-validator.ts | N/A |

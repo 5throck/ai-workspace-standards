@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-09]**: fix(pipeline): resolve l2-to-variant-pipeline issues and post-pipeline audit failures for co-export promotion — fixed `path`/`fs` namespace bug in pm-md-parser.ts, added custom field merge to preserve engagement_methodology/deliverable_template in generated variant.json, unified pinned codegraph version across Claude/Gemini settings generators, added Layer 1 golden-reference sections (When to Use, Output Format, Related Skills) to gateguard/sync skills in L0/L1/common, expanded consulting capability registry with 4 new capabilities (CLIENT_ENGAGEMENT, ANALYSIS, REPORTING, PRESENTATION), added PROMOTION_CHECKLIST.md/_ORIGIN.md/_COMMON_VERSION.md to audit .md whitelist, removed L0-only `lifecycle:` frontmatter from co-export pm.md, removed CONSTITUTION.md references from co-export context.md (L0 leakage), added VARIANT-INJECT: guidelines to co-export.context.md. Pipeline passes all 6 phases; audit passes all checks. Verified `bun scripts/l2-to-variant-pipeline.ts --l2-path=./Projects/co-export --name=co-export --type=consulting` (6/6 clean), `bun scripts/audit.ts` (all checks passed).
+
 - **[2026-08-07]**: chore(co-deck): upgrade Projects/co-deck to template v0.5.3 — synced workspace-managed blocks, updated core scripts (audit.ts v2.10.11, dev-sync.ts v1.5.0, validate-docs-links.ts v1.0.0), platform commands, and skills. Verified `bun scripts/audit.ts Projects/co-deck` (all checks passed).
 
 - **[2026-08-07]**: feat(governance): facilitate multi-agent meeting on preventing unnecessary `nul` file creation on Windows/Git Bash — established 4-layer defense strategy (standardized shell redirection `> /dev/null 2>&1` & `$null`, banned `> nul` redirects, added `nul`/`NUL` to `.gitignore` and `templates/common/.gitignore`, updated `scripts/audit.ts` to auto-delete `WINDOWS_DEVICE_NAMES` regardless of git tracking status). Recorded meeting transcript in `memory/meeting-2026-08-07-prevent-nul-file-creation.md`. Verified `bun scripts/audit.ts` (all checks passed).
@@ -918,7 +920,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-07*
+*Last Updated: 2026-08-09*
 
 
 

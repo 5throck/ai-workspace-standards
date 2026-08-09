@@ -1,5 +1,5 @@
 // scripts/helpers/registries/capability-registry.ts
-// @version 1.0.0
+// @version 1.0.1
 // SSOT for capability definitions
 
 /**
@@ -44,6 +44,10 @@ export const CAPABILITY_REGISTRY = {
   // Consulting
   ENGAGEMENT_CONTEXT:    'engagement-context',
   DELIVERABLE_STANDARDS: 'deliverable-standards',
+  CLIENT_ENGAGEMENT:     'client-engagement',
+  ANALYSIS:              'analysis',
+  REPORTING:             'reporting',
+  PRESENTATION:          'presentation',
 } as const;
 
 /**

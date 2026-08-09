@@ -1,5 +1,5 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.0.0
+// @version 1.0.1
 // SSOT for per-type validation policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -72,6 +72,10 @@ export const VALIDATION_POLICIES = {
     requiredCapabilities: [
       CAPABILITY_REGISTRY.ENGAGEMENT_CONTEXT,
       CAPABILITY_REGISTRY.DELIVERABLE_STANDARDS,
+      CAPABILITY_REGISTRY.CLIENT_ENGAGEMENT,
+      CAPABILITY_REGISTRY.ANALYSIS,
+      CAPABILITY_REGISTRY.REPORTING,
+      CAPABILITY_REGISTRY.PRESENTATION,
     ],
     optionalAgentSections: ['## Engagement Context', '## Deliverable Standards'],
     optionalSkillSections: ['## Prerequisites', '## Quality Criteria'],

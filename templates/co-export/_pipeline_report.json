@@ -1,0 +1,139 @@
+{
+  "variantName": "co-export",
+  "variantType": "consulting",
+  "timestamp": "2026-08-09T01:40:26.086Z",
+  "phase": "4.5",
+  "summary": {
+    "totalFiles": 18,
+    "passedFiles": 18,
+    "failedFiles": 0
+  },
+  "gaps": [
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\customs-duty-drawback-specialist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\export-control-compliance-specialist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\foreign-regulatory-intelligence-analyst.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\fta-origin-analyst.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\hs-classification-specialist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\logistics-coordinator.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\market-entry-strategist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\agents\\trade-documentation-specialist.md",
+      "fileType": "agent",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\customs-duty-drawback-workflow\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\export-control-screening\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\foreign-regulation-monitoring\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\fta-origin-determination\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\gateguard\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\hs-classification-workflow\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\logistics-coordination\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\market-entry-strategy\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\sync\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    },
+    {
+      "filePath": "C:\\git\\ai_workspace\\templates\\co-export\\skills\\trade-documentation-checklist\\SKILL.md",
+      "fileType": "skill",
+      "passed": true,
+      "missingSections": [],
+      "extraSections": []
+    }
+  ]
+}

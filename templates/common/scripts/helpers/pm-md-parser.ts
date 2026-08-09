@@ -5,7 +5,7 @@
  * Parses YAML frontmatter from pm.md files and extracts variant_overrides.
  * Handles both L0 (workspace root), L1 (templates/common), and L2 (templates/co-*) pm.md files.
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @author automation-engineer
  *
  * Usage:
@@ -16,8 +16,8 @@
  *   const overrides = extractVariantOverrides(parsed.frontmatter);
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ export function parsePmMd(filePath: string): PmMdParseResult {
   };
 
   // Check file existence
-  if (!existsSync(filePath)) {
+  if (!fs.existsSync(filePath)) {
     result.error = `File not found: ${filePath}`;
     return result;
   }
@@ -132,7 +132,7 @@ export function parsePmMd(filePath: string): PmMdParseResult {
   // Read file content
   let content: string;
   try {
-    content = readFileSync(filePath, 'utf-8');
+    content = fs.readFileSync(filePath, 'utf-8');
   } catch (error) {
     result.error = `Failed to read file ${filePath}: ${error instanceof Error ? error.message : String(error)}`;
     return result;
@@ -151,7 +151,7 @@ export function parsePmMd(filePath: string): PmMdParseResult {
 
   // Extract extends path
   if (frontmatter.extends) {
-    result.extendsPath = resolve(dirname(filePath), frontmatter.extends);
+    result.extendsPath = path.resolve(path.dirname(filePath), frontmatter.extends);
   }
 
   // Extract remove_sections
@@ -222,7 +222,7 @@ export function resolveExtendsChain(
   const chain: PmMdParseResult[] = [];
 
   // Normalize file path
-  const normalizedPath = resolve(filePath);
+  const normalizedPath = path.resolve(filePath);
 
   // Check for circular reference
   if (visited.has(normalizedPath)) {
@@ -237,7 +237,7 @@ export function resolveExtendsChain(
   chain.push(parsed);
 
   // If there's an extends path, recursively resolve it
-  if (parsed.extendsPath && existsSync(parsed.extendsPath)) {
+  if (parsed.extendsPath && fs.existsSync(parsed.extendsPath)) {
     const parentChain = resolveExtendsChain(parsed.extendsPath, workspaceRoot, visited);
     chain.push(...parentChain);
   }

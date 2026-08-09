@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.9.1
+ * @version 1.9.2
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -273,10 +273,20 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       }
 
       // Check 3: Duplicate sections vs L1 common pm.md
+      // Only flag headers that appear OUTSIDE frontmatter and VARIANT-SECTION blocks.
+      // Headers inside frontmatter scalars (variant_overrides) and VARIANT-SECTION blocks
+      // are intentional overrides, not duplicates.
       if (ex16(l1CommonPmPath)) {
         const l1Content = rfs(l1CommonPmPath, 'utf-8');
         const l1Headers = [...l1Content.matchAll(/^#{1,3} .+/gm)].map(m => m[0].trim());
-        const l2Headers = [...pmContent.matchAll(/^#{1,3} .+/gm)].map(m => m[0].trim());
+        // Extract body only (after the second --- frontmatter delimiter)
+        const fmEndIdx = pmContent.indexOf('---', pmContent.indexOf('---') + 3);
+        const bodyOnly = fmEndIdx >= 0 ? pmContent.slice(fmEndIdx + 3) : pmContent;
+        // Strip VARIANT-SECTION blocks (intentional overrides, not duplicates)
+        const stripped = bodyOnly.replace(
+          /<!--\s*VARIANT-SECTION:.*?-->[\s\S]*?<!--\s*END VARIANT-SECTION\s*-->/g, ''
+        );
+        const l2Headers = [...stripped.matchAll(/^#{1,3} .+/gm)].map(m => m[0].trim());
         const duplicates = l2Headers.filter(h => l1Headers.includes(h));
         if (duplicates.length > 0) {
           pmIssues.push(`${duplicates.length} section header(s) duplicated from L1 common pm.md: ${duplicates.slice(0, 3).join(', ')}${duplicates.length > 3 ? '...' : ''}`);
@@ -471,7 +481,60 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
     // Eager imports used across 3.7b–3.7d
     const { globSync } = await import('node:fs') as typeof import('node:fs');
-    const yaml = (await import('js-yaml')).default as typeof import('js-yaml');
+
+    // Lightweight YAML frontmatter parser — avoids js-yaml which fails in Bun
+    // (SyntaxError: Missing 'default' export in js-yaml.mjs).
+    // Mirrors the parser in generate-variant.ts parseAgentFrontmatter().
+    function parseFrontmatter(content: string): Record<string, unknown> {
+      const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (!match) return {};
+      const lines = match[1].split(/\r?\n/);
+      const result: Record<string, unknown> = {};
+      let currentKey = '';
+      let blockScalar = false;
+      let blockLines: string[] = [];
+      function flushBlock() {
+        if (blockScalar && currentKey) {
+          result[currentKey] = blockLines.join(' ').trim();
+          blockLines = [];
+          blockScalar = false;
+        }
+      }
+      for (const line of lines) {
+        const topMatch = line.match(/^([\w][\w-]*):\s*(.*)/);
+        if (topMatch) {
+          flushBlock();
+          currentKey = topMatch[1];
+          const val = topMatch[2].trim();
+          if (val === '>' || val === '|') { blockScalar = true; blockLines = []; }
+          else if (val === '') { result[currentKey] = {}; }
+          else if (val.startsWith('[')) {
+            result[currentKey] = val.replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean);
+          } else { result[currentKey] = val.replace(/^['"]|['"]$/g, ''); }
+          continue;
+        }
+        if (blockScalar && line.startsWith('  ')) { blockLines.push(line.trim()); continue; }
+        const nestedKV = line.match(/^  ([\w][\w-]*):\s*(.*)/);
+        if (nestedKV && !blockScalar) {
+          flushBlock();
+          const parentVal = result[currentKey];
+          if (typeof parentVal === 'object' && parentVal !== null && !Array.isArray(parentVal)) {
+            (parentVal as Record<string, unknown>)[nestedKV[1]] = nestedKV[2].trim().replace(/^['"]|['"]$/g, '');
+          }
+          continue;
+        }
+        const listItem = line.match(/^  - (.*)/);
+        if (listItem && !blockScalar) {
+          const item = listItem[1].trim().replace(/^['"]|['"]$/g, '');
+          if (!Array.isArray(result[currentKey])) result[currentKey] = [];
+          (result[currentKey] as unknown[]).push(item);
+          continue;
+        }
+        if (blockScalar && line.trim() === '') { flushBlock(); }
+      }
+      flushBlock();
+      return result;
+    }
 
     // 3.7a: Registry integrity check
     const { validateRegistryIntegrity } = await import('./helpers/registries/index.ts');
@@ -506,25 +569,22 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       const agentsDir37c = join(config.l2ProjectPath, 'agents');
       const coveredCapabilities = new Set<string>();
 
-      for (const agentFile of globSync('*.md', { cwd: agentsDir37c })) {
+              for (const agentFile of globSync('*.md', { cwd: agentsDir37c })) {
         const content = readFileSync(join(agentsDir37c, agentFile), 'utf-8');
-        const match = content.match(/^---\n([\s\S]*?)\n---/);
-        if (match) {
-          try {
-            const fm = yaml.load(match[1]) as Record<string, unknown>;
-            const caps = fm?.capabilities;
-            if (Array.isArray(caps)) {
-              for (const cap of caps) {
-                if (typeof cap === 'string') {
-                  coveredCapabilities.add(cap);
-                  if (!isCapability(cap)) {
-                    console.warn(`[3.7] WARNING: Unknown capability "${cap}" in ${agentFile}`);
-                  }
+        try {
+          const fm = parseFrontmatter(content);
+          const caps = fm?.capabilities;
+          if (Array.isArray(caps)) {
+            for (const cap of caps) {
+              if (typeof cap === 'string') {
+                coveredCapabilities.add(cap);
+                if (!isCapability(cap)) {
+                  console.warn(`[3.7] WARNING: Unknown capability "${cap}" in ${agentFile}`);
                 }
               }
             }
-          } catch { /* skip malformed frontmatter */ }
-        }
+          }
+        } catch { /* skip malformed frontmatter */ }
       }
 
       for (const required of policy.requiredCapabilities) {
@@ -542,8 +602,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       const agentsDir37d = join(config.l2ProjectPath, 'agents');
       const agentFrontmatters = globSync('*.md', { cwd: agentsDir37d }).map(f => {
         const content = readFileSync(join(agentsDir37d, f), 'utf-8');
-        const match = content.match(/^---\n([\s\S]*?)\n---/);
-        const fm = match ? (yaml.load(match[1]) as Record<string, unknown>) : {};
+        const fm = parseFrontmatter(content);
         return {
           name: basename(f, '.md'),
           capabilities: Array.isArray(fm?.capabilities) ? fm.capabilities as string[] : [],
@@ -617,6 +676,30 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         console.log(`  ✅ Injected co-deck extension fields (agent_manifest, theme_manifest, lecture_profile)`);
       } catch {
         console.warn(`  ⚠️  Could not read templates/co-deck/variant.json — extension fields skipped`);
+      }
+    }
+
+    // Merge custom fields from L2 source variant.json (engagement_methodology, deliverable_template, etc.)
+    {
+      const { readFileSync: rfs, existsSync: efs } = await import('node:fs');
+      const l2VariantPath = join(config.l2ProjectPath, 'variant.json');
+      if (efs(l2VariantPath)) {
+        try {
+          const l2Variant = JSON.parse(rfs(l2VariantPath, 'utf-8'));
+          // Known custom fields to preserve beyond the canonical schema
+          const customFields: string[] = [
+            'engagement_methodology', 'deliverable_template',
+            'agent_overrides', 'skill_manifest', 'promotionChecklist',
+          ];
+          for (const field of customFields) {
+            if (l2Variant[field] !== undefined) {
+              (metadata as Record<string, unknown>)[field] = l2Variant[field];
+            }
+          }
+          console.log(`  ✅ Merged custom fields from L2 variant.json`);
+        } catch {
+          console.warn(`  ⚠️  Could not parse L2 variant.json — custom fields skipped`);
+        }
       }
     }
 

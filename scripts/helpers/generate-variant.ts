@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.7.2
+ * @version 1.7.3
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -70,6 +70,8 @@ export interface VariantMetadata {
     required_fields: string[];
     notes?: string;
   };
+  /** Optional: Custom fields from L2 source variant.json (engagement_methodology, etc.) */
+  [key: string]: unknown;
 }
 
 export interface AgentDefinition {
@@ -252,6 +254,16 @@ function substitutePlaceholders(content: string, metadata: VariantMetadata): str
  */
 function generateVariantJson(metadata: VariantMetadata): string {
   const today = new Date().toISOString().split('T')[0];
+  const canonicalKeys = new Set([
+    'name', 'description', 'variantType', 'status', 'version', 'inherits_common',
+    'agentRoster', 'skills', 'agent_manifest', 'theme_manifest', 'lecture_profile',
+  ]);
+  const customFields: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    if (!canonicalKeys.has(key)) {
+      customFields[key] = value;
+    }
+  }
   const variantJson = {
     name: metadata.name,
     description: metadata.description,
@@ -275,6 +287,7 @@ function generateVariantJson(metadata: VariantMetadata): string {
     ...(metadata.agent_manifest && { agent_manifest: metadata.agent_manifest }),
     ...(metadata.theme_manifest && { theme_manifest: metadata.theme_manifest }),
     ...(metadata.lecture_profile && { lecture_profile: metadata.lecture_profile }),
+    ...customFields,
   };
 
   return JSON.stringify(variantJson, null, 2);
@@ -1189,11 +1202,11 @@ function generateGeminiSettings(variantPath: string): string {
   const settingsPath = join(variantPath, '.gemini', 'settings.json');
   const settings: Record<string, unknown> = {
     _comment:
-      'Variant-specific overrides vs L1 (templates/common): unpinned codegraph version (-y) for auto-updates, PostToolUse lifecycle check hook added. These are intentional L2 variant settings.',
+      'Variant-specific overrides vs L1 (templates/common): codegraph MCP server added for co-export. These are intentional L2 variant settings.',
     mcpServers: {
       codegraph: {
         command: 'npx',
-        args: ['-y', '@colbymchenry/codegraph', 'serve'],
+        args: ['@colbymchenry/codegraph@0.9.7', 'serve'],
       },
     },
     hooks: {
