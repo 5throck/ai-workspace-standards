@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.8.0
+ * @version 1.8.1
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -1378,11 +1378,16 @@ export async function generateVariant(
   ]);
 
   for (const file of manifest.keepInVariant) {
+    // Normalize to forward slashes so SKIP_IN_COPY and prefix checks match on Windows,
+    // where path.relative() yields backslashes (same normalization as the agent loop, L335).
+    // Without this, an entry like 'docs/context.md' never matches 'docs\context.md' and the
+    // stale immutable context leaks into the promoted variant template.
+    const normalizedTarget = file.targetPath.replace(/\\/g, '/');
     // Skip already handled files and migration artifacts
-    if (file.targetPath.startsWith('agents/') ||
-        file.targetPath.startsWith('scripts/') ||
-        file.targetPath.includes('skills/') ||
-        SKIP_IN_COPY.has(file.targetPath)) {
+    if (normalizedTarget.startsWith('agents/') ||
+        normalizedTarget.startsWith('scripts/') ||
+        normalizedTarget.includes('skills/') ||
+        SKIP_IN_COPY.has(normalizedTarget)) {
       continue;
     }
 

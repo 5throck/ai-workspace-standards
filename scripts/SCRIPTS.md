@@ -70,7 +70,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.8.1 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -143,7 +143,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lifecycle-sync-audit.ts` | L0 | 1.4.3 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.5.2 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.5.3 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
@@ -178,7 +178,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.15 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.16 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
@@ -499,4 +499,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-08-09 — Version bump for l2-to-variant-pipeline v1.10.1 (Issue Set A fixes: consolidated SKIP_AGENT_FILES, fixed missingOptionalSections JSON field, removed process.exit(1) from executeL2ToVariantPipeline, registry-driven canonicalExtensionSource for lecture type, deleted dead VariantPlugin.goldenReference()); previous: Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*
+*Last updated: 2026-08-09 — Version bumps for validate-templates v1.5.16 (new Check WS-07: variants must not carry local docs/context.md), generate-variant v1.8.1 (fix Windows path-separator so SKIP_IN_COPY actually excludes docs/context.md during promotion), new-project v1.5.3 (defense-in-depth: variant overlay skips docs/context.md); previous: Version bump for l2-to-variant-pipeline v1.10.1 (Issue Set A fixes: consolidated SKIP_AGENT_FILES, fixed missingOptionalSections JSON field, removed process.exit(1) from executeL2ToVariantPipeline, registry-driven canonicalExtensionSource for lecture type, deleted dead VariantPlugin.goldenReference()); previous: Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*

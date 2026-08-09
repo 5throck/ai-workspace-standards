@@ -32,6 +32,10 @@ Variants **MUST NOT** include shared commands (`changelog.md`, `memlog.md`, `new
 
 Domain-specific commands (e.g., `security-check.md` for co-develop, co-security) are **optional** extensions listed in the Optional Files table below.
 
+### Shared Context (Inherited from Common)
+
+Variants **MUST NOT** include their own `docs/context.md`. The immutable project context is owned solely by `templates/common/docs/context.md` (L1) and is copied into every project at scaffold time; a variant-level `docs/context.md` would overwrite that canonical copy because the variant overlay runs *after* the common copy. Variant-specific content belongs in `docs/{variant}.context.md` (which extends `context.md`). If a variant places `docs/context.md` in its overlay, `validate-templates.ts` Check **WS-07** will fail validation.
+
 ## Optional Files (Domain Extensions)
 
 | File / Path | Used by |

@@ -31,6 +31,7 @@
 | `AGENTS.md` | Workspace Root | `templates/co-*/AGENTS.md` | `bun run agent:verify` |
 | `.claude/commands/*.md` | Workspace Root | `templates/common/.claude/commands/` + `.gemini/commands/` | Manual propagation |
 | `variant.json` | `templates/co-*/` | (None) | Variant itself is the source |
+| `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L2 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
 
 #### Three Types of Flows
 
@@ -74,5 +75,6 @@ Projects/<name>/   ←── Disconnected from Workspace Root thereafter (No aut
 | Editing Workspace Root and Template simultaneously in the same session | Violates CWD isolation principle (CLAUDE.md §9) |
 | Editing `CLAUDE.md` without syncing `GEMINI.md` | Violates platform parity — both files are joint SSOTs |
 | Modifying a template without running `validate-templates.ts` | Fails to detect inconsistencies in derived locations |
+| A variant (`templates/co-*/`) carrying its own `docs/context.md` | Clobbers common's immutable copy at scaffold time (the variant overlay overwrites it); variant content belongs in `docs/<variant>.context.md` |
 
 **TL;DR**: The Workspace Root is the ONLY editing source. Templates are its copies, and new projects are creation-time snapshots. The flow is strictly one-way: Top-Down.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.15
+ * @version 1.5.16
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2222,6 +2222,18 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
   }
 }
 
+// Check WS-07: Variants MUST NOT carry their own docs/context.md (owned solely by templates/common/)
+function checkNoVariantLocalContextMd(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-07: ${variant} must not carry its own docs/context.md ===`);
+
+  const variantContextMd = join(TEMPLATES_DIR, variant, 'docs', 'context.md');
+  if (existsSync(variantContextMd)) {
+    fail(variant, 'WS-07', `templates/${variant}/docs/context.md must not exist — the immutable project context is owned solely by templates/common/docs/context.md and copied into every project at scaffold time`, `Delete templates/${variant}/docs/context.md; move any variant-specific content into docs/${variant}.context.md`);
+  } else {
+    pass(`WS-07: ${variant} has no local docs/context.md (inherits common's)`);
+  }
+}
+
 // Main
 // A-10: propagation-map.json schema validation
 function checkPropagationMapSchema(): void {
@@ -2301,12 +2313,13 @@ function main() {
     if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
   }
 
-  // WS-04, WS-05, WS-06: Reverse-direction layer checks for co-* variants
+  // WS-04, WS-05, WS-06, WS-07: Reverse-direction layer checks for co-* variants
   for (const [variant] of manifests) {
     if (!variant.startsWith('co-')) continue;
     checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
     checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
     checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
+    checkNoVariantLocalContextMd(variant);                       // WS-07
   }
 
   checkSharedFileSync();

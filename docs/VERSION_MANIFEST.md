@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T06:37:06.917Z
+**Generated**: 2026-08-09T07:05:26.287Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -118,7 +118,7 @@
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.8.0 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.8.1 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.1.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
@@ -137,7 +137,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
-| new-project.ts | 1.5.2 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
 | normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
 | orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
 | pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
@@ -200,7 +200,7 @@
 | validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.15 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.16 | scripts/validate-templates.ts | js-yaml |
 | validation-policy.ts | 1.0.1 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |

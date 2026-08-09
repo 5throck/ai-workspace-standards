@@ -484,7 +484,7 @@ Two template files serve distinct roles in the documentation layer:
 
 | File | Layer | Role |
 |------|-------|------|
-| `templates/common/docs/_common/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied to `docs/context.md` in every new L2 project. Do NOT modify after project creation. |
+| `templates/common/docs/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied verbatim to `docs/context.md` in every new L2 project. Variant templates MUST NOT carry their own `docs/context.md` (enforced by `validate-templates.ts` WS-07); variant-specific content goes in `docs/<variant>.context.md`. Do NOT modify after project creation. |
 | `templates/common/docs/variant.context.template.md` | L1 | **Variant overlay template** — customization layer rendered into `docs/<variant>.context.md`. Contains VARIANT-INJECT markers for variant-specific sections. |
 
 **Read order for AI tools in any L2 project:**
@@ -631,4 +631,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-07*
+*Last Updated: 2026-08-09*

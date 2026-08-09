@@ -89,6 +89,15 @@ The canonical template for all variant `<variant>.context.md` files is:
 templates/common/docs/variant.context.template.md
 ```
 
+> **Shared immutable context (`docs/context.md`) — Single Source of Truth**: The immutable
+> project context lives ONLY at `templates/common/docs/context.md` (L1) and is copied verbatim
+> into every new project's `docs/context.md`. **Variant templates MUST NOT carry their own
+> `docs/context.md`** — the variant overlay runs after the common copy, so a variant-level copy
+> would clobber common's canonical file (and then be locked with `merge=ours`). Variant-specific
+> content (tech stack, agents, skills, workflow) MUST live in `docs/<variant>.context.md`, which
+> *extends* `context.md`. Enforced by `validate-templates.ts` Check **WS-07** and the
+> L2→variant promotion pipeline (`generate-variant.ts` excludes `docs/context.md`).
+
 ### VARIANT-INJECT Governance
 
 Variant-specific sections are marked with inject markers:
