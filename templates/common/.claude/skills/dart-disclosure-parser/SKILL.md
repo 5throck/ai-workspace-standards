@@ -4,10 +4,10 @@ description: >
   Real-time Korean DART Open API corporate disclosure and financial statement parsing rules,
   data normalization, and accounting line-item extraction for consulting intelligence.
 version: 1.0.0
-status: active
+status: deprecated
 owner: strategy-analyst
-last_reviewed: 2026-08-06
-prerequisites: API_K_DART environment variable, DART Open API access key
+last_reviewed: 2026-08-09
+prerequisites: DART_API_KEY environment variable (formerly API_K_DART)
 scope: co-consult
 l2_propagate: true
 metadata:

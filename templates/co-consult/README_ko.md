@@ -66,10 +66,8 @@ lang_reason: source-material
 - **stakeholder-alignment**: 체계적인 이해관계자 매핑, 저항 분석, 영향력-관심 우선순위화.
 - **stakeholder-review-management**: 이해관계자 리뷰 주기 관리 — 리뷰어 선정, 피드백, 충돌 해결, 변경 추적.
 - **technical-feasibility**: 제안된 솔루션의 기술적 구현 가능성 평가; 복잡도 등급 및 리스크 산출.
-- **k-dart**: 한국 금융감독원 DART OpenAPI에서 공시, 기업 개황, 재무제표, 주요사항보고서 조회.
 - **company-intelligence**: 종합적인 기업/기업집단 인텔리전스; 5개 병렬 리서치 에이전트를 하나의 보고서로 통합.
 - **financial-statement-analysis**: 한국 재무제표 분석 전체 파이프라인 — DART → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
-- **dart-disclosure-parser**: 한국 DART 공시 및 재무제표의 실시간 파싱, 정규화, 계정과목 추출.
 - **mece-logic-auditor**: 컨설팅 문제 해결 프레임워크를 위한 MECE 이슈 트리 감사 및 전략적 추론 평가.
 
 ## 협업 방법

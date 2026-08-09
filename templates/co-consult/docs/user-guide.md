@@ -66,7 +66,7 @@ Use this table to see which agent(s) and skill(s) will typically be dispatched. 
 This is the newest and most complex skill (`financial-statement-analysis`), for Korean company financial analysis based on DART (Korea's Financial Supervisory Service disclosure system). It runs as a six-stage pipeline: **DART collection → validation → normalization → KPI extraction → ROIC value driver tree → report generation.**
 
 ### Step 1 — Collect DART data
-Use the `k-dart` skill (or ask the PM to dispatch `data-analyst`) to pull the target company's disclosures and financial statements from the DART OpenAPI. This requires the `API_K_DART` environment variable to be set. Save the raw JSON response — this is the input to the pipeline.
+Use the `k-dart` skill (or ask the PM to dispatch `data-analyst`) to pull the target company's disclosures and financial statements from the DART OpenAPI. This requires the `DART_API_KEY` environment variable to be set. Save the raw JSON response — this is the input to the pipeline.
 
 ### Step 2 — Run the pipeline
 The whole validation → normalization → KPI → driver-tree → report chain is automated by one script:

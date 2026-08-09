@@ -67,10 +67,8 @@
     { "name": "stakeholder-alignment" },
     { "name": "stakeholder-review-management" },
     { "name": "technical-feasibility" },
-    { "name": "k-dart" },
     { "name": "company-intelligence" },
     { "name": "financial-statement-analysis" },
-    { "name": "dart-disclosure-parser" },
     { "name": "mece-logic-auditor" }
   ],
   "skill_manifest": {
@@ -167,23 +165,9 @@
         "platform_parity": "required"
       },
       {
-        "name": "k-dart",
-        "layer": "workspace",
-        "used_by_agents": ["strategy-analyst"],
-        "phases": [1],
-        "platform_parity": "required"
-      },
-      {
         "name": "company-intelligence",
         "layer": "workspace",
         "used_by_agents": ["pm", "strategy-analyst"],
-        "phases": [1],
-        "platform_parity": "required"
-      },
-      {
-        "name": "dart-disclosure-parser",
-        "layer": "workspace",
-        "used_by_agents": ["strategy-analyst"],
         "phases": [1],
         "platform_parity": "required"
       },
