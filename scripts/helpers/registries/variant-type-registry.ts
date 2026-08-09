@@ -9,6 +9,14 @@
 export interface VariantTypeDefinition {
   readonly name: string;
   readonly description: string;
+  /**
+   * Optional path (relative to workspace root) to the `variant.json` of the
+   * canonical variant for this type, used as the source of type-specific
+   * extension fields (e.g. `agent_manifest`, `theme_manifest`, `lecture_profile`
+   * for `lecture`). Undefined for types with no canonical extension source.
+   * See: docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md Issue A.4
+   */
+  readonly canonicalExtensionSource?: string;
 }
 
 /**
@@ -39,6 +47,7 @@ export const VARIANT_TYPE_REGISTRY = {
   lecture: {
     name: 'lecture',
     description: 'Lecture and presentation material production workflow',
+    canonicalExtensionSource: 'templates/co-deck/variant.json',
   },
   game: {
     name: 'game',

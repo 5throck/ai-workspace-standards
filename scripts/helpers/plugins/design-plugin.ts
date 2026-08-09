@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -36,7 +35,6 @@ import type {
  * import { DesignPlugin } from './helpers/plugins/design-plugin.ts';
  * const plugin = new DesignPlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class DesignPlugin implements VariantPlugin {
@@ -118,40 +116,5 @@ export class DesignPlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for design variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * design variants. Agent files require standard sections (Role, Responsibilities,
-   * Collaboration Protocol) plus design-specific optional sections (Design
-   * Principles, Style Guide, Component Standards).
-   *
-   * @returns The golden reference for design variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Collaboration Protocol',
-        ],
-        optional: [
-          '## Design Principles',
-          '## Style Guide',
-          '## Component Standards',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

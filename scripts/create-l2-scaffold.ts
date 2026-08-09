@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.8.1
 /**
  * create-l2-scaffold.ts
  *
@@ -9,7 +9,7 @@
  *
  * Usage:
  *   bun scripts/create-l2-scaffold.ts <variant-name> [--domain <type>] [--dry-run]
- *   bun scripts/create-l2-scaffold.ts safety-os --domain ehs
+ *   bun scripts/create-l2-scaffold.ts safety-os --domain security
  *
  * Note: all external commands are run via execFileSync (no shell) to avoid
  * command-injection; the variant name is additionally regex-validated.
@@ -572,7 +572,6 @@ Legal Basis / Role / Protocols), then register them in the roster table below.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOMAIN_DOC_DIRS: Record<string, string[]> = {
-  ehs: ["docs/reports", "docs/procedures", "docs/blueprint"],
   development: ["docs/drafts", "docs/reports", "docs/research"],
   design: ["docs/drafts", "docs/reports", "docs/research"],
   security: ["docs/drafts", "docs/reports", "docs/research"],

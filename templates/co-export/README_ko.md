@@ -35,7 +35,11 @@ translated_from_hash: PLACEHOLDER
 - **market-entry-strategy**: market-entry-strategy 스킬
 - **trade-documentation-checklist**: trade-documentation-checklist 스킬
 
-## 4. 의존성 설치
+## 4. 스크립트 안내
+
+`templates/co-export/scripts/` 디렉터리는 별도로 존재하지 않습니다. 워크스페이스 자동화 스크립트(`dev-sync.ts`, `test-runner.ts` 등)는 스캐폴딩 시점에 `templates/common/scripts/`에서 상속받아 사용됩니다. 프로모션 기준은 워크스페이스 루트의 `scripts/helpers/variant-governance-rules.ts`(이 템플릿에는 포함되지 않음)가 관리합니다.
+
+## 5. 의존성 설치
 
 ```bash
 bun --version   # audit.ts, dev-sync.ts 실행에 필요

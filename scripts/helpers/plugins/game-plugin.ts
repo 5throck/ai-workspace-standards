@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -36,7 +35,6 @@ import type {
  * import { GamePlugin } from './helpers/plugins/game-plugin.ts';
  * const plugin = new GamePlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class GamePlugin implements VariantPlugin {
@@ -118,41 +116,5 @@ export class GamePlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for game variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * game variants. Agent files require standard sections (Role, Responsibilities,
-   * Collaboration Protocol) plus game-specific optional sections (Game Mechanics,
-   * Performance Budget, Asset Pipeline, Technical Constraints).
-   *
-   * @returns The golden reference for game variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Collaboration Protocol',
-        ],
-        optional: [
-          '## Game Mechanics',
-          '## Performance Budget',
-          '## Asset Pipeline',
-          '## Technical Constraints',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

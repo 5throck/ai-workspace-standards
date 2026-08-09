@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -37,7 +36,6 @@ import type {
  * import { CollaborationPlugin } from './helpers/plugins/collaboration-plugin.ts';
  * const plugin = new CollaborationPlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class CollaborationPlugin implements VariantPlugin {
@@ -119,40 +117,5 @@ export class CollaborationPlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for collaboration variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * collaboration variants. Agent files require standard sections (Role, Responsibilities,
-   * Collaboration Protocol) plus collaboration-specific optional sections (Workflow
-   * Guidelines, Documentation Standards, Team Norms).
-   *
-   * @returns The golden reference for collaboration variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Collaboration Protocol',
-        ],
-        optional: [
-          '## Workflow Guidelines',
-          '## Documentation Standards',
-          '## Team Norms',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

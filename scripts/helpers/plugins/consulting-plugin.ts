@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -37,7 +36,6 @@ import type {
  * import { ConsultingPlugin } from './helpers/plugins/consulting-plugin.ts';
  * const plugin = new ConsultingPlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class ConsultingPlugin implements VariantPlugin {
@@ -117,40 +115,5 @@ export class ConsultingPlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for consulting variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * consulting variants. Agent files require standard sections (Role, Responsibilities,
-   * Engagement Protocol) plus consulting-specific optional sections (Methodology,
-   * Deliverable Standards, Quality Checklist).
-   *
-   * @returns The golden reference for consulting variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Engagement Protocol',
-        ],
-        optional: [
-          '## Methodology',
-          '## Deliverable Standards',
-          '## Quality Checklist',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

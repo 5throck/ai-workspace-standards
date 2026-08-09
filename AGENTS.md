@@ -350,10 +350,13 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 | Scenario | Use | Do NOT use |
 |----------|-----|------------|
+| Design the implementation approach and folder structure | `architect` | `automation-engineer` |
+| Write or modify automation scripts (.ts, package.json) per ADR-0036 | `automation-engineer` | `architect` |
+| Update documentation files | `docs-writer` | `architect` |
+| Create new project from template | `scaffolding-expert` | `automation-engineer` |
+| Security review, Git hooks configuration | `security-expert` | `architect` |
+| Cross-validate documentation consistency | `auditor` | `docs-writer` |
 | Orchestrate multi-step task across agents | `pm` | any execution agent |
-
-<!-- VARIANT-ROLE-BOUNDARY-START -->
-<!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ---
 
@@ -489,6 +492,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
+| `simulate-l2-promotion` | `skills/simulate-l2-promotion/` | E2E smoke test for L2 scaffold → variant promotion pipeline |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 ### Platform Skills Distribution

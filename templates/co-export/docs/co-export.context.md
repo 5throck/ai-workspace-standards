@@ -76,7 +76,7 @@ PM (Phase 0: triage + scope)
 
 ## Skills
 
-Seven domain skills, one per specialist, defined in `skills/<name>/SKILL.md` and mirrored to
+Eight domain skills, one per specialist, defined in `skills/<name>/SKILL.md` and mirrored to
 `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`. See [AGENTS.md § Domain Skills](../AGENTS.md#domain-skills)
 for the full table. Common skills inherited from `templates/common/skills/` cover research,
 documentation, and lifecycle management.

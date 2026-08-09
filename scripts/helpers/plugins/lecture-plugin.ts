@@ -17,7 +17,6 @@ import type {
   VariantPlugin,
   ValidationContext,
   ValidationIssue,
-  GoldenReference,
 } from './variant-plugin.ts';
 
 /**
@@ -37,7 +36,6 @@ import type {
  * import { LecturePlugin } from './helpers/plugins/lecture-plugin.ts';
  * const plugin = new LecturePlugin();
  * const issues = await plugin.validate(ctx);
- * const ref = plugin.goldenReference();
  * ```
  */
 export class LecturePlugin implements VariantPlugin {
@@ -119,40 +117,5 @@ export class LecturePlugin implements VariantPlugin {
     }
 
     return issues;
-  }
-
-  /**
-   * Returns the golden reference structure for lecture variants.
-   *
-   * Defines expected section headings for agent files and skill files in
-   * lecture variants. Agent files require standard sections (Role, Responsibilities,
-   * Session Protocol) plus lecture-specific optional sections (Curriculum Map,
-   * Assessment Criteria, Engagement Strategy).
-   *
-   * @returns The golden reference for lecture variants.
-   */
-  goldenReference(): GoldenReference {
-    return {
-      agentSections: {
-        required: [
-          '## Role',
-          '## Responsibilities',
-          '## Session Protocol',
-        ],
-        optional: [
-          '## Curriculum Map',
-          '## Assessment Criteria',
-          '## Engagement Strategy',
-        ],
-      },
-      skillSections: {
-        required: [
-          '## Overview',
-          '## Key Activities',
-          '## Output Standards',
-        ],
-        optional: [],
-      },
-    };
   }
 }

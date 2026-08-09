@@ -59,7 +59,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.8.0 | active | —| —| L0 | —|
+| `create-l2-scaffold.ts` | L0 | 1.8.1 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -129,7 +129,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.10.0 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.10.1 | active | —| —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -166,6 +166,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `test-l2-promotion.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -498,4 +499,4 @@ When modifying a script:
 ---
 
 *SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*
-*Last updated: 2026-08-09 — Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*
+*Last updated: 2026-08-09 — Version bump for l2-to-variant-pipeline v1.10.1 (Issue Set A fixes: consolidated SKIP_AGENT_FILES, fixed missingOptionalSections JSON field, removed process.exit(1) from executeL2ToVariantPipeline, registry-driven canonicalExtensionSource for lecture type, deleted dead VariantPlugin.goldenReference()); previous: Version bumps for l2-to-variant-pipeline v1.10.0, generate-variant v1.8.0, pm-md-parser v1.1.0, create-l2-scaffold v1.8.0, reconcile-with-l0-l1 v1.2.2, golden-reference-loader v1.1.0, capability-registry v1.0.2, consulting-plugin v1.1.0, agent-verify v1.0.2 (feature + bugfix changes: scan L1-match classification, lean variant templates, ADR-0048 pm.md).*

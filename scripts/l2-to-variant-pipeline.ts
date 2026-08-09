@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.0
+ * @version 1.10.1
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -82,6 +82,7 @@ import {
   checkStructuralGaps,
   formatGapReport,
   StructuralGapReport,
+  SKIP_AGENT_FILES,
 } from './helpers/golden-reference-loader.ts';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.ts';
 import { generateVariant, GeneratedVariant, VariantMetadata, parseAgentFile } from './helpers/generate-variant.ts';
@@ -96,7 +97,7 @@ import { validateDependencies } from './helpers/variant-governance-rules.ts';
 import { ErrorPhase, fatalError, logError, logErrors } from './lib/error-handling.ts';
 import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd } from './helpers/pm-md-parser.ts';
 import type { VariantType } from './helpers/registries/variant-type-registry.ts';
-import { listVariantTypes, isVariantType } from './helpers/registries/variant-type-registry.ts';
+import { listVariantTypes, isVariantType, getVariantTypeDefinition } from './helpers/registries/variant-type-registry.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -157,7 +158,9 @@ export interface PipelineResult {
 
 /**
  * Execute complete L2-to-variant pipeline
- * @version 1.2.0
+ * @version 1.3.0 — Phase 3.5/4.5 failures now return buildFailureResult() instead of
+ *                  calling process.exit(1) directly, so programmatic callers can handle
+ *                  failure without their host process dying (Issue A.3).
  */
 export async function executeL2ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
   const startTime = Date.now();
@@ -447,7 +450,8 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
             console.error(`   ❌ Auto-regeneration failed: ${fixMsg}`);
             console.error(`   Fix manually: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
             console.error(`   Then re-run the pipeline.`);
-            process.exit(1);
+            errors.push({ phase: '3.5', error: `AGENTS.md auto-regeneration failed: ${fixMsg}` });
+            return buildFailureResult(phases, errors, startTime);
           }
         } else {
           // BLOCKING: Phase 4 injection will silently produce wrong output without markers
@@ -455,14 +459,14 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
           console.error(`   Phase 4 injectVariantPlaceholders() will find no markers → uninjected output.`);
           console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${config.variantName}`);
           console.error(`   Or re-run pipeline with autoFixAgentsMd:true\n`);
-          process.exit(1);
+          errors.push({ phase: '3.5', error: 'AGENTS.md is missing injection anchors (VARIANT-* markers or §-structure)' });
+          return buildFailureResult(phases, errors, startTime);
         }
       }
     }
 
     console.log(`✅ PHASE 3.5 COMPLETE`);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === undefined) throw error; // re-throw process.exit
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn(`⚠️  PHASE 3.5 WARNING: ${errorMsg}`);
   }
@@ -680,18 +684,21 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       skills,
     };
 
-    // Lecture-type: read extension fields from canonical co-deck template
-    if (config.variantType === 'lecture') {
+    // Registry-driven: read extension fields from the canonical variant.json declared
+    // for this variantType in VARIANT_TYPE_REGISTRY (currently only 'lecture' → co-deck).
+    // See: docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md Issue A.4
+    const canonicalExtensionSource = getVariantTypeDefinition(config.variantType).canonicalExtensionSource;
+    if (canonicalExtensionSource) {
       const { readFileSync } = await import('node:fs');
-      const canonicalPath = join(process.cwd(), 'templates', 'co-deck', 'variant.json');
+      const canonicalPath = join(process.cwd(), ...canonicalExtensionSource.split('/'));
       try {
         const canonical = JSON.parse(readFileSync(canonicalPath, 'utf-8'));
         if (canonical.agent_manifest) metadata.agent_manifest = canonical.agent_manifest;
         if (canonical.theme_manifest) metadata.theme_manifest = canonical.theme_manifest;
         if (canonical.lecture_profile) metadata.lecture_profile = canonical.lecture_profile;
-        console.log(`  ✅ Injected co-deck extension fields (agent_manifest, theme_manifest, lecture_profile)`);
+        console.log(`  ✅ Injected canonical extension fields from ${canonicalExtensionSource} (agent_manifest, theme_manifest, lecture_profile)`);
       } catch {
-        console.warn(`  ⚠️  Could not read templates/co-deck/variant.json — extension fields skipped`);
+        console.warn(`  ⚠️  Could not read ${canonicalExtensionSource} — extension fields skipped`);
       }
     }
 
@@ -763,7 +770,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const agentsDir = j(variantPath, 'agents');
     if (ex(agentsDir)) {
       for (const file of rd(agentsDir)) {
-        if (!file.endsWith('.md') || ['pm.md', 'README.md'].includes(file)) continue;
+        if (!file.endsWith('.md') || SKIP_AGENT_FILES.has(file)) continue;
         const filePath = j(agentsDir, file);
         const content = ru(filePath);
         gapReports.push(checkStructuralGaps(filePath, content, agentGolden, 'agent'));
@@ -807,7 +814,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         fileType: r.fileType,
         passed: r.passed,
         missingSections: r.missingSections ?? [],
-        extraSections: r.extraSections ?? [],
+        missingOptionalSections: r.missingOptionalSections ?? [],
       })),
     };
     wu(reportOutputPath, JSON.stringify(jsonReport, null, 2));
@@ -842,7 +849,8 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         console.error(`   ${issues.join('; ')}`);
         console.error(`   Fix: bun scripts/regenerate-agents-md.ts --variant ${variantPath.split(/[\\/]/).pop()}`);
         console.error(`   Then re-run the pipeline.\n`);
-        process.exit(1);
+        errors.push({ phase: '4.5', error: `AGENTS.md structure misaligned with L1 template: ${issues.join('; ')}` });
+        return buildFailureResult(phases, errors, startTime);
       }
     }
 
@@ -1065,7 +1073,6 @@ function normalizeRelPath(relativePath: string): string {
  * @version 1.3.0
  */
 function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
-  const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
   const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
 
   const agentFiles = scanResult.files.filter(f => {
