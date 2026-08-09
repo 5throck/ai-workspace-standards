@@ -71,8 +71,6 @@
 | **Competitive Intelligence** | `skills/competitive-intelligence/SKILL.md` | strategy-analyst |
 | **Financial Modeling** | `skills/financial-modeling/SKILL.md` | strategy-analyst |
 | **Insight Synthesis** | `skills/insight-synthesis/SKILL.md` | strategy-analyst |
-| **k-dart** | `skills/k-dart/SKILL.md` | strategy-analyst |
-| **DART Disclosure Parser** | `skills/dart-disclosure-parser/SKILL.md` | strategy-analyst |
 | **MECE Logic Auditor** | `skills/mece-logic-auditor/SKILL.md` | strategy-analyst |
 | **Financial Statement Analysis** | `skills/financial-statement-analysis/SKILL.md` | data-analyst |
 | **Stakeholder Alignment** | `skills/stakeholder-alignment/SKILL.md` | change-management-partner |

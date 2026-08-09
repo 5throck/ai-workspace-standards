@@ -64,10 +64,8 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **stakeholder-alignment**: Systematic stakeholder mapping, resistance analysis, and influence-interest prioritization.
 - **stakeholder-review-management**: Manages stakeholder review cycles — reviewer selection, feedback, conflict resolution, and change tracking.
 - **technical-feasibility**: Evaluates whether a proposed solution is technically implementable; produces complexity grades and risks.
-- **k-dart**: Queries the Korean FSS DART OpenAPI for disclosures, profiles, financials, and event reports.
 - **company-intelligence**: Comprehensive company/corporate-group intelligence; dispatches 5 parallel research agents into one report.
 - **financial-statement-analysis**: Full Korean financial statement analysis pipeline — DART → validate → normalize → KPI → ROIC tree → report.
-- **dart-disclosure-parser**: Real-time Korean DART disclosure and financial statement parsing, normalization, and line-item extraction.
 - **mece-logic-auditor**: MECE issue tree auditing and strategic reasoning evaluation for consulting problem-solving frameworks.
 
 ## How to Collaborate

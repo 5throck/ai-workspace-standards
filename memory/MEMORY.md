@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-10](2026-08-10.md) | feat(skills): promote k-dart and create k-law as L1 common skills, remove co-consult duplicates |
 | [2026-08-09](2026-08-09.md) | fix(pipeline): resolve remaining l2-to-variant-pipeline issues for co-export promotion |
 | [2026-08-07](2026-08-07.md) | fix(scripts): validate-templates B-04 supports nested theme CSS layout; inject-skills registers co-game |
 | [2026-08-06](2026-08-06.md) | fix(scripts): resolve audit and scaffolding test issues |

@@ -40,7 +40,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | Automated STRIDE threat matrix generation and DREAD risk scoring framework |
 | `sarif-exporter` | 1.0.0 | active | security-expert | 2026-08-06 | — | Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 JSON format |
 | `accessibility-audit` | 1.0.0 | active | pm | 2026-08-06 | — | Automated WCAG 2.1 AA accessibility evaluation using axe-core |
-| `dart-disclosure-parser` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | Real-time DART Open API corporate disclosure and financial statement parsing rules |
+| `dart-disclosure-parser` | 1.0.0 | deprecated | strategy-analyst | 2026-08-09 | 2026-12-01 | Merged into k-dart v2.0.0 at L1 — retained for backward-compat only |
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | MECE issue tree auditing and strategic reasoning evaluation rules |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
