@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.9.0
+ * @version 1.10.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -26,6 +26,8 @@ import { applyContextTemplate, applyTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } fro
 import type { VariantType } from './registries/variant-type-registry.ts';
 import { getVariantTypeDefinition } from './registries/variant-type-registry.ts';
 import { getPromotionPolicy } from './registries/promotion-policy.ts';
+import { SKIP_AGENT_FILES } from './golden-reference-loader.ts';
+import type { L2ScanResult } from './scan-l2-project.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -924,7 +926,7 @@ function renderBetaBlock(variantType: VariantType, status: string, locale: 'en' 
  * otherwise (beta/generated variants). Shared by EN and KO rendering.
  * @version 1.0.0
  */
-function buildReadmeSubstitutions(metadata: VariantMetadata, locale: 'en' | 'ko'): Record<string, string> {
+export function buildReadmeSubstitutions(metadata: VariantMetadata, locale: 'en' | 'ko'): Record<string, string> {
   const n = metadata.readmeNarrative ?? {};
   const ko = locale === 'ko';
   return {
@@ -959,7 +961,7 @@ function buildReadmeSubstitutions(metadata: VariantMetadata, locale: 'en' | 'ko'
  * The template IS the structural SSOT; this function only supplies values.
  * @version 2.0.0
  */
-function generateReadme(variantPath: string, metadata: VariantMetadata): string {
+export function generateReadme(variantPath: string, metadata: VariantMetadata): string {
   const templatePath = join(COMMON_TEMPLATE, 'docs', 'README.template.md');
 
   if (!existsSync(templatePath)) {
@@ -1005,7 +1007,7 @@ function getVariantTypeDescription(variantType: VariantType): string {
  * Korean mirror of generateReadme(); shares buildReadmeSubstitutions() with locale='ko'.
  * @version 2.0.0
  */
-function generateReadmeKo(variantPath: string, metadata: VariantMetadata): string {
+export function generateReadmeKo(variantPath: string, metadata: VariantMetadata): string {
   const templatePath = join(COMMON_TEMPLATE, 'docs', 'README_ko.template.md');
 
   if (!existsSync(templatePath)) {
@@ -1020,6 +1022,83 @@ function generateReadmeKo(variantPath: string, metadata: VariantMetadata): strin
 
   const readmeKoPath = join(variantPath, 'README_ko.md');
   return applyTemplate(templatePath, readmeKoPath, buildReadmeSubstitutions(metadata, 'ko'));
+}
+
+/**
+ * Normalize scan relative paths to forward slashes (Windows uses backslashes).
+ */
+export function normalizeRelPath(relativePath: string): string {
+  return relativePath.replaceAll('\\', '/');
+}
+
+/**
+ * Extract agent roster from L2 scan result.
+ * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
+ * @version 1.3.0
+ */
+export function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
+  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
+
+  const agentFiles = scanResult.files.filter(f => {
+    const relPath = normalizeRelPath(f.relativePath);
+    if (!relPath.startsWith('agents/') || !relPath.endsWith('.md')) return false;
+    const fileName = relPath.split('/').pop() ?? '';
+    return !SKIP_AGENT_FILES.has(fileName) && !fileName.includes('handoff-spec');
+  });
+
+  return agentFiles
+    .map(file => {
+      const absPath = join(l2ProjectPath, file.relativePath);
+      return parseAgentFile(absPath);
+    })
+    .filter((agent): agent is NonNullable<typeof agent> => agent !== null);
+}
+
+/**
+ * Extract variant-specific skills from L2 scan result.
+ * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
+ * When the L2 variant.json declares `skill_manifest.variant_specific`, only those skills are included;
+ * otherwise falls back to all skill directories under skills/.
+ * @version 1.4.0
+ */
+export function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
+  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
+
+  // Variant-specific skills from L2 variant.json manifest (preferred)
+  let variantSpecificNames: Set<string> | undefined;
+  const variantJsonPath = join(l2ProjectPath, 'variant.json');
+  if (existsSync(variantJsonPath)) {
+    try {
+      const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+      const manifest = variantJson?.skill_manifest?.variant_specific;
+      if (Array.isArray(manifest) && manifest.length > 0) {
+        variantSpecificNames = new Set(
+          manifest
+            .map((s: { name?: unknown }) => (typeof s?.name === 'string' ? s.name : null))
+            .filter((n: string | null): n is string => n !== null),
+        );
+      }
+    } catch {
+      // Ignore malformed variant.json — fall back to directory scan
+    }
+  }
+
+  const skillFiles = scanResult.files.filter(f =>
+    normalizeRelPath(f.relativePath).startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
+  );
+
+  const skills: VariantMetadata['skills'] = [];
+  const processedSkills = new Set<string>();
+
+  for (const file of skillFiles) {
+    const match = normalizeRelPath(file.relativePath).match(/skills\/([^/]+)\//);
+    if (!match || processedSkills.has(match[1])) continue;
+    if (variantSpecificNames && !variantSpecificNames.has(match[1])) continue;
+    skills.push({ name: match[1] });
+    processedSkills.add(match[1]);
+  }
+
+  return skills;
 }
 
 /**

@@ -34,6 +34,8 @@
 | `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L2 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
 | `README.md` / `README_ko.md` | `templates/common/docs/README.template.md` (+KO) | `templates/co-*/README.md` + `Projects/<name>/README.md` | `generate-variant.ts` `applyTemplate()` + `validate-templates.ts` WS-08 + `verify-readme-sync.ts` |
 
+> **README enforcement scope**: Phase A `Projects/<name>/` READMEs are generated **self-service** via `scripts/generate-l2-readme.ts` (and at scaffold time by `create-l2-scaffold.ts`) — no CI gate, consistent with the L2 Design Gate exemption. Phase B `templates/co-*/` READMEs are **hard-enforced** by `validate-templates.ts` Check WS-08 (unchanged). Both paths share the same renderer (`helpers/generate-variant.ts`), so Phase A and Phase B READMEs are structurally identical.
+
 #### Three Types of Flows
 
 **1. Propagation Flow (Workspace → Templates)**
