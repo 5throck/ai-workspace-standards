@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.1.0
+version: 1.2.0
 owner: pm
-last_reviewed: 2026-08-09
+last_reviewed: 2026-08-11
 metadata:
   type: process
   triggers:
@@ -140,6 +140,16 @@ For each domain-specific skill, create `Projects/<variant-name>/skills/<skill-na
 
 Common skills from `templates/common/skills/` are already present — only create domain-specific ones.
 
+### Step 6.5: Regenerate README
+
+`create-l2-scaffold.ts` rendered `README.md`/`README_ko.md` from the workspace README Standard template at scaffold time (Step 1), but with an empty agent roster and empty skills. Now that agents (Step 5) and skills (Step 6) exist, regenerate so the **Meet the AI Team** and **Skills** sections render real content:
+
+```bash
+bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>
+```
+
+Re-run this command after **any** later agent, skill, or `variant.json` change — it reads the live project state via `scanL2Project()` each time. In particular, re-run after Step 7 once `variant.json → description` is filled, so the README tagline no longer reads `TODO: describe…`. This is the Phase A self-service renderer; Phase B's `templates/co-*/` README standard is enforced separately by `WS-08` in `validate-templates.ts`.
+
 ### Step 7: Complete variant.json
 
 Edit `Projects/<variant-name>/variant.json`:
@@ -207,6 +217,7 @@ grep "^## " GEMINI.md
 > **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
 
 - [ ] Run `bun scripts/verify-scripts.ts --verify` in the L2 project — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
+- [ ] Regenerate the README via `bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
 
 ---
 
@@ -228,3 +239,4 @@ When all PROMOTION_CHECKLIST.md conditions are met:
 | CHANGELOG.md not updated | Update manually after each Phase A session |
 | Antigravity .gemini/ files not mirrored from .claude/ | Check .gemini/ after Step 3 Antigravity checklist |
 | agents/*.md missing Section C: Antigravity Integration | Add Section C to every agent during Step 5 |
+| README.md/README_ko.md left as scaffold stub (empty Meet-the-AI-Team / Skills sections) | Run `bun scripts/generate-l2-readme.ts` after Step 6, and again after any later agent/skill change |

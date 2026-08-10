@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.8.1
+// @version 1.9.0
 /**
  * create-l2-scaffold.ts
  *
@@ -26,6 +26,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { includeScriptInL2, parseScriptLayers } from './helpers/layer-filter.ts';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import { generateReadme, generateReadmeKo, type VariantMetadata } from './helpers/generate-variant.ts';
+import { isVariantType } from './helpers/registries/variant-type-registry.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -399,7 +401,7 @@ variant-specific content **before** Phase B:
 - ${BT}CLAUDE.md${BT} — add a ${BT}## ${displayName} Context${BT} section
 - ${BT}GEMINI.md${BT} — add an identical ${BT}## ${displayName} Context${BT} section (platform parity)
 - ${BT}AGENTS.md${BT} — add variant-specific agent roster entries
-- ${BT}README.md${BT} / ${BT}README_ko.md${BT} — replace placeholder with real variant description
+- ${BT}README.md${BT} / ${BT}README_ko.md${BT} — must contain variant-specific content (regenerate via ${BT}scripts/generate-l2-readme.ts${BT})
 - ${BT}variant.json${BT} — complete all ${BT}TODO:${BT} fields
 
 ## Files Requiring ${displayName}-specific Additions
@@ -409,6 +411,7 @@ variant-specific content **before** Phase B:
 - [ ] ${BT}AGENTS.md${BT} — variant agent roster
 - [ ] ${BT}agents/*.md${BT} — variant agent definitions (3-Section: Legal Basis / Role / Protocols)
 - [ ] ${BT}skills/<domain-skill>/SKILL.md${BT} — domain skills
+- [ ] ${BT}README.md${BT} / ${BT}README_ko.md${BT} — regenerate via ${BT}bun scripts/generate-l2-readme.ts${BT} once agents/skills exist
 - [ ] ${BT}variant.json${BT} — description, type, agent_overrides, skill_manifest
 - [ ] ${BT}SECURITY.md${BT} — complete security policy
 - [ ] ${BT}PROMOTION_CHECKLIST.md${BT} — finalize Phase B conditions for this domain
@@ -497,47 +500,27 @@ TODO: document how secrets/credentials are handled (see ${BT}.env.sample${BT}).
 
   ensureDir(path.join(projectDir, 'memory'));
 
-  // README.md
-  const readmeMd = `# ${displayName} (co-${variant})
-
-> TODO: describe the ${displayName} variant.
-
-**Status**: beta · **Version**: 0.1.0 · **Created**: ${TODAY}
-
-## Overview
-
-TODO: explain what this variant does and who it is for.
-
-## Getting Started
-
-TODO: setup and usage instructions.
-
----
-
-_Scaffolded via ${BT}scripts/create-l2-scaffold.ts${BT} on ${TODAY}. See ${BT}_ORIGIN.md${BT} for provenance._
-`;
-  writeFile(path.join(projectDir, "README.md"), readmeMd);
-
-  // README_ko.md
-  const readmeKoMd = `# ${displayName} (co-${variant})
-
-> TODO: ${displayName} variant 설명을 작성하세요.
-
-**상태**: beta · **버전**: 0.1.0 · **생성일**: ${TODAY}
-
-## 개요
-
-TODO: 이 variant가 무엇을 하는지, 누구를 위한 것인지 설명하세요.
-
-## 시작하기
-
-TODO: 설치 및 사용 방법.
-
----
-
-_${TODAY}에 ${BT}scripts/create-l2-scaffold.ts${BT}로 스캐폴딩됨. 출처는 ${BT}_ORIGIN.md${BT} 참조._
-`;
-  writeFile(path.join(projectDir, "README_ko.md"), readmeKoMd);
+  // README.md / README_ko.md — render from templates/common/docs/README{,_ko}.template.md
+  // via the shared renderer (the same one l2-to-variant-pipeline.ts uses at Phase B).
+  // Bootstrap metadata yields the real 7-section structure with graceful empty-roster /
+  // empty-skills placeholders; re-run `bun scripts/generate-l2-readme.ts` after agents
+  // and skills exist to populate the Meet-the-AI-Team / Skills sections.
+  // variant_type stays `domain ?? "TODO"` in variant.json (above), but the renderer's
+  // Variant Type section calls getVariantTypeDescription(), which requires a registry-
+  // valid VariantType — so fall back to 'collaboration' purely for rendering safety.
+  const bootstrapMetadata: VariantMetadata = {
+    name: `co-${variant}`,
+    description: `TODO: describe the ${displayName} variant.`,
+    variantType: domain && isVariantType(domain) ? domain : 'collaboration',
+    status: 'beta',
+    version: '0.1.0',
+    inherits_common: 'templates/common',
+    agentRoster: [],
+    skills: [],
+  };
+  generateReadme(projectDir, bootstrapMetadata);
+  generateReadmeKo(projectDir, bootstrapMetadata);
+  FILE_COUNT += 2; // generateReadme/generateReadmeKo write via applyTemplate, bypassing the local writeFile counter
 
   // AGENTS.md — header only, workspace roster removed, TODO section added.
   const agentsMd = `# AGENTS.md — co-${variant}
@@ -775,8 +758,9 @@ function printSummary(variant: string): void {
   log("  3. Edit AGENTS.md  → add variant-specific agent entries");
   log("  4. Create agents/<name>.md files (3-Section: Legal Basis / Role / Protocols)");
   log("  5. Create domain-specific skills in skills/<domain-skill>/SKILL.md");
-  log("  6. Complete variant.json (description, type, agent_overrides, skill_manifest)");
-  log("  7. Define PROMOTION_CHECKLIST.md conditions for your domain");
+  log("  6. Regenerate README.md/README_ko.md  → bun scripts/generate-l2-readme.ts (re-run after any agent/skill change)");
+  log("  7. Complete variant.json (description, type, agent_overrides, skill_manifest)");
+  log("  8. Define PROMOTION_CHECKLIST.md conditions for your domain");
   log("");
   log("⚠️  Git hooks active — run commits via /sync pipeline only");
   log(

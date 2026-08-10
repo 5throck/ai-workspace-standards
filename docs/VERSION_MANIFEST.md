@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-10T06:06:59.897Z
+**Generated**: 2026-08-10T22:37:33.809Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 36
-- **Scripts**: 139
+- **Scripts**: 140
 - **Commands**: 8
 
 ---
@@ -37,7 +37,7 @@
 | accessibility-audit | 1.0.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
 | agent-lifecycle-manager | 1.0.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
 | audit-workspace | 1.0.0 | active | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
-| create-variant | 1.1.0 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
+| create-variant | 1.2.0 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | active | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
@@ -99,7 +99,7 @@
 | collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | consulting-plugin.ts | 1.1.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
-| create-l2-scaffold.ts | 1.8.1 | scripts/create-l2-scaffold.ts | N/A |
+| create-l2-scaffold.ts | 1.9.0 | scripts/create-l2-scaffold.ts | N/A |
 | design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
 | dev-sync.ts | 1.5.0 | scripts/dev-sync.ts | bun |
 | development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
@@ -116,8 +116,9 @@
 | gateguard-fact-force.ts | 1.2.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
+| generate-l2-readme.ts | 1.0.0 | scripts/generate-l2-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.9.0 | scripts/helpers/generate-variant.ts | fs, path |
+| generate-variant.ts | 1.10.0 | scripts/helpers/generate-variant.ts | fs, path |
 | generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | golden-reference-loader.ts | 1.1.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
 | index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
@@ -127,7 +128,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
 | integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.10.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.10.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
 | layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
 | lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |

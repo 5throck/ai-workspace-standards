@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.1
+ * @version 1.10.2
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -85,7 +85,7 @@ import {
   SKIP_AGENT_FILES,
 } from './helpers/golden-reference-loader.ts';
 import { reconcileWithL0L1, ReconciledManifest } from './helpers/reconcile-with-l0-l1.ts';
-import { generateVariant, GeneratedVariant, VariantMetadata, parseAgentFile } from './helpers/generate-variant.ts';
+import { generateVariant, GeneratedVariant, VariantMetadata, parseAgentFile, extractAgentRoster, extractSkills } from './helpers/generate-variant.ts';
 import {
   initializeBetaLifecycle,
   checkPromotionEligibilityDetails,
@@ -1058,83 +1058,6 @@ function buildFailureResult(
     executionTime: Date.now() - startTime,
     errors,
   };
-}
-
-/**
- * Normalize scan relative paths to forward slashes (Windows uses backslashes).
- */
-function normalizeRelPath(relativePath: string): string {
-  return relativePath.replaceAll('\\', '/');
-}
-
-/**
- * Extract agent roster from L2 scan result.
- * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
- * @version 1.3.0
- */
-function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
-  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
-
-  const agentFiles = scanResult.files.filter(f => {
-    const relPath = normalizeRelPath(f.relativePath);
-    if (!relPath.startsWith('agents/') || !relPath.endsWith('.md')) return false;
-    const fileName = relPath.split('/').pop() ?? '';
-    return !SKIP_AGENT_FILES.has(fileName) && !fileName.includes('handoff-spec');
-  });
-
-  return agentFiles
-    .map(file => {
-      const absPath = join(l2ProjectPath, file.relativePath);
-      return parseAgentFile(absPath);
-    })
-    .filter((agent): agent is NonNullable<typeof agent> => agent !== null);
-}
-
-/**
- * Extract variant-specific skills from L2 scan result.
- * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
- * When the L2 variant.json declares `skill_manifest.variant_specific`, only those skills are included;
- * otherwise falls back to all skill directories under skills/.
- * @version 1.4.0
- */
-function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
-  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
-
-  // Variant-specific skills from L2 variant.json manifest (preferred)
-  let variantSpecificNames: Set<string> | undefined;
-  const variantJsonPath = join(l2ProjectPath, 'variant.json');
-  if (existsSync(variantJsonPath)) {
-    try {
-      const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
-      const manifest = variantJson?.skill_manifest?.variant_specific;
-      if (Array.isArray(manifest) && manifest.length > 0) {
-        variantSpecificNames = new Set(
-          manifest
-            .map((s: { name?: unknown }) => (typeof s?.name === 'string' ? s.name : null))
-            .filter((n: string | null): n is string => n !== null),
-        );
-      }
-    } catch {
-      // Ignore malformed variant.json — fall back to directory scan
-    }
-  }
-
-  const skillFiles = scanResult.files.filter(f =>
-    normalizeRelPath(f.relativePath).startsWith('skills/') && f.relativePath.endsWith('SKILL.md')
-  );
-
-  const skills: VariantMetadata['skills'] = [];
-  const processedSkills = new Set<string>();
-
-  for (const file of skillFiles) {
-    const match = normalizeRelPath(file.relativePath).match(/skills\/([^/]+)\//);
-    if (!match || processedSkills.has(match[1])) continue;
-    if (variantSpecificNames && !variantSpecificNames.has(match[1])) continue;
-    skills.push({ name: match[1] });
-    processedSkills.add(match[1]);
-  }
-
-  return skills;
 }
 
 // ============================================================================

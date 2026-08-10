@@ -40,6 +40,8 @@ Variants **MUST NOT** include their own `docs/context.md`. The immutable project
 
 Every variant's `README.md` and `README_ko.md` MUST follow ONE unified structure. The structural SSOT is `templates/common/docs/README.template.md` (+ `README_ko.template.md`), rendered by `scripts/helpers/generate-variant.ts` via `applyTemplate()`. Stable, hand-maintained variants keep their authored prose but conform to the section skeleton; beta/generated variants are produced entirely by the generator. `validate-templates.ts` Check **WS-08** enforces conformance.
 
+**Enforcement scope** — Phase A `Projects/<name>/` READMEs are produced **self-service** via `scripts/generate-l2-readme.ts` (and at scaffold time by `create-l2-scaffold.ts`); there is no CI gate, consistent with the L2 Design Gate exemption (L2 projects manage their own design workflow). Phase B `templates/co-*/` READMEs are what WS-08 hard-enforces. Both paths call the same renderer (`helpers/generate-variant.ts`), so a Phase A README is structurally identical to its Phase B counterpart the moment the variant is promoted.
+
 **Required top-level (`##`) sections — identical set in EN and KO, in this order:**
 
 | # | English (`README.md`) | Korean (`README_ko.md`) |

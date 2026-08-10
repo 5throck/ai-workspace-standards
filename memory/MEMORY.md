@@ -4,6 +4,16 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-11](2026-08-11.md) | feat(scripts): make README generation reusable for Phase A variant scaffolds
+
+Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README stub and required hand-authoring to match the workspace README Standard. This makes the existing Phase B renderer reusable at scaffold time and as a self-service CLI, so Phase A and Phase B READMEs can never drift structurally.
+
+- generate-l2-readme.ts (new, v1.0.0): self-service CLI to regenerate README.md/README_ko.md for any L2 project path from templates/common/docs/README.template.md, sharing the same renderer as the Phase B pipeline.
+- create-l2-scaffold.ts v1.9.0: render README from the standard template (via generateReadme/generateReadmeKo) instead of hardcoded heredoc stubs; _ORIGIN.md checklist and printSummary now point at generate-l2-readme.ts.
+- helpers/generate-variant.ts v1.10.0: export generateReadme/generateReadmeKo/buildReadmeSubstitutions; relocate extractAgentRoster/extractSkills/normalizeRelPath here from l2-to-variant-pipeline.ts so both phases share one implementation.
+- l2-to-variant-pipeline.ts v1.10.2: import the three relocated functions instead of defining them locally (pure refactor; Phase B regression 8/8).
+- skills/create-variant v1.2.0: new Step 6.5 (Regenerate README), Common Pitfall row, Verification bullet; propagated to all 6 lockstepped platform mirrors.
+- Governance docs: clarify Phase A (self-service, no CI gate) vs Phase B (WS-08 hard-enforced on templates/co-*/ only). |
 | [2026-08-10](2026-08-10.md) | feat(skills): promote k-dart and create k-law as L1 common skills, remove co-consult duplicates |
 | [2026-08-09](2026-08-09.md) | fix(pipeline): resolve remaining l2-to-variant-pipeline issues for co-export promotion |
 | [2026-08-07](2026-08-07.md) | fix(scripts): validate-templates B-04 supports nested theme CSS layout; inject-skills registers co-game |
