@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-09T15:46:15.147Z
+**Generated**: 2026-08-10T06:06:59.897Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 8
-- **Skills**: 37
+- **Skills**: 36
 - **Scripts**: 139
 - **Commands**: 8
 
@@ -38,7 +38,6 @@
 | agent-lifecycle-manager | 1.0.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents | pm |
 | audit-workspace | 1.0.0 | active | skills/audit-workspace/SKILL.md | workspace | audit workspace, run audit, check compliance, workspace check | auditor |
 | create-variant | 1.1.0 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, create variant, variant creation, scaffold new variant, new co- project | pm |
-| dart-disclosure-parser | 1.0.0 | deprecated | skills/dart-disclosure-parser/SKILL.md | workspace | dart-disclosure-parser, /dart-disclosure-parser, DART parsing, DART OpenAPI parse, financial statement parser, corporate disclosure parser | strategy-analyst |
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.0.0 | active | .claude/skills/finishing-a-development-branch/SKILL.md | both | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | N/A |
 | gateguard | 1.0.0 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
@@ -240,7 +239,7 @@
 **Checked**: Claude (.claude/) vs Gemini (.gemini/)
 
 - **Commands with parity**: 8 / 8
-- **Skills with parity**: 5 / 37
+- **Skills with parity**: 5 / 36
 
 ---
 

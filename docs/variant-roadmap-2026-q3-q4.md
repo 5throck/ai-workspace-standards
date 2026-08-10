@@ -113,7 +113,7 @@ The 7 workspace variants map directly to industry-standard open-source benchmark
   - Outputs detailed violation reports containing DOM selectors, impact severity, and remediation guidance.
 
 #### 2.2 `co-consult`: DART Open API Disclosure Parser & MECE Logic Auditor
-- **Milestone 2.2.1: DART Open API Live Disclosure Parser (`skills/dart-disclosure-parser/`)**
+- **Milestone 2.2.1: DART Open API Live Disclosure Parser (`skills/dart-disclosure-parser/`)** — *superseded: merged into `k-dart` v2.0.0, standalone skill removed 2026-08-10*
   - Connects directly to South Korea's DART (Data Analysis, Retrieval and Transfer System) Open API.
   - Fetches and parses corporate filings, financial balance sheets, income statements, and major disclosures into structured JSON datasets.
 - **Milestone 2.2.2: MECE Logic Tree Auditor (`skills/mece-logic-auditor/`)**
