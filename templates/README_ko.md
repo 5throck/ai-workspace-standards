@@ -46,7 +46,6 @@ templates/
 - **`swe-solve`**: `co-develop`의 자율 4단계 문제 해결 파이프라인 (탐색 & 진단 → 국소화 & 계획 → 코드 수정 & 테스트 → 리뷰 & PR).
 - **`compile-tokens.ts`**: `co-design`에서 `tokens.json` 디자인 토큰을 CSS 커스텀 속성 및 TypeScript 타입으로 컴파일.
 - **`accessibility-audit`**: `co-design`에서 axe-core 기반 자동화된 WCAG 2.1 AA 접근성 평가.
-- **`dart-disclosure-parser`**: `co-consult`에서 대한민국 DART Open API 실시간 기업 공시 및 재무제표 파서.
 - **`mece-logic-auditor`**: `co-consult`에서 ME/CE/Logic 스코어카드를 갖춘 구조적 MECE 이슈 트리 감사 스킬.
 - **`presenter-mode`**: `co-deck`에서 BroadcastChannel 동기화 기반의 경량 HTML5 이중 창 발표자 모드 제공.
 - **`render-pdf-deck.ts`**: `co-deck`에서 CSS `@page` 인쇄 규칙을 준수하는 Playwright 기반 페이징 미디어 PDF 렌더러.
@@ -97,4 +96,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 업데이트
 
-*Last Updated: 2026-08-06*
+*Last Updated: 2026-08-10*

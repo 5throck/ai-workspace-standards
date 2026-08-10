@@ -48,7 +48,6 @@ The following 2026 Q3–Q4 roadmap enhancements have been integrated across temp
 - **`swe-solve`**: Autonomous 4-stage problem-solving workflow (Ingest & Inspect → Localization & Plan → Mutation & Test → Review & PR) in `co-develop`.
 - **`compile-tokens.ts`**: Compiles `tokens.json` design tokens to CSS custom properties and TypeScript types in `co-design`.
 - **`accessibility-audit`**: Automated WCAG 2.1 AA accessibility evaluation using axe-core in `co-design`.
-- **`dart-disclosure-parser`**: Real-time South Korean DART Open API corporate disclosure and financial statement parser in `co-consult`.
 - **`mece-logic-auditor`**: Structural MECE issue tree auditor with ME/CE/Logic scorecards in `co-consult`.
 - **`presenter-mode`**: Dual-window HTML5 presenter display with BroadcastChannel synchronization in `co-deck`.
 - **`render-pdf-deck.ts`**: Playwright-based paged-media presentation PDF renderer supporting CSS `@page` print rules in `co-deck`.
@@ -99,4 +98,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-08-10*
