@@ -186,7 +186,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-security/         # ✅ Stable — 레드팀 및 위협 모델링 에이전트 팀
     ├── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
     ├── co-deck/             # 🔶 Beta — 강연 자료 및 프레젠테이션 제작 에이전트 팀
-    ├── co-game/             # 🔶 Beta — HTML5 Canvas 게임 개발 에이전트 팀
+    ├── co-game/             # ✅ Stable — HTML5 Canvas 게임 개발 에이전트 팀
     ├── co-export/           # 🔶 Beta — 수출입 무역 컴플라이언스 에이전트 팀
     └── co-news/             # 🔶 Beta — 한국 경제/금융 저널리즘 에이전트 팀
 ```
@@ -250,7 +250,7 @@ C:\git\
 | `co-security` | ✅ Stable | 보안 인게이지먼트 워크플로 — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 | `co-consult` | ✅ Stable | 전략 컨설팅 워크플로 — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect 등 |
 | `co-deck` | 🔶 Beta | 강연 자료 제작 워크플로 — PM, Version, Research, Storyline, Design, Build, Measure, Export |
-| `co-game` | 🔶 Beta | HTML5 Canvas 게임 개발 워크플로 — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
+| `co-game` | ✅ Stable | HTML5 Canvas 게임 개발 워크플로 — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | 수출입 무역 컴플라이언스 워크플로 — PM, HS 분류, 수출 통제, FTA 원산지, 환급, 물류, 시장 진출, 해외 규제 모니터링, 무역 서류 |
 | `co-news` | 🔶 Beta | 한국 경제/금융 저널리즘 워크플로 — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
 

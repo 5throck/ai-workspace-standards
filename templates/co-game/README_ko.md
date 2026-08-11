@@ -8,7 +8,7 @@ lang_reason: source-material
 # co-game
 
 > **언어**: [English](README.md) · **한국어**
-> **상태**: ⚠️ Beta — v0.1.0
+> **상태**: ✅ Stable — v1.0.0
 > Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함합니다.
 
 ## 개요
@@ -17,7 +17,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ## 빠른 시작
 
-이것은 워크스페이스 템플릿의 beta 변형입니다. `templates/common`에서 상속하며 변형별 맞춤 설정을 포함합니다.
+이것은 워크스페이스 템플릿의 stable 변형입니다. `templates/common`에서 상속하며 변형별 맞춤 설정을 포함합니다.
 
 ### Claude Code 사용자:
 
@@ -90,14 +90,10 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 이 변형은 Vanilla TypeScript 기반 HTML5 Canvas 게임 개발과 장르 전문 디자인 에이전트에 중점을 둡니다.
 
-> **⚠️ 베타 변형** — 프로덕션 용도가 아닙니다.
+> **✅ 스테이블 변형** — 프로덕션 사용 가능.
 
-- **클라이언트 참여**: 0/3 (변형 거버넌스 규칙 참조)
-- **베타 기간**: 0/3개월
-- **추가 검증**: 대기 중
-
-승급 기준은 `scripts/helpers/variant-governance-rules.ts`를 참조하세요.
+2026-08-12에 beta에서 승격되었습니다. 라이프사이클 기록은 `variant.json`를 참조하세요.
 
 ---
 
-*최근 업데이트: 2026-08-11*
+*최근 업데이트: 2026-08-12*

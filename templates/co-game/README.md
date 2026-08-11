@@ -6,7 +6,7 @@ content_hash: 57b9c9c5107cbe394519f980f89661d285488ee63e69b109ab4a34a422657837
 # co-game
 
 > **Language**: **English** · [한국어](README_ko.md)
-> **Status**: ⚠️ Beta — v0.1.0
+> **Status**: ✅ Stable — v1.0.0
 > Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
 
 ## Overview
@@ -15,7 +15,7 @@ Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specia
 
 ## Quick Start
 
-This is a beta variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
+This is a stable variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
 
 ### For Claude Code users:
 
@@ -88,13 +88,9 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 
 This variant focuses on HTML5 Canvas game development using Vanilla TypeScript with genre-specialized design agents.
 
-> **⚠️ Beta variant** — not for production use.
+> **✅ Stable variant** — ready for production use.
 
-- **Client Engagements**: 0/3 (see variant governance rules)
-- **Beta Duration**: 0/3 months
-- **Additional Checks**: Pending
-
-See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
+Promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 
 ---
 

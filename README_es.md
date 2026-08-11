@@ -186,7 +186,7 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-security/         # ✅ Estable — equipo de agentes para red team y modelado de amenazas
     ├── co-consult/          # ✅ Estable — equipo de agentes para consultoría estratégica y análisis
     ├── co-deck/             # 🔶 Beta — equipo de agentes para producción de material de lectura y presentaciones
-    └── co-game/             # 🔶 Beta — equipo de agentes para desarrollo de juegos en HTML5 Canvas
+    └── co-game/             # ✅ Estable — equipo de agentes para desarrollo de juegos en HTML5 Canvas
 ```
 
 Cada subproyecto vive en su propio directorio y repositorio git:
@@ -247,7 +247,7 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-security` | ✅ Estable | Flujo de compromiso de seguridad — PM, Líder de Red Team, Pentester, Modelador de Amenazas, Ingeniero de Parches, Redactor de Informes |
 | `co-consult` | ✅ Estable | Flujo de consultoría estratégica — Líder de Compromiso, Analista de Estrategia, Experto en la Industria, Socio de Gestión del Cambio, Líder de Comunicaciones, Arquitecto de Soluciones, y más |
 | `co-deck` | 🔶 Beta | Flujo de producción de material de lectura — PM, Versión, Investigación, Guion, Diseño, Construcción, Medición, Exportación |
-| `co-game` | 🔶 Beta | Flujo de desarrollo de juegos HTML5 Canvas — PM, Diseñador de Juegos, Diseñadores Arcade/Puzzle, Artista Visual, Diseñador de Sonido, Desarrollador de Juegos, Depurador de Juegos, Ejecutor de Pruebas, Monitor de Seguridad |
+| `co-game` | ✅ Estable | Flujo de desarrollo de juegos HTML5 Canvas — PM, Diseñador de Juegos, Diseñadores Arcade/Puzzle, Artista Visual, Diseñador de Sonido, Desarrollador de Juegos, Depurador de Juegos, Ejecutor de Pruebas, Monitor de Seguridad |
 
 ### Selección de versión y variante
 

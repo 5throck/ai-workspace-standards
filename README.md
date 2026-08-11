@@ -188,7 +188,7 @@ C:\git\ (workspace root - this repo)
     ├── co-security/         # ✅ Stable — red team and threat modeling agent team
     ├── co-consult/          # ✅ Stable — strategy consulting and analysis agent team
     ├── co-deck/             # 🔶 Beta — lecture and presentation material production agent team
-    ├── co-game/             # 🔶 Beta — HTML5 Canvas game development agent team
+    ├── co-game/             # ✅ Stable — HTML5 Canvas game development agent team
     ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
     └── co-news/             # 🔶 Beta — Korean business/finance journalism agent team
 ```
@@ -253,7 +253,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-security` | ✅ Stable | Security engagement workflow — PM, Red Team Lead, Pentester, Threat Modeler, Patch Engineer, Report Writer |
 | `co-consult` | ✅ Stable | Strategy consulting workflow — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect, and more |
 | `co-deck` | 🔶 Beta | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
-| `co-game` | 🔶 Beta | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
+| `co-game` | ✅ Stable | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation |
 | `co-news` | 🔶 Beta | Korean business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
 

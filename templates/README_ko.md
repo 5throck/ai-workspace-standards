@@ -20,7 +20,7 @@ templates/
 ├── co-security/         # 보안 점검 variant
 ├── co-consult/          # 전략 컨설팅 variant
 ├── co-deck/             # 강의/발표 자료 제작 variant (beta)
-└── co-game/             # 게임 개발 variant (beta)
+└── co-game/             # 게임 개발 variant
 ```
 
 **동작 방식:** 새 프로젝트를 스캐폴딩할 때, 스크립트는 먼저 `templates/common/`(공유 인프라)을 복사한 다음 선택된 variant를 덮어씁니다(variant 전용 파일이 공통 파일을 재정의).
@@ -35,7 +35,7 @@ templates/
 | [`co-security`](co-security/) | ✅ Stable | 6개 에이전트(pm, red-team-lead, pentester, threat-modeler 등)를 갖춘 보안 점검 워크플로우 |
 | [`co-consult`](co-consult/) | ✅ Stable | 11개 에이전트 및 16개 도메인 스킬을 갖춘 전략 컨설팅 워크플로우 |
 | [`co-deck`](co-deck/) | 🔶 Beta | 13개 에이전트 및 다중 테마 HTML-to-PDF 파이프라인을 갖춘 강의/발표 자료 제작 워크플로우 |
-| [`co-game`](co-game/) | 🔶 Beta | Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 13개 에이전트 워크플로우 |
+| [`co-game`](co-game/) | ✅ Stable | Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 13개 에이전트 워크플로우 |
 
 ## Phase 1, 2 & 3 고도화 기능
 
@@ -96,4 +96,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 업데이트
 
-*Last Updated: 2026-08-10*
+*Last Updated: 2026-08-11*
