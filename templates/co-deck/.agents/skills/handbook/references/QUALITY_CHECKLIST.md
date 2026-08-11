@@ -7,6 +7,19 @@
 
 ## Automated Checks
 
+### validate-handbook (unified runner — structure + nav + tables)
+
+Run everything with one command: `bun run validate-handbook --docs-dir docs` (`--checks all` adds authoring + doctor).
+
+| # | Check | Tool | Description |
+|---|-------|------|-------------|
+| ① | Structure | `check-structure.ts` | Tag nesting (stack-based), pre/copy-btn balance, nested code-block, stray chars after closing tags, required scripts, lang attribute, language pairs |
+| ② | Broken links | `check-links.ts` | All internal `<a href>` targets resolve to existing files |
+| ③ | prev/next symmetry | `check-symmetry.ts` | A→next→B implies B→prev→A |
+| ④ | Label match | `check-labels.ts` | chapter-nav labels match target title/h1 |
+| ⑤ | DOCS sync | `check-search.ts` | site-search.js DOCS array matches actual HTML files (skipped when no site-search.js) |
+| ⑥ | Table policy | `check-tables.ts` | No colgroup/col-width, nowrap-first-column, or max-width-without-width |
+
 ### validate-nav (4 checks)
 
 | # | Check | Tool | Description |
@@ -138,6 +151,7 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §21-1 All pages have sidebar nav
 - [ ] §21-1 Content pages have chapter-nav
 - [ ] §21-2 Index page grouped by day/type with instructor materials section
+- [ ] §21-2 Instructor materials group is the FIRST group on the index page (above all chapter groups)
 - [ ] §21-4 prev/next mutual symmetry verified
 
 ### Course Materials (§14, §15, §20)

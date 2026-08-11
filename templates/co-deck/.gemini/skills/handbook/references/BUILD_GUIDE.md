@@ -56,7 +56,9 @@ bun scripts/scaffold-handbook.ts --project . --output handbook --lang ko
 This copies:
 - HTML templates → `handbook/docs/`
 - CSS/JS assets → `handbook/docs/assets/`
-- Validation scripts → `handbook/scripts/`
+- Validation scripts → `handbook/scripts/` (validate-handbook, check-structure,
+  validate-nav + check-links/symmetry/labels/search, check-tables, update-footers,
+  check-authoring, handbook-doctor, apply-handbook-theme)
 - `package.json` with npm scripts
 - CI workflow → `handbook/.github/workflows/`
 
@@ -129,6 +131,11 @@ Required for course mode. Must include:
 | Demo sequence | Demo sequence for live demonstrations |
 | Evaluation criteria | Evaluation criteria and rubrics |
 
+### Index Placement
+
+- Place Course Overview and Lecture Guide at `docs/lecture-guide/00_Course_Overview.html` and `docs/lecture-guide/00_Lecture_Guide.html` (or paths matching the project's conventions).
+- On the index page (`docs/index.html`), list both as cards in the instructor materials group. The instructor materials group must be the **first group** on the index page, placed directly below the meta block and above all chapter groups (see AUTHORING_GUIDELINES.md §21-2). Do not place it between or after the chapter groups.
+
 ---
 
 ## §5: Quality Verification
@@ -136,15 +143,22 @@ Required for course mode. Must include:
 Dispatch `handbook-reviewer` agent to run all validation checks:
 
 ```bash
+# Unified validation: structure + nav + tables in one command
+bun run validate-handbook --docs-dir docs
+
 # 12 static analysis checks
 bun run handbook-doctor --project .
 
 # 10 authoring compliance checks
 bun run check-authoring --project . --lang ko
 
-# 4 navigation integrity checks
+# 4 navigation integrity checks (also part of validate-handbook)
 bun run validate-nav --docs-dir docs
 ```
+
+> The unified runner (`validate-handbook.ts`) and all check scripts
+> (`check-structure.ts`, `validate-nav.ts`, `check-tables.ts`, `update-footers.ts`)
+> are deployed into the generated handbook's `scripts/` by `scaffold-handbook.ts`.
 
 ### Fix Cycle
 1. Run all 3 tools

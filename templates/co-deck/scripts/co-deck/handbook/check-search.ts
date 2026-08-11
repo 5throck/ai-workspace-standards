@@ -1,8 +1,10 @@
-// @version 1.0.0
 // scripts/co-deck/handbook/check-search.ts
 // Check ④: site-search.js DOCS array must contain all HTML files in docs/,
 // and every DOCS entry must point to an existing file.
-// Adapted from Handbooks/multi-agent-harness-handbook/scripts/check-search.ts
+// Canonical source of the handbook toolkit (adapted from
+// Handbooks/multi-agent-harness-handbook/scripts/check-search.ts).
+// Skipped when site-search.js is absent — handbooks that use inpage-search.js
+// have no global DOCS array to validate.
 
 import { findAllHtmlFiles, readFile, parseDocsArray, fileExists, getDocsDir } from "./nav-utils.ts";
 import { relative, join } from "node:path";
@@ -18,6 +20,7 @@ export function checkSearchIndex(): SearchIndexError[] {
   const docsDir = getDocsDir();
 
   const searchJsPath = join(docsDir, "assets", "site-search.js");
+  if (!fileExists(searchJsPath)) return errors; // no global search index — skip
   const searchJs = readFile(searchJsPath);
   const docsEntries = parseDocsArray(searchJs);
 
