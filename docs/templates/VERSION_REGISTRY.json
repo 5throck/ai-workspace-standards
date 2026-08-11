@@ -68,9 +68,9 @@
       "migration_guides": []
     },
     "co-game": {
-      "latest": "0.1.0",
+      "latest": "1.0.0",
       "released": "2026-07-08",
-      "status": "beta",
+      "status": "stable",
       "changelog": [],
       "security_advisories": [],
       "migration_guides": [],

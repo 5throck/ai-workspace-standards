@@ -20,7 +20,7 @@ templates/
 ├── co-security/         # Security engagement variant
 ├── co-consult/          # Strategy consulting variant
 ├── co-deck/             # Lecture/presentation variant (beta)
-├── co-game/             # Game development variant (beta)
+├── co-game/             # Game development variant
 └── co-export/           # Import/export trade compliance variant (beta)
 ```
 
@@ -36,7 +36,7 @@ templates/
 | [`co-security`](co-security/) | ✅ Stable | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, etc.) |
 | [`co-consult`](co-consult/) | ✅ Stable | Strategy consulting with 11 agents and 16 domain skills |
 | [`co-deck`](co-deck/) | 🔶 Beta | Lecture/presentation production with 13 agents and multi-theme HTML-to-PDF pipeline |
-| [`co-game`](co-game/) | 🔶 Beta | Game development for HTML5 Canvas with Vanilla TypeScript and 13 agents |
+| [`co-game`](co-game/) | ✅ Stable | Game development for HTML5 Canvas with Vanilla TypeScript and 13 agents |
 | [`co-export`](co-export/) | 🔶 Beta | Import/export trade-compliance workflow with 8 agents (HS classification, export control, FTA origin, duty drawback, logistics, market entry, foreign regulation monitoring, trade documentation) |
 
 ## Phase 1, 2 & 3 Advancements
@@ -98,4 +98,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-08-10*
+*Last Updated: 2026-08-11*

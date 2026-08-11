@@ -2,14 +2,14 @@
   "name": "co-game",
   "description": "Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.",
   "variant_type": "game",
-  "status": "beta",
-  "version": "0.1.0",
+  "status": "stable",
+  "version": "1.0.0",
   "inherits_common": "templates/common",
   "created_at": "2026-07-08T00:02:24.154Z",
   "lifecycle": {
-    "statusSince": "2026-07-08",
-    "lastTransition": "initial → beta on 2026-07-08",
-    "stablePromotedOn": null
+    "statusSince": "2026-08-12",
+    "lastTransition": "initial → beta on 2026-07-08 → stable on 2026-08-12",
+    "stablePromotedOn": "2026-08-12"
   },
   "agents": [
     {
@@ -113,12 +113,9 @@
       }
     ]
   },
-  "betaLifecycleSummary": {
-    "betaEngagements": 0,
-    "betaBugs": 0,
-    "betaAgeInMonths": 0,
-    "promotionEligible": false,
-    "missingCriteria": [],
-    "lastSynced": "2026-07-11T08:21:33.185Z"
+  "stablePromotionSummary": {
+    "promotedOn": "2026-08-12",
+    "previousStatus": "beta",
+    "promotionReason": "Variant matured with 2 complete game implementations (pacman, bubble-bobble), 12 agents, 4 skills, and comprehensive test suites."
   }
 }

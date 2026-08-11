@@ -118,7 +118,7 @@ co-game reuses the workspace's 6-phase model (see [AGENTS.md §4.2](../AGENTS.md
 | **4** | Implementation | `game-developer` → `test-runner` → `game-debugger` execution loop (max 3 iterations on failure) |
 | **5** | Finalization | PM logs decisions to `memory/YYYY-MM-DD.md`; runs `/sync`; opens PR |
 
-**Beta variant status**: co-game is currently a **beta** variant (v0.1.0) — it requires 3 client engagements and 3 months of beta duration before promotion to stable. See `scripts/helpers/variant-governance-rules.ts` for the exact promotion criteria.
+**Stable variant status**: co-game is a **stable** variant (v1.0.0) — promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 
 ---
 

@@ -468,7 +468,7 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant
-One of seven project archetypes: `co-develop`, `co-design`, `co-work`, `co-security`, `co-consult` (all stable), `co-deck` (beta), `co-game` (beta, game development — created 2026-07-08). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+One of seven project archetypes: `co-develop`, `co-design`, `co-work`, `co-security`, `co-consult`, `co-game` (all stable), `co-deck` (beta). Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Three values:
@@ -631,4 +631,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-08-11*
