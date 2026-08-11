@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-12]**: chore(templates/co-game): add projects/ from live project — copied `projects/pacman/` (src, tests, docs, config) and `projects/bubble-bobble/` (src, tests, maps) from `Projects/co-game/projects/` to `templates/co-game/projects/`, excluding node_modules, dist, and lock files (96 files).
+
 - **[2026-08-12]**: chore(templates/co-game): bidirectional sync with project — updated template README dates (2026-08-09 → 2026-08-11) to match live project; applied project-side changes directly to local `Projects/co-game/` filesystem (agent capabilities, Designer row, SKILLS.md, variant.json skills/skill_manifest, docs/superpowers→designs rename, src/ecs + tests copy).
 
 - **[2026-08-12]**: docs(readme): add co-news and co-export variants to Korean README — added `co-news` (Korean business/finance journalism, Beta) and `co-export` (import/export trade compliance, Beta) to README_ko.md Repository Structure tree, Template Variants table, and Multi-Agent Workflow section; updated Last Updated date to 2026-08-12.

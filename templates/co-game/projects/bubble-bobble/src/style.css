@@ -1,0 +1,34 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #111111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: monospace;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 768px; /* Restricts the layout bounds on wide screens */
+  border: 6px solid #ffcc00;
+  border-radius: 4px;
+  box-shadow: 0 0 32px rgba(255, 200, 0, 0.4), 0 0 80px rgba(0,0,0,0.9);
+}
+
+#game-canvas {
+  display: block;
+  background-color: #000;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3; /* Stretch horizontally to match classic 4:3 CRT monitor aspect ratio */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

@@ -1,0 +1,10 @@
+export { EntityBase, directionToVelocity, oppositeDirection } from "./EntityBase";
+export { Pacman } from "./Pacman";
+export { GhostBase } from "./GhostBase";
+export { Blinky } from "./Blinky";
+export { Pinky } from "./Pinky";
+export { Inky } from "./Inky";
+export { Clyde } from "./Clyde";
+export { Dot } from "./Dot";
+export { PowerPellet } from "./PowerPellet";
+export { Fruit } from "./Fruit";
