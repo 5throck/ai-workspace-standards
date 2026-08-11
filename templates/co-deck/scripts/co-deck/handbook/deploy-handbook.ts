@@ -21,10 +21,32 @@ function getArg(name: string, fallback: string): string {
   return fallback;
 }
 
+// --- Input Validation ---
+function validateRepoSlug(slug: string): boolean {
+  return /^[a-zA-Z0-9]+([._-][a-zA-Z0-9]+)*\/[a-zA-Z0-9]+([._-][a-zA-Z0-9]+)*$/.test(slug);
+}
+function validateVisibility(vis: string): boolean {
+  return vis === "public" || vis === "private";
+}
+function validateOutputDir(dir: string): boolean {
+  return dir !== "" && !dir.includes("..") && !dir.startsWith("/") && !dir.includes("\0");
+}
+
 const projectDir = resolve(getArg("--project", "."));
 const outputDir = getArg("--output", "handbook");
 const repoSlug = getArg("--repo", "");
 const visibility = getArg("--visibility", "public");
+
+// Validate inputs
+if (!validateRepoSlug(repoSlug)) {
+  fatal('--repo must be "owner/name" with only alphanumeric, dot, hyphen, underscore');
+}
+if (!validateVisibility(visibility)) {
+  fatal('--visibility must be "public" or "private"');
+}
+if (!validateOutputDir(outputDir)) {
+  fatal('--output must not contain "..", start with "/", or be empty');
+}
 
 const handbookDir = join(projectDir, outputDir);
 const docsDir = join(handbookDir, "docs");
@@ -134,9 +156,7 @@ function patchReadmePagesUrl(readmePath: string, url: string, title: string): bo
 // --- Step 0: Validate inputs ---
 log("🔍", "Pre-flight checks...");
 
-if (!repoSlug || !repoSlug.includes("/")) {
-  fatal('--repo is required and must be "owner/name" format (e.g. 5throck/my-handbook)');
-}
+// repoSlug already validated above by validateRepoSlug
 
 if (!existsSync(docsDir)) {
   fatal(`docs/ directory not found at ${docsDir} — run scaffold first`);

@@ -12,6 +12,7 @@ owner: pm
 prerequisites: none
 last_reviewed: 2026-06-13
 metadata:
+  type: process
   triggers:
     - build new agent team
     - create agent team

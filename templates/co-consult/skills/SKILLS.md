@@ -23,6 +23,7 @@ Generated: 2026-08-11T05:17:34.294Z
 - [project-review](skills/project-review/SKILL.md)
 - [script-lifecycle-manager](skills/script-lifecycle-manager/SKILL.md)
 - [security-scan](skills/security-scan/SKILL.md)
+- [team-builder](skills/team-builder/SKILL.md)
 - [skill-lifecycle-manager](skills/skill-lifecycle-manager/SKILL.md)
 - [solution-design](skills/solution-design/SKILL.md)
 - [stakeholder-alignment](skills/stakeholder-alignment/SKILL.md)
@@ -35,14 +36,9 @@ Generated: 2026-08-11T05:17:34.294Z
 - [update-bun-packages](skills/update-bun-packages/SKILL.md)
 - [validate-docs-links](skills/validate-docs-links/SKILL.md)
 
-## Unknown
-
-- [company-intelligence](skills/company-intelligence/SKILL.md)
-- [k-law](skills/k-law/SKILL.md)
-- [team-builder](skills/team-builder/SKILL.md)
-
 ## Domain
 
+- [company-intelligence](skills/company-intelligence/SKILL.md)
 - [competitive-intelligence](skills/competitive-intelligence/SKILL.md)
 - [financial-modeling](skills/financial-modeling/SKILL.md)
 - [org-readiness-assessment](skills/org-readiness-assessment/SKILL.md)
@@ -82,5 +78,6 @@ Generated: 2026-08-11T05:17:34.294Z
 
 ## Contract-safety
 
+- [k-law](skills/k-law/SKILL.md)
 - [zod-contract-gate](skills/zod-contract-gate/SKILL.md)
 

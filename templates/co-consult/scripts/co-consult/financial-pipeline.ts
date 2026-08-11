@@ -82,6 +82,13 @@ async function main() {
     ? args[companyFlagIdx + 1]
     : "unknown";
 
+  // Validate companyName — prevent path traversal
+  const SAFE_NAME_RE = /^[a-zA-Z0-9가-힣][a-zA-Z0-9가-힣_\-\s]*[a-zA-Z0-9가-힣]$/;
+  if (companyName !== "unknown" && !SAFE_NAME_RE.test(companyName)) {
+    console.error(`Error: --company contains unsafe characters: "${companyName}"`);
+    process.exit(1);
+  }
+
   const outputDirFlagIdx = args.indexOf("--output-dir");
   const scriptDir = dirname(process.argv[1]);
   const outputDir = outputDirFlagIdx >= 0 && args[outputDirFlagIdx + 1]
@@ -118,7 +125,13 @@ async function main() {
   const validationOutput = join(outputDir, "validation", `validation-report-${today}.json`);
   const validationJson = await runPythonScript("validate.py", [dartPath]);
   writeFileSync(validationOutput, validationJson, "utf-8");
-  const validationReport = JSON.parse(validationJson);
+  let validationReport: { summary: { pass_rate: number; passed: number; total_checks: number } };
+  try {
+    validationReport = JSON.parse(validationJson);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Validation output is not valid JSON: ${msg}`);
+  }
   console.log(`   ✅ Validation complete: ${validationReport.summary.pass_rate}% pass rate (${validationReport.summary.passed}/${validationReport.summary.total_checks})`);
 
   // ③ Normalization
@@ -127,7 +140,13 @@ async function main() {
   const mappingPath = resolve(scriptDir, "..", "..", "python", "mappings", "ifrs_general.json");
   const canonicalJson = await runPythonScript("normalize.py", [dartPath, mappingPath]);
   writeFileSync(canonicalOutput, canonicalJson, "utf-8");
-  const canonicalModel = JSON.parse(canonicalJson);
+  let canonicalModel: { meta: { coverage: { coverage_pct: number; mapped: number; total_fields: number } } };
+  try {
+    canonicalModel = JSON.parse(canonicalJson);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Normalization output is not valid JSON: ${msg}`);
+  }
   console.log(`   ✅ Normalization complete: ${canonicalModel.meta.coverage.coverage_pct}% field coverage (${canonicalModel.meta.coverage.mapped}/${canonicalModel.meta.coverage.total_fields})`);
 
   // ④ KPI Extraction
@@ -149,7 +168,16 @@ async function main() {
   const reportOutput = join(outputDir, "reports", `financial-analysis-${companyName}-${today}.md`);
   // Import and run report generator
   const { generateReport } = await import("./financial-report.ts");
-  const report = generateReport(canonicalModel, validationReport, JSON.parse(kpiJson), JSON.parse(treeJson));
+  let kpiParsed: unknown;
+  let treeParsed: unknown;
+  try {
+    kpiParsed = JSON.parse(kpiJson);
+    treeParsed = JSON.parse(treeJson);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Report data is not valid JSON: ${msg}`);
+  }
+  const report = generateReport(canonicalModel, validationReport, kpiParsed, treeParsed);
   writeFileSync(reportOutput, report, "utf-8");
   console.log(`   ✅ Report saved to: ${reportOutput}`);
 
