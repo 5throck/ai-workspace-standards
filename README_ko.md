@@ -186,7 +186,9 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-security/         # ✅ Stable — 레드팀 및 위협 모델링 에이전트 팀
     ├── co-consult/          # ✅ Stable — 전략 컨설팅 및 분석 에이전트 팀
     ├── co-deck/             # 🔶 Beta — 강연 자료 및 프레젠테이션 제작 에이전트 팀
-    └── co-game/             # 🔶 Beta — HTML5 Canvas 게임 개발 에이전트 팀
+    ├── co-game/             # 🔶 Beta — HTML5 Canvas 게임 개발 에이전트 팀
+    ├── co-export/           # 🔶 Beta — 수출입 무역 컴플라이언스 에이전트 팀
+    └── co-news/             # 🔶 Beta — 한국 경제/금융 저널리즘 에이전트 팀
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -227,6 +229,7 @@ C:\git\
 - **co-consult**: 리서치, 분석, 산출물 작성, 고객 납품을 아우르는 7단계 전략 컨설팅 워크플로
 - **co-deck**: 리서치부터 인쇄 가능한 PDF까지의 11단계 강연 자료 제작 워크플로, 5개의 승인 게이트 포함
 - **co-game**: Vanilla TypeScript 기반 HTML5 Canvas 게임 개발 워크플로, 게임 설계, 아케이드/퍼즐 장르, 비주얼 아트, 사운드, 엔진 구현, 디버깅, 테스트 전문 에이전트 포함
+- **co-news**: 상장사 보도를 담당하는 경제 기자를 위한 한국 경제/금융 저널리즘 워크플로 — DART 금융 공시(k-dart), 한국 상법 리서치(k-law), 인용 레저 기반 팩트체크, AI투 느낌 감소, 금융 인포그래픽 생성
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -248,6 +251,8 @@ C:\git\
 | `co-consult` | ✅ Stable | 전략 컨설팅 워크플로 — Engagement Leader, Strategy Analyst, Industry Expert, Change Management Partner, Communications Lead, Solutions Architect 등 |
 | `co-deck` | 🔶 Beta | 강연 자료 제작 워크플로 — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | 🔶 Beta | HTML5 Canvas 게임 개발 워크플로 — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
+| `co-export` | 🔶 Beta | 수출입 무역 컴플라이언스 워크플로 — PM, HS 분류, 수출 통제, FTA 원산지, 환급, 물류, 시장 진출, 해외 규제 모니터링, 무역 서류 |
+| `co-news` | 🔶 Beta | 한국 경제/금융 저널리즘 워크플로 — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
 
 ### 버전 및 Variant 선택
 
@@ -321,4 +326,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-30*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-11*
