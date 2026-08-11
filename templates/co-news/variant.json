@@ -1,0 +1,143 @@
+{
+  "name": "co-news",
+  "description": "Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.",
+  "variant_type": "collaboration",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-08-11T15:23:46.046Z",
+  "lifecycle": {
+    "statusSince": "2026-08-10",
+    "lastTransition": "initial → beta on 2026-08-10",
+    "stablePromotedOn": null
+  },
+  "agents": [
+    {
+      "name": "fact-checker",
+      "file": "agents/fact-checker.md"
+    },
+    {
+      "name": "financial-analyst",
+      "file": "agents/financial-analyst.md"
+    },
+    {
+      "name": "legal-researcher",
+      "file": "agents/legal-researcher.md"
+    },
+    {
+      "name": "reporter",
+      "file": "agents/reporter.md"
+    },
+    {
+      "name": "style-editor",
+      "file": "agents/style-editor.md"
+    },
+    {
+      "name": "visual-editor",
+      "file": "agents/visual-editor.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "ai-tell-reduction"
+    },
+    {
+      "name": "financial-infographic-svg"
+    },
+    {
+      "name": "financial-journalism-style"
+    },
+    {
+      "name": "financial-narrative-brief"
+    },
+    {
+      "name": "source-verification-ledger"
+    }
+  ],
+  "displayName": "Co-News",
+  "agent_overrides": {
+    "pm": {
+      "type": "additive",
+      "reason": "Overrides PM with an Editor-in-Chief role — gates every article on fact-checker sign-off (0 UNVERIFIED claims in the citation ledger) and style-editor sign-off (AI-tell reduction + house-style conformance) before publish; routes financial/disclosure questions to financial-analyst and legal/regulatory questions to legal-researcher.",
+      "since": "2026-08-10",
+      "reviewed_by": "architect",
+      "overrides": [
+        "agent-roster",
+        "governance-workflow",
+        "dispatch-protocol"
+      ]
+    }
+  },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "source-verification-ledger",
+        "layer": "workspace",
+        "used_by_agents": [
+          "fact-checker"
+        ],
+        "phases": [
+          2
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "financial-narrative-brief",
+        "layer": "workspace",
+        "used_by_agents": [
+          "financial-analyst"
+        ],
+        "phases": [
+          1
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "financial-journalism-style",
+        "layer": "workspace",
+        "used_by_agents": [
+          "style-editor",
+          "reporter"
+        ],
+        "phases": [
+          3,
+          4
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "ai-tell-reduction",
+        "layer": "workspace",
+        "used_by_agents": [
+          "style-editor"
+        ],
+        "phases": [
+          4
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "financial-infographic-svg",
+        "layer": "workspace",
+        "used_by_agents": [
+          "visual-editor"
+        ],
+        "phases": [
+          5
+        ],
+        "platform_parity": "required"
+      }
+    ]
+  },
+  "createdAt": "2026-08-10",
+  "phaseAComplete": true,
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "betaLifecycleSummary": {
+    "betaEngagements": 0,
+    "betaBugs": 0,
+    "betaAgeInMonths": 0,
+    "promotionEligible": false,
+    "missingCriteria": [],
+    "lastSynced": "2026-08-11T15:23:46.126Z"
+  }
+}

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-12](2026-08-12.md) | chore: update |
 | [2026-08-11](2026-08-11.md) | feat(scripts): make README generation reusable for Phase A variant scaffolds
 
 Phase A L2 projects (Projects/<name>/) previously scaffolded a 2-section README stub and required hand-authoring to match the workspace README Standard. This makes the existing Phase B renderer reusable at scaffold time and as a self-service CLI, so Phase A and Phase B READMEs can never drift structurally.
