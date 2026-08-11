@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: stakeholder-alignment, consulting-report-writing
+metadata:
+  type: process
+  triggers:
+    - stakeholder review
+    - review cycle
+    - feedback collection
+    - deliverable review
+    - review management
+    - reviewer selection
 ---
 
 ## Context

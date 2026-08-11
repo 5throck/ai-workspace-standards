@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-// @version 1.0.0
 // scripts/co-deck/handbook/scaffold-handbook.ts
 // Generates handbook project scaffold from skill templates + assets.
 // Copies template HTML, CSS, JS, scripts, and examples into a new project.
@@ -50,16 +49,20 @@ const TEMPLATE_FILES: { src: string; dest: string }[] = [
 ];
 
 const SCRIPT_FILES: { src: string; dest: string }[] = [
-  { src: "handbook/validate-nav.ts", dest: "validate-nav.ts" },
-  { src: "handbook/check-links.ts", dest: "check-links.ts" },
-  { src: "handbook/check-symmetry.ts", dest: "check-symmetry.ts" },
-  { src: "handbook/check-labels.ts", dest: "check-labels.ts" },
-  { src: "handbook/check-search.ts", dest: "check-search.ts" },
-  { src: "handbook/nav-utils.ts", dest: "nav-utils.ts" },
-  { src: "handbook/scaffold-handbook.ts", dest: "scaffold-handbook.ts" },
-  { src: "handbook/check-authoring.ts", dest: "check-authoring.ts" },
-  { src: "handbook/apply-handbook-theme.ts", dest: "apply-handbook-theme.ts" },
-  { src: "handbook/handbook-doctor.ts", dest: "handbook-doctor.ts" },
+  { src: "validate-handbook.ts", dest: "validate-handbook.ts" },
+  { src: "check-structure.ts", dest: "check-structure.ts" },
+  { src: "validate-nav.ts", dest: "validate-nav.ts" },
+  { src: "check-links.ts", dest: "check-links.ts" },
+  { src: "check-symmetry.ts", dest: "check-symmetry.ts" },
+  { src: "check-labels.ts", dest: "check-labels.ts" },
+  { src: "check-search.ts", dest: "check-search.ts" },
+  { src: "check-tables.ts", dest: "check-tables.ts" },
+  { src: "update-footers.ts", dest: "update-footers.ts" },
+  { src: "nav-utils.ts", dest: "nav-utils.ts" },
+  { src: "scaffold-handbook.ts", dest: "scaffold-handbook.ts" },
+  { src: "check-authoring.ts", dest: "check-authoring.ts" },
+  { src: "apply-handbook-theme.ts", dest: "apply-handbook-theme.ts" },
+  { src: "handbook-doctor.ts", dest: "handbook-doctor.ts" },
 ];
 
 let copied = 0;
@@ -93,7 +96,6 @@ ensureDir(join(assetsDir, "js"));
 ensureDir(join(assetsDir, "images"));
 ensureDir(join(assetsDir, "icons"));
 ensureDir(scriptsDir);
-ensureDir(join(scriptsDir, "handbook"));
 ensureDir(join(targetDir, ".github", "workflows"));
 
 // Copy templates
@@ -119,7 +121,11 @@ const packageJson = {
   private: true,
   type: "module",
   scripts: {
+    "validate-handbook": `bun run scripts/validate-handbook.ts --docs-dir docs`,
     "validate-nav": `bun run scripts/validate-nav.ts --docs-dir docs`,
+    "check-structure": `bun run scripts/check-structure.ts --docs-dir docs`,
+    "check-tables": `bun run scripts/check-tables.ts --docs-dir docs`,
+    "update-footers": `bun run scripts/update-footers.ts --docs-dir docs`,
     "check-authoring": `bun run scripts/check-authoring.ts --project . --lang ${lang}`,
     "apply-theme": `bun run scripts/apply-handbook-theme.ts --project . --theme azure`,
     "handbook-doctor": `bun run scripts/handbook-doctor.ts --project .`,
@@ -139,12 +145,12 @@ on:
       - 'handbook/scripts/**'
 
 jobs:
-  validate-nav:
+  validate-handbook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: cd handbook && bun install && bun run validate-nav
+      - run: cd handbook && bun install && bun run validate-handbook
 
   check-authoring:
     runs-on: ubuntu-latest
@@ -165,10 +171,10 @@ console.log(`\n✅ Handbook scaffold created: ${targetDir}`);
 console.log(`   📋 ${copied} file(s) copied, ${created} file(s) created, ${skipped} skipped`);
 console.log(`   📁 docs/    — HTML pages + assets`);
 console.log(`   📁 scripts/ — Validation and tooling scripts`);
-console.log(`   📁 .github/ — CI workflow (validate-nav + check-authoring)`);
+console.log(`   📁 .github/ — CI workflow (validate-handbook + check-authoring)`);
 console.log(`\n   Next steps:`);
 console.log(`   1. cd ${outputDir}`);
 console.log(`   2. bun install`);
 console.log(`   3. bun run apply-theme --theme azure`);
 console.log(`   4. Edit docs/chapters/ to add content`);
-console.log(`   5. bun run validate-nav && bun run check-authoring`);
+console.log(`   5. bun run validate-handbook   # structure + nav + tables in one command`);

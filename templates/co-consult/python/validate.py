@@ -292,14 +292,24 @@ def check_net_income_retained_earnings(raw_data: dict, years: list[str]) -> list
 
         # Current retained earnings (thstrm)
         re_curr_raw = find_account_amount(bs_curr, "이익잉여금(결손금)")
+        if re_curr_raw is None:
+            re_curr_raw = find_account_amount(bs_curr, "이익잉여금")
         # Prior retained earnings (frmtrm) of the current year = ending of previous year
         re_prev_raw = find_account_amount(
             bs_curr, "이익잉여금(결손금)", amount_col="frmtrm_amount"
         )
+        if re_prev_raw is None:
+            re_prev_raw = find_account_amount(
+                bs_curr, "이익잉여금", amount_col="frmtrm_amount"
+            )
 
-        # Net income from CIS
-        cis_curr = df_curr[df_curr["sj_div"] == "CIS"]
+        # Net income — DART reports this under CIS when a company files a
+        # combined statement, or under IS when income statement and other
+        # comprehensive income are filed as separate statements.
+        cis_curr = df_curr[df_curr["sj_div"].isin(["CIS", "IS"])]
         ni_raw = find_account_amount(cis_curr, "당기순이익(손실)")
+        if ni_raw is None:
+            ni_raw = find_account_amount(cis_curr, "당기순이익")
 
         if any(v is None for v in (re_curr_raw, re_prev_raw, ni_raw)):
             checks.append({

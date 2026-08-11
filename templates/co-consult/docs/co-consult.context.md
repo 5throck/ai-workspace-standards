@@ -1,4 +1,4 @@
-# [Project Name] — co-consult Configuration
+# co-consult — co-consult Configuration
 
 > Extends docs/context.md. This file IS the customization layer for this project.
 > context.md is IMMUTABLE — all project-specific changes belong here.
@@ -56,7 +56,6 @@
 |-------|------|-------------------|
 | **Research Analysis** | `.claude/skills/research-analysis/SKILL.md` | Analyzing topics, synthesizing research, evidence gathering |
 | **Documentation Writing** | `.claude/skills/documentation-writing/SKILL.md` | Creating guides, drafting communications, synthesizing complex information |
-| **API Documentation** | `.claude/skills/api-documentation/SKILL.md` | Documenting REST APIs, GraphQL interfaces, SDKs |
 | **Meeting Facilitation** | `skills/meeting-facilitation/SKILL.md` | Running structured multi-agent meetings |
 | **Agent Lifecycle Manager** | `skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle and validation |
 | **Skill Lifecycle Manager** | `skills/skill-lifecycle-manager/SKILL.md` | Managing skill lifecycle and validation |
@@ -71,8 +70,7 @@
 | **Competitive Intelligence** | `skills/competitive-intelligence/SKILL.md` | strategy-analyst |
 | **Financial Modeling** | `skills/financial-modeling/SKILL.md` | strategy-analyst |
 | **Insight Synthesis** | `skills/insight-synthesis/SKILL.md` | strategy-analyst |
-| **MECE Logic Auditor** | `skills/mece-logic-auditor/SKILL.md` | strategy-analyst |
-| **Financial Statement Analysis** | `skills/financial-statement-analysis/SKILL.md` | data-analyst |
+| **k-dart** | `skills/k-dart/SKILL.md` | strategy-analyst |
 | **Stakeholder Alignment** | `skills/stakeholder-alignment/SKILL.md` | change-management-partner |
 | **Org Readiness Assessment** | `skills/org-readiness-assessment/SKILL.md` | change-management-partner |
 
@@ -282,7 +280,13 @@ Each agent must save its deliverables to the designated folder with the specifie
 7. **Default deliverable language is Korean**. Unless the client explicitly requests another language, all deliverables MUST be written in Korean and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
 8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
 9. Phase 1 research deliverables MUST pass cross-validation before entering `insight-synthesis`. PM dispatches validator agents per the Cross-Validation Matrix in [`engagement-orchestration.md`](engagement-orchestration.md). See Phase 1.5 Cross-Validation section for checklist and re-execution triggers.
+10. **Korean-terminology reference assets are SSOT'd at `docs/terms-ko.json`** (workspace root — not per-skill). Any skill that needs a Korean-original ↔ English glossary (business/financial/corporate-research terms not covered by the workspace English-only doc policy) MUST read/link `docs/terms-ko.json` rather than maintaining a local `references/terms-ko.json` copy. Rationale: a skill-local copy is duplicated 4× across platform mirrors (`skills/`, `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) and, when two or more skills need overlapping terms (e.g. `company-intelligence` and `financial-statement-analysis` both need financial-statement account names), those per-skill copies drift out of sync with no audit check catching it. Extending an entry: add it directly to `docs/terms-ko.json` under the relevant category (create a new category if none fits); do not add category duplicates. Currently consumed by: `company-intelligence`, `financial-statement-analysis`.
 
 ---
 
-*co-consult.context.md version: 2.3 — Phase 1.5 Cross-Validation*
+*co-consult.context.md version: 2.4 — Korean-terminology SSOT (docs/terms-ko.json)*
+
+## Template Provenance
+
+- **Template-Version**: 0.5.3
+- **Template-Variant**: co-consult

@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none
+metadata:
+  type: process
+  triggers:
+    - synthesize insights
+    - insight synthesis
+    - integrate analysis
+    - strategic synthesis
+    - combine findings
+    - cross-analysis integration
 ---
 
 ## Context

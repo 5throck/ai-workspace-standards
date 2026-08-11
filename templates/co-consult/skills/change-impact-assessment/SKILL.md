@@ -11,6 +11,14 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: org-readiness-assessment
+metadata:
+  type: process
+  triggers:
+    - change impact
+    - impact assessment
+    - organizational impact
+    - change impact assessment
+    - affected groups
 ---
 
 ## Context

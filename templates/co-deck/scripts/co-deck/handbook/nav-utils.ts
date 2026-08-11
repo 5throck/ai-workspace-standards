@@ -1,14 +1,24 @@
-// @version 1.0.0
 // scripts/co-deck/handbook/nav-utils.ts
-// HTML parsing helpers for navigation validation — zero external deps.
-// Adapted from Handbooks/multi-agent-harness-handbook/scripts/nav-utils.ts
-// DOCS_DIR is configurable via --docs-dir CLI arg.
+// HTML parsing helpers for handbook validation — zero external deps.
+// This file is the canonical source of the handbook validation toolkit.
+// The two handbook repos (intro-to-ai-harness, multi-agent-harness-handbook)
+// vendor their copies from here — see the validate-handbook.ts unified runner.
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
-import { join, relative, dirname } from "node:path";
+import { join, dirname } from "node:path";
 
-/** Resolve DOCS_DIR from CLI args or default. */
+// Resolved lazily so `configureDocsDir()` (called by the unified runner
+// before any check runs) takes effect even after the module is imported.
+let configuredDocsDir: string | null = null;
+
+/** Programmatically point the toolkit at a docs directory (unified runner). */
+export function configureDocsDir(dir: string): void {
+  configuredDocsDir = dir;
+}
+
+/** Resolve the docs dir from (1) configureDocsDir, (2) --docs-dir CLI, (3) default. */
 function resolveDocsDir(): string {
+  if (configuredDocsDir) return configuredDocsDir;
   const args = process.argv.slice(2);
   const idx = args.indexOf("--docs-dir");
   if (idx !== -1 && args[idx + 1]) {
@@ -20,8 +30,6 @@ function resolveDocsDir(): string {
   return join(import.meta.dirname || ".", "..", "..", "..", "handbook", "docs");
 }
 
-const DOCS_DIR = resolveDocsDir();
-
 /** Find all .html files under docs/ (recursively), returning absolute paths. */
 export function findAllHtmlFiles(): string[] {
   const results: string[] = [];
@@ -32,7 +40,7 @@ export function findAllHtmlFiles(): string[] {
       else if (entry.name.endsWith(".html")) results.push(full);
     }
   }
-  walk(DOCS_DIR);
+  walk(resolveDocsDir());
   return results;
 }
 
@@ -153,5 +161,5 @@ export function fileExists(absPath: string): boolean {
 
 /** Get the docs directory path. */
 export function getDocsDir(): string {
-  return DOCS_DIR;
+  return resolveDocsDir();
 }

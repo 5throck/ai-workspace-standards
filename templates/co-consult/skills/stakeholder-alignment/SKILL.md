@@ -10,6 +10,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+metadata:
+  type: process
+  triggers:
+    - stakeholder mapping
+    - stakeholder analysis
+    - stakeholder alignment
+    - influence-interest
+    - stakeholder identification
+    - communication strategy
 ---
 
 ## Context

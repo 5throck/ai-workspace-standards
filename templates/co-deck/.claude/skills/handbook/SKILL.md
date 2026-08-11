@@ -1,6 +1,6 @@
 ---
 name: handbook
-scope: co-deck
+scope: variant
 version: 0.1.0
 description: >-
   Document Production Workflow for co-deck — generates searchable, themed
@@ -44,7 +44,7 @@ Dark mode is automatic (3-layer: `:root` light → `@media prefers-color-scheme:
 | `companion` | Create companion handbook from existing co-deck project |
 | `course` | Create full course site with Course Overview + Instructor Guide |
 | `theme` | Apply a built-in theme to existing handbook |
-| `verify` | Run all validation checks (validate-nav + check-authoring + handbook-doctor) |
+| `verify` | Run all validation checks (validate-handbook + check-authoring) |
 | `deploy` | Deploy to GitHub Pages |
 | `doctor` | Run handbook-doctor.ts enhanced static analyzer (12 checks) |
 
@@ -81,13 +81,19 @@ Dispatch `handbook-writer` agent to write chapter content following AUTHORING_GU
 
 Dispatch `handbook-writer` agent to generate Course Overview (§14 — 9 required items) and Instructor Guide (§24 — lecture flow, expected questions, timing, frequent mistakes, demo order, evaluation criteria).
 
+Place both files in the instructor materials group on the index page. The instructor materials group must be the **first group** on `index.html`, directly below the meta block and above all chapter groups (see AUTHORING_GUIDELINES.md §21-2).
+
 ### H-5: Quality Verification
 
 Dispatch `handbook-reviewer` agent to run:
-1. `bun run handbook-doctor` — 12 static analysis checks
+1. `bun run validate-handbook` — unified validation (structure + nav + tables in one command)
 2. `bun run check-authoring` — 10 authoring compliance checks
-3. `bun run validate-nav` — 4 navigation integrity checks
+3. `bun run handbook-doctor` — 12 static analysis checks
 4. Apply fixes for any issues found
+
+> The validation scripts (`validate-handbook.ts`, `check-structure.ts`, `validate-nav.ts`,
+> `check-tables.ts`, etc.) are **copied into the generated handbook's `scripts/`** by
+> `scaffold-handbook.ts`, so every handbook ships with self-validation tooling.
 
 ### H-6: Apply Theme
 
@@ -125,7 +131,11 @@ handbook/
 │       ├── js/lang-switcher.js
 │       └── images/
 ├── scripts/
-│   ├── validate-nav.ts
+│   ├── validate-handbook.ts   # unified runner (structure + nav + tables)
+│   ├── check-structure.ts     # HTML structure validation
+│   ├── validate-nav.ts        # 4 navigation integrity checks
+│   ├── check-tables.ts        # table column-sizing policy
+│   ├── update-footers.ts      # localized footer sync (write tool)
 │   ├── check-authoring.ts
 │   ├── apply-handbook-theme.ts
 │   └── handbook-doctor.ts

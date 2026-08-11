@@ -1,7 +1,52 @@
-# NAV_VALIDATION — Navigation Integrity Validation
+# NAV_VALIDATION — Handbook Validation Toolkit
 
-> Specification for the 4-check navigation validation system.
-> Adapted from Handbooks/multi-agent-harness-handbook/scripts/validate-nav.ts.
+> Specification for the handbook validation toolkit.
+> Canonical source: `scripts/co-deck/handbook/` in co-deck. The two handbook repos
+> vendor their copies from here. The unified entry point is `validate-handbook.ts`.
+> Navigation checks adapted from Handbooks/multi-agent-harness-handbook/scripts/validate-nav.ts;
+> structure checks ported from Handbooks/intro-to-ai-harness/scripts/validate-structure.py.
+
+---
+
+## Unified Entry Point
+
+`validate-handbook.ts` runs every read-only check in one command:
+
+```bash
+bun run validate-handbook --docs-dir docs                    # structure + nav + tables
+bun run validate-handbook --docs-dir docs --checks all       # + authoring + doctor
+```
+
+- **① Structure** — `check-structure.ts` (always)
+- **② Navigation** — `validate-nav.ts` 4 checks (always)
+- **③ Tables** — `check-tables.ts` (always)
+- **authoring** — `check-authoring.ts` (opt-in, co-deck guidelines convention)
+- **doctor** — `handbook-doctor.ts` (opt-in, co-deck conventions)
+
+Check ②④ (`check-search.ts`) is skipped automatically when the handbook uses
+in-page search (`inpage-search.js`) instead of a global `site-search.js`.
+
+## Structure Checks (check-structure.ts)
+
+| # | Check | Error condition |
+|---|-------|-----------------|
+| ① | `<pre>` / `</pre>` balance | Unbalanced pre tags |
+| ① | `.copy-btn` per `<pre>` | Code block without a copy button |
+| ② | Tag nesting (stack-based) | Extra, unmatched, or mis-nested closing tags; unclosed tags at EOF. Count-based checks are NOT sufficient — an extra `</div>` paired with an extra `<div>` balances to zero yet breaks layout |
+| ③ | Nested code-block | `<div class="code-block">` inside another `code-block` |
+| ④ | Stray chars after closing tag | e.g. `</div>d>` |
+| ⑤ | Required scripts | A script referenced by every page (e.g. `dark-mode-toggle.js`, `lang-switcher.js`) missing from a page |
+| ⑥ | `lang` attribute | `<html>` without `lang="..."` |
+| ⑦ | Language pairs | A `X_<lang>.html` with no base (`X.html`/`X.md`) and no sibling language variant |
+
+## Table Checks (check-tables.ts)
+
+| # | Rule | Violation |
+|---|------|-----------|
+| 1 | No `<colgroup>` / inline `<col style="width:...">` | Hand-tuned per-table ratios |
+| 2 | No `col.col-*` percentage width CSS | Same |
+| 3 | No `nowrap` on a table's first `td` column | Starves translatable prose columns |
+| 4 | No `max-width` without a paired `width` | Collapses column to min-content |
 
 ---
 

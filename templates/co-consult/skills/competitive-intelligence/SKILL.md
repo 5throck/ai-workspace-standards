@@ -11,6 +11,16 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: none
+metadata:
+  type: domain
+  triggers:
+    - competitive analysis
+    - market analysis
+    - competitor profiling
+    - market entry analysis
+    - industry attractiveness
+    - competitive intelligence
+    - five forces
 ---
 
 ## Context

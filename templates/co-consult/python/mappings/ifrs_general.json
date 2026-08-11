@@ -10,72 +10,72 @@
   "mappings": {
     "revenue": {
       "account_nm_patterns": ["수익(매출액)", "매출액", "영업수익", "수익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "cogs": {
       "account_nm_patterns": ["매출원가"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "gross_profit": {
       "account_nm_patterns": ["매출총이익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "sg_and_a": {
       "account_nm_patterns": ["판매비와관리비", "판매비및일반관리비 총계", "판매비와 일반관리비"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "rd_expense": {
       "account_nm_patterns": ["연구개발비"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "depreciation": {
       "account_nm_patterns": ["감가상각비"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "operating_income": {
       "account_nm_patterns": ["영업이익(손실)", "영업이익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "ebt": {
       "account_nm_patterns": ["법인세비용차감전순이익(손실)", "법인세차감전순이익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "tax_expense": {
       "account_nm_patterns": ["법인세비용", "법인세비용(수익)"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "net_income": {
       "account_nm_patterns": ["당기순이익(손실)", "당기순이익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "fin_expense": {
       "account_nm_patterns": ["금융비용", "금융원가"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "fin_income": {
       "account_nm_patterns": ["금융수익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "equity_method_income": {
       "account_nm_patterns": ["지분법손익"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "minority_interest_ni": {
       "account_nm_patterns": ["비지배지분에 귀속되는 당기순이익(손실)", "비지배지분"],
-      "sj_div": ["CIS"],
+      "sj_div": ["CIS", "IS"],
       "priority": 1
     },
     "ebitda": {
