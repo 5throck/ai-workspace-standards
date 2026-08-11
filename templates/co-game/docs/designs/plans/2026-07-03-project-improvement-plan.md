@@ -696,7 +696,7 @@ export class ObjectPool<T> {
   }
 
   get(): T {
-    const obj = this.available.pop() ?? this.factory();
+    const obj = this.available.pop() ?? this.factory(); // encoding-check-ignore
     this.active.push(obj);
     return obj;
   }
