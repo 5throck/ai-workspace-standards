@@ -67,6 +67,15 @@ iterative calibration loop. Pre-built native binaries, no build step required.
 | `tests/theme-browser-smoke.browser.mjs` | 0.1.0 | active | Playwright browser smoke tests for all theme×style pairs: zero JS errors, correct slide count, nav controls, TOC, fullscreen — runs via Node.js | `node scripts/co-deck/tests/theme-browser-smoke.browser.mjs` |
 | `tests/verify-new-theme.test.ts` | 0.1.0 | active | Tests for verify-new-theme: fast-mode against all existing themes, timing, non-existent theme error reporting, JSON output format, --style flag | `bun test scripts/co-deck/tests/verify-new-theme.test.ts` |
 | `tests/scaffold-theme-style.test.ts` | 0.1.0 | active | Tests for scaffold-theme-style: --from derivation (copies template.html/theme.css, sets based_on/author), minimally valid stubs (4 INJECT markers, required fields, CSS structure, region skeleton), contract validation, error handling | `bun test scripts/co-deck/tests/scaffold-theme-style.test.ts` |
+| `tests/theme-contract.test.ts` | 0.1.0 | active | Tests for theme-contract: loadThemePackage(), validateThemePackage(), SLIDE_TYPE_HTML_TO_JSON mapping | `bun test scripts/co-deck/tests/theme-contract.test.ts` |
+| `tests/theme-preview.test.ts` | 0.1.0 | active | Tests for preview system (preview.html + build-theme-preview.ts): preview-data.json parsing, theme-native DOM, iframe src pattern, incompatible pairs error, error panel structure | `bun test scripts/co-deck/tests/theme-preview.test.ts` |
+| `tests/theme-visual-regression.test.ts` | 0.1.0 | active | Visual regression tests for theme×style pairs: generates deck via buildThemeDeck(), takes Playwright screenshots (1280x720), compares against baselines | `bun test scripts/co-deck/tests/theme-visual-regression.test.ts` |
+| `tests/theme-visual-regression.browser.mjs` | 0.1.0 | active | Playwright screenshot capture & comparison helper for theme-visual-regression.test.ts; runs via Node.js (bun has Playwright subprocess issues on Windows); modes: capture, compare | `node scripts/co-deck/tests/theme-visual-regression.browser.mjs` |
+| `tests/generate-themes-manifest.test.ts` | 0.1.0 | active | Tests for generate-themes-manifest: deterministic output, --check mode, --themes-md auto-update | `bun test scripts/co-deck/tests/generate-themes-manifest.test.ts` |
+| `tests/apply-handbook-theme.test.ts` | 1.0.1 | active | Tests for apply-handbook-theme: theme application, CSS generation, dark mode layers | `bun test scripts/co-deck/tests/apply-handbook-theme.test.ts` |
+| `tests/check-structure.test.ts` | 1.0.0 | active | Tests for check-structure: regression fixtures mirroring real production bugs (extra </div>, nested code-block, stray chars, orphaned language variants) | `bun test scripts/co-deck/tests/check-structure.test.ts` |
+| `tests/deploy-readme-patch.test.ts` | 1.0.0 | active | Tests for deploy-handbook patchReadmePagesUrl() — README Pages URL injection | `bun test scripts/co-deck/tests/deploy-readme-patch.test.ts` |
+| `tests/extract_slidedata.test.mjs` | 0.1.0 | active | Tests for extract_slidedata.mjs: slideData extraction from HTML, fixture-based | `bun test scripts/co-deck/tests/extract_slidedata.test.mjs` |
 | `build-theme-preview.ts` | 0.1.0 | active | Build preview iframe from production renderer: reads preview-data.json + buildThemeDeck(), outputs per-theme×style HTML decks into preview/decks/ | `bun scripts/co-deck/build-theme-preview.ts [--root <path>] [--all]` |
 | `verify-new-theme.ts` | 1.0.0 | active | Composite registration gate: 5 checks (structural validation, manifest freshness, THEMES.md markers, fixture build + extraction round-trip, PDF generation); `--fast` skips checks 4–5; `--json` for CI; target <30s full / <3s fast | `bun scripts/co-deck/verify-new-theme.ts <name> [--style <name>] [--fast] [--json]` |
 
@@ -84,6 +93,11 @@ Handbook validation and tooling scripts in `scripts/co-deck/handbook/`:
 | `handbook/check-search.ts` | 1.0.0 | active | Check ④: site-search.js DOCS array must match actual HTML files | (library — imported by validate-nav) |
 | `handbook/scaffold-handbook.ts` | 1.0.0 | active | Generate handbook project scaffold — copies templates+assets+scripts, creates package.json and CI workflow | `bun scripts/co-deck/handbook/scaffold-handbook.ts --project <path> [--output handbook/] [--lang ko]` |
 | `handbook/check-authoring.ts` | 1.0.0 | active | AUTHORING_GUIDELINES compliance checker — 10 checks (visual elements, copy buttons, sidebar nav, chapter-nav, flex min-width, mid-word strong, course overview, CSS variables, language pairs, instructor guide); supports `--examples-dir` for regression fixture validation | `bun scripts/co-deck/handbook/check-authoring.ts --project <path> [--lang ko] [--examples-dir <path>]` |
+| `handbook/check-structure.ts` | 1.0.0 | active | HTML structure validator — well-formedness layer: tag nesting (stack-based), `<pre>`/`.copy-btn` balance, no nested code-blocks, no stray characters near closing tags, required script references, `<html lang>` attribute, language pair completeness; ported from intro-to-ai-harness | `bun scripts/co-deck/handbook/check-structure.ts --docs-dir docs` |
+| `handbook/check-tables.ts` | 1.0.0 | active | Enforces table column-sizing policy: no inline `<colgroup>`/`<col>` widths, no per-table CSS percentage column rules, no `white-space: nowrap` on first `td`, no `max-width` without accompanying `width`; vendored from multi-agent-harness-handbook | `bun scripts/co-deck/handbook/check-tables.ts --docs-dir docs` |
+| `handbook/validate-handbook.ts` | 1.0.0 | active | Unified handbook validator — single entry point aggregating every read-only check: structure (check-structure), navigation (validate-nav 4 checks), tables (check-tables); optional: authoring + doctor via `--checks all`; exit code 1 on failure | `bun scripts/co-deck/handbook/validate-handbook.ts --docs-dir docs [--checks structure,nav,tables\|all]` |
+| `handbook/deploy-handbook.ts` | 1.0.0 | active | Deploys handbook to GitHub Pages — automates repo creation, visibility, GitHub Actions workflow generation, Pages activation, and verification | `bun scripts/co-deck/handbook/deploy-handbook.ts --project . --output handbook --repo owner/handbook-name --visibility public` |
+| `handbook/update-footers.ts` | 1.0.0 | active | Syncs localized site footer into every HTML page under docs/ (ko, en, es, ja); write-only maintenance tool — run deliberately, not as part of validation; vendored from multi-agent-harness-handbook | `bun scripts/co-deck/handbook/update-footers.ts --docs-dir docs` |
 | `handbook/apply-handbook-theme.ts` | 1.0.0 | active | CSS theme applicator — 5 built-in themes (azure, graphite, teal, amber, indigo), each with 3-layer dark mode | `bun scripts/co-deck/handbook/apply-handbook-theme.ts --project <path> --theme <name>` |
 | `handbook/handbook-doctor.ts` | 1.0.0 | active | Enhanced static analyzer — 12 checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, course overview, instructor guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | `bun scripts/co-deck/handbook/handbook-doctor.ts --project <path> [--severity warn\|error]` |
 | `html-to-pdf.ts` | 1.1.0 | active | Generate PDF from self-contained HTML slide deck using Puppeteer (system Chrome/Edge, WebSocket transport) — captures each `<section>` as a full-page PDF | `bun scripts/co-deck/html-to-pdf.ts --html presentations/<project>/lecture_vN.html [--out output.pdf] [--width 1920] [--height 1080] [--scale 1.5] [--pages N]` |
@@ -98,11 +112,11 @@ bun run validate-nav
 bun run apply-theme --theme azure
 ```
 
-Also available in `scripts/` root (not co-deck specific):
+Also available in `scripts/` root (not co-deck specific, but vendored copy present):
 
 | script | version | status | description |
 |--------|---------|--------|-------------|
-| `extract_slidedata.mjs` | 1.2.0 | active | Extract slideData array from HTML file to slidedata.json (bracket-depth state machine; requires strict-JSON slideData) |
+| `extract_slidedata.mjs` | 1.2.0 | active | Extract slideData array from HTML file to slidedata.json (bracket-depth state machine; requires strict-JSON slideData); co-deck copy in `scripts/co-deck/` |
 
 ---
 
@@ -155,4 +169,4 @@ These scripts reside in `scripts/co-deck/` per **ADR-0033: Variant-Specific Skil
 
 **Reference:** ADR-0033 · Script Lifecycle §6.5
 
-*Last Updated: 2026-07-21 — handbook scripts (validate-nav + scaffold + check-authoring + apply-theme + handbook-doctor); design doc v4*
+*Last Updated: 2026-08-11 — added missing handbook scripts (check-structure, check-tables, validate-handbook, deploy-handbook, update-footers) + 7 missing test entries; noted extract_slidedata.mjs co-deck vendored copy*

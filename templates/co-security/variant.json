@@ -34,9 +34,9 @@
     }
   ],
   "skills": [
-    { "name": "sarif-exporter" },
-    { "name": "stride-threat-matrix" },
-    { "name": "verify-authorization" }
+    { "name": "sarif-exporter", "file": "skills/sarif-exporter/SKILL.md" },
+    { "name": "stride-threat-matrix", "file": "skills/stride-threat-matrix/SKILL.md" },
+    { "name": "verify-authorization", "file": "skills/verify-authorization/SKILL.md" }
   ],
   "skill_manifest": {
     "variant_specific": [
@@ -53,6 +53,11 @@
         "used_by_agents": ["pentester", "report-writer"],
         "phases": [3, 5],
         "platform_parity": "required"
+      },
+      {
+        "name": "verify-authorization",
+        "used_by_agents": ["red-team-lead", "pentester"],
+        "phases": [1, 3]
       }
     ]
   },

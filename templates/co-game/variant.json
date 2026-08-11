@@ -62,10 +62,10 @@
     }
   ],
   "skills": [
-    { "name": "code-review" },
-    { "name": "refactoring" },
-    { "name": "test-driven-development" },
-    { "name": "sound-synth" }
+    { "name": "code-review", "file": "skills/code-review/SKILL.md" },
+    { "name": "refactoring", "file": "skills/refactoring/SKILL.md" },
+    { "name": "test-driven-development", "file": "skills/test-driven-development/SKILL.md" },
+    { "name": "sound-synth", "file": "skills/sound-synth/SKILL.md" }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
@@ -88,6 +88,30 @@
       "puzzle-designer"
     ],
     "notes": "arcade-designer: skip for non-arcade genres. puzzle-designer: skip for non-puzzle games. designer: skip if no UI/UX component. stack-setup: skip for projects with existing configured stack."
+  },
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "sound-synth",
+        "used_by_agents": ["sound-designer"],
+        "phases": [3, 4]
+      },
+      {
+        "name": "code-review",
+        "used_by_agents": ["game-debugger", "game-developer"],
+        "phases": [3, 5]
+      },
+      {
+        "name": "refactoring",
+        "used_by_agents": ["game-developer", "game-debugger"],
+        "phases": [3, 5]
+      },
+      {
+        "name": "test-driven-development",
+        "used_by_agents": ["game-developer", "test-runner"],
+        "phases": [3, 5]
+      }
+    ]
   },
   "betaLifecycleSummary": {
     "betaEngagements": 0,

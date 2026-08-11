@@ -540,7 +540,13 @@ function findLibreOffice(): string | null {
  * Windows paths. Escaped string interpolation is the safer choice here.)
  */
 function shellEscapePath(path: string): string {
-  return path.replace(/"/g, '\\"');
+  return path
+    .replace(/\\/g, '\\\\')
+    .replace(/\$/g, '\\$')
+    .replace(/`/g, '\\`')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/"/g, '\\"');
 }
 
 async function convertDocxToPdf(docxPath: string, outDir: string): Promise<string | null> {
@@ -562,8 +568,9 @@ async function convertDocxToPdf(docxPath: string, outDir: string): Promise<strin
 
     const pdfPath = join(outDir, basename(docxPath, '.docx') + '.pdf');
     return existsSync(pdfPath) ? pdfPath : null;
-  } catch (err: any) {
-    console.warn(`⚠️ LibreOffice PDF conversion failed: ${err.message}`);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`⚠️ LibreOffice PDF conversion failed: ${msg}`);
     return null;
   }
 }
@@ -643,8 +650,9 @@ async function main() {
           console.log(`   ✅ PDF  -> ${pdfResult} (${pdfSizeKb}KB)`);
         }
       }
-    } catch (err: any) {
-      console.error(`   ❌ Error: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`   ❌ Error: ${msg}`);
     }
   }
 }
