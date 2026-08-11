@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-08-09",
+  "last_updated": "2026-08-11",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -86,6 +86,13 @@
       "changelog": [
         "2026-08-09: Initial release as beta variant (v0.1.0)"
       ]
+    },
+    "co-news": {
+      "latest": "0.1.0",
+      "status": "beta",
+      "released": "2026-08-11",
+      "security_advisories": [],
+      "migration_guides": []
     }
   },
   "schema_version": "1.0"
