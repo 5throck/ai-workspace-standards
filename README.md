@@ -189,7 +189,8 @@ C:\git\ (workspace root - this repo)
     ├── co-consult/          # ✅ Stable — strategy consulting and analysis agent team
     ├── co-deck/             # 🔶 Beta — lecture and presentation material production agent team
     ├── co-game/             # 🔶 Beta — HTML5 Canvas game development agent team
-    └── co-export/           # 🔶 Beta — import/export trade compliance agent team
+    ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
+    └── co-news/             # 🔶 Beta — Korean business/finance journalism agent team
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -231,6 +232,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-deck**: An 11-stage lecture material production workflow from research to print-ready PDF, with 5 approval gates
 - **co-game**: A game development workflow for HTML5 Canvas games using Vanilla TypeScript, with specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing
 - **co-export**: A trade/export-compliance workflow covering HS classification, export control and sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, and trade documentation
+- **co-news**: A Korean business/finance journalism workflow for economics reporters covering listed companies — DART financial disclosures (via k-dart), Korean commercial-law research (via k-law), fact-checking with citation ledger, AI-tell reduction, and financial infographic generation
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -253,6 +255,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-deck` | 🔶 Beta | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | 🔶 Beta | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation |
+| `co-news` | 🔶 Beta | Korean business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
 
 ### Selecting a version and variant
 
@@ -326,4 +329,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-09*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-11*

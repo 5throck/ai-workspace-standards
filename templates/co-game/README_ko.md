@@ -100,4 +100,4 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ---
 
-*최근 업데이트: 2026-08-09*
+*최근 업데이트: 2026-08-11*
