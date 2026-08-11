@@ -5,3 +5,11 @@
 #
 # Install with: pip install -r requirements.txt
 pandas>=2.0,<3.0
+
+# Used by python/extract_hwp.py for HWP 5.0 binary (OLE compound file) parsing
+# — reads the FileHeader/BodyText streams for the hwp-extract.ts orchestrator
+# (see scripts/co-consult/hwp-extract.ts).
+olefile>=0.46,<1.0
+
+# Used by python/generate_hwpx.py for HWPX .hwpx file generation — no Hancom Office required.
+python-hwpx>=6.0,<7

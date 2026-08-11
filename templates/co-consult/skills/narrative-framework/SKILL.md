@@ -12,6 +12,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: none
+metadata:
+  type: process
+  triggers:
+    - narrative structure
+    - storytelling
+    - persuasive narrative
+    - storyline
+    - pyramid principle
+    - message framework
 ---
 
 ## Context

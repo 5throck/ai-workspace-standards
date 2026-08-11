@@ -12,6 +12,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none
+metadata:
+  type: process
+  triggers:
+    - technical feasibility
+    - feasibility study
+    - technical viability
+    - complexity grade
+    - technology readiness
+    - build vs buy
 ---
 
 ## Context

@@ -11,6 +11,14 @@ last_reviewed: 2026-06-13
 status: active
 owner: change-management-partner
 prerequisites: none
+metadata:
+  type: domain
+  triggers:
+    - organizational readiness
+    - change readiness
+    - change capacity
+    - readiness assessment
+    - transformation readiness
 ---
 
 ## Context

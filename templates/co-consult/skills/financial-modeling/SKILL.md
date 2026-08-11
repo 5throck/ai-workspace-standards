@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: strategy-analyst
 prerequisites: technical-feasibility, org-readiness-assessment
+metadata:
+  type: domain
+  triggers:
+    - financial model
+    - financial modeling
+    - business case
+    - ROI analysis
+    - NPV IRR
+    - investment justification
 ---
 
 ## Context

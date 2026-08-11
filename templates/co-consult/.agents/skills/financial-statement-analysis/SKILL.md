@@ -1,6 +1,6 @@
 ---
 name: financial-statement-analysis
-scope: co-consult
+scope: common
 description: >
   Comprehensive Korean financial statement analysis pipeline. Collects DART data,
   validates accounting integrity, normalizes to canonical financial model,
@@ -13,10 +13,11 @@ description: >
   "financial metrics extraction", "corporate financial analysis".
 status: active
 owner: data-analyst
-version: 1.0.0
+version: 1.3.0
 last_reviewed: 2026-07-19
 prerequisites:
   - k-dart
+l2_propagate: false
 metadata:
   type: analysis
   tier: medium
@@ -49,16 +50,43 @@ This hybrid approach complies with the project's Computational Integrity policy
 
 ## When to Use
 
-- A consulting engagement requires ROIC, profitability, growth, leverage, or cash-flow analysis of a Korean listed company
-- The client or engagement lead asks for a "financial statement analysis", "fundamental analysis", or "value driver tree"
-- `data-analyst` needs validated, normalized financial data before building a business case in `financial-modeling`
-- Do NOT use for non-Korean companies (no DART coverage) or for engagements needing only qualitative company research — use `company-intelligence` instead
+- PM dispatches a financial statement analysis task for a Korean listed company
+- A client engagement requires ROIC-based value driver decomposition or peer benchmarking
+- DART data has been collected (via `k-dart` skill) and needs end-to-end analysis through the pipeline
+- An existing analysis needs re-validation with updated financial data
 
 ## Prerequisites
 
 - `k-dart` skill — for DART data collection (Phase ①)
 - Python 3 with `pandas` installed — for data processing (Phases ②–⑤)
 - Bun runtime — for orchestration scripts
+
+## Execution Steps
+
+See [Pipeline Stages](#pipeline-stages) for the per-stage breakdown. The high-level
+execution protocol for the `data-analyst` agent is:
+
+1. **Receive dispatch from PM** with company name and year range
+2. **Collect data** using `k-dart` skill (or use existing data if available)
+3. **Run pipeline**:
+   ```bash
+   bun scripts/co-consult/financial-pipeline.ts <dart-file> --company <name>
+   ```
+4. **Review outputs** — check validation pass rate (>90% acceptable), coverage (>80% acceptable)
+5. **Cross-validate against FnGuide** (Stage ⑦) — for domestic listed companies only; record match/mismatch in the report
+6. **Synthesize Investment View** — fill section 8 of the report with analytical insights
+7. **Hand off** to `communications-lead` or `strategy-analyst` as appropriate
+
+## Output Format
+
+| Output | Destination | Format |
+|--------|-------------|--------|
+| Raw DART data | `deliverables/<company>/dart/` | JSON |
+| Validation report | `deliverables/<company>/validation/` | JSON |
+| Canonical model | `deliverables/<company>/canonical/` | JSON |
+| KPI report | `deliverables/<company>/kpi/` | JSON |
+| Driver tree | `deliverables/<company>/driver-tree/` | JSON |
+| Final report | `deliverables/reports/` | Markdown |
 
 ## Pipeline Stages
 
@@ -73,7 +101,9 @@ This hybrid approach complies with the project's Computational Integrity policy
     ↓
 ⑤ ROIC Value Driver Tree (python/driver_tree.py)
     ↓
-⑥ Report Generation (scripts/financial-report.ts)
+⑥ Report Generation (scripts/co-consult/financial-report.ts)
+    ↓
+⑦ FnGuide Cross-Validation (domestic listed companies only)
 ```
 
 ### ① DART Data Collection
@@ -107,7 +137,7 @@ Validates raw DART data for accounting integrity.
 Converts Korean DART account names to a Canonical Financial Model using
 industry-specific mapping tables.
 
-**Mapping table**: `python/mappings/ifrs_general.json`
+**Mapping table**: `python/mappings/ifrs_general.json` — see `income_statement`, `balance_sheet`, and `cash_flow_statement` in `docs/terms-ko.json` for the Korean account-name variants this table must cover (e.g. service companies reporting revenue/COGS under a different pair of account names than manufacturers, or `sj_div` differences between IS/CIS filings).
 
 **Canonical fields** (36 per year):
 - Income: revenue, cogs, gross_profit, sg_and_a, rd_expense, depreciation, operating_income, ebit, ebt, nopat, tax_expense, net_income, fin_expense, fin_income
@@ -174,6 +204,29 @@ Generates a structured Markdown report from all pipeline outputs.
 
 **Runner**: `bun scripts/co-consult/financial-report.ts <canonical.json> <validation.json> <kpi.json> <tree.json> --output <path>`
 
+### ⑦ FnGuide Cross-Validation (domestic listed companies only)
+
+DART is the primary source of truth, but the normalization/mapping layer (Stage ③) is
+company-specific and can silently drop fields (e.g. non-standard account names, wrong
+`sj_div`, consolidated vs separate mismatch). For **domestic Korean listed companies**,
+after Stage ⑥ report generation, cross-check headline figures against FnGuide
+(`comp.fnguide.com`) — the same underlying data source Naver Finance
+(`finance.naver.com`) displays, and reachable via WebFetch/browser tools when
+`finance.naver.com` itself is blocked.
+
+**Fields to cross-check** (Annual, latest 3 years): Revenue, Operating Income,
+Net Income, Total Assets, Total Equity.
+
+**Procedure**:
+1. Fetch `https://comp.fnguide.com/SVO2/ASP/SVD_Finance.asp?pGB=1&gicode=A<6-digit-stock-code>&MenuYn=Y&NewMenuID=103&stkGb=701` — **do not** add `ReportGB=B`, which forces the separate-financials view; omit it to get the page's default view and read the basis label shown in the table header (Korean on the live page — see `consolidation_basis` in `docs/terms-ko.json` for the three label variants and their meaning).
+2. Match the DART pipeline's `fs_div` (CFS/OFS, from Stage ① collection params) to the basis FnGuide actually rendered — consolidated↔CFS, separate/individual↔OFS. If they don't match, the comparison is invalid; re-fetch to align basis before comparing figures.
+3. Compare the 5 fields above for each of the latest 3 fiscal years. Treat a mismatch as **material** if it exceeds ~1% (rounding between 100-million-KRW units and KRW_billions aside).
+4. **On match**: note "FnGuide cross-validated ✅" in the report's Appendix A (Validation Summary) with the fetch date.
+5. **On mismatch**: do not silently trust either source — diagnose which stage produced the divergence (wrong `fs_div` collected in Stage ①, mapping gap in Stage ③, or a genuine FnGuide/DART reporting-basis difference such as restated financials) before reporting the analysis as complete. Common root cause: consolidated/separate basis mismatch (see step 2) rather than an actual data error.
+
+**Applicability**: Skip this stage for non-domestic-listed entities (private/unlisted
+subsidiaries, foreign issuers) — FnGuide only covers KRX-listed companies.
+
 ## End-to-End Pipeline
 
 Run all stages in sequence:
@@ -192,33 +245,6 @@ This creates the full output structure:
 └── reports/financial-analysis-<company>-YYYY-MM-DD.md
 ```
 
-## Execution Steps
-
-(also referred to as the Execution Protocol for the `data-analyst` agent)
-
-1. **Receive dispatch from PM** with company name and year range
-2. **Collect data** using `k-dart` skill (or use existing data if available)
-3. **Run pipeline**:
-   ```bash
-   bun scripts/co-consult/financial-pipeline.ts <dart-file> --company <name>
-   ```
-4. **Review outputs** — check validation pass rate (>90% acceptable), coverage (>80% acceptable)
-5. **Synthesize Investment View** — fill section 8 of the report with analytical insights
-6. **Hand off** to `communications-lead` or `strategy-analyst` as appropriate
-
-## Output Format
-
-The pipeline emits one Markdown report (see §⑥ Report Generation for the section list) plus the intermediate JSON artifacts it was built from:
-
-| Output | Destination | Format |
-|--------|-------------|--------|
-| Raw DART data | `deliverables/<company>/dart/` | JSON |
-| Validation report | `deliverables/<company>/validation/` | JSON |
-| Canonical model | `deliverables/<company>/canonical/` | JSON |
-| KPI report | `deliverables/<company>/kpi/` | JSON |
-| Driver tree | `deliverables/<company>/driver-tree/` | JSON |
-| Final report | `deliverables/reports/` | Markdown |
-
 ## Error Handling
 
 | Stage | Failure Mode | Recovery |
@@ -227,17 +253,45 @@ The pipeline emits one Markdown report (see §⑥ Report Generation for the sect
 | ③ Normalization | Coverage < 60% | Check industry mapping, may need custom mapping |
 | ④ KPI | Missing key fields | Report which KPIs are unavailable due to missing inputs |
 | ⑤ Driver Tree | NOPAT/IC unavailable | Report tree with null nodes and notes |
+| ⑦ FnGuide Cross-Validation | Figures mismatch FnGuide | Check consolidated/separate/individual basis mismatch first (most common cause); if bases align and mismatch persists, re-examine Stage ① `fs_div` collection and Stage ③ mapping coverage before trusting the report |
+
+### Language
+
+- All raw inputs are Korean (DART filings, FnGuide/Naver labels) — pipeline stages
+  (validate/normalize/kpi/driver_tree) consume Korean account names directly and
+  emit English canonical field names; no translation step is needed for the numeric
+  pipeline itself.
+- Report body: English (per workspace language policy), with Korean account/company
+  names preserved in parentheses where it aids traceability back to the DART filing.
+- Exception: If the user explicitly requests the report in Korean, write in Korean.
+
+## Reference Material
+
+- `docs/terms-ko.json` (workspace root — **not** a per-skill file): SSOT for
+  Korean-original DART/financial-statement terminology — consolidation-basis
+  labels (consolidated/separate/individual), `sj_div` filing-section codes,
+  and income statement / balance sheet / cash flow account-name variants
+  (including the non-standard revenue/opex labels some service companies
+  use). Shared with `company-intelligence` and any other skill that needs
+  Korean business terminology — do not fork a local copy under this skill's
+  `references/`; edit `docs/terms-ko.json` directly so all consuming skills
+  stay in sync. Non-Markdown reference asset, exempt from the workspace
+  English-only doc policy — see the Language Policy Exception in `context.md`
+  and the SSOT rule in `docs/co-consult.context.md` (Domain Rules). Consult
+  this file when Stage ③ normalization coverage drops (new/unmapped Korean
+  account name) or when Stage ⑦ FnGuide cross-validation shows a
+  consolidated/separate/individual basis mismatch.
 
 ## Related Skills
 
 - `k-dart` — DART data collection (prerequisite)
 - `financial-modeling` — Consulting ROI/NPV business cases (complementary)
-- `company-intelligence` — Broader company research (upstream)
+- `company-intelligence` — Broader company research (upstream); shares the
+  `docs/terms-ko.json` SSOT glossary
 
 ## Notes
 
 - All financial computations are performed by Python pandas (Class A Computational Integrity compliance)
-- A NodeJS-Polars validation engine was considered as an alternative to `python/validate.py` and explicitly rejected — the pipeline keeps the Bun/TypeScript orchestration + Python/pandas computation split as-is
 - The AI agent must NOT calculate financial figures directly
 - Korean DART account names vary by company; the normalization mapping absorbs this variation
 - The pipeline is loosely coupled — each stage can run independently with JSON I/O

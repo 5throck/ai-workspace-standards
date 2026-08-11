@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: delivery-manager
 prerequisites: solution-design
+metadata:
+  type: process
+  triggers:
+    - project delivery
+    - execution plan
+    - milestone planning
+    - delivery plan
+    - workstream planning
+    - delivery management
 ---
 
 ## Context

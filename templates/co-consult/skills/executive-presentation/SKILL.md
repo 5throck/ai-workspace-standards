@@ -11,6 +11,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: communications-lead
 prerequisites: technical-feasibility, org-readiness-assessment, financial-modeling
+metadata:
+  type: process
+  triggers:
+    - executive presentation
+    - executive deck
+    - C-level presentation
+    - decision deck
+    - strategy deck
+    - board presentation
 ---
 
 ## Context

@@ -210,13 +210,13 @@ All specialist agents below are dispatched ONLY through PM:
 | `change-management-partner` | Phase 1, 2 | "change management partner", "change management", "organizational transformation", "stakeholder" |
 | `communications-lead` | Phase 3 | "communications lead", "strategy", "strategic analysis", "communicate", "presentation" |
 | `data-analyst` | Phase 1, 3 | "data analyst", "research", "analyze", "investigate", "data analysis" |
-| `delivery-manager` | Phase 4 | "delivery manager", "stakeholder review", "review cycle", "logistics", "engagement milestones" |
+| `delivery-manager` | Phase 4 | "delivery manager", "schedule", "coordinate", "track progress" |
 | `industry-expert` | Phase 1, 2 | "industry expert", "industry", "market landscape", "competitive analysis" |
-| `sme` | Phase 1, 2, 3 | "sme", "subject matter expert", "functional expertise", "functional analysis", "domain expertise" |
+| `sme` | Phase 1, 2, 3 | "sme", "design", "create design", "subject matter", "functional expertise" |
 | `solutions-architect` | Phase 3 | "solutions architect", "design", "create design", "solution design", "architecture" |
 | `strategy-analyst` | Phase 1 | "strategy analyst", "research", "analyze", "investigate", "strategy" |
 | `technology-specialist` | Phase 4 | "technology specialist", "technology platform", "digital transformation", "collaboration tools" |
-| `workstream-lead` | Phase 4 | "workstream lead", "workstream", "team coordination", "task assignment", "progress tracking" |
+| `workstream-lead` | Phase 4 | "workstream lead", "schedule", "coordinate", "track progress", "workstream" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
@@ -567,6 +567,10 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | Skill | Location | Purpose |
 |-------|----------|---------|
 | **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
+| **HWP Document Processing** | `skills/hwp-document-processing/SKILL.md` | Structural validation of HWP government-template deliverables |
+| **Sample-Driven Report Writing** | `skills/sample-driven-report-writing/SKILL.md` | Analyzes a deliverable sample for TOC structure + per-section table/chart requirements, then researches and drafts to match |
+| **K-DART** | `skills/k-dart/SKILL.md` | Korean FSS DART OpenAPI queries — disclosures, financials, company profiles, major-event reports |
+| **K-Law** | `skills/k-law/SKILL.md` | Korean Ministry of Legislation National Law Information Center Open API queries |
 
 ---
 

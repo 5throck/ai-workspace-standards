@@ -12,6 +12,15 @@ last_reviewed: 2026-06-13
 status: active
 owner: solutions-architect
 prerequisites: none
+metadata:
+  type: process
+  triggers:
+    - solution design
+    - technical design
+    - solution architecture
+    - architecture options
+    - implementation roadmap
+    - requirements decomposition
 ---
 
 ## Context
