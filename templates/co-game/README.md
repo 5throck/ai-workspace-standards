@@ -98,4 +98,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-08-11*
