@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-12]**: fix(templates): standardize variant contracts, fix inheritance paths, remove build artifacts — fixed co-news pm.md extends path (`../../../agents/pm.md` → `../../common/agents/pm.md`), added missing `agent_manifest` to co-export and co-news variant.json, fixed `createdAt` → `created_at` camelCase in co-news, deleted 4 `_pipeline_report.{json,md}` build artifacts from co-export and co-news, fixed common template gitleaks.toml placeholder title and added missing allowlist entries, enhanced variant.schema.json with optional properties (`variant_type`, `inherits_common`, `created_at`, `agents`, `skills`, `agent_manifest`, `skill_manifest`, `script_manifest`). Design doc: `docs/designs/project-review-fixes-design.md`.
+
 - **[2026-08-12]**: chore(templates/co-game): add projects/ from live project — copied `projects/pacman/` (src, tests, docs, config) and `projects/bubble-bobble/` (src, tests, maps) from `Projects/co-game/projects/` to `templates/co-game/projects/`, excluding node_modules, dist, and lock files (96 files).
 
 - **[2026-08-12]**: chore(templates/co-game): bidirectional sync with project — updated template README dates (2026-08-09 → 2026-08-11) to match live project; applied project-side changes directly to local `Projects/co-game/` filesystem (agent capabilities, Designer row, SKILLS.md, variant.json skills/skill_manifest, docs/superpowers→designs rename, src/ecs + tests copy).
@@ -954,7 +956,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-11*
+*Last Updated: 2026-08-12*
 
 
 
