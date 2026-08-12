@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-12]**: docs(lifecycle): add agent governance records for 7 variants (59 files) — created `docs/lifecycle/agents/` directories and agent governance records for all variants missing lifecycle documentation: co-consult (11 records), co-design (8), co-develop (7), co-game (13), co-news (7, beta phase), co-security (6), co-work (7). Each record follows the co-export template pattern (Overview, Phase History, Acceptance Criteria).
+
 - **[2026-08-12]**: chore: improve audit coverage, update propagation map, complete review fixes — added variant.json schema validation to `scripts/audit.ts` (validates required fields, name pattern, status enum, semver version, lifecycle fields, and conditional requirements per `docs/templates/variant.schema.json`; WARN-level per plan trade-off), added missing `co-export` and `co-news` to `scripts/propagation-map.json` governance-agents target_variants (all 9 variants now covered). Design doc: `docs/designs/project-review-fixes-design.md`.
 
 - **[2026-08-12]**: docs: fix stale .sh references, reconcile SCRIPTS.md versions, fix variant AGENTS.md headers — updated 2 stale `.sh` references to `.ts` in `docs/lifecycle/README.md` (`validate-doc-folder.sh` → `validate-doc-folder.ts`), synced 12 L1 SCRIPTS.md version entries to match L0 SSOT, added "curated subset" clarification to AGENTS.md §6 Skills table, fixed all 9 variant template AGENTS.md headers from "Workspace Root Agent Ecosystem" to variant-specific labels (e.g., "co-design Variant Agent Ecosystem"). Design doc: `docs/designs/project-review-fixes-design.md`.
