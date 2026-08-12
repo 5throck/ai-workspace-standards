@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # .githooks/post-checkout
 
 PREV_COMMIT=$1
@@ -31,7 +32,7 @@ fi
 # multiple branches in quick succession. The AI process only reads/analyzes and
 # writes to the log file, so file conflicts are unlikely — the lock primarily
 # prevents redundant parallel sessions.
-LOCK_FILE="/tmp/post-checkout-ai.lock"
+LOCK_FILE="$(git rev-parse --git-dir)/post-checkout-ai.lock"
 
 if [ -f "$LOCK_FILE" ]; then
   echo "[post-checkout] AI session already running, skipping."
