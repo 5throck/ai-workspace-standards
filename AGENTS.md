@@ -481,7 +481,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
 Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
-**Common workspace-level skills** (see `docs/VERSION_MANIFEST.md` for versions):
+**Common workspace-level skills** (curated subset — see `docs/VERSION_MANIFEST.md` for the complete registry):
 
 | Skill | Location | Purpose |
 |-------|----------|---------|

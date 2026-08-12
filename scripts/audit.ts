@@ -1,4 +1,4 @@
-// @version 2.10.13
+// @version 2.10.14
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -476,6 +476,20 @@ if (hasBun) {
             Fail("Script registry detected issues (run 'bun scripts/verify-scripts.ts --verify' to see details)");
         else
             Pass("Script registry: all scripts verified");
+    }
+    if (fs.existsSync(path.join('scripts', 'validate-skills.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'validate-skills.ts')}`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Skill validation detected issues (run 'bun scripts/validate-skills.ts' to see details)");
+        else
+            Pass("Skill validation: all skills valid");
+    }
+    if (fs.existsSync(path.join('scripts', 'validate-agents.ts'))) {
+        const out = await $`bun ${path.join('scripts', 'validate-agents.ts')}`.quiet().nothrow();
+        if (out.exitCode !== 0)
+            Fail("Agent validation detected issues (run 'bun scripts/validate-agents.ts' to see details)");
+        else
+            Pass("Agent validation: all agents valid");
     }
     if (fs.existsSync(path.join('scripts', 'readme-lifecycle-audit.ts')) && fs.existsSync('templates')) {
         const out = await $`bun ${path.join('scripts', 'readme-lifecycle-audit.ts')} --json`.quiet().nothrow();
