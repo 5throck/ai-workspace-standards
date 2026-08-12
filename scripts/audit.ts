@@ -1,4 +1,4 @@
-// @version 2.10.15
+// @version 2.10.16
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -948,6 +948,16 @@ function checkVariantJsonSchema() {
       if (variantData.status === 'deprecated' && variantData.lifecycle && !('deprecatedOn' in variantData.lifecycle)) {
         Warn(`Variant schema: templates/${variant}/variant.json status=deprecated but lifecycle.deprecatedOn is missing`);
         schemaWarnings++;
+      }
+
+      // skills[].file convention check
+      if (Array.isArray(variantData.skills)) {
+        for (const skill of variantData.skills) {
+          if (skill.name && !skill.file) {
+            Warn(`Variant schema: templates/${variant}/variant.json skills[] entry "${skill.name}" missing "file" field (expected: "skills/${skill.name}/SKILL.md")`);
+            schemaWarnings++;
+          }
+        }
       }
     } catch (e: any) {
       Warn(`Variant schema: templates/${variant}/variant.json parse error: ${e.message}`);

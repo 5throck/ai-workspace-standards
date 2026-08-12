@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-12]**: fix(audit): add skills[].file validation to variant schema check — added WARN-level check in `scripts/audit.ts` `checkVariantJsonSchema()` that warns when a `skills[]` entry has a `name` but no `file` field (expected: `skills/{name}/SKILL.md`). Bumped audit.ts to 2.10.16.
+
 - **[2026-08-12]**: fix(templates): add skills[].file to variant.json for 5 variants — added `"file": "skills/{name}/SKILL.md"` to 43 skill entries across co-consult (19), co-deck (11), co-develop (4), co-news (5), and co-work (4) variant.json files to establish the file field convention for skill discoverability.
 
 - **[2026-08-12]**: docs(lifecycle): add agent governance records for 7 variants (59 files) — created `docs/lifecycle/agents/` directories and agent governance records for all variants missing lifecycle documentation: co-consult (11 records), co-design (8), co-develop (7), co-game (13), co-news (7, beta phase), co-security (6), co-work (7). Each record follows the co-export template pattern (Overview, Phase History, Acceptance Criteria).
