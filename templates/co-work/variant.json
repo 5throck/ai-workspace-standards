@@ -38,15 +38,30 @@
     }
   ],
   "skills": [
-    { "name": "api-documentation" },
-    { "name": "documentation-writing" },
-    { "name": "research-analysis" },
-    { "name": "standup-synthesizer" }
+    {
+      "name": "api-documentation",
+      "file": "skills/api-documentation/SKILL.md"
+    },
+    {
+      "name": "documentation-writing",
+      "file": "skills/documentation-writing/SKILL.md"
+    },
+    {
+      "name": "research-analysis",
+      "file": "skills/research-analysis/SKILL.md"
+    },
+    {
+      "name": "standup-synthesizer",
+      "file": "skills/standup-synthesizer/SKILL.md"
+    }
   ],
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [],
-    "optional": ["ms365-expert", "storyteller"],
+    "optional": [
+      "ms365-expert",
+      "storyteller"
+    ],
     "notes": "ms365-expert: only when MS365 tooling (Word, Excel, PowerPoint, Teams) is required. storyteller: skip for purely technical or operational work."
   },
   "skill_manifest": {
@@ -54,8 +69,12 @@
       {
         "name": "standup-synthesizer",
         "layer": "workspace",
-        "used_by_agents": ["project-coordinator"],
-        "phases": [4],
+        "used_by_agents": [
+          "project-coordinator"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       }
     ]

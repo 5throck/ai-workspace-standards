@@ -5,7 +5,7 @@
   "status": "beta",
   "version": "0.1.0",
   "inherits_common": "templates/common",
-  "created_at": "2026-08-11T15:23:46.046Z",
+  "created_at": "2026-08-10T00:00:00.000Z",
   "lifecycle": {
     "statusSince": "2026-08-10",
     "lastTransition": "initial → beta on 2026-08-10",
@@ -39,19 +39,24 @@
   ],
   "skills": [
     {
-      "name": "ai-tell-reduction"
+      "name": "ai-tell-reduction",
+      "file": "skills/ai-tell-reduction/SKILL.md"
     },
     {
-      "name": "financial-infographic-svg"
+      "name": "financial-infographic-svg",
+      "file": "skills/financial-infographic-svg/SKILL.md"
     },
     {
-      "name": "financial-journalism-style"
+      "name": "financial-journalism-style",
+      "file": "skills/financial-journalism-style/SKILL.md"
     },
     {
-      "name": "financial-narrative-brief"
+      "name": "financial-narrative-brief",
+      "file": "skills/financial-narrative-brief/SKILL.md"
     },
     {
-      "name": "source-verification-ledger"
+      "name": "source-verification-ledger",
+      "file": "skills/source-verification-ledger/SKILL.md"
     }
   ],
   "displayName": "Co-News",
@@ -129,7 +134,6 @@
       }
     ]
   },
-  "created_at": "2026-08-10T00:00:00.000Z",
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [],
