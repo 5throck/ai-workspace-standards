@@ -3,7 +3,7 @@
 > **Spec**: project-review-fixes
 > **Date**: 2026-08-12
 > **Author**: PM Agent (architect dispatch)
-> **Status**: Approved
+> **Status**: Completed (2026-08-13 — all PRs merged)
 
 ## 1. Overview
 
@@ -191,9 +191,26 @@ Comprehensive fix plan addressing all findings from the project review of the wo
 
 ## 6. Out of Scope
 
-| Item | Reason |
-|------|--------|
-| 13 lifecycle governance records | Bulk creation — separate lifecycle-manager session |
-| co-consult/co-deck lifecycle docs | Variant-specific — separate session |
-| skills[].file standardization | Convention needs ratification before enforcement |
-| variant AGENTS.md full content sync | Content-heavy — separate session |
+| Item | Reason | Status |
+|------|--------|--------|
+| 13 lifecycle governance records | Bulk creation — separate lifecycle-manager session | ✅ **Completed** — PR6 (#495): 59 records across 7 variants |
+| co-consult/co-deck lifecycle docs | Variant-specific — separate session | ✅ **Completed** — PR6 (#495) |
+| skills[].file standardization | Convention needs ratification before enforcement | ✅ **Completed** — PR7 (#496) + PR8 (#497) |
+| variant AGENTS.md full content sync | Content-heavy — separate session | ✅ **Completed** — headers fixed in PR5-era work (#485); remaining content synced in 2026-08-11 template syncs |
+
+## 7. Execution Results
+
+All change specifications in §4 were implemented and merged in 8 sequential PRs (2026-08-12 local / 2026-08-11~12 UTC):
+
+| PR | Title | Merged (local) | Scope |
+|----|-------|----------------|-------|
+| #490 | fix(templates): standardize variant contracts, fix inheritance paths, remove build artifacts | 2026-08-12 | §4.1 PR1 (Template Contracts) — co-news extends path, agent_manifest for co-export/co-news, createdAt→created_at, build artifact removal, gitleaks.toml, variant.schema.json enhancement |
+| #491 | fix(githooks): add strict mode, replace python3 with language-guard.ts, fix /tmp/ path | 2026-08-12 | §4.2 PR2 (GitHooks Security) — all 5 hooks |
+| #492 | fix(scripts): add path validation, fix prompt, improve version parser, integrate validators | 2026-08-12 | §4.3 PR3 (Script Quality) |
+| #493 | chore: update | 2026-08-12 | Docs/lifecycle sync (`docs/designs/project-review-fixes-design.md` updated) |
+| #494 | chore: improve audit coverage, update propagation map, complete review fixes | 2026-08-12 | §4.5 PR5 (CI/Cleanup) — audit.ts variant.json schema WARN check, propagation-map co-export/co-news targets |
+| #495 | docs(lifecycle): add agent governance records for 7 variants (59 files) | 2026-08-12 | Out of Scope Item 1-2 — lifecycle governance records |
+| #496 | fix(templates): add skills[].file to variant.json for 5 variants (43 skills) | 2026-08-12 | Out of Scope Item 3 — skills[].file convention |
+| #497 | fix(audit): add skills[].file validation to variant schema check | 2026-08-12 | Out of Scope Item 3 — audit.ts WARN-level enforcement (v2.10.16) |
+
+**Verification**: `bun scripts/audit.ts` passes (0 errors) on main after all merges; lifecycle compliance gate passed at every sync.

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-13]**: docs(designs): reflect week 08-10..08-13 execution in design docs — updated `docs/designs/project-review-fixes-design.md` (Status → Completed, added §7 Execution Results table for PRs #490–#497, marked §6 Out of Scope items completed), `docs/variant-roadmap-2026-q3-q4.md` (scope 7 → 9 variants with co-news/co-export rows, co-game stable v1.0.0, all Phase 1–3 milestones marked delivered, doc version 1.2.0), `docs/designs/create-l2-scaffold-design.md` (v1.9.0 + README generation reuse), and `docs/designs/l2-to-variant-pipeline-design-checklist.md` (v1.10.2 + Phase 2 shared-helper refactor note).
+
 - **[2026-08-12]**: fix(audit): add skills[].file validation to variant schema check — added WARN-level check in `scripts/audit.ts` `checkVariantJsonSchema()` that warns when a `skills[]` entry has a `name` but no `file` field (expected: `skills/{name}/SKILL.md`). Bumped audit.ts to 2.10.16.
 
 - **[2026-08-12]**: fix(templates): add skills[].file to variant.json for 5 variants — added `"file": "skills/{name}/SKILL.md"` to 43 skill entries across co-consult (19), co-deck (11), co-develop (4), co-news (5), and co-work (4) variant.json files to establish the file field convention for skill discoverability.

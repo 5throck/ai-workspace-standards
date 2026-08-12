@@ -1,7 +1,7 @@
 # Design: create-l2-scaffold.ts
 
 **Script**: `scripts/create-l2-scaffold.ts`
-**Version**: 1.5.0
+**Version**: 1.9.0
 **Layer**: L0 (workspace root only — not copied to templates/common/ or L2 projects)
 
 ## Purpose
@@ -34,7 +34,9 @@ bun scripts/create-l2-scaffold.ts safety-os --domain ehs
 ### Reads
 - `templates/common/` — L1 common overlay (source for all scaffold files)
 - `templates/common/scripts/SCRIPTS.md` — reads inherited common version string
+- `templates/common/docs/README.template.md` — README render template (via shared `generateReadme`/`generateReadmeKo` helpers)
 - `scripts/helpers/layer-filter.ts` — `includeScriptInL2()` to filter which scripts are copied
+- `scripts/helpers/generate-variant.ts` — `generateReadme()`, `generateReadmeKo()`, `buildReadmeSubstitutions()`, `extractAgentRoster()`, `extractSkills()`, `normalizeRelPath()` (shared with `l2-to-variant-pipeline.ts`)
 - `scripts/helpers/pm-md-parser.ts` — `parsePmMd()`, `extractVariantOverrides()` for pm.md generation
 
 ### Writes
@@ -42,7 +44,13 @@ bun scripts/create-l2-scaffold.ts safety-os --domain ehs
   - Common overlay files (`.gitignore`, `.githooks`, `.claude/`, `.gemini/`, `CHANGELOG.md`, `CLAUDE.md`, `GEMINI.md`)
   - Filtered scripts from `templates/common/scripts/` (via `includeScriptInL2()`)
   - Stub `agents/pm.md` with variant-specific frontmatter
+  - `README.md` / `README_ko.md` rendered from the standard L1 README template (Phase A and Phase B READMEs share one renderer)
   - `docs/`, `memory/`, `skills/` scaffold directories
+
+### README Generation Reuse (v1.9.0, 2026-08-11)
+- Scaffold-time READMEs are rendered from `templates/common/docs/README.template.md` using the same shared renderer as the Phase B promotion pipeline — Phase A and Phase B READMEs can never drift structurally.
+- Self-service regeneration for any L2 project path is available via `scripts/generate-l2-readme.ts` (v1.0.0).
+- `_ORIGIN.md` checklist and `printSummary` output now point at `generate-l2-readme.ts`.
 
 ### External Commands
 All external commands run via `execFileSync` (no shell) to prevent command injection.
