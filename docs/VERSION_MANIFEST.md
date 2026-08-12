@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-12T13:45:56.680Z
+**Generated**: 2026-08-12T13:51:10.067Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -84,7 +84,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.15 | scripts/audit.ts | bun |
+| audit.ts | 2.10.16 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
