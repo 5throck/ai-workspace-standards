@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.7.1
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
@@ -26,6 +26,7 @@ let platform = 'both';
 let dryRun = false;
 let pruneRemoved = false;
 let rollback = false;
+let yesFlag = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -34,11 +35,12 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--dry-run') { dryRun = true; continue; }
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
+  if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback] [--yes]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -86,8 +88,8 @@ if (existsSync(templateVersionFile)) {
   console.log('\nWARNING: template-version.txt not found in this project.');
   console.log('    This project may have been created before version tracking was introduced.');
   console.log(`    Treating as: unknown -> current (${currentVersion})\n`);
-  const answer = prompt('    Proceed? [y/N] ') ?? '';
-  if (import.meta.main) {
+  if (import.meta.main && !yesFlag) {
+    const answer = prompt('    Proceed? [y/N] ') ?? '';
     if (!['y', 'Y'].includes(answer)) { console.log('Aborted.'); process.exit(0); }
   }
 }

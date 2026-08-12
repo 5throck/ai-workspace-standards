@@ -1,4 +1,4 @@
-// @version 1.5.0
+// @version 1.5.1
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -14,15 +14,15 @@ const RESET = '\x1b[0m';
 
 // Workspace root guard — dev-sync must run from the workspace root it belongs to.
 // Using import.meta.dir (script location) prevents CWD mismatches when two clones exist.
-	const expectedRoot = path.resolve(import.meta.dir, '..');
-	const actualCwd = process.cwd();
-	if (path.resolve(actualCwd) !== expectedRoot) {
+const expectedRoot = path.resolve(import.meta.dir, '..');
+const actualCwd = process.cwd();
+if (path.resolve(actualCwd) !== expectedRoot) {
     console.error(`${RED}❌ dev-sync: CWD mismatch.${RESET}`);
     console.error(`   Expected: ${expectedRoot}`);
     console.error(`   Current:  ${actualCwd}`);
     console.error(`   Run from the workspace root: cd ${expectedRoot}`);
     if (import.meta.main) {
-      process.exit(1);
+        process.exit(1);
     }
 }
 

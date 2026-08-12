@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { $ } from 'bun';
@@ -211,10 +211,16 @@ async function collectScripts(): Promise<ScriptInfo[]> {
     const scriptsDir = 'scripts';
     if (!fs.existsSync(scriptsDir)) return scripts;
 
+    // Subdirectories containing library/helper modules, not standalone executable scripts.
+    // These files intentionally lack @version headers and should not appear in VERSION_MANIFEST.
+    const LIBRARY_SUBDIRS = new Set(['helpers', 'lib', 'validators', 'hooks']);
+
     function walkDir(dir: string, callback: (filePath: string) => void) {
         for (const item of fs.readdirSync(dir)) {
             const itemPath = path.join(dir, item);
             if (fs.statSync(itemPath).isDirectory()) {
+                // Skip library subdirectories — their modules are not standalone scripts
+                if (LIBRARY_SUBDIRS.has(item)) continue;
                 walkDir(itemPath, callback);
             } else if (item.endsWith('.ts')) {
                 callback(itemPath);
