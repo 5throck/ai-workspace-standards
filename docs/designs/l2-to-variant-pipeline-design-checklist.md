@@ -1,8 +1,8 @@
 # L2-to-Variant Pipeline - Design Completeness Checklist
 
 > **Architect**: Verification that design is production-ready
-> **Status**: ✅ UPDATED - Phase 1.6 + Phase 3.5 added (v1.8.2, 2026-06-22)
-> **Date**: 2026-06-03 | **Last Updated**: 2026-06-22
+> **Status**: ✅ UPDATED - v1.10.2 (2026-08-11): Phase 2 refactor — shared helpers relocated to `helpers/generate-variant.ts`; Phase 1.6 + Phase 3.5 previously added (v1.8.2, 2026-06-22)
+> **Date**: 2026-06-03 | **Last Updated**: 2026-08-11
 
 ---
 
@@ -37,6 +37,7 @@
 - [x] Reclassification matrix
 - [x] Reconciled manifest schema
 - [x] Conflict resolution framework
+- [x] **v1.10.0 refactor (2026-08-11)**: `extractAgentRoster` / `extractSkills` / `normalizeRelPath` relocated from this pipeline to `scripts/helpers/generate-variant.ts` (v1.10.0) so `create-l2-scaffold.ts` (v1.9.0) and the Phase B pipeline share one implementation; Phase B regression suite 8/8 passing
 
 ### ✅ Phase 3.5: AGENTS.md §-Structure Check (v1.8.2, BLOCKING)
 - [x] 6 VARIANT-\*-START marker requirement specified (AGENTS, AGENT-DETAILS, DISPATCH-TRIGGERS, PHASE-GATE, SUBAGENT-ROSTER, ROLE-BOUNDARY)

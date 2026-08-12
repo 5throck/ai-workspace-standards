@@ -1,17 +1,17 @@
 # 3-Phase Execution Roadmap: Variant Template Enhancements (2026 Q3–Q4)
 
-**Document Version**: 1.1.0  
+**Document Version**: 1.2.0  
 **Target Execution Timeline**: 2026 Q3 – 2026 Q4 (Weeks 1 through 10)  
-**Scope**: All 7 Workspace Variant Templates (`co-develop`, `co-design`, `co-consult`, `co-deck`, `co-game`, `co-security`, `co-work`)  
+**Scope**: All 9 Workspace Variant Templates (`co-develop`, `co-design`, `co-consult`, `co-deck`, `co-game`, `co-security`, `co-work`, `co-news`, `co-export`)  
 **Governance Alignment**: [CONSTITUTION.md](../CONSTITUTION.md), [VERSION_MANIFEST.md](VERSION_MANIFEST.md), [Variant Contract](governance/variant-contract.md), [Variant Registry Architecture](designs/variant-registry-architecture-design.md), [Variant Templates Advancement Design](designs/variant-templates-advancement-design.md)  
-**Status**: Approved & Execution Ready  
+**Status**: Approved & Execution Ready — **Execution Notes**: 9th variant `co-news` promoted 2026-08-10, `co-export` beta 2026-08-08, `co-game` promoted to stable v1.0.0 on 2026-08-12 (see §2 for status per variant).  
 
 ---
 
 ## 1. Executive Summary & Goals for 2026 Q3–Q4
 
 ### 1.1 Context & Strategic Vision
-The AI Workspace platform provides standardized multi-agent development environments categorized into 7 domain-specific L2 variant templates. While the Phase A/B baseline infrastructure established governance compliance, schema validation (`validate-templates.ts`), and platform file symmetry, the 2026 Q3–Q4 roadmap elevates these 7 variants into enterprise-grade, domain-specialized execution engines.
+The AI Workspace platform provides standardized multi-agent development environments categorized into 9 domain-specific L2 variant templates. While the Phase A/B baseline infrastructure established governance compliance, schema validation (`validate-templates.ts`), and platform file symmetry, the 2026 Q3–Q4 roadmap elevates these 9 variants into enterprise-grade, domain-specialized execution engines.
 
 By integrating proven industry methodologies and open-source benchmark architectures, each variant template will deliver automated, self-contained capabilities directly accessible to AI subagents and human engineers, fully synchronized with [docs/designs/variant-templates-advancement-design.md](designs/variant-templates-advancement-design.md).
 
@@ -42,9 +42,11 @@ The 7 workspace variants map directly to industry-standard open-source benchmark
 | **`co-design`** | `design` | **shadcn/ui** & **Tailwind CSS** | **8 agents**<br>(`design pm`, `design-lead`, `prototype-engineer`, `service-designer`, `storyteller`, `typography-expert`, `ux-researcher`, `visual-designer`) | Basic UI rules, style guidelines | `tokens.json` design token compiler (CSS vars + TS types), `axe-core` accessibility audit engine, Vite component playground | Single SSOT for design tokens with automated WCAG AA compliance |
 | **`co-consult`** | `consulting` | **OpenBB Platform** & **McKinsey frameworks** | **11 agents**<br>(`pm`, `market-researcher`, `financial-analyst`, `strategy-consultant`, `data-analyst`, `esg-analyst`, `risk-analyst`, `deliverable-writer`, `k-dart` lead, `industry-analyst`, `qa-reviewer`) | Financial report templates, basic analysis skills | Live DART Open API corporate disclosure parser, MECE logic tree auditor, Executive HTML dashboard compiler | Real-time regulatory filing ingestion with structured logic auditing |
 | **`co-deck`** | `lecture` | **Slidev** & **Marp** | **13 agents**<br>(`presentation-architect`, `scriptwriter`, `slide-designer`, `theme-stylist`, `audio-narrator`, `source-verifier`, `curriculum-planner`, `handbook-writer`, `qa-auditor`, `slide-layout-specialist`, `slide-content-editor`, `presentation-pm`, `deck-compiler`) | Slide markdown tools, theme assets | Dual-screen Presenter Mode (`BroadcastChannel` API), Multi-speaker TTS audio narrator, Playwright paged-media PDF renderer | Multi-screen state synchronization and high-fidelity PDF generation |
-| **`co-game`** | `game` | **Phaser** & **jsfxr** | **12 agents**<br>(`game-pm`, `game-designer`, `game-programmer`, `canvas-artist`, `audio-designer`, `qa-tester`, `level-designer`, `ui-programmer`, `math-balancer`, `physics-programmer`, `shader-artist`, `game-architect`) | Game loop templates, basic asset structure | 150-line TypeScript ECS engine core, Web Audio `sound-synth` procedural audio generator, Single-file HTML game bundler | Zero-dependency modular ECS engine with asset-free procedural audio |
+| **`co-game`** | `game` | **Phaser** & **jsfxr** | **12 agents**<br>(`game-pm`, `game-designer`, `game-programmer`, `canvas-artist`, `audio-designer`, `qa-tester`, `level-designer`, `ui-programmer`, `math-balancer`, `physics-programmer`, `shader-artist`, `game-architect`) | Game loop templates, basic asset structure (**stable** v1.0.0, promoted 2026-08-12) | 150-line TypeScript ECS engine core, Web Audio `sound-synth` procedural audio generator, Single-file HTML game bundler | Zero-dependency modular ECS engine with asset-free procedural audio |
 | **`co-security`** | `security` | **OWASP SAMM** & **DefectDojo** | **6 agents**<br>(`sec-lead`, `threat-modeler`, `code-auditor`, `compliance-expert`, `cloud-sec-architect`, `incident-responder`) | Security checklist, gitleaks rules | STRIDE automated threat matrix generator, SPDX SBOM generator, SARIF security report exporter | Automated threat modeling and standardized CI security reporting |
 | **`co-work`** | `collaboration` | **n8n** & **Apache POI / docx** | **7 agents**<br>(`work-pm`, `business-analyst`, `content-writer`, `ms365-expert`, `work-coordinator`, `process-automation-engineer`, `document-specialist`) | Task tracking, team collaboration skills | Markdown to native MS Office OOXML (`.docx`/`.xlsx`) compiler, Daily standup digest synthesizer, No-code workflow connector schemas | Native Office document compilation without external office dependencies |
+| **`co-news`** | `collaboration` | **Reuters/Sedaily-style business journalism** | **7 agents**<br>(`pm`, `reporter`, `fact-checker`, `financial-analyst`, `legal-researcher`, `style-editor`, `visual-editor`) | Korean business/finance journalism (Phase A prototype → official variant 2026-08-10, **beta**) | Real DART filing ingestion + financial narrative briefs, source-verification ledgers, AI-tell reduction, financial infographic SVG generation | Verifiable, evidence-led financial journalism with citation ledgers |
+| **`co-export`** | `trade` | **WTO/Korea customs compliance** | **9 agents**<br>(`pm`, `customs-duty-drawback-specialist`, `export-control-compliance-specialist`, `foreign-regulatory-intelligence-analyst`, `fta-origin-analyst`, `hs-classification-specialist`, `logistics-coordinator`, `market-entry-strategist`, `trade-documentation-specialist`) | Import/export trade compliance (official variant, **beta** 2026-08-08) | HS classification workflow, FTA origin determination, customs duty drawback, export control screening, foreign regulation monitoring | Standardized cross-border trade compliance workflows |
 
 ### 2.1 Industry Benchmark & Agent Roster Alignments
 
@@ -75,27 +77,27 @@ The 7 workspace variants map directly to industry-standard open-source benchmark
 ### Phase 1: Short-term Roadmap (2026 Q3 - Weeks 1-3)
 **Theme**: Developer Tooling, Presentation Rendering & Security Compliance Foundation
 
-#### 1.1 `co-develop`: IDE Rules Generator & Zod API Contract Gate
-- **Milestone 1.1.1: IDE Context Rules Generator (`scripts/generate-ide-rules.ts`)**
+#### 1.1 `co-develop`: IDE Rules Generator & Zod API Contract Gate — ✅ **Completed**
+- **Milestone 1.1.1: IDE Context Rules Generator (`scripts/generate-ide-rules.ts`)** — ✅ delivered
   - Dynamically synthesizes workspace configuration, active agent profiles, and coding standards into context-specific `.cursorrules` and `.clauderules` files.
   - Automatically triggered during `new-project.ts` initialization and updated via `upgrade-project.ts`.
-- **Milestone 1.1.2: Zod API Runtime Contract Gate (`skills/zod-contract-gate/`)**
+- **Milestone 1.1.2: Zod API Runtime Contract Gate (`skills/zod-contract-gate/`)** — ✅ delivered
   - Implements runtime schema validation using `zod` for internal API endpoints, IPC channels, and agent payload boundaries.
   - Auto-generates TypeScript type definitions from schemas and rejects invalid payloads before processing.
 
-#### 1.2 `co-deck`: Dual-Screen Presenter Mode & Playwright PDF Renderer
-- **Milestone 1.2.1: Dual-Screen Presenter Mode (`skills/presenter-mode/`)**
+#### 1.2 `co-deck`: Dual-Screen Presenter Mode & Playwright PDF Renderer — ✅ **Completed**
+- **Milestone 1.2.1: Dual-Screen Presenter Mode (`skills/presenter-mode/`)** — ✅ delivered
   - Utilizes the browser `BroadcastChannel` API to maintain state synchronization between Presenter Window (speaker notes, current/next slide preview, elapsed timer) and Audience Window.
   - Sub-50ms synchronization latency with auto-reconnection logic.
-- **Milestone 1.2.2: Playwright Paged-Media PDF Renderer (`scripts/render-pdf-deck.ts`)**
+- **Milestone 1.2.2: Playwright Paged-Media PDF Renderer (`scripts/render-pdf-deck.ts`)** — ✅ delivered
   - Employs headless Chromium via Playwright to convert HTML presentation decks into paginated PDF documents.
   - Respects `@page` CSS print rules, preserves custom typography, and captures high-DPI canvas visuals.
 
-#### 1.3 `co-security`: STRIDE Threat Matrix Generator & SARIF Exporter
-- **Milestone 1.3.1: STRIDE Threat Matrix Generator (`skills/stride-threat-matrix/`)**
+#### 1.3 `co-security`: STRIDE Threat Matrix Generator & SARIF Exporter — ✅ **Completed**
+- **Milestone 1.3.1: STRIDE Threat Matrix Generator (`skills/stride-threat-matrix/`)** — ✅ delivered
   - Analyzes architecture specs, route definitions, and data flow manifests to generate a structured STRIDE threat model (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege).
   - Produces actionable risk ratings and mitigation checklists.
-- **Milestone 1.3.2: SARIF Security Report Exporter (`skills/sarif-exporter/`)**
+- **Milestone 1.3.2: SARIF Security Report Exporter (`skills/sarif-exporter/`)** — ✅ delivered
   - Formats static analysis and threat scanning outputs into Static Analysis Results Interchange Format (SARIF v2.1.0).
   - Integrates natively with GitHub Advanced Security dashboard and CI upload actions.
 
@@ -104,27 +106,27 @@ The 7 workspace variants map directly to industry-standard open-source benchmark
 ### Phase 2: Mid-term Roadmap (2026 Q3/Q4 - Weeks 4-6)
 **Theme**: Design Systems, Live Financial Ingestion & Minimalist Game Architecture
 
-#### 2.1 `co-design`: `tokens.json` Compiler & `axe-core` Accessibility Auditor
-- **Milestone 2.1.1: `tokens.json` Design Token Compiler (`scripts/compile-tokens.ts`)**
+#### 2.1 `co-design`: `tokens.json` Compiler & `axe-core` Accessibility Auditor — ✅ **Completed**
+- **Milestone 2.1.1: `tokens.json` Design Token Compiler (`scripts/compile-tokens.ts`)** — ✅ delivered
   - Establishes `tokens.json` as the Single Source of Truth for visual design tokens (colors, typography, spacing, shadows, radii).
   - Compiles tokens into CSS Custom Properties (`:root { --color-primary: ... }`) and strongly-typed TypeScript constant files (`tokens.ts`).
-- **Milestone 2.1.2: `axe-core` Accessibility Audit Engine (`skills/accessibility-audit/`)**
+- **Milestone 2.1.2: `axe-core` Accessibility Audit Engine (`skills/accessibility-audit/`)** — ✅ delivered
   - Integrates `axe-core` into the test suite and dev server to perform real-time accessibility evaluation against WCAG 2.1 Level AA benchmarks.
   - Outputs detailed violation reports containing DOM selectors, impact severity, and remediation guidance.
 
-#### 2.2 `co-consult`: DART Open API Disclosure Parser & MECE Logic Auditor
-- **Milestone 2.2.1: DART Open API Live Disclosure Parser (`skills/dart-disclosure-parser/`)** — *superseded: merged into `k-dart` v2.0.0, standalone skill removed 2026-08-10*
+#### 2.2 `co-consult`: DART Open API Disclosure Parser & MECE Logic Auditor — ✅ **Completed**
+- **Milestone 2.2.1: DART Open API Live Disclosure Parser (`skills/dart-disclosure-parser/`)** — ✅ *superseded: merged into `k-dart` v2.0.0, standalone skill removed 2026-08-10*
   - Connects directly to South Korea's DART (Data Analysis, Retrieval and Transfer System) Open API.
   - Fetches and parses corporate filings, financial balance sheets, income statements, and major disclosures into structured JSON datasets.
-- **Milestone 2.2.2: MECE Logic Tree Auditor (`skills/mece-logic-auditor/`)**
+- **Milestone 2.2.2: MECE Logic Tree Auditor (`skills/mece-logic-auditor/`)** — ✅ delivered
   - Structural logic checker that analyzes proposed strategic frameworks and issue trees for Mutually Exclusive, Collectively Exhaustive principles.
   - Flags overlapping logic branches and unaddressed domain coverage gaps.
 
-#### 2.3 `co-game`: 150-Line TS ECS Engine Core & Web Audio `sound-synth`
-- **Milestone 2.3.1: 150-Line TypeScript ECS Engine Core (`templates/co-game/src/ecs/`)**
+#### 2.3 `co-game`: 150-Line TS ECS Engine Core & Web Audio `sound-synth` — ✅ **Completed**
+- **Milestone 2.3.1: 150-Line TypeScript ECS Engine Core (`templates/co-game/src/ecs/`)** — ✅ delivered
   - Minimalist Entity-Component-System framework contained within ~150 lines of TypeScript with zero external dependencies.
   - High-performance bitmask component allocation, entity lifecycle management, and system execution loops.
-- **Milestone 2.3.2: Web Audio `sound-synth` Procedural Generator (`skills/sound-synth/`)**
+- **Milestone 2.3.2: Web Audio `sound-synth` Procedural Generator (`skills/sound-synth/`)** — ✅ delivered
   - Browser-native Web Audio API synthesizer for procedural retro 8-bit sound effect creation (jump, laser, explosion, pickup, coin).
   - Requires zero external audio assets or audio files; generates audio programmatically at runtime.
 
@@ -133,15 +135,15 @@ The 7 workspace variants map directly to industry-standard open-source benchmark
 ### Phase 3: Long-term Roadmap (2026 Q4 - Weeks 7-10)
 **Theme**: Enterprise Office Generation & Autonomous Issue-to-PR Pipeline
 
-#### 3.1 `co-work`: Markdown to OOXML Compiler & Standup Digest Synthesizer
-- **Milestone 3.1.1: Markdown to Native MS Office OOXML Compiler (`scripts/md-to-ooxml.ts`)**
+#### 3.1 `co-work`: Markdown to OOXML Compiler & Standup Digest Synthesizer — ✅ **Completed**
+- **Milestone 3.1.1: Markdown to Native MS Office OOXML Compiler (`scripts/md-to-ooxml.ts`)** — ✅ delivered
   - Native compilation engine that compiles Markdown source files into valid Microsoft Office Open XML formats (`.docx` and `.xlsx`).
   - Supports styled headings, formatted tables, bullet lists, callout boxes, and spreadsheet formulas without requiring Microsoft Office binary dependencies.
-- **Milestone 3.2.2: Daily Standup Digest Synthesizer (`skills/standup-synthesizer/`)**
+- **Milestone 3.2.2: Daily Standup Digest Synthesizer (`skills/standup-synthesizer/`)** — ✅ delivered
   - Automated agent pipeline aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
   - Synthesizes concise, structured standup digests organized by Accomplished, In Progress, Blockers, and Planned Tasks.
 
-#### 3.2 `co-develop`: Autonomous `swe-solve` Issue-to-PR Resolution Pipeline
+#### 3.2 `co-develop`: Autonomous `swe-solve` Issue-to-PR Resolution Pipeline — ✅ **Completed**
 - **Milestone 3.2.1: Autonomous `swe-solve` Resolution Pipeline (`skills/swe-solve/`)**
   - Multi-stage autonomous problem-solving workflow for software engineering tasks:
     - **Stage 1 (Ingest & Inspect)**: Parses issue descriptions, identifies relevant files, and retrieves AST/code contexts.
