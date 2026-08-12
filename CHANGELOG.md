@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-12]**: fix(templates): add skills[].file to variant.json for 5 variants — added `"file": "skills/{name}/SKILL.md"` to 43 skill entries across co-consult (19), co-deck (11), co-develop (4), co-news (5), and co-work (4) variant.json files to establish the file field convention for skill discoverability.
+
 - **[2026-08-12]**: docs(lifecycle): add agent governance records for 7 variants (59 files) — created `docs/lifecycle/agents/` directories and agent governance records for all variants missing lifecycle documentation: co-consult (11 records), co-design (8), co-develop (7), co-game (13), co-news (7, beta phase), co-security (6), co-work (7). Each record follows the co-export template pattern (Overview, Phase History, Acceptance Criteria).
 
 - **[2026-08-12]**: chore: improve audit coverage, update propagation map, complete review fixes — added variant.json schema validation to `scripts/audit.ts` (validates required fields, name pattern, status enum, semver version, lifecycle fields, and conditional requirements per `docs/templates/variant.schema.json`; WARN-level per plan trade-off), added missing `co-export` and `co-news` to `scripts/propagation-map.json` governance-agents target_variants (all 9 variants now covered). Design doc: `docs/designs/project-review-fixes-design.md`.

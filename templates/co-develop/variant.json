@@ -38,47 +38,85 @@
     }
   ],
   "skills": [
-    { "name": "code-review" },
-    { "name": "refactoring" },
-    { "name": "swe-solve" },
-    { "name": "test-driven-development" }
+    {
+      "name": "code-review",
+      "file": "skills/code-review/SKILL.md"
+    },
+    {
+      "name": "refactoring",
+      "file": "skills/refactoring/SKILL.md"
+    },
+    {
+      "name": "swe-solve",
+      "file": "skills/swe-solve/SKILL.md"
+    },
+    {
+      "name": "test-driven-development",
+      "file": "skills/test-driven-development/SKILL.md"
+    }
   ],
   "skill_manifest": {
     "variant_specific": [
       {
         "name": "code-review",
         "layer": "workspace",
-        "used_by_agents": ["code-writer"],
-        "phases": [4],
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "skip"
       },
       {
         "name": "refactoring",
         "layer": "workspace",
-        "used_by_agents": ["code-writer"],
-        "phases": [4],
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "skip"
       },
       {
         "name": "swe-solve",
         "layer": "workspace",
-        "used_by_agents": ["pm"],
-        "phases": [4],
+        "used_by_agents": [
+          "pm"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "test-driven-development",
         "layer": "workspace",
-        "used_by_agents": ["test-runner"],
-        "phases": [4],
+        "used_by_agents": [
+          "test-runner"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "skip"
       }
     ]
   },
   "agent_manifest": {
     "variant_agents_dir": "agents",
-    "pipeline_order": ["architect", "designer", "stack-setup", "code-writer", "test-runner", "security-monitor"],
-    "optional": ["designer", "stack-setup"],
+    "pipeline_order": [
+      "architect",
+      "designer",
+      "stack-setup",
+      "code-writer",
+      "test-runner",
+      "security-monitor"
+    ],
+    "optional": [
+      "designer",
+      "stack-setup"
+    ],
     "notes": "designer: skip if no UI/UX component in scope. stack-setup: skip for projects with an existing configured stack."
   }
 }

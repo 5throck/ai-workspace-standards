@@ -105,37 +105,48 @@
   },
   "skills": [
     {
-      "name": "version"
+      "name": "version",
+      "file": "skills/version/SKILL.md"
     },
     {
-      "name": "research"
+      "name": "research",
+      "file": "skills/research/SKILL.md"
     },
     {
-      "name": "storyline"
+      "name": "storyline",
+      "file": "skills/storyline/SKILL.md"
     },
     {
-      "name": "design"
+      "name": "design",
+      "file": "skills/design/SKILL.md"
     },
     {
-      "name": "html-build"
+      "name": "html-build",
+      "file": "skills/html-build/SKILL.md"
     },
     {
-      "name": "measure"
+      "name": "measure",
+      "file": "skills/measure/SKILL.md"
     },
     {
-      "name": "prep-pdf"
+      "name": "prep-pdf",
+      "file": "skills/prep-pdf/SKILL.md"
     },
     {
-      "name": "pdf-export"
+      "name": "pdf-export",
+      "file": "skills/pdf-export/SKILL.md"
     },
     {
-      "name": "theme-authoring"
+      "name": "theme-authoring",
+      "file": "skills/theme-authoring/SKILL.md"
     },
     {
-      "name": "handbook"
+      "name": "handbook",
+      "file": "skills/handbook/SKILL.md"
     },
     {
-      "name": "presenter-mode"
+      "name": "presenter-mode",
+      "file": "skills/presenter-mode/SKILL.md"
     }
   ],
   "skill_manifest": {
@@ -143,78 +154,143 @@
       {
         "name": "version",
         "layer": "workspace",
-        "used_by_agents": ["design", "html-build", "image-curator", "diagram-specialist", "measure", "pdf-export", "research", "source-verifier", "storyline", "handbook-writer", "handbook-reviewer"],
-        "phases": [0, 1, 2, 3, 4, 5, 6],
+        "used_by_agents": [
+          "design",
+          "html-build",
+          "image-curator",
+          "diagram-specialist",
+          "measure",
+          "pdf-export",
+          "research",
+          "source-verifier",
+          "storyline",
+          "handbook-writer",
+          "handbook-reviewer"
+        ],
+        "phases": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
         "platform_parity": "required"
       },
       {
         "name": "research",
         "layer": "workspace",
-        "used_by_agents": ["research"],
-        "phases": [1],
+        "used_by_agents": [
+          "research"
+        ],
+        "phases": [
+          1
+        ],
         "platform_parity": "required"
       },
       {
         "name": "storyline",
         "layer": "workspace",
-        "used_by_agents": ["storyline"],
-        "phases": [2, 3],
+        "used_by_agents": [
+          "storyline"
+        ],
+        "phases": [
+          2,
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "design",
         "layer": "workspace",
-        "used_by_agents": ["design"],
-        "phases": [3],
+        "used_by_agents": [
+          "design"
+        ],
+        "phases": [
+          3
+        ],
         "platform_parity": "required"
       },
       {
         "name": "html-build",
         "layer": "workspace",
-        "used_by_agents": ["html-build"],
-        "phases": [4],
+        "used_by_agents": [
+          "html-build"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "measure",
         "layer": "workspace",
-        "used_by_agents": ["measure"],
-        "phases": [4],
+        "used_by_agents": [
+          "measure"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "prep-pdf",
         "layer": "workspace",
-        "used_by_agents": ["measure", "pdf-export"],
-        "phases": [4],
+        "used_by_agents": [
+          "measure",
+          "pdf-export"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       },
       {
         "name": "pdf-export",
         "layer": "workspace",
-        "used_by_agents": ["pdf-export"],
-        "phases": [4, 5],
+        "used_by_agents": [
+          "pdf-export"
+        ],
+        "phases": [
+          4,
+          5
+        ],
         "platform_parity": "required"
       },
       {
         "name": "theme-authoring",
         "layer": "workspace",
-        "used_by_agents": ["pm"],
+        "used_by_agents": [
+          "pm"
+        ],
         "phases": [],
         "platform_parity": "required"
       },
       {
         "name": "handbook",
         "layer": "workspace",
-        "used_by_agents": ["handbook-writer", "handbook-reviewer"],
-        "phases": ["H-2", "H-3", "H-4", "H-5"],
+        "used_by_agents": [
+          "handbook-writer",
+          "handbook-reviewer"
+        ],
+        "phases": [
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
         "platform_parity": "required"
       },
       {
         "name": "presenter-mode",
         "layer": "workspace",
-        "used_by_agents": ["html-build"],
-        "phases": [4],
+        "used_by_agents": [
+          "html-build"
+        ],
+        "phases": [
+          4
+        ],
         "platform_parity": "required"
       }
     ]
