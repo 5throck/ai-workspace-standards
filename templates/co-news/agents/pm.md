@@ -1,7 +1,7 @@
 ---
 owner: "architect"
 status: "active"
-extends: ../../../agents/pm.md
+extends: ../../common/agents/pm.md
 capabilities:
   - communication
   - task-management

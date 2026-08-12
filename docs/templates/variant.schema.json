@@ -66,6 +66,98 @@
           "description": "Scheduled archive date (null if not scheduled)"
         }
       }
+    },
+    "variant_type": {
+      "type": "string",
+      "description": "Variant classification (e.g., consulting, collaboration, development)"
+    },
+    "inherits_common": {
+      "type": "string",
+      "description": "Path to common template this variant inherits from (e.g., templates/common)"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 datetime when the variant was created"
+    },
+    "agents": {
+      "type": "array",
+      "description": "List of variant-specific agents",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "Agent identifier" },
+          "file": { "type": "string", "description": "Relative path to agent file (e.g., agents/foo.md)" }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "description": "List of variant-specific skills",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "Skill identifier" },
+          "version": { "type": "string", "description": "Skill version" },
+          "file": { "type": "string", "description": "Relative path to SKILL.md (e.g., skills/foo/SKILL.md)" }
+        }
+      }
+    },
+    "agent_manifest": {
+      "type": "object",
+      "description": "Agent orchestration metadata",
+      "properties": {
+        "variant_agents_dir": { "type": "string", "description": "Directory containing variant agent files" },
+        "pipeline_order": { "type": "array", "items": { "type": "string" }, "description": "Ordered agent names for sequential pipeline phases" },
+        "optional": { "type": "array", "items": { "type": "string" }, "description": "Agent names that are optional/situational" },
+        "notes": { "type": "string", "description": "Free-text notes on agent dispatch strategy" }
+      }
+    },
+    "skill_manifest": {
+      "type": "object",
+      "description": "Skill orchestration metadata",
+      "properties": {
+        "variant_specific": {
+          "type": "array",
+          "description": "Variant-specific skill entries with usage metadata",
+          "items": {
+            "type": "object",
+            "required": ["name", "used_by_agents", "phases"],
+            "properties": {
+              "name": { "type": "string" },
+              "layer": { "type": "string" },
+              "used_by_agents": { "type": "array", "items": { "type": "string" } },
+              "phases": { "type": "array", "items": { "type": "integer" } },
+              "platform_parity": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "script_manifest": {
+      "type": "object",
+      "description": "Script inventory metadata",
+      "properties": {
+        "variant_scripts_dir": { "type": "string", "description": "Directory containing variant-specific scripts" },
+        "local": {
+          "type": "array",
+          "description": "Locally defined scripts",
+          "items": {
+            "type": "object",
+            "required": ["name", "path"],
+            "properties": {
+              "name": { "type": "string" },
+              "path": { "type": "string" }
+            }
+          }
+        },
+        "external": {
+          "type": "array",
+          "description": "External script references",
+          "items": { "type": "object" }
+        }
+      }
     }
   },
   "allOf": [
