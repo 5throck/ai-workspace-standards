@@ -191,14 +191,14 @@ Created: 2026-05-15
 **Scripts**:
 - `scripts/validate-skills.ts`: Validates required sections in all `skills/*.md` files
 - `scripts/validate-agents.ts`: Validates required sections in all `agents/*.md` files
-- `scripts/validate-doc-folder.sh`: Confirms no lifecycle-related files exist in the workspace root
+- `scripts/validate-doc-folder.ts`: Confirms no lifecycle-related files exist in the workspace root
 
 **Pre-commit hook**:
 ```bash
 # .git/hooks/pre-commit
 bun scripts/validate-skills.ts
 bun scripts/validate-agents.ts
-bash scripts/validate-doc-folder.sh
+bun scripts/validate-doc-folder.ts
 ```
 
 **Validation failures**:
