@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # commit-msg: auto-log memory + CHANGELOG on every direct git commit.
 # Receives the commit message file path as $1.
 # Runs AFTER pre-commit, so the message is guaranteed to be available.
@@ -12,10 +13,28 @@ COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '1,/^$/d' -e '/^#/d' | sed 
 echo "$COMMIT_MSG" | grep -qE "^Merge|^WIP|^fixup!|^squash!" && exit 0
 
 # ── Enforce English Only ───────────────────────────────────────────────────────
-if ! python3 -c "import sys,re; data=open(sys.argv[1],encoding='utf-8').read(); sys.exit(1) if re.search(r'[가-힣ᄀ-ᇿ㄰-㆏]',data) else sys.exit(0)" "$COMMIT_MSG_FILE"; then
-  echo -e "\033[31m[FAIL]\033[0m Non-English characters (Korean) detected in commit message."
-  echo "       Workspace policy requires all commit messages must be in English."
-  exit 1
+# Uses language-guard.ts (Korean + Japanese + Chinese detection + code-block stripping).
+# Falls back to python3 Korean-only regex if bun is unavailable.
+if command -v bun >/dev/null 2>&1; then
+  if ! bun -e "
+    import { readFileSync } from 'fs';
+    import { hasNonEnglish } from './scripts/lib/language-guard.ts';
+    const text = readFileSync(process.argv[1], 'utf-8');
+    process.exit(hasNonEnglish(text) ? 1 : 0);
+  " "$COMMIT_MSG_FILE"; then
+    echo -e "\033[31m[FAIL]\033[0m Non-English characters detected in commit message."
+    echo "       Workspace policy requires all commit messages must be in English."
+    exit 1
+  fi
+elif command -v python3 >/dev/null 2>&1; then
+  # Fallback: Korean-only regex (narrower than language-guard.ts)
+  if ! python3 -c "import sys,re; data=open(sys.argv[1],encoding='utf-8').read(); sys.exit(1) if re.search(r'[가-힣ᄀ-ᇿ㄰-㆏]',data) else sys.exit(0)" "$COMMIT_MSG_FILE"; then
+    echo -e "\033[31m[FAIL]\033[0m Non-English characters detected in commit message."
+    echo "       Workspace policy requires all commit messages must be in English."
+    exit 1
+  fi
+else
+  echo "[WARN] bun and python3 not found — non-English check skipped." >&2
 fi
 
 TODAY=$(date +%Y-%m-%d)

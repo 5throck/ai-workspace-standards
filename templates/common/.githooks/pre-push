@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # pre-push wrapper: routes to TS logic
+
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun not found. Install bun: https://bun.sh" >&2; exit 1; }
 bun run scripts/hooks/pre-push.ts
