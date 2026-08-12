@@ -1,4 +1,4 @@
-// @version 2.10.14
+// @version 2.10.15
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -875,6 +875,91 @@ function checkVariantSkillSections() {
   }
 }
 
+// Variant JSON schema validation
+function checkVariantJsonSchema() {
+  const schemaPath = path.join('docs', 'templates', 'variant.schema.json');
+  const templatesDir = 'templates';
+  if (!fs.existsSync(schemaPath) || !fs.existsSync(templatesDir)) return;
+
+  const variants = fs.readdirSync(templatesDir)
+    .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+
+  if (variants.length === 0) return;
+
+  let schemaWarnings = 0;
+  for (const variant of variants) {
+    const variantJsonPath = path.join(templatesDir, variant, 'variant.json');
+    if (!fs.existsSync(variantJsonPath)) continue;
+
+    try {
+      const content = fs.readFileSync(variantJsonPath, 'utf-8');
+      const variantData = JSON.parse(content);
+
+      // Validate required fields per variant.schema.json
+      const required = ['name', 'description', 'status', 'version', 'lifecycle'];
+      const missing = required.filter(f => !(f in variantData));
+      if (missing.length > 0) {
+        Warn(`Variant schema: templates/${variant}/variant.json missing required field(s): ${missing.join(', ')}`);
+        schemaWarnings++;
+      }
+
+      // Validate name pattern: ^co-[a-z]+$
+      if (variantData.name && !/^co-[a-z]+$/.test(variantData.name)) {
+        Warn(`Variant schema: templates/${variant}/variant.json name "${variantData.name}" does not match pattern ^co-[a-z]+$`);
+        schemaWarnings++;
+      }
+
+      // Validate status enum
+      const validStatuses = ['draft', 'beta', 'stable', 'deprecated'];
+      if (variantData.status && !validStatuses.includes(variantData.status)) {
+        Warn(`Variant schema: templates/${variant}/variant.json has invalid status "${variantData.status}" (expected: ${validStatuses.join(', ')})`);
+        schemaWarnings++;
+      }
+
+      // Validate version semver pattern
+      if (variantData.version && !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(variantData.version)) {
+        Warn(`Variant schema: templates/${variant}/variant.json version "${variantData.version}" does not match semver pattern MAJOR.MINOR.PATCH`);
+        schemaWarnings++;
+      }
+
+      // Validate lifecycle required fields
+      if (variantData.lifecycle) {
+        const lcRequired = ['statusSince', 'lastTransition'];
+        const lcMissing = lcRequired.filter(f => !(f in variantData.lifecycle));
+        if (lcMissing.length > 0) {
+          Warn(`Variant schema: templates/${variant}/variant.json lifecycle missing required field(s): ${lcMissing.join(', ')}`);
+          schemaWarnings++;
+        }
+      }
+
+      // Conditional: beta requires betaEngagements
+      if (variantData.status === 'beta' && variantData.lifecycle && !('betaEngagements' in variantData.lifecycle)) {
+        Warn(`Variant schema: templates/${variant}/variant.json status=beta but lifecycle.betaEngagements is missing`);
+        schemaWarnings++;
+      }
+
+      // Conditional: stable requires stablePromotedOn
+      if (variantData.status === 'stable' && variantData.lifecycle && !('stablePromotedOn' in variantData.lifecycle)) {
+        Warn(`Variant schema: templates/${variant}/variant.json status=stable but lifecycle.stablePromotedOn is missing`);
+        schemaWarnings++;
+      }
+
+      // Conditional: deprecated requires deprecatedOn
+      if (variantData.status === 'deprecated' && variantData.lifecycle && !('deprecatedOn' in variantData.lifecycle)) {
+        Warn(`Variant schema: templates/${variant}/variant.json status=deprecated but lifecycle.deprecatedOn is missing`);
+        schemaWarnings++;
+      }
+    } catch (e: any) {
+      Warn(`Variant schema: templates/${variant}/variant.json parse error: ${e.message}`);
+      schemaWarnings++;
+    }
+  }
+
+  if (schemaWarnings === 0) {
+    Pass(`Variant JSON schema: all ${variants.length} variant.json files validated`);
+  }
+}
+
 // Stale shell/script reference check
 if (!LIFECYCLE_ONLY) {
 function checkStaleShellReferences() {
@@ -940,6 +1025,7 @@ checkL2VariantIntegrity();
 checkVariantContextGuidelinesSection();
 checkVariantAgentSections();
 checkVariantSkillSections();
+checkVariantJsonSchema();
 }
 
 // Workspace root detection: presence of context.md (and absence of variant.json)
