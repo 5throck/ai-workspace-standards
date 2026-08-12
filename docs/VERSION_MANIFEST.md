@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-12T06:39:55.778Z
+**Generated**: 2026-08-12T07:54:55.652Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 36
-- **Scripts**: 140
+- **Scripts**: 74
 - **Commands**: 8
 
 ---
@@ -77,99 +77,48 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| _test-consumer.ts | N/A | scripts/hooks/_test-consumer.ts | N/A |
-| _test-module.ts | N/A | scripts/hooks/_test-module.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.5 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
-| agent-override-merge.ts | 1.0.1 | scripts/lib/agent-override-merge.ts | js-yaml |
-| agent-promote.ts | 0.1.1 | scripts/helpers/agent-promote.ts | N/A |
-| agent-similarity-analyzer.ts | 1.1.1 | scripts/helpers/agent-similarity-analyzer.ts | fs, path |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.13 | scripts/audit.ts | bun |
-| auth.ts | 1.0.0 | scripts/lib/auth.ts | N/A |
-| beta-lifecycle.ts | 1.2.0 | scripts/helpers/beta-lifecycle.ts | fs, path |
-| capability-registry.ts | 1.0.2 | scripts/helpers/registries/capability-registry.ts | N/A |
-| capability-validator.ts | 1.0.0 | scripts/validators/capability-validator.ts | fs, js-yaml, path |
+| audit.ts | 2.10.14 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| collaboration-plugin.ts | 1.0.0 | scripts/helpers/plugins/collaboration-plugin.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
-| consulting-plugin.ts | 1.1.0 | scripts/helpers/plugins/consulting-plugin.ts | N/A |
 | create-l2-scaffold.ts | 1.9.0 | scripts/create-l2-scaffold.ts | N/A |
-| design-plugin.ts | 1.0.0 | scripts/helpers/plugins/design-plugin.ts | N/A |
-| dev-sync.ts | 1.5.0 | scripts/dev-sync.ts | bun |
-| development-plugin.ts | 1.0.0 | scripts/helpers/plugins/development-plugin.ts | N/A |
+| dev-sync.ts | 1.5.1 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
-| dispatch-serial.ts | 1.0.0 | scripts/dispatch-serial.ts | N/A |
+| dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
-| duplicate-validator.ts | 1.0.0 | scripts/validators/duplicate-validator.ts | fs, path |
-| encoding-utils.ts | 1.1.0 | scripts/lib/encoding-utils.ts | fs, path |
-| error-handling.ts | 1.1.0 | scripts/lib/error-handling.ts | N/A |
-| extends-validator-wrapper.ts | 1.0.0 | scripts/validators/extends-validator-wrapper.ts | fs, js-yaml, path |
-| extends-validator.ts | 1.0.1 | scripts/helpers/extends-validator.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
-| game-plugin.ts | 1.0.0 | scripts/helpers/plugins/game-plugin.ts | N/A |
-| gateguard-fact-force.ts | 1.2.0 | scripts/hooks/gateguard-fact-force.ts | N/A |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l2-readme.ts | 1.0.0 | scripts/generate-l2-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-variant.ts | 1.10.0 | scripts/helpers/generate-variant.ts | fs, path |
-| generate-version-manifest.ts | 1.1.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
-| golden-reference-loader.ts | 1.1.0 | scripts/helpers/golden-reference-loader.ts | fs, path |
-| index.ts | 1.0.0 | scripts/helpers/plugins/index.ts | N/A |
-| index.ts | 1.0.0 | scripts/helpers/registries/index.ts | N/A |
-| index.ts | 1.0.0 | scripts/validators/index.ts | N/A |
+| generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
-| integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
 | l2-to-variant-pipeline.ts | 1.10.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
-| language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
-| layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
-| lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
-| lifecycle-governance.ts | 1.0.0 | scripts/helpers/lifecycle-governance.ts | N/A |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
-| merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
-| normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
-| orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
-| pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
-| platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
-| platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
-| pm-md-parser.ts | 1.1.0 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
-| post-write-lifecycle-check.ts | 1.1.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
-| pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
-| promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
 | propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
-| propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |
-| reconcile-with-l0-l1.ts | 1.2.2 | scripts/helpers/reconcile-with-l0-l1.ts | fs, path, semver |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.0 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.1 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
-| rollback-partial-project.ts | 1.0.0 | scripts/helpers/rollback-partial-project.ts | N/A |
-| scan-l2-project.ts | 1.1.1 | scripts/helpers/scan-l2-project.ts | crypto, fs, path |
-| schema-validator.ts | 1.1.0 | scripts/validators/schema-validator.ts | fs, js-yaml, path |
-| security-plugin.ts | 1.0.0 | scripts/helpers/plugins/security-plugin.ts | N/A |
-| security-validator.ts | 1.0.1 | scripts/helpers/security-validator.ts | fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.1 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.2.0 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
-| ssrf.ts | 1.1.0 | scripts/lib/ssrf.ts | N/A |
-| substitute-placeholders.ts | 1.1.1 | scripts/helpers/substitute-placeholders.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
@@ -177,36 +126,23 @@
 | sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |
 | tag-template.ts | 1.0.1 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.2.1 | scripts/team-builder.ts | N/A |
-| template-utils.ts | 1.1.0 | scripts/helpers/template-utils.ts | N/A |
-| template-validation.ts | 1.0.2 | scripts/helpers/template-validation.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l2-promotion.ts | 1.0.1 | scripts/test-l2-promotion.ts | bun |
 | test-new-project.ts | 1.0.4 | scripts/test-new-project.ts | bun |
 | test-platform-parity.ts | 0.2.4 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |
-| ticket-schema.ts | 1.0.0 | scripts/helpers/ticket-schema.ts | N/A |
-| ticket-store.ts | 1.0.0 | scripts/helpers/ticket-store.ts | js-yaml |
 | ticket.ts | 1.0.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| types.ts | 1.0.0 | scripts/validators/types.ts | N/A |
-| update-variant-lifecycle.ts | 1.0.1 | scripts/helpers/update-variant-lifecycle.ts | N/A |
-| upgrade-project.ts | 1.7.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.7.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.2 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.4.4 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
-| validate-output.ts | 1.0.1 | scripts/helpers/validate-output.ts | N/A |
-| validate-platform-parity.ts | 1.1.1 | scripts/helpers/validate-platform-parity.ts | fs, path |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.5.17 | scripts/validate-templates.ts | js-yaml |
-| validation-policy.ts | 1.0.1 | scripts/helpers/registries/validation-policy.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
-| variant-governance-rules.ts | 1.1.1 | scripts/helpers/variant-governance-rules.ts | N/A |
-| variant-json-validator.ts | 1.0.0 | scripts/validators/variant-json-validator.ts | N/A |
-| variant-plugin.ts | 1.0.0 | scripts/helpers/plugins/variant-plugin.ts | N/A |
-| variant-type-registry.ts | 1.0.0 | scripts/helpers/registries/variant-type-registry.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.1 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
@@ -215,8 +151,6 @@
 | verify-scripts.ts | 1.3.1 | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
-| workspace-integration.ts | 1.0.0 | scripts/helpers/workspace-integration.ts | crypto, fs, path |
-| write-scripts-snapshot.ts | 1.0.1 | scripts/helpers/write-scripts-snapshot.ts | N/A |
 
 ---
 

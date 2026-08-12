@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Serial Agent Dispatcher
- * @version 1.0.0
+ * @version 1.0.1
  * Automates dispatching subagents that must run sequentially
  *
  * This dispatcher is for tasks with dependencies:
@@ -261,6 +261,18 @@ async function main() {
   if (pipelineFileIndex >= 0 && args[pipelineFileIndex + 1]) {
     try {
       const pipelinePath = args[pipelineFileIndex + 1];
+      // Security: reject absolute paths and paths outside workspace
+      const workspaceRoot = new URL('..', import.meta.url).pathname;
+      const resolved = pipelinePath.startsWith('.') ? pipelinePath : pipelinePath;
+      const isAbsolute = pipelinePath.startsWith('/') || pipelinePath.startsWith('\\') || /^[A-Za-z]:/.test(pipelinePath);
+      if (isAbsolute) {
+        console.error(`❌ --pipeline must be a relative path (received absolute: ${pipelinePath})`);
+        process.exit(1);
+      }
+      if (resolved.includes('..')) {
+        console.error(`❌ --pipeline must not contain path traversal (received: ${pipelinePath})`);
+        process.exit(1);
+      }
       pipeline = await import(pipelinePath).then(m => m.default || m.pipeline);
     } catch (error) {
       console.error(`❌ Failed to load pipeline from ${args[pipelineFileIndex + 1]}:`, error);

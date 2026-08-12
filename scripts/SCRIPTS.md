@@ -55,21 +55,21 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.13 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.10.14 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l2-scaffold.ts` | L0 | 1.9.0 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `dispatch-serial.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l2-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-version-manifest.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/generate-variant.ts` | L0 | 1.10.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
@@ -171,7 +171,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.7.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.7.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
