@@ -5,11 +5,11 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.10.0
+ * @version 1.11.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
- * - helpers/scan-l2-project.ts (File classification types)
+ * - helpers/scan-l3-project.ts (File classification types)
  * - helpers/reconcile-with-l0-l1.ts (Reconciled manifest types)
  * - helpers/variant-governance-rules.ts (Variant type definitions)
  * - lib/encoding-utils.ts (UTF-8 handling)
@@ -27,7 +27,7 @@ import type { VariantType } from './registries/variant-type-registry.ts';
 import { getVariantTypeDefinition } from './registries/variant-type-registry.ts';
 import { getPromotionPolicy } from './registries/promotion-policy.ts';
 import { SKIP_AGENT_FILES } from './golden-reference-loader.ts';
-import type { L2ScanResult } from './scan-l2-project.ts';
+import type { L3ScanResult } from './scan-l3-project.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -46,9 +46,9 @@ export interface VariantMetadata {
   version: string;
   /** Inherits from templates/common */
   inherits_common: string;
-  /** Agent roster from L2 project */
+  /** Agent roster from L3 project */
   agentRoster: AgentDefinition[];
-  /** Skills from L2 project */
+  /** Skills from L3 project */
   skills: SkillDefinition[];
   /** Optional: Lecture variant — agent pipeline order and optional flags */
   agent_manifest?: {
@@ -82,7 +82,7 @@ export interface VariantMetadata {
     workflowPhases?: string;
     quickStartBody?: string;
   };
-  /** Optional: Custom fields from L2 source variant.json (engagement_methodology, etc.) */
+  /** Optional: Custom fields from L3 source variant.json (engagement_methodology, etc.) */
   [key: string]: unknown;
 }
 
@@ -165,9 +165,9 @@ function createDirectory(dirPath: string): void {
 }
 
 /**
- * Normalize agent frontmatter when copying from L2 source to variant template.
+ * Normalize agent frontmatter when copying from L3 source to variant template.
  *
- * Strips L2-only fields (lifecycle, formal_name, variant) that do not belong in
+ * Strips L3-only fields (lifecycle, formal_name, variant) that do not belong in
  * standard variant agent files, and ensures all four tier platforms are present
  * (claude, gemini, antigravity, gemini-cli) by inheriting the claude tier value.
  *
@@ -179,11 +179,11 @@ export function normalizeAgentFrontmatter(content: string): string {
 
   const [, open, fm, close, body] = fmMatch;
 
-  // Strip L2-only fields
-  const L2_ONLY_FIELDS = ['lifecycle', 'formal_name', 'variant'];
+  // Strip L3-only fields
+  const L3_ONLY_FIELDS = ['lifecycle', 'formal_name', 'variant'];
   let normalized = fm;
 
-  for (const field of L2_ONLY_FIELDS) {
+  for (const field of L3_ONLY_FIELDS) {
     // Match single-line field: "field: value"
     // Match block field: "field:\n  key: val\n  key2: val2" (indented sub-keys)
     normalized = normalized.replace(
@@ -353,7 +353,7 @@ function generateAgentOverrides(
         throw new Error(`Path traversal detected: ${file.targetPath} resolves outside workspace`);
       }
 
-      // Check if source exists (from L2 project)
+      // Check if source exists (from L3 project)
       if (existsSync(file.sourcePath)) {
         // Skip README files — normalize only specialist agent files
         const isSpecialistAgent = !['README.md', 'README_ko.md', 'pm.md'].includes(
@@ -755,7 +755,7 @@ function generateAgentsMd(
 function generateClaudeMd(variantPath: string, metadata: VariantMetadata, manifest: ReconciledManifest): string {
   const claudeMdPath = join(variantPath, 'CLAUDE.md');
 
-  // Try to use L2 project's CLAUDE.md if it exists in manifest
+  // Try to use L3 project's CLAUDE.md if it exists in manifest
   const claudeMdFile = manifest.keepInVariant.find(f => f.targetPath === 'CLAUDE.md');
 
   if (claudeMdFile && existsSync(claudeMdFile.sourcePath)) {
@@ -807,7 +807,7 @@ ${metadata.skills.map(skill => `- **${skill.name}**: ${skill.description || skil
 function generateGeminiMd(variantPath: string, metadata: VariantMetadata, manifest: ReconciledManifest): string {
   const geminiMdPath = join(variantPath, 'GEMINI.md');
 
-  // Try to use L2 project's GEMINI.md if it exists in manifest
+  // Try to use L3 project's GEMINI.md if it exists in manifest
   const geminiMdFile = manifest.keepInVariant.find(f => f.targetPath === 'GEMINI.md');
 
   if (geminiMdFile && existsSync(geminiMdFile.sourcePath)) {
@@ -1032,12 +1032,12 @@ export function normalizeRelPath(relativePath: string): string {
 }
 
 /**
- * Extract agent roster from L2 scan result.
+ * Extract agent roster from L3 scan result.
  * Skips pm.md, README.md, README_ko.md, and handoff-spec files.
  * @version 1.3.0
  */
-export function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['agentRoster'] {
-  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
+export function extractAgentRoster(scanResult: L3ScanResult): VariantMetadata['agentRoster'] {
+  const l3ProjectPath = scanResult.scanMetadata.l3ProjectPath;
 
   const agentFiles = scanResult.files.filter(f => {
     const relPath = normalizeRelPath(f.relativePath);
@@ -1048,25 +1048,25 @@ export function extractAgentRoster(scanResult: L2ScanResult): VariantMetadata['a
 
   return agentFiles
     .map(file => {
-      const absPath = join(l2ProjectPath, file.relativePath);
+      const absPath = join(l3ProjectPath, file.relativePath);
       return parseAgentFile(absPath);
     })
     .filter((agent): agent is NonNullable<typeof agent> => agent !== null);
 }
 
 /**
- * Extract variant-specific skills from L2 scan result.
+ * Extract variant-specific skills from L3 scan result.
  * Only includes skills/ (not .claude/skills/ or .gemini/skills/ — those are L0 common).
  * When the L2 variant.json declares `skill_manifest.variant_specific`, only those skills are included;
  * otherwise falls back to all skill directories under skills/.
  * @version 1.4.0
  */
-export function extractSkills(scanResult: L2ScanResult): VariantMetadata['skills'] {
-  const l2ProjectPath = scanResult.scanMetadata.l2ProjectPath;
+export function extractSkills(scanResult: L3ScanResult): VariantMetadata['skills'] {
+  const l3ProjectPath = scanResult.scanMetadata.l3ProjectPath;
 
   // Variant-specific skills from L2 variant.json manifest (preferred)
   let variantSpecificNames: Set<string> | undefined;
-  const variantJsonPath = join(l2ProjectPath, 'variant.json');
+  const variantJsonPath = join(l3ProjectPath, 'variant.json');
   if (existsSync(variantJsonPath)) {
     try {
       const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
@@ -1490,7 +1490,7 @@ export async function generateVariant(
     'README_ko.md',
     'variant.json',
     'skills/SKILLS.md',
-    // L2 migration artifacts — not part of the variant template contract
+    // L3 migration artifacts — not part of the variant template contract
     'docs/context.md',
     'docs/ARCHITECTURE.md',
     'docs/_ORIGIN.md',

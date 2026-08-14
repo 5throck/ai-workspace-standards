@@ -38,9 +38,13 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 <!-- status: active | deprecated | experimental -->
 <!-- removal-date: YYYY-MM-DD (required when status=deprecated) or —-->
 <!-- security-advisory: CVE-XXXX or —-->
-<!-- Layer column values (ONLY 2 TYPES USED):
-  L0           = workspace root only; must NOT be copied to templates/common/ or L2 projects
-  L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L2 at new-project time
+<!-- Layer column values (ONLY 2 TYPES USED). L0/L1/L2/L3 here follow
+     CONSTITUTION.md's Terminology Definition (L1=templates/common, L2=templates/co-*,
+     L3=Projects/*); these Layer values predate that document and use L2 to mean
+     "reaches a scaffolded project," which CONSTITUTION.md calls L3 — not renamed here
+     since layer-filter.ts and verify-scripts.ts parse these literal strings:
+  L0           = workspace root only; must NOT be copied to templates/common/ or L3 projects
+  L0+L1        = exists in scripts/ AND templates/common/scripts/; scaffold-copies to L3 at new-project time
   L0+L1+L2     = reserved for future use (Fork Model architecture - not currently used)
 -->
 <!-- pair: reserved field (was used for sh/ps1 pair tracking — abolished per ADR-0036) -->
@@ -59,7 +63,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `create-l2-scaffold.ts` | L0 | 1.9.0 | active | —| —| L0 | —|
+| `create-l2-scaffold.ts` | L0 | 1.9.1 | active | —| —| L0 | —|
 | `dev-sync.ts` | L0 | 1.5.1 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -67,17 +71,17 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `generate-l2-readme.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `generate-l2-readme.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.10.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.11.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `helpers/inject-skills.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/integration-helpers.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/layer-filter.ts` | L0 | 1.3.1 | active | —| —| L0 | —|
+| `helpers/layer-filter.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
@@ -99,9 +103,9 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/plugins/lecture-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/workspace-integration.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.2.2 | active | —| —| L0 | —|
-| `helpers/normalize-agent-skills.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `helpers/scan-l2-project.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
+| `helpers/reconcile-with-l0-l1.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/normalize-agent-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/scan-l3-project.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/template-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -130,12 +134,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/pre-push.ts` | L0 | 1.2.6 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
-| `l2-to-variant-pipeline.ts` | L0 | 1.10.2 | active | —| —| L0 | —|
+| `l2-to-variant-pipeline.ts` | L0 | 1.10.3 | active | —| —| L0 | —|
 | `regenerate-agents-md.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/agent-override-merge.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `lib/auth.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/encoding-utils.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lib/error-handling.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `lib/error-handling.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `lib/language-guard.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/pipeline-state.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -185,7 +189,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
-| `verify-scripts.ts` | L0 | 1.3.1 | active | —| —| L0+L1 | —|
+| `verify-scripts.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
@@ -212,9 +216,10 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 |-------|----------|-------|---------------|
 | **L0 —Workspace SSOT** | `scripts/` (workspace root) | workspace maintainer | Versioned via this file |
 | **L1 —Template snapshot** | `templates/common/scripts/` | publish: `bun run propagate:apply` | Explicit publish from L0 via consolidated tool |
-| **L2 —Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L2 propagation via `propagate-to-templates.ts` |
+| **L2 —Variant template** | `templates/co-*/scripts/<variant>/` | variant maintainer | Variant-specific scripts, propagated from L0 |
+| **L3 —Project** | `<project>/scripts/` | project team | Independent snapshot after creation, plus L1->L3 propagation via `propagate-to-templates.ts` |
 
-**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run propagate:apply`, which is a consolidated tool that also handles L1->L2 propagation. L2 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L2.
+**Propagation rule**: L0 is the development SSOT. Publish L0→L1 explicitly with `bun run propagate:apply`, which is a consolidated tool that also handles L1->L3 propagation. L3 projects snapshot L1 at creation time and receive subsequent updates via propagation. No automatic back-propagation from L3.
 
 ---
 
@@ -457,9 +462,9 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 ### Propagation Scripts (Bun / TypeScript)
 
 #### `propagate-to-templates.ts`
-**Purpose**: Publishes L0 workspace scripts and governance docs to L1 (`templates/common/`) and propagates L1 changes to L2 variant projects. This is the consolidated propagation tool invoked via `bun run propagate:apply`.
+**Purpose**: Publishes L0 workspace scripts and governance docs to L1 (`templates/common/`) and propagates L1 changes to L2 variant templates. This is the consolidated propagation tool invoked via `bun run propagate:apply`.
 **Usage**: `bun scripts/propagate-to-templates.ts [flags]`
-**Layer**: L0 (workspace infrastructure only — not copied to templates/common/ or L2 projects)
+**Layer**: L0 (workspace infrastructure only — not copied to templates/common/, templates/co-*/, or L3 projects)
 **Aliases**: `bun run propagate:apply` (--apply), `bun run propagate:dry-run` (--dry-run)
 
 **Flag → Layer/Phase Mapping**:
@@ -471,7 +476,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 | `--governance-l1` | L0 governance → L1(common) | Phase A: deploy CLAUDE.md/GEMINI.md/AGENTS.md to L1 |
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
-| `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
+| `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 variants not diverged from L1 |
 | `--include-disabled` | Opt-in override | Include domains marked `disabled: true` (e.g. `docs`) in the dry-run report only — combining with `--apply` is a hard error (exit 1), not a silent write |
 
 **Typical workflow**:
@@ -490,7 +495,7 @@ bun scripts/propagate-to-templates.ts --domain docs --include-disabled --dry-run
 ### L2 Variant Tooling (Bun / TypeScript)
 
 #### `generate-l2-readme.ts`
-**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L2 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL2Project()`. This is the Phase A self-service complement to `l2-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L2 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l2-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
+**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L3 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL3Project()` (this script's own `l2`-prefixed name and flags predate the L3 layer terminology). This is the Phase A self-service complement to `l2-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L3 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l2-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
 **Usage**: `bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]`
 **Layer**: L0 (workspace infrastructure — not copied to templates/common/ or L2 projects)
 

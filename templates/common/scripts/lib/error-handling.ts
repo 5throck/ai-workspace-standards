@@ -1,10 +1,10 @@
 /**
  * Error Handling Library
  *
- * Structured error recovery and logging for the L2-to-variant pipeline.
+ * Structured error recovery and logging for the L3-to-variant pipeline.
  * Addresses Risk #4: Error Handling.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @Risk #4: Error Handling (P1 - High)
  */
 
@@ -20,7 +20,7 @@ export enum ErrorSeverity {
 
 export enum ErrorPhase {
   ADR_VALIDATION = 'adr_validation',
-  L2_SCAN = 'l2_scan',
+  L3_SCAN = 'l3_scan',
   RECONCILIATION = 'reconciliation',
   VARIANT_GENERATION = 'variant_generation',
   BETA_SETUP = 'beta_setup',

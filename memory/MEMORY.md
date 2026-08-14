@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-15](2026-08-15.md) | chore: update |
 | [2026-08-14](2026-08-14.md) | chore: update |
 | [2026-08-13](2026-08-13.md) | docs(designs): reflect week 08-10..08-13 execution in design docs |
 | [2026-08-12](2026-08-12.md) | chore: update |

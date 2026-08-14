@@ -1,17 +1,20 @@
 #!/usr/bin/env bun
 /**
- * L2 Project Scanner
+ * L3 Project Scanner
  *
- * Recursively scans L2 project directories and classifies files
+ * Recursively scans L3 project directories and classifies files
  * for variant conversion pipeline.
  *
- * @version 1.1.1
- * @phase 1: L2 Analysis
+ * @version 1.2.0
+ * @phase 1: L3 Analysis
  *
  * Dependencies:
  * - lib/encoding-utils.ts (UTF-8 handling)
  * - lib/error-handling.ts (Error management)
  * - lib/pipeline-state.ts (State persistence)
+ *
+ * Renamed from scan-l2-project.ts (see CONSTITUTION.md §Terminology Definition —
+ * L2 = templates/co-*, L3 = Projects/*; this scanner operates on Projects/*).
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
@@ -25,7 +28,7 @@ import { fatalError, warningError, ErrorPhase, ErrorSeverity } from '../lib/erro
 // ============================================================================
 
 export interface FileClassification {
-  /** Relative path from L2 project root */
+  /** Relative path from L3 project root */
   relativePath: string;
   /** File exists in L0 (workspace root) */
   existsInL0: boolean;
@@ -35,21 +38,21 @@ export interface FileClassification {
   l0Version?: string;
   /** Version extracted from L1 file header */
   l1Version?: string;
-  /** Version extracted from L2 file header */
-  l2Version?: string;
+  /** Version extracted from L3 file header */
+  l3Version?: string;
   /** SHA-256 hash of L0 file content */
   hashL0?: string;
   /** SHA-256 hash of L1 file content */
   hashL1?: string;
-  /** SHA-256 hash of L2 file content */
-  hashL2?: string;
+  /** SHA-256 hash of L3 file content */
+  hashL3?: string;
   /** Classification based on comparison */
   classification: 'new' | 'modified' | 'identical' | 'conflict';
   /** Platform scope detection */
   platformScope: 'claude' | 'gemini' | 'both' | 'neutral';
 }
 
-export interface L2ScanResult {
+export interface L3ScanResult {
   /** All classified files */
   files: FileClassification[];
   /** Scan summary statistics */
@@ -62,8 +65,8 @@ export interface L2ScanResult {
   };
   /** Metadata about the scan */
   scanMetadata: {
-    l2ProjectPath: string;
-    l2ProjectName: string;
+    l3ProjectPath: string;
+    l3ProjectName: string;
     scannedAt: string;
     platform: string;
   };
@@ -164,16 +167,16 @@ function scanDirectoryRecursively(
 }
 
 /**
- * Classify a single file by comparing L0/L1/L2 versions
+ * Classify a single file by comparing L0/L1/L3 versions
  * @version 1.1.0
  */
 function classifyFile(
-  l2Path: string,
-  l2ProjectPath: string,
+  l3Path: string,
+  l3ProjectPath: string,
   l0Root: string,
   l1Common: string
 ): FileClassification {
-  const relativePath = relative(l2ProjectPath, l2Path);
+  const relativePath = relative(l3ProjectPath, l3Path);
   const platformScope = detectPlatformScope(relativePath);
 
   // Check existence in L0 and L1
@@ -183,26 +186,26 @@ function classifyFile(
   const existsInL0 = existsSync(l0Path);
   const existsInL1 = existsSync(l1Path);
 
-  // Read L2 file (must exist)
-  let l2Content: string;
-  let l2Encoding: string;
+  // Read L3 file (must exist)
+  let l3Content: string;
+  let l3Encoding: string;
 
   try {
-    const encoding = detectEncoding(l2Path);
-    l2Encoding = encoding.encoding;
-    l2Content = readUTF8File(l2Path);
+    const encoding = detectEncoding(l3Path);
+    l3Encoding = encoding.encoding;
+    l3Content = readUTF8File(l3Path);
   } catch (error) {
     throw fatalError(
-      ErrorPhase.L2_SCAN,
-      'L2_FILE_READ_FAILED',
-      `Failed to read L2 file: ${relativePath}`,
+      ErrorPhase.L3_SCAN,
+      'L3_FILE_READ_FAILED',
+      `Failed to read L3 file: ${relativePath}`,
       error instanceof Error ? error.message : String(error),
       'Ensure file is readable and valid UTF-8 encoding'
     );
   }
 
-  const l2Version = extractVersion(l2Content);
-  const hashL2 = computeHash(l2Content);
+  const l3Version = extractVersion(l3Content);
+  const hashL3 = computeHash(l3Content);
 
   // Read L0 and L1 if they exist
   let l0Version: string | undefined;
@@ -217,7 +220,7 @@ function classifyFile(
       hashL0 = computeHash(l0Content);
     } catch (error) {
       throw warningError(
-        ErrorPhase.L2_SCAN,
+        ErrorPhase.L3_SCAN,
         'L0_FILE_READ_FAILED',
         `Failed to read L0 file: ${relativePath}`,
         error instanceof Error ? error.message : String(error)
@@ -232,7 +235,7 @@ function classifyFile(
       hashL1 = computeHash(l1Content);
     } catch (error) {
       throw warningError(
-        ErrorPhase.L2_SCAN,
+        ErrorPhase.L3_SCAN,
         'L1_FILE_READ_FAILED',
         `Failed to read L1 file: ${relativePath}`,
         error instanceof Error ? error.message : String(error)
@@ -244,32 +247,32 @@ function classifyFile(
   let classification: FileClassification['classification'] = 'new';
 
   if (!existsInL0 && !existsInL1) {
-    // New file - only exists in L2
+    // New file - only exists in L3
     classification = 'new';
   } else if (existsInL0 && !existsInL1) {
     // Compare with L0 only
-    if (hashL2 === hashL0) {
+    if (hashL3 === hashL0) {
       classification = 'identical';
     } else {
       classification = 'modified';
     }
   } else if (!existsInL0 && existsInL1) {
     // Compare with L1 only
-    if (hashL2 === hashL1) {
+    if (hashL3 === hashL1) {
       classification = 'identical';
     } else {
       classification = 'modified';
     }
   } else if (existsInL0 && existsInL1) {
     // Compare with both L0 and L1
-    const matchesL0 = hashL2 === hashL0;
-    const matchesL1 = hashL2 === hashL1;
+    const matchesL0 = hashL3 === hashL0;
+    const matchesL1 = hashL3 === hashL1;
 
     if (matchesL0 && matchesL1) {
       classification = 'identical';
     } else if (matchesL1) {
-      // L2 matches L1 (variant's inheritance source) even when L0 differs —
-      // the variant inherits this file from templates/common, so the L2 copy is redundant.
+      // L3 matches L1 (variant's inheritance source) even when L0 differs —
+      // the variant inherits this file from templates/common, so the L3 copy is redundant.
       classification = 'identical';
     } else if (!matchesL0 && !matchesL1) {
       // Check if L0 and L1 are identical (then it's a true modification)
@@ -291,10 +294,10 @@ function classifyFile(
     existsInL1,
     l0Version,
     l1Version,
-    l2Version,
+    l3Version,
     hashL0,
     hashL1,
-    hashL2,
+    hashL3,
     classification,
     platformScope,
   };
@@ -305,26 +308,26 @@ function classifyFile(
 // ============================================================================
 
 /**
- * Scan L2 project and classify all files
- * @version 1.1.0
+ * Scan L3 project and classify all files
+ * @version 1.2.0
  */
-export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult> {
-  console.log(`\n=== Scanning L2 Project ===`);
-  console.log(`L2 Path: ${l2ProjectPath}`);
+export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult> {
+  console.log(`\n=== Scanning L3 Project ===`);
+  console.log(`L3 Path: ${l3ProjectPath}`);
   console.log(`L0 Root: ${L0_ROOT}`);
   console.log(`L1 Common: ${L1_COMMON}\n`);
 
-  if (!existsSync(l2ProjectPath)) {
+  if (!existsSync(l3ProjectPath)) {
     throw fatalError(
-      ErrorPhase.L2_SCAN,
-      'L2_PROJECT_NOT_FOUND',
-      `L2 project path does not exist: ${l2ProjectPath}`,
+      ErrorPhase.L3_SCAN,
+      'L3_PROJECT_NOT_FOUND',
+      `L3 project path does not exist: ${l3ProjectPath}`,
       undefined,
-      'Verify the L2 project path is correct and the directory exists'
+      'Verify the L3 project path is correct and the directory exists'
     );
   }
 
-  const l2ProjectName = basename(l2ProjectPath);
+  const l3ProjectName = basename(l3ProjectPath);
   const files: FileClassification[] = [];
   const startTime = Date.now();
 
@@ -333,7 +336,7 @@ export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult
     console.log(`Scanning ${category}...`);
 
     for (const scanPath of paths) {
-      const fullScanPath = join(l2ProjectPath, scanPath);
+      const fullScanPath = join(l3ProjectPath, scanPath);
 
       if (!existsSync(fullScanPath)) {
         console.log(`  ⊘ ${scanPath} - not found, skipping`);
@@ -348,7 +351,7 @@ export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult
         const extensions = category === 'scripts' ? ['.ts', '.sh', '.ps1'] :
                          category === 'agents' || category === 'skills' ? ['.md'] :
                          ['.md', '.json'];
-        filesToScan = scanDirectoryRecursively(fullScanPath, l2ProjectPath, extensions);
+        filesToScan = scanDirectoryRecursively(fullScanPath, l3ProjectPath, extensions);
       } else {
         // Single file
         filesToScan = [fullScanPath];
@@ -359,7 +362,7 @@ export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult
       // Classify each file
       for (const filePath of filesToScan) {
         try {
-          const classification = classifyFile(filePath, l2ProjectPath, L0_ROOT, L1_COMMON);
+          const classification = classifyFile(filePath, l3ProjectPath, L0_ROOT, L1_COMMON);
           files.push(classification);
         } catch (error) {
           // Log error but continue scanning
@@ -392,8 +395,8 @@ export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult
     files,
     summary,
     scanMetadata: {
-      l2ProjectPath,
-      l2ProjectName,
+      l3ProjectPath,
+      l3ProjectName,
       scannedAt: new Date().toISOString(),
       platform: process.platform,
     },
@@ -406,20 +409,20 @@ export async function scanL2Project(l2ProjectPath: string): Promise<L2ScanResult
 
 async function main() {
   const args = process.argv.slice(2);
-  const l2PathArg = args.find(arg => arg.startsWith('--l2-path='));
+  const l3PathArg = args.find(arg => arg.startsWith('--l3-path='));
 
-  if (!l2PathArg) {
-    console.error('Usage: bun scripts/helpers/scan-l2-project.ts --l2-path=<path-to-l2-project>');
+  if (!l3PathArg) {
+    console.error('Usage: bun scripts/helpers/scan-l3-project.ts --l3-path=<path-to-l3-project>');
     process.exit(1);
   }
 
-  const l2ProjectPath = l2PathArg.split('=')[1];
+  const l3ProjectPath = l3PathArg.split('=')[1];
 
   try {
-    const result = await scanL2Project(l2ProjectPath);
+    const result = await scanL3Project(l3ProjectPath);
 
     // Output JSON for programmatic use
-    const jsonPath = join(L0_ROOT, '.pipeline-state', 'l2-scan-result.json');
+    const jsonPath = join(L0_ROOT, '.pipeline-state', 'l3-scan-result.json');
     const fs = await import('fs');
     const { mkdirSync, writeFileSync } = fs;
     const stateDir = join(L0_ROOT, '.pipeline-state');

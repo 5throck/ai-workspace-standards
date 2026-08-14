@@ -1,11 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 /**
  * generate-l2-readme.ts
  *
  * Regenerates README.md/README_ko.md for a Phase A L2 project (Projects/<name>/)
  * using the workspace's README Standard template (templates/common/docs/README.template.md),
- * reading the live agent roster and skills from the project via scanL2Project().
+ * reading the live agent roster and skills from the project via scanL3Project()
+ * (this script's own "l2" naming predates CONSTITUTION.md's L3 layer — see
+ * §Terminology Definition; the project it scans is L3, not L2).
  * Complement to l2-to-variant-pipeline.ts's Phase B README generation — shares the
  * same rendering engine (helpers/generate-variant.ts) so Phase A and Phase B never drift.
  *
@@ -24,7 +26,7 @@ import {
   extractSkills,
   type VariantMetadata,
 } from './helpers/generate-variant.ts';
-import { scanL2Project } from './helpers/scan-l2-project.ts';
+import { scanL3Project } from './helpers/scan-l3-project.ts';
 import { isVariantType } from './helpers/registries/variant-type-registry.ts';
 import { fatalError, ErrorPhase, logError } from './lib/error-handling.ts';
 
@@ -148,7 +150,7 @@ async function main(): Promise<void> {
     variantType = 'collaboration';
   }
 
-  const scanResult = await scanL2Project(l2Path);
+  const scanResult = await scanL3Project(l2Path);
   const agentRoster = extractAgentRoster(scanResult);
   const skills = extractSkills(scanResult);
 

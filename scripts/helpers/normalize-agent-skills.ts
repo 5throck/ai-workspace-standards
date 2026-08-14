@@ -6,21 +6,21 @@
  * skill files, and normalizes skill frontmatter/body section names to match
  * the canonical variant specialist structure.
  *
- * @version 1.0.1
+ * @version 1.1.0
  * @phase 1.5: Agent/Skill Normalization
  *
  * See: docs/adr/0042-l2-variant-pipeline-wave15-golden-reference.md
  * See: docs/designs/variant-specialist-skill-structure.md
  *
  * Dependencies:
- * - helpers/scan-l2-project.ts (L2ScanResult, FileClassification)
+ * - helpers/scan-l3-project.ts (L3ScanResult, FileClassification)
  * - lib/encoding-utils.ts (UTF-8 handling)
  * - lib/error-handling.ts (Error management)
  */
 
 import { join, dirname, basename } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { L2ScanResult } from './scan-l2-project.ts';
+import { L3ScanResult } from './scan-l3-project.ts';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 import { warningError, ErrorPhase } from '../lib/error-handling.ts';
 
@@ -223,7 +223,7 @@ function normalizeAgentFile(
   filePath: string,
   content: string,
   agentName: string,
-  l2ProjectPath: string,
+  l3ProjectPath: string,
   auto: boolean,
 ): {
   normalized: NormalizedFile;
@@ -270,7 +270,7 @@ function normalizeAgentFile(
         .replace(/-+/g, '-')
         .trim();
       const slug = `${agentName}-${headerSlug}`;
-      const targetPath = join(l2ProjectPath, 'skills', slug, 'SKILL.md');
+      const targetPath = join(l3ProjectPath, 'skills', slug, 'SKILL.md');
 
       const skillContent = `---
 name: ${slug}
@@ -429,16 +429,16 @@ function normalizeSkillFile(
 // ============================================================================
 
 /**
- * Run Wave 1.5 normalization over the L2 scan result.
+ * Run Wave 1.5 normalization over the L3 scan result.
  *
- * @param scanResult - Output from Wave 1 (scan-l2-project.ts)
- * @param l2ProjectPath - Absolute path to the L2 project root
+ * @param scanResult - Output from Wave 1 (scan-l3-project.ts)
+ * @param l3ProjectPath - Absolute path to the L3 project root
  * @param options.auto - Treat MEDIUM-confidence skill patterns same as HIGH (no approval gate)
  * @param options.dryRun - Compute results but do not write any files
  */
 export function normalizeAgentSkills(
-  scanResult: L2ScanResult,
-  l2ProjectPath: string,
+  scanResult: L3ScanResult,
+  l3ProjectPath: string,
   options: { auto?: boolean; dryRun?: boolean } = {},
 ): NormalizationResult {
   const { auto = false, dryRun = false } = options;
@@ -471,7 +471,7 @@ export function normalizeAgentSkills(
         file.relativePath,
         content,
         agentName,
-        l2ProjectPath,
+        l3ProjectPath,
         auto,
       );
       result.normalizedAgents.push(normalized);
