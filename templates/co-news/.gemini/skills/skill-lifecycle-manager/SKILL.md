@@ -52,7 +52,7 @@ This skill provides a systematic approach to creating, validating, and maintaini
 2. Create skill directory: `mkdir -p skills/<skill-name>/`
 3. Create SKILL.md file: `touch skills/<skill-name>/SKILL.md`
 4. After editing, run `bun scripts/sync-skills.ts` to distribute to `.claude/skills/` and `.gemini/skills/`.
-5. Check if `templates/common/` exists to confirm you are in the L0 workspace. If it does not exist, you are in an L2 project and must skip this step. If it does exist, propagate to the L1 template by running `bun run propagate:apply`.
+5. Check if `templates/common/` exists to confirm you are in the L0 workspace. If it does not exist, you are in an L3 project and must skip this step. If it does exist, propagate to the L1 template by running `bun run propagate:apply`.
 
 **Validation**:
 - Directory name should use kebab-case (lowercase with hyphens)
