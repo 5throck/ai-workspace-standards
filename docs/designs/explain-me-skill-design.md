@@ -92,7 +92,7 @@ skills/explain-me/
 ## 6. Propagation
 
 - `scope: common` — available to all variants
-- `l2_propagate: true` — propagated to L1 template and L2 projects
+- `l2_propagate: true` — propagated to L1 template and L3 projects (the field is named `l2_propagate` in code/frontmatter but gates L1+L3 reach — see `docs/constitution/06-skill-lifecycle.md`)
 - `owner: pm` — avoids orphan detection in variants (§6 common-scope owner pitfall)
 
 ## 7. Skill Type

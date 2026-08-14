@@ -7,15 +7,18 @@ Reusable workflow knowledge is defined as skills.
 
 #### Ownership Layers
 
-Skills follow the same L0/L1/L2 model as scripts:
+Skills follow the same L0/L1/L2/L3 model as scripts:
 
 | Layer | Location | Owner | Update Policy |
 |-------|----------|-------|---------------|
 | **L0 — Workspace SSOT** | `skills/` (workspace root) | workspace maintainer | Edit directly; distribute via `bun run propagate:apply` |
 | **L1 — Template snapshot** | `templates/common/skills/` | publish: `bun run propagate:apply` | Explicit publish from L0 |
-| **L2 — Project** | `<project>/skills/` | project team | Independent snapshot after creation |
+| **L2 — Variant template** | `templates/co-*/skills/` | variant maintainer | Variant-specific skills (`scope: <variant-name>`), propagated from L0 |
+| **L3 — Project** | `<project>/skills/` | project team | Independent snapshot after creation |
 
-**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. Propagation filtering is controlled exclusively by SKILL.md frontmatter (`l2_propagate`/`scope`) — skills with `l2_propagate: false` or `scope: workspace` are excluded at the L0→L1 stage and never enter `templates/common/`. L2 projects snapshot L1 at creation time — no automatic back-propagation.
+**Propagation rule**: Develop at L0 (`skills/`). Run `bun run propagate:apply` to distribute to `.claude/skills/` and `.gemini/skills/` and publish to the L1 template snapshot. Propagation filtering is controlled exclusively by SKILL.md frontmatter (`l2_propagate`/`scope`) — skills with `l2_propagate: false` or `scope: workspace` are excluded at the L0→L1 stage and never enter `templates/common/`. L3 projects snapshot L1 (plus any L2 variant overlay) at creation time — no automatic back-propagation.
+
+> **Field-name note**: The `l2_propagate` frontmatter field and the `"L0+L1+L2"` scope value below (from `scripts/helpers/layer-filter.ts`'s `LayerValue` type) are literal code identifiers that predate this document's L3 layer — their `L2` denotes "propagates all the way to a scaffolded project," which this document now calls L3. Do not rename these identifiers from this doc alone; that would require a coordinated code change to `layer-filter.ts` and every `SKILL.md` using the field.
 
 > **Workspace Root vs. Individual Projects**:
 > - **Workspace Root** (`ai-workspace-standards`): Skills focus on template maintenance and scaffolding validation (e.g., `simulate-project-creation`, `security-scan`, `audit-workspace`).
@@ -76,11 +79,11 @@ version: 1.0.0
 
 **`scope` allowed values**: `workspace` (L0-only), `common` (L0+L1, shared unmodified across all variants), `variant` (generic placeholder), or the **literal name of the variant the skill belongs to** (e.g. `scope: co-consult`) — a domain-only skill with a variant override and no `templates/common/` base. `scripts/helpers/layer-filter.ts` treats any value other than `workspace`/`common` as a variant-name marker and propagates the skill to L0+L1+L2. `scripts/skill-lifecycle-audit.ts` validates `scope` against `workspace | common | variant | <current project's own directory name>` — run the audit from inside the variant directory (e.g. `cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts`) so it can resolve the variant name correctly.
 
-#### L2 Propagation Control
+#### `l2_propagate` (L1/L3) Propagation Control
 
-Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propagate-to-templates.ts`, and then snapshot-copied to generated projects (L2) at `new-project` time. Skills with `l2_propagate: false` are **excluded at the L0→L1 propagation stage** — they never enter `templates/common/` and therefore never reach L2 projects.
+Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propagate-to-templates.ts`, and then snapshot-copied to generated projects (L3) at `new-project` time. Skills with `l2_propagate: false` are **excluded at the L0→L1 propagation stage** — they never enter `templates/common/` and therefore never reach L3 projects. (The field is literally named `l2_propagate`, not `l3_propagate` — see the field-name note above.)
 
-| `l2_propagate` value | Propagated to L1? | Copied to L2? |
+| `l2_propagate` value | Propagated to L1? | Copied to L3? |
 |---------------------|-------------------|---------------|
 | `true` (default) | ✅ Yes | ✅ Yes |
 | `false` | ❌ No — stays in L0 only | ❌ No |
@@ -213,7 +216,7 @@ The audit checks for:
 
 ```bash
 bun scripts/skill-lifecycle-audit.ts                                   # workspace root (skills/, .claude/skills/)
-cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts  # repeat per templates/co-*/ variant
+cd templates/co-consult && bun ../../scripts/skill-lifecycle-audit.ts  # L2 variant layer — repeat per templates/co-*/ variant
 cd templates/common && bun scripts/skill-lifecycle-audit.ts            # L1 common layer
 ```
 
