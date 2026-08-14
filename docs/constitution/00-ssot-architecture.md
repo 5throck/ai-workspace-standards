@@ -9,17 +9,21 @@
 │              SSOT Hierarchy (Top = Authoritative)            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Tier 1 ── Workspace Root  (repo root, e.g. the top-level   │
-│            directory returned by `git rev-parse --show-     │
-│            toplevel`). The true source. Edit ONLY here.     │
+│  Tier 1 (= L0) ── Workspace Root  (repo root, e.g. the      │
+│            top-level directory returned by `git rev-parse   │
+│            --show-toplevel`). The true source. Edit ONLY    │
+│            here.                                            │
 │                                                             │
-│  Tier 2 ── templates/common/  +  templates/co-*/            │
+│  Tier 2 (= L1 + L2) ── templates/common/ (L1)  +             │
+│            templates/co-*/ (L2)                             │
 │            Copies of Workspace Root + variant overrides     │
 │                                                             │
-│  Tier 3 ── New Projects  (Projects/<name>/)                 │
+│  Tier 3 (= L3) ── New Projects  (Projects/<name>/)           │
 │            Creation-time snapshot. Independent evolution.   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
+
+> **Tier vs. L-number**: This section's "Tier 1/2/3" is a coarser, 3-bucket grouping predating the finer-grained L0/L1/L2/L3 layer numbering in [CONSTITUTION.md §Terminology Definition](../../CONSTITUTION.md#terminology-definition) — Tier 2 spans both L1 (`templates/common/`) and L2 (`templates/co-*/`). Prefer the L-number terminology when precision between the common and variant template layers matters.
 
 #### SSOT Locations per File
 
@@ -31,10 +35,10 @@
 | `AGENTS.md` | Workspace Root | `templates/co-*/AGENTS.md` | `bun run agent:verify` |
 | `.claude/commands/*.md` | Workspace Root | `templates/common/.claude/commands/` + `.gemini/commands/` | Manual propagation |
 | `variant.json` | `templates/co-*/` | (None) | Variant itself is the source |
-| `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L2 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
+| `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L3 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
 | `README.md` / `README_ko.md` | `templates/common/docs/README.template.md` (+KO) | `templates/co-*/README.md` + `Projects/<name>/README.md` | `generate-variant.ts` `applyTemplate()` + `validate-templates.ts` WS-08 + `verify-readme-sync.ts` |
 
-> **README enforcement scope**: Phase A `Projects/<name>/` READMEs are generated **self-service** via `scripts/generate-l2-readme.ts` (and at scaffold time by `create-l2-scaffold.ts`) — no CI gate, consistent with the L2 Design Gate exemption. Phase B `templates/co-*/` READMEs are **hard-enforced** by `validate-templates.ts` Check WS-08 (unchanged). Both paths share the same renderer (`helpers/generate-variant.ts`), so Phase A and Phase B READMEs are structurally identical.
+> **README enforcement scope**: Phase A `Projects/<name>/` READMEs are generated **self-service** via `scripts/generate-l2-readme.ts` (and at scaffold time by `create-l2-scaffold.ts`) — no CI gate, consistent with the L3 Design Gate exemption (script name `generate-l2-readme.ts` predates the L3 layer). Phase B `templates/co-*/` READMEs are **hard-enforced** by `validate-templates.ts` Check WS-08 (unchanged). Both paths share the same renderer (`helpers/generate-variant.ts`), so Phase A and Phase B READMEs are structurally identical.
 
 #### Three Types of Flows
 

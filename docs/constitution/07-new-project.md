@@ -42,7 +42,7 @@ live there as **real, editable files** (not embedded strings).
 > **Extension templates** - ADR, analyst agent, skill, and daily log formats are **not**
 > generated at project init. Find ready-to-copy examples in [`templates/_examples/`](templates/_examples/).
 
-#### 7.3 L2 Exclusion Rules
+#### 7.3 L3 Exclusion Rules
 
 Workspace-management artifacts are excluded **at the L0→L1 propagation stage** by `propagate-to-templates.ts`, so `templates/common/` only contains artifacts that belong in generated projects. `new-project.ts` applies a secondary safety-net check after copying, in case any artifact was added directly to `templates/common/` without going through the propagation pipeline.
 
@@ -96,7 +96,7 @@ templates/common/docs/variant.context.template.md
 > would clobber common's canonical file (and then be locked with `merge=ours`). Variant-specific
 > content (tech stack, agents, skills, workflow) MUST live in `docs/<variant>.context.md`, which
 > *extends* `context.md`. Enforced by `validate-templates.ts` Check **WS-07** and the
-> L2→variant promotion pipeline (`generate-variant.ts` excludes `docs/context.md`).
+> L3→variant (L2) promotion pipeline (`generate-variant.ts` excludes `docs/context.md`).
 
 ### VARIANT-INJECT Governance
 
@@ -166,18 +166,18 @@ This ensures every scaffolded project has the standard lifecycle scripts regardl
 
 Two independent dimensions govern the workspace lifecycle:
 
-- **Layer**: Physical file location — L0 (workspace root) / L1 (templates/) / L2 (generated projects)
+- **Layer**: Physical file location — L0 (workspace root) / L1 (`templates/common/`) / L2 (`templates/co-*/`) / L3 (generated projects, `Projects/*/`)
 - **Stage**: Development phase — Phase A (Scaffold) / Phase B (Refinement & Reconcile) / Phase C (Template Promotion)
 
 | | Phase A — Scaffold | Phase B — Refinement | Phase C — Promotion |
 |---|---|---|---|
-| **L0** (workspace root) | `create-l2-scaffold.ts` (new L1 variant) <br> `new-project.ts` (new L2 project) | No L0 changes | `bun run propagate:apply` syncs L0→L1 |
-| **L1 common** (`templates/common/`) | `propagate:apply` installs scripts | `propagate:docs` injects COMMON markers | — |
-| **L1 variant** (`templates/co-*/`) | Scaffold output created by `create-l2-scaffold.ts` | Manual reconcile — insert variant-specific content | — |
-| **L2** (generated project) | `new-project.ts` output | Developer customization | `l2-to-variant-pipeline.ts` promotes to L1 |
+| **L0** (workspace root) | `create-l2-scaffold.ts` (new L2 variant) <br> `new-project.ts` (new L3 project) | No L0 changes | `bun run propagate:apply` syncs L0→L1 |
+| **L1** (`templates/common/`) | `propagate:apply` installs scripts | `propagate:docs` injects COMMON markers | — |
+| **L2** (`templates/co-*/`) | Scaffold output created by `create-l2-scaffold.ts` | Manual reconcile — insert variant-specific content | — |
+| **L3** (generated project) | `new-project.ts` output | Developer customization | `l2-to-variant-pipeline.ts` promotes to L2 |
 
 > **Key script roles**:
-> - `new-project.ts` — creates a new L2 project from a variant template
-> - `create-l2-scaffold.ts` — creates a new L1 variant scaffold from scratch
-> - `l2-to-variant-pipeline.ts` — promotes an existing L2 project to an L1 variant template
-> - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L1(variants)
+> - `new-project.ts` — creates a new L3 project from an L2 variant template
+> - `create-l2-scaffold.ts` — creates a new L2 variant scaffold from scratch
+> - `l2-to-variant-pipeline.ts` — promotes an existing L3 project to an official L2 variant template
+> - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L2(variants)

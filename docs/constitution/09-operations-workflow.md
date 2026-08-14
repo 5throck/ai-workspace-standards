@@ -113,7 +113,7 @@ bun scripts/variant-feature.ts --variant co-deck --feature slide-export [--type 
 When promoting an existing `Projects/<name>/` project to a reusable `templates/<name>/` variant:
 
 ```bash
-# Promote L2 project → variant template (diffs against templates/common/, generates variant.json)
+# Promote L3 project → L2 variant template (diffs against templates/common/, generates variant.json)
 bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal [--dry-run]
 ```
 
@@ -208,7 +208,7 @@ Track these metrics monthly to ensure operational health:
 
 The workspace uses a lightweight spec registry (`docs/specs/registry.json`) to track design decisions from inception through implementation. This enforces the principle that development never starts without a linked design artifact.
 
-**Three workflow layers** (distinct from the L0/L1/L2 *template* hierarchy):
+**Three workflow layers** (distinct from the L0/L1/L2/L3 *template* hierarchy):
 
 | Layer | Name | Purpose |
 |-------|------|---------|
@@ -216,7 +216,7 @@ The workspace uses a lightweight spec registry (`docs/specs/registry.json`) to t
 | Layer 2 | Feature Automation | Scripted stub generation for variants (`variant-feature.ts`, `project-to-variant.ts`) |
 | Layer 3 | Lifecycle Tracking | Drift detection in `audit.ts --spec-check`; status updates in `/sync` |
 
-> **Terminology note**: "Layer 1/2/3" here refers to *workflow layers*, not template propagation tiers. Template tiers are always written as L0/L1/L2 (uppercase L with digit).
+> **Terminology note**: "Layer 1/2/3" here refers to *workflow layers*, not template propagation tiers. Template tiers are always written as L0/L1/L2/L3 (uppercase L with digit) — see [CONSTITUTION.md §Terminology Definition](../../CONSTITUTION.md#terminology-definition).
 
 ##### Spec Registry Schema
 
