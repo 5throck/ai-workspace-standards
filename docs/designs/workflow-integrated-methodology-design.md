@@ -85,7 +85,7 @@ bun scripts/variant-feature.ts --variant co-deck --feature slide-export [--type 
 
 ### `scripts/project-to-variant.ts` (v1.0.0)
 
-Promotes an existing L2 project to a reusable `templates/<name>/` variant. Diffs against `templates/common/` to identify variant-unique files, generates `variant.json`, runs `validate-templates.ts`, and outputs a manual review checklist.
+Promotes an existing L3 project to a reusable `templates/<name>/` variant. Diffs against `templates/common/` to identify variant-unique files, generates `variant.json`, runs `validate-templates.ts`, and outputs a manual review checklist.
 
 ```bash
 bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal [--dry-run]

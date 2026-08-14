@@ -8,7 +8,7 @@
 
 ## What This Does
 
-Converts a user-created L2 project (under workspace root) into a new template variant that can be used for all future projects via `/new-project`.
+Converts a user-created L3 project (under workspace root) into a new template variant that can be used for all future projects via `/new-project`.
 
 **Example**: User creates a data engineering project with custom agents → Pipeline converts it → `templates/co-data/` → Future projects can use `--variant co-data`
 
@@ -23,7 +23,7 @@ L2 Project (User Input)
     │
     ▼
 Phase 1: Scan & Classify
-    • Analyze all files in L2 project
+    • Analyze all files in L3 project
     • Compare with L0 (workspace root) and L1 (templates/common/)
     • Classify: new / modified / identical
     │
@@ -120,7 +120,7 @@ bun scripts/l2-to-variant-pipeline.ts <l2-project-path> --variant <name> --force
 ## Implementation Phases
 
 ### Phase 0: Prerequisites (PM + Architect) - 1 day
-- User provides L2 project path
+- User provides L3 project path
 - Architect reviews structure
 - Architect approves/rejects conversion
 
@@ -150,7 +150,7 @@ bun scripts/l2-to-variant-pipeline.ts <l2-project-path> --variant <name> --force
 
 Pipeline is complete when:
 
-- [ ] Scans any L2 project and generates manifest
+- [ ] Scans any L3 project and generates manifest
 - [ ] Classifies files correctly (new/modified/identical)
 - [ ] Compares versions and selects newest
 - [ ] Triggers anti-swelling when ≥50% override
@@ -167,7 +167,7 @@ Pipeline is complete when:
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| L2 project has structural issues | High | Phase 0 architect review catches early |
+| L3 project has structural issues | High | Phase 0 architect review catches early |
 | Version conflicts | Medium | Fail-fast + clear error messages |
 | Platform parity violations | High | Strict validation blocks generation |
 | Anti-swelling over-triggering | Low | Conservative 50% threshold |
@@ -179,7 +179,7 @@ Pipeline is complete when:
 
 **Proceed with implementation** with the following approach:
 
-1. **Pilot Conversion**: Start with a simple L2 project (e.g., existing co-consult)
+1. **Pilot Conversion**: Start with a simple L3 project (e.g., existing co-consult)
 2. **Iterative Refinement**: Test pipeline, adjust based on results
 3. **Documentation First**: Document error codes and troubleshooting before full rollout
 4. **Safety Gates**: Keep strict validation - better to fail early than create broken variants

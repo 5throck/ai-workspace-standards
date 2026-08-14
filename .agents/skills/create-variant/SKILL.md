@@ -58,7 +58,7 @@ This creates `Projects/<variant-name>/` with:
 - bun install complete
 - stub files (_ORIGIN.md, variant.json, PROMOTION_CHECKLIST.md, etc.)
 
-> **Fork Model**: After scaffold completes, L2 evolves independently from L1. L1 changes will NOT automatically propagate to this L2 project. To get L1 updates later, re-run `create-l2-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
+> **Fork Model**: After scaffold completes, this `Projects/<name>/` draft (L3 — `create-l2-scaffold.ts`'s "L2" predates this layer name) evolves independently from L1. L1 changes will NOT automatically propagate to it. To get L1 updates later, re-run `create-l2-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
 
 ### Step 2: Add variant section to CLAUDE.md
 
@@ -216,7 +216,7 @@ grep "^## " GEMINI.md
 
 > **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
 
-- [ ] Run `bun scripts/verify-scripts.ts --verify` in the L2 project — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
+- [ ] Run `bun scripts/verify-scripts.ts --verify` in the `Projects/<name>/` draft (L3) — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
 - [ ] Regenerate the README via `bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
 
 ---

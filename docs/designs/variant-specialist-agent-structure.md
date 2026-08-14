@@ -138,7 +138,7 @@ This ensures all work flows through the proper N-stage workflow with quality gat
 
 ## 5. Normalization via `generate-variant.ts`
 
-When `l2-to-variant-pipeline.ts` generates a variant from an L2 project, it calls
+When `l2-to-variant-pipeline.ts` generates a variant from an L3 project, it calls
 `normalizeAgentFrontmatter()` in `scripts/helpers/generate-variant.ts` on every specialist
 agent file. This function:
 

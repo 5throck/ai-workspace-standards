@@ -1,6 +1,6 @@
 # L2-to-Variant Conversion Pipeline Design
 
-> **Architect**: Design document for converting L2 projects into new template variants
+> **Architect**: Design document for converting L3 projects into new template variants
 > **Status**: Draft Design - Implementation In Progress
 > **Created**: 2026-06-03
 > **Last Updated**: 2026-06-22 (Added Phase 1.6 pm.md pre-flight and Phase 3.5 AGENTS.md §-structure check; v1.8.2)
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This document defines the architectural design for a pipeline that analyzes user-created L2 projects and converts them into new template variants (e.g., `templates/<new-variant>/`).
+This document defines the architectural design for a pipeline that analyzes user-created L3 projects and converts them into new template variants (e.g., `templates/<new-variant>/`).
 
 **Problem Statement**: Users create projects under the workspace root that evolve into reusable patterns. Converting these evolved projects into template variants is currently a manual, error-prone process with undefined steps. **Critical Gaps**:
 1. **No ADR requirement for new variants** — Variant creation lacks architectural decision documentation
@@ -21,7 +21,7 @@ This document defines the architectural design for a pipeline that analyzes user
 
 **Stage 1 — Scan & Prepare** (source normalization before generation):
 1. **Phase 0 - ADR Creation**: Architectural decision record for variant creation rationale
-2. **Phase 1 - Variant Structure Conversion**: Analyze L2 project → Extract variant-specific components
+2. **Phase 1 - Variant Structure Conversion**: Analyze L3 project → Extract variant-specific components
 3. **Phase 1.5 - Agent/Skill Frontmatter Normalization**: Validate agent/skill frontmatter fields
 4. **Phase 1.6 - pm.md Pre-flight Diagnosis** *(NEW, v1.8.2)*: Check L2 agents/pm.md structure — `extends:` pattern, 200-line limit, duplicate section detection vs L1 common pm.md
 5. **Phase 2 - L0/L1 Reflection**: Compare with workspace → Reconcile versions → Repropagate
@@ -78,7 +78,7 @@ L2 Project Path (User Input)
 ┌─────────────────────────────────────────────────────────────┐
 │  Phase 1: Variant Structure Conversion                      │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Scan L2 project structure                                │
+│  1. Scan L3 project structure                                │
 │  2. Categorize files (agents/, skills/, .claude/, .gemini/) │
 │  3. Identify variant-specific additions                     │
 │  4. Generate intermediate manifest                          │
@@ -225,8 +225,8 @@ Phase 1.6 and Phase 3.5 were introduced to normalize L2 source files before Stag
 
 ### Problem Statement
 
-**Current state (L2 project)**:
-- Description of the L2 project being converted
+**Current state (L3 project)**:
+- Description of the L3 project being converted
 - Key characteristics and domain focus
 - Current agent roster, skills, workflows
 - Platform-specific implementations
@@ -436,7 +436,7 @@ Create <variant-name> variant as new template under `templates/<variant-name>/`.
 ### Success Criteria
 
 - [ ] ADR approved by PM and Platform Lead
-- [ ] L2 project analysis complete (Phase 1)
+- [ ] L3 project analysis complete (Phase 1)
 - [ ] L0/L1 reconciliation complete (Phase 2)
 - [ ] Variant structure generated (Phase 3)
 - [ ] Beta lifecycle initialized (Phase 3.5)
@@ -592,7 +592,7 @@ async function main() {
 - [ ] **Implementation Timeline**: Phase breakdown with durations and owners
 - [ ] **Success Criteria**: 10+ criteria including governance and validation
 - [ ] **Status**: Set to "**Accepted**" (not Proposed or Rejected)
-- [ ] **References**: Links to L2 project, CONSTITUTION.md, variant lifecycle docs
+- [ ] **References**: Links to L3 project, CONSTITUTION.md, variant lifecycle docs
 
 **ADR Quality Gates**:
 
@@ -641,7 +641,7 @@ The automation-engineer must create the ADR template file during Phase 4 impleme
 
 ### 2.1 L2 Project Analysis Strategy
 
-**Objective**: Systematically categorize all files in the L2 project to understand:
+**Objective**: Systematically categorize all files in the L3 project to understand:
 
 1. **What's new** (not in L0/L1)
 2. **What's modified** (exists in L0/L1 but different)
@@ -688,7 +688,7 @@ interface FileClassification {
 
 **Implementation Approach** (for automation-engineer):
 
-1. **Recursive directory traversal** of L2 project path
+1. **Recursive directory traversal** of L3 project path
 2. **Hash computation** for all files (SHA-256)
 3. **L0/L1 lookup** by relative path:
    - L0 = workspace root (`agents/`, `skills/`, `.claude/`, `.gemini/`)
@@ -884,14 +884,14 @@ interface ConflictResolution {
 **Input Sources**:
 1. Reconciled manifest decisions
 2. Common contract (`docs/templates/common-contract.json`)
-3. L2 project metadata (if any exists)
+3. L3 project metadata (if any exists)
 
 **Generation Rules**:
 
 > **CRITICAL DESIGN CHANGE**: New variants now initialize as `status: "beta"` with version `0.1.0`, NOT `stable`.
 
 **Rationale**:
-- Newly converted L2 projects lack real-world testing
+- Newly converted L3 projects lack real-world testing
 - Beta status allows controlled validation before stable promotion
 - Prevents premature production commitment to unproven variants
 - Aligns with [`docs/governance/variant-lifecycle.md`](../../governance/variant-lifecycle.md) governance framework
@@ -1787,9 +1787,9 @@ If checks fail:
 
 #### 5.5.1 memory/ Development Log Cleanup
 
-**Objective**: Remove non-portable artifacts from the L2 project's memory/ directory before variant template creation.
+**Objective**: Remove non-portable artifacts from the L3 project's memory/ directory before variant template creation.
 
-**Problem**: L2 projects accumulate development logs that include:
+**Problem**: L3 projects accumulate development logs that include:
 - File system artifacts (`.git/`, `node_modules/`, `.codegraph/`, `.env/` references)
 - Environment-specific paths
 - Temporary debugging notes
@@ -1894,7 +1894,7 @@ function cleanupMemoryLogs(memoryDir: string): MemoryLogCleanupResult {
 
 **Objective**: Ensure all L2 variant agents, skills, and workflows are properly registered in the workspace `AGENTS.md` governance document.
 
-**Problem**: L2 projects may introduce:
+**Problem**: L3 projects may introduce:
 - New agents not in workspace roster
 - New skills not in skills registry
 - New workflows not documented
@@ -2694,7 +2694,7 @@ Add to §10.3 Integration Requirements:
  * L2-to-Variant Conversion Pipeline
  * @version 1.0.0
  *
- * Converts a user-created L2 project into a new template variant.
+ * Converts a user-created L3 project into a new template variant.
  *
  * Usage:
  *   bun scripts/l2-to-variant-pipeline.ts <l2-project-path> --variant <name>
@@ -2820,8 +2820,8 @@ class PipelineError extends Error {
 }
 
 // Error codes:
-// - L2_NOT_FOUND: L2 project path does not exist
-// - L2_INVALID: L2 project is not a valid project (missing CLAUDE.md/GEMINI.md)
+// - L3_NOT_FOUND: L3 project path does not exist
+// - L3_INVALID: L3 project is not a valid project (missing CLAUDE.md/GEMINI.md)
 // - VARIANT_EXISTS: Variant directory already exists (use --force)
 // - VERSION_CONFLICT: Unresolvable version conflict
 // - PARITY_VIOLATION: Platform parity check failed
@@ -2886,10 +2886,10 @@ describe('L2-to-Variant Pipeline', () => {
 
 **Test Scenarios**:
 
-1. **End-to-end conversion**: Convert a real L2 project (e.g., `test-projects/variant-candidate/`)
-2. **Conflict resolution**: L2 project with conflicting L0/L1 versions
-3. **Anti-swelling**: L2 project that should move content to common
-4. **Platform parity**: L2 project with parity violations
+1. **End-to-end conversion**: Convert a real L3 project (e.g., `test-projects/variant-candidate/`)
+2. **Conflict resolution**: L3 project with conflicting L0/L1 versions
+3. **Anti-swelling**: L3 project that should move content to common
+4. **Platform parity**: L3 project with parity violations
 5. **Dry run**: Verify analysis without file generation
 
 ### 7.3 Validation Tests
@@ -3002,7 +3002,7 @@ The pipeline implementation is complete when:
   - [ ] Alternatives Considered: Minimum 3 alternatives with pros/cons/decisions
   - [ ] Implementation Timeline: Phase breakdown with durations and owners
   - [ ] Success Criteria: 10+ criteria including governance and validation
-  - [ ] References: Links to L2 project, CONSTITUTION.md, variant lifecycle docs
+  - [ ] References: Links to L3 project, CONSTITUTION.md, variant lifecycle docs
 - [ ] **ADR Approval**: ADR approved by proper authorities
   - [ ] PM approval recorded in ADR
   - [ ] Platform Lead approval recorded (for major architectural changes)
@@ -3171,8 +3171,8 @@ The pipeline implementation is complete when:
 
 ### Phase 1: Prerequisites (PM + Architect)
 
-1. User provides L2 project path
-2. Architect reviews L2 project structure
+1. User provides L3 project path
+2. Architect reviews L3 project structure
 3. Architect identifies potential issues (missing L0 components, platform parity violations)
 4. Architect approves or rejects conversion
 
@@ -3254,7 +3254,7 @@ The pipeline implementation is complete when:
 **For PM**:
 1. Review this design document
 2. Approve or request changes
-3. Provide L2 project path for pilot conversion
+3. Provide L3 project path for pilot conversion
 4. Dispatch automation-engineer for implementation
 
 **For Automation Engineer** (after PM approval):
