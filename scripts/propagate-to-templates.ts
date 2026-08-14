@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.3.1
+ * @version 2.4.0
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -441,7 +441,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
         let srcContent = readFileSync(sourcePath, 'utf-8');
         const isTemplateTarget = targetPath.includes('templates/') || targetPath.includes('templates\\') || targetPath.includes('templates' + sep);
         if (isTemplateTarget && srcContent.includes('CONSTITUTION.md')) {
-          srcContent = scrubConstitutionRefs(srcContent);
+          srcContent = scrubConstitutionRefs(srcContent, sourcePath);
         }
         const tgtContent = readFileSync(targetPath, 'utf-8');
         status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
@@ -584,8 +584,52 @@ function printTable(diffs: FileDiff[]): void {
   console.log(`${C.dim}${sep}${C.reset}\n`);
 }
 
-/** Scrub CONSTITUTION.md references for L1+ targets (no longer L0 context). */
-function scrubConstitutionRefs(content: string): string {
+/**
+ * Scrub CONSTITUTION.md references for L1+ targets (no longer L0 context).
+ *
+ * For code files (.ts/.js/.tsx/.jsx), only text inside line comments and block
+ * comments is scrubbed — string literals used in functional file-existence checks (e.g.
+ * `join(dir, "CONSTITUTION.md")`, used by several scripts' own L0-root detection) are
+ * left untouched. Those checks must keep pointing at the real L0 marker file regardless
+ * of which layer the script itself runs from; blanket-replacing them with "context.md"
+ * silently breaks root detection in the propagated copy (found 2026-08-15 — several
+ * already-propagated L1 scripts, e.g. agent-lifecycle-audit.ts, had this exact bug).
+ *
+ * For markdown/prose files (the default), the full blanket replace is safe since there
+ * is no functional code to protect.
+ */
+export function scrubConstitutionRefs(content: string, filePath?: string): string {
+  const isCode = filePath ? /\.(ts|tsx|js|jsx)$/.test(filePath) : false;
+
+  if (isCode) {
+    const lines = content.split('\n');
+    let inBlockComment = false;
+    const scrubbedLines = lines.map((line) => {
+      const trimmed = line.trim();
+      const wasInBlockComment = inBlockComment;
+      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf('/*') + 2))) {
+        inBlockComment = true;
+      } else if (wasInBlockComment && /\*\//.test(line)) {
+        inBlockComment = false;
+      }
+      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith('//') || trimmed.startsWith('*');
+
+      if (isFullLineComment) {
+        return line.replace(/CONSTITUTION\.md/g, 'context.md');
+      }
+
+      // Trailing line comment on an otherwise-functional line: scrub only the comment part.
+      const commentIdx = line.indexOf('//');
+      if (commentIdx !== -1 && line.slice(commentIdx).includes('CONSTITUTION.md')) {
+        return line.slice(0, commentIdx) + line.slice(commentIdx).replace(/CONSTITUTION\.md/g, 'context.md');
+      }
+
+      // Functional code (string literal in join()/existsSync()/array/etc.) — leave as-is.
+      return line;
+    });
+    return scrubbedLines.join('\n');
+  }
+
   // A-1. Header line — handles both backtick and plain variants.
   content = content.replace(
     /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
@@ -615,7 +659,7 @@ function applyDiffs(diffs: FileDiff[]): number {
     // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
     const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
     if (needsScrub) {
-      content = scrubConstitutionRefs(content);
+      content = scrubConstitutionRefs(content, d.sourcePath);
     }
 
     // For in-sync files: still write if scrub changed the content.

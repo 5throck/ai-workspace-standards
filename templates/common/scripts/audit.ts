@@ -51,17 +51,17 @@ if (fs.existsSync('CHANGELOG.md')) {
 // 2. context.md must be accessible (workspace root / L1 template context only —
 //    L2 variant projects intentionally omit context.md and use docs/context.md
 //    instead; variant.json, when present, also marks a generated project copy)
-if (fs.existsSync('context.md') || fs.existsSync('../context.md') || fs.existsSync('../../context.md')) {
-    Pass('context.md accessible');
+if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md')) {
+    Pass('CONSTITUTION.md accessible');
 } else if (fs.existsSync('docs/context.md') || fs.existsSync('variant.json')) {
-    Pass('context.md check skipped (L1/L2 project — uses docs/context.md)');
+    Pass('CONSTITUTION.md check skipped (L1/L2 project — uses docs/context.md)');
 } else {
-    Fail('context.md not found (expected at ./, ../, or ../../)');
+    Fail('CONSTITUTION.md not found (expected at ./, ../, or ../../)');
 }
 
 // 2.5. Constitution section files must exist and be non-empty (workspace root only)
-if (fs.existsSync('context.md') && fs.existsSync('docs/constitution')) {
-    const content = fs.readFileSync('context.md', 'utf-8');
+if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('docs/constitution')) {
+    const content = fs.readFileSync('CONSTITUTION.md', 'utf-8');
     const regex = /docs\/constitution\/([\w.-]+\.md)/g;
     let match;
     while ((match = regex.exec(content)) !== null) {
@@ -364,7 +364,7 @@ if (!LIFECYCLE_ONLY) {
     // Check: no non-standard .md files at project root (file organization policy)
     const STANDARD_ROOT_MD = new Set([
         'README.md', 'README_ko.md', 'CHANGELOG.md', 'AGENTS.md',
-        'SECURITY.md', 'context.md', 'CLAUDE.md', 'GEMINI.md',
+        'SECURITY.md', 'CONSTITUTION.md', 'CLAUDE.md', 'GEMINI.md',
         'PROMOTION_CHECKLIST.md', '_ORIGIN.md', '_COMMON_VERSION.md'
     ]);
     const rootMdFiles = fs.readdirSync('.')

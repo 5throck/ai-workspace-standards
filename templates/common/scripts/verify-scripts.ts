@@ -41,7 +41,7 @@ function findWorkspaceRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 6; i++) {
     if (
-      existsSync(join(dir, "context.md")) ||
+      existsSync(join(dir, "CONSTITUTION.md")) ||
       existsSync(join(dir, "variant.json")) ||
       existsSync(join(dir, "docs", "context.md"))
     ) {
@@ -62,7 +62,7 @@ function findWorkspaceRoot(startDir: string): string {
 function findTrueWorkspaceRoot(startDir: string): string | null {
   let dir = startDir;
   for (let i = 0; i < 8; i++) {
-    if (existsSync(join(dir, "context.md"))) return dir;
+    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
     const parent = dirname(dir);
     if (parent === dir) return null;
     dir = parent;

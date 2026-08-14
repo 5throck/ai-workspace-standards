@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.17
+ * @version 1.5.18
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { validatePropagationMap } from './lib/propagation-map-schema.ts';
+import { scrubConstitutionRefs } from './propagate-to-templates.ts';
 
 interface VariantManifest {
   name: string;
@@ -881,8 +882,9 @@ function checkL0L1ScriptParity() {
         continue;
       }
 
-      // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
-      const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');
+      // L1 files have CONSTITUTION.md refs scrubbed to context.md (comment-only for code files —
+      // see propagate-to-templates.ts's scrubConstitutionRefs); normalize L0 the same way before comparison.
+      const l0Normalized = scrubConstitutionRefs(normalize(l0Content), l0Path);
       if (normalize(l1Content) !== l0Normalized) {
         fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
       } else {
@@ -934,8 +936,9 @@ function checkL0L1ScriptParity() {
         continue;
       }
 
-      // L1 files have CONSTITUTION.md refs scrubbed to context.md; normalize L0 before comparison.
-      const l0Normalized = normalize(l0Content).replace(/CONSTITUTION\.md/g, 'context.md');
+      // L1 files have CONSTITUTION.md refs scrubbed to context.md (comment-only for code files —
+      // see propagate-to-templates.ts's scrubConstitutionRefs); normalize L0 the same way before comparison.
+      const l0Normalized = scrubConstitutionRefs(normalize(l0Content), l0FilePath);
       if (l0Normalized !== normalize(l1Content)) {
         const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
         const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;

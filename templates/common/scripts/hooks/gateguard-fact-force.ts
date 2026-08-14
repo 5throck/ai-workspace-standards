@@ -31,7 +31,7 @@ const SAFE_PATH_PREFIXES = ['memory/', 'CHANGELOG.md', '.git/', 'node_modules/']
 // High-value non-code files that should be gated via reference search.
 // Lighter gating: searches for filename references instead of importers.
 const GOVERNED_CONFIG_PATHS = [
-  'CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'context.md', 'package.json',
+  'CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'CONSTITUTION.md', 'package.json',
 ];
 
 // Glob patterns passed to git grep to limit file types

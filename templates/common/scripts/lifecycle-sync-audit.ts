@@ -63,7 +63,7 @@ const SCRIPTS_MD = join(ROOT, 'scripts', 'SCRIPTS.md');
 const TEMPLATE_SCRIPTS_MD = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPTS.md');
 
 // Detect workspace root by presence of context.md
-const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'context.md'));
+const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'CONSTITUTION.md'));
 
 interface RegistryEntry {
   version: string;
@@ -475,7 +475,7 @@ function runCheckD(): DuplicateEntry[] {
         walkDir(fullPath);
       } else if (item.isFile() && item.name.endsWith('.md')) {
         // Skip context.md (contains definition example, not a real duplicate)
-        if (item.name === 'context.md') continue;
+        if (item.name === 'CONSTITUTION.md') continue;
         let content: string;
         try {
           content = readFileSync(fullPath, 'utf-8');

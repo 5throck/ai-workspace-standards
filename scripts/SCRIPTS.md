@@ -152,7 +152,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.0.2 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.3.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.4.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -183,7 +183,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.4.4 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.5.17 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.5.18 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|

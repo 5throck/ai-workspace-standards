@@ -13,7 +13,7 @@ const YELLOW = '\x1b[33m';
 const GREEN  = '\x1b[32m';
 const RESET  = '\x1b[0m';
 
-/** Normalizes CRLF to LF and context.md refs so line-ending and template transforms don't register as content drift. */
+/** Normalizes CRLF to LF and CONSTITUTION.md refs so line-ending and template transforms don't register as content drift. */
 export function normalizeLineEndings(content: string): string {
   return content.replace(/\r\n/g, '\n').replace(/CONSTITUTION\.md/g, 'context.md');
 }

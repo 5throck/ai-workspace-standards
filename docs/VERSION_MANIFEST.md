@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-14T15:27:44.089Z
+**Generated**: 2026-08-14T15:42:45.831Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -107,7 +107,7 @@
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
-| propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
@@ -141,7 +141,7 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.17 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.18 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.1 | scripts/verify-memory.ts | fs, path |
