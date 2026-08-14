@@ -2,7 +2,7 @@
 
 **Script**: `scripts/create-l2-scaffold.ts`
 **Version**: 1.9.0
-**Layer**: L0 (workspace root only — not copied to templates/common/ or L2 projects)
+**Layer**: L0 (workspace root only — not copied to templates/common/ or L3 projects)
 
 ## Purpose
 
@@ -40,7 +40,7 @@ bun scripts/create-l2-scaffold.ts safety-os --domain ehs
 - `scripts/helpers/pm-md-parser.ts` — `parsePmMd()`, `extractVariantOverrides()` for pm.md generation
 
 ### Writes
-- `Projects/<variant-name>/` — new L2 project directory with:
+- `Projects/<variant-name>/` — new L3 project directory with:
   - Common overlay files (`.gitignore`, `.githooks`, `.claude/`, `.gemini/`, `CHANGELOG.md`, `CLAUDE.md`, `GEMINI.md`)
   - Filtered scripts from `templates/common/scripts/` (via `includeScriptInL2()`)
   - Stub `agents/pm.md` with variant-specific frontmatter
@@ -49,7 +49,7 @@ bun scripts/create-l2-scaffold.ts safety-os --domain ehs
 
 ### README Generation Reuse (v1.9.0, 2026-08-11)
 - Scaffold-time READMEs are rendered from `templates/common/docs/README.template.md` using the same shared renderer as the Phase B promotion pipeline — Phase A and Phase B READMEs can never drift structurally.
-- Self-service regeneration for any L2 project path is available via `scripts/generate-l2-readme.ts` (v1.0.0).
+- Self-service regeneration for any L3 project path is available via `scripts/generate-l2-readme.ts` (v1.0.0).
 - `_ORIGIN.md` checklist and `printSummary` output now point at `generate-l2-readme.ts`.
 
 ### External Commands

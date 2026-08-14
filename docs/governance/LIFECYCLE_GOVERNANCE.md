@@ -2,7 +2,7 @@
 
 > **Doc intent:** Human-readable governance specification for the 5-domain × 3-layer lifecycle model.
 > Machine-readable policy is in [`lifecycle-governance.json`](lifecycle-governance.json).
-> Last Updated: 2026-08-09
+> Last Updated: 2026-08-14
 
 ---
 
@@ -53,7 +53,7 @@ This workspace enforces lifecycle governance across **5 domains** and **3 layers
 **Lifecycle states:**
 - `draft` — under construction, not ready for project creation
 - `beta` — functional but pending stabilization
-- `active` — stable, suitable for L2 project creation
+- `active` — stable, suitable for L3 project creation
 - `deprecated` — no new projects; existing projects may continue
 - `archived` — frozen, no new activity
 
@@ -145,7 +145,7 @@ Additionally, script creation must follow the **Hybrid Scripting Architecture**:
 
 **Current gaps:**
 - `audit.ts` at L0 does not call `readme-lifecycle-audit.ts`.
-- L2 projects do not have `readme-lifecycle-audit.ts` wired into their local `audit.ts` copies.
+- L3 projects do not have `readme-lifecycle-audit.ts` wired into their local `audit.ts` copies.
 
 ---
 

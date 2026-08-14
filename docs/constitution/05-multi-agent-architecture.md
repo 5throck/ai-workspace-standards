@@ -140,7 +140,7 @@ The workspace supports variant-specific PM agents for different project types (c
 - **L0** (workspace root/agents/pm.md) provides skeleton structure only (not full content duplication)
 - **L1** (templates/common/agents/pm.md) acts as base template that defines extends chain
 - **L2** (templates/co-*/agents/pm.md) generates variant-specific content from scratch
-- Layout Reconstruction triggers at L2 generation time and project scaffold time
+- Layout Reconstruction triggers at L2 generation time and again at L3 project scaffold time (`new-project.ts` copies the L2 `pm.md` into `Projects/<name>/agents/pm.md`)
 - L2 pm.md target size: ~50-100 lines (not 384 lines like L0)
 
 **Layout Reconstruction Architecture** (6 components):

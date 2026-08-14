@@ -293,7 +293,7 @@ To prevent divergence from workspace root common/ files:
 
 **Propagation Path**:
 ```
-L1 (Workspace Root)      ← Editing SSOT
+L0 (Workspace Root)      ← Editing SSOT
       ↓
 L2 (templates/co-xxx/)   ← Variant definition
       ↓
@@ -720,5 +720,5 @@ Tier 3  Team Coordination    5%  → Team communication and handoffs
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-06-05*
+*Last Updated: 2026-08-14*
 *Status: Active*

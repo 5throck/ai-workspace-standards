@@ -12,8 +12,8 @@
 
 ### Problem Statement
 
-**Current state (L2 project)**:
-- Description of the L2 project being converted
+**Current state (L3 project)**:
+- Description of the L3 project being converted
 - Key characteristics and domain focus
 - Current agent roster, skills, workflows
 - Platform-specific implementations
@@ -217,7 +217,7 @@ Create <variant-name> variant as new template under `templates/<variant-name>/`.
 ### Success Criteria
 
 - [ ] ADR approved by PM and Platform Lead
-- [ ] L2 project analysis complete (Phase 1)
+- [ ] L3 project analysis complete (Phase 1)
 - [ ] L0/L1 reconciliation complete (Phase 2)
 - [ ] Variant structure generated (Phase 3)
 - [ ] Beta lifecycle initialized (Phase 3.5)

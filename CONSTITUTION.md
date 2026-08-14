@@ -65,7 +65,7 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 This section clearly defines hierarchy and distribution-related terms used in this document.
 
-**Layer Structure** - extends ADR-0031's 3-tier model (L0/L1/L2) with a live-project L3 layer:
+**Layer Structure** - L0-L2 matches ADR-0031/0032/0039 and the actual `L2` values used in `scripts/helpers/merge-frontmatter.ts`, `scripts/helpers/layer-filter.ts`, and `scripts/verify-scripts.ts`; L3 is this document's addition for the live project directory, which those scripts and ADRs do not model as a numbered layer:
 
 | Term | Definition | Description |
 |------|------------|-------------|
@@ -91,7 +91,7 @@ This section clearly defines hierarchy and distribution-related terms used in th
 **Notes**:
 - The "L0 → L1 → L2" expression refers to the **distribution path**, not the **layer structure**.
 - The layer structure forms a static hierarchy as "L0 → L1 → L2 → L3".
-- ADR-0031/0032/0039 formally define only L0-L2 (a 3-tier model); L3 is this document's workspace-level convention for naming the live project directory that results from scaffolding - keep this in mind when cross-referencing those ADRs directly.
+- ADR-0031/0032/0039 and the `L2` values in `merge-frontmatter.ts`/`layer-filter.ts`/`verify-scripts.ts` formally define only L0-L2; L3 is this document's workspace-level convention for the live project directory that results from scaffolding.
 
 ---
 
@@ -351,7 +351,7 @@ See [ADR 0012: VERSION_MANIFEST Schema Design](docs/adr/0012-version-manifest-sc
 
 Every new project starts with `/new-project` (Claude Code) or `bun scripts/new-project.ts` (cross-platform CLI). The script copies `templates/` into the new directory, substitutes `[Project Name]` placeholders, removes `_examples/`, and initializes git with hooks active. Generated files include `docs/context.md` (fill in 10 sections), `AGENTS.md` (ready), 5 agent files (`[Project Name]` already substituted), `CLAUDE.md`/`GEMINI.md` (add project-specific settings if needed), `scripts/` (audit, dev-sync, sync-md), `.githooks/`, `CHANGELOG.md`, `README.md`, `.env.sample`, `.gitignore`, and `memory/MEMORY.md`.
 
-> **Layer × Stage model**: workspace lifecycle spans three layers (L0 workspace root / L1 templates / L2 generated projects) and three phases (Phase A Scaffold / Phase B Refinement / Phase C Promotion). See [§7.4 Layer × Stage Reference Matrix](docs/constitution/07-new-project.md) for the full cross-reference.
+> **Layer × Stage model**: workspace lifecycle spans four layers (L0 workspace root / L1 common templates / L2 variant templates / L3 generated projects) and three phases (Phase A Scaffold / Phase B Refinement / Phase C Promotion). See [§7.5 Layer × Stage Reference Matrix](docs/constitution/07-new-project.md) for the full cross-reference.
 
 ---
 
@@ -418,14 +418,14 @@ must **not** contain references to it.
 - `CONSTITUTION.md` is on the blocklist in
   [`docs/governance/variant-contract.md`](docs/governance/variant-contract.md) —
   `validate-templates.ts` Check 0 blocks any copy in `templates/common/`.
-- L1 and L2 documentation (`.md` files, agent definitions, skill specs, CLAUDE.md,
+- L1, L2, and L3 documentation (`.md` files, agent definitions, skill specs, CLAUDE.md,
   GEMINI.md) must **not** reference `CONSTITUTION.md` by file path, section anchor,
   or markdown link.
-- **L2 substitute**: generated projects use `docs/context.md` and
+- **L3 substitute**: generated projects use `docs/context.md` and
   `<variant>.context.md` instead.
 - The session-start directive in CLAUDE.md / GEMINI.md ("read CONSTITUTION.md first")
   is L0-only; `merge-frontmatter.ts` strips CONSTITUTION.md references from L2
-  output during scaffolding.
+  (variant template) output during scaffolding.
 
 **Enforcement**:
 - `audit.ts` L0 Leakage check scans all `.md` files under `templates/` for
@@ -487,10 +487,10 @@ Two template files serve distinct roles in the documentation layer:
 
 | File | Layer | Role |
 |------|-------|------|
-| `templates/common/docs/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied verbatim to `docs/context.md` in every new L2 project. Variant templates MUST NOT carry their own `docs/context.md` (enforced by `validate-templates.ts` WS-07); variant-specific content goes in `docs/<variant>.context.md`. Do NOT modify after project creation. |
+| `templates/common/docs/context.md` | L1 | **Project identity document** — immutable project architecture, standards, and invariants. Copied verbatim to `docs/context.md` in every new L3 project. Variant templates MUST NOT carry their own `docs/context.md` (enforced by `validate-templates.ts` WS-07); variant-specific content goes in `docs/<variant>.context.md`. Do NOT modify after project creation. |
 | `templates/common/docs/variant.context.template.md` | L1 | **Variant overlay template** — customization layer rendered into `docs/<variant>.context.md`. Contains VARIANT-INJECT markers for variant-specific sections. |
 
-**Read order for AI tools in any L2 project:**
+**Read order for AI tools in any L3 project:**
 1. `docs/context.md` — immutable project identity
 2. `docs/<variant>.context.md` — THIS FILE — variant-specific tech stack, agents, skills, workflow
 
