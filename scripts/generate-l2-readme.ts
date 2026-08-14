@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.0.2
 /**
  * generate-l2-readme.ts
  *
- * Regenerates README.md/README_ko.md for a Phase A L2 project (Projects/<name>/)
+ * Regenerates README.md/README_ko.md for a Phase A L3 project (Projects/<name>/)
  * using the workspace's README Standard template (templates/common/docs/README.template.md),
  * reading the live agent roster and skills from the project via scanL3Project()
  * (this script's own "l2" naming predates CONSTITUTION.md's L3 layer — see
@@ -45,7 +45,7 @@ function printUsage(): void {
     'Usage: bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]\n' +
       '\n' +
       'Options:\n' +
-      '  --l2-path <path>   Path to the L2 project (default: current working directory)\n' +
+      '  --l2-path <path>   Path to the L3 project (default: current working directory)\n' +
       '  --dry-run          Print the planned output without writing any files\n' +
       '  --locale <locale>  One of: en, ko, both (default: both)\n' +
       '  -h, --help         Show this help message\n'
@@ -110,7 +110,7 @@ async function main(): Promise<void> {
       'VARIANT_JSON_NOT_FOUND',
       `variant.json not found at: ${variantJsonPath}`,
       undefined,
-      'Ensure --l2-path points to a valid Phase A L2 project (Projects/<name>/) with a variant.json'
+      'Ensure --l2-path points to a valid Phase A L3 project (Projects/<name>/) with a variant.json'
     );
     logError(err);
     process.exit(1);

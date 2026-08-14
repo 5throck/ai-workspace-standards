@@ -2,7 +2,7 @@
 /**
  * L2-to-Variant Pipeline
  *
- * Complete pipeline for converting L2 projects to beta variants.
+ * Complete pipeline for converting L3 projects to beta variants.
  * Orchestrates all wave components:
  * - Wave 1: L3 scanning (scan-l3-project.ts)
  * - Wave 2: L0/L1 reconciliation (reconcile-with-l0-l1.ts)
@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.3
+ * @version 1.10.4
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -104,7 +104,7 @@ import { listVariantTypes, isVariantType, getVariantTypeDefinition } from './hel
 // ============================================================================
 
 export interface PipelineConfig {
-  /** Path to L2 project */
+  /** Path to L3 project (field name predates the L3 layer) */
   l2ProjectPath: string;
   /** Variant name */
   variantName: string;

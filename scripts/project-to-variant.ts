@@ -1,8 +1,8 @@
-// @version 1.0.2
+// @version 1.0.3
 /**
  * project-to-variant.ts
  *
- * Promotes an existing L2 project (Projects/<name>/) to a variant template (templates/<name>/).
+ * Promotes an existing L3 project (Projects/<name>/) to a variant template (templates/<name>/).
  * Diffs against templates/common/ to keep only variant-specific files.
  *
  * Usage:
