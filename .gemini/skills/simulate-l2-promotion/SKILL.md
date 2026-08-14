@@ -20,9 +20,9 @@ metadata:
 
 ## Context
 This skill is designed to be used by the `automation-engineer` or `architect` agents to verify that
-`scripts/create-l2-scaffold.ts` (L2 variant scaffold creation) and `scripts/l2-to-variant-pipeline.ts`
-(L2 → variant promotion) work correctly end-to-end against a disposable fixture, before an L2 project
-is promoted for real.
+`scripts/create-l2-scaffold.ts` (L3 variant draft creation — the script's own name predates the L3 layer)
+and `scripts/l2-to-variant-pipeline.ts` (L3 → L2 variant promotion) work correctly end-to-end against a
+disposable fixture, before an L3 project is promoted for real.
 
 It exists as a separate, minimal skill from `simulate-project-creation` because the two pipelines exercise
 structurally different scripts (`new-project.ts` for L1 scaffolding vs. `create-l2-scaffold.ts` +
@@ -61,7 +61,7 @@ regression guard against the specific bug class fixed on 2026-08-09.
         `missingSections` list (sanity check that classification actually ran, not just skipped everything).
    5. Deletes both the `Projects/` fixture and the `tests/.temp/` pipeline output, regardless of outcome.
 3. Exit code: `0` if all assertions passed, `1` otherwise. Treat any non-zero exit as a blocker before
-   promoting a real L2 project.
+   promoting a real L3 project.
 
 ## Output Format
 Console test report in the same style as `test-new-project.ts`: one `✅`/`❌` line per assertion, followed
