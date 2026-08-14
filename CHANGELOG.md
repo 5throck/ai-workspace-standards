@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-14]**: docs(constitution): fix L0-L3 terminology table mismatch with ADR-0031/0032 — `CONSTITUTION.md` §Terminology Definition claimed to be "Based on ADR-0031" but ADR-0031/0032/0039 all define only a 3-tier L0/L1/L2 model with no L3, while the table asserted a 4th "L3 = Projects/*" layer. Added the missing L0 row, reworded the L3 definition as the live working directory scaffolded from an L2 variant template, clarified that L3 is this document's own extension beyond the ADRs (not literally defined by them), and added an ADR-0032 cross-reference.
+
 - **[2026-08-13]**: docs(designs): reflect week 08-10..08-13 execution in design docs — updated `docs/designs/project-review-fixes-design.md` (Status → Completed, added §7 Execution Results table for PRs #490–#497, marked §6 Out of Scope items completed), `docs/variant-roadmap-2026-q3-q4.md` (scope 7 → 9 variants with co-news/co-export rows, co-game stable v1.0.0, all Phase 1–3 milestones marked delivered, doc version 1.2.0), `docs/designs/create-l2-scaffold-design.md` (v1.9.0 + README generation reuse), and `docs/designs/l2-to-variant-pipeline-design-checklist.md` (v1.10.2 + Phase 2 shared-helper refactor note).
 
 - **[2026-08-12]**: fix(audit): add skills[].file validation to variant schema check — added WARN-level check in `scripts/audit.ts` `checkVariantJsonSchema()` that warns when a `skills[]` entry has a `name` but no `file` field (expected: `skills/{name}/SKILL.md`). Bumped audit.ts to 2.10.16.
@@ -972,7 +974,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-12*
+*Last Updated: 2026-08-14*
 
 
 
