@@ -4,12 +4,12 @@ status: active
 scope: common
 description: >
   Scans, updates, and upgrades Bun dependencies and packages across the AI workspace (L0)
-  or standalone project (L1/L2) while ensuring lockfile consistency, package.json version bumps,
+  or standalone project (L2/L3) while ensuring lockfile consistency, package.json version bumps,
   and security compliance.
   Use when: updating bun dependencies, upgrading packages to @latest, checking outdated packages in workspace or templates.
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-08-07
+version: 1.3.0
+last_reviewed: 2026-08-15
 metadata:
   type: process
   triggers:
@@ -22,10 +22,10 @@ metadata:
 
 ## Overview
 
-This skill provides a layer-aware methodology for auditing, updating, and upgrading Bun packages and dependencies. It automatically detects whether it is running in **L0 (Workspace Maintainer)** or **L1/L2 (Standalone Project)** context and adapts its scope accordingly:
+This skill provides a layer-aware methodology for auditing, updating, and upgrading Bun packages and dependencies. It automatically detects whether it is running in **L0 (Workspace Maintainer)** or **L2/L3 (Standalone Project)** context and adapts its scope accordingly:
 
 - **L0 Mode (Workspace Maintainer)**: Audits workspace root `package.json`, `templates/common/package.json`, and variant overlay `templates/co-*/package.json`, then propagates changes via `bun run propagate:apply`.
-- **L1/L2 Mode (Standalone Project)**: Audits local project `./package.json` (and `./scripts/package.json` if present) without referencing non-existent template paths or attempting L0-only template propagation.
+- **L2/L3 Mode (Standalone Project)**: Audits local project `./package.json` (and `./scripts/package.json` if present) without referencing non-existent template paths or attempting L0-only template propagation.
 
 ---
 
@@ -35,7 +35,7 @@ This skill provides a layer-aware methodology for auditing, updating, and upgrad
 - **Major Upgrades**: Upgrading pinned exact versions or major releases to `@latest` (`bun add <package>@latest` / `bun add -d <package>@latest`).
 - **Security Patches**: Upgrading vulnerable packages reported by security advisories (`gitleaks`, `bun audit`, CVEs).
 - **Template Synchronization (L0 Mode)**: Aligning package versions between workspace root (`package.json`) and `templates/common/package.json`.
-- **Project Dependency Refresh (L1/L2 Mode)**: Refreshing dependencies in scaffolded or variant-based projects.
+- **Project Dependency Refresh (L2/L3 Mode)**: Refreshing dependencies in scaffolded or variant-based projects.
 
 ---
 
@@ -48,12 +48,12 @@ Before scanning, determine the execution context by checking for the existence o
 if [ -d "templates/common" ]; then
   MODE="L0_WORKSPACE_ROOT"
 else
-  MODE="L1_L2_STANDALONE_PROJECT"
+  MODE="L2_L3_STANDALONE_PROJECT"
 fi
 ```
 
 - **If `MODE == L0_WORKSPACE_ROOT`**: Follow L0 Workspace Root steps below.
-- **If `MODE == L1_L2_STANDALONE_PROJECT`**: Follow L1/L2 Standalone Project steps below.
+- **If `MODE == L2_L3_STANDALONE_PROJECT`**: Follow L2/L3 Standalone Project steps below.
 
 ---
 
@@ -70,7 +70,7 @@ fi
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun outdated
    ```
 
-### L1/L2 Standalone Project Mode
+### L2/L3 Standalone Project Mode
 1. **Target Locations**:
    - Project Root: `./package.json`
    - Script Subdirectory (if present): `./scripts/package.json`
@@ -122,7 +122,7 @@ fi
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun run propagate:apply
    ```
 
-### L1/L2 Standalone Project Mode
+### L2/L3 Standalone Project Mode
 1. **In-Range & Pinned Update**:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun update
@@ -132,7 +132,7 @@ fi
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun install
    ```
-3. *(Skip L0 `propagate:apply` — L1/L2 projects operate independently).*
+3. *(Skip L0 `propagate:apply` — L2/L3 projects operate independently).*
 
 ---
 
@@ -156,7 +156,7 @@ fi
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun scripts/dev-sync.ts --body-file ".git/sync-pr-body.md" "chore(deps): update bun packages to @latest and sync templates"
    ```
 
-### L1/L2 Standalone Project Mode
+### L2/L3 Standalone Project Mode
 1. Run local project QA gate / tests:
    ```bash
    $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; bun test
