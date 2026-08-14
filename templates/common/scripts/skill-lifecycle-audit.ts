@@ -64,7 +64,7 @@ const colors = {
 
 const ROOT = cwd();
 const AGENTS_FILE = join(ROOT, 'AGENTS.md');
-const CONSTITUTION_FILE = join(ROOT, 'context.md');
+const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
 
 // A skill's `scope` may be 'workspace' (L0-only), 'common' (L0+L1, shared across
 // all variants), or the literal name of the variant it belongs to (L0+L1+L2) —

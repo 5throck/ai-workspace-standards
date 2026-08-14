@@ -17,7 +17,7 @@ const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
 const agentsDir = path.join(projectRoot, "agents");
 const agentsMdPath = path.join(projectRoot, "AGENTS.md");
-const constitutionMdPath = path.join(projectRoot, "context.md");
+const constitutionMdPath = path.join(projectRoot, "CONSTITUTION.md");
 
 interface VerificationIssue {
   type: "missing_file" | "missing_docs" | "metadata_mismatch";

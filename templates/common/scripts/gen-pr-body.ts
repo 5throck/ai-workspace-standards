@@ -31,7 +31,7 @@ if (!commitMsg) {
 // (workspace root) or docs/context.md §3 (variant projects, which omit context.md).
 // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
 // with dev-sync.ts and pre-commit.ts so the three enforcement points can't drift.
-const LANGUAGE_POLICY_REF = existsSync('context.md') ? 'context.md §3' : 'docs/context.md §3';
+const LANGUAGE_POLICY_REF = existsSync('CONSTITUTION.md') ? 'CONSTITUTION.md §3' : 'docs/context.md §3';
 
 function validateLanguage(text: string, label = 'PR body'): void {
   if (hasNonEnglish(text)) {

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-14T14:33:29.914Z
+**Generated**: 2026-08-14T16:00:53.758Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -88,7 +88,7 @@
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
-| create-l2-scaffold.ts | 1.9.0 | scripts/create-l2-scaffold.ts | N/A |
+| create-l2-scaffold.ts | 1.9.1 | scripts/create-l2-scaffold.ts | N/A |
 | dev-sync.ts | 1.5.1 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
@@ -96,18 +96,18 @@
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
-| generate-l2-readme.ts | 1.0.0 | scripts/generate-l2-readme.ts | fs, path |
+| generate-l2-readme.ts | 1.0.1 | scripts/generate-l2-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l2-to-variant-pipeline.ts | 1.10.2 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.10.3 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
-| propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
@@ -141,14 +141,14 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.5.17 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.5.18 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-memory.ts | 1.0.1 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.1.1 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.3.1 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.4.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skills.ts | 1.2.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.9.1
 /**
  * create-l2-scaffold.ts
  *
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { includeScriptInL2, parseScriptLayers } from './helpers/layer-filter.ts';
+import { includeScriptInL3, parseScriptLayers } from './helpers/layer-filter.ts';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { generateReadme, generateReadmeKo, type VariantMetadata } from './helpers/generate-variant.ts';
 import { isVariantType } from './helpers/registries/variant-type-registry.ts';
@@ -208,12 +208,12 @@ function copyCommonOverlay(projectDir: string): void {
   const dstScripts = path.join(projectDir, "scripts");
   ensureDir(dstScripts);
   for (const entry of fs.readdirSync(COMMON_SCRIPTS_DIR)) {
-    if (!includeScriptInL2(entry)) continue; // skip L0 scripts
+    if (!includeScriptInL3(entry)) continue; // skip L0 scripts
     copyItem(path.join(COMMON_SCRIPTS_DIR, entry), path.join(dstScripts, entry));
   }
   log(`  ✅ scripts/ copied (Tier 3 bootstrap/setup scripts excluded)`);
 
-  // ── Filter SCRIPTS.md for L2 ───────────────────────────────────────────────
+  // ── Filter SCRIPTS.md for this L3 draft ─────────────────────────────────────
   // copyCommonOverlay copies SCRIPTS.md verbatim from L1, which includes L0-only
   // registry rows.  Strip those rows so the project's SCRIPTS.md accurately
   // reflects what's on disk (matches new-project.ts §6.5 behavior).

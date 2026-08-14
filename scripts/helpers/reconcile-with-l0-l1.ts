@@ -2,14 +2,14 @@
 /**
  * L0/L1 Reconciliation
  *
- * Compares L2 scan results with L0/L1 versions and determines
+ * Compares L3 scan results with L0/L1 versions and determines
  * which files to keep in variant, move to common, or discard.
  *
- * @version 1.2.2
+ * @version 1.3.0
  * @phase 2: L0/L1 Reconciliation
  *
  * Dependencies:
- * - helpers/scan-l2-project.ts (File classification)
+ * - helpers/scan-l3-project.ts (File classification)
  * - lib/encoding-utils.ts (UTF-8 handling)
  * - lib/error-handling.ts (Error management)
  * - lib/pipeline-state.ts (State persistence)
@@ -18,7 +18,7 @@
 import * as semver from 'semver';
 import { join, basename } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { FileClassification, L2ScanResult } from './scan-l2-project.ts';
+import { FileClassification, L3ScanResult } from './scan-l3-project.ts';
 import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
 import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
 
@@ -46,7 +46,7 @@ export interface ReconciledManifest {
 }
 
 export interface ReconciledFile {
-  /** Source file path (L2, L0, or L1) */
+  /** Source file path (L3, L0, or L1) */
   sourcePath: string;
   /** Target path in final structure */
   targetPath: string;
@@ -57,7 +57,7 @@ export interface ReconciledFile {
   /** Hash for verification */
   hash?: string;
   /** Which layer this came from */
-  sourceLayer: 'L0' | 'L1' | 'L2';
+  sourceLayer: 'L0' | 'L1' | 'L3';
 }
 
 export interface ConflictResolution {
@@ -66,14 +66,14 @@ export interface ConflictResolution {
   /** Type of conflict */
   conflict: 'version_mismatch' | 'content_divergence' | 'platform_parity' | 'circular_dependency';
   /** Resolution strategy */
-  resolution: 'keep_l2' | 'keep_l0' | 'keep_l1' | 'merge' | 'manual_review';
+  resolution: 'keep_l3' | 'keep_l0' | 'keep_l1' | 'merge' | 'manual_review';
   /** Reason for resolution */
   reason: string;
   /** Versions involved */
   versions: {
     l0?: string;
     l1?: string;
-    l2?: string;
+    l3?: string;
   };
   /** Is this resolution automated or requires manual review */
   requiresManualReview: boolean;
@@ -127,7 +127,7 @@ function shouldMoveToCommon(
     return { move: false, reason: 'New file, no override' };
   }
 
-  // If file only exists in L2, doesn't apply
+  // If file only exists in L3, doesn't apply
   if (!file.existsInL0 && !file.existsInL1) {
     return { move: false, reason: 'New file, no override' };
   }
@@ -170,17 +170,17 @@ function reconcileFile(
 ): {
   decision: 'keep' | 'move' | 'discard';
   reason: string;
-  sourceLayer: 'L0' | 'L1' | 'L2';
+  sourceLayer: 'L0' | 'L1' | 'L3';
   conflict?: ConflictResolution;
 } {
-  const { relativePath, classification, l0Version, l1Version, l2Version, existsInL0, existsInL1 } = file;
+  const { relativePath, classification, l0Version, l1Version, l3Version, existsInL0, existsInL1 } = file;
 
-  // Case 1: New file (only in L2)
+  // Case 1: New file (only in L3)
   if (classification === 'new') {
     return {
       decision: 'keep',
       reason: `New file in ${variantName} variant`,
-      sourceLayer: 'L2',
+      sourceLayer: 'L3',
     };
   }
 
@@ -196,44 +196,44 @@ function reconcileFile(
   // Case 3: Modified file
   if (classification === 'modified') {
     // Version comparison
-    const versionComparison = compareVersions(l2Version, l0Version || l1Version);
+    const versionComparison = compareVersions(l3Version, l0Version || l1Version);
 
     if (versionComparison === 1) {
-      // L2 version is newer
+      // L3 version is newer
       return {
         decision: 'keep',
-        reason: `L2 version (${l2Version}) is newer than L0/L1 (${l0Version || l1Version})`,
-        sourceLayer: 'L2',
+        reason: `L3 version (${l3Version}) is newer than L0/L1 (${l0Version || l1Version})`,
+        sourceLayer: 'L3',
       };
     } else if (versionComparison === -1) {
       // L0/L1 version is newer
       return {
         decision: 'discard',
-        reason: `L0/L1 version (${l0Version || l1Version}) is newer than L2 (${l2Version}) - use L0/L1 version`,
+        reason: `L0/L1 version (${l0Version || l1Version}) is newer than L3 (${l3Version}) - use L0/L1 version`,
         sourceLayer: existsInL0 ? 'L0' : 'L1',
       };
     } else if (versionComparison === 0) {
       // Versions equal but content differs - conflict
       return {
         decision: 'keep',
-        reason: `Same version (${l2Version}) but different content - L2 variant may have variant-specific changes`,
-        sourceLayer: 'L2',
+        reason: `Same version (${l3Version}) but different content - L3 project may have variant-specific changes`,
+        sourceLayer: 'L3',
         conflict: {
           filePath: relativePath,
           conflict: 'content_divergence',
-          resolution: 'keep_l2',
-          reason: 'Same version but content differs - preserving L2 variant for review',
-          versions: { l0: l0Version, l1: l1Version, l2: l2Version },
+          resolution: 'keep_l3',
+          reason: 'Same version but content differs - preserving L3 file for review',
+          versions: { l0: l0Version, l1: l1Version, l3: l3Version },
           requiresManualReview: true,
         },
       };
     }
 
-    // No version info - keep L2 for review
+    // No version info - keep L3 for review
     return {
       decision: 'keep',
-      reason: 'Modified file without version headers - preserving L2 for manual review',
-      sourceLayer: 'L2',
+      reason: 'Modified file without version headers - preserving L3 file for manual review',
+      sourceLayer: 'L3',
     };
   }
 
@@ -244,25 +244,25 @@ function reconcileFile(
       conflict: 'content_divergence',
       resolution: 'manual_review',
       reason: 'L0 and L1 have diverged - requires manual reconciliation',
-      versions: { l0: l0Version, l1: l1Version, l2: l2Version },
+      versions: { l0: l0Version, l1: l1Version, l3: l3Version },
       requiresManualReview: true,
     };
 
     // Attempt automated resolution
     const l0vsL1 = compareVersions(l0Version, l1Version);
-    const l2vsL0 = compareVersions(l2Version, l0Version);
-    const l2vsL1 = compareVersions(l2Version, l1Version);
+    const l3vsL0 = compareVersions(l3Version, l0Version);
+    const l3vsL1 = compareVersions(l3Version, l1Version);
 
-    // If L2 is newest, keep it
-    if ((l2vsL0 === 1 || l2vsL0 === undefined) && (l2vsL1 === 1 || l2vsL1 === undefined)) {
-      conflict.resolution = 'keep_l2';
-      conflict.reason = 'L2 version is newest - keeping variant version';
+    // If L3 is newest, keep it
+    if ((l3vsL0 === 1 || l3vsL0 === undefined) && (l3vsL1 === 1 || l3vsL1 === undefined)) {
+      conflict.resolution = 'keep_l3';
+      conflict.reason = 'L3 version is newest - keeping variant version';
       conflict.requiresManualReview = false;
 
       return {
         decision: 'keep',
         reason: conflict.reason,
-        sourceLayer: 'L2',
+        sourceLayer: 'L3',
         conflict,
       };
     }
@@ -299,16 +299,16 @@ function reconcileFile(
     return {
       decision: 'keep',
       reason: 'Unresolvable conflict - requires manual review',
-      sourceLayer: 'L2',
+      sourceLayer: 'L3',
       conflict,
     };
   }
 
-  // Fallback - keep L2
+  // Fallback - keep L3
   return {
     decision: 'keep',
-    reason: 'Default - preserving L2 file',
-    sourceLayer: 'L2',
+    reason: 'Default - preserving L3 file',
+    sourceLayer: 'L3',
   };
 }
 
@@ -378,11 +378,11 @@ function applyAntiSwellingProtection(
 // ============================================================================
 
 /**
- * Reconcile L2 scan results with L0 and L1
+ * Reconcile L3 scan results with L0 and L1
  * @version 1.1.0
  */
 export async function reconcileWithL0L1(
-  scanResult: L2ScanResult,
+  scanResult: L3ScanResult,
   variantName: string
 ): Promise<ReconciledManifest> {
   console.log(`\n=== Reconciling with L0/L1 ===`);
@@ -395,11 +395,11 @@ export async function reconcileWithL0L1(
 
   // Reconcile each file
   for (const file of scanResult.files) {
-    // Prevent modification of core scripts in L2 projects
+    // Prevent modification of core scripts in L3 projects
     const normalizedPath = file.relativePath.replace(/\\/g, '/');
     if (normalizedPath === 'scripts/dev-sync.ts' || normalizedPath === 'scripts/audit.ts') {
-      const isIdenticalToL0 = file.existsInL0 && file.hashL2 === file.hashL0;
-      const isIdenticalToL1 = file.existsInL1 && file.hashL2 === file.hashL1;
+      const isIdenticalToL0 = file.existsInL0 && file.hashL3 === file.hashL0;
+      const isIdenticalToL1 = file.existsInL1 && file.hashL3 === file.hashL1;
       if (!isIdenticalToL0 && !isIdenticalToL1) {
         throw new Error(`Integrity Violation: Core script '${normalizedPath}' has been modified. Direct modifications to core scripts are forbidden. Please migrate your variant-specific validations to 'scripts/audit-variant.ts' instead.`);
       }
@@ -408,11 +408,11 @@ export async function reconcileWithL0L1(
     const result = reconcileFile(file, variantName);
 
     const reconciledFile: ReconciledFile = {
-      sourcePath: join(scanResult.scanMetadata.l2ProjectPath, file.relativePath),
+      sourcePath: join(scanResult.scanMetadata.l3ProjectPath, file.relativePath),
       targetPath: file.relativePath,
       reason: result.reason,
-      version: file.l2Version,
-      hash: file.hashL2,
+      version: file.l3Version,
+      hash: file.hashL3,
       sourceLayer: result.sourceLayer,
     };
 
@@ -515,7 +515,7 @@ async function main() {
 
   try {
     const scanResultJson = readFileSync(scanResultArg, 'utf-8');
-    const scanResult = JSON.parse(scanResultJson) as L2ScanResult;
+    const scanResult = JSON.parse(scanResultJson) as L3ScanResult;
 
     await reconcileWithL0L1(scanResult, variantArg);
 

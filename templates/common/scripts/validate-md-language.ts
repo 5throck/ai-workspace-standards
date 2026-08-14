@@ -67,7 +67,7 @@ interface Violation {
 function isProtectedPath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/');
   const basename = normalized.split('/').pop() ?? '';
-  if (['CLAUDE.md', 'GEMINI.md', 'context.md', 'AGENTS.md'].includes(basename)) return true;
+  if (['CLAUDE.md', 'GEMINI.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
   if (basename.endsWith('.context.md')) return true;
   return [
     /(?:^|\/)agents\/[^/]+\.md$/,
@@ -296,8 +296,8 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`      Reason: ${v.reason}\n`);
     });
     console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter.");
-    console.log("Exception NOT available for: agents/, skills/, CLAUDE.md, GEMINI.md, context.md, AGENTS.md, *.context.md");
-    console.log("See: context.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
+    console.log("Exception NOT available for: agents/, skills/, CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
+    console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
   }
 }

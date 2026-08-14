@@ -180,6 +180,6 @@ This table tracks the **variant-authoring** lifecycle specifically (creating a b
 
 > **Key script roles**:
 > - `create-l2-scaffold.ts` — creates a new variant **draft** at `Projects/<name>/` (L3), despite the "l2" in its own name and header comment (`"Phase A scaffold creation for new workspace variants (L2 / Projects/)"`) — the name follows ADR-0031's original terminology, which called this draft "L2" before this document's L3 layer existed
-> - `l2-to-variant-pipeline.ts` — promotes that L3 draft into an official L2 variant template at `templates/co-<name>/` (same naming-predates-L3 caveat; its helpers `scan-l2-project.ts` and `reconcile-with-l0-l1.ts` also call the L3 draft "L2" internally)
+> - `l2-to-variant-pipeline.ts` — promotes that L3 draft into an official L2 variant template at `templates/co-<name>/` (same naming-predates-L3 caveat; its helpers `helpers/scan-l3-project.ts` and `helpers/reconcile-with-l0-l1.ts` now use L3-correct identifiers internally, matching this document's terminology)
 > - `new-project.ts` — separately, creates an ordinary L3 project at `Projects/<name>/` from an *existing* L2 variant template — this is the everyday project-creation path, not variant authoring
 > - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L2(variants)

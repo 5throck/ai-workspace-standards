@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.3.1
+ * @version 1.4.0
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
  *
- * Layer-aware: auto-detects L0 (workspace root) vs L1/L2 (project) context and
- * skips L0-only registry entries when running in an L2 project.
+ * Layer-aware: auto-detects L0 (workspace root) / L1 (templates/common) /
+ * L2 (templates/co-<variant>) / L3 (Projects/<name>) context and skips
+ * L0-only registry entries outside L0.
  *
  * Usage:
  *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
@@ -29,16 +30,18 @@ import { join, dirname, relative } from "path";
 const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts"];
 const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
 
-// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/).
-// context.md marks the L0 workspace root; variant.json / docs/context.md mark a
-// generated L1/L2 project root (no context.md there by design). If this script is
+// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/,
+// templates/co-*/scripts/, or a scaffolded Projects/<name>/scripts/ — possibly detached
+// from the workspace entirely once a project has been relocated, e.g. to C:\projects\).
+// context.md marks the true L0 workspace root; variant.json / docs/context.md mark
+// a generated context root (no context.md there by design). If this script is
 // running standalone with none of these markers present, fall back to the directory
 // containing this script's own scripts/ folder.
 function findWorkspaceRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 6; i++) {
     if (
-      existsSync(join(dir, "context.md")) ||
+      existsSync(join(dir, "CONSTITUTION.md")) ||
       existsSync(join(dir, "variant.json")) ||
       existsSync(join(dir, "docs", "context.md"))
     ) {
@@ -51,24 +54,63 @@ function findWorkspaceRoot(startDir: string): string {
   return dirname(startDir);
 }
 
+// Walk all the way up to the true L0 workspace root (context.md), independent of
+// findWorkspaceRoot()'s "nearest marker" stop. Returns null if the workspace root is not
+// reachable (e.g. a project relocated outside the workspace tree) — the drift check below
+// only makes sense relative to the true root, so it must be skipped in that case rather
+// than silently computing a path that can never exist.
+function findTrueWorkspaceRoot(startDir: string): string | null {
+  let dir = startDir;
+  for (let i = 0; i < 8; i++) {
+    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+  return null;
+}
+
 const scriptDir = import.meta.dir;
 const workspaceRoot = findWorkspaceRoot(scriptDir);
-const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT
-const l1TemplateDir = join(workspaceRoot, "templates", "common", "scripts");  // L1 snapshot
+const trueWorkspaceRoot = findTrueWorkspaceRoot(scriptDir);
+const scriptsDir = join(workspaceRoot, "scripts");        // L0 SSOT (or nearest context root)
+const l1TemplateDir = trueWorkspaceRoot
+  ? join(trueWorkspaceRoot, "templates", "common", "scripts")  // L1 snapshot, always resolved from the true root
+  : join(workspaceRoot, "templates", "common", "scripts");
 const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 
 // ── Layer Detection ──────────────────────────────────────────────────────────
-// Determine the current execution context so that checks can be scoped.
+// Determine the current execution context so that checks can be scoped. Layer
+// numbering follows context.md §Terminology Definition (L1=templates/common,
+// L2=templates/co-*, L3=Projects/*):
 // L0 = workspace root (context.md), full verification.
-// L1 = template (variant.json without context.md), skip L0-only entries.
-// L2 = scaffolded project (docs/context.md only), skip L0-only entries.
-
-type ContextLayer = "L0" | "L1" | "L2";
+// L1 = templates/common/, L2 = an official variant template (templates/co-*/),
+// L3 = a scaffolded/live project (Projects/*/, or detached elsewhere) — L1/L2/L3
+// all skip L0-only registry entries.
+//
+// When the true workspace root is reachable (this script is still nested inside it),
+// detection is precise and path-based: findWorkspaceRoot()'s "nearest marker" walk is
+// NOT used here, because it stops at the first ancestor with any marker and would
+// otherwise misdetect templates/common/ (which carries no local marker of its own) as
+// L0 by walking straight past it to the true root. Only when the true root is NOT
+// reachable (a project relocated outside the workspace tree) do we fall back to a
+// file-presence heuristic — in which case variant.json can't distinguish an L2 template
+// from an L3 Phase-A draft (create-l2-scaffold.ts writes variant.json into Projects/*/
+// too), so an unreachable-root context with variant.json is assumed L3 (the far more
+// common real-world case: a relocated project, not a relocated template).
+type ContextLayer = "L0" | "L1" | "L2" | "L3";
 
 function detectContextLayer(): ContextLayer {
-  if (existsSync(join(workspaceRoot, "context.md"))) return "L0";
-  if (existsSync(join(workspaceRoot, "variant.json"))) return "L1";
-  return "L2";
+  if (trueWorkspaceRoot) {
+    const rel = relative(trueWorkspaceRoot, scriptDir).replace(/\\/g, "/");
+    if (rel === "scripts" || rel.startsWith("scripts/")) return "L0";
+    if (rel === "templates/common/scripts" || rel.startsWith("templates/common/scripts/")) return "L1";
+    if (/^templates\/co-[^/]+\/scripts(\/|$)/.test(rel)) return "L2";
+    return "L3";
+  }
+
+  if (existsSync(join(workspaceRoot, "context.md"))) return "L0"; // defensive; unreachable given the branch above
+  return "L3";
 }
 
 const contextLayer = detectContextLayer();
@@ -164,14 +206,14 @@ function getActualScripts(): string[] {
 }
 
 // ── Layer-Aware Filtering ────────────────────────────────────────────────────
-// In L1/L2 context, L0-only entries are irrelevant (their .ts files are
+// In L1/L2/L3 context, L0-only entries are irrelevant (their .ts files are
 // intentionally absent).  Returns true when the entry should be checked.
 
 const L0_ONLY_LAYERS = new Set(["L0", "L0-only"]);
 
 function isLayerRelevant(entry: RegistryEntry): boolean {
   if (contextLayer === "L0") return true;
-  // In L1/L2, skip entries whose layer marks them as workspace-only
+  // In L1/L2/L3, skip entries whose layer marks them as workspace-only
   return !L0_ONLY_LAYERS.has(entry.layer);
 }
 
@@ -304,7 +346,7 @@ function verify(): boolean {
   }
 
   // Check 1: Scripts on disk but not in registry
-  // In L1/L2, build a set of relevant (non-L0-only) registered names only
+  // In L1/L2/L3, build a set of relevant (non-L0-only) registered names only
   const relevantRegisteredNames = contextLayer === "L0"
     ? registeredNames
     : new Set(registry.filter(isLayerRelevant).map((e) => e.script));
@@ -315,7 +357,7 @@ function verify(): boolean {
   }
 
   // Check 2: Scripts in registry but not on disk
-  // In L0, check all entries. In L1/L2, skip L0-only entries (intentionally absent).
+  // In L0, check all entries. In L1/L2/L3, skip L0-only entries (intentionally absent).
   for (const entry of registry) {
     if (!isLayerRelevant(entry)) continue;
     if (!existsSync(join(scriptsDir, entry.script))) {
@@ -326,7 +368,7 @@ function verify(): boolean {
   }
 
   // Check 6a: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
-  // In L2, skip entirely — templates/common/scripts/ does not exist in project scope.
+  // In L2/L3, skip entirely — templates/common/scripts/ is not comparable from a variant template or project.
   if (contextLayer === "L0" || contextLayer === "L1") {
     const { drifted } = detectDrift(registry);
     for (const d of drifted) {
@@ -421,7 +463,13 @@ function verify(): boolean {
 
   // Output
   console.log(`\n=== verify-scripts.ts ===`);
-  console.log(`Context: ${contextLayer} (${contextLayer === "L0" ? "workspace root — full verification" : contextLayer === "L1" ? "template — L0-only entries skipped" : "project — L0-only entries skipped"})`);
+  const contextDescriptions: Record<ContextLayer, string> = {
+    L0: "workspace root — full verification",
+    L1: "common template — L0-only entries skipped",
+    L2: "variant template — L0-only entries skipped",
+    L3: "project — L0-only entries skipped",
+  };
+  console.log(`Context: ${contextLayer} (${contextDescriptions[contextLayer]})`);
   console.log(`Registry: ${scriptsMdPath}`);
   console.log(`Scripts dir: ${scriptsDir}\n`);
 

@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.3.1
+ * @version 1.4.0
  * @status active
  *
  * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
  * and provides filtering functions for publish-to-template, create-l2-scaffold,
  * validate-templates, and new-project.sh.
  *
- * Layer values:
+ * Layer values (L0/L1/L2 here follow CONSTITUTION.md's Terminology Definition:
+ * L1 = templates/common, L2 = templates/co-*):
  *   L0        = workspace root only
- *   L0+L1     = templates/common + all L2 projects (identically)
- *   L0+L1+L2  = variant-specific (common base + co-* override)
+ *   L0+L1     = templates/common + all L3 (scaffolded) projects, identically
+ *   L0+L1+L2  = variant-specific (common base + co-* override); reaches its
+ *               own variant's L3 projects too, not just the L2 template itself
  */
 
 import * as fs from "fs";
@@ -194,8 +196,8 @@ export function includeScriptInL1(
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
-/** Should this script be included when scaffolding an L2 project? */
-export function includeScriptInL2(
+/** Should this script be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
+export function includeScriptInL3(
   scriptName: string,
   layers?: Map<string, LayerValue>,
 ): boolean {
@@ -243,8 +245,8 @@ export function includeSkillInL1(
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
-/** Should this skill be included when scaffolding an L2 project? */
-export function includeSkillInL2(
+/** Should this skill be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
+export function includeSkillInL3(
   skillName: string,
   layers?: Map<string, LayerValue>,
 ): boolean {

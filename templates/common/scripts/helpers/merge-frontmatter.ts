@@ -1325,10 +1325,10 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
 
     // Debug: Check if context.md was removed
-    if (variantLevel === 'L2' && processedFinalBody.includes('context.md')) {
-      console.warn('⚠️  context.md still present after removeL0OnlyContent!');
+    if (variantLevel === 'L2' && processedFinalBody.includes('CONSTITUTION.md')) {
+      console.warn('⚠️  CONSTITUTION.md still present after removeL0OnlyContent!');
     } else if (variantLevel === 'L2') {
-      console.log('✅ context.md successfully removed from L2 variant');
+      console.log('✅ CONSTITUTION.md successfully removed from L2 variant');
     }
 
     const result = `---

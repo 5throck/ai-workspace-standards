@@ -222,9 +222,9 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 ### Propagation Scripts (Bun / TypeScript)
 
 #### `propagate-to-templates.ts`
-**Purpose**: Publishes L0 workspace scripts and governance docs to L1 (`templates/common/`) and propagates L1 changes to L2 variant projects. This is the consolidated propagation tool invoked via `bun run propagate:apply`.
+**Purpose**: Publishes L0 workspace scripts and governance docs to L1 (`templates/common/`) and propagates L1 changes to L2 variant templates. This is the consolidated propagation tool invoked via `bun run propagate:apply`.
 **Usage**: `bun scripts/propagate-to-templates.ts [flags]`
-**Layer**: L0 (workspace infrastructure only — not copied to templates/common/ or L2 projects)
+**Layer**: L0 (workspace infrastructure only — not copied to templates/common/, templates/co-*/, or L3 projects)
 **Aliases**: `bun run propagate:apply` (--apply), `bun run propagate:dry-run` (--dry-run)
 
 **Flag → Layer/Phase Mapping**:
@@ -236,7 +236,7 @@ Checks 6 validation rules: syntax, circular references, depth limits, file exist
 | `--governance-l1` | L0 governance → L1(common) | Phase A: deploy CLAUDE.md/GEMINI.md/AGENTS.md to L1 |
 | `--docs` | L1(common) → L1(variants) COMMON marker injection | Phase B: prepare variant-specific governance docs |
 | `--prune` | L1(common) cleanup | Maintenance: remove L0-only orphan files from L1 |
-| `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 projects not diverged from L1 |
+| `--check-drift` | L1 vs L2 drift report | Any phase: verify L2 variants not diverged from L1 |
 | `--include-disabled` | Opt-in override | Include domains marked `disabled: true` (e.g. `docs`) in the dry-run report only — combining with `--apply` is a hard error (exit 1), not a silent write |
 
 **Typical workflow**:
@@ -255,7 +255,7 @@ bun scripts/propagate-to-templates.ts --domain docs --include-disabled --dry-run
 ### L2 Variant Tooling (Bun / TypeScript)
 
 #### `generate-l2-readme.ts`
-**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L2 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL2Project()`. This is the Phase A self-service complement to `l2-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L2 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l2-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
+**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L3 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL3Project()` (this script's own `l2`-prefixed name and flags predate the L3 layer terminology). This is the Phase A self-service complement to `l2-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L3 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l2-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
 **Usage**: `bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]`
 **Layer**: L0 (workspace infrastructure — not copied to templates/common/ or L2 projects)
 

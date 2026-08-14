@@ -148,7 +148,7 @@ Common skills from `templates/common/skills/` are already present — only creat
 bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>
 ```
 
-Re-run this command after **any** later agent, skill, or `variant.json` change — it reads the live project state via `scanL2Project()` each time. In particular, re-run after Step 7 once `variant.json → description` is filled, so the README tagline no longer reads `TODO: describe…`. This is the Phase A self-service renderer; Phase B's `templates/co-*/` README standard is enforced separately by `WS-08` in `validate-templates.ts`.
+Re-run this command after **any** later agent, skill, or `variant.json` change — it reads the live project state via `scanL3Project()` each time. In particular, re-run after Step 7 once `variant.json → description` is filled, so the README tagline no longer reads `TODO: describe…`. This is the Phase A self-service renderer; Phase B's `templates/co-*/` README standard is enforced separately by `WS-08` in `validate-templates.ts`.
 
 ### Step 7: Complete variant.json
 

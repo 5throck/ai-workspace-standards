@@ -4,18 +4,18 @@
  *
  * Complete pipeline for converting L2 projects to beta variants.
  * Orchestrates all wave components:
- * - Wave 1: L2 scanning (scan-l2-project.ts)
+ * - Wave 1: L3 scanning (scan-l3-project.ts)
  * - Wave 2: L0/L1 reconciliation (reconcile-with-l0-l1.ts)
  * - Wave 3: Variant generation (generate-variant.ts)
  * - Wave 3: Beta lifecycle management (beta-lifecycle.ts)
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.2
+ * @version 1.10.3
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
- *   PHASE 1   — L2 project scan (scan-l2-project.ts)
+ *   PHASE 1   — L3 project scan (scan-l3-project.ts)
  *   PHASE 1.5 — Agent/skill normalization — NEW in v1.7.0 (normalize-agent-skills.ts)
  *               · Detects skill content in agent bodies (HIGH/MEDIUM/LOW confidence)
  *               · Extracts HIGH-confidence skill content → skills/<slug>/SKILL.md
@@ -57,7 +57,7 @@
  * See: docs/designs/variant-specialist-skill-structure.md
  *
  * Dependencies:
- * - helpers/scan-l2-project.ts (L2 scanning)
+ * - helpers/scan-l3-project.ts (L3 scanning)
  * - helpers/reconcile-with-l0-l1.ts (Reconciliation)
  * - helpers/generate-variant.ts (Variant generation + agent normalization)
  * - helpers/beta-lifecycle.ts (Lifecycle management)
@@ -70,7 +70,7 @@
 import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { readUTF8File } from './lib/encoding-utils.ts';
-import { scanL2Project, L2ScanResult } from './helpers/scan-l2-project.ts';
+import { scanL3Project, L3ScanResult } from './helpers/scan-l3-project.ts';
 import {
   normalizeAgentSkills,
   formatNormalizationReport,
@@ -137,7 +137,7 @@ export interface PipelineResult {
   success: boolean;
   /** Pipeline execution phases */
   phases: {
-    scan: { success: boolean; result?: L2ScanResult; error?: string };
+    scan: { success: boolean; result?: L3ScanResult; error?: string };
     reconcile: { success: boolean; result?: ReconciledManifest; error?: string };
     generate: { success: boolean; result?: GeneratedVariant; error?: string };
     lifecycle: { success: boolean; result?: BetaLifecycleState; error?: string };
@@ -180,7 +180,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     integrate: { success: false },
   };
 
-  let scanResult: L2ScanResult | undefined;
+  let scanResult: L3ScanResult | undefined;
   let reconciledManifest: ReconciledManifest | undefined;
   let generatedVariant: GeneratedVariant | undefined;
   let lifecycleState: BetaLifecycleState | undefined;
@@ -196,7 +196,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`PHASE 1: Scanning L2 Project`);
     console.log(`${'─'.repeat(60)}`);
 
-    scanResult = await scanL2Project(config.l2ProjectPath);
+    scanResult = await scanL3Project(config.l2ProjectPath);
     phases.scan = { success: true, result: scanResult };
     console.log(`✅ PHASE 1 COMPLETE`);
   } catch (error) {
