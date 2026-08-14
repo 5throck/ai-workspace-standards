@@ -65,13 +65,14 @@ For internationalization (i18n) work, also load the baseline translation referen
 
 This section clearly defines hierarchy and distribution-related terms used in this document.
 
-**Layer Structure** - Based on ADR-0031:
+**Layer Structure** - extends ADR-0031's 3-tier model (L0/L1/L2) with a live-project L3 layer:
 
 | Term | Definition | Description |
 |------|------------|-------------|
+| **L0** | workspace root | scripts/, agents/ reference point - the only place core configs, scripts, and agents are edited |
 | **L1** | templates/common | Common infrastructure layer - templates shared by all variants |
-| **L2** | templates/co-* | Variant-specific layer - co-work, co-design, etc. |
-| **L3** | Projects/* | Actual project layer - result of new project creation |
+| **L2** | templates/co-* | Variant-specific template layer - co-work, co-design, etc. |
+| **L3** | Projects/* | The live working directory - the actual dev environment scaffolded (cloned) from an L2 variant template; this is where a developer opens the project and does real day-to-day work |
 
 **Source and Distribution**:
 
@@ -79,16 +80,18 @@ This section clearly defines hierarchy and distribution-related terms used in th
 |------|------------|-------------|
 | **L0 Source** | workspace root | scripts/, agents/ reference point - original source code location |
 | **Distribution Path** | workspace root → templates/common → templates/co-* | Path where L0 source is distributed to L1 and L2 |
-| **Scaffolding** | templates/co-* → Projects/* | Copied from L2 to L3 for project creation |
+| **Scaffolding** | templates/co-* → Projects/* | Copied from L2 to L3 (via `new-project.ts`) for project creation |
 | **workspace root** | Root directory containing L0 source | Git repository top-level directory |
 
 **Reference Documents**:
 - **ADR-0031 (L1-L2 Fork Model)**: L1 independent evolution, L2 scaffold-time delivery
+- **ADR-0032 (Layer Governance Framework)**: formalizes the L0/L1/L2 3-tier model that L3 (this section) extends
 - **ADR-0039 (L0→L1→L2 Hierarchy and Extends)**: Extends chain processing, L0→L1→L2 inheritance and governance
 
 **Notes**:
 - The "L0 → L1 → L2" expression refers to the **distribution path**, not the **layer structure**.
-- The layer structure forms a static hierarchy as "L1 → L2 → L3".
+- The layer structure forms a static hierarchy as "L0 → L1 → L2 → L3".
+- ADR-0031/0032/0039 formally define only L0-L2 (a 3-tier model); L3 is this document's workspace-level convention for naming the live project directory that results from scaffolding - keep this in mind when cross-referencing those ADRs directly.
 
 ---
 
@@ -631,4 +634,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-11*
+*Last Updated: 2026-08-14*
