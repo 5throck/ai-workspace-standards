@@ -4,11 +4,11 @@
  *
  * Provides applyTemplate() (generic renderer) and applyContextTemplate()
  * (context.md convenience wrapper) used by:
- *   - generate-variant.ts (L2→L1 variant promotion: context.md + README rendering)
- *   - new-project.ts (L1→L2 project deployment: context.md)
- *   - create-l2-scaffold.ts (L2 project README stub rendering)
+ *   - generate-variant.ts (L3→L2 variant promotion: context.md + README rendering)
+ *   - new-project.ts (L1→L3 project deployment: context.md)
+ *   - create-l2-scaffold.ts (L3 project README stub rendering)
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';

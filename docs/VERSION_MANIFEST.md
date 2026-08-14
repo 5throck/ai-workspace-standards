@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-14T22:13:46.849Z
+**Generated**: 2026-08-14T22:21:54.452Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -84,7 +84,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.16 | scripts/audit.ts | bun |
+| audit.ts | 2.10.17 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
@@ -96,17 +96,17 @@
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
-| generate-l2-readme.ts | 1.0.1 | scripts/generate-l2-readme.ts | fs, path |
+| generate-l2-readme.ts | 1.0.2 | scripts/generate-l2-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l2-to-variant-pipeline.ts | 1.10.3 | scripts/l2-to-variant-pipeline.ts | fs, path |
+| l2-to-variant-pipeline.ts | 1.10.4 | scripts/l2-to-variant-pipeline.ts | fs, path |
 | lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
-| project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
+| project-to-variant.ts | 1.0.3 | scripts/project-to-variant.ts | N/A |
 | propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |
