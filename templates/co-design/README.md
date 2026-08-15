@@ -41,7 +41,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **design-lead** | Design system architect — visual language, tokens, and component architecture | high | inherit |
 | **prototype-engineer** | Interactive prototyping specialist — builds functional prototypes for testing | medium | inherit |
 | **service-designer** | Service designer — end-to-end service experiences, journeys, and blueprints | medium | inherit |
-| **storyteller** | Design storyteller — philosophy, meaning, and narrative coherence for design | medium | inherit |
+| **storyteller** | Brand narrative lead — design principles, brand voice, and pattern consistency audits | medium | inherit |
 | **typography-expert** | Typography expert — font selection, type systems, and visual hierarchy | medium | inherit |
 | **ux-researcher** | User research specialist — interviews, usability testing, and synthesis | medium | inherit |
 | **visual-designer** | Visual design execution — UI designs, mockups, and specifications | medium | inherit |
@@ -87,4 +87,4 @@ This variant focuses on UI/UX design, design systems, prototyping, and design ha
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-08-15*

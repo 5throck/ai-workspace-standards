@@ -37,7 +37,7 @@ This document defines the workflow phases used by the `co-design` variant. It fo
 ### Phase 2 — Design Direction & Approval
 **PM enforces the gate**: no execution without explicit user approval.
 - `design-lead` (Tier: High) synthesizes research and narrative inputs into design direction: token architecture, component philosophy, and system-level decisions
-- `storyteller` (Tier: Medium) reviews the proposed direction for narrative coherence and flags decisions that would break the design's meaning
+- `storyteller` (Tier: Medium) reviews the proposed direction against the design principles document and flags any decisions that violate a stated principle
 - PM synthesizes findings into a decision recommendation
 - **USER APPROVAL REQUIRED** before proceeding to Phase 3
 - **Output**: approved design direction brief, design token architecture

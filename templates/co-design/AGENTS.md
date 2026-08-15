@@ -23,7 +23,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **design-lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Design direction, design system architecture, and creative strategy owner |
 | **prototype-engineer** | [`agents/prototype-engineer.md`](agents/prototype-engineer.md) | Medium | Interactive prototypes and design handoff artifacts builder |
 | **service-designer** | [`agents/service-designer.md`](agents/service-designer.md) | Medium | End-to-end service experience and customer journey designer |
-| **storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Philosophical foundation, meaning, and narrative coherence for design systems |
+| **storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Brand narrative, design principles, and cross-pattern consistency owner |
 | **typography-expert** | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Font selection, type systems, and visual hierarchy specialist |
 | **ux-researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | User research, needs analysis, and UX insights specialist |
 | **visual-designer** | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Visual designs, design tokens, and component specifications producer |
@@ -69,7 +69,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/storyteller.md`](agents/storyteller.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Philosophical foundation, meaning, and narrative coherence for design systems |
+| **Role** | Brand narrative, design principles, and cross-pattern consistency owner |
 
 ### typography-expert
 
@@ -180,7 +180,7 @@ All specialist agents below are dispatched ONLY through PM:
 | `design-lead` | Phase 2 | "design lead", "design system", "design tokens", "design direction", "design strategy" |
 | `prototype-engineer` | Phase 4 | "prototype engineer", "interactive prototype", "clickable prototype", "prototype testing", "build prototype" |
 | `service-designer` | Phase 3 | "service designer", "design", "create design", "service design", "customer journey" |
-| `storyteller` | Phase 1 | "storyteller", "design philosophy", "brand narrative", "narrative coherence", "brand identity" |
+| `storyteller` | Phase 1 | "storyteller", "design principles", "brand narrative", "brand voice", "pattern consistency audit" |
 | `typography-expert` | Phase 3 | "typography expert", "visual", "typography", "font" |
 | `ux-researcher` | Phase 1 | "ux researcher", "research", "analyze", "investigate", "user research" |
 | `visual-designer` | Phase 3 | "visual designer", "visual design", "UI mockup", "screen design", "design specification" |
@@ -208,7 +208,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Design direction | Phase 2, 3 | `design-lead` | High | |
 | Interactive prototypes and design handoff artifacts builder | Phase 4 | `prototype-engineer` | Medium | |
 | End-to-end service experience and customer journey designer | Phase 3 | `service-designer` | Medium | |
-| Philosophical foundation | Phase 1, 2 | `storyteller` | Medium | |
+| Brand narrative and design principles | Phase 1, 2 | `storyteller` | Medium | |
 | Font selection | Phase 3 | `typography-expert` | Medium | |
 | User research | Phase 1 | `ux-researcher` | Medium | |
 | Visual designs | Phase 3 | `visual-designer` | Medium | |
@@ -417,7 +417,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Design direction, design system architecture, and creative strategy owner | `design-lead` | `pm` |
 | Interactive prototypes and design handoff artifacts builder | `prototype-engineer` | `pm` |
 | End-to-end service experience and customer journey designer | `service-designer` | `pm` |
-| Philosophical foundation, meaning, and narrative coherence for design systems | `storyteller` | `pm` |
+| Brand narrative, design principles, and cross-pattern consistency owner | `storyteller` | `pm` |
 | Font selection, type systems, and visual hierarchy specialist | `typography-expert` | `pm` |
 | User research, needs analysis, and UX insights specialist | `ux-researcher` | `pm` |
 | Visual designs, design tokens, and component specifications producer | `visual-designer` | `pm` |
