@@ -220,6 +220,12 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 ## §3: Agent Coordination & Orchestration Rules
 
+> **See also**: [`docs/phase-definitions.md`](docs/phase-definitions.md) documents this same
+> orchestration workflow and phase-numbering map in the standard `docs/phase-definitions.md`
+> format used by every other variant (Phase Overview table, PM Facilitation table, deliverables
+> pipeline). This section remains the source of truth for the orchestration steps themselves;
+> keep both in sync if the workflow changes.
+
 ### 🔄 Agent Coordination Workflow (Harness Advanced)
 
 1.  **Triage & Initial Research (PM & Subagents)**:
