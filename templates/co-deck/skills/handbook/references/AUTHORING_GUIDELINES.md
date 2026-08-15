@@ -902,11 +902,14 @@ body, header, main, footer, nav, .sidebar {
 | Language | Suffix | Example |
 |----------|--------|---------|
 | Korean (default) | *(none)* | `01_Why_AI_Chapter.html` |
+| Korean (explicit) | `_ko` | `A_Appendix_ko.html` |
 | English | `_en` | `01_Why_AI_Chapter_en.html` |
 | Japanese | `_ja` | `01_Why_AI_Chapter_ja.html` |
 | Spanish | `_es` | `01_Why_AI_Chapter_es.html` |
 
 Index pages follow the same pattern: `index.html` / `index_en.html` / `index_ja.html` / `index_es.html`.
+
+**Explicit `_ko` suffix**: When a handbook has no unsuffixed default file for a given piece of content (every language ships as an explicit suffixed pair, e.g. an appendix added after the base chapters were already using the unsuffixed-Korean convention), use `_ko` explicitly rather than leaving Korean unsuffixed inconsistently with its siblings — e.g. `A_Remote_Access_ko.html` / `A_Remote_Access_en.html`. Language-switcher tooling and authoring-compliance checkers must treat `_ko` as a valid Korean variant, not only the unsuffixed default.
 
 ### 23-2. Page Structure Requirements
 
