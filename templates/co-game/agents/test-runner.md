@@ -2,7 +2,7 @@
 name: test-runner
 role: Test execution and acceptance criteria verification specialist
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-05-28"
 capabilities:
   - testing

@@ -2,7 +2,7 @@
 name: game-debugger
 role: Bug root cause analysis, fix proposals, and bug pattern documentation specialist for game engine
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-28"
 capabilities:
   - debugging

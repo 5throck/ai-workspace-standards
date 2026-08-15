@@ -2,7 +2,7 @@
 name: game-developer
 role: Canvas rendering engine, game loop, collision detection, and entity implementation specialist
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-27"
 capabilities:
   - game-loop

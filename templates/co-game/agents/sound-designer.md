@@ -2,7 +2,7 @@
 name: sound-designer
 role: Procedural audio design specialist — sound effects, BGM loops, audio architecture
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-27"
 capabilities:
   - asset-pipeline

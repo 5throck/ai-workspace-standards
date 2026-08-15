@@ -2,7 +2,7 @@
 name: puzzle-designer
 role: Puzzle/board game design specialist — matching logic, turn systems, difficulty generation
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-27"
 capabilities:
   - game-design
