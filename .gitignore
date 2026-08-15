@@ -122,6 +122,11 @@ __pycache__/
 nul
 NUL
 
+# --- Antigravity/ZCode session-local state (already caught by the /*/  rule
+# above; documented explicitly per this file's own convention for local-only
+# state directories, e.g. .gateguard-state/ and .pipeline-state/ above) ---
+.zcode/
+
 # --- Sandbox for testing ---
 .sandbox/
 
