@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.4
+// @version 1.5.0
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -62,17 +62,20 @@ interface Violation {
 }
 
 /**
- * Returns true for protected paths where lang: ko exception is never permitted.
+ * Returns true for protected paths where lang: ko exception is never permitted —
+ * core governance/routing docs that must stay single-source English regardless
+ * of a project's domain. agents/*.md and skills/*.md are NOT protected: a project
+ * whose real-world domain requires Korean (e.g. citing Korean building codes,
+ * bilingual client-facing skill docs) may declare `lang: ko` + `lang_reason:
+ * legal|source-material|proper-noun` in frontmatter, same exception mechanism
+ * used everywhere else — see Stage 3 in analyzeFile().
  */
 function isProtectedPath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/');
   const basename = normalized.split('/').pop() ?? '';
   if (['CLAUDE.md', 'GEMINI.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
   if (basename.endsWith('.context.md')) return true;
-  return [
-    /(?:^|\/)agents\/[^/]+\.md$/,
-    /(?:^|\/)skills\/.*\.md$/,
-  ].some(p => p.test(normalized));
+  return false;
 }
 
 /**
@@ -168,7 +171,7 @@ function isExcludedPath(filePath: string): boolean {
  * Analyze file content for language violations using 4-stage judgment.
  *
  * Stage 1 (exception folder) is handled upstream by isExcludedPath / isOfficialDocument.
- * Stage 2: Protected path (agents/, skills/, governance files) → FAIL
+ * Stage 2: Protected path (core governance/routing files) → FAIL
  * Stage 3: lang: ko frontmatter → PASS+INFO (valid reason) or FAIL (missing/invalid)
  * Stage 4: No declaration → FAIL
  */
@@ -188,7 +191,7 @@ function analyzeFile(filePath: string): Violation | null {
     if (isProtectedPath(filePath)) {
       return {
         file: filePath,
-        reason: "Korean content in protected path (agents/, skills/, or governance file) — lang: ko exception is not permitted"
+        reason: "Korean content in protected path (core governance/routing file) — lang: ko exception is not permitted"
       };
     }
 
@@ -296,7 +299,7 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`      Reason: ${v.reason}\n`);
     });
     console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter.");
-    console.log("Exception NOT available for: agents/, skills/, CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
+    console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CONSTITUTION.md, AGENTS.md, *.context.md");
     console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
   }
