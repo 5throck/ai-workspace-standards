@@ -5,10 +5,10 @@ last_updated: "2026-06-23"
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
 tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 model: inherit
 color: yellow
 description: >-

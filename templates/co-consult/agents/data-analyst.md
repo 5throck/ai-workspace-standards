@@ -4,10 +4,10 @@ role: Statistical analysis, data modeling, and business insights specialist
 status: active
 formal_name: Data Analyst & Analytics Specialist
 tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: cyan
 description: >

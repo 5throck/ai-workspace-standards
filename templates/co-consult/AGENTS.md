@@ -22,7 +22,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 <!-- VARIANT-AGENTS-START -->
 | **change-management-partner** | [`agents/change-management-partner.md`](agents/change-management-partner.md) | Medium | Organizational transformation and stakeholder alignment specialist |
 | **communications-lead** | [`agents/communications-lead.md`](agents/communications-lead.md) | Medium | Client-facing communications and strategic narrative producer |
-| **data-analyst** | [`agents/data-analyst.md`](agents/data-analyst.md) | Low | Statistical analysis, data modeling, and business insights specialist |
+| **data-analyst** | [`agents/data-analyst.md`](agents/data-analyst.md) | Medium | Statistical analysis, data modeling, and business insights specialist |
 | **delivery-manager** | [`agents/delivery-manager.md`](agents/delivery-manager.md) | Low | Project delivery and operations coordination specialist |
 | **industry-expert** | [`agents/industry-expert.md`](agents/industry-expert.md) | High | Industry-specific insights and competitive dynamics specialist |
 | **sme** | [`agents/sme.md`](agents/sme.md) | Medium | Functional expertise and solution design specialist |
@@ -61,7 +61,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/data-analyst.md`](agents/data-analyst.md) |
-| **Tier** | low |
+| **Tier** | medium |
 | **Phases** | 1, 3 |
 | **Role** | Statistical analysis, data modeling, and business insights specialist |
 
@@ -240,7 +240,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- VARIANT-PHASE-GATE-START -->
 | Organizational transformation and stakeholder alignment specialist | Phase 1, 2 | `change-management-partner` | Medium | |
 | Client-facing communications and strategic narrative producer | Phase 3 | `communications-lead` | Medium | |
-| Statistical analysis | Phase 1, 3 | `data-analyst` | Low | |
+| Statistical analysis | Phase 1, 3 | `data-analyst` | Medium | |
 | Project delivery and operations coordination specialist | Phase 4 | `delivery-manager` | Low | |
 | Industry-specific insights and competitive dynamics specialist | Phase 1, 2 | `industry-expert` | High | |
 | Functional expertise and solution design specialist | Phase 1, 2, 3 | `sme` | Medium | |
@@ -392,7 +392,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 | change-management-partner | `agents/change-management-partner.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
 | communications-lead | `agents/communications-lead.md` | Medium | ❌ serial | ✅ within phase scope |
-| data-analyst | `agents/data-analyst.md` | Low | sequential (phase-ordered) | ✅ within phase scope |
+| data-analyst | `agents/data-analyst.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
 | delivery-manager | `agents/delivery-manager.md` | Low | ❌ serial | ✅ within phase scope |
 | industry-expert | `agents/industry-expert.md` | High | sequential (phase-ordered) | ✅ within phase scope |
 | sme | `agents/sme.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
