@@ -33,17 +33,25 @@ const DEFAULT_CONFIG: RetryConfig = {
 
 /**
  * Execute a function with retry logic
+ *
+ * Pass an optional AbortSignal to allow external cancellation (e.g. Ctrl-C,
+ * caller timeout). A thrown AbortError propagates immediately without retrying.
  */
 async function withRetry<T>(
   fn: () => Promise<T>,
   config: RetryConfig = DEFAULT_CONFIG,
-  context?: string
+  context?: string,
+  signal?: AbortSignal
 ): Promise<RetryResult & { result?: T }> {
   const startTime = Date.now();
   let lastError: Error | undefined;
   let delay = config.initialDelay;
 
   for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+    if (signal?.aborted) {
+      throw (signal.reason ?? new DOMException("Aborted", "AbortError"));
+    }
+
     try {
       console.log(`${context ? `[${context}] ` : ''}Attempt ${attempt}/${config.maxRetries}`);
 
@@ -64,14 +72,15 @@ async function withRetry<T>(
         result
       };
     } catch (error) {
-      lastError = error as Error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`${context ? `[${context}] ` : ''}Attempt ${attempt} failed: ${lastError.message}`);
 
       if (attempt < config.maxRetries) {
-        const waitTime = Math.min(delay, config.maxDelay);
-        console.log(`${context ? `[${context}] ` : ''}Waiting ${waitTime}ms before retry...`);
+        // Randomized jitter avoids thundering-herd retries in parallel dispatch.
+        const waitTime = Math.min(delay, config.maxDelay) * (0.5 + Math.random() * 0.5);
+        console.log(`${context ? `[${context}] ` : ''}Waiting ${Math.round(waitTime)}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-        delay = Math.floor(delay * config.backoffMultiplier);
+        delay = Math.min(Math.floor(delay * config.backoffMultiplier), config.maxDelay);
       }
     }
   }

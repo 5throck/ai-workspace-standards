@@ -12,6 +12,7 @@
  */
 
 interface SerialAgentTask {
+  id?: string;
   description: string;
   role: string;
   task: string;
@@ -161,10 +162,11 @@ export async function dispatchSerial(
   let completedCount = 0;
 
   for (const task of pipeline) {
-    // Check dependencies
+    // Check dependencies. `dependsOn` resolves against the task `id` when present,
+    // falling back to `description` for backward compatibility.
     if (task.dependsOn) {
       const dependency = results.find(
-        r => r.task.description === task.dependsOn
+        r => (r.task.id && r.task.id === task.dependsOn) || r.task.description === task.dependsOn
       );
 
       if (!dependency) {

@@ -1,9 +1,22 @@
 ---
 name: SAP PP Module — Production Planning
 description: Use when working on PP module tasks — BOM, routing, production orders, MRP, or work center management. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and customizing tables for the PP module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: pp-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-pp
+    - BOM
+    - routing
+    - production order
+    - MRP
+    - work center
 ---
 
 # PP Analyst Context — Production Planning
@@ -127,3 +140,38 @@ SELECT matnr, werks, plart, dispo, mabst, eisbe
 - `CONF_DATA`: `CONF_QTY` (Confirmed Yield), `SCRAP_QTY`, `CONF_UNIT`, `WORK_CENTER`, `CONF_ACTIVITY1`/`2`/`3` (Activity quantities), `FIN_CONF` (`X`=Final Confirmation → sets CNF status)
 - `TIMETICKETS`: Table for multiple operation confirmations — `OPERATION`, `CONF_QTY`, `FIN_CONF`
 - `RETURN`: Standard BAPI return — commit with `BAPI_TRANSACTION_COMMIT`
+
+## Context
+
+This skill provides the PP Analyst with comprehensive domain knowledge for the Production Planning module in SAP. It is loaded when the active task involves BOM management, routing configuration, production order processing, MRP, or work center management. The skill covers manufacturing process flows, master data structures, query patterns, and standard BAPIs for production operations.
+
+## When to Use
+
+- Creating or analyzing production orders, BOMs, or routings (CO01/CS01/CA01)
+- Running or reviewing MRP results (MD01/MD04) and stock/requirement lists
+- Confirming production operations, goods issue, or goods receipt (CO11N/MIGO)
+- Analyzing work center capacity, production versions, or component requirements
+- Investigating production order status and WIP tracking
+- Building queries against PP tables (AUFK, AFKO, AFPO, MAST, STKO, PLKO)
+
+## Execution Steps
+
+1. Review the Process Flow section to understand the MRP-to-production-to-GI/GR chain.
+2. Query key tables using the Key Table Relationships section — trace from MAST (BOM) through PLKO (routing) to AUFK/AFKO (production orders).
+3. Apply Common Query Patterns for BOM explosion, production order status, unconfirmed operations, and MRP parameter review.
+4. Check SAP Quirks & Known Issues for BOM alternative handling, parallel sequences, over-confirmation rules, and repetitive manufacturing differences.
+5. Use Standard Customizing Tables to validate production order types, work center categories, production versions, and MRP controllers.
+6. Leverage Strategic BAPIs & APIs for production order creation, change, release, and confirmation.
+
+## Output Format
+
+Structured analysis output should include: plant and MRP controller context, production order numbers with status indicators, BOM component lists, routing operation summaries, quantity and date breakdowns, and WIP status. Include capacity utilization and exception message analysis when relevant.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns for PP custom programs and production enhancements
+- `sap-mm` — MM integration for production order goods issue (261) and goods receipt (101)
+- `sap-co` — CO integration for production order costing and WIP settlement
+- `sap-sd` — SD integration for make-to-order or assemble-to-order scenarios
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for RESB and AFVC high-volume tables

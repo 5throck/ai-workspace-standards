@@ -22,6 +22,10 @@ url = "https://mcp-abap.marianzeis.de/mcp"
 [mcp_servers.sap-docs]
 url = "https://mcp-sap-docs.marianzeis.de/mcp"
 
+[mcp_servers.codegraph]
+command = "npx"
+args = ["-y", "@colbymchenry/codegraph", "serve"]
+
 [[skills.config]]
 enabled = true
 path = "skills"

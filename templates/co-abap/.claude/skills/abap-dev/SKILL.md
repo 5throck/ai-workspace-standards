@@ -1,9 +1,22 @@
 ---
 name: ABAP Development Skills
 description: Use when working on SAP ABAP development tasks — provides specialized workflows for BAPI exploration, transport management, unit testing, performance analysis, impact architecture analysis, and documentation audits. Trigger on any SAP/ABAP coding, debugging, or system analysis task.
+version: 1.1.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: code-writer
+prerequisites: vsp MCP server
 metadata:
   type: core
-version: 1.1.0
+  triggers:
+    - abap-dev
+    - BAPI
+    - transport
+    - ABAP Unit
+    - performance analysis
+    - impact analysis
 ---
 
 # ABAP Development Skills (vsp)
@@ -195,3 +208,43 @@ ENDCLASS.
 3. **Re-run**: Repeat until the audit returns 0 errors.
 
 **Gate**: A passing audit is required before running the final `/sync` command.
+
+## Context
+
+This skill provides the core ABAP development workflow patterns for AI agents operating against an SAP system via the vsp MCP server. It covers the full development lifecycle from BAPI discovery and transport management through unit testing, performance analysis, impact assessment, and documentation auditing. Each sub-section maps to a specialized capability that can be invoked independently or as part of an end-to-end delivery chain.
+
+## When to Use
+
+- Working on any SAP ABAP coding, debugging, or system analysis task
+- Searching for BAPIs or standard function modules for integration scenarios
+- Creating, populating, or releasing SAP transport requests (CTS)
+- Writing or running ABAP Unit tests for custom objects
+- Investigating slow ABAP programs or expensive SQL queries
+- Analyzing the impact of a proposed change before implementation
+- Running documentation audits before finalization or sync
+
+## Execution Steps
+
+1. **BAPI Exploration** — Use `sap:bapi-explorer` to discover, evaluate, and document standard SAP BAPIs for integration use cases.
+2. **Transport Management** — Use `sap:transport-manager` to create, populate, and release transport requests via CTS.
+3. **Unit Test Architecture** — Use `sap:unit-architect` to design and implement ABAP Unit test classes mapped to acceptance criteria.
+4. **Performance Analysis** — Use `sap:performance-analyzer` to identify and resolve SQL and code performance bottlenecks.
+5. **Impact Assessment** — Use `sap:impact-architecture` to analyze the full call-graph and CDS dependency impact of a proposed change.
+6. **Documentation Audit** — Use `sap:documentation-audit` to verify documentation quality before finalization.
+
+## Output Format
+
+Each sub-section produces its own structured output:
+- **BAPI Explorer**: Standardized BAPI documentation block with name, function group, parameters, return structure, and limitations.
+- **Transport Manager**: Transport number logged in `memory/YYYY-MM-DD.md` with object list and release confirmation.
+- **Unit Architect**: Test class skeleton code with method-per-AC mapping and coverage report from `RunUnitTests`.
+- **Performance Analyzer**: Finding list with problem patterns, recommended fixes, and before/after metrics.
+- **Impact Architecture**: Impact Summary table (object, type, caller count, risk level) and Risk Assessment block.
+- **Documentation Audit**: Pass/fail result from `bun scripts/vsp-audit.ts` with error details if applicable.
+
+## Related Skills
+
+- [post-write-chain](../post-write-chain/SKILL.md) — Mandatory QA gate after every ABAP write operation
+- [dump-monitor](../dump-monitor/SKILL.md) — System health monitoring for ABAP short dumps
+- [performance-tuning](../performance-tuning/SKILL.md) — Standardized performance analysis workflow for large-table scenarios
+- [desktop-app-fallback](../desktop-app-fallback/SKILL.md) — Manual QA chain for Claude Code Desktop App sessions

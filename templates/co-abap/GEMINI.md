@@ -22,11 +22,23 @@ Domain: SAP ABAP development via vsp MCP server (ADT REST APIs).
 
 ### Session Start
 ```
-@docs/context.md @docs/co-abap.context.md @AGENTS.md @memory/MEMORY.md
+@docs/co-abap.context.md @AGENTS.md @memory/MEMORY.md
 ```
 
 ### Recommended Mode
 `--mode hyperfocused` (single sap_execute entry point for all 101 MCP operations)
+
+### Post-Write Chain
+After ANY WriteSource, EditSource, or Activate, run the mandatory QA gate in order:
+1. SyntaxCheck
+2. RunUnitTests
+3. GetCodeCoverage (≥70% new objects)
+4. RunATCCheck (Zero P1 findings)
+
+**Desktop App Note**: PostToolUse hooks do NOT fire in Claude Code Desktop App — run the chain manually.
+
+### Memory Index Sync
+After Write/Edit, run `bun scripts/sync-md.ts` to update the memory index.
 
 ### Subagent Orchestration
 - `define_subagent` / `invoke_subagent` / `send_message` for multi-agent workflows

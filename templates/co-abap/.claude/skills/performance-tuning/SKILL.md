@@ -1,9 +1,21 @@
 ---
 name: Performance Tuning
 description: Use when investigating slow ABAP programs, expensive SQL statements, or reviewing performance risk on large tables (VBAK, BSEG, ACDOCA, etc.). Provides a standardized workflow using TraceExecution, ListSQLTraces, and GetCallGraph to diagnose and document performance issues before they reach production.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: dba
+prerequisites: vsp MCP server
 metadata:
   type: core
-version: 1.0.0
+  triggers:
+    - performance-tuning
+    - TraceExecution
+    - ListSQLTraces
+    - GetCallGraph
+    - slow program
 ---
 
 # Performance Tuning Workflow
@@ -84,3 +96,30 @@ instead of ad-hoc `RunQuery` sampling. Owned by the **DBA** agent (`agents/dba.m
 - [agents/dba.md](../../agents/dba.md) — primary owner of this workflow
 - [skills/post-write-chain/SKILL.md](../post-write-chain/SKILL.md) — run after functional QA passes, before transport release
 - [docs/context.md § ABAP SQL Reference](../../docs/context.md) — baseline SQL syntax rules (max_rows, tilde notation, DESCENDING)
+
+## Context
+
+This skill standardizes performance analysis for ABAP programs and SQL queries so findings are reproducible and comparable across sessions. It replaces ad-hoc `RunQuery` sampling with a structured workflow using `TraceExecution`, `ListSQLTraces`, and `GetCallGraph` to diagnose bottlenecks and document recommendations before they reach production. It is owned by the DBA agent but may be triggered by Architect or QA Engineer during design or review.
+
+## Execution Steps
+
+1. **Baseline trace** — Use `TraceExecution` on the target object to capture runtime, DB time percentage, and top statements.
+2. **SQL statement analysis** — Use `ListSQLTraces` and `GetSQLTraceState` to identify high-execution-count statements or full table scans.
+3. **Call graph check** — Use `GetCallGraph` or `AnalyzeCallGraph` to detect redundant nested SELECTs inside loops (N+1 anti-pattern).
+4. **Index verification** — Use `GetTable` to check whether existing secondary indexes cover the WHERE/JOIN predicates in traced statements.
+5. **Report** — Document findings using the standardized Performance Report format with findings table and recommendations.
+
+## Output Format
+
+A structured Performance Analysis Report containing:
+- Trigger reason (slow report, pre-release check, QA escalation)
+- Trace summary with total runtime, DB time percentage, and top statements
+- Findings table with statement/pattern, tables affected, issue description, and severity
+- Recommendations for each finding (index addition, query rewrite, or code fix)
+- Verdict (Pass or Needs optimization before transport release)
+
+## Related Skills
+
+- [abap-dev](../abap-dev/SKILL.md) — Core ABAP development workflows including the performance-analyzer sub-section
+- [post-write-chain](../post-write-chain/SKILL.md) — Run after performance fixes pass to validate no regressions
+- [dump-monitor](../dump-monitor/SKILL.md) — Use together when a dump indicates a performance-related timeout

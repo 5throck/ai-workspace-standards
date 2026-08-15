@@ -105,23 +105,39 @@ async function main() {
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
-    const buffer = await res.arrayBuffer();
-    fs.writeFileSync(target, Buffer.from(buffer));
-
-    // Verify download is non-empty
-    const stat = fs.statSync(target);
-    if (stat.size === 0) {
-      console.error(`${RED}Error: Download failed or file is empty.${RESET}`);
-      fs.unlinkSync(target);
-      process.exit(1);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length === 0) {
+      throw new Error("Download failed or file is empty.");
     }
+
+    // Verify SHA256 checksum when the release publishes a <asset>.sha256 file.
+    const actual = crypto.createHash("sha256").update(buffer).digest("hex");
+    try {
+      const sumRes = await fetch(`${downloadUrl}.sha256`);
+      if (sumRes.ok) {
+        const expected = (await sumRes.text()).trim().split(/\s+/)[0].toLowerCase();
+        if (expected && expected !== actual) {
+          throw new Error(`Checksum mismatch: expected ${expected}, got ${actual}`);
+        }
+        console.log(`${GREEN}✅ SHA256 verified: ${actual.slice(0, 12)}…${RESET}`);
+      } else {
+        console.warn(`${CYAN}⚠ No checksum asset at ${downloadUrl}.sha256 — skipping integrity check.${RESET}`);
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith("Checksum mismatch")) {
+        throw e;
+      }
+      console.warn(`${CYAN}⚠ Could not verify checksum: ${e instanceof Error ? e.message : e}${RESET}`);
+    }
+
+    fs.writeFileSync(target, buffer);
 
     // Make executable (non-Windows)
     if (!isWindows) {
       fs.chmodSync(target, 0o755);
     }
   } catch (e) {
-    console.error(`${RED}Error: Download failed: ${e}${RESET}`);
+    console.error(`${RED}Error: Download failed: ${e instanceof Error ? e.message : e}${RESET}`);
     console.error(`       Check that the release asset exists: ${downloadUrl}`);
     process.exit(1);
   }

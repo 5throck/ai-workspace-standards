@@ -1,9 +1,22 @@
 ---
 name: SAP SD Module — Sales & Distribution
 description: Use when working on SD module tasks — sales orders, deliveries, billing, pricing, or order-to-cash processes. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and standard BAPIs for the SD module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: sd-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-sd
+    - sales order
+    - delivery
+    - billing
+    - pricing
+    - O2C
 ---
 
 # SD Analyst Context — Sales & Distribution
@@ -134,3 +147,37 @@ SELECT kunnr, COUNT(*) AS order_cnt, SUM( netwr ) AS total_net
 - `ERRORS`: Error table — check before commit
 - `SUCCESS`: Returns created billing document numbers
 - Note: Commit individually per document via `BAPI_TRANSACTION_COMMIT`; batch processing supported
+
+## Context
+
+This skill provides the SD Analyst with comprehensive domain knowledge for the Sales & Distribution module in SAP. It is loaded when the active task involves sales order processing, delivery management, billing, pricing configuration, or the overall order-to-cash (O2C) cycle. The skill covers end-to-end process flows, master data relationships, query patterns, and standard integration BAPIs.
+
+## When to Use
+
+- Working on sales order creation, modification, or analysis (VA01/VA02/VA03)
+- Processing deliveries, picking, or goods issue (VL01N/VL02N)
+- Creating or reviewing billing documents (VF01/VF02)
+- Analyzing pricing conditions, condition types, or rebate processing
+- Investigating order-to-cash (O2C) process gaps or document flow issues
+- Building reports or queries against SD tables (VBAK, VBAP, LIKP, VBRK)
+
+## Execution Steps
+
+1. Review the Process Flow section to understand the O2C document chain and relevant transaction codes.
+2. Query key tables using the Key Table Relationships section as a join reference guide.
+3. Apply Common Query Patterns as starting templates — adapt date ranges, document types, and status filters to the specific requirement.
+4. Check SAP Quirks & Known Issues for pricing re-determination behavior, partial delivery rules, and credit block handling.
+5. Use Standard Customizing Tables to validate configuration settings (order types, billing types, account determination).
+6. Leverage Strategic BAPIs & APIs for automated sales order, delivery, or billing document processing.
+
+## Output Format
+
+Structured analysis output should include: business context (sales org, distribution channel, division), document references (VBELN numbers with types), data tables with key fields, status indicators (delivery/billing completion), and recommended actions. Include table relationship diagrams for complex cross-module queries.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns and coding standards for SD custom programs
+- `sap-fi` — Financial Accounting integration via billing documents (VKOA account determination)
+- `sap-le` — Logistics Execution for delivery processing and shipping
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for large SD table datasets

@@ -95,4 +95,27 @@ if (-not $entryExists) {
     $entry | Out-File -FilePath $memoryFile -Encoding UTF8 -Append
 }
 
+# Auto-update MEMORY.md index
+bun scripts/sync-md.ts "$today" "$commitMsg" 2>$null
+
+# Auto-add CHANGELOG entry if [Unreleased] section has no entries yet
+if (Test-Path "CHANGELOG.md") {
+    $changelog = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
+    $inUnreleased = $false
+    $hasEntry = $false
+    foreach ($line in (Get-Content "CHANGELOG.md" -Encoding UTF8)) {
+        if ($line -match '^## \[Unreleased\]') { $inUnreleased = $true; continue }
+        if ($inUnreleased -and $line -match '^## ') { break }
+        if ($inUnreleased -and $line -match '^\s*[-*]|^### ') { $hasEntry = $true; break }
+    }
+    if (-not $hasEntry) {
+        $marker = "## [Unreleased]"
+        $newEntry = "$marker`n`n### Added`n- **[$today]**: $commitMsg"
+        $updated = $changelog.Replace($marker, $newEntry, [System.StringComparison]::Ordinal)
+        if ($updated -ne $changelog) {
+            $updated | Set-Content "CHANGELOG.md" -Encoding UTF8
+        }
+    }
+}
+
 exit 0

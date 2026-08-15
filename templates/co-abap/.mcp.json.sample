@@ -44,6 +44,10 @@
     "sap-docs": {
       "type": "http",
       "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    },
+    "codegraph": {
+      "command": "npx",
+      "args": ["-y", "@colbymchenry/codegraph", "serve"]
     }
   }
 }

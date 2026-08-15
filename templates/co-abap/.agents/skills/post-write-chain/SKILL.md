@@ -1,9 +1,20 @@
 ---
 name: Post-Write Mandatory Chain
 description: Use after ANY WriteSource, EditSource, or Activate operation on SAP ABAP objects. Enforces the mandatory quality gate: SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck. Trigger automatically after every ABAP write operation.
+version: 1.1.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: test-runner
+prerequisites: vsp MCP server
 metadata:
   type: core
-version: 1.1.0
+  triggers:
+    - post-write-chain
+    - WriteSource
+    - EditSource
+    - Activate
 ---
 
 > ⚠️ **Desktop App**: `PostToolUse` hooks do **not** fire automatically. Run `/post-write <object-name>` **manually** after every WriteSource or EditSource in Desktop App sessions.
@@ -72,3 +83,28 @@ Action required: Add ABAP Unit test cases covering the uncovered branches,
 ## Claude Code Desktop App Note
 
 `PostToolUse` hooks do **not** fire automatically in the Desktop App. Run all three steps of this chain manually after each write in Desktop sessions using `/post-write <object-name>`.
+
+## Context
+
+This skill enforces a mandatory four-step quality gate that runs after every ABAP write operation (WriteSource, EditSource, or Activate). The chain ensures that no modified object reaches a transport request or production without passing syntax validation, unit tests, code coverage thresholds, and ATC checks. It is the primary safeguard against regressions in the ABAP development workflow.
+
+## When to Use
+
+- After any `WriteSource`, `EditSource`, or `Activate` operation on SAP ABAP objects
+- Automatically triggered by PostToolUse hooks in CLI sessions
+- Manually invoked via `/post-write <object-name>` in Claude Code Desktop App sessions
+- Before releasing a transport request
+
+## Execution Steps
+
+1. **SyntaxCheck** — Run syntax validation on the modified object. Must return 0 errors to proceed.
+2. **RunUnitTests** — Execute all ABAP Unit tests for the object. Must return 0 failures to proceed.
+3. **GetCodeCoverage** — Measure statement coverage. New objects require 70% minimum; existing objects must not regress below prior baseline.
+4. **RunATCCheck** — Execute ABAP Test Cockpit checks. Priority-1 findings block deployment.
+5. If any step fails, fix the issue and re-run from the failed step. Do not skip forward.
+
+## Related Skills
+
+- [abap-dev](../abap-dev/SKILL.md) — Core ABAP development workflows including unit testing and performance analysis
+- [desktop-app-fallback](../desktop-app-fallback/SKILL.md) — Manual QA chain for Desktop App sessions where hooks do not fire
+- [performance-tuning](../performance-tuning/SKILL.md) — Deep performance analysis for slow programs and expensive SQL
