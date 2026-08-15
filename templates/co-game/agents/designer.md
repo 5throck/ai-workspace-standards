@@ -2,7 +2,7 @@
 name: designer
 role: UI/UX specs, wireframes, and component definition producer
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-05-28"
 capabilities:
   - level-design

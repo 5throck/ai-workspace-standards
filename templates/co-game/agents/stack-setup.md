@@ -2,7 +2,7 @@
 name: stack-setup
 role: Unknown stack identification and secure setup procedure specialist
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-20"
 capabilities:
   - environment-setup

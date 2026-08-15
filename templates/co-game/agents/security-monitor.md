@@ -2,7 +2,7 @@
 name: security-monitor
 role: Security policy enforcement and secrets leak prevention specialist
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-20"
 capabilities:
   - security

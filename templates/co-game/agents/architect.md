@@ -2,7 +2,7 @@
 name: architect
 role: Implementation plans, ADRs, and system architecture design specialist
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-05-28"
 capabilities:
   - architecture

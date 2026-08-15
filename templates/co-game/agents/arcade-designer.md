@@ -2,7 +2,7 @@
 name: arcade-designer
 role: Retro arcade game design specialist — entity AI, wave systems, scoring, level layout
 status: active
-version: "1.0.0"
+version: "1.0.1"
 last_updated: "2026-06-27"
 capabilities:
   - game-design
