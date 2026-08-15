@@ -589,7 +589,7 @@ if (existsSync(layerFilter)) {
     l0Scripts = result.stdout.split('\n').filter(Boolean);
   }
 } else {
-  l0Scripts = ['validate-templates.ts', 'create-l2-scaffold.ts', 'l2-to-variant-pipeline.ts', 'fix-script-versions.ts'];
+  l0Scripts = ['validate-templates.ts', 'create-l3-scaffold.ts', 'l3-to-variant-pipeline.ts', 'fix-script-versions.ts'];
 }
 for (const s of l0Scripts) {
   const fp = join(projectDir, 'scripts', s);

@@ -1,20 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.0.2
+// @version 1.0.3
 /**
- * generate-l2-readme.ts
+ * generate-l3-readme.ts
  *
  * Regenerates README.md/README_ko.md for a Phase A L3 project (Projects/<name>/)
  * using the workspace's README Standard template (templates/common/docs/README.template.md),
  * reading the live agent roster and skills from the project via scanL3Project()
  * (this script's own "l2" naming predates CONSTITUTION.md's L3 layer — see
  * §Terminology Definition; the project it scans is L3, not L2).
- * Complement to l2-to-variant-pipeline.ts's Phase B README generation — shares the
+ * Complement to l3-to-variant-pipeline.ts's Phase B README generation — shares the
  * same rendering engine (helpers/generate-variant.ts) so Phase A and Phase B never drift.
  *
  * Usage:
- *   bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]
- *   bun scripts/generate-l2-readme.ts --l2-path Projects/co-journalist
- *   cd Projects/co-journalist && bun scripts/generate-l2-readme.ts   # bare form, defaults to cwd
+ *   bun scripts/generate-l3-readme.ts [--l3-path <path>] [--dry-run] [--locale en|ko|both]
+ *   bun scripts/generate-l3-readme.ts --l3-path Projects/co-journalist
+ *   cd Projects/co-journalist && bun scripts/generate-l3-readme.ts   # bare form, defaults to cwd
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -42,10 +42,10 @@ interface Args {
 
 function printUsage(): void {
   console.log(
-    'Usage: bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]\n' +
+    'Usage: bun scripts/generate-l3-readme.ts [--l3-path <path>] [--dry-run] [--locale en|ko|both]\n' +
       '\n' +
       'Options:\n' +
-      '  --l2-path <path>   Path to the L3 project (default: current working directory)\n' +
+      '  --l3-path <path>   Path to the L3 project (default: current working directory)\n' +
       '  --dry-run          Print the planned output without writing any files\n' +
       '  --locale <locale>  One of: en, ko, both (default: both)\n' +
       '  -h, --help         Show this help message\n'
@@ -69,9 +69,9 @@ function parseArgs(argv: string[]): Args {
       process.exit(0);
     } else if (a === '--dry-run') {
       dryRun = true;
-    } else if (a === '--l2-path') {
+    } else if (a === '--l3-path') {
       l2Path = argv[++i] ?? null;
-    } else if (a.startsWith('--l2-path=')) {
+    } else if (a.startsWith('--l3-path=')) {
       l2Path = a.split('=')[1] ?? null;
     } else if (a === '--locale') {
       const val = argv[++i] ?? '';
@@ -110,7 +110,7 @@ async function main(): Promise<void> {
       'VARIANT_JSON_NOT_FOUND',
       `variant.json not found at: ${variantJsonPath}`,
       undefined,
-      'Ensure --l2-path points to a valid Phase A L3 project (Projects/<name>/) with a variant.json'
+      'Ensure --l3-path points to a valid Phase A L3 project (Projects/<name>/) with a variant.json'
     );
     logError(err);
     process.exit(1);
@@ -197,7 +197,7 @@ async function main(): Promise<void> {
 
 if (import.meta.main) {
   main().catch((error) => {
-    console.error('\n❌ generate-l2-readme failed:');
+    console.error('\n❌ generate-l3-readme failed:');
     console.error(error);
     process.exit(1);
   });

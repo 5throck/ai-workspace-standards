@@ -6,7 +6,7 @@
  * (context.md convenience wrapper) used by:
  *   - generate-variant.ts (L3→L2 variant promotion: context.md + README rendering)
  *   - new-project.ts (L1→L3 project deployment: context.md)
- *   - create-l2-scaffold.ts (L3 project README stub rendering)
+ *   - create-l3-scaffold.ts (L3 project README stub rendering)
  *
  * @version 1.1.1
  */

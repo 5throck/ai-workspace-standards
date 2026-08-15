@@ -63,11 +63,11 @@ Before running the pipeline, update these fields in `Projects/<variant-name>/`:
 - Confirm §Manual Phase B Steps lists all domain-specific folders
 - Confirm §Reconcile Survival Notes is complete
 
-### Step 3: Run l2-to-variant-pipeline.ts
+### Step 3: Run l3-to-variant-pipeline.ts
 
 ```bash
 # From workspace root C:\git\
-bun scripts/l2-to-variant-pipeline.ts \
+bun scripts/l3-to-variant-pipeline.ts \
   --source Projects/<variant-name> \
   --variant co-<variant-name> \
   --variantType <security|development|design|consulting|collaboration>
@@ -105,7 +105,7 @@ cp -r templates/common/.claude/skills/. templates/co-<variant-name>/.claude/skil
 cp -r templates/common/.gemini/skills/. templates/co-<variant-name>/.gemini/skills/
 ```
 
-> **Reconcile boundary**: `l2-to-variant-pipeline.ts` strips files from L2 that are identical to L0. Skills (`.claude/skills/`, `.gemini/skills/`) are **excluded from reconcile** and must always be present in L2. If skills are missing after pipeline run, restore them manually from `templates/common/.claude/skills/` and `templates/common/.gemini/skills/`.
+> **Reconcile boundary**: `l3-to-variant-pipeline.ts` strips files from L2 that are identical to L0. Skills (`.claude/skills/`, `.gemini/skills/`) are **excluded from reconcile** and must always be present in L2. If skills are missing after pipeline run, restore them manually from `templates/common/.claude/skills/` and `templates/common/.gemini/skills/`.
 
 ### Step 6: Verify new-project.sh/ps1 picks up the new variant
 

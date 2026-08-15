@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * L2-to-Variant Pipeline
+ * L3-to-Variant Pipeline
  *
  * Complete pipeline for converting L3 projects to beta variants.
  * Orchestrates all wave components:
@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.4
+ * @version 1.10.5
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -44,7 +44,7 @@
  *               · Writes _pipeline_report.md + _pipeline_report.json in variant root
  *               · Additional BLOCKING check: AGENTS.md VARIANT-* marker presence (double defense)
  *   PHASE 4.6 — Generated variant pm.md completion + context.md generation
- *               · Operates on GENERATED variant output (not L2 source)
+ *               · Operates on GENERATED variant output (not L3 source)
  *               · Distinct from Phase 1.6 (source diagnosis)
  *   PHASE 5   — Beta lifecycle initialization
  *   PHASE 6   — Platform parity validation
@@ -104,8 +104,8 @@ import { listVariantTypes, isVariantType, getVariantTypeDefinition } from './hel
 // ============================================================================
 
 export interface PipelineConfig {
-  /** Path to L3 project (field name predates the L3 layer) */
-  l2ProjectPath: string;
+  /** Path to L3 project */
+  l3ProjectPath: string;
   /** Variant name */
   variantName: string;
   /** Variant type */
@@ -157,15 +157,15 @@ export interface PipelineResult {
 // ============================================================================
 
 /**
- * Execute complete L2-to-variant pipeline
+ * Execute complete L3-to-variant pipeline
  * @version 1.3.0 — Phase 3.5/4.5 failures now return buildFailureResult() instead of
  *                  calling process.exit(1) directly, so programmatic callers can handle
  *                  failure without their host process dying (Issue A.3).
  */
-export async function executeL2ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
+export async function executeL3ToVariantPipeline(config: PipelineConfig): Promise<PipelineResult> {
   const startTime = Date.now();
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`L2-to-Variant Pipeline`);
+  console.log(`L3-to-Variant Pipeline`);
   console.log(`Variant: ${config.variantName}`);
   console.log(`Type: ${config.variantType}`);
   console.log(`${'='.repeat(60)}\n`);
@@ -188,15 +188,15 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   let integrationResult: IntegrationResult | undefined;
 
   // ============================================================================
-  // PHASE 1: SCAN L2 PROJECT
+  // PHASE 1: SCAN L3 PROJECT
   // ============================================================================
 
   try {
     console.log(`\n${'─'.repeat(60)}`);
-    console.log(`PHASE 1: Scanning L2 Project`);
+    console.log(`PHASE 1: Scanning L3 Project`);
     console.log(`${'─'.repeat(60)}`);
 
-    scanResult = await scanL3Project(config.l2ProjectPath);
+    scanResult = await scanL3Project(config.l3ProjectPath);
     phases.scan = { success: true, result: scanResult };
     console.log(`✅ PHASE 1 COMPLETE`);
   } catch (error) {
@@ -222,7 +222,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
 
       const normResult: NormalizationResult = normalizeAgentSkills(
         scanResult!,
-        config.l2ProjectPath,
+        config.l3ProjectPath,
         { auto: config.autoExtract ?? false, dryRun: false },
       );
 
@@ -260,24 +260,24 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const { readFileSync: rfs, existsSync: ex16 } = await import('node:fs');
     const { join: j16 } = await import('node:path');
 
-    const l2PmPath = j16(config.l2ProjectPath, 'agents', 'pm.md');
+    const l3PmPath = j16(config.l3ProjectPath, 'agents', 'pm.md');
     const l1CommonPmPath = j16('templates', 'common', 'agents', 'pm.md');
 
-    if (!ex16(l2PmPath)) {
-      console.log(`ℹ️  No agents/pm.md found in L2 source — skipping Phase 1.6`);
+    if (!ex16(l3PmPath)) {
+      console.log(`ℹ️  No agents/pm.md found in L3 source — skipping Phase 1.6`);
     } else {
-      const pmContent = rfs(l2PmPath, 'utf-8');
+      const pmContent = rfs(l3PmPath, 'utf-8');
       const pmLines = pmContent.split('\n').length;
       const pmIssues: string[] = [];
 
       // Check 1: extends: pattern
       if (!pmContent.includes('extends:')) {
-        pmIssues.push(`Missing 'extends:' pattern — L2 pm.md should delegate to common via extends: ../../common/agents/pm.md`);
+        pmIssues.push(`Missing 'extends:' pattern — L3 pm.md should delegate to common via extends: ../../common/agents/pm.md`);
       }
 
       // Check 2: 200-line limit
       if (pmLines > 200) {
-        pmIssues.push(`Line count ${pmLines} exceeds 200-line L2 limit (L0 duplication bug risk)`);
+        pmIssues.push(`Line count ${pmLines} exceeds 200-line L3 limit (L0 duplication bug risk)`);
       }
 
       // Check 3: Duplicate sections vs L1 common pm.md
@@ -379,7 +379,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   // ============================================================================
   // PHASE 3.5: AGENTS.MD §-STRUCTURE AND VARIANT-* MARKER PRE-FLIGHT CHECK
   // ============================================================================
-  // Verifies the L2 source AGENTS.md has the §-numbered structure and all 6
+  // Verifies the L3 source AGENTS.md has the §-numbered structure and all 6
   // VARIANT-*-START/END anchor markers required for Phase 4 injection.
   // Without markers, injectVariantPlaceholders() silently produces an uninjected
   // file — this gate catches that BEFORE generation runs.
@@ -397,12 +397,12 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const { readFileSync: rfs35, existsSync: ex35 } = await import('node:fs');
     const { join: j35 } = await import('node:path');
 
-    const l2AgentsMdPath = j35(config.l2ProjectPath, 'AGENTS.md');
+    const l3AgentsMdPath = j35(config.l3ProjectPath, 'AGENTS.md');
 
-    if (!ex35(l2AgentsMdPath)) {
-      console.log(`ℹ️  No AGENTS.md found in L2 source — will be generated from scratch in Phase 4.`);
+    if (!ex35(l3AgentsMdPath)) {
+      console.log(`ℹ️  No AGENTS.md found in L3 source — will be generated from scratch in Phase 4.`);
     } else {
-      const agentsMdContent = rfs35(l2AgentsMdPath, 'utf-8');
+      const agentsMdContent = rfs35(l3AgentsMdPath, 'utf-8');
 
       const requiredMarkers = [
         'VARIANT-AGENTS-START',
@@ -428,21 +428,21 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         if (config.autoFixAgentsMd) {
           console.log(`   autoFixAgentsMd=true: regenerating AGENTS.md from L1 common template...`);
           try {
-            // Inline regeneration: read L1 template, inject agent blocks, write to L2 source
+            // Inline regeneration: read L1 template, inject agent blocks, write to L3 source
             const commonTemplate = j35('templates', 'common', 'AGENTS.md');
             if (!ex35(commonTemplate)) {
               throw new Error(`L1 template not found: ${commonTemplate}`);
             }
             // Delegate to regenerate-agents-md.ts via subprocess
             const { execFileSync: efs } = await import('node:child_process');
-            const variantDirName = config.l2ProjectPath.split(/[\\/]/).pop() ?? config.variantName;
-            // Map L2 path to templates/<variant> if it lives under templates/
-            const isInTemplates = config.l2ProjectPath.replace(/\\/g, '/').includes('templates/');
+            const variantDirName = config.l3ProjectPath.split(/[\\/]/).pop() ?? config.variantName;
+            // Map L3 path to templates/<variant> if it lives under templates/
+            const isInTemplates = config.l3ProjectPath.replace(/\\/g, '/').includes('templates/');
             if (isInTemplates) {
               efs('bun', ['scripts/regenerate-agents-md.ts', '--variant', variantDirName], { stdio: 'inherit' });
               console.log(`   ✅ AGENTS.md regenerated for ${variantDirName}`);
             } else {
-              console.warn(`   ⚠️  L2 source is not under templates/ — auto-regeneration skipped. Run manually:`);
+              console.warn(`   ⚠️  L3 source is not under templates/ — auto-regeneration skipped. Run manually:`);
               console.warn(`      bun scripts/regenerate-agents-md.ts --variant ${variantDirName}`);
             }
           } catch (fixErr) {
@@ -474,7 +474,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   // ============================================================================
   // PHASE 3.7: PLUGIN-BASED TYPE VALIDATION
   // ============================================================================
-  // Runs after Phase 3.5 and before Phase 4. Validates the L2 source against
+  // Runs after Phase 3.5 and before Phase 4. Validates the L3 source against
   // the variant-type registry (integrity, required agents, required capabilities)
   // and delegates to plugin-specific validation hooks when available.
   //
@@ -563,7 +563,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const { getValidationPolicy } = await import('./helpers/registries/index.ts');
     const policy = getValidationPolicy(config.variantType);
     if (policy.requiredAgents && policy.requiredAgents.length > 0) {
-      const agentsDir = join(config.l2ProjectPath, 'agents');
+      const agentsDir = join(config.l3ProjectPath, 'agents');
       const agentFiles = globSync('*.md', { cwd: agentsDir }).map(f => basename(f, '.md'));
       for (const required of policy.requiredAgents) {
         if (!agentFiles.includes(required)) {
@@ -576,7 +576,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     let hasCapabilityErrors = false;
     if (policy.requiredCapabilities && policy.requiredCapabilities.length > 0) {
       const { isCapability } = await import('./helpers/registries/index.ts');
-      const agentsDir37c = join(config.l2ProjectPath, 'agents');
+      const agentsDir37c = join(config.l3ProjectPath, 'agents');
       const coveredCapabilities = new Set<string>();
 
               for (const agentFile of globSync('*.md', { cwd: agentsDir37c })) {
@@ -612,7 +612,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     const plugin = getPlugin(config.variantType);
     if (plugin?.validate) {
       // Collect agent frontmatters for plugin context
-      const agentsDir37d = join(config.l2ProjectPath, 'agents');
+      const agentsDir37d = join(config.l3ProjectPath, 'agents');
       const agentFrontmatters = globSync('*.md', { cwd: agentsDir37d }).map(f => {
         const content = readFileSync(join(agentsDir37d, f), 'utf-8');
         const fm = parseFrontmatter(content);
@@ -622,11 +622,11 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
         };
       });
 
-      const variantJsonPath = join(config.l2ProjectPath, 'variant.json');
+      const variantJsonPath = join(config.l3ProjectPath, 'variant.json');
       const variantJson = existsSync(variantJsonPath) ? JSON.parse(readFileSync(variantJsonPath, 'utf-8')) : {};
 
       const issues = await plugin.validate({
-        variantDir: config.l2ProjectPath,
+        variantDir: config.l3ProjectPath,
         variantType: config.variantType,
         agentFrontmatters,
         variantJson,
@@ -669,7 +669,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     console.log(`PHASE 4: Generating Variant`);
     console.log(`${'─'.repeat(60)}`);
 
-    // Extract agent roster and skills from L2 scan result
+    // Extract agent roster and skills from L3 scan result
     const agentRoster = extractAgentRoster(scanResult!);
     const skills = extractSkills(scanResult!);
 
@@ -702,13 +702,13 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
       }
     }
 
-    // Merge custom fields from L2 source variant.json (engagement_methodology, deliverable_template, etc.)
+    // Merge custom fields from L3 source variant.json (engagement_methodology, deliverable_template, etc.)
     {
       const { readFileSync: rfs, existsSync: efs } = await import('node:fs');
-      const l2VariantPath = join(config.l2ProjectPath, 'variant.json');
-      if (efs(l2VariantPath)) {
+      const l3VariantPath = join(config.l3ProjectPath, 'variant.json');
+      if (efs(l3VariantPath)) {
         try {
-          const l2Variant = JSON.parse(rfs(l2VariantPath, 'utf-8'));
+          const l2Variant = JSON.parse(rfs(l3VariantPath, 'utf-8'));
           // Canonical schema keys — anything NOT in this set is a custom field to preserve
           const CANONICAL_KEYS = new Set([
             'name', 'description', 'variant_type', 'variantType', 'type',
@@ -724,12 +724,12 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
             }
           }
           if (customFields.length > 0) {
-            console.log(`  ✅ Merged custom fields from L2 variant.json: ${customFields.join(', ')}`);
+            console.log(`  ✅ Merged custom fields from L3 variant.json: ${customFields.join(', ')}`);
           } else {
-            console.log(`  ✅ No custom fields to merge from L2 variant.json`);
+            console.log(`  ✅ No custom fields to merge from L3 variant.json`);
           }
         } catch {
-          console.warn(`  ⚠️  Could not parse L2 variant.json — custom fields skipped`);
+          console.warn(`  ⚠️  Could not parse L3 variant.json — custom fields skipped`);
         }
       }
     }
@@ -826,7 +826,7 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
     }
 
     // BLOCKING CHECK: AGENTS.md must have §-numbered structure and VARIANT-* markers.
-    // Without these, l2-to-variant-pipeline.ts injection has no anchors → silent drift.
+    // Without these, l3-to-variant-pipeline.ts injection has no anchors → silent drift.
     const agentsMdPath = j(variantPath, 'AGENTS.md');
     if (ex(agentsMdPath)) {
       const { readUTF8File: ru2 } = await import('./lib/encoding-utils.js');
@@ -865,11 +865,11 @@ export async function executeL2ToVariantPipeline(config: PipelineConfig): Promis
   // PHASE 4.6: GENERATED VARIANT PM.MD COMPLETION + CONTEXT.MD GENERATION
   // ============================================================================
   // Role: "generation completion" — operates on the GENERATED variant pm.md,
-  // NOT the L2 source pm.md. Interprets extends: pattern and fills
+  // NOT the L3 source pm.md. Interprets extends: pattern and fills
   // <!-- VARIANT-SECTION: ... --> markers with variant-specific data, then
   // generates docs/<variant>.context.md from variant_overrides.
   //
-  // Distinct from Phase 1.6 (source diagnosis): Phase 1.6 diagnoses the L2
+  // Distinct from Phase 1.6 (source diagnosis): Phase 1.6 diagnoses the L3
   // source file; Phase 4.6 completes the already-generated variant output.
   // ============================================================================
 
@@ -1068,7 +1068,7 @@ async function main() {
   const args = process.argv.slice(2);
 
   // Parse arguments
-  const l2PathArg = args.find(arg => arg.startsWith('--l2-path='));
+  const l3PathArg = args.find(arg => arg.startsWith('--l3-path='));
   const nameArg = args.find(arg => arg.startsWith('--name='));
   const typeArg = args.find(arg => arg.startsWith('--type='));
   const descArg = args.find(arg => arg.startsWith('--description='));
@@ -1080,9 +1080,9 @@ async function main() {
   const versionArg = args.find(arg => arg.startsWith('--version='));
   const statusArg = args.find(arg => arg.startsWith('--status='));
 
-  if (!l2PathArg || !nameArg || !typeArg || !descArg) {
-    console.error('Usage: bun scripts/l2-to-variant-pipeline.ts \\');
-    console.error('  --l2-path=<path-to-l2-project> \\');
+  if (!l3PathArg || !nameArg || !typeArg || !descArg) {
+    console.error('Usage: bun scripts/l3-to-variant-pipeline.ts \\');
+    console.error('  --l3-path=<path-to-l3-project> \\');
     console.error('  --name=<variant-name> \\');
     console.error(`  --type=<${listVariantTypes().join('|')}> \\`);
     console.error('  --description=<variant-description> \\');
@@ -1109,7 +1109,7 @@ async function main() {
   }
 
   const config: PipelineConfig = {
-    l2ProjectPath: l2PathArg.split('=')[1],
+    l3ProjectPath: l3PathArg.split('=')[1],
     variantName: variantNameRaw,
     variantType: variantTypeRaw,
     variantDescription: descArg.split('=')[1],
@@ -1121,7 +1121,7 @@ async function main() {
   };
 
   try {
-    const result = await executeL2ToVariantPipeline(config);
+    const result = await executeL3ToVariantPipeline(config);
 
     if (result.success) {
       console.log('\n✅ Pipeline execution successful');

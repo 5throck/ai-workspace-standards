@@ -237,7 +237,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 ### Pluggable Variant Audit Hooks and Integrity Protection
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
 - **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
-- **Integrity Enforcement**: During template reconciliation (`l2-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+- **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
 <!-- COMMON-AGENTS:END -->
 
 ---
@@ -492,7 +492,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 | `create-variant` | `skills/create-variant/` | New variant scaffolding |
 | `promote-variant` | `skills/promote-variant/` | Variant promotion to official |
-| `simulate-l2-promotion` | `skills/simulate-l2-promotion/` | E2E smoke test for L2 scaffold → variant promotion pipeline |
+| `simulate-l3-to-variant-promotion` | `skills/simulate-l3-to-variant-promotion/` | E2E smoke test for L3 scaffold → variant promotion pipeline |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 ### Platform Skills Distribution

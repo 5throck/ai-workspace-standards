@@ -32,7 +32,7 @@ export interface PipelineState {
   startedAt: string;
   completedAt?: string;
   variantName: string;
-  l2ProjectPath?: string;
+  l3ProjectPath?: string;
   rollbackActions: RollbackAction[];
   context: Record<string, unknown>;
 }
@@ -48,13 +48,13 @@ const STATE_FILE = join(STATE_DIR, 'current-state.json');
  * Initialize pipeline state
  * @version 1.1.0
  */
-export function initializeState(variantName: string, l2ProjectPath?: string): PipelineState {
+export function initializeState(variantName: string, l3ProjectPath?: string): PipelineState {
   const state: PipelineState = {
     status: 'in_progress',
     currentPhase: 'adr_validation' as ErrorPhase,
     startedAt: new Date().toISOString(),
     variantName,
-    l2ProjectPath,
+    l3ProjectPath,
     rollbackActions: [],
     context: {},
   };
@@ -318,7 +318,7 @@ export function getStateSummary(): string | null {
     `Started: ${state.startedAt}`,
     state.completedAt ? `Completed: ${state.completedAt}` : null,
     `Variant: ${state.variantName}`,
-    state.l2ProjectPath ? `L2 Project: ${state.l2ProjectPath}` : null,
+    state.l3ProjectPath ? `L3 Project: ${state.l3ProjectPath}` : null,
     `Rollback Actions: ${state.rollbackActions.length}`,
   ].filter(Boolean) as string[];
 

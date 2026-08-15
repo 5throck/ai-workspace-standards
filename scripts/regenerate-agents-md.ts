@@ -12,7 +12,7 @@
  *   bun scripts/regenerate-agents-md.ts --dry-run --variant co-work
  *
  * Problem solved: Variants generated before the §-numbered AGENTS.md structure
- * was introduced lack VARIANT-*-START/END markers, so l2-to-variant-pipeline.ts
+ * was introduced lack VARIANT-*-START/END markers, so l3-to-variant-pipeline.ts
  * injection has no anchors to replace. This script regenerates from scratch.
  */
 
