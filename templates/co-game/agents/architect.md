@@ -7,7 +7,7 @@ last_updated: "2026-05-28"
 capabilities:
   - architecture
 tier:
-  claude: high        # claude-opus-4-7
+  claude: high        # claude-opus-5-0
   gemini: high        # gemini-3.1-pro
   antigravity: high   # gemini-3.1-pro
   gemini-cli: high    # gemini-3.1-pro

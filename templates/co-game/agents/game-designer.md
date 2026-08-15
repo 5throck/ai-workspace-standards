@@ -9,7 +9,7 @@ capabilities:
   - game-loop
   - level-design
 tier:
-  claude: high        # claude-opus-4-7
+  claude: high        # claude-opus-5-0
   gemini: high        # gemini-3.1-pro
   antigravity: high   # gemini-3.1-pro
   gemini-cli: high    # gemini-3.1-pro

@@ -29,10 +29,10 @@ name: <agent-slug>              # kebab-case, matches filename
 role: <one-line role description>
 status: active
 tier:
-  claude: high|medium|low       # claude-opus-4-7 | claude-sonnet-4-6 | claude-haiku-4-5
-  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.5-flash
-  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.5-flash
-  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.5-flash
+  claude: high|medium|low       # claude-opus-5-0 | claude-sonnet-5-0 | claude-haiku-4-5
+  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.7-flash
+  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.7-flash
+  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.7-flash
 model: inherit
 color: blue | green | purple | red | orange | yellow | cyan | gray
 description: >-
@@ -125,7 +125,7 @@ All PM execution plans MUST use the following table format (enforced in `CLAUDE.
 | 1 | ... | ... | Medium | sonnet | 2026-06-24-topic-slug |
 ```
 
-> **Note**: `Model` holds the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](../../CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table.
+> **Note**: `Model` holds the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](../../CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table.
 
 - **Spec column**: References the spec ID from `docs/specs/registry.json`. A plan without a spec ID generates a PM Gateway warning (non-blocking). Spec IDs follow the format `YYYY-MM-DD-<topic-slug>`.
 - See [§9.7 Spec Registry](09-operations-workflow.md#97-spec-registry--design-gate) for the full spec lifecycle.
@@ -175,9 +175,9 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-4-7, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-4-6, gemini-3.5-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.5-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
+| **High** | claude-opus-5-0, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
+| **Medium** | claude-sonnet-5-0, gemini-3.7-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **Low** | claude-haiku-4-5, gemini-3.7-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
 

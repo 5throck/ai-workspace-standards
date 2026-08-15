@@ -56,15 +56,15 @@ Agent(
 
 | Tier | Registry Model ID | Agent `model` Parameter | Typical Use |
 |------|-------------------|------------------------|-------------|
-| High | `claude-opus-4-7` | `"opus"` | Synthesis agent, complex reasoning, merge conflicts |
-| Medium | `claude-sonnet-4-6` | `"sonnet"` | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
+| High | `claude-opus-5-0` | `"opus"` | Synthesis agent, complex reasoning, merge conflicts |
+| Medium | `claude-sonnet-5-0` | `"sonnet"` | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
 | Low | `claude-haiku-4-5` | `"haiku"` | Structural validation, simple checks, formatting |
 
-> **docs-writer tier**: Medium (`claude-sonnet-4-6`) — per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium (`claude-sonnet-5-0`) — per 2026-05-28 team restructuring.
 
 **Translation rule**: When dispatching, translate the agent's tier to its registry model, then to the matching alias:
-- High → `claude-opus-4-7` → `model = "opus"`
-- Medium → `claude-sonnet-4-6` → `model = "sonnet"`
+- High → `claude-opus-5-0` → `model = "opus"`
+- Medium → `claude-sonnet-5-0` → `model = "sonnet"`
 - Low → `claude-haiku-4-5` → `model = "haiku"`
 
 ### 1.3 Parallel Dispatch
@@ -151,10 +151,10 @@ Spawn parallel instances to execute dedicated work concurrently. PM **must** exp
 | Tier | Model ID | Thinking Parameter | Typical Use |
 |------|----------|-------------------|-------------|
 | High | `gemini-3.1-pro` | `thinking_level="medium"` | Synthesis agent, complex reasoning |
-| Medium | `gemini-3.5-flash` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
-| Low | `gemini-3.5-flash` | (none) | Structural validation, simple checks |
+| Medium | `gemini-3.7-flash` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
+| Low | `gemini-3.7-flash` | (none) | Structural validation, simple checks |
 
-> **Note**: Medium and Low tiers share the same model (`gemini-3.5-flash`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID (e.g. `gemini-3.1-pro`), not a Claude-style short alias.
+> **Note**: Medium and Low tiers share the same model (`gemini-3.7-flash`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID (e.g. `gemini-3.1-pro`), not a Claude-style short alias.
 
 ### 2.3 send_message for Inter-Agent Communication
 
@@ -278,10 +278,10 @@ After all sequential passes, merge all findings, deduplicate, and apply fixes to
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Domain Expert | `sonnet` | `gemini-3.5-flash` |
-| Devil's Advocate | `sonnet` | `gemini-3.5-flash` |
-| Clarity Editor | `sonnet` | `gemini-3.5-flash` |
-| Consistency Auditor | `sonnet` | `gemini-3.5-flash` |
+| Domain Expert | `sonnet` | `gemini-3.7-flash` |
+| Devil's Advocate | `sonnet` | `gemini-3.7-flash` |
+| Clarity Editor | `sonnet` | `gemini-3.7-flash` |
+| Consistency Auditor | `sonnet` | `gemini-3.7-flash` |
 | Synthesis + Apply | `opus` | `gemini-3.1-pro` |
 
 **Claude Code — Parallel Dispatch (single turn)**:
@@ -357,13 +357,13 @@ Agent(description = "§6 Synthesis — merge findings and apply fixes",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Grammar Checker | `sonnet` | `gemini-3.5-flash` |
-| Spelling + Terminology | `sonnet` | `gemini-3.5-flash` |
-| Loanword Refinement | `sonnet` | `gemini-3.5-flash` |
-| Style + Tone | `sonnet` | `gemini-3.5-flash` |
-| Merge + Apply | `sonnet` | `gemini-3.5-flash` |
+| Grammar Checker | `sonnet` | `gemini-3.7-flash` |
+| Spelling + Terminology | `sonnet` | `gemini-3.7-flash` |
+| Loanword Refinement | `sonnet` | `gemini-3.7-flash` |
+| Style + Tone | `sonnet` | `gemini-3.7-flash` |
+| Merge + Apply | `sonnet` | `gemini-3.7-flash` |
 
-> Language proofreading is less reasoning-intensive than content verification, so `sonnet`/`gemini-3.5-flash` is sufficient even for the merge step.
+> Language proofreading is less reasoning-intensive than content verification, so `sonnet`/`gemini-3.7-flash` is sufficient even for the merge step.
 
 **Claude Code — Parallel Dispatch (single turn)**:
 
@@ -438,7 +438,7 @@ Agent(description = "§7 Merge proofreading findings and apply",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| SVG Designer | `sonnet` | `gemini-3.5-flash` |
+| SVG Designer | `sonnet` | `gemini-3.7-flash` |
 
 > SVG creation is a focused task that benefits from a single specialist rather than parallel dispatch. The designer receives the report section context and produces a self-contained inline SVG string.
 
@@ -490,6 +490,6 @@ Agent(
 
 | Tier | Claude Alias | Claude Registry ID | Gemini Model ID |
 |------|-------------|-------------------|-----------------|
-| **High** | `"opus"` | `claude-opus-4-7` | `gemini-3.1-pro` |
-| **Medium** | `"sonnet"` | `claude-sonnet-4-6` | `gemini-3.5-flash` |
-| **Low** | `"haiku"` | `claude-haiku-4-5` | `gemini-3.5-flash` |
+| **High** | `"opus"` | `claude-opus-5-0` | `gemini-3.1-pro` |
+| **Medium** | `"sonnet"` | `claude-sonnet-5-0` | `gemini-3.7-flash` |
+| **Low** | `"haiku"` | `claude-haiku-4-5` | `gemini-3.7-flash` |

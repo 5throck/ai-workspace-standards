@@ -4,9 +4,9 @@ role: specialist
 status: active
 tier:
   claude: low        # claude-haiku-4-5
-  gemini: low        # gemini-3.5-flash
-  antigravity: low   # gemini-3.5-flash
-  gemini-cli: low    # gemini-3.5-flash
+  gemini: low        # gemini-3.7-flash
+  antigravity: low   # gemini-3.7-flash
+  gemini-cli: low    # gemini-3.7-flash
 model: inherit
 color: orange
 description: 'New Project & Template Specialist. Use when: "Creating new projects", "Template validation", "Scaffolding tasks"'

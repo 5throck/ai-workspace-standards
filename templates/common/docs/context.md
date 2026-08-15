@@ -28,12 +28,12 @@ The mapping is immutable per generation:
 
 **Gemini Tier Mapping (3.x Generation):**
 - **High**: `gemini-3.1-pro` (Complex reasoning, planning, PM/Architect)
-- **Medium**: `gemini-3.5-flash` (Reviews, testing, QA)
-- **Low**: `gemini-3.5-flash` (Fast, repetitive execution)
+- **Medium**: `gemini-3.7-flash` (Reviews, testing, QA)
+- **Low**: `gemini-3.7-flash` (Fast, repetitive execution)
 
 **Claude Tier Mapping:**
-- **High**: `claude-opus-4-7`
-- **Medium**: `claude-sonnet-4-6`
+- **High**: `claude-opus-5-0`
+- **Medium**: `claude-sonnet-5-0`
 - **Low**: `claude-haiku-4-5`
 
 Standard directory layout for all projects in this workspace:
