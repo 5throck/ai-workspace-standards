@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // scripts/co-deck/handbook/check-authoring.ts
 // AUTHORING_GUIDELINES compliance checker.
 // Validates handbook HTML against the 21-section authoring guidelines + dark mode + i18n.
@@ -44,6 +44,10 @@ function readHtml(path: string): string {
 /** Check 1: §10 — Each section must have at least one visual element */
 function checkVisualElements(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
+  // §10-1 exempts reference/procedure pages; index pages are exempt too since
+  // their required structure IS the chapter-card grid (§21-2), a visual element
+  // this checker doesn't otherwise have a signature for.
+  if (isNonChapterPage(file)) return issues;
   // Look for visual indicators: <img, <svg, CSS class-based visuals, <table, code blocks
   const visualPatterns = [
     /<img\s/gi,
@@ -80,13 +84,34 @@ function checkCopyButtons(html: string, file: string): AuthoringIssue[] {
   return issues;
 }
 
+/**
+ * Pages that are landing/auxiliary pages rather than numbered chapters, and are
+ * therefore exempt from the sidebar and chapter-nav requirements (§21-1). Handles
+ * language-variant suffixes (index_en.html) and underscore filenames
+ * (00_Course_Overview.html).
+ */
+function isNonChapterPage(file: string): boolean {
+  const base = relative(process.cwd(), file).replace(/\\/g, "/");
+  return (
+    /(^|\/)index(_[a-z]{2})?\.html$/i.test(base) ||
+    /course[-_]overview/i.test(base) ||
+    /(instructor|lecture)[-_]guide/i.test(base) ||
+    /(^|\/)faq\//.test(base) ||
+    /(^|\/)glossary\//.test(base) ||
+    /(^|\/)setup\//.test(base)
+  );
+}
+
 /** Check 3: §21-1 — Sidebar navigation */
 function checkSidebarNav(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
-  if (!html.includes("class=\"sidebar\"") && !html.includes("class='sidebar'") && !html.includes("id=\"sidebar\"")) {
+  if (isNonChapterPage(file)) return issues;
+  const hasSidebar = html.includes("class=\"sidebar\"") || html.includes("class='sidebar'") || html.includes("id=\"sidebar\"");
+  const hasLayoutNav = html.includes("class=\"layout\"") && /<nav[\s>]/.test(html);
+  if (!hasSidebar && !hasLayoutNav) {
     issues.push({
       file, rule: "sidebar-nav", section: "§21-1",
-      detail: "No sidebar navigation found",
+      detail: "No sidebar navigation found (expected class=\"sidebar\", id=\"sidebar\", or <nav> inside class=\"layout\")",
       severity: "error",
     });
   }
@@ -96,9 +121,7 @@ function checkSidebarNav(html: string, file: string): AuthoringIssue[] {
 /** Check 4: §21-1 — Chapter navigation (prev/next) */
 function checkChapterNav(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
-  // index.html, course-overview, instructor-guide don't need chapter-nav
-  const base = relative(process.cwd(), file).replace(/\\/g, "/");
-  if (/index\.html$/.test(base) || /course-overview/.test(base) || /instructor-guide/.test(base)) return issues;
+  if (isNonChapterPage(file)) return issues;
   if (!html.includes("class=\"chapter-nav\"") && !html.includes("class='chapter-nav'")) {
     issues.push({
       file, rule: "chapter-nav", section: "§21-1",
@@ -110,9 +133,10 @@ function checkChapterNav(html: string, file: string): AuthoringIssue[] {
 }
 
 /** Check 5: §11-1 — flex layout min-width: 0 */
-function checkFlexMinWidth(html: string, file: string): AuthoringIssue[] {
+function checkFlexMinWidth(html: string, file: string, sharedCss: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
-  if (html.includes("step-list") && html.includes("step-content") && !html.includes("min-width: 0") && !html.includes("min-width:0")) {
+  const hasMinWidthRule = (src: string) => src.includes("min-width: 0") || src.includes("min-width:0");
+  if (html.includes("step-list") && html.includes("step-content") && !hasMinWidthRule(html) && !hasMinWidthRule(sharedCss)) {
     issues.push({
       file, rule: "flex-min-width", section: "§11-1",
       detail: "step-content without min-width: 0 (flex overflow risk)",
@@ -193,16 +217,19 @@ function checkLanguagePairs(htmlFiles: string[], baseDir: string): AuthoringIssu
   const files = new Map<string, string[]>();
   for (const f of htmlFiles) {
     const rel = relative(baseDir, f).replace(/\\/g, "/");
-    const name = rel.replace(/_[a-z]{2}\.html$/, "");
+    // Normalize to the same base key whether or not a language suffix is present
+    // (e.g. "ch01/foo.html" and "ch01/foo_en.html" must both key to "ch01/foo").
+    const name = rel.replace(/(_[a-z]{2})?\.html$/, "");
     if (!files.has(name)) files.set(name, []);
     files.get(name)!.push(rel);
   }
   for (const [name, variants] of files) {
     // Skip base templates and assets
     if (name.includes("assets/") || name.includes("templates/")) continue;
-    // Check if there's a _XX suffix variant
+    // Only warn when a translated variant exists with no companion file at all
+    // (neither an unsuffixed base nor another language variant).
     const suffixed = variants.filter((v) => /_[a-z]{2}\.html$/.test(v));
-    if (suffixed.length === 1) {
+    if (variants.length === 1 && suffixed.length === 1) {
       issues.push({
         file: suffixed[0], rule: "language-pair", section: "§23",
         detail: `Language variant "${suffixed[0]}" has no base file counterpart`,
@@ -252,6 +279,67 @@ function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
   return issues;
 }
 
+/** Check 9b: §21-6 — Footer structure (consistent per language, has license + repo link) */
+function checkFooterStructure(htmlFiles: string[], baseDir: string): AuthoringIssue[] {
+  const issues: AuthoringIssue[] = [];
+  const footerByLang = new Map<string, Map<string, string[]>>();
+
+  for (const f of htmlFiles) {
+    const rel = relative(baseDir, f).replace(/\\/g, "/");
+    const html = readHtml(f);
+    const langMatch = html.match(/<html\s+lang="([a-z]{2})"/);
+    const lang = langMatch ? langMatch[1] : "unknown";
+    const footerMatch = html.match(/<footer>([\s\S]*?)<\/footer>/);
+
+    if (!footerMatch) {
+      issues.push({
+        file: rel, rule: "footer-missing", section: "§21-6",
+        detail: "No <footer> found",
+        severity: "error",
+      });
+      continue;
+    }
+
+    const footerText = footerMatch[1].trim();
+    if (!/creativecommons\.org\/licenses\/by-nc-sa/.test(footerText)) {
+      issues.push({
+        file: rel, rule: "footer-license", section: "§21-6",
+        detail: "Footer is missing the CC BY-NC-SA license line",
+        severity: "error",
+      });
+    }
+    if (!/github\.com\/[\w-]+\/ai-workspace-standards/.test(footerText)) {
+      issues.push({
+        file: rel, rule: "footer-repo-link", section: "§21-6",
+        detail: "Footer is missing the ai-workspace-standards repo link",
+        severity: "warn",
+      });
+    }
+
+    if (!footerByLang.has(lang)) footerByLang.set(lang, new Map());
+    const byText = footerByLang.get(lang)!;
+    if (!byText.has(footerText)) byText.set(footerText, []);
+    byText.get(footerText)!.push(rel);
+  }
+
+  for (const [lang, byText] of footerByLang) {
+    if (byText.size <= 1) continue;
+    const sorted = [...byText.entries()].sort((a, b) => b[1].length - a[1].length);
+    const [, majorityFiles] = sorted[0];
+    for (const [, files] of sorted.slice(1)) {
+      for (const file of files) {
+        issues.push({
+          file, rule: "footer-inconsistent", section: "§21-6",
+          detail: `Footer text differs from the other ${majorityFiles.length} "${lang}" page(s) — every page in a language must share the exact same footer (only baseline date/tool list should change together, in sync)`,
+          severity: "error",
+        });
+      }
+    }
+  }
+
+  return issues;
+}
+
 /** Check 10: §20 — Instructor Guide completeness */
 function checkInstructorGuide(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
@@ -288,6 +376,12 @@ const htmlFiles = examplesDir
 const baseDir = examplesDir || docsDir;
 const allIssues: AuthoringIssue[] = [];
 
+// Concatenate all shared stylesheets so rules defined once (not repeated per page) are visible
+const cssDir = join(docsDir, "assets", "css");
+const sharedCss = existsSync(cssDir)
+  ? readdirSync(cssDir).filter((f) => f.endsWith(".css")).map((f) => readHtml(join(cssDir, f))).join("\n")
+  : "";
+
 console.log(`\n📋 check-authoring.ts — checking ${htmlFiles.length} HTML files in ${baseDir}`);
 console.log(`   Language: ${lang}${examplesDir ? " (examples regression mode)" : ""}\n`);
 
@@ -300,7 +394,7 @@ for (const file of htmlFiles) {
   allIssues.push(...checkCopyButtons(html, rel));
   allIssues.push(...checkSidebarNav(html, rel));
   allIssues.push(...checkChapterNav(html, rel));
-  allIssues.push(...checkFlexMinWidth(html, rel));
+  allIssues.push(...checkFlexMinWidth(html, rel, sharedCss));
   allIssues.push(...checkMidWordStrong(html, rel));
   allIssues.push(...checkCourseOverview(html, rel));
   allIssues.push(...checkCssVariablesOnly(html, rel));
@@ -310,6 +404,10 @@ for (const file of htmlFiles) {
 
 // Cross-file checks
 allIssues.push(...checkLanguagePairs(htmlFiles, baseDir));
+// Footer content (license/repo links) is specific to a real deployed handbook;
+// --examples-dir holds several independent demo scaffolds that aren't expected
+// to carry this project's real license/repo footer, so skip it there.
+if (!examplesDir) allIssues.push(...checkFooterStructure(htmlFiles, baseDir));
 
 // Report
 const errors = allIssues.filter((i) => i.severity === "error");
