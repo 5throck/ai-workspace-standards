@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.2
+ * @version 1.0.3
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -178,7 +178,9 @@ function hasNestedField(rawContent: string, fieldPath: string): boolean {
 function validateRuntimeDefinitions(): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1: Runtime Definition Validation (agents/*.md)${colors.reset}`);
 
-  const agentFiles = readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md') && f !== 'README.md');
+  const agentFiles = readdirSync(AGENTS_DIR).filter(
+    f => f.endsWith('.md') && !/^README(_\w+)?\.md$/.test(f) && !f.startsWith('_'),
+  );
 
   for (const file of agentFiles) {
     totalFiles++;
