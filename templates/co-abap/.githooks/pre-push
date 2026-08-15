@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# pre-push: run audit gate + block direct push to main/master.
+
+echo "=== pre-push audit ==="
+bun scripts/audit.ts || {
+  echo ""
+  echo -e "\033[31m❌ Audit failed — push blocked. Fix issues above before pushing.\033[0m"
+  exit 1
+}
+
+ZERO_SHA="0000000000000000000000000000000000000000"
+BLOCKED=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Deleting a remote ref (local_sha is all zeros) is never a "direct push" — always allow.
+  [ "$local_sha" = "$ZERO_SHA" ] && continue
+
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/master)
+      BLOCKED=1
+      BLOCKED_REF="${remote_ref#refs/heads/}"
+      ;;
+  esac
+done
+
+if [ "$BLOCKED" = "1" ]; then
+  echo ""
+  echo -e "\033[31m❌ Direct push to '$BLOCKED_REF' is blocked. Use a PR branch.\033[0m"
+  echo "   Create a PR with: /sync \"feat: ...\"  or  bun scripts/dev-sync.ts \"feat: ...\""
+  exit 1
+fi
