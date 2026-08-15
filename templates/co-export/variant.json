@@ -1,6 +1,6 @@
 {
   "name": "co-export",
-  "description": "Import/export trade consulting variant",
+  "description": "Import/export trade consulting variant for AI-assisted cross-border trade engagements. Includes specialized agents covering HS classification, FTA/origin determination, export control and sanctions screening, customs duty drawback, foreign regulatory intelligence, logistics coordination (Incoterms), trade documentation, and market entry strategy.",
   "variant_type": "consulting",
   "status": "beta",
   "version": "0.1.0",
@@ -12,6 +12,10 @@
     "stablePromotedOn": null
   },
   "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
     {
       "name": "customs-duty-drawback-specialist",
       "file": "agents/customs-duty-drawback-specialist.md"

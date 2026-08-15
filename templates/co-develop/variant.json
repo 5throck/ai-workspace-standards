@@ -1,6 +1,6 @@
 {
   "name": "co-develop",
-  "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor",
+  "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)",
   "variant_type": "development",
   "status": "stable",
   "version": "1.0.0",
@@ -12,6 +12,10 @@
     "stablePromotedOn": "2026-06-13"
   },
   "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
     {
       "name": "architect",
       "file": "agents/architect.md"
