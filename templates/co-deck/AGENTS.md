@@ -21,11 +21,11 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 <!-- VARIANT-AGENTS-START -->
 | **design** | [`agents/design.md`](agents/design.md) | Medium | Locks visual design style — color palette, fonts, layout into design_spec.md |
-| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Medium | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
-| **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Medium | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
+| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Low | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
+| **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Low | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
 | **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Generates SVG concept diagrams and data charts from visual_spec → assets/diagrams/; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| **measure** | [`agents/measure.md`](agents/measure.md) | Medium | Validates the 4-layer spec merge (base → theme → style → overrides) and checks font availability via the `prep-pdf` skill (Playwright-free) |
-| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Medium | Generates sample and full PDF from slidedata.json and layout_spec.json |
+| **measure** | [`agents/measure.md`](agents/measure.md) | Low | Validates the 4-layer spec merge (base → theme → style → overrides) and checks font availability via the `prep-pdf` skill (Playwright-free) |
+| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Low | Generates sample and full PDF from slidedata.json and layout_spec.json |
 | **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md; loads lecture-profile.md |
 | **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Validates URLs in research_notes.md → source-verification.md + Trust Score |
 | **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md with image_role/image_query fields |
@@ -54,7 +54,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/html-build.md`](agents/html-build.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 4 |
 | **Role** | Generates HTML slides from slide_deck.md and design_spec.md |
 
@@ -63,7 +63,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/measure.md`](agents/measure.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 4 |
 | **Role** | Validates the 4-layer spec merge (base → theme → style → overrides), checks font availability, and optionally generates a sample PDF — via the `prep-pdf` skill, no Playwright required |
 
@@ -72,7 +72,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/pdf-export.md`](agents/pdf-export.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 4, 5 |
 | **Role** | Generates sample and full PDF from slidedata.json and layout_spec.json |
 
@@ -90,7 +90,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/image-curator.md`](agents/image-curator.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 3.5 |
 | **Role** | Searches and downloads commercial-use images via Pixabay (keyless), Unsplash, Pexels; outputs assets/images/ + image-manifest.json |
 
@@ -277,11 +277,11 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 <!-- VARIANT-PHASE-GATE-START -->
 | design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
-| lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | medium | |
-| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | medium | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
+| lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | low | |
+| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | low | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
 | assets/diagrams/*.svg (+ optional *.png) + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| layout_summary.md (4-layer spec merge validation + font check) | Phase 4 | `measure` | medium | |
-| <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | medium | |
+| layout_summary.md (4-layer spec merge validation + font check) | Phase 4 | `measure` | low | |
+| <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | low | |
 | research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |
 | source-verification.md (URL accessibility + Trust Score) | Phase 1.5 | `source-verifier` | medium | optional: --skip-verify |
 | storyline.md + slide_deck.md (narrative and per-slide content) | Phase 2 | `storyline` | medium | |
@@ -457,11 +457,11 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 | design | `agents/design.md` | Medium | ⚠️ sequential preferred | project files |
-| html-build | `agents/html-build.md` | Medium | ⚠️ sequential preferred | project files |
-| image-curator | `agents/image-curator.md` | Medium | ✅ parallel with diagram-specialist | project files |
+| html-build | `agents/html-build.md` | Low | ⚠️ sequential preferred | project files |
+| image-curator | `agents/image-curator.md` | Low | ✅ parallel with diagram-specialist | project files |
 | diagram-specialist | `agents/diagram-specialist.md` | Medium | ✅ parallel with image-curator | project files |
-| measure | `agents/measure.md` | Medium | ⚠️ sequential preferred | project files |
-| pdf-export | `agents/pdf-export.md` | Medium | ⚠️ sequential preferred | project files |
+| measure | `agents/measure.md` | Low | ⚠️ sequential preferred | project files |
+| pdf-export | `agents/pdf-export.md` | Low | ⚠️ sequential preferred | project files |
 | research | `agents/research.md` | Medium | ⚠️ sequential preferred | project files |
 | source-verifier | `agents/source-verifier.md` | Medium | ⚠️ sequential preferred | project files |
 | storyline | `agents/storyline.md` | Medium | ⚠️ sequential preferred | project files |
