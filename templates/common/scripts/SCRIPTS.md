@@ -125,7 +125,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validators/platform-parity-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/write-scripts-snapshot.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
-| `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|

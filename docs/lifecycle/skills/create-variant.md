@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-07-03 | - | production | Backfilled lifecycle record for existing production skill | pm |
+| 2026-08-16 | production | production | Version drift fix: aligned lifecycle doc to v1.2.0 per SKILL.md | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -35,7 +36,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.0.1
+- **Version**: 1.2.0
 - **Owner**: pm
-- **Last Updated**: 2026-07-03
-- **Last Reviewer**: pm
+- **Last Updated**: 2026-08-16
+- **Last Reviewer**: lifecycle-manager

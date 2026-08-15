@@ -80,13 +80,16 @@
       "source_file": "templates/common/AGENTS.md",
       "marker": "COMMON-AGENTS",
       "target_variants": [
+        "co-abap",
         "co-consult",
         "co-deck",
         "co-design",
         "co-develop",
+        "co-export",
+        "co-game",
+        "co-news",
         "co-security",
-        "co-work",
-        "co-game"
+        "co-work"
       ]
     },
     "skills": {

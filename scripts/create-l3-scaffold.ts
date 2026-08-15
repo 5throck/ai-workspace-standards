@@ -333,7 +333,7 @@ function generateStubs(
         notes: "Scaffolded on new-project creation. Agents load this file at stage start."
       }
     } : {}),
-    createdAt: TODAY,
+    created_at: TODAY,
     phaseAComplete: false,
     promotionChecklist: "PROMOTION_CHECKLIST.md",
   };

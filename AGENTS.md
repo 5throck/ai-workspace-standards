@@ -495,6 +495,8 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `simulate-l3-to-variant-promotion` | `skills/simulate-l3-to-variant-promotion/` | E2E smoke test for L3 scaffold → variant promotion pipeline |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
+> **Complete Skill Registry**: The table above is a curated subset. For the complete registry including all 31 workspace-level skills, versions, status, and lifecycle metadata, see [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md).
+
 ### Platform Skills Distribution
 
 Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:

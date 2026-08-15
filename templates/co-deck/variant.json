@@ -445,6 +445,8 @@
     "warn": 0.7,
     "escalate": 0.7
   },
+  "phaseAComplete": true,
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "betaLifecycleSummary": {
     "betaEngagements": 0,
     "betaBugs": 0,

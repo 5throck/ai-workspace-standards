@@ -11,7 +11,7 @@ content_hash: 447ffc6f0eda28772ffdeceae70a66f02111e1f964d08933fad6a8949f4a1d3e
 
 ## Overview
 
-Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.. See docs/context.md for full architecture and standards.
+Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 

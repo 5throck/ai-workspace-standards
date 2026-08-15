@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Documentation specialist
-- [x] Tier assignment: Medium-tier (claude-sonnet-4-6) for documentation tasks
+- [x] Tier assignment: Medium-tier (claude-sonnet-5-0) for documentation tasks
 - [x] Documentation responsibilities specified: Markdown standardization, translations
 - [x] Successfully validated in documentation workflows
 

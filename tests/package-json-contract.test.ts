@@ -31,9 +31,9 @@ describe('templates/common/package.json (SSOT contract)', () => {
     }
   });
 
-  test('devDependencies includes js-yaml (runtime requirement for audit.ts, merge-frontmatter.ts)', () => {
-    expect(pkg.devDependencies['js-yaml']).toBeDefined();
-    expect(pkg.devDependencies['@types/js-yaml']).toBeDefined();
+  test('dependencies includes js-yaml 5.x (runtime requirement for audit.ts, merge-frontmatter.ts; built-in types since 5.x)', () => {
+    expect(pkg.dependencies['js-yaml']).toBeDefined();
+    expect(pkg.devDependencies['@types/js-yaml']).toBeUndefined();
   });
 
   test('engines requires bun >= 1.0.0', () => {

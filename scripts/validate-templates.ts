@@ -662,10 +662,10 @@ function checkAgentsRoster(variant: string): void {
 function checkCommands(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  const allSharedCommands = ['changelog.md', 'meeting.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
+  const allSharedCommands = ['changelog.md', 'commit-push-pr.md', 'gateguard.md', 'meeting.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
 
   if (variant === 'common') {
-    // common/ must have all 6 shared commands in BOTH .claude/commands/ and .gemini/commands/
+    // common/ must have all shared commands in BOTH .claude/commands/ and .gemini/commands/
     for (const platform of ['.claude', '.gemini']) {
       const commandsDir = join(TEMPLATES_DIR, 'common', platform, 'commands');
       if (!existsSync(commandsDir)) {
@@ -764,7 +764,10 @@ function checkContextSync(variant: string): void {
   const contextMdPath = join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
 
   if (!existsSync(agentsMdPath) || !existsSync(contextMdPath)) {
-    return; // Skip if either doesn't exist
+    if (existsSync(agentsMdPath) && !existsSync(contextMdPath)) {
+      warn(variant, 'context-missing', `templates/${variant}/docs/${variant}.context.md not found — variant contract declares this as Required`, `Create docs/${variant}.context.md`);
+    }
+    return;
   }
 
   const agentsMd = readFileSync(agentsMdPath, 'utf-8');

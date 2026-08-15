@@ -13,6 +13,7 @@
 | 2026-05-30 | production | production | Updated to v1.2.0: Restructured Antigravity mode to Sequential Relay Protocol and unified dual-engine SSOT | antigravity |
 | 2026-05-30 | production | production | Updated to v1.3.0: Modularized SKILL.md into specialized execution modes (`modes/claude.md`, `modes/antigravity.md`) and extracted common templates | antigravity |
 | 2026-05-30 | production | production | Updated to v1.3.1: Enforced English and UTF-8 encoding standard across SKILL.md and resolved text corruption | antigravity |
+| 2026-08-16 | production | production | Version drift fix: aligned lifecycle doc to v1.4.0 per SKILL.md | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -38,5 +39,5 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-05-30
-- **Last Reviewer**: antigravity
+- **Last Updated**: 2026-08-16
+- **Last Reviewer**: lifecycle-manager

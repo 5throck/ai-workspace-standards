@@ -1,6 +1,8 @@
 <!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
 # Secrets — never commit
 .env
+.env.*
+!.env.sample
 
 # Python
 .venv/
@@ -19,6 +21,7 @@ build/
 # OS artifacts
 .DS_Store
 Thumbs.db
+Desktop.ini
 nul
 NUL
 
