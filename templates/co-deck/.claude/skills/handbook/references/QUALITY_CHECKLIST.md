@@ -29,7 +29,7 @@ Run everything with one command: `bun run validate-handbook --docs-dir docs` (`-
 | ③ | Label match | `check-labels.ts` | chapter-nav labels match target title/h1 |
 | ④ | DOCS sync | `check-search.ts` | site-search.js DOCS array matches actual HTML files |
 
-### check-authoring (10 checks)
+### check-authoring (11 checks)
 
 | # | Check | Section | Description |
 |---|-------|---------|-------------|
@@ -43,6 +43,7 @@ Run everything with one command: `bun run validate-handbook --docs-dir docs` (`-
 | 8 | CSS variables | §22 | No hardcoded hex colors in inline styles |
 | 9 | Language pairs | §23 | Language variants have base file counterparts |
 | 10 | Instructor Guide | §24 | instructor-guide.html has required sections |
+| 11 | No private-repo refs | §4a | git clone/links do not target a non-allowlisted (unverified-private) repository |
 
 ### handbook-doctor (12 checks)
 
@@ -122,6 +123,7 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §2 All code blocks have copy buttons; one step = one action
 - [ ] §3 Role definitions use AGENTS.md-first tool-neutral approach
 - [ ] §4 Numbers/classifications match official sources
+- [ ] §4a No `git clone`/link/citation points at a private repository — every source a reader is told to use must be reachable without special access
 - [ ] §5 No organizational scale assumptions
 - [ ] §6 No artificial time/scope constraints
 - [ ] §7 Prerequisites (accounts, permissions, installations) are complete

@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: variant
-version: 0.1.0
+version: 0.2.0
 description: >-
   Document Production Workflow for co-deck — generates searchable, themed
   handbooks as static sites (GitHub Pages). Three modes: standalone handbook,
@@ -87,7 +87,7 @@ Place both files in the instructor materials group on the index page. The instru
 
 Dispatch `handbook-reviewer` agent to run:
 1. `bun run validate-handbook` — unified validation (structure + nav + tables in one command)
-2. `bun run check-authoring` — 10 authoring compliance checks
+2. `bun run check-authoring` — 11 authoring compliance checks
 3. `bun run handbook-doctor` — 12 static analysis checks
 4. Apply fixes for any issues found
 
