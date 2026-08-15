@@ -168,9 +168,9 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
 
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-4-7 / gemini-3.1-pro)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-4-6 / gemini-3.5-flash)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.5-flash)
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-0 / gemini-3.1-pro)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-0 / gemini-3.7-flash)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.7-flash)
 
 ### §3.7 Meeting Facilitation
 
@@ -418,7 +418,7 @@ When modifying files that affect both CLAUDE.md and GEMINI.md:
 
 #### Example 1: Multi-Agent Platform Parity Update
 
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example).
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|

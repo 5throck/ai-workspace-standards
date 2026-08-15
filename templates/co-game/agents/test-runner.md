@@ -7,10 +7,10 @@ last_updated: "2026-05-28"
 capabilities:
   - testing
 tier:
-  claude: medium        # claude-sonnet-4-6
-  gemini: medium        # gemini-3.5-flash
-  antigravity: medium   # gemini-3.5-flash
-  gemini-cli: medium    # gemini-3.5-flash
+  claude: medium        # claude-sonnet-5-0
+  gemini: medium        # gemini-3.7-flash
+  antigravity: medium   # gemini-3.7-flash
+  gemini-cli: medium    # gemini-3.7-flash
 model: inherit
 color: cyan
 description: >

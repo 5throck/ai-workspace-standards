@@ -274,8 +274,8 @@ dispatch_protocol:
 | `communication_style` | `string` | Yes | Communication mode (`sync` or `async`) |
 
 **Tier Values**:
-- `high`: High-complexity orchestration (claude-opus-4-7, gemini-3.1-pro)
-- `medium`: Standard orchestration (claude-sonnet-4-6, gemini-3.5-flash)
+- `high`: High-complexity orchestration (claude-opus-5-0, gemini-3.1-pro)
+- `medium`: Standard orchestration (claude-sonnet-5-0, gemini-3.7-flash)
 - `low`: Simple coordination (claude-haiku-4-5)
 
 **Communication Style Values**:

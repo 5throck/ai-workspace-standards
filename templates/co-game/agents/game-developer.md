@@ -9,9 +9,9 @@ capabilities:
   - engine-implementation
 tier:
   claude: low        # claude-haiku-4-5
-  gemini: low        # gemini-3.5-flash
-  antigravity: low   # gemini-3.5-flash
-  gemini-cli: low    # gemini-3.5-flash
+  gemini: low        # gemini-3.7-flash
+  antigravity: low   # gemini-3.7-flash
+  gemini-cli: low    # gemini-3.7-flash
 model: inherit
 color: cyan
 description: >

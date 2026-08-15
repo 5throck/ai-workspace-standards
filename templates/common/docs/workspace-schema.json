@@ -30,24 +30,24 @@
   },
   "models": {
     "claude": {
-      "high":   "claude-opus-4-7",
-      "medium": "claude-sonnet-4-6",
+      "high":   "claude-opus-5-0",
+      "medium": "claude-sonnet-5-0",
       "low":    "claude-haiku-4-5"
     },
     "gemini": {
       "high":   "gemini-3.1-pro",
-      "medium": "gemini-3.5-flash",
-      "low":    "gemini-3.5-flash"
+      "medium": "gemini-3.7-flash",
+      "low":    "gemini-3.7-flash"
     },
     "antigravity": {
       "high":   "gemini-3.1-pro",
-      "medium": "gemini-3.5-flash",
-      "low":    "gemini-3.5-flash"
+      "medium": "gemini-3.7-flash",
+      "low":    "gemini-3.7-flash"
     },
     "gemini-cli": {
       "high":   "gemini-3.1-pro",
-      "medium": "gemini-3.5-flash",
-      "low":    "gemini-3.5-flash"
+      "medium": "gemini-3.7-flash",
+      "low":    "gemini-3.7-flash"
     }
   },
   "variant_lifecycle": {

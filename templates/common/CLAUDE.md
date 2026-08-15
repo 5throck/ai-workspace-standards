@@ -224,7 +224,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[AGENTS.md §5.1 Standard Execution Plan Template](AGENTS.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](AGENTS.md#511-design-gate-exemptions)** — do not restate them here.
 
-> **Note (Claude Code-specific)**: The `Model` column shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-4-6`). See §6 (Native Sub-agents) below for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent note).
+> **Note (Claude Code-specific)**: The `Model` column shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-0`). See §6 (Native Sub-agents) below for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent note).
 <!-- Note: `fable` is a forward-looking alias not yet registered in docs/workspace-schema.json; do not use until added to the schema -->
 
 **Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
@@ -235,7 +235,7 @@ Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. 
 
 > **Agent Architecture**: See [docs/context.md](docs/context.md) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
-> **docs-writer tier**: Medium (claude-sonnet-4-6) — upgraded from Low per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium (claude-sonnet-5-0) — upgraded from Low per 2026-05-28 team restructuring.
 
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
@@ -247,7 +247,7 @@ Agent(
 )
 ```
 
-> **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-4-7`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. <!-- Note: `fable` is a forward-looking alias not yet registered in workspace-schema.json --> When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-4-7` → `model = "opus"`; Medium → `claude-sonnet-4-6` → `model = "sonnet"`; Low → `claude-haiku-4-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
+> **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-5-0`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. <!-- Note: `fable` is a forward-looking alias not yet registered in workspace-schema.json --> When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-5-0` → `model = "opus"`; Medium → `claude-sonnet-5-0` → `model = "sonnet"`; Low → `claude-haiku-4-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
 
 Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Subagent Roster](AGENTS.md#subagent-roster)):
 1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
@@ -258,8 +258,8 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
-- **High-tier** → `claude-opus-4-7`
-- **Medium-tier** → `claude-sonnet-4-6`
+- **High-tier** → `claude-opus-5-0`
+- **Medium-tier** → `claude-sonnet-5-0`
 - **Low-tier** → `claude-haiku-4-5`
 
 <!-- COMMON-CLAUDE:START -->
@@ -324,7 +324,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-07-31 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-08-15 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
 <!-- COMMON-CLAUDE:END -->
 
 
