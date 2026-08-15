@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.3
+ * @version 1.4.4
  * @last_updated 2026-06-21
  * @license MIT
  */
@@ -357,7 +357,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'audit:tag-template',                         // audit.ts: string mention in warning message only
   'dev-sync:propagate-to-templates',            // dev-sync.ts: called only inside isL0Context guard
   'audit:propagate-to-templates',               // audit.ts: comment reference only (replaced checkScriptSync)
-  'create-l2-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
+  'create-l3-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
   'list-template-versions:tag-template',        // L0-workflow coordination; reference only in L1 copy
   'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
   'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
