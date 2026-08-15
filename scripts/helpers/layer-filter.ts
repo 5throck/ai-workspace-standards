@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
  * layer-filter.ts — Single Layer Filter Engine
- * @version 1.4.0
+ * @version 1.4.1
  * @status active
  *
  * Reads SCRIPTS.md layer column (for scripts) and SKILL.md frontmatter (for skills)
- * and provides filtering functions for publish-to-template, create-l2-scaffold,
+ * and provides filtering functions for publish-to-template, create-l3-scaffold,
  * validate-templates, and new-project.sh.
  *
  * Layer values (L0/L1/L2 here follow CONSTITUTION.md's Terminology Definition:
