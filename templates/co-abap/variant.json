@@ -300,12 +300,8 @@
         "path": "scripts/co-abap/retry-handler.ts"
       },
       {
-        "name": "vsp-publish-sh",
-        "path": "scripts/co-abap/vsp-publish.sh"
-      },
-      {
-        "name": "vsp-publish-ps1",
-        "path": "scripts/co-abap/vsp-publish.ps1"
+        "name": "vsp-publish",
+        "path": "scripts/co-abap/vsp-publish.ts"
       }
     ],
     "external": []
