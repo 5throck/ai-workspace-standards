@@ -555,12 +555,16 @@ The allowable values for `lang_reason` are:
 - `source-material`: Primary source quotations where English translation would compromise academic accuracy or meaning.
 - `proper-noun`: Files dominated by Korean proper nouns (e.g., institution names, person names).
 
-Exception is NOT available for: agents/*.md, skills/*.md, CONSTITUTION.md,
-CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md file.
+Exception is NOT available for: CONSTITUTION.md, CLAUDE.md, GEMINI.md, AGENTS.md,
+or any variant context.md file — these core governance/routing docs must stay
+single-source English regardless of a project's domain. agents/*.md and
+skills/*.md MAY use the exception: a project whose real-world domain requires
+Korean (e.g. citing Korean statutes, bilingual client-facing skill docs) may
+declare `lang: ko` + a valid `lang_reason` in frontmatter.
 
 #### Non-English Reference Material in Skills
 
-Because the `lang: ko` exception is unavailable inside `skills/*.md`, a skill that genuinely needs non-English reference material — a terminology glossary, a mapping of official source-language field/status names, source-language excerpts — MUST NOT embed that content in `SKILL.md` or any other `.md` file under the skill directory. Instead:
+`skills/*.md` may declare the `lang: ko` + `lang_reason` exception directly (see above) when the skill's own content is genuinely Korean-language. For a large or purely-tabular non-English reference (a terminology glossary, a mapping of official source-language field/status names) that would otherwise bloat `SKILL.md`, prefer keeping it out of Markdown entirely:
 
 - Store the non-English content in a **non-Markdown reference file** (e.g. `references/terms-ko.json`, `references/glossary-ko.csv`) under `skills/<name>/references/`. `bun scripts/validate-md-language.ts` only scans `*.md` files, so non-Markdown reference assets fall outside the English-only policy and may contain the source language directly, without frontmatter.
 - `SKILL.md` itself stays English-only and simply points to the reference file (e.g. "See `references/terms-ko.json` for the Korean-original DART terminology mapping").

@@ -184,7 +184,7 @@ For files where Korean is legally or academically mandatory, add to the frontmat
 lang: ko
 lang_reason: legal # legal | source-material | proper-noun
 ```
-*(Not available for: agents/*.md, skills/*.md, context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md)*
+*(Not available for: context.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md)*
 <!-- COMMON-CLAUDE:END -->
 
 ### 4.5 Skill Resolution Priority

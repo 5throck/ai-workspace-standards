@@ -171,7 +171,7 @@ For files where Korean is legally or academically mandatory, add to the frontmat
 lang: ko
 lang_reason: legal # legal | source-material | proper-noun
 ```
-*(Not available for: agents/*.md, skills/*.md, CONSTITUTION.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md)*
+*(Not available for: CONSTITUTION.md, CLAUDE.md, GEMINI.md, AGENTS.md, or any variant context.md)*
 <!-- COMMON-GEMINI:END -->
 
 ### 5. Agent Dispatch Rules
