@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 57b9c9c5107cbe394519f980f89661d285488ee63e69b109ab4a34a422657837
+translated_from_hash: 2bd06f3bbba6dbf07b8e5f9f1ed0e636838f68868dd4cd9a4ecddba4a8a0e5d8
 lang: ko
 lang_reason: source-material
 ---
@@ -9,11 +9,11 @@ lang_reason: source-material
 
 > **언어**: [English](README.md) · **한국어**
 > **상태**: ✅ Stable — v1.0.0
-> Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함합니다.
+> Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함하며, 아키텍처 설계, 보안 모니터링, 기술 스택 설정 에이전트도 포함합니다.
 
 ## 개요
 
-Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함합니다. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
+Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함하며, 아키텍처 설계, 보안 모니터링, 기술 스택 설정 에이전트도 포함합니다. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
 
 ## 빠른 시작
 
@@ -29,7 +29,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ## 팀 미션
 
-**미션:** Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함합니다.
+**미션:** Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다. 게임 디자인, 아케이드/퍼즐 장르, 시각 아트, 사운드, 엔진 구현, 디버깅, 테스트를 위한 전문 에이전트를 포함하며, 아키텍처 설계, 보안 모니터링, 기술 스택 설정 에이전트도 포함합니다.
 
 ## AI 팀 소개
 

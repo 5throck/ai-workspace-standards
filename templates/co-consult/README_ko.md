@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 2004d1d0f82c1ae1a66737d2e615fe3e2a539ab551ac50267716adad27e6d6eb
+translated_from_hash: 8ee91bf86c2512b706dc322ff622d2523ece08cf38dac54e6e44465937acb9eb
 lang: ko
 lang_reason: source-material
 ---
@@ -69,6 +69,9 @@ lang_reason: source-material
 - **company-intelligence**: 종합적인 기업/기업집단 인텔리전스; 5개 병렬 리서치 에이전트를 하나의 보고서로 통합.
 - **financial-statement-analysis**: 한국 재무제표 분석 전체 파이프라인 — DART → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
 - **mece-logic-auditor**: 컨설팅 문제 해결 프레임워크를 위한 MECE 이슈 트리 감사 및 전략적 추론 평가.
+- **k-law**: 법제처 국가법령정보센터 Open API를 조회하여 법령, 판례, 행정규칙, 자치법규, 법령해석례를 검색합니다.
+- **hwp-document-processing**: 한글 문서 형식 HWP 5.0(읽기/검증만 가능)과 HWPX(읽기/쓰기/생성/검증 모두 가능)를 처리합니다 — 정부/기관 산출물이 한글 문서 형식을 요구할 때 사용합니다.
+- **sample-driven-report-writing**: 산출물 샘플(HWP/PDF/DOCX)의 구조와 섹션별 필수 표/차트 요건을 추출한 뒤, 샘플의 정확한 형식에 맞춰 보고서 내용을 작성합니다.
 
 ## 협업 방법
 

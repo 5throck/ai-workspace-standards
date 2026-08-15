@@ -1,13 +1,13 @@
 ---
 sync_version: 1
-content_hash: 7bbe7039fbcd19b54968443b4542854f63dc846f6841c01052fecf00ffb0e1be
+content_hash: 640b8a19681fdba7a7ce939040c9ef5d34cff2c8a6f9d56b7156b8c2583dbbae
 ---
 
 # co-export
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ⚠️ Beta — v0.1.0
-> Import/export trade consulting variant
+> Import/export trade consulting variant for AI-assisted cross-border trade engagements. Includes specialized agents covering HS classification, FTA/origin determination, export control and sanctions screening, customs duty drawback, foreign regulatory intelligence, halal certification, logistics coordination (Incoterms), trade documentation, and market entry strategy.
 
 ## Overview
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** Import/export trade consulting variant
+**Mission:** To provide a comprehensive, multi-agent import/export trade compliance and consulting partnership — from HS classification through logistics delivery.
 
 ## Meet the AI Team
 

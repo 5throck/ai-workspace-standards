@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: PLACEHOLDER
+content_hash: 447ffc6f0eda28772ffdeceae70a66f02111e1f964d08933fad6a8949f4a1d3e
 ---
 
 # co-news
@@ -92,4 +92,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-11*
+*Last Updated: 2026-08-15*
