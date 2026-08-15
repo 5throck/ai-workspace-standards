@@ -47,6 +47,7 @@ This variant follows the standard 7-phase workflow defined in [`phase-definition
 | HS Classification Specialist | `agents/hs-classification-specialist.md` | High | 1, 2 | Phase 1 (classification) |
 | Customs Duty Drawback Specialist | `agents/customs-duty-drawback-specialist.md` | High | 3 | — |
 | FTA/Origin Analyst | `agents/fta-origin-analyst.md` | High | 1, 2 | — |
+| Halal Certification Specialist | `agents/halal-certification-specialist.md` | Medium | 1, 2 | — |
 | Export Control & Sanctions Screening Specialist | `agents/export-control-compliance-specialist.md` | High | 1, 2 | — |
 | Foreign Regulatory Intelligence Analyst | `agents/foreign-regulatory-intelligence-analyst.md` | Medium | 1 | — |
 | Market Entry Strategist | `agents/market-entry-strategist.md` | Medium | 1, 3, 4 | Phase 3 (strategy synthesis) |
@@ -57,7 +58,7 @@ This variant follows the standard 7-phase workflow defined in [`phase-definition
 
 ## Skills
 
-Eight domain skills, one per specialist, defined in `skills/<name>/SKILL.md` and mirrored to
+Nine domain skills, one per specialist, defined in `skills/<name>/SKILL.md` and mirrored to
 `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`. See [AGENTS.md § Domain Skills](../AGENTS.md#domain-skills)
 for the full table. Common skills inherited from `templates/common/skills/` cover research,
 documentation, and lifecycle management.
@@ -67,6 +68,7 @@ documentation, and lifecycle management.
 | `hs-classification-workflow` | hs-classification-specialist |
 | `customs-duty-drawback-workflow` | customs-duty-drawback-specialist |
 | `fta-origin-determination` | fta-origin-analyst |
+| `halal-certification-workflow` | halal-certification-specialist |
 | `export-control-screening` | export-control-compliance-specialist |
 | `foreign-regulation-monitoring` | foreign-regulatory-intelligence-analyst |
 | `market-entry-strategy` | market-entry-strategist |
@@ -120,6 +122,7 @@ PM (Phase 0: triage + scope)
  ├─▶ Phase 1 (parallel): hs-classification-specialist, fta-origin-analyst,
  │                        export-control-compliance-specialist,
  │                        foreign-regulatory-intelligence-analyst,
+ │                        halal-certification-specialist,
  │                        market-entry-strategist
  │
  ├─▶ Phase 2 (gate): PM synthesizes compliance + strategy findings → USER APPROVAL
@@ -142,7 +145,7 @@ PM (Phase 0: triage + scope)
 | Phase | Name | What Happens | Primary Owner |
 |-------|------|--------------|---------------|
 | 0 | Engagement Initiation | PM defines scope (target country/product, regulatory jurisdictions in play), assembles the relevant specialists | PM |
-| 1 | Research & Compliance Screening | Classification, origin, control, foreign-regulation, and market specialists dispatched in parallel | hs-classification-specialist, fta-origin-analyst, export-control-compliance-specialist, foreign-regulatory-intelligence-analyst, market-entry-strategist |
+| 1 | Research & Compliance Screening | Classification, origin, control, foreign-regulation, halal-certification, and market specialists dispatched in parallel | hs-classification-specialist, fta-origin-analyst, export-control-compliance-specialist, foreign-regulatory-intelligence-analyst, halal-certification-specialist, market-entry-strategist |
 | 2 | Design Review & Approval | PM synthesizes compliance + strategy findings into a single recommendation — **USER APPROVAL REQUIRED** before Phase 3 | PM |
 | 3 | Execution | Strategy doc, trade documentation, and duty drawback (recurring, once HS is confirmed) produced | market-entry-strategist, trade-documentation-specialist, customs-duty-drawback-specialist |
 | 4 | Delivery | Logistics/Incoterms coordination and final handoff | logistics-coordinator |
@@ -204,6 +207,7 @@ PM (Phase 0: triage + scope)
 | HS classification / tariff assessment reports | `deliverables/reports/` | hs-classification-specialist |
 | Duty drawback assessment reports | `deliverables/reports/` | customs-duty-drawback-specialist |
 | FTA/origin determination reports | `deliverables/reports/` | fta-origin-analyst |
+| Halal certification determination reports | `deliverables/reports/` | halal-certification-specialist |
 | Export control / sanctions screening reports | `deliverables/reports/` | export-control-compliance-specialist |
 | Foreign regulation monitoring briefs | `deliverables/research/` | foreign-regulatory-intelligence-analyst |
 | Market entry strategy documents | `deliverables/drafts/` (draft) → `deliverables/reports/` (final) | market-entry-strategist |

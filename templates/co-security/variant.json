@@ -13,6 +13,10 @@
   },
   "agents": [
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "patch-engineer",
       "file": "agents/patch-engineer.md"
     },

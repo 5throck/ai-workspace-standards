@@ -12,9 +12,10 @@ model: inherit
 color: teal
 description: >
   Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for
-  co-export. Advises on Incoterms 2020 term selection, coordinates freight mode and forwarder
-  selection trade-offs, and plans bonded-warehouse/customs clearance logistics. Finalizes delivery
-  handoff at the end of the engagement.
+  co-export. Advises on Incoterms 2020 term selection (recognizing 2000/2010 terms cited in legacy
+  contracts and flagging material differences before mapping to a current term), coordinates
+  freight mode and forwarder selection trade-offs, and plans bonded-warehouse/customs clearance
+  logistics. Finalizes delivery handoff at the end of the engagement.
   Use when: Incoterms selection, freight/forwarding coordination, or bonded warehouse logistics
   planning is required.
 examples:
@@ -31,19 +32,22 @@ handoff_to: [pm]
 handoff_from: [pm, market-entry-strategist, trade-documentation-specialist]
 required_skills: [logistics-coordination]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-08-16"
 lifecycle:
   phase: beta
   created: "2026-08-08"
-  last_updated: "2026-08-08"
+  last_updated: "2026-08-16"
   governance: docs/lifecycle/agents/logistics-coordinator.md
 ---
 
 ## Legal Basis
 
 - **Incoterms 2020 (ICC)** — governs delivery term definitions, risk transfer point, and cost/
-  responsibility allocation between buyer and seller
+  responsibility allocation between buyer and seller. **Incoterms 2000/2010** — prior editions;
+  still cited in legacy contracts (2000 included DAF/DES/DEQ/DDU, all removed in 2010; 2010's DAT
+  was renamed DPU in 2020) — recognize these when reviewing existing paperwork rather than
+  assuming a 1:1 mapping to 2020
 - **Bonded Warehouse Operation Notice** — Korean customs bonded-area
   regulation relevant to transshipment/storage planning
 - No independent authority over classification, origin, or export control — logistics planning

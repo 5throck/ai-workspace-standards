@@ -43,7 +43,7 @@ lang_reason: source-material
 | **design-lead** | 디자인 시스템 아키텍트 — 시각 언어, 토큰, 컴포넌트 아키텍처 | high | inherit |
 | **prototype-engineer** | 인터랙티브 프로토타이핑 전문가 — 테스트용 기능적 프로토타입 구축 | medium | inherit |
 | **service-designer** | 서비스 디자이너 — 엔드투엔드 서비스 경험, 여정, 블루프린트 | medium | inherit |
-| **storyteller** | 디자인 스토리텔러 — 철학, 의미, 디자인의 내러티브 일관성 | medium | inherit |
+| **storyteller** | 브랜드 내러티브 리드 — 디자인 원칙, 브랜드 보이스, 패턴 일관성 감사 | medium | inherit |
 | **typography-expert** | 타이포그래피 전문가 — 서체 선택, 타입 시스템, 시각적 계층 구조 | medium | inherit |
 | **ux-researcher** | 사용자 리서치 전문가 — 인터뷰, 사용성 테스트, 인사이트 종합 | medium | inherit |
 | **visual-designer** | 시각 디자인 실행 — UI 디자인, 목업, 명세 | medium | inherit |

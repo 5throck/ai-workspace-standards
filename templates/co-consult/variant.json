@@ -13,6 +13,10 @@
   },
   "agents": [
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "change-management-partner",
       "file": "agents/change-management-partner.md"
     },

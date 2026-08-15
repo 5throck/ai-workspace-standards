@@ -13,6 +13,10 @@
   },
   "agents": [
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "analyst",
       "file": "agents/analyst.md"
     },

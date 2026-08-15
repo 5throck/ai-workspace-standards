@@ -17,6 +17,7 @@ lang_reason: source-material
 | 무역 실무 리더 (PM) | `pm.md` | High | 오케스트레이션, 게이트 관리, 라이프사이클 종료 |
 | HS 분류 전문가 | `hs-classification-specialist.md` | High | HS 코드 분류, 세관 평가, 관세율 적용 |
 | FTA/원산지 분석가 | `fta-origin-analyst.md` | High | FTA 원산지 규정, 원산지 증명서 요건 |
+| 할랄 인증 전문가 | `halal-certification-specialist.md` | Medium | 할랄 인증 요건, 인증기관 인정 여부, 인증/갱신 일정 |
 | 수출통제·제재 스크리닝 전문가 | `export-control-compliance-specialist.md` | High | 전략물자 수출통제, 제재/거래제한 당사자 스크리닝 |
 | 해외 규제 인텔리전스 분석가 | `foreign-regulatory-intelligence-analyst.md` | Medium | 미국/중국/EU 수입 규제 및 관세 변동 모니터링 |
 | 시장 진출 전략가 | `market-entry-strategist.md` | Medium | 시장 조사, 진출 채널 전략, 바이어 발굴 |

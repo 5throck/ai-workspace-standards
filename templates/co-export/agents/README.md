@@ -13,6 +13,7 @@ Agent definition files for the **co-export** trade consulting team. Each agent f
 | Trade Engagement Leader (PM) | `pm.md` | High | Orchestration, gates, lifecycle finalization |
 | HS Classification Specialist | `hs-classification-specialist.md` | High | HS code classification, customs valuation, tariff rate |
 | FTA/Origin Analyst | `fta-origin-analyst.md` | High | FTA rules of origin, origin certification requirements |
+| Halal Certification Specialist | `halal-certification-specialist.md` | Medium | Halal certification requirement, certifying-body recognition, audit/renewal timeline |
 | Export Control & Sanctions Screening Specialist | `export-control-compliance-specialist.md` | High | Strategic items export control, sanctions/denied-party screening |
 | Foreign Regulatory Intelligence Analyst | `foreign-regulatory-intelligence-analyst.md` | Medium | US/China/EU import regulation & tariff-change monitoring |
 | Market Entry Strategist | `market-entry-strategist.md` | Medium | Market research, entry channel strategy, buyer discovery |

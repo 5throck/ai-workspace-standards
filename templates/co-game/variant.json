@@ -1,6 +1,6 @@
 {
   "name": "co-game",
-  "description": "Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.",
+  "description": "Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing, plus architecture planning, security monitoring, and tech-stack setup.",
   "variant_type": "game",
   "status": "stable",
   "version": "1.0.0",
@@ -12,6 +12,10 @@
     "stablePromotedOn": "2026-08-12"
   },
   "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
     {
       "name": "architect",
       "file": "agents/architect.md"

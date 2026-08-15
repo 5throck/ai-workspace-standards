@@ -24,6 +24,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **export-control-compliance-specialist** | [`agents/export-control-compliance-specialist.md`](agents/export-control-compliance-specialist.md) | High | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods,  |
 | **foreign-regulatory-intelligence-analyst** | [`agents/foreign-regulatory-intelligence-analyst.md`](agents/foreign-regulatory-intelligence-analyst.md) | Medium | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) cha |
 | **fta-origin-analyst** | [`agents/fta-origin-analyst.md`](agents/fta-origin-analyst.md) | High | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for co-export. Determines whethe |
+| **halal-certification-specialist** | [`agents/halal-certification-specialist.md`](agents/halal-certification-specialist.md) | Medium | Halal certification requirement analysis and certification process specialist for co-export. Determines whether a desti |
 | **hs-classification-specialist** | [`agents/hs-classification-specialist.md`](agents/hs-classification-specialist.md) | High | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods unde |
 | **logistics-coordinator** | [`agents/logistics-coordinator.md`](agents/logistics-coordinator.md) | Low | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for co-export. Advises on Incoterms  |
 | **market-entry-strategist** | [`agents/market-entry-strategist.md`](agents/market-entry-strategist.md) | Medium | Overseas market entry strategy, buyer discovery, and market research lead for co-export. Assesses target-market demand,  |
@@ -71,6 +72,15 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Tier** | high |
 | **Phases** | 1, 2 |
 | **Role** | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for co-export. Determines whether goods qualify for preferential tariff treatment under a specific FTA, identifies the applicable origin criterion (wholly obtained / CTC / RVC / specific process), and defines the origin certificate/declaration requirements per the Foreign Trade Act and the relevant FTA text. Use when: FTA preferential eligibility, rules-of-origin qualification, or origin certificate requirements need to be determined. |
+
+### halal-certification-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/halal-certification-specialist.md`](agents/halal-certification-specialist.md) |
+| **Tier** | medium |
+| **Phases** | 1, 2 |
+| **Role** | Halal certification requirement analysis and certification process specialist for co-export. Determines whether a destination market requires or strongly prefers halal certification for a given product category, identifies which certification body's mark is recognized in that market (JAKIM, BPJPH/MUI, ESMA, GSO), and defines the certification/audit process and renewal cycle. Use when: halal certification requirement, certifying-body selection, or halal-market compliance readiness needs to be determined. |
 
 ### hs-classification-specialist
 
@@ -189,6 +199,7 @@ All specialist agents below are dispatched ONLY through PM:
 | `export-control-compliance-specialist` | Phase 1, Phase 2 | "export-control-compliance-specialist task needed", "export-control-compliance-specialist work required" |
 | `foreign-regulatory-intelligence-analyst` | Phase 1 | "foreign-regulatory-intelligence-analyst task needed", "foreign-regulatory-intelligence-analyst work required" |
 | `fta-origin-analyst` | Phase 1, Phase 2 | "fta-origin-analyst task needed", "fta-origin-analyst work required" |
+| `halal-certification-specialist` | Phase 1, Phase 2 | "halal-certification-specialist task needed", "halal certification required", "JAKIM", "BPJPH", "halal-market compliance" |
 | `hs-classification-specialist` | Phase 1, Phase 2 | "hs-classification-specialist task needed", "hs-classification-specialist work required" |
 | `logistics-coordinator` | Phase 3, Phase 4 | "logistics-coordinator task needed", "logistics-coordinator work required" |
 | `market-entry-strategist` | Phase 1, Phase 3, Phase 4 | "market-entry-strategist task needed", "market-entry-strategist work required" |
@@ -218,6 +229,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Strategic items export control and sanctions/denied-party screening specialist f | Phase 1 | `export-control-compliance-specialist` | high | |
 | Monitors and reports on US, China, and EU import regulation, tariff, and trade-d | Phase 1 | `foreign-regulatory-intelligence-analyst` | medium | |
 | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification spe | Phase 1 | `fta-origin-analyst` | high | |
+| Halal certification requirement analysis and certification process specialist f | Phase 1 | `halal-certification-specialist` | medium | |
 | HS code classification, customs valuation, and tariff rate determination special | Phase 1 | `hs-classification-specialist` | high | |
 | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordina | Phase 3 | `logistics-coordinator` | low | |
 | Overseas market entry strategy, buyer discovery, and market research lead for co | Phase 1 | `market-entry-strategist` | medium | |
@@ -364,6 +376,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | export-control-compliance-specialist | `agents/export-control-compliance-specialist.md` | High | ⚠️ sequential preferred | orchestrates only |
 | foreign-regulatory-intelligence-analyst | `agents/foreign-regulatory-intelligence-analyst.md` | Medium | ⚠️ sequential preferred | project files |
 | fta-origin-analyst | `agents/fta-origin-analyst.md` | High | ⚠️ sequential preferred | orchestrates only |
+| halal-certification-specialist | `agents/halal-certification-specialist.md` | Medium | ⚠️ sequential preferred | project files |
 | hs-classification-specialist | `agents/hs-classification-specialist.md` | High | ⚠️ sequential preferred | orchestrates only |
 | logistics-coordinator | `agents/logistics-coordinator.md` | Low | ✅ | project files |
 | market-entry-strategist | `agents/market-entry-strategist.md` | Medium | ⚠️ sequential preferred | project files |
@@ -425,6 +438,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Strategic items export control and sanctions/denied-party screening specialist f | `export-control-compliance-specialist` | `pm` |
 | Monitors and reports on US, China, and EU import regulation, tariff, and trade-d | `foreign-regulatory-intelligence-analyst` | `pm` |
 | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification spe | `fta-origin-analyst` | `pm` |
+| Halal certification requirement analysis and certification process specialist f | `halal-certification-specialist` | `pm` |
 | HS code classification, customs valuation, and tariff rate determination special | `hs-classification-specialist` | `pm` |
 | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordina | `logistics-coordinator` | `pm` |
 | Overseas market entry strategy, buyer discovery, and market research lead for co | `market-entry-strategist` | `pm` |

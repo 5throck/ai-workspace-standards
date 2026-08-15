@@ -155,6 +155,9 @@ Required env keys (see `.env.sample`):
 
 ## Development Workflow
 
+> See [`docs/phase-definitions.md`](phase-definitions.md) for the full 6-step orchestration
+> workflow, the orchestration-step ↔ agent-phase numbering map, and the PM facilitation table.
+
 ```bash
 # 1. Start a task
 /triage <request>          # PM classifies — creates task file — parallel research
