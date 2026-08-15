@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.3
+ * @version 1.0.4
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -98,7 +98,10 @@ function normalizeContent(raw: string): string {
 // Parse frontmatter fields from markdown
 function parseFrontmatter(rawContent: string): Record<string, true> {
   const content = normalizeContent(rawContent);
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  // 'm' flag: frontmatter may be preceded by a leading comment line (e.g. co-deck's
+  // "# @resolved-from: ..." annotation on extends-pattern agent files), so the opening
+  // "---" isn't always the first line of the file.
+  const match = content.match(/^---\n([\s\S]*?)\n---/m);
   if (!match) return {};
 
   const fields: Record<string, true> = {};
@@ -124,7 +127,10 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
 // Check nested field existence in frontmatter
 function hasNestedField(rawContent: string, fieldPath: string): boolean {
   const content = normalizeContent(rawContent);
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  // 'm' flag: frontmatter may be preceded by a leading comment line (e.g. co-deck's
+  // "# @resolved-from: ..." annotation on extends-pattern agent files), so the opening
+  // "---" isn't always the first line of the file.
+  const match = content.match(/^---\n([\s\S]*?)\n---/m);
   if (!match) return false;
 
   const parts = fieldPath.split('.');
