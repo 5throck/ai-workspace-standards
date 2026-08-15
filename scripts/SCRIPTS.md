@@ -128,6 +128,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `fix-parse-agent.sed` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-consumer.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
 | `hooks/_test-module.ts` | L0 | 1.0.0 | active | —| —| L0-only | —|
+| `hooks/agent-model-gate.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
