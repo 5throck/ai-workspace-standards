@@ -98,7 +98,7 @@ All other sections are inherited from the parent (L1 for L2 variants):
 **Current State**: Phase 1 - Frontmatter-only for new variants
 - New variants MUST use frontmatter extends pattern
 - Existing markers are deprecated but still supported during transition
-- Scaffold script (`create-l2-scaffold.ts`) implements frontmatter resolution
+- Scaffold script (`create-l3-scaffold.ts`) implements frontmatter resolution
 
 **Future Phases** (from ADR-0033):
 - Phase 2: Backward compatibility with deprecation warnings

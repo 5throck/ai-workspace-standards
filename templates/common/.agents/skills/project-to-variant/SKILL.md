@@ -61,7 +61,7 @@ For a more thorough conversion with normalization:
 cp -r <project-path> Projects/<variant-name>/
 cd Projects/<variant-name>/ && git init && git add -A && git commit -m "initial"
 cd <workspace-root>
-bun scripts/l2-to-variant-pipeline.ts
+bun scripts/l3-to-variant-pipeline.ts
 ```
 
 ## See Also

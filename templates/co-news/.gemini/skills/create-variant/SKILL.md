@@ -46,10 +46,10 @@ A variant is a domain-specific AI team configuration built on the workspace comm
 
 ```bash
 # From workspace root C:\git\
-bun scripts/create-l2-scaffold.ts <variant-name> --domain <type>
+bun scripts/create-l3-scaffold.ts <variant-name> --domain <type>
 
 # Example:
-bun scripts/create-l2-scaffold.ts safety-os --domain ehs
+bun scripts/create-l3-scaffold.ts safety-os --domain ehs
 ```
 
 This creates `Projects/<variant-name>/` with:
@@ -58,7 +58,7 @@ This creates `Projects/<variant-name>/` with:
 - bun install complete
 - stub files (_ORIGIN.md, variant.json, PROMOTION_CHECKLIST.md, etc.)
 
-> **Fork Model**: After scaffold completes, this `Projects/<name>/` draft (L3 — `create-l2-scaffold.ts`'s "L2" predates this layer name) evolves independently from L1. L1 changes will NOT automatically propagate to it. To get L1 updates later, re-run `create-l2-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
+> **Fork Model**: After scaffold completes, this `Projects/<name>/` draft (L3 — `create-l3-scaffold.ts`'s "L2" predates this layer name) evolves independently from L1. L1 changes will NOT automatically propagate to it. To get L1 updates later, re-run `create-l3-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
 
 ### Step 2: Add variant section to CLAUDE.md
 
@@ -142,10 +142,10 @@ Common skills from `templates/common/skills/` are already present — only creat
 
 ### Step 6.5: Regenerate README
 
-`create-l2-scaffold.ts` rendered `README.md`/`README_ko.md` from the workspace README Standard template at scaffold time (Step 1), but with an empty agent roster and empty skills. Now that agents (Step 5) and skills (Step 6) exist, regenerate so the **Meet the AI Team** and **Skills** sections render real content:
+`create-l3-scaffold.ts` rendered `README.md`/`README_ko.md` from the workspace README Standard template at scaffold time (Step 1), but with an empty agent roster and empty skills. Now that agents (Step 5) and skills (Step 6) exist, regenerate so the **Meet the AI Team** and **Skills** sections render real content:
 
 ```bash
-bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>
+bun scripts/generate-l3-readme.ts --l3-path Projects/<variant-name>
 ```
 
 Re-run this command after **any** later agent, skill, or `variant.json` change — it reads the live project state via `scanL3Project()` each time. In particular, re-run after Step 7 once `variant.json → description` is filled, so the README tagline no longer reads `TODO: describe…`. This is the Phase A self-service renderer; Phase B's `templates/co-*/` README standard is enforced separately by `WS-08` in `validate-templates.ts`.
@@ -184,7 +184,7 @@ Manually add an entry to `Projects/<variant-name>/CHANGELOG.md`:
 ## [Unreleased]
 
 ### Added
-- Phase A scaffold created via create-l2-scaffold.ts
+- Phase A scaffold created via create-l3-scaffold.ts
 - [List domain-specific files created]
 ```
 
@@ -217,7 +217,7 @@ grep "^## " GEMINI.md
 > **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
 
 - [ ] Run `bun scripts/verify-scripts.ts --verify` in the `Projects/<name>/` draft (L3) — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
-- [ ] Regenerate the README via `bun scripts/generate-l2-readme.ts --l2-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
+- [ ] Regenerate the README via `bun scripts/generate-l3-readme.ts --l3-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
 
 ---
 
@@ -239,4 +239,4 @@ When all PROMOTION_CHECKLIST.md conditions are met:
 | CHANGELOG.md not updated | Update manually after each Phase A session |
 | Antigravity .gemini/ files not mirrored from .claude/ | Check .gemini/ after Step 3 Antigravity checklist |
 | agents/*.md missing Section C: Antigravity Integration | Add Section C to every agent during Step 5 |
-| README.md/README_ko.md left as scaffold stub (empty Meet-the-AI-Team / Skills sections) | Run `bun scripts/generate-l2-readme.ts` after Step 6, and again after any later agent/skill change |
+| README.md/README_ko.md left as scaffold stub (empty Meet-the-AI-Team / Skills sections) | Run `bun scripts/generate-l3-readme.ts` after Step 6, and again after any later agent/skill change |

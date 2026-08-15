@@ -310,7 +310,7 @@ function addVariantToVersionRegistry(
     security_advisories: [],
     migration_guides: [],
     source_project: config.sourceProject ?? `Projects/${config.variantName}`,
-    promoted_via: 'l2-to-variant-pipeline.ts',
+    promoted_via: 'l3-to-variant-pipeline.ts',
   };
 
   return JSON.stringify(data, null, 2) + '\n';

@@ -95,7 +95,7 @@ const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 // L0 by walking straight past it to the true root. Only when the true root is NOT
 // reachable (a project relocated outside the workspace tree) do we fall back to a
 // file-presence heuristic — in which case variant.json can't distinguish an L2 template
-// from an L3 Phase-A draft (create-l2-scaffold.ts writes variant.json into Projects/*/
+// from an L3 Phase-A draft (create-l3-scaffold.ts writes variant.json into Projects/*/
 // too), so an unreachable-root context with variant.json is assumed L3 (the far more
 // common real-world case: a relocated project, not a relocated template).
 type ContextLayer = "L0" | "L1" | "L2" | "L3";

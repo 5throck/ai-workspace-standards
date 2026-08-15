@@ -1096,7 +1096,7 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
                     Warn(`AGENTS.md PM Direct Execution Scope not synced to: templates/${entry}/AGENTS.md`);
                     syncWarnings++;
                 }
-                // Check for §-numbered structure and VARIANT-* placeholder markers (required for l2-to-variant-pipeline.ts injection)
+                // Check for §-numbered structure and VARIANT-* placeholder markers (required for l3-to-variant-pipeline.ts injection)
                 const requiredMarkers = [
                     'VARIANT-AGENTS-START',
                     'VARIANT-AGENT-DETAILS-START',

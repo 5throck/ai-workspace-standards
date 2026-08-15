@@ -533,8 +533,8 @@ variant: co-work
 ## Scaffolding Integration
 
 This schema is used by:
-- `scripts/create-l2-scaffold.ts` - Initial variant scaffolding
-- `scripts/l2-to-variant-pipeline.ts` - L2 to template promotion
+- `scripts/create-l3-scaffold.ts` - Initial variant scaffolding
+- `scripts/l3-to-variant-pipeline.ts` - L3 to template promotion
 - Variant author workflows - Manual override configuration
 
 ### Scaffolding Script Usage

@@ -252,26 +252,26 @@ bun scripts/propagate-to-templates.ts --domain docs --include-disabled --dry-run
 
 **Disabled domains**: a domain entry may carry `"disabled": true` in `propagation-map.json` to declare it *intentionally* inactive (as opposed to silently never having worked — see the `docs` domain's `note` field for the concrete incident this guards against). Default runs skip it and print why; `--include-disabled` is a read/inspect escape hatch, not a way to reactivate it — flip the flag in `propagation-map.json` itself once the underlying policy question is resolved.
 
-### L2 Variant Tooling (Bun / TypeScript)
+### L3 Variant Tooling (Bun / TypeScript)
 
-#### `generate-l2-readme.ts`
-**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L3 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL3Project()` (this script's own `l2`-prefixed name and flags predate the L3 layer terminology). This is the Phase A self-service complement to `l2-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L3 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l2-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
-**Usage**: `bun scripts/generate-l2-readme.ts [--l2-path <path>] [--dry-run] [--locale en|ko|both]`
+#### `generate-l3-readme.ts`
+**Purpose**: Regenerates `README.md`/`README_ko.md` for a Phase A L3 project (`Projects/<name>/`) from the workspace README Standard template (`templates/common/docs/README.template.md`), reading the live agent roster and skills via `scanL3Project()`. This is the Phase A self-service complement to `l3-to-variant-pipeline.ts`'s Phase B README generation — both call the same rendering engine (`helpers/generate-variant.ts`'s `generateReadme`/`generateReadmeKo`), so Phase A and Phase B READMEs can never drift structurally. Phase A is self-service only (no CI gate, consistent with the L3 Design Gate exemption); Phase B's `templates/co-*/` README standard stays hard-enforced by `WS-08` in `validate-templates.ts`. `create-l3-scaffold.ts` also calls this renderer directly at scaffold time, so even a same-day scaffold ships the real 7-section structure instead of a stub.
+**Usage**: `bun scripts/generate-l3-readme.ts [--l3-path <path>] [--dry-run] [--locale en|ko|both]`
 **Layer**: L0 (workspace infrastructure — not copied to templates/common/ or L3 projects)
 
 **Flags**:
 
 | Flag | Behavior |
 |------|----------|
-| `--l2-path <path>` | Target L3 project (defaults to `process.cwd()` — works bare from inside the project; flag name predates the L3 layer) |
+| `--l3-path <path>` | Target L3 project (defaults to `process.cwd()` — works bare from inside the project) |
 | `--dry-run` | Print planned output (agent/skill counts, files would-write) without writing |
 | `--locale en\|ko\|both` | Which README(s) to regenerate (default: `both`) |
 
 **Typical workflow**:
 ```bash
-bun scripts/generate-l2-readme.ts --l2-path Projects/co-journalist --dry-run  # preview
-bun scripts/generate-l2-readme.ts --l2-path Projects/co-journalist            # write both
-cd Projects/co-journalist && bun scripts/generate-l2-readme.ts                # bare form (cwd)
+bun scripts/generate-l3-readme.ts --l3-path Projects/co-journalist --dry-run  # preview
+bun scripts/generate-l3-readme.ts --l3-path Projects/co-journalist            # write both
+cd Projects/co-journalist && bun scripts/generate-l3-readme.ts                # bare form (cwd)
 ```
 
 ---
