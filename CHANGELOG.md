@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-15]**: fix(scripts): `validate-agents.ts`'s frontmatter regex anchored `---` to the literal start of the file (`^---\n`, no `m` flag), so any agent file with a leading comment before its frontmatter (e.g. co-deck's extends-pattern `pm.md`, which starts with `# @resolved-from: L0/common/agents/pm.md`) was treated as having no frontmatter at all — even though it had a complete, valid `lifecycle:` block. Added the `m` flag so `^---` matches the frontmatter delimiter on any line, not just line 1. v1.0.3→1.0.4, propagated L0→L1. Discovered while fixing missing `lifecycle` frontmatter across several `Projects/co-*` repos.
+
 - **[2026-08-15]**: fix(scripts): `validate-agents.ts` excluded `README.md` from agent lifecycle-frontmatter validation but not `README_ko.md`, causing false-positive "missing lifecycle frontmatter" errors on Korean README files in `agents/` — discovered while unblocking `/sync` for several `Projects/co-*` repos. Broadened the exclusion regex to `^README(_\w+)?\.md$` plus any underscore-prefixed file (`_COMMON.md`, etc.), matching the convention used elsewhere. v1.0.2→1.0.3, propagated L0→L1. `bun scripts/audit.ts` passes clean.
 
 - **[2026-08-15]**: fix(templates): bump `version:` on all 13 `templates/co-game/agents/*.md` files — discovered while syncing `Projects/co-game` with the model-registry update: the same content-changed-without-version-bump bug affected co-game's non-extends agent roster, whose `tier:` comment lines were updated in that earlier PR without bumping `version:`, so `upgrade-project.ts` silently skipped them too. All 12 files 1.0.0→1.0.1, `pm.md` 1.1.0→1.1.1. `bun scripts/audit.ts` passes clean.
