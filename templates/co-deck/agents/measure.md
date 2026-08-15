@@ -1,6 +1,6 @@
 ---
 name: measure
-version: "2.0.0"
+version: "2.0.1"
 last_updated: "2026-06-23"
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
