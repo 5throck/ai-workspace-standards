@@ -37,6 +37,13 @@ paths = [
   # Other projects in workspace root — not part of this repo's audit scope
   # .env files are gitignored; --no-git mode scans them anyway — exclude here
   '''\.env$''',
+  # Local dependency/build directories — gitignored, never committed, but
+  # --no-git mode scans them anyway; third-party library internals (test
+  # fixtures, crypto constant names, etc.) commonly trip generic secret regexes
+  '''(^|/)\.venv/''',
+  '''(^|/)venv/''',
+  '''(^|/)node_modules/''',
+  '''(^|/)__pycache__/''',
   # L2 Projects/ directory contains user engagements — outside audit scope
   '''Projects/''',
   '''abap_coding_mig/''',

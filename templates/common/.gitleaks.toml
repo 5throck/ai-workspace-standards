@@ -24,6 +24,10 @@ regexes = [
 ]
 paths = [
   '''\.env\.sample''',
+  # .env is gitignored and never committed; --no-git mode scans the raw
+  # filesystem regardless of .gitignore, so exclude it here explicitly
+  # (mirrors the same fix already present in the L0 workspace-root config)
+  '''\.env$''',
   '''CHANGELOG\.md''',
   '''.*_test\.(js|ts|py|go|rs)$''',
   '''.*\.test\.(js|ts)$''',
@@ -32,4 +36,11 @@ paths = [
   '''memory/.*''',
   # _examples/ contains illustrative content with realistic-looking values
   '''_examples/.*''',
+  # Local dependency/build directories — gitignored, never committed, but
+  # --no-git mode scans them anyway; third-party library internals (test
+  # fixtures, crypto constant names, etc.) commonly trip generic secret regexes
+  '''(^|/)\.venv/''',
+  '''(^|/)venv/''',
+  '''(^|/)node_modules/''',
+  '''(^|/)__pycache__/''',
 ]
