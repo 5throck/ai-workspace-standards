@@ -677,19 +677,6 @@ The index is the entry point for the entire handbook. Include the following stru
 **Principle**: When adding, deleting, or reordering chapters, **do not stop at merely moving files** — update and verify all four of the following without exception. These are the points most frequently missed during renumbering.
 
 - **Why**: During an actual chapter reordering: ① `chapter-nav` prev/next did not reflect the new order, creating links that skip or loop backward; ② links pointed to new files but label text retained old chapter numbers; ③ newly created files were not added to `site-search.js`'s `DOCS` array, causing them to be missed in full-site search.
-
-### 21-5. `<meta name="description">` Template
-
-**Principle**: Every chapter file's `<meta name="description">` follows a fixed template rather than free-form summary text:
-
-```
-"Chapter N · Title - part of the Multi-Agent Team Harness Engineering Handbook."
-```
-
-localized per language edition (e.g., the KO/JA/ES editions translate "Chapter N · Title" and the trailing clause, not just insert raw English).
-
-- **Why**: A consistent description template keeps search-engine snippets and social previews predictable across dozens of chapter files, and avoids each chapter re-deriving its own summary wording.
-- **How to apply**: When authoring a new chapter file, set the meta description to `<course/handbook name> — Chapter N · <Title>` (or the equivalent localized phrasing), not a bespoke paragraph.
 - **How to apply**:
   1. **prev/next mutual symmetry** — If document A's `next` points to B, then B's `prev` must point to A. Fixing only one side and missing the other creates a link that works in one direction ("next") but not the other ("previous").
   2. **Link label and target consistency** — The label text (chapter number, title) in `<a href="...">label</a>` must always match the current chapter number and title of the file that `href` actually points to. When moving files, a common mistake is to update only `href` while leaving the label text as the copied old text.
@@ -704,6 +691,43 @@ localized per language edition (e.g., the KO/JA/ES editions translate "Chapter N
     ```
 
     The `scripts/validate-nav.ts` automated verification script checks all four items in CI (`bun run scripts/validate-nav.ts`).
+
+### 21-5. `<meta name="description">` Template
+
+**Principle**: Every chapter file's `<meta name="description">` follows a fixed template rather than free-form summary text:
+
+```
+"Chapter N · Title - part of the Multi-Agent Team Harness Engineering Handbook."
+```
+
+localized per language edition (e.g., the KO/JA/ES editions translate "Chapter N · Title" and the trailing clause, not just insert raw English).
+
+- **Why**: A consistent description template keeps search-engine snippets and social previews predictable across dozens of chapter files, and avoids each chapter re-deriving its own summary wording.
+- **How to apply**: When authoring a new chapter file, set the meta description to `<course/handbook name> — Chapter N · <Title>` (or the equivalent localized phrasing), not a bespoke paragraph.
+
+### 21-6. Footer Structure
+
+**Principle**: Every page's `<footer>` follows a fixed 3-line structure, not free-form colophon text:
+
+1. **Baseline line** — supported tool versions / `ai-workspace-standards main (<YYYY-MM-DD>)` baseline date · `<language> educational material` label
+2. **Official resources line** — links to each supported tool's official docs, followed by the source repo link
+3. **License line** — the CC BY-NC-SA 4.0 statement, with the language-appropriate license deed URL (`.../deed.ko` for Korean, base URL for English)
+
+```html
+<footer>
+  Claude Code 2026-07 / Antigravity CLI 1.1.0+ / Antigravity 2.0 / ai-workspace-standards main (2026-08-15) 기준 · 한국어 교육 자료<br>
+  공식 자료: <a href="https://code.claude.com/docs/en/overview" target="_blank">Claude Code</a> ·
+  <a href="https://antigravity.google/docs/home" target="_blank">Antigravity</a> ·
+  <a href="https://github.com/5throck/ai-workspace-standards" target="_blank">ai-workspace-standards</a><br>
+  본 핸드북의 콘텐츠는 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0 (저작자표시-비영리-동일조건변경허락 4.0 국제)</a> 라이선스에 따라 이용할 수 있습니다.
+</footer>
+```
+
+- **Why**: A footer that lists only the tools this specific handbook actually supports (not a generic "Claude" link) sets accurate reader expectations, and a dated baseline lets readers judge whether the content might be stale relative to the tools it documents.
+- **How to apply**:
+  - The tool list in line 1 and the official-docs links in line 2 must match the handbook's actual declared platform support (§3) — do not list a tool the handbook doesn't cover, and do not omit one it does.
+  - The baseline date advances whenever a content or terminology sync pass is done (see §19); it is not the file's creation date.
+  - This structure is identical across every page of a handbook (chapters, index, glossary, FAQ, lecture guide) — only the tool list, baseline date, and language wording vary.
 
 ---
 
