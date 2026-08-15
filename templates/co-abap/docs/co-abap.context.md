@@ -10,7 +10,7 @@
 > Tool-specific overrides live in `../CLAUDE.md` (Claude Code CLI + Desktop App), `../.codex/config.toml` and `../.codex/hooks.json` (Codex), `../GEMINI.md` (Gemini CLI).
 > Claude Code Desktop App shares all config with CLI but PostToolUse hooks do not fire — run Post-Write chain manually.
 > Agent roles and orchestration rules live in `../AGENTS.md`.
-> Per-session technical guidelines and custom skills live in `docs/skill.md` (legacy entry point; current skills are auto-discovered from the `skills/` directory).
+> Per-session technical guidelines and custom skills live in `skills/` (auto-discovered from the `skills/` directory).
 > ABAP development history (date-archived) lives in `../memory/`.
 > Module analyst deep-knowledge files live in `../agents/` (relative to repo root).
 
@@ -88,6 +88,8 @@ Required env keys (see `.env.sample`):
 | Security Monitor | `agents/security-monitor.md` | Security policies and safe dependencies | active |
 | GUI Scripter | `agents/gui-scripter.md` | BDC / VBS automation (last resort) | active |
 | Intelligence Investigator | `agents/sap-investigator.md` | Codebase pattern scan, historical design extraction | active |
+| Read-Only Analyst | `agents/read-only-analyst.md` | Business data queries, AS-IS analysis with draft acceptance criteria | active |
+| Schema Inspector | `agents/schema-inspector.md` | Table/CDS structure inspection, dependency maps | active |
 
 > Lifecycle management: `bun scripts/agent-verify.ts` (agent ↔ documentation sync check)
 > After any agent change, update AGENTS.md and this table.
@@ -105,11 +107,8 @@ Required env keys (see `.env.sample`):
 | ABAP Development | `.agents/skills/abap-dev/` | Core SAP ABAP development workflow | active |
 | Desktop App Fallback | `.agents/skills/desktop-app-fallback/` | Manual post-write QA for Claude Code Desktop App | active |
 | Dump Monitoring | `.agents/skills/dump-monitor/` | Standardized ListDumps/GetDump health check routed to /triage | active |
-| Meeting | `.agents/skills/meeting/` | Shortcut alias for meeting-facilitation | active |
-| Meeting Facilitation | `.agents/skills/meeting-facilitation/` | Structured multi-agent meetings for decisions | active |
 | Performance Tuning | `.agents/skills/performance-tuning/` | Standardized trace/SQL/call-graph analysis for slow programs and large-table access | active |
 | Post-Write Chain | `.agents/skills/post-write-chain/` | Mandatory QA chain after WriteSource/EditSource | active |
-| Project Review | `.agents/skills/project-review/` | Comprehensive parallel review using specialist agents | active |
 | SAP CO — Controlling | `.agents/skills/sap-co/` | CO module: cost centers, internal orders, CO-PA | active |
 | SAP FI — Financial Accounting | `.agents/skills/sap-fi/` | FI module: journal entries, GL, AR/AP, fixed assets | active |
 | SAP LE — Logistics Execution | `.agents/skills/sap-le/` | LE module: shipping, transport, warehouse management | active |
@@ -117,39 +116,40 @@ Required env keys (see `.env.sample`):
 | SAP PP — Production Planning | `.agents/skills/sap-pp/` | PP module: BOM, routing, production orders, MRP | active |
 | SAP SD — Sales & Distribution | `.agents/skills/sap-sd/` | SD module: sales orders, deliveries, billing, pricing | active |
 | Source Command: Celebrate | `.agents/skills/source-command-celebrate/` | Celebrate task completion for team morale | active |
-| Sync | `.agents/skills/sync/` | Full project sync pipeline (memlog → changelog → audit → commit → push → PR) | active |
 <!-- DYNAMIC_SKILLS_END -->
 
 > **SSOT**: Skills live in `.agents/skills/` and are synced to `.claude/skills/` and `.gemini/skills/` via `bun scripts/sync-skills.ts`.
+> Workspace-root skills (e.g., `meeting`, `meeting-facilitation`, `project-review`, `sync`) are inherited from L0 at scaffold time and are not variant-managed.
 
 ---
 
 ## Scripts
 
+> Scripts without a `scripts/co-abap/` path are inherited from `templates/common/scripts/` (copied to the project `scripts/` at scaffold time). Variant-specific scripts live in `scripts/co-abap/`.
+
 | Script | Purpose | Status |
 |--------|---------|--------|
-| `dev-sync.ts` | Full sync pipeline (memlog → changelog → audit → commit → PR) | active |
-| `sync-skills.ts` | 3-platform skill distribution (.agents → .claude/.gemini) | active |
-| `audit.ts` | Documentation integrity audit | active |
-| `sync-md.ts` | Update memory/MEMORY.md index | active |
-| `sync-mcp.ts` | Propagate .mcp.json (SSOT) to .claude/.gemini settings | active |
-| `verify-skills.ts` | Skill auto-discovery and index generation | active |
-| `agent-verify.ts` | Agent file ↔ documentation synchronization check | active |
-| `agent-create.ts` | Create new agent files from template | active |
-| `agent-list.ts` | List all agents with metadata | active |
-| `agent-delete.ts` | Delete agent files | active |
-| `dispatch.ts` | Main CLI dispatcher with parallel/serial modes | active |
-| `dispatch-parallel.ts` | Parallel agent dispatcher for read-only tasks | active |
-| `dispatch-serial.ts` | Serial pipeline executor for write operations | active |
-| `retry-handler.ts` | Error recovery with 3-retry limit and exponential backoff | active |
-| `vsp-audit.ts` | Legacy audit wrapper (delegates to audit.ts) | active |
-| `vsp-task.ts` | Create task files from template | active |
-| `new-requirement.ts` | Scaffold `deliverables/REQ-NNN-slug/01_srs.md` and register RTM row (Stage 1) | active |
-| `setup.ts` | Project environment setup | active |
-| `scratch-cleanup.ts` | Scratch workspace hygiene (temp purge, task archival, status) | active |
-| `install-vsp.ts` | VSP (VS Code extension) installation | active |
-| `install-bun.ts` | Bun runtime installation | active |
-| `git-sync.ts` | ~~Simple commit-and-push utility~~ Superseded by `dev-sync.ts` | **deprecated** |
+| `dev-sync.ts` | Full sync pipeline (memlog → changelog → audit → commit → PR) — *inherited from common* | active |
+| `sync-skills.ts` | 3-platform skill distribution (.agents → .claude/.gemini) — *inherited from common* | active |
+| `audit.ts` | Documentation integrity audit — *inherited from common* | active |
+| `sync-md.ts` | Update memory/MEMORY.md index — *inherited from common* | active |
+| `sync-mcp.ts` | Propagate .mcp.json (SSOT) to .claude/.gemini settings — *inherited from common* | active |
+| `verify-skills.ts` | Skill auto-discovery and index generation — *inherited from common* | active |
+| `agent-verify.ts` | Agent file ↔ documentation synchronization check — *inherited from common* | active |
+| `agent-create.ts` | Create new agent files from template — *inherited from common* | active |
+| `agent-list.ts` | List all agents with metadata — *inherited from common* | active |
+| `agent-delete.ts` | Delete agent files — *inherited from common* | active |
+| `dispatch.ts` | Main CLI dispatcher with parallel/serial modes — *variant: scripts/co-abap/* | active |
+| `dispatch-parallel.ts` | Parallel agent dispatcher for read-only tasks — *variant: scripts/co-abap/* | active |
+| `dispatch-serial.ts` | Serial pipeline executor for write operations — *variant: scripts/co-abap/* | active |
+| `retry-handler.ts` | Error recovery with 3-retry limit and exponential backoff — *variant: scripts/co-abap/* | active |
+| `vsp-audit.ts` | Legacy audit wrapper (delegates to audit.ts) — *variant: scripts/co-abap/* | active |
+| `vsp-task.ts` | Create task files from template — *variant: scripts/co-abap/* | active |
+| `new-requirement.ts` | Scaffold `deliverables/REQ-NNN-slug/01_srs.md` and register RTM row (Stage 1) — *variant: scripts/co-abap/* | active |
+| `setup.ts` | Project environment setup — *variant: scripts/co-abap/* | active |
+| `scratch-cleanup.ts` | Scratch workspace hygiene (temp purge, task archival, status) — *variant: scripts/co-abap/* | active |
+| `install-vsp.ts` | VSP (VS Code extension) installation — *variant: scripts/co-abap/* | active |
+| `install-bun.ts` | Bun runtime installation — *variant: scripts/co-abap/* | active |
 
 ---
 
@@ -369,7 +369,7 @@ func (s *Server) handleX(ctx context.Context, req mcp.CallToolRequest) (*mcp.Cal
 4. **Auth** — use basic OR cookies, not both
 5. **ZADT_VSP** — WebSocket debug/RFC/RunReport require it installed on SAP
 
-> Security and sanitization rules are in [security.md](security.md).
+> Security and sanitization rules are in [security.md](security.md) (inherited from `templates/common/docs/_common/security.md` at scaffold time).
 
 ---
 
@@ -403,22 +403,21 @@ All `.md` files must be written in **English**. **Exception**: files whose name 
 
 ### Documentation Synchronization
 
-`docs/context.md` is the **single source of truth** for shared engineering content.
+`templates/common/docs/context.md` is the **single source of truth** for shared engineering content (inherited by this variant; the variant's own context file is `docs/co-abap.context.md`).
 
 | Change type | Action |
 |-------------|--------|
-| Shared content (build, codebase, rules, issues) | Update `docs/context.md` only |
+| Shared content (build, codebase, rules, issues) | Update `templates/common/docs/context.md` only |
 | Tool-specific config or skill | Update `CLAUDE.md`, `GEMINI.md`, or `.codex/` only |
-| Agent roles or workflow | Update `AGENTS.md`; reflect summary in `docs/context.md` |
+| Agent roles or workflow | Update `AGENTS.md`; reflect summary in `templates/common/docs/context.md` |
 | ABAP-specific configuration | Update `docs/co-abap.context.md` only |
 
-Do **not** copy shared sections from `docs/context.md` into tool-specific files.
+Do **not** copy shared sections from `templates/common/docs/context.md` into tool-specific files.
 
 ### Initial Context Files
 <!-- Files listed here MUST be loaded at the start of EVERY session by ALL AI tools. -->
 <!-- The exact loading mechanism (e.g., '@' syntax or 'Read' commands) is tool-specific and defined in CLAUDE.md / GEMINI.md. -->
-- `docs/context.md` - Full architecture map, standards
-- `docs/co-abap.context.md` - ABAP-specific tech stack, agents, skills, workflow
+- `docs/co-abap.context.md` - Full architecture map, standards, ABAP-specific tech stack (shared base: `templates/common/docs/context.md`)
 - `AGENTS.md` - Canonical agent roster
 - `memory/MEMORY.md` - Recent session history (if exists)
 - `skills/abap-dev/SKILL.md` - Always load for SAP ABAP development tasks
@@ -432,7 +431,7 @@ All development artifacts (ABAP sources, docs, research reports) and memory logs
 
 ### Tooling Matrix
 
-For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs Antigravity vs Gemini CLI) and hook behavior by environment, see [docs/tooling-matrix.md](tooling-matrix.md).
+For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs Antigravity vs Gemini CLI) and hook behavior by environment, see [`templates/common/docs/_examples/guides/tooling-matrix.md`](../templates/common/docs/_examples/guides/tooling-matrix.md).
 
 ---
 
@@ -485,7 +484,7 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 ## Auto-Updating & Context Maintenance
 
 - **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/co-abap.context.md` whenever a significant architectural decision or multi-file feature is completed.
-- **Archiving**: If `docs/co-abap.context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.
+- **Archiving**: If `docs/co-abap.context.md` or logs become too unwieldy, older decisions should be archived to `memory/`.
 
 ## Dynamic Roster & Skills Note
 **Note:** The agent and skills lists in this project may be dynamically expanded by the PM orchestrator during the Kickoff Phase based on emerging requirements.

@@ -21,11 +21,10 @@ Domain: SAP ABAP development via vsp MCP server (ADT REST APIs).
 ## ABAP Lifecycle Rules
 
 ### Session Start Checklist
-1. Read `docs/context.md` — immutable project identity
-2. Read `docs/co-abap.context.md` — ABAP-specific configuration
-3. Read `AGENTS.md` — agent registry
-4. Check `memory/MEMORY.md` — recent session history
-5. Load skills: `skills/abap-dev/SKILL.md`, `skills/post-write-chain/SKILL.md`
+1. Read `docs/co-abap.context.md` — project identity + ABAP-specific configuration (shared base: `templates/common/docs/context.md`)
+2. Read `AGENTS.md` — agent registry
+3. Check `memory/MEMORY.md` — recent session history
+4. Load skills: `skills/abap-dev/SKILL.md`, `skills/post-write-chain/SKILL.md`
 
 ### Post-Write Chain
 After ANY WriteSource, EditSource, or Activate:

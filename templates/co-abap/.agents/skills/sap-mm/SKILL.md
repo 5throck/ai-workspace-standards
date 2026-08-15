@@ -1,9 +1,22 @@
 ---
 name: SAP MM Module — Materials Management
 description: Use when working on MM module tasks — purchasing, goods receipt, material master, inventory, or procure-to-pay processes. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and standard BAPIs for the MM module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: mm-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-mm
+    - purchasing
+    - goods receipt
+    - material master
+    - inventory
+    - P2P
 ---
 
 # MM Analyst Context — Materials Management
@@ -140,3 +153,38 @@ SELECT matnr, bwkey, vprsv, verpr, stprs, peinh, laepr
 - `PLANTDATA`: `PLANT`, `PURCHASING`, `MRP_TYPE`, `MRP_CTRLER`, `LOT_SIZE`
 - `PLANTDATAX`: Checkboxes for changed plant-level fields
 - `RETURN`: Standard BAPI return — commit with `BAPI_TRANSACTION_COMMIT`
+
+## Context
+
+This skill provides the MM Analyst with comprehensive domain knowledge for the Materials Management module in SAP. It is loaded when the active task involves purchasing, goods receipt, material master management, inventory, or the procure-to-pay (P2P) cycle. The skill covers document flows, master data hierarchies, query patterns, and standard BAPIs for procurement operations.
+
+## When to Use
+
+- Creating or analyzing purchase requisitions and purchase orders (ME51N/ME21N)
+- Processing goods receipt or return deliveries (MIGO)
+- Working with material master data (MM01/MM02) across organizational levels
+- Analyzing stock levels, inventory movements, or material valuation
+- Handling invoice verification (MIRO) and vendor line items
+- Building queries against MM tables (EKKO, EKPO, MSEG, MARA, MARD, MBEW)
+
+## Execution Steps
+
+1. Review the Process Flow section to understand the P2P document chain from requisition to invoice.
+2. Query key tables using the Key Table Relationships section — trace from EKKO/EKPO (PO) through MKPF/MSEG (GR) to MBEW (valuation).
+3. Apply Common Query Patterns for unreceived POs, stock status, goods movements, and material valuation.
+4. Check SAP Quirks & Known Issues for moving average price reversal behavior, split valuation, and GR-based IV constraints.
+5. Use Standard Customizing Tables to validate plant, storage location, purchasing group, and movement type configuration.
+6. Leverage Strategic BAPIs & APIs for PO creation/change, goods movement, and material master maintenance.
+
+## Output Format
+
+Structured analysis output should include: purchasing organization and group context, PO/GR reference numbers, material and plant details, quantity and value breakdowns, delivery status indicators, and valuation information. Include stock summary tables by storage location when relevant.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns for MM custom programs and enhancements
+- `sap-fi` — FI integration via goods receipt and invoice verification postings
+- `sap-co` — CO integration for cost center assignment and material account determination
+- `sap-pp` — Production Planning integration for production order goods issue (MIGO 261)
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for MSEG high-volume tables

@@ -1,9 +1,22 @@
 ---
 name: SAP LE Module — Logistics Execution
 description: Use when working on LE module tasks — shipping, transport, warehouse management, delivery processing, or handling units. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and customizing tables for the LE module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: le-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-le
+    - shipping
+    - transport
+    - warehouse
+    - delivery
+    - handling unit
 ---
 
 # LE Analyst Context — Logistics Execution
@@ -132,3 +145,38 @@ SELECT a~tanum, a~lgnum, a~bdatu, b~matnr, b~sollm, b~istme
 - `TANUM`: Transfer Order Number to confirm
 - `CONFIRMED_ITEMS`: Table of `TAPOS` (item number), `MATNR`, `ISQUI` (confirmed qty), `ISEUM` (UoM) — leave empty to confirm all items at target quantities
 - `RETURN`: Standard BAPI return — sets `LTAK.KQUIT = 'Q'`; commit with `BAPI_TRANSACTION_COMMIT`
+
+## Context
+
+This skill provides the LE Analyst with comprehensive domain knowledge for the Logistics Execution module in SAP. It is loaded when the active task involves shipping, transport management, warehouse operations (WM), delivery processing, or handling unit management. The skill covers outbound logistics flows, WM integration, query patterns, and standard BAPIs for delivery and warehouse operations.
+
+## When to Use
+
+- Creating or modifying outbound deliveries and picking instructions (VL01N/VL02N)
+- Managing shipping, transport, and shipment completion (VT01N/VT02N)
+- Working with Warehouse Management transfer orders (LT01/LT0A)
+- Analyzing handling units, packing, or nested HU structures (VEKP/VEPO)
+- Processing or reversing goods issue for deliveries (MIGO/VL09)
+- Building queries against LE tables (LIKP, LIPS, VTTK, LTAK, VEKP)
+
+## Execution Steps
+
+1. Review the Process Flow section to understand the delivery-to-shipment-to-WM chain.
+2. Query key tables using the Key Table Relationships section — trace from LIKP/LIPS (delivery) through VTTK/VTTP (shipment) to LTAK/LTAP (WM).
+3. Apply Common Query Patterns for incomplete deliveries, handling unit content, shipment mapping, and unconfirmed transfer orders.
+4. Check SAP Quirks & Known Issues for PGI reversal behavior, WM-IM integration sequence, EWM vs WM differences, and HU nesting.
+5. Use Standard Customizing Tables to validate delivery types, shipping conditions, and warehouse/storage configuration.
+6. Leverage Strategic BAPIs & APIs for delivery change, goods issue confirmation, and WM transfer order creation/confirmation.
+
+## Output Format
+
+Structured analysis output should include: delivery and shipment reference numbers, warehouse and storage location context, picking and GI status indicators, handling unit content summaries, and transport stage timelines. Include WM transfer order status when warehouse operations are in scope.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns for LE custom programs and delivery user exits
+- `sap-sd` — SD integration for sales order-to-delivery document flow
+- `sap-fi` — FI integration for goods issue postings and shipment cost settlement
+- `sap-mm` — MM integration for stock transport and replenishment deliveries
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for LIPS and LTAP high-volume tables

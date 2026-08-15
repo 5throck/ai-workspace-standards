@@ -18,7 +18,7 @@
 //              Makefile              → info only (not run automatically)
 //   Unknown    (none of the above)   → stack-setup agent invocation required
 //
-// Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit]
+// Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit] [--with-gemini-plugins] [--with-codegraph]
 
 import path from "node:path";
 import * as fs from "node:fs";
@@ -42,6 +42,9 @@ const args = process.argv.slice(2);
 const SKIP_INSTALL = args.includes("--skip-install");
 const SKIP_LICENSE = args.includes("--skip-license-check");
 const SKIP_COMMIT = args.includes("--skip-commit");
+// Remote-code installs are opt-in: they clone/download and execute third-party code.
+const WITH_GEMINI_PLUGINS = args.includes("--with-gemini-plugins");
+const WITH_CODEGRAPH = args.includes("--with-codegraph");
 
 function pass(msg: string) {
   console.log(`${GREEN}[PASS]${RESET} ${msg}`);
@@ -385,20 +388,24 @@ async function main() {
     info("Skipping dependency install (--skip-install)");
   }
 
-  // ── 3. Gemini Plugins Setup ──────────────────────────────────────────────────
+  // ── 3. Gemini Plugins Setup (opt-in: --with-gemini-plugins) ──────────────────
   const superpowersDir = path.join(
     process.env.HOME || process.env.USERPROFILE || "",
     ".gemini", "config", "plugins", "superpowers"
   );
-  if (!fs.existsSync(superpowersDir)) {
-    info("Gemini superpowers plugin not found - installing globally...");
-    fs.mkdirSync(path.dirname(superpowersDir), { recursive: true });
-    const { exitCode } = await $`git clone https://github.com/obra/superpowers ${superpowersDir}`.quiet().nothrow();
-    if (exitCode === 0) {
-      pass("superpowers plugin installed successfully");
-    } else {
-      warn("Failed to install superpowers plugin");
+  if (WITH_GEMINI_PLUGINS) {
+    if (!fs.existsSync(superpowersDir)) {
+      info("Gemini superpowers plugin not found - installing globally...");
+      fs.mkdirSync(path.dirname(superpowersDir), { recursive: true });
+      const { exitCode } = await $`git clone https://github.com/obra/superpowers ${superpowersDir}`.quiet().nothrow();
+      if (exitCode === 0) {
+        pass("superpowers plugin installed successfully");
+      } else {
+        warn("Failed to install superpowers plugin");
+      }
     }
+  } else {
+    info("Skipping Gemini superpowers plugin install (pass --with-gemini-plugins to enable).");
   }
 
   // ── 4. Install RTK (Rust Token Killer) ─────────────────────────────────────────
@@ -421,14 +428,14 @@ async function main() {
     info("Skipping rtk installation (Windows native is not fully supported).");
   }
 
-  // ── 5. Initialize CodeGraph MCP ──────────────────────────────────────────────
-  if (await cmdExists("npx")) {
+  // ── 5. Initialize CodeGraph MCP (opt-in: --with-codegraph) ──────────────────
+  if (WITH_CODEGRAPH && (await cmdExists("npx"))) {
     info("Initializing and indexing CodeGraph for AI context...");
     await $`npx -y @colbymchenry/codegraph init`.quiet().nothrow();
     await $`npx -y @colbymchenry/codegraph index`.quiet().nothrow();
     pass("CodeGraph initialized successfully");
   } else {
-    warn("npx not found - skipping CodeGraph initialization");
+    info("Skipping CodeGraph initialization (pass --with-codegraph to enable; requires npx).");
   }
 
   // ── 5b. Install githooks ─────────────────────────────────────────────────────

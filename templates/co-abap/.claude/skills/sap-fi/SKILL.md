@@ -1,9 +1,22 @@
 ---
 name: SAP FI Module — Financial Accounting
 description: Use when working on FI module tasks — journal entries, account determination, G/L, accounts payable/receivable, or financial reporting. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and standard BAPIs for the FI module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: fi-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-fi
+    - journal entry
+    - GL
+    - accounts payable
+    - accounts receivable
+    - financial reporting
 ---
 
 # FI Analyst Context — Financial Accounting
@@ -138,3 +151,38 @@ SELECT rldnr, rbukrs, racct, ryear, drcrk, tslvt, tsl01, tsl02
 - `HEADERDATA`: `INVOICE_IND` (`X`=Invoice, space=Credit Memo), `DOC_DATE`, `PSTNG_DATE`, `COMP_CODE`, `CURRENCY`, `GROSS_AMOUNT`, `CALC_TAX_IND`
 - `ITEMDATA`: `INVOICE_DOC_ITEM`, `PO_NUMBER`, `PO_ITEM`, `QUANTITY`, `PO_UNIT`, `ITEM_AMOUNT`
 - `RETURN`: Standard BAPI return — check `TYPE = 'E'`; commit with `BAPI_TRANSACTION_COMMIT`
+
+## Context
+
+This skill provides the FI Analyst with comprehensive domain knowledge for the Financial Accounting module in SAP. It is loaded when the active task involves journal entries, G/L account management, accounts payable/receivable, financial reporting, or period-end closing. The skill covers document posting flows, integration with SD/MM/CO, and standard BAPIs for financial operations.
+
+## When to Use
+
+- Creating or analyzing FI document postings (FB01/FB50/FB60/FB70)
+- Working with G/L account balances, open item clearing, or financial statements
+- Investigating accounts payable or accounts receivable line items
+- Handling foreign currency valuation or period-end closing processes
+- Reviewing SD or MM integration postings (automatic FI postings via VKOA/OBYC)
+- Building queries against FI tables (BKPF, BSEG, ACDOCA, FAGLFLEXT)
+
+## Execution Steps
+
+1. Review the Process Flow section to understand FI document sources (SD, MM, CO, direct) and the closing process.
+2. Query key tables using the Key Table Relationships section — prefer BSID/BSAD/BSIS/BSAS views over direct BSEG joins for performance.
+3. Apply Common Query Patterns as starting templates — adjust for New GL vs Classic GL and S/4HANA ACDOCA availability.
+4. Check Account Determination tables (VKOA, T030, ANKL) when investigating automatic posting configuration.
+5. Review SAP Quirks & Known Issues for BSEG cluster performance, reversal document handling, and currency amount pitfalls.
+6. Leverage Strategic BAPIs & APIs for posting, simulation, reversal, or incoming invoice processing.
+
+## Output Format
+
+Structured analysis output should include: company code, document type and date ranges, posting references (BELNR with BUKRS and GJAHR), debit/credit breakdowns, account determination mapping, and integration source tracing. Include variance highlights for reconciliation tasks.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns for FI custom programs and user exits
+- `sap-sd` — SD billing integration to FI via VKOA account determination
+- `sap-mm` — MM goods receipt and invoice verification integration to FI
+- `sap-co` — Controlling integration via cost elements and ACDOCA
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for BSEG cluster tables and large FI datasets

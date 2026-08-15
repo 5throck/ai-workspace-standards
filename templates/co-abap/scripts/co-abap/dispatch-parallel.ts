@@ -168,11 +168,12 @@ async function main() {
     if (args[i] === '--task' && args[i + 1]) {
       const parts = args[i + 1].split(':');
       if (parts.length >= 3) {
+        const priority = ['high', 'medium', 'low'].includes(parts[3]) ? parts[3] as 'high' | 'medium' | 'low' : 'medium';
         customTasks.push({
           description: parts[0],
           role: parts[1],
           task: parts[2],
-          priority: (parts[3] as 'high' | 'medium' | 'low') || 'medium'
+          priority
         });
       }
       i++;

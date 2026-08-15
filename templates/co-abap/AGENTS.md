@@ -30,7 +30,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **code-writer** | [`agents/code-writer.md`](agents/code-writer.md) | Low | ABAP implementation via WriteSource/EditSource |
 | **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Low | SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck |
 | **dba** | [`agents/dba.md`](agents/dba.md) | Medium | Table/CDS/index design, SQL performance tuning |
-| **devops-admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | Low | Transport management, infrastructure install |
+| **devops-admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | Medium | Transport management, infrastructure install |
 | **sap-investigator** | [`agents/sap-investigator.md`](agents/sap-investigator.md) | Medium | Codebase pattern scan, historical design extraction |
 | **read-only-analyst** | [`agents/read-only-analyst.md`](agents/read-only-analyst.md) | Medium | Business data queries, AS-IS analysis |
 | **schema-inspector** | [`agents/schema-inspector.md`](agents/schema-inspector.md) | Medium | Table/CDS structure inspection, dependency maps |
@@ -39,7 +39,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **form-expert** | [`agents/form-expert.md`](agents/form-expert.md) | Medium | SAP Script, Smart Forms, Adobe Forms design |
 | **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Low | Security policies and safe dependencies |
 | **gui-scripter** | [`agents/gui-scripter.md`](agents/gui-scripter.md) | Low | BDC / VBS automation (last resort) |
-<!-- VARIANT-AGENTS-END ---
+<!-- VARIANT-AGENTS-END -->
 
 ## §2: Individual Agent Definitions
 
@@ -141,7 +141,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/devops-admin.md`](agents/devops-admin.md) |
-| **Tier** | low |
+| **Tier** | medium |
 | **Phases** | 5 |
 | **Role** | Transport management, infrastructure install, system audit |
 
@@ -216,7 +216,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Tier** | low |
 | **Phases** | 3 |
 | **Role** | BDC / VBS automation — LAST RESORT when no BAPI/OData/RFC alternative exists |
-<!-- VARIANT-AGENT-DETAILS-END ---
+<!-- VARIANT-AGENT-DETAILS-END -->
 
 ## §3: Agent Coordination & Orchestration Rules
 
@@ -246,6 +246,21 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
     *   **Memory Logging**: Record key decisions and issues in `memory/YYYY-MM-DD.md`.
     *   **Git Sync**: Execute `/sync` (full pipeline: memlog → changelog → audit → commit → push → PR).
     *   **Final Report**: PM summarizes the outcome and test results for the user.
+
+#### Phase Numbering Map (Orchestration Steps ↔ Agent Phases)
+
+The orchestration workflow above uses **steps 1-6**; individual agent definitions use **phases 1-5** (plus occasional phase 6 for late-stage skills). The mapping is:
+
+| Orchestration Step | Agent Phase | Scope |
+|--------------------|:-----------:|-------|
+| 1. Triage & Initial Research | 1 | Read-only parallel research (sap-investigator, read-only-analyst, schema-inspector, module analysts) |
+| 2. Business Analysis & AC Definition | 1 | Module analyst PRD/AC drafting (read-only) |
+| 3. Governance & Implementation Approval | 2 | Design & approval gate (PM + user sign-off) |
+| 4. Technical Design & Impact Analysis | 2 | Architect/DBA design, impact analysis |
+| 5. Implementation & Verification Chain | 3-4 | code-writer implementation (3) + test-runner QA chain (4) |
+| 6. Finalization, Sync & Reporting | 5-6 | Memory logging, /sync, reporting (5); late-stage skills (e.g., dump-monitor) run at 6 |
+
+> Agent `Phases` fields in §2 refer to the **Agent Phase** column above. Skills may declare phase 6 for post-release monitoring.
 
 ### 📦 Requirements-Driven Deliverables Workflow (Stage 1 to 5)
 
@@ -381,11 +396,23 @@ All agents, regardless of their role, must adhere to the following:
 
 ### Platform Skills Registry
 
-| Skill | Location | Purpose |
-|-------|----------|---------|
-| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
-| **ABAP Development** | `skills/abap-dev/SKILL.md` | BAPI exploration, transport management, unit testing, performance analysis |
-| **Post-Write Chain** | `skills/post-write-chain/SKILL.md` | Mandatory SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck after ABAP writes |
+Variant-specific skills (`skills/` is the SSOT; propagated to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/` via `sync-skills.ts`):
+
+| Skill | Location | Owner | Purpose |
+|-------|----------|-------|---------|
+| **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | pm | Managing agent lifecycle, creating/retiring agents, validation (inherited from workspace root) |
+| **ABAP Development** | `skills/abap-dev/SKILL.md` | code-writer | BAPI exploration, transport management, unit testing, performance analysis |
+| **Post-Write Chain** | `skills/post-write-chain/SKILL.md` | test-runner | Mandatory SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck after ABAP writes |
+| **Performance Tuning** | `skills/performance-tuning/SKILL.md` | dba | Trace/SQL/call-graph analysis for slow programs and large-table access |
+| **Dump Monitor** | `skills/dump-monitor/SKILL.md` | devops-admin | SAP short dump detection via ListDumps/GetDump, routed to /triage |
+| **Desktop App Fallback** | `skills/desktop-app-fallback/SKILL.md` | test-runner | Manual post-write QA chain for Claude Code Desktop App (hooks don't fire) |
+| **Source Command Celebrate** | `skills/source-command-celebrate/SKILL.md` | pm | Morale-boosting celebration after successful task completion |
+| **SAP SD** | `skills/sap-sd/SKILL.md` | sd-analyst | Sales & Distribution — O2C flow, VBAK/VBAP/LIKP/VBRK, BAPIs |
+| **SAP FI** | `skills/sap-fi/SKILL.md` | fi-analyst | Financial Accounting — BKPF/BSEG/ACDOCA, account determination |
+| **SAP MM** | `skills/sap-mm/SKILL.md` | mm-analyst | Materials Management — EKKO/EKPO/MSEG/MARA, P2P flow |
+| **SAP PP** | `skills/sap-pp/SKILL.md` | pp-analyst | Production Planning — AUFK/AFKO/MAST/STKO, MRP flow |
+| **SAP LE** | `skills/sap-le/SKILL.md` | le-analyst | Logistics Execution — LIKP/LIPS/VTTK/LTAK, WM integration |
+| **SAP CO** | `skills/sap-co/SKILL.md` | co-analyst | Controlling — CSKS/COSP/COAS/CE1xxxx, CO-PA analysis |
 
 ---
 

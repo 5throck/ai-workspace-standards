@@ -13,6 +13,10 @@
   },
   "agents": [
     {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
       "name": "sd-analyst",
       "file": "agents/sd-analyst.md"
     },

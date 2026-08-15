@@ -1,9 +1,21 @@
 ---
 name: SAP CO Module — Controlling
 description: Use when working on CO module tasks — cost center accounting, internal orders, CO-PA profitability analysis, or cost allocation. Provides process flows, key table relationships, common query patterns, field notes, SAP quirks, and customizing tables for the CO module.
+version: 1.0.0
+last_reviewed: 2026-08-15
+status: active
+scope: variant
+l2_propagate: false
+owner: co-analyst
+prerequisites: vsp MCP server
 metadata:
   type: module
-version: 1.0.0
+  triggers:
+    - sap-co
+    - cost center
+    - internal order
+    - CO-PA
+    - cost allocation
 ---
 
 # CO Analyst Context — Controlling
@@ -143,3 +155,38 @@ CO-PA has two types:
 - `ORDER_DATA_PS`: `RESPONSIBLE_COST_CTR`, `PROFIT_CENTER`, `PERSON_RESP`, `WBS_ELEMENT`
 - `ORDER_DATA_PS_X`: Checkboxes for changed fields (X = changed)
 - `RETURN`: Standard BAPI return — commit with `BAPI_TRANSACTION_COMMIT`
+
+## Context
+
+This skill provides the CO Analyst with comprehensive domain knowledge for the Controlling module in SAP. It is loaded when the active task involves cost center accounting, internal order management, CO-PA profitability analysis, or cost allocation cycles. The skill covers cost flows, CO-PA structures, query patterns, and standard BAPIs for controlling operations.
+
+## When to Use
+
+- Creating or analyzing cost centers, internal orders, or profit centers
+- Working on cost allocation — distribution (KSV5), assessment (KSU5), or settlement (CO88)
+- Analyzing CO-PA profitability reports (KE30) or direct CO-PA postings (KE21N)
+- Investigating planned vs actual cost variances by cost element or cost center
+- Building queries against CO tables (COSP, COEP, CSKS, COAS, CE1xxxx)
+- Reviewing WIP or period-end controlling processes
+
+## Execution Steps
+
+1. Review the Process Flow section to understand cost incurrence sources (FI, PP, HR) and the allocation chain.
+2. Query key tables using the Key Table Relationships section — identify operating concern from TKA01 for CE1xxxx table naming.
+3. Apply Common Query Patterns for cost center aggregation, internal order balances, CO-PA profitability, and WIP status.
+4. Check SAP Quirks & Known Issues for CE1xxxx naming conventions, cost element integration (S/4HANA vs Classic), and allocation tracing.
+5. Review the CO-PA Structure section to determine account-based vs costing-based approach in the target system.
+6. Leverage Strategic BAPIs & APIs for cost center and internal order creation and modification.
+
+## Output Format
+
+Structured analysis output should include: controlling area context, cost object references (KOSTL/AUFNR/PRCTR), planned vs actual comparison tables, allocation cycle summaries, and CO-PA profitability breakdowns by characteristic. Include variance analysis with root-cause indicators.
+
+## Related Skills
+
+- `abap-dev` — ABAP development patterns for CO custom reports and user exits
+- `sap-fi` — FI integration via cost elements and ACDOCA universal journal
+- `sap-sd` — SD billing integration to CO-PA profitability analysis
+- `sap-pp` — Production order confirmation integration to CO actual costing
+- `post-write-chain` — Post-write review and validation workflow
+- `performance-tuning` — Query optimization for COEP and COSP aggregation tables

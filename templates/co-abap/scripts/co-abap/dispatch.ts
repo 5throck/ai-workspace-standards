@@ -30,11 +30,6 @@ interface SerialOptions {
   dryRun: boolean;
 }
 
-interface CliOptions {
-  mode: string;
-  args: string[];
-}
-
 /**
  * Display help information
  *
@@ -170,12 +165,16 @@ async function runSerial(args: string[]): Promise<void> {
 
   if (pipelineIndex >= 0 && args[pipelineIndex + 1]) {
     const pipelinePath = path.resolve(projectRoot, args[pipelineIndex + 1]);
+    // Reject paths that escape the project boundary (e.g. ../.. outside projectRoot).
+    const rel = path.relative(projectRoot, pipelinePath);
+    if (rel.startsWith("..") || path.isAbsolute(rel)) {
+      throw new Error(`Pipeline path must stay inside the project: ${args[pipelineIndex + 1]}`);
+    }
     try {
       const pipelineModule = await import(pipelinePath);
       pipeline = pipelineModule.default || pipelineModule.pipeline;
     } catch (error) {
-      console.error(`❌ Failed to load pipeline from ${args[pipelineIndex + 1]}:`, error);
-      process.exit(1);
+      throw new Error(`Failed to load pipeline from ${args[pipelineIndex + 1]}: ${error instanceof Error ? error.message : error}`);
     }
   }
 
