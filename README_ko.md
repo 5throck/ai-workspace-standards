@@ -307,7 +307,7 @@ bun scripts/validate-templates.ts
 - **Day 1 — 일반 사용자**: 핵심 AI 개념, Vibe Coding vs. Harness Engineering 원칙, 가드레일, 권한 모델, 기본적인 멀티 에이전트 조작
 - **Day 2 — IT 전문가**: 아키텍처 심층 해설 (SSOT 계층 L0→L1→L2), 엔터프라이즈 배포 전략, 커스텀 바리안트 엔지니어링 (Phase A/B), 종합 실습 프로젝트
 
-모든 개념은 4가지 주요 플랫폼 (Claude Code, Claude App, Antigravity CLI, Antigravity 2.0)에서 시연됩니다.
+모든 개념은 4가지 주요 플랫폼 (Claude Code, Claude Desktop App, Antigravity CLI, Antigravity 2.0)에서 시연됩니다.
 
 ---
 

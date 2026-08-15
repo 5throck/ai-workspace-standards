@@ -303,7 +303,7 @@ bun scripts/validate-templates.ts
 - **Day 1 — 一般ユーザー**: AIの基礎概念、Vibe Coding vs. Harness Engineeringの原則、ガードレール、権限モデル、基本的なマルチエージェント操作
 - **Day 2 — IT専門家**: アーキテクチャの詳細解説（SSOT階層 L0→L1→L2）、エンタープライズ展開戦略、カスタムバリアントエンジニアリング（フェーズA/B）、総合演習プロジェクト
 
-すべての概念は4つのプラットフォーム（Claude Code、Claude App、Antigravity CLI、Antigravity 2.0）でデモンストレーションされます。
+すべての概念は4つのプラットフォーム（Claude Code、Claude Desktop App、Antigravity CLI、Antigravity 2.0）でデモンストレーションされます。
 
 ---
 
@@ -325,4 +325,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-07-30*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-15*

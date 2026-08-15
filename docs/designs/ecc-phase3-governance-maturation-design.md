@@ -94,11 +94,11 @@ Phase 3 resolves pre-existing drift issues and matures the governance infrastruc
 
 ## Platform Coverage
 
-| Component | Claude CLI | Claude App | Gemini CLI | Antigravity |
+| Component | Claude CLI | Claude Desktop App | Gemini CLI | Antigravity |
 |-----------|:----------:|:----------:|:----------:|:-----------:|
 | GateGuard State Persistence | ✅ | ✅* | ✅ | ❌ |
 | GateGuard Config Gating | ✅ | ✅* | ✅ | ❌ |
 | Encoding Vigilance Audit | ✅ | — | — | — |
 | CI Hook Test Step | ✅ | — | — | — |
 
-\* Claude App: conditionally supported (bundled CLI)
+\* Claude Desktop App: conditionally supported (bundled CLI)

@@ -310,7 +310,7 @@ This handbook is a 2-day intensive curriculum covering:
 - **Day 1 — General Users**: Core AI concepts, Vibe Coding vs. Harness Engineering principles, guardrails, permission models, and basic multi-agent operations.
 - **Day 2 — IT Professionals**: Deep-dive architecture (SSOT hierarchy L0→L1→L2), enterprise deployment strategies, custom variant engineering (Phase A/B), and comprehensive capstone projects.
 
-All concepts are demonstrated across four major platforms (Claude Code, Claude App, Antigravity CLI, and Antigravity 2.0).
+All concepts are demonstrated across four major platforms (Claude Code, Claude Desktop App, Antigravity CLI, and Antigravity 2.0).
 
 ---
 

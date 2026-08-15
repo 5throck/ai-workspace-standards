@@ -299,7 +299,7 @@ Este manual es un programa intensivo de 2 días que cubre:
 - **Día 1 — Usuarios Generales**: Conceptos fundamentales de IA, principios de Vibe Coding vs. Harness Engineering, salvaguardas, modelos de permisos y operaciones básicas multi-agente.
 - **Día 2 — Profesionales de TI**: Arquitectura detallada (jerarquía SSOT L0→L1→L2), estrategias de despliegue empresarial, ingeniería de variantes personalizadas (Fase A/B) y proyectos finales integrales.
 
-Todos los conceptos se demuestran en cuatro plataformas principales (Claude Code, Claude App, Antigravity CLI y Antigravity 2.0).
+Todos los conceptos se demuestran en cuatro plataformas principales (Claude Code, Claude Desktop App, Antigravity CLI y Antigravity 2.0).
 
 ---
 

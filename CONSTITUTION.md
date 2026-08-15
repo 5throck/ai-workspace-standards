@@ -196,7 +196,7 @@ L2 variant `pm.md` files must use the strict additive format utilizing `<!-- VAR
 
 Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`. To enable automated skill discovery by Claude, Gemini, and Antigravity, the `skills/` directory must be registered in the customizations configuration file `.agents/skills.json` at the root of the workspace or project. When creating a new skill, use the `skill-creator` plugin and complete the registration checklist: add to `docs/context.md ## Skills` (individual projects) and `AGENTS.md ## Skills` (workspace root). Skills have four states: **draft**, **active**, **deprecated** (archive after 30 days), **archived** (delete after 90 days). Version bump rules: **patch** (1.0.x) for wording fixes, **minor** (1.x.0) for new steps, **major** (x.0.0) for rewrites. Shared skills (`owner: [agent1, agent2]`) require both owners' approval.
 
-**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude App, Gemini CLI, Antigravity, Antigravity CLI). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across all three platform directories. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
+**Cross-Platform Skill Availability**: The `skills/<name>/` directory is the Single Source of Truth (SSOT) for all skill definitions. Every skill defined in `skills/` MUST be available on all supported AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI). Platform-specific distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) serve as derived copies only — they MUST NOT be the sole location of any skill. Variant templates MUST maintain skill parity across all three platform directories. Platform-specific configuration files (`skills.json`) register these directories for discovery, but the canonical definition always resides in `skills/`.
 
 ---
 
@@ -578,7 +578,7 @@ Governance rules are enforced at three layers, ensuring coverage across all 4 su
 
 #### 11.1 Three-Layer Enforcement Model
 
-| Layer | Mechanism | Claude CLI | Claude App | Gemini CLI | Antigravity |
+| Layer | Mechanism | Claude CLI | Claude Desktop App | Gemini CLI | Antigravity |
 |-------|-----------|:----------:|:----------:|:----------:|:-----------:|
 | Hook | Deterministic script execution | ✅ | ✅* | ✅ | ❌ |
 | Prompt | System instruction compliance | ✅ | ✅ | ✅ | ✅ |
@@ -634,4 +634,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-14*
+*Last Updated: 2026-08-15*
