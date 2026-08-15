@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: co-deck
-version: 0.2.0
+version: 0.2.1
 description: >-
   Document Production Workflow for co-deck — generates searchable, themed
   handbooks as static sites (GitHub Pages). Three modes: standalone handbook,
@@ -89,7 +89,7 @@ Dispatch `handbook-writer` agent to generate Course Overview (§14 — 9 require
 
 Dispatch `handbook-reviewer` agent to run:
 1. `bun run handbook-doctor` — 12 static analysis checks
-2. `bun run check-authoring` — 11 authoring compliance checks
+2. `bun run check-authoring` — 12 authoring compliance checks (incl. §21-6 footer structure)
 3. `bun run validate-nav` — 4 navigation integrity checks
 4. Apply fixes for any issues found
 
