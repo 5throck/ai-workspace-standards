@@ -93,6 +93,18 @@
       "released": "2026-08-11",
       "security_advisories": [],
       "migration_guides": []
+    },
+    "co-abap": {
+      "latest": "1.0.0",
+      "status": "stable",
+      "released": "2026-08-15",
+      "source_project": "Projects/co-abap",
+      "promoted_via": "manual-migration",
+      "changelog": [
+        "2026-08-15: Initial release as stable variant (v1.0.0) — migrated from co-abap project with 19 agents, 12 skills, 13 scripts"
+      ],
+      "security_advisories": [],
+      "migration_guides": []
     }
   },
   "schema_version": "1.0"

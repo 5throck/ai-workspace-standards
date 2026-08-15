@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "abap": {
+      "command": "./vsp",
+      "args": [
+        "--mode",
+        "hyperfocused"
+      ],
+      "env": {
+        "SAP_MODE": "hyperfocused",
+        "SAP_ALLOWED_PACKAGES": "Z*,$TMP,$ZADT_VSP,$VSP_ADT",
+        "SAP_FEATURE_ABAPGIT": "on",
+        "SAP_FEATURE_TRANSPORT": "on",
+        "SAP_FEATURE_UI5": "on",
+        "SAP_FEATURE_RAP": "on"
+      }
+    },
+    "abap-docs": {
+      "type": "http",
+      "url": "https://mcp-abap.marianzeis.de/mcp"
+    },
+    "sap-docs": {
+      "type": "http",
+      "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    },
+    "codegraph": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@colbymchenry/codegraph",
+        "serve"
+      ]
+    }
+  }
+}

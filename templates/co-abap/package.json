@@ -1,0 +1,20 @@
+{
+  "name": "co-abap-scripts",
+  "version": "1.0.0",
+  "description": "SAP ABAP Harness Engineering variant scripts",
+  "scripts": {
+    "verify-skills": "bun scripts/co-abap/verify-skills.ts || bun scripts/verify-skills.ts",
+    "agent:verify": "bun scripts/co-abap/agent-verify.ts || bun scripts/agent-verify.ts",
+    "audit": "bun scripts/co-abap/audit.ts || bun scripts/audit.ts",
+    "dispatch:parallel": "bun scripts/co-abap/dispatch-parallel.ts",
+    "dispatch:serial": "bun scripts/co-abap/dispatch-serial.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "bun-types": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "bun": ">= 1.0.0"
+  }
+}

@@ -1,0 +1,309 @@
+{
+  "name": "co-abap",
+  "description": "SAP ABAP development variant for AI-assisted harness engineering. Includes specialized SAP module analysts (SD, MM, FI, CO, PP, LE), technical execution agents (Architect, ABAP Developer, QA Engineer, DBA), and ABAP-specific skills (post-write chain, performance tuning, dump monitoring). Operates via the vsp MCP server connecting to SAP NetWeaver through ADT REST APIs.",
+  "variant_type": "abap-development",
+  "status": "stable",
+  "version": "1.0.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-08-15T00:00:00.000Z",
+  "lifecycle": {
+    "statusSince": "2026-08-15",
+    "lastTransition": "stable (migrated from co-abap project)",
+    "stablePromotedOn": "2026-08-15"
+  },
+  "agents": [
+    {
+      "name": "sd-analyst",
+      "file": "agents/sd-analyst.md"
+    },
+    {
+      "name": "mm-analyst",
+      "file": "agents/mm-analyst.md"
+    },
+    {
+      "name": "fi-analyst",
+      "file": "agents/fi-analyst.md"
+    },
+    {
+      "name": "co-analyst",
+      "file": "agents/co-analyst.md"
+    },
+    {
+      "name": "pp-analyst",
+      "file": "agents/pp-analyst.md"
+    },
+    {
+      "name": "le-analyst",
+      "file": "agents/le-analyst.md"
+    },
+    {
+      "name": "architect",
+      "file": "agents/architect.md"
+    },
+    {
+      "name": "code-writer",
+      "file": "agents/code-writer.md"
+    },
+    {
+      "name": "test-runner",
+      "file": "agents/test-runner.md"
+    },
+    {
+      "name": "dba",
+      "file": "agents/dba.md"
+    },
+    {
+      "name": "devops-admin",
+      "file": "agents/devops-admin.md"
+    },
+    {
+      "name": "interface-expert",
+      "file": "agents/interface-expert.md"
+    },
+    {
+      "name": "fiori-developer",
+      "file": "agents/fiori-developer.md"
+    },
+    {
+      "name": "form-expert",
+      "file": "agents/form-expert.md"
+    },
+    {
+      "name": "security-monitor",
+      "file": "agents/security-monitor.md"
+    },
+    {
+      "name": "gui-scripter",
+      "file": "agents/gui-scripter.md"
+    },
+    {
+      "name": "sap-investigator",
+      "file": "agents/sap-investigator.md"
+    },
+    {
+      "name": "read-only-analyst",
+      "file": "agents/read-only-analyst.md"
+    },
+    {
+      "name": "schema-inspector",
+      "file": "agents/schema-inspector.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "abap-dev",
+      "file": "skills/abap-dev/SKILL.md"
+    },
+    {
+      "name": "post-write-chain",
+      "file": "skills/post-write-chain/SKILL.md"
+    },
+    {
+      "name": "performance-tuning",
+      "file": "skills/performance-tuning/SKILL.md"
+    },
+    {
+      "name": "dump-monitor",
+      "file": "skills/dump-monitor/SKILL.md"
+    },
+    {
+      "name": "desktop-app-fallback",
+      "file": "skills/desktop-app-fallback/SKILL.md"
+    },
+    {
+      "name": "source-command-celebrate",
+      "file": "skills/source-command-celebrate/SKILL.md"
+    },
+    {
+      "name": "sap-sd",
+      "file": "skills/sap-sd/SKILL.md"
+    },
+    {
+      "name": "sap-fi",
+      "file": "skills/sap-fi/SKILL.md"
+    },
+    {
+      "name": "sap-mm",
+      "file": "skills/sap-mm/SKILL.md"
+    },
+    {
+      "name": "sap-pp",
+      "file": "skills/sap-pp/SKILL.md"
+    },
+    {
+      "name": "sap-le",
+      "file": "skills/sap-le/SKILL.md"
+    },
+    {
+      "name": "sap-co",
+      "file": "skills/sap-co/SKILL.md"
+    }
+  ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "abap-dev",
+        "layer": "variant",
+        "used_by_agents": ["architect", "code-writer", "test-runner", "sap-investigator"],
+        "phases": [1, 2, 3, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "post-write-chain",
+        "layer": "variant",
+        "used_by_agents": ["code-writer", "test-runner", "pm"],
+        "phases": [3, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "performance-tuning",
+        "layer": "variant",
+        "used_by_agents": ["dba", "sap-investigator", "architect"],
+        "phases": [1, 2, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "dump-monitor",
+        "layer": "variant",
+        "used_by_agents": ["pm", "devops-admin"],
+        "phases": [1, 6],
+        "platform_parity": "required"
+      },
+      {
+        "name": "desktop-app-fallback",
+        "layer": "variant",
+        "used_by_agents": ["code-writer", "test-runner"],
+        "phases": [3, 4],
+        "platform_parity": "required"
+      },
+      {
+        "name": "source-command-celebrate",
+        "layer": "variant",
+        "used_by_agents": ["pm"],
+        "phases": [6],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-sd",
+        "layer": "variant",
+        "used_by_agents": ["sd-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-fi",
+        "layer": "variant",
+        "used_by_agents": ["fi-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-mm",
+        "layer": "variant",
+        "used_by_agents": ["mm-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-pp",
+        "layer": "variant",
+        "used_by_agents": ["pp-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-le",
+        "layer": "variant",
+        "used_by_agents": ["le-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
+      {
+        "name": "sap-co",
+        "layer": "variant",
+        "used_by_agents": ["co-analyst", "architect", "dba"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      }
+    ]
+  },
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": [
+      "sap-investigator",
+      "read-only-analyst",
+      "schema-inspector",
+      "security-monitor",
+      "architect",
+      "code-writer",
+      "test-runner"
+    ],
+    "optional": [
+      "dba",
+      "devops-admin",
+      "interface-expert",
+      "fiori-developer",
+      "form-expert",
+      "gui-scripter"
+    ],
+    "notes": "6-step harness lifecycle: Triage → Business Analysis → Governance → Tech Design → Implementation → Finalization. Phase 1 (parallel read-only): investigator + analyst + schema-inspector. Phase 2 (serial write): architect → code-writer. Phase 3 (verification): test-runner. Optional agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
+  },
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/co-abap",
+    "local": [
+      {
+        "name": "vsp-task",
+        "path": "scripts/co-abap/vsp-task.ts"
+      },
+      {
+        "name": "vsp-audit",
+        "path": "scripts/co-abap/vsp-audit.ts"
+      },
+      {
+        "name": "install-vsp",
+        "path": "scripts/co-abap/install-vsp.ts"
+      },
+      {
+        "name": "install-bun",
+        "path": "scripts/co-abap/install-bun.ts"
+      },
+      {
+        "name": "setup",
+        "path": "scripts/co-abap/setup.ts"
+      },
+      {
+        "name": "new-requirement",
+        "path": "scripts/co-abap/new-requirement.ts"
+      },
+      {
+        "name": "scratch-cleanup",
+        "path": "scripts/co-abap/scratch-cleanup.ts"
+      },
+      {
+        "name": "dispatch",
+        "path": "scripts/co-abap/dispatch.ts"
+      },
+      {
+        "name": "dispatch-parallel",
+        "path": "scripts/co-abap/dispatch-parallel.ts"
+      },
+      {
+        "name": "dispatch-serial",
+        "path": "scripts/co-abap/dispatch-serial.ts"
+      },
+      {
+        "name": "retry-handler",
+        "path": "scripts/co-abap/retry-handler.ts"
+      },
+      {
+        "name": "vsp-publish-sh",
+        "path": "scripts/co-abap/vsp-publish.sh"
+      },
+      {
+        "name": "vsp-publish-ps1",
+        "path": "scripts/co-abap/vsp-publish.ps1"
+      }
+    ],
+    "external": []
+  }
+}
