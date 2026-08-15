@@ -87,7 +87,7 @@ The following findings result from web investigation and workspace testing condu
 
 ## 3. Architectural Decisions
 
-### 3.1 Claude App Hook Support Policy
+### 3.1 Claude Desktop App Hook Support Policy
 
 **Decision**: Claude Desktop App is classified as "verified by Anthropic, conditionally supported in practice."
 
@@ -648,5 +648,5 @@ genuine workflow issue that requires human judgment to resolve.
 
 ---
 
-*Last Updated: 2026-07-31*
+*Last Updated: 2026-08-15*
 *Design Owner: Template Architect*

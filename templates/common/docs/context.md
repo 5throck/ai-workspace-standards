@@ -46,12 +46,12 @@ Standard directory layout for all projects in this workspace:
 ├── memory/       # Session logs (MEMORY.md index + daily logs)
 ├── agents/       # Role-based agent definitions
 ├── skills/       # Reusable workflow skills (SSOT for all platforms)
-├── .claude/      # Claude Code / Claude App settings and slash commands
+├── .claude/      # Claude Code / Claude Desktop App settings and slash commands
 ├── .gemini/      # Gemini CLI settings and slash commands
 └── .agents/      # Antigravity / Antigravity CLI settings and slash commands
 ```
 
-**Cross-Platform Skill Availability**: `skills/` is the Single Source of Truth (SSOT) for all skill definitions. Every skill MUST be available on all AI platforms (Claude Code, Claude App, Gemini CLI, Antigravity, Antigravity CLI). Platform distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) are derived copies — they MUST NOT be the sole location of any skill.
+**Cross-Platform Skill Availability**: `skills/` is the Single Source of Truth (SSOT) for all skill definitions. Every skill MUST be available on all AI platforms (Claude Code, Claude Desktop App, Gemini CLI, Antigravity, Antigravity CLI). Platform distribution directories (`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) are derived copies — they MUST NOT be the sole location of any skill.
 
 ---
 

@@ -41,7 +41,7 @@ Every session log entry MUST include the following four sections:
 - Issue: symptom → root cause → resolution (or "pending")
 ```
 
-> **Tool consistency note**: All AI tools (Claude Code, Claude App, Antigravity, Antigravity CLI) MUST produce session logs with these exact four section headings. This ensures logs are machine-readable and consistent across tools.
+> **Tool consistency note**: All AI tools (Claude Code, Claude Desktop App, Antigravity, Antigravity CLI) MUST produce session logs with these exact four section headings. This ensures logs are machine-readable and consistent across tools.
 
 #### 2.2 Rules
 - Log files are written in **English**.

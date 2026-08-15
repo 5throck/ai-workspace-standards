@@ -628,7 +628,7 @@ A/B files are linked to each other sequentially via prev/next links.
 
 - **`.platform-pair`**: 2-column comparison grid — used only in common reference files. Used when comparing 4 tools side by side (e.g., Chapter 4 §1 reference).
 - **`.platform-block`**: Single-platform command block — in A/B split files, show only the relevant platform's block. Remove the opposite platform's block.
-- **4-tool classification**: Claude App (Desktop), Claude Code (CLI), Antigravity (Desktop), Antigravity CLI (agy).
+- **4-tool classification**: Claude Desktop App, Claude Code (CLI), Antigravity (Desktop), Antigravity CLI (agy).
 
 ### 18-6. A/B Split Checklist
 
@@ -805,7 +805,7 @@ structural rules live in `assets/css/handbook-components.css` (never overwritten
   --code-bg: #f6f8fa;  --code-border: #d0d7de;
   --tag-bg: #ddf4ff;   --tag-text: #0550ae;
 
-  /* Platform colors (Claude, Claude App, AGY, Antigravity) */
+  /* Platform colors (Claude, Claude Desktop App, AGY, Antigravity) */
   --platform-claude: #d97706;   --platform-claudeapp: #f59e0b;
   --platform-agy: #0550ae;      --platform-antigravity: #6639ba;
 

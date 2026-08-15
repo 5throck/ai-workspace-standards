@@ -94,7 +94,7 @@ Per-session in-memory Map is sufficient. 3-layer enforcement (Hook → Prompt �
 
 ## 4. Platform Coverage After Phase 2
 
-| Component | Claude CLI | Claude App | Gemini CLI | Antigravity |
+| Component | Claude CLI | Claude Desktop App | Gemini CLI | Antigravity |
 |-----------|:----------:|:----------:|:----------:|:-----------:|
 | GateGuard Hook | ✅ configurable | ✅* | ✅ deny | ❌ |
 | GateGuard Prompt | ✅ | ✅ | ✅ | ✅ |
@@ -102,7 +102,7 @@ Per-session in-memory Map is sufficient. 3-layer enforcement (Hook → Prompt �
 | Command Schema | ✅ | ✅ | ✅ | ✅ |
 | Hook Unit Tests | ✅ subprocess | — | ✅ subprocess | — |
 
-\* Claude App: conditionally supported (bundled CLI)
+\* Claude Desktop App: conditionally supported (bundled CLI)
 
 ---
 
