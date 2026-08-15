@@ -55,6 +55,9 @@ NUL
 # CodeGraph Index
 .codegraph/
 
+# Antigravity/ZCode session-local state (plans, config — never shared)
+.zcode/
+
 # Windows reserved device name artifacts (created by git hooks on cmd.exe)
 nul
 NUL
