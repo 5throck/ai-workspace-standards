@@ -10,7 +10,7 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @last_updated 2026-07-19
  * @license MIT
  */
@@ -110,7 +110,7 @@ function getAgentRegistry(): AgentRegistry {
 // Parse YAML frontmatter from SKILL.md
 function parseFrontmatter(filePath: string): SkillFrontmatter | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n');
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
     if (!frontmatterMatch) return null;
