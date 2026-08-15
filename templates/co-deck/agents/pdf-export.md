@@ -1,6 +1,6 @@
 ---
 name: pdf-export
-version: "2.1.0"
+version: "2.1.1"
 last_updated: "2026-06-23"
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
