@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // scripts/co-deck/handbook/check-authoring.ts
 // AUTHORING_GUIDELINES compliance checker.
 // Validates handbook HTML against the 21-section authoring guidelines + dark mode + i18n.
@@ -213,6 +213,45 @@ function checkLanguagePairs(htmlFiles: string[], baseDir: string): AuthoringIssu
   return issues;
 }
 
+/** Check 11: private-repository references (git clone / links) */
+// Known-public repositories a handbook is allowed to point readers at without
+// further verification. Extend this list only for repos confirmed public.
+const PUBLIC_REPO_ALLOWLIST = new Set([
+  "5throck/ai-workspace-standards",
+]);
+function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
+  const issues: AuthoringIssue[] = [];
+  const seen = new Set<string>();
+
+  const cloneRe = /git clone\s+https:\/\/github\.com\/([^\/\s"'<]+)\/([^\/\s"'<.]+)(?:\.git)?/gi;
+  let m: RegExpExecArray | null;
+  while ((m = cloneRe.exec(html)) !== null) {
+    const repo = `${m[1]}/${m[2]}`;
+    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !seen.has(repo)) {
+      seen.add(repo);
+      issues.push({
+        file, rule: "private-repo-clone", section: "§4a",
+        detail: `git clone targets "${repo}", not in the public-repo allowlist — verify it is public before publishing, or replace with the workspace + new-project.ts workflow`,
+        severity: "error",
+      });
+    }
+  }
+
+  const linkRe = /github\.com\/([^\/\s"'<)]+)\/([^\/\s"'<).]+)/gi;
+  while ((m = linkRe.exec(html)) !== null) {
+    const repo = `${m[1]}/${m[2]}`;
+    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !seen.has(repo)) {
+      seen.add(repo);
+      issues.push({
+        file, rule: "private-repo-link", section: "§4a",
+        detail: `Link/citation references "${repo}", not in the public-repo allowlist — verify it is public before publishing`,
+        severity: "warn",
+      });
+    }
+  }
+  return issues;
+}
+
 /** Check 10: §20 — Instructor Guide completeness */
 function checkInstructorGuide(html: string, file: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
@@ -266,6 +305,7 @@ for (const file of htmlFiles) {
   allIssues.push(...checkCourseOverview(html, rel));
   allIssues.push(...checkCssVariablesOnly(html, rel));
   allIssues.push(...checkInstructorGuide(html, rel));
+  allIssues.push(...checkNoPrivateRepoRefs(html, rel));
 }
 
 // Cross-file checks

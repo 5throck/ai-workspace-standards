@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-15]**: feat(co-deck): add §4a "No Private-Repository References" rule to the `handbook` skill's AUTHORING_GUIDELINES.md — prompted by a real bug where a co-consult/co-deck practice handbook told readers to `git clone` a private per-variant example repo instead of the public workspace repo. Added a new automated check (`check-authoring.ts` Check 11, §4a) that flags `git clone`/link references to any `github.com/<owner>/<repo>` not in a small public-repo allowlist. Ported the rule + checklist item into the diverged `.claude/`/`.gemini/`/`.agents/` copies of the handbook skill (co-deck's own AUTHORING_GUIDELINES.md and QUALITY_CHECKLIST.md have evolved ahead of the `skills/` SSOT — surgical port, not overwrite). `check-authoring.ts` 1.0.0→1.1.0, `handbook` skill 0.1.0→0.2.0 (all 4 copies). Registered in `templates/co-deck/scripts/co-deck/SCRIPTS.md`.
+
 - **[2026-08-15]**: docs(skills): fix `update-bun-packages/SKILL.md`'s "L1/L2 Standalone Project" labeling — its own layer-detection logic (`[ -d "templates/common" ]`) only distinguishes L0 (workspace root) from everything else; the non-L0 branch is entered from `templates/co-*/` (L2) and `Projects/*/` (L3) alike, never from `templates/common/` itself (L1 is never a place this skill runs standalone). Renamed the mode label, `MODE` variable value, and all section headers from "L1/L2" to "L2/L3" throughout. Bumped skill version 1.2.0→1.3.0, re-synced to `.claude/`, `.gemini/`, `.agents/`, and `templates/common/`, and fixed the same stale wording in `templates/co-news/`'s diverged copy. `bun scripts/audit.ts` passes clean.
 
 - **[2026-08-15]**: docs(scripts): fix remaining L2→L3 code comments in 5 root scripts — `audit.ts` (CONSTITUTION.md-skip message: "L1/L2 project" → "L2/L3 project", since both variant templates and scaffolded projects use `docs/context.md`), `generate-l2-readme.ts` (header/usage/error-message text describing its `Projects/<name>/` target), `helpers/template-utils.ts` (JSDoc for its 3 callers — also corrected a pre-existing "L2→L1"/"L1→L2" direction error unrelated to today's L2/L3 work, since `generate-variant.ts` actually promotes L3→L2 and `new-project.ts` deploys L1→L3), `l2-to-variant-pipeline.ts` (top-of-file summary + `PipelineConfig.l2ProjectPath` field doc), and `project-to-variant.ts` (header comment). All comment-only changes (no identifier renames). Version-bumped and propagated `audit.ts`/`helpers/template-utils.ts` (L0+L1) to `templates/common/`; regenerated `scripts/README.md`. `bun scripts/audit.ts` passes clean.
@@ -998,7 +1000,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-14*
+*Last Updated: 2026-08-15*
 
 
 

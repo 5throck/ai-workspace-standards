@@ -125,6 +125,7 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §2 All code blocks have copy buttons; one step = one action
 - [ ] §3 Role definitions use AGENTS.md-first tool-neutral approach
 - [ ] §4 Numbers/classifications match official sources
+- [ ] §4a No `git clone`/link/citation points at a private repository — every source a reader is told to use must be reachable without special access
 - [ ] §5 No organizational scale assumptions
 - [ ] §6 No artificial time/scope constraints
 - [ ] §7 Prerequisites (accounts, permissions, installations) are complete

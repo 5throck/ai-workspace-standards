@@ -67,6 +67,20 @@
 
 ---
 
+## 4a. No Private-Repository References
+
+**Principle**: Never cite, link to, or instruct readers to `git clone` a private repository. Every command, link, and source a reader is told to use must be reachable by someone with no special access.
+
+- **Why**: A co-consult/co-deck practice handbook told readers to run `git clone https://github.com/5throck/co-consult.git` — but that repository is private, so the exercise failed at step one for any reader without access. The correct source was already public: `templates/co-consult/` inside the public `ai-workspace-standards` repository, reachable via `bun scripts/new-project.ts "<name>" --variant co-consult`.
+- **How to apply**:
+  - Before writing any `git clone <url>` instruction, verify the target repository is public (check it loads in a private/incognito browser session, or confirm via `gh repo view <owner>/<repo> --json visibility`).
+  - When the content lives inside a variant of `ai-workspace-standards` (e.g. `templates/co-consult/`, `templates/co-deck/`), point readers at the public workspace repo and the real scaffolding command (`bun scripts/new-project.ts "<name>" --variant <variant>`) — never at a private per-variant repo, even if one exists internally for other purposes.
+  - This applies to every reference type, not just clone commands: `<a href>` links, "GitHub repository:" lines, screenshots showing a private repo URL, and code comments.
+  - If a source is genuinely private and no public equivalent exists, either omit it or describe the concept without a clickable/copyable pointer a reader would fail to follow — do not silently include an inaccessible link.
+  - Applies to both standalone and companion modes, and to every language edition (a link private in one language is private in all).
+
+---
+
 ## 5. Generalization of Operational Model Expressions
 
 **Principle**: Do not lock descriptions to a single scale. Express scope in general terms.
