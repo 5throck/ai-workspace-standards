@@ -49,8 +49,8 @@ BUILD_GUIDE.md does **not** prescribe **how** to dispatch them. Instead, it refe
 | Tier | Claude (alias) | Antigravity/Gemini |
 |------|---------------|-------------------|
 | High | `opus` | `gemini-3.1-pro` |
-| Medium | `sonnet` | `gemini-3.5-flash` |
-| Low | `haiku` | `gemini-3.5-flash` |
+| Medium | `sonnet` | `gemini-3.7-flash` |
+| Low | `haiku` | `gemini-3.7-flash` |
 
 ## 4. Language Policy Compliance
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-15T06:16:29.645Z
+**Generated**: 2026-08-15T06:21:24.146Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-07-31 |
-| auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-07-31 |
-| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-07-31 |
-| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-07-31 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-07-31 |
-| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-07-31 |
-| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-07-31 |
-| security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-07-31 |
+| architect | agents/architect.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
+| auditor | agents/auditor.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
+| docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
+| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
+| scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
+| security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
 
 ---
 
