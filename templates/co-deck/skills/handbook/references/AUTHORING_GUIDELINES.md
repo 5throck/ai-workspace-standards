@@ -204,6 +204,22 @@ Below is an actual applied placement example. For new courses, create a placemen
 | Ch.N §2 | Hands-on | flow-box (auto-performed) + prompt-box | CSS + code |
 | Ch.N §3 | Structure/architecture | Hierarchy diagram or tree-box | SVG + CSS |
 
+### 10-4. Standard Named Component Classes
+
+**Principle**: Reuse the following named CSS component conventions instead of inventing ad-hoc box styles. They are drawn from repeated patterns across the shipped chapters and are recognized as first-class visual elements under §10-1.
+
+| Component | Classes | Purpose |
+|-----------|---------|---------|
+| Command reference chips | `.cmd-chips`, `.cmd-list`, `.cmd-list-title`, `.cmd-chip` | Quick-glance list of commands/flags, distinct from a `.code-block` (which shows a runnable sequence) |
+| End-of-section recap | `.keypoints`, `.kp-title` | Bullet recap of what the section just taught |
+| End-of-section quiz | `.quiz`, `.quiz-title` | Self-check questions placed at section end (pairs with §20-4 check questions for instructor use) |
+| Index card type badges | `.tag-ref`, `.tag-ex`, `.tag-ch` | On `index.html` cards, distinguish reference material, hands-on exercises, and numbered chapters at a glance (extends §21-2) |
+| Schedule/timing rows | `.schedule-block`, `.schedule-time`, `.schedule-body` | Renders the §20-1 time-allocation table as timeline rows in the Lecture Guide |
+| Version/label rows | `.version-row`, `.vlabel`, `.vvalue` | Key–value rows for version/tooling info blocks (e.g., in Course Overview prerequisites) |
+
+- **Why**: Without a named convention, each new chapter reinvents its own box markup for the same recurring content shapes (command lists, quizzes, recaps), causing visual drift across chapters.
+- **How to apply**: When a section needs one of the above content shapes, reuse the matching class set rather than creating a new one. If a genuinely new recurring shape emerges in 3+ places, add it to this table rather than leaving it undocumented.
+
 ---
 
 ## 11. Markup Details
@@ -326,6 +342,21 @@ When referencing another chapter or section, unify the format as **`N장 §M`**.
 ✗ "제5장에서 다룸"
 ✓ "5장 §3에서 다룬다"
 ```
+
+### 12-3a. Glossary Entry Markup
+
+**Principle**: Glossary entries use a fixed `<dl>`/`<dt>`/`<dd>` pattern that pairs the local-language term with the English term and back-links to where it is explained in depth.
+
+```html
+<dt>훅 <span class="en">hook</span></dt>
+<dd>
+  ... definition ...
+  <span class="see">자세히: <a href="../concepts/....html#hooks">4장 §2</a></span>
+</dd>
+```
+
+- **Why**: A uniform glossary structure lets `site-search.js` and the term-glossing rule in §12-2 point readers to one predictable place, and keeps the "first-use gloss, then English-only" rule (§12-2) consistent with how the glossary itself defines terms.
+- **How to apply**: Every glossary `<dt>` pairs the local term with `<span class="en">English</span>`; every `<dd>` that has a fuller treatment elsewhere ends with `<span class="see">...</span>` using the §12-3 chapter/section reference format.
 
 ### 12-4. Minimize em-dash (—) Usage
 
@@ -730,7 +761,7 @@ The index is the entry point for the entire handbook. Include the following stru
 
 - **Course title and one-line description**: Placed at the top.
 - **Grouping by day and type**: Group chapter cards by course day (e.g., Day 1 / Day 2) and type (concept / hands-on).
-- **Chapter cards**: Each card includes the chapter title, 1–2 line description, chapter number tag, and link. Concept chapters and hands-on chapters should be visually distinguishable.
+- **Chapter cards**: Each card includes the chapter title, 1–2 line description, chapter number tag, and link. Concept chapters and hands-on chapters should be visually distinguishable using the `.tag-ref` (reference material) / `.tag-ex` (hands-on exercise) / `.tag-ch` (numbered chapter) badge classes from §10-4.
 - **Instructor materials group**: Course Overview, Lecture Guide, and other instructor-only resources are placed in a separate group.
 
 ### 21-3. Consistency
@@ -744,6 +775,19 @@ The index is the entry point for the entire handbook. Include the following stru
 **Principle**: When adding, deleting, or reordering chapters, **do not stop at merely moving files** — update and verify all four of the following without exception. These are the points most frequently missed during renumbering.
 
 - **Why**: During an actual chapter reordering: ① `chapter-nav` prev/next did not reflect the new order, creating links that skip or loop backward; ② links pointed to new files but label text retained old chapter numbers; ③ newly created files were not added to `site-search.js`'s `DOCS` array, causing them to be missed in full-site search.
+
+### 21-5. `<meta name="description">` Template
+
+**Principle**: Every chapter file's `<meta name="description">` follows a fixed template rather than free-form summary text:
+
+```
+"Chapter N · Title - part of the Multi-Agent Team Harness Engineering Handbook."
+```
+
+localized per language edition (e.g., the KO/JA/ES editions translate "Chapter N · Title" and the trailing clause, not just insert raw English).
+
+- **Why**: A consistent description template keeps search-engine snippets and social previews predictable across dozens of chapter files, and avoids each chapter re-deriving its own summary wording.
+- **How to apply**: When authoring a new chapter file, set the meta description to `<course/handbook name> — Chapter N · <Title>` (or the equivalent localized phrasing), not a bespoke paragraph.
 - **How to apply**:
   1. **prev/next mutual symmetry** — If document A's `next` points to B, then B's `prev` must point to A. Fixing only one side and missing the other creates a link that works in one direction ("next") but not the other ("previous").
   2. **Link label and target consistency** — The label text (chapter number, title) in `<a href="...">label</a>` must always match the current chapter number and title of the file that `href` actually points to. When moving files, a common mistake is to update only `href` while leaving the label text as the copied old text.
