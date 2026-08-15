@@ -42,6 +42,7 @@ lang_reason: source-material
 | **export-control-compliance-specialist** | Strategic items export control and sanctions screening specialist | high | inherit |
 | **foreign-regulatory-intelligence-analyst** | Monitors US/China/EU import regulation, tariff, and trade-defense changes | medium | inherit |
 | **fta-origin-analyst** | FTA rules-of-origin analysis and origin certification specialist | high | inherit |
+| **halal-certification-specialist** | Halal certification requirement analysis and certification process specialist | medium | inherit |
 | **hs-classification-specialist** | HS code classification, customs valuation, and tariff rate specialist | high | inherit |
 | **logistics-coordinator** | Incoterms selection, freight/forwarding, and bonded warehouse logistics | low | inherit |
 | **market-entry-strategist** | Overseas market entry strategy, buyer discovery, and market research | medium | inherit |
@@ -53,8 +54,9 @@ lang_reason: source-material
 - **export-control-screening**: Guides the Export Control & Sanctions Screening Specialist through strategic-item classification, catch-all end-use/end-user assessment, and denied-party/sanctions screening. The highest-consequence workflow on the team — escalation discipline is mandatory.
 - **foreign-regulation-monitoring**: Guides the Foreign Regulatory Intelligence Analyst through tracking US/China/EU import regulation, tariff, and trade-defense changes, with strict source attribution and staleness disclosure so downstream compliance work isn't built on outdated destination-market context.
 - **fta-origin-determination**: Guides the FTA/Origin Analyst through determining whether goods qualify for preferential tariff treatment under a specific Free Trade Agreement — origin criterion selection, non-originating material assessment, and origin certification method identification.
+- **halal-certification-workflow**: Guides the Halal Certification Specialist through determining whether halal certification is required for a destination market and product category, identifying the recognized certifying body (JAKIM, BPJPH/MUI, ESMA, GSO), and mapping the certification/audit process and renewal cycle.
 - **hs-classification-workflow**: Guides the HS Classification Specialist through GRI-ordered Harmonized System classification, customs valuation basis determination, and tariff rate lookup. Ensures classification reasoning is reproducible and defensible under a customs post-clearance audit.
-- **logistics-coordination**: Guides the Logistics Coordinator through Incoterms 2020 term selection, freight mode/forwarder comparison, and bonded-warehouse/customs clearance logistics planning, ending in final engagement delivery handoff.
+- **logistics-coordination**: Guides the Logistics Coordinator through Incoterms term selection (2020 default, with 2000/2010 version recognition for legacy contracts), freight mode/forwarder comparison, and bonded-warehouse/customs clearance logistics planning, ending in final engagement delivery handoff.
 - **market-entry-strategy**: Guides the Market Entry Strategist through destination-market demand assessment, competitive landscape analysis, entry channel comparison, and buyer/distributor discovery — synthesized with compliance findings into a single go-to-market recommendation.
 - **trade-documentation-checklist**: Guides the Trade Documentation Specialist through assembling a complete, internally consistent trade document package (invoice, packing list, B/L, certificate of origin) and reviewing letter-of-credit terms against UCP 600 for discrepancy risk.
 

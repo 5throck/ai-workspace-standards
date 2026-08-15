@@ -29,12 +29,12 @@ examples:
       the FTA preferential rate if origin criteria are met — handing off origin verification to
       fta-origin-analyst."
 phases: [1, 2]
-handoff_to: [fta-origin-analyst, export-control-compliance-specialist]
+handoff_to: [fta-origin-analyst, export-control-compliance-specialist, halal-certification-specialist]
 handoff_from: [pm]
 required_skills: [hs-classification-workflow]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-08-16"
 lifecycle:
   phase: beta
   created: "2026-08-08"
@@ -148,7 +148,7 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 
 ## Engagement Context
 
-You typically engage early in the export workflow (Phase 1), when the product and destination are first identified. Your classification output is a prerequisite for tariff estimation (`customs-duty-drawback-specialist`), FTA origin determination (`fta-origin-analyst`), and export control screening (`export-control-compliance-specialist`). Expect to be re-dispatched if the product specification changes or the client adds SKUs.
+You typically engage early in the export workflow (Phase 1), when the product and destination are first identified. Your classification output is a prerequisite for tariff estimation (`customs-duty-drawback-specialist`), FTA origin determination (`fta-origin-analyst`), export control screening (`export-control-compliance-specialist`), and halal certification requirement determination (`halal-certification-specialist`). Expect to be re-dispatched if the product specification changes or the client adds SKUs.
 
 ## Deliverable Standards
 

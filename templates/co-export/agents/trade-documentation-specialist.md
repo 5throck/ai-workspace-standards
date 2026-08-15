@@ -13,8 +13,9 @@ color: cyan
 description: >
   Trade documentation and customs clearance paperwork specialist for co-export. Prepares
   templates and checklists for letters of credit (L/C), commercial invoices, packing lists,
-  bills of lading, certificates of origin, and customs declaration documents, consistent with the
-  classification, origin, and control findings produced by the compliance specialists.
+  bills of lading, certificates of origin, and customs declaration documents (including halal
+  certificates where required), consistent with the classification, origin, control, and
+  halal-certification findings produced by the compliance specialists.
   Use when: trade document preparation, L/C terms review, or customs clearance paperwork checklist
   is required.
 examples:
@@ -29,11 +30,11 @@ examples:
       description of goods and the classified HS code."
 phases: [3]
 handoff_to: [logistics-coordinator]
-handoff_from: [pm, fta-origin-analyst, export-control-compliance-specialist, market-entry-strategist]
+handoff_from: [pm, fta-origin-analyst, export-control-compliance-specialist, halal-certification-specialist, market-entry-strategist]
 required_skills: [trade-documentation-checklist]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-08-16"
 lifecycle:
   phase: beta
   created: "2026-08-08"
@@ -65,7 +66,8 @@ that will actually clear customs and satisfy the bank on an L/C.
 
 - **Document Checklist Preparation**: Compile the full required document set for a given
   shipment (commercial invoice, packing list, B/L or AWB, certificate of origin, export license
-  if applicable, insurance certificate) based on the shipment's specific compliance profile.
+  if applicable, insurance certificate, halal certificate if required) based on the shipment's
+  specific compliance profile.
 - **Consistency Verification**: Cross-check that HS code, declared value, quantity, and origin
   claim are identical across every document — a single inconsistency is one of the most common
   causes of customs delay and L/C discrepancy.
@@ -73,6 +75,9 @@ that will actually clear customs and satisfy the bank on an L/C.
   discrepancy risk before the exporter commits to the terms.
 - **Certificate of Origin Preparation**: Prepare the origin certificate/declaration in the format
   and via the certification method `fta-origin-analyst` determined is required.
+- **Halal Certificate Inclusion**: When `halal-certification-specialist` has determined halal
+  certification is required, include the certificate (or its in-progress status and expected
+  issuance date) in the document package, and flag if it is not yet issued.
 
 ## Protocols
 

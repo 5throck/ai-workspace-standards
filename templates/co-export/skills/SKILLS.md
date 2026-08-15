@@ -10,6 +10,7 @@ This directory contains variant-specific skills for the `co-export` template.
 | export-control-screening | `export-control-screening/` | export-control-screening skill |
 | foreign-regulation-monitoring | `foreign-regulation-monitoring/` | foreign-regulation-monitoring skill |
 | fta-origin-determination | `fta-origin-determination/` | fta-origin-determination skill |
+| halal-certification-workflow | `halal-certification-workflow/` | halal-certification-workflow skill |
 | hs-classification-workflow | `hs-classification-workflow/` | hs-classification-workflow skill |
 | logistics-coordination | `logistics-coordination/` | logistics-coordination skill |
 | market-entry-strategy | `market-entry-strategy/` | market-entry-strategy skill |
