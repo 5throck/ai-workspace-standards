@@ -1,7 +1,7 @@
 # Design: Spec Registry Enforcement + project-to-variant.ts Hardening
 
 **Date**: 2026-08-16
-**Status**: Proposed
+**Status**: Approved — Part A Stage 1 implemented; Stage 2 and Part B remain as follow-up PRs (see Delivery Scope)
 **Source**: brainstorming
 **Spec ID**: 2026-08-16-spec-registry-enforcement-design
 **Related**: [workflow-integrated-methodology-design.md](workflow-integrated-methodology-design.md), [execution-plan-design-gate-design.md](execution-plan-design-gate-design.md), [ADR-0054](../adr/0054-error-handling-standardization.md)

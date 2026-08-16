@@ -1,4 +1,4 @@
-// @version 2.12.0
+// @version 2.13.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -1719,7 +1719,10 @@ if (fs.existsSync(variantAuditPath)) {
 }
 
 // ── Spec Registry Checks (--spec-check mode, warn-only) ─────────────────────
-if (SPEC_CHECK && !LIFECYCLE_ONLY) {
+// NOTE: guarded by SPEC_CHECK alone (not !LIFECYCLE_ONLY) because dev-sync.ts's
+// only call site passes --spec-check --lifecycle-only together; gating on
+// !LIFECYCLE_ONLY here made this block permanently unreachable.
+if (SPEC_CHECK) {
     const SPEC_REGISTRY = path.join('docs', 'specs', 'registry.json');
     if (!fs.existsSync(SPEC_REGISTRY)) {
         Warn('Spec registry not found at docs/specs/registry.json — run: bun scripts/spec-register.ts to initialize');
@@ -1739,14 +1742,23 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
 
         const codeChangedDirs = ['scripts/', 'templates/', 'agents/'];
         const changedCode = changedFiles.filter(f => codeChangedDirs.some(d => f.startsWith(d)));
+        const changedSpecArea = changedFiles.some(f =>
+            f.startsWith('docs/specs/') || f.startsWith('docs/designs/'));
         if (changedCode.length > 0) {
-            const registeredFiles = new Set(registry.specs.map(s => s.file));
-            // Loose check: any approved/draft spec is sufficient (no file-level mapping required)
-            const hasActiveSpec = registry.specs.some(s => s.status === 'approved' || s.status === 'implemented');
-            if (!hasActiveSpec) {
-                Warn(`Spec check: ${changedCode.length} code file(s) changed but no approved/implemented spec found in registry — consider running brainstorming skill or spec-register.ts`);
+            const RECENT_DAYS = 7;
+            const now = Date.now();
+            const recentActiveSpec = registry.specs.some(s => {
+                if (s.status !== 'approved' && s.status !== 'implemented') return false;
+                const updated = Date.parse(s.last_updated);
+                return !isNaN(updated) && (now - updated) <= RECENT_DAYS * 86400 * 1000;
+            });
+            // Relevance is diff-recency-based, not true per-file spec-to-code mapping
+            // (out of scope for this pass — see docs/designs/2026-08-16-spec-registry-enforcement-design.md).
+            const relevant = changedSpecArea || recentActiveSpec;
+            if (!relevant) {
+                Warn(`Spec check: ${changedCode.length} code file(s) changed but no recent/relevant spec activity (diff doesn't touch docs/specs|docs/designs, and no approved/implemented spec updated within ${RECENT_DAYS}d) — consider running the brainstorming skill or spec-register.ts`);
             } else {
-                Pass(`Spec check: code changes covered by spec registry (${registry.specs.filter(s => s.status === 'approved' || s.status === 'implemented').length} active spec(s))`);
+                Pass('Spec check: code changes covered by spec registry activity');
             }
         }
 

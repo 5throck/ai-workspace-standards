@@ -36,6 +36,411 @@
       "source": "architect",
       "created": "2026-08-09",
       "last_updated": "2026-08-09"
+    },
+    {
+      "id": "2026-08-16-august-regression-coverage-design",
+      "title": "august regression coverage design",
+      "file": "docs/designs/2026-08-16-august-regression-coverage-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-16-spec-registry-enforcement-design",
+      "title": "spec registry enforcement design",
+      "file": "docs/designs/2026-08-16-spec-registry-enforcement-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-07-adr-0033-implementation-summary",
+      "title": "adr 0033 implementation summary",
+      "file": "docs/designs/adr-0033-implementation-summary.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-10-agents-md-final-structure",
+      "title": "agents md final structure",
+      "file": "docs/designs/agents-md-final-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-10-agents-md-section-integration-design",
+      "title": "agents md section integration design",
+      "file": "docs/designs/agents-md-section-integration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-16-ai-workspace-service-platform-roadmap",
+      "title": "ai workspace service platform roadmap",
+      "file": "docs/designs/ai-workspace-service-platform-roadmap.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-beta-lifecycle-variant-sync-design",
+      "title": "beta lifecycle variant sync design",
+      "file": "docs/designs/beta-lifecycle-variant-sync-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-design",
+      "title": "co deck theme reduction design",
+      "file": "docs/designs/co-deck-theme-reduction-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-plan",
+      "title": "co deck theme reduction plan",
+      "file": "docs/designs/co-deck-theme-reduction-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-12-consolidate-propagation-scripts-plan",
+      "title": "consolidate propagation scripts plan",
+      "file": "docs/designs/consolidate-propagation-scripts-plan.md",
+      "status": "drifted",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-13-create-l2-scaffold-design",
+      "title": "create l2 scaffold design",
+      "file": "docs/designs/create-l2-scaffold-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-deploy-to-l1-script-design",
+      "title": "deploy to l1 script design",
+      "file": "docs/designs/deploy-to-l1-script-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase1-governance-design",
+      "title": "ecc phase1 governance design",
+      "file": "docs/designs/ecc-phase1-governance-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase2-governance-hardening-design",
+      "title": "ecc phase2 governance hardening design",
+      "file": "docs/designs/ecc-phase2-governance-hardening-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-01-ecc-phase3-governance-maturation-design",
+      "title": "ecc phase3 governance maturation design",
+      "file": "docs/designs/ecc-phase3-governance-maturation-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-03-explain-me-skill-design",
+      "title": "explain me skill design",
+      "file": "docs/designs/explain-me-skill-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-22-extract-slidedata-fix-plan",
+      "title": "extract slidedata fix plan",
+      "file": "docs/designs/extract-slidedata-fix-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-governance-docs-consolidation-design",
+      "title": "governance docs consolidation design",
+      "file": "docs/designs/governance-docs-consolidation-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-08-l0-l2-deployment-audit-design",
+      "title": "l0 l2 deployment audit design",
+      "file": "docs/designs/l0-l2-deployment-audit-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-l1-agent-format-spec",
+      "title": "l1 agent format spec",
+      "file": "docs/designs/l1-agent-format-spec.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-conversion-pipeline",
+      "title": "l2 to variant conversion pipeline",
+      "file": "docs/designs/l2-to-variant-conversion-pipeline.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-design-checklist",
+      "title": "l2 to variant pipeline design checklist",
+      "file": "docs/designs/l2-to-variant-pipeline-design-checklist.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-executive-summary",
+      "title": "l2 to variant pipeline executive summary",
+      "file": "docs/designs/l2-to-variant-pipeline-executive-summary.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-m11-m12-m15-and-beta-lifecycle-design",
+      "title": "m11 m12 m15 and beta lifecycle design",
+      "file": "docs/designs/m11-m12-m15-and-beta-lifecycle-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-mvp-wave-1-summary",
+      "title": "mvp wave 1 summary",
+      "file": "docs/designs/mvp-wave-1-summary.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-narration-engine-tts-design",
+      "title": "narration engine tts design",
+      "file": "docs/designs/narration-engine-tts-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-group-type-mapping-spec",
+      "title": "pm md group type mapping spec",
+      "file": "docs/designs/pm-md-group-type-mapping-spec.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-operations-guide",
+      "title": "pm md operations guide",
+      "file": "docs/designs/pm-md-operations-guide.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-variant-specific-content-injection-design",
+      "title": "pm md variant specific content injection design",
+      "file": "docs/designs/pm-md-variant-specific-content-injection-design.md",
+      "status": "drifted",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-03-project-review-2026-07-03-improvement-plan",
+      "title": "project review 2026 07 03 improvement plan",
+      "file": "docs/designs/project-review-2026-07-03-improvement-plan.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-12-project-review-fixes-design",
+      "title": "project review fixes design",
+      "file": "docs/designs/project-review-fixes-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-02-retry-handler-fail-fast-design",
+      "title": "retry handler fail fast design",
+      "file": "docs/designs/retry-handler-fail-fast-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-sequential-pr-merge-policy-design",
+      "title": "sequential pr merge policy design",
+      "file": "docs/designs/sequential-pr-merge-policy-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-thumbnail-to-headline-nav-design",
+      "title": "thumbnail to headline nav design",
+      "file": "docs/designs/thumbnail-to-headline-nav-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-thumbnail-to-headline-nav-plan",
+      "title": "thumbnail to headline nav plan",
+      "file": "docs/designs/thumbnail-to-headline-nav-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-tts-autoplay-separation-design",
+      "title": "tts autoplay separation design",
+      "file": "docs/designs/tts-autoplay-separation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-tts-autoplay-separation-plan",
+      "title": "tts autoplay separation plan",
+      "file": "docs/designs/tts-autoplay-separation-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-upgrade-project-content-sync-plan",
+      "title": "upgrade project content sync plan",
+      "file": "docs/designs/upgrade-project-content-sync-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-agent-structure",
+      "title": "variant specialist agent structure",
+      "file": "docs/designs/variant-specialist-agent-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-skill-structure",
+      "title": "variant specialist skill structure",
+      "file": "docs/designs/variant-specialist-skill-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-variant-templates-advancement-design",
+      "title": "variant templates advancement design",
+      "file": "docs/designs/variant-templates-advancement-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-variant-templates-sync-design",
+      "title": "variant templates sync design",
+      "file": "docs/designs/variant-templates-sync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-01-version-manifest-implementation-plan",
+      "title": "version manifest implementation plan",
+      "file": "docs/designs/version-manifest-implementation-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-11-workspace-hardening-design",
+      "title": "workspace hardening design",
+      "file": "docs/designs/workspace-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-06-workspace-q3-improvements-design",
+      "title": "workspace q3 improvements design",
+      "file": "docs/designs/workspace-q3-improvements-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
     }
   ]
 }

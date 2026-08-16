@@ -1,4 +1,4 @@
-// @version 1.5.2
+// @version 1.5.3
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -222,9 +222,11 @@ if (fs.existsSync(archiveMemoryTs)) {
 }
 
 // 3.9 Spec registry check (non-blocking — warns if approved specs are stale or code has no spec)
+// Output is intentionally visible (no .quiet()) — Stage 1 of the spec-registry-enforcement
+// rollout; see docs/designs/2026-08-16-spec-registry-enforcement-design.md.
 const specRegPath = path.join('docs', 'specs', 'registry.json');
 if (fs.existsSync(specRegPath)) {
-    await $`bun scripts/audit.ts --spec-check --lifecycle-only`.quiet().nothrow();
+    await $`bun scripts/audit.ts --spec-check --lifecycle-only`.nothrow();
 }
 
 // 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)
