@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.0.1
 // scripts/helpers/upgrade-versions.ts
 // Pure version-extraction and frontmatter-merge helpers for upgrade-project.ts.
 // Extracted so the version-detection logic is unit-testable (the CLI script's
@@ -11,17 +11,19 @@ import { existsSync, readFileSync } from "node:fs";
 
 /**
  * Extract a script's version from its header.
- * Priority: `// @version X.Y.Z` line comment (established convention), then
- * JSDoc block style `* @version X.Y.Z` (used by security-validator.ts, whose
- * version lived in a JSDoc block and was silently never detected — see
- * docs/designs/upgrade-project-content-sync-plan.md §알려진 한계).
+ * Priority: `// @version X.Y.Z` line comment (established convention), then any
+ * other `@version X.Y.Z` occurrence — JSDoc block (` * @version 1.1.0`),
+ * inline JSDoc, or mid-line header (` * Level: L0 | Status: active | @version 1.1.0`).
+ * Files using these styles (e.g. security-validator.ts, qa-gate.ts,
+ * validate-model-registry.ts) were silently treated as "no version" and never
+ * synced — see docs/designs/upgrade-project-content-sync-plan.md, Known Limitations.
  */
 export function extractScriptVersion(filePath: string): string {
   if (!existsSync(filePath)) return "";
   const content = readFileSync(filePath, "utf8");
   const lineVersion = content.split("\n").find(l => /^\s*\/\/\s*@version\s+\d/.test(l));
   if (lineVersion) return lineVersion.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
-  return content.match(/^\s*\*\s*@version\s+(\d+\.\d+\.\d+)/m)?.[1] ?? "";
+  return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "";
 }
 
 /**
