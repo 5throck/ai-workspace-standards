@@ -3,12 +3,12 @@ name: presenter-mode
 description: >
   Dual-window presenter state synchronization using browser BroadcastChannel API,
   syncing slide index, speaker notes, timer, current/next slide preview.
-version: 1.0.0
-last_reviewed: 2026-08-06
+version: 1.0.1
+last_reviewed: 2026-08-16
 status: active
 scope: co-deck
 l2_propagate: true
-owner: presentation-architect
+owner: html-build
 prerequisites: HTML presentation deck with BroadcastChannel API support
 metadata:
   type: presentation-sync

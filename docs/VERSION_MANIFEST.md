@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T01:35:05.541Z
+**Generated**: 2026-08-16T01:55:08.729Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -46,7 +46,7 @@
 | meeting-facilitation | 1.4.0 | active | skills/meeting-facilitation/SKILL.md | workspace | meeting, agent discussion, collaborative decision, multi-agent coordination, facilitate meeting | pm |
 | platform-command-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
-| presenter-mode | 1.0.0 | active | skills/presenter-mode/SKILL.md | workspace | presenter-mode, /presenter-mode, dual-window sync, presenter view | presentation-architect |
+| presenter-mode | 1.0.1 | active | skills/presenter-mode/SKILL.md | workspace | presenter-mode, /presenter-mode, dual-window sync, presenter view | html-build |
 | project-review | 1.1.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.0.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.0.1 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
@@ -117,7 +117,7 @@
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-lifecycle-audit.ts | 1.2.1 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.3.0 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
