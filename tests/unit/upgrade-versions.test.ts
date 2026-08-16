@@ -14,6 +14,8 @@ describe('extractScriptVersion', () => {
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'line.ts'), '#!/usr/bin/env bun\n// @version 1.2.3\nconsole.log("x");\n');
     writeFileSync(join(dir, 'jsdoc.ts'), '/**\n * @version 2.0.1\n * Security validator\n */\nexport const x = 1;\n');
+    writeFileSync(join(dir, 'inline.ts'), '/** @version 4.5.6 */\nexport const x = 1;\n');
+    writeFileSync(join(dir, 'midline.ts'), ' * Level: L0 | Status: active | @version 5.0.0\n * Header comment\n');
     writeFileSync(join(dir, 'both.ts'), '// @version 3.0.0\n/**\n * @version 9.9.9 (dependency note, not the file version)\n */\nexport const x = 1;\n');
     writeFileSync(join(dir, 'none.ts'), '// no version header here\nexport const x = 1;\n');
   });
@@ -28,6 +30,14 @@ describe('extractScriptVersion', () => {
 
   test('extracts JSDoc block * @version (security-validator.ts case)', () => {
     expect(extractScriptVersion(join(dir, 'jsdoc.ts'))).toBe('2.0.1');
+  });
+
+  test('extracts inline JSDoc /** @version ... */ (qa-gate.ts case)', () => {
+    expect(extractScriptVersion(join(dir, 'inline.ts'))).toBe('4.5.6');
+  });
+
+  test('extracts mid-line header | @version (validate-model-registry.ts case)', () => {
+    expect(extractScriptVersion(join(dir, 'midline.ts'))).toBe('5.0.0');
   });
 
   test('prefers line-comment version when both styles exist', () => {
