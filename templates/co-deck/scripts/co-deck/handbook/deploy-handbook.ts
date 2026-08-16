@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.1.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/deploy-handbook.ts
 // Deploys a handbook to GitHub Pages — automates repo creation, visibility,
@@ -12,7 +12,7 @@
 
 import { writeFileSync, existsSync, readFileSync, mkdirSync, cpSync, readdirSync } from "node:fs";
 import { join, resolve, basename } from "node:path";
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -75,6 +75,29 @@ function run(cmd: string, opts?: { cwd?: string; silent?: boolean }): string {
   } catch (e: unknown) {
     const err = e as { stderr?: string; message?: string };
     throw new Error(`Command failed: ${cmd}\n${err.stderr || err.message || e}`);
+  }
+}
+
+// Argv-array variant of run() — invokes the binary directly via execFileSync
+// with a separate args array, so interpolated values (repo slugs, paths, URLs)
+// are never parsed by a shell. Injection-resistant regardless of input content.
+function runArgs(bin: string, argv: string[], opts?: { cwd?: string; silent?: boolean; captureStderr?: boolean }): string {
+  const cwd = opts?.cwd ?? projectDir;
+  try {
+    const stdioCfg = opts?.silent ? ["ignore", "pipe", opts?.captureStderr ? "pipe" : "inherit"] : "inherit";
+    const result = execFileSync(bin, argv, {
+      cwd,
+      encoding: "utf-8",
+      stdio: stdioCfg as never,
+      timeout: 60_000,
+    });
+    return (result || "").trim();
+  } catch (e: unknown) {
+    const err = e as { stderr?: string; stdout?: string; message?: string };
+    if (opts?.captureStderr && (err.stdout !== undefined || err.stderr !== undefined)) {
+      return `${err.stdout || ""}${err.stderr || ""}`.trim();
+    }
+    throw new Error(`Argv command failed: ${bin} ${argv.join(" ")}\n${err.stderr || err.message || e}`);
   }
 }
 
@@ -214,31 +237,31 @@ log("📦", `Ensuring GitHub repo: ${fullRepo} (${visibility})`);
 
 let repoExists = true;
 try {
-  run(`gh repo view ${fullRepo}`, { silent: true });
+  runArgs("gh", ["repo", "view", fullRepo], { silent: true });
 } catch {
   repoExists = false;
 }
 
 if (repoExists) {
   // Check current visibility
-  const currentVis = run(`gh repo view ${fullRepo} --json isPrivate -q ".isPrivate"`, { silent: true });
+  const currentVis = runArgs("gh", ["repo", "view", fullRepo, "--json", "isPrivate", "-q", ".isPrivate"], { silent: true });
   const isPrivate = currentVis === "true";
   const wantsPublic = visibility === "public";
 
   if (isPrivate && wantsPublic) {
     log("🔓", `Switching ${fullRepo} from private to public...`);
-    run(`gh repo edit ${fullRepo} --visibility public`);
+    runArgs("gh", ["repo", "edit", fullRepo, "--visibility", "public"]);
     log("✅", "Repository is now public");
   } else if (!isPrivate && !wantsPublic) {
     log("🔒", `Switching ${fullRepo} from public to private...`);
-    run(`gh repo edit ${fullRepo} --visibility private`);
+    runArgs("gh", ["repo", "edit", fullRepo, "--visibility", "private"]);
     log("✅", "Repository is now private");
   } else {
     log("✅", `Repository already ${visibility}`);
   }
 } else {
   log("🆕", `Creating repository: ${fullRepo} (${visibility})...`);
-  run(`gh repo create ${fullRepo} --${visibility} --source=. --push=false`);
+  runArgs("gh", ["repo", "create", fullRepo, `--${visibility}`, "--source=.", "--push=false"]);
   log("✅", "Repository created");
 }
 
@@ -302,8 +325,9 @@ log("✅", "Created .github/workflows/deploy-pages.yml");
 log("🌐", "Configuring GitHub Pages...");
 
 try {
-  // Check if Pages is already enabled
-  const pagesInfo = run(`gh api repos/${fullRepo}/pages -q ".source" 2>&1`, { silent: true });
+  // Check if Pages is already enabled (captureStderr: gh api may exit non-zero
+  // on 404 — we want the combined stdout+stderr text, not a thrown error).
+  const pagesInfo = runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-q", ".source"], { silent: true, captureStderr: true });
 
   if (pagesInfo && !pagesInfo.includes("404")) {
     log("ℹ️", "GitHub Pages is already configured");
@@ -313,13 +337,13 @@ try {
 } catch {
   // Enable Pages via Actions deployment source
   try {
-    run(`gh api repos/${fullRepo}/pages -X POST -f build_type=workflow -f source[branch]=main -f source[path]=/`, { silent: true });
+    runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-X", "POST", "-f", "build_type=workflow", "-f", "source[branch]=main", "-f", "source[path]=/"], { silent: true });
     log("✅", "GitHub Pages enabled (Actions deployment)");
   } catch (e: unknown) {
     const err = e as { message?: string };
     // If Pages was just enabled by the workflow, it may conflict — try just enabling via Actions
     try {
-      run(`gh api repos/${fullRepo}/pages -X POST -f build_type=workflow`, { silent: true });
+      runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-X", "POST", "-f", "build_type=workflow"], { silent: true });
       log("✅", "GitHub Pages enabled (Actions deployment)");
     } catch {
       log("⚠️", `Could not enable Pages via API. It may auto-enable on first push. Manual step: go to repo Settings → Pages → Source: GitHub Actions`);
@@ -338,7 +362,7 @@ try {
 }
 
 // Stage all handbook files
-run(`git add ${outputDir}/.github/workflows/deploy-pages.yml ${outputDir}/docs/.nojekyll`);
+runArgs("git", ["add", `${outputDir}/.github/workflows/deploy-pages.yml`, `${outputDir}/docs/.nojekyll`]);
 log("✅", "Staged deploy workflow and .nojekyll");
 
 // Patch README files with GitHub Pages URL
@@ -347,7 +371,7 @@ for (const readmeFile of readmeFiles) {
   const readmePath = join(handbookDir, readmeFile);
   const patched = patchReadmePagesUrl(readmePath, pagesUrl, repoName);
   if (patched) {
-    run(`git add ${readmePath}`);
+    runArgs("git", ["add", readmePath]);
     log("📝", `Patched ${readmeFile} with GitHub Pages URL`);
   } else {
     log("ℹ️", `${readmeFile} already has correct GitHub Pages URL`);
@@ -355,10 +379,10 @@ for (const readmeFile of readmeFiles) {
 }
 
 // Check if there are changes to commit
-const readmeArgs = readmeFiles.map(f => `${outputDir}/${f}`).join(" ");
-const status = run(`git status --porcelain -- ${outputDir}/.github/workflows/deploy-pages.yml ${outputDir}/docs/.nojekyll ${readmeArgs}`, { silent: true });
+const readmeArgList = readmeFiles.map(f => `${outputDir}/${f}`);
+const status = runArgs("git", ["status", "--porcelain", "--", `${outputDir}/.github/workflows/deploy-pages.yml`, `${outputDir}/docs/.nojekyll`, ...readmeArgList], { silent: true });
 if (status) {
-  run(`git commit -m "ci(handbook): add GitHub Pages deploy workflow"`);
+  runArgs("git", ["commit", "-m", "ci(handbook): add GitHub Pages deploy workflow"]);
   log("✅", "Committed deploy workflow");
 } else {
   log("ℹ️", "No new changes to commit");
@@ -367,11 +391,11 @@ if (status) {
 // Add remote if not already present
 const remoteUrl = `https://github.com/${fullRepo}.git`;
 try {
-  run(`git remote get-url origin`, { silent: true });
+  runArgs("git", ["remote", "get-url", "origin"], { silent: true });
   // Update origin URL if different
-  run(`git remote set-url origin ${remoteUrl}`);
+  runArgs("git", ["remote", "set-url", "origin", remoteUrl]);
 } catch {
-  run(`git remote add origin ${remoteUrl}`);
+  runArgs("git", ["remote", "add", "origin", remoteUrl]);
   log("✅", `Added remote origin → ${remoteUrl}`);
 }
 

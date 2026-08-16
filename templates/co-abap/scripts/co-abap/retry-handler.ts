@@ -1,8 +1,18 @@
-// @version 1.0.0
 #!/usr/bin/env bun
 /**
- * Error Recovery Handler
+ * Error Recovery Handler — VSP variant
+ * @version 1.0.2
  * Implements retry logic with exponential backoff for subagent failures
+ *
+ * VARIANT-SPECIFIC FEATURES:
+ * - AbortSignal support for cancellation (VSP-specific, not in common version)
+ * - Randomized jitter in backoff to prevent thundering herd in parallel dispatch
+ * - Simpler error classification (co-abap does not require auth error detection)
+ *
+ * NOTE: Common version has more comprehensive auth error classification (401/403).
+ * This variant intentionally excludes it as VSP context does not use such errors.
+ * If merging with common later, consider whether auth error detection is needed.
+ * (ADR-0050 Part 1: Variant files only diverge when logic is genuinely variant-specific)
  */
 
 import path from "node:path";
