@@ -16,9 +16,9 @@
 | ① | Broken links | §21-4 | All internal `<a href>` targets resolve to existing files |
 | ② | prev/next symmetry | §21-4 | A→next→B implies B→prev→A |
 | ③ | Label match | §21-4 | chapter-nav labels match target title/h1 |
-| ④ | DOCS sync | §23-4 | site-search.js DOCS array matches actual HTML files |
+| ④ | Search index sync | §23-4 | 3-way validation: `search-manifest.json` ↔ actual HTML files ↔ generated `search-data.js` (v2.0.0) |
 
-**Implementation details**: All 4 checks share `nav-utils.ts` for HTML parsing. See `validation/NAV_VALIDATION.md` for the full specification including shared utilities, error conditions, and CI integration.
+**Implementation details**: All 4 checks share `nav-utils.ts` for HTML parsing. Check ④ uses `check-search.ts` (v2.0.0) — a manifest-based 3-way validation that fails on `missing-file` (manifest → dead path), `missing-from-manifest` (primary HTML file not registered), `stale-search-data` (manifest ↔ `search-data.js` drift, both directions), and `missing-search-data` (generated file absent). Locale-variant files (`*_ko/_en/_ja/_es.html`) and `index.html` are exempt by design. Skipped entirely when `search-manifest.json` is absent. See `validation/NAV_VALIDATION.md` for the full specification including shared utilities, error conditions, and CI integration.
 
 **Running**:
 ```bash
@@ -29,7 +29,7 @@ bun run validate-nav
 bun scripts/validate-nav.ts --docs-dir path/to/docs
 ```
 
-### check-authoring (10 checks)
+### check-authoring (12 checks)
 
 | # | Check | Section | Description |
 |---|-------|---------|-------------|
@@ -40,9 +40,11 @@ bun scripts/validate-nav.ts --docs-dir path/to/docs
 | 5 | min-width: 0 | §11-1 | step-content has flex overflow prevention |
 | 6 | No mid-word strong | §11 | No short words wrapped in `<strong>` causing line breaks |
 | 7 | Course Overview items | §14 | course-overview.html has all 9 required items |
-| 8 | CSS variables | §22 | No hardcoded hex colors in inline styles |
+| 8 | CSS variables | §22 | No hardcoded hex colors in inline styles (the complementary allowlist for intentional inline styles lives in `check-lint.ts`) |
 | 9 | Language pairs | §23 | Language variants have base file counterparts |
+| 9b | Footer structure | §21-6 | Consistent per-language footer with license + repo link |
 | 10 | Instructor Guide | §20 | instructor-guide.html has required sections |
+| 11 | No private-repo refs | §4a | No `git clone`/link/citation points at a private repository |
 
 ### handbook-doctor (12 checks)
 
@@ -60,6 +62,44 @@ bun scripts/validate-nav.ts --docs-dir path/to/docs
 | 10 | Duplicate IDs | warn | Same ID used in multiple files |
 | 11 | Hardcoded colors | warn | Hardcoded hex in inline styles |
 | 12 | Empty title/h1 | error | Empty `<title>` or `<h1>` tags |
+
+### check-a11y (L2 — accessibility)
+
+| # | Check | Description |
+|---|-------|-------------|
+| 1 | Missing alt | `<img>` without an `alt` attribute |
+| 2 | Heading hierarchy | Headings skip levels (e.g. `h1` → `h3`); hierarchy resets inside layout containers (`.compare-col`, `.schedule-body`, `.keypoints`, `.faq-item`, `.tip-box`, `.scenario-card`, …) via stack-based div tracking |
+| 3 | Empty links | `<a>` with no text content or aria-label |
+| 4 | Missing html lang | `<html>` without a `lang` attribute |
+
+### check-spell (L3 — English spell check)
+
+Scans English handbook HTML for 197 hardcoded common misspellings. Strips `<script>`, `<style>`, `<pre>`, `<code>`, and URLs before checking to avoid false positives.
+
+### check-lint (L4 — HTML lint)
+
+| # | Check | Description |
+|---|-------|-------------|
+| 1 | Inline styles | `style="..."` attributes — **allowlisted** intentional patterns pass: CSS custom properties (`var(...)`), SVG presentation attributes (`fill`/`stroke`/`font-*`/`opacity`), flexbox (`display: flex`), `grid-template-columns`, short margin/padding (< 60 chars) |
+| 2 | Inline event handlers | `onclick`/`onerror`/… (XSS risk) — `copyCode(...)` calls are allowlisted |
+| 3 | Deprecated tags | `<font>`, `<center>`, `<marquee>`, … |
+| 4 | Duplicate IDs | Same `id` used more than once in a file |
+| 5 | Empty headings | `<h1>`–`<h6>` with no content |
+
+### check-external-links (L5 — external link checker)
+
+Performs HTTP HEAD requests on all external `<a href>` targets with a 5s timeout and 5-request concurrency. Skips known-safe domains (creativecommons.org, github.com, claude.ai, anthropic.com) to avoid rate-limit flakes.
+
+### validate-handbook (unified entry point)
+
+`validate-handbook.ts` (v1.1.0) aggregates every read-only check in one command:
+
+```bash
+bun run validate-handbook --docs-dir docs                 # structure + nav + tables (default)
+bun run validate-handbook --docs-dir docs --checks all    # + a11y + spell + lint + authoring + doctor
+```
+
+`--checks all` runs all 8 groups (① structure, ② nav, ③ tables, a11y, spell, lint, authoring, doctor). Exit code 1 on any failure. `runSubprocess` wraps the CLI-oriented checks (authoring, doctor) in try/catch so a missing script reports a clear error instead of crashing.
 
 ---
 
@@ -79,6 +119,13 @@ on:
       - 'handbook/scripts/**'
 
 jobs:
+  validate-handbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run validate-handbook
+
   validate-nav:
     runs-on: ubuntu-latest
     steps:
@@ -92,6 +139,47 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: cd handbook && bun install && bun run check-authoring
+
+  handbook-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run doctor
+
+  check-a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-a11y
+
+  check-spell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-spell
+
+  check-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-lint
+
+  build-search-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run build-search-index
+      - name: Verify search-data.js is up to date
+        run: |
+          if ! git diff --exit-code docs/assets/search-data.js; then
+            echo "::error::search-data.js is out of sync with search-manifest.json. Run 'bun run build-search-index' and commit the result."
+            exit 1
+          fi
 ```
 
 > **If you pin actions to a commit SHA instead of a tag** (common in security-conscious variants of this workflow, e.g. `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`): **verify the SHA actually resolves before committing.** A SHA that looks plausible but is wrong in even one character fails at "resolve action" before the job runs at all — no useful error beyond `Unable to resolve action`, and (for a deploy workflow) no indication anything is wrong until someone notices the live site is stale. Verify each pin against its tag via the GitHub API rather than trusting a hash from memory or a template:
@@ -162,7 +250,7 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §10-2 SVGs use `viewBox` + `width="100%"` for responsiveness
 - [ ] §21 All pages have sidebar nav and chapter-nav
 - [ ] §21-4 prev/next mutual symmetry verified (on renumbering)
-- [ ] §21-4 New pages (any language variant) registered in `site-search.js`'s `DOCS` array
+- [ ] §21-4 New pages (any language variant) registered in `search-manifest.json` and `search-data.js` regenerated via `build-search-index.ts`
 - [ ] §21-4 Body-text chapter-number cross-references match the actual current chapter list
 
 ### Course Materials (§14, §15, §20)
