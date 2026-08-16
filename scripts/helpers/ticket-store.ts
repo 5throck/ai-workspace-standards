@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // @l2-propagate: false
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
@@ -28,6 +28,13 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+// Same UTC-normalized YYYY-MM-DD convention as spec-register.ts's today() — duplicated
+// (not imported) because spec-register.ts is a CLI-only script with top-level argv
+// parsing/process.exit side effects, unsafe to import as a module.
+function today(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
 function loadYamlCapped<T>(path: string): T {
   const stat = statSync(path);
   if (stat.size > MAX_YAML_BYTES) throw new Error(`[ticket-store] refusing to parse oversized YAML (${stat.size} bytes): ${path}`);
@@ -54,7 +61,7 @@ export function readTicket(dir: string, id: string): Ticket {
   return obj;
 }
 
-export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind }): Ticket[] {
+export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind; ready?: boolean }): Ticket[] {
   if (!existsSync(dir)) return [];
   const files = readdirSync(dir).filter(f => f.endsWith('.yaml') && !f.includes('.tmp-'));
   const tickets = files.map(f => {
@@ -62,9 +69,11 @@ export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind
     validateTicket(obj);
     return obj;
   });
+  const READY_STATUSES: Status[] = ['backlog', 'waiting'];
   return tickets.filter(t =>
     (filter?.status === undefined || t.status === filter.status) &&
-    (filter?.kind === undefined || t.kind === filter.kind)
+    (filter?.kind === undefined || t.kind === filter.kind) &&
+    (filter?.ready !== true || (READY_STATUSES.includes(t.status) && (t.not_before === undefined || t.not_before <= today())))
   );
 }
 
@@ -91,6 +100,7 @@ export interface CreateTicketInput {
   title?: string;
   inputs?: Record<string, string>;
   priority: Priority;
+  not_before?: string;
 }
 
 /** Creates a ticket file with a collision-safe ID: computes a candidate seq from a
@@ -119,6 +129,7 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
       title: input.title,
       inputs: input.inputs,
       priority: input.priority,
+      not_before: input.not_before,
       status: 'backlog',
       attempts: 0,
       created_at: nowIso(),

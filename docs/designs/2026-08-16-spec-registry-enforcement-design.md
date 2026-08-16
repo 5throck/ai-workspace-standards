@@ -1,7 +1,7 @@
 # Design: Spec Registry Enforcement + project-to-variant.ts Hardening
 
 **Date**: 2026-08-16
-**Status**: Approved — Part A Stage 1 implemented; Stage 2 and Part B remain as follow-up PRs (see Delivery Scope)
+**Status**: Approved — Part A Stage 1 and Part B implemented; Stage 2 remains as a follow-up PR (see Delivery Scope)
 **Source**: brainstorming
 **Spec ID**: 2026-08-16-spec-registry-enforcement-design
 **Related**: [workflow-integrated-methodology-design.md](workflow-integrated-methodology-design.md), [execution-plan-design-gate-design.md](execution-plan-design-gate-design.md), [ADR-0054](../adr/0054-error-handling-standardization.md)
@@ -26,10 +26,11 @@ Separately, this workspace's variant automation is uneven by direction. "Templat
 
 ## Delivery Scope
 
-Per this workspace's own Sequential Branch Dependency Rule (`dev-sync.ts` touches shared files — `CHANGELOG.md`, `SCRIPTS.md`, `VERSION_MANIFEST.md` — on every commit, so unmerged parallel branches conflict), this design ships as **one PR now** (Part A, Stage 1) plus **two fully-specified follow-up PRs** that are deliberately deferred:
+Per this workspace's own Sequential Branch Dependency Rule (`dev-sync.ts` touches shared files — `CHANGELOG.md`, `SCRIPTS.md`, `VERSION_MANIFEST.md` — on every commit, so unmerged parallel branches conflict), this design shipped as sequential PRs rather than one big change:
 
-- **Stage 2** (Warn → Fail, actually blocking commits) needs a soak period to observe Stage 1's output on real commits first.
-- **Part B** (`project-to-variant.ts` hardening) touches the same shared pipeline files and must not branch until the Part A PR merges.
+- **Part A Stage 1** (PR #538, merged) — spec-check gating/relevance fix, `spec-backfill.ts`, ADR-0055 (Proposed).
+- **Part B** (`project-to-variant.ts` hardening) — implemented in the next PR after Part A merged, per the Sequential Branch Dependency Rule.
+- **Stage 2** (Warn → Fail, actually blocking commits) remains deferred — it needs a soak period to observe Stage 1's output on real commits first (≥1 week / one Weekly Health Check cycle with no false-positive reports).
 
 ---
 
@@ -97,7 +98,7 @@ await $`bun scripts/audit.ts --spec-check --lifecycle-only`.nothrow();
 
 ---
 
-## Part B — project-to-variant.ts Hardening (follow-up PR)
+## Part B — project-to-variant.ts Hardening (implemented)
 
 **`scripts/project-to-variant.ts`** (161 lines, v1.0.3 → 1.1.0). Diagnosis conclusion: this is the actual bottleneck in the "existing project → variant" path — no complexity gate, and its "Manual Review Checklist" (current lines 148-157) is printed text, never executed. Not rewritten into a clone of the 1143-line `l3-to-variant-pipeline.ts` (dual-maintenance, against this workspace's own simplicity-first principle) — instead, close the specific gaps:
 
@@ -107,6 +108,8 @@ await $`bun scripts/audit.ts --spec-check --lifecycle-only`.nothrow();
 4. Keep only genuinely judgment-based items printed: `pm.md` override review, `CLAUDE.md`/`GEMINI.md` narrative context update.
 5. Fix `skills/project-to-variant/SKILL.md`'s stale CLI usage section (currently documents `<project-path> [--name ...] [--type ...]`, which doesn't match the actual `--source`/`--target`/`--dry-run` flags) and document the new routing behavior.
 6. `scripts/SCRIPTS.md`: bump the `project-to-variant.ts` row. Regenerate `README.md`.
+
+**Found during implementation**: the auto-generated `variant.json`'s `agents`/`skills` fields were plain string arrays (`["lead"]`), but `regenerate-agents-md.ts` expects `{name, file}` objects (`variant.agents.map(a => a.name)`) — matching the canonical schema already used by every real variant (e.g. `templates/co-abap/variant.json`). This was silent/unnoticed before because nothing previously consumed `project-to-variant.ts`'s generated `variant.json` with `regenerate-agents-md.ts`; wiring them together in step 3 surfaced it. Fixed as part of this PR (not a separate follow-up) since step 3 doesn't work correctly without it.
 
 ---
 

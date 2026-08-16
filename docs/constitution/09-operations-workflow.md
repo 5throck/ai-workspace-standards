@@ -23,6 +23,9 @@ bun scripts/sync-skill-status.ts
 
 # Check for docs/designs/*.md files missing from the spec registry
 bun scripts/spec-backfill.ts --check
+
+# Check for ready governance-backlog items (deferred decisions whose soak/review date has passed)
+bun scripts/ticket.ts list --ready --kind manual
 ```
 
 **Checklist**:
@@ -31,6 +34,7 @@ bun scripts/spec-backfill.ts --check
 - [ ] No unexpected state mismatches between files and registry tables
 - [ ] Deprecated items list is current
 - [ ] No design docs missing from `docs/specs/registry.json` (or run `bun scripts/spec-backfill.ts` to close the gap)
+- [ ] No ready governance-backlog tickets ignored — action them or explicitly defer (update `not_before`)
 
 **Output**: Log findings to `memory/YYYY-MM-DD.md` with section "## Weekly Health Check"
 

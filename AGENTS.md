@@ -182,6 +182,15 @@ When `/meeting` is invoked, the PM orchestrates structured multi-agent discussio
 3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
 4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
 
+### §3.7.5 Governance Backlog Dispatch
+
+**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM.
+
+Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [CONSTITUTION.md §Session start checklist](CONSTITUTION.md) and [§9.1](docs/constitution/09-operations-workflow.md#91-weekly-agentskill-health-check)):
+
+- If it's a pure decision (approve/reject), PM reviews and moves it (`bun scripts/ticket.ts move <id> review`, then `done`) — no specialist dispatch needed.
+- If acting on it requires implementation work, PM dispatches through the normal PM Gateway path (§3.1–§3.5) like any other task — no new mechanism. If the item is independent of other in-flight work and Agent Teams is enabled for the session, PM may dispatch it as a parallel teammate instead of sequentially.
+
 ### §3.8 Permission Denial Protocol
 
 When a specialist agent's required tool is denied, PM must **not** substitute for the specialist. Instead:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // @l2-propagate: false
 // ticket-schema.ts — Pure schema types, state machine, and validation for the
 // Phase A Service Ticket + Kanban system. No file I/O here (see ticket-store.ts).
@@ -53,6 +53,9 @@ export interface Ticket {
   status: Status;
   attempts: number;
   created_at: string;
+  /** ISO YYYY-MM-DD. Governance Backlog eligibility gate, orthogonal to `status` —
+   * absent means always eligible. See docs/designs/2026-08-16-governance-backlog-design.md. */
+  not_before?: string;
   history: HistoryEntry[];
   result: string | null;
   error: string | null;
@@ -78,6 +81,7 @@ const ID_PATTERN = /^[a-z0-9-]+$/;
 const SCRIPT_REF_PATTERN = /^scripts\/[a-z0-9-]+\.ts$/;
 const SKILL_REF_PATTERN = /^[a-z0-9-]+$/;
 const INPUT_NAME_PATTERN = /^[a-z0-9_-]+$/;
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function fail(msg: string): never {
   throw new Error(`[ticket-schema] ${msg}`);
@@ -131,6 +135,9 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   const validStatuses: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
   if (!validStatuses.includes(t.status as Status)) fail(`ticket.status invalid: ${JSON.stringify(t.status)}`);
   if (typeof t.attempts !== 'number' || t.attempts < 0) fail('ticket.attempts must be a non-negative number');
+  if (t.not_before !== undefined && (typeof t.not_before !== 'string' || !ISO_DATE_PATTERN.test(t.not_before))) {
+    fail(`ticket.not_before must be an ISO YYYY-MM-DD string: ${JSON.stringify(t.not_before)}`);
+  }
   if (!Array.isArray(t.history)) fail('ticket.history must be an array');
   if (t.inputs !== undefined) {
     if (typeof t.inputs !== 'object' || t.inputs === null) fail('ticket.inputs must be an object');

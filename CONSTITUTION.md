@@ -47,6 +47,7 @@ Navigate to the project directory before starting work. Each project has its own
 3. **Agent Roster**: Read `AGENTS.md` or load `@AGENTS.md`.
 4. **Session History**: Read `memory/MEMORY.md` or load `@memory/MEMORY.md` (skip if file does not exist).
 5. **Session Skills**: Load any skills listed under `## Session Start Skills` in `docs/context.md` (or `CONSTITUTION.md` for the root workspace). (For Gemini, load `@skills/`).
+6. **Governance Backlog** (workspace root only): Run `bun scripts/ticket.ts list --ready --kind manual`. If it prints any tickets, surface them to the user — these are deferred governance decisions (e.g. a soak-period gate) whose date has passed and that no longer depend on anyone remembering to check back. If the command prints nothing, say nothing and proceed silently — this step must not add noise to every session. See [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md).
 
 If `docs/context.md` does not exist (legacy or external project), fall back to `README.md` and any local `CLAUDE.md` or `GEMINI.md` in the project root.
 

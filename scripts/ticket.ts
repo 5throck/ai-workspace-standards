@@ -1,23 +1,36 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
+//         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind)
 
 import { resolve, join } from 'node:path';
+import { existsSync } from 'node:fs';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog,
 } from './helpers/ticket-store.ts';
-import type { Priority, Status } from './helpers/ticket-schema.ts';
+import type { Priority, Status, Kind } from './helpers/ticket-schema.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..');
+// Service tickets: ephemeral execution-queue instances (tickets/*.yaml is gitignored — Task 8).
 const ticketsDir = join(workspaceRoot, 'tickets');
+// Manual (Governance Backlog) tickets: deliberately git-tracked so deferred decisions survive
+// across sessions/machines. `tickets/*.yaml` only ignores direct children, not this subdirectory —
+// see docs/designs/2026-08-16-governance-backlog-design.md.
+const governanceDir = join(ticketsDir, 'governance');
 const catalogPath = join(workspaceRoot, 'services.yaml');
+
+/** kind: manual tickets live in governanceDir; kind: service tickets live in ticketsDir.
+ * Used by commands (move) that take only an id, not a kind. */
+function resolveTicketDir(id: string): string {
+  return existsSync(join(governanceDir, `${id}.yaml`)) ? governanceDir : ticketsDir;
+}
 
 const [, , cmd, ...rest] = process.argv;
 
-const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html']);
+const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready']);
 
 function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
   const positional: string[] = [];
@@ -49,9 +62,10 @@ try {
       const priority = (flags.priority as Priority) ?? 'normal';
       if (flags.manual) {
         const title = positional[0];
-        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent]');
-        const t = createTicket(ticketsDir, { kind: 'manual', title, priority });
-        console.log(`✅ Created manual ticket ${t.id}: ${title}`);
+        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--not-before YYYY-MM-DD]');
+        const notBefore = flags['not-before'] as string | undefined;
+        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore });
+        console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}`);
       } else {
         const serviceId = positional[0];
         if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--inputs \'{"k":"v"}\']');
@@ -69,9 +83,17 @@ try {
     }
     case 'list': {
       const { flags } = parseFlags(rest);
-      const tickets = listTickets(ticketsDir, { status: flags.status as Status | undefined });
+      // --kind and --ready are independent, composable filters (not a bundled mode) — see
+      // docs/designs/2026-08-16-governance-backlog-design.md. Service and manual tickets live
+      // in separate directories (ephemeral vs. git-tracked); merge both unless --kind narrows it.
+      const listFilter = { status: flags.status as Status | undefined, ready: flags.ready === true ? true : undefined };
+      const kindFilter = flags.kind as Kind | undefined;
+      const tickets = [
+        ...(kindFilter === 'manual' ? [] : listTickets(ticketsDir, { ...listFilter, kind: 'service' })),
+        ...(kindFilter === 'service' ? [] : listTickets(governanceDir, { ...listFilter, kind: 'manual' })),
+      ];
       if (flags.json) console.log(JSON.stringify(tickets, null, 2));
-      else for (const t of tickets) console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})`);
+      else for (const t of tickets) console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}`);
       break;
     }
     case 'next': {
@@ -84,7 +106,7 @@ try {
       const { positional, flags } = parseFlags(rest);
       const [id, status] = positional;
       if (!id || !status) fail('usage: ticket.ts move <id> <status> [--force]');
-      const moved = moveTicket(ticketsDir, id, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined });
+      const moved = moveTicket(resolveTicketDir(id), id, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined });
       console.log(`✅ ${id} -> ${moved.status}`);
       break;
     }
@@ -104,7 +126,7 @@ try {
     }
     case 'board': {
       const { flags } = parseFlags(rest);
-      const tickets = listTickets(ticketsDir);
+      const tickets = [...listTickets(ticketsDir), ...listTickets(governanceDir)];
       const lanes: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
       if (flags.html) {
         const html = `<!DOCTYPE html><html><head><meta charset="utf-8">

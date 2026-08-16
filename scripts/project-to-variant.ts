@@ -1,13 +1,20 @@
-// @version 1.0.3
+// @version 1.1.0
 /**
  * project-to-variant.ts
  *
  * Promotes an existing L3 project (Projects/<name>/) to a variant template (templates/<name>/).
  * Diffs against templates/common/ to keep only variant-specific files.
  *
+ * Lightweight path only — for projects that diverge significantly from templates/common/
+ * (see the complexity routing check below), use the Full L2 Pipeline instead:
+ * l3-to-variant-pipeline.ts (ADR-referenced review, anti-swelling, platform-parity checks).
+ *
  * Usage:
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal
  *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --dry-run
+ *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --force
+ *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --design-doc docs/designs/co-legal-design.md
+ *   bun scripts/project-to-variant.ts --source Projects/co-legal --target co-legal --threshold-files 60 --threshold-dirs 5
  */
 
 import * as fs from 'node:fs';
@@ -34,12 +41,17 @@ function getArg(flag: string): string | undefined {
   return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : undefined;
 }
 const DRY_RUN = args.includes('--dry-run');
+const FORCE = args.includes('--force');
+const designDocArg = getArg('--design-doc');
+const THRESHOLD_FILES = Number(getArg('--threshold-files') ?? 40);
+const THRESHOLD_DIRS = Number(getArg('--threshold-dirs') ?? 3);
+const LARGE_DIR_MIN_FILES = 15;
 
 const sourceArg = getArg('--source');
 const targetArg = getArg('--target');
 
 if (!sourceArg || !targetArg) {
-  fail('Usage: bun scripts/project-to-variant.ts --source <path> --target <variant-name> [--dry-run]');
+  fail('Usage: bun scripts/project-to-variant.ts --source <path> --target <variant-name> [--dry-run] [--force] [--design-doc <path>] [--threshold-files <n>] [--threshold-dirs <n>]');
 }
 
 if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(targetArg)) {
@@ -110,6 +122,35 @@ console.log(`Skipped         : ${skipped.length}`);
 console.log(`Variant-unique  : ${variantUnique.length}`);
 console.log('');
 
+// Complexity/divergence routing check — makes the informal "use the Full L2 Pipeline for
+// anything non-trivial" judgment call (previously only documented in SKILL.md prose) an
+// automated decision instead of tribal knowledge.
+const commonTopDirs = new Set(
+  [...commonFiles].map(f => f.split('/')[0]).filter(Boolean)
+);
+const variantDirCounts = new Map<string, number>();
+for (const f of variantUnique) {
+  const top = f.rel.split('/')[0];
+  if (!top || commonTopDirs.has(top)) continue; // only dirs absent from templates/common/
+  variantDirCounts.set(top, (variantDirCounts.get(top) ?? 0) + 1);
+}
+const largeDomainDirs = [...variantDirCounts.entries()].filter(([, count]) => count > LARGE_DIR_MIN_FILES);
+
+if (variantUnique.length > THRESHOLD_FILES || largeDomainDirs.length > THRESHOLD_DIRS) {
+  console.log(`${YELLOW}This project diverges significantly from templates/common/ ` +
+    `(${variantUnique.length} variant-unique file(s), ${largeDomainDirs.length} large domain dir(s): ` +
+    `${largeDomainDirs.map(([d, c]) => `${d}/ (${c})`).join(', ') || 'none'}).${RESET}`);
+  console.log(`Recommended: use the Full L2 Pipeline instead of this script:`);
+  console.log(`  cp -r ${sourceArg} Projects/${targetArg}/ && cd Projects/${targetArg}/ && git init && git add -A && git commit -m "initial"`);
+  console.log(`  bun scripts/l3-to-variant-pipeline.ts`);
+  console.log(`This gets ADR-referenced review (see docs/adr/templates/variant-creation-template.md), ` +
+    `anti-swelling (validate-templates.ts WS-02) and platform-parity checks (validate-platform-parity.ts) automatically.`);
+  if (!FORCE) {
+    fail('Aborting — pass --force to proceed with the lightweight pipeline anyway.');
+  }
+  console.log(`${YELLOW}--force passed — proceeding with the lightweight pipeline despite the size warning.${RESET}\n`);
+}
+
 let copied = 0;
 let errored = 0;
 
@@ -131,8 +172,16 @@ if (!DRY_RUN) {
   if (!fs.existsSync(path.join(targetDir, 'variant.json'))) {
     const agentsDir = path.join(targetDir, 'agents');
     const skillsDir = path.join(targetDir, 'skills');
-    const agents = fs.existsSync(agentsDir) ? fs.readdirSync(agentsDir).filter(f => f.endsWith('.md') && f !== 'README.md').map(f => f.replace('.md', '')) : [];
-    const skills = fs.existsSync(skillsDir) ? fs.readdirSync(skillsDir).filter(f => fs.statSync(path.join(skillsDir, f)).isDirectory()) : [];
+    // {name, file} shape — matches the canonical variant.json schema (see e.g. templates/co-abap/variant.json)
+    // and is required by regenerate-agents-md.ts's `variant.agents.map(a => a.name)`.
+    const agents = fs.existsSync(agentsDir)
+      ? fs.readdirSync(agentsDir).filter(f => f.endsWith('.md') && f !== 'README.md')
+          .map(f => ({ name: f.replace('.md', ''), file: `agents/${f}` }))
+      : [];
+    const skills = fs.existsSync(skillsDir)
+      ? fs.readdirSync(skillsDir).filter(f => fs.statSync(path.join(skillsDir, f)).isDirectory())
+          .map(f => ({ name: f, file: `skills/${f}/SKILL.md` }))
+      : [];
     const variantJson = { name: targetArg, extends: 'common', version: '0.1.0', agents, skills, description: `TODO: Describe the ${targetArg} variant` };
     fs.writeFileSync(path.join(targetDir, 'variant.json'), JSON.stringify(variantJson, null, 2) + '\n', 'utf-8');
     console.log(`${GREEN}Generated templates/${targetArg}/variant.json${RESET}`);
@@ -145,13 +194,34 @@ if (!DRY_RUN) {
   }
 }
 
+// Auto-run what doesn't require judgment: AGENTS.md roster generation is mechanical.
+const regenTs = path.join(WORKSPACE_ROOT, 'scripts', 'regenerate-agents-md.ts');
+if (fs.existsSync(regenTs)) {
+  console.log(`\n${CYAN}${DRY_RUN ? 'Previewing' : 'Regenerating'} templates/${targetArg}/AGENTS.md roster...${RESET}`);
+  const regenArgs = DRY_RUN ? ['--dry-run', '--variant', targetArg] : ['--variant', targetArg];
+  try { execFileSync(process.execPath, [regenTs, ...regenArgs], { cwd: WORKSPACE_ROOT, stdio: 'inherit' }); }
+  catch { console.log(`${YELLOW}AGENTS.md regeneration reported issues -- review above${RESET}`); }
+}
+
+// Auto-register the spec when the caller supplies which design doc describes this variant —
+// there's no reliable way to auto-discover that, so this stays opt-in via --design-doc.
+let specRegistered = false;
+if (designDocArg && !DRY_RUN) {
+  const specRegisterTs = path.join(WORKSPACE_ROOT, 'scripts', 'spec-register.ts');
+  if (fs.existsSync(specRegisterTs)) {
+    console.log(`\n${CYAN}Registering spec: ${designDocArg}...${RESET}`);
+    try {
+      execFileSync(process.execPath, [specRegisterTs, '--file', designDocArg, '--source', 'manual'], { cwd: WORKSPACE_ROOT, stdio: 'inherit' });
+      specRegistered = true;
+    } catch { console.log(`${YELLOW}Spec registration failed -- review above${RESET}`); }
+  }
+}
+
 console.log(`
 ${CYAN}=== Manual Review Checklist ===${RESET}
-  [ ] templates/${targetArg}/variant.json -- verify agents/skills lists
-  [ ] templates/${targetArg}/AGENTS.md -- update agent roster
   [ ] templates/${targetArg}/agents/pm.md -- verify PM overrides
-  [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- update variant context
-  [ ] Register spec: bun scripts/spec-register.ts --file <design-doc> --source manual
+  [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- update variant context${specRegistered ? '' : `
+  [ ] Register spec: bun scripts/spec-register.ts --file <design-doc> --source manual (or re-run with --design-doc <path>)`}
 
 Run bun scripts/audit.ts after completing the checklist.
 `);
