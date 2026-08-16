@@ -122,3 +122,7 @@ When adding or recommending dependencies:
 - **Phase taxonomy**: pick the most specific `ErrorPhase` — generic (`SCRIPT_EXECUTION`, `FILE_IO`, `CLI_PARSING`, `AUDIT`, `LIFECYCLE`, `SECURITY`) or pipeline-specific (`VALIDATION`, `L3_SCAN`, etc.).
 - **What NOT to do**: do not force normal output through the library; do not migrate scripts purely for consistency (migration rides along with functional changes per §8.3); do not remove existing structured errors from pipeline scripts.
 - **L0+L1 scripts**: when migrating an L0+L1 script, sync the change to `templates/common/scripts/` in the same commit.
+
+#### 8.12 Variant Script Inheritance (ADR-0050)
+
+**Variant scripts inherit from `templates/common/`, never duplicate it.** ADR-0050 Part 1 codifies this: a script needed by more than one variant lives in `templates/common/scripts/` (or workspace-root `scripts/` for L0-only tooling); a `templates/co-*/scripts/` copy is only legitimate when genuinely variant-specific, and even then must compose common logic rather than re-implement it. `scripts/audit.ts`'s `checkVariantScriptDrift()` WARN check flags divergence from this rule.

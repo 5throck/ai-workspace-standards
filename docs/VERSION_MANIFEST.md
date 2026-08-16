@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T01:55:08.729Z
+**Generated**: 2026-08-16T03:10:25.938Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -84,7 +84,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.18 | scripts/audit.ts | bun |
+| audit.ts | 2.12.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
@@ -134,7 +134,7 @@
 | ticket.ts | 1.0.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | upgrade-project.ts | 1.7.1 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.0.4 | scripts/validate-agents.ts | N/A |
+| validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.6.0 | scripts/validate-md-language.ts | fs |

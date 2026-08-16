@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.0.4
+ * @version 1.0.5
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -96,7 +96,7 @@ function normalizeContent(raw: string): string {
 }
 
 // Parse frontmatter fields from markdown
-function parseFrontmatter(rawContent: string): Record<string, true> {
+export function parseFrontmatter(rawContent: string): Record<string, true> {
   const content = normalizeContent(rawContent);
   // 'm' flag: frontmatter may be preceded by a leading comment line (e.g. co-deck's
   // "# @resolved-from: ..." annotation on extends-pattern agent files), so the opening
@@ -125,7 +125,7 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
 }
 
 // Check nested field existence in frontmatter
-function hasNestedField(rawContent: string, fieldPath: string): boolean {
+export function hasNestedField(rawContent: string, fieldPath: string): boolean {
   const content = normalizeContent(rawContent);
   // 'm' flag: frontmatter may be preceded by a leading comment line (e.g. co-deck's
   // "# @resolved-from: ..." annotation on extends-pattern agent files), so the opening
@@ -180,18 +180,21 @@ function hasNestedField(rawContent: string, fieldPath: string): boolean {
   return false;
 }
 
+// Filter predicate for agent files (exported for testability)
+export function isAgentFile(filename: string): boolean {
+  return filename.endsWith('.md') && !/^README(_\w+)?\.md$/.test(filename) && !filename.startsWith('_');
+}
+
 // Part 1: Validate runtime definitions (agents/*.md)
-function validateRuntimeDefinitions(): void {
+function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1: Runtime Definition Validation (agents/*.md)${colors.reset}`);
 
-  const agentFiles = readdirSync(AGENTS_DIR).filter(
-    f => f.endsWith('.md') && !/^README(_\w+)?\.md$/.test(f) && !f.startsWith('_'),
-  );
+  const agentFiles = readdirSync(agentsDir).filter(isAgentFile);
 
   for (const file of agentFiles) {
     totalFiles++;
     const agentName = file.replace('.md', '');
-    const filePath = join(AGENTS_DIR, file);
+    const filePath = join(agentsDir, file);
     const rawContent = readFileSync(filePath, 'utf-8');
 
     const missingFields: string[] = [];
@@ -311,4 +314,6 @@ function main() {
   process.exit(errors.length > 0 ? 1 : 0);
 }
 
-main();
+if (import.meta.main) {
+  main();
+}

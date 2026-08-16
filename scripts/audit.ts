@@ -1,10 +1,11 @@
-// @version 2.10.18
+// @version 2.12.0
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
 import * as url from 'node:url';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 
@@ -1030,6 +1031,206 @@ function checkStaleShellReferences() {
     }
 }
 checkStaleShellReferences();
+
+// Shell-injection-shaped source scan (WARN-only, first-pass heuristic).
+// See docs/designs/2026-08-16-august-regression-coverage-design.md for full
+// FAIL-vs-WARN reasoning and pattern-calibration notes. TODO: revisit
+// promoting this to Fail() once the false-positive rate is empirically known
+// after a full audit cycle.
+function checkShellInjectionPatterns() {
+    // Self-contained recursive directory walk (the module-level `walkDir` is
+    // block-scoped to an earlier `if (!LIFECYCLE_ONLY)` block and is not
+    // visible here).
+    function walkScanDir(dir: string, callback: (fPath: string) => void) {
+        if (!fs.existsSync(dir)) return;
+        const SKIP_DIRS = new Set(['node_modules', '.git', '.bun', '.temp']);
+        for (const f of fs.readdirSync(dir)) {
+            if (SKIP_DIRS.has(f)) continue;
+            const dirPath = path.join(dir, f);
+            if (!fs.existsSync(dirPath)) continue;
+            try {
+                const isDirectory = fs.statSync(dirPath).isDirectory();
+                if (isDirectory) {
+                    walkScanDir(dirPath, callback);
+                } else {
+                    callback(dirPath);
+                }
+            } catch {
+                // Ignore transient files deleted during concurrent test runs
+            }
+        }
+    }
+
+    const scanRoots = ['scripts'];
+    if (fs.existsSync('templates')) {
+        for (const variant of fs.readdirSync('templates')) {
+            if (!variant.startsWith('co-')) continue;
+            const variantScriptsDir = path.join('templates', variant, 'scripts');
+            if (fs.existsSync(variantScriptsDir)) scanRoots.push(variantScriptsDir);
+        }
+    }
+
+    let warnCount = 0;
+    for (const root of scanRoots) {
+        if (!fs.existsSync(root)) continue;
+        walkScanDir(root, (filePath) => {
+            if (filePath.includes('node_modules')) return;
+            const normalized = filePath.replace(/\\/g, '/');
+            if (!normalized.endsWith('.ts')) return;
+            if (normalized.endsWith('.test.ts') || normalized.endsWith('.d.ts')) return;
+
+            let content: string;
+            try {
+                content = readUTF8File(filePath);
+            } catch {
+                return;
+            }
+
+            for (const sourcePattern of sourceShellInjectionPatterns) {
+                sourcePattern.pattern.lastIndex = 0;
+                const matches = content.matchAll(sourcePattern.pattern);
+                for (const foundMatch of matches) {
+                    const matchIndex = foundMatch.index ?? 0;
+                    const upToMatch = content.slice(0, matchIndex);
+                    const lineNo = upToMatch.split('\n').length;
+                    const remediationText = sourcePattern.remediation;
+                    const patternLabel = sourcePattern.name;
+                    Warn(`Shell injection pattern: ${filePath}:${lineNo} matched "${patternLabel}" - ${remediationText}`);
+                    warnCount++;
+                }
+            }
+        });
+    }
+
+    if (warnCount === 0) {
+        Pass('Shell injection pattern scan: no matches found');
+    } else {
+        Warn(`Shell injection pattern scan: ${warnCount} match(es) found (WARN-only, first-pass heuristic)`);
+    }
+}
+checkShellInjectionPatterns();
+
+// Variant script drift detection (WARN-only, first-pass heuristic).
+// Flags templates/co-*/scripts files that duplicate templates/common/scripts files by >50% content overlap.
+// See docs/designs/2026-08-16-august-regression-coverage-design.md §2 for design, rationale, and denominator choice.
+function checkVariantScriptDrift() {
+    // Build a map of basename -> full path for all templates/common/scripts/**/*.ts
+    const commonScriptMap = new Map<string, string>();
+
+    function populateCommonMap() {
+        const commonDir = path.join('templates', 'common', 'scripts');
+        if (!fs.existsSync(commonDir)) return;
+
+        function walkDir(dir: string) {
+            for (const entry of fs.readdirSync(dir)) {
+                const fullPath = path.join(dir, entry);
+                try {
+                    const stat = fs.statSync(fullPath);
+                    if (stat.isDirectory()) {
+                        walkDir(fullPath);
+                    } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts') && !entry.endsWith('.d.ts')) {
+                        const basename = path.basename(fullPath);
+                        // Store the first occurrence; later ones are ignored (unlikely in practice)
+                        if (!commonScriptMap.has(basename)) {
+                            commonScriptMap.set(basename, fullPath);
+                        }
+                    }
+                } catch {
+                    // Ignore transient files
+                }
+            }
+        }
+        walkDir(commonDir);
+    }
+
+    populateCommonMap();
+
+    // Helper: extract non-blank, non-comment-only trimmed lines
+    function getContentLines(content: string): Set<string> {
+        const lines = new Set<string>();
+        for (const line of content.split('\n')) {
+            const trimmed = line.trim();
+            // Skip blank lines and comment-only lines
+            if (trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('/*') && !trimmed.startsWith('*')) {
+                lines.add(trimmed);
+            }
+        }
+        return lines;
+    }
+
+    // Helper: compute line-overlap similarity using |intersection| / min(|A|,|B|)
+    function computeSimilarity(contentA: string, contentB: string): number {
+        const linesA = getContentLines(contentA);
+        const linesB = getContentLines(contentB);
+
+        if (linesA.size === 0 || linesB.size === 0) return 0;
+
+        // Compute intersection
+        let intersection = 0;
+        for (const line of linesA) {
+            if (linesB.has(line)) intersection++;
+        }
+
+        // Denominator: min(|A|, |B|) to catch copy-paste-then-extend patterns
+        const denominator = Math.min(linesA.size, linesB.size);
+        return denominator > 0 ? intersection / denominator : 0;
+    }
+
+    // Scan templates/co-*/scripts/**/*.ts
+    let warnCount = 0;
+    const templatesDir = path.join('templates');
+    if (fs.existsSync(templatesDir)) {
+        for (const variant of fs.readdirSync(templatesDir)) {
+            if (!variant.startsWith('co-')) continue;
+            const variantScriptsDir = path.join(templatesDir, variant, 'scripts');
+            if (!fs.existsSync(variantScriptsDir)) continue;
+
+            function walkVariantScripts(dir: string) {
+                for (const entry of fs.readdirSync(dir)) {
+                    const fullPath = path.join(dir, entry);
+                    try {
+                        const stat = fs.statSync(fullPath);
+                        if (stat.isDirectory()) {
+                            walkVariantScripts(fullPath);
+                        } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts') && !entry.endsWith('.d.ts')) {
+                            const basename = path.basename(fullPath);
+                            const commonPath = commonScriptMap.get(basename);
+                            if (commonPath) {
+                                let variantContent: string;
+                                let commonContent: string;
+                                try {
+                                    variantContent = readUTF8File(fullPath);
+                                    commonContent = readUTF8File(commonPath);
+                                } catch {
+                                    return;
+                                }
+
+                                const similarity = computeSimilarity(commonContent, variantContent);
+                                if (similarity > 0.50) {
+                                    const percent = (similarity * 100).toFixed(1);
+                                    const remediationNote = 'ADR-0050 Part 1: variant-local scripts must not duplicate common/ logic; compose/call common instead.';
+                                    Warn(`Script drift detected: ${fullPath} (${percent}% similar to ${commonPath}) - ${remediationNote}`);
+                                    warnCount++;
+                                }
+                            }
+                        }
+                    } catch {
+                        // Ignore transient files
+                    }
+                }
+            }
+            walkVariantScripts(variantScriptsDir);
+        }
+    }
+
+    if (warnCount === 0) {
+        Pass('Variant script drift check: no high-similarity duplicates found');
+    } else {
+        Warn(`Variant script drift check: ${warnCount} match(es) found (WARN-only, first-pass heuristic)`);
+    }
+}
+checkVariantScriptDrift();
+
 // Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
 checkL2VariantIntegrity();
 checkVariantContextGuidelinesSection();
