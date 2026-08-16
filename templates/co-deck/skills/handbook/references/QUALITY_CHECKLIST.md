@@ -94,6 +94,12 @@ jobs:
       - run: cd handbook && bun install && bun run check-authoring
 ```
 
+> **If you pin actions to a commit SHA instead of a tag** (common in security-conscious variants of this workflow, e.g. `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`): **verify the SHA actually resolves before committing.** A SHA that looks plausible but is wrong in even one character fails at "resolve action" before the job runs at all — no useful error beyond `Unable to resolve action`, and (for a deploy workflow) no indication anything is wrong until someone notices the live site is stale. Verify each pin against its tag via the GitHub API rather than trusting a hash from memory or a template:
+> ```bash
+> gh api repos/<owner>/<action-repo>/git/refs/tags/<tag> --jq .object.sha
+> ```
+> Compare the result against the SHA in the workflow file — they must match exactly. Do this for every pinned action whenever the workflow file is authored or copied into a new handbook, not just the first time.
+
 ### Examples as Regression Fixtures
 
 The `examples/` directory in the skill contains 3 reference handbook implementations:
@@ -138,6 +144,8 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §11 No mid-word `<strong>` causing line breaks
 - [ ] §11-1 flex children have `min-width: 0`
 - [ ] §11-2 Fixed elements have `flex-shrink: 0`
+- [ ] §11-3 No `<a>` nested inside a card's `<a class="card">`
+- [ ] §11-4 `.table-schedule` used only where 3rd+ columns hold short fixed vocabulary
 
 ### Writing Style (§12, §16)
 
@@ -154,6 +162,8 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §10-2 SVGs use `viewBox` + `width="100%"` for responsiveness
 - [ ] §21 All pages have sidebar nav and chapter-nav
 - [ ] §21-4 prev/next mutual symmetry verified (on renumbering)
+- [ ] §21-4 New pages (any language variant) registered in `site-search.js`'s `DOCS` array
+- [ ] §21-4 Body-text chapter-number cross-references match the actual current chapter list
 
 ### Course Materials (§14, §15, §20)
 
