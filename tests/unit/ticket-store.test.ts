@@ -47,6 +47,51 @@ describe('createTicket', () => {
   });
 });
 
+describe('listTickets ready filter (not_before boundary cases)', () => {
+  // Same UTC-normalized YYYY-MM-DD convention as ticket-store.ts's today()/spec-register.ts's today().
+  function today(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+  function isoDaysFromToday(delta: number): string {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + delta);
+    return d.toISOString().split('T')[0];
+  }
+
+  test('not_before unset is always ready', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'unset', priority: 'normal' });
+    const ready = listTickets(dir, { ready: true }).map(x => x.id);
+    expect(ready).toContain(t.id);
+  });
+
+  test('not_before in the past is ready', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'past', priority: 'normal', not_before: isoDaysFromToday(-7) });
+    const ready = listTickets(dir, { ready: true }).map(x => x.id);
+    expect(ready).toContain(t.id);
+  });
+
+  test('not_before exactly equal to today is ready (boundary: <=, not <)', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'today', priority: 'normal', not_before: today() });
+    const ready = listTickets(dir, { ready: true }).map(x => x.id);
+    expect(ready).toContain(t.id);
+  });
+
+  test('not_before in the future is not ready', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'future', priority: 'normal', not_before: isoDaysFromToday(7) });
+    const ready = listTickets(dir, { ready: true }).map(x => x.id);
+    expect(ready).not.toContain(t.id);
+  });
+
+  test('ready filter still excludes done/failed tickets regardless of not_before', () => {
+    const t = createTicket(dir, { kind: 'manual', title: 'done-past', priority: 'normal', not_before: isoDaysFromToday(-7) });
+    moveTicket(dir, t.id, 'waiting', { force: false });
+    moveTicket(dir, t.id, 'review', { force: false });
+    moveTicket(dir, t.id, 'done', { force: false });
+    const ready = listTickets(dir, { ready: true }).map(x => x.id);
+    expect(ready).not.toContain(t.id);
+  });
+});
+
 describe('moveTicket', () => {
   test('allows an adjacent transition without --force', () => {
     const t = createTicket(dir, { kind: 'manual', title: 'x', priority: 'normal' });

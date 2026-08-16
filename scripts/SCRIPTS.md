@@ -117,8 +117,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-output.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `helpers/validate-platform-parity.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
-| `helpers/ticket-schema.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `helpers/ticket-store.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `helpers/ticket-schema.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
+| `helpers/ticket-store.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `validators/types.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/variant-json-validator.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validators/extends-validator-wrapper.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -179,7 +179,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-l3-to-variant-promotion.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
+| `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.7.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
