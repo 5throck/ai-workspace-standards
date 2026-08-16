@@ -283,7 +283,7 @@ export function checkStructure(docsDir?: string): StructureError[] {
     present.add(relative(dir, abs).replace(/\\/g, "/"));
   }
   for (const rel of relFiles) {
-    const m = rel.match(/^(.+)_([a-z]{2})\.html$/i);
+    const m = rel.match(/^(.+)_([a-z]{2,3}(-[A-Z]{2})?)\.html$/i);
     if (!m) continue;
     const stem = m[1];
     const hasBase = present.has(`${stem}.html`) || present.has(`${stem}.md`);
