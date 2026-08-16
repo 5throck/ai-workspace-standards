@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: variant
-version: 0.2.1
+version: 0.2.2
 description: >-
   Document Production Workflow for co-deck — generates searchable, themed
   handbooks as static sites (GitHub Pages). Three modes: standalone handbook,
@@ -11,7 +11,7 @@ description: >-
   H-Stage pipeline (H-0 through H-7). Independent from the 11-Stage slide pipeline.
 status: active
 owner: pm
-last_reviewed: 2026-07-17
+last_reviewed: 2026-08-16
 prerequisites: research (optional — standalone mode has no prerequisites)
 ---
 
