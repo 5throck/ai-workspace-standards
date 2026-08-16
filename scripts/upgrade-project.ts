@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.7.1
+// @version 1.8.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
@@ -8,6 +8,10 @@
 // v1.7.0: Added DOCS_MERGE (variant/common docs), VARIANT_DOCS_SYNC, COMMANDS_SYNC;
 //           extended managed block markers (VARIANT-INJECT, COMMON-AGENTS, DYNAMIC_SKILLS);
 //           added sync-skills.ts post-invoke for platform skill distribution
+// v1.8.0: extractScriptVersion now falls back to JSDoc `* @version` headers (files like
+//           security-validator.ts were silently never synced); added variant scripts/skills
+//           sync (templates/<variant>/scripts/<variant>/ and skills/<variant>/ → project);
+//           agent overwrites preserve the project's local `lifecycle:` frontmatter block.
 //
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -18,6 +22,7 @@ import {
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -224,11 +229,8 @@ function semverGt(a: string, b: string): boolean {
   return false;
 }
 
-function extractScriptVersion(filePath: string): string {
-  if (!existsSync(filePath)) return '';
-  const line = readFileSync(filePath, 'utf8').split('\n').find(l => /^\s*\/\/\s*@version\s+\d/.test(l)) ?? '';
-  return line.match(/(\d+\.\d+\.\d+)/)?.[1] ?? '';
-}
+// extractScriptVersion / preserveLifecycleFrontmatter are imported from
+// ./helpers/upgrade-versions.ts (testable pure helpers).
 
 function extractFrontmatterVersion(filePath: string): string {
   if (!existsSync(filePath)) return '';
@@ -695,7 +697,111 @@ for (const subDir of scriptSubDirs) {
 }
 console.log('');
 
+// ── VARIANT SCRIPTS SYNC: scripts/<variant>/ ─────────────────────────────────
+// Variant-specific scripts (scripts/<variant>/) are not part of the L1 common
+// registry; sync them from templates/<variant>/scripts/<variant>/ so template
+// improvements (e.g. handbook validation scripts) reach the project. Version-
+// based where an @version header exists (line or JSDoc style); hash-based for
+// unversioned files (template is canonical). Project-only files are preserved.
+const variantScriptsSrc = join(templatesDir, 'scripts', variant);
+if (existsSync(variantScriptsSrc)) {
+  console.log(`--- VARIANT SCRIPTS: scripts/${variant}/ ---`);
+  const variantScriptsDst = join(projectDir, 'scripts', variant);
+  const seenVariantScripts = new Set<string>();
+  const syncVariantScripts = (dir: string, rel: string): void => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'temp') continue;
+      const abs = join(dir, entry.name);
+      const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        syncVariantScripts(abs, entryRel);
+      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs'))) {
+        seenVariantScripts.add(entryRel);
+        const rel2 = `scripts/${variant}/${entryRel}`;
+        const projFile = join(projectDir, rel2);
+        const tplVer = extractScriptVersion(abs);
+        if (tplVer) {
+          const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : '';
+          if (!existsSync(projFile)) {
+            console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
+            if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(abs, projFile); }
+            console.log(`  ${dryTag}COPIED: ${rel2}`);
+            syncChanged++;
+          } else if (semverGt(tplVer, projVer)) {
+            if (isLocallyModified(projFile)) {
+              console.log(`  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+            } else {
+              console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+            }
+            if (!dryRun) copyFileSync(abs, projFile);
+            console.log(`  ${dryTag}COPIED: ${rel2}`);
+            syncChanged++;
+          } else {
+            console.log(`  OK     ${rel2}  ${projVer}`);
+          }
+        } else {
+          // Unversioned file — template is canonical; compare by content hash.
+          if (!existsSync(projFile)) {
+            console.log(`  NEW   ${rel2}  (hash)`);
+            if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(abs, projFile); }
+            console.log(`  ${dryTag}COPIED: ${rel2}`);
+            syncChanged++;
+          } else if (fileHash(abs) !== fileHash(projFile)) {
+            if (isLocallyModified(projFile)) {
+              console.log(`  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`);
+            } else {
+              console.log(`  UPDATE ${rel2}  (hash changed)`);
+            }
+            if (!dryRun) copyFileSync(abs, projFile);
+            console.log(`  ${dryTag}COPIED: ${rel2}`);
+            syncChanged++;
+          } else {
+            console.log(`  OK     ${rel2}  (hash match)`);
+          }
+        }
+      }
+    }
+  };
+  syncVariantScripts(variantScriptsSrc, '');
+  // Preserve project-only variant scripts (files in the project not in the template).
+  const preserveVariantScripts = (dir: string, rel: string): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'temp') continue;
+      const abs = join(dir, entry.name);
+      const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        preserveVariantScripts(abs, entryRel);
+      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.mjs')) && !seenVariantScripts.has(entryRel)) {
+        console.log(`  PRESERVE (project-only): scripts/${variant}/${entryRel}`);
+      }
+    }
+  };
+  preserveVariantScripts(variantScriptsDst, '');
+  // Sync the variant SCRIPTS.md registry from the template.
+  const variantRegSrc = join(variantScriptsSrc, 'SCRIPTS.md');
+  const variantRegDst = join(variantScriptsDst, 'SCRIPTS.md');
+  if (existsSync(variantRegSrc) && (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst))) {
+    console.log(`  UPDATE scripts/${variant}/SCRIPTS.md  (registry)`);
+    if (!dryRun) copyFileSync(variantRegSrc, variantRegDst);
+    console.log(`  ${dryTag}COPIED: scripts/${variant}/SCRIPTS.md`);
+    syncChanged++;
+  }
+  console.log('');
+}
+
 // ── SYNC_IF_NEWER: agents/ ────────────────────────────────────────────────────
+// Writes the template agent content over the project file, preserving the
+// project's local `lifecycle:` frontmatter block (L3 governance records).
+function writeAgentWithLifecycle(tplFile: string, projFile: string): void {
+  if (existsSync(projFile)) {
+    const merged = preserveLifecycleFrontmatter(readFileSync(tplFile, 'utf8'), readFileSync(projFile, 'utf8'));
+    writeFileSync(projFile, merged);
+  } else {
+    copyFileSync(tplFile, projFile);
+  }
+}
+
 console.log('--- SYNC_IF_NEWER: agents/ ---');
 const tplAgentsDirs = [join(templatesDir, 'agents'), join(commonDir, 'agents')];
 const seenAgents = new Set<string>();
@@ -723,7 +829,7 @@ for (const agentsDir of tplAgentsDirs) {
       syncChanged++;
     } else if (!projVer) {
       console.log(`  UPDATE ${rel}  (no version) → ${tplVer}`);
-      if (!dryRun) copyFileSync(tplFile, projFile);
+      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
@@ -733,7 +839,7 @@ for (const agentsDir of tplAgentsDirs) {
       } else {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
       }
-      if (!dryRun) copyFileSync(tplFile, projFile);
+      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
@@ -813,6 +919,78 @@ if (existsSync(projSkillsDir)) {
   }
 }
 console.log('');
+
+// ── VARIANT SKILLS SYNC: skills/<variant>/ ───────────────────────────────────
+// Variant-specific skills (skills/<variant>/) are not in the L1 common pool;
+// mirror them from templates/<variant>/skills/<name>/ so skill improvements
+// (e.g. handbook skill content) reach the project. Version/hash-based on the
+// SKILL.md frontmatter; the whole skill directory is mirrored on update.
+const variantSkillsSrc = join(templatesDir, 'skills');
+if (existsSync(variantSkillsSrc)) {
+  console.log(`--- VARIANT SKILLS: skills/${variant}/ ---`);
+  for (const skillName of readdirSync(variantSkillsSrc)) {
+    const tplSkillFile = join(variantSkillsSrc, skillName, 'SKILL.md');
+    if (!existsSync(tplSkillFile)) continue;
+    const tplSkillDir = join(variantSkillsSrc, skillName);
+    const projSkillDir = join(projectDir, 'skills', skillName);
+    const projSkillFile = join(projSkillDir, 'SKILL.md');
+    const tplVer = extractFrontmatterVersion(tplSkillFile);
+    const projVer = existsSync(projSkillFile) ? extractFrontmatterVersion(projSkillFile) : '';
+    const copySkillDir = (): void => {
+      mkdirSync(projSkillDir, { recursive: true });
+      for (const entry of readdirSync(tplSkillDir, { withFileTypes: true })) {
+        const src = join(tplSkillDir, entry.name);
+        const dst = join(projSkillDir, entry.name);
+        if (entry.isDirectory()) {
+          mkdirSync(dst, { recursive: true });
+          for (const sub of readdirSync(src, { withFileTypes: true })) {
+            const subSrc = join(src, sub.name);
+            const subDst = join(dst, sub.name);
+            if (sub.isFile()) copyFileSync(subSrc, subDst);
+          }
+        } else if (entry.isFile()) {
+          copyFileSync(src, dst);
+        }
+      }
+    };
+    if (tplVer) {
+      if (!existsSync(projSkillFile)) {
+        console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
+        if (!dryRun) copySkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+        syncChanged++;
+      } else if (semverGt(tplVer, projVer)) {
+        if (isLocallyModified(projSkillFile)) {
+          console.log(`  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+        } else {
+          console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}`);
+        }
+        if (!dryRun) copySkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+        syncChanged++;
+      } else {
+        console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+      }
+    } else {
+      const tplHash = fileHash(tplSkillFile);
+      const projHash = existsSync(projSkillFile) ? fileHash(projSkillFile) : '';
+      if (!existsSync(projSkillFile)) {
+        console.log(`  NEW   skills/${skillName}/SKILL.md  (hash)`);
+        if (!dryRun) copySkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+        syncChanged++;
+      } else if (tplHash !== projHash) {
+        console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
+        if (!dryRun) copySkillDir();
+        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+        syncChanged++;
+      } else {
+        console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+      }
+    }
+  }
+  console.log('');
+}
 
 // ── OVERWRITE: docs/_common/ (allowlist) ──────────────────────────────────────
 console.log('--- OVERWRITE: docs/_common/ (governance files) ---');
