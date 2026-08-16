@@ -7,7 +7,7 @@
 
 ## Overview
 
-The navigation validation system ensures handbook HTML files maintain consistent, correct inter-page navigation. It runs as a CI gate on every PR.
+The navigation validation system ensures handbook HTML files maintain consistent, correct inter-page navigation. Check ④ additionally keeps the manifest-driven search index (`search-manifest.json` → `search-data.js`) in sync with the actual files. It runs as a CI gate on every PR.
 
 ## Checks
 
@@ -35,14 +35,25 @@ Validates chapter-nav link labels match the target file's `<title>` or `<h1>`.
 - **Pattern**: Korean chapter numbers (e.g., `3장`, `8장 §1`)
 - **Error condition**: Label says `3장` but target title says `5장`
 
-### Check ④: site-search.js DOCS Sync
+### Check ④: Search Index Sync (check-search.ts v2.0.0)
 
-Ensures the `DOCS` array in `site-search.js` matches actual HTML files.
+Ensures the search index is consistent across all three artifacts of the manifest-driven pipeline:
 
-- **Bidirectional check**:
-  - Every DOCS entry must point to an existing file
-  - Every HTML file (except index.html and assets/) must be in DOCS
-- **Error condition**: Missing in DOCS or pointing to non-existent file
+```
+docs/search-manifest.json   (SSOT — { path, title, lang } per page)
+        │  build-search-index.ts
+        ▼
+docs/assets/search-data.js  (generated — declares SEARCH_DATA.DOCS + LABELS)
+        ▼
+site-search.js              (consumes SEARCH_DATA at runtime — never edited by hand)
+```
+
+- **3-way validation** (all directions checked):
+  - **Manifest ↔ files**: every manifest entry must resolve to an existing HTML file (`missing-file`); every primary HTML file (except `index.html`, `assets/`, and locale-variant `*_ko/_en/_ja/_es.html` files) must be registered in the manifest (`missing-from-manifest`)
+  - **Manifest ↔ generated data**: every manifest entry must exist in `search-data.js` and vice versa (`stale-search-data` — drift in either direction means the index is stale and must be regenerated)
+  - **Generated file present**: `search-data.js` must exist (`missing-search-data`)
+- **Skipped** when `search-manifest.json` is absent — handbooks using only `inpage-search.js` have no global search index to validate
+- **Error condition**: any of the above mismatch types; regenerating via `bun run build-search-index --docs-dir docs` and committing the output resolves them
 
 ## Running
 
@@ -67,7 +78,7 @@ All 4 checks share `nav-utils.ts` for HTML parsing:
 | `extractAllLinks()` | Extract all `<a href>` targets |
 | `extractTitle()` | Extract `<title>` content |
 | `extractH1()` | Extract `<h1>` content |
-| `parseDocsArray()` | Parse DOCS array from site-search.js |
+| `parseDocsArray()` | Parse the DOCS entries from generated `search-data.js` (used by Check ④ to detect stale index data) |
 | `getDocsDir()` | Return configured docs directory |
 
 ## CI Integration

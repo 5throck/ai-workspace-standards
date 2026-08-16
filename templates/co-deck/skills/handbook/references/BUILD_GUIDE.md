@@ -120,18 +120,26 @@ Required for course mode. See `AUTHORING_GUIDELINES.md §20` for the 6 required 
 Dispatch `handbook-reviewer` agent to run all validation checks:
 
 ```bash
-# 12 static analysis checks
-bun run handbook-doctor --project .
+# Unified entry point — runs structure + navigation + tables (default)
+bun run validate-handbook --docs-dir docs
 
-# 10 authoring compliance checks
-bun run check-authoring --project . --lang ko
+# Full verification — all 8 check groups (structure, nav, tables, a11y, spell, lint, authoring, doctor)
+bun run validate-handbook --docs-dir docs --checks all
 
-# 4 navigation integrity checks
-bun run validate-nav --docs-dir docs
+# Individual check layers (each also runs standalone)
+bun run check-a11y --docs-dir docs        # L2 — missing alt, heading hierarchy, empty links, html lang
+bun run check-spell --docs-dir docs       # L3 — common English misspellings
+bun run check-lint --docs-dir docs        # L4 — inline styles (allowlist), event handlers, deprecated tags, IDs
+bun run check-external-links --docs-dir docs  # L5 — external URL reachability
+
+# Legacy single-purpose tools (still available)
+bun run handbook-doctor --project .       # 12 static analysis checks
+bun run check-authoring --project . --lang ko  # 12 authoring compliance checks
+bun run validate-nav --docs-dir docs      # 4 navigation integrity checks
 ```
 
 ### Fix Cycle
-1. Run all 3 tools
+1. Run `validate-handbook --checks all` first — it aggregates every read-only check in one pass
 2. Auto-fix issues where possible
 3. Re-run to verify all checks pass
 4. Report unfixable issues to PM
@@ -162,14 +170,48 @@ This generates `assets/css/handbook-variables.css` with:
 > Both files are linked in every HTML template.
 
 ### Step 3: Generate Search Index
-Update `assets/js/site-search.js` DOCS array to include all HTML files:
-```javascript
-const DOCS = [
-  { path: 'index.html', title: 'Handbook Home' },
-  { path: 'chapters/chapter_01.html', title: '1장 Introduction' },
-  // ...
-];
+
+The search index is **manifest-driven** — `site-search.js` never holds a hand-maintained page list. The pipeline is:
+
 ```
+docs/search-manifest.json   (SSOT — { path, title, lang } per page)
+        │  bun run build-search-index --docs-dir docs
+        ▼
+docs/assets/search-data.js  (auto-generated — declares the SEARCH_DATA global)
+        ▼
+docs/assets/site-search.js  (consumes SEARCH_DATA at runtime)
+```
+
+**To register a new page**, edit `docs/search-manifest.json` and regenerate:
+
+```jsonc
+// docs/search-manifest.json — one entry per searchable page
+{
+  "pages": [
+    { "path": "index.html", "title": "Handbook Home", "lang": "ko" },
+    { "path": "chapters/chapter_01.html", "title": "1장 Introduction", "lang": "ko" }
+    // ...
+  ]
+}
+```
+
+```bash
+bun run build-search-index --docs-dir docs
+```
+
+- `search-data.js` is auto-generated — **never edit it by hand** (CI fails if it drifts from the manifest).
+- Locale-variant files (`chapter_en.html`, `chapter_ja.html`, …) are reached via the language switcher and do **not** need manifest entries.
+- If your handbook uses `inpage-search.js` instead of `site-search.js`, no manifest is required — `check-search` skips validation when the manifest is absent.
+
+### Step 3b: Extract Shared Copy-Button Script (optional)
+
+Handbooks that inline `copyCode()` per page can extract the shared implementation into `docs/assets/copy-code.js`:
+
+```bash
+bun run extract-copycode --docs-dir docs
+```
+
+This replaces inline `copyCode()` definitions with a `<script src="assets/copy-code.js">` reference, keeping one canonical implementation across the site.
 
 ### Step 4: Meta Tags
 Ensure each HTML file has:
@@ -207,14 +249,13 @@ bun scripts/scaffold-handbook.ts --project . --output handbook --lang ko
 
 # 3. Run validation
 cd handbook
-bun run handbook-doctor
-bun run check-authoring --lang ko
-bun run validate-nav
+bun run validate-handbook --checks all
 
 # 4. Apply theme
 bun run apply-theme --theme azure
 
-# 5. Update search index (edit docs/assets/js/site-search.js)
+# 5. Update search index (edit docs/search-manifest.json, then regenerate)
+bun run build-search-index --docs-dir docs
 
 # 6. Deploy
 cd .. && git add handbook/ && git commit -m "feat: add handbook" && git push

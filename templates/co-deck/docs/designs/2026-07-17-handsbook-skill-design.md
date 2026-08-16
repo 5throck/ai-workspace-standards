@@ -23,6 +23,8 @@ The skill is inspired by [beret21/teachme v0.3.1](https://github.com/beret21/tea
 - **Modular references**: BUILD_GUIDE (pipeline), AUTHORING_GUIDELINES (writing standards), SECTION_TYPES (content templates), QUALITY_CHECKLIST (verification) are separate files with single responsibilities.
 - **Shared validation infra**: Navigation validation scripts (`validate-nav.ts`) are referenced from a common location and included in every handbook project.
 - **Examples as CI regression fixtures**: `examples/` serve dual purpose — learning reference AND CI regression fixtures validated by `check-authoring.ts --examples-dir`.
+- **Manifest-driven search index**: `search-manifest.json` is the SSOT of searchable pages. `build-search-index.ts` generates `search-data.js` consumed by `site-search.js` — no manual DOCS array editing. CI verifies the generated file is never stale.
+- **Layered validation toolkit**: Validation is organized as independent check layers (structure, navigation, tables, a11y, spell, lint, external links, authoring, doctor) aggregated by a single entry point (`validate-handbook.ts`).
 - **Lifecycle management**: Validation scripts follow the workspace lifecycle model — versioned, tracked, and updated centrally.
 
 ## 2. Directory Structure
@@ -73,6 +75,8 @@ templates/co-deck/skills/handbook/
 | `examples/` as regression fixtures | `check-authoring.ts --examples-dir` validates examples on every PR |
 | `instructor-guide.html` template | Course sites require instructor operations guide (lecture flow, expected questions, timing, etc.) |
 | CSS variables only (zero hardcoded hex) | Enables theme switching without touching HTML — single `apply-handbook-theme.ts` command |
+| `search-manifest.json` + `build-search-index.ts` (not manual DOCS array) | Handbooks scale to 36–124 pages per language; a hand-maintained array drifts. Manifest → generated `search-data.js` separates page data from search UI logic |
+| Unified `validate-handbook.ts` entry point | One command validates the whole handbook (`--checks all` = 8 check groups) instead of remembering individual scripts |
 
 ## 3. SKILL.md Frontmatter
 
@@ -80,7 +84,7 @@ templates/co-deck/skills/handbook/
 ---
 name: handbook
 description: "Generate a searchable, themed handbook as a static site (GitHub Pages) from any topic or co-deck lecture storyline. Supports standalone handbooks, lecture companions, and full course sites with dark mode (3-layer CSS) and multi-language (i18n)."
-version: 0.1.0
+version: 0.3.0
 status: active
 scope: co-deck
 owner: pm
@@ -168,7 +172,7 @@ Theme is a first-class domain step, not just an asset swap:
 1. Select built-in theme (azure/graphite/teal/amber/indigo)
 2. Run `apply-handbook-theme.ts` — generates `:root` + `@media dark` + `.dark` CSS blocks
 3. Generate/update `handbook-theme.css`
-4. Update `site-search.js` DOCS array
+4. Update `search-manifest.json` (add/remove pages), then run `build-search-index.ts` to regenerate `search-data.js` — `site-search.js` consumes the generated `SEARCH_DATA` global, so its DOCS array is never edited by hand
 5. Update meta tags (description, language)
 
 ## 6. Section Types (SECTION_TYPES.md)
@@ -186,13 +190,20 @@ Theme is a first-class domain step, not just an asset swap:
 
 ### Automated (Scripts)
 
-| Script | Checks | Exit Code |
-|--------|--------|-----------|
-| `validate-nav.ts` | 4 (broken links, prev/next symmetry, label↔target, search sync) | 1 on failure |
-| `check-authoring.ts` | 10 (visual, copy buttons, sidebar nav, chapter-nav, min-width:0, mid-word strong, Course Overview 9 items, CSS variables, language pairs, Instructor Guide) | 1 on failure |
-| `handbook-doctor.ts` | 12 (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | 1 on failure |
+Validation is organized as independent check layers aggregated by a single entry point, `validate-handbook.ts` (v1.1.0). Default `--checks structure,nav,tables`; `--checks all` runs all 8 groups. Exit code 1 on any failure.
 
-**CI Integration**: `check-authoring.ts --examples-dir` validates `examples/` as regression fixtures on every PR.
+| Check Group | Script | Checks | Mode |
+|-------------|--------|--------|------|
+| ① Structure | `check-structure.ts` | Tag nesting (stack-based), `<pre>`/`.copy-btn` balance, no nested code-blocks, stray chars, required scripts, `<html lang>`, language pairs | in-process |
+| ② Navigation | `validate-nav.ts` (4 checks) | Broken links, prev/next symmetry, label↔target match, **search index sync (v2.0.0 manifest 3-way)** | in-process |
+| ③ Tables | `check-tables.ts` | Table column-sizing policy (no inline colgroup widths, no nowrap on first td) | in-process |
+| a11y | `check-a11y.ts` | Missing `alt`, heading hierarchy (stack-based container reset), empty links, missing `html lang` | in-process |
+| spell | `check-spell.ts` | 197 common English misspellings (strips script/style/pre/code/URLs) | in-process |
+| lint | `check-lint.ts` | Inline styles (allowlist: CSS custom props, SVG, flexbox), inline event handlers (copyCode allowlist), deprecated tags, duplicate IDs, empty headings | in-process |
+| authoring | `check-authoring.ts` | 12 AUTHORING_GUIDELINES compliance checks + `--examples-dir` regression | subprocess |
+| doctor | `handbook-doctor.ts` | 12 static analysis checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | subprocess |
+
+**CI Integration**: `check-authoring.ts --examples-dir` validates `examples/` as regression fixtures on every PR. The scaffolded workflow runs `validate-handbook`, `validate-nav`, `check-authoring`, `handbook-doctor`, `check-a11y`, `check-spell`, `check-lint`, and a `build-search-index` job that fails if `search-data.js` is out of sync with `search-manifest.json`.
 
 ### Manual (Agent)
 
@@ -201,7 +212,9 @@ Theme is a first-class domain step, not just an asset swap:
 - i18n completeness (all chapters have language pairs)
 - Instructor Guide content quality review
 
-## 8. Validation Scripts (10 files)
+## 8. Validation Scripts (21 files)
+
+The handbook toolkit ships 21 scripts in `scripts/co-deck/handbook/`, registered in `scripts/co-deck/SCRIPTS.md`.
 
 ### Navigation Validation (from teachme, modified)
 - `nav-utils.ts` — HTML parsing helpers (DOCS_DIR accepts `--docs-dir` CLI arg)
@@ -209,13 +222,32 @@ Theme is a first-class domain step, not just an asset swap:
 - `check-links.ts` — broken link check
 - `check-symmetry.ts` — prev/next reciprocity check
 - `check-labels.ts` — label↔target match check
-- `check-search.ts` — search index sync check
+- `check-search.ts` — **v2.0.0** search index sync check (manifest 3-way: `search-manifest.json` ↔ actual HTML files ↔ generated `search-data.js`; stale detection both directions)
 
-### New Scripts
+### Search Index Pipeline (new)
+- `search-manifest.json` — SSOT of searchable pages (`{ path, title, lang }` per entry), created per handbook in `docs/`
+- `build-search-index.ts` — reads the manifest, generates `docs/assets/search-data.js` declaring the `SEARCH_DATA` global (`DOCS` + per-language `LABELS`)
+- `site-search.js` — consumes `SEARCH_DATA` at runtime; the DOCS array is **never edited by hand**
+
+### Quality Verification Layers (new)
+- `check-a11y.ts` — L2 accessibility (missing alt, heading hierarchy with stack-based container reset, empty links, missing lang)
+- `check-spell.ts` — L3 English spell check (197 common misspellings; strips script/style/pre/code/URLs)
+- `check-lint.ts` — L4 HTML lint (inline styles with allowlist, inline event handlers, deprecated tags, duplicate IDs, empty headings)
+- `check-external-links.ts` — L5 external link checker (HTTP HEAD, 5s timeout, 5-request concurrency, safe-domain skips)
+
+### Structure, Authoring & Aggregation
+- `check-structure.ts` — HTML well-formedness (stack-based tag nesting, pre/copy-btn balance, language pairs)
+- `check-tables.ts` — table column-sizing policy
+- `check-authoring.ts` — 12 AUTHORING_GUIDELINES compliance checks + `--examples-dir` regression
+- `validate-handbook.ts` — **v1.1.0** unified entry point aggregating every read-only check (`--checks all` = 8 groups; runSubprocess try/catch)
+
+### Scaffolding, Theming, Deploy & Maintenance
 - `scaffold-handbook.ts` — generates handbook project scaffold from templates
-- `check-authoring.ts` — 10 AUTHORING_GUIDELINES compliance checks + `--examples-dir` regression
 - `apply-handbook-theme.ts` — 5 built-in theme application (azure/graphite/teal/amber/indigo)
 - `handbook-doctor.ts` — 12 static analysis checks
+- `deploy-handbook.ts` — GitHub Pages deployment automation
+- `update-footers.ts` — localized site footer sync (ko/en/es/ja)
+- `extract-copycode.ts` — extracts inline `copyCode()` into shared `docs/assets/copy-code.js`
 
 ## 9. Agents (2 new)
 
@@ -262,3 +294,11 @@ Both agents are **only dispatched in H-Stage** — never in the 11-Stage slide p
   - `handbook-doctor` expanded to 12 static analysis checks
   - `instructor-guide.html` template added
   - `dark-mode-toggle.js`, `lang-switcher.js` assets added
+- **v0.3.0 (2026-08-17) — manifest-driven search + layered validation toolkit**:
+  - Search pipeline: `search-manifest.json` → `build-search-index.ts` → `search-data.js` → `site-search.js` (replaces hand-maintained DOCS array; scales to 36–124 pages per language)
+  - `check-search.ts` v2.0.0 — manifest 3-way validation (manifest ↔ files ↔ generated data, stale detection both directions)
+  - New check layers: `check-a11y.ts` (L2), `check-spell.ts` (L3), `check-lint.ts` (L4), `check-external-links.ts` (L5)
+  - `validate-handbook.ts` v1.1.0 — unified entry point; `--checks all` runs 8 groups; runSubprocess try/catch
+  - `check-structure.ts` language regex extended to `[a-z]{2,3}(-[A-Z]{2})?`
+  - Shared `copy-code.js` asset extracted via `extract-copycode.ts`
+  - CI: `build-search-index` job with `git diff --exit-code` staleness verification

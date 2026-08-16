@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-07-21
+# Last Updated: 2026-08-16
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -572,8 +572,8 @@ H-1: research — Web research (reuse existing agent)
 H-2: handbook-writer — Propose section types + chapter structure
 H-3: handbook-writer — Write chapter content (SECTION_TYPES + AUTHORING_GUIDELINES)
 H-4: handbook-writer — Generate Course Overview + Instructor Guide
-H-5: handbook-reviewer — handbook-doctor.ts + check-authoring.ts → fix
-H-6: PM/automation — Apply Theme (domain step) → Generate CSS → Search index → Meta
+H-5: handbook-reviewer — validate-handbook.ts (--checks all) → fix
+H-6: PM/automation — Apply Theme (domain step) → Generate CSS → Search index (manifest → build-search-index) → Meta
 H-7: PM — Secret scan + deploy + verify
 ```
 
@@ -593,9 +593,10 @@ H-7: PM — Secret scan + deploy + verify
 3. **Multi-language file convention** — Separate files per language: `chapter.html` (default), `chapter_ko.html`, `chapter_en.html`. Language switcher uses AI-friendly filename convention.
 4. **6 section types**: Manual, Chapter, Examples, Quiz, CourseOverview, InstructorGuide — each with prescribed HTML structure per SECTION_TYPES.md.
 5. **Companion mode skips H-1** — When building a companion handbook from an existing slide project, reuse all cached pipeline outputs (research, images, diagrams, references, versions) instead of re-researching.
-6. **Theme is a domain step** (H-6) — Select built-in theme (azure/graphite/teal/amber/indigo) → run `apply-handbook-theme.ts` → generate CSS → update `site-search.js` DOCS array → update meta tags.
+6. **Theme is a domain step** (H-6) — Select built-in theme (azure/graphite/teal/amber/indigo) → run `apply-handbook-theme.ts` → generate CSS → **update `search-manifest.json` and regenerate `search-data.js` via `build-search-index.ts`** → update meta tags. `site-search.js` consumes the generated `SEARCH_DATA` global and is never edited by hand.
 7. **examples/ are CI regression fixtures** — `check-authoring.ts --examples-dir` validates all examples/ files on every PR. Examples must pass all authoring checks.
-8. **handbook-doctor runs 12 static analysis checks** — sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1.
+8. **Search index is manifest-driven** — `docs/search-manifest.json` (`{ path, title, lang }` per page) is the SSOT; `build-search-index.ts` generates `docs/assets/search-data.js`. Locale variants (`*_ko/_en/_ja/_es.html`) and `index.html` need no manifest entry. `check-search.ts` (v2.0.0) validates manifest ↔ files ↔ generated data (3-way, stale detection both directions); the scaffolded CI `build-search-index` job fails on drift.
+9. **Validation is layered and aggregated** — `validate-handbook.ts` (v1.1.0) is the unified entry point: default `structure,nav,tables`, `--checks all` runs 8 groups (structure, nav, tables, a11y, spell, lint, authoring, doctor). New check layers: `check-a11y.ts` (L2 heading hierarchy with stack-based container reset), `check-spell.ts` (L3, 197 misspellings), `check-lint.ts` (L4 inline-style allowlist: CSS custom props, SVG, flexbox; copyCode event-handler allowlist), `check-external-links.ts` (L5 HTTP HEAD). `handbook-doctor` runs 12 static analysis checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1).
 
 ---
 
@@ -650,6 +651,7 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 ---
 
 *co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
+*co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
 
 ## Template Provenance
 
