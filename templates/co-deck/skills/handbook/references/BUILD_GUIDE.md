@@ -50,15 +50,19 @@ Dispatch the `research` agent for web research:
 ### Template Copy
 Run `scaffold-handbook.ts` to create the project structure:
 ```bash
-bun scripts/scaffold-handbook.ts --project . --output handbook --lang ko
+bun scripts/scaffold-handbook.ts --project . --output handbook --lang ko \
+  --title "My Handbook" --description "One-line summary" \
+  --repo owner/name --chapters "Ch1,Ch2,Ch3"
 ```
+`--title`, `--description`, `--repo`, and `--chapters` are optional — each has a sane fallback if omitted (`--repo` only affects the generated "Read the Handbook Live" link; `--chapters` only seeds the README's curriculum list).
 
 This copies:
 - HTML templates → `handbook/docs/`
 - CSS/JS assets → `handbook/docs/assets/`
-- Validation scripts → `handbook/scripts/`
-- `package.json` with npm scripts
+- Validation scripts → `handbook/scripts/` (including `deploy-handbook.ts`)
+- `package.json` with npm scripts (including `deploy`, wired to `deploy-handbook.ts`)
 - CI workflow → `handbook/.github/workflows/`
+- `README.md` + `README_ko.md` + `LICENSE` (CC BY-NC-SA 4.0), auto-generated from `--title`/`--description`/`--repo`/`--chapters`
 
 ### Companion Mode Asset Reuse
 Copy cached assets from the co-deck project:

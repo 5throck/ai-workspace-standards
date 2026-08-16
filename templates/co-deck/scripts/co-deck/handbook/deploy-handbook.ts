@@ -1,5 +1,5 @@
-// @version 1.1.0
 #!/usr/bin/env bun
+// @version 1.1.0
 // scripts/co-deck/handbook/deploy-handbook.ts
 // Deploys a handbook to GitHub Pages — automates repo creation, visibility,
 // GitHub Actions workflow generation, Pages activation, and verification.

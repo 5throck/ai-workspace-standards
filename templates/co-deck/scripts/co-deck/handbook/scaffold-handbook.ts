@@ -1,5 +1,5 @@
-// @version 1.0.0
 #!/usr/bin/env bun
+// @version 1.0.0
 // scripts/co-deck/handbook/scaffold-handbook.ts
 // Generates handbook project scaffold from skill templates + assets.
 // Copies template HTML, CSS, JS, scripts, and examples into a new project.
@@ -17,6 +17,10 @@ function getArg(name: string, fallback: string): string {
 const projectDir = resolve(getArg("--project", "."));
 const outputDir = getArg("--output", "handbook");
 const lang = getArg("--lang", "ko");
+const title = getArg("--title", "Handbook");
+const description = getArg("--description", "");
+const repo = getArg("--repo", "");
+const chaptersArg = getArg("--chapters", "");
 
 const targetDir = join(projectDir, outputDir);
 const docsDir = join(targetDir, "docs");
@@ -64,6 +68,7 @@ const SCRIPT_FILES: { src: string; dest: string }[] = [
   { src: "check-authoring.ts", dest: "check-authoring.ts" },
   { src: "apply-handbook-theme.ts", dest: "apply-handbook-theme.ts" },
   { src: "handbook-doctor.ts", dest: "handbook-doctor.ts" },
+  { src: "deploy-handbook.ts", dest: "deploy-handbook.ts" },
 ];
 
 let copied = 0;
@@ -131,9 +136,100 @@ const packageJson = {
     "apply-theme": `bun run scripts/apply-handbook-theme.ts --project . --theme azure`,
     "handbook-doctor": `bun run scripts/handbook-doctor.ts --project .`,
     "scaffold": `bun run scripts/scaffold-handbook.ts --project . --output handbook --lang ${lang}`,
+    "deploy": `bun run scripts/deploy-handbook.ts --project . --output handbook`,
   },
 };
 writeFileSync(join(targetDir, "package.json"), JSON.stringify(packageJson, null, 2) + "\n");
+created++;
+
+// --- README.md + LICENSE generation ---
+
+const chapters = chaptersArg ? chaptersArg.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+// Supported languages for README generation: en is always README.md,
+// additional languages get README_<code>.md (e.g. README_ko.md, README_ja.md).
+// Add new languages to README_LANGS to auto-generate them at scaffold time.
+const README_LANGS: Array<{ code: string; file: string; label: string }> = [
+  { code: "en", file: "README.md", label: "English" },
+  { code: "ko", file: "README_ko.md", label: "한국어" },
+];
+
+function generateReadme(langCode: string, langLabel: string): string {
+  const isKo = langCode === "ko";
+
+  // Build language switcher: list all README_LANGS entries
+  const langLinks = README_LANGS.map(l => {
+    const marker = l.code === langCode ? `**${l.label}**` : l.label;
+    return `[${marker}](${l.file})`;
+  });
+  const langSwitcher = `Language: ${langLinks.join(" | ")}`;
+
+  const desc = description || (isKo
+    ? `${title}은(는) AI 워크스페이스 교육 프로그램입니다.`
+    : `Welcome to the **${title}**, an AI Workspace educational program.`);
+
+  const pagesUrl = repo
+    ? `https://${repo.replace(/^https?:\/\//, "").split("/")[0]}.github.io/${repo.split("/").pop()}/`
+    : "";
+
+  const pagesSection = pagesUrl
+    ? (isKo
+        ? `\n## 🌐 교육 프로그램 바로가기 (웹사이트)\n👉 **[${title} 교육 사이트 보기](${pagesUrl})**\n`
+        : `\n## 🌐 Read the Handbook Live\n👉 **[Online Handbook & Educational Program](${pagesUrl})**\n`)
+    : "";
+
+  const curriculumHeader = isKo ? "## 📚 커리큘럼 구성" : "## 📚 Curriculum / Contents";
+  const chapterList = chapters.length > 0
+    ? chapters.map(ch => `  - **${ch}**`).join("\n")
+    : `  - *(Add chapter list)*`;
+
+  const versionsHeader = isKo ? "## 🎯 대상 버전" : "## 🎯 Target Versions";
+  const versionInfo = "Claude Code 2026-07 / Antigravity CLI 1.1.0+ / Antigravity 2.0";
+
+  const licenseHeader = "## 📜 License";
+  const licenseText = isKo
+    ? `- **핸드북 콘텐츠**: [CC BY-NC-SA 4.0](LICENSE) (저작자표시-비영리-동일조건변경허락 4.0 국제)`
+    : `- **Handbook content**: [CC BY-NC-SA 4.0](LICENSE) (Attribution-NonCommercial-ShareAlike 4.0 International)`;
+
+  return `# ${title}\n\n${langSwitcher}\n\n${desc}\n${pagesSection}\n${curriculumHeader}\n${chapterList}\n\n${versionsHeader}\n- ${versionInfo}\n\n${licenseHeader}\n${licenseText}\n`;
+}
+
+// Generate all README files
+const readmeNames: string[] = [];
+for (const { code, file, label } of README_LANGS) {
+  writeFileSync(join(targetDir, file), generateReadme(code, label));
+  readmeNames.push(file);
+  created++;
+}
+
+// Write LICENSE (CC BY-NC-SA 4.0)
+const licenseContent = `${title} — Content License
+============================================================
+
+The written content of this handbook (chapter text, diagrams, and other
+documentation under this repository) is licensed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
+
+저작자표시-비영리-동일조건변경허락 4.0 국제 (CC BY-NC-SA 4.0)
+
+You are free to:
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+  - Attribution (저작자표시) — You must give appropriate credit, provide a
+    link to the license, and indicate if changes were made.
+  - NonCommercial (비영리) — You may not use the material for commercial
+    purposes.
+  - ShareAlike (동일조건변경허락) — If you remix, transform, or build upon
+    the material, you must distribute your contributions under the same
+    license as the original.
+
+Full legal code: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+License deed:    https://creativecommons.org/licenses/by-nc-sa/4.0/
+License deed (한국어): https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko
+`;
+writeFileSync(join(targetDir, "LICENSE"), licenseContent);
 created++;
 
 // Create CI workflow
@@ -173,9 +269,11 @@ console.log(`   📋 ${copied} file(s) copied, ${created} file(s) created, ${ski
 console.log(`   📁 docs/    — HTML pages + assets`);
 console.log(`   📁 scripts/ — Validation and tooling scripts`);
 console.log(`   📁 .github/ — CI workflow (validate-handbook + check-authoring)`);
+console.log(`   📄 ${readmeNames.join(", ")}, LICENSE — Auto-generated project metadata`);
 console.log(`\n   Next steps:`);
 console.log(`   1. cd ${outputDir}`);
 console.log(`   2. bun install`);
 console.log(`   3. bun run apply-theme --theme azure`);
 console.log(`   4. Edit docs/chapters/ to add content`);
 console.log(`   5. bun run validate-handbook   # structure + nav + tables in one command`);
+console.log(`   6. bun run deploy --repo {owner}/{name}   # deploy to GitHub Pages`);

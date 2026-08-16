@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// scripts/check-structure.ts
+// scripts/co-deck/handbook/check-structure.ts
 // HTML structure validator — the well-formedness layer of the handbook toolkit.
 // Ported from intro-to-ai-harness/scripts/validate-structure.py (stack-based).
 //
@@ -18,7 +18,7 @@
 //   ⑦ language pair completeness — every `X_<lang>.html` needs its base `X.html`
 //
 // Usage:
-//   bun run scripts/check-structure.ts --docs-dir docs
+//   bun run scripts/co-deck/handbook/check-structure.ts --docs-dir docs
 // Exit code 0 if all pass, 1 otherwise.
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
