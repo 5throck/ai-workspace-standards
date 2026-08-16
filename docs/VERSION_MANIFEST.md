@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-15T23:37:05.136Z
+**Generated**: 2026-08-16T00:21:56.521Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -84,12 +84,12 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.10.17 | scripts/audit.ts | bun |
+| audit.ts | 2.10.18 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.9.2 | scripts/create-l3-scaffold.ts | N/A |
-| dev-sync.ts | 1.5.1 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.5.2 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |

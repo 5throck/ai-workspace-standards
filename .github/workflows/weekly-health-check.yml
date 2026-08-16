@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -37,3 +39,21 @@ jobs:
 
       - name: Verify scripts registry
         run: bun run verify-scripts
+
+      - name: Secret scanning - gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Security audit - dependency vulnerabilities
+        shell: bash
+        continue-on-error: true
+        run: |
+          audit_output=$(bun audit 2>&1) || true
+          echo "$audit_output"
+          if echo "$audit_output" | grep -qE '[1-9][0-9]* (high|critical)'; then
+            echo "WARNING: High or critical vulnerabilities found. See audit output above."
+            exit 1
+          fi
+          echo "Security check passed (no high/critical vulnerabilities)."

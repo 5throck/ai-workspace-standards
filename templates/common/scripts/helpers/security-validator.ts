@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.0.1
+ * @version 1.0.2
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -77,6 +77,32 @@ export interface SecurityValidatorOptions {
   allowed_root_dirs?: string[];
   override_whitelist?: string[];
   strict_mode?: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Extract content that appears inside fenced code blocks (``` ... ```) or
+ * inline code (` ... `). Returns a string containing only the code-block
+ * regions, with non-code prose stripped out. This allows URL detection to
+ * target only executable/referenced code rather than documentation links.
+ */
+function extractCodeBlockContent(content: string): string {
+  const codeRegions: string[] = [];
+  // Match fenced code blocks: opening ``` with optional lang, then body, then closing ```
+  const fencedBlockRegex = /```[a-zA-Z]*\n([\s\S]*?)```/g;
+  let match: RegExpExecArray | null;
+  while ((match = fencedBlockRegex.exec(content)) !== null) {
+    codeRegions.push(match[1]);
+  }
+  // Match inline code: `...` (not inside fenced blocks — simplified single-pass)
+  const inlineCodeRegex = /`([^`\n]+)`/g;
+  while ((match = inlineCodeRegex.exec(content)) !== null) {
+    codeRegions.push(match[1]);
+  }
+  return codeRegions.join('\n');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -211,21 +237,26 @@ export class SecurityValidator {
       }
     }
 
-    // Check 3: External URL detection
+    // Check 3: External URL detection — only flag URLs inside code blocks
+    // (fenced ``` blocks) or inline code (`backtick` wrapped). URLs in
+    // regular prose/documentation are legitimate references and allowed.
     const urlPatterns = [
       /https?:\/\/[^\s]+/i,
       /ftp:\/\/[^\s]+/i,
       /file:\/\/\/[^\s]+/i
     ];
 
+    // Extract text that is inside code blocks (``` ... ```) or inline code (`...`)
+    // by stripping non-code regions, then check only the code regions for URLs.
+    const codeBlockContent = extractCodeBlockContent(content);
     for (const pattern of urlPatterns) {
-      if (pattern.test(content)) {
+      if (pattern.test(codeBlockContent)) {
         return {
           valid: false,
           violation_type: SecurityViolationType.EXTERNAL_URL,
-          message: 'External URL detected in override content',
+          message: 'External URL detected inside code block in override content',
           malicious_input: content.substring(0, 100) + '...',
-          remediation: 'Use relative paths or remove external references'
+          remediation: 'Remove external references from code blocks — use relative paths'
         };
       }
     }
