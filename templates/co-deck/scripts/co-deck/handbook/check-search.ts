@@ -1,4 +1,4 @@
-// scripts/check-search.ts
+// scripts/co-deck/handbook/check-search.ts
 // Check ④: site-search.js DOCS array must contain all HTML files in docs/,
 // and every DOCS entry must point to an existing file.
 // Canonical source of the handbook toolkit (adapted from

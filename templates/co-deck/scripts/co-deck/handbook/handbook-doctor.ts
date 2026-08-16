@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// scripts/handbook-doctor.ts
+// scripts/co-deck/handbook/handbook-doctor.ts
 // Enhanced static analyzer for handbook HTML files.
 // 12 checks: nav, broken links, dark palette, lang pair, visual, Course Overview,
 // Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1.

@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
-// scripts/update-footers.ts
+// scripts/co-deck/handbook/update-footers.ts
 // Syncs the localized site footer into every HTML page under docs/.
 // Vendored from Handbooks/multi-agent-harness-handbook/scripts/update-footers.ts
-// (canonical source: scripts/).
+// (canonical source: scripts/co-deck/handbook/).
 // WRITE-ONLY maintenance tool — run deliberately, not as part of validation.
 //
 // Usage:
-//   bun run scripts/update-footers.ts --docs-dir docs
+//   bun run scripts/co-deck/handbook/update-footers.ts --docs-dir docs
 
 import { writeFileSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
