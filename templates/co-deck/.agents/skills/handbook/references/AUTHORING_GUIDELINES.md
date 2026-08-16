@@ -335,6 +335,8 @@ This rule applies **per document (file)** — in a different document, the first
 ✓ <h1>신규 variant 만들기</h1>             (English only in heading)
 ```
 
+> **Exception — Korean-primary handbooks** (approved 2026-08-16): For handbooks whose base/default edition is Korean (`lang="ko"` base files with `_en` variants), the default edition may keep **fully Korean `<h1>` and `<title>` text**. Rationale: a Korean-first handbook's primary audience reads Korean headings natively, and the `_en` variant provides the English-heading experience. This exception applies only to the **default (Korean) edition**; translated editions must use their own language consistently. When the default edition is not Korean, the English-only rule above applies unchanged.
+
 ### 12-3. Chapter/Section Reference Format
 
 When referencing another chapter or section, unify the format as **`N장 §M`**.

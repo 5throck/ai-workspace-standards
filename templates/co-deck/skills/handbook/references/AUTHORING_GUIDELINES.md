@@ -354,6 +354,8 @@ This rule applies **per document (file)** — in a different document, the first
 
 Common rule: No parenthetical glosses in headings. Only English technical terms appear in heading text, combined with local-language structure words (articles, prepositions, etc.).
 
+> **Exception — Korean-primary handbooks** (approved 2026-08-16): For handbooks whose **base/default edition is Korean** (`lang="ko"` base files with `_en` variants), the default edition may keep **fully Korean `<h1>` and `<title>` text** (e.g. `<h1>왜 AI 에이전트 팀인가?</h1>`). Rationale: a Korean-first handbook's primary audience reads Korean headings natively, and the `_en` variant provides the English-heading experience. This exception applies only to the default (Korean) edition; translated editions must use their own language consistently. When the default edition is not Korean, the English-only rule and the language table above apply unchanged.
+
 ### 12-3. Chapter/Section Reference Format
 
 When referencing another chapter or section, unify the format as **`N장 §M`**.
