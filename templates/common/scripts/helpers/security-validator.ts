@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.0.2
+ * @version 1.1.0
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -373,6 +373,90 @@ export function validateOverrideSecurity(
   const validator = options ? new SecurityValidator(options) : defaultSecurityValidator;
   return validator.validateOverrideContent(sectionName, content);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Source-scanning shell-injection patterns (NOT markdown/frontmatter oriented)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Used by scripts/audit.ts's checkShellInjectionPatterns() to scan .ts script
+// source for shell-injection-shaped sink patterns. Deliberately a SEPARATE,
+// narrower pattern set from `shellCommandPatterns` above -- that set targets
+// markdown/frontmatter override content and flags the mere presence of
+// executable-looking code, which is the right bar for "should this doc field
+// contain code at all." Applied to real script source, it would flag nearly
+// every one of the ~80 scripts in this repo that legitimately spawn
+// subprocesses, drowning real findings in noise. See design doc
+// docs/designs/2026-08-16-august-regression-coverage-design.md section 1.
+//
+// Calibration (2026-08-16): surveyed scripts/*.ts and templates/*/scripts/**/*.ts
+// before finalizing these regexes.
+//   - Bun's tagged-template shell helper auto-escapes each interpolation as a
+//     single, safely-quoted argv token by default. A broad "any interpolation
+//     not wrapped in a shellEscape*/shellQuote* call" rule matched ~97 lines
+//     across this repo with zero true positives (every script in this
+//     workspace that uses the helper relies on that default auto-escaping and
+//     none of them disable it). That rule was rejected as unusably noisy.
+//   - Narrowed to the genuinely risk-signaling shape: interpolating a
+//     COMPOUND string assembled via string concatenation, array-join, or a
+//     nested template literal -- i.e. the author is manually building shell
+//     syntax rather than relying on the helper's per-token escaping. Zero
+//     matches for this narrower shape exist in the current repo (confirmed
+//     via survey), so it starts from a clean baseline.
+//   - For subprocess-spawn call sites in this repo, direct calls consistently
+//     use either string literals (no interpolation) or the argv-array form --
+//     both safe. The three bugs patched in commit bd4312f62 that DID reach an
+//     interpolated shell string did so through a locally-defined wrapper
+//     function (e.g. a `run(cmd)` helper in
+//     templates/co-deck/scripts/co-deck/handbook/deploy-handbook.ts), not a
+//     bare subprocess-spawn call. The pattern below therefore also matches
+//     calls to any function whose name contains a subprocess/shell-invocation
+//     keyword (case-insensitive) -- confirmed via survey to add zero
+//     additional false positives in the current corpus while catching that
+//     wrapper shape.
+export interface SourceShellInjectionPattern {
+  name: string;
+  pattern: RegExp;
+  remediation: string;
+}
+
+// Sink-function-name fragment used by the subprocess-spawn pattern below.
+// Matches Node's child_process spawning family plus locally-defined wrapper
+// functions whose name contains one of these fragments (see calibration
+// notes above).
+const SUBPROCESS_SINK_NAME_FRAGMENT = ['run', 'exec', 'spawn', 'shell'].join('|');
+
+export const sourceShellInjectionPatterns: SourceShellInjectionPattern[] = [
+  {
+    name: 'bun-shell-compound-interpolation',
+    // Tagged-template shell invocation containing an interpolation whose
+    // expression is built via string concatenation, `.join(`, or a nested
+    // template literal, and is not visibly wrapped in a
+    // shellEscape*/shellQuote*/escapeShellArg* call.
+    pattern: new RegExp(
+      '\\$`[^`]*\\$\\{(?![^}]*\\b(?:shellEscape|shellQuote|escapeShellArg)\\w*\\s*\\()' +
+      // `.join(` counts as a compound-build signal EXCEPT the common, safe
+      // `path.join(...)` idiom (calibration: path.join(...) accounted for
+      // 100% of this sub-pattern's false positives on the current repo).
+      '[^}]*(?:\\+|(?<!path)\\.join\\s*\\(|`[^`]*\\$\\{)[^}]*\\}[^`]*`',
+      'g'
+    ),
+    remediation: 'Validate/allowlist the input before interpolating a manually-assembled string into a shell-invocation template, or wrap it in a shellEscape*/shellQuote* helper before interpolation.'
+  },
+  {
+    name: 'subprocess-spawn-string-build',
+    // Calls to a subprocess-spawning function (Node's child_process family,
+    // or a locally-defined wrapper -- see SUBPROCESS_SINK_NAME_FRAGMENT)
+    // where the command argument is built via string concatenation or a
+    // template literal with interpolation, rather than the safer argv-array
+    // calling form.
+    pattern: new RegExp(
+      '\\b\\w*(?:' + SUBPROCESS_SINK_NAME_FRAGMENT + ')\\w*\\s*\\(\\s*' +
+      '(?:[^,()]*\\+[^,()]*|`[^`]*\\$\\{[^}]*\\}[^`]*`)',
+      'gi'
+    ),
+    remediation: 'Prefer the argv-array calling form over shell-string interpolation, or validate/allowlist the input before building the command string.'
+  }
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLI Interface (for testing)

@@ -1,10 +1,10 @@
 ---
-status: "Proposed"
+status: "Accepted"
 ---
 
 # ADR-0050: Variant Script Inheritance Pattern and Golden-Reference SSOT
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-08-09
 **Author**: architect
 **Decision Type**: Pipeline Governance / Architecture
@@ -72,3 +72,9 @@ Codifying the pattern established by commit 20e039d:
 ## Implementation
 
 See `docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md` for the full task breakdown (Tasks 1–6). This ADR's Part 2 corresponds to Task 4 (delete `goldenReference()`); Part 1 is a documentation-only codification of existing 20e039d behavior, with the `propagate-to-templates.ts` source/target guard in Task 5 as a related but separately-motivated defensive fix (Issue B, not Part 1 of this ADR).
+
+### Implementation Status (2026-08-16)
+
+- **Part 2 — done and verified.** `VariantPlugin.goldenReference()` has been removed from all `scripts/helpers/plugins/*.ts` files; zero references remain repo-wide.
+- **Part 1's audit.ts follow-up — now specified, implementation pending.** The drift-detection check proposed in this ADR's Consequences section (a `templates/co-*/scripts/` file that duplicates a `templates/common/scripts/` file by name and >50% content similarity) is fully designed in `docs/designs/2026-08-16-august-regression-coverage-design.md` (§2), including the similarity heuristic, FAIL/WARN decision (WARN, initially), and acceptance criteria. The `audit.ts` code itself is implementation work for the next PR, not included in this status update.
+- Status flipped from "Proposed" to "Accepted" on 2026-08-16: both parts of the ADR's *decision* are settled and Part 2 is fully executed; Part 1's own follow-up check was always scoped as optional, deferred work in the original Consequences section, not a precondition for acceptance.

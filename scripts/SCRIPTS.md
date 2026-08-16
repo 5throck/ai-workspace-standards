@@ -63,7 +63,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.10.18 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.12.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -89,7 +89,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/lifecycle-governance.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
-| `helpers/security-validator.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
+| `helpers/security-validator.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -181,7 +181,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `ticket.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `upgrade-project.ts` | L0 | 1.7.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
-| `validate-agents.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
+| `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
