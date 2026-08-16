@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: PLACEHOLDER
+translated_from_hash: 447ffc6f0eda28772ffdeceae70a66f02111e1f964d08933fad6a8949f4a1d3e
 lang: ko
 lang_reason: source-material
 ---

@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-utils.ts — shared utilities for co-deck theme/style scripts.
 //
 // Extracted from validate-theme-styles.ts, generate-themes-manifest.ts,

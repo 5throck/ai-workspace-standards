@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // install-bun.ts - Bun runtime installer
 // Usage: bun scripts/install-bun.ts

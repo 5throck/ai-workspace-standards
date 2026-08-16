@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lister CLI for Workspace Root
- * @version 1.0.0
+ * @version 1.1.0
  * Lists all agents in the agents/ directory with metadata
  *
  * Usage:
@@ -12,6 +12,7 @@
 
 import path from "node:path";
 import { promises as fs } from "node:fs";
+import { ErrorPhase, die } from "./lib/error-handling.ts";
 
 const scriptDir = path.dirname(import.meta.path);
 const projectRoot = path.resolve(scriptDir, "..");
@@ -136,11 +137,10 @@ async function listAgents(groupFilter?: string, verbose: boolean = false): Promi
     console.log(`\nTotal: ${filteredAgents.length} agents\n`);
   } catch (error) {
     if ((error as any).code === "ENOENT") {
-      console.error("Agents directory not found.");
+      die("Agents directory not found", 1);
     } else {
-      console.error("Error:", error);
+      die(`Error listing agents: ${error instanceof Error ? error.message : String(error)}`, 1);
     }
-    process.exit(1);
   }
 }
 
@@ -192,7 +192,6 @@ async function main(): Promise<void> {
 
 if (import.meta.main) {
   main().catch(error => {
-    console.error("Error:", error);
-    process.exit(1);
+    die(`Fatal error: ${error instanceof Error ? error.message : String(error)}`, 1);
   });
 }

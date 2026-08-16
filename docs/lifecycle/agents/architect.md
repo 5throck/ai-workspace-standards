@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Design phase specialist
-- [x] Tier assignment: High-tier (claude-opus-4-7)
+- [x] Tier assignment: High-tier (claude-opus-5-0)
 - [x] Design responsibilities specified: Implementation plans, ADRs, architectural standards
 - [x] Template structure design expertise documented
 - [x] User approval gate requirement documented
@@ -30,7 +30,7 @@
 
 **Design Phase Specialist** - Template structure design and architectural standards
 
-**Phases Supported**: 2 (Design)
+**Phases Supported**: 1-2 (Planning & Architecture)
 
 **Key Responsibilities**:
 - Implementation plan creation
@@ -41,7 +41,7 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [2]
+**Can Lead Phases**: [1, 2]
 **Can Support In**: [0, 6]
 **Tier**: high
 **Communication Style**: sync (requires user approval before implementation)

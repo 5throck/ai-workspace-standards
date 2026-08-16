@@ -10,27 +10,57 @@ Records and governs the lifecycle of agents, skills, and scripts.
 docs/lifecycle/
 ├── README.md (this file)
 ├── agents/
-│   ├── pm.md
 │   ├── architect.md
-│   ├── automation-engineer.md
 │   ├── auditor.md
+│   ├── automation-engineer.md
 │   ├── docs-writer.md
 │   ├── lifecycle-manager.md
-│   └── ...
+│   ├── pm.md
+│   ├── scaffolding-expert.md
+│   └── security-expert.md
 ├── scripts/
-│   ├── validate-pm-extends.md
 │   ├── new-project.md
-│   └── ...
+│   └── validate-pm-extends.md
 ├── skills/
-│   ├── skill-lifecycle-manager.md
+│   ├── accessibility-audit.md
 │   ├── agent-lifecycle-manager.md
+│   ├── audit-workspace.md
+│   ├── create-variant.md
+│   ├── explain-me.md
+│   ├── gateguard.md
+│   ├── mece-logic-auditor.md
 │   ├── meeting-facilitation.md
-│   └── ...
+│   ├── presenter-mode.md
+│   ├── project-review.md
+│   ├── project-to-variant.md
+│   ├── promote-variant.md
+│   ├── sarif-exporter.md
+│   ├── script-lifecycle-manager.md
+│   ├── security-scan.md
+│   ├── simulate-l3-to-variant-promotion.md
+│   ├── simulate-project-creation.md
+│   ├── skill-lifecycle-manager.md
+│   ├── sound-synth.md
+│   ├── standup-synthesizer.md
+│   ├── stride-threat-matrix.md
+│   ├── swe-solve.md
+│   ├── sync.md
+│   ├── team-builder.md
+│   ├── ticket-run.md
+│   ├── translate.md
+│   ├── update-bun-packages.md
+│   ├── upgrade-project.md
+│   ├── validate-docs-links.md
+│   ├── variant-feature.md
+│   └── zod-contract-gate.md
 └── templates/
+    ├── co-consult.md
+    ├── co-deck.md
     ├── co-design.md
     ├── co-develop.md
-    ├── co-work.md
+    ├── co-export.md
     ├── co-security.md
+    ├── co-work.md
     └── common.md
 ```
 

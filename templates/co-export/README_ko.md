@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 7bbe7039fbcd19b54968443b4542854f63dc846f6841c01052fecf00ffb0e1be
+translated_from_hash: 640b8a19681fdba7a7ce939040c9ef5d34cff2c8a6f9d56b7156b8c2583dbbae
 lang: ko
 lang_reason: source-material
 ---
@@ -9,7 +9,7 @@ lang_reason: source-material
 
 > **언어**: [English](README.md) · **한국어**
 > **상태**: ⚠️ Beta — v0.1.0
-> Import/export trade consulting variant
+> Import/export trade consulting variant for AI-assisted cross-border trade engagements. Includes specialized agents covering HS classification, FTA/origin determination, export control and sanctions screening, customs duty drawback, foreign regulatory intelligence, halal certification, logistics coordination (Incoterms), trade documentation, and market entry strategy.
 
 ## 개요
 
@@ -29,7 +29,7 @@ lang_reason: source-material
 
 ## 팀 미션
 
-**미션:** 수출입 무역 컨설팅 변형
+**미션:** HS 분류부터 물류 배송까지, 종합적인 멀티 에이전트 수출입 무역 컴플라이언스 및 컨설팅 파트너십을 제공합니다.
 
 ## AI 팀 소개
 

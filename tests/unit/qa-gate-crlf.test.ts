@@ -6,7 +6,7 @@
  * @version 1.0.0
  */
 import { describe, test, expect } from 'bun:test';
-import { normalizeLineEndings, sha256Normalized } from '../../scripts/qa-gate.ts';
+import { normalizeLineEndings, scrubConstitutionRefs, sha256Normalized } from '../../scripts/qa-gate.ts';
 
 describe('normalizeLineEndings', () => {
     test('converts CRLF to LF', () => {
@@ -15,6 +15,17 @@ describe('normalizeLineEndings', () => {
 
     test('leaves LF-only content unchanged', () => {
         expect(normalizeLineEndings('line1\nline2\n')).toBe('line1\nline2\n');
+    });
+});
+
+describe('scrubConstitutionRefs', () => {
+    test('replaces CONSTITUTION.md with context.md', () => {
+        expect(scrubConstitutionRefs('see CONSTITUTION.md for details')).toBe('see context.md for details');
+    });
+
+    test('leaves content without CONSTITUTION.md unchanged', () => {
+        const input = 'see context.md for details';
+        expect(scrubConstitutionRefs(input)).toBe(input);
     });
 });
 

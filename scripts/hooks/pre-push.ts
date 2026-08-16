@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.6
+ * @version 1.2.7
  */
 
 import { $ } from "bun";
@@ -43,10 +43,41 @@ async function main() {
   const refUpdates = await readPushRefUpdates();
 
   // Secret scan (gitleaks) — skip if not installed
+  // Scoped to only the commits being pushed, not the entire working tree.
   try {
     await $`which gitleaks`;
     try {
-      await $`gitleaks detect --source . --no-git --redact`;
+      const pushedUpdates = refUpdates.filter(r => r.localOid !== ZERO_OID);
+      if (pushedUpdates.length > 0) {
+        // Use gitleaks in git-aware mode with --log-opts to restrict scanning
+        // to only the commit ranges being pushed. Collect unique commit SHAs
+        // across all pushed ref updates via git rev-list.
+        const revListArgs: string[] = [];
+        for (const ref of pushedUpdates) {
+          if (ref.remoteOid !== ZERO_OID) {
+            // Existing remote ref — diff the range
+            revListArgs.push(`${ref.remoteOid}..${ref.localOid}`);
+          } else {
+            // New branch with no remote counterpart — diff against
+            // all known remote refs to avoid scanning full history.
+            const remoteRefs = (await $`git for-each-ref --format='%(objectname)' refs/remotes/`.text()).trim();
+            if (remoteRefs) {
+              revListArgs.push(`${remoteRefs.split('\n').join(' ')}..${ref.localOid}`);
+            } else {
+              // No remote refs at all (fresh clone with no upstream) — fall back
+              // to scanning untracked working tree changes only
+              revListArgs.push(`HEAD`);
+            }
+          }
+        }
+        // Deduplicate and run gitleaks against the commit list
+        const commitShas = (await $`git rev-list ${revListArgs.join(' ')}`.text()).trim();
+        if (commitShas) {
+          const uniqueShas = [...new Set(commitShas.split('\n'))].join(' ');
+          await $`gitleaks detect --redact --log-opts -- ${uniqueShas}`;
+        }
+      }
+      // Tag-only or deletion pushes: nothing to scan, pass through
       console.log("  ✅ Secret scan passed");
     } catch {
       console.error("\n\x1b[31m❌ Secret scan failed — push blocked. Run 'gitleaks detect' to see detected secrets.\x1b[0m");

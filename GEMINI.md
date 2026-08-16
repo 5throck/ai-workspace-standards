@@ -220,6 +220,7 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 
 ---
 
+<!-- COMMON-GEMINI:START -->
 ### 6. Workspace & Template Boundary Policy
 
 - **Strict CWD Isolation**: When modifying templates (in `templates/`), you MUST strictly limit your working directory (CWD) to the specific template folder.
@@ -258,6 +259,27 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Antigravity | ✅ Prompt (manual) | Hooks do not fire — agent self-enforces |
 
 If the hook is not active (Antigravity), agents must still follow the 4-step process before making first edits.
+<!-- COMMON-GEMINI:END -->
+
+<!-- COMMON-GEMINI:START -->
+### Custom Command Error Recovery
+If a custom slash command or background script returns a non-zero exit code:
+* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
+* **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
+* **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
+  * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
+  * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+<!-- COMMON-GEMINI:END -->
+
+<!-- COMMON-GEMINI:START -->
+### Windows Platform Requirement
+
+**Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
+
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
+- Verify: `git config core.hooksPath` should point to `.githooks/`
+- All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
+- If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
 <!-- COMMON-GEMINI:END -->
 
 ## Agent Teams vs. Antigravity Agent Manager

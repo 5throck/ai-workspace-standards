@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-browser-smoke.browser.mjs — Playwright browser smoke tests for theme×style compatibility matrix.
 //
 // Uses Node.js (not bun) because bun has issues with Playwright subprocess handling

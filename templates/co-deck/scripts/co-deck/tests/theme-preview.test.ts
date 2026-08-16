@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-preview.test.ts — tests for the preview system (preview.html + build-theme-preview.ts).
 //
 // Validates:

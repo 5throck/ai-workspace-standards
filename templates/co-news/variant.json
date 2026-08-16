@@ -9,7 +9,8 @@
   "lifecycle": {
     "statusSince": "2026-08-10",
     "lastTransition": "initial → beta on 2026-08-10",
-    "stablePromotedOn": null
+    "stablePromotedOn": null,
+    "betaEngagements": []
   },
   "agents": [
     {

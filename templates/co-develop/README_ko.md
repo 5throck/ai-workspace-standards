@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: c4d28a89fa885f0d489c733c4c6798f37cdb96181ac41f7f0d19aa8221e4652e
+translated_from_hash: c61c755f7d1190b7805957415d879a852a13ca09f45447cf2cc3e5dea5b1bd99
 lang: ko
 lang_reason: source-material
 ---
@@ -9,11 +9,11 @@ lang_reason: source-material
 
 > **언어**: [English](README.md) · **한국어**
 > **상태**: ✅ Stable — v1.0.0
-> Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
+> Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)
 
 ## 개요
 
-Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
+Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization). 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
 
 ## 빠른 시작
 
@@ -29,7 +29,7 @@ Software development workflow — full agent team with PM, Architect, Designer, 
 
 ## 팀 미션
 
-**미션:** Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
+**미션:** Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)
 
 ## AI 팀 소개
 

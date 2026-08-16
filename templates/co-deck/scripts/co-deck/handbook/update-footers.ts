@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/update-footers.ts
 // Syncs the localized site footer into every HTML page under docs/.

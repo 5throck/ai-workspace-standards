@@ -70,13 +70,13 @@ jobs:
         run: bun test tests/unit/hook-gateguard.test.ts tests/unit/hook-post-write-lifecycle.test.ts
 
       - name: Run E2E scenario tests
-        shell: pwsh
+        shell: bash
         run: |
-          if ($IsWindows -eq $true) {
+          if [ -d "tests/scenarios" ] && [ "$(ls tests/scenarios/ 2>/dev/null)" ]; then
             bun run test:e2e
-          } else {
-            echo "Skipping E2E tests on non-Windows (requires PowerShell)"
-          }
+          else
+            echo "::notice::E2E scenario tests skipped — no tests/scenarios/ directory or directory is empty"
+          fi
 
       - name: Tier 3 Auditor - Lifecycle Compliance Check
         shell: pwsh

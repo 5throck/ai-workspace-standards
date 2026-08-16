@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Quality assurance and consistency validation
-- [x] Tier assignment: Medium-tier (claude-sonnet-4-6)
+- [x] Tier assignment: Medium-tier (claude-sonnet-5-0)
 - [x] QA responsibilities specified: Documentation validation, consistency checks
 - [x] Independent QA execution documented
 - [x] Maximum 2 iterations before PM escalation
@@ -30,7 +30,7 @@
 
 **Quality Assurance Specialist** - Independent validation and consistency checks
 
-**Phases Supported**: 5 (QA)
+**Phases Supported**: 6 (Quality Assurance)
 
 **Key Responsibilities**:
 - Documentation cross-validation
@@ -41,7 +41,7 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [5]
+**Can Lead Phases**: [6]
 **Can Support In**: [0, 2, 6]
 **Tier**: medium
 **Communication Style**: sync (quality gates require verification)

@@ -1,3 +1,4 @@
+// @version 1.0.0
 // scripts/co-deck/handbook/check-symmetry.ts
 // Check ②: If A's chapter-nav next → B, then B's chapter-nav prev → A.
 // Canonical source of the handbook toolkit (adapted from

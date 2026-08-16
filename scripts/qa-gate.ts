@@ -6,6 +6,10 @@
 
 import { $ } from 'bun';
 import { createHash } from 'node:crypto';
+import { normalizeLineEndings } from './lib/encoding-utils.ts';
+
+// Re-export for downstream consumers (e.g. unit tests)
+export { normalizeLineEndings };
 
 const CYAN   = '\x1b[36m';
 const RED    = '\x1b[31m';
@@ -13,14 +17,14 @@ const YELLOW = '\x1b[33m';
 const GREEN  = '\x1b[32m';
 const RESET  = '\x1b[0m';
 
-/** Normalizes CRLF to LF and CONSTITUTION.md refs so line-ending and template transforms don't register as content drift. */
-export function normalizeLineEndings(content: string): string {
-  return content.replace(/\r\n/g, '\n').replace(/CONSTITUTION\.md/g, 'context.md');
+/** Replaces CONSTITUTION.md references with context.md so template transforms don't register as content drift. */
+export function scrubConstitutionRefs(content: string): string {
+  return content.replace(/CONSTITUTION\.md/g, 'context.md');
 }
 
-/** SHA256 of CRLF-normalized content — used to compare L0/L1 file pairs without false positives from line-ending differences (M5). */
+/** SHA256 of CRLF-normalized, constitution-scrubbed content — used to compare L0/L1 file pairs without false positives from line-ending or template transform differences (M5). */
 export function sha256Normalized(content: string): string {
-  return createHash('sha256').update(normalizeLineEndings(content)).digest('hex');
+  return createHash('sha256').update(scrubConstitutionRefs(normalizeLineEndings(content))).digest('hex');
 }
 
 async function runQaGate(): Promise<void> {

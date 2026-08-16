@@ -169,6 +169,24 @@
         "notes": "pipeline_order: omit or use [] for variants with parallel/free-form agent dispatch. retry_policy: declares on_fail routing and max_retries per agent. optional[]: agents that can be skipped by PM."
       }
     },
+    "co-abap": {
+      "agent_manifest": {
+        "description": "SAP ABAP development pipeline with optional SAP module analysts and technical execution agents",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order"],
+        "notes": "pipeline_order defines the 6-step harness lifecycle. optional[] lists agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
+      },
+      "skill_manifest": {
+        "description": "Variant-specific skills manifest with ABAP and SAP module skills",
+        "required_fields": ["variant_specific"],
+        "notes": "Each entry declares name, layer, used_by_agents, phases, and platform_parity."
+      },
+      "script_manifest": {
+        "description": "Variant-specific scripts for VSP (VS Code ABAP) task execution and ABAP project lifecycle",
+        "required_fields": ["variant_scripts_dir", "local", "external"],
+        "notes": "local[] lists variant-only scripts. external[] reserved for future third-party integrations."
+      }
+    },
     "co-consult": {
       "agent_manifest": { "$ref": "_shared.agent_manifest" }
     },
@@ -177,6 +195,70 @@
     },
     "co-develop": {
       "agent_manifest": { "$ref": "_shared.agent_manifest" }
+    },
+    "co-export": {
+      "agent_manifest": {
+        "description": "Import/export trade consulting agent roster with flat dispatch and no strict sequential dependency",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order"],
+        "notes": "Agents dispatched by PM based on trade-consulting engagement phase. pipeline_order is empty for free-form dispatch."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": ["type", "reason", "since", "reviewed_by", "overrides"],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "engagement_methodology": {
+        "description": "Variant-specific engagement methodology description",
+        "required_fields": [],
+        "notes": "Free-text field describing the structured engagement phases and client sign-off gates."
+      },
+      "deliverable_template": {
+        "description": "Standard deliverable template descriptions per engagement phase",
+        "required_fields": [],
+        "notes": "Free-text field listing deliverable types and their phase mapping."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": ["betaEngagements", "betaBugs", "betaAgeInMonths", "promotionEligible", "missingCriteria", "lastSynced"]
+      }
+    },
+    "co-news": {
+      "agent_manifest": {
+        "description": "Korean business/finance newsroom agent roster with flat dispatch and fact-checker sign-off gate",
+        "required_fields": ["variant_agents_dir", "optional", "notes"],
+        "optional_fields": ["pipeline_order"],
+        "notes": "Agents dispatched by PM based on newsroom workflow phase. Fact-checker sign-off gate before publish."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": ["type", "reason", "since", "reviewed_by", "overrides"],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": ["betaEngagements", "betaBugs", "betaAgeInMonths", "promotionEligible", "missingCriteria", "lastSynced"]
+      },
+      "phaseAComplete": {
+        "description": "Flag indicating Phase A (prototype) completion status",
+        "required_fields": [],
+        "notes": "Boolean. true when all PROMOTION_CHECKLIST criteria have been met."
+      },
+      "promotionChecklist": {
+        "description": "Path to the promotion checklist file",
+        "required_fields": [],
+        "notes": "Relative path from variant root to the PROMOTION_CHECKLIST.md file."
+      }
     },
     "co-work": {
       "agent_manifest": { "$ref": "_shared.agent_manifest" }

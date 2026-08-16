@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/check-tables.ts
 // Enforces the "TABLE COLUMN-SIZING POLICY" documented in

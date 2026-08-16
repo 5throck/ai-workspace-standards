@@ -112,3 +112,13 @@ When adding or recommending dependencies:
 - **PowerShell (`.ps1`, `powershell -Command`)**: Output suppression MUST use `> $null` or `| Out-Null`.
 - **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child process calls on Windows creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative file path. Node.js/Bun `fs` APIs cannot delete physical `nul` files due to Win32 device mapping.
 - **Git Ignore & Audit Protection**: All repository `.gitignore` templates MUST include `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts regardless of tracking status.
+
+#### 8.11 Error Handling Standard (ADR-0054)
+
+**Use `scripts/lib/error-handling.ts` for error and exit paths in all workspace scripts.** ADR-0054 establishes the library as the standard; migration is incremental (opportunistic with functional changes).
+
+- **Fatal conditions**: use `die(message, code)` from the library instead of raw `console.error(msg); process.exit(1)`.
+- **Structured errors**: use `fatalError(ErrorPhase.X, code, message, details, remediation)` + `logError(err)` for complex failure points that need remediation hints.
+- **Phase taxonomy**: pick the most specific `ErrorPhase` — generic (`SCRIPT_EXECUTION`, `FILE_IO`, `CLI_PARSING`, `AUDIT`, `LIFECYCLE`, `SECURITY`) or pipeline-specific (`VALIDATION`, `L3_SCAN`, etc.).
+- **What NOT to do**: do not force normal output through the library; do not migrate scripts purely for consistency (migration rides along with functional changes per §8.3); do not remove existing structured errors from pipeline scripts.
+- **L0+L1 scripts**: when migrating an L0+L1 script, sync the change to `templates/common/scripts/` in the same commit.

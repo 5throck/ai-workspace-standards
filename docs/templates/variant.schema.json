@@ -87,7 +87,8 @@
         "required": ["name"],
         "properties": {
           "name": { "type": "string", "description": "Agent identifier" },
-          "file": { "type": "string", "description": "Relative path to agent file (e.g., agents/foo.md)" }
+          "file": { "type": "string", "description": "Relative path to agent file (e.g., agents/foo.md)" },
+          "role": { "type": "string", "description": "Optional one-line role description for the agent within this variant" }
         }
       }
     },
@@ -104,6 +105,105 @@
         }
       }
     },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable variant name for display (e.g., 'Co Export', 'Co-News')"
+    },
+    "agent_overrides": {
+      "type": "object",
+      "description": "Per-agent configuration overrides for this variant",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "description": "Override type (e.g., 'additive', 'replacing')" },
+          "reason": { "type": "string", "description": "Human-readable justification for the override" },
+          "since": { "type": "string", "description": "Date or version when the override was introduced" },
+          "reviewed_by": { "type": "string", "description": "Agent or role that reviewed/approved the override" },
+          "overrides": { "type": "array", "items": { "type": "string" }, "description": "List of override categories (e.g., 'agent-roster', 'governance-workflow', 'dispatch-protocol')" }
+        }
+      }
+    },
+    "betaLifecycleSummary": {
+      "type": "object",
+      "description": "Beta variant lifecycle tracking and promotion eligibility",
+      "properties": {
+        "betaEngagements": { "type": "integer", "minimum": 0, "description": "Count of successful engagements during beta phase" },
+        "betaBugs": { "type": "integer", "minimum": 0, "description": "Count of bugs reported during beta phase" },
+        "betaAgeInMonths": { "type": "integer", "minimum": 0, "description": "Age of the variant in months since beta promotion" },
+        "promotionEligible": { "type": "boolean", "description": "Whether the variant currently meets promotion criteria" },
+        "missingCriteria": { "type": "array", "items": { "type": "string" }, "description": "List of unmet promotion criteria" },
+        "lastSynced": { "type": "string", "description": "ISO 8601 datetime of last lifecycle summary sync" }
+      }
+    },
+    "phaseAComplete": {
+      "type": "boolean",
+      "description": "Whether Phase A (prototype) is complete for this variant"
+    },
+    "promotionChecklist": {
+      "type": "string",
+      "description": "Path to the promotion checklist file (e.g., 'PROMOTION_CHECKLIST.md')"
+    },
+    "engagement_methodology": {
+      "type": "string",
+      "description": "Human-readable description of the variant's engagement methodology and phase structure"
+    },
+    "deliverable_template": {
+      "type": "string",
+      "description": "Human-readable description of standard deliverable templates per phase"
+    },
+    "stablePromotionSummary": {
+      "type": "object",
+      "description": "Stable promotion tracking metadata",
+      "properties": {
+        "promotedOn": { "type": "string", "description": "Date the variant was promoted to stable" },
+        "previousStatus": { "type": "string", "description": "Status before promotion (e.g., 'beta')" },
+        "promotionReason": { "type": "string", "description": "Human-readable justification for promotion" }
+      }
+    },
+    "theme_manifest": {
+      "type": "object",
+      "description": "Variant-specific theme manifest (e.g., for co-deck HTML themes)",
+      "properties": {
+        "themes_dir": { "type": "string" },
+        "base_css": { "type": "string" },
+        "styles_dir": { "type": "string" },
+        "overrides_dir": { "type": "string" },
+        "shared_layout_base": { "type": "string" },
+        "available": { "type": "array", "items": { "type": "string" }, "description": "List of available theme names" },
+        "default": { "type": "string", "description": "Default theme name" },
+        "notes": { "type": "string", "description": "Free-text notes on theme configuration" }
+      }
+    },
+    "handbook_pipeline": {
+      "type": "object",
+      "description": "Independent handbook production pipeline manifest (e.g., for co-deck H-Stage)",
+      "properties": {
+        "description": { "type": "string" },
+        "variant_agents_dir": { "type": "string" },
+        "agents": { "type": "array", "items": { "type": "string" }, "description": "Agent names participating in the handbook pipeline" },
+        "entry_skill": { "type": "string", "description": "Skill that triggers the handbook pipeline" },
+        "notes": { "type": "string" }
+      }
+    },
+    "trust_score_thresholds": {
+      "type": "object",
+      "description": "Trust score thresholds for quality gates (e.g., for co-deck source verification)",
+      "properties": {
+        "pass": { "type": "number", "minimum": 0, "maximum": 1, "description": "Minimum trust score to pass (e.g., 0.9)" },
+        "warn": { "type": "number", "minimum": 0, "maximum": 1, "description": "Trust score threshold for warning (e.g., 0.7)" },
+        "escalate": { "type": "number", "minimum": 0, "maximum": 1, "description": "Trust score threshold for escalation (e.g., 0.7)" }
+      }
+    },
+    "lecture_profile": {
+      "type": "object",
+      "description": "Lecture profile configuration for presentation variants",
+      "properties": {
+        "template_path": { "type": "string", "description": "Path to master lecture profile template" },
+        "project_path": { "type": "string", "description": "Path pattern for project-specific lecture profile" },
+        "required_fields": { "type": "array", "items": { "type": "string" }, "description": "Required fields in the lecture profile" },
+        "notes": { "type": "string" }
+      }
+    },
     "agent_manifest": {
       "type": "object",
       "description": "Agent orchestration metadata",
@@ -111,6 +211,19 @@
         "variant_agents_dir": { "type": "string", "description": "Directory containing variant agent files" },
         "pipeline_order": { "type": "array", "items": { "type": "string" }, "description": "Ordered agent names for sequential pipeline phases" },
         "optional": { "type": "array", "items": { "type": "string" }, "description": "Agent names that are optional/situational" },
+        "skippable": { "type": "array", "items": { "type": "string" }, "description": "Agent names that can be skipped (run but failure is non-blocking)" },
+        "retry_policy": {
+          "type": "object",
+          "description": "Per-agent retry policies for transient failures",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "on_fail": { "type": "string", "description": "Agent to fall back to on failure" },
+              "max_retries": { "type": "integer", "minimum": 1, "description": "Maximum retry attempts before escalation" },
+              "failure_condition": { "type": "string", "description": "Condition that triggers retry (e.g., 'trust_score < threshold')" }
+            }
+          }
+        },
         "notes": { "type": "string", "description": "Free-text notes on agent dispatch strategy" }
       }
     },
@@ -146,10 +259,11 @@
           "items": {
             "type": "object",
             "required": ["name", "path"],
-            "properties": {
-              "name": { "type": "string" },
-              "path": { "type": "string" }
-            }
+              "properties": {
+                "name": { "type": "string" },
+                "path": { "type": "string" },
+                "status": { "type": "string", "description": "Script status (e.g., 'active', 'deprecated')" }
+              }
           }
         },
         "external": {

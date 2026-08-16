@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-visual-regression.test.ts — visual regression tests for theme×style pairs.
 //
 // Tests fully compatible theme×style combinations by:

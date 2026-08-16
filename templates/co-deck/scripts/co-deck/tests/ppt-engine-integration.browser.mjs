@@ -1,3 +1,4 @@
+// @version 0.1.0
 // ppt-engine-integration.browser.mjs — Playwright browser integration tests for PPT-engine runtime.
 //
 // Tests runtime behavior of PPT-engine shared runtime (Task 7, Part B):

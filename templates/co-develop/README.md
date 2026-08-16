@@ -1,17 +1,17 @@
 ---
 sync_version: 1
-content_hash: c4d28a89fa885f0d489c733c4c6798f37cdb96181ac41f7f0d19aa8221e4652e
+content_hash: c61c755f7d1190b7805957415d879a852a13ca09f45447cf2cc3e5dea5b1bd99
 ---
 
 # co-develop
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ✅ Stable — v1.0.0
-> Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
+> Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)
 
 ## Overview
 
-Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor. See docs/context.md for full architecture and standards.
+Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization). See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, and Security Monitor
+**Mission:** Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)
 
 ## Meet the AI Team
 
@@ -84,4 +84,4 @@ This variant focuses on software development workflows, feature implementation, 
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-08-15*

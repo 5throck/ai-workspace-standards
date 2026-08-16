@@ -1,4 +1,4 @@
-// @version 1.5.1
+// @version 1.5.2
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -106,7 +106,24 @@ let separator = "";
 const memoryFile = path.join('memory', `${date}.md`);
 if (fs.existsSync(memoryFile)) { separator = "\n---\n\n"; }
 
-const template = `${separator}## Session Summary
+// Idempotency check: skip append if a Session Summary with the same
+// commit message already exists for today (prevents duplicates when
+// /sync is re-run on the same day).
+let alreadyLogged = false;
+if (fs.existsSync(memoryFile)) {
+    const existing = fs.readFileSync(memoryFile, 'utf-8');
+    // Match a Session Summary header followed by the same message
+    const duplicatePattern = new RegExp(
+        `^## Session Summary\\s*\\n${msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+        'm'
+    );
+    alreadyLogged = duplicatePattern.test(existing);
+}
+
+if (alreadyLogged) {
+    console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
+} else {
+    const template = `${separator}## Session Summary
 ${msg}
 
 ## Changes
@@ -119,7 +136,8 @@ ${fileLines}
 - None
 `;
 
-fs.appendFileSync(memoryFile, template, 'utf8');
+    fs.appendFileSync(memoryFile, template, 'utf8');
+}
 
 // 2. Update MEMORY.md index
 try {

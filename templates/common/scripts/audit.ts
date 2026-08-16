@@ -1,4 +1,4 @@
-// @version 2.10.17
+// @version 2.10.18
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -6,7 +6,7 @@ import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import * as url from 'node:url';
-import { detectEncoding, detectHomoglyphs, detectZeroWidthChars } from './lib/encoding-utils.ts';
+import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 
 // Check for --lifecycle-only flag
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
@@ -61,7 +61,7 @@ if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || f
 
 // 2.5. Constitution section files must exist and be non-empty (workspace root only)
 if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('docs/constitution')) {
-    const content = fs.readFileSync('CONSTITUTION.md', 'utf-8');
+    const content = readUTF8File('CONSTITUTION.md');
     const regex = /docs\/constitution\/([\w.-]+\.md)/g;
     let match;
     while ((match = regex.exec(content)) !== null) {
@@ -109,7 +109,7 @@ if (!LIFECYCLE_ONLY) {
         const urlRegex = /https:\/\/raw\.githubusercontent\.com\/5throck\/ai-workspace-standards\/main\/CONSTITUTION\.md#[\w-]+/g;
 
         for (const filePath of urlCheckFiles) {
-            const content = fs.readFileSync(filePath, 'utf-8');
+            const content = readUTF8File(filePath);
             let match;
             while ((match = urlRegex.exec(content)) !== null) {
                 const url = match[0];
@@ -133,7 +133,7 @@ if (!LIFECYCLE_ONLY) {
 
 // 3. CHANGELOG.md must have [Unreleased] section
 if (fs.existsSync('CHANGELOG.md')) {
-    const cl = fs.readFileSync('CHANGELOG.md', 'utf-8');
+    const cl = readUTF8File('CHANGELOG.md');
     if (cl.includes('[Unreleased]')) {
         Pass('CHANGELOG.md has [Unreleased] section');
     } else {
@@ -253,7 +253,7 @@ if (!LIFECYCLE_ONLY) {
             if (HOMOGLYPH_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
 
             try {
-                const content = fs.readFileSync(filePath, 'utf-8');
+                const content = readUTF8File(filePath);
                 const matches = detectHomoglyphs(content);
                 if (matches.length > 0) {
                     // Report first 5 matches per file to avoid spam
@@ -296,7 +296,7 @@ if (!LIFECYCLE_ONLY) {
             if (ZW_SKIP_PREFIXES.some(p => normalizedPath.includes(p))) return;
 
             try {
-                const content = fs.readFileSync(filePath, 'utf-8');
+                const content = readUTF8File(filePath);
                 const matches = detectZeroWidthChars(content);
                 // U+FEFF (BOM) and U+2060 (word joiner) have legitimate uses in
                 // source code (BOM-stripping regexes, code-fence escapes).
@@ -342,7 +342,7 @@ if (fs.existsSync('agents') && fs.readdirSync('agents').some(f => f.endsWith('.m
 // 6-8. Project-level checks
 if (!LIFECYCLE_ONLY) {
     if (fs.existsSync(projectCtxPath)) {
-    const ctx = fs.readFileSync(projectCtxPath, 'utf-8');
+    const ctx = readUTF8File(projectCtxPath);
     if (/^## Coding Guidelines/m.test(ctx)) {
         Pass('docs/context.md has ## Coding Guidelines');
     } else {
@@ -380,7 +380,7 @@ if (!LIFECYCLE_ONLY) {
     if (fs.existsSync(researchDir)) {
         const researchFiles = fs.readdirSync(researchDir).filter(f => f.endsWith('.md'));
         const missingRefs = researchFiles.filter(f => {
-            const content = fs.readFileSync(path.join(researchDir, f), 'utf-8');
+            const content = readUTF8File(path.join(researchDir, f));
             return !content.includes('## References') && !content.includes('## Sources');
         });
         if (missingRefs.length > 0) {
@@ -409,7 +409,7 @@ if (!LIFECYCLE_ONLY && fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
     }
 
     if (modifiedScripts.size > 0) {
-        const scriptsMd = fs.readFileSync(path.join('scripts', 'SCRIPTS.md'), 'utf-8');
+        const scriptsMd = readUTF8File(path.join('scripts', 'SCRIPTS.md'));
         const registryLines = scriptsMd.split('\n').filter(l => l.startsWith('| `'));
         
         let pairErrors = 0;
@@ -560,7 +560,7 @@ function verifyScriptVersionHeaders(): boolean {
     const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts'));
     for (const script of scripts) {
         const scriptPath = path.join(scriptsDir, script);
-        const content = fs.readFileSync(scriptPath, 'utf-8');
+        const content = readUTF8File(scriptPath);
         if (!content.match(/@version\s+\d+\.\d+\.\d+/)) {
             Fail(`Missing @version header in ${script}`);
             return false;
@@ -582,11 +582,11 @@ function verifyScriptRegistryConsistency(): boolean {
     }
 
     const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.ts') && !f.startsWith('test-'));
-    const scriptsMdContent = fs.readFileSync(scriptsMdPath, 'utf-8');
+    const scriptsMdContent = readUTF8File(scriptsMdPath);
 
     for (const script of scripts) {
         const scriptPath = path.join(scriptsDir, script);
-        const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
+        const scriptContent = readUTF8File(scriptPath);
         const versionMatch = scriptContent.match(/@version\s+(\d+\.\d+\.\d+)/);
 
         if (!versionMatch) {
@@ -628,13 +628,13 @@ if (langValidate.exitCode === 0) {
 // Agent/Skill State Synchronization Check
 if (!LIFECYCLE_ONLY && fs.existsSync('AGENTS.md') && fs.existsSync('agents')) {
     let syncErrors = 0;
-    const agentsContent = fs.readFileSync('AGENTS.md', 'utf-8');
-    
+    const agentsContent = readUTF8File('AGENTS.md');
+
     for (const file of fs.readdirSync('agents')) {
         if (!file.endsWith('.md')) continue;
         const agentFile = path.join('agents', file);
         const agentName = path.basename(file, '.md');
-        const content = fs.readFileSync(agentFile, 'utf-8');
+        const content = readUTF8File(agentFile);
         
         const statusMatch = /^status:\s*(.+)$/m.exec(content);
         if (statusMatch) {
@@ -665,7 +665,7 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
     for (const file of fs.readdirSync(claudeCommandsDir)) {
         if (!file.endsWith('.md')) continue;
         const filePath = path.join(claudeCommandsDir, file);
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = readUTF8File(filePath);
         if (/^gemini-parity:\s*skip/m.test(content)) continue;
         
         const geminiCmd = path.join('.gemini', 'commands', file);
@@ -712,7 +712,7 @@ function checkL2VariantIntegrity() {
 
     const pmMdPath = path.join(variantDir, 'agents', 'pm.md');
     if (fs.existsSync(pmMdPath)) {
-      const pmContent = fs.readFileSync(pmMdPath, 'utf-8');
+      const pmContent = readUTF8File(pmMdPath);
       const hasVariantOverrides = pmContent.includes('variant_overrides:');
       const hasExtendsPattern = pmContent.includes('extends:');
       const isResolved = pmContent.startsWith('# @resolved-from:');
@@ -750,7 +750,7 @@ function checkVariantContextGuidelinesSection() {
     for (const file of fs.readdirSync(docsDir)) {
       if (!file.endsWith('.context.md')) continue;
       const filePath = path.join(docsDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = readUTF8File(filePath);
       if (!content.includes('VARIANT-INJECT: guidelines [REQUIRED]')) {
         missing.push(`templates/${variant}/docs/${file}`);
       }
@@ -797,7 +797,7 @@ function checkVariantAgentSections() {
       .filter(f => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('_') && !f.startsWith('README'));
     for (const file of agentFiles) {
       const filePath = path.join(agentsDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = readUTF8File(filePath);
       const missing = REQUIRED_SECTIONS.filter(s => !content.includes(s));
       if (missing.length > 0) {
         failures.push(`templates/${variant}/agents/${file}: missing ${missing.map(s => `"${s}"`).join(', ')}`);
@@ -843,7 +843,7 @@ function checkVariantSkillSections() {
     for (const slug of slugs) {
       const skillPath = path.join(skillsDir, slug, 'SKILL.md');
       if (!fs.existsSync(skillPath)) continue;
-      const content = fs.readFileSync(skillPath, 'utf-8');
+      const content = readUTF8File(skillPath);
 
       // Skip files marked with audit_exception (e.g., PM reference cards that use a different structure)
       if (/^audit_exception:/m.test(content)) continue;
@@ -892,7 +892,7 @@ function checkVariantJsonSchema() {
     if (!fs.existsSync(variantJsonPath)) continue;
 
     try {
-      const content = fs.readFileSync(variantJsonPath, 'utf-8');
+      const content = readUTF8File(variantJsonPath);
       const variantData = JSON.parse(content);
 
       // Validate required fields per variant.schema.json
@@ -1002,7 +1002,7 @@ function checkStaleShellReferences() {
     let staleErrors = 0;
     for (const filePath of filesToScan) {
         if (!fs.existsSync(filePath)) continue;
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = readUTF8File(filePath);
         const lines = content.split('\n');
         lines.forEach((line, idx) => {
             // Skip lines that are documentation examples (e.g. anti-pattern tables with backtick-quoted examples)
@@ -1051,7 +1051,7 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
     let emptySection = 0;
     for (const file of agentFiles) {
         const filePath = path.join('agents', file);
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = readUTF8File(filePath);
         const sectionIdx = content.indexOf('## Required Tools');
         if (sectionIdx === -1) {
             Fail(`Agent file missing Required Tools section: ${file}`);
@@ -1074,7 +1074,7 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('agents')) {
 
 // Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md (workspace root only)
 if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
-    const agentsMdContent = fs.readFileSync('AGENTS.md', 'utf-8');
+    const agentsMdContent = readUTF8File('AGENTS.md');
     const hasPmScope = agentsMdContent.includes('### PM Direct Execution Scope');
     if (hasPmScope) {
         const templatesDir = 'templates';
@@ -1085,7 +1085,7 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
                 if (!entry.startsWith('co-')) continue;
                 const variantAgentsMd = path.join(templatesDir, entry, 'AGENTS.md');
                 if (!fs.existsSync(variantAgentsMd)) continue;
-                const variantContent = fs.readFileSync(variantAgentsMd, 'utf-8');
+                const variantContent = readUTF8File(variantAgentsMd);
                 // Only check variants that have a pm agent entry
                 const hasPmEntry = /\|\s*pm\s*\|/.test(variantContent)
                     || /pm\.md/.test(variantContent)
@@ -1136,7 +1136,7 @@ if (IS_WORKSPACE_ROOT) {
 
     let strayFound = 0;
     try {
-        const schemaRaw = fs.readFileSync(path.join('docs', 'workspace-schema.json'), 'utf-8');
+        const schemaRaw = readUTF8File(path.join('docs', 'workspace-schema.json'));
         const schema = JSON.parse(schemaRaw);
         const allowedFiles: string[] = schema?.rootAllowlist?.files ?? [];
         const allowedDirs: string[] = schema?.rootAllowlist?.dirs ?? [];
@@ -1214,7 +1214,7 @@ if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
                 if (SKIP_DIRS.has(item)) continue;
                 checkLeakage(itemPath);
             } else if (stat.isFile() && itemPath.endsWith('.md')) {
-                const content = fs.readFileSync(itemPath, 'utf-8');
+                const content = readUTF8File(itemPath);
                 if (L0_LEAK_PATTERN.test(content) && !content.includes('intentional-duplicate')) {
                     Fail(`L0 Leakage: ${itemPath} contains unauthorized reference to CONSTITUTION`);
                     leakageErrors++;
@@ -1290,7 +1290,7 @@ if (fs.existsSync('templates')) {
     const versionFile = 'templates/VERSION';
     if (fs.existsSync(versionFile)) {
         try {
-            const version = fs.readFileSync(versionFile, 'utf-8').trim();
+            const version = readUTF8File(versionFile).trim();
             const tagOut = execFileSync('git', ['tag', '-l', `template-v${version}`], { encoding: 'utf-8' }).trim();
             if (tagOut === '') {
                 Warn(`Template version ${version} in templates/VERSION has no corresponding git tag. Run: bun scripts/tag-template.ts`);
@@ -1351,8 +1351,8 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
             return true; // Not applicable
         }
 
-        const l0Content = fs.readFileSync(l0PmPath, 'utf-8');
-        const l1Content = fs.readFileSync(l1PmPath, 'utf-8');
+	        const l0Content = readUTF8File(l0PmPath);
+	        const l1Content = readUTF8File(l1PmPath);
 
         // Extract YAML frontmatter sections
         const extractYamlSection = (content: string, sectionStart: string, sectionEnd: string): string => {
@@ -1444,9 +1444,9 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                 const l2PmPath = path.join(templatesDir, variant, 'agents', 'pm.md');
                 if (!fs.existsSync(l2PmPath)) continue;
 
-                const l2Content = fs.readFileSync(l2PmPath, 'utf-8');
+	                const l2Content = readUTF8File(l2PmPath);
 
-                const hasVariantOverrides = l2Content.includes('variant_overrides:');
+	                const hasVariantOverrides = l2Content.includes('variant_overrides:');
                 const hasExtendsPattern = l2Content.includes('extends:');
                 const isResolved = l2Content.startsWith('# @resolved-from:');
                 if (!hasVariantOverrides && !hasExtendsPattern && !isResolved) {
@@ -1525,7 +1525,7 @@ if (SPEC_CHECK && !LIFECYCLE_ONLY) {
     } else {
         interface SpecEntry { id: string; file: string; status: string; created: string; last_updated: string; }
         interface Registry { specs: SpecEntry[]; }
-        const registry: Registry = JSON.parse(fs.readFileSync(SPEC_REGISTRY, 'utf-8'));
+	        const registry: Registry = JSON.parse(readUTF8File(SPEC_REGISTRY));
 
         // Check 1: modified code files with no associated spec
         let changedFiles: string[] = [];

@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/validate-handbook.ts
 // Unified handbook validator — the single entry point of the toolkit.

@@ -15,7 +15,7 @@
 ### Production Phase
 
 - [x] Agent role clearly defined: Security specialist
-- [x] Tier assignment: Medium-tier (claude-sonnet-4-6)
+- [x] Tier assignment: Medium-tier (claude-sonnet-5-0)
 - [x] Security responsibilities specified: Git hooks, .gitleaks, credential management
 - [x] Successfully validated in security workflows
 
@@ -28,7 +28,7 @@
 
 **Security Specialist** - Git hooks enforcement and credential management
 
-**Phases Supported**: 4 (Implementation), 5 (QA)
+**Phases Supported**: 6 (Quality Assurance)
 
 **Key Responsibilities**:
 - Git hooks enforcement
@@ -39,7 +39,7 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [4, 5]
+**Can Lead Phases**: [6]
 **Can Support In**: [0, 2]
 **Tier**: medium
 **Communication Style**: sync (security gates require validation)

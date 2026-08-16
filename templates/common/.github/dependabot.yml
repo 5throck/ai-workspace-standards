@@ -4,16 +4,14 @@
 
 version: 2
 updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
 
   # Python (pip / uv)
   # - package-ecosystem: "pip"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #   open-pull-requests-limit: 5
-
-  # Node.js (npm / pnpm / yarn)
-  # - package-ecosystem: "npm"
   #   directory: "/"
   #   schedule:
   #     interval: "weekly"

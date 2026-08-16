@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-contract.ts — typed interfaces and validation functions for theme packages.
 //
 // Defines the contract that every theme package must satisfy:

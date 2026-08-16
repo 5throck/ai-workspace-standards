@@ -1,3 +1,4 @@
+// @version 0.1.0
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { spawnSync } from "child_process";
 import { readFileSync, existsSync, unlinkSync, writeFileSync, mkdirSync } from "fs";

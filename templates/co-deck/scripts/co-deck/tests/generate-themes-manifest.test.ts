@@ -1,3 +1,4 @@
+// @version 0.1.0
 import { describe, it, expect } from 'bun:test';
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, unlinkSync } from 'fs';

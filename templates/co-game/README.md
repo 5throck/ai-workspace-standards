@@ -1,17 +1,17 @@
 ---
 sync_version: 1
-content_hash: 57b9c9c5107cbe394519f980f89661d285488ee63e69b109ab4a34a422657837
+content_hash: 2bd06f3bbba6dbf07b8e5f9f1ed0e636838f68868dd4cd9a4ecddba4a8a0e5d8
 ---
 
 # co-game
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ✅ Stable — v1.0.0
-> Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
+> Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing, plus architecture planning, security monitoring, and tech-stack setup.
 
 ## Overview
 
-Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing. See docs/context.md for full architecture and standards.
+Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing, plus architecture planning, security monitoring, and tech-stack setup. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing.
+**Mission:** Game development variant for HTML5 Canvas games using Vanilla TypeScript. Specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing, plus architecture planning, security monitoring, and tech-stack setup.
 
 ## Meet the AI Team
 
@@ -94,4 +94,4 @@ Promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 
 ---
 
-*Last Updated: 2026-08-11*
+*Last Updated: 2026-08-15*

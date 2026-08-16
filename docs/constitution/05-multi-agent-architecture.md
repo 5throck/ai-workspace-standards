@@ -14,7 +14,7 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 There are two distinct agent file types with different formats:
 
 **Workspace-root agents** (`agents/*.md`) — PM, architect, auditor, and workspace-level specialists.
-No YAML frontmatter; pure Markdown. Created by `scripts/agent-create.ts`.
+Use full YAML frontmatter with required fields: `name`, `role`, `status`, `tier` (claude, gemini, antigravity, gemini-cli), `model`, `description`, `examples`, `version`, `last_reviewed`, `lifecycle` (phase, created, last_updated, governance). Optional fields include `color`. Created by `scripts/agent-create.ts`.
 
 **Variant specialist agents** (`templates/<variant>/agents/*.md`) — Domain specialists inside
 a project variant (e.g., co-develop, co-deck). Require full YAML frontmatter. See

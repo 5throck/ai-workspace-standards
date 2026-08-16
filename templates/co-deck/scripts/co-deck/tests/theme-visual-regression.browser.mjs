@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-visual-regression.browser.mjs — Playwright screenshot capture & comparison.
 //
 // Uses Node.js (not bun) because bun has issues with Playwright subprocess handling

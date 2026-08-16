@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 2004d1d0f82c1ae1a66737d2e615fe3e2a539ab551ac50267716adad27e6d6eb
+content_hash: 83d126771e650e8c047fbcfe58b31870a584c5a0fb63abe2b10207a3a9c552b1
 ---
 
 # co-abap
