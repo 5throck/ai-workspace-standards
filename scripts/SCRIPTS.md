@@ -135,7 +135,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `hooks/gateguard-fact-force.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `hooks/post-write-lifecycle-check.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `hooks/pre-commit.ts` | L0 | 1.5.9 | active | —| —| L0+L1 | —|
-| `hooks/pre-push.ts` | L0 | 1.2.7 | active | —| —| L0+L1 | —|
+| `hooks/pre-push.ts` | L0 | 1.2.8 | active | —| —| L0+L1 | —|
 | `ingest-external-skills.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `ingest-security-frameworks.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `l3-to-variant-pipeline.ts` | L0 | 1.10.5 | active | —| —| L0 | —|
@@ -164,7 +164,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
-| `skill-lifecycle-audit.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
+| `skill-lifecycle-audit.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
@@ -184,12 +184,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-agents.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `validate-md-language.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
-| `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `validate-md-language.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
+| `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.5.18 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
-| `verify-memory.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `verify-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `verify-platform-lifecycle.ts` | L0 | 1.1.2 | active | —| —| L0+L1 | —|
 | `verify-readme-sync.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|

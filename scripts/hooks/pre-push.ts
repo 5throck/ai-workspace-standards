@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.2.7
+ * @version 1.2.8
  */
 
 import { $ } from "bun";
@@ -62,7 +62,13 @@ async function main() {
             // all known remote refs to avoid scanning full history.
             const remoteRefs = (await $`git for-each-ref --format='%(objectname)' refs/remotes/`.text()).trim();
             if (remoteRefs) {
-              revListArgs.push(`${remoteRefs.split('\n').join(' ')}..${ref.localOid}`);
+              // Each remote SHA must be its own `^sha` exclusion token — joining
+              // them into a single string (e.g. "sha1 sha2..localOid") produces
+              // an invalid git-rev-list argument once more than one remote ref
+              // exists (always true: `origin/HEAD` sits alongside `origin/main`).
+              const uniqueRemoteShas = [...new Set(remoteRefs.split('\n').filter(Boolean))];
+              for (const sha of uniqueRemoteShas) revListArgs.push(`^${sha}`);
+              revListArgs.push(ref.localOid);
             } else {
               // No remote refs at all (fresh clone with no upstream) — fall back
               // to scanning untracked working tree changes only
@@ -71,7 +77,7 @@ async function main() {
           }
         }
         // Deduplicate and run gitleaks against the commit list
-        const commitShas = (await $`git rev-list ${revListArgs.join(' ')}`.text()).trim();
+        const commitShas = (await $`git rev-list ${revListArgs}`.text()).trim();
         if (commitShas) {
           const uniqueShas = [...new Set(commitShas.split('\n'))].join(' ');
           await $`gitleaks detect --redact --log-opts -- ${uniqueShas}`;

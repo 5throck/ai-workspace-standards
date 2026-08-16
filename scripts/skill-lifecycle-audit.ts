@@ -10,8 +10,8 @@
  *   bun scripts/skill-lifecycle-audit.ts --fix    # Auto-fix simple issues
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.2.1
- * @last_updated 2026-07-19
+ * @version 1.3.0
+ * @last_updated 2026-08-16
  * @license MIT
  */
 
@@ -71,8 +71,19 @@ const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
 // see scripts/helpers/layer-filter.ts. `variant` itself is also accepted as a
 // generic placeholder for skills not yet tied to one specific variant name.
 const CURRENT_VARIANT_NAME = basename(ROOT);
+// Root-level (L0) skills in skills/ may declare a specific variant's name as
+// their scope even though the audit always runs from workspace root (where
+// CURRENT_VARIANT_NAME resolves to the workspace folder name, never a co-*
+// name) — so known variant directory names must be accepted too.
+const KNOWN_VARIANT_NAMES = (() => {
+  const templatesDir = join(ROOT, 'templates');
+  if (!existsSync(templatesDir)) return [] as string[];
+  return readdirSync(templatesDir, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
+    .map(e => e.name);
+})();
 function isValidScope(scope: string): boolean {
-  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME].includes(scope);
+  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES].includes(scope);
 }
 
 // Detect if we're at workspace root or in a sub-project
@@ -182,7 +193,16 @@ function agentExists(owner: string, registry: AgentRegistry): boolean {
 
   const agentPath1 = join(ROOT, 'agents', `${owner}.md`);
   const agentPath2 = join(ROOT, '.claude', 'agents', `${owner}.md`);
-  return existsSync(agentPath1) || existsSync(agentPath2);
+  if (existsSync(agentPath1) || existsSync(agentPath2)) return true;
+
+  // A root-level (L0) skill's owner may be a variant-specific agent (the
+  // skill's home domain) even though the skill itself lives in the shared
+  // skills/ directory for L1 propagation — check every variant's roster too.
+  for (const variantName of KNOWN_VARIANT_NAMES) {
+    const variantAgentPath = join(ROOT, 'templates', variantName, 'agents', `${owner}.md`);
+    if (existsSync(variantAgentPath)) return true;
+  }
+  return false;
 }
 
 // Check file modification time (safe, no shell execution)
@@ -349,7 +369,7 @@ function auditSkills(jsonMode = false): AuditResult {
       warnings.push({
         level: 'warning',
         file: relPath,
-        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME}`,
+        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME} | ${KNOWN_VARIANT_NAMES.join(' | ')}`,
       });
     }
 

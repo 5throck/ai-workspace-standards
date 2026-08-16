@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-memory.ts — Memory Log Format Verifier
- * @version 1.0.1
+ * @version 1.1.0
  *
  * Validates that memory/*.md session logs follow the mandatory 4-section format
  * and that MEMORY.md index is in sync with actual files on disk.
@@ -17,6 +17,7 @@
 
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join } from "path";
+import { die } from "./lib/error-handling.ts";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
@@ -278,8 +279,9 @@ if (args.includes("--report")) {
     process.exit(ok ? 0 : 1);
   }
 } else {
-  console.error(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`);
   if (import.meta.main) {
-    process.exit(1);
+    die(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`, 1);
+  } else {
+    console.error(`Usage: bun scripts/verify-memory.ts [--verify | --report] [file...]`);
   }
 }

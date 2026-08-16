@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -24,6 +24,7 @@
 
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "node:path";
+import { die } from "./lib/error-handling.ts";
 
 /**
  * Supported locale codes are loaded from docs/workspace-schema.json (i18n.locale_codes).
@@ -307,8 +308,9 @@ async function validateMarkdownLanguage(): Promise<void> {
 
 // Run validation
 validateMarkdownLanguage().catch((error) => {
-  console.error("Validation error:", error);
   if (import.meta.main) {
-    process.exit(1);
+    die(`Validation error: ${error instanceof Error ? error.message : String(error)}`, 1);
+  } else {
+    console.error("Validation error:", error);
   }
 });

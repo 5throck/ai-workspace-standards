@@ -90,7 +90,17 @@ process.exit(1);
 | `cleanup-completed-md.ts` | L0+L1 | `die()` for error paths, explicit exit codes |
 | `agent-list.ts` | L0+L1 | `die()` for ENOENT/catch paths |
 
-### 3. Registry + Docs
+### 3. Second migration batch (opportunistic follow-up)
+
+| Script | Layer | Changes |
+|--------|-------|---------|
+| `validate-md-language.ts` | L0+L1 | `die()` for uncaught-error catch (guarded by `import.meta.main` for test-import safety) |
+| `verify-memory.ts` | L0+L1 | `die()` for CLI usage error (same guard pattern) |
+| `validate-model-registry.ts` | L0+L1 | `die()` for 3 fatal conditions: schema unreadable, missing `models` block, missing platforms, plus agents-dir read failure |
+
+Per-file report/violation output (e.g. mismatch listings in `validate-model-registry.ts`, `validate-md-language.ts`) was left as plain `console.log`/`console.error` — these are structured validation reports, not error/exit paths, per §3 "What NOT to Do".
+
+### 4. Registry + Docs
 
 - `scripts/SCRIPTS.md` — note the migration convention in the header comment.
 - `docs/constitution/08-coding-guidelines.md` §8.11 — reference the standard.
