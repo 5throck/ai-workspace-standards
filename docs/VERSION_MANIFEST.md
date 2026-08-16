@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T08:02:20.239Z
+**Generated**: 2026-08-16T09:10:10.078Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 36
-- **Scripts**: 74
+- **Scripts**: 75
 - **Commands**: 8
 
 ---
@@ -84,12 +84,12 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.12.0 | scripts/audit.ts | bun |
+| audit.ts | 2.13.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.9.2 | scripts/create-l3-scaffold.ts | N/A |
-| dev-sync.ts | 1.5.2 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.5.3 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -118,7 +118,8 @@
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.3.0 | scripts/skill-lifecycle-audit.ts | N/A |
-| spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
+| spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
+| spec-register.ts | 1.1.0 | scripts/spec-register.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
 | sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |

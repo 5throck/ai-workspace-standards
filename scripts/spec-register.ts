@@ -1,16 +1,21 @@
-// @version 1.0.1
+// @version 1.1.0
 /**
  * spec-register.ts
  *
  * Spec Registry CRUD -- manages docs/specs/registry.json.
- * Called by brainstorming skill, meeting skill, variant-feature.ts, audit.ts.
+ * Called by brainstorming skill, meeting skill, variant-feature.ts, audit.ts, spec-backfill.ts.
  *
  * Usage:
  *   bun scripts/spec-register.ts --file docs/designs/foo.md --source brainstorming
  *   bun scripts/spec-register.ts --file docs/designs/foo.md --source meeting --ref memory/meeting-2026-06-24-foo.md
+ *   bun scripts/spec-register.ts --file docs/designs/foo.md --source manual --status implemented --id 2026-01-02-foo
  *   bun scripts/spec-register.ts --update 2026-06-24-foo --status implemented
  *   bun scripts/spec-register.ts --list
  *   bun scripts/spec-register.ts --list --status approved
+ *
+ * --id <value> overrides the default slugFromPath(filePath) id. Needed for files without a
+ * YYYY-MM-DD- filename prefix, so callers (e.g. spec-backfill.ts) can supply a dated id that
+ * matches the convention used by hand-registered entries.
  */
 
 import * as fs from 'node:fs';
@@ -24,7 +29,7 @@ const YELLOW = '[33m';
 const CYAN = '[36m';
 const RESET = '[0m';
 
-type SpecStatus = 'draft' | 'approved' | 'implemented' | 'drifted';
+type SpecStatus = 'draft' | 'proposed' | 'approved' | 'implemented' | 'drifted';
 type SpecSource = 'brainstorming' | 'meeting' | 'manual';
 
 interface SpecEntry {
@@ -98,7 +103,7 @@ if (getArg('--file')) {
   }
 
   const registry = loadRegistry();
-  const id = slugFromPath(filePath);
+  const id = getArg('--id') ?? slugFromPath(filePath);
   const existing = registry.specs.find(s => s.id === id);
   if (existing) {
     existing.last_updated = today();

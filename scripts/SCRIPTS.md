@@ -63,12 +63,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.12.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.13.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.9.2 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.5.2 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.5.3 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -163,7 +163,8 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
 | `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
-| `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
+| `spec-backfill.ts` | L0 | 1.0.0 | active | `--dry-run`, `--check` | —| L0 | —|
+| `spec-register.ts` | L0 | 1.1.0 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref`, `--id` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `sync-md.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
