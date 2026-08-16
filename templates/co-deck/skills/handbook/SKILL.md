@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: co-deck
-version: 0.2.2
+version: 0.2.3
 description: >-
   Document Production Workflow for co-deck — generates searchable, themed
   handbooks as static sites (GitHub Pages). Three modes: standalone handbook,

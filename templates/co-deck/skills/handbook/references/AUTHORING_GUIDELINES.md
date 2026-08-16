@@ -295,6 +295,26 @@ When placing a badge, title, and description side by side inside `.level-header`
 .level-header .level-desc  { flex: 1; }
 ```
 
+### 11-3. No Nested Interactive Elements (`<a>` Inside `<a>`)
+
+**Rule**: Never place an `<a>` element inside another `<a>` element — most commonly, a card built as `<a class="card" href="...">` must not contain an inline `<a href="...">` in its description text.
+
+- **Why**: Nested `<a>` tags are invalid HTML5. Per the parsing spec, the browser's parser implicitly closes the outer `<a>` as soon as it encounters the inner one — it does not error, it silently truncates. Everything in the card after the inline link (including the trailing "Open →" affordance) stops being part of the clickable card link. This bug produces no visible symptom in a static preview; it only shows up as "half the card doesn't respond to clicks" when actually used in a browser, so review by eye is not sufficient.
+- **How to apply**:
+  - If a card's description needs to reference an external resource (e.g., a prerequisite handbook, an upstream repo), write it as plain text — do not wrap it in `<a>`.
+  - Put the actual link on the destination page instead (its own lead paragraph, footer, etc.), where it isn't nested inside another link.
+  - When reviewing an existing card, search for `<a` inside the card's inner markup (between the opening `<a class="card"...>` and its matching `</a>`) — any hit is a bug, not a style choice.
+
+### 11-4. `.table-schedule` Column-Width Convention
+
+**Rule**: Only wrap a `<table>` in `.table-schedule` when every column from the 3rd onward holds **short, fixed vocabulary** (e.g., "Lecture", "10 min", "Y/N"). Do not use it for tables where a later column holds free-text prose (explanations, recommendations, notes).
+
+- **Why**: `.table-schedule td:nth-child(n+3) { white-space: nowrap; }` exists specifically so short repeated values in schedule-style tables (`Category | Content | Format | Est. Time`) stay compact instead of wrapping awkwardly. If a table's 3rd+ column instead holds long sentences, the same rule forces that column to refuse wrapping, blowing the table out far wider than its container instead of laying out normally.
+  - Only the 1st column gets an explicit width (`18ch`) with normal wrapping — it's sized for chapter labels that vary a lot in length across languages.
+- **How to apply**:
+  - Skip-map / comparison tables where a later column is a sentence-length recommendation or explanation should use a bare `<table>` (no wrapper div) — the base `table` rule (`table-layout: auto`, normal wrapping) already renders it correctly.
+  - Reserve `.table-schedule` for tables shaped like the time-allocation tables in the Lecture Guide (§20): short category labels, short duration/format values.
+
 ---
 
 ## 12. Writing Style Consistency
@@ -795,14 +815,15 @@ The index is the entry point for the entire handbook. Include the following stru
 
 ### 21-4. Renumbering Integrity Verification
 
-**Principle**: When adding, deleting, or reordering chapters, **do not stop at merely moving files** — update and verify all four of the following without exception. These are the points most frequently missed during renumbering.
+**Principle**: When adding, deleting, or reordering chapters — or adding any standalone new page (a prerequisite guide, appendix, setup page, etc.) — **do not stop at merely moving/creating files** — update and verify all five of the following without exception. These are the points most frequently missed.
 
-- **Why**: During an actual chapter reordering: ① `chapter-nav` prev/next did not reflect the new order, creating links that skip or loop backward; ② links pointed to new files but label text retained old chapter numbers; ③ newly created files were not added to `site-search.js`'s `DOCS` array, causing them to be missed in full-site search.
+- **Why**: During an actual chapter reordering: ① `chapter-nav` prev/next did not reflect the new order, creating links that skip or loop backward; ② links pointed to new files but label text retained old chapter numbers; ③ newly created files were not added to `site-search.js`'s `DOCS` array, causing them to be missed in full-site search. Separately, adding a standalone new page (not a renumbering) has its own recurring failure mode: ④ the page gets created and linked from one place, but its running-text prose still cross-references chapter numbers by the wrong number (e.g. body text says "see Chapter 5" for content that's actually Chapter 6) — this isn't caught by link-label checks because it's plain text, not a link, and it isn't caught by skimming since the number "looks right" out of context.
 - **How to apply**:
   1. **prev/next mutual symmetry** — If document A's `next` points to B, then B's `prev` must point to A. Fixing only one side and missing the other creates a link that works in one direction ("next") but not the other ("previous").
   2. **Link label and target consistency** — The label text (chapter number, title) in `<a href="...">label</a>` must always match the current chapter number and title of the file that `href` actually points to. When moving files, a common mistake is to update only `href` while leaving the label text as the copied old text.
-  3. **Search index synchronization** — When adding new chapter files or changing paths, add/update entries in the `DOCS` array in `docs/assets/site-search.js`. Do not omit warmup exercises that have no chapter number.
+  3. **Search index synchronization** — When adding new chapter files, or any standalone new page, add/update entries in the `DOCS` array in `docs/assets/site-search.js` **for every language variant of the page**, not just the base language. Do not omit warmup exercises that have no chapter number.
   4. **Sidebar "Other chapters" list** — Also update the "Other chapters" sidebar list in all affected chapters and the card order/tag numbers on `index.html`.
+  5. **Body-text chapter cross-references** — Grep the new or changed page for every chapter-number mention in running prose (not just `<a>` labels — e.g. Korean `N장`, English `Chapter N`) and check each one against the actual current chapter list on `index.html`. Do this even for content that isn't part of a renumbering; a page written once and never touched again can still get its own internal cross-references wrong from the start, or drift out of sync as other chapters are renumbered around it later.
   - **Verification method**: Use the following script to mechanically check for ① broken links and ② prev/next asymmetry (runs against all HTML files under `docs/`).
 
     ```
@@ -1027,6 +1048,8 @@ After completing the draft, verify each item below one by one.
 - [ ] §11-1: Do flex children `.step-content` have `min-width: 0`, and do text boxes have `overflow-wrap: break-word`?
 - [ ] §11-1: Do text boxes inside `.platform-block` have negative margin compensation?
 - [ ] §11-2: Do fixed elements (badges, titles) inside flex containers have `flex-shrink: 0`?
+- [ ] §11-3: Does any card (`<a class="card">`) contain a nested `<a>` in its description text? (Search for `<a` between the card's opening and closing tags — any hit is a bug.)
+- [ ] §11-4: Does any `.table-schedule` table have a 3rd+ column holding sentence-length text instead of short fixed vocabulary? (If so, drop the wrapper.)
 - [ ] §12-1: Are sentence endings unified in the formal plain register for the document's language?
 - [ ] §12-2: Are English technical terms glossed with `language_term(English)` only on first appearance in the document, and English-only thereafter?
 - [ ] §12-2: Do `<title>`/`<h1>`/`chapter-eyebrow`/nav heading text use English technical terms only, without parenthetical glosses or monolingual-only labels, across all language editions?
@@ -1052,7 +1075,8 @@ After completing the draft, verify each item below one by one.
 - [ ] §21: Do chapter files and index cards have consistent chapter numbers, titles, and links?
 - [ ] §21-4: (On renumbering) Are prev/next of all affected chapters mutually symmetric?
 - [ ] §21-4: (On renumbering) Do link label chapter numbers/titles match the actual target files?
-- [ ] §21-4: (On renumbering) Have new/moved files been reflected in `site-search.js`'s `DOCS` array?
+- [ ] §21-4: (On renumbering, or adding any new page) Have new/moved files been reflected in `site-search.js`'s `DOCS` array — for every language variant?
+- [ ] §21-4: (On any new or edited page) Do body-text chapter-number cross-references (`N장`, `Chapter N`, etc.) match the actual current chapter list on `index.html`?
 
 ---
 
