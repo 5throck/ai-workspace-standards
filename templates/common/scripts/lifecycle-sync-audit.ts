@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @last_updated 2026-06-21
  * @license MIT
  */
@@ -579,7 +579,13 @@ function runCheckV(): SyncIssue[] {
       if (!existsSync(scriptFile)) continue; // B-03 already catches missing files
 
       const fileVersion = extractFileVersion(scriptFile);
-      const registryVersion = variantRegistry.get(basename(entry.path));
+      // Preserve subdirectory prefix for registry lookup (e.g. "handbook/check-labels.ts")
+      // instead of stripping it via basename() (which yields just "check-labels.ts")
+      const variantScriptsPrefix = `scripts/${variantName}/`;
+      const registryKey = entry.path.startsWith(variantScriptsPrefix)
+        ? entry.path.slice(variantScriptsPrefix.length)
+        : basename(entry.path);
+      const registryVersion = variantRegistry.get(registryKey);
 
       if (fileVersion === null) {
         issues.push({
@@ -595,7 +601,7 @@ function runCheckV(): SyncIssue[] {
           level: 'warning',
           file: variantScriptsMd.replace(ROOT + '/', '').replace(ROOT + '\\', ''),
           message: `Check V: ${variantName}/${entry.path} declared in variant.json but not found in ${variantName}/scripts/${variantName}/SCRIPTS.md registry`,
-          fix: `Add ${basename(entry.path)} to templates/${variantName}/scripts/${variantName}/SCRIPTS.md`,
+          fix: `Add ${registryKey} to templates/${variantName}/scripts/${variantName}/SCRIPTS.md`,
         });
         continue;
       }
@@ -605,7 +611,7 @@ function runCheckV(): SyncIssue[] {
           level: 'error',
           file: `templates/${variantName}/${entry.path}`,
           message: `Check V: ${variantName}/${entry.path} @version ${fileVersion} does not match ${variantName}/SCRIPTS.md entry ${registryVersion}`,
-          fix: `Update templates/${variantName}/scripts/${variantName}/SCRIPTS.md version for ${basename(entry.path)} from ${registryVersion} to ${fileVersion}`,
+          fix: `Update templates/${variantName}/scripts/${variantName}/SCRIPTS.md version for ${registryKey} from ${registryVersion} to ${fileVersion}`,
         });
       }
     }

@@ -1,5 +1,7 @@
 # co-abap Variant Scripts
 
+## Registry
+
 | Script | Version | Purpose | Layer |
 |--------|---------|---------|-------|
 | `dispatch.ts` | 1.0.0 | Main CLI dispatcher with parallel/serial modes | L2 |

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T00:48:57.053Z
+**Generated**: 2026-08-16T00:58:20.224Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -102,7 +102,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.10.5 | scripts/l3-to-variant-pipeline.ts | fs, path |
-| lifecycle-sync-audit.ts | 1.4.4 | scripts/lifecycle-sync-audit.ts | N/A |
+| lifecycle-sync-audit.ts | 1.4.5 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
