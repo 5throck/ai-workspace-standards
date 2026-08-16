@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // scripts/co-deck/handbook/scaffold-handbook.ts
 // Generates handbook project scaffold from skill templates + assets.
 // Copies template HTML, CSS, JS, scripts, and examples into a new project.
@@ -55,13 +55,19 @@ const TEMPLATE_FILES: { src: string; dest: string }[] = [
 
 const SCRIPT_FILES: { src: string; dest: string }[] = [
   { src: "validate-handbook.ts", dest: "validate-handbook.ts" },
+  { src: "build-search-index.ts", dest: "build-search-index.ts" },
+  { src: "check-a11y.ts", dest: "check-a11y.ts" },
+  { src: "check-external-links.ts", dest: "check-external-links.ts" },
+  { src: "check-lint.ts", dest: "check-lint.ts" },
+  { src: "check-search.ts", dest: "check-search.ts" },
+  { src: "check-spell.ts", dest: "check-spell.ts" },
   { src: "check-structure.ts", dest: "check-structure.ts" },
   { src: "validate-nav.ts", dest: "validate-nav.ts" },
   { src: "check-links.ts", dest: "check-links.ts" },
   { src: "check-symmetry.ts", dest: "check-symmetry.ts" },
   { src: "check-labels.ts", dest: "check-labels.ts" },
-  { src: "check-search.ts", dest: "check-search.ts" },
   { src: "check-tables.ts", dest: "check-tables.ts" },
+  { src: "extract-copycode.ts", dest: "extract-copycode.ts" },
   { src: "update-footers.ts", dest: "update-footers.ts" },
   { src: "nav-utils.ts", dest: "nav-utils.ts" },
   { src: "scaffold-handbook.ts", dest: "scaffold-handbook.ts" },
@@ -129,6 +135,12 @@ const packageJson = {
   scripts: {
     "validate-handbook": `bun run scripts/validate-handbook.ts --docs-dir docs`,
     "validate-nav": `bun run scripts/validate-nav.ts --docs-dir docs`,
+    "check-a11y": `bun run scripts/check-a11y.ts --docs-dir docs`,
+    "check-spell": `bun run scripts/check-spell.ts --docs-dir docs`,
+    "check-lint": `bun run scripts/check-lint.ts --docs-dir docs`,
+    "check-external-links": `bun run scripts/check-external-links.ts --docs-dir docs`,
+    "build-search-index": `bun run scripts/build-search-index.ts --docs-dir docs`,
+    "extract-copycode": `bun run scripts/extract-copycode.ts --docs-dir docs`,
     "check-structure": `bun run scripts/check-structure.ts --docs-dir docs`,
     "check-tables": `bun run scripts/check-tables.ts --docs-dir docs`,
     "update-footers": `bun run scripts/update-footers.ts --docs-dir docs`,
@@ -255,6 +267,40 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: cd handbook && bun install && bun run check-authoring --examples-dir ../templates/co-deck/skills/handbook/examples
+
+  check-a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-a11y
+
+  check-spell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-spell
+
+  check-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run check-lint
+
+  build-search-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd handbook && bun install && bun run build-search-index
+      - name: Verify search-data.js is up to date
+        run: |
+          if ! git diff --exit-code docs/assets/search-data.js; then
+            echo "::error::search-data.js is out of sync with search-manifest.json. Run 'bun run build-search-index' and commit the result."
+            exit 1
+          fi
 `;
 writeFileSync(join(targetDir, ".github", "workflows", "validate-handbook.yml"), ciYml);
 created++;
