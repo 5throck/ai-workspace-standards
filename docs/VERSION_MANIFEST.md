@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T09:10:10.078Z
+**Generated**: 2026-08-16T09:21:39.294Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -48,7 +48,7 @@
 | platform-skill-lifecycle-manager | 1.0.0 | active | .claude/skills/platform-skill-lifecycle-manager/SKILL.md | both | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | presenter-mode | 1.0.1 | active | skills/presenter-mode/SKILL.md | workspace | presenter-mode, /presenter-mode, dual-window sync, presenter view | html-build |
 | project-review | 1.1.0 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
-| project-to-variant | 1.0.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
+| project-to-variant | 1.1.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.0.1 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
 | sarif-exporter | 1.0.0 | active | skills/sarif-exporter/SKILL.md | workspace | sarif-exporter, /sarif-exporter, sarif export, export sarif report, sarif format | security-expert |
 | script-lifecycle-manager | 1.2.0 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
@@ -106,7 +106,7 @@
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
-| project-to-variant.ts | 1.0.3 | scripts/project-to-variant.ts | N/A |
+| project-to-variant.ts | 1.1.0 | scripts/project-to-variant.ts | N/A |
 | propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.3 | scripts/readme-lifecycle-audit.ts | N/A |

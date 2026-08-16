@@ -1,11 +1,11 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: "1.0.0"
+version: "1.1.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
-last_reviewed: 2026-07-31
+last_reviewed: 2026-08-16
 metadata:
   type: scaffolding
   triggers:
@@ -29,36 +29,44 @@ Converts an existing standalone project into an official `co-*` variant template
 ## Script
 
 **Script**: `scripts/project-to-variant.ts`
-**Usage**: `bun scripts/project-to-variant.ts <project-path> [--name <variant-name>] [--type <variant-type>]`
+**Usage**: `bun scripts/project-to-variant.ts --source <project-path> --target <variant-name> [--dry-run] [--force] [--design-doc <path>] [--threshold-files <n>] [--threshold-dirs <n>]`
 
 ### Arguments
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `<project-path>` | Yes | Path to the existing project |
-| `--name <name>` | No | Variant name (e.g., `co-analytics`) |
-| `--type <type>` | No | Registered type: security, development, design, consulting, collaboration, lecture, game |
+| `--source <path>` | Yes | Path to the existing project (e.g., `Projects/co-legal`) |
+| `--target <name>` | Yes | Variant name, must match `^co-[a-z][a-z0-9-]{1,30}$` (e.g., `co-legal`) |
+| `--dry-run` | No | Preview without writing files |
+| `--force` | No | Proceed even if the complexity routing check recommends the Full L2 Pipeline instead |
+| `--design-doc <path>` | No | Auto-register this spec via `spec-register.ts` (can't be auto-discovered) |
+| `--threshold-files <n>` | No | Override the variant-unique-file-count routing threshold (default 40) |
+| `--threshold-dirs <n>` | No | Override the large-domain-dir-count routing threshold (default 3) |
 
 ## What It Does
 
 1. Diffs the project against `templates/common/`
 2. Keeps only variant-unique files
 3. Skips `.git/`, `node_modules/`, `memory/`
-4. Generates `variant.json` if not present
-5. Runs `validate-templates.ts` for verification
-6. Outputs manual review checklist
+4. **Complexity routing check**: if the project diverges significantly from `templates/common/` (more than `--threshold-files` variant-unique files, or more than `--threshold-dirs` domain directories with >15 files each that don't exist in `templates/common/`), it prints a recommendation to use the Full L2 Pipeline instead and aborts unless `--force` is passed — this automates the judgment call that used to live only in this doc's prose (see Alternative below)
+5. Generates `variant.json` if not present
+6. Runs `validate-templates.ts` for verification
+7. Regenerates `templates/<target>/AGENTS.md` via `regenerate-agents-md.ts` (mechanical — always run, not gated on judgment)
+8. Registers the spec via `spec-register.ts` if `--design-doc` was passed
+9. Outputs a manual review checklist for the remaining judgment-based items only (`pm.md` override review, `CLAUDE.md`/`GEMINI.md` narrative context)
 
 ## Step-by-Step Procedure
 
 1. **Evaluate suitability**: ≥3 domain agents, ≥2 skills, ≥3 expected future projects
 2. **Prepare**: Remove `node_modules/`, `.env`, `memory/`, `CHANGELOG.md`
-3. **Run conversion**: `bun scripts/project-to-variant.ts <project-path> --name <name> --type <type>`
+3. **Run conversion**: `bun scripts/project-to-variant.ts --source <project-path> --target <variant-name> --design-doc <path-to-design-doc>`
 4. **Verify**: `bun scripts/validate-templates.ts`
 5. **Review variant.json**: Check agents, skills, script_manifest
+6. **Complete the printed manual checklist**: `pm.md` overrides and `CLAUDE.md`/`GEMINI.md` narrative context — everything else is now automated
 
 ## Alternative: Full L2 Pipeline
 
-For a more thorough conversion with normalization:
+The script itself recommends this automatically when the complexity routing check trips (see step 4 above). For a more thorough conversion with ADR-referenced review, anti-swelling checks, and platform-parity enforcement:
 
 ```bash
 cp -r <project-path> Projects/<variant-name>/
