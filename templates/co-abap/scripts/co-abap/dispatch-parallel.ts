@@ -1,39 +1,25 @@
-// @version 1.0.0
 #!/usr/bin/env bun
 /**
- * Parallel Agent Dispatcher
+ * Parallel Agent Dispatcher — VSP variant wrapper
+ * @version 1.0.1
  * Automates dispatching multiple read-only subagents simultaneously
  *
- * This dispatcher is optimized for tasks that can run independently:
- * - Codebase analysis
- * - Documentation generation
- * - Health checks
- * - Parallel investigation
+ * Re-exports the common dispatcher with VSP-specific default tasks.
+ * (ADR-0050: Variant scripts inherit from templates/common, never duplicate)
  *
  * @module dispatch-parallel
  */
 
-interface ParallelAgentTask {
-  description: string;
-  role: string;
-  task: string;
-  context?: string[];
-  outputFormat?: string;
-  priority?: 'high' | 'medium' | 'low';
-}
-
-interface DispatchResult {
-  task: ParallelAgentTask;
-  status: 'dispatched' | 'completed' | 'failed';
-  output?: string;
-  error?: string;
-  timestamp: Date;
-}
+import {
+  dispatchParallel as commonDispatchParallel,
+  type ParallelAgentTask,
+  type DispatchResult
+} from '../../dispatch-parallel.ts';
 
 /**
- * Default parallel agent configurations for common VSP workflows
+ * VSP-specific default tasks for parallel dispatch
  */
-const defaultTasks: ParallelAgentTask[] = [
+const vspDefaultTasks: ParallelAgentTask[] = [
   {
     description: "Codebase analyzer",
     role: "code-analyst",
@@ -85,79 +71,6 @@ const defaultTasks: ParallelAgentTask[] = [
 ];
 
 /**
- * Dispatch a single agent task
- * In production, this would invoke the Agent tool or call the appropriate API
- */
-async function dispatchAgent(task: ParallelAgentTask): Promise<DispatchResult> {
-  const startTime = Date.now();
-
-  try {
-    console.log(`   [${task.priority || 'medium'}] ${task.description}`);
-    console.log(`   Role: ${task.role}`);
-    console.log(`   Task: ${task.task.substring(0, 60)}${task.task.length > 60 ? '...' : ''}`);
-
-    // Simulate agent dispatch
-    // In real implementation, this would call:
-    // - Agent tool for Claude Code subagents
-    // - MCP server tools for specialized agents
-    // - External API calls for remote agents
-
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
-
-    const elapsed = Date.now() - startTime;
-    console.log(`   ✅ Complete (${elapsed}ms)\n`);
-
-    return {
-      task,
-      status: 'completed',
-      output: `Output from ${task.role}`,
-      timestamp: new Date()
-    };
-  } catch (error) {
-    return {
-      task,
-      status: 'failed',
-      error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date()
-    };
-  }
-}
-
-/**
- * Dispatch multiple agents in parallel and await all results
- */
-export async function dispatchParallel(tasks: ParallelAgentTask[]): Promise<DispatchResult[]> {
-  console.log(`\n🚀 Parallel Agent Dispatcher`);
-  console.log(`📊 Dispatching ${tasks.length} agents simultaneously\n`);
-  console.log(`━${'━'.repeat(60)}`);
-
-  const startTime = Date.now();
-
-  // Sort by priority and dispatch in parallel
-  const prioritizedTasks = [...tasks].sort((a, b) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
-    return (priorityOrder[a.priority || 'medium'] ?? 1) - (priorityOrder[b.priority || 'medium'] ?? 1);
-  });
-
-  const results = await Promise.all(
-    prioritizedTasks.map(task => dispatchAgent(task))
-  );
-
-  const elapsed = Date.now() - startTime;
-  const completed = results.filter(r => r.status === 'completed').length;
-  const failed = results.filter(r => r.status === 'failed').length;
-
-  console.log(`━${'━'.repeat(60)}`);
-  console.log(`\n📊 Results:`);
-  console.log(`   ✅ Completed: ${completed}/${tasks.length}`);
-  console.log(`   ❌ Failed: ${failed}/${tasks.length}`);
-  console.log(`   ⏱️  Total time: ${elapsed}ms`);
-  console.log(`   📈 Average per task: ${Math.round(elapsed / tasks.length)}ms\n`);
-
-  return results;
-}
-
-/**
  * CLI entry point
  */
 async function main() {
@@ -181,10 +94,10 @@ async function main() {
     }
   }
 
-  const tasksToRun = customTasks.length > 0 ? customTasks : defaultTasks;
+  const tasksToRun = customTasks.length > 0 ? customTasks : vspDefaultTasks;
 
   try {
-    await dispatchParallel(tasksToRun);
+    await commonDispatchParallel(tasksToRun);
     process.exit(0);
   } catch (error) {
     console.error('❌ Dispatch failed:', error);
@@ -193,15 +106,16 @@ async function main() {
 }
 
 /**
- * Export for direct module use - handles empty task array by using defaults
+ * Export for direct module use - handles empty task array by using VSP defaults
  */
 export async function runDispatcher(tasks?: ParallelAgentTask[]): Promise<DispatchResult[]> {
-  return dispatchParallel(tasks && tasks.length > 0 ? tasks : defaultTasks);
+  return commonDispatchParallel(tasks && tasks.length > 0 ? tasks : vspDefaultTasks);
 }
+
+// Re-export common types and functions for backward compatibility
+export { commonDispatchParallel as dispatchParallel, type ParallelAgentTask, type DispatchResult };
 
 // Run if executed directly
 if (import.meta.main) {
   main();
 }
-
-export { dispatchParallel as default, ParallelAgentTask, DispatchResult };
