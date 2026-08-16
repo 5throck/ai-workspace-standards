@@ -29,7 +29,7 @@ Full investigation: `docs/designs/2026-08-16-spec-registry-enforcement-design.md
 
 ### Stage 2 (separate follow-up PR — blocking)
 
-Gated on Stage 1 having run visibly in real `/sync` output for at least one Weekly Health Check cycle (~1 week) with no false-positive reports:
+Gated on Stage 1 having run visibly in real `/sync` output for at least one Weekly Health Check cycle (~1 week) with no false-positive reports. This readiness gate is tracked as a real Governance Backlog ticket (`tickets/governance/T-20260816-001.yaml`, `not_before: 2026-08-23`) rather than a prose reminder — see [docs/designs/2026-08-16-governance-backlog-design.md](2026-08-16-governance-backlog-design.md); it surfaces automatically via `bun scripts/ticket.ts list --ready --kind manual` at session start and in the Weekly Health Check once the date passes.
 
 - Promote the "no relevant spec" `Warn(...)` to `Fail(...)` in `audit.ts` (the stale-spec and missing-file checks stay `Warn`).
 - Add an exemption escape hatch — `--spec-exempt=<E1-E5>` / `SYNC_SPEC_EXEMPT` env var — validated against the exemption categories already defined in `AGENTS.md` §5.1.1 (`memory-log`, `changelog`, `hotfix-typo`, `pure-readme`, `sync-only`).
@@ -70,6 +70,7 @@ Gated on Stage 1 having run visibly in real `/sync` output for at least one Week
 **References:**
 
 - `docs/designs/2026-08-16-spec-registry-enforcement-design.md` — full investigation and design
+- `docs/designs/2026-08-16-governance-backlog-design.md` — tracks Stage 2's soak-period readiness as a real ticket instead of a prose reminder
 - `docs/designs/workflow-integrated-methodology-design.md` — original (non-functional) mechanism
-- `AGENTS.md` §5.1.1 — Design Gate exemption categories (E1-E5)
+- `AGENTS.md` §3.7.5 — Governance Backlog Dispatch convention; §5.1.1 — Design Gate exemption categories (E1-E5)
 - ADR-0054 — Error Handling Standardization (structural precedent for incremental, opportunistic rollout of a workspace-wide script-behavior change)
