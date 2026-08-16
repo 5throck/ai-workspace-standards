@@ -2,10 +2,11 @@
 /**
  * validate-model-registry.ts
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block.
- * Level: L0 | Status: active | @version 1.0.3
+ * Level: L0 | Status: active | @version 1.1.0
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { die } from "./lib/error-handling.ts";
 
 const WORKSPACE_ROOT = new URL("..", import.meta.url).pathname
   .replace(/\/$/, "")
@@ -102,24 +103,27 @@ let schema: WorkspaceSchema;
 try {
   schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
 } catch (err) {
-  console.error(`ERROR: Could not read docs/workspace-schema.json at ${schemaPath}`);
   if (import.meta.main) {
-    process.exit(1);
+    die(`Could not read docs/workspace-schema.json at ${schemaPath}`, 1);
+  } else {
+    console.error(`ERROR: Could not read docs/workspace-schema.json at ${schemaPath}`);
   }
 }
 
 if (!schema.models) {
-  console.error("ERROR: docs/workspace-schema.json is missing the 'models' block.");
   if (import.meta.main) {
-    process.exit(1);
+    die("docs/workspace-schema.json is missing the 'models' block.", 1);
+  } else {
+    console.error("ERROR: docs/workspace-schema.json is missing the 'models' block.");
   }
 }
 
 const missingPlatforms = PLATFORMS.filter((p) => !schema.models![p]);
 if (missingPlatforms.length > 0) {
-  console.error(`ERROR: workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`);
   if (import.meta.main) {
-    process.exit(1);
+    die(`workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`, 1);
+  } else {
+    console.error(`ERROR: workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`);
   }
 }
 
@@ -133,9 +137,10 @@ try {
     .filter((f) => f.endsWith(".md"))
     .map((f) => join(agentsDir, f));
 } catch (err) {
-  console.error(`ERROR: Could not read agents directory at ${agentsDir}`);
   if (import.meta.main) {
-    process.exit(1);
+    die(`Could not read agents directory at ${agentsDir}`, 1);
+  } else {
+    console.error(`ERROR: Could not read agents directory at ${agentsDir}`);
   }
 }
 
