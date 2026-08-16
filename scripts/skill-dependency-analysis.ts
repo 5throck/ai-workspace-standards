@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Dependency Analysis Script (SC-02)
- * @version 1.0.1
+ * @version 1.0.2
  * Analyzes /skill invocation references within SKILL.md files to detect:
  *   - Circular dependencies (A → B → A)
  *   - Orphaned references (skill calls a non-existent or archived skill)
@@ -86,8 +86,9 @@ function extractDependencies(content: string): string[] {
   // Strip frontmatter
   const body = content.replace(/^---\n[\s\S]*?\n---\n/, '');
 
-  // /skill <name> or `/skill <name>`
-  for (const m of body.matchAll(/`?\/skill\s+([\w-]+)`?/gi)) {
+  // /skill <name> or `/skill <name>` — require word boundary to avoid
+  // matching plain English like "agent/skill checklists" or "manual/skill layer"
+  for (const m of body.matchAll(/(?:^|(?<=[\s`/]))\/skill\s+([\w-]+)(?=[\s`'\"]|$)/gim)) {
     deps.add(m[1].toLowerCase());
   }
 

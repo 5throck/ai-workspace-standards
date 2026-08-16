@@ -1,3 +1,4 @@
+// @version 1.0.0
 // scripts/co-deck/handbook/nav-utils.ts
 // HTML parsing helpers for handbook validation — zero external deps.
 // This file is the canonical source of the handbook validation toolkit.

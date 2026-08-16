@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T00:30:44.727Z
+**Generated**: 2026-08-16T00:48:57.053Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -116,7 +116,7 @@
 | resolve-variants.ts | 1.0.1 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | retry-handler.ts | 1.0.1 | scripts/retry-handler.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
-| skill-dependency-analysis.ts | 1.0.1 | scripts/skill-dependency-analysis.ts | N/A |
+| skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-lifecycle-audit.ts | 1.2.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | spec-register.ts | 1.0.1 | scripts/spec-register.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |

@@ -1,3 +1,4 @@
+// @version 0.1.0
 // verify-new-theme.test.ts — tests for the composite theme registration gate.
 //
 // Tests that verify-new-theme.ts runs successfully against existing themes

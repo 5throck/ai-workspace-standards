@@ -1,3 +1,4 @@
+// @version 0.1.0
 // theme-browser-smoke.test.ts — compatibility matrix tests (builder-side).
 //
 // This file covers:

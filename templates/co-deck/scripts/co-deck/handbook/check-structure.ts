@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/check-structure.ts
 // HTML structure validator — the well-formedness layer of the handbook toolkit.

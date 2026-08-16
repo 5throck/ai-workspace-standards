@@ -1,3 +1,4 @@
+// @version 0.1.0
 import { describe, it, expect, beforeAll } from 'bun:test';
 import { loadThemePackage, validateThemePackage, SLIDE_TYPE_HTML_TO_JSON } from '../lib/theme-contract.js';
 import { resolve, dirname } from 'path';

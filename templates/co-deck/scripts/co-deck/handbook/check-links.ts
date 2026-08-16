@@ -1,3 +1,4 @@
+// @version 1.0.0
 // scripts/co-deck/handbook/check-links.ts
 // Check ①: Verify all internal a href targets resolve to existing files.
 // Canonical source of the handbook toolkit (adapted from

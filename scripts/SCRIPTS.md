@@ -158,7 +158,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
-| `skill-dependency-analysis.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `skill-dependency-analysis.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `spec-register.ts` | L0 | 1.0.1 | active | `--file`, `--source`, `--update`, `--status`, `--list`, `--ref` | —| L0 | —|
 | `skill-lifecycle-audit.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `sync-agent-status.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|

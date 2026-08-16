@@ -1,3 +1,4 @@
+// @version 1.0.0
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/scaffold-handbook.ts
 // Generates handbook project scaffold from skill templates + assets.

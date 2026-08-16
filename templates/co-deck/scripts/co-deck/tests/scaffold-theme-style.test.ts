@@ -1,3 +1,4 @@
+// @version 0.1.0
 // scaffold-theme-style.test.ts — tests for the theme/style scaffolder.
 //
 // Tests --from derivation, minimally valid scaffolding, required files,
