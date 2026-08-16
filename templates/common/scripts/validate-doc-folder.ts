@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.0.0
+ * @version 1.1.0
  * Ensures required subdirectories exist in docs/ folder
  */
 
 import fs from 'fs';
 import path from 'path';
 import { resolve } from 'node:path';
+import { ErrorPhase, die, withSyncErrorHandling } from './lib/error-handling.ts';
 
 interface ValidationResult {
   success: boolean;
@@ -79,9 +80,7 @@ function main(): void {
   const result = validateDocsFolder(docsPath);
 
   if (!result.docsExists) {
-    console.error('❌ docs/ directory does not exist');
-    console.error('   Please create the docs/ directory structure');
-    process.exit(1);
+    die('docs/ directory does not exist — please create the docs/ directory structure', 1);
   }
 
   console.log('✅ docs/ directory exists');
@@ -121,7 +120,7 @@ function main(): void {
     console.log('');
     console.log('Please create missing directories:');
     console.log('   mkdir -p docs/constitution docs/governance docs/lifecycle');
-    process.exit(1);
+    die('Missing required docs/ subdirectories', 1);
   } else {
     console.log('');
     console.log('✅ All required docs/ subdirectories exist');
@@ -130,4 +129,4 @@ function main(): void {
 }
 
 // Run validation
-main();
+withSyncErrorHandling(ErrorPhase.AUDIT, main);

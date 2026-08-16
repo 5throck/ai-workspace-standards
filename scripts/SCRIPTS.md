@@ -13,6 +13,10 @@
 
 > **Policy change (2026-06-11)**: All scripts are TypeScript executed via Bun. The former Tier 1 sh/ps1 bootstrap tier has been abolished. See [ADR-0036](../docs/adr/0036-script-ts-migration.md) for rationale.
 
+## Error Handling Standard (ADR-0054)
+
+> **Policy (2026-08-16)**: Error and exit paths in all scripts MUST use `scripts/lib/error-handling.ts` (`die()`, `fatalError()` + `logError()`, `withSyncErrorHandling()`). Migration is **incremental** — a script migrates when it is otherwise modified (no pure-consistency rewrites). When migrating an L0+L1 script, sync the change to `templates/common/scripts/` in the same commit. See [ADR-0054](../docs/adr/0054-error-handling-standardization.md) and `docs/constitution/08-coding-guidelines.md` §8.11.
+
 All scripts in this workspace are written in TypeScript and executed via `bun`. There is no longer a distinction between "bootstrap" and "ops" tiers — Bun is a hard prerequisite for the workspace and is assumed to be installed before any script runs.
 
 **Single rule**: every new script must be a `.ts` file. No `.sh` or `.ps1` files will be accepted.
@@ -55,12 +59,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-create.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `agent-delete.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `agent-lifecycle-audit.ts` | L0 | 1.1.5 | active | —| —| L0+L1 | —|
-| `agent-list.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `agent-list.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `audit.ts` | L0 | 2.10.18 | active | —| —| L0+L1 | —|
-| `cleanup-completed-md.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
+| `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.9.2 | active | —| —| L0 | —|
@@ -178,7 +182,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `upgrade-project.ts` | L0 | 1.7.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
-| `validate-doc-folder.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.5.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|

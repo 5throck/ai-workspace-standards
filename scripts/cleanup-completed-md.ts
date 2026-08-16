@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 // cleanup-completed-md.ts — Move completed task plans from memory/ to memory/completed/
 // Usage: bun scripts/cleanup-completed-md.ts
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { ErrorPhase, die, warnAndExit } from './lib/error-handling.ts';
 
 const COMPLETED_MARKER = '## Task Status: Completed';
 const FINAL_SYNTHESIS_MARKER = '## Synthesis';
@@ -21,7 +22,7 @@ console.log('🧹 Cleaning up completed memory files...\n');
 if (!existsSync(memoryDir)) {
   console.log('ℹ️  memory/ directory not found — nothing to clean.');
   if (import.meta.main) {
-    process.exit(0);
+    warnAndExit('Nothing to clean — memory/ directory not found');
   }
 }
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-16T01:02:28.258Z
+**Generated**: 2026-08-16T01:10:31.647Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -80,12 +80,12 @@
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
 | agent-lifecycle-audit.ts | 1.1.5 | scripts/agent-lifecycle-audit.ts | N/A |
-| agent-list.ts | 1.0.0 | scripts/agent-list.ts | N/A |
+| agent-list.ts | 1.1.0 | scripts/agent-list.ts | N/A |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.10.18 | scripts/audit.ts | bun |
-| cleanup-completed-md.ts | 1.0.1 | scripts/cleanup-completed-md.ts | N/A |
+| cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.9.2 | scripts/create-l3-scaffold.ts | N/A |
@@ -135,7 +135,7 @@
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | upgrade-project.ts | 1.7.1 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.4 | scripts/validate-agents.ts | N/A |
-| validate-doc-folder.ts | 1.0.0 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.5.0 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
