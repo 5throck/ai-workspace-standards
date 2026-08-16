@@ -3,19 +3,19 @@
 **Variant:** co-export
 **Current Status:** beta (v0.1.0)
 **Beta Since:** 2026-08-08
-**Phase A Complete:** false
+**Phase A Complete:** true
 
 ## Phase A Completion (prerequisite for promotion eligibility)
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
-| A1 | **Agent manifest complete** | Pending | 10 agents defined in variant.json. Verify each agent file (`agents/*.md`) has substantive content (no TODO stubs). |
-| A2 | **Skill manifest complete** | Pending | 9 variant-specific skills defined. Verify each SKILL.md is complete and operational. |
-| A3 | **Agent files substantive** | Pending | PM pm.md currently minimal (no variant_overrides). Per agent_overrides, pm.md should include additive overrides for governance-workflow, agent-roster, and dispatch-protocol sections. All 9 specialist agent files must have non-placeholder content. |
-| A4 | **Documentation complete** | Pending | README.md present and accurate; context.md complete with domain-specific guidelines; AGENTS.md reflects actual roster; variant.json fields accurate. |
-| A5 | **Engagement methodology documented** | Pending | 4-phase delivery methodology documented (regulatory intelligence, compliance cross-check, market-entry refinement, logistics/drawback). |
-| A6 | **Deliverable templates defined** | Pending | Standard deliverable templates per phase documented (Classification Memorandum, FTA Origin Analysis Report, Export Control Screening Certificate, etc.). |
-| A7 | **Audit passes** | Pending | `bun scripts/audit.ts` passes with 0 errors. No deprecated scripts. |
+| A1 | **Agent manifest complete** | ✅ Verified | 10 agents defined in variant.json; all 10 agent `.md` files contain substantive domain-specific content (1,706 total lines). Zero TODO stubs or placeholders. |
+| A2 | **Skill manifest complete** | ✅ Verified | 9 variant-specific skills defined; all 9 SKILL.md files have complete frontmatter (name, version, scope, status, owner, prerequisites, last_reviewed) and substantive body content (74–94 lines each). variant.json and disk directories match exactly. |
+| A3 | **Agent files substantive** | ✅ Verified | pm.md has substantive variant_overrides (111 lines) with governance-workflow, agent-roster, and dispatch-protocol. All 9 specialist agents have full sections: Legal Basis, Role, Responsibilities, Protocols, Constraints, Meeting Participation, Engagement Context, Deliverable Standards, Special Instructions. |
+| A4 | **Documentation complete** | ✅ Verified | README.md present with accurate 10-agent/9-skill roster; context.md complete with domain-specific guidelines; AGENTS.md reflects actual roster; variant.json fields accurate. |
+| A5 | **Engagement methodology documented** | ✅ Verified | 4-phase delivery methodology documented in pm.md variant_overrides dispatch-protocol: Phase 1 (regulatory intelligence), Phase 2 (compliance cross-check with client sign-off gate), Phase 3 (market-entry refinement), Phase 4 (logistics/drawback). |
+| A6 | **Deliverable templates defined** | ✅ Verified | Deliverable Standards sections present in all specialist agent files. Document types include Classification Memorandum, FTA Origin Analysis Report, Export Control Screening Certificate, Drawback Filing Package, L/C Documentation Package, Market Entry Recommendation, etc. |
+| A7 | **Audit passes** | ✅ Verified | `bun scripts/audit.ts` passes with 0 errors (3 pre-existing beta variant warnings unrelated to co-export). |
 
 ## Promotion Criteria (beta -> stable)
 

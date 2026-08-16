@@ -179,7 +179,7 @@
   },
   "engagement_methodology": "Structured trade-consulting engagement methodology with 4-phase delivery: (1) Regulatory intelligence gathering and HS/FTA classification, (2) Compliance cross-check with export-control and foreign-regulatory screening, (3) Market-entry strategy refinement and trade-documentation preparation, (4) Logistics coordination and post-shipment drawback filing. Each phase includes a client sign-off gate before proceeding to execution.",
   "deliverable_template": "Standard deliverable template standards per phase: Phase 1 — Classification Memorandum (HS code + GRI reasoning), FTA Origin Analysis Report (WH/RVC/CTC determination); Phase 2 — Export Control Screening Certificate, Foreign Regulatory Intelligence Brief; Phase 3 — Market Entry Strategy Deck (compliance-cost-integrated landed-cost model), Trade Documentation Package (invoice, packing list, COO, FTA certificate); Phase 4 — Shipment Execution Report, Duty Drawback Filing Package.",
-  "phaseAComplete": false,
+  "phaseAComplete": true,
   "betaLifecycleSummary": {
     "betaEngagements": 0,
     "betaBugs": 0,

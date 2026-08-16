@@ -1,10 +1,11 @@
 /**
  * Error Handling Library
  *
- * Structured error recovery and logging for the L3-to-variant pipeline.
- * Addresses Risk #4: Error Handling.
+ * Structured error recovery and logging for workspace scripts.
+ * Originally built for the L3-to-variant pipeline (Risk #4), now expanded
+ * for general-purpose script error handling.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @Risk #4: Error Handling (P1 - High)
  */
 
@@ -19,6 +20,7 @@ export enum ErrorSeverity {
 }
 
 export enum ErrorPhase {
+  // Pipeline-specific phases (legacy L3-to-variant)
   ADR_VALIDATION = 'adr_validation',
   L3_SCAN = 'l3_scan',
   RECONCILIATION = 'reconciliation',
@@ -26,6 +28,13 @@ export enum ErrorPhase {
   BETA_SETUP = 'beta_setup',
   INTEGRATION = 'integration',
   VALIDATION = 'validation',
+  // General-purpose phases (any script)
+  SCRIPT_EXECUTION = 'script_execution',
+  FILE_IO = 'file_io',
+  CLI_PARSING = 'cli_parsing',
+  AUDIT = 'audit',
+  LIFECYCLE = 'lifecycle',
+  SECURITY = 'security',
 }
 
 export interface PipelineError {
@@ -315,5 +324,69 @@ export function logErrors(errors: PipelineError[]): void {
     for (const error of grouped.info) {
       logError(error);
     }
+  }
+}
+
+// ============================================================================
+// GENERAL-PURPOSE CONVENIENCE
+// @version 1.3.0
+// ============================================================================
+
+/**
+ * Exit with a formatted error message. For simple scripts that need
+ * clean error+exit without full PipelineError tracking.
+ */
+export function die(message: string, code = 1): never {
+  console.error(`\n❌ ${message}`);
+  process.exit(code);
+}
+
+/**
+ * Exit with a formatted warning + optional exit code.
+ * Use for non-fatal but script-ending conditions.
+ */
+export function warnAndExit(message: string, code = 0): never {
+  console.warn(`\n⚠️  ${message}`);
+  process.exit(code);
+}
+
+/**
+ * Wrap an async function with structured error handling.
+ * Catches errors, logs them with the given phase, and exits.
+ */
+export async function withErrorHandling<T>(
+  phase: ErrorPhase,
+  fn: () => Promise<T>,
+  context?: Record<string, unknown>
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    logError(error);
+    const recovery = determineRecoveryAction(error);
+    await executeRecoveryAction(recovery);
+    process.exit(1);
+  }
+}
+
+/**
+ * Wrap a sync function with structured error handling.
+ */
+export function withSyncErrorHandling<T>(
+  phase: ErrorPhase,
+  fn: () => T,
+  context?: Record<string, unknown>
+): T {
+  try {
+    return fn();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    logError(error);
+    const recovery = determineRecoveryAction(error);
+    void executeRecoveryAction(recovery);
+    process.exit(1);
   }
 }

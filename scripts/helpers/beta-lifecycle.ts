@@ -235,15 +235,16 @@ export function initializeBetaLifecycle(
 }
 
 /**
- * Calculate beta age in months
- * @version 1.1.0
+ * Calculate beta age in months using calendar month difference
+ * @version 1.2.0
  */
 function calculateBetaAge(betaCreatedAt: string): number {
   const created = new Date(betaCreatedAt);
   const now = new Date();
-  const diffInMs = now.getTime() - created.getTime();
-  const diffInMonths = diffInMs / (1000 * 60 * 60 * 24 * 30);
-  return Math.floor(diffInMonths * 10) / 10; // Round to 1 decimal place
+  const months = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth());
+  const dayFraction = (now.getDate() - created.getDate()) / 30;
+  const total = months + dayFraction;
+  return Math.floor(total * 10) / 10; // Round to 1 decimal place
 }
 
 /**
