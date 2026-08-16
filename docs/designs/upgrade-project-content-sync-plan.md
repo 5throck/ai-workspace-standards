@@ -105,13 +105,15 @@ bun scripts/upgrade-project.ts Projects/co-architect --dry-run
 
 ## 알려진 한계
 
-`extractScriptVersion`은 `// @version X.Y.Z` (라인 주석) 형식만 인식한다. `scripts/helpers/security-validator.ts`처럼 JSDoc 블록 주석(`/**\n * @version X.Y.Z\n */`) 스타일로 버전을 선언한 파일은 정규식이 매칭되지 않아 항상 "버전 없음"으로 판정되고, `SYNC_IF_NEWER` 대상에서 조용히 제외된다 — 실제로는 버전이 있고 outdated한 파일인데도 사용자에게 아무 경고 없이 영구히 동기화되지 않는다.
+~~`extractScriptVersion`은 `// @version X.Y.Z` (라인 주석) 형식만 인식한다. `scripts/helpers/security-validator.ts`처럼 JSDoc 블록 주석(`/**\n * @version X.Y.Z\n */`) 스타일로 버전을 선언한 파일은 정규식이 매칭되지 않아 항상 "버전 없음"으로 판정되고, `SYNC_IF_NEWER` 대상에서 조용히 제외된다 — 실제로는 버전이 있고 outdated한 파일인데도 사용자에게 아무 경고 없이 영구히 동기화되지 않는다.~~
 
-2026-08-17에 `Projects/co-deck` 업그레이드 중 이 문제로 실제 장애가 발생했다: `scripts/audit.ts`를 최신 버전으로 동기화했더니, 이 최신 `audit.ts`가 `security-validator.ts` 1.1.0에서만 추가된 `sourceShellInjectionPatterns` export를 요구했다. `security-validator.ts`는 위 버그 때문에 계속 1.0.1에 머물러 있었고(정상적으로 SYNC_IF_NEWER 대상이 되었어야 함), 그 결과 `audit.ts` import 시점에 `SyntaxError: Export named 'sourceShellInjectionPatterns' not found`로 파이프라인 전체가 크래시했다. 해당 세션에서는 `audit.ts`/`security-validator.ts` 둘 다 업그레이드에서 제외하고 롤백한 뒤, 정규식 수정 + `security-validator.ts` 자체 테스트(`security-validator.test.ts`, 업그레이드 전부터 6개 실패 상태였음)와 함께 별도 팔로업 작업으로 분리했다.
+~~2026-08-17에 `Projects/co-deck` 업그레이드 중 이 문제로 실제 장애가 발생했다: `scripts/audit.ts`를 최신 버전으로 동기화했더니, 이 최신 `audit.ts`가 `security-validator.ts` 1.1.0에서만 추가된 `sourceShellInjectionPatterns` export를 요구했다. `security-validator.ts`는 위 버그 때문에 계속 1.0.1에 머물러 있었고(정상적으로 SYNC_IF_NEWER 대상이 되었어야 함), 그 결과 `audit.ts` import 시점에 `SyntaxError: Export named 'sourceShellInjectionPatterns' not found`로 파이프라인 전체가 크래시했다. 해당 세션에서는 `audit.ts`/`security-validator.ts` 둘 다 업그레이드에서 제외하고 롤백한 뒤, 정규식 수정 + `security-validator.ts` 자체 테스트(`security-validator.test.ts`, 업그레이드 전부터 6개 실패 상태였음)와 함께 별도 팔로업 작업으로 분리했다.~~
 
-**후속 조치 필요**: `extractScriptVersion`이 JSDoc 스타일(`\*\s*@version\s+(\d+\.\d+\.\d+)`)도 매칭하도록 정규식 확장. 워크스페이스 전역에서 `// @version` vs `* @version` 두 스타일이 몇 개 파일에 쓰이고 있는지 먼저 확인(`grep -rn "\* @version" scripts/` vs `grep -rn "// @version" scripts/`) — 이 설계 문서가 애초에 라인 주석 스타일만 상정하고 작성됐으므로, 다른 파일도 같은 이유로 조용히 스킵되고 있을 가능성이 있다.
+**해결됨 (2026-08-17, upgrade-project.ts v1.8.0)**: `extractScriptVersion`이 이제 `// @version` 라인 주석을 우선 매칭하고, 없으면 JSDoc 스타일(`^\s*\*\s*@version\s+(\d+\.\d+\.\d+)`)을 폴백으로 매칭한다. 구현은 테스트 가능한 순수 헬퍼(`scripts/helpers/upgrade-versions.ts`)로 분리했고 `tests/unit/upgrade-versions.test.ts`에서 두 스타일 모두 검증한다. 같은 이유로 조용히 스킵되던 다른 JSDoc 버전 파일(`lifecycle-sync-audit.ts`, `validate-doc-folder.ts`, `compile-tokens.ts` 등)도 이제 동기화 대상이 된다.
+
+**추가로 해결된 전파 갭 (v1.8.0)**: `upgrade-project.ts`가 이제 변형 전용 콘텐츠도 동기화한다 — `scripts/<variant>/` (버전/해시 기반, 프로젝트 전용 파일 보존, variant SCRIPTS.md 레지스트리 포함)와 `skills/<variant>/` (SKILL.md 프론트매터 버전/해시 기반, 전체 스킬 폴더 미러). agents 덮어쓰기 시 프로젝트의 `lifecycle:` 프론트매터 블록도 보존한다. (변형 docs — `docs/html-themes/`, `docs/designs/` — 는 생성물/이진 아티팩트 특성상 아직 자동 동기화 범위 밖이며 수동 동기화 대상.)
 
 ## 상태
 
 - [x] 구현 완료 — `semverGt`/`extractScriptVersion`/`extractFrontmatterVersion`/`fileHash` 및 `SYNC_IF_NEWER` (scripts/agents/skills), `docs/_common/` OVERWRITE 전부 `upgrade-project.ts`에 반영되어 있고, `Sync files updated` 카운터도 존재함 (커밋 이력상 2026-07-19 `v1.7.0` 확장 작업보다 앞서 구현된 것으로 추정 — 정확한 구현 커밋은 미확인). 2026-08-17 `Projects/co-deck` 업그레이드에서 실제로 정상 동작 확인.
-- [ ] 위 "알려진 한계" 섹션의 JSDoc `@version` 인식 확장 — 미착수, 별도 세션에서 팔로업 예정
+- [x] "알려진 한계" 섹션의 JSDoc `@version` 인식 확장 — **v1.8.0에서 해결됨** (2026-08-17): 라인 주석 우선 + JSDoc 폴백, `scripts/helpers/upgrade-versions.ts`로 분리, `tests/unit/upgrade-versions.test.ts` 7건 통과. 함께 해결: 변형 스크립트/스킬 동기화, agents `lifecycle:` 프론트매터 보존.
