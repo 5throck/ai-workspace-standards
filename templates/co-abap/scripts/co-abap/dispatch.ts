@@ -1,13 +1,17 @@
-// @version 1.0.0
 #!/usr/bin/env bun
 /**
- * Agent Dispatcher CLI
+ * Agent Dispatcher CLI — VSP variant
+ * @version 1.0.1
  * Main entry point for agent dispatch operations
  *
  * Usage:
  *   bun scripts/dispatch.ts parallel [--task "Description:role:task:priority"]
  *   bun scripts/dispatch.ts serial [--pipeline file.ts] [--continue-on-error] [--verbose]
  *   bun scripts/dispatch.ts help
+ *
+ * Re-exports the common dispatch router. VSP-specific defaults are handled by
+ * dispatch-parallel.ts and dispatch-serial.ts wrappers.
+ * (ADR-0050: Variant scripts inherit from templates/common, never duplicate)
  *
  * @module dispatch
  */
