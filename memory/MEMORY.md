@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-18](2026-08-18.md) | chore: update |
 | [2026-08-17](2026-08-17.md) | chore: update |
 | [2026-08-16](2026-08-16.md) | docs(co-deck): update handbook skill check count for footer-structure check |
 | [2026-08-15](2026-08-15.md) | chore: update |
