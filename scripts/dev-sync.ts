@@ -1,4 +1,9 @@
-// @version 1.5.3
+// @version 1.5.4
+// v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
+//           previously `gh pr view <branch>` matched ANY PR regardless of state, so
+//           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
+//           new commits to be pushed with zero PR coverage (silently reported as
+//           "no new PR needed").
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -450,12 +455,16 @@ if (!pushRetry.success) {
     }
 }
 
-// 7. Generate PR body and open PR — but skip creation if a PR already exists for
-// this branch (e.g. re-running /sync to push a follow-up commit onto an open PR).
+// 7. Generate PR body and open PR — but skip creation if an OPEN PR already exists
+// for this branch (e.g. re-running /sync to push a follow-up commit onto an open PR).
 // The push above already updated it; calling `gh pr create` again would just fail
 // with "a pull request ... already exists", masking the fact that the commit/push
 // actually succeeded.
-const existingPrRes = await $`gh pr view ${branch} --json url --jq .url`.quiet().nothrow();
+// `gh pr view <branch>` resolves to ANY PR for that branch regardless of state —
+// on a reused branch name whose earlier PR was already MERGED/CLOSED, that lookup
+// still "succeeds" and this step would wrongly report "no new PR needed" while the
+// new commits sit with zero PR coverage. Must check state explicitly.
+const existingPrRes = await $`gh pr view ${branch} --json url,state --jq "if .state == \"OPEN\" then .url else \"\" end"`.quiet().nothrow();
 const existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
 
 if (existingPrUrl) {

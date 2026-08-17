@@ -63,12 +63,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.13.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.13.1 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.9.2 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.5.3 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.5.4 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -181,7 +181,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `test-runner.ts` | L0 | 1.1.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `ticket.ts` | L0 | 1.1.0 | active | `create --not-before`, `list --kind`, `list --ready` | —| L0 | —|
-| `upgrade-project.ts` | L0 | 1.8.0 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
+| `upgrade-project.ts` | L0 | 1.8.1 | active | `--variant`, `--platform`, `--dry-run`, `--prune-removed`, `--rollback`, `--yes` | —| L0 | —|
 | `variant-feature.ts` | L0 | 1.0.0 | active | `--variant`, `--feature`, `--type` | —| L0 | —|
 | `validate-agents.ts` | L0 | 1.0.5 | active | —| —| L0+L1 | —|
 | `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
