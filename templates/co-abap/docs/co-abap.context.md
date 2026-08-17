@@ -434,7 +434,7 @@ All development artifacts (ABAP sources, docs, research reports) and memory logs
 
 ### Tooling Matrix
 
-For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs Antigravity vs Gemini CLI) and hook behavior by environment, see [`templates/common/docs/_examples/guides/tooling-matrix.md`](../templates/common/docs/_examples/guides/tooling-matrix.md).
+For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs Antigravity vs Gemini CLI) and hook behavior by environment, see [docs/tooling-matrix.md](tooling-matrix.md).
 
 ---
 
