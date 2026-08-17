@@ -1,4 +1,6 @@
-// @version 2.13.0
+// @version 2.13.1
+// v2.13.1: Homoglyph check (3.7) now skips docs/adr/ and docs/designs/ — these
+//   legitimately use Greek letters as math notation, not homoglyph-attack candidates.
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -239,7 +241,10 @@ if (!LIFECYCLE_ONLY) {
     let homoglyphErrors = 0;
     const HOMOGLYPH_DIRS = ['agents', 'docs', 'memory', 'scripts', 'skills', 'tests'];
     const HOMOGLYPH_EXTENSIONS = new Set(['.md', '.ts', '.tsx', '.js', '.jsx']);
-    const HOMOGLYPH_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/'];
+    // docs/adr/ and docs/designs/ legitimately use Greek letters (sigma, theta,
+    // gamma, etc.) as mathematical notation in architecture/algorithm documentation
+    // — not homoglyph-attack candidates. Excluded rather than flagged per-occurrence.
+    const HOMOGLYPH_SKIP_PREFIXES = ['node_modules/', '.git/', 'templates/', 'memory/archive/', 'docs/adr/', 'docs/designs/'];
 
     for (const dir of HOMOGLYPH_DIRS) {
         if (!fs.existsSync(dir)) continue;
