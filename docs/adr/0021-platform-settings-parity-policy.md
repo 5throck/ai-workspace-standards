@@ -1,5 +1,5 @@
 ---
-status: Accepted (Amended 2026-08-01)
+status: Accepted (Amended 2026-08-17)
 date: 2026-06-02
 author: PM + Architect + Auditor
 ---
@@ -116,3 +116,16 @@ New `schemas/command.schema.json` (lenient, all optional) validates command fron
 ### A2.4 Claude Desktop App Hook Status — Unchanged
 
 No new Anthropic documentation confirms or denies Desktop App hook support. The 2026-05 observation remains on record. Re-verification deferred to next Claude Code release.
+
+## Amendment 3 (2026-08-17) — Homoglyph Check Directory Exemption
+
+### A3.1 False Positives on Legitimate Mathematical Notation
+
+The Homoglyph detection check added in A2.3 (`audit.ts` 3.7) scans `agents/docs/memory/scripts/skills/tests` with no exemption mechanism beyond a fixed `HOMOGLYPH_SKIP_PREFIXES` list (`node_modules/`, `.git/`, `templates/`, `memory/archive/`). This surfaced a real gap while restoring `Projects/co-architect`'s `CLAUDE.md`/`GEMINI.md` content (see ADR-0056): its `docs/adr/*.md` and `docs/designs/*.md` files legitimately use Greek letters (Σ, θ, Γ, etc.) as standard mathematical notation in architecture/algorithm documentation. The check flagged 13 such occurrences across 4 files as suspicious confusable characters — a false-positive rate of 100% for that content class, with no way to allowlist it short of editing the math notation out of technical docs.
+
+**Fix**: Added `docs/adr/` and `docs/designs/` to `HOMOGLYPH_SKIP_PREFIXES` (`audit.ts` 2.13.0→2.13.1) rather than building a content-aware exemption (e.g. per-occurrence suppression comments, context-sensitive scoring). Path-based exclusion was chosen because:
+- These two directories are the workspace's canonical home for technical/mathematical notation (ADRs and design docs), making a coarse exclusion low-risk.
+- A content-aware mechanism (inline suppression markers, homoglyph-in-URL-only scoring) is more precise but adds meaningful implementation and review surface for a problem with only one observed occurrence pattern so far.
+- If homoglyph attacks are ever found hiding inside `docs/adr/`/`docs/designs/` content, this exclusion can be narrowed later — it is not a permanent architectural commitment, just the minimal fix for the reported gap.
+
+No classification impact on ADR-0021 proper (still a settings-parity policy document); this amendment only extends the A2.3 encoding-vigilance addendum.
