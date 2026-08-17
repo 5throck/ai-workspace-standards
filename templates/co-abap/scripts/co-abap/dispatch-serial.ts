@@ -15,7 +15,7 @@ import {
   type SerialAgentTask,
   type SerialPipelineResult,
   type SerialExecutionOptions
-} from '../../dispatch-serial.ts';
+} from '../dispatch-serial.ts';
 
 /**
  * VSP-specific default pipeline for serial dispatch

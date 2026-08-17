@@ -14,7 +14,7 @@ import {
   dispatchParallel as commonDispatchParallel,
   type ParallelAgentTask,
   type DispatchResult
-} from '../../dispatch-parallel.ts';
+} from '../dispatch-parallel.ts';
 
 /**
  * VSP-specific default tasks for parallel dispatch
