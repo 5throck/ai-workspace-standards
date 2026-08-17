@@ -21,3 +21,15 @@
 
 # Declare files that will always have LF line endings on checkout.
 *.sh text eol=lf
+
+# Union merge for append-only pipeline files — auto-combines both sides on merge
+# instead of raising conflicts. dev-sync.ts touches these shared files on every commit
+# (CHANGELOG.md [Unreleased] entries, memory/*.md session logs, regenerated manifests),
+# so parallel PR branches always edit the same anchor lines; union keeps both sides'
+# content, eliminating the conflict-marker step for the common case. Entry order after
+# a union merge may need a quick manual pass; transient duplicates in fully-regenerated
+# files (VERSION_MANIFEST.md, scripts/README.md) are overwritten at the next sync.
+CHANGELOG.md merge=union
+memory/*.md merge=union
+docs/VERSION_MANIFEST.md merge=union
+scripts/README.md merge=union
