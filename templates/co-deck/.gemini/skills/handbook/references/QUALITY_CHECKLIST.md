@@ -29,7 +29,7 @@ Run everything with one command: `bun run validate-handbook --docs-dir docs` (`-
 | ③ | Label match | `check-labels.ts` | chapter-nav labels match target title/h1 |
 | ④ | DOCS sync | `check-search.ts` | site-search.js DOCS array matches actual HTML files |
 
-### check-authoring (11 checks)
+### check-authoring (12 checks)
 
 | # | Check | Section | Description |
 |---|-------|---------|-------------|
@@ -44,6 +44,7 @@ Run everything with one command: `bun run validate-handbook --docs-dir docs` (`-
 | 9 | Language pairs | §23 | Language variants have base file counterparts |
 | 10 | Instructor Guide | §24 | instructor-guide.html has required sections |
 | 11 | No private-repo refs | §4a | git clone/links do not target a non-allowlisted (unverified-private) repository |
+| 12 | Meta date granularity | §21-2 | Index page `meta` block "last updated" uses month-only format (e.g., `August 2026`, `2026년 8월`), not day-specific |
 
 ### handbook-doctor (12 checks)
 
@@ -153,6 +154,7 @@ If examples fail, the check exits with code 1 and blocks the PR.
 - [ ] §21-1 All pages have sidebar nav
 - [ ] §21-1 Content pages have chapter-nav
 - [ ] §21-2 Index page grouped by day/type with instructor materials section
+- [ ] §21-2 Index page meta block "last updated" uses month-only granularity (no day)
 - [ ] §21-2 Instructor materials group is the FIRST group on the index page (above all chapter groups)
 - [ ] §21-4 prev/next mutual symmetry verified
 

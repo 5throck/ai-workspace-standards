@@ -685,6 +685,7 @@ Every chapter HTML file must include the following navigation elements:
 The index is the entry point for the entire handbook. Include the following structure:
 
 - **Course title and one-line description**: Placed at the top.
+- **Meta block** (`<div class="meta">`): Contains handbook metadata (audience, tools, or baseline versions) and a "last updated" date. The date must use **month-only granularity** (e.g., `August 2026`, `2026년 8월`, `2026年8月`, `Agosto 2026`). Do not include the day — a monthly granularity reduces noise from minor edits and keeps the date stable across content passes within the same month.
 - **Grouping by day and type**: Group chapter cards by course day (e.g., Day 1 / Day 2) and type (concept / hands-on).
 - **Chapter cards**: Each card includes the chapter title, 1–2 line description, chapter number tag, and link. Concept chapters and hands-on chapters should be visually distinguishable using the `.tag-ref` (reference material) / `.tag-ex` (hands-on exercise) / `.tag-ch` (numbered chapter) badge classes from §10-4.
 - **Instructor materials group**: Course Overview, Lecture Guide, and other instructor-only resources are placed in a separate group.
