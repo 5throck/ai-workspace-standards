@@ -279,6 +279,40 @@ function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
   return issues;
 }
 
+/** Check 12: §21-2 — Meta block "last updated" uses month-only granularity */
+function checkMetaDateGranularity(html: string, file: string): AuthoringIssue[] {
+  const issues: AuthoringIssue[] = [];
+  const base = file.replace(/\\/g, "/");
+  if (!/(^|\/)index(_[a-z]{2})?\.html$/i.test(base)) return issues;
+
+  const metaRe = /<div\s+class="meta">([\s\S]*?)<\/div>/;
+  const metaMatch = html.match(metaRe);
+  if (!metaMatch) return issues;
+
+  const metaHtml = metaMatch[1];
+
+  // Detect day-specific date patterns inside <strong> tags within meta block.
+  // KO: "2026년 8월 17일", JA: "2026年8月17日", ES: "17 de agosto de 2026", EN: "August 17, 2026"
+  const dayPatterns = [
+    /<strong>[^<]*\d{1,2}(?:일|日)[^<]*<\/strong>/,
+    /<strong>[^<]*\d{1,2}\s+de\s+/,
+    /<strong>[^<]*\w+\s+\d{1,2},?\s+\d{4}<\/strong>/,
+  ];
+
+  for (const re of dayPatterns) {
+    if (re.test(metaHtml)) {
+      const matched = metaHtml.match(re)![0];
+      issues.push({
+        file, rule: "meta-date-granularity", section: "§21-2",
+        detail: `Meta block "last updated" uses day-specific date ("${matched.replace(/<\/?strong>/g, "")}") — use month-only granularity (e.g., "August 2026", "2026년 8월")`,
+        severity: "warn",
+      });
+      break; // One warning per file is enough
+    }
+  }
+  return issues;
+}
+
 /** Check 9b: §21-6 — Footer structure (consistent per language, has license + repo link) */
 function checkFooterStructure(htmlFiles: string[], baseDir: string): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
@@ -400,6 +434,7 @@ for (const file of htmlFiles) {
   allIssues.push(...checkCssVariablesOnly(html, rel));
   allIssues.push(...checkInstructorGuide(html, rel));
   allIssues.push(...checkNoPrivateRepoRefs(html, rel));
+  allIssues.push(...checkMetaDateGranularity(html, rel));
 }
 
 // Cross-file checks
