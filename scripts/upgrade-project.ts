@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.8.1
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
@@ -12,6 +12,11 @@
 //           security-validator.ts were silently never synced); added variant scripts/skills
 //           sync (templates/<variant>/scripts/<variant>/ and skills/<variant>/ → project);
 //           agent overwrites preserve the project's local `lifecycle:` frontmatter block.
+// v1.8.1: fix(mergeWorkspaceManaged): match managed blocks positionally (template's Nth
+//           occurrence of a marker <-> project's Nth occurrence) instead of blindly
+//           replacing every occurrence with each template block in turn — the latter
+//           clobbered all N blocks with the last-processed block's content whenever a
+//           single marker type (e.g. COMMON-CLAUDE) wraps multiple distinct sections.
 //
 // Migrated from upgrade-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -347,29 +352,51 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   const projContent = readFileSync(projectFile, 'utf8');
   const projManaged = findManagedBlocks(projContent);
 
-  // Strategy: merge each managed block from template into project.
-  // For each pattern type in the template, replace matching blocks in the project.
+  // Strategy: merge each managed block from template into project, matched
+  // POSITIONALLY (template's Nth block of a given marker type -> project's Nth
+  // occurrence of that same marker type). A marker type like COMMON-CLAUDE can
+  // wrap several distinct blocks with different content in one file (e.g. one
+  // per numbered CLAUDE.md section) — the marker itself carries no per-block
+  // label, so a blind "replace every match with this one block" would clobber
+  // every occurrence with whichever block was processed last.
   let updated = projContent;
   let merged = false;
 
   for (const { pattern, blocks: tplBlocks } of tplManaged) {
-    for (const tplBlock of tplBlocks) {
-      const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
-      if (regex.test(updated)) {
-        if (!dryRun) {
-          updated = updated.replace(regex, tplBlock.matched);
-        }
-        merged = true;
-        console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
-      } else {
-        // No matching block in project — append
+    const closeEscaped = pattern.close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(pattern.open.source + '[\\s\\S]*?' + closeEscaped, 'g');
+
+    const projOccurrences: Array<{ start: number; end: number }> = [];
+    for (const occ of updated.matchAll(regex)) {
+      projOccurrences.push({ start: occ.index!, end: occ.index! + occ[0].length });
+    }
+
+    if (projOccurrences.length === 0) {
+      // No matching block in project — append all template blocks
+      for (const tplBlock of tplBlocks) {
         if (!dryRun) {
           updated = updated + '\n\n' + tplBlock.matched + '\n';
         }
         merged = true;
         console.log(`    ${dryTag}APPENDED ${pattern.label} block to: ${rel}`);
       }
+      continue;
+    }
+
+    if (projOccurrences.length !== tplBlocks.length) {
+      console.log(`    WARNING: ${pattern.label} block count mismatch in ${rel} (project has ${projOccurrences.length}, template has ${tplBlocks.length}) — merging positionally up to the shorter count`);
+    }
+
+    // Replace positionally, back-to-front so earlier offsets stay valid.
+    const pairCount = Math.min(projOccurrences.length, tplBlocks.length);
+    for (let i = pairCount - 1; i >= 0; i--) {
+      const { start, end } = projOccurrences[i];
+      const tplBlock = tplBlocks[i];
+      if (!dryRun) {
+        updated = updated.slice(0, start) + tplBlock.matched + updated.slice(end);
+      }
+      merged = true;
+      console.log(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
     }
   }
 
