@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-19](2026-08-19.md) | fix(co-deck): remove execSync shell invocation from deploy-handbook.ts |
 | [2026-08-18](2026-08-18.md) | docs(handbook): add month-only date granularity rule for index meta block |
 | [2026-08-17](2026-08-17.md) | chore: update |
 | [2026-08-16](2026-08-16.md) | docs(co-deck): update handbook skill check count for footer-structure check |
