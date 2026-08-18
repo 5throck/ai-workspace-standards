@@ -12,7 +12,7 @@
 
 import { writeFileSync, existsSync, readFileSync, mkdirSync, cpSync, readdirSync } from "node:fs";
 import { join, resolve, basename } from "node:path";
-import { execSync, execFileSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -62,25 +62,6 @@ function fatal(msg: string): never {
   process.exit(1);
 }
 
-function run(cmd: string, opts?: { cwd?: string; silent?: boolean }): string {
-  const cwd = opts?.cwd ?? projectDir;
-  try {
-    const result = execSync(cmd, {
-      cwd,
-      encoding: "utf-8",
-      stdio: opts?.silent ? "pipe" : "inherit",
-      timeout: 60_000,
-    });
-    return (result || "").trim();
-  } catch (e: unknown) {
-    const err = e as { stderr?: string; message?: string };
-    throw new Error(`Command failed: ${cmd}\n${err.stderr || err.message || e}`);
-  }
-}
-
-// Argv-array variant of run() — invokes the binary directly via execFileSync
-// with a separate args array, so interpolated values (repo slugs, paths, URLs)
-// are never parsed by a shell. Injection-resistant regardless of input content.
 function runArgs(bin: string, argv: string[], opts?: { cwd?: string; silent?: boolean; captureStderr?: boolean }): string {
   const cwd = opts?.cwd ?? projectDir;
   try {
@@ -199,7 +180,7 @@ if (!existsSync(nojekyllPath)) {
 
 // Validate gh CLI is available and authenticated
 try {
-  run("gh auth status", { silent: true });
+  runArgs("gh", ["auth", "status"], { silent: true });
 } catch {
   fatal("gh CLI not authenticated — run `gh auth login` first");
 }
@@ -215,13 +196,13 @@ const scanPatterns = [
   "credentials",
 ];
 try {
-  const scanCmd = `grep -rniE "(${scanPatterns.join("|")})\\s*[=:]\\s*['\"]?[^'\"\\s]{8,}" docs/`;
-  run(scanCmd, { cwd: handbookDir, silent: true });
+  const scanPattern = `(${scanPatterns.join("|")})\\s*[=:]\\s*['\"]?[^'\"\\s]{8,}`;
+  runArgs("grep", ["-rniE", scanPattern, "docs/"], { cwd: handbookDir, silent: true });
   fatal("Potential secrets detected in docs/ — aborting deployment. Review and remove before retry.");
 } catch (e: unknown) {
   const err = e as { message?: string };
   // grep returns non-zero when no matches — that's what we want
-  if (err.message?.includes("Command failed") || err.message?.includes("grep")) {
+  if (err.message?.includes("command failed") || err.message?.includes("grep")) {
     log("✅", "No secrets detected");
   } else {
     fatal(`Secret scan error: ${err.message || e}`);
@@ -356,7 +337,7 @@ log("📤", "Committing and pushing to GitHub...");
 
 // Ensure we're on main
 try {
-  run("git rev-parse --abbrev-ref HEAD", { silent: true });
+  runArgs("git", ["rev-parse", "--abbrev-ref", "HEAD"], { silent: true });
 } catch {
   fatal("Not inside a git repository");
 }
@@ -401,7 +382,7 @@ try {
 
 // Push
 try {
-  run("git push -u origin main", { silent: true });
+  runArgs("git", ["push", "-u", "origin", "main"], { silent: true });
   log("✅", "Pushed to GitHub");
 } catch (e: unknown) {
   const err = e as { message?: string };
