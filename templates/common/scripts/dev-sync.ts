@@ -1,4 +1,4 @@
-// @version 1.5.4
+// @version 1.5.5
 // v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
 //           previously `gh pr view <branch>` matched ANY PR regardless of state, so
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
@@ -49,7 +49,11 @@ for (let i = 0; i < rawArgs.length; i++) {
     msgArgs.push(arg);
   }
 }
-const msg = msgArgs.join(' ') || "chore: update";
+const msg = (msgArgs.join(' ') || "chore: update")
+  // Collapse newlines/control chars — safe for git -m and gh --title arguments
+  .replace(/[\r\n\t]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim() || "chore: update";
 
 // Language gate — commit messages / PR titles must be English (context.md §3).
 // Runs before any git mutation so a non-English message never reaches a commit or PR

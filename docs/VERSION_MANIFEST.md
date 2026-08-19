@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-19T01:25:32.944Z
+**Generated**: 2026-08-19T01:53:39.791Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -82,14 +82,14 @@
 | agent-lifecycle-audit.ts | 1.1.5 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | N/A |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
-| analyze-git-history.ts | 1.0.1 | scripts/analyze-git-history.ts | child_process |
+| analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
 | audit.ts | 2.13.2 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.9.2 | scripts/create-l3-scaffold.ts | N/A |
-| dev-sync.ts | 1.5.4 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.5.5 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.0.0 | scripts/dispatch.ts | N/A |
@@ -105,7 +105,7 @@
 | lifecycle-sync-audit.ts | 1.4.5 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
-| new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
+| new-project.ts | 1.5.4 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.1.0 | scripts/project-to-variant.ts | N/A |
 | propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |

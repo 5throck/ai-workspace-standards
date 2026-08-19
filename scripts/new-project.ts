@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.3
+// @version 1.5.4
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -51,7 +51,7 @@ if (!projectName) {
 // Validate project name
 if (!/^[a-zA-Z0-9_/.\-]+$/.test(projectName) || projectName.includes('..')) {
   console.error(`❌ Invalid project name: '${projectName}'`);
-  console.error('   Only letters, numbers, hyphens (-), underscores (_), and slashes (/) are allowed, without path traversal (..).');
+  console.error('   Only letters, numbers, hyphens (-), underscores (_), and dots (.) are allowed, without path traversal (..).');
   if (import.meta.main) {
     process.exit(1);
   }

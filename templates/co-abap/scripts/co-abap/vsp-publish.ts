@@ -160,7 +160,8 @@ async function commitAndPush(targetDir: string, commitMessage: string): Promise<
 }
 
 async function main() {
-  const commitMessage = process.argv.slice(2).join(" ");
+  // Collapse newlines/control chars — single-line message is safe for git -m
+  const commitMessage = process.argv.slice(2).join(" ").replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim();
 
   console.log(`${CYAN}--- Harness Packaging & Publishing Hook ---${RESET}`);
 
