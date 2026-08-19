@@ -1,7 +1,7 @@
-// @version 1.0.1
+// @version 1.0.2
 import { execFileSync } from 'child_process';
 
-const NUM_COMMITS = parseInt(process.argv[2], 10) || 50;
+const NUM_COMMITS = Math.min(Math.max(parseInt(process.argv[2], 10) || 50, 1), 10000);
 
 function runGit(args: string[]): string {
   try {

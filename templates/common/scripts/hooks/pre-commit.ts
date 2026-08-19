@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.5.9
+ * @version 1.5.10
  */
 
 import { $ } from "bun";
@@ -283,6 +283,9 @@ async function main() {
       /sk-[0-9a-zA-Z]{48}/,
       /sk-ant-[a-zA-Z0-9\-_]{95,}/,    // H-07: Anthropic API keys (sk-ant-api03-...)
       /sk-proj-[a-zA-Z0-9\-_]{48,}/,   // H-07: Anthropic project keys
+      /gho_[A-Za-z0-9]{30,}/,          // GitHub OAuth tokens (shorter than ghp_)
+      /github_pat_[A-Za-z0-9_]{20,}/,  // GitHub fine-grained PATs
+      /xox[baprs]-[A-Za-z0-9-]{10,}/,  // Slack tokens
     ];
     return async () => {
       const diffText = await diff.text();
