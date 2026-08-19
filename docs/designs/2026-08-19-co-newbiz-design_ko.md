@@ -178,6 +178,17 @@ agents/
 | `brownfield/customer-retention-agent` | Medium | 인수 후 고객 이탈 — change of control 조항, 집중도, 경쟁중복 |
 | `brownfield/incentive-agent` | Medium | 정책 혜택 획득·환수 양방향 |
 | `brownfield/pmi-agent` | Medium | PMI 계획, 시너지 실현, 통합 리스크 |
+
+> **★ 딜 분석 에이전트의 이중 역할 (2차 회의 R2)** — §2에서 "이 팀은 개별 딜을 분석하지 않는다"고 했으나, 위 표의 상당수는 딜 분석 전문가다. 모순이 아니라 **시기에 따라 하는 일이 다르다**:
+>
+> | 시기 | 하는 일 |
+> |---|---|
+> | **구축기 (Stage 1~4)** | 방법론·체크리스트·판정 규칙·모델 사양을 만든다. 산출물은 스킬과 `rag_rule` 시드다 |
+> | **가동 후** | 실제 검토에 **온디맨드로 투입되는 자문역**. PM 디스패치 또는 MCP를 통해 특정 딜의 판단을 돕는다 |
+>
+> 이 구분이 문서화되지 않으면 가동 후 누군가 "안 쓰는 에이전트"로 판단해 삭제한다.
+>
+> **통합 후보**: `customer-retention`·`incentive`·`pmi`는 각각 체크리스트 1~2개 분량이라 `brownfield-agent`의 스킬로 흡수 가능하다. 다만 safety_os 수준의 세분화가 명시적 요구사항이므로 **임의 축소하지 않고 Stage 1 M8에서 결정**한다 (Open Issue O-8).
 | `dd/commercial-dd-agent` | Medium | CDD — 고객·가격결정력·채널체크·전문가 인터뷰 |
 | `dd/technical-dd-agent` | Medium | TDD — 현장실사, 설비 잔존수명, TRL, 인증, EHS, capex 검증 |
 | `partnership/partnership-agent` | Medium | 협력 파트너 확보 — 소싱 전략, 파트너 실사, JV 구조화 |
@@ -213,6 +224,15 @@ agents/
 **32 agents** — `_core` 1 + 기능 19 + 기술 9 + 산업 1 + 지역 1 + `_shared` 1.
 
 축 A(거버넌스·검토)가 19명, 축 B(시스템)가 9명. 산업·지역은 두 축 모두에 입력을 제공하는 횡단 도메인이다. **거버넌스가 시스템의 부속이 아니라는 팀 목적이 로스터 구성에 그대로 드러난다.**
+
+**단계 의존 티어링 (2차 회의 R10)** — High tier 12명은 설계·방법론 수립 단계에서는 타당하나 정상 운영에서는 과하다. AGENTS.md §3.6 비용 계층 전략에 맞춰 단계별로 조정한다.
+
+| 단계 | 티어 정책 |
+|---|---|
+| **Stage 1~4** (설계·방법론) | 표기된 tier 그대로. 이 시기의 오판 비용이 가장 크다 |
+| **가동 후** (정상 운영) | 상시 판단이 필요한 `process-governance-manager`·`compliance-officer`·`security-engineer`·`legal-counsel`·`risk-officer`만 High 유지. 나머지 방법론 에이전트는 **Medium으로 하향**(온디맨드 자문 시 필요하면 건별 상향) |
+
+에이전트 문서에 "정상 운영 권장 티어"를 병기한다.
 
 ### 5.7 교차 검증 (Phase 1.5)
 
@@ -355,6 +375,12 @@ group_agenda(id, cycle, project_id, entity_id, submitted_at, capital_request,
              priority_rank, decision, rationale)
 ```
 
+**★ policy pin 과 2단계 심의의 상호작용 (2차 회의 R6)** — 프로젝트가 착수 시점 규정 v1.2로 고정된 상태에서 그룹 규정이 v1.3으로 개정되고, 그 프로젝트가 Entity IC를 통과해 Group IC에 올라오면 **어느 버전으로 심의하는가?**
+
+**원칙: Group IC는 프로젝트에 pin된 동일 버전(v1.2)으로 심의한다.** 각사가 v1.2로 승인한 안건을 그룹이 v1.3으로 보면 기준이 달라 승인 자체가 무의미해진다.
+
+**예외**: 그룹 규정 변경이 **중대**한 경우(안전·법규·규제 준수 관련) Group IC가 신규 버전 재평가를 요구할 수 있다. 단 이는 **`policy_change` 결정으로 기록**되며 묵시적 적용은 금지한다 — 어느 버전으로 심의했는지가 사후에 항상 확인 가능해야 한다.
+
 ### 6.5 규정 변경 → 시스템 반영 파이프라인
 
 ```
@@ -425,7 +451,7 @@ governance_kpi(id, period_id, entity_id, metric_key, value, note)
 
 **게이트 차단 규칙**: 필수 산출물 누락 또는 미완료 필수 체크리스트 항목이 있으면 **유효한 waiver 없이는 게이트를 통과할 수 없다.** 이것이 규정을 문서에서 시스템으로 끌어내리는 지점이다.
 
-### 6.7 해외 지역 프로파일
+### 6.7 해외 지역 프로파일 · 콘텐츠 공급
 
 `region-profiles/<ISO2>.yaml` — 지역별 필수 항목:
 
@@ -456,6 +482,49 @@ typical_closing_weeks: 16
 **필수 검토 축**: 기업결합신고 / 외국인투자심사(CFIUS·EU FSR·산업기술보호법) / **노동(EU 근로자대표 협의 의무 — 빠뜨리면 클로징 지연)** / 세제·이전가격 / 송금·외환 / 부패방지(FCPA·UK Bribery Act) / 제재(OFAC) / 데이터 이전(GDPR) / 환경책임 승계 / 인센티브·환수.
 
 `_validate.ts`가 필수 필드 누락을 차단한다.
+
+**★ 콘텐츠 공급 주체와 출처 (2차 회의 R9)** — 프로파일 내용은 매년 바뀐다(HSR 신고 기준액, CFIUS 요건, 세율, works council 임계 인원). 소유자만 정하고 공급 주체를 정하지 않으면 프로파일은 **조용히 썩는다**.
+
+모든 프로파일 필드에 아래 3개를 **필수**로 부착한다:
+
+```yaml
+merger_control:
+  regime: HSR (Hart-Scott-Rodino)
+  threshold_usd: 126_400_000
+  _meta:
+    source: "FTC 2026 HSR threshold notice (https://www.ftc.gov/...)"
+    verified_on: 2026-08-19
+    maintainer: external-counsel      # internal-legal | external-counsel | public-source
+```
+
+- **`_validate.ts`가 출처 없는 필드를 거부**한다 — 규칙만 쓰고 검사하지 않으면 지켜지지 않는다
+- 분기 갱신 시 `verified_on` 경과분을 자동 플래그하고 담당 maintainer에게 통지한다
+- `maintainer: external-counsel` 필드는 **외부 자문 비용이 발생하는 운영 의존성**이므로 예산 계획에 반영한다
+
+### 6.8 ★ 절차와 스킬의 권위 분리 (2차 회의 R3)
+
+`procedures/*.yaml` 와 `skills/*.md` 가 같은 워크플로우를 다루면 **반드시 어긋난다.** 축을 명확히 나눈다.
+
+| | `procedures/*.yaml` | `skills/*.md` |
+|---|---|---|
+| **다루는 것** | **무엇을 · 언제** — 단계, 순서, 게이트, 승인자, 필수 산출물 | **어떻게** — 에이전트의 기법, 판단 기준, 품질 바 |
+| **소비자** | 게이트 엔진 (기계 실행) | 에이전트 (추론) |
+| **버전·pin 대상** | ✅ (`project_policy_pin`) | ❌ |
+| **권위** | **절차 단계에 관한 한 유일 권위** | 기법에 관한 권위 |
+
+**규칙: 스킬은 절차의 단계를 재서술하지 않는다.** procedure key를 참조한다.
+
+```markdown
+<!-- skills/brownfield-feasibility/SKILL.md -->
+## 절차
+`procedures/_shared/brownfield-screening` 를 따른다. 단계는 이 문서에 복제하지 않는다.
+
+## 기법
+각 단계에서 판단이 갈리는 지점과 그 해소 방법:
+- 타겟 스크리닝: 재무 스크린만으로 거르면 …
+```
+
+**lint 강제**: 스킬 파일이 게이트 단계를 열거하면(번호 매긴 단계 목록 + 승인자·게이트 키워드 동시 출현) **검증 실패**시킨다. 규칙만 두고 검사하지 않으면 6개월 뒤 전부 어긋나 있다.
 
 ---
 
@@ -581,6 +650,14 @@ ELSE 종합 = AMBER
 | Red (C등급 체인, staleness 초과, `assumed` 비율 과다) | **최대 AMBER + "판단 보류"** |
 
 크랭크축처럼 **2홉 프록시로 추정한 시장에서 재무 지표만 보고 Green을 줄 수는 없다.** 이 체계에서 가장 중요한 규칙이다.
+
+**★ 캡의 역효과 방지 (2차 회의 R5)** — 이 사업 영역에서 프록시 체인은 본질적으로 B~C 등급이다(크랭크축처럼 2홉을 건너뛰는 것이 예외가 아니라 표준). 캡을 그대로 두면 **거의 모든 프로젝트가 영원히 Amber**가 되어, §5.8에서 경고한 "신호등이 전부 Amber가 되어 아무도 안 본다"를 이 규칙 자신이 유발한다. 캡은 유지하되 두 가지를 더한다.
+
+1. **Stage 3 캘리브레이션 드라이런** — 과거 의사결정 5~10건에 규칙 세트를 돌려 등급 분포를 확인한다. **Amber가 80%를 넘으면 임계값을 재조정**한다. 규칙을 만들고 분포를 확인하지 않으면 실패를 가동 후에 발견한다.
+2. **데이터 신뢰도 차원을 실행 가능하게** — "체인 B등급"으로 끝내지 않고 **무엇을 확보하면 상향되는지**를 함께 출력한다.
+   > 예: `데이터 신뢰도 B — 선박→엔진 회귀 R²=0.71. 크랭크축 직접 출하 통계(협회 자료) 확보 시 A등급으로 상향되며 종합 Green 가능.`
+
+   캡이 **차단**이 아니라 **할 일**이 되어야 조직이 움직인다.
 
 **스테이지 게이트별 임계값 분리**(`rag_rule.stage_gate`) · **히스테리시스**(승격 hurdle+2.0%p / 강등 hurdle+0.5%p, 최소 유지 7일) · **등급에 근거 문장과 발동 규칙 필수 첨부**.
 
@@ -795,7 +872,21 @@ project_classification(project_id, sensitivity, mnpi_flag, wall_group,
 상장사 관련 딜은 **내부자거래 규제 대상**이다.
 - `mnpi_flag=true` 프로젝트는 **접근자 명부(insider list) 자동 생성·유지** — 규제 대응 시 즉시 제출 가능해야 한다
 - 열람 기록 보존, **접근 시 MNPI 고지 배너**
-- **MCP 노출 제한**: MCP 도구 응답에서 기본 제외. 명시적 스코프 토큰만 접근 가능하며 그 접근도 감사 대상
+
+**★ MCP 접근 — 블랭킷 차단이 아니라 세션 단위 등록 (2차 회의 R7)**
+
+초안은 MNPI 프로젝트를 MCP 응답에서 전면 제외했으나, **상장사 관련 M&A는 대부분 MNPI**이므로 이 시스템의 최고가치 용례(AI 클라이언트가 딜 분석을 돕는 것)가 통째로 막힌다. 규제가 요구하는 것은 **금지가 아니라 추적**이다.
+
+4개 조건을 모두 만족할 때만 접근을 허용한다:
+
+| # | 조건 |
+|---|---|
+| 1 | MCP 토큰이 **`insider_list` 등재 사용자**에게 귀속 |
+| 2 | 토큰이 **명시적 `mnpi` 스코프** 보유 (기본 스코프에 포함하지 않는다) |
+| 3 | 모든 접근이 **`data_access_log`에 기록** |
+| 4 | **접근 시점에 insider list 등재를 자동 갱신** — 사후에 명부를 만들면 규제 대응이 되지 않는다 |
+
+조건 미충족 시 해당 프로젝트는 응답에서 제외된다(존재 자체를 노출하지 않음).
 
 ```sql
 insider_list(project_id, user_id, added_at, removed_at, reason, acknowledged_at)
@@ -883,15 +974,35 @@ bun scripts/co-newbiz/newbiz.ts <command>
 
 **workspace/common (6)**: `k-dart`, `security-scan`, `stride-threat-matrix`, `sarif-exporter`, `accessibility-audit`, `zod-contract-gate`
 
-### 9.2 신규 (77)
+### 9.2 ★ 스킬 성립 요건 (2차 회의 R4)
+
+스킬 하나당 파일·버전·검증·전파 비용이 붙는다. 규칙이 없으면 6개월 뒤 150개가 된다. **아래 3개를 모두 만족해야 독립 스킬**이고, 미달이면 다른 스킬의 한 절(section)이다.
+
+| # | 요건 |
+|---|---|
+| a | **고유 트리거** — 다른 스킬과 구분되는 발동 조건이 있다 |
+| b | **고유 소유자** — 소유 에이전트가 명확하고 다른 스킬과 겹치지 않는다 |
+| c | **비자명한 산출물 1개 이상** — 파일·레코드·판정 등 실체가 있는 결과를 만든다 |
+
+**즉시 병합 (5건, 93 → 88)**
+
+| 병합 대상 | 흡수처 | 사유 |
+|---|---|---|
+| `governance-training-and-notice` | `compliance-monitoring` | 고유 산출물 없음 — 점검 결과의 후속 조치 |
+| `governance-kpi-reporting` | `compliance-monitoring` | 동일 데이터·동일 소유자 |
+| `glossary-lint` | `glossary-management` | 관리 활동의 한 수단 |
+| `site-comparison` | `regional-incentive-sourcing` | 인센티브 NPV 환산이 비교의 본체 |
+| `backup-and-dr` | `database-operations` | 트리거·소유자 동일 |
+
+### 9.3 신규 (72)
 
 | 그룹 | 스킬 |
 |---|---|
 | **거버넌스 제정 (7)** | `governance-document-hierarchy` · `policy-and-procedure-governance` · **`procedure-reference-override`** · **`two-tier-approval-chain`** · **`policy-change-impact-analysis`** · `regulation-monitoring` · `adr-governance` |
-| **거버넌스 운영 (6)** | **`compliance-monitoring`** · **`waiver-management`** · **`interpretation-registry`** · `governance-training-and-notice` · `governance-kpi-reporting` · `checklist-authoring` |
+| **거버넌스 운영 (4)** | **`compliance-monitoring`**(교육·공지·KPI 흡수) · **`waiver-management`** · **`interpretation-registry`** · `checklist-authoring` |
 | **그룹 심의 (3)** | `group-level-review` · `portfolio-fit-assessment` · **`intra-group-transaction-compliance`** |
-| **용어 (2)** | `glossary-management` · `glossary-lint` |
-| **GF/BF·게이트 (8)** | `greenfield-feasibility` · `brownfield-feasibility` · `stage-gate-governance` · **`site-infrastructure-assessment`** · **`regional-incentive-sourcing`** · `site-comparison` · `talent-pipeline-planning` · `community-partnership-planning` |
+| **용어 (1)** | `glossary-management`(lint 흡수) |
+| **GF/BF·게이트 (7)** | `greenfield-feasibility` · `brownfield-feasibility` · `stage-gate-governance` · **`site-infrastructure-assessment`** · **`regional-incentive-sourcing`**(부지 비교 흡수) · `talent-pipeline-planning` · `community-partnership-planning` |
 | **M&A 특수 (7)** | **`antitrust-screening`** · **`customer-attrition-risk`** · `incentive-clawback-assessment` · **`management-incentive-review`** · **`compensation-harmonization-analysis`** · **`debt-and-contingent-liability-simulation`** · `pmi-planning` |
 | **파트너십 (3)** | `partner-sourcing-strategy` · `partner-due-diligence` · `jv-structuring` |
 | **지역·산업 (2)** | `region-profile-application` · `industry-profile-application` |
@@ -900,7 +1011,7 @@ bun scripts/co-newbiz/newbiz.ts <command>
 | **법령·DD (9)** | `regulatory-screening` · **`permit-pathway-mapping`** · `statute-change-monitoring` · `legal-risk-register` · `commercial-due-diligence` · `technical-due-diligence` · `site-visit-protocol` · `expert-interview` · `dd-to-valuation-bridge` |
 | **판정·품질 (3)** | **`rag-scoring-framework`** · `run-versioning-and-attribution` · `assumption-audit` |
 | **플랫폼 (11)** | `master-data-governance` · `data-normalization` · **`data-freshness-and-revision-control`** · `db-migration-governance` · `query-performance-tuning` · `rest-api-design` · `mcp-server-integration` · `ui-information-architecture` · `auth-and-account-management` · `continuous-monitoring-and-alerting` · `notification-channel-management` |
-| **운영·보안 (11)** | `deployment-and-release` · `database-operations` · `backup-and-dr` · `observability-and-alerting` · `incident-response` · `infrastructure-automation` · `batch-scheduling-operations` · `security-baseline-review` · `vulnerability-management` · `access-control-review` · `admin-console-operations` |
+| **운영·보안 (10)** | `deployment-and-release` · `database-operations`(백업·DR 흡수) · `observability-and-alerting` · `incident-response` · `infrastructure-automation` · `batch-scheduling-operations` · `security-baseline-review` · `vulnerability-management` · `access-control-review` · `admin-console-operations` |
 
 ---
 
@@ -911,12 +1022,13 @@ bun scripts/co-newbiz/newbiz.ts <command>
 프로세스와 규정이 확정되기 전에 코드를 쓰면 규정과 시스템이 또 따로 논다(문제 #9).
 
 ```
-Stage 0  프로젝트·에이전트 생성
-Stage 1  ★ 미팅을 통한 계획 고도화          ← 여기서 계획이 확정된다
-Stage 2  프로세스·규정집·운영 매뉴얼
-Stage 3  디테일 프로세스·운영체계 + ★수기 파일럿
-Stage 4  시스템 구현 계획 (SRS + 추적성 매트릭스)
-Stage 5  시스템 개발 → 배포·운영 이관
+Stage 0    프로젝트·에이전트 생성
+Stage 1    ★ 미팅을 통한 계획 고도화          ← 여기서 계획이 확정된다
+Stage 2    프로세스·규정집·운영 매뉴얼
+Stage 2.5  ★ Thin Vertical Slice              ← Stage 3과 병행
+Stage 3    디테일 프로세스·운영체계 + ★수기 파일럿
+Stage 4    시스템 구현 계획 (SRS + 추적성 매트릭스)
+Stage 5    시스템 개발 → 배포·운영 이관
 ```
 
 각 Stage 종료 시 **PM이 사용자 승인 게이트**를 건다.
@@ -996,6 +1108,28 @@ Stage 5  시스템 개발 → 배포·운영 이관
 | **운영 매뉴얼** | 시스템 운영자 | 배치·백업·복구·장애 대응·권한 관리 |
 | **관리자 매뉴얼** | 관리자 | 계정·규정 버전·기준정보·알림 규칙 관리 |
 
+### 10.5-1 Stage 2.5 — ★ Thin Vertical Slice (2차 회의 R1)
+
+**문제**: 초안은 동작하는 무언가가 Stage 5에야 나온다. 조직은 그렇게 오래 기다려주지 않고, 더 중요하게는 **이 설계의 핵심 주장이 끝까지 검증되지 않는다.** "데이터가 바뀌면 보고서가 재생성된다"가 진짜 되는지를 Stage 5 후반에 알게 되면, 안 될 경우 스키마부터 다시 판다.
+
+**해법**: Stage 2에서 규정집이 확정된 **직후**, 그 확정된 프로세스의 **부분집합만** 구현해 단일 주장을 증명한다. Stage 3 수기 파일럿과 **병행**한다.
+
+| 포함 | 제외 |
+|---|---|
+| DB 코어 (마이그레이션 + 최소 기준정보) | 웹 UI |
+| 가정 레지스트리 (`assumption` + `run` + `run_input`) | 인증·계정 |
+| fetcher 1개 (FRED 유가 등 단일 시리즈) | MCP 서버 |
+| 프록시 체인 1개 (선박→엔진→크랭크축) | 알림·스케줄러 |
+| NPV/IRR 계산 | RAG 판정 엔진 |
+| 마크다운 보고서 생성 | DOCX/PDF/HWPX 렌더러 |
+
+**성공 기준 — 단 하나**:
+> 유가 시리즈에 신규 관측치를 넣고 `model`을 재실행했을 때, **보고서를 사람이 다시 쓰지 않고** 숫자가 갱신되며 `diff`가 변화 원인을 변수별로 분해한다.
+
+**이 원칙이 문서 우선을 깨지 않는 이유**: 미확정 프로세스를 코딩하는 것이 아니라, Stage 2에서 **이미 확정된** 프로세스의 부분집합을 구현한다. 오히려 Stage 3 수기 파일럿과 상호 검증한다 — 수기로 계산한 값과 슬라이스가 계산한 값이 다르면 둘 중 하나가 틀렸다.
+
+> **리소스 주의**: Stage 3과 병행하므로 인력 충돌 가능성이 있다. 일정·리소스 추정(§15 O-7)이 나온 뒤 병행 여부를 확정한다 (O-9).
+
 ### 10.6 Stage 3 — 디테일 프로세스 + 수기 파일럿
 
 | # | 작업 |
@@ -1008,6 +1142,18 @@ Stage 5  시스템 개발 → 배포·운영 이관
 | 3.6 | 파일럿 피드백 반영 — 규정·절차·체크리스트 개정 |
 
 > **★ 수기 파일럿의 이유**: 프로세스 결함은 **코드를 쓰기 전에** 드러나야 한다. 엑셀과 문서만으로 Screening→Group IC까지 한 번 굴려보면 "이 단계는 실행 불가", "이 산출물은 아무도 안 본다", "이 판정 기준은 데이터가 없다"가 즉시 나온다. 시스템 개발 후에 발견하면 스키마부터 다시 판다. **파일럿 1회 비용이 재작업 비용보다 압도적으로 싸다.**
+
+**★ 파일럿 산출물은 버리지 않는다 (2차 회의 R8)** — 파일럿 결과물은 **시스템의 시드/기준 데이터**가 된다.
+
+| 파일럿 산출물 | 행선지 |
+|---|---|
+| 가정값(WACC, hurdle IRR, 성장률 등) | Stage 5에서 `assumption` 초기 적재 |
+| 프록시 체인 계수·근거 | `proxy_link` 시드 |
+| 체크리스트 결과·DD 발견사항 | `dd_finding` 시드 |
+| 최종 보고서 | **Stage 5.10 시스템 파일럿 대조의 골든 레퍼런스** |
+| RAG 등급 판정 결과 | 캘리브레이션 드라이런(§8.2) 입력 |
+
+따라서 **파일럿 양식을 기계 적재 가능하게 설계한다** — 자유서식 문서가 아니라 구조화된 시트(고정 컬럼, 단위 명시, 출처 필드)로 만든다. 이걸 놓치면 5.10의 기준선이 사라지고, 사람이 다시 입력하는 과정에서 값이 바뀌어 대조 자체가 무의미해진다.
 
 ### 10.7 Stage 4 — 시스템 구현 계획
 
@@ -1033,7 +1179,7 @@ Stage 5  시스템 개발 → 배포·운영 이관
 | 5.5 | 인증·계정·세션·감사 + **프로젝트 멤버십·MNPI·개인정보 통제(§8.10)** |
 | 5.6 | Hono API + React SPA + RAG 대시보드·절차 뷰어·용어 툴팁 + 관리자 콘솔 |
 | 5.7 | OpenAPI + MCP 서버 + 클라이언트 등록 |
-| 5.8 | Skills 최종 — 재사용 16 + 신규 77 |
+| 5.8 | Skills 최종 — 재사용 16 + 신규 72 (성립 요건 §9.2 적용 후) |
 | 5.9 | 배포 파이프라인·런북·보안 기준선 실행 |
 | 5.10 | **★ 시스템 파일럿** — Stage 3에서 수기로 돌린 그 건을 시스템으로 재실행해 결과 대조 |
 
@@ -1066,6 +1212,14 @@ Stage 5  시스템 개발 → 배포·운영 이관
 | 0038–0040 | **★ 프로젝트 단위 need-to-know 접근 통제** / **★ 개인정보 최소수집·집계우선** / MNPI insider list |
 | 0041–0042 | 환율 적용 시점 정책 / MVP 경계와 축소 순서 |
 | 0043–0044 | **★ 4개 도메인 구조와 PM ↔ 도메인 리드 조정 모델** / 산업·지역 프로파일 구동 |
+| **0045** | **절차(`procedures/`)와 스킬(`skills/`)의 권위 분리 및 lint 강제** |
+| **0046** | **Thin Vertical Slice 선행 검증 (Stage 2.5)** |
+| **0047** | **RAG 캘리브레이션 드라이런 의무화와 신뢰도 차원의 실행가능화** |
+| **0048** | **MNPI 세션 단위 insider 등록 (블랭킷 차단 철회)** |
+| **0049** | **policy pin 과 Group IC 심의 버전 규칙** |
+| **0050** | **스킬 성립 요건 3개 (트리거·소유자·산출물)** |
+| **0051** | **프로파일 필드 출처 필수화 (`source`·`verified_on`·`maintainer`)** |
+| **0052** | **단계 의존 티어링 (설계기 High → 운영기 Medium)** |
 
 **ADR 트리거** — ADR 없이 진행 불가: DB 스키마 파괴적 변경 / 기준정보 코드 체계 변경 / 환산 방법론 변경 / RAG 판정 규칙·임계값 변경 / Stage Gate·Kill Criteria 변경 / **규정·절차 개정** / 지역 프로파일 필수 축 변경 / 알림 정책 변경 / 외부 데이터 소스 변경 / DB 엔진·이식성 예외 / **인증·권한·정보보호 모델 변경** / MCP 도구 권한 확대 / **팀 편성·에이전트 승격** / 배포·롤백 전략 변경
 
@@ -1087,6 +1241,27 @@ Stage 5  시스템 개발 → 배포·운영 이관
 | **G8** | pm | 조직 관점 성공 기준 부재 | 중간 | §13 |
 
 **G1·G2가 치명인 이유**: 이 둘은 나중에 얹을 수 없다. 접근 통제는 스키마와 API 전 계층에 걸리고, 개인정보는 수집 시점부터 근거가 있어야 한다. **Stage 4 이후에 발견하면 전면 재작업이다.**
+
+### 12.2 설계 고도화 회의 (2차)
+
+전사: `memory/meeting-2026-08-19-co-newbiz-design-refinement.md`
+
+1차가 **누락**을 찾았다면 2차는 **들어 있는데 잘못됐거나 과한 것**을 찾았다. 규칙 제안자 본인이 자기 규칙을 반박하도록 운영했다.
+
+| # | 지적 | 결정 | 반영 |
+|---|---|---|---|
+| **R1** | 동작하는 것이 Stage 5에야 나온다 — 핵심 주장이 끝까지 미검증 | **Stage 2.5 Thin Vertical Slice 신설** (Stage 3과 병행) | §10.5-1 |
+| **R2** | "딜을 분석하지 않는다"면서 딜 분석 전문가가 19명 | **이중 역할 명시** — 구축기 방법론 / 가동 후 온디맨드 자문 | §5.3 |
+| **R3** | `procedures/`와 `skills/`가 같은 영역을 다뤄 반드시 어긋난다 | **권위 분리** — 절차=무엇을·언제(권위) / 스킬=어떻게. **lint 강제** | §6.8 |
+| **R4** | 스킬 93개 과잉 | **성립 요건 3개** 도입, 5건 병합 (93→88) | §9.2 |
+| **R5** | 신뢰도 캡이 전부 Amber를 만들어 신호를 죽인다 | 캡 유지 + **캘리브레이션 드라이런** + **신뢰도 차원 실행가능화** | §8.2 |
+| **R6** | policy pin과 2단계 심의의 상호작용 미정의 | **Group IC도 pin된 버전으로 심의**, 중대 변경 시 명시적 재평가 결정 | §6.4 |
+| **R7** | MNPI 블랭킷 차단이 MCP 최고가치 용례를 막는다 | **세션 단위 insider 등록**으로 전환 (금지 → 추적) | §8.10(c) |
+| **R8** | 파일럿 산출물의 행방이 없다 | **시드/골든 레퍼런스로 보존**, 양식을 기계 적재 가능하게 | §10.6 |
+| **R9** | 프로파일 콘텐츠 공급 주체가 없다 | **`source`·`verified_on`·`maintainer` 필수화**, 미기재 시 검증 거부 | §6.7 |
+| **R10** | High tier 12명이 정상 운영에서 과하다 | **단계 의존 티어링** | §5.6 |
+
+> **R5·R7은 1차 회의에서 채택한 결정을 스스로 수정한 것이다.** 1차 결정이 틀렸다기보다, 강하게 걸어둔 안전장치가 부작용을 낳는 지점을 찾은 것이다.
 
 ---
 
@@ -1201,6 +1376,10 @@ bun scripts/co-newbiz/newbiz.ts db:export --dialect postgres --out /tmp/pg.sql
 | O-5 | 기존 과거 검토 건의 시스템 초기 적재 여부·범위 | Stage 4 |
 | O-6 | 알림 채널(사내 메일 서버 / Slack / Teams) 확정 | Stage 5 (5.4) |
 | O-7 | 전체 일정·리소스 추정 — 현재 계획에 없음 | Stage 1 (M8) |
+| O-8 | 얇은 에이전트 3종(`customer-retention`·`incentive`·`pmi`) 통합 여부 — safety_os 수준 세분화가 명시 요구사항이라 임의 축소 부적절 | Stage 1 (M8) |
+| O-9 | Thin Slice(2.5)와 수기 파일럿(3) 병행 시 인력 충돌 가능성 — O-7 해소 후 판단 | Stage 1 (M8) |
+| O-10 | RAG 캘리브레이션에 쓸 과거 의사결정 데이터 확보 여부 — 문서로만 남아 등급 재현이 어려울 수 있음 | Stage 3 착수 전 |
+| O-11 | `maintainer: external-counsel` 프로파일 필드의 외부 자문 비용 — 예산 반영 필요 | Stage 2 |
 
 ---
 
