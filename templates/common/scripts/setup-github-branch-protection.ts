@@ -82,6 +82,15 @@ async function main() {
   const repo = await inferRepo();
   if (!repo) return;
   const branch = getArg('branch') || 'main';
+
+  // Slug validation — reject values that could traverse the gh api URL path
+  const REPO_SLUG_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
+  const BRANCH_RE = /^[a-zA-Z0-9_./-]+$/;
+  if (!REPO_SLUG_RE.test(repo) || !BRANCH_RE.test(branch)) {
+    console.error('Invalid --repo (expected owner/name) or --branch slug — aborting.');
+    if (import.meta.main) process.exit(1);
+    return;
+  }
   const checks = getRepeatedArg('check');
 
   console.log(`${CYAN}Repo: ${repo}  Branch: ${branch}${isDryRun ? '  (dry-run)' : ''}${RESET}`);

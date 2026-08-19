@@ -46,8 +46,8 @@ jobs:
   #   name: Python Tests
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+  #     - uses: actions/setup-python@v4.6.0  # pin by SHA in real use
   #       with:
   #         python-version: "3.11"
   #     - run: pip install -r requirements.txt
@@ -57,8 +57,8 @@ jobs:
   #   name: Node.js Tests
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+  #     - uses: actions/setup-node@v4.1.0  # pin by SHA in real use
   #       with:
   #         node-version: "20"
   #     - run: npm ci

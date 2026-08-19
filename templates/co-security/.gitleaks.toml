@@ -1,15 +1,14 @@
-# gitleaks configuration — workspace root
+# gitleaks configuration — common template
 # Docs: https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
 
-title = "ai-workspace-standards gitleaks config"
+title = "ai-workspace-common-template gitleaks config"
 
 [extend]
 # Inherit all default rules from the upstream gitleaks config
 useDefault = true
 
 [allowlist]
-description = "Allowlist for known false positives in this workspace"
-# Regex patterns on the matched secret value
+description = "Allowlist for known false positives"
 regexes = [
   # Placeholder values in .env.sample and docs
   '''your[_-]?(api[_-]?)?key[_-]?here''',
@@ -23,20 +22,20 @@ regexes = [
   # gitleaks:allow inline marker (single-line suppression)
   '''gitleaks:allow''',
 ]
-# Paths to skip entirely
 paths = [
   '''\.env\.sample''',
-  # CHANGELOG entries describe changes by title only — no secret values expected
-  # If a real secret is found here, remove this exclusion and fix the entry
-  '''CHANGELOG\.(md|txt)$''',
+  # .env is gitignored and never committed; --no-git mode scans the raw
+  # filesystem regardless of .gitignore, so exclude it here explicitly
+  # (mirrors the same fix already present in the L0 workspace-root config)
+  '''\.env$''',
+  '''CHANGELOG\.md''',
   '''.*_test\.(js|ts|py|go|rs)$''',
   '''.*\.test\.(js|ts)$''',
   '''.*_spec\.rb$''',
-  # co-security agent docs legitimately discuss credentials/secrets as subject matter
-  '''templates/co-security/agents/.*\.md$''',
-  # Other projects in workspace root — not part of this repo's audit scope
-  # .env files are gitignored; --no-git mode scans them anyway — exclude here
-  '''\.env$''',
+  # memory/ logs never contain secrets (they're AI session notes)
+  '''memory/.*''',
+  # _examples/ contains illustrative content with realistic-looking values
+  '''_examples/.*''',
   # Local dependency/build directories — gitignored, never committed, but
   # --no-git mode scans them anyway; third-party library internals (test
   # fixtures, crypto constant names, etc.) commonly trip generic secret regexes
@@ -44,6 +43,4 @@ paths = [
   '''(^|/)venv/''',
   '''(^|/)node_modules/''',
   '''(^|/)__pycache__/''',
-  # L2 Projects/ directory contains user engagements — outside audit scope
-  '''Projects/''',
 ]

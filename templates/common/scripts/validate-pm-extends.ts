@@ -36,7 +36,7 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname, resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 
 /**
@@ -477,11 +477,11 @@ function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
 
   // Primary: use git ls-files to get only tracked pm.md files
   try {
-    const trackedFiles = execSync('git ls-files -- "*/pm.md" "**/pm.md" "pm.md"', {
-      cwd: workspaceRoot,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
+    const trackedFiles = execFileSync('git', ['ls-files', '--', '*/pm.md', '**/pm.md', 'pm.md'], {
+  cwd: workspaceRoot,
+  encoding: 'utf-8',
+  stdio: ['pipe', 'pipe', 'pipe'],
+}).trim();
 
     if (trackedFiles.length > 0) {
       return trackedFiles

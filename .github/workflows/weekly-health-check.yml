@@ -44,11 +44,9 @@ jobs:
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
 
       - name: Security audit - dependency vulnerabilities
         shell: bash
-        continue-on-error: true
         run: |
           audit_output=$(bun audit 2>&1) || true
           echo "$audit_output"
