@@ -9,8 +9,8 @@
  *   bun scripts/readme-lifecycle-audit.ts
  *   bun scripts/readme-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.3
- * @last_updated 2026-06-02
+ * @version 1.0.4
+ * @last_updated 2026-08-20
  * @license MIT
  */
 
@@ -248,7 +248,10 @@ function auditReadmes(jsonMode = false): AuditResult {
     const isKorean = readmeFile.endsWith('README_ko.md');
     // Only the workspace-root EN README requires specific sections;
     // KO variants are checked via i18n consistency, templates/README.md has its own structure.
-    const isWorkspaceRoot = relPath === 'README.md';
+    // Gate on IS_WORKSPACE_ROOT (context.md presence) too — relPath alone matches
+    // any project's own root README.md, which wrongly pulled every L3 project's README
+    // into the stricter workspace-root section requirements.
+    const isWorkspaceRoot = IS_WORKSPACE_ROOT && relPath === 'README.md';
     const sections = parseSections(readmeFile);
 
     // Check required sections (EN workspace root only — skip KO and templates/README)

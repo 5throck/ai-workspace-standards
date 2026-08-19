@@ -149,7 +149,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.4.5 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.4.6 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.5.3 | active | —| —| L0 | —|
@@ -158,7 +158,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `project-to-variant.ts` | L0 | 1.0.3 | active | `--source`, `--target`, `--dry-run` | —| L0 | —|
 | `propagate-to-templates.ts` | L0 | 2.4.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
-| `readme-lifecycle-audit.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
+| `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|
@@ -172,7 +172,6 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
-| `test-platform-parity.ts` | L0 | 0.2.4 | active | —| —| L0+L1 | —|
 | `test-new-project.ts` | L0 | 1.0.4 | active | —| —| L0 | —|
 | `test-extends-validator.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `test-l3-to-variant-promotion.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
@@ -435,16 +434,6 @@ agent's output as input to the next.
 **Usage**: `import { withRetry } from './retry-handler.ts'` (library module)
 
 ---
-
-### Platform Parity Scripts (Bun / TypeScript)
-
-#### `test-platform-parity.ts`
-**Purpose**: Validates platform parity between L0 workspace files and their L1/L2 counterparts per ADR-0033.
-Compares CLAUDE.md, GEMINI.md, and agents/pm.md across workspace root, templates/common/, and all L2 variants.
-**Usage**: `bun scripts/test-platform-parity.ts [--verbose]`
-**Runs automatically**: As part of audit.ts (non-lifecycle-only mode)
-**Exit codes**: 0 (pass), 1 (errors), 2 (warnings)
-**See also**: `docs/platform-parity-rules.md` for detailed parity rules
 
 #### `validate-pm-extends.ts`
 **Purpose**: Validates pm.md extends chains for correctness and compliance per ADR-0033.
