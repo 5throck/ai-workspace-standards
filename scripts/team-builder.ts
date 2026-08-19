@@ -187,9 +187,8 @@ function isDone(checkpoints: Checkpoint[], step: number): boolean {
 
 // ─── Shell helpers ────────────────────────────────────────────────────────────
 
-function run(cmd: string): { success: boolean; stdout: string; stderr: string } {
-  const parts = cmd.split(" ");
-  const result = Bun.spawnSync(parts, { cwd: CWD });
+function run(cmd: string, args: string[] = []): { success: boolean; stdout: string; stderr: string } {
+  const result = Bun.spawnSync([cmd, ...args], { cwd: CWD });
   return {
     success: result.exitCode === 0,
     stdout: result.stdout ? new TextDecoder().decode(result.stdout) : "",
@@ -331,7 +330,7 @@ async function checkPreconditions(
   let ok = true;
 
   // 1. Git working tree clean
-  const git = run("git status --porcelain");
+  const git = run("git", ["status", "--porcelain"]);
   if (!git.success || git.stdout.trim() !== "") {
     console.error(`${R}[FAIL] Git working tree is not clean. Commit or stash changes first.${Z}`);
     if (git.stdout.trim()) console.error(git.stdout.trim());
@@ -341,7 +340,7 @@ async function checkPreconditions(
   }
 
   // 2. Audit passes
-  const audit = run("bun scripts/audit.ts");
+  const audit = run("bun", ["scripts/audit.ts"]);
   if (!audit.success) {
     console.error(`${R}[FAIL] bun scripts/audit.ts failed. Fix issues before running team-builder.${Z}`);
     if (audit.stdout.trim()) console.error(audit.stdout.slice(0, 500));
@@ -660,7 +659,7 @@ async function createSkills(proposal: TeamBuilderProposal): Promise<void> {
 async function runValidationGate(): Promise<boolean> {
   let allPass = true;
 
-  const audit = run("bun scripts/audit.ts");
+  const audit = run("bun", ["scripts/audit.ts"]);
   if (audit.success) {
     console.log(`  ${G}[PASS] bun scripts/audit.ts${Z}`);
   } else {
@@ -669,7 +668,7 @@ async function runValidationGate(): Promise<boolean> {
     allPass = false;
   }
 
-  const skillAudit = run("bun scripts/skill-lifecycle-audit.ts");
+  const skillAudit = run("bun", ["scripts/skill-lifecycle-audit.ts"]);
   if (skillAudit.success) {
     console.log(`  ${G}[PASS] bun scripts/skill-lifecycle-audit.ts${Z}`);
   } else {

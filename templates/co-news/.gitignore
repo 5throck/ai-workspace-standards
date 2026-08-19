@@ -1,0 +1,76 @@
+<!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
+# Secrets — never commit
+.env
+.env.*
+!.env.sample
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+nul
+NUL
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates — never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Databases
+*.sqlite
+*.db
+
+# CodeGraph Index
+.codegraph/
+
+# Antigravity/ZCode session-local state (plans, config — never shared)
+.zcode/
+
+# Windows reserved device name artifacts (created by git hooks on cmd.exe)
+nul
+NUL
+
+# --- Sandbox for testing ---
+.sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/
+
+# Ignore test temp directories
+tests/.temp/
+<!-- /WORKSPACE-MANAGED -->

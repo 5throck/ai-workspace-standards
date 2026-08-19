@@ -1,4 +1,4 @@
-// @version 2.13.1
+// @version 2.13.2
 // v2.13.1: Homoglyph check (3.7) now skips docs/adr/ and docs/designs/ — these
 //   legitimately use Greek letters as math notation, not homoglyph-attack candidates.
 import { $ } from 'bun';
@@ -1358,11 +1358,17 @@ if (IS_WORKSPACE_ROOT) {
                     let rmResult;
                     if (process.platform === 'win32') {
                         rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
-                        if (rmResult.status !== 0) {
-                            rmResult = spawnSync('powershell', ['-Command', `Remove-Item -Force -LiteralPath '${item}'`], { encoding: 'utf-8' });
-                        }
                     } else {
                         rmResult = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', item], { encoding: 'utf-8' });
+                    }
+                    // Shell-free fallback — never interpolate filenames into a command line
+                    if (rmResult.status !== 0) {
+                        try {
+                            fs.rmSync(item, { force: true });
+                            rmResult = { ...rmResult, status: 0, stderr: '' };
+                        } catch (e) {
+                            rmResult = { ...rmResult, status: 1, stderr: String(e) };
+                        }
                     }
                     if (rmResult.status === 0) {
                         Warn(`Auto-deleted Windows device name artifact: ${item} (external tool wrote to Git Bash "nul" filename)`);
@@ -1431,6 +1437,38 @@ if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     checkLeakage('templates');
     if (leakageErrors === 0) {
         Pass('L0 Leakage check: no unauthorized CONSTITUTION references in templates');
+    }
+}
+
+// Check: GitHub Actions workflow permission hygiene (workspace root and templates)
+if (!LIFECYCLE_ONLY) {
+    const workflowDirs = ['.github/workflows'];
+    if (fs.existsSync('templates')) {
+        workflowDirs.push('templates/common/.github/workflows');
+    }
+    let permChecked = 0;
+    let permErrors = 0;
+    for (const wfDir of workflowDirs) {
+        if (!fs.existsSync(wfDir)) continue;
+        for (const item of fs.readdirSync(wfDir)) {
+            if (!item.endsWith('.yml') && !item.endsWith('.yaml')) continue;
+            const wfPath = path.join(wfDir, item);
+            // Skip comment-only lines so commented-out examples don't trigger
+            const content = readUTF8File(wfPath)
+                .split(String.fromCharCode(10))
+                .filter((l: string) => !l.trimStart().startsWith('#'))
+                .join(String.fromCharCode(10));
+            permChecked++;
+            if (/permissions:[\s\S]{0,60}(all|write-all)|write-all/i.test(content)) {
+                Fail(`Workflow permission over-grant: ${wfPath} requests write-all/all permissions`);
+                permErrors++;
+            } else if (!/permissions:/.test(content)) {
+                Warn(`Workflow without explicit permissions block (defaults may over-grant): ${wfPath}`);
+            }
+        }
+    }
+    if (permChecked > 0 && permErrors === 0) {
+        Pass(`Workflow permission hygiene: ${permChecked} workflow files checked, no write-all grants`);
     }
 }
 

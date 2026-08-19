@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **[2026-08-19]**: fix(security): PM-led security review remediation (project-review skill, 4 parallel agents + cross-validation) — 1 Critical, 5 High, 8 Moderate findings fixed in one pass. **C-1**: `create-l3-scaffold.ts` `overlayItems` now copies `.gitleaks.toml` and `.github` into L3 scaffolds (previously scaffolded prototypes had no secret scanning or CI; `new-project.ts` was already covered via full common copy). **H**: removed `continue-on-error` from weekly health check's gitleaks and dependency-audit steps (repo is public, gitleaks-action needs no license — failures now fail loudly); added `github-actions` ecosystem to `.github/dependabot.yml` (pinned action SHAs now auto-update); `audit.ts` Windows device-name deletion PowerShell fallback replaced with shell-free `fs.rmSync` (removes quote-injection path, root+common mirrors); `templates/co-security/.gitleaks.toml` provisioned (docs claimed enforcement, no config existed); `audit.ts` 2.13.2 adds workflow permission hygiene check (fails on `write-all`/`all` grants, warns on missing `permissions:` block). **M**: 18 stale gitleaks path exclusions removed (nonexistent dirs, rescan clean); `team-builder.ts` `run()` refactored to argv-array signature (no more `split(" ")`); slug validation added to `setup-github-branch-protection.ts`; `validate-pm-extends.ts` `execSync`→`execFileSync` (last shell call in scripts/); `remove-project.ts` adds workspace-boundary + project-marker guard before recursive delete; root `.gitignore` copied to all 10 variants; `@types/js-yaml` moved dependencies→devDependencies; commented example actions in common ci.yml annotated with pin guidance.
+
 - **[2026-08-18]**: fix(co-deck): `templates/co-deck/scripts/co-deck/handbook/deploy-handbook.ts` still used an `execSync`-based `run()` helper with shell command strings for `gh auth status`, the secret-scan grep, `git rev-parse`, and `git push` — the same shell-invocation pattern eliminated from both Handbooks repos during their project-review fixes. Converted all 4 call sites to the script's existing `runArgs()` helper (`execFileSync` argument arrays, injection-resistant regardless of input content) and removed the now-unused `run()`/`execSync` import; the secret-scan error-message matcher was updated for the new error prefix. Verified: `bun build` clean, `grep execSync` → 0 matches, `bun test scripts/co-deck/tests/deploy-readme-patch.test.ts` → 8 pass.
 
 - **[2026-08-18]**: fix(templates): `templates/co-abap/scripts/co-abap/dispatch-parallel.ts` and `dispatch-serial.ts` (ADR-0050 variant wrappers) imported the common dispatchers via `../../dispatch-*.ts` — from their `scripts/co-abap/` location this resolves to the *project root*, one level above the common copies at `scripts/`, so the wrappers were unimportable in every scaffolded co-abap project (verified: `bun scripts/co-abap/dispatch-parallel.ts --help` fails with "Cannot find module" in `Projects/co-abap`, which carries the same broken import). Corrected to `../dispatch-*.ts`. Found while aligning `Projects/co-abap-plugin` with the template — that project's copies and `Projects/co-abap`'s copies were fixed in the same pass.
@@ -1098,7 +1100,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-08-18*
+*Last Updated: 2026-08-19*
 
 
 

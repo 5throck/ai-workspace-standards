@@ -7,7 +7,7 @@
 // No permission manipulation — files are deleted as-is by the OS.
 
 import { existsSync, rmSync } from 'node:fs';
-import { resolve, isAbsolute, dirname, basename } from 'node:path';
+import { resolve, isAbsolute, dirname, basename, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import * as readline from 'node:readline';
 
@@ -23,6 +23,26 @@ if (!projectArg) {
 const projectDir = isAbsolute(projectArg)
   ? projectArg
   : resolve(process.cwd(), projectArg);
+
+// ── Boundary guard ───────────────────────────────────────────────────────────
+// Refuse to delete anything outside the workspace root, or any directory that
+// does not look like a scaffolded project (marker files required).
+const WORKSPACE_ROOT = resolve(import.meta.dir, '..');
+const PROJECT_MARKERS = ['AGENTS.md', 'variant.json', 'package.json'];
+const insideWorkspace = projectDir === WORKSPACE_ROOT || projectDir.startsWith(WORKSPACE_ROOT + sep);
+const hasMarker = PROJECT_MARKERS.some((m) => existsSync(resolve(projectDir, m)));
+if (projectDir === WORKSPACE_ROOT || !insideWorkspace) {
+  console.error(`[FAIL] Refusing to delete outside the workspace root: ${projectDir}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
+if (!hasMarker) {
+  console.error(`[FAIL] Refusing to delete: no project marker found (${PROJECT_MARKERS.join(', ')}) in ${projectDir}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
 
 console.log('\n============================================================');
 console.log(`  REMOVE PROJECT: ${projectDir}`);
