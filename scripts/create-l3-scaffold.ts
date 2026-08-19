@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.9.2
+// @version 1.10.0
 /**
  * create-l3-scaffold.ts
  *
@@ -100,6 +100,18 @@ function toDisplayName(name: string): string {
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+/**
+ * Canonical `co-`-prefixed variant slug.
+ *
+ * Callers may pass either bare (`newbiz`) or already-prefixed (`co-newbiz`) names.
+ * Prefixing unconditionally produced `co-co-newbiz` in variant.json and in every
+ * derived path (templates/co-co-newbiz/, AGENTS.md header, collision check), so the
+ * prefix is applied only when it is actually missing.
+ */
+function toVariantSlug(name: string): string {
+  return name.startsWith("co-") ? name : `co-${name}`;
 }
 
 /** Read the common version from SCRIPTS.md header, fall back to "1.0.0". */
@@ -291,7 +303,7 @@ function generateStubs(
 
   // variant.json
   const variantJson = {
-    name: `co-${variant}`,
+    name: toVariantSlug(variant),
     displayName,
     description: "TODO: describe this variant",
     variant_type: domain ?? "TODO",
@@ -388,7 +400,7 @@ function generateStubs(
 | Field | Value |
 |-------|-------|
 | Workspace common version | ${BT}${commonVersion}${BT} |
-| Variant name | ${BT}co-${variant}${BT} |
+| Variant name | ${BT}${toVariantSlug(variant)}${BT} |
 | Domain | ${BT}${domain ?? "(none)"}${BT} |
 | Creation date | ${TODAY} |
 | Phase A complete | ${BT}false${BT} |
@@ -420,7 +432,7 @@ variant-specific content **before** Phase B:
 ${domainAddendum}
 ## Phase B Manual Copy Steps
 
-When promoting from ${BT}Projects/${variant}/${BT} to ${BT}templates/co-${variant}/${BT}:
+When promoting from ${BT}Projects/${variant}/${BT} to ${BT}templates/${toVariantSlug(variant)}/${BT}:
 
 1. Copy variant-specific ${BT}agents/${BT}, ${BT}skills/${BT}, and domain doc folders.
 2. ${domain ? "Copy domain-specific assets (workflows/, regulations/, evidence-models/) if present." : "Copy any domain-specific document folders created under docs/."}
@@ -494,13 +506,38 @@ TODO: document how secrets/credentials are handled (see ${BT}.env.sample${BT}).
 | Component | Version | Source |
 |-----------|---------|--------|
 | common overlay | ${BT}${commonVersion}${BT} | templates/common/ |
-| variant (co-${variant}) | ${BT}0.1.0${BT} | this project |
+| variant (${toVariantSlug(variant)}) | ${BT}0.1.0${BT} | this project |
 
 > TODO: regenerate with ${BT}bun scripts/generate-version-manifest.ts${BT} once agents/skills are defined.
 `;
   writeFile(path.join(projectDir, "docs", "VERSION_MANIFEST.md"), versionManifestMd);
 
+  // memory/MEMORY.md — the dry-run output has always advertised this file, but it was
+  // never written. Its absence is not cosmetic: scripts/sync-md.ts treats a missing
+  // "## Sessions" heading as a legacy index needing migration, and its migration branch
+  // appends the Meetings/ADRs sections on every run. Seeding the canonical structure here
+  // keeps that branch from ever firing.
   ensureDir(path.join(projectDir, 'memory'));
+  writeFile(
+    path.join(projectDir, 'memory', 'MEMORY.md'),
+    `# Memory Index
+
+## Sessions
+
+| Date | Summary |
+|------|---------|
+
+## Meetings
+
+| Date | Topic | File |
+|------|-------|------|
+
+## ADRs
+
+| ID | Title | Status | File |
+|----|-------|--------|------|
+`,
+  );
 
   // README.md / README_ko.md — render from templates/common/docs/README{,_ko}.template.md
   // via the shared renderer (the same one l3-to-variant-pipeline.ts uses at Phase B).
@@ -511,7 +548,7 @@ TODO: document how secrets/credentials are handled (see ${BT}.env.sample${BT}).
   // Variant Type section calls getVariantTypeDescription(), which requires a registry-
   // valid VariantType — so fall back to 'collaboration' purely for rendering safety.
   const bootstrapMetadata: VariantMetadata = {
-    name: `co-${variant}`,
+    name: toVariantSlug(variant),
     description: `TODO: describe the ${displayName} variant.`,
     variantType: domain && isVariantType(domain) ? domain : 'collaboration',
     status: 'beta',
@@ -525,7 +562,7 @@ TODO: document how secrets/credentials are handled (see ${BT}.env.sample${BT}).
   FILE_COUNT += 2; // generateReadme/generateReadmeKo write via applyTemplate, bypassing the local writeFile counter
 
   // AGENTS.md — header only, workspace roster removed, TODO section added.
-  const agentsMd = `# AGENTS.md — co-${variant}
+  const agentsMd = `# AGENTS.md — ${toVariantSlug(variant)}
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
 > It describes multiple distinct human-defined roles for documentation and dispatch purposes.
@@ -620,9 +657,23 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
   const displayName = toDisplayName(variant);
 
   // pm.md additive skeleton with variant_overrides support
+  // The lifecycle block is required by scripts/validate-agents.ts (FRONTMATTER_REQUIRED_FIELDS
+  // = lifecycle.phase, lifecycle.governance). Without it a freshly scaffolded project fails
+  // its own `bun scripts/audit.ts` immediately — and since audit is a FATAL gate in the
+  // /sync pipeline, the project cannot make its first commit until someone hand-patches
+  // this stub. The matching governance record is written just below.
   const pmMd = `---
+name: pm
+variant: ${toVariantSlug(variant)}
 owner: "architect"
 status: "active"
+version: "0.1.0"
+last_updated: "${TODAY}"
+lifecycle:
+  phase: production
+  created: ${TODAY}
+  last_updated: ${TODAY}
+  governance: docs/lifecycle/agents/pm.md
 extends: ../../../agents/pm.md
 remove_sections:
   - "## Governance Workflow"
@@ -686,6 +737,34 @@ This section replaces the workspace PM's dispatch protocol with variant-specific
 <!-- END VARIANT-SECTION -->
 `;
   writeFile(path.join(projectDir, "agents", "pm.md"), pmMd);
+
+  // Governance record referenced by pm.md's lifecycle.governance field. validate-agents.ts
+  // warns when docs/lifecycle/agents/ is missing, and the pair must be created together —
+  // a lifecycle block pointing at a nonexistent record is worse than neither.
+  writeFile(
+    path.join(projectDir, "docs", "lifecycle", "agents", "pm.md"),
+    `# Agent Governance Record — pm
+
+## Overview
+
+- **Agent Name**: pm
+- **Role**: Project Manager (PM) Agent — variant override extending the workspace PM template
+- **Phase**: production
+- **Variant**: ${toVariantSlug(variant)}
+
+## Phase History
+
+- **${TODAY}**: Initial release — scaffolded by ${BT}create-l3-scaffold.ts${BT}.
+
+## Acceptance Criteria
+
+- [x] Defined in ${BT}agents/pm.md${BT}
+- [x] Uses the ${BT}extends${BT} pattern (ADR-0033) rather than duplicating the workspace PM
+- [x] Carries ${BT}lifecycle${BT} frontmatter with ${BT}phase${BT} and ${BT}governance${BT}
+- [x] Validated by ${BT}scripts/validate-agents.ts${BT}
+- [ ] TODO: variant_overrides filled in (governance workflow, agent roster, dispatch protocol)
+`,
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -710,40 +789,72 @@ function initGit(projectDir: string): void {
 }
 
 function bunInstall(projectDir: string): void {
-  const scriptsDir = path.join(projectDir, "scripts");
-  if (!fs.existsSync(path.join(scriptsDir, "package.json"))) {
-    log("⚠️  scripts/package.json missing — skipping bun install");
+  // package.json lives at the project root (written by writePackageJson), not under
+  // scripts/. The old check looked for scripts/package.json — a path no template has
+  // ever populated — so install was silently skipped on every scaffold. The resulting
+  // project appeared to work only because Bun resolves imports by walking up to the
+  // parent workspace's node_modules; a standalone clone of the project's own git repo
+  // had neither manifest nor dependencies.
+  if (!fs.existsSync(path.join(projectDir, "package.json"))) {
+    log("⚠️  package.json missing — skipping bun install");
     return;
   }
-  log("📦 Running bun install in scripts/ …");
+  log("📦 Running bun install …");
   try {
-    runNoShell("bun", ["install"], { cwd: scriptsDir });
+    runNoShell("bun", ["install"], { cwd: projectDir });
     log("✅ bun install complete");
   } catch (e) {
     log(`⚠️  bun install failed (non-fatal): ${(e as Error).message}`);
-    log(`    Manual retry: cd ${path.join(projectDir, "scripts")} && bun install`);
+    log(`    Manual retry: cd ${projectDir} && bun install`);
   }
 }
 
-function runSetup(projectDir: string): void {
-  const setupSh = path.join(COMMON_SCRIPTS_DIR, "setup.sh").replace(/\\/g, "/");
-  if (!fs.existsSync(setupSh)) {
-    log("⚙️  setup.sh not found — skipping (legacy bootstrap step)");
+/**
+ * Write the project's package.json, derived from templates/common/package.json.
+ *
+ * Adapted rather than copied verbatim:
+ *  - `name` / `description` become variant-specific
+ *  - `workspace-scripts: true` is an L0 marker and must not propagate
+ *  - `private: true` is added — L3 prototypes are not published
+ *  - `scripts` entries whose target .ts is absent from this scaffold are pruned,
+ *    since Tier 3 bootstrap scripts are excluded from L3 copies
+ */
+function writePackageJson(projectDir: string, variant: string): void {
+  const srcPath = path.join(COMMON_DIR, "package.json");
+  if (!fs.existsSync(srcPath)) {
+    log("  ⚠️  templates/common/package.json missing — skipping package.json generation");
     return;
   }
-  log("⚙️  Running setup.sh …");
-  try {
-    runNoShell("bash", [setupSh, "--skip-commit", "--skip-license-check"], {
-      cwd: projectDir,
-    });
-    log("✅ setup.sh complete");
-  } catch (e) {
-    log(`⚠️  setup.sh failed (non-fatal): ${(e as Error).message}`);
-    log(
-      `    Manual retry: cd ${projectDir} && bash "${setupSh}" --skip-commit --skip-license-check`,
-    );
+
+  const pkg = JSON.parse(fs.readFileSync(srcPath, "utf8")) as Record<string, unknown>;
+  const slug = toVariantSlug(variant);
+
+  pkg.name = slug;
+  pkg.description = `${toDisplayName(variant)} — L3 variant prototype scaffolded from templates/common`;
+  pkg.private = true;
+  delete pkg["workspace-scripts"];
+
+  const scripts = (pkg.scripts ?? {}) as Record<string, string>;
+  const kept: Record<string, string> = {};
+  const pruned: string[] = [];
+  for (const [key, cmd] of Object.entries(scripts)) {
+    const target = cmd.split(/\s+/).find((t) => t.startsWith("scripts/") && t.endsWith(".ts"));
+    if (!target || fs.existsSync(path.join(projectDir, target))) {
+      kept[key] = cmd;
+    } else {
+      pruned.push(key);
+    }
   }
+  pkg.scripts = kept;
+
+  writeFile(path.join(projectDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
+  log(
+    `  ✅ package.json written (${Object.keys(kept).length} scripts` +
+      (pruned.length ? `, ${pruned.length} pruned: ${pruned.join(", ")}` : "") +
+      ")",
+  );
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Step 10: Completion summary
@@ -795,14 +906,14 @@ function createLectureScaffold(projectDir: string): void {
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const projectDir = path.join(WORKSPACE_ROOT, "Projects", args.variant);
-  const templateVariantDir = path.join(WORKSPACE_ROOT, "templates", `co-${args.variant}`);
+  const templateVariantDir = path.join(WORKSPACE_ROOT, "templates", toVariantSlug(args.variant));
 
   // Step 1: duplicate / existence checks
   if (fs.existsSync(projectDir)) {
     fail(`Projects/${args.variant}/ already exists. Choose a different name or remove it first.`);
   }
   if (fs.existsSync(templateVariantDir)) {
-    log(`⚠️  templates/co-${args.variant}/ already exists — proceeding with L3 scaffold anyway.`);
+    log(`⚠️  templates/${toVariantSlug(args.variant)}/ already exists — proceeding with L3 scaffold anyway.`);
   }
   if (!fs.existsSync(COMMON_DIR)) {
     fail(`templates/common/ not found at ${COMMON_DIR}`);
@@ -824,9 +935,10 @@ function main(): void {
     log("    │     PROMOTION_CHECKLIST.md, SECURITY.md, README.md, README_ko.md, AGENTS.md");
     log("    ├─ docs/VERSION_MANIFEST.md + domain doc folders");
     log("    ├─ memory/MEMORY.md");
+    log("    ├─ package.json (adapted from templates/common/package.json)");
     log("    └─ agents/README.md");
     log("");
-    log("  Then: git init + hooks, bun install (scripts/), setup.sh");
+    log("  Then: git init + hooks, bun install (project root)");
     log("");
     log("Dry run complete — no files written.");
     return;
@@ -855,11 +967,9 @@ function main(): void {
   // Step 7: git init
   initGit(projectDir);
 
-  // Step 8: bun install
+  // Step 8: package.json + bun install
+  writePackageJson(projectDir, args.variant);
   bunInstall(projectDir);
-
-  // Step 9: setup.sh
-  runSetup(projectDir);
 
   // Step 10: summary
   printSummary(args.variant);

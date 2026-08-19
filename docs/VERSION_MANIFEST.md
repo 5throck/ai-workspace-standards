@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-19T06:48:02.342Z
+**Generated**: 2026-08-19T14:23:35.304Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -88,7 +88,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
-| create-l3-scaffold.ts | 1.9.2 | scripts/create-l3-scaffold.ts | N/A |
+| create-l3-scaffold.ts | 1.10.0 | scripts/create-l3-scaffold.ts | N/A |
 | dev-sync.ts | 1.5.5 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
@@ -121,7 +121,7 @@
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-register.ts | 1.1.0 | scripts/spec-register.ts | N/A |
 | sync-agent-status.ts | 1.0.1 | scripts/sync-agent-status.ts | N/A |
-| sync-md.ts | 1.2.0 | scripts/sync-md.ts | N/A |
+| sync-md.ts | 1.3.0 | scripts/sync-md.ts | N/A |
 | sync-skill-status.ts | 1.0.1 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.4.1 | scripts/sync-skills.ts | N/A |

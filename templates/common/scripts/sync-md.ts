@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 // sync-md.ts - Update memory/MEMORY.md index
 // Usage:
 //   bun run scripts/sync-md.ts "YYYY-MM-DD" "summary"              # session entry
@@ -50,23 +50,49 @@ if (!exists) {
 let content = await Bun.file(MEMORY_FILE).text();
 
 // ── Migrate legacy flat index if no ## Sessions section ──────────────────────
+//
+// Idempotency matters here. The previous version keyed the whole migration off a
+// single `## Sessions` guard and then appended the Meetings/ADRs sections
+// unconditionally. Its heading regex required the line to be exactly
+// "# Memory Index", so any project using a suffixed title (e.g.
+// "# Memory Index — co-newbiz") never got `## Sessions` inserted, the guard stayed
+// false on every subsequent run, and the two sections were re-appended each time —
+// three copies of each after two syncs. Each section is now inserted only if it is
+// actually absent, and the heading match tolerates a suffix.
 if (!content.includes('## Sessions')) {
-  // Prepend Sessions section after # Memory Index heading
-  content = content.replace(/(# Memory Index\r?\n)/, '$1\n## Sessions\n\n');
-  content = content + `
+  // Insert Sessions after the `# Memory Index...` heading, whatever follows it on
+  // that line. If no such heading exists at all, prepend one so the file still ends
+  // up with the canonical structure rather than silently staying unmigrated.
+  const headingRe = /^(#\s+Memory Index[^\n]*\r?\n)/m;
+  if (headingRe.test(content)) {
+    content = content.replace(headingRe, '$1\n## Sessions\n\n| Date | Summary |\n|------|---------|\n');
+  } else {
+    content = `# Memory Index\n\n## Sessions\n\n| Date | Summary |\n|------|---------|\n\n${content}`;
+  }
+}
+
+if (!content.includes('## Meetings')) {
+  content = content.trimEnd() + `
+
 ## Meetings
 
 | Date | Topic | File |
 |------|-------|------|
+`;
+}
+
+if (!content.includes('## ADRs')) {
+  content = content.trimEnd() + `
 
 ## ADRs
 
 | ID | Title | Status | File |
 |----|-------|--------|------|
 `;
-  await Bun.write(MEMORY_FILE, content);
-  content = await Bun.file(MEMORY_FILE).text();
 }
+
+await Bun.write(MEMORY_FILE, content);
+content = await Bun.file(MEMORY_FILE).text();
 
 // ── Append to appropriate section ────────────────────────────────────────────
 function makeSlug(str: string, maxLen: number): string {
