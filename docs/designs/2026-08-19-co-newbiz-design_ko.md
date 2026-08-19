@@ -42,16 +42,21 @@ Green Field(신규 설립)와 Brown Field(M&A) 양쪽을 다루는 신사업 검
 
 ## 2. 팀의 목적
 
-> 신규 사업 추진에 필요한 **규정·절차·가이드라인·체크리스트 등 제반 절차를 소유·운영**하고, 동시에 **이를 시스템으로 구현해 효과적으로 운영되도록 유지보수**한다.
+> 신규 사업 추진에 필요한 **규정·절차·가이드라인·체크리스트 등 제반 절차를 소유·운영**하고, **이를 시스템으로 구현해 유지보수**하며, **그 체계 위에서 실제 딜 검토를 수행**한다.
 
-두 축은 **동등하다**. 어느 하나가 다른 하나의 부속이 아니다.
+세 축은 **동등하다**. 어느 하나가 다른 하나의 부속이 아니다.
 
 | 축 | 내용 |
 |---|---|
 | **A. 거버넌스 소유·운영** | 규정·절차·가이드라인·체크리스트·양식의 제정·개정·해석·배포·교육, 그리고 준수 점검·예외 승인·성과 측정까지의 상시 운영 |
 | **B. 시스템 구현·유지보수** | A를 시스템으로 구현하고, 서버·DB를 고도화·배포·운영하며, 인프라 자동화와 보안 점검으로 지속 가능하게 유지 |
+| **C. 딜 검토 수행** | A의 절차와 B의 시스템 위에서 **실제 신규사업·M&A 건을 분석**한다. 시장·재무·법령·DD·M&A 특수검토·인증 산출물을 생산한다 |
 
-**이 팀이 하지 않는 일**: 개별 딜을 직접 분석하지 않는다. 실제 검토는 이 팀이 만든 규정·절차와 시스템 위에서 사람 분석가와 AI 클라이언트(MCP 경유)가 수행한다.
+**축 C가 A·B를 검증한다.** 자기가 만든 절차로 자기가 딜을 돌려보면 절차의 결함이 즉시 드러난다. 방법론만 만들고 쓰지 않는 팀은 현실과 어긋난 규정을 만든다 — 축 C는 부가 기능이 아니라 **A·B의 품질 보증 장치**다.
+
+**최종 투자 판단은 사람이 한다.** 팀은 분석·근거·등급 제안까지 산출하고, 게이트 승인과 투자 결정은 사람 승인자가 내린다(§8.9-1 참조). 이 경계는 협상 대상이 아니다.
+
+> **설계 이력**: 초안과 1·2차 회의는 "이 팀은 개별 딜을 분석하지 않는다"를 전제로 했고, 2차 회의 R2에서 딜 분석 에이전트를 "구축기 방법론 / 가동 후 온디맨드 자문"의 이중 역할로 정리했다. 이번 개정으로 **딜 분석이 정식 3번째 축으로 승격**되었다. §5.3의 역할 구분과 §8.9-1의 실행 모델이 그 결과다.
 
 ---
 
@@ -118,7 +123,7 @@ safety_os도 동일하다 — `Safety Governance Manager`·`Safety Workflow Mana
 
 | 도메인 | 관심사 | 리드 | 인원 |
 |---|---|---|---|
-| **기능 (functional)** | 신사업 추진 관련 **규정·절차·운영** — 거버넌스와 검토 방법론 | `process-governance-manager` | 19 |
+| **기능 (functional)** | 신사업 추진 관련 **규정·절차·운영**, 검토 방법론, **딜 검토 수행(축 C)** | `process-governance-manager` | 20 |
 | **기술 (technical)** | **시스템 구성 및 운영** — DB·API·UI·배포·운영·보안 | `platform-lead` | 9 |
 | **산업 (industry)** | 해당 **산업의 특성** 반영 | `industry-lead` | 1 |
 | **지역 (region)** | **국내 포함 지역적 특성** 반영 | `region-lead` | 1 |
@@ -158,7 +163,7 @@ agents/
 >
 > **하위 그룹(`governance/`, `analysis/` 등)은 디렉터리·문서상의 정리이지 디스패치 계층이 아니다.** 평면 PM Gateway 제약은 그대로다.
 
-### 5.3 기능 도메인 (19)
+### 5.3 기능 도메인 (20)
 
 | Agent | Tier | 역할 |
 |---|---|---|
@@ -179,18 +184,19 @@ agents/
 | `brownfield/incentive-agent` | Medium | 정책 혜택 획득·환수 양방향 |
 | `brownfield/pmi-agent` | Medium | PMI 계획, 시너지 실현, 통합 리스크 |
 
-> **★ 딜 분석 에이전트의 이중 역할 (2차 회의 R2)** — §2에서 "이 팀은 개별 딜을 분석하지 않는다"고 했으나, 위 표의 상당수는 딜 분석 전문가다. 모순이 아니라 **시기에 따라 하는 일이 다르다**:
+> **★ 딜 분석 에이전트의 두 시기 (2차 회의 R2 → 축 C 승격으로 개정)** — 위 표의 상당수는 딜 분석 전문가다. §2에서 딜 검토가 정식 축(C)이 되었으므로, 이들은 **부업이 아니라 본업으로 딜을 분석한다.**
 >
 > | 시기 | 하는 일 |
 > |---|---|
 > | **구축기 (Stage 1~4)** | 방법론·체크리스트·판정 규칙·모델 사양을 만든다. 산출물은 스킬과 `rag_rule` 시드다 |
-> | **가동 후** | 실제 검토에 **온디맨드로 투입되는 자문역**. PM 디스패치 또는 MCP를 통해 특정 딜의 판단을 돕는다 |
+> | **가동 후 (축 C)** | **실제 딜 검토를 수행한다.** 게이트별로 투입되어 분석 산출물을 생산한다 — 실행 모델은 §8.9-1 |
 >
-> 이 구분이 문서화되지 않으면 가동 후 누군가 "안 쓰는 에이전트"로 판단해 삭제한다.
+> 구축기 산출물이 곧 가동기의 작업 지침이다. **자기가 만든 절차로 자기가 딜을 도는 구조**이므로 절차의 결함이 즉시 자신에게 돌아온다(§8.9-1 (g) 되먹임).
 >
-> **통합 후보**: `customer-retention`·`incentive`·`pmi`는 각각 체크리스트 1~2개 분량이라 `brownfield-agent`의 스킬로 흡수 가능하다. 다만 safety_os 수준의 세분화가 명시적 요구사항이므로 **임의 축소하지 않고 Stage 1 M8에서 결정**한다 (Open Issue O-8).
+> **통합 후보**: `customer-retention`·`incentive`·`pmi`는 각각 체크리스트 1~2개 분량이라 `brownfield-agent`의 스킬로 흡수 가능하다. 다만 safety_os 수준의 세분화가 명시적 요구사항이고, **축 C 승격으로 실제 딜에서 독립 투입될 여지가 커졌으므로** 판단을 Stage 1 M8로 유지한다 (Open Issue O-8).
 | `dd/commercial-dd-agent` | Medium | CDD — 고객·가격결정력·채널체크·전문가 인터뷰 |
-| `dd/technical-dd-agent` | Medium | TDD — 현장실사, 설비 잔존수명, TRL, 인증, EHS, capex 검증 |
+| `dd/technical-dd-agent` | Medium | TDD — 현장실사, 설비 잔존수명, TRL, EHS, capex 검증 |
+| `certification/certification-agent` | **High** | **인증·규제 대응** — 요건 식별, gap 분석, 확보 옵션 비교, 로드맵 DAG, **CoC 승계 판정**, 진행 중 규제 변화 대응 |
 | `partnership/partnership-agent` | Medium | 협력 파트너 확보 — 소싱 전략, 파트너 실사, JV 구조화 |
 | `group/group-review-agent` | High | 그룹 차원 검토 — 포트폴리오 정합성, 내부거래 규제, 자본 배분 우선순위 |
 
@@ -221,18 +227,19 @@ agents/
 
 ### 5.6 총계
 
-**32 agents** — `_core` 1 + 기능 19 + 기술 9 + 산업 1 + 지역 1 + `_shared` 1.
+**33 agents** — `_core` 1 + 기능 20 + 기술 9 + 산업 1 + 지역 1 + `_shared` 1.
 
-축 A(거버넌스·검토)가 19명, 축 B(시스템)가 9명. 산업·지역은 두 축 모두에 입력을 제공하는 횡단 도메인이다. **거버넌스가 시스템의 부속이 아니라는 팀 목적이 로스터 구성에 그대로 드러난다.**
+축 A(거버넌스)와 축 C(딜 검토)를 함께 담당하는 기능 도메인이 20명, 축 B(시스템)가 9명. 산업·지역은 두 축 모두에 입력을 제공하는 횡단 도메인이다. **거버넌스가 시스템의 부속이 아니라는 팀 목적이 로스터 구성에 그대로 드러난다.**
 
 **단계 의존 티어링 (2차 회의 R10)** — High tier 12명은 설계·방법론 수립 단계에서는 타당하나 정상 운영에서는 과하다. AGENTS.md §3.6 비용 계층 전략에 맞춰 단계별로 조정한다.
 
 | 단계 | 티어 정책 |
 |---|---|
 | **Stage 1~4** (설계·방법론) | 표기된 tier 그대로. 이 시기의 오판 비용이 가장 크다 |
-| **가동 후** (정상 운영) | 상시 판단이 필요한 `process-governance-manager`·`compliance-officer`·`security-engineer`·`legal-counsel`·`risk-officer`만 High 유지. 나머지 방법론 에이전트는 **Medium으로 하향**(온디맨드 자문 시 필요하면 건별 상향) |
+| **가동 후 — 상시 운영** | 거버넌스 상시 업무(`compliance-officer` 준수 점검, `sre` 헬스체크 등)는 **Medium 이하로 하향** |
+| **가동 후 — 딜 검토 중 (축 C)** | **표기 tier 유지.** 실제 딜의 밸류에이션·독과점·인증 승계 판단은 오판 비용이 설계기와 동일하다 |
 
-에이전트 문서에 "정상 운영 권장 티어"를 병기한다.
+> **2차 회의 R10 결정 개정**: R10은 "가동 후 상당수 Medium 하향"이었으나, 딜 검토가 축 C로 승격되면서 **일괄 하향은 부적절**해졌다. 티어는 시기가 아니라 **작업 성격**으로 가른다 — 상시 점검·리포팅은 하향, 딜 판단은 유지. `analysis_task` 실행 시에는 에이전트의 표기 tier를 적용한다.
 
 ### 5.7 교차 검증 (Phase 1.5)
 
@@ -243,7 +250,7 @@ agents/
 | 방법론·모델 사양 | 기능 | **기술** `data-architect`(스키마 표현 가능성) · 기능 내 `quant-methodologist` ↔ `financial-analyst` |
 | RAG 판정 규칙 | 기능 `process-governance-manager` | 기능 `financial-analyst`(임계값) · `quant-methodologist`(신뢰도 캡) |
 | 규정·절차 변경 | 기능 `process-governance-manager` | 기능 `legal-counsel`·`risk-officer` + **기술** `platform-lead`(시스템 반영 가능성) |
-| M&A 검토 | 기능 `brownfield-agent` | 기능 `antitrust`·`customer-retention`·`incentive`·`hr-integration` + **지역** `region-lead` — 5개 동시 필수 |
+| M&A 검토 | 기능 `brownfield-agent` | 기능 `antitrust`·`customer-retention`·`incentive`·`hr-integration`·**`certification`**(CoC 승계) + **지역** `region-lead` — **6개 동시 필수** |
 | 부채·우발채무 | 기능 `valuation-agent` | 기능 `legal-counsel`(소송·보증·환경책임)·`financial-analyst`(미적립 퇴직급여) |
 | 경영진·임직원 보상 | 기능 `hr-integration-agent` | 기능 `legal-counsel`·`valuation-agent` + **지역** `region-lead`(TUPE·works council) |
 | 전·후방 연관성 | 기능 `market-intelligence-agent` | 기능 `quant-methodologist` + **산업** `industry-lead` |
@@ -814,6 +821,74 @@ site_candidate(id, project_id, name, region_code, infra_score, infra_capex,
                permit_lead_time_days, total_score, rank)
 ```
 
+### 8.8-1 ★ 인증·규제 대응 (`certification-agent`)
+
+> **인허가(permit)와 인증(certification)은 다르다.** 인허가는 정부가 주는 **사업·시설 운영 허가**로, 없으면 공장을 돌릴 수 없다(§8.8). 인증은 제3자가 **제품·시스템이 기준에 부합함을 확인**하는 것으로, 없으면 **팔 수 없다**. 둘 다 리드타임이 매출 개시를 지연시키지만 성격·주관기관·절차가 다르므로 섞어 관리하면 둘 다 놓친다.
+
+#### (a) 대상 인증 체계
+
+| 범주 | 예시 |
+|---|---|
+| **제품 안전·시장 진입** | KC(국내), CE 마킹(EU), UL(북미), CCC(중국), PSE(일본) |
+| **산업별 필수** | **선급 형식승인**(DNV·LR·ABS·KR — 조선기자재 필수), IATF 16949(자동차), API(석유·가스), ASME(압력용기), PED(EU 압력기기), ATEX/IECEx(방폭) |
+| **경영시스템** | ISO 9001·14001·45001, ISO 27001 |
+| **환경·물질** | RoHS, REACH, K-REACH, 배터리 규정 |
+| **고객 개별 승인** | OEM 벤더 등록, **초도품 승인(PPAP / FAI)**, 고객 실사(audit) |
+
+#### (b) 대응 방안 도출 — gap → 옵션 비교
+
+단순히 "무엇이 필요한가"에서 멈추지 않고 **어떻게 확보할 것인가**까지 도출한다.
+
+1. **요건 식별** — 목표 시장 × 제품 × 고객 조합으로 필수·선택 인증을 확정. `region-profiles`·`industry-profiles`에서 로드
+2. **Gap 분석** — 요건 대비 현재 상태(설비·시험역량·문서체계·인력 자격)
+3. **확보 옵션 비교** ★
+
+| 옵션 | 리드타임 | 비용 | 리스크 |
+|---|---|---|---|
+| **자체 취득** | 최장 (시험·심사·시정조치 반복) | 중 | 일정 불확실성 최대 |
+| **인증 보유사 인수 (BF)** | 최단 | 최고 | **승계 가능성 확인 필수** (아래 함정) |
+| **파트너십 / 위탁생산** | 중 | 중 | 마진 희석, 파트너 의존 |
+| **OEM 공급으로 우회** | 단 | 저 | 브랜드·마진 포기 |
+
+4. **로드맵** — 인증별 착수 시점·선후관계(ISO 9001이 IATF의 전제 등)를 **DAG로 구성**, 크리티컬 패스 산출
+5. **유지 관리** — 갱신 주기, 사후심사(surveillance audit), 설계 변경 시 재인증 트리거
+
+#### (c) 모델 연결 — 인증이 매출 개시 시점을 결정한다 ★
+
+**공장을 다 지어도 인증이 없으면 매출은 0이다.** 인증 취득 시점이 ramp-up 곡선의 시작점이므로 재무 모델에 직접 반영한다.
+
+- 인증 리드타임 → **매출 개시 지연** → NPV·IRR 직격
+- 인증 미취득 시나리오 → **Kill Criteria 후보** (필수 인증을 못 받으면 사업 자체가 성립하지 않는다)
+- RAG **규제·인허가** 차원에 입력. 필수 인증이 미확보 상태면 해당 차원 Red
+
+#### (d) ★ Brown Field의 함정 — 인증은 자동 승계되지 않는다
+
+**"인증 보유 기업을 인수하면 인증 리드타임을 건너뛴다"**는 것이 M&A 밸류에이션 프리미엄의 주요 근거다. 그런데 **일부 인증은 법인 변경·지배구조 변경 시 재심사 대상**이며, 사업장 이전이 동반되면 대부분 재심사다.
+
+→ `brownfield-agent`·`antitrust-agent`와 같은 층위의 **필수 교차 검증 항목**으로 둔다. 승계 불가 판정이 나면 **밸류에이션 프리미엄이 통째로 사라지므로** `dd_finding.value_impact`에 반영한다.
+
+#### (e) 진행 중 규제 변화 대응
+
+인증이 현재 기준 충족이라면, 이것은 **다가오는 기준**에 대한 대응이다. IMO Tier III·탈탄소 연료 전환, EU CBAM, RoHS/REACH 개정, 배터리 규정 등.
+
+`regulations/`의 시행일 감지(§6.5)와 연결되어, 시행 예정 규제가 제품 사양·원가·수요 구조에 미치는 영향을 **선제적으로** 평가한다. §8.4의 **대체·전환 위협** 축과 직결된다.
+
+```sql
+certification(id, project_id, scheme, scope, authority, region_code, mandatory,
+              status, lead_time_months, cost_estimate, prerequisite_cert_id,
+              acquisition_option, transferable_on_coc, expires_on,
+              surveillance_cycle_months, blocks_revenue)
+certification_gap(id, certification_id, requirement, current_state, gap,
+                  action, owner, due_date, status)
+certification_edge(from_cert_id, to_cert_id)      -- 선후관계 DAG
+regulatory_change(id, framework, region_code, announced_on, effective_on,
+                  impact_summary, affected_assumption_key, response_plan, status)
+customer_qualification(id, project_id, customer_id, stage, requirement,
+                       status, target_date)        -- 벤더등록·PPAP/FAI·감사
+```
+
+`certification.blocks_revenue=true` 인 항목이 미취득이면 **해당 시점 이후 매출을 0으로 강제**한다 — 모델이 낙관적 ramp-up을 그리는 것을 구조적으로 막는다.
+
 ### 8.9 협력 파트너 확보
 
 **유형**: 기술(라이선스·공동개발) / 공급 / 판매·채널 / **JV** / 재무 / 지역
@@ -831,6 +906,77 @@ site_candidate(id, project_id, name, region_code, infra_score, infra_capex,
 ```sql
 partner_candidate / jv_term
 ```
+
+### 8.9-1 ★ 딜 검토 실행 모델 (축 C)
+
+방법론을 만드는 것과 그것으로 실제 딜을 도는 것은 다른 일이다. 이 절은 **에이전트가 실제 검토를 수행하는 경로**를 정의한다.
+
+#### (a) 딜 워크스페이스
+
+딜 하나 = `md_project` 레코드 하나 + 전용 워크스페이스. 게이트 진행 상태, 참여자, 산출물, `run` 이력이 여기 묶인다.
+
+```sql
+deal_workspace(project_id, deal_type, current_gate, lead_user_id, status,
+               opened_at, closed_at, close_reason)
+   -- deal_type: greenfield | brownfield
+analysis_task(id, project_id, gate, agent_key, skill_key, requested_by,
+              requested_at, status, output_ref, model_id, agent_version,
+              confidence, reviewed_by, reviewed_at, review_result)
+```
+
+#### (b) 게이트별 에이전트 투입
+
+각 스테이지 게이트에서 어떤 에이전트가 무엇을 산출하는지는 **`procedures/*.yaml`가 정의**한다(§6.8 권위 분리). 에이전트 목록을 스킬에 중복 기술하지 않는다.
+
+| 게이트 | 주 투입 | 산출물 |
+|---|---|---|
+| Screening | `market-intelligence`, `industry-lead` | 시장 규모·성장, 전·후방 연관성 초안 |
+| Pre-FS | + `financial-analyst`, `quant-methodologist`, `region-lead` | 프록시 체인 보정, 과거 재무·피어, 지역 요건 |
+| FS | + `valuation`, `greenfield`/`brownfield`, `certification`, `legal-counsel` | 재무 모델, 인증 로드맵, 인허가 경로 |
+| DD | + `commercial-dd`, `technical-dd`, `antitrust`, `customer-retention`, `hr-integration`, `incentive` | DD 발견사항 → 밸류에이션 브리지 |
+| Entity IC | `risk-officer`(레드팀), `compliance-officer`(준수 점검) | 편향 감사, 게이트 충족 확인 |
+| Group IC | `group-review` | 포트폴리오 정합, 내부거래, 자본 배분 순위 |
+
+#### (c) ★ 권한 — 에이전트는 자체 권한을 갖지 않는다
+
+정보 보호(§8.10)와 정면으로 만나는 지점이다. **에이전트가 독립 권한을 가지면 need-to-know 통제를 우회하는 경로가 된다.**
+
+| 규칙 | 내용 |
+|---|---|
+| **권한 상속** | 에이전트는 **호출한 사용자의 권한으로 실행**된다. 사용자가 그 프로젝트의 `project_member`가 아니면 에이전트도 데이터를 못 읽는다 |
+| **에이전트 계정 금지** | 별도 서비스 계정에 광범위 권한을 주지 않는다. 편의를 위해 이걸 만드는 순간 §8.10 전체가 무력화된다 |
+| **MNPI** | 호출 사용자가 `insider_list`에 없으면 MNPI 프로젝트에 대한 에이전트 실행 자체가 거부된다 |
+| **감사** | `analysis_task`가 **누가 요청했고 어느 에이전트·모델·버전이 산출했는지** 기록한다. 산출물에도 동일 정보가 각인된다 |
+
+#### (d) 사람 ↔ 에이전트 경계
+
+| 에이전트가 하는 것 | 사람이 하는 것 |
+|---|---|
+| 데이터 수집·정규화, 계산, 체크리스트 실행 | **게이트 승인** |
+| 근거 정리, 리스크 식별, 시나리오 산출 | **투자 결정** |
+| RAG 등급 **제안** | RAG 등급 **확정**(제안과 다르면 사유 기록) |
+| 산출물 초안 작성 | 산출물 승인·서명 |
+| 가정값 도출(`derived`) | 정책 가정 입력(`user` — WACC, hurdle IRR) |
+
+**에이전트 산출물은 그 자체로 게이트를 통과시키지 못한다.** 반드시 사람 리뷰어(`analysis_task.reviewed_by`)를 거친다.
+
+#### (e) 에이전트 산출물의 신뢰 등급
+
+에이전트가 만든 값은 §8.1 가정 레지스트리 규칙을 그대로 따른다.
+
+- 외부 데이터 기반 → `derived` + `anchor_ref` 필수
+- 에이전트 판단에 의한 추정 → **`assumed` + `rationale` NOT NULL**
+- 산출물 헤더에 `agent_key` / `model_id` / `agent_version` / 요청자 / 검토자 각인
+
+> **원칙: AI가 만들었다는 사실이 숨겨지면 안 된다.** IC에 올라간 숫자가 누구·무엇이 만든 것인지 추적 불가능하면 그 자체가 거버넌스 실패다.
+
+#### (f) 교차 검증을 딜에도 적용
+
+§5.7의 도메인 간 교차 검증 매트릭스를 **딜 산출물에도 그대로 적용**한다. 특히 M&A는 `antitrust`·`customer-retention`·`incentive`·`hr-integration`·`certification`·`region-lead` **6개 동시 검증**이 필수다(인증 승계 항목 추가로 5개 → 6개).
+
+#### (g) 축 C가 축 A를 되먹임한다
+
+딜을 돌면서 발견한 절차의 결함은 **`interpretation`(해석 질의) 또는 `waiver`로 기록**되고, 그 누적이 §6.6 규정 개정 우선순위가 된다. 축 C 없이는 이 되먹임 루프가 돌지 않는다 — 방법론만 만드는 팀이 현실과 어긋나는 이유다.
 
 ### 8.10 정보 보호 — 개인정보 · need-to-know · MNPI
 
@@ -945,7 +1091,7 @@ bun scripts/co-newbiz/newbiz.ts <command>
 
 **MCP** `mcp/co-newbiz/` — `Projects/co-architect/mcp/` 패턴 그대로. **DB에 직접 붙지 않고 REST API 경유** — 권한·감사가 한 곳에서만 집행되어 AI 클라이언트가 우회할 수 없다.
 
-도구(✱ = 쓰기, 스코프+감사로그): `list_projects`·`get_project_status`·`get_rag_assessment`·`list_notifications`·`manage_watch`✱·`lookup_term`·`get_procedure`·`get_compliance_status`·`list_waivers`·`search_interpretations`·`get_approval_chain`·`search_series`·`get_observations`·`list_data_changes`·`get_financial_analysis`·`get_peer_benchmark`·`get_projection`·`get_assumptions`·`set_assumption`✱·`get_value_chain_linkage`·`get_proxy_chain`·`calibrate_chain`✱·`run_model`✱·`compare_runs`·`run_simulation`✱·`get_antitrust_assessment`·`get_customer_risk`·`get_incentive_exposure`·`get_compensation_gap`·`get_liability_exposure`·`compare_sites`·`list_partner_candidates`·`list_regulatory_requirements`·`get_permit_path`·`list_dd_findings`·`add_dd_finding`✱·`generate_report`✱·`export_report`
+도구(✱ = 쓰기, 스코프+감사로그): `list_projects`·`get_project_status`·`get_rag_assessment`·`list_notifications`·`manage_watch`✱·`lookup_term`·`get_procedure`·`get_compliance_status`·`list_waivers`·`search_interpretations`·`get_approval_chain`·**`get_certification_status`**·**`get_certification_gap`**·**`request_analysis`**✱·**`get_analysis_task`**·**`review_analysis`**✱·`search_series`·`get_observations`·`list_data_changes`·`get_financial_analysis`·`get_peer_benchmark`·`get_projection`·`get_assumptions`·`set_assumption`✱·`get_value_chain_linkage`·`get_proxy_chain`·`calibrate_chain`✱·`run_model`✱·`compare_runs`·`run_simulation`✱·`get_antitrust_assessment`·`get_customer_risk`·`get_incentive_exposure`·`get_compensation_gap`·`get_liability_exposure`·`compare_sites`·`list_partner_candidates`·`list_regulatory_requirements`·`get_permit_path`·`list_dd_findings`·`add_dd_finding`✱·`generate_report`✱·`export_report`
 
 **사용자·DB·배치·규정 관리는 MCP 미노출** — 관리자 콘솔 전용.
 
@@ -1008,8 +1154,9 @@ bun scripts/co-newbiz/newbiz.ts <command>
 | **지역·산업 (2)** | `region-profile-application` · `industry-profile-application` |
 | **시장·프록시 (4)** | **`value-chain-linkage-analysis`** · **`proxy-industry-chain`** · **`unit-conversion-calibration`** · `market-data-pipeline` |
 | **재무·시뮬레이션 (8)** | `historical-financial-analysis` · `peer-benchmarking` · **`growth-projection-modeling`** · `quality-of-earnings` · `investment-feasibility-modeling` · `wacc-input-session` · `scenario-planning` · `monte-carlo-simulation` |
-| **법령·DD (9)** | `regulatory-screening` · **`permit-pathway-mapping`** · `statute-change-monitoring` · `legal-risk-register` · `commercial-due-diligence` · `technical-due-diligence` · `site-visit-protocol` · `expert-interview` · `dd-to-valuation-bridge` |
+| **법령·인증·DD (13)** | `regulatory-screening` · **`permit-pathway-mapping`**(인허가) · **`certification-roadmap`**(인증 요건·gap·확보 옵션·DAG) · **`certification-transferability`**(CoC 승계 판정) · **`regulatory-change-response`**(시행 예정 규제 선제 대응) · **`customer-qualification`**(벤더등록·PPAP/FAI) · `statute-change-monitoring` · `legal-risk-register` · `commercial-due-diligence` · `technical-due-diligence` · `site-visit-protocol` · `expert-interview` · `dd-to-valuation-bridge` |
 | **판정·품질 (3)** | **`rag-scoring-framework`** · `run-versioning-and-attribution` · `assumption-audit` |
+| **딜 실행 — 축 C (3)** | **`deal-execution-playbook`**(게이트별 에이전트 투입·산출물·사람 검증 지점) · **`agent-output-provenance`**(산출물 각인·신뢰등급·검토 기록) · **`deal-workspace-operations`**(워크스페이스 개설·멤버십·종결·아카이빙) |
 | **플랫폼 (11)** | `master-data-governance` · `data-normalization` · **`data-freshness-and-revision-control`** · `db-migration-governance` · `query-performance-tuning` · `rest-api-design` · `mcp-server-integration` · `ui-information-architecture` · `auth-and-account-management` · `continuous-monitoring-and-alerting` · `notification-channel-management` |
 | **운영·보안 (10)** | `deployment-and-release` · `database-operations`(백업·DR 흡수) · `observability-and-alerting` · `incident-response` · `infrastructure-automation` · `batch-scheduling-operations` · `security-baseline-review` · `vulnerability-management` · `access-control-review` · `admin-console-operations` |
 
@@ -1039,7 +1186,7 @@ Stage 5    시스템 개발 → 배포·운영 이관
 
 | 티어 | 범위 | 잘라낼 수 있나 |
 |---|---|---|
-| **MVP** | 문서 5계층 · 그룹 공통 절차 + 1개 각사 · 스테이지 게이트 + 2단계 승인 · 용어집 · **정보 보호(§8.10)** · DB 코어 · CLI · 재무·프록시 체인 · RAG · 보고서 출력 | **불가** |
+| **MVP** | 문서 5계층 · 그룹 공통 절차 + 1개 각사 · 스테이지 게이트 + 2단계 승인 · 용어집 · **정보 보호(§8.10)** · **딜 실행 경로 + 권한 상속(§8.9-1)** · **필수 인증 관리(§8.8-1)** · DB 코어 · CLI · 재무·프록시 체인 · RAG · 보고서 출력 | **불가** |
 | **Tier 2** | 웹 UI + 관리자 콘솔 · 인증 · 자동 감시·알림 · MCP · 지역 프로파일 3개 | 미룰 수 있음 (CLI로 대체 운영) |
 | **Tier 3** | 지역·산업 프로파일 확장 · 시뮬레이션 고도화 · 거버넌스 KPI 대시보드 · 다국어 | 후속 릴리스 |
 
@@ -1053,7 +1200,7 @@ Stage 5    시스템 개발 → 배포·운영 이관
 |---|---|---|---|
 | 0.0 | **설계 문서 작성·등록** (본 문서) | architect, docs-writer | `docs/designs/2026-08-19-co-newbiz-design_ko.md` + `spec-register.ts` |
 | 0.1 | Scaffold + CLAUDE/GEMINI Context + Antigravity parity | scaffolding-expert | `Projects/co-newbiz/` |
-| 0.2 | **Agents 32개** + AGENTS.md 로스터 | agent-lifecycle-manager | `agents/**` |
+| 0.2 | **Agents 33개** + AGENTS.md 로스터 | agent-lifecycle-manager | `agents/**` |
 | 0.3 | 용어집 초기 골격(스키마 + 핵심 50개) | glossary-curator | `glossary/**` |
 
 ### 10.4 Stage 1 — 미팅을 통한 계획 고도화
@@ -1071,6 +1218,8 @@ Stage 5    시스템 개발 → 배포·운영 이관
 | **M6** | 신규 설립 부지 선정 기준 | greenfield(진행), incentive, technical-dd, legal-counsel, partnership | 다기준 가중치, **인센티브 NPV 환산 방식**, 인허가 리드타임 반영 |
 | **M7** | 시스템 아키텍처와 운영 모델 | platform-lead(진행), backend/frontend-engineer, dba, sre, security-engineer | DB·API·MCP 경계, 운영 리듬, 보안 기준선, 배포·롤백 |
 | **M7-1** | **정보 보호 — 개인정보·need-to-know·MNPI** | security-engineer(진행), legal-counsel, compliance-officer, hr-integration, data-architect | 최소수집 범위, 프로젝트 멤버십 모델, MNPI 취급 기준, 보존·파기 |
+| **M7-2** | **인증·규제 대응 전략** | certification-agent(진행), industry-lead, region-lead, legal-counsel, brownfield, valuation | 대상 인증 스킴 확정, 확보 옵션 판단 기준, **CoC 승계 확인 절차**, 매출 개시 시점 반영 방식 |
+| **M7-3** | **딜 검토 실행 모델 (축 C)** | pm(진행), process-governance-manager, security-engineer, compliance-officer, risk-officer, platform-lead | 게이트별 에이전트 투입 정의, **권한 상속 규칙**, 사람↔에이전트 경계, 산출물 각인, 동시 딜 수 상한 |
 | **M8** | 통합 리뷰 — 계획 최종 고도화 | pm(진행) + 전 리드 | M0~M7 통합, 상충 해소, **미해결 쟁점의 수용 리스크 확정** |
 
 **미팅 산출물의 반영 경로** — 미팅이 잡담으로 끝나지 않으려면 출구가 정해져 있어야 한다:
@@ -1219,7 +1368,14 @@ Stage 5    시스템 개발 → 배포·운영 이관
 | **0049** | **policy pin 과 Group IC 심의 버전 규칙** |
 | **0050** | **스킬 성립 요건 3개 (트리거·소유자·산출물)** |
 | **0051** | **프로파일 필드 출처 필수화 (`source`·`verified_on`·`maintainer`)** |
-| **0052** | **단계 의존 티어링 (설계기 High → 운영기 Medium)** |
+| **0052** | **단계 의존 티어링** — 시기가 아닌 **작업 성격** 기준으로 개정(상시 운영 하향 / 딜 판단 유지) |
+| **0053** | **인증(certification)과 인허가(permit)의 분리 관리** |
+| **0054** | **인증 리드타임의 매출 개시 시점 강제 (`blocks_revenue`)** |
+| **0055** | **인증 CoC 승계 판정을 M&A 필수 교차검증 항목으로** |
+| **0056** | **★ 딜 검토를 팀의 3번째 축으로 승격** |
+| **0057** | **★ 에이전트 권한 상속 원칙 (에이전트 전용 계정 금지)** |
+| **0058** | **에이전트 산출물 각인 의무 (agent/model/version/요청자/검토자)** |
+| **0059** | **사람 ↔ 에이전트 판단 경계 (게이트 승인·투자 결정은 사람)** |
 
 **ADR 트리거** — ADR 없이 진행 불가: DB 스키마 파괴적 변경 / 기준정보 코드 체계 변경 / 환산 방법론 변경 / RAG 판정 규칙·임계값 변경 / Stage Gate·Kill Criteria 변경 / **규정·절차 개정** / 지역 프로파일 필수 축 변경 / 알림 정책 변경 / 외부 데이터 소스 변경 / DB 엔진·이식성 예외 / **인증·권한·정보보호 모델 변경** / MCP 도구 권한 확대 / **팀 편성·에이전트 승격** / 배포·롤백 전략 변경
 
@@ -1275,6 +1431,8 @@ Stage 5    시스템 개발 → 배포·운영 이관
 | **거버넌스 채택** | 신규 검토 건의 **100%가 시스템 게이트를 경유**, 우회 건 0 | 가동 후 3개월 |
 | **효율** | 게이트별 소요 기간 중위값 단축, 재작업률 감소 | 가동 후 6개월 |
 | **품질** | 체크리스트 완료율, **waiver 발생률 안정화**(초기 급증 후 하락) | 가동 후 6개월 |
+| **딜 검토 (축 C)** | 시스템·절차 위에서 **실제 딜 1건을 Screening→Group IC까지 완주**하고 IC 산출물이 승인됨 | 가동 후 3개월 |
+| **되먹임** | 딜 수행 중 발견된 절차 결함이 `interpretation`/`waiver`로 기록되어 **최소 1회 규정 개정으로 이어짐** | 가동 후 6개월 |
 | **지속성** | 규정 개정 1회가 **`policy:impact` → 시스템 반영까지 완주** | 첫 개정 시 |
 
 > **마지막 항목이 이 프로젝트의 진짜 시험대다.** 규정 개정 한 번을 시스템 반영까지 끊김 없이 통과시키지 못하면 문제 #9를 풀지 못한 것이다.
@@ -1334,8 +1492,28 @@ bun scripts/co-newbiz/newbiz.ts db:migrate && bun scripts/co-newbiz/newbiz.ts md
 ### 14.8 신규 설립
 인프라 항목별 **리드타임·비용이 capex/일정에 반영** · 하수 여유용량 부족 시 **기술·실행 차원 Red** · `compare_sites` 후보 3곳 비교 시 **인센티브 NPV가 인프라 capex·물류비와 같은 표에서 합산** · 착공 시한이 인허가 크리티컬 패스보다 짧으면 **감면 소멸 리스크 경고**
 
+### 14.8-1 ★ 인증·규제 대응
+1. 필수 인증(`mandatory=true`, `blocks_revenue=true`)을 미취득 상태로 두고 모델 실행 → **해당 시점 이후 매출이 0으로 강제**되는지 (낙관적 ramp-up이 그려지면 실패)
+2. 인증 선후관계 DAG(ISO 9001 → IATF 16949 등)에서 **크리티컬 패스가 산출**되고 매출 개시 시점이 그에 맞춰 밀리는지
+3. **CoC 승계 판정**: `transferable_on_coc=false` 인증을 보유한 타겟 → **밸류에이션 프리미엄이 제거되고 `dd_finding.value_impact`에 반영**되는지 (반영 안 되면 실패 — M&A 최대 함정)
+4. 확보 옵션 4종(자체·인수·파트너십·OEM) 비교표에 리드타임·비용·리스크가 모두 채워지는지
+5. 시행 예정 규제(`regulatory_change.effective_on` 미래) 등록 → **영향받는 `assumption`이 자동 플래그**되는지
+6. 인허가(`permit`)와 인증(`certification`)이 **서로 다른 테이블·다른 크리티컬 패스로 관리**되는지 (합쳐져 있으면 실패)
+
 ### 14.9 파트너십
 롱리스트→숏리스트 평가 축 완비 · **제재 이력 후보가 컴플라이언스 리스크 High로 자동 분류** · 파트너 확보 실패가 **지연이 아닌 중단(Kill Criteria)으로 처리**
+
+### 14.9-1 ★ 딜 검토 실행 (축 C)
+1. 딜 워크스페이스 개설 → 게이트별 에이전트 투입이 **`procedures/*.yaml` 정의대로** 이뤄지는지 (스킬에 하드코딩돼 있으면 §6.8 권위 분리 위반)
+2. **권한 상속 검증 — 가장 중요**: 프로젝트 **비멤버** 사용자가 에이전트 분석을 요청 → **거부**되는지. 에이전트가 호출자 권한을 넘어 데이터를 읽으면 **실패**
+3. **에이전트 전용 서비스 계정이 코드베이스에 존재하지 않는지** 검사 (편의상 만들어지는 순간 §8.10 전체가 무력화)
+4. MNPI 프로젝트에서 `insider_list` 미등재 사용자의 에이전트 실행 → **거부**
+5. 산출물에 `agent_key`/`model_id`/`agent_version`/요청자/검토자가 **각인**되는지
+6. 에이전트가 추정한 값이 `assumed` + `rationale` 없이 저장되면 **실패**
+7. **사람 검토 없이 게이트 통과 시도 → 차단** (`analysis_task.reviewed_by` NULL이면 게이트 미충족)
+8. 에이전트 제안 RAG 등급과 사람 확정 등급이 다를 때 **사유가 기록**되는지
+9. M&A 교차검증 **6종**(`antitrust`·`customer-retention`·`incentive`·`hr-integration`·`certification`·`region-lead`) 중 하나라도 누락 시 게이트 차단
+10. 딜 수행 중 발견된 절차 결함이 `interpretation` 또는 `waiver`로 **기록되어 규정 개정 우선순위에 반영**되는지 (§8.9-1 (g) 되먹임)
 
 ### 14.10 인증·권한
 초기화 전체 흐름(요청→관리자 임시→로그인 시 **전 화면 차단·변경 강제**→정상) · **DB 직접 열어 `password_hash` 원문 복원 불가** · `viewer`로 모델 실행 → **403** · 실패 N회 잠금 · 세션 강제 종료 후 401
@@ -1380,6 +1558,10 @@ bun scripts/co-newbiz/newbiz.ts db:export --dialect postgres --out /tmp/pg.sql
 | O-9 | Thin Slice(2.5)와 수기 파일럿(3) 병행 시 인력 충돌 가능성 — O-7 해소 후 판단 | Stage 1 (M8) |
 | O-10 | RAG 캘리브레이션에 쓸 과거 의사결정 데이터 확보 여부 — 문서로만 남아 등급 재현이 어려울 수 있음 | Stage 3 착수 전 |
 | O-11 | `maintainer: external-counsel` 프로파일 필드의 외부 자문 비용 — 예산 반영 필요 | Stage 2 |
+| O-12 | **인증기관·시험소 선정과 비용** — 선급·IATF 등은 인증기관별 리드타임·비용 차이가 크다. 대상 산업 확정 후 실사 필요 | Stage 2 (M6 이후) |
+| O-13 | **인증 CoC 승계 규칙의 근거 확보** — 인증 스킴별 법인변경 시 재심사 여부는 스킴 규정을 직접 확인해야 한다. `legal-counsel` + 인증기관 조회 필요 | Stage 3 |
+| O-14 | **축 C 승격에 따른 인력·부하 재산정** — 딜 검토가 정식 업무가 되면 상시 부하가 발생한다. O-7 일정·리소스 추정에 반드시 포함 | Stage 1 (M8) |
+| O-15 | **동시 진행 딜 수의 상한** — 정보 격리(wall_group)·검토 품질·에이전트 비용을 고려한 동시 처리 한계 미정 | Stage 3 |
 
 ---
 
