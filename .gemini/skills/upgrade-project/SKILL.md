@@ -1,7 +1,7 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.2.0"
+version: "1.2.1"
 status: active
 scope: workspace
 owner: pm
@@ -102,7 +102,7 @@ converging on similar wording is expected. `scripts/audit.ts`'s cross-variant co
 commonization check (WARN-only) flags sections with high textual overlap across variants as
 candidates for promotion into `docs/context.md` (if shared by most variants) or a shared skill
 (if shared by only a subset) — run it after scaffolding a new variant, or at minimum every 5
-variants / quarterly. Full rationale: ADR-0050 Part 3.
+variants / quarterly. Full procedure: `skills/context-commonization-review/SKILL.md`. Full rationale: ADR-0050 Part 3.
 
 ## Step-by-Step Procedure
 
