@@ -165,12 +165,6 @@ Required env keys (see `.env.sample`):
 # 2. After implementation
 /post-write                # SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck
 /transport                 # Create/release CTS transport
-
-# 3. Sync to Git
-/sync "feat: description"  # memlog → changelog → audit → commit → PR
-
-# Manual equivalent
-bun scripts/dev-sync.ts "feat: description"
 ```
 
 > **Requirements-Driven Deliverables Workflow (Stage 1 to 5)**:
@@ -180,6 +174,18 @@ bun scripts/dev-sync.ts "feat: description"
 > - `03_implementation_report.md` (Stage 3: Implementation Summary — Owner: Specialist Developers)
 > - `04_qa_report.md` (Stage 4: QA & Verification — Owner: QA Engineer)
 > - Release & sync (Stage 5 — Owner: PM & DevOps/Admin)
+
+---
+
+## Git / PR Workflow
+
+See `docs/context.md` § Git / PR Workflow for the full `/sync` pipeline (memlog → MEMORY.md
+index update → CHANGELOG.md → audit → branch → commit/push → PR). No content override —
+`co-abap`'s only variant-specific rule is ordering: `/sync "feat: description"` always runs
+**after** `/transport` (Development Workflow step 2, above) — the CTS transport must be
+created/released before the git-side commit, or the two are out of sync.
+
+Manual equivalent: `bun scripts/dev-sync.ts "feat: description"`.
 
 ---
 
