@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
 /**
  * create-l3-scaffold.ts
  *
@@ -190,33 +190,50 @@ function parseArgs(argv: string[]): Args {
 // Step 3: Copy common overlay
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Top-level templates/common/ entries that must NOT be blanket-copied into an L3
+// scaffold: workspace-only artifacts (node_modules, bun.lock, propagation-map.json,
+// .gateguard-state — none of these belong in a project checkout), items handled by
+// a dedicated step elsewhere in this script (docs/, agents/, scripts/, skills/,
+// memory/, package.json — each needs L3-specific filtering or stub generation, not
+// a raw copy), items synced by a separate mechanism (.agents/ — populated later by
+// scripts/sync-skills.ts, not at scaffold time), and files that must stay a
+// Phase-A-specific stub rather than the L0 original (README.md, README_ko.md,
+// AGENTS.md, SECURITY.md — see generateStubs()).
+//
+// Everything else is copied by default. This mirrors the "default include, explicit
+// exclude" pattern new-project.ts's copyDir(commonDir, projectDir) uses, rather than
+// the previous allowlist ("default exclude, explicit include"): an allowlist silently
+// drops any new file added to templates/common/ until someone remembers to list it
+// here — that's exactly how docs/context.md (added 2026-05-27) and .claude/skills.json
+// + .gemini/skills.json went missing from every L3 scaffold for months.
+const COMMON_OVERLAY_EXCLUDE = new Set([
+  '.agents', '.gateguard-state', 'node_modules', 'bun.lock', 'propagation-map.json',
+  'docs', 'agents', 'scripts', 'skills', 'memory', 'package.json',
+  'README.md', 'README_ko.md', 'AGENTS.md', 'SECURITY.md',
+]);
+
 function copyCommonOverlay(projectDir: string): void {
   log("📦 Copying templates/common/ overlay…");
 
-  // Top-level files & directories (excluding scripts/ which is filtered below).
-  const overlayItems = [
-    ".gitignore",
-    ".gitattributes",
-    ".editorconfig",
-    ".env.sample",
-    ".gitleaks.toml",
-    ".githooks",
-    ".github",
-    ".claude/settings.json",
-    ".claude/commands",
-    ".claude/skills",
-    ".gemini/settings.json",
-    ".gemini/commands",
-    ".gemini/skills",
-    "CHANGELOG.md",
-  ];
-
-  for (const item of overlayItems) {
-    copyItem(path.join(COMMON_DIR, item), path.join(projectDir, item));
+  for (const entry of fs.readdirSync(COMMON_DIR)) {
+    if (COMMON_OVERLAY_EXCLUDE.has(entry)) continue;
+    copyItem(path.join(COMMON_DIR, entry), path.join(projectDir, entry));
   }
 
-  copyItem(path.join(COMMON_DIR, 'CLAUDE.md'), path.join(projectDir, 'CLAUDE.md'));
-  copyItem(path.join(COMMON_DIR, 'GEMINI.md'), path.join(projectDir, 'GEMINI.md'));
+  // Protect docs/context.md from accidental merge overwrites (matches new-project.ts
+  // §5.7). templates/common/.gitattributes doesn't carry this rule itself — it's
+  // scaffold-time-only, since it only makes sense once docs/context.md actually exists
+  // in the project — so every scaffolding path has to add it explicitly.
+  const gitattributesPath = path.join(projectDir, '.gitattributes');
+  const gaRule = 'docs/context.md merge=ours\n';
+  if (fs.existsSync(gitattributesPath)) {
+    const ga = fs.readFileSync(gitattributesPath, 'utf8');
+    if (!ga.includes('docs/context.md')) {
+      fs.appendFileSync(gitattributesPath, `\n${gaRule}`);
+    }
+  } else {
+    writeFile(gitattributesPath, gaRule);
+  }
 
   // scripts/ — copy everything except L0-only scripts (resolved via layer-filter).
   const dstScripts = path.join(projectDir, "scripts");
@@ -617,6 +634,30 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
     log('  ✅ docs/_common/ files copied');
   }
 
+  // docs/context.md — the immutable common project-context file (SSOT: templates/common/docs/context.md).
+  // It lives directly under templates/common/docs/, not inside docs/_common/, so the loop above never
+  // picks it up. new-project.ts gets this file for free via its full copyDir(commonDir, projectDir);
+  // this L3 path has to copy it explicitly, or every scaffolded project silently ships without it.
+  copyItem(path.join(COMMON_DIR, 'docs', 'context.md'), path.join(projectDir, 'docs', 'context.md'));
+  log('  ✅ docs/context.md copied (immutable common project context)');
+
+  // The copy above is still the raw common template — [Project Name] / <variant-name> / <variant>
+  // placeholders unresolved. new-project.ts's substitute-placeholders.ts helper would do this,
+  // but it sweeps every text file in the project — several copied skill docs (e.g.
+  // scripts/SCRIPTS.md's `templates/co-*/scripts/<variant>/` example) use the same literal
+  // <variant> token as illustrative doc text, not a placeholder, and would get corrupted.
+  // Scope the substitution to just the one file that actually needs it.
+  const slug = toVariantSlug(variant);
+  const contextMdPath = path.join(projectDir, 'docs', 'context.md');
+  if (fs.existsSync(contextMdPath)) {
+    const substituted = fs.readFileSync(contextMdPath, 'utf8')
+      .replace(/\[Project Name\]/g, slug)
+      .replace(/<variant-name>/g, slug)
+      .replace(/`([^`]*)<variant>([^`]*)`/g, `\`$1${slug}$2\``);
+    fs.writeFileSync(contextMdPath, substituted, 'utf8');
+    log('  ✅ docs/context.md placeholders substituted ([Project Name], <variant-name>, <variant>)');
+  }
+
   const dirs = (domain && DOMAIN_DOC_DIRS[domain]) || DEFAULT_DOC_DIRS;
   if (domain && !DOMAIN_DOC_DIRS[domain]) {
     log(`  ⚠️  Unknown domain "${domain}" — using default doc layout.`);
@@ -926,11 +967,14 @@ function main(): void {
     log("");
     log("🔍 DRY RUN — the following would be created:");
     log(`  Projects/${args.variant}/`);
-    log("    ├─ common overlay: .gitignore, .env.sample, .githooks/,");
-    log("    │     .claude/{settings.json,commands/,skills/}, .gemini/{...}, CHANGELOG.md");
+    log("    ├─ common overlay: every templates/common/ top-level file/dir NOT in");
+    log("    │     COMMON_OVERLAY_EXCLUDE — .gitignore, .env.sample, .githooks/, .github/,");
+    log("    │     .claude/{settings.json,commands/,skills/,skills.json}, .gemini/{...}, CHANGELOG.md");
+    log("    ├─ .gitattributes + 'docs/context.md merge=ours' protection rule");
     log("    ├─ scripts/ (Tier 3 bootstrap/setup scripts excluded), scripts/hooks/,");
     log("    │     scripts/package.json, scripts/SCRIPTS.md");
     log("    ├─ skills/ (all common skills)");
+    log("    ├─ docs/context.md (immutable, placeholders substituted) + docs/_common/*");
     log("    ├─ stubs: variant.json, _ORIGIN.md, _COMMON_VERSION.md,");
     log("    │     PROMOTION_CHECKLIST.md, SECURITY.md, README.md, README_ko.md, AGENTS.md");
     log("    ├─ docs/VERSION_MANIFEST.md + domain doc folders");
@@ -938,7 +982,7 @@ function main(): void {
     log("    ├─ package.json (adapted from templates/common/package.json)");
     log("    └─ agents/README.md");
     log("");
-    log("  Then: git init + hooks, bun install (project root)");
+    log("  Then: git init + hooks, bun install (project root), post-scaffold audit");
     log("");
     log("Dry run complete — no files written.");
     return;
@@ -970,6 +1014,19 @@ function main(): void {
   // Step 8: package.json + bun install
   writePackageJson(projectDir, args.variant);
   bunInstall(projectDir);
+
+  // Step 9: post-scaffold audit — new-project.ts self-verifies immediately after
+  // scaffolding; this script previously didn't, so scaffold defects (like the missing
+  // docs/context.md this version fixes) surfaced only later, whenever someone happened
+  // to run /sync's pre-commit audit gate. Non-fatal: a fresh L3 draft still has TODOs
+  // by design (agents/pm.md placeholders, etc.), so failures here are informational.
+  log("\nRunning post-scaffold audit…");
+  try {
+    runNoShell('bun', [path.join(projectDir, 'scripts', 'audit.ts'), '--skip-memory'], { cwd: projectDir });
+    log(`\n✅ Project scaffold verified: Projects/${args.variant}/`);
+  } catch {
+    log('\n⚠️  Project scaffolded but audit found issues — review above before continuing.');
+  }
 
   // Step 10: summary
   printSummary(args.variant);

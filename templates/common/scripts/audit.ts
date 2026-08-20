@@ -1,4 +1,7 @@
-// @version 2.13.2
+// @version 2.13.3
+// v2.13.3: docs/context.md missing now FAILs (not just Warns) for L2/L3 projects —
+//   previously any project without it was silently assumed to be the workspace root,
+//   letting create-l3-scaffold.ts's missing-context.md defect pass audit undetected.
 // v2.13.1: Homoglyph check (3.7) now skips docs/adr/ and docs/designs/ — these
 //   legitimately use Greek letters as math notation, not homoglyph-attack candidates.
 import { $ } from 'bun';
@@ -54,7 +57,11 @@ if (fs.existsSync('CHANGELOG.md')) {
 // 2. context.md must be accessible (workspace root / L1 template context only —
 //    L2 variant templates and L3 projects intentionally omit context.md and use
 //    docs/context.md instead; variant.json, when present, also marks a generated project copy)
-if (fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md')) {
+// isWorkspaceRoot is reused below (§6-8) to tell "we ARE the workspace root" apart from
+// "we're a scaffolded project that's simply missing its docs/context.md" — the two cases
+// look identical if you only check for docs/context.md's absence.
+const isWorkspaceRoot = fs.existsSync('CONSTITUTION.md') || fs.existsSync('../CONSTITUTION.md') || fs.existsSync('../../CONSTITUTION.md');
+if (isWorkspaceRoot) {
     Pass('CONSTITUTION.md accessible');
 } else if (fs.existsSync('docs/context.md') || fs.existsSync('variant.json')) {
     Pass('CONSTITUTION.md check skipped (L2/L3 project — uses docs/context.md)');
@@ -395,8 +402,10 @@ if (!LIFECYCLE_ONLY) {
             Pass('docs/research/: all research files have ## References section');
         }
     }
-} else {
+} else if (isWorkspaceRoot) {
     Warn('docs/context.md not found - skipping project-level checks (workspace root)');
+} else {
+    Fail('docs/context.md missing — every scaffolded L2/L3 project must carry an immutable docs/context.md (SSOT: templates/common/docs/context.md). This usually means the project was created before create-l3-scaffold.ts copied this file (fixed in v1.10.1) — copy templates/common/docs/context.md into docs/context.md to repair it.');
 }
 }
 
