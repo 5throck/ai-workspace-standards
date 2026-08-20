@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.8.1
+// @version 1.9.0
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
+// v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
+//           (version-footer sync) — the common template carries no managed-block markers,
+//           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
+//           footer existing specifically for this comparison. VARIANT_DOCS_SYNC's src resolution
+//           generalized from a variant-dir-only join() to resolveTemplate() (variant, then common)
+//           to support docs/context.md's common-only SSOT.
 // v1.3.0: Added multi-pattern managed block support (WORKSPACE-MANAGED, COMMON-CLAUDE, COMMON-GEMINI);
 //           removed stale agent MERGE references and CONSTITUTION.md
 // v1.6.0: Added --prune-removed, --rollback, conflict detection for SYNC files, auto-discovery for script subdirs
@@ -481,7 +487,6 @@ function inlineVersionGt(a: string, b: string): boolean {
 // ── DOCS_MERGE: common/variant docs with managed blocks ───────────────────────
 console.log('--- DOCS_MERGE: common and variant docs (managed blocks) ---');
 const DOCS_MERGE_FILES: string[] = [
-  'docs/context.md',
   'AGENTS.md',
 ];
 // Auto-discover variant-specific context file
@@ -519,14 +524,18 @@ console.log('');
 
 // ── VARIANT_DOCS_SYNC: variant-specific docs (version/hash based) ──────────────
 console.log('--- VARIANT_DOCS_SYNC: variant documentation (version/hash based) ---');
+// docs/context.md's SSOT is templates/common/, not the variant dir — WS-07 forbids
+// variants from carrying their own copy — so it needs the variant-then-common
+// fallback resolveTemplate() already provides, not a variant-dir-only join().
 const VARIANT_DOCS_SYNC: string[] = [
+  'docs/context.md',
   'docs/engagement-orchestration.md',
   'docs/team-configuration-guide.md',
 ];
 for (const rel of VARIANT_DOCS_SYNC) {
-  const src = join(templatesDir, rel);
+  const src = resolveTemplate(rel);
   const dest = join(projectDir, rel);
-  if (!existsSync(src)) { console.log(`  SKIP (no template): ${rel}`); continue; }
+  if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
 
   const tplInlineVer = extractInlineVersion(src);
   if (!existsSync(dest)) {

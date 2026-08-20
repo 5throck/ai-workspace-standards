@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-20T18:59:01.265Z
+**Generated**: 2026-08-20T19:17:50.590Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -66,7 +66,7 @@
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | translate | 1.0.0 | active | skills/translate/SKILL.md | workspace | translate, translation, localize, Korean translation | pm |
 | update-bun-packages | 1.3.0 | active | skills/update-bun-packages/SKILL.md | workspace | update bun packages, upgrade bun packages, bun update, update dependencies, upgrade dependencies | pm |
-| upgrade-project | 1.1.0 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
+| upgrade-project | 1.2.0 | active | skills/upgrade-project/SKILL.md | workspace | upgrade project, upgrade template, sync project with template, refresh project, update project infrastructure | pm |
 | validate-docs-links | 1.0.0 | active | skills/validate-docs-links/SKILL.md | workspace | validate links, check links, broken links, docs validation | pm |
 | variant-feature | 1.0.0 | active | skills/variant-feature/SKILL.md | workspace | add feature to variant, extend variant, variant feature, add agent to variant, add skill to variant | scaffolding-expert |
 | zod-contract-gate | 1.0.0 | active | skills/zod-contract-gate/SKILL.md | workspace | zod-contract-gate, /zod-contract-gate, zod contract validation, schema contract gate, runtime schema validation | architect |
@@ -84,7 +84,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.0.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.13.3 | scripts/audit.ts | bun |
+| audit.ts | 2.14.0 | scripts/audit.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
@@ -134,7 +134,7 @@
 | test-runner.ts | 1.1.0 | scripts/test-runner.ts | fs, os, path |
 | ticket.ts | 1.1.0 | scripts/ticket.ts | N/A |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| upgrade-project.ts | 1.8.1 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.9.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |

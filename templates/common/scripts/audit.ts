@@ -1,4 +1,7 @@
-// @version 2.13.3
+// @version 2.14.0
+// v2.14.0: New checkVariantContextCommonization() — WARN-only cross-variant check flagging
+//   docs/<variant>.context.md sections that duplicate the same-heading section in another
+//   variant's context.md by >50% overlap (ADR-0050 Part 3, mirrors checkVariantScriptDrift()).
 // v2.13.3: docs/context.md missing now FAILs (not just Warns) for L2/L3 projects —
 //   previously any project without it was silently assumed to be the workspace root,
 //   letting create-l3-scaffold.ts's missing-context.md defect pass audit undetected.
@@ -1244,6 +1247,113 @@ function checkVariantScriptDrift() {
     }
 }
 checkVariantScriptDrift();
+
+// Cross-variant context commonization check (WARN-only, first-pass heuristic).
+// Flags docs/<variant>.context.md sections that duplicate the SAME-heading section in
+// another variant's context.md by >50% content overlap — a candidate for promotion into
+// the shared docs/context.md (ADR-0050 Part 3), or extraction into a shared skill if only
+// a subset of variants need it. Mirrors checkVariantScriptDrift()'s similarity heuristic,
+// scoped per markdown section instead of per whole file.
+function checkVariantContextCommonization() {
+    const templatesDir = 'templates';
+    if (!fs.existsSync(templatesDir)) return;
+
+    const variants = fs.readdirSync(templatesDir)
+        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    if (variants.length < 2) return; // nothing to compare cross-variant
+
+    type Section = { variant: string; heading: string; lines: Set<string> };
+    const sections: Section[] = [];
+
+    function getContentLines(text: string): Set<string> {
+        const lines = new Set<string>();
+        for (const line of text.split('\n')) {
+            const trimmed = line.trim();
+            if (trimmed) lines.add(trimmed);
+        }
+        return lines;
+    }
+
+    function normalizeHeading(heading: string): string {
+        return heading.replace(/^#{2,3}\s+/, '').trim().toLowerCase();
+    }
+
+    for (const variant of variants) {
+        const docsDir = path.join(templatesDir, variant, 'docs');
+        if (!fs.existsSync(docsDir)) continue;
+        for (const file of fs.readdirSync(docsDir)) {
+            if (!file.endsWith('.context.md')) continue;
+            const content = readUTF8File(path.join(docsDir, file));
+            const lines = content.split('\n');
+            let currentHeading = '';
+            let currentBody: string[] = [];
+            const flush = () => {
+                if (currentHeading && currentBody.length > 0) {
+                    const bodyLines = getContentLines(currentBody.join('\n'));
+                    if (bodyLines.size >= 3) { // skip trivial/near-empty sections
+                        sections.push({ variant, heading: normalizeHeading(currentHeading), lines: bodyLines });
+                    }
+                }
+            };
+            for (const line of lines) {
+                if (/^#{2,3}\s+/.test(line)) {
+                    flush();
+                    currentHeading = line;
+                    currentBody = [];
+                } else {
+                    currentBody.push(line);
+                }
+            }
+            flush();
+        }
+    }
+
+    // Group by normalized heading — only compare sections that answer the same question.
+    const byHeading = new Map<string, Section[]>();
+    for (const s of sections) {
+        if (!byHeading.has(s.heading)) byHeading.set(s.heading, []);
+        byHeading.get(s.heading)!.push(s);
+    }
+
+    // Aggregate per heading rather than reporting every pair — a heading shared across
+    // N variants produces up to N*(N-1)/2 pairwise matches, which buries the one decision
+    // that actually matters ("is this heading common enough to promote?") under noise.
+    let flaggedHeadings = 0;
+    const totalVariantCount = variants.length;
+    for (const [heading, group] of byHeading) {
+        const involved = new Set<string>();
+        let minSim = 1, maxSim = 0;
+        for (let i = 0; i < group.length; i++) {
+            for (let j = i + 1; j < group.length; j++) {
+                const a = group[i], b = group[j];
+                if (a.variant === b.variant) continue;
+                let intersection = 0;
+                for (const line of a.lines) if (b.lines.has(line)) intersection++;
+                const denominator = Math.min(a.lines.size, b.lines.size);
+                const similarity = denominator > 0 ? intersection / denominator : 0;
+                if (similarity > 0.50) {
+                    involved.add(a.variant);
+                    involved.add(b.variant);
+                    minSim = Math.min(minSim, similarity);
+                    maxSim = Math.max(maxSim, similarity);
+                }
+            }
+        }
+        if (involved.size > 0) {
+            flaggedHeadings++;
+            const range = minSim === maxSim ? `${(minSim * 100).toFixed(0)}%` : `${(minSim * 100).toFixed(0)}-${(maxSim * 100).toFixed(0)}%`;
+            const variantList = [...involved].sort().join(', ');
+            Warn(`Context commonization candidate: "${heading}" section is >50% similar (${range} overlap) across ${involved.size}/${totalVariantCount} variants: ${variantList} — consider promoting to docs/context.md if shared by most variants, or a shared skill if only a subset (ADR-0050 Part 3)`);
+        }
+    }
+
+    if (flaggedHeadings === 0) {
+        Pass('Context commonization check: no high-similarity cross-variant sections found');
+    } else {
+        Warn(`Context commonization check: ${flaggedHeadings} section heading(s) flagged across variants (WARN-only, first-pass heuristic — see ADR-0050 Part 3)`);
+    }
+}
+checkVariantContextCommonization();
 
 // Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
 checkL2VariantIntegrity();

@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: "1.1.0"
+version: "1.2.0"
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-07-31
+last_reviewed: 2026-08-21
 metadata:
   type: scaffolding
   triggers:
@@ -58,7 +58,7 @@ The upgrade tool classifies files into categories:
 | **MERGE** | Section-based merge via markers | `CLAUDE.md`, `GEMINI.md`, `.gitignore`, `agents/pm.md` |
 | **DOCS_MERGE** | Section-based merge (managed blocks) | `AGENTS.md`, `docs/<variant>.context.md` |
 | **DOCS_OVERWRITE** | Plain overwrite (no blocks) | `docs/phase-definitions.md` |
-| **VARIANT_DOCS_SYNC** | Version/hash-based sync | `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md` |
+| **VARIANT_DOCS_SYNC** | Version/hash-based sync | `docs/context.md`, `docs/engagement-orchestration.md`, `docs/team-configuration-guide.md` |
 | **COMMANDS_SYNC** | Hash-based sync | `.claude/commands/*.md`, `.gemini/commands/*.md` |
 | **SYNC_IF_NEWER** | Version-based update | Scripts (`.ts`), agents (`.md`), skills (`SKILL.md`) |
 | **PRESERVE** | Never touched | `README.md`, `src/` |
@@ -84,6 +84,25 @@ The merge engine recognizes these marker patterns for section-based merge:
 3. **Security bootstrap verification**: Post-upgrade check of critical files
 4. **Local modification detection**: Warns when overwriting files with uncommitted local changes
 5. **Post-upgrade sync-skills.ts**: Automatically distributes platform skills after upgrade
+
+### `docs/context.md` Version Sync
+
+`docs/context.md` (the immutable common project-context file) carries an inline `*context.md
+version: X.Y*` footer that `VARIANT_DOCS_SYNC` compares against `templates/common/docs/context.md`'s
+footer on every upgrade run — if the project's copy is unmodified (`git status` clean for that file)
+and behind, it's updated automatically; if it has local modifications, the upgrade reports a
+CONFLICT instead of overwriting it. "Immutable" means don't hand-edit it for project-specific
+content (that belongs in `docs/<variant>.context.md`) — it does not mean the file never changes;
+this is the sanctioned, conflict-aware channel for it to receive non-breaking governance/infra
+updates over time. `docs/<variant>.context.md`'s `<!-- VARIANT-INJECT -->`-wrapped sections (in
+DOCS_MERGE, above) are the equivalent mechanism for that file's shared-guidance subset.
+
+As the number of variants grows, unrelated `docs/<variant>.context.md` files independently
+converging on similar wording is expected. `scripts/audit.ts`'s cross-variant context
+commonization check (WARN-only) flags sections with high textual overlap across variants as
+candidates for promotion into `docs/context.md` (if shared by most variants) or a shared skill
+(if shared by only a subset) — run it after scaffolding a new variant, or at minimum every 5
+variants / quarterly. Full rationale: ADR-0050 Part 3.
 
 ## Step-by-Step Procedure
 

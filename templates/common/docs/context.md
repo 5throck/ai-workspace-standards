@@ -279,6 +279,28 @@ For full lifecycle procedures:
 - **Skill Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
 - **Script Lifecycle**: See [AGENTS.md §8 Lifecycle Management](../AGENTS.md#8-lifecycle-management)
 
+### Context Commonization Review
+
+This file (`docs/context.md`) and each variant's `docs/<variant>.context.md` follow the same
+one-directional inheritance rule ADR-0050 already established for scripts: `docs/context.md`
+(this file) is the SSOT for content genuinely shared by every variant; a `docs/<variant>.context.md`
+may only add variant-specific content, never re-state what belongs here. As the number of variants
+grows, unrelated variants independently reaching for the same wording is expected — left unmanaged,
+that duplication compounds project-by-project instead of being fixed once at the source.
+
+- **Trigger**: after scaffolding a new variant (`create-variant` skill), and at minimum every 5
+  new variants or once per quarter (whichever comes first) since the last review.
+- **Detection**: `scripts/audit.ts`'s cross-variant context drift check (mirrors `checkVariantScriptDrift()`)
+  flags `docs/<variant>.context.md` sections with high textual overlap across multiple variants —
+  WARN-only, a first-pass heuristic requiring human judgment, not an auto-fix.
+- **Decision** (architect-owned): content shared by nearly all variants → promote into this file, so
+  the version-footer sync in `upgrade-project.ts` propagates it everywhere automatically. Content
+  shared by only a subset → extract into a shared skill or `docs/_common/` reference the affected
+  variants opt into, rather than bloating this file (every project pays the cost of reading it —
+  irrelevant content here is a tax on variants that never needed it). Coincidental, likely-to-diverge
+  similarity → leave alone.
+- Full rationale, thresholds, and worked examples: ADR-0050 Part 3 (Variant Script Inheritance and Golden-Reference SSOT) in the workspace root repository — not linked here for the same relative-path reason noted above.
+
 ## Platform Hooks & Governance Enforcement
 
 This workspace uses a 3-layer enforcement model (Hook → Prompt → Skill) to ensure governance rules are applied across all platforms.
@@ -324,4 +346,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.1 — ECC Phase 1 governance enforcement layers*
+*context.md version: 2.2 — fixed broken ADR-0021 relative link; added Context Commonization Review (ADR-0050 Part 3)*
