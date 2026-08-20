@@ -290,16 +290,20 @@ that duplication compounds project-by-project instead of being fixed once at the
 
 - **Trigger**: after scaffolding a new variant (`create-variant` skill), and at minimum every 5
   new variants or once per quarter (whichever comes first) since the last review.
-- **Detection**: `scripts/audit.ts`'s cross-variant context drift check (mirrors `checkVariantScriptDrift()`)
+- **Detection**: `scripts/audit.ts`'s `checkVariantContextCommonization()` (mirrors `checkVariantScriptDrift()`)
   flags `docs/<variant>.context.md` sections with high textual overlap across multiple variants —
   WARN-only, a first-pass heuristic requiring human judgment, not an auto-fix.
-- **Decision** (architect-owned): content shared by nearly all variants → promote into this file, so
-  the version-footer sync in `upgrade-project.ts` propagates it everywhere automatically. Content
-  shared by only a subset → extract into a shared skill or `docs/_common/` reference the affected
-  variants opt into, rather than bloating this file (every project pays the cost of reading it —
-  irrelevant content here is a tax on variants that never needed it). Coincidental, likely-to-diverge
-  similarity → leave alone.
-- Full rationale, thresholds, and worked examples: ADR-0050 Part 3 (Variant Script Inheritance and Golden-Reference SSOT) in the workspace root repository — not linked here for the same relative-path reason noted above.
+- **Decision** (architect-owned): content shared by nearly all variants → promote into this file via
+  `scripts/promote-context-section.ts`, so the version-footer sync in `upgrade-project.ts` propagates
+  it everywhere automatically. Content shared by only a subset → extract into a shared skill or
+  `docs/_common/` reference the affected variants opt into, rather than bloating this file (every
+  project pays the cost of reading it — irrelevant content here is a tax on variants that never
+  needed it). Coincidental, likely-to-diverge similarity → leave alone. A high overlap percentage is
+  a hint, not a verdict — `promote-context-section.ts` always shows a per-variant diff before writing
+  anything, since near-identical text can still carry a deliberate, load-bearing difference.
+- Full procedure: `skills/context-commonization-review/SKILL.md`. Full rationale, thresholds, and
+  worked examples: ADR-0050 Part 3 (Variant Script Inheritance and Golden-Reference SSOT) in the
+  workspace root repository — not linked here for the same relative-path reason noted above.
 
 ## Platform Hooks & Governance Enforcement
 
@@ -346,4 +350,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.2 — fixed broken ADR-0021 relative link; added Context Commonization Review (ADR-0050 Part 3)*
+*context.md version: 2.3 — Context Commonization Review now names its actual tooling (checkVariantContextCommonization(), promote-context-section.ts, context-commonization-review skill)*

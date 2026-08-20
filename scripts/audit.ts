@@ -1,4 +1,7 @@
-// @version 2.14.0
+// @version 2.14.1
+// v2.14.1: checkVariantContextCommonization()'s section-parsing extracted to
+//   helpers/context-sections.ts (shared with the new promote-context-section.ts) —
+//   behavior-preserving refactor, no output change.
 // v2.14.0: New checkVariantContextCommonization() — WARN-only cross-variant check flagging
 //   docs/<variant>.context.md sections that duplicate the same-heading section in another
 //   variant's context.md by >50% overlap (ADR-0050 Part 3, mirrors checkVariantScriptDrift()).
@@ -14,6 +17,7 @@ import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
+import { splitIntoSections, getContentLines } from './helpers/context-sections.ts';
 import * as url from 'node:url';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 
@@ -1265,46 +1269,18 @@ function checkVariantContextCommonization() {
     type Section = { variant: string; heading: string; lines: Set<string> };
     const sections: Section[] = [];
 
-    function getContentLines(text: string): Set<string> {
-        const lines = new Set<string>();
-        for (const line of text.split('\n')) {
-            const trimmed = line.trim();
-            if (trimmed) lines.add(trimmed);
-        }
-        return lines;
-    }
-
-    function normalizeHeading(heading: string): string {
-        return heading.replace(/^#{2,3}\s+/, '').trim().toLowerCase();
-    }
-
     for (const variant of variants) {
         const docsDir = path.join(templatesDir, variant, 'docs');
         if (!fs.existsSync(docsDir)) continue;
         for (const file of fs.readdirSync(docsDir)) {
             if (!file.endsWith('.context.md')) continue;
             const content = readUTF8File(path.join(docsDir, file));
-            const lines = content.split('\n');
-            let currentHeading = '';
-            let currentBody: string[] = [];
-            const flush = () => {
-                if (currentHeading && currentBody.length > 0) {
-                    const bodyLines = getContentLines(currentBody.join('\n'));
-                    if (bodyLines.size >= 3) { // skip trivial/near-empty sections
-                        sections.push({ variant, heading: normalizeHeading(currentHeading), lines: bodyLines });
-                    }
-                }
-            };
-            for (const line of lines) {
-                if (/^#{2,3}\s+/.test(line)) {
-                    flush();
-                    currentHeading = line;
-                    currentBody = [];
-                } else {
-                    currentBody.push(line);
+            for (const { heading, body } of splitIntoSections(content)) {
+                const bodyLines = getContentLines(body);
+                if (bodyLines.size >= 3) { // skip trivial/near-empty sections
+                    sections.push({ variant, heading, lines: bodyLines });
                 }
             }
-            flush();
         }
     }
 
