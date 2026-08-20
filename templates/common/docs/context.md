@@ -264,6 +264,25 @@ Use an external computation tool when the task involves ANY of the following:
 
 ---
 
+## Git / PR Workflow
+
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+
+```
+/sync "feat: description"
+  — 1. memory log (memlog)
+  — 2. MEMORY.md index update (sync-md)
+  — 3. CHANGELOG.md [Unreleased] auto-add
+  — 4. audit.ts  (must exit 0)
+  — 5. git checkout -b pr/<date>-<slug>
+  — 6. git commit + push
+  — 7. gh pr create
+```
+
+> All PR titles, bodies, and review comments must be in **English**.
+
+---
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
@@ -350,4 +369,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.3 — Context Commonization Review now names its actual tooling (checkVariantContextCommonization(), promote-context-section.ts, context-commonization-review skill)*
+*context.md version: 2.4 — promoted "Git / PR Workflow" section from 6 variants (co-consult, co-design, co-develop, co-export, co-security, co-work)*
