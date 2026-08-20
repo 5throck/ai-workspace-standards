@@ -1876,3 +1876,31 @@ O-3(수기 파일럿용 실제 딜)를 "조직 외부 입력을 기다리는 항
 사용자 결정(2026-08-20): **R&BD(Research & Business Development — 기술/IP 인수, 라이선스인, 사내벤처 분사)를 Green Field/Brown Field와 동급인 제3의 심사 유형이 아니라, Brown Field의 하위 유형(`case_subtype: rbd`)으로 편입**한다. R&BD 딜의 실질(지분 취득, 라이선스, 분사 신설법인에 대한 투자)이 부지 선정 중심의 Green Field보다 Brown Field의 딜 구조·밸류에이션 메커니즘에 가깝기 때문이다.
 
 이에 따라 별도의 `rbd-screening`/`rbd-pre-fs` 등 신규 절차 파일 대신, 기존 `brownfield-pre-fs`(딜 구조 가설에 "사내벤처 분사" 옵션 추가)와 `brownfield-dd`(R&BD 딜에 한해 신규 `rbd-technology-checklist.yaml` 실행 — 핵심기술 TRL, 정부 R&D 과제 조건(기술료·IP 귀속), FTO 실사, build/license/spin-off 사업화 경로 결정, 원소속 기업과의 지속 관계)를 확장하는 방식으로 반영했다. 포스코 사내벤처 프로그램(POVENTURES)의 앰버로드 분사(2023) 실제 사례로 즉시 검증했으며, 신규 체크리스트 항목과 구조 옵션 전부가 첫 실제 사례에서 유효성을 확인했다(사소한 보완 1건 제외). 상세는 `Projects/co-newbiz/docs/pilots/pilot-011-posco-amberoad.md`.
+
+## 19. 투자 Vehicle 구조화 부록 (2026-08-20)
+
+### 19.1 발견된 공백
+
+Stage 5 시스템 파일럿(§18 이후, `Projects/co-newbiz/docs/pilots/pilot-001-system-rerun.md`) 과정에서 사용자가 지적: 설계 전반에 걸쳐 "딜 구조 가설"(`brownfield-pre-fs`의 Pre-FS 산출물)이 **지분 취득 방식**(직접 매수 지분율, R&BD의 경우 사내벤처 분사 등 — §18.2)은 다루지만, **그 지분·자산을 보유하는 법인 구조**, 즉 투자 vehicle 자체의 설계(직접 투자법인 보유 vs 특수목적법인(SPV) 신설 vs 지주회사 경유)는 어디에도 명시되지 않는다. 밸류에이션·DD·인수 후 통합은 상세히 설계됐으나, "이 딜을 **어떤 그릇에 담을지**"는 누락된 축이다.
+
+이는 사소한 누락이 아니다 — 동일한 딜이라도 투자 vehicle 선택에 따라 (a) 세무 구조(원천징수·조세조약·이전가격), (b) 책임 격리(모회사 우발채무 전이 차단), (c) 자금조달 레버리지(SPV 자체 차입 vs 모기업 신용 활용), (d) Exit 용이성(지분 매각 vs 자산 매각, SPV째로 매각하는 옵션)이 전부 달라진다. 이 네 축을 검토하지 않고 진행한 딜 구조는, 이미 설계된 QoE·밸류에이션 브리지가 아무리 정교해도 최적이 아닐 수 있다.
+
+### 19.2 결정
+
+**투자 Vehicle 선택을 Pre-FS 단계의 딜 구조 가설에 필수 하위 항목으로 명시한다.** 별도 게이트를 신설하지 않고, 기존 `brownfield-pre-fs`/`greenfield-pre-fs` 절차의 "딜 구조 가설" 산출물 정의를 다음 4축을 포함하도록 확장한다:
+
+| 축 | 검토 내용 | 소유 |
+|---|---|---|
+| **세무 구조** | 투자국·타겟국 간 조세조약, SPV 소재지에 따른 원천징수 차등, 이전가격 리스크 | `valuation-agent`(모델링), `legal-counsel`(자문) |
+| **책임 격리** | 직접 보유 시 모회사로 우발채무·소송 리스크 전이 여부, SPV 격리 시 격리 실효성(법인격 부인 리스크 포함) | `legal-counsel`, `risk-officer` |
+| **자금조달 레버리지** | SPV 자체 차입(비소구/제한소구) vs 모기업 신용 활용 — 차입 구조가 DSCR·covenant 시뮬레이션(`debt-and-contingent-liability-simulation`)에 미치는 영향 | `valuation-agent` |
+| **Exit 구조** | 지분 매각 vs 자산 매각 vs SPV 통째 매각 — 각 방식의 세무·소요기간 차이가 초기 vehicle 선택에 미치는 영향 (Exit을 딜 구조 시점부터 역산) | `brownfield-agent`, `valuation-agent` |
+
+**Green Field에도 동일하게 적용**: 신규 법인 설립 시에도 모법인 직접 설립 vs 현지 지주 자회사 경유 여부는 동일한 4축(특히 세무·책임 격리)으로 검토 대상이다 — Brown Field 전용이 아니다.
+
+### 19.3 시스템 반영 방향 (co-newbiz 저장소, 후속 작업)
+
+- Pre-FS 딜 구조 가설 산출물에 투자 vehicle 결정 필드 추가 — 신규 절차 스키마 변경이 아니라 기존 `brownfield-pre-fs`/`greenfield-pre-fs`의 딜 구조 가설 산출물 정의 확장이므로 procedures 스키마 자체의 큰 변경은 아니다.
+- co-newbiz 저장소 스킬 인벤토리(설계 §9.3, Stage 5 Wave 5.8 신규 86개 스킬 목록)에 없는 축이었음을 확인 — 신규 스킬(가칭 `investment-vehicle-structuring`, 재무·시뮬레이션 그룹 또는 M&A 특수 그룹) 추가가 필요하며, 이미 존재하는 `investment-feasibility-modeling`(NPV/IRR 계산)·`jv-structuring`(파트너십 JV 거버넌스)과는 명확히 다른 관심사(어떤 그릇에 담을지 vs 그 안의 숫자·거버넌스)로 구분한다.
+- ADR 필요 여부: 이 결정이 딜 구조 가설의 산출물 정의를 바꾸므로 co-newbiz 저장소 자체의 ADR 트리거 목록(정책/절차 개정) 기준으로 co-newbiz 저장소에 별도 ADR을 남긴다 — 이 설계 문서 차원에서는 신규 ADR 없이 이 부록으로 결정을 기록한다.
+- 상세 구현(스킬 파일, ADR, 절차 스키마 확장)은 `Projects/co-newbiz/`에서 진행하며, 이 부록은 설계 원본에 이 축을 공식 기록하는 것이 목적이다.
