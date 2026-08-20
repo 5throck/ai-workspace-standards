@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-16
+# Last Updated: 2026-08-20
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -429,6 +429,15 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | 9-10 | Measure | — | layout_summary.md (estimate-layout.ts, Playwright-free) |
 | 11 | Export | **Gate 5 (required)** | sample_5slides.pdf → full .pdf |
 <!-- END VARIANT-INJECT -->
+
+---
+
+## Git / PR Workflow
+
+See `docs/context.md` § Git / PR Workflow for the full `/sync` pipeline (memlog → MEMORY.md
+index update → CHANGELOG.md → audit → branch → commit/push → PR). No content override — none
+of `co-deck`'s 4 production workflows (Presentation, Handbook, Theme, Style) alter git/PR
+mechanics; each production run still ends the same way once its gates pass.
 
 ---
 

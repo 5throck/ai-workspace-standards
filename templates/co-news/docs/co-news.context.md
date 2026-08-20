@@ -97,6 +97,13 @@ If any condition fails, the article is routed back to the responsible agent — 
 Default output language is **Korean**. During Phase 0 assignment scoping, the PM confirms the target language with the user. All git artifacts (commit messages, PR titles, branch names) remain in English regardless of article language.
 <!-- END VARIANT-SECTION -->
 
+### Git / PR Workflow
+
+See `docs/context.md` § Git / PR Workflow for the full `/sync` pipeline (memlog → MEMORY.md
+index update → CHANGELOG.md → audit → branch → commit/push → PR). No content override —
+`co-news`'s only variant-specific rule is ordering: `/sync` runs only after the Editorial
+Review Gate (above) passes — a draft is never committed with open fact-check or style-editor
+items.
 
 ### Agent Roster
 
