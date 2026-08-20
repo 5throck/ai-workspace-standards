@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.2.0
+version: 1.2.1
 owner: pm
-last_reviewed: 2026-08-11
+last_reviewed: 2026-08-21
 metadata:
   type: process
   triggers:
@@ -53,10 +53,13 @@ bun scripts/create-l3-scaffold.ts safety-os --domain ehs
 ```
 
 This creates `Projects/<variant-name>/` with:
-- All common infrastructure (.claude/, .gemini/, scripts/, skills/)
+- All common infrastructure (.claude/, .gemini/, scripts/, skills/) — every top-level file/dir under `templates/common/` is copied by default except a short, documented exclusion list (`COMMON_OVERLAY_EXCLUDE` in the script), so new common files show up automatically without needing a script change
+- `docs/context.md` (the immutable common project-context file, placeholders substituted) + `docs/_common/*`
+- `.gitattributes` with a `docs/context.md merge=ours` protection rule
 - Git initialized + .githooks configured
 - bun install complete
 - stub files (_ORIGIN.md, variant.json, PROMOTION_CHECKLIST.md, etc.)
+- A post-scaffold `bun scripts/audit.ts` run — non-fatal, but surfaces problems immediately instead of waiting for the first `/sync`
 
 > **Fork Model**: After scaffold completes, this `Projects/<name>/` draft (L3) evolves independently from L1. L1 changes will NOT automatically propagate to it. To get L1 updates later, re-run `create-l3-scaffold.ts` or manually copy needed files. See [ADR-0031](../../docs/adr/0031-l1-l2-fork-model.md).
 
@@ -214,7 +217,7 @@ grep "^## " CLAUDE.md
 grep "^## " GEMINI.md
 ```
 
-> **Note**: `new-project.sh` and `new-project.ps1` auto-detect variants dynamically from `templates/` at runtime — no manual update to these scripts is required when adding a new variant.
+> **Note**: `new-project.ts` auto-detects variants dynamically from `templates/` at runtime — no manual update to that script is required when adding a new variant.
 
 - [ ] Run `bun scripts/verify-scripts.ts --verify` in the `Projects/<name>/` draft (L3) — must exit 0 with 0 errors (confirms SCRIPTS.md has no ghost entries or PAIR MISSING warnings)
 - [ ] Regenerate the README via `bun scripts/generate-l3-readme.ts --l3-path Projects/<variant-name>` and confirm **zero `TODO:` markers** remain in `README.md`/`README_ko.md` (the `variant.json → description` must be filled first, in Step 7, or the tagline still reads `TODO: describe…`)
