@@ -9,7 +9,7 @@ description: >
 status: active
 scope: workspace
 l2_propagate: false
-version: "1.0.0"
+version: "1.1.0"
 owner: architect
 last_reviewed: 2026-08-21
 metadata:
@@ -82,6 +82,19 @@ before re-running without `--dry-run`. The script:
 - Removes the section from each listed variant's `templates/<variant>/docs/<variant>.context.md`
 - Does **not** decide anything and does **not** touch already-scaffolded projects (see step 4)
 
+**⚠️ Known defect — nested `###` subsections are silently dropped, not promoted.** The
+removal regex stops at the *next* `#{2,3}` heading, so if the promoted `##` section has a
+nested `###` subsection, that subsection is excluded from both the removal (left behind as an
+orphaned, parent-less duplicate in the variant file) *and* the canonical content copied into
+`docs/context.md` (never appears there either) — real content loss if no other copy of that
+subsection exists elsewhere in the file. Hit in practice promoting "Scripts" (`### Hybrid
+Scripting` nested underneath): 7 variant files were left with an orphaned duplicate, and
+`co-consult`/`co-export` genuinely lost the content since neither had a second copy elsewhere.
+**Before running without `--dry-run`, check whether the candidate section (per `audit.ts`'s
+output) has a nested `###` subsection** — if so, verify after promotion that the subsection
+landed in `docs/context.md` and manually add it if not, then manually remove any orphaned
+leftover from each variant file. The tool itself is not yet fixed for this case.
+
 ### 4. Handle already-scaffolded projects
 
 Removing a section from `templates/<variant>/docs/<variant>.context.md` only fixes *future*
@@ -124,3 +137,9 @@ trail ADR-0050 Part 3 relies on for "why was this promoted/left alone" questions
 - `templates/common/docs/context.md` § Lifecycle Management § Context Commonization Review
 - `skills/upgrade-project/SKILL.md` — how promoted `docs/context.md` content reaches existing projects
 - `skills/create-variant/SKILL.md` — the natural trigger point after scaffolding a new variant
+- `docs/governance/variant-contract.md` § Context.md Structure Standard (`validate-templates.ts`
+  Check WS-09) — a related but distinct concern: this skill promotes/dedups *content* that's
+  duplicated across variants; WS-09 instead enforces that every variant's `docs/<variant>.context.md`
+  has the same top-level *structure* (slot presence + order), regardless of whether the content in
+  each slot is shared or variant-specific. Content standardization was explicitly considered and
+  rejected during WS-09's design — see that doc for why.
