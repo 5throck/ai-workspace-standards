@@ -1,4 +1,4 @@
-// @version 2.19.0
+// @version 2.19.1
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -1539,8 +1539,10 @@ if (IS_WORKSPACE_ROOT && fs.existsSync('AGENTS.md')) {
 
 // Check: Workspace root should not contain stray test artifacts or unauthorized files
 if (IS_WORKSPACE_ROOT) {
-    // Windows reserved device names that external tools (codegraph, antivirus, etc.)
-    // can create as files when run inside Git Bash (where > nul writes a file, not the device).
+    // Windows reserved device names. Observed producers (2026-08-21): a `bun build` whose output
+    // path resolved to `nul` left a physical file inside templates/co-deck/, which — gitignored
+    // and thus invisible to review — copyDir shipped into every scaffold from that variant.
+    // The sweep below therefore covers tracked trees, not just untracked scratch dirs.
     const WINDOWS_DEVICE_NAMES = new Set([
         'nul', 'NUL', 'con', 'CON', 'prn', 'PRN', 'aux', 'AUX',
         'com1','com2','com3','com4','com5','com6','com7','com8','com9',

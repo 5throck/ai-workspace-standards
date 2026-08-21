@@ -90,6 +90,8 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 **When to use `l2_propagate: false`**: Workspace-management skills that should never leave the workspace root — variant creation tools, workspace audit scripts, etc. These skills exist only at L0 and are never propagated to templates or generated projects.
 
+> ⚠️ **Never set `l2_propagate: false` on a skill living inside a variant template** (`templates/co-*/skills/`). The field is an L0→L1 propagation control and is self-contradictory in a variant: a variant skill exists precisely to be copied into projects scaffolded from that variant, yet `new-project.ts`'s safety-net honors the flag and **silently deletes the skill from every scaffold**. This exact combination (`scope: co-abap` + `l2_propagate: false` on 12 skills, plus one in co-consult) shipped co-abap projects without any of their SAP skills until it was found on 2026-08-21. A variant skill needs only `scope: <variant-name>` — nothing else.
+
 **Current excluded skills**: `audit-workspace`, `create-variant`, `promote-variant`
 
 > `propagate-to-templates.ts` calls `includeSkillInL1()` from `helpers/layer-filter.ts`, which reads SKILL.md frontmatter directly — `l2_propagate: false` or `scope: workspace` returns `false` (excluded). `new-project.ts` also checks this as a safety net. SKILLS.md is not consulted for propagation decisions.
