@@ -183,3 +183,8 @@ This table tracks the **variant-authoring** lifecycle specifically (creating a b
 > - `l2-to-variant-pipeline.ts` — promotes that L3 draft into an official L2 variant template at `templates/co-<name>/` (same naming-predates-L3 caveat; its helpers `helpers/scan-l3-project.ts` and `helpers/reconcile-with-l0-l1.ts` now use L3-correct identifiers internally, matching this document's terminology)
 > - `new-project.ts` — separately, creates an ordinary L3 project at `Projects/<name>/` from an *existing* L2 variant template — this is the everyday project-creation path, not variant authoring
 > - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L2(variants)
+
+#### 7.6 New Variant Requirements
+
+- **ADR Requirement (ADR-0026)**: Every new variant addition MUST be accompanied by an ADR (`docs/adr/`) documenting the domain problem addressed, the rationale for the chosen agent roster, and how the variant differs from existing variants.
+- **PROMOTION_CHECKLIST.md Universal vs. Domain-specific conditions (ADR-0028)**: Conditions split into **Universal** (agent/`AGENTS.md` registration, `CLAUDE.md`↔`GEMINI.md` platform parity, `bun install`/setup success, human sign-off on `_ORIGIN.md` § Manual Phase B Steps — non-overridable by any variant) and **Domain-specific** (skill validation, domain artifact completeness, domain audit script — each variant must define its own; an unmodified `TODO:` placeholder blocks promotion).

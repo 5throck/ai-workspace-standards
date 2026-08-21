@@ -59,3 +59,4 @@ Every project follows this layout. Omit folders that don't apply to the project 
 - **Orchestration**: `agents/pm.md` is always created - even for single-agent or simple projects.
 - **Agent Index**: `AGENTS.md` is always created at the project root - it is the canonical agent roster shared by all AI tools. Keep it in sync with `docs/context.md ## Agents` (or `CONSTITUTION.md` for the root workspace).
 - **Secrets**: `.env.sample` is always committed; `.env` is always in `.gitignore`.
+- **Root Directory Protection (ADR-0025)**: `docs/workspace-schema.json § rootAllowlist` (`files` + `dirs`) is the SSOT for what may exist at the workspace root — a default-deny allowlist. `audit.ts` fails on any root-level item not present in it. Test, debug, and temporary scripts MUST live under `tests/`, never at root; adding a new legitimate root item requires updating `rootAllowlist` in the same change.

@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-08-21]**: docs(readme): added the "Claude Code and Multi-Agent Harness" introductory course (https://5throck.github.io/intro-to-ai-harness/) to the Learning Resources section of all 4 README language variants (`README.md`, `README_ko.md`, `README_ja.md`, `README_es.md`), each with a translated description matching that file's language, positioned before the existing (more advanced) Multi-Agent Harness Engineering Handbook link as the recommended starting point for beginners.
+
+### Changed
+- **[2026-08-21]**: docs(constitution): closed 3 gaps between settled ADR decisions and `CONSTITUTION.md`'s delegated `docs/constitution/*.md` files, found via a full 39-ADR audit — ADR-0025 (Root Directory Protection / `workspace-schema.json § rootAllowlist` default-deny) added to `docs/constitution/01-folder-structure.md` §1.2; ADR-0026 (every new variant requires an ADR) and ADR-0028 (`PROMOTION_CHECKLIST.md` Universal vs. Domain-specific condition split) added to `docs/constitution/07-new-project.md` as new §7.6. The other 36 ADRs were confirmed already covered, superseded, or narrow single-script details not warranting workspace-wide policy documentation.
+
 ### Changed
 - **[2026-08-21]**: docs(governance): reflected this session's Context Commonization Review + WS-09 structure-standardization work into the design/governance docs: `docs/governance/variant-contract.md` gained a "Context.md Structure Standard" section (parallel to the existing "README Standard"/WS-08 section, documenting WS-09's slot schema, exemptions, and severity policy); `docs/adr/0050-variant-script-inheritance-and-golden-reference-ssot.md` gained two Implementation Status entries (the "Scripts" promotion + the `Hybrid Scripting` nested-subsection bug it surfaced, and the WS-09 structural-standardization decision); `docs/constitution/00-ssot-architecture.md`'s SSOT flow table gained a WS-09 row (explicitly noting it enforces structure only, not content — no single SSOT file the way `docs/context.md`/`README.md` have); `skills/context-commonization-review/SKILL.md` (1.0.0 → 1.1.0) documents the nested-`###`-subsection defect as a known caveat to check for before running `promote-context-section.ts` without `--dry-run`, and cross-references WS-09 as a related-but-distinct concern (content dedup vs. structural conformance).
 

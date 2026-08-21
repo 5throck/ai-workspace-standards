@@ -291,7 +291,13 @@ Verifica: completitud del frontmatter del agente, secciones requeridas (`## Meet
 
 ## 📚 Recursos de Aprendizaje (Learning Resources)
 
-Un manual educativo completo está disponible para los profesionales que deseen dominar el flujo de trabajo multi-agente de este espacio de trabajo:
+¿Nuevo en este espacio de trabajo? Comienza con el curso introductorio para principiantes:
+
+**[Claude Code and Multi-Agent Harness](https://5throck.github.io/intro-to-ai-harness/)**
+
+Una guía práctica y aplicada para principiantes en IA y usuarios de Claude Desktop App (macOS, Windows, Linux). 13 capítulos en 4 partes — fundamentos, dos proyectos prácticos (co-consult, co-deck), creación de agentes/skills/equipos personalizados y automatización de flujos de trabajo — cada uno con ejercicios paso a paso.
+
+Para profesionales que buscan profundizar más, también está disponible un manual educativo completo:
 
 **[Manual de Multi-Agent Harness Engineering](https://5throck.github.io/multi-agent-harness-handbook/)**
 

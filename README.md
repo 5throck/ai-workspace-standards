@@ -302,7 +302,13 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 
 ## 📚 Learning Resources
 
-A comprehensive educational handbook is available for practitioners looking to master the multi-agent workflow of this workspace:
+New to this workspace? Start with the beginner-friendly introductory course:
+
+**[Claude Code and Multi-Agent Harness](https://5throck.github.io/intro-to-ai-harness/)**
+
+A practical, hands-on guide for AI beginners and Claude Desktop App users (macOS, Windows, Linux). 13 chapters across 4 parts — foundations, two hands-on projects (co-consult, co-deck), building custom agents/skills/teams, and workflow automation — each with step-by-step exercises.
+
+For practitioners ready to go deeper, a comprehensive educational handbook is also available:
 
 **[Multi-Agent Harness Engineering Handbook](https://5throck.github.io/multi-agent-harness-handbook/)**
 
@@ -332,4 +338,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-15*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-21*
