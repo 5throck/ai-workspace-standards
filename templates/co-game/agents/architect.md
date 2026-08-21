@@ -23,6 +23,11 @@ phases: [1, 2]
 handoff_to: [designer, game-developer]
 handoff_from: [pm]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/architect.md
 ---
 
 ## Role

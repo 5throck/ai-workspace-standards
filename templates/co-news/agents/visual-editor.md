@@ -25,6 +25,11 @@ handoff_from: [style-editor]
 required_skills: [financial-infographic-svg]
 version: "1.0.0"
 last_updated: "2026-08-10"
+lifecycle:
+  phase: beta
+  created: "2026-08-12"
+  last_updated: "2026-08-10"
+  governance: docs/lifecycle/agents/visual-editor.md
 ---
 
 ## Role

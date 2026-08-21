@@ -26,6 +26,11 @@ handoff_from: [pm]
 required_skills: [financial-narrative-brief]
 version: "1.0.0"
 last_updated: "2026-08-10"
+lifecycle:
+  phase: beta
+  created: "2026-08-12"
+  last_updated: "2026-08-10"
+  governance: docs/lifecycle/agents/financial-analyst.md
 ---
 
 ## Role

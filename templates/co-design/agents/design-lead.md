@@ -23,6 +23,11 @@ handoff_from: [ux-researcher]
 required_skills: [ui-ux-design-intelligence, service-design]
 version: "1.0.0"
 last_updated: "2026-05-28"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/design-lead.md
 ---
 
 ## Role

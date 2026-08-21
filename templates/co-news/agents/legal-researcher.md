@@ -26,6 +26,11 @@ handoff_from: [pm, financial-analyst]
 required_skills: []
 version: "1.0.0"
 last_updated: "2026-08-10"
+lifecycle:
+  phase: beta
+  created: "2026-08-12"
+  last_updated: "2026-08-10"
+  governance: docs/lifecycle/agents/legal-researcher.md
 ---
 
 ## Role

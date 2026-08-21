@@ -22,6 +22,11 @@ phases: [2, 3]
 handoff_to: [design]
 handoff_from: [research, pm]
 required_skills: [storyline]
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-06-20"
+  governance: docs/lifecycle/agents/storyline.md
 ---
 
 ## Role

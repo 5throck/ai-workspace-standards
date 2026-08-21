@@ -23,6 +23,11 @@ handoff_from: [pm]
 required_skills: [research-analysis, competitive-intelligence]
 version: "1.0.0"
 last_updated: "2026-06-20"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-20"
+  governance: docs/lifecycle/agents/industry-expert.md
 ---
 
 ## Role

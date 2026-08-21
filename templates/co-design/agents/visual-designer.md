@@ -23,6 +23,11 @@ handoff_from: [design-lead]
 required_skills: [ui-ux-design-intelligence]
 version: "1.0.0"
 last_updated: "2026-05-28"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/visual-designer.md
 ---
 
 ## Role

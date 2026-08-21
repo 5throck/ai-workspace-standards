@@ -21,6 +21,11 @@ phases: [4]
 handoff_to: [test-runner]
 handoff_from: [designer, architect]
 required_skills: [code-review, refactoring]
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/code-writer.md
 ---
 
 ## Role

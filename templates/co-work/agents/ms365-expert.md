@@ -23,6 +23,11 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [content-writer, technical-writer]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/ms365-expert.md
 ---
 
 ## Role

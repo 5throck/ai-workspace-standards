@@ -26,6 +26,11 @@ handoff_from: [financial-analyst, legal-researcher]
 required_skills: [source-verification-ledger]
 version: "1.0.0"
 last_updated: "2026-08-10"
+lifecycle:
+  phase: beta
+  created: "2026-08-12"
+  last_updated: "2026-08-10"
+  governance: docs/lifecycle/agents/fact-checker.md
 ---
 
 ## Role

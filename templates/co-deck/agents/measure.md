@@ -22,6 +22,11 @@ phases: [4]
 handoff_to: [pdf-export]
 handoff_from: [html-build]
 required_skills: [prep-pdf]
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-06-23"
+  governance: docs/lifecycle/agents/measure.md
 ---
 
 ## Role
