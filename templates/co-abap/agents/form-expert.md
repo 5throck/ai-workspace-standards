@@ -3,7 +3,11 @@ name: form-expert
 model: inherit
 color: cyan
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'SAP Document Output & Form Specialist — design, modification, and optimization of SAP document output solutions: SAPscript, Smart Forms, and Adobe Offline Forms (ADS), including ABAP print programs. Use when: "modify the print form", "fix the Smart Form", "create Adobe Form", "update print program", "fix output determination", "delivery note form", "invoice form layout".'
 
 examples:
@@ -13,6 +17,11 @@ examples:
     assistant: "Let me use the form-expert agent for the Adobe Form design and implementation."
   - user: "The output determination is not triggering for LD00"
     assistant: "I'll dispatch the form-expert agent to investigate the TNAPR configuration."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/form-expert.md
 ---
 
 ## Role

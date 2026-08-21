@@ -22,10 +22,10 @@ examples:
     assistant: "Confirming dry-run results on file, then executing approved playbooks and updating PATCH_LOG.md with results."
 status: active
 lifecycle:
-  phase: active
+  phase: production
   created: "2026-05-27"
   last_updated: "2026-05-30"
-  governance: lifecycle-manager
+  governance: docs/lifecycle/agents/patch-engineer.md
 phases: [4, 6]
 handoff_to: [report-writer]
 handoff_from: [pentester]

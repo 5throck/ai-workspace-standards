@@ -3,13 +3,22 @@ name: fi-analyst
 model: inherit
 color: yellow
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'FI Module Analyst — deep domain expert for Financial Accounting business processes. Use when: "FI analyst", "financial accounting", "general ledger", "accounts payable", "accounts receivable", "FI module", "posting analysis".'
 examples:
   - user: "Analyze open accounts payable items that are overdue in company code 1000"
     assistant: "I'll dispatch the fi-analyst agent to query BSIK/BSAK and produce the AP aging AS-IS report."
   - user: "FI analyst — check why GL account 400000 has uncleared postings from last period"
     assistant: "Let me use the fi-analyst agent to examine BKPF/BSEG and draft the clearing gap analysis."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/fi-analyst.md
 ---
 
 # FI Analyst — Financial Accounting

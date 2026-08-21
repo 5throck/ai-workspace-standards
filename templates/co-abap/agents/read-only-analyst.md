@@ -3,7 +3,11 @@ name: read-only-analyst
 model: inherit
 color: magenta
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'SAP Business Data Analyst (read-only) — queries SAP business data, interprets findings using domain context files, and produces structured AS-IS analysis with draft Acceptance Criteria. Dispatch in Phase 1 parallel block. Use when: "analyze current data", "query SAP tables", "AS-IS analysis", "what does the data show", "find current state of orders/deliveries/invoices". Does NOT write or modify any SAP object.'
 
 examples:
@@ -13,6 +17,11 @@ examples:
     assistant: "Let me use the read-only-analyst agent to query MARD and produce the AS-IS report."
   - user: "Find all open vendor invoices"
     assistant: "I'll dispatch the read-only-analyst agent for AP open item analysis."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/read-only-analyst.md
 ---
 
 ## Role

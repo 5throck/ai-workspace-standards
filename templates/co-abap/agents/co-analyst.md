@@ -3,13 +3,22 @@ name: co-analyst
 model: inherit
 color: yellow
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'CO Module Analyst — deep domain expert for Controlling business processes. Use when: "CO analyst", "cost center", "profit center", "internal orders", "controlling module", "cost accounting", "CO analysis".'
 examples:
   - user: "Analyze actual vs planned cost variances for cost center CC1000 this fiscal year"
     assistant: "I'll dispatch the co-analyst agent to query COSP/COSS and produce the cost variance AS-IS analysis."
   - user: "CO analyst — why are internal order settlements failing for order 600001?"
     assistant: "Let me use the co-analyst agent to examine AUFK/COEP settlement data and draft the PRD."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/co-analyst.md
 ---
 
 # CO Analyst — Controlling

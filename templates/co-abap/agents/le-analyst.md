@@ -3,13 +3,22 @@ name: le-analyst
 model: inherit
 color: yellow
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'LE Module Analyst — deep domain expert for Logistics Execution business processes. Use when: "LE analyst", "warehouse management", "transfer order", "shipping", "logistics execution", "LE module", "WM analysis".'
 examples:
   - user: "Investigate why transfer orders in warehouse W001 are not being confirmed"
     assistant: "I'll dispatch the le-analyst agent to query LTAP/LTBK and produce the TO confirmation AS-IS analysis."
   - user: "LE analyst — check the outbound delivery backlog for shipping point SP01"
     assistant: "Let me use the le-analyst agent to examine LIKP/LIPS delivery data and draft the shipping bottleneck PRD."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/le-analyst.md
 ---
 
 # LE Analyst — Logistics Execution

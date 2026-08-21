@@ -3,11 +3,20 @@ name: security-monitor
 model: inherit
 color: red
 status: active
-tier: low
+tier:
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 description: 'Security Monitor — enforces security policies, audits dependencies, and scans for secrets in the SAP ABAP harness. Use when: "security check", "scan for vulnerabilities", "audit secrets", "pre-PR security review".'
 examples:
   - user: "Run security check before deployment"
     assistant: "I'll dispatch the security-monitor agent to audit dependencies and scan for secrets."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/security-monitor.md
 ---
 
 # Security Monitor Agent

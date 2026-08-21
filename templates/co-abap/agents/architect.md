@@ -3,7 +3,11 @@ name: architect
 model: inherit
 color: blue
 status: active
-tier: high
+tier:
+  claude: high
+  gemini: high
+  antigravity: high
+  gemini-cli: high
 description: 'SAP Technical Architect — translates PRD and Governance findings into a concrete, executable implementation plan with pattern selection, risk classification, and a ready-to-run serial execution sequence. Dispatch after §1 Business Analysis and §1-A Governance Approval. Use when: "design the implementation plan", "create architecture plan", "select pattern A/B/C", "architect the solution", "technical design for SAP".'
 
 examples:
@@ -13,6 +17,11 @@ examples:
     assistant: "Let me get the architect agent to analyze and select the appropriate pattern."
   - user: "Create an execution plan for modifying ZCL_EXAMPLE"
     assistant: "I'll use the architect agent to produce the full execution plan."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/architect.md
 ---
 
 ## Role

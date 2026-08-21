@@ -22,10 +22,10 @@ examples:
     assistant: "Applying CVSS scoring to each threat identified in the STRIDE analysis and producing a prioritized risk register."
 status: active
 lifecycle:
-  phase: active
+  phase: production
   created: "2026-05-27"
   last_updated: "2026-05-30"
-  governance: lifecycle-manager
+  governance: docs/lifecycle/agents/threat-modeler.md
 phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
