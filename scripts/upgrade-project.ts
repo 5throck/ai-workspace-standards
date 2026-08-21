@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
+// v1.10.0: Two gaps found while upgrading 7 real projects in one session:
+//   (1) .gitleaks.toml moved out of blind LOCKED overwrite into mergeGitleaksToml() —
+//         co-abap's project-specific allowlist entries (vendored-ABAP false-positive
+//         exclusion, SAP trial default-credential regex) were silently dropped by the
+//         old LOCKED behavior, breaking the pre-push secret scan on the next push.
+//   (2) SYNC_IF_NEWER: scripts/ now calls reconcileScriptRegistry() after every copy —
+//         previously file CONTENT was synced by version but the project's own
+//         scripts/SCRIPTS.md registry was never updated, so verify-scripts.ts/
+//         lifecycle-sync-audit.ts failed after every single upgrade (stale version
+//         numbers on existing rows, "Unregistered script" for newly-added files) and
+//         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
 // Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|both] [--dry-run] [--prune-removed] [--rollback]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
@@ -254,6 +265,59 @@ function fileHash(filePath: string): string {
   return createHash('md5').update(readFileSync(filePath)).digest('hex');
 }
 
+/**
+ * Reconcile the project's local scripts/SCRIPTS.md registry after SYNC_IF_NEWER
+ * copies an updated (or brand-new) script file into the project.
+ *
+ * Previously this script synced FILE CONTENT by version comparison but never touched
+ * the project's own SCRIPTS.md — every upgrade left `verify-scripts.ts`/`lifecycle-sync-
+ * audit.ts` failing on stale version numbers (existing rows) or "Unregistered script"
+ * (new files like a newly-added helper), requiring manual reconciliation every time.
+ * The L0 (workspace root) registry is the version source of truth: if a row for this
+ * script already exists in the project registry, only its version column is replaced,
+ * preserving every project-specific column (layer label conventions differ project to
+ * project — e.g. "L0+L1" vs "common" — this must never silently normalize those). If no
+ * row exists yet, the L0 registry's row is copied in verbatim (same shape, since the
+ * project's registry format is itself derived from L0) and appended after the last
+ * script row in the table.
+ */
+function reconcileScriptRegistry(scriptRelPath: string): void {
+  const registryPath = join(projectDir, 'scripts', 'SCRIPTS.md');
+  if (!existsSync(registryPath) || !existsSync(scriptsMd)) return;
+  // Registry rows key scripts by path relative to scripts/ (no "scripts/" prefix).
+  const name = scriptRelPath.replace(/^scripts\//, '');
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const l0Content = readFileSync(scriptsMd, 'utf8');
+  const l0RowMatch = l0Content.match(new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*$`, 'm'));
+  if (!l0RowMatch) return; // not in L0 registry (e.g. a variant-local script) — nothing to reconcile
+  const l0Version = l0RowMatch[1].trim();
+  const l0FullRow = l0RowMatch[0];
+
+  const content = readFileSync(registryPath, 'utf8');
+  const rowRe = new RegExp(`^(\\| \`${escaped}\` \\| [^|]*\\| )[^|]+( \\|.*)$`, 'm');
+  if (rowRe.test(content)) {
+    const updated = content.replace(rowRe, `$1${l0Version}$2`);
+    if (updated !== content) {
+      writeFileSync(registryPath, updated, 'utf8');
+      console.log(`    📝 scripts/SCRIPTS.md: ${name} → v${l0Version}`);
+    }
+    return;
+  }
+
+  // No row at all — append the L0 row verbatim after the last `| \`*.ts\` |` row.
+  const lines = content.split('\n');
+  let lastRowIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\|\s*`[^`]+\.ts`\s*\|/.test(lines[i])) lastRowIdx = i;
+  }
+  if (lastRowIdx >= 0) {
+    lines.splice(lastRowIdx + 1, 0, l0FullRow);
+    writeFileSync(registryPath, lines.join('\n'), 'utf8');
+    console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${l0Version})`);
+  }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function resolveTemplate(rel: string): string {
   const vf = join(templatesDir, rel);
@@ -425,12 +489,76 @@ function isLocallyModified(filePath: string): boolean {
 
 let lockedChanged = 0, mergeChanged = 0, preserveListed = 0, syncChanged = 0;
 
+/**
+ * Extract every `'''...'''` (or `'...'`) string literal from a named TOML array
+ * (e.g. `regexes = [ ... ]` or `paths = [ ... ]`), by array name. Comment-only lines
+ * are stripped first — explanatory comments routinely contain apostrophes (e.g. "AI
+ * session notes" or "they're"), which a naive single-quote match mistakes for the
+ * start of a string literal and misparses everything after it.
+ */
+function extractGitleaksArray(content: string, arrayName: string): string[] {
+  const blockMatch = content.match(new RegExp(`${arrayName}\\s*=\\s*\\[([\\s\\S]*?)\\n\\]`));
+  if (!blockMatch) return [];
+  const codeOnly = blockMatch[1]
+    .split('\n')
+    .filter(line => !line.trim().startsWith('#'))
+    .join('\n');
+  const entries: string[] = [];
+  for (const m of codeOnly.matchAll(/'''([^']*)'''|'([^']*)'/g)) {
+    entries.push(m[1] ?? m[2]);
+  }
+  return entries;
+}
+
+/**
+ * .gitleaks.toml is shared boilerplate but routinely carries project-specific allowlist
+ * entries (e.g. co-abap's exclusion for vendored ABAP source that trips generic-api-key
+ * false positives) — a plain LOCKED overwrite silently deletes those, and the next
+ * `git push` fails the pre-push secret scan on findings that were already known-safe.
+ * Preserve any project-only `regexes`/`paths` entries by appending them into the new
+ * template content before writing, rather than dropping them.
+ */
+function mergeGitleaksToml(dest: string, src: string): void {
+  if (!existsSync(dest)) {
+    if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+    console.log(`  ${dryTag}WROTE: .gitleaks.toml (new)`);
+    return;
+  }
+  const destContent = readFileSync(dest, 'utf8');
+  const srcContent = readFileSync(src, 'utf8');
+  const srcRegexes = new Set(extractGitleaksArray(srcContent, 'regexes'));
+  const srcPaths = new Set(extractGitleaksArray(srcContent, 'paths'));
+  const projectOnlyRegexes = extractGitleaksArray(destContent, 'regexes').filter(e => !srcRegexes.has(e));
+  const projectOnlyPaths = extractGitleaksArray(destContent, 'paths').filter(e => !srcPaths.has(e));
+
+  let merged = srcContent;
+  if (projectOnlyRegexes.length > 0) {
+    merged = merged.replace(
+      /(regexes\s*=\s*\[[\s\S]*?)(\n\])/,
+      `$1\n  # Preserved from this project's prior .gitleaks.toml (not in the current common template):\n` +
+        projectOnlyRegexes.map(e => `  '''${e}''',`).join('\n') + `$2`
+    );
+    console.log(`  ⚠️  Preserved ${projectOnlyRegexes.length} project-specific regex allowlist entr${projectOnlyRegexes.length === 1 ? 'y' : 'ies'} that the template overwrite would have dropped`);
+  }
+  if (projectOnlyPaths.length > 0) {
+    merged = merged.replace(
+      /(paths\s*=\s*\[[\s\S]*?)(\n\])/,
+      `$1\n  # Preserved from this project's prior .gitleaks.toml (not in the current common template):\n` +
+        projectOnlyPaths.map(e => `  '''${e}''',`).join('\n') + `$2`
+    );
+    console.log(`  ⚠️  Preserved ${projectOnlyPaths.length} project-specific path exclusion${projectOnlyPaths.length === 1 ? '' : 's'} that the template overwrite would have dropped`);
+  }
+  diffSummary(dest, src);
+  if (!dryRun) writeFileSync(dest, merged, 'utf8');
+  console.log(`  ${dryTag}WROTE: .gitleaks.toml`);
+}
+
 // ── LOCKED files ───────────────────────────────────────────────────────────────
 console.log('--- LOCKED files (always overwrite) ---');
 const LOCKED_FILES = [
   '.githooks/pre-commit', '.githooks/pre-push', '.githooks/commit-msg',
   '.githooks/post-checkout', '.githooks/pre-rebase',
-  '.gitattributes', '.gitleaks.toml',
+  '.gitattributes',
 ];
 for (const rel of LOCKED_FILES) {
   const src = resolveTemplate(rel);
@@ -444,6 +572,20 @@ for (const rel of LOCKED_FILES) {
   }
   console.log(`  ${dryTag}WROTE: ${rel}`);
   lockedChanged++;
+}
+// .gitleaks.toml: same "always take the template" intent as LOCKED, but merge-aware —
+// see mergeGitleaksToml() for why a blind overwrite is unsafe for this specific file.
+{
+  const rel = '.gitleaks.toml';
+  const src = resolveTemplate(rel);
+  const dest = join(projectDir, rel);
+  if (!src) {
+    console.log(`  SKIP (no template): ${rel}`);
+  } else {
+    console.log(`  LOCKED (merge-aware): ${rel}`);
+    mergeGitleaksToml(dest, src);
+    lockedChanged++;
+  }
 }
 console.log('');
 
@@ -713,7 +855,7 @@ for (const subDir of scriptSubDirs) {
     const projVer = extractScriptVersion(projFile);
     if (!existsSync(projFile)) {
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
-      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); }
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
@@ -723,7 +865,7 @@ for (const subDir of scriptSubDirs) {
       } else {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
       }
-      if (!dryRun) copyFileSync(tplFile, projFile);
+      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
