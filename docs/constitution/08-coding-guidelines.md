@@ -111,7 +111,11 @@ When adding or recommending dependencies:
 - **Unix/Git Bash (`.sh`, `.githooks`, `bash -c`)**: Output suppression MUST use `> /dev/null 2>&1`.
 - **PowerShell (`.ps1`, `powershell -Command`)**: Output suppression MUST use `> $null` or `| Out-Null`.
 - **Prohibition of `> nul`**: Writing `> nul` or `2> nul` inside Git Bash or Bun/Node child process calls on Windows creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative file path. Node.js/Bun `fs` APIs cannot delete physical `nul` files due to Win32 device mapping.
-- **Git Ignore & Audit Protection**: All repository `.gitignore` templates MUST include `nul` and `NUL`. `scripts/audit.ts` automatically detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts regardless of tracking status.
+- **Git Ignore & Audit Protection**: All repository `.gitignore` templates MUST include `nul` and `NUL` (verified present in the root and all 11 template `.gitignore` files as of 2026-08-21). `scripts/audit.ts` enforces this rule on two fronts:
+  - **Remediation** — recursively detects and removes physical `WINDOWS_DEVICE_NAMES` artifacts under untracked local project directories, regardless of tracking status. Depth matters: such a file at *any* depth blocks deleting every parent directory above it from PowerShell, because `Remove-Item` resolves the name to the Win32 device rather than to the file. (Git Bash's `rm -f -- <path>` deletes it correctly, and is what the sweep shells out to.)
+  - **Prevention** — a static check fails the audit on any `> nul` / `2> nul` occurrence in `.ts`, `.js`, `.mjs`, `.sh`, `.ps1`, `.cmd`, `.bat`, or `.githooks/` files. `.md` is excluded, since the governance docs must quote the pattern in order to forbid it, and comment lines are stripped for the same reason. A line containing `nul-lint-ignore` is skipped — reserved for diagnostics that must quote what they forbid.
+
+> **Note**: the artifacts observed in practice were **not** produced by workspace code — a full-tree scan on 2026-08-21 found zero `> nul` redirects in workspace source. The producer is an external tool, so the recursive sweep is the operative safeguard and the static check exists to keep our own code clean.
 
 #### 8.11 Error Handling Standard (ADR-0054)
 
