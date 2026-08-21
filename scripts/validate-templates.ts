@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.7.0
+ * @version 1.8.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2399,10 +2399,11 @@ function checkContextMdStructure(variant: string): void {
 //     is inherited from the L0 root agent at resolve time, so requiring a literal block here would
 //     duplicate the SSOT. pm.md's own scaffold-time lifecycle handling lives in new-project.ts §2.5.
 const WS10_SKIP_FILES = new Set(['README.md', 'README_ko.md']);
-// co-abap has no docs/lifecycle/agents/ directory at all, so its 19 agents need governance records
-// authored before the frontmatter can point anywhere real. Exempt (same precedent as WS-09) rather
-// than emit 19 failures for work that is a content task, not a mechanical backfill.
-const WS10_EXEMPT_VARIANTS = new Set(['co-abap']);
+// No exemptions remain. co-abap was exempted at introduction (it had no docs/lifecycle/agents/
+// directory at all, so its 19 agents had nowhere to point); its governance records were authored
+// 2026-08-21 and the exemption lifted in the same session. Keep the set rather than deleting it —
+// a newly promoted variant may legitimately need a grace period before its records exist.
+const WS10_EXEMPT_VARIANTS = new Set<string>();
 
 function checkAgentLifecycleFrontmatter(variant: string): void {
   if (WS10_EXEMPT_VARIANTS.has(variant)) return;
@@ -2464,16 +2465,17 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
       continue;
     }
 
-    // Pointer resolution is deliberately WARN-only, even when the check is otherwise fatal: this is
-    // a STRICTER assertion than validate-agents.ts makes (it only checks the key is non-empty), so
-    // failing here would block commits on a defect that does not actually break a scaffolded
-    // project's audit. It found a real one immediately — co-security's 5 agents all carry
-    // `governance: lifecycle-manager`, an agent NAME rather than a docs/lifecycle/agents/*.md path
-    // — which is tracked as a follow-up templates fix. Promote to fail() once that lands.
+    // The pointer must resolve. This is a STRICTER assertion than validate-agents.ts makes (which
+    // only checks the key is non-empty) — deliberately so: it caught co-security's 5 agents all
+    // carrying `governance: lifecycle-manager`, an agent NAME rather than a
+    // docs/lifecycle/agents/*.md path, which passed every project-layer check while resolving to
+    // nothing. Introduced as WARN-only pending that fix; promoted to a policy-aware failure once
+    // co-security was corrected (2026-08-21), so an unresolvable pointer can never land again.
     const govRel = String(lifecycle.governance);
     if (!existsSync(join(TEMPLATES_DIR, variant, govRel))) {
-      warn(variant, 'WS-10', `templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
+      report(`templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
         `Set lifecycle.governance to a path, e.g. docs/lifecycle/agents/${agentName}.md, and create that record ("## Phase History" + "## Acceptance Criteria")`);
+      issuesFound++;
     }
   }
 
