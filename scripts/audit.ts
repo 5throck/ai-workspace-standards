@@ -1,4 +1,4 @@
-// @version 2.18.0
+// @version 2.19.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -1640,18 +1640,31 @@ if (IS_WORKSPACE_ROOT) {
                     continue;
                 }
                 if (!WINDOWS_DEVICE_NAMES.has(entry.name)) continue;
-                // Shell-free: never interpolate the filename into a command line.
-                const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', entryPath], { encoding: 'utf-8' });
-                if (rm.status === 0 && !fs.existsSync(entryPath)) {
+                // Shell-free: never interpolate the filename into a command line. Pass a
+                // FORWARD-SLASH path: Git Bash's rm treats backslashes as escapes/quoting quirks.
+                // Trust only the exit status for success — fs.existsSync() is unreliable here
+                // because Win32 device-name resolution makes it return true for paths that
+                // no longer exist (and false for backslash forms that do). Observed live:
+                // rm exited 0 and the file was gone, yet existsSync(path.join(...)) was true,
+                // producing a false "could not be auto-deleted" warning.
+                const posixPath = entryPath.split(path.sep).join('/');
+                const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', posixPath], { encoding: 'utf-8' });
+                if (rm.status === 0) {
                     Warn(`Auto-deleted Windows device name artifact: ${entryPath} (blocks directory deletion from PowerShell)`);
                     nestedSwept++;
                 } else {
-                    Warn(`Windows device name artifact '${entryPath}' could not be auto-deleted — remove it from Git Bash with: rm -f -- "${entryPath}"`);
+                    Warn(`Windows device name artifact '${entryPath}' could not be auto-deleted — remove it from Git Bash with: rm -f -- "${posixPath}"`);
                 }
             }
         };
+        // Sweep EVERY top-level directory, tracked or not. Tracked trees matter as much as
+        // untracked ones — a device-name file inside templates/ is gitignored (the template's
+        // own .gitignore lists NUL), so it never shows in git status, yet the scaffold's
+        // copyDir ignores .gitignore and ships it into every project made from that variant.
+        // That exact case (templates/co-deck/nul, created 2026-08-17, propagated into every
+        // co-deck scaffold) is why this sweep covers templates/ now.
         for (const item of fs.readdirSync('.')) {
-            if (trackedItems.has(item) || item.startsWith('.') || SWEEP_SKIP_DIRS.has(item)) continue;
+            if (item.startsWith('.') || SWEEP_SKIP_DIRS.has(item)) continue;
             let isDir = false;
             try { isDir = fs.statSync(item).isDirectory(); } catch { continue; }
             if (isDir) sweepDeviceNames(item, 1);
