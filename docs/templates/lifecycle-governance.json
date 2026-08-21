@@ -46,9 +46,9 @@
     }
   },
   "variantValidationPolicy": {
-    "description": "Controls validate-templates.ts check severity and new-project.ts project-creation gating. mandatoryBeforeProjectCreation lists DOMAIN names that new-project.ts treats as hard gates. warningOnly lists DOMAIN names and/or CHECK CODES that validate-templates.ts emits as non-blocking WARN instead of FAIL — used to roll out new checks without breaking the gate. (WS-08 README Standard graduated from warningOnly to FAIL on 2026-08-09 once all 8 variants conformed.)",
+    "description": "Controls validate-templates.ts check severity and new-project.ts project-creation gating. mandatoryBeforeProjectCreation lists DOMAIN names that new-project.ts treats as hard gates. warningOnly lists DOMAIN names and/or CHECK CODES that validate-templates.ts emits as non-blocking WARN instead of FAIL — used to roll out new checks without breaking the gate. (WS-08 README Standard graduated from warningOnly to FAIL on 2026-08-09 once all 8 variants conformed. WS-09 context.md Structure Conformance added 2026-08-21, starts warningOnly until all 7 collaboration-family variants — everything but co-abap — are confirmed conforming.)",
     "mandatoryBeforeProjectCreation": ["variant", "agent", "skill"],
-    "warningOnly": ["script", "readme"]
+    "warningOnly": ["script", "readme", "WS-09"]
   },
   "newVariantChecklist": [
     "Create variant directory under templates/",

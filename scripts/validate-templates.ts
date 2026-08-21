@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.5.18
+ * @version 1.6.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2317,6 +2317,71 @@ function checkReadmeStandard(variant: string): void {
   }
 }
 
+// Check WS-09: docs/<variant>.context.md structure conformance
+// Established 2026-08-21 after reviewing all "collaboration-family" variants' context.md heading
+// structure (ADR-0050 Part 3 follow-up): 7 of 8 variants (all but co-abap, a structurally distinct
+// SAP/ABAP domain) already share the same skeleton — Stack → Agents → Skills → [Environment Setup]
+// → Development Workflow → <Domain> Guidelines → File Organization Policy → Domain Rules — with the
+// heading TEXT varying per domain ("Tool Stack" vs "Design Stack", "Consulting Guidelines" vs
+// "Coding Guidelines") even though the SECTION'S ROLE is identical. Content itself is deliberately
+// NOT standardized (Skills/Agents tables genuinely differ per domain — forcing identical wording
+// there destroys the domain-specific value, as the co-security commit-type-convention and
+// co-abap/co-architect/co-consult/co-game leftover-duplicate cases both showed this session).
+// This check enforces only PRESENCE and RELATIVE ORDER of the required slots via an alias/regex
+// match per slot — never a whitelist of allowed headings — so domain-specific extra headings
+// (e.g. co-export's "Overview"/"Regulatory Scope" before Stack) are always permitted.
+const WS09_STRUCTURE_SCHEMA: { slot: string; match: RegExp; required: boolean }[] = [
+  { slot: 'Stack', match: /^(Tool|Tech|Design) Stack$/, required: true },
+  { slot: 'Agents', match: /^Agents?\b/, required: true },
+  { slot: 'Skills', match: /^Skills$/, required: true },
+  { slot: 'Environment Setup', match: /^Environment Setup$/, required: false },
+  { slot: 'Development Workflow', match: /^(Development|Engagement) Workflow\b/, required: true },
+  { slot: 'Guidelines', match: /\bGuidelines$/, required: true },
+  { slot: 'File Organization Policy', match: /^File Organization Policy$/, required: true },
+  { slot: 'Domain Rules', match: /^Domain Rules$/, required: true },
+];
+// co-abap is a structurally distinct SAP/ABAP domain (30+ headings, no Stack/Guidelines/File
+// Organization Policy slots at all) — forcing it into this skeleton would misrepresent its actual
+// structure rather than standardize it. Exempt rather than fail.
+const WS09_EXEMPT_VARIANTS = new Set(['co-abap']);
+
+function checkContextMdStructure(variant: string): void {
+  if (WS09_EXEMPT_VARIANTS.has(variant)) return;
+
+  const contextPath = join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
+  if (!existsSync(contextPath)) return; // presence is Check WS-checkContextSync's concern
+
+  if (!JSON_MODE) console.log(`\n=== Check WS-09: docs/${variant}.context.md structure conformance ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-09') ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, 'WS-09', msg, fix);
+    else fail(variant, 'WS-09', msg, fix);
+  };
+
+  const content = readFileSync(contextPath, 'utf-8');
+  const headings = [...content.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+
+  let lastMatchedIndex = -1;
+  let issuesFound = 0;
+  for (const { slot, match, required } of WS09_STRUCTURE_SCHEMA) {
+    const idx = headings.findIndex((h, i) => i > lastMatchedIndex && match.test(h));
+    if (idx === -1) {
+      if (required) {
+        report(`templates/${variant}/docs/${variant}.context.md is missing the required "${slot}" slot (or it appears before an earlier required slot)`,
+          `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map(s => s.slot).join(' → ')}`);
+        issuesFound++;
+      }
+      continue;
+    }
+    lastMatchedIndex = idx;
+  }
+
+  if (issuesFound === 0) {
+    pass(`WS-09: ${variant} context.md structure conforms to the standard slot order${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+  }
+}
+
 // Main
 // A-10: propagation-map.json schema validation
 function checkPropagationMapSchema(): void {
@@ -2404,6 +2469,7 @@ function main() {
     checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
     checkNoVariantLocalContextMd(variant);                       // WS-07
     checkReadmeStandard(variant);                                // WS-08
+    checkContextMdStructure(variant);                            // WS-09
   }
 
   checkSharedFileSync();
