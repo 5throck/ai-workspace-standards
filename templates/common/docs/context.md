@@ -296,6 +296,9 @@ Use an external computation tool when the task involves ANY of the following:
 
 > See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
+### Hybrid Scripting
+All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
+
 
 ## Lifecycle Management
 

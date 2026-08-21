@@ -68,12 +68,6 @@ For managing agents, see `skills/agent-lifecycle-manager/SKILL.md`.
 
 ---
 
-
-### Hybrid Scripting
-All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
-
----
-
 ## Engagement Workflow (Phases 0—)
 
 | Phase | Name | Key Agents | Output |

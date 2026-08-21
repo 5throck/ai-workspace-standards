@@ -58,12 +58,6 @@
 
 ---
 
-
-### Hybrid Scripting
-All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
-
----
-
 ## Environment Setup
 
 - Copy `.env.sample` —`.env` and fill in all required values.
