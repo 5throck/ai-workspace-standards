@@ -22,10 +22,10 @@ examples:
     assistant: "Distilling the engagement findings into an executive summary with risk posture overview, critical findings, and remediation priorities."
 status: active
 lifecycle:
-  phase: active
+  phase: production
   created: "2026-05-27"
   last_updated: "2026-05-30"
-  governance: lifecycle-manager
+  governance: docs/lifecycle/agents/report-writer.md
 phases: [5, 6]
 handoff_to: [pm]
 handoff_from: [patch-engineer]

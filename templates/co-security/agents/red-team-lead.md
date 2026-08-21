@@ -22,10 +22,10 @@ examples:
     assistant: "Reviewing PoC against approved attack path and scope boundaries. Providing sign-off or rejection with reasoning."
 status: active
 lifecycle:
-  phase: active
+  phase: production
   created: "2026-05-27"
   last_updated: "2026-05-30"
-  governance: lifecycle-manager
+  governance: docs/lifecycle/agents/red-team-lead.md
 phases: [1, 2, 3]
 handoff_to: [pentester, threat-modeler]
 handoff_from: [pm]

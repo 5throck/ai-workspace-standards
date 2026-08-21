@@ -3,13 +3,22 @@ name: pp-analyst
 model: inherit
 color: yellow
 status: active
-tier: medium
+tier:
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 description: 'PP Module Analyst — deep domain expert for Production Planning business processes. Use when: "PP analyst", "production order", "MRP", "bill of materials", "work center", "production planning", "PP module".'
 examples:
   - user: "Check why production orders for material FG100 are showing MRP exceptions"
     assistant: "I'll dispatch the pp-analyst agent to query AUFK/AFKO/RESB and produce the MRP exception AS-IS analysis."
   - user: "PP analyst — analyze the BOM explosion for finished good FG200 and identify missing components"
     assistant: "Let me use the pp-analyst agent to examine STKO/STPO BOM data and draft the component gap analysis."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/pp-analyst.md
 ---
 
 # PP Analyst — Production Planning

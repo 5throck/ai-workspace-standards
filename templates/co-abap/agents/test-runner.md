@@ -3,7 +3,11 @@ name: test-runner
 model: inherit
 color: red
 status: active
-tier: low
+tier:
+  claude: low
+  gemini: low
+  antigravity: low
+  gemini-cli: low
 description: 'SAP Quality Assurance Specialist — stability verification and quality governance of ABAP objects using RunUnitTests, GetCodeCoverage, and RunATCCheck. Dispatch in Phase 3 validation block after code-writer completes. Use when: "run unit tests", "run ATC check", "quality gate", "verify the implementation", "test the changes", "check for ATC violations", "check code coverage".'
 
 examples:
@@ -13,6 +17,11 @@ examples:
     assistant: "Let me use the test-runner agent to run RunATCCheck."
   - user: "Verify the unit tests pass after the code-writer's changes"
     assistant: "I'll dispatch the test-runner agent for the Phase 3 validation."
+lifecycle:
+  phase: production
+  created: "2026-08-15"
+  last_updated: "2026-08-21"
+  governance: docs/lifecycle/agents/test-runner.md
 ---
 
 ## Role
