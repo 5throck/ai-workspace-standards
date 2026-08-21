@@ -1,4 +1,12 @@
-// @version 2.14.1
+// @version 2.15.0
+// v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
+//   sections that duplicate a same-heading section already present in the common
+//   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
+//   variants against EACH OTHER, so a section promoted into the common file (ADR-0050 Part 3)
+//   but left behind in one or more variant files went undetected once fewer than 2 variants
+//   still carried it — exactly the gap that let co-abap/co-architect/co-consult/co-game's
+//   "Git / PR Workflow" duplicates linger unnoticed after the promotion PR (ai-workspace-standards
+//   #578/#579) until a manual follow-up review caught them.
 // v2.14.1: checkVariantContextCommonization()'s section-parsing extracted to
 //   helpers/context-sections.ts (shared with the new promote-context-section.ts) —
 //   behavior-preserving refactor, no output change.
@@ -1330,6 +1338,65 @@ function checkVariantContextCommonization() {
     }
 }
 checkVariantContextCommonization();
+
+// Stale promoted-content check (WARN-only). Complements checkVariantContextCommonization():
+// that check only compares variants against EACH OTHER, so once a shared section is promoted
+// into the common docs/context.md (ADR-0050 Part 3) and cleaned up in most variants, a single
+// remaining variant-file duplicate falls below the "2+ variants" threshold and goes silently
+// undetected. This check instead compares every docs/<variant>.context.md section directly
+// against templates/common/docs/context.md's own sections — a >50% overlap here means the
+// variant's copy is stale and should simply be deleted (promote-context-section.ts already did
+// the promotion; nothing left to decide).
+function checkStalePromotedContent() {
+    const commonContextPath = path.join('templates', 'common', 'docs', 'context.md');
+    if (!fs.existsSync(commonContextPath)) return;
+
+    const templatesDir = 'templates';
+    if (!fs.existsSync(templatesDir)) return;
+    const variants = fs.readdirSync(templatesDir)
+        .filter(d => d.startsWith('co-') && fs.statSync(path.join(templatesDir, d)).isDirectory());
+    if (variants.length === 0) return;
+
+    const commonSections = splitIntoSections(readUTF8File(commonContextPath));
+    const commonByHeading = new Map<string, Set<string>>();
+    for (const { heading, body } of commonSections) {
+        const bodyLines = getContentLines(body);
+        if (bodyLines.size >= 3) commonByHeading.set(heading, bodyLines);
+    }
+    if (commonByHeading.size === 0) return;
+
+    let flaggedCount = 0;
+    for (const variant of variants) {
+        const docsDir = path.join(templatesDir, variant, 'docs');
+        if (!fs.existsSync(docsDir)) continue;
+        for (const file of fs.readdirSync(docsDir)) {
+            if (!file.endsWith('.context.md')) continue;
+            const filePath = path.join(docsDir, file);
+            const content = readUTF8File(filePath);
+            for (const { heading, body } of splitIntoSections(content)) {
+                const commonLines = commonByHeading.get(heading);
+                if (!commonLines) continue;
+                const variantLines = getContentLines(body);
+                if (variantLines.size < 3) continue;
+                let intersection = 0;
+                for (const line of variantLines) if (commonLines.has(line)) intersection++;
+                const denominator = Math.min(variantLines.size, commonLines.size);
+                const similarity = denominator > 0 ? intersection / denominator : 0;
+                if (similarity > 0.50) {
+                    flaggedCount++;
+                    Warn(`Stale promoted content: ${filePath} § "${heading}" is ${(similarity * 100).toFixed(0)}% similar to the already-promoted docs/context.md § "${heading}" — this variant copy is likely a leftover duplicate and should be removed (ADR-0050 Part 3)`);
+                }
+            }
+        }
+    }
+
+    if (flaggedCount === 0) {
+        Pass('Stale promoted content check: no variant sections duplicate already-promoted common content');
+    } else {
+        Warn(`Stale promoted content check: ${flaggedCount} variant section(s) duplicate content already promoted to docs/context.md (WARN-only — see ADR-0050 Part 3)`);
+    }
+}
+checkStalePromotedContent();
 
 // Script sync: validated by bun scripts/propagate-to-templates.ts --dry-run --domain scripts
 checkL2VariantIntegrity();
