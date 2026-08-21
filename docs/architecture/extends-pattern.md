@@ -396,6 +396,10 @@ Since ADR-0048 (June 2026), all variant pm.md files follow a frontmatter-only ex
 | `variant` | **Yes** | L2 only | Variant identifier (`co-deck`, `co-work`, etc.) |
 | `version` | **Yes** | All | Semver version string (e.g. `"1.1.0"`) |
 | `last_updated` | **Yes** | All | ISO date (e.g. `"2026-06-23"`) |
+| `remove_sections` | No | L1, L2 | ADR-0039 override mechanism — array of parent section headings stripped at resolve time (consumed by `merge-frontmatter.ts`) |
+| `variant_overrides` | No | L2 | ADR-0034 structured override block (governance workflow, roster, dispatch protocol), consumed at scaffold time |
+| `owner` | No | L2 | Owning agent for the override content (pass-through metadata) |
+| `capabilities` | No | L2 | Capability declarations merged into the resolved pm.md; read by `capability-validator.ts` |
 | `formal_name` | No | L0, L1 | Human-readable name |
 | `status` | No | All | `active` / `deprecated` / `draft` |
 | `tier` | No | L0, L1 | Per-platform model tier mapping (`claude`, `gemini`, `antigravity`, `gemini-cli`) |

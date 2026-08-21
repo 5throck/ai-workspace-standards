@@ -98,7 +98,7 @@ What IS standardized is **structure**: 7 of 8 collaboration-family variants alre
 
 **Exemption** — `co-abap` is a structurally distinct SAP/ABAP domain (30+ headings, no Stack/Guidelines/File Organization Policy slots at all) and is exempted outright (`WS09_EXEMPT_VARIANTS` in `validate-templates.ts`) rather than forced to conform.
 
-**Severity policy** — like WS-08, WS-09 starts in `variantValidationPolicy.warningOnly` (`docs/templates/lifecycle-governance.json`) during rollout. As of 2026-08-21: `co-consult`, `co-design`, `co-develop`, `co-export`, `co-game`, `co-security`, `co-work`, and `co-deck` all conform; `co-news` (a newer, still-diverging beta variant) does not yet. Remove `"WS-09"` from `warningOnly` once all non-exempt variants conform, mirroring WS-08's 2026-08-09 graduation.
+**Severity policy** — WS-09 started in `variantValidationPolicy.warningOnly` (`docs/templates/lifecycle-governance.json`) during rollout and **graduated to a hard FAIL on 2026-08-21**, mirroring WS-08's 2026-08-09 graduation, once the last non-conforming variant (`co-news`) was brought into conformance (its 4 missing slots were added with newsroom-specific content, not generic filler).
 
 ### Agent Lifecycle Frontmatter Standard
 
