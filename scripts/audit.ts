@@ -1,4 +1,4 @@
-// @version 2.16.0
+// @version 2.17.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -1567,31 +1567,47 @@ if (IS_WORKSPACE_ROOT) {
                 }
             }
         }
-        // Sweep one level into local project directories too. The root-level loop above only sees
-        // './nul'; in practice these artifacts land inside scaffolded project dirs (observed
+        // Sweep RECURSIVELY into local project directories too. The root-level loop above only
+        // sees './nul'; in practice these artifacts land inside scaffolded project dirs (observed
         // 2026-08-21 in two of six freshly scaffolded projects), where nothing ever cleaned them.
         // They then block deletion of the whole directory from PowerShell — Remove-Item resolves
         // 'nul' to the Win32 device rather than the file — which is the actual user-visible pain.
-        // No repo script writes '> nul' (verified by full-tree scan), so the producer is an
-        // external tool and cannot be fixed at the source from here; sweeping makes it self-healing.
+        // Depth matters: a device-name file at ANY depth blocks deleting every parent above it,
+        // so a one-level sweep would leave the same symptom one directory down.
+        // No repo script writes '> nul' (verified by full-tree scan; Check "nul redirect" below
+        // now enforces that), so the producer is an external tool and cannot be fixed at the
+        // source from here — sweeping is what makes recurrence self-healing.
+        // Closes Layer 3 of the 2026-08-07 meeting
+        // (memory/archive/meeting-2026-08-07-prevent-nul-file-creation.md).
+        const SWEEP_SKIP_DIRS = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build', '.next', 'coverage']);
         let nestedSwept = 0;
-        for (const item of fs.readdirSync('.')) {
-            if (trackedItems.has(item) || item.startsWith('.') || item === 'node_modules') continue;
-            let isDir = false;
-            try { isDir = fs.statSync(item).isDirectory(); } catch { continue; }
-            if (!isDir) continue;
-            for (const nested of (() => { try { return fs.readdirSync(item); } catch { return []; } })()) {
-                if (!WINDOWS_DEVICE_NAMES.has(nested)) continue;
-                const nestedPath = path.join(item, nested);
+        const sweepDeviceNames = (dir: string, depth: number): void => {
+            if (depth > 8) return; // guard against pathological trees / symlink loops
+            let entries: fs.Dirent[];
+            try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+            for (const entry of entries) {
+                const entryPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                    if (SWEEP_SKIP_DIRS.has(entry.name)) continue;
+                    sweepDeviceNames(entryPath, depth + 1);
+                    continue;
+                }
+                if (!WINDOWS_DEVICE_NAMES.has(entry.name)) continue;
                 // Shell-free: never interpolate the filename into a command line.
-                const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', nestedPath], { encoding: 'utf-8' });
-                if (rm.status === 0 && !fs.existsSync(nestedPath)) {
-                    Warn(`Auto-deleted Windows device name artifact: ${nestedPath} (blocks directory deletion from PowerShell)`);
+                const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', entryPath], { encoding: 'utf-8' });
+                if (rm.status === 0 && !fs.existsSync(entryPath)) {
+                    Warn(`Auto-deleted Windows device name artifact: ${entryPath} (blocks directory deletion from PowerShell)`);
                     nestedSwept++;
                 } else {
-                    Warn(`Windows device name artifact '${nestedPath}' could not be auto-deleted — remove it from Git Bash with: rm -f -- "${nestedPath}"`);
+                    Warn(`Windows device name artifact '${entryPath}' could not be auto-deleted — remove it from Git Bash with: rm -f -- "${entryPath}"`);
                 }
             }
+        };
+        for (const item of fs.readdirSync('.')) {
+            if (trackedItems.has(item) || item.startsWith('.') || SWEEP_SKIP_DIRS.has(item)) continue;
+            let isDir = false;
+            try { isDir = fs.statSync(item).isDirectory(); } catch { continue; }
+            if (isDir) sweepDeviceNames(item, 1);
         }
         if (strayFound === 0 && nestedSwept === 0) {
             Pass('Workspace root is clean from stray test artifacts');
@@ -1600,6 +1616,66 @@ if (IS_WORKSPACE_ROOT) {
         Warn('Could not read docs/workspace-schema.json for stray-artifact check — skipping');
     }
 }
+
+// Check: `> nul` redirect linting — prevent the artifact at the source
+// Layer 4 of the 2026-08-07 meeting (memory/archive/meeting-2026-08-07-prevent-nul-file-creation.md).
+// The sweep above is remediation; this is prevention. On Windows, `> nul` / `2> nul` in a shell
+// context can materialize a physical file named `nul` that then blocks deleting the whole
+// directory tree from PowerShell. CONSTITUTION.md §8 bans the pattern outright: use
+// `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell.
+//
+// A full-tree scan on 2026-08-21 found zero violations in workspace source, so this check starts
+// clean and exists to keep it that way. Scanning is limited to executable file types — .md is
+// deliberately excluded because the governance docs quote the banned pattern in order to ban it.
+// Comment lines are stripped before matching for the same reason (audit.ts's own comments above
+// discuss `> nul` at length).
+if (!LIFECYCLE_ONLY) {
+    const NUL_REDIRECT = /(?:^|[^\w/])(?:[12]|&)?>\s*nul(?![\w./\\-])/i;
+    const LINT_EXTS = ['.ts', '.js', '.mjs', '.sh', '.ps1', '.cmd', '.bat'];
+    const LINT_SKIP_DIRS = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build', '.next', 'coverage', 'Projects']);
+    const LINT_ROOTS = ['scripts', 'templates', '.githooks', 'tests'];
+
+    /** Strip line comments so prose *about* the banned pattern isn't mistaken for a use of it. */
+    const stripComment = (line: string): string =>
+        line.replace(/^\s*(?:\/\/|#|<#|\*).*$/, '').replace(/\s+(?:\/\/|#)\s.*$/, '');
+
+    let nulLintHits = 0;
+    let nulLintScanned = 0;
+    const lintDir = (dir: string, depth: number): void => {
+        if (depth > 10) return;
+        let entries: fs.Dirent[];
+        try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+        for (const entry of entries) {
+            const entryPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+                if (LINT_SKIP_DIRS.has(entry.name)) continue;
+                lintDir(entryPath, depth + 1);
+                continue;
+            }
+            const isHook = dir.includes('.githooks');
+            if (!isHook && !LINT_EXTS.some(ext => entry.name.endsWith(ext))) continue;
+            let content: string;
+            try { content = fs.readFileSync(entryPath, 'utf-8'); } catch { continue; }
+            nulLintScanned++;
+            content.split('\n').forEach((line, i) => {
+                // Escape hatch for lines that must contain the literal pattern — e.g. this check's
+                // own diagnostic strings below, which quote what they forbid.
+                if (line.includes('nul-lint-ignore')) return;
+                if (NUL_REDIRECT.test(stripComment(line))) {
+                    Fail(`Banned '> nul' redirect at ${entryPath}:${i + 1} — creates an undeletable Windows device-name file. Use '> /dev/null 2>&1' (Bash) or '$null' / 'Out-Null' (PowerShell).`); // nul-lint-ignore
+                    nulLintHits++;
+                }
+            });
+        }
+    };
+    for (const root of LINT_ROOTS) {
+        if (fs.existsSync(root)) lintDir(root, 1);
+    }
+    if (nulLintHits === 0) {
+        Pass(`'> nul' redirect check: no banned redirects found (${nulLintScanned} files scanned)`); // nul-lint-ignore
+    }
+}
+
 // Check: L0 Leakage (CONSTITUTION.md references in templates)
 if (!LIFECYCLE_ONLY && fs.existsSync('templates')) {
     let leakageErrors = 0;
