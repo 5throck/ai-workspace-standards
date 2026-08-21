@@ -1,5 +1,6 @@
 ---
 name: fi-analyst
+role: FI Module Analyst
 model: inherit
 color: yellow
 status: active
@@ -19,6 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/fi-analyst.md
+version: "1.0.0"
 ---
 
 # FI Analyst — Financial Accounting

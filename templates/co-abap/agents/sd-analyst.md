@@ -1,5 +1,6 @@
 ---
 name: sd-analyst
+role: SD Module Analyst
 model: inherit
 color: yellow
 status: active
@@ -19,6 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/sd-analyst.md
+version: "1.0.0"
 ---
 
 # SD Analyst — Sales & Distribution

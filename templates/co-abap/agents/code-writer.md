@@ -1,5 +1,6 @@
 ---
 name: code-writer
+role: SAP ABAP Code Implementation Specialist
 model: inherit
 color: green
 status: active
@@ -22,6 +23,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/code-writer.md
+version: "1.0.0"
 ---
 
 ## Role

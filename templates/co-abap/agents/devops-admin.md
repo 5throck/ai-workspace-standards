@@ -1,5 +1,6 @@
 ---
 name: devops-admin
+role: SAP DevOps / Admin
 model: inherit
 color: yellow
 status: active
@@ -20,6 +21,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/devops-admin.md
+version: "1.0.0"
 ---
 
 ## Role

@@ -1,5 +1,6 @@
 ---
 name: sap-investigator
+role: SAP Codebase Intelligence Scanner (read-only)
 model: inherit
 color: magenta
 status: active
@@ -22,6 +23,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/sap-investigator.md
+version: "1.0.0"
 ---
 
 ## Role

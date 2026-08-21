@@ -1,5 +1,6 @@
 ---
 name: form-expert
+role: SAP Document Output & Form Specialist
 model: inherit
 color: cyan
 status: active
@@ -22,6 +23,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/form-expert.md
+version: "1.0.0"
 ---
 
 ## Role
