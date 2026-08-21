@@ -77,12 +77,6 @@ documentation, and lifecycle management.
 
 ---
 
-
-### Hybrid Scripting
-All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).
-
----
-
 ## Development Workflow
 
 ```
