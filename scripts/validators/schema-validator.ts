@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
@@ -55,10 +55,17 @@ const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Valid lifecycle phase values. */
-const VALID_LIFECYCLE_PHASES = ['production', 'development', 'retired'] as const;
+// 'beta' mirrors the variant.json `status` vocabulary. It is used consistently — by exactly the
+// agents of the two variants whose variant.json status is 'beta' (co-export 9, co-news 6) and
+// nowhere else — so the enum was stale, not the data.
+const VALID_LIFECYCLE_PHASES = ['production', 'beta', 'development', 'retired'] as const;
 
-/** Valid metadata.type values for skills. */
-const VALID_METADATA_TYPES = ['process', 'security', 'quality', 'lifecycle'] as const;
+// Skill metadata.type is NOT enum-constrained. The four values this list once held
+// ('process', 'security', 'quality', 'lifecycle') match only 60 of the 80 skills that declare a
+// type; 16 distinct values are in use overall, grown organically with no documented taxonomy to
+// migrate toward. Freezing the current spread into an enum would encode the sprawl rather than
+// govern it, so the check below enforces shape (non-empty string) and leaves the taxonomy
+// question open — see the follow-up noted in the 2026-08-21 CHANGELOG entry.
 
 /** Valid gemini-parity values for commands. */
 const VALID_GEMINI_PARITY_VALUES = ['full', 'partial', 'skip'] as const;
@@ -73,9 +80,15 @@ const VALID_COMMAND_SCOPE_VALUES = ['common', 'claude-only', 'gemini-only'] as c
 /**
  * Required top-level fields in agent frontmatter.
  */
+// `last_reviewed` is deliberately NOT required. It is an L0-only convention — present on the 8
+// workspace-root agents and absent from 92 of 100 agents overall, because variant agents track
+// freshness with `last_updated` instead. Requiring it here would fail almost every variant agent
+// for not following a convention that was never propagated to them. Its date-pattern check below
+// still applies whenever the field IS present. (2026-08-21: measured before wiring this validator
+// into audit.ts for the first time.)
 const AGENT_REQUIRED_FIELDS = [
   'name', 'role', 'status', 'tier', 'version',
-  'last_reviewed', 'description', 'lifecycle',
+  'description', 'lifecycle',
 ] as const;
 
 /**
@@ -277,13 +290,13 @@ function validateSkillFrontmatter(
     });
   }
 
-  // ── metadata.type enum ──────────────────────────────────────────────────
+  // ── metadata.type shape ─────────────────────────────────────────────────
   if (typeof fm.metadata === 'object' && fm.metadata !== null && !Array.isArray(fm.metadata)) {
-    if (fm.metadata.type !== undefined && !VALID_METADATA_TYPES.includes(fm.metadata.type)) {
+    if (fm.metadata.type !== undefined && (typeof fm.metadata.type !== 'string' || fm.metadata.type.trim() === '')) {
       issues.push({
         severity: 'error',
-        category: 'invalid-enum',
-        message: `Skill "${skillName}" metadata.type has invalid value "${fm.metadata.type}" — must be one of: ${VALID_METADATA_TYPES.join(', ')}`,
+        category: 'constraint-violation',
+        message: `Skill "${skillName}" metadata.type must be a non-empty string`,
         file: skillFile,
       });
     }
@@ -400,6 +413,13 @@ export const schemaValidator: ValidatorDefinition = {
         });
         continue;
       }
+
+      // Skip L1-B `extends:` stubs (i.e. every variant's pm.md). Their frontmatter is a delta —
+      // the required fields live in the parent and are merged at resolve time — so validating the
+      // stub standalone reports the entire required set as missing. This accounted for 46 of the
+      // 47 remaining errors when this validator was first wired into audit.ts (2026-08-21):
+      // exactly one agent per variant, always pm.md. Resolution is `extendsValidatorWrapper`'s job.
+      if (frontmatter.extends) continue;
 
       const agentIssues = validateAgentFrontmatter(frontmatter, agentFile);
       checks += agentIssues.length;

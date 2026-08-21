@@ -1,4 +1,4 @@
-// @version 2.17.0
+// @version 2.18.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -498,6 +498,53 @@ if (hasBun) {
             Pass('Skill audit: all skills healthy');
         } else {
             Fail("Skill audit detected issues (run 'bun scripts/skill-lifecycle-audit.ts' to see details)");
+        }
+    }
+    // Variant registry validators (scripts/validators/ — the framework context.md §6.6
+    // documents as audit-enforced). This wiring is L0-only: `scripts/validators/` is a layer-L0
+    // directory and is not propagated to templates/common/scripts/, so the existsSync guard
+    // makes the L1 copy of this file skip the check rather than crash.
+    // First wired 2026-08-21 — before that the framework was imported by nothing (dead code),
+    // which is how `phase: active`/`beta` drift and 6 unparseable SKILL.md frontmatters went
+    // unnoticed. Error-severity findings Fail the audit; warnings stay visible as WARN.
+    if (fs.existsSync(path.join('scripts', 'validators', 'index.ts')) && fs.existsSync('templates')) {
+        const { runAllValidators } = await import('./validators/index.ts');
+        let validatorErrors = 0;
+        let validatorWarnings = 0;
+        for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-'))) {
+            const variantDir = path.join('templates', variant);
+            const vjPath = path.join(variantDir, 'variant.json');
+            if (!fs.existsSync(vjPath)) continue;
+            let variantJson: Record<string, unknown>;
+            try { variantJson = JSON.parse(readUTF8File(vjPath)); } catch { continue; }
+            const agentsDir = path.join(variantDir, 'agents');
+            const agentFiles = fs.existsSync(agentsDir)
+                ? fs.readdirSync(agentsDir).filter(f => f.endsWith('.md') && !f.startsWith('README'))
+                : [];
+            const rawSkills = (variantJson as { skills?: unknown }).skills ?? [];
+            const skillFiles = (rawSkills as unknown[]).map(s => (typeof s === 'string' ? s : (s as { name?: string })?.name ?? ''));
+            const results = await runAllValidators({
+                variantDir,
+                variantType: (variantJson as { variant_type?: string }).variant_type ?? variant,
+                variantJson: variantJson as Record<string, any>,
+                agentFiles,
+                skillFiles,
+                policy: null,
+            });
+            for (const r of results) {
+                if (r.skipped) continue;
+                for (const issue of r.issues ?? []) {
+                    if (issue.severity === 'error') {
+                        Fail(`Variant registry validation [${variant}] ${issue.category}: ${issue.message}`);
+                        validatorErrors++;
+                    } else if (issue.severity === 'warning') {
+                        validatorWarnings++;
+                    }
+                }
+            }
+        }
+        if (validatorErrors === 0) {
+            Pass(`Variant registry validation: all variants clean (${validatorWarnings} warning(s) surfaced)`);
         }
     }
     if (fs.existsSync(path.join('scripts', 'verify-scripts.ts'))) {
