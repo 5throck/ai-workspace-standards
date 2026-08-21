@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
@@ -10,7 +10,8 @@
  *   1. Agent frontmatter: required fields, status enum, tier object,
  *      tier value enums, version semver pattern, description min-length,
  *      lifecycle required fields and phase enum
- *   2. Skill frontmatter: required fields, status enum, metadata.type enum
+ *   2. Skill frontmatter: required fields, status enum, metadata.type shape (error)
+ *      + documented-taxonomy membership (warning)
  *   3. Command frontmatter: optional fields only; validates gemini-parity enum,
  *      description min-length, version semver, scope enum (lenient — no frontmatter = skip)
  */
@@ -60,12 +61,19 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 // nowhere else — so the enum was stale, not the data.
 const VALID_LIFECYCLE_PHASES = ['production', 'beta', 'development', 'retired'] as const;
 
-// Skill metadata.type is NOT enum-constrained. The four values this list once held
-// ('process', 'security', 'quality', 'lifecycle') match only 60 of the 80 skills that declare a
-// type; 16 distinct values are in use overall, grown organically with no documented taxonomy to
-// migrate toward. Freezing the current spread into an enum would encode the sprawl rather than
-// govern it, so the check below enforces shape (non-empty string) and leaves the taxonomy
-// question open — see the follow-up noted in the 2026-08-21 CHANGELOG entry.
+// Skill metadata.type is NOT enum-constrained as an error. The documented taxonomy lives in
+// docs/constitution/06-skill-lifecycle.md § "Skill metadata.type Taxonomy" (established
+// 2026-08-21 by surveying the 19 values then in use); this list mirrors it so the validator can
+// WARN on undocumented values — visible drift, not a blocked commit. The check below enforces
+// shape (non-empty string) as an error and vocabulary membership as a warning. Update the doc
+// and this list together, never one without the other.
+const DOCUMENTED_METADATA_TYPES = [
+  'process', 'implementation', 'domain', 'module', 'core',
+  'analysis', 'research', 'strategic-reasoning', 'financial-analysis', 'legal-research',
+  'testing', 'accessibility-testing', 'security-reporting', 'threat-modeling', 'contract-safety',
+  'scaffolding', 'presentation-sync', 'audio-synthesis',
+  'task', 'utility',
+] as const;
 
 /** Valid gemini-parity values for commands. */
 const VALID_GEMINI_PARITY_VALUES = ['full', 'partial', 'skip'] as const;
@@ -292,11 +300,25 @@ function validateSkillFrontmatter(
 
   // ── metadata.type shape ─────────────────────────────────────────────────
   if (typeof fm.metadata === 'object' && fm.metadata !== null && !Array.isArray(fm.metadata)) {
-    if (fm.metadata.type !== undefined && (typeof fm.metadata.type !== 'string' || fm.metadata.type.trim() === '')) {
+    if (fm.metadata.type !== undefined && (typeof fm.metadata.type !== 'string' || fm.metadata.type === '')) {
       issues.push({
         severity: 'error',
         category: 'constraint-violation',
         message: `Skill "${skillName}" metadata.type must be a non-empty string`,
+        file: skillFile,
+      });
+    }
+
+    // Vocabulary check — WARN, not error. The taxonomy is documented in
+    // docs/constitution/06-skill-lifecycle.md § "Skill metadata.type Taxonomy"; this list
+    // mirrors it. An unlisted value is visible drift (someone should either pick an existing
+    // type or extend the doc + this list together), but does not block a commit — the field
+    // predates the taxonomy and new domain variants may legitimately coin a value mid-flight.
+    if (typeof fm.metadata.type === 'string' && !DOCUMENTED_METADATA_TYPES.includes(fm.metadata.type)) {
+      issues.push({
+        severity: 'warning',
+        category: 'undocumented-skill-type',
+        message: `Skill "${skillName}" metadata.type "${fm.metadata.type}" is not in the documented taxonomy — reuse the closest value in docs/constitution/06-skill-lifecycle.md or extend the taxonomy (doc + this list) in the same change`,
         file: skillFile,
       });
     }

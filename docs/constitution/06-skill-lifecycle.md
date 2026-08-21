@@ -195,6 +195,35 @@ last_reviewed_by: pm-agent
 ---
 ```
 
+##### Skill `metadata.type` Taxonomy
+
+`metadata.type` classifies a skill by its **functional role**. The vocabulary below is the documented taxonomy (established 2026-08-21 by surveying all values then in use — 19 distinct, grown organically since the field's introduction). `schema-validator.ts` emits a **warning** (not an error) for values outside this list, so an unlisted value is visible drift rather than a blocked commit.
+
+| Value | Meaning | Representative skills |
+|-------|---------|----------------------|
+| `process` | Workflow, governance, or operational procedure | `agent-lifecycle-manager`, `sync` |
+| `implementation` | Producing or transforming concrete artifacts (documents, code, interfaces) | `documentation-writing`, `hwp-document-processing` |
+| `domain` | Variant-specific domain knowledge or methodology | co-consult's `competitive-intelligence`, `financial-modeling` |
+| `module` | Reference knowledge for a specific external system module (a `domain` subkind; co-abap's SAP modules) | `sap-fi`, `sap-sd` |
+| `core` | A variant's mandatory, always-on workflow (a `domain` subkind; semantically close to `process` but variant-owned) | co-abap's `post-write-chain`, `dump-monitor` |
+| `analysis` | Analytical method producing structured findings | `financial-statement-analysis` |
+| `research` | Source gathering and evidence collection | `company-intelligence` |
+| `strategic-reasoning` | Structured reasoning frameworks for strategy work | `mece-logic-auditor` |
+| `financial-analysis` | Financial-data analysis methods | `k-dart` |
+| `legal-research` | Statute, precedent, and regulatory lookup | `k-law` |
+| `testing` | Test execution or test-design methodology | — (reserved) |
+| `accessibility-testing` | Accessibility evaluation rules and remediation | `accessibility-audit` |
+| `security-reporting` | Producing standardized security findings output | `sarif-exporter` |
+| `threat-modeling` | Threat enumeration and risk scoring | `stride-threat-matrix` |
+| `contract-safety` | Interface/schema contract validation | `zod-contract-gate` |
+| `scaffolding` | Project, variant, or upgrade scaffolding workflows | `project-to-variant`, `upgrade-project` |
+| `presentation-sync` | Presenter/display synchronization | `presenter-mode` |
+| `audio-synthesis` | Procedural audio generation | `sound-synth` |
+| `task` | *Discouraged* — a procedure skill; prefer `process` (kept only because `desktop-app-fallback` uses it) | `desktop-app-fallback` |
+| `utility` | *Example files only* — not for real skills | `docs/_examples/` samples |
+
+**Decision rule**: reuse the closest existing value; add a new one only when no row fits, document it here in the same change, and keep it a hyphenated lowercase noun phrase. `module` and `core` are variant-ecosystem subkinds — do not invent new subkinds per variant.
+
 ##### Running Skill Health Audit
 
 Execute the audit script to check skill health:
