@@ -4,8 +4,7 @@ description: 'Use after ANY WriteSource, EditSource, or Activate operation on SA
 version: 1.1.0
 last_reviewed: 2026-08-15
 status: active
-scope: variant
-l2_propagate: false
+scope: co-abap
 owner: test-runner
 prerequisites: vsp MCP server
 metadata:

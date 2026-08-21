@@ -1,6 +1,6 @@
 ---
 name: financial-statement-analysis
-scope: common
+scope: co-consult
 description: >
   Comprehensive Korean financial statement analysis pipeline. Collects DART data,
   validates accounting integrity, normalizes to canonical financial model,
@@ -17,7 +17,6 @@ version: 1.3.0
 last_reviewed: 2026-07-19
 prerequisites:
   - k-dart
-l2_propagate: false
 metadata:
   type: analysis
   tier: medium

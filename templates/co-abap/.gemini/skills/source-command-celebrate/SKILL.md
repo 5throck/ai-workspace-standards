@@ -4,8 +4,7 @@ description: Celebrate the successful completion of a task to boost team morale.
 version: 1.0.0
 last_reviewed: 2026-08-15
 status: active
-scope: variant
-l2_propagate: false
+scope: co-abap
 owner: pm
 prerequisites: none
 metadata:
