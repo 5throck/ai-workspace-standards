@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -431,6 +431,45 @@ for (const srcFile of walkFiles(templatesDir)) {
 // Ensure variant-overlaid files are also writable
 makeWritable(projectDir);
 console.log('  ✅ Variant templates copied');
+
+// ── 2.3a. Purge Windows device-name artifacts copied from the template ─────────
+// copyDir ignores .gitignore, so a device-name file (e.g. `nul`) that somehow lands in a
+// templates/co-*/ directory ships into every project scaffolded from that variant — observed
+// live: templates/co-deck/nul (created 2026-08-17 by an external tool) propagated into every
+// co-deck scaffold, where it blocked deleting the project directory from PowerShell. Delete
+// such files here, at the propagation point, so a scaffold is clean even if a template
+// regresses. audit.ts sweeps the templates/ tree too, but that runs later and elsewhere.
+{
+  const DEVICE_NAMES = new Set([
+    'nul', 'NUL', 'con', 'CON', 'prn', 'PRN', 'aux', 'AUX',
+    ...Array.from({ length: 9 }, (_, i) => `com${i + 1}`), ...Array.from({ length: 9 }, (_, i) => `COM${i + 1}`),
+    ...Array.from({ length: 9 }, (_, i) => `lpt${i + 1}`), ...Array.from({ length: 9 }, (_, i) => `LPT${i + 1}`),
+  ]);
+  const SKIP = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build']);
+  const purge = (dir: string, depth: number): number => {
+    if (depth > 8) return 0;
+    let entries: import('node:fs').Dirent[];
+    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return 0; }
+    let removed = 0;
+    for (const entry of entries) {
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!SKIP.has(entry.name)) removed += purge(p, depth + 1);
+        continue;
+      }
+      if (!DEVICE_NAMES.has(entry.name)) continue;
+      // Forward-slash path: Git Bash's rm mis-handles backslash forms. Shell-free argument
+      // passing; trust the exit status (fs.existsSync is unreliable for device-name paths).
+      const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', p.split('\\').join('/')], { encoding: 'utf-8' });
+      if (rm.status === 0) {
+        console.log(`  🗑️  Purged device-name artifact from scaffold: ${p}`);
+        removed++;
+      }
+    }
+    return removed;
+  };
+  purge(projectDir, 1);
+}
 
 // ── 2.3b. Create deliverables/ subdirectories (co-consult) ──────────────────────
 if (variant === 'co-consult') {
