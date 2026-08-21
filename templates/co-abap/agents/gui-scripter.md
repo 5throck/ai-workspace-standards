@@ -1,5 +1,6 @@
 ---
 name: gui-scripter
+role: SAP GUI Scripting & Automation Specialist (LAST RESORT)
 model: inherit
 color: yellow
 status: active
@@ -20,6 +21,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/gui-scripter.md
+version: "1.0.0"
 ---
 
 ## Role

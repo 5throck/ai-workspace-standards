@@ -1,5 +1,6 @@
 ---
 name: security-monitor
+role: Security Monitor
 model: inherit
 color: red
 status: active
@@ -17,6 +18,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/security-monitor.md
+version: "1.0.0"
 ---
 
 # Security Monitor Agent
