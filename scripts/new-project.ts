@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.4
+// @version 1.6.0
 // new-project.ts — Scaffold a new project under the workspace root
 // Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
 //
@@ -459,6 +459,7 @@ if (variant === 'co-consult') {
 }
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
+const projectDate = new Date().toISOString().slice(0, 10);
 const pmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(pmMd)) {
   let content = readFileSync(pmMd, 'utf8');
@@ -466,14 +467,26 @@ if (existsSync(pmMd)) {
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
     const fm: Record<string, unknown> = yaml.load(match[1], { schema: yaml.DEFAULT_SCHEMA }) || {};
-    delete fm.lifecycle;
+    // lifecycle is REGENERATED, not deleted. The resolved pm.md inherits L0's block verbatim —
+    // including created/last_updated dates describing the workspace's own history, which are
+    // meaningless in a freshly scaffolded project. But deleting it outright left the project
+    // failing its own post-scaffold audit: scripts/validate-agents.ts requires lifecycle.phase +
+    // lifecycle.governance in every agents/*.md, so pm.md was a guaranteed error in every project
+    // scaffolded from every variant. Rewrite with project-local dates instead.
+    const inherited = (fm.lifecycle ?? {}) as Record<string, unknown>;
+    fm.lifecycle = {
+      phase: inherited.phase ?? 'production',
+      created: projectDate,
+      last_updated: projectDate,
+      governance: 'docs/lifecycle/agents/pm.md',
+    };
     delete fm.formal_name;
     delete fm.variant;
     const newFm = '---\n' + (yaml.dump(fm) as string).trimEnd() + '\n---\n';
     content = newFm + content.slice(match[0].length);
   }
   writeFileSync(pmMd, content, 'utf8');
-  console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, lifecycle, formal_name, variant)');
+  console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, formal_name, variant); regenerated lifecycle with project-local dates');
 }
 
 // ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
@@ -514,7 +527,7 @@ if (existsSync(substitutePlaceholders)) {
 }
 
 // ── 5.5b. Update lifecycle.statusSince in variant.json ────────────────────────
-const projectDate = new Date().toISOString().slice(0, 10);
+// (projectDate is declared at §2.5, which also needs it)
 const projVariantJson = join(projectDir, 'variant.json');
 if (existsSync(projVariantJson)) {
   const helper = join(workspaceRoot, 'scripts', 'helpers', 'update-variant-lifecycle.ts');

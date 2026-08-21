@@ -100,6 +100,26 @@ What IS standardized is **structure**: 7 of 8 collaboration-family variants alre
 
 **Severity policy** — like WS-08, WS-09 starts in `variantValidationPolicy.warningOnly` (`docs/templates/lifecycle-governance.json`) during rollout. As of 2026-08-21: `co-consult`, `co-design`, `co-develop`, `co-export`, `co-game`, `co-security`, `co-work`, and `co-deck` all conform; `co-news` (a newer, still-diverging beta variant) does not yet. Remove `"WS-09"` from `warningOnly` once all non-exempt variants conform, mirroring WS-08's 2026-08-09 graduation.
 
+### Agent Lifecycle Frontmatter Standard
+
+Every variant agent runtime definition (`templates/co-*/agents/*.md`) MUST carry a `lifecycle:` frontmatter block with at minimum `phase` and `governance`. `validate-templates.ts` Check **WS-10** enforces this.
+
+This mirrors, at the template layer, what `scripts/validate-agents.ts` already enforces at the project layer — and exists because that asymmetry caused a real failure. Nothing validated the template copies, so the requirement silently drifted: only `co-export` and `co-security` ever carried the block, meaning `bun scripts/new-project.ts <name> --variant <v>` produced a project that failed its own post-scaffold audit for 8 of 10 variants. The governance records existed and passed `validate-agents.ts` Part 2 the whole time; only the runtime pointer was missing. Backfilled 2026-08-21 across 59 agents in 7 variants.
+
+```yaml
+lifecycle:
+  phase: production        # required — matches the governance record's "- **Phase**:" line
+  created: "YYYY-MM-DD"    # conventional
+  last_updated: "YYYY-MM-DD"
+  governance: docs/lifecycle/agents/<name>.md   # required
+```
+
+**Skipped files** — `README.md` / `README_ko.md` (roster docs, not agent definitions), and any file carrying `extends:` in its frontmatter (i.e. `pm.md`, an L1-B stub whose lifecycle block is inherited from the L0 root agent at resolve time; requiring a literal block there would duplicate the SSOT). `pm.md`'s scaffold-time lifecycle is regenerated with project-local dates by `new-project.ts` §2.5.
+
+**Exemption** — `co-abap` has no `docs/lifecycle/agents/` directory at all, so its 19 agents need governance records authored before the frontmatter can point anywhere real. Exempted via `WS10_EXEMPT_VARIANTS` (same precedent as WS-09) rather than emitting 19 failures for what is a content task, not a mechanical backfill.
+
+**Severity policy** — unlike WS-08/WS-09, WS-10 ships as a hard **FAIL** immediately (all non-exempt variants already conform as of 2026-08-21), though it still reads `variantValidationPolicy.warningOnly` for consistency. One sub-assertion is deliberately **WARN-only regardless**: whether `lifecycle.governance` actually resolves to an existing file. That is stricter than `validate-agents.ts` itself (which only checks the key is non-empty), so failing on it would block commits over a defect that does not break a scaffolded project's audit. It found a real one on first run — `co-security`'s 5 agents all set `governance: lifecycle-manager`, an agent *name* rather than a path. Promote that sub-assertion to `fail()` once `co-security` is corrected.
+
 ## Optional Files (Domain Extensions)
 
 | File / Path | Used by |
