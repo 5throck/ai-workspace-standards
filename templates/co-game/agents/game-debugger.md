@@ -27,7 +27,7 @@ examples:
 phases: [4]
 handoff_to: [test-runner, pm]
 handoff_from: [pm]
-required_skills: [systematic-debugging, test-driven-development]
+required_skills: [test-driven-development]
 lifecycle:
   phase: production
   created: "2026-08-12"
