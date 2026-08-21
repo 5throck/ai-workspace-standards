@@ -283,6 +283,20 @@ Use an external computation tool when the task involves ANY of the following:
 
 ---
 
+## Scripts
+
+<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
+<!-- Status: active | deprecated | experimental -->
+
+| Script | Type | Entrypoint | Source Layer | Status |
+|--------|------|------------|-------------|--------|
+| `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
+| `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
+| `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
+
+> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
+
+
 ## Lifecycle Management
 
 This workspace follows explicit lifecycle management practices for Agents, Skills, and Scripts to ensure consistency and maintainability.
@@ -369,4 +383,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.4 — promoted "Git / PR Workflow" section from 6 variants (co-consult, co-design, co-develop, co-export, co-security, co-work)*
+*context.md version: 2.5 — promoted "Scripts" section from 7 variants (co-consult, co-design, co-develop, co-export, co-game, co-security, co-work)*

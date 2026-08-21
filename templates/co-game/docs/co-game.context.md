@@ -66,18 +66,6 @@
 
 ---
 
-## Scripts
-
-<!-- Source Layer: L0 = templates/common (SSOT) | L1 = workspace root | L2 = project-local -->
-<!-- Status: active | deprecated | experimental -->
-
-| Script | Type | Entrypoint | Source Layer | Status |
-|--------|------|------------|-------------|--------|
-| `audit` | Tier 2 | `package.json` (`bun run audit`) | L0 | active |
-| `dev-sync` | Tier 2 | `package.json` (`bun run dev-sync`) | L0 | active |
-| `sync-md` | Tier 2 | `package.json` (`bun run sync-md`) | L0 | active |
-
-> See SCRIPTS.md in templates/common/scripts/ for full lifecycle registry.
 
 ### Hybrid Scripting
 All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterparts (ADR-0036).

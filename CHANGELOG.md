@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **[2026-08-21]**: docs(templates): promoted the "Scripts" section (2.4 → 2.5) — 7/10 variants (`co-consult`, `co-design`, `co-develop`, `co-export`, `co-game`, `co-security`, `co-work`) carried a char-for-char identical `audit`/`dev-sync`/`sync-md` script table + "Hybrid Scripting" note. Moved into `docs/context.md` via `promote-context-section.ts`; the section is removed wholesale from each variant file (the tool has no partial-section mode), which also dropped `co-export`'s 3-line variant-specific explanation ("co-export does not maintain its own script copies") — accepted as a known trade-off rather than treated as a defect in this pass. `co-abap` was excluded (its Scripts section carries SAP-specific entries, not the common table). `bun scripts/audit.ts`'s new `checkStalePromotedContent()` confirms no leftover duplicates.
+
 ### Added
 - **[2026-08-21]**: test(l3-promotion): `test-l3-to-variant-promotion.ts` (1.0.2 → 1.1.0) — adds Test 5, `docs/context.md` coverage for the L3 scaffold → variant promotion path, closing the gap flagged at the start of this session (a real project, `co-news`, was missing `docs/context.md` due to two independent scaffold-time bugs that had no regression test). Asserts: (5a) the L3 fixture's `docs/context.md` survives `create-l3-scaffold.ts`; (5b) it's correctly *absent* from the promoted variant template output (`generate-variant.ts`'s `SKIP_IN_COPY` deliberately excludes it — a `templates/co-*/` template never carries its own `docs/context.md`, only `templates/common/` does); (5c) `docs/<variant>.context.md` is generated in the promoted output. Test 5b's expectation was initially written backwards and caught by running the test against the real pipeline before committing — confirms the existing "Check WS-07" intent in `validate-templates.ts` rather than contradicting it.
 
