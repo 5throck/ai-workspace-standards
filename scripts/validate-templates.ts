@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.8.0
+ * @version 1.9.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -1714,7 +1714,16 @@ function checkCommonContract(): void {
       const variantRaw = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
 
       // Check if variant uses extends pattern
-      const variantFields = parseFrontmatter(variantRaw);
+      // Parse with a real YAML parser, not the line-based parseFrontmatter(): that helper trims
+      // each candidate key before testing for indentation, so indented lines inside block scalars
+      // (e.g. prose under `variant_overrides:`) whose text contains a colon were reported as
+      // top-level frontmatter keys — producing nonsense C-SK-02 warnings like
+      // "unexpected fields: <!-- VARIANT-SECTION, 1. HS classification memorandum, ...".
+      const fmMatchV = normalizeContent(variantRaw.replace(/^# @resolved-from:.*\n/, '')).match(/^---\n([\s\S]*?)\n---/);
+      let variantFields: Record<string, unknown> = {};
+      if (fmMatchV) {
+        try { variantFields = (load(fmMatchV[1]) as Record<string, unknown>) ?? {}; } catch { variantFields = {}; }
+      }
       const hasExtends = 'extends' in variantFields;
 
       if (hasExtends) {
@@ -1722,8 +1731,15 @@ function checkCommonContract(): void {
         // "Minimal pattern" REQUIRES `name`, `variant`, `version`, and `last_updated`
         // alongside `extends` — it is not extends-only. validate-pm-extends.ts (the
         // dedicated ADR-0033/0048 validator) already treats this schema as valid;
-        // only flag fields outside that documented schema.
-        const allowedWithExtends = new Set(['extends', 'name', 'variant', 'version', 'last_updated']);
+        // only flag fields outside that documented schema. `remove_sections` and
+        // `variant_overrides` are the ADR-0039/ADR-0034 override mechanism consumed
+        // at scaffold time by merge-frontmatter.ts; `status` is documented optional
+        // at all levels; `owner` and `capabilities` are pass-through agent metadata
+        // read by other validators (capability-validator.ts reads pm's capabilities).
+        const allowedWithExtends = new Set([
+          'extends', 'name', 'variant', 'version', 'last_updated', 'status',
+          'remove_sections', 'variant_overrides', 'owner', 'capabilities',
+        ]);
         const fieldKeys = Object.keys(variantFields);
         const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));
 
