@@ -20,12 +20,12 @@ metadata:
     - /k-dart
     - DART
     - DART OpenAPI
-    - `DART 공시`
-    - `공시검색`
-    - `기업개황`
-    - `재무제표`
-    - `재무정보`
-    - `재무제표 조회`
+    - "`DART 공시`"
+    - "`공시검색`"
+    - "`기업개황`"
+    - "`재무제표`"
+    - "`재무정보`"
+    - "`재무제표 조회`"
     - financial statement
     - corporate disclosure
 ---
