@@ -299,7 +299,13 @@ bun scripts/validate-templates.ts
 
 ## 📚 학습 리소스 (Learning Resources)
 
-본 워크스페이스의 멀티 에이전트 워크플로를 습득하려는 실무자를 위한 종합 교육 핸드북이 제공됩니다:
+이 워크스페이스가 처음이라면, 초보자를 위한 입문 과정부터 시작하세요:
+
+**[Claude Code and Multi-Agent Harness](https://5throck.github.io/intro-to-ai-harness/)**
+
+AI 입문자 및 Claude Desktop App 사용자(macOS, Windows, Linux)를 위한 실습 중심 가이드입니다. 4개 파트, 13개 챕터로 구성되어 있으며 — 기초 개념, 두 가지 실습 프로젝트(co-consult, co-deck), 커스텀 에이전트/스킬/팀 구축, 워크플로 자동화를 각 단계별 실습과 함께 다룹니다.
+
+더 깊이 있는 학습을 원하는 실무자를 위해, 종합 교육 핸드북도 제공됩니다:
 
 **[Multi-Agent Harness Engineering 핸드북](https://5throck.github.io/multi-agent-harness-handbook/)**
 
@@ -329,4 +335,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-15*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-21*
