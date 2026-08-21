@@ -4,8 +4,7 @@ description: Use when working on SD module tasks — sales orders, deliveries, b
 version: 1.0.0
 last_reviewed: 2026-08-15
 status: active
-scope: variant
-l2_propagate: false
+scope: co-abap
 owner: sd-analyst
 prerequisites: vsp MCP server
 metadata:

@@ -38,6 +38,19 @@
         "matcher": "Write|Edit",
         "command": "bun scripts/sync-md.ts"
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "async": true,
+            "statusMessage": "Configuring git hooks..."
+          }
+        ]
+      }
     ]
   },
   "enableAllProjectMcpServers": true

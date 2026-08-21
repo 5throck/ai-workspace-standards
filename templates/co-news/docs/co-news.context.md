@@ -6,6 +6,17 @@
 
 Korean business/finance journalism variant for economics reporters covering listed companies. Grounded in DART financial disclosures and Korean Commercial Act research, it produces fact-checked, naturally human-written articles — Korean by default, with multi-language support.
 
+## Tech Stack
+
+| Component | Role |
+|-----------|------|
+| **DART OpenAPI** (via the `k-dart` L1 skill) | Financial disclosures: company overview, financial statements, major-report search. Every figure traces to a DART receipt number |
+| **Korean law sources** (via the `k-law` L1 skill) | Statutes, precedents, and regulatory context for legal claims |
+| **Inline SVG** | Financial infographics generated from the narrative brief (no binary image assets) |
+| **Bun + TypeScript** | Operational scripts (`scripts/`) inherited from the common template |
+
+No runtime application stack — co-news produces article deliverables, not software. Research sources are reached over HTTP (DART OpenAPI, National Law Information Center); no game engine, browser runtime, or SAP connection is involved.
+
 ## Agents
 
 See [AGENTS.md](../AGENTS.md) for the full 7-agent roster.
@@ -32,6 +43,15 @@ Also uses the L1 common skills k-dart (DART financial disclosures) and k-law (Ko
 | 5 | Visualization | visual-editor |
 | 6 | Final QA / publish gate | pm |
 
+## Development Workflow
+
+The newsroom pipeline is strictly sequential after Phase 1 — each phase's output is the next phase's input, and two gates are hard:
+
+1. **Source Verification Gate** (end of Phase 2) — reporter is never dispatched while the citation ledger shows any `UNVERIFIED` claim.
+2. **Editorial Review Gate** (Phase 6) — the article is publish-ready only when fact-checker AND style-editor sign off; failures route back to the responsible agent, never forward.
+
+Phase 1 is the only parallel stage (`financial-analyst` + `legal-researcher` run concurrently). `/sync` runs only after the Editorial Review Gate passes — a draft is never committed with open fact-check or style items (see Git / PR Workflow below). Full dispatch details: Dispatch Protocol at the end of this file.
+
 ---
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
@@ -56,6 +76,32 @@ Also uses the L1 common skills k-dart (DART financial disclosures) and k-law (Ko
 5. All PR titles, bodies, and branch names must be in **English**; article output defaults to Korean per the assignment's target language.
 
 <!-- END VARIANT-INJECT -->
+
+## File Organization Policy
+
+Article deliverables live under `deliverables/`, one directory per assignment:
+
+```
+deliverables/drafts/<article>/
+├── brief/            # Phase 1 outputs: financial-narrative-brief, legal context brief
+├── ledger.md         # Phase 2: source-verification citation ledger
+├── draft.md          # Phase 3: reporter's draft
+├── final.md          # Post-Phase 6: publish-ready article
+└── figures/          # Phase 5: one SVG per figure + manifest.md
+```
+
+Rules:
+
+- One article = one `<article>` directory; never mix two assignments' files.
+- Figure SVGs are never inlined into markdown until `final.md` — drafts reference them by path so the style-editor's rewrite can't silently drop one.
+- Governance files (`CHANGELOG.md`, `memory/`, `variant.json`) follow the common template's layout — no newsroom-specific overrides.
+
+## Domain Rules
+
+The five Core Principles under Newsroom Guidelines above are the binding rules (fact-verified, disclosure-grounded, naturally human-written, house-style conformant, publish-gated). Two operational additions:
+
+1. **Language split** — article content defaults to Korean (or the assignment's target language); ALL git artifacts (commits, PR titles, branches) are English-only, always.
+2. **Figure formatting locale** — Korean numeral-grouping units (jo/eok/man) appear only in Korean-language articles; never mix grouping conventions within a single figure.
 
 ---
 

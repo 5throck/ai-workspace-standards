@@ -4,8 +4,7 @@ description: Manual Post-Write QA chain for Claude Code Desktop App (hooks don't
 version: 1.0.0
 last_reviewed: 2026-08-15
 status: active
-scope: variant
-l2_propagate: false
+scope: co-abap
 owner: test-runner
 prerequisites: Claude Code Desktop App
 metadata:
