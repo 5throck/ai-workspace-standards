@@ -1,5 +1,5 @@
 // scripts/helpers/registries/capability-registry.ts
-// @version 1.0.2
+// @version 1.1.0
 // SSOT for capability definitions
 
 /**
@@ -48,6 +48,12 @@ export const CAPABILITY_REGISTRY = {
   ANALYSIS:              'analysis',
   REPORTING:             'reporting',
   PRESENTATION:          'presentation',
+
+  // News (co-news newsroom workflow)
+  DOCUMENTATION:         'documentation',
+  KNOWLEDGE_SHARING:     'knowledge-sharing',
+  COMMUNICATION:         'communication',
+  TASK_MANAGEMENT:       'task-management',
 } as const;
 
 /**
