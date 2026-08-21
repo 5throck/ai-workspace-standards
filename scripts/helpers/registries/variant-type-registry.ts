@@ -1,5 +1,5 @@
 // scripts/helpers/registries/variant-type-registry.ts
-// @version 1.0.0
+// @version 1.1.0
 // SSOT for variant type definitions
 
 /**
@@ -52,6 +52,10 @@ export const VARIANT_TYPE_REGISTRY = {
   game: {
     name: 'game',
     description: 'Game development for HTML5 Canvas games using Vanilla TypeScript',
+  },
+  'abap-development': {
+    name: 'abap-development',
+    description: 'SAP ABAP development against NetWeaver via ADT REST APIs, with module analysts (SD/MM/FI/CO/PP/LE) and technical execution agents',
   },
 } as const;
 
