@@ -20,7 +20,7 @@ examples:
 phases: [1, 2, 3]
 handoff_to: [pm, solutions-architect]
 handoff_from: [pm]
-required_skills: [technical-feasibility, research-analysis]
+required_skills: [technical-feasibility, company-intelligence]
 version: "1.0.0"
 last_updated: "2026-06-02"
 lifecycle:

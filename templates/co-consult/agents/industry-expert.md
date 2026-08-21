@@ -20,7 +20,7 @@ examples:
 phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
-required_skills: [research-analysis, competitive-intelligence]
+required_skills: [company-intelligence, competitive-intelligence]
 version: "1.0.0"
 last_updated: "2026-06-20"
 lifecycle:

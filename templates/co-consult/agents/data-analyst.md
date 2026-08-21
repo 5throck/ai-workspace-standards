@@ -20,7 +20,7 @@ examples:
 phases: [1, 3]
 handoff_to: [strategy-analyst, communications-lead]
 handoff_from: [pm]
-required_skills: [research-analysis, financial-modeling, financial-statement-analysis, insight-synthesis]
+required_skills: [company-intelligence, financial-modeling, financial-statement-analysis, insight-synthesis]
 version: "1.0.1"
 last_updated: "2026-06-02"
 lifecycle:

@@ -20,7 +20,7 @@ examples:
 phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
-required_skills: [documentation-writing, narrative-framework, consulting-report-writing, executive-presentation]
+required_skills: [narrative-framework, consulting-report-writing, executive-presentation]
 version: "1.0.0"
 last_updated: "2026-06-02"
 lifecycle:
