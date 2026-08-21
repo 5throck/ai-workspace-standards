@@ -22,6 +22,11 @@ phases: [1.5]
 handoff_to: [storyline, research, pm]
 handoff_from: [research, pm]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-06-20"
+  governance: docs/lifecycle/agents/source-verifier.md
 ---
 
 ## Role

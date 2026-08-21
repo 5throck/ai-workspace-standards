@@ -23,6 +23,11 @@ handoff_from: [pm]
 required_skills: [technical-feasibility, research-analysis]
 version: "1.0.0"
 last_updated: "2026-06-02"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-02"
+  governance: docs/lifecycle/agents/sme.md
 ---
 
 ## Role

@@ -24,6 +24,11 @@ phases: [0, 5]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-20"
+  governance: docs/lifecycle/agents/security-monitor.md
 ---
 
 # Security Monitor Agent

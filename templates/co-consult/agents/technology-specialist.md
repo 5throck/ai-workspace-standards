@@ -23,6 +23,11 @@ handoff_from: [communications-lead, solutions-architect]
 required_skills: [technical-feasibility, solution-design]
 version: "1.0.0"
 last_updated: "2026-06-02"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-02"
+  governance: docs/lifecycle/agents/technology-specialist.md
 ---
 
 ## Role

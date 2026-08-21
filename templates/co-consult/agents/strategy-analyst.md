@@ -23,6 +23,11 @@ handoff_from: [pm]
 required_skills: [research-analysis, competitive-intelligence, financial-modeling, insight-synthesis]
 version: "1.0.0"
 last_updated: "2026-06-02"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-02"
+  governance: docs/lifecycle/agents/strategy-analyst.md
 ---
 
 ## Role

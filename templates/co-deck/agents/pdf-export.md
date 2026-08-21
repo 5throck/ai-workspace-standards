@@ -22,6 +22,11 @@ phases: [4, 5]
 handoff_to: []
 handoff_from: [measure, pm]
 required_skills: [pdf-export]
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-06-23"
+  governance: docs/lifecycle/agents/pdf-export.md
 ---
 
 ## Role

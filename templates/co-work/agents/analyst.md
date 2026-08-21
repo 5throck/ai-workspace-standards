@@ -23,6 +23,11 @@ phases: [1]
 handoff_to: [content-writer, technical-writer]
 handoff_from: [pm]
 required_skills: [research-analysis]
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-05-28"
+  governance: docs/lifecycle/agents/analyst.md
 ---
 
 ## Role

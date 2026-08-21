@@ -21,6 +21,11 @@ phases: [4]
 handoff_to: [measure]
 handoff_from: [design, pm]
 required_skills: [html-build]
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-06-24"
+  governance: docs/lifecycle/agents/html-build.md
 ---
 
 ## Role

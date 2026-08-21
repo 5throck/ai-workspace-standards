@@ -23,6 +23,11 @@ phases: [4]
 handoff_to: []
 handoff_from: [pm]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-20"
+  governance: docs/lifecycle/agents/project-coordinator.md
 ---
 
 ## Role

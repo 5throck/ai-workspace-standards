@@ -28,6 +28,11 @@ phases: [3]
 handoff_to: [game-developer]
 handoff_from: [game-designer, arcade-designer, puzzle-designer]
 required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-27"
+  governance: docs/lifecycle/agents/sound-designer.md
 ---
 
 # Sound Designer

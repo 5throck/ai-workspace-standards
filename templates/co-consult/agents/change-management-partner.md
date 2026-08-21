@@ -23,6 +23,11 @@ handoff_from: [pm]
 required_skills: [stakeholder-alignment, org-readiness-assessment, change-impact-assessment]
 version: "1.0.0"
 last_updated: "2026-06-02"
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-02"
+  governance: docs/lifecycle/agents/change-management-partner.md
 ---
 
 ## Role

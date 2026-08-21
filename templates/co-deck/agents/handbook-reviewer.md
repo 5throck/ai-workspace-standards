@@ -23,6 +23,11 @@ phases: [H-5]
 handoff_to: [pm]
 handoff_from: [handbook-writer]
 required_skills: [handbook]
+lifecycle:
+  phase: production
+  created: "2026-05-29"
+  last_updated: "2026-07-17"
+  governance: docs/lifecycle/agents/handbook-reviewer.md
 ---
 
 ## Role

@@ -28,6 +28,11 @@ phases: [4]
 handoff_to: [test-runner, pm]
 handoff_from: [pm]
 required_skills: [systematic-debugging, test-driven-development]
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: "2026-06-28"
+  governance: docs/lifecycle/agents/game-debugger.md
 ---
 
 ## Role
