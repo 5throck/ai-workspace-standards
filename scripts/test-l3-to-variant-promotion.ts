@@ -2,8 +2,8 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.0.2
- * @last_updated 2026-08-09
+ * @version 1.1.0
+ * @last_updated 2026-08-21
  *
  * Backs the `simulate-l3-to-variant-promotion` skill (skills/simulate-l3-to-variant-promotion/SKILL.md).
  * Exercises `scripts/create-l3-scaffold.ts` + `scripts/l3-to-variant-pipeline.ts`
@@ -260,6 +260,40 @@ try {
         }
       } catch (e) { fail('Test 4', String(e)); }
     }
+
+    // ── Test 5: docs/context.md survives scaffold → promotion ───────────────
+    // Regression guard for the class of bug this test suite originally had no
+    // coverage for: create-l3-scaffold.ts silently failing to copy the common
+    // docs/context.md (or l3-to-variant-pipeline.ts failing to carry it / the
+    // generated docs/<variant>.context.md forward) went undetected for a real
+    // scaffolded project (co-news) until a user noticed the file was missing.
+    console.log('\nTest 5: docs/context.md survives scaffold and promotion');
+    try {
+      const scaffoldContextMd = join(L3_FIXTURE_PATH, 'docs', 'context.md');
+      if (!existsSync(scaffoldContextMd)) {
+        fail('Test 5a', `docs/context.md not found in scaffolded L3 fixture at ${scaffoldContextMd}`);
+      } else {
+        pass('Test 5a PASSED: docs/context.md present in scaffolded L3 fixture');
+      }
+
+      // generate-variant.ts's SKIP_IN_COPY deliberately excludes docs/context.md from
+      // the promoted variant *template* output (templates/co-*/ never carries its own
+      // docs/context.md — it's generated fresh from templates/common/docs/context.md
+      // only when a real project is instantiated via new-project.ts). Assert the
+      // exclusion holds rather than expecting the file to be there.
+      const promotedContextMd = join(PIPELINE_OUTPUT_PATH, 'docs', 'context.md');
+      const promotedVariantContextMd = join(PIPELINE_OUTPUT_PATH, 'docs', 'co-e2etest.context.md');
+      if (existsSync(promotedContextMd)) {
+        fail('Test 5b', `docs/context.md unexpectedly present in promoted variant TEMPLATE output at ${promotedContextMd} — should only exist in templates/common/, generated fresh at project-instantiation time`);
+      } else {
+        pass('Test 5b PASSED: docs/context.md correctly absent from promoted variant template output (SKIP_IN_COPY)');
+      }
+      if (!existsSync(promotedVariantContextMd)) {
+        fail('Test 5c', `docs/co-e2etest.context.md not found in promoted variant output at ${promotedVariantContextMd}`);
+      } else {
+        pass('Test 5c PASSED: docs/co-e2etest.context.md generated in promoted variant output');
+      }
+    } catch (e) { fail('Test 5', String(e)); }
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
