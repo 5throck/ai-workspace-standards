@@ -77,7 +77,28 @@ No other top-level (`##`) sections are permitted; extra content must live under 
 
 **Frontmatter** — `README.md` carries `content_hash`; `README_ko.md` carries `translated_from_hash` (mirroring the EN hash). Presence is checked by Check 11 (`checkReadmePresence`); hash freshness by `scripts/verify-readme-sync.ts`.
 
-**Severity policy** — WS-08 consults `variantValidationPolicy.warningOnly` in `docs/templates/lifecycle-governance.json`. While `"WS-08"` is listed there, non-conformance is a non-blocking **WARN** (rollout phase); remove the entry to make WS-08 a hard **FAIL**. This is the only check that reads `warningOnly` for per-check severity.
+**Severity policy** — WS-08 consults `variantValidationPolicy.warningOnly` in `docs/templates/lifecycle-governance.json`. While `"WS-08"` is listed there, non-conformance is a non-blocking **WARN** (rollout phase); remove the entry to make WS-08 a hard **FAIL**. (WS-09 below reads the same policy for its own severity — see that section for the current per-check list.)
+
+### Context.md Structure Standard
+
+Established 2026-08-21 after reviewing whether `docs/<variant>.context.md` files could be standardized (ADR-0050 Part 3 follow-up). Content is deliberately **not** standardized — the Skills/Agents tables, Agent Dispatch Order, and Guidelines body are genuinely variant-specific and forcing identical wording destroys the domain-specific value (confirmed the hard way this session: the co-security commit-type-convention divergence, and the leftover-duplicate cases in `co-abap`/`co-architect`/`co-consult`/`co-game` after the "Git / PR Workflow" promotion, both showed naive text-matching isn't a safe basis for forcing sameness).
+
+What IS standardized is **structure**: 7 of 8 collaboration-family variants already share the same top-level (`##`) slot skeleton, just with domain-flavored heading text. `validate-templates.ts` Check **WS-09** enforces presence and relative order of the following slots, matching each via an alias/regex table rather than an exact-text whitelist — so domain-specific extra headings (e.g. `co-export`'s `## Overview` / `## Regulatory Scope` before Stack) are always permitted:
+
+| # | Slot | Matches (examples) | Required |
+|---|------|---------------------|:--------:|
+| 1 | Stack | `## Tool Stack`, `## Tech Stack`, `## Design Stack` | Yes |
+| 2 | Agents | `## Agents`, `## Agent Roster & Phase Mapping` | Yes |
+| 3 | Skills | `## Skills` | Yes |
+| 4 | Environment Setup | `## Environment Setup` | No |
+| 5 | Development Workflow | `## Development Workflow`, `## Engagement Workflow (Phases 0—)` | Yes |
+| 6 | Guidelines | any `## <Domain> Guidelines` (Consulting/Design/Coding/Security/Writing/…) | Yes |
+| 7 | File Organization Policy | `## File Organization Policy` | Yes |
+| 8 | Domain Rules | `## Domain Rules` | Yes |
+
+**Exemption** — `co-abap` is a structurally distinct SAP/ABAP domain (30+ headings, no Stack/Guidelines/File Organization Policy slots at all) and is exempted outright (`WS09_EXEMPT_VARIANTS` in `validate-templates.ts`) rather than forced to conform.
+
+**Severity policy** — like WS-08, WS-09 starts in `variantValidationPolicy.warningOnly` (`docs/templates/lifecycle-governance.json`) during rollout. As of 2026-08-21: `co-consult`, `co-design`, `co-develop`, `co-export`, `co-game`, `co-security`, `co-work`, and `co-deck` all conform; `co-news` (a newer, still-diverging beta variant) does not yet. Remove `"WS-09"` from `warningOnly` once all non-exempt variants conform, mirroring WS-08's 2026-08-09 graduation.
 
 ## Optional Files (Domain Extensions)
 

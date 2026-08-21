@@ -37,8 +37,11 @@
 | `variant.json` | `templates/co-*/` | (None) | Variant itself is the source |
 | `docs/context.md` | `templates/common/docs/context.md` | `docs/context.md` in every L3 project (copied verbatim) | `new-project.ts` copy + `validate-templates.ts` WS-07 |
 | `README.md` / `README_ko.md` | `templates/common/docs/README.template.md` (+KO) | `templates/co-*/README.md` + `Projects/<name>/README.md` | `generate-variant.ts` `applyTemplate()` + `validate-templates.ts` WS-08 + `verify-readme-sync.ts` |
+| `docs/<variant>.context.md` structure (not content) | No file SSOT — a slot schema (`WS09_STRUCTURE_SCHEMA` in `validate-templates.ts`) | Every `templates/co-*/docs/<variant>.context.md`'s heading skeleton | `validate-templates.ts` WS-09 (presence + relative order only, via alias matching) |
 
 > **README enforcement scope**: Phase A `Projects/<name>/` READMEs are generated **self-service** via `scripts/generate-l2-readme.ts` (and at scaffold time by `create-l2-scaffold.ts`) — no CI gate, consistent with the L3 Design Gate exemption (script name `generate-l2-readme.ts` predates the L3 layer). Phase B `templates/co-*/` READMEs are **hard-enforced** by `validate-templates.ts` Check WS-08 (unchanged). Both paths share the same renderer (`helpers/generate-variant.ts`), so Phase A and Phase B READMEs are structurally identical.
+
+> **`docs/<variant>.context.md` structure vs. content**: unlike the rows above, WS-09 has no single SSOT file to derive from — each variant's *content* stays genuinely variant-specific (Skills/Agents tables, Agent Dispatch Order, Guidelines body), only the *slot skeleton* (Stack → Agents → Skills → [Environment Setup] → Development Workflow → Guidelines → File Organization Policy → Domain Rules) is enforced, matched via alias/regex so domain-flavored heading text (`Tool Stack` vs `Design Stack`) is unaffected. `co-abap` is exempted (structurally distinct SAP/ABAP domain). See `docs/governance/variant-contract.md` § Context.md Structure Standard.
 
 #### Three Types of Flows
 
