@@ -154,7 +154,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lifecycle-sync-audit.ts` | L0 | 1.4.6 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `new-project.ts` | L0 | 1.5.4 | active | —| —| L0 | —|
+| `new-project.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
 | `remove-project.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.1.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
@@ -191,7 +191,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-md-language.ts` | L0 | 1.6.0 | active | —| —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
-| `validate-templates.ts` | L0 | 1.6.0 | active | —| —| L0 | —|
+| `validate-templates.ts` | L0 | 1.7.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `verify-new-project-tests.ts` | L0 | 1.0.3 | active | —| —| L0 | —|

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.6.0
+ * @version 1.7.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2382,6 +2382,106 @@ function checkContextMdStructure(variant: string): void {
   }
 }
 
+// Check WS-10: variant agents/*.md must carry lifecycle frontmatter
+// Established 2026-08-21. scripts/validate-agents.ts requires lifecycle.phase + lifecycle.governance
+// in every agents/*.md, and runs as part of audit.ts — but nothing validated the TEMPLATE copies, so
+// the requirement silently drifted: only co-export and co-security ever had the block, meaning
+// `new-project.ts <name> --variant <v>` produced a project that failed its own post-scaffold audit
+// for 8 of 10 variants (reported live for co-deck: 13 errors on a fresh scaffold). The governance
+// records existed and passed validate-agents.ts Part 2 the whole time — several even claimed
+// "Verified governance record and lifecycle frontmatter" in their Phase History — so only the
+// runtime pointer was missing. This check closes the loop: what validate-agents.ts demands of an
+// L2 project, validate-templates.ts now demands of the L1 template it is scaffolded from.
+//
+// Skipped deliberately:
+//   - README.md / README_ko.md — roster docs, not agent definitions.
+//   - Any file with `extends:` in its frontmatter (i.e. pm.md) — an L1-B stub whose lifecycle block
+//     is inherited from the L0 root agent at resolve time, so requiring a literal block here would
+//     duplicate the SSOT. pm.md's own scaffold-time lifecycle handling lives in new-project.ts §2.5.
+const WS10_SKIP_FILES = new Set(['README.md', 'README_ko.md']);
+// co-abap has no docs/lifecycle/agents/ directory at all, so its 19 agents need governance records
+// authored before the frontmatter can point anywhere real. Exempt (same precedent as WS-09) rather
+// than emit 19 failures for work that is a content task, not a mechanical backfill.
+const WS10_EXEMPT_VARIANTS = new Set(['co-abap']);
+
+function checkAgentLifecycleFrontmatter(variant: string): void {
+  if (WS10_EXEMPT_VARIANTS.has(variant)) return;
+
+  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  if (!existsSync(agentsDir)) return; // variant carries no agent roster of its own
+
+  if (!JSON_MODE) console.log(`\n=== Check WS-10: agents/*.md lifecycle frontmatter in ${variant} ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-10') ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, 'WS-10', msg, fix);
+    else fail(variant, 'WS-10', msg, fix);
+  };
+
+  let checked = 0;
+  let issuesFound = 0;
+
+  for (const file of readdirSync(agentsDir).filter(f => f.endsWith('.md') && !WS10_SKIP_FILES.has(f))) {
+    const agentPath = join(agentsDir, file);
+    const content = readFileSync(agentPath, 'utf-8');
+
+    const match = content.replace(/^﻿/, '').replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
+    if (!match) {
+      report(`templates/${variant}/agents/${file} has no YAML frontmatter`,
+        `Add a frontmatter block with at minimum: name, and a lifecycle: block with phase + governance`);
+      issuesFound++;
+      continue;
+    }
+
+    let fm: Record<string, unknown>;
+    try {
+      fm = (load(match[1]) as Record<string, unknown>) ?? {};
+    } catch {
+      report(`templates/${variant}/agents/${file} frontmatter is not valid YAML`,
+        `Fix the YAML syntax in the frontmatter block`);
+      issuesFound++;
+      continue;
+    }
+
+    if (fm.extends) continue; // L1-B stub — lifecycle is inherited from the L0 root agent
+
+    checked++;
+    const agentName = typeof fm.name === 'string' && fm.name.trim() ? fm.name.trim() : file.replace(/\.md$/, '');
+    const lifecycle = fm.lifecycle as Record<string, unknown> | undefined;
+
+    if (!lifecycle || typeof lifecycle !== 'object') {
+      report(`templates/${variant}/agents/${file} is missing the required lifecycle: frontmatter block`,
+        `Add:\n  lifecycle:\n    phase: production\n    created: "YYYY-MM-DD"\n    last_updated: "YYYY-MM-DD"\n    governance: docs/lifecycle/agents/${agentName}.md`);
+      issuesFound++;
+      continue;
+    }
+
+    const missing = (['phase', 'governance'] as const).filter(k => !lifecycle[k]);
+    if (missing.length > 0) {
+      report(`templates/${variant}/agents/${file} lifecycle block is missing: ${missing.map(m => `lifecycle.${m}`).join(', ')}`,
+        `validate-agents.ts requires both lifecycle.phase and lifecycle.governance — add the missing key(s)`);
+      issuesFound++;
+      continue;
+    }
+
+    // Pointer resolution is deliberately WARN-only, even when the check is otherwise fatal: this is
+    // a STRICTER assertion than validate-agents.ts makes (it only checks the key is non-empty), so
+    // failing here would block commits on a defect that does not actually break a scaffolded
+    // project's audit. It found a real one immediately — co-security's 5 agents all carry
+    // `governance: lifecycle-manager`, an agent NAME rather than a docs/lifecycle/agents/*.md path
+    // — which is tracked as a follow-up templates fix. Promote to fail() once that lands.
+    const govRel = String(lifecycle.governance);
+    if (!existsSync(join(TEMPLATES_DIR, variant, govRel))) {
+      warn(variant, 'WS-10', `templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
+        `Set lifecycle.governance to a path, e.g. docs/lifecycle/agents/${agentName}.md, and create that record ("## Phase History" + "## Acceptance Criteria")`);
+    }
+  }
+
+  if (issuesFound === 0) {
+    pass(`WS-10: ${variant} agent lifecycle frontmatter OK (${checked} agent(s) checked)${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+  }
+}
+
 // Main
 // A-10: propagation-map.json schema validation
 function checkPropagationMapSchema(): void {
@@ -2470,6 +2570,7 @@ function main() {
     checkNoVariantLocalContextMd(variant);                       // WS-07
     checkReadmeStandard(variant);                                // WS-08
     checkContextMdStructure(variant);                            // WS-09
+    checkAgentLifecycleFrontmatter(variant);                     // WS-10
   }
 
   checkSharedFileSync();
