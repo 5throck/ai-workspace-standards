@@ -1,4 +1,4 @@
-// @version 2.15.0
+// @version 2.16.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -1567,7 +1567,33 @@ if (IS_WORKSPACE_ROOT) {
                 }
             }
         }
-        if (strayFound === 0) {
+        // Sweep one level into local project directories too. The root-level loop above only sees
+        // './nul'; in practice these artifacts land inside scaffolded project dirs (observed
+        // 2026-08-21 in two of six freshly scaffolded projects), where nothing ever cleaned them.
+        // They then block deletion of the whole directory from PowerShell — Remove-Item resolves
+        // 'nul' to the Win32 device rather than the file — which is the actual user-visible pain.
+        // No repo script writes '> nul' (verified by full-tree scan), so the producer is an
+        // external tool and cannot be fixed at the source from here; sweeping makes it self-healing.
+        let nestedSwept = 0;
+        for (const item of fs.readdirSync('.')) {
+            if (trackedItems.has(item) || item.startsWith('.') || item === 'node_modules') continue;
+            let isDir = false;
+            try { isDir = fs.statSync(item).isDirectory(); } catch { continue; }
+            if (!isDir) continue;
+            for (const nested of (() => { try { return fs.readdirSync(item); } catch { return []; } })()) {
+                if (!WINDOWS_DEVICE_NAMES.has(nested)) continue;
+                const nestedPath = path.join(item, nested);
+                // Shell-free: never interpolate the filename into a command line.
+                const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', nestedPath], { encoding: 'utf-8' });
+                if (rm.status === 0 && !fs.existsSync(nestedPath)) {
+                    Warn(`Auto-deleted Windows device name artifact: ${nestedPath} (blocks directory deletion from PowerShell)`);
+                    nestedSwept++;
+                } else {
+                    Warn(`Windows device name artifact '${nestedPath}' could not be auto-deleted — remove it from Git Bash with: rm -f -- "${nestedPath}"`);
+                }
+            }
+        }
+        if (strayFound === 0 && nestedSwept === 0) {
             Pass('Workspace root is clean from stray test artifacts');
         }
     } catch (_e) {
