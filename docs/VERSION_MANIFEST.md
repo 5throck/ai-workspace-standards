@@ -1,7 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-21T14:57:06.167Z
-**Generated**: 2026-08-08T03:00:43.337Z
+**Generated**: 2026-08-22T05:34:37.874Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -111,31 +110,6 @@
 | project-to-variant.ts | 1.1.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
-| inject-skills.ts | 1.0.2 | scripts/helpers/inject-skills.ts | N/A |
-| integration-helpers.ts | 1.1.1 | scripts/helpers/integration-helpers.ts | fs, path |
-| l2-to-variant-pipeline.ts | 1.9.1 | scripts/l2-to-variant-pipeline.ts | fs, path |
-| language-guard.ts | 1.0.0 | scripts/lib/language-guard.ts | N/A |
-| layer-filter.ts | 1.3.1 | scripts/helpers/layer-filter.ts | fs, path |
-| lecture-plugin.ts | 1.0.0 | scripts/helpers/plugins/lecture-plugin.ts | N/A |
-| lifecycle-governance.ts | 1.0.1 | scripts/helpers/lifecycle-governance.ts | N/A |
-| lifecycle-sync-audit.ts | 1.4.3 | scripts/lifecycle-sync-audit.ts | N/A |
-| list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
-| md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
-| merge-frontmatter.ts | 1.8.6 | scripts/helpers/merge-frontmatter.ts | fs, js-yaml, path |
-| new-project.ts | 1.5.3 | scripts/new-project.ts | js-yaml |
-| normalize-agent-skills.ts | 1.0.1 | scripts/helpers/normalize-agent-skills.ts | fs, path |
-| orphan-reference-validator.ts | 1.0.0 | scripts/validators/orphan-reference-validator.ts | fs, js-yaml, path |
-| pipeline-state.ts | 1.1.1 | scripts/lib/pipeline-state.ts | fs, path |
-| platform-context.ts | 1.0.0 | scripts/lib/platform-context.ts | bun, os |
-| platform-parity-validator.ts | 1.0.0 | scripts/validators/platform-parity-validator.ts | fs, path |
-| pm-md-parser.ts | 1.0.2 | scripts/helpers/pm-md-parser.ts | fs, js-yaml, path |
-| post-write-lifecycle-check.ts | 1.1.0 | scripts/hooks/post-write-lifecycle-check.ts | bun |
-| pre-commit.ts | 1.5.9 | scripts/hooks/pre-commit.ts | bun |
-| pre-push.ts | 1.2.6 | scripts/hooks/pre-push.ts | bun |
-| project-to-variant.ts | 1.0.2 | scripts/project-to-variant.ts | N/A |
-| promotion-policy.ts | 1.0.0 | scripts/helpers/registries/promotion-policy.ts | N/A |
-| propagate-to-templates.ts | 2.3.1 | scripts/propagate-to-templates.ts | js-yaml |
-| propagation-map-schema.ts | 1.2.0 | scripts/lib/propagation-map-schema.ts | N/A |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
