@@ -1,0 +1,46 @@
+{
+  "_note": "Korean-original DART terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION.md — Non-English Reference Material in Skills). SKILL.md stays English-only and links here.",
+  "report_types": {
+    "사업보고서": "annual report",
+    "반기보고서": "semi-annual report",
+    "분기보고서": "quarterly report",
+    "주요사항보고서": "major event report"
+  },
+  "corporate_actions": {
+    "유상증자": "paid-in capital increase",
+    "무상증자": "free capital increase (stock dividend)",
+    "감자": "capital reduction",
+    "자기주식취득": "treasury stock acquisition",
+    "자기주식처분": "treasury stock disposal",
+    "합병": "merger",
+    "분할": "division/spin-off"
+  },
+  "financials": {
+    "매출액": "revenue",
+    "영업이익": "operating profit",
+    "당기순이익": "net income",
+    "자산총계": "total assets",
+    "부채총계": "total liabilities",
+    "자본총계": "total equity"
+  },
+  "audit_and_legal": {
+    "감사의견": "audit opinion",
+    "적정": "unqualified (clean opinion)",
+    "한정": "qualified opinion",
+    "부적정": "adverse opinion",
+    "의견거절": "disclaimer of opinion",
+    "소송": "litigation"
+  },
+  "entity_classes": {
+    "유가증권시장": "KOSPI",
+    "코스닥시장": "KOSDAQ",
+    "코넥스시장": "KONEX"
+  },
+  "status_messages": {
+    "정상": "OK",
+    "미등록키": "unregistered key",
+    "사용할수없는키": "unusable key",
+    "접근할수없는IP": "inaccessible IP",
+    "조회된데이터가없음": "no data found"
+  }
+}
