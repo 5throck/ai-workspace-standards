@@ -1,5 +1,5 @@
 // scripts/helpers/registries/promotion-policy.ts
-// @version 1.0.0
+// @version 1.1.0
 // SSOT for beta-to-stable promotion policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -51,6 +51,10 @@ export const PROMOTION_POLICIES = {
   game: {
     minEngagements: 3,
     minBetaMonths: 3,
+  },
+  'abap-development': {
+    minEngagements: 3,
+    minBetaMonths: 2,
   },
 } satisfies Record<VariantType, PromotionPolicy>;
 

@@ -5,11 +5,6 @@ formal_name: Project Manager (PM) Agent
 status: active
 version: "1.0.0"
 last_updated: "2026-07-31"
-lifecycle:
-  phase: production
-  created: "2026-05-29"
-  last_updated: "2026-08-23"
-  governance: docs/lifecycle/agents/pm.md
 tier:
   claude: high
   gemini: high

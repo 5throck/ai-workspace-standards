@@ -1,5 +1,5 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.0.1
+// @version 1.1.0
 // SSOT for per-type validation policies
 
 import type { VariantType } from './variant-type-registry.ts';
@@ -97,6 +97,10 @@ export const VALIDATION_POLICIES = {
     ],
     requiredAgents: ['game-designer', 'game-developer', 'visual-artist', 'sound-designer', 'game-debugger'],
     optionalAgentSections: ['## Game Mechanics', '## Performance Budget'],
+  },
+  'abap-development': {
+    requiredCapabilities: [],
+    optionalAgentSections: ['## Phase Handoff Protocol'],
   },
 } satisfies Record<VariantType, ValidationPolicy>;
 
