@@ -6,7 +6,7 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.2.1
+version: 1.3.0
 owner: pm
 last_reviewed: 2026-08-21
 metadata:
@@ -167,6 +167,7 @@ Edit `Projects/<variant-name>/PROMOTION_CHECKLIST.md` to replace placeholder con
 - Condition 3: specify which domain artifacts must be complete with which fields
 - Condition 4: specify the domain audit script name
 - Add domain-specific agent/skill checklists
+- Keep the bilingual user-guide condition: Phase B promotion requires `docs/user-guide.md` + `docs/user-guide_ko.md` (validate-templates WS-11) — author them in Phase A so promotion isn't blocked
 
 ### Step 9: Configure git hooks
 
