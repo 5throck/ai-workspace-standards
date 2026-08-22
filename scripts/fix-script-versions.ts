@@ -48,6 +48,7 @@ const SCRIPTS_TO_FIX = [
   'helpers/inject-skills.ts',
   'helpers/merge-frontmatter.ts',
   'helpers/substitute-placeholders.ts',
+  'helpers/prune-country-scoped-assets.ts',
   'helpers/update-variant-lifecycle.ts',
   'helpers/validate-output.ts',
   'helpers/write-scripts-snapshot.ts',

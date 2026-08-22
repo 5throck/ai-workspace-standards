@@ -4,7 +4,8 @@
 > Propagation control is via SKILL.md frontmatter (`l2_propagate`/`scope`) — not this file.  
 > Platform skills (`.claude/skills/`, `.gemini/skills/`) are tracked by `verify-platform-lifecycle.ts` — not here.  
 > Machine parsing: `layer-filter.ts` reads each skill's `SKILL.md` frontmatter directly.  
-> **L0+L1+L2 skills** are variant-specific overrides living in `templates/co-*/skills/` — NOT published to `templates/common/skills/`.
+> **L0+L1+L2 skills** are variant-specific overrides living in `templates/co-*/skills/` — NOT published to `templates/common/skills/`.  
+> **Country-scoped skills** (`k-law`/`k-dart`/`k-kosis`, KR): deployment scope lives in the `country_scoped_assets` registry in `docs/workspace-schema.json` - NOT in SKILL.md frontmatter. They deploy only to projects scaffolded with a matching target country (`--country KR`); region-neutral projects exclude them. See `docs/country-profiles.md` and ADR-0057.
 
 ---
 
@@ -40,9 +41,9 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | Automated STRIDE threat matrix generation and DREAD risk scoring framework |
 | `sarif-exporter` | 1.0.0 | active | security-expert | 2026-08-06 | — | Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 JSON format |
 | `accessibility-audit` | 1.0.0 | active | pm | 2026-08-06 | — | Automated WCAG 2.1 AA accessibility evaluation using axe-core |
-| `k-dart` | 2.0.0 | active | strategy-analyst | 2026-08-09 | — | Unified DART OpenAPI skill — disclosure query, financial parsing, line-item extraction (scope: common, l2_propagate) |
-| `k-law` | 1.0.0 | active | strategy-analyst | 2026-08-09 | — | Korean Ministry of Government Legislation (`법제처`) National Law Information Center OpenAPI — statutes, precedents, ordinances (scope: common, l2_propagate) |
-| `k-kosis` | 1.0.0 | active | financial-analyst | 2026-08-23 | — | Korean Statistical Information Service (`통계청 KOSIS`) OpenAPI — national statistics search, table browsing, data retrieval, metadata lookup (scope: common, l2_propagate); promoted from co-pitch |
+| `k-dart` | 2.0.0 | active | strategy-analyst | 2026-08-09 | — | Unified DART OpenAPI skill — disclosure query, financial parsing, line-item extraction (scope: common, l2_propagate); KR-scoped - deployed only to KR-target projects, pruned otherwise (registry: `country_scoped_assets` in `docs/workspace-schema.json`) |
+| `k-law` | 1.0.0 | active | strategy-analyst | 2026-08-09 | — | Korean Ministry of Government Legislation (`법제처`) National Law Information Center OpenAPI — statutes, precedents, ordinances (scope: common, l2_propagate); KR-scoped - deployed only to KR-target projects, pruned otherwise (registry: `country_scoped_assets` in `docs/workspace-schema.json`) |
+| `k-kosis` | 1.0.0 | active | financial-analyst | 2026-08-23 | — | Korean Statistical Information Service (`통계청 KOSIS`) OpenAPI — national statistics search, table browsing, data retrieval, metadata lookup (scope: common, l2_propagate); promoted from co-pitch; KR-scoped - deployed only to KR-target projects, pruned otherwise (registry: `country_scoped_assets` in `docs/workspace-schema.json`) |
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | MECE issue tree auditing and strategic reasoning evaluation rules |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |

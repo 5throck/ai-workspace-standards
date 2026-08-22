@@ -1,16 +1,17 @@
 #!/usr/bin/env bun
 /**
  * substitute-placeholders.ts — Replace placeholders in all text files
- * @version 1.1.1
+ * @version 1.2.0
  *
  * Usage:
- *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]
+ *   bun scripts/helpers/substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant] [country]
  *
  * Replaces:
  *   [Project Name] → <project-name>
  *   {{PROJECT_NAME}} → <project-name>
  *   {{PROJECT_DESCRIPTION}} → "A new project" (or custom)
  *   {{PROJECT_CHARACTERISTICS}} → "" (or custom)
+ *   {{COUNTRY}} → <country display name> or "the applicable jurisdiction" (region-neutral)
  *   <variant-name> → <variant> (in docs/context.md)
  *   <variant> → <variant> (in docs/context.md, within backtick paths only)
  */
@@ -24,9 +25,10 @@ const projectName = args[1] || '';
 const description = args[2] || 'A new project';
 const characteristics = args[3] || '';
 const variantName = args[4] || projectName;
+const countryDisplayName = args[5] || '';
 
 if (!projectDir || !projectName) {
-  console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant]');
+  console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant] [country]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -67,6 +69,9 @@ try {
     modified = modified.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
     modified = modified.replace(/\{\{PROJECT_DESCRIPTION\}\}/g, description);
     modified = modified.replace(/\{\{PROJECT_CHARACTERISTICS\}\}/g, characteristics);
+    // Replace {{COUNTRY}} with display name or fallback
+    const countryReplacement = countryDisplayName || 'the applicable jurisdiction';
+    modified = modified.replace(/\{\{COUNTRY\}\}/g, countryReplacement);
     // Replace variant placeholders in docs/context.md
     modified = modified.replace(/<variant-name>/g, variantName);
     // Replace <variant> only inside backtick paths (e.g. `docs/<variant>.context.md`)

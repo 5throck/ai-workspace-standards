@@ -29,6 +29,8 @@ templates/
 
 **동작 방식:** 새 프로젝트를 스캐폴딩할 때, 스크립트는 먼저 `templates/common/`(공유 인프라)을 복사한 다음 선택된 variant를 덮어씁니다(variant 전용 파일이 공통 파일을 재정의).
 
+**국가 스코프 스킬:** `k-law`, `k-dart`, `k-kosis`는 `docs/workspace-schema.json`의 `country_scoped_assets` 섹션에 KR 스코프로 등록되어 있으며, 대상 국가 `KR`로 스캐폴딩한 프로젝트(`--country KR`)에만 배포되고 지역 중립 프로젝트에는 배포되지 않습니다. 자세한 내용은 `common/docs/country-profiles.md`와 ADR-0057(`docs/adr/0057-country-profile-mechanism.md`)을 참고하세요.
+
 ## 사용 가능한 Variant
 
 | Variant | 상태 | 설명 |
@@ -43,7 +45,7 @@ templates/
 | [`co-export`](co-export/) | 🔶 Beta | 8개 에이전트를 갖춘 수출입 무역 컴플라이언스 워크플로우 (HS 분류, 수출통제·제재 스크리닝, FTA 원산지, 관세 환급, 물류, 시장 진입, 해외 규제 모니터링, 무역 서류) |
 | [`co-news`](co-news/) | 🔶 Beta | 7개 에이전트(pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor)와 DART/규제 리서치 연동을 갖춘 한국 경제/금융 저널리즘 워크플로우 |
 | [`co-abap`](co-abap/) | ✅ Stable | 20개 에이전트(6개 SAP 모듈 애널리스트, 12개 기술 전문가, pm)와 ABAP 전용 스킬(post-write chain, 성능 튜닝, 덤프 모니터링)을 갖춘 SAP ABAP 개발 워크플로우 |
-| [`co-hr`](co-hr/) | 🔶 Beta | 12개 에이전트(pm + 노무 컴플라이언스, 노사관계, 안전보건, 채용, 보상·복지, 성과관리, L&D, 경력·계승, 조직설계, 변화관리, 데이터 분석 전문가 11인)와 k-law/k-kosis 규제 리서치 연동을 갖춘 한국 노무/HR 컨설팅 워크플로우 |
+| [`co-hr`](co-hr/) | 🔶 Beta | 12개 에이전트(pm + 노무 컴플라이언스, 노사관계, 안전보건, 채용, 보상·복지, 성과관리, L&D, 경력·계승, 조직설계, 변화관리, 데이터 분석 전문가 11인)와 k-law/k-kosis 규제 리서치 연동을 갖춘 한국 노무/HR 컨설팅 워크플로우 (k-law/k-kosis는 KR 스코프 스킬 - KR 대상 프로젝트에만 배포) |
 
 ## Phase 1, 2 & 3 고도화 기능
 

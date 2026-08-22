@@ -272,6 +272,26 @@
           "items": { "type": "object" }
         }
       }
+    },
+    "country_config": {
+      "type": "object",
+      "description": "Country/jurisdiction profile configuration",
+      "properties": {
+        "profiles_dir": {
+          "type": "string",
+          "description": "Directory containing country profile markdown files (e.g., 'docs/countries')"
+        },
+        "supported": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2,4}$" },
+          "description": "List of supported ISO 3166-1 alpha-2 codes or well-known region codes (EU, ASEAN)"
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "Default country code (null for region-neutral, which is the required default state)"
+        }
+      },
+      "required": ["profiles_dir", "supported"]
     }
   },
   "allOf": [

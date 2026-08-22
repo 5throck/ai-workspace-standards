@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
 // new-project.ts — Scaffold a new project under the workspace root
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -21,6 +21,7 @@ let projectName = '';
 let variant = '';
 let templateVer = '';
 let platform = 'both';
+let country = '';
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -37,12 +38,23 @@ for (let i = 0; i < args.length; i++) {
     continue;
   }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
+  if (args[i] === '--country' && args[i + 1]) {
+    country = args[++i];
+    // Validate country pattern: ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN)
+    if (!/^[A-Z]{2,4}$/.test(country)) {
+      console.error(`❌ Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+    continue;
+  }
   if (!projectName && !args[i].startsWith('--')) { projectName = args[i]; continue; }
   if (projectName && !variant && !args[i].startsWith('--')) { variant = args[i]; continue; }
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|both] [--version X.Y.Z] [--country <CODE>]');
   if (import.meta.main) {
     process.exit(1);
   }
@@ -204,6 +216,83 @@ if (existsSync(variantJsonPath)) {
       }
     }
   }
+}
+
+// ── Country/jurisdiction selection ──────────────────────────────────────────────
+let selectedCountry = '';
+const autoYes = process.argv.includes('--yes') || process.argv.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
+
+// Check if variant has country_config
+let countryConfig: { profiles_dir?: string; supported?: string[]; default?: string | null } | undefined;
+if (existsSync(variantJsonPath)) {
+  try {
+    const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+    countryConfig = variantJson.country_config as { profiles_dir?: string; supported?: string[]; default?: string | null } | undefined;
+  } catch (e) {
+    // variant.json parse error - skip country config
+  }
+}
+
+if (countryConfig?.supported && countryConfig.supported.length > 0) {
+  // Variant has country_config - handle country selection
+  if (country) {
+    // --country flag provided
+    if (!countryConfig.supported.includes(country)) {
+      console.error(`❌ Country '${country}' not supported by variant '${variant}'.`);
+      console.error(`   Supported: ${countryConfig.supported.join(', ')}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+    selectedCountry = country;
+  } else if (!autoYes) {
+    // Interactive prompting
+    console.log(`\n🌐 This variant supports country-specific profiles. Select target jurisdiction:`);
+    const profilesDir = join(templatesDir, countryConfig.profiles_dir || 'docs/countries');
+    const options: string[] = [];
+
+    for (const code of countryConfig.supported) {
+      const profilePath = join(profilesDir, `${code}.md`);
+      let displayName = code;
+      if (existsSync(profilePath)) {
+        try {
+          const profileContent = readFileSync(profilePath, 'utf-8');
+          const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
+          if (nameMatch) displayName = `${code} — ${nameMatch[1].trim()}`;
+        } catch (e) {
+          // Profile read error - use code only
+        }
+      }
+      options.push(`${options.length + 1}. ${displayName}`);
+    }
+    options.push(`${options.length + 1}. Region-neutral (no target jurisdiction)`);
+
+    console.log(options.join('\n'));
+    const answer = prompt(`Select jurisdiction [1-${options.length}, default: ${options.length}]: `) ?? `${options.length}`;
+    const selection = parseInt(answer, 10);
+
+    if (isNaN(selection) || selection < 1 || selection > options.length) {
+      console.log('Invalid selection. Defaulting to region-neutral.');
+      selectedCountry = ''; // Region-neutral
+    } else if (selection === options.length) {
+      selectedCountry = ''; // Region-neutral
+    } else {
+      selectedCountry = countryConfig.supported[selection - 1];
+    }
+  } else {
+    // --yes or CI: default to region-neutral
+    selectedCountry = '';
+  }
+} else {
+  // Variant does not have country_config
+  if (country) {
+    console.error(`❌ Variant '${variant}' does not support country profiles.`);
+    console.error('   The --country flag is only valid for variants with country_config.');
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+  selectedCountry = ''; // Region-neutral
 }
 
 // ── Lifecycle governance pre-check ────────────────────────────────────────────
@@ -430,6 +519,22 @@ for (const srcFile of walkFiles(templatesDir)) {
 }
 // Ensure variant-overlaid files are also writable
 makeWritable(projectDir);
+
+// ── 2.4. Prune country-scoped assets ───────────────────────────────────────────
+const pruneHelper = join(workspaceRoot, 'scripts', 'helpers', 'prune-country-scoped-assets.ts');
+if (existsSync(pruneHelper)) {
+  console.log(`🌐 Pruning country-scoped assets${selectedCountry ? ` for ${selectedCountry}` : ' (region-neutral)'}…`);
+  const pruneResult = spawnSync(process.execPath, [pruneHelper, projectDir, selectedCountry || 'none'], { stdio: 'inherit' });
+  if (pruneResult.status !== 0) {
+    console.error('❌ Prune helper failed');
+    rollbackPartialProject(projectDir);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+} else {
+  console.warn('⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning');
+}
 console.log('  ✅ Variant templates copied');
 
 // ── 2.3a. Purge Windows device-name artifacts copied from the template ─────────
@@ -552,7 +657,32 @@ if (existsSync(variantJsonPath)) {
   });
 }
 
-// ── 4. Remove .gitkeep placeholders ───────────────────────────────────────────
+// ── 4. Create ACTIVE.md if country was selected ──────────────────────────────────
+if (selectedCountry && countryConfig?.profiles_dir) {
+  const countriesDir = join(projectDir, countryConfig.profiles_dir);
+  if (existsSync(countriesDir)) {
+    const activePath = join(countriesDir, 'ACTIVE.md');
+    let countryName = selectedCountry;
+    const profilePath = join(countriesDir, `${selectedCountry}.md`);
+    if (existsSync(profilePath)) {
+      try {
+        const profileContent = readFileSync(profilePath, 'utf-8');
+        const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
+        if (nameMatch) countryName = nameMatch[1].trim();
+      } catch (e) {
+        // Profile read error - use code
+      }
+    }
+    const activeContent = `# Active Country Profile
+
+Active jurisdiction: ${selectedCountry} — ${countryName}. See ${countryConfig.profiles_dir}/${selectedCountry}.md. Set at scaffold time; change by editing this file.
+`;
+    writeFileSync(activePath, activeContent);
+    console.log(`  📄 Created ${countryConfig.profiles_dir}/ACTIVE.md (points to ${selectedCountry})`);
+  }
+}
+
+// ── 5. Remove .gitkeep placeholders ───────────────────────────────────────────
 for (const f of walkFiles(projectDir)) {
   if (basename(f) === '.gitkeep') rmSync(f);
 }
@@ -560,7 +690,25 @@ for (const f of walkFiles(projectDir)) {
 // ── 5. Substitute placeholders ────────────────────────────────────────────────
 const substitutePlaceholders = join(workspaceRoot, 'scripts', 'helpers', 'substitute-placeholders.ts');
 if (existsSync(substitutePlaceholders)) {
-  spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant], { stdio: 'inherit' });
+  // Get country display name for {{COUNTRY}} placeholder
+  let countryDisplayName = '';
+  if (selectedCountry) {
+    const profilePath = join(projectDir, 'docs', 'countries', `${selectedCountry}.md`);
+    if (existsSync(profilePath)) {
+      try {
+        const profileContent = readFileSync(profilePath, 'utf-8');
+        const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
+        if (nameMatch) countryDisplayName = nameMatch[1].trim();
+      } catch (e) {
+        // Profile read error - fall back to code
+        countryDisplayName = selectedCountry;
+      }
+    } else {
+      countryDisplayName = selectedCountry;
+    }
+  }
+
+  spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant, countryDisplayName], { stdio: 'inherit' });
 } else {
   console.log('⚠️  Placeholder substitution skipped (helper missing)');
 }
@@ -603,16 +751,18 @@ if (existsSync(contextTemplatePath) && !existsSync(variantContextMd)) {
 if (existsSync(variantContextMd)) {
   const ctx = readFileSync(variantContextMd, 'utf8');
   if (!ctx.includes('Template-Version:')) {
-    appendFileSync(variantContextMd, `\n## Template Provenance\n\n- **Template-Version**: ${templateVersion}\n- **Template-Variant**: ${variant}\n`);
+    const jurisdictionLine = selectedCountry ? `- **Target-Jurisdiction**: ${selectedCountry}\n` : `- **Target-Jurisdiction**: region-neutral\n`;
+    appendFileSync(variantContextMd, `\n## Template Provenance\n\n- **Template-Version**: ${templateVersion}\n- **Template-Variant**: ${variant}\n${jurisdictionLine}`);
   }
 }
 
 // ── 5.6. Write .claude/template-version.txt ───────────────────────────────────
 const claudeDir = join(projectDir, '.claude');
 mkdirSync(claudeDir, { recursive: true });
+const countryLine = selectedCountry ? `country=${selectedCountry}\n` : `country=none\n`;
 writeFileSync(
   join(claudeDir, 'template-version.txt'),
-  `variant=${variant}\nversion=${templateVersion}\nplatform=${platform}\ncreated=${new Date().toISOString()}\n`
+  `variant=${variant}\nversion=${templateVersion}\nplatform=${platform}\n${countryLine}created=${new Date().toISOString()}\n`
 );
 
 // ── 5.6b. Inject AGENTS.md Skills into docs/context.md ───────────────────────

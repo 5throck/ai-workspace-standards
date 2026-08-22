@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.11.0
+ * @version 1.12.0
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -740,6 +740,15 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
     generatedVariant = await generateVariant(metadata, reconciledManifest!, config.outputPath);
     phases.generate = { success: true, result: generatedVariant };
+
+    // Post-generation cleanup: remove ACTIVE.md if copied (project-specific artifact)
+    const activeMdPath = join(config.outputPath, 'docs', 'countries', 'ACTIVE.md');
+    const { existsSync: esync, rmSync: rmsync } = await import('node:fs');
+    if (esync(activeMdPath)) {
+      rmsync(activeMdPath);
+      console.log(`  ✅ Removed project-specific artifact: docs/countries/ACTIVE.md`);
+    }
+
     console.log(`✅ PHASE 4 COMPLETE`);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
@@ -1037,6 +1046,11 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
   console.log(`\n🎉 Variant generated successfully!`);
   console.log(`Path: ${generatedVariant!.variantPath}`);
+
+  // Country profile verification checklist
+  console.log(`\n=== Manual Verification Checklist ===`);
+  console.log(`  [ ] templates/${config.variantName}/docs/countries/ profiles contain jurisdiction knowledge (not project-specific data); ACTIVE.md excluded`);
+  console.log(`  [ ] variant.json country_config.supported matches shipped profiles (validate-templates country-config check)`);
 
   return {
     success: true,

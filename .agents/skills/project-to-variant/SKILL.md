@@ -1,7 +1,7 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: "1.2.0"
+version: "1.3.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
@@ -53,7 +53,18 @@ Converts an existing standalone project into an official `co-*` variant template
 6. Runs `validate-templates.ts` for verification
 7. Regenerates `templates/<target>/AGENTS.md` via `regenerate-agents-md.ts` (mechanical — always run, not gated on judgment)
 8. Registers the spec via `spec-register.ts` if `--design-doc` was passed
-9. Outputs a manual review checklist for the remaining judgment-based items only (`pm.md` override review, `CLAUDE.md`/`GEMINI.md` narrative context)
+9. Outputs a manual review checklist for the remaining judgment-based items only (`pm.md` override review, `CLAUDE.md`/`GEMINI.md` narrative context, country-profile review items)
+
+### Country Profiles and Country-Scoped Skills
+
+When the source project carries country assets, the conversion handles them as follows:
+
+- `docs/countries/ACTIVE.md` is **excluded** - it records this project's country selection (project state), not reusable template knowledge
+- `docs/countries/<CODE>.md` profiles **are carried** into the template - they are durable jurisdiction knowledge (statutes, regulators, formats)
+- The `country_config` key in `variant.json` is **preserved**, keeping `supported` in sync with the carried profiles
+- Country-scoped skills (`k-law`, `k-dart`, `k-kosis` - see the `country_scoped_assets` registry in `docs/workspace-schema.json`) are **never copied** into the variant: they already live in `templates/common/skills/` and deploy only to matching-country projects at scaffold time
+
+When reviewing the output, confirm `country_config.supported` matches exactly the profiles carried into `templates/<target>/docs/countries/`. The full L2 pipeline (`l3-to-variant-pipeline.ts`) applies the same rules. See ADR-0057 for the full mechanism.
 
 ## Step-by-Step Procedure
 
@@ -61,7 +72,7 @@ Converts an existing standalone project into an official `co-*` variant template
 2. **Prepare**: Remove `node_modules/`, `.env`, `memory/`, `CHANGELOG.md`
 3. **Run conversion**: `bun scripts/project-to-variant.ts --source <project-path> --target <variant-name> --design-doc <path-to-design-doc>`
 4. **Verify**: `bun scripts/validate-templates.ts`
-5. **Review variant.json**: Check agents, skills, script_manifest
+5. **Review variant.json**: Check agents, skills, script_manifest, and `country_config` (if country profiles were carried)
 6. **Complete the printed manual checklist**: `pm.md` overrides and `CLAUDE.md`/`GEMINI.md` narrative context — everything else is now automated
 
 ## Alternative: Full L2 Pipeline

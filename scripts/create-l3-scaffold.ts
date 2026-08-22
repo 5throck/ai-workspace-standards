@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
 /**
  * create-l3-scaffold.ts
  *
@@ -8,7 +8,7 @@
  * steps to fix gaps). Future variants run this script instead of hand-copying.
  *
  * Usage:
- *   bun scripts/create-l3-scaffold.ts <variant-name> [--domain <type>] [--dry-run]
+ *   bun scripts/create-l3-scaffold.ts <variant-name> [--domain <type>] [--country <CODE>] [--dry-run]
  *   bun scripts/create-l3-scaffold.ts safety-os --domain security
  *
  * Note: all external commands are run via execFileSync (no shell) to avoid
@@ -148,12 +148,14 @@ function runNoShell(
 interface Args {
   variant: string;
   domain: string | null;
+  country: string;
   dryRun: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
   let variant = "";
   let domain: string | null = null;
+  let country = "";
   let dryRun = false;
 
   for (let i = 0; i < argv.length; i++) {
@@ -164,6 +166,17 @@ function parseArgs(argv: string[]): Args {
       domain = argv[++i] ?? null;
     } else if (a.startsWith("--domain=")) {
       domain = a.split("=")[1] ?? null;
+    } else if (a === "--country") {
+      country = argv[++i] ?? "";
+      // Validate country pattern
+      if (country && !/^[A-Z]{2,4}$/.test(country)) {
+        fail(`Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+      }
+    } else if (a.startsWith("--country=")) {
+      country = a.split("=")[1] ?? "";
+      if (country && !/^[A-Z]{2,4}$/.test(country)) {
+        fail(`Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+      }
     } else if (!a.startsWith("--")) {
       if (!variant) variant = a;
     }
@@ -172,7 +185,7 @@ function parseArgs(argv: string[]): Args {
   if (!variant) {
     fail(
       "Missing <variant-name>. " +
-        "Usage: bun scripts/create-l3-scaffold.ts <variant-name> [--domain <type>] [--dry-run]",
+        "Usage: bun scripts/create-l3-scaffold.ts <variant-name> [--domain <type>] [--country <CODE>] [--dry-run]",
     );
   }
 
@@ -183,7 +196,7 @@ function parseArgs(argv: string[]): Args {
     );
   }
 
-  return { variant, domain, dryRun };
+  return { variant, domain, country, dryRun };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -996,6 +1009,18 @@ function main(): void {
 
   // Step 4: root skills
   copyRootSkills(projectDir);
+
+  // Step 4.5: Prune country-scoped assets — MUST run after copyRootSkills():
+  // Step 3's overlay excludes top-level skills/ (COMMON_OVERLAY_EXCLUDE), so a
+  // prune placed before Step 4 would miss skills/k-* that Step 4 copies in afterward.
+  const pruneHelper = path.join(WORKSPACE_ROOT, "scripts", "helpers", "prune-country-scoped-assets.ts");
+  if (fs.existsSync(pruneHelper)) {
+    const country = args.country || "none";
+    log(`🌐 Pruning country-scoped assets${args.country ? ` for ${args.country}` : " (region-neutral)"}…`);
+    runNoShell(process.execPath, [pruneHelper, projectDir, country], { cwd: WORKSPACE_ROOT, quiet: false });
+  } else {
+    log("⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning");
+  }
 
   // Step 5: stub files
   generateStubs(projectDir, args.variant, args.domain);

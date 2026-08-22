@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.3.0
+version: 1.4.0
 owner: pm
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 metadata:
   type: process
   triggers:
@@ -41,16 +41,22 @@ A variant is a domain-specific AI team configuration built on the workspace comm
 - [ ] Variant name is unique: check `Projects/` and `templates/` — no existing `co-<name>`
 - [ ] Variant name format: lowercase, alphanumeric + hyphens only (e.g., `safety-os`, `legal-ai`)
 - [ ] Domain type decided: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | (custom)
+- [ ] Target country decided: a specific jurisdiction (`--country <CODE>`, e.g. `KR`) or region-neutral (default - omit the flag)
 
 ### Step 1: Run scaffold script
 
 ```bash
 # From workspace root C:\git\
-bun scripts/create-l3-scaffold.ts <variant-name> --domain <type>
+bun scripts/create-l3-scaffold.ts <variant-name> --domain <type> [--country <CODE>]
 
 # Example:
 bun scripts/create-l3-scaffold.ts safety-os --domain ehs
+
+# Example (domain anchored to a specific jurisdiction):
+bun scripts/create-l3-scaffold.ts labor-kr --domain hr --country KR
 ```
+
+> **Target country**: pass `--country <CODE>` (ISO 3166-1 alpha-2 or a well-known region code such as `EU`) when the domain is anchored to a specific jurisdiction. This deploys that country's scoped skills into the draft (e.g. `KR` deploys `k-law`/`k-dart`/`k-kosis`) and records the selection. Omit the flag for a region-neutral variant - country-scoped skills are then pruned from the scaffold. See `templates/common/docs/country-profiles.md` (shipped into the project as `docs/country-profiles.md`).
 
 This creates `Projects/<variant-name>/` with:
 - All common infrastructure (.claude/, .gemini/, scripts/, skills/) — every top-level file/dir under `templates/common/` is copied by default except a short, documented exclusion list (`COMMON_OVERLAY_EXCLUDE` in the script), so new common files show up automatically without needing a script change
@@ -74,7 +80,7 @@ Open `Projects/<variant-name>/CLAUDE.md` and add at the end:
 [Describe how PM agent is overridden for this domain]
 
 ### Domain
-[Describe the domain and applicable laws/standards]
+[Describe the domain and applicable laws/standards - jurisdiction-neutral prose; country-specific statutes, regulators, and formats go in docs/countries/<CODE>.md profiles]
 
 ### <VariantName> Lifecycle Rules
 | Modified file(s) | Required follow-up actions |
@@ -86,6 +92,8 @@ Open `Projects/<variant-name>/CLAUDE.md` and add at the end:
 ```
 
 > **Reconcile survival**: This section makes CLAUDE.md differ from workspace root — required for Phase B pipeline.
+
+> **Country vs. domain**: keep base variant content jurisdiction-neutral. Country-specific statutes, regulators, and operational formats belong in country profiles (`docs/countries/<CODE>.md` - format specified in `docs/country-profiles.md`, shipped from `templates/common/docs/`). If the domain requires jurisdiction anchoring, author the profiles, declare `country_config` in `variant.json` (Step 7), and scaffold with `--country <CODE>` (Step 1). Country profiles are advisory knowledge loaded at engagement start (Phase 0 intake) - they are never auto-executed.
 
 ### Step 3: Add identical section to GEMINI.md (Antigravity parity)
 
@@ -160,6 +168,7 @@ Edit `Projects/<variant-name>/variant.json`:
 - `variant_type`: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game`
 - `agent_overrides.pm.reason`: describe the PM role override
 - `skill_manifest.variant_specific`: list domain skills with `used_by_agents` and `phases`
+- `country_config`: declare supported country profiles if the variant ships `docs/countries/<CODE>.md` (keep `default: null` - region-neutral is the required default state)
 
 ### Step 8: Define PROMOTION_CHECKLIST.md conditions
 
