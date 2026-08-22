@@ -24,12 +24,12 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **change-management-partner** | [`agents/change-management-partner.md`](agents/change-management-partner.md) | Medium | Change management partner - manages change for org restructuring or new HR system rollouts, stakeholder alignment, resis |
 | **compensation-benefits-analyst** | [`agents/compensation-benefits-analyst.md`](agents/compensation-benefits-analyst.md) | Medium | Compensation and benefits analyst - designs wage structures, incentive schemes, benefits programs, and conducts compensa |
 | **data-analyst** | [`agents/data-analyst.md`](agents/data-analyst.md) | Medium | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, and labor-cost data, and builds HR dashboa |
-| **labor-compliance-analyst** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) | Medium | Labor compliance analyst - reviews compliance with Korean labor law (`근로기준법` and related statutes), maintains and audits |
-| **labor-relations-specialist** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) | Medium | Labor relations specialist - supports responses to `노동위원회` proceedings (unfair dismissal / unfair labor practice), colle |
+| **labor-compliance-analyst** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) | Medium | Labor compliance analyst - reviews compliance with the labor legislation of the target jurisdiction (see the active coun |
+| **labor-relations-specialist** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) | Medium | Labor relations specialist - supports responses to labor-relations-authority proceedings (unfair dismissal / unfair labo |
 | **learning-development-specialist** | [`agents/learning-development-specialist.md`](agents/learning-development-specialist.md) | Medium | Learning and development specialist - designs training systems, competency models, and training program operations (HRD) |
 | **org-design-consultant** | [`agents/org-design-consultant.md`](agents/org-design-consultant.md) | Medium | Org design consultant - designs organizational structure, job architecture, workforce planning, governance, and restruct |
 | **performance-management-consultant** | [`agents/performance-management-consultant.md`](agents/performance-management-consultant.md) | Medium | Performance management consultant - designs performance evaluation systems, KPI/OKR frameworks, and feedback processes ( |
-| **safety-health-officer** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) | Medium | Safety and health officer - reviews compliance with `산업안전보건법` and `중대재해처벌법`, and advises on safety-and-health management |
+| **safety-health-officer** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) | Medium | Safety and health officer - reviews compliance with the jurisdiction’s occupational safety and health legislation (inclu |
 | **talent-acquisition-specialist** | [`agents/talent-acquisition-specialist.md`](agents/talent-acquisition-specialist.md) | Medium | Talent acquisition specialist - designs recruiting strategy, sourcing channels, selection processes, and talent pipeline |
 <!-- VARIANT-AGENTS-END -->
 ---
@@ -82,7 +82,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Labor compliance analyst - reviews compliance with Korean labor law (`근로기준법` and related statutes), maintains and audits `취업규칙` (work rules), and evaluates wage and working-time systems. Owns the k-law skill for statute/precedent/administrative-rule lookup. Use when: labor law compliance review, work-rule drafting/audit, wage or working-time system design required. |
+| **Role** | Labor compliance analyst - reviews compliance with the labor legislation of the target jurisdiction (see the active country profile under docs/countries/), maintains and audits work rules, and evaluates wage and working-time systems. Uses the k-law skill for statute/precedent/administrative-rule lookup when the active country profile is KR. Use when: labor law compliance review, work-rule drafting/audit, wage or working-time system design required. |
 
 ### labor-relations-specialist
 
@@ -91,7 +91,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Labor relations specialist - supports responses to `노동위원회` proceedings (unfair dismissal / unfair labor practice), collective bargaining strategy, and `노사협의회` (Labor-Management Council) operating advisory, plus precedent research. Co-uses the k-law skill. Use when: labor board dispute response, bargaining strategy, labor- management council operation, or precedent research required. |
+| **Role** | Labor relations specialist - supports responses to labor-relations-authority proceedings (unfair dismissal / unfair labor practice), collective bargaining strategy, and labor-management council operating advisory, plus precedent research. Co-uses the k-law skill when the active country profile is KR. Use when: labor board dispute response, bargaining strategy, labor-management council operation, or precedent research required. |
 
 ### learning-development-specialist
 
@@ -109,7 +109,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/org-design-consultant.md`](agents/org-design-consultant.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3 |
-| **Role** | Org design consultant - designs organizational structure, job architecture, workforce planning, governance, and restructuring, including business-reason-based workforce restructuring/redeployment, voluntary-retirement (`희망퇴직`) process design, and outplacement linkage. Synthesizes inputs from HRM/HRD and labor-relations specialists into a coherent structural design. Use when: org structure design, job architecture design, workforce planning, restructuring, or voluntary-retirement/outplacement process design required. |
+| **Role** | Org design consultant - designs organizational structure, job architecture, workforce planning, governance, and restructuring, including business-reason-based workforce restructuring/redeployment, voluntary-retirement process design, and outplacement linkage. Synthesizes inputs from HRM/HRD and labor-relations specialists into a coherent structural design. Use when: org structure design, job architecture design, workforce planning, restructuring, or voluntary-retirement/outplacement process design required. |
 
 ### performance-management-consultant
 
@@ -127,7 +127,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Safety and health officer - reviews compliance with `산업안전보건법` and `중대재해처벌법`, and advises on safety-and-health management system design and `산업안전보건위원회` operation. Co-uses the k-law skill. Use when: industrial safety/health compliance review or serious-accident-prevention system design required. |
+| **Role** | Safety and health officer - reviews compliance with the jurisdiction’s occupational safety and health legislation (including serious-accident liability regimes where enacted) and advises on safety-and-health management system design and safety-health committee operation. Co-uses the k-law skill when the active country profile is KR. Use when: industrial safety/health compliance review or serious-accident-prevention system design required. |
 
 ### talent-acquisition-specialist
 
@@ -251,12 +251,12 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Change management partner - manages change for org restructuring or new HR syste | Phase 1 | `change-management-partner` | medium | |
 | Compensation and benefits analyst - designs wage structures, incentive schemes,  | Phase 2 | `compensation-benefits-analyst` | medium | |
 | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, an | Phase 1 | `data-analyst` | medium | |
-| Labor compliance analyst - reviews compliance with Korean labor law (`근로기준법` and | Phase 1 | `labor-compliance-analyst` | medium | |
-| Labor relations specialist - supports responses to `노동위원회` proceedings (unfair d | Phase 1 | `labor-relations-specialist` | medium | |
+| Labor compliance analyst - reviews compliance with the labor legislation of the  | Phase 1 | `labor-compliance-analyst` | medium | |
+| Labor relations specialist - supports responses to labor-relations-authority pro | Phase 1 | `labor-relations-specialist` | medium | |
 | Learning and development specialist - designs training systems, competency model | Phase 2 | `learning-development-specialist` | medium | |
 | Org design consultant - designs organizational structure, job architecture, work | Phase 2 | `org-design-consultant` | medium | |
 | Performance management consultant - designs performance evaluation systems, KPI/ | Phase 2 | `performance-management-consultant` | medium | |
-| Safety and health officer - reviews compliance with `산업안전보건법` and `중대재해처벌법`, and | Phase 1 | `safety-health-officer` | medium | |
+| Safety and health officer - reviews compliance with the jurisdiction’s occupatio | Phase 1 | `safety-health-officer` | medium | |
 | Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | Phase 2 | `talent-acquisition-specialist` | medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
@@ -464,12 +464,12 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 | Change management partner - manages change for org restructuring or new HR syste | `change-management-partner` | `pm` |
 | Compensation and benefits analyst - designs wage structures, incentive schemes,  | `compensation-benefits-analyst` | `pm` |
 | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, an | `data-analyst` | `pm` |
-| Labor compliance analyst - reviews compliance with Korean labor law (`근로기준법` and | `labor-compliance-analyst` | `pm` |
-| Labor relations specialist - supports responses to `노동위원회` proceedings (unfair d | `labor-relations-specialist` | `pm` |
+| Labor compliance analyst - reviews compliance with the labor legislation of the  | `labor-compliance-analyst` | `pm` |
+| Labor relations specialist - supports responses to labor-relations-authority pro | `labor-relations-specialist` | `pm` |
 | Learning and development specialist - designs training systems, competency model | `learning-development-specialist` | `pm` |
 | Org design consultant - designs organizational structure, job architecture, work | `org-design-consultant` | `pm` |
 | Performance management consultant - designs performance evaluation systems, KPI/ | `performance-management-consultant` | `pm` |
-| Safety and health officer - reviews compliance with `산업안전보건법` and `중대재해처벌법`, and | `safety-health-officer` | `pm` |
+| Safety and health officer - reviews compliance with the jurisdiction’s occupatio | `safety-health-officer` | `pm` |
 | Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | `talent-acquisition-specialist` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 

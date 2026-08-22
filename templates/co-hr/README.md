@@ -1,17 +1,17 @@
 ---
 sync_version: 1
-content_hash: PLACEHOLDER
+content_hash: 2a95ee51b09b91282df91397484af982536b06f6cff92255bddb1ca66f6d0857
 ---
 
 # co-hr
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ⚠️ Beta — v0.1.0
-> HR & Labor Relations Multi AI Team - Korean labor law compliance + HRM/HRD + org design + change management consulting
+> HR & Labor Relations Multi AI Team - labor-law compliance for the target jurisdiction (country profiles under docs/countries/) + HRM/HRD + org design + change management consulting
 
 ## Overview
 
-HR & Labor Relations Multi AI Team - Korean labor law compliance + HRM/HRD + org design + change management consulting. See docs/context.md for full architecture and standards.
+HR & Labor Relations Multi AI Team - labor-law compliance for the target jurisdiction (country profiles under docs/countries/) + HRM/HRD + org design + change management consulting. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** HR & Labor Relations Multi AI Team - Korean labor law compliance + HRM/HRD + org design + change management consulting
+**Mission:** HR & Labor Relations Multi AI Team - labor-law compliance for the target jurisdiction (country profiles under docs/countries/) + HRM/HRD + org design + change management consulting
 
 ## Meet the AI Team
 
@@ -39,12 +39,12 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **change-management-partner** | Change management partner - manages change for org restructuring or new HR syste | medium | inherit |
 | **compensation-benefits-analyst** | Compensation and benefits analyst - designs wage structures, incentive schemes,  | medium | inherit |
 | **data-analyst** | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, an | medium | inherit |
-| **labor-compliance-analyst** | Labor compliance analyst - reviews compliance with Korean labor law (`근로기준법` and | medium | inherit |
-| **labor-relations-specialist** | Labor relations specialist - supports responses to `노동위원회` proceedings (unfair d | medium | inherit |
+| **labor-compliance-analyst** | Labor compliance analyst - reviews compliance with the labor legislation of the  | medium | inherit |
+| **labor-relations-specialist** | Labor relations specialist - supports responses to labor-relations-authority pro | medium | inherit |
 | **learning-development-specialist** | Learning and development specialist - designs training systems, competency model | medium | inherit |
 | **org-design-consultant** | Org design consultant - designs organizational structure, job architecture, work | medium | inherit |
 | **performance-management-consultant** | Performance management consultant - designs performance evaluation systems, KPI/ | medium | inherit |
-| **safety-health-officer** | Safety and health officer - reviews compliance with `산업안전보건법` and `중대재해처벌법`, and | medium | inherit |
+| **safety-health-officer** | Safety and health officer - reviews compliance with the jurisdiction’s occupatio | medium | inherit |
 | **talent-acquisition-specialist** | Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | medium | inherit |
 
 ## Skills

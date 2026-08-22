@@ -1,6 +1,6 @@
 # co-hr Context
 
-co-hr is a 12-agent Multi-AI-Team for Korean labor-law compliance, HR management/development, and organizational design consulting. It routes incoming engagements to one of 11 domain-lead archetypes (labor compliance, labor relations, safety & health, org design, compensation & benefits, performance management, talent acquisition, learning & development, career & succession, change management, or cross-functional transformation), each drawing on a shared bench of specialist agents and skills. PM performs intake classification, dispatches the archetype lead and supporting agents, and enforces compliance sign-off and approval gates before any deliverable reaches the client.
+co-hr is a 12-agent Multi-AI-Team for labor-law compliance of the target jurisdiction (country profiles under `docs/countries/`), HR management/development, and organizational design consulting. It routes incoming engagements to one of 11 domain-lead archetypes (labor compliance, labor relations, safety & health, org design, compensation & benefits, performance management, talent acquisition, learning & development, career & succession, change management, or cross-functional transformation), each drawing on a shared bench of specialist agents and skills. PM performs intake classification, dispatches the archetype lead and supporting agents, and enforces compliance sign-off and approval gates before any deliverable reaches the client.
 
 ## Tech Stack
 
@@ -18,9 +18,9 @@ co-hr is a 12-agent Multi-AI-Team for Korean labor-law compliance, HR management
 | Agent | Tier | Role |
 |-------|------|------|
 | **pm** | medium | Engagement orchestration — intake classification, archetype routing, client interface, QA gate |
-| **labor-compliance-analyst** | medium | `근로기준법`/labor law compliance review, `취업규칙` (work rules) maintenance, wage & working-time system review |
-| **labor-relations-specialist** | medium | `노동위원회` case response, collective bargaining strategy support, `노사협의회` operation advisory, precedent research |
-| **safety-health-officer** | medium | `산업안전보건법`/`중대재해처벌법` compliance, safety and health management system + `산업안전보건위원회` operation |
+| **labor-compliance-analyst** | medium | labor-law compliance review (jurisdiction per active country profile), work rules maintenance, wage & working-time system review |
+| **labor-relations-specialist** | medium | labor-relations-authority case response, collective bargaining strategy support, labor-management council operation advisory, precedent research |
+| **safety-health-officer** | medium | occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation |
 | **org-design-consultant** | medium | Org structure/job architecture design, workforce planning, governance, reorganization, workforce restructuring linked to voluntary retirement and outplacement support |
 | **compensation-benefits-analyst** | medium | Wage structure, incentives, benefits design, compensation benchmarking (HRM) |
 | **performance-management-consultant** | medium | Evaluation system, KPI/OKR design, performance feedback process (HRM) |
@@ -38,7 +38,7 @@ co-hr is a 12-agent Multi-AI-Team for Korean labor-law compliance, HR management
 | Archetype | Lead | Support |
 |---|---|---|
 | Labor Law Compliance Audit | labor-compliance-analyst | safety-health-officer, data-analyst |
-| Labor Dispute / Labor Relations Commission Response | labor-relations-specialist | labor-compliance-analyst, change-management-partner |
+| Labor Dispute / Labor-Relations-Authority Response | labor-relations-specialist | labor-compliance-analyst, change-management-partner |
 | Occupational Safety & Health Compliance | safety-health-officer | labor-compliance-analyst, org-design-consultant |
 | Org Restructuring / Workforce Planning | org-design-consultant | change-management-partner, data-analyst, labor-compliance-analyst, talent-acquisition-specialist |
 | Compensation & Benefits Redesign | compensation-benefits-analyst | org-design-consultant, data-analyst, performance-management-consultant |
@@ -55,11 +55,11 @@ PM classifies the incoming request at Phase 0 intake and assigns it to the match
 ## Skills
 
 <!-- VARIANT-INJECT: skills -->
-Ten variant-specific domain skills are registered for co-hr in `skill_manifest.variant_specific` (`variant.json`); see `skills/SKILLS.md` for the authoritative registry, versions, and owners. In addition, every skill inherited from `templates/common` — including `k-law` for Korean statutory research via the open.law.go.kr API — is available to all agents.
+Ten variant-specific domain skills are registered for co-hr in `skill_manifest.variant_specific` (`variant.json`); see `skills/SKILLS.md` for the authoritative registry, versions, and owners. In addition, skills inherited from `templates/common` are available to all agents, with one exception: KR-scoped skills in the `country_scoped_assets` registry — `k-law` (Korean statutory research via the open.law.go.kr API) and `k-kosis` (Korean national statistics) — deploy only to projects scaffolded with `--country KR` (see `docs/countries/`).
 
 | Skill | Owner |
 |-------|-------|
-| `k-law` | labor-compliance-analyst / labor-relations-specialist / safety-health-officer (statutory research) |
+| `k-law` (present only in KR-scaffolded projects) | labor-compliance-analyst / labor-relations-specialist / safety-health-officer (statutory research when the active profile is KR) |
 | `stakeholder-alignment` | change-management-partner |
 | `org-readiness-assessment` | change-management-partner |
 | `consulting-report-writing` | shared — pm (final deliverable formatting, available to any agent) |
@@ -78,7 +78,7 @@ Ten variant-specific domain skills are registered for co-hr in `skill_manifest.v
 
 <!-- VARIANT-INJECT: environment-setup -->
 - `bun install` — installs dependencies for the bun-run TypeScript operational scripts.
-- `LAW_API_OC` environment variable — **required** by the `k-law` skill to query the National Law Information Center Open API (open.law.go.kr).
+- `LAW_API_OC` environment variable — **required** by the `k-law` skill (present only in KR-scaffolded projects) to query the National Law Information Center Open API (open.law.go.kr).
 - Git Bash required on Windows — workspace hooks and operational scripts use Unix-style shell conventions.
 <!-- END VARIANT-INJECT -->
 
@@ -88,7 +88,7 @@ Ten variant-specific domain skills are registered for co-hr in `skill_manifest.v
 | Phase | Name | What Happens | Primary Owner |
 |-------|------|--------------|---------------|
 | 0 | Intake & Archetype Classification | PM classifies the incoming request into one of 11 engagement archetypes (see Team Configuration Scenarios above) and assigns the archetype's lead + supporting agents | pm |
-| 1 | Diagnosis & Research | Archetype lead conducts research/diagnosis (statutory research via k-law, workforce data via data-analyst, or domain-specific per archetype) | Archetype lead |
+| 1 | Diagnosis & Research | Archetype lead conducts research/diagnosis (statutory research per the active country profile, workforce data via data-analyst, or domain-specific per archetype) | Archetype lead |
 | 1.5 | Compliance & Cross-Validation | For any engagement with legal exposure (restructuring, policy change, dismissal-adjacent), labor-compliance-analyst signs off before Phase 2; data-analyst validates any quantitative claim's methodology | pm (dispatches validators) |
 | 2 | Design & Approval Gate | Archetype lead + supporting agents produce the design/recommendation; **approval gate** — no execution without client sign-off | Archetype lead |
 | 3 | Stakeholder Validation | change-management-partner is always involved here regardless of archetype lead, for any org-wide rollout | change-management-partner |
@@ -98,8 +98,8 @@ Ten variant-specific domain skills are registered for co-hr in `skill_manifest.v
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Guidelines
 
-- **Documentation language**: English only for all documentation and deliverables; Korean statute names and legally required proper nouns (`근로기준법`, `공인노무사`, etc.) remain in Korean.
-- **Legal disclaimer**: co-hr deliverables are not legal advice. Matters requiring a legal determination must be reviewed by a certified labor attorney (`공인노무사`) or lawyer.
+- **Documentation language**: English only for all documentation and deliverables; statute names and legally required proper nouns of the active jurisdiction remain in that jurisdiction's language.
+- **Legal disclaimer**: co-hr deliverables are not legal advice. Matters requiring a legal determination must be reviewed by the jurisdiction's licensed labor professional or lawyer (per the active country profile).
 <!-- END VARIANT-INJECT -->
 
 ## File Organization Policy
@@ -116,15 +116,7 @@ Ten variant-specific domain skills are registered for co-hr in `skill_manifest.v
 ## Domain Rules
 
 <!-- VARIANT-INJECT: domain-rules -->
-Applicable Korean statute families:
-
-- `근로기준법` (Labor Standards Act)
-- `노동조합및노동관계조정법` (Trade Union and Labor Relations Adjustment Act)
-- `근로자참여및협력증진에관한법률` (Act on the Promotion of Worker Participation and Cooperation — statutory basis for `노사협의회`, distinct from union law)
-- `산업안전보건법` (Occupational Safety and Health Act)
-- `중대재해처벌법` (Serious Accidents Punishment Act)
-
-The authoritative statutory enumeration and engagement-specific applicability live in the `## Co-Hr Context` section of `CLAUDE.md` — refer there for the full scope rather than duplicating it here.
+Applicable statute families are defined by the active country profile (`docs/countries/<CODE>.md`; see `docs/countries/KR.md` for the KR profile's statute families — labor standards, trade union & labor relations adjustment, worker participation & cooperation, occupational safety and health, and serious-accident liability). Identify the active profile at Phase 0 intake; when no profile is active, confirm the applicable jurisdiction with the client before any statutory work.
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -144,8 +136,8 @@ PM orchestrates HR/labor consulting engagements through four phases:
 
 - **Phase 0 - Intake**: Clarify engagement scope with the client (labor compliance
   audit, HRM/HRD design, org restructuring, change management, or a combination).
-  Identify applicable law families up front (`근로기준법`, `노동조합및노동관계조정법`,
-  `근로자참여및협력증진에관한법률`, `산업안전보건법`, `중대재해처벌법`) so the correct
+  Identify the applicable law families up front (per the active country profile,
+  `docs/countries/`) so the correct
   labor-relations specialists are engaged from Phase 1.
 - **Phase 1 - Research & Diagnosis**: Dispatch labor-compliance-analyst,
   labor-relations-specialist, safety-health-officer (statutory/labor research), and
@@ -163,7 +155,7 @@ PM orchestrates HR/labor consulting engagements through four phases:
 
 Every deliverable touching statutory interpretation (labor-compliance-analyst,
 labor-relations-specialist, safety-health-officer outputs) must carry the legal
-disclaimer and be flagged for licensed `공인노무사`/lawyer review where ambiguous.
+disclaimer and be flagged for review by the jurisdiction's licensed labor professional or lawyer where ambiguous.
 This section replaces the workspace PM's governance workflow with variant-specific logic.
 <!-- END VARIANT-SECTION -->
 

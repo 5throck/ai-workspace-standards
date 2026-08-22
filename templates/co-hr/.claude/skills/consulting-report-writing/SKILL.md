@@ -64,7 +64,7 @@ Shared quality-floor skill. Use whenever any co-hr agent produces a formal clien
    - Quantify every claim where possible ("20% cost reduction" not "significant cost reduction")
    - One idea per paragraph, topic sentence first
    - No jargon without definition
-   - Korean legal/regulatory proper nouns stay in backticks per co-hr's English-prose language policy
+   - Legal/regulatory proper nouns of the active jurisdiction stay in backticks per co-hr's English-prose language policy
 
 6. **Visual Communication**: Every data point should have a chart or table. Every complex argument should have a visual framework.
 

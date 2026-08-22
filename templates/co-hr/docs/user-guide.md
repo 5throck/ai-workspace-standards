@@ -10,7 +10,7 @@
 ## 1. Quick Start
 
 1. Bring your request to the **PM** — it is the single entry point. Describe the engagement
-   in plain language (Korean or English): *"Review our disciplinary-dismissal procedure for
+   in plain language (the project's working language): *"Review our disciplinary-dismissal procedure for
    compliance"* or *"Design a new performance-management system for 300 employees."*
 2. The PM classifies the request into one of **11 engagement archetypes**
    (see §2) and assigns the archetype's lead + supporting agents.
@@ -19,7 +19,7 @@
 
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
-   | Statutory research (Korean labor law) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
+   | Statutory research (labor law of the target jurisdiction) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
    | Workforce data analysis | data-analyst | Medium | claude-sonnet-5-0 | Claude Code |
 
 4. Once approved, specialists run — research in parallel where safe, writes serialized.
@@ -38,9 +38,9 @@
 
 | Your scenario | Lead agent | Skill(s) involved |
 |---------------|-----------|-------------------|
-| Labor law compliance audit | labor-compliance-analyst | `k-law`, `hr-metrics-analysis` |
-| Labor dispute / Labor Relations Commission response | labor-relations-specialist | `k-law` |
-| Occupational safety & health compliance | safety-health-officer | `k-law`, `k-kosis` |
+| Labor law compliance audit | labor-compliance-analyst | `k-law` (KR profile), `hr-metrics-analysis` |
+| Labor dispute / labor-relations-authority response | labor-relations-specialist | `k-law` (KR profile) |
+| Occupational safety & health compliance | safety-health-officer | `k-law` (KR profile), `k-kosis` (KR profile) |
 | Org restructuring / workforce planning | org-design-consultant | `org-design-framework`, `org-readiness-assessment` |
 | Compensation & benefits redesign | compensation-benefits-analyst | `compensation-benchmarking` |
 | Performance management system design | performance-management-consultant | `performance-system-design` |
@@ -89,7 +89,7 @@ Never bypass the PM workflow with direct specialist invocation, and never run ra
 | Phase | Owner | What happens |
 |-------|-------|--------------|
 | 0 — Intake & Archetype Classification | pm | Request classified into one of 11 archetypes; lead + support assigned |
-| 1 — Diagnosis & Research | Archetype lead | Statutory research (`k-law`), workforce data (data-analyst), or domain research |
+| 1 — Diagnosis & Research | Archetype lead | Statutory research (per active country profile), workforce data (data-analyst), or domain research |
 | 1.5 — Compliance & Cross-Validation | pm (dispatches validators) | labor-compliance-analyst signs off legal exposure; data-analyst validates quantitative methodology |
 | 2 — Design & Approval Gate | Archetype lead | Design/recommendation produced; **client sign-off required** before execution |
 | 3 — Stakeholder Validation | change-management-partner | Always involved for org-wide rollouts, regardless of archetype |
@@ -109,9 +109,10 @@ writes a given file at a time, coordinated by the PM.
 
 Domain rules to keep in mind:
 
-- Statutory claims must cite Korean law via `k-law`; workforce statistics use `k-kosis`.
-  Core statute families: `근로기준법`, `노동조합및노동관계조정법`,
-  `근로자참여및협력증진에관한법률`, `산업안전보건법`, `중대재해처벌법`.
+- Statutory claims must cite the applicable jurisdiction's law via its statute-lookup
+  tooling (`k-law` when the active country profile is KR); workforce statistics use
+  `k-kosis` under KR. Core statute families are enumerated by the active country
+  profile (see `docs/countries/KR.md`).
 - Legal-exposure engagements (restructuring, policy change, dismissal-adjacent) cannot
   pass Phase 2 without labor-compliance-analyst sign-off.
 - The Phase 2 approval gate is hard: no execution work begins on unapproved designs,

@@ -4,7 +4,7 @@ variant: co-hr
 owner: "architect"
 status: "active"
 version: "0.1.0"
-last_updated: "2026-08-22"
+last_updated: "2026-08-23"
 capabilities: [engagement-context, deliverable-standards, client-engagement]
 extends: ../../common/agents/pm.md
 remove_sections:
@@ -22,8 +22,9 @@ variant_overrides:
 
     - **Phase 0 - Intake**: Clarify engagement scope with the client (labor compliance
       audit, HRM/HRD design, org restructuring, change management, or a combination).
-      Identify applicable law families up front (`근로기준법`, `노동조합및노동관계조정법`,
-      `근로자참여및협력증진에관한법률`, `산업안전보건법`, `중대재해처벌법`) so the correct
+      Identify the applicable jurisdiction and its statute families up front (see the
+      active country profile under `docs/countries/`; if no profile is active, confirm
+      the jurisdiction with the client at intake) so the correct
       labor-relations specialists are engaged from Phase 1.
     - **Phase 1 - Research & Diagnosis**: Dispatch labor-compliance-analyst,
       labor-relations-specialist, safety-health-officer (statutory/labor research), and
@@ -41,7 +42,8 @@ variant_overrides:
 
     Every deliverable touching statutory interpretation (labor-compliance-analyst,
     labor-relations-specialist, safety-health-officer outputs) must carry the legal
-    disclaimer and be flagged for licensed `공인노무사`/lawyer review where ambiguous.
+    disclaimer and be flagged for review by the jurisdiction's licensed labor
+    professional (per the active country profile) where ambiguous.
     This section replaces the workspace PM's governance workflow with variant-specific logic.
     <!-- END VARIANT-SECTION -->
   agent_roster: |
@@ -79,8 +81,9 @@ PM orchestrates HR/labor consulting engagements through four phases:
 
 - **Phase 0 - Intake**: Clarify engagement scope with the client (labor compliance
   audit, HRM/HRD design, org restructuring, change management, or a combination).
-  Identify applicable law families up front (`근로기준법`, `노동조합및노동관계조정법`,
-  `근로자참여및협력증진에관한법률`, `산업안전보건법`, `중대재해처벌법`) so the correct
+  Identify the applicable jurisdiction and its statute families up front (see the
+  active country profile under `docs/countries/`; if no profile is active, confirm
+  the jurisdiction with the client at intake) so the correct
   labor-relations specialists are engaged from Phase 1.
 - **Phase 1 - Research & Diagnosis**: Dispatch labor-compliance-analyst,
   labor-relations-specialist, safety-health-officer (statutory/labor research), and
@@ -98,7 +101,8 @@ PM orchestrates HR/labor consulting engagements through four phases:
 
 Every deliverable touching statutory interpretation (labor-compliance-analyst,
 labor-relations-specialist, safety-health-officer outputs) must carry the legal
-disclaimer and be flagged for licensed `공인노무사`/lawyer review where ambiguous.
+disclaimer and be flagged for review by the jurisdiction's licensed labor
+professional (per the active country profile) where ambiguous.
 <!-- END VARIANT-SECTION -->
 
 <!-- VARIANT-SECTION: agent-roster -->

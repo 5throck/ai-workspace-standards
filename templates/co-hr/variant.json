@@ -1,6 +1,6 @@
 {
   "name": "co-hr",
-  "description": "HR & Labor Relations Multi AI Team - Korean labor law compliance + HRM/HRD + org design + change management consulting",
+  "description": "HR & Labor Relations Multi AI Team - labor-law compliance for the target jurisdiction (country profiles under docs/countries/) + HRM/HRD + org design + change management consulting",
   "variant_type": "consulting",
   "status": "beta",
   "version": "0.1.0",
@@ -105,7 +105,7 @@
   "agent_overrides": {
     "pm": {
       "type": "additive",
-      "reason": "Overrides governance-workflow, agent-roster, and dispatch-protocol to orchestrate a 12-agent HR/노무 consulting roster through a Phase 0 intake -> Phase 1 research/diagnosis -> Phase 2 design -> Phase 3 validation/delivery engagement lifecycle, with tier raised to claude=high given the compliance-sequencing complexity across legal, HRM, HRD, and org-design domains.",
+      "reason": "Overrides governance-workflow, agent-roster, and dispatch-protocol to orchestrate a 12-agent HR/labor-relations consulting roster through a Phase 0 intake -> Phase 1 research/diagnosis -> Phase 2 design -> Phase 3 validation/delivery engagement lifecycle, with tier raised to claude=high given the compliance-sequencing complexity across legal, HRM, HRD, and org-design domains.",
       "since": "2026-08-22",
       "reviewed_by": "architect",
       "overrides": [
@@ -212,6 +212,11 @@
         ]
       }
     ]
+  },
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": ["KR"],
+    "default": null
   },
   "phaseAComplete": true,
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
