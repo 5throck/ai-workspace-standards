@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.0.1
+version: 1.1.0
 owner: pm
-last_reviewed: 2026-06-05
+last_reviewed: 2026-08-23
 metadata:
   type: process
   triggers:
@@ -70,13 +70,19 @@ Before running the pipeline, update these fields in `Projects/<variant-name>/`:
 bun scripts/l3-to-variant-pipeline.ts \
   --source Projects/<variant-name> \
   --variant co-<variant-name> \
-  --variantType <security|development|design|consulting|collaboration>
+  --variantType <security|development|design|consulting|collaboration> \
+  --auto-fix-agents-md \
+  --auto-fix-pm-md
 ```
 
 Expected output:
 - `templates/co-<variant-name>/` created
 - Common files reconciled (duplicates removed)
 - Platform parity validated
+- Domain skills materialized into all three skill roots (`skills/`, `.claude/skills/`, `.gemini/skills/`) — no manual copying (generate-variant.ts ≥ 1.12.0)
+- Agent `lifecycle` frontmatter preserved on the variant copy — no post-run backfills (generate-variant.ts ≥ 1.12.0)
+- VARIANT-INJECT markers ensured in `docs/co-<variant-name>.context.md` even when the L3 source overwrites the marker-rich skeleton
+- `AGENTS.md` regenerated with the full roster (`--auto-fix-agents-md`, via `regenerate-agents-md.ts --source`)
 
 ### Step 4: Manual copy — pipeline-excluded directories
 

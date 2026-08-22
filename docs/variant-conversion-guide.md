@@ -232,7 +232,6 @@ bun scripts/validate-skills.ts  # Verify skills
 
 | Limitation | Impact | Workaround |
 |-----------|--------|-----------|
-| `project-to-variant.ts` has no SKILL.md | PM has no guided workflow | Follow this guide manually |
 | No automated detection of closest variant | User must identify the right variant | Use the mapping table in §3 Step 1 |
 | Conversion is one-way | No automated "un-variant" process | Manual file cleanup |
 | Variant infrastructure adoption (Scenario B) is manual | Requires careful file-by-file adoption | Use upgrade-project.ts for automation where possible |
@@ -243,6 +242,7 @@ bun scripts/validate-skills.ts  # Verify skills
 
 - [Project Upgrade Guide](project-upgrade-guide.md) — Upgrading variant-based projects
 - [Creating a Variant Guide](creating-a-variant.md) — Creating new variants from scratch
+- [Project-to-Variant Skill](../skills/project-to-variant/SKILL.md) — Guided workflow for the Scenario A conversion path (invocable as the `project-to-variant` skill)
 - [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
 - [New Project Scaffolding](constitution/07-new-project.md) — L3 project creation
 - [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results
