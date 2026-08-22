@@ -127,6 +127,15 @@ Every entry under `[Unreleased]` MUST include a PR reference:
 - Short description of change (#PR-number)
 ```
 
+### Country Profiles (`docs/countries/`)
+
+If the project was scaffolded with a target country (`--country <CODE>`),
+`docs/countries/ACTIVE.md` points at the active profile (`docs/countries/<CODE>.md`) —
+advisory jurisdiction knowledge (regulatory framework, operational formats, language
+defaults, tooling) loaded at Phase 0 intake. With no country selected, the project is
+region-neutral: agents confirm the applicable jurisdiction with the client before
+assuming one. Convention: [`docs/country-profiles.md`](country-profiles.md).
+
 ### Language Policy
 
 | Content | Language |

@@ -57,6 +57,32 @@ The filtering is automatic — `propagate-to-templates.ts` enforces it at publis
 
 **Excluded scripts** (workspace-management): `upgrade-project.ts`
 
+#### 7.3.5 Target Country Selection (Country Profiles)
+
+If the chosen variant declares `country_config` in its `variant.json`, `new-project.ts`
+asks for the project's target country at scaffold time (or takes `--country <CODE>`):
+
+- **`--country <CODE>`** — must be listed in the variant's `country_config.supported`
+  (mismatch → error). Writes `docs/countries/ACTIVE.md` pointing at the profile
+  (`docs/countries/<CODE>.md`), and records `Target-Jurisdiction: <CODE>` in the
+  scaffold provenance block plus `country=<CODE>` in `.claude/template-version.txt`.
+- **Region-neutral (the default — no flag, `--yes`, or CI)** — no active profile;
+  the variant's profiles stay dormant on disk and agents operate
+  jurisdiction-parametrically, confirming the applicable jurisdiction with the client
+  at Phase 0 intake.
+
+**Country-scoped skill pruning**: after the copy + overlay steps, the shared helper
+`scripts/helpers/prune-country-scoped-assets.ts` deletes every skill registered in the
+`country_scoped_assets` section of [`docs/workspace-schema.json`](../workspace-schema.json)
+(SSOT) from all four mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
+`.agents/skills/`) unless the selected country matches the registered scope — e.g.
+`k-law` / `k-dart` / `k-kosis` (KR) deploy only to `--country KR` projects and are
+absent from region-neutral ones. The same helper runs in `create-l2-scaffold.ts`
+(new-variant drafts take the same `--country` flag).
+
+See [ADR-0057](../adr/0057-country-profile-mechanism.md) and the convention doc
+[`templates/common/docs/country-profiles.md`](../../templates/common/docs/country-profiles.md).
+
 #### 7.4 Post-Scaffold Checklist
 
 ```

@@ -304,6 +304,36 @@ When a skill needs source-language reference data (a terminology glossary, offic
 
 **Registration Checklist addition**: if a skill adds a `references/` reference asset, note it in the skill's `SKILLS.md` `notes` column (e.g. `notes: ko glossary in references/terms-ko.json`).
 
+#### 6.8 Country-Scoped Skills
+
+Skills whose **data access** is specific to one country (statute databases, national
+statistics APIs, disclosure systems) are registered — not frontmatter-marked — in the
+`country_scoped_assets` section of [`docs/workspace-schema.json`](../workspace-schema.json)
+(SSOT; mirrored to `templates/common/docs/workspace-schema.json` for scaffolds):
+
+```json
+"country_scoped_assets": {
+  "skills": { "k-law": "KR", "k-dart": "KR", "k-kosis": "KR" },
+  "scripts": {}
+}
+```
+
+**Deployment rule**: `new-project.ts` and `create-l2-scaffold.ts` call
+`scripts/helpers/prune-country-scoped-assets.ts` after the copy/overlay steps to delete
+every registered skill from all four mirror directories (`skills/`, `.claude/skills/`,
+`.gemini/skills/`, `.agents/skills/`) unless the project's target country (`--country`)
+matches the registered scope. Region-neutral projects receive none of them.
+
+- **Registry-only by design** — no SKILL.md frontmatter field; one source of truth.
+- **Language is never a country scope** — `translate` and other language skills must not
+  be registered (country ≠ language, §4.3 of the constitution).
+- **Agents reference country-scoped skills only through the active country profile**
+  (its *Tooling & Skill Mapping* section), never via `required_skills:` frontmatter —
+  pruning would otherwise strand a dangling reference.
+- **Validation** — `validate-templates.ts` fails if a registered skill is missing from
+  `templates/common/skills/` (registry drift) and warns on `required_skills` references
+  to scoped skills in variants that do not support that country.
+
 ---
 
 ### Cross-Platform Deployment Rule
