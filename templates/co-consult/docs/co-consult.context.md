@@ -209,9 +209,9 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 
 Each agent must save its deliverables to the designated folder with the specified naming convention. `{topic}` is derived from the engagement subject or client brief.
 
-**Language Convention**: Deliverables are written in **Korean** by default. Korean-language files use the `_ko.md` suffix. English-language deliverables (only on explicit client request) use `.md` without suffix.
+**Language Convention**: The deliverable language follows the active country profile (KR default: **Korean**). Korean-language files use the `_ko.md` suffix. English-language deliverables (only on explicit client request) use `.md` without suffix.
 
-| Agent | Output Type | Destination | Naming Convention (Korean default) |
+| Agent | Output Type | Destination | Naming Convention (KR default: Korean) |
 |-------|-------------|-------------|-------------------|
 | Industry Expert | Industry analysis reports, trend briefings | `deliverables/reports/` | `{topic}-industry-analysis-{YYYY-MM-DD}_ko.md` |
 | Industry Expert | Regulatory overviews | `deliverables/research/` | `{topic}-regulatory-{YYYY-MM-DD}_ko.md` |
@@ -242,14 +242,14 @@ Each agent must save its deliverables to the designated folder with the specifie
 4. Publication artifacts must be version-controlled before distribution.
 5. Change management assessments must include organizational readiness scores.
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
-7. **Default deliverable language is Korean**. Unless the client explicitly requests another language, all deliverables MUST be written in Korean and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
+7. **Deliverable language follows the active country profile (KR default: Korean)**. Unless the client explicitly requests another language, all deliverables MUST be written in the default language and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
 8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
 9. Phase 1 research deliverables MUST pass cross-validation before entering `insight-synthesis`. PM dispatches validator agents per the Cross-Validation Matrix in [`engagement-orchestration.md`](engagement-orchestration.md). See Phase 1.5 Cross-Validation section for checklist and re-execution triggers.
 10. **Korean-terminology reference assets are SSOT'd at `docs/terms-ko.json`** (workspace root — not per-skill). Any skill that needs a Korean-original ↔ English glossary (business/financial/corporate-research terms not covered by the workspace English-only doc policy) MUST read/link `docs/terms-ko.json` rather than maintaining a local `references/terms-ko.json` copy. Rationale: a skill-local copy is duplicated 4× across platform mirrors (`skills/`, `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) and, when two or more skills need overlapping terms (e.g. `company-intelligence` and `financial-statement-analysis` both need financial-statement account names), those per-skill copies drift out of sync with no audit check catching it. Extending an entry: add it directly to `docs/terms-ko.json` under the relevant category (create a new category if none fits); do not add category duplicates. Currently consumed by: `company-intelligence`, `financial-statement-analysis`.
 
 ---
 
-*co-consult.context.md version: 2.4 — Korean-terminology SSOT (docs/terms-ko.json)*
+*co-consult.context.md version: 2.5 — deliverable language now country-profile-driven (KR default: Korean)*
 
 ## Template Provenance
 

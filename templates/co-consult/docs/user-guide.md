@@ -39,8 +39,8 @@ Use this table to see which agent(s) and skill(s) will typically be dispatched. 
 |---|---|---|
 | "I need a market/competitive analysis" | strategy-analyst | `competitive-intelligence` |
 | "Build the business case / ROI / NPV for this recommendation" | strategy-analyst | `financial-modeling` |
-| "I need a Korean company's financial analysis" (DART-based) | data-analyst | `financial-statement-analysis`, `k-dart` |
-| "Give me a full profile / intelligence report on this company" | data-analyst | `company-intelligence`, `k-dart` |
+| "I need a Korean company's financial analysis" (KR profile, DART-based) | data-analyst | `financial-statement-analysis`, `k-dart` (KR profile) |
+| "Give me a full profile / intelligence report on this company" | data-analyst | `company-intelligence`, `k-dart` (KR profile) |
 | "I need industry insights / regulatory landscape" | industry-expert | (industry research, no dedicated skill file) |
 | "I need a client deck / executive presentation" | communications-lead | `executive-presentation`, `narrative-framework` |
 | "Write up the findings as a consulting report" | communications-lead | `consulting-report-writing` |
@@ -63,10 +63,10 @@ Use this table to see which agent(s) and skill(s) will typically be dispatched. 
 
 ## 3. Walkthrough: Financial Statement Analysis Pipeline
 
-This is the newest and most complex skill (`financial-statement-analysis`), for Korean company financial analysis based on DART (Korea's Financial Supervisory Service disclosure system). It runs as a six-stage pipeline: **DART collection → validation → normalization → KPI extraction → ROIC value driver tree → report generation.**
+This is the newest and most complex skill (`financial-statement-analysis`), for listed-company financial analysis based on the active country profile's disclosure system (KR profile: DART, the Financial Supervisory Service disclosure system). It runs as a six-stage pipeline: **DART collection → validation → normalization → KPI extraction → ROIC value driver tree → report generation.**
 
 ### Step 1 — Collect DART data
-Use the `k-dart` skill (or ask the PM to dispatch `data-analyst`) to pull the target company's disclosures and financial statements from the DART OpenAPI. This requires the `DART_API_KEY` environment variable to be set. Save the raw JSON response — this is the input to the pipeline.
+Use the `k-dart` skill (KR profile; or ask the PM to dispatch `data-analyst`) to pull the target company's disclosures and financial statements from the DART OpenAPI. This requires the `DART_API_KEY` environment variable to be set. Save the raw JSON response — this is the input to the pipeline.
 
 ### Step 2 — Run the pipeline
 The whole validation → normalization → KPI → driver-tree → report chain is automated by one script:
