@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.11.0
+ * @version 1.12.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -167,11 +167,18 @@ function createDirectory(dirPath: string): void {
 /**
  * Normalize agent frontmatter when copying from L3 source to variant template.
  *
- * Strips L3-only fields (lifecycle, formal_name, variant) that do not belong in
- * standard variant agent files, and ensures all four tier platforms are present
+ * Strips L3-only fields (formal_name, variant) that do not belong in standard
+ * variant agent files, and ensures all four tier platforms are present
  * (claude, gemini, antigravity, gemini-cli) by inheriting the claude tier value.
  *
- * @version 1.0.0
+ * `lifecycle` is deliberately PRESERVED (v1.1.0): L2 variant agents carry
+ * lifecycle frontmatter that their docs/lifecycle/agents/<name>.md governance
+ * records reference — stripping it forced manual backfills of 59 agents (PR
+ * #588) and 11 more (co-hr, 2026-08-23). Only templates/common/agents/pm.md
+ * must stay lifecycle-free (audit L0-only check), and that file is never
+ * routed through this normalizer.
+ *
+ * @version 1.1.0
  */
 export function normalizeAgentFrontmatter(content: string): string {
   const fmMatch = content.match(/^(---\r?\n)([\s\S]*?)(\r?\n---)([\s\S]*)$/);
@@ -180,7 +187,7 @@ export function normalizeAgentFrontmatter(content: string): string {
   const [, open, fm, close, body] = fmMatch;
 
   // Strip L3-only fields
-  const L3_ONLY_FIELDS = ['lifecycle', 'formal_name', 'variant'];
+  const L3_ONLY_FIELDS = ['formal_name', 'variant'];
   let normalized = fm;
 
   for (const field of L3_ONLY_FIELDS) {
@@ -384,9 +391,20 @@ function generateAgentOverrides(
 
 /**
  * Generate skill directories and files
- * @version 1.1.0
+ *
+ * v1.2.0: normalizes targetPath separators before every prefix/match check —
+ * on Windows path.relative() yields backslashes, so the old forward-slash
+ * 'skills/' checks never matched and zero skill directories were created
+ * (the co-hr promotion, 2026-08-23, logged "Skills created: 10" while
+ * materializing none — same defect class as the v1.8.1 SKIP_IN_COPY fix).
+ * Also materializes the top-level skills/<name>/ copy of the co-consult
+ * layout, which was previously dropped by BOTH this function (platform dirs
+ * only) and the copy-remaining loop (skips 'skills/' assuming this function
+ * handled it).
+ *
+ * @version 1.2.0
  */
-function generateSkillDirectories(
+export function generateSkillDirectories(
   variantPath: string,
   metadata: VariantMetadata,
   manifest: ReconciledManifest
@@ -397,9 +415,12 @@ function generateSkillDirectories(
   const skillFiles = new Map<string, ReconciledFile[]>();
 
   for (const file of manifest.keepInVariant) {
-    if (file.targetPath.includes('skills/') && file.targetPath.endsWith('.md')) {
+    // Normalize to forward slashes so prefix checks match on Windows (same
+    // normalization as the agent loop and the copy-remaining loop)
+    const normalizedTarget = file.targetPath.replace(/\\/g, '/');
+    if (normalizedTarget.includes('skills/') && normalizedTarget.endsWith('.md')) {
       // Extract skill name from path (e.g., 'skills/meeting-facilitation/SKILL.md')
-      const match = file.targetPath.match(/skills\/([^/]+)\//);
+      const match = normalizedTarget.match(/skills\/([^/]+)\//);
       if (match) {
         const skillName = match[1];
         if (!skillFiles.has(skillName)) {
@@ -414,6 +435,7 @@ function generateSkillDirectories(
   for (const [skillName, files] of skillFiles.entries()) {
     const claudeSkillDir = join(variantPath, '.claude', 'skills', skillName);
     const geminiSkillDir = join(variantPath, '.gemini', 'skills', skillName);
+    const topLevelSkillDir = join(variantPath, 'skills', skillName);
 
     createDirectory(claudeSkillDir);
     createDirectory(geminiSkillDir);
@@ -422,8 +444,9 @@ function generateSkillDirectories(
 
     // Copy skill files
     for (const file of files) {
-      const isClaude = file.targetPath.includes('.claude/skills/');
-      const isGemini = file.targetPath.includes('.gemini/skills/');
+      const normalizedTarget = file.targetPath.replace(/\\/g, '/');
+      const isClaude = normalizedTarget.includes('.claude/skills/');
+      const isGemini = normalizedTarget.includes('.gemini/skills/');
 
       if (isClaude) {
         const targetPath = join(variantPath, '.claude', 'skills', skillName, 'SKILL.md');
@@ -436,6 +459,26 @@ function generateSkillDirectories(
         const targetPath = join(variantPath, '.gemini', 'skills', skillName, 'SKILL.md');
         if (existsSync(file.sourcePath)) {
           copyFileUTF8(file.sourcePath, targetPath);
+        }
+      }
+    }
+
+    // Top-level skills/<name>/SKILL.md (canonical co-consult layout): build it
+    // from the source's top-level copy when present, else mirror a platform
+    // copy, and backfill platform roots whose source had no platform file so
+    // all three skill roots carry the skill.
+    const canonicalSource =
+      files.find((f) => f.targetPath.replace(/\\/g, '/').startsWith('skills/'))?.sourcePath ??
+      files.find((f) => existsSync(f.sourcePath))?.sourcePath;
+    if (canonicalSource && existsSync(canonicalSource)) {
+      createDirectory(topLevelSkillDir);
+      copyFileUTF8(canonicalSource, join(topLevelSkillDir, 'SKILL.md'));
+      skillDirectories.push(topLevelSkillDir);
+
+      for (const platformDir of [claudeSkillDir, geminiSkillDir]) {
+        const platformDest = join(platformDir, 'SKILL.md');
+        if (!existsSync(platformDest)) {
+          copyFileUTF8(canonicalSource, platformDest);
         }
       }
     }
@@ -1206,6 +1249,68 @@ function generateContextMd(variantPath: string, metadata: VariantMetadata): stri
   });
 }
 
+/**
+ * WS-09 standard slots that must carry VARIANT-INJECT wrapper pairs in
+ * <variant>.context.md. Seven slots wrap AFTER the `## ` heading;
+ * `guidelines` is the sole [REQUIRED] slot and wraps immediately BEFORE its
+ * heading (co-deck placement, mirrored by the 2026-08-23 co-hr promotion).
+ */
+const CONTEXT_INJECT_SLOTS = [
+  { heading: 'Tech Stack', slot: 'tech-stack', beforeHeading: false },
+  { heading: 'Agents', slot: 'agents', beforeHeading: false },
+  { heading: 'Skills', slot: 'skills', beforeHeading: false },
+  { heading: 'Environment Setup', slot: 'environment-setup', beforeHeading: false },
+  { heading: 'Development Workflow', slot: 'development-workflow', beforeHeading: false },
+  { heading: 'Guidelines', slot: 'guidelines', beforeHeading: true },
+  { heading: 'File Organization Policy', slot: 'file-organization', beforeHeading: false },
+  { heading: 'Domain Rules', slot: 'domain-rules', beforeHeading: false },
+] as const;
+
+/**
+ * Ensure the 8 standard VARIANT-INJECT wrapper pairs exist in a variant's
+ * context.md. The copy-remaining loop lets the L3 source's context.md
+ * overwrite the marker-rich skeleton generated from the canonical template —
+ * this re-applies missing wrappers around the WS-09 standard headings so the
+ * variant contract (audit's VARIANT-INJECT: guidelines [REQUIRED] check)
+ * holds without manual post-run fixes. Files that already carry a slot's
+ * marker pass through unchanged (idempotent); absent headings are skipped
+ * (WS-09 structural validation reports those separately).
+ *
+ * @version 1.0.0
+ */
+export function ensureVariantInjectMarkers(content: string): string {
+  const lines = content.split(/\r?\n/);
+
+  for (const { heading, slot, beforeHeading } of CONTEXT_INJECT_SLOTS) {
+    if (content.includes(`VARIANT-INJECT: ${slot}`)) continue;
+
+    const startMarker = `<!-- VARIANT-INJECT: ${slot}${slot === 'guidelines' ? ' [REQUIRED]' : ''} -->`;
+    const headingIdx = lines.findIndex((line) => new RegExp(`^## ${heading}\\s*$`).test(line));
+    if (headingIdx === -1) continue;
+
+    // Section boundary: the next `---` separator or next ## heading after the
+    // section body (### subsections stay inside the wrapper)
+    let boundary = lines.length;
+    for (let i = headingIdx + 1; i < lines.length; i++) {
+      if (/^## /.test(lines[i]) || /^---\s*$/.test(lines[i])) {
+        boundary = i;
+        break;
+      }
+    }
+
+    // END marker goes after the last non-blank content line
+    let endInsertAt = boundary;
+    while (endInsertAt > headingIdx + 1 && lines[endInsertAt - 1].trim() === '') {
+      endInsertAt--;
+    }
+    lines.splice(endInsertAt, 0, '<!-- END VARIANT-INJECT -->');
+
+    lines.splice(beforeHeading ? headingIdx : headingIdx + 1, 0, startMarker);
+  }
+
+  return lines.join('\n');
+}
+
 // ============================================================================
 // SETTINGS FILE GENERATION
 // ============================================================================
@@ -1521,6 +1626,12 @@ export async function generateVariant(
 
     if (existsSync(file.sourcePath)) {
       copyFileUTF8(file.sourcePath, targetPath);
+      // The L3 source's <variant>.context.md overwrites the marker-rich
+      // skeleton generated from the canonical template — re-apply the 8-slot
+      // VARIANT-INJECT wrappers so the variant contract holds (v1.12.0).
+      if (normalizedTarget === `docs/${metadata.name}.context.md`) {
+        writeUTF8File(targetPath, ensureVariantInjectMarkers(readUTF8File(targetPath)));
+      }
       filesCopied++;
     }
   }
