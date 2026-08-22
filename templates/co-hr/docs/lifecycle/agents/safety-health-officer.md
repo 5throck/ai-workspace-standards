@@ -3,7 +3,7 @@
 ## Overview
 
 - **Agent Name**: safety-health-officer
-- **Role**: `산업안전보건법`/`중대재해처벌법` compliance, safety and health management system + `산업안전보건위원회` operation
+- **Role**: occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation
 - **Phase**: production
 - **Variant**: co-hr
 
@@ -15,5 +15,5 @@
 
 - [x] Defined in `agents/safety-health-officer.md`
 - [x] Follows 3-Tier model mapping
-- [x] Delivers `산업안전보건법`/`중대재해처벌법` compliance and safety-health management system + `산업안전보건위원회` operation
+- [x] Delivers occupational safety and health compliance (incl. serious-accident liability regimes where enacted) and safety-health management system + safety-health committee operation
 - [x] Validated by `scripts/validate-agents.ts`

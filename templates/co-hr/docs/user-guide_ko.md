@@ -19,7 +19,7 @@
 
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
-   | 법령 리서치 (한국 노동법) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
+   | 법령 리서치 (대상 관할권 노동법) | labor-compliance-analyst | High | claude-opus-5-0 | Claude Code |
    | 인력 데이터 분석 | data-analyst | Medium | claude-sonnet-5-0 | Claude Code |
 
 4. 승인되면 전문가 에이전트가 실행됩니다 — 리서치는 안전한 범위에서 병렬, 쓰기는
@@ -37,9 +37,9 @@
 
 | 시나리오 | 리드 에이전트 | 관련 스킬 |
 |----------|--------------|-----------|
-| 노동법 컴플라이언스 감사 | labor-compliance-analyst | `k-law`, `hr-metrics-analysis` |
-| 노동분쟁 / 노동위원회 대응 | labor-relations-specialist | `k-law` |
-| 산업안전보건 컴플라이언스 | safety-health-officer | `k-law`, `k-kosis` |
+| 노동법 컴플라이언스 감사 | labor-compliance-analyst | `k-law`(KR 프로필), `hr-metrics-analysis` |
+| 노동분쟁 / 노동관계 당국 대응 | labor-relations-specialist | `k-law`(KR 프로필) |
+| 산업안전보건 컴플라이언스 | safety-health-officer | `k-law`(KR 프로필), `k-kosis`(KR 프로필) |
 | 조직 재설계 / 인력 계획 | org-design-consultant | `org-design-framework`, `org-readiness-assessment` |
 | 보상·복지 재설계 | compensation-benefits-analyst | `compensation-benchmarking` |
 | 성과관리 제도 설계 | performance-management-consultant | `performance-system-design` |
@@ -87,7 +87,7 @@ PM 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원�
 | 단계 | 소유자 | 진행 내용 |
 |------|--------|-----------|
 | 0 — 접수 및 아키타입 분류 | pm | 요청을 11개 아키타입 중 하나로 분류, 리드 + 지원 배정 |
-| 1 — 진단 및 리서치 | 아키타입 리드 | 법령 리서치(`k-law`), 인력 데이터(data-analyst), 도메인별 조사 |
+| 1 — 진단 및 리서치 | 아키타입 리드 | 법령 리서치(활성 국가 프로필에 따름), 인력 데이터(data-analyst), 도메인별 조사 |
 | 1.5 — 컴플라이언스 교차 검증 | pm (검증자 디스패치) | labor-compliance-analyst가 법적 노출 서명, data-analyst가 정량 방법론 검증 |
 | 2 — 설계 및 승인 게이트 | 아키타입 리드 | 설계/권고안 산출, 실행 전 **고객 승인 필수** |
 | 3 — 이해관계자 검증 | change-management-partner | 아키타입과 무관하게 전사 롤아웃에는 항상 참여 |
@@ -107,9 +107,9 @@ PM 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원�
 
 유의할 도메인 규칙:
 
-- 법령 주장은 `k-law`를 통해 한국 법령을 인용해야 하고, 인력 통계는 `k-kosis`를
-  사용합니다. 핵심 법령군: `근로기준법`, `노동조합및노동관계조정법`,
-  `근로자참여및협력증진에관한법률`, `산업안전보건법`, `중대재해처벌법`.
+- 법령 주장은 활성 국가 프로필의 관할 법령을 해당 조회 도구(KR 프로필인 경우
+  `k-law`)를 통해 인용해야 하고, 인력 통계는 KR 프로필에서 `k-kosis`를 사용합니다.
+  핵심 법령군은 활성 국가 프로필(`docs/countries/KR.md`)이 정의합니다.
 - 법적 노출 engagement(구조조정, 제도 변경, 해고 인접)는
   labor-compliance-analyst의 서명 없이 Phase 2를 통과할 수 없습니다.
 - Phase 2 승인 게이트는 절대 규칙입니다: 일정이 빠듯해도 승인되지 않은 설계의

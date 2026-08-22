@@ -26,14 +26,14 @@ metadata:
 
 ## Context
 
-Use in Phase 2 (Design) whenever an engagement requires organizational structure, job architecture, or workforce/headcount planning work, and in Phase 3 when restructuring or voluntary-retirement (`희망퇴직`) process design linked to outplacement support is in scope. Owned by the Org Design Consultant, who synthesizes HRM/HRD and labor-relations specialist inputs into a coherent structural design.
+Use in Phase 2 (Design) whenever an engagement requires organizational structure, job architecture, or workforce/headcount planning work, and in Phase 3 when restructuring or voluntary-retirement process design linked to outplacement support is in scope. Owned by the Org Design Consultant, who synthesizes HRM/HRD and labor-relations specialist inputs into a coherent structural design.
 
 ## When to Use
 
 - When designing or redesigning an organizational structure
 - When defining job families, job levels, or role definitions
 - When headcount/workforce planning is needed for a current-state or target-state model
-- When a business-reason-based restructuring or `희망퇴직` process must be designed
+- When a business-reason-based restructuring or voluntary-retirement process must be designed
 
 ## Execution Steps
 
@@ -59,7 +59,7 @@ Use in Phase 2 (Design) whenever an engagement requires organizational structure
    - Confirm business-reason basis for the restructuring before designing selection mechanics
    - Selection criteria fairness safeguards: document objective, non-discriminatory selection criteria and how they will be applied consistently
    - Sequencing: order of announcement, consultation, selection, and implementation steps
-   - Linkage to voluntary-retirement (`희망퇴직`) and outplacement support scope already owned by the Org Design Consultant — ensure the restructuring plan explicitly connects redeployment criteria to the `희망퇴직` program terms and outplacement handoff
+   - Linkage to voluntary-retirement and outplacement support scope already owned by the Org Design Consultant — ensure the restructuring plan explicitly connects redeployment criteria to the voluntary-retirement program terms and outplacement handoff
    - Flag any step requiring Labor Relations Specialist or Labor Compliance Analyst review before execution
 
 5. **Risk Review**: For any restructuring or headcount reduction scenario, log risks (legal, reputational, morale) in the restructuring risk register.
