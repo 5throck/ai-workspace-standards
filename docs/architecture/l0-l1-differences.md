@@ -152,7 +152,7 @@ L2 (templates/co-*/agents/pm.md) — Full-featured variants
 
 1. ✅ **Core workflow logic** (governance, execution plans, specialist dispatch)
 2. ✅ **Permission rules** (PM Gateway enforcement)
-3. ❌ **Lifecycle metadata** (L1 doesn't have it — L2 variants don't inherit)
+3. ❌ **Lifecycle metadata** (L1 doesn't have it — L2 variants don't inherit it; L2 specialist agents carry their own lifecycle blocks instead — see FAQ Q2)
 4. ❌ **Role declarations** (L1 doesn't have `role: orchestrator`)
 5. ✅ **Variant markers** (L2 inherits extendable section markers)
 
@@ -174,7 +174,7 @@ L2 (templates/co-*/agents/pm.md) — Full-featured variants
 | New governance rules | ✅ Yes | All variants must follow governance |
 | Permission denial protocols | ✅ Yes | Critical for PM Gateway enforcement |
 
-**Rule of Thumb**: Propagate **workflow logic** and **governance rules** from L0→L1. Skip **metadata** (lifecycle, role) that only L0 uses.
+**Rule of Thumb**: Propagate **workflow logic** and **governance rules** from L0→L1. Skip **metadata** (lifecycle, role) that L1 doesn't carry.
 
 ## Migration Notes
 
@@ -255,11 +255,11 @@ bun scripts/create-l2-scaffold.ts --variant co-design --force
 
 ### Q1: Why doesn't L1 have lifecycle metadata?
 
-**A**: L1 is a static template file, not a running agent instance. Lifecycle tracking (phase, last_updated, governance) is runtime state for L0 only. Templates don't have lifecycle state.
+**A**: L1 is a static template file, not a running agent instance. Lifecycle tracking (phase, last_updated, governance) is runtime state for concrete agent instances — the L0 workspace and L2/L3 specialist agents — not for the L1 common template (the workspace audit enforces lifecycle as an L0-only field there).
 
 ### Q2: Can I add lifecycle metadata to my L2 variant?
 
-**A**: Technically yes, but not recommended. L2 variants are templates too. If you need lifecycle tracking, track it in your project's `memory/` logs or ADRs, not in agent frontmatter.
+**A**: Yes — and for specialist agent files it is **required**. Each variant's own `validate-agents.ts` fails on agent files missing `lifecycle.phase` / `lifecycle.governance` (PR #588 backfilled 59 agents across existing variants; `generate-variant.ts` ≥ 1.12.0 preserves the block during promotion instead of stripping it). The exception is the extends-based `pm.md`: lifecycle is not part of the variant pm.md extends chain — `templates/common/agents/pm.md` must stay lifecycle-free (L0-only field per the workspace audit) — so variant `pm.md` files don't carry it.
 
 ### Q3: Why does L1 use multi-line description but L0 doesn't?
 

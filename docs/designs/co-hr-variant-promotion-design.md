@@ -2,7 +2,7 @@
 
 - **Date**: 2026-08-23
 - **Author**: Architect
-- **Status**: Approved gate recommendation (pending PM/user confirmation of Row 1 dispatch)
+- **Status**: **Implemented** — landed via PR #606 (merged 2026-08-23); follow-up pipeline fixes in PR #607. See Outcome.
 - **Source project**: `Projects/co-hr/` (L3, scaffolded 2026-08-22 by `create-l3-scaffold.ts`, single commit `223bee7`, clean tree, separate git repo)
 - **Target**: `templates/co-hr/` (does not yet exist; 10 sibling variants exist)
 
@@ -82,3 +82,7 @@ Promote the proven L3 project `Projects/co-hr` (HR/labor consulting: Korean labo
 ## Gate Verdict
 
 **GO** for Row 1 (Full L2 Pipeline). All 7 checklist conditions PASS; pm override APPROVED; no blocking ambiguities.
+
+## Outcome (2026-08-23)
+
+Promotion completed: `templates/co-hr/` landed via PR #606 (92 files, +6539/−2044). All acceptance criteria verified green before merge — including criterion 2: the `extends` rewrite was applied post-pipeline exactly as Open Question 1 prescribed (the pipeline only checks `extends:` presence; it does not rewrite the path). Open Question 2 resolved in the same PR (`displayName: "Co HR"`). The run surfaced 4 pipeline defects — Windows backslash path handling in skill-dir creation, `lifecycle` frontmatter stripping, VARIANT-INJECT marker loss when the L3 context.md overwrites the generated skeleton, and auto-fix flags unreachable from the CLI — all fixed in PR #607 (`generate-variant.ts` 1.12.0, `l3-to-variant-pipeline.ts` 1.11.0, `regenerate-agents-md.ts` 1.1.0) with unit coverage in `tests/unit/generate-variant-pipeline-fixes.test.ts`; future promotions should not need the manual post-run fixes this run required. The L3 source was subsequently reconciled (pm.md lifecycle restore, Korean-trigger backticks in `AGENTS.md`) and committed via its own pipeline (Projects/co-hr PR #1, 709b306).
