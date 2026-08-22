@@ -1,0 +1,51 @@
+{
+  "type": "module",
+  "name": "co-hr",
+  "version": "1.0.0",
+  "description": "Co Hr — L3 variant prototype scaffolded from templates/common",
+  "scripts": {
+    "test": "bun scripts/test-runner.ts integration",
+    "test:unit": "bun scripts/test-runner.ts unit",
+    "test:e2e": "bun scripts/test-runner.ts scenarios",
+    "test:full": "bun scripts/test-runner.ts scenarios && bun scripts/test-runner.ts integration && bun scripts/test-runner.ts unit",
+    "verify-skills": "bun scripts/verify-skills.ts",
+    "validate-agents": "bun scripts/validate-agents.ts",
+    "validate-doc-folder": "bun scripts/validate-doc-folder.ts",
+    "validate-skills": "bun scripts/validate-skills.ts",
+    "validate:language": "bun scripts/validate-md-language.ts",
+    "agent:create": "bun scripts/agent-create.ts",
+    "agent:list": "bun scripts/agent-list.ts",
+    "agent:delete": "bun scripts/agent-delete.ts",
+    "agent:verify": "bun scripts/agent-verify.ts",
+    "dispatch:parallel": "bun scripts/dispatch.ts parallel",
+    "dispatch:serial": "bun scripts/dispatch.ts serial",
+    "audit": "bun scripts/audit.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts",
+    "gen-pr-body": "bun scripts/gen-pr-body.ts",
+    "qa-gate": "bun scripts/qa-gate.ts",
+    "sync-skills": "bun scripts/sync-skills.ts",
+    "agent-lifecycle-audit": "bun scripts/agent-lifecycle-audit.ts",
+    "skill-lifecycle-audit": "bun scripts/skill-lifecycle-audit.ts",
+    "readme-lifecycle-audit": "bun scripts/readme-lifecycle-audit.ts",
+    "lifecycle-sync": "bun scripts/lifecycle-sync-audit.ts",
+    "translate-readme": "bun scripts/translate-readme.ts",
+    "verify-scripts": "bun scripts/verify-scripts.ts",
+    "clean:sandbox": "bun -e \"import {rmSync, mkdirSync} from 'node:fs'; rmSync('.sandbox', {recursive:true, force:true}); mkdirSync('.sandbox');\""
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "js-yaml": "^5.2.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "overrides": {
+    "hono": ">=4.12.25",
+    "esbuild": ">=0.28.1"
+  },
+  "private": true
+}

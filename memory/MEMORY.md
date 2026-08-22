@@ -5,6 +5,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-08-22](2026-08-22.md) | chore: update |
+| [2026-08-23](2026-08-23.md) | feat(skills): promote k-kosis to templates/common |
 | [2026-08-21](2026-08-21.md) | fix(scaffold): repair create-l3-scaffold.ts docs/context.md omission and related drift-prone gaps |
 | [2026-08-20](2026-08-20.md) | docs(design): fold co-newbiz Stage 1 outcomes into the design of record |
 | [2026-08-19](2026-08-19.md) | fix(co-deck): remove execSync shell invocation from deploy-handbook.ts |
