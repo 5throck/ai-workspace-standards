@@ -1,11 +1,11 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: "1.1.0"
+version: "1.2.0"
 status: active
 scope: workspace
 owner: scaffolding-expert
-last_reviewed: 2026-08-16
+last_reviewed: 2026-08-23
 metadata:
   type: scaffolding
   triggers:
@@ -72,8 +72,10 @@ The script itself recommends this automatically when the complexity routing chec
 cp -r <project-path> Projects/<variant-name>/
 cd Projects/<variant-name>/ && git init && git add -A && git commit -m "initial"
 cd <workspace-root>
-bun scripts/l3-to-variant-pipeline.ts
+bun scripts/l3-to-variant-pipeline.ts --auto-fix-agents-md --auto-fix-pm-md
 ```
+
+Since `l3-to-variant-pipeline.ts` 1.11.0, `--auto-fix-agents-md` / `--auto-fix-pm-md` let the pipeline regenerate the variant `AGENTS.md` from the L3 roster, and `generate-variant.ts` ≥ 1.12.0 materializes domain skills into all three skill roots, preserves agent `lifecycle` frontmatter, and re-applies VARIANT-INJECT markers — the manual post-run fixes this path used to require are automated.
 
 ## See Also
 

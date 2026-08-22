@@ -142,14 +142,15 @@ When `l2-to-variant-pipeline.ts` generates a variant from an L3 project, it call
 `normalizeAgentFrontmatter()` in `scripts/helpers/generate-variant.ts` on every specialist
 agent file. This function:
 
-1. **Strips L2-only fields** — removes `lifecycle:`, `formal_name:`, and `variant:` which
-   are internal to the L2 workspace and do not belong in variant templates.
+1. **Strips L3-only fields** — removes `formal_name:` and `variant:` which
+   are internal to the L3 source and do not belong in variant templates.
 2. **Adds missing tier platforms** — if `gemini:`, `antigravity:`, or `gemini-cli:` are absent,
    inherits the `claude:` tier value and inserts the missing platform lines.
 3. **Cleans blank lines** — collapses 3+ consecutive blank lines to 2.
 
-L2 agent files may carry additional lifecycle metadata; the normalization function strips it
-automatically when producing the variant copy.
+L2 agent files carry their own lifecycle metadata; the normalization function preserves it when
+producing the variant copy (since `generate-variant.ts` 1.12.0 / PR #607 — L2 governance records
+reference it, and the old stripping behavior forced manual backfills of 59 agents in PR #588).
 
 ---
 
