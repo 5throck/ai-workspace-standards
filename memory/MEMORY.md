@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-23](2026-08-23.md) | feat: scaffold co-hr Phase A variant — 12-agent HR/labor consulting team Korean labor-law compliance + HRM/HRD + org design Multi-AI-Team. 12 agents, 11 domain skills (k-law + 10 new/ported), archetype-based workflow routing (11 engagement types), engagement-orchestration.md. Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com> |
 | [2026-08-21](2026-08-21.md) | fix(scaffold): repair create-l3-scaffold.ts docs/context.md omission and related drift-prone gaps |
 | [2026-08-20](2026-08-20.md) | docs(design): fold co-newbiz Stage 1 outcomes into the design of record |
 | [2026-08-19](2026-08-19.md) | fix(co-deck): remove execSync shell invocation from deploy-handbook.ts |
