@@ -148,6 +148,19 @@ Every non-draft `co-*` variant MUST be mentioned in all six index READMEs: root 
 
 Rationale: a 2026-08-23 audit found `co-export`, `co-news`, `co-abap`, and `co-hr` entirely absent from `README_es.md`, `README_ja.md`, and `templates/README_ko.md` — the index files had silently stopped being updated as new variants landed, and nothing gated it. Detection was manual; WS-12 makes it automatic. Guidance: update all six index files in the same change that adds a variant.
 
+### Country Profile Standard
+
+A variant whose domain is jurisdiction-aware declares `country_config` in its `variant.json` and owns its country profiles at `docs/countries/<CODE>.md` (`<CODE>` = ISO 3166-1 alpha-2 or a well-known region code, `^[A-Z]{2,4}$`). Currently declared by: `co-hr`, `co-export`, `co-news`, `co-consult` (all KR-only).
+
+```json
+"country_config": { "profiles_dir": "docs/countries", "supported": ["KR"], "default": null }
+```
+
+- `default: null` is policy — every variant is region-neutral unless the scaffold selects a country (`--country`, see constitution §7.3.5). A non-null default draws a validator WARN.
+- **Profile format** — frontmatter `code` / `name` / `status` / `last_verified` plus five normative sections in order: Overview, Regulatory & Legal Framework, Operational Formats, Language & Communication Defaults, Tooling & Skill Mapping. Profiles are **advisory Phase 0 intake knowledge** — they never auto-execute; with no active profile agents stay jurisdiction-parametric. Convention doc: [`templates/common/docs/country-profiles.md`](../../templates/common/docs/country-profiles.md); decision record: [ADR-0057](../adr/0057-country-profile-mechanism.md).
+- **Enforcement** — `validate-templates.ts` Check 2 sub-checks: `country-config` (config shape, profile existence per `supported[]`, frontmatter `code` match, `last_verified` staleness >12 months WARN, non-null `default` WARN, undeclared `docs/countries/` WARN) and `country-scoped-assets` (registry integrity + no `required_skills` references to scoped skills in variants that do not support the country).
+- **Language policy** — profiles are an English base with jurisdiction proper nouns (statute names, agency names) wrapped in single backticks; Korean script outside inline code fails `validate-md-language.ts` (no `lang: ko` exception is used for profiles in practice).
+
 ## Optional Files (Domain Extensions)
 
 | File / Path | Used by |
@@ -156,6 +169,7 @@ Rationale: a 2026-08-23 audit found `co-export`, `co-news`, `co-abap`, and `co-h
 | `.gemini/commands/security-check.md` | co-develop, co-security |
 | `.claude/skills/*/SKILL.md` | Claude Code-only skills |
 | `skills/*/SKILL.md` | Platform-neutral skills (accessible from all AI tools) |
+| `docs/countries/<CODE>.md` | Country profiles — requires matching `country_config` in variant.json (co-hr, co-export, co-news, co-consult) |
 | `ansible/` | co-security only |
 | `scripts/` (variant-local) | co-security only |
 | `PATCH_LOG.md` | co-security only |
