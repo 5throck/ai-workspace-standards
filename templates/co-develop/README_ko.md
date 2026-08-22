@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: c61c755f7d1190b7805957415d879a852a13ca09f45447cf2cc3e5dea5b1bd99
+translated_from_hash: 0057c576458a53667e29abebc84ff0f2dc962acef79b3cd10cadaedee54af8db
 lang: ko
 lang_reason: source-material
 ---
