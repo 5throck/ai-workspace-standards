@@ -54,7 +54,7 @@ Generated: 2026-08-11T05:17:34.294Z
 
 ## Financial-analysis
 
-- [k-dart](skills/k-dart/SKILL.md)
+- [k-dart](skills/k-dart/SKILL.md) — KR-scoped common skill; deploys only to --country KR projects
 
 ## Strategic-reasoning
 
@@ -78,6 +78,6 @@ Generated: 2026-08-11T05:17:34.294Z
 
 ## Contract-safety
 
-- [k-law](skills/k-law/SKILL.md)
+- [k-law](skills/k-law/SKILL.md) — KR country profile only
 - [zod-contract-gate](skills/zod-contract-gate/SKILL.md)
 

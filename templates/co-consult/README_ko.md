@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 3033b5a9087b3da901a43a2dc079677345f19e5195f616bbd81a324c898b82a5
+translated_from_hash: a2151e62e8161b32aad5ff7e87b566b6e2011714ef452fd6d87a8e398195957d
 lang: ko
 lang_reason: source-material
 ---
@@ -67,7 +67,7 @@ lang_reason: source-material
 - **stakeholder-review-management**: 이해관계자 리뷰 주기 관리 — 리뷰어 선정, 피드백, 충돌 해결, 변경 추적.
 - **technical-feasibility**: 제안된 솔루션의 기술적 구현 가능성 평가; 복잡도 등급 및 리스크 산출.
 - **company-intelligence**: 종합적인 기업/기업집단 인텔리전스; 5개 병렬 리서치 에이전트를 하나의 보고서로 통합.
-- **financial-statement-analysis**: 한국 재무제표 분석 전체 파이프라인 — DART → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
+- **financial-statement-analysis**: 활성 국가 프로필 공시 시스템(KR: DART) 기반 재무제표 분석 전체 파이프라인 — 수집 → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
 - **mece-logic-auditor**: 컨설팅 문제 해결 프레임워크를 위한 MECE 이슈 트리 감사 및 전략적 추론 평가.
 - **k-law**: 법제처 국가법령정보센터 Open API를 조회하여 법령, 판례, 행정규칙, 자치법규, 법령해석례를 검색합니다.
 - **hwp-document-processing**: 한글 문서 형식 HWP 5.0(읽기/검증만 가능)과 HWPX(읽기/쓰기/생성/검증 모두 가능)를 처리합니다 — 정부/기관 산출물이 한글 문서 형식을 요구할 때 사용합니다.

@@ -85,7 +85,7 @@ Dispatch analytical inputs against the Writing Spec's section list:
 
 - **Company financials / industry data** → `k-dart`, `financial-statement-analysis` pipeline (`bun scripts/co-consult/financial-pipeline.ts`), `company-intelligence`, `competitive-intelligence`
 - **Legal / regulatory environment** → `k-law`
-- **DART fallback** (non-disclosing / unlisted target companies): use company-provided source documents (`세무조정계산서`, `결산서`, `시산표`), explicitly labeled `기업 제공 비공식 자료` with document name and date — these are not independently verifiable the way a DART filing is.
+- **Disclosure fallback** (non-disclosing / unlisted target companies with no KR-profile DART filing): use company-provided source documents (`세무조정계산서`, `결산서`, `시산표`), explicitly labeled `기업 제공 비공식 자료` with document name and date — these are not independently verifiable the way a DART filing is.
 - Each research output is mapped to the specific chapter(s) it feeds, per the Writing Spec.
 
 ## Phase 3 — Draft (parallel, against the Writing Spec)
@@ -111,7 +111,7 @@ Dispatch analytical inputs against the Writing Spec's section list:
 1. **No placeholder leftovers** — every guideline/example block in the sample must become real narrative.
 2. **Expand through argument density, not appendices** — meet page targets by deepening tables/charts/interpretation, never by padding with raw source documents.
 3. **Table-to-narrative ratio** — every table earns at least half a page of interpretation.
-4. **DART fallback** — explicitly label company-provided unofficial materials.
+4. **Disclosure fallback (KR profile: DART)** — explicitly label company-provided unofficial materials.
 5. **Client-data handling** — drafts contain financials and PII; review for sensitive data before any `git add`/commit.
 6. **File naming** — `{company}-{report-type}-{YYYY-MM-DD}_ko.md` (draft) → final format per sample, in `deliverables/reports/`.
 

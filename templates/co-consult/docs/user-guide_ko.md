@@ -39,8 +39,8 @@ PM:   ▶ strategy-analyst dispatch...
 |---|---|---|
 | "시장/경쟁 분석이 필요합니다" | strategy-analyst | `competitive-intelligence` |
 | "이 권고안의 비즈니스 케이스/ROI/NPV를 만들어주세요" | strategy-analyst | `financial-modeling` |
-| "한국 기업의 재무 분석이 필요합니다" (DART 기반) | data-analyst | `financial-statement-analysis`, `k-dart` |
-| "이 회사의 전체 프로필/인텔리전스 보고서를 만들어주세요" | data-analyst | `company-intelligence`, `k-dart` |
+| "한국 기업의 재무 분석이 필요합니다" (KR 프로필, DART 기반) | data-analyst | `financial-statement-analysis`, `k-dart`(KR 프로필) |
+| "이 회사의 전체 프로필/인텔리전스 보고서를 만들어주세요" | data-analyst | `company-intelligence`, `k-dart`(KR 프로필) |
 | "산업 인사이트/규제 환경 분석이 필요합니다" | industry-expert | (산업 리서치, 전용 스킬 파일 없음) |
 | "클라이언트 덱/임원용 프레젠테이션이 필요합니다" | communications-lead | `executive-presentation`, `narrative-framework` |
 | "이 결과를 컨설팅 보고서로 작성해주세요" | communications-lead | `consulting-report-writing` |
@@ -63,10 +63,10 @@ PM:   ▶ strategy-analyst dispatch...
 
 ## 3. 단계별 안내: 재무제표 분석 파이프라인
 
-이는 가장 최근에 추가되었고 가장 복잡한 스킬(`financial-statement-analysis`)로, 한국 금융감독원 전자공시시스템(DART)을 기반으로 한 한국 기업 재무 분석을 다룹니다. 6단계 파이프라인으로 실행됩니다: **DART 수집 → 검증 → 정규화 → KPI 추출 → ROIC 밸류 드라이버 트리 → 보고서 생성.**
+이는 가장 최근에 추가되었고 가장 복잡한 스킬(`financial-statement-analysis`)로, 활성 국가 프로필의 공시 시스템(KR 프로필: 금융감독원 전자공시시스템 DART)을 기반으로 한 상장 기업 재무 분석을 다룹니다. 6단계 파이프라인으로 실행됩니다: **DART 수집 → 검증 → 정규화 → KPI 추출 → ROIC 밸류 드라이버 트리 → 보고서 생성.**
 
 ### 1단계 — DART 데이터 수집
-`k-dart` 스킬(또는 PM에게 `data-analyst` 투입을 요청)을 사용하여 대상 기업의 공시와 재무제표를 DART OpenAPI에서 가져옵니다. 이를 위해서는 `DART_API_KEY` 환경 변수가 설정되어 있어야 합니다. 원본 JSON 응답을 저장하세요 — 이것이 파이프라인의 입력값입니다.
+`k-dart` 스킬(KR 프로필; 또는 PM에게 `data-analyst` 투입을 요청)을 사용하여 대상 기업의 공시와 재무제표를 DART OpenAPI에서 가져옵니다. 이를 위해서는 `DART_API_KEY` 환경 변수가 설정되어 있어야 합니다. 원본 JSON 응답을 저장하세요 — 이것이 파이프라인의 입력값입니다.
 
 ### 2단계 — 파이프라인 실행
 검증 → 정규화 → KPI → 드라이버 트리 → 보고서로 이어지는 전체 체인은 하나의 스크립트로 자동화됩니다.

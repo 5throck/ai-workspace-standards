@@ -569,8 +569,8 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | **Agent Lifecycle Manager** | `.claude/skills/agent-lifecycle-manager/SKILL.md` | Managing agent lifecycle, creating/retiring agents, validation |
 | **HWP Document Processing** | `skills/hwp-document-processing/SKILL.md` | Structural validation of HWP government-template deliverables |
 | **Sample-Driven Report Writing** | `skills/sample-driven-report-writing/SKILL.md` | Analyzes a deliverable sample for TOC structure + per-section table/chart requirements, then researches and drafts to match |
-| **K-DART** | `skills/k-dart/SKILL.md` | Korean FSS DART OpenAPI queries — disclosures, financials, company profiles, major-event reports |
-| **K-Law** | `skills/k-law/SKILL.md` | Korean Ministry of Legislation National Law Information Center Open API queries |
+| **K-DART** | `skills/k-dart/SKILL.md` | Korean FSS DART OpenAPI queries — disclosures, financials, company profiles, major-event reports (KR profile; common skill, deploys only to --country KR projects) |
+| **K-Law** | `skills/k-law/SKILL.md` | Korean Ministry of Legislation National Law Information Center Open API queries (KR profile only) |
 
 ---
 

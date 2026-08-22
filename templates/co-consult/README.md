@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 3033b5a9087b3da901a43a2dc079677345f19e5195f616bbd81a324c898b82a5
+content_hash: a2151e62e8161b32aad5ff7e87b566b6e2011714ef452fd6d87a8e398195957d
 ---
 
 # co-consult
@@ -65,7 +65,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **stakeholder-review-management**: Manages stakeholder review cycles — reviewer selection, feedback, conflict resolution, and change tracking.
 - **technical-feasibility**: Evaluates whether a proposed solution is technically implementable; produces complexity grades and risks.
 - **company-intelligence**: Comprehensive company/corporate-group intelligence; dispatches 5 parallel research agents into one report.
-- **financial-statement-analysis**: Full Korean financial statement analysis pipeline — DART → validate → normalize → KPI → ROIC tree → report.
+- **financial-statement-analysis**: Full financial statement analysis pipeline on the active country profile's disclosure system (KR: DART) — collection → validate → normalize → KPI → ROIC tree → report.
 - **mece-logic-auditor**: MECE issue tree auditing and strategic reasoning evaluation for consulting problem-solving frameworks.
 - **k-law**: Queries the Korean Ministry of Government Legislation's National Law Information Center Open API for statutes, precedents, administrative rules, municipal ordinances, and legal interpretation cases.
 - **hwp-document-processing**: Handles Korean office formats HWP 5.0 (read/validate only) and HWPX (full read/write/generate/validate) — used when a deliverable must be produced in or reference a Korean government/institutional document format.

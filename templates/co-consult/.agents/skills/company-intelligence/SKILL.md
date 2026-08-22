@@ -42,7 +42,7 @@ Use when the user asks to research, investigate, or analyze a company or corpora
 ```
 User Request (company name + scope)
   |
-  +-- Identify: listed vs private, group vs standalone, Korean vs foreign
+  +-- Identify: listed vs private, group vs standalone, home-market vs foreign
   |
   +-- Dispatch 5 parallel research agents (all general-purpose, sonnet tier)
   |   +-- Agent 1: Company Overview & Subsidiaries
@@ -63,7 +63,7 @@ Before dispatching, determine:
 | Question | Why it matters |
 |----------|---------------|
 | Is this a corporate **group** (chaebol/conglomerate) or a **single company**? | Determines whether to research subsidiaries |
-| **Korean** company or foreign? | Determines search language (use Korean-language queries for Korean companies) |
+| **Home-market** company or foreign? | Determines search language (use the home-market language for local companies; KR profile: Korean) |
 | **Listed** or private? | Determines availability of financial data and analyst reports |
 | What **industry**? | Helps focus product/market searches |
 
@@ -94,7 +94,7 @@ For a SINGLE COMPANY:
 3. History timeline: major milestones, pivots, acquisitions
 4. Ownership structure: major shareholders, institutional investors
 
-For Korean companies, use Korean-language search queries alongside English:
+For home-market companies, use the home-market language for search queries alongside English (KR profile: Korean):
 - "[COMPANY] overview", "[COMPANY] history", "[COMPANY] subsidiaries"
 - "[COMPANY] introduction", "[COMPANY] milestones"
 Also search English: "[English name] company overview"
@@ -115,7 +115,7 @@ Search for:
 2. Total Assets, Total Equity, Total Liabilities
 3. Growth trends: YoY revenue growth, margin trends
 4. Key ratios: debt-to-equity, operating margin, ROE, current ratio
-5. DART filings (Korean electronic disclosure system) if Korean listed company
+5. Disclosure filings from the active country profile's system (KR: DART) if home-market listed company
 6. Dividend history if available
 7. Segment breakdown if diversified
 
@@ -123,7 +123,7 @@ For listed companies, search:
 - "[TICKER or COMPANY] business report"
 - "[COMPANY] consolidated financial statements"
 - "[COMPANY] balance sheet"
-- DART: dart.fss.or.kr
+- Disclosure system (KR profile — DART): dart.fss.or.kr
 
 For private companies:
 - "[COMPANY] financial statements"
@@ -150,7 +150,7 @@ Search for:
 6. Recent developments: new products, R&D investments, market expansion
 7. Technology differentiation and patents if notable
 
-For Korean companies, use Korean-language search queries:
+For home-market companies, use the home-market language for search queries (KR profile: Korean):
 - "[COMPANY] products", "[COMPANY] business segments"
 - "[COMPANY] market share", "[COMPANY] competitors"
 - "[COMPANY] technology", "[COMPANY] R&D"
@@ -172,14 +172,14 @@ related to "[COMPANY_NAME]" and its subsidiaries.
 Search for:
 1. Securities analyst reports: which firms cover this company,
    recent ratings, target prices, investment opinions (Buy/Hold/Sell)
-2. Credit ratings: from NICE, Korea Ratings, Korea Investors Service,
+2. Credit ratings: from home-market agencies (KR: NICE, Korea Ratings, Korea Investors Service),
    or international agencies (Moody's, S&P, Fitch)
 3. Industry research reports that mention the company
 4. ESG ratings or sustainability assessments
 5. News-based analysis from major financial outlets
 6. Any government or regulatory assessments
 
-For Korean listed companies, search Naver Finance and specific securities firm names.
+For home-market listed companies, search local finance portals and securities firm names (KR profile: Naver Finance).
 For private companies, note the likely absence and suggest alternative sources.
 
 If reports exist, summarize: recommendation, key thesis, risks identified.
@@ -282,8 +282,8 @@ For the full output template with formatting examples, read `references/output-t
 
 ### Quality Checks Before Writing
 
-1. **Cross-validate**: If multiple agents report conflicting data, prefer official filings (DART/KRX) over news articles
-2. **Currency normalization**: Ensure all financial figures are in the same currency (KRW for Korean companies)
+1. **Cross-validate**: If multiple agents report conflicting data, prefer official disclosure filings over news articles (KR profile: DART/KRX)
+2. **Currency normalization**: Ensure all financial figures are in the profile's reporting currency (KR profile: KRW)
 3. **Timeliness**: Note the most recent data year available; flag if >12 months old
 4. **Source attribution**: Every factual claim must have a source; mark unverified claims with warning symbol
 5. **Data gap awareness**: Explicitly list what could NOT be found
@@ -296,12 +296,12 @@ For the full output template with formatting examples, read `references/output-t
 | Rate limits hit during research | Note in limitations; suggest manual re-search |
 | Private company — no financials | Use news articles, credit research, estimated figures; mark as estimates |
 | Korean JS-rendered pages | Note as limitation; suggest manual access |
-| Conflicting data between agents | Prefer official sources (DART, KRX) over secondary sources |
+| Conflicting data between agents | Prefer official disclosure sources (KR profile: DART, KRX) over secondary sources |
 | Group has 10+ subsidiaries | Focus on major subsidiaries; list others in appendix |
 
 ### Language
 
-- Research queries: Use Korean-language queries for Korean companies, English for foreign companies, both for global companies
+- Research queries: use the home-market language for home-market companies (KR profile: Korean), English for foreign companies, both for global companies
 - Report body: English (per workspace language policy), with Korean proper nouns preserved in parentheses where helpful
 - Exception: If the user explicitly requests the report in Korean, write in Korean
 

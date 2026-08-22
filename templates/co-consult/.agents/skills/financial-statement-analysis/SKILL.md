@@ -2,7 +2,8 @@
 name: financial-statement-analysis
 scope: co-consult
 description: >
-  Comprehensive Korean financial statement analysis pipeline. Collects DART data,
+  Comprehensive financial statement analysis pipeline for the home-jurisdiction disclosure
+  system (KR profile: DART). Collects DART data,
   validates accounting integrity, normalizes to canonical financial model,
   extracts KPIs (profitability, growth, leverage, cash flow), builds a 5+ level
   ROIC value driver tree, and generates a structured Markdown report.
@@ -37,9 +38,15 @@ metadata:
 
 ## Context
 
-End-to-end financial statement analysis pipeline for Korean listed companies.
+End-to-end financial statement analysis pipeline for listed companies in the active
+country profile's jurisdiction (KR: Korean listed companies).
 Uses DART (Financial Supervisory Service electronic disclosure system) data
 to produce validated, normalized financial analysis with ROIC-based value driver decomposition.
+
+**Jurisdiction scope**: the pipeline targets the KR disclosure system (DART). Under a non-KR
+active country profile (or a region-neutral engagement), agents must not run it — request
+client-supplied disclosures instead and flag verification limits. See the country profiles
+under docs/countries/ (KR profile: Tooling & Skill Mapping).
 
 **Architecture**: Bun (TypeScript) orchestration + Python pandas data processing.
 This hybrid approach complies with the project's Computational Integrity policy
@@ -49,7 +56,7 @@ This hybrid approach complies with the project's Computational Integrity policy
 
 ## When to Use
 
-- PM dispatches a financial statement analysis task for a Korean listed company
+- PM dispatches a financial statement analysis task for a listed company (KR profile: Korean listed company with DART data)
 - A client engagement requires ROIC-based value driver decomposition or peer benchmarking
 - DART data has been collected (via `k-dart` skill) and needs end-to-end analysis through the pipeline
 - An existing analysis needs re-validation with updated financial data
