@@ -29,7 +29,7 @@
 | AI-tell reduction | style-editor AI-tell pass produces naturally human-written output | Pending |
 | DART integration | financial-analyst successfully queries k-dart for disclosure data | Pending |
 | k-law integration | legal-researcher successfully queries k-law for statute/precedent data | Pending |
-| Multi-language | Article output works in Korean (default) and at least one other language | Pending |
+| Multi-language | Article output works in the profile-default language (KR: Korean) and at least one other language | Pending |
 | Infographic pipeline | visual-editor generates valid SVG infographics from narrative brief | Pending |
 
 ## Review History

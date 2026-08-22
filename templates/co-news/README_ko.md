@@ -9,11 +9,11 @@ lang_reason: source-material
 
 > **언어**: [English](README.md) · **한국어**
 > **상태**: ⚠️ Beta — v0.1.0
-> Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
+> Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
 
 ## 개요
 
-Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
+Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.. 전체 아키텍처와 표준은 docs/context.md를 참고하세요.
 
 ## 빠른 시작
 
@@ -29,7 +29,7 @@ Korean business/finance journalism variant for economics reporters covering list
 
 ## 팀 미션
 
-**미션:** Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
+**미션:** Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
 
 ## AI 팀 소개
 
@@ -38,7 +38,7 @@ Korean business/finance journalism variant for economics reporters covering list
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
 | **fact-checker** | Fact-checker - the newsroom's citation gatekeeper | medium | inherit |
-| **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings to produce articl | medium | inherit |
+| **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | medium | inherit |
 | **legal-researcher** | Legal researcher - runs the k-law skill against the National Law Information Cen | medium | inherit |
 | **reporter** | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | medium | inherit |
 | **style-editor** | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | medium | inherit |

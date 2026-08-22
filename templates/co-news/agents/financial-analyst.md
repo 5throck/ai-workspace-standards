@@ -12,7 +12,7 @@ tier:
 model: inherit
 color: green
 description: >
-  Financial analyst - runs the k-dart skill against DART filings to produce
+  Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce
   article-ready narrative briefs (headline number, YoY/QoQ delta, context,
   disclosure citation) — not valuation models. Use when: a story needs
   headline financial numbers, deltas, or disclosure-sourced context for a

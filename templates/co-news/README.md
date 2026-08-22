@@ -7,11 +7,11 @@ content_hash: 447ffc6f0eda28772ffdeceae70a66f02111e1f964d08933fad6a8949f4a1d3e
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ⚠️ Beta — v0.1.0
-> Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
+> Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
 
 ## Overview
 
-Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals. See docs/context.md for full architecture and standards.
+Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
+**Mission:** Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.
 
 ## Meet the AI Team
 
@@ -36,7 +36,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
 | **fact-checker** | Fact-checker - the newsroom's citation gatekeeper | medium | inherit |
-| **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings to produce articl | medium | inherit |
+| **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | medium | inherit |
 | **legal-researcher** | Legal researcher - runs the k-law skill against the National Law Information Cen | medium | inherit |
 | **reporter** | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | medium | inherit |
 | **style-editor** | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | medium | inherit |
@@ -92,4 +92,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-08-22*

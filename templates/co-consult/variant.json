@@ -136,6 +136,11 @@
       "file": "skills/sample-driven-report-writing/SKILL.md"
     }
   ],
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": ["KR"],
+    "default": null
+  },
   "skill_manifest": {
     "variant_specific": [
       {
