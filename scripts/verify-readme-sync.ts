@@ -1,4 +1,4 @@
-// @version 1.1.1
+// @version 1.2.0
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
@@ -119,8 +119,23 @@ async function runStaticAudit(): Promise<number> {
                 console.error(`        README.md content_hash:          ${enHash}`);
                 console.error(`        README_ko.md translated_from_hash: ${koHash}`);
                 errors++;
+            } else if (enHash === "PLACEHOLDER") {
+                // Sentinel value — tracking never activated for this pair (ADR-0013)
+                console.log(`\x1b[32m[PASS]\x1b[0m ${dir}: READMEs present; hash-sync tracking not active (see ADR-0013).`);
             } else {
-                console.log(`\x1b[32m[PASS]\x1b[0m ${dir}: READMEs are synchronized (hash: ${enHash.slice(0, 12)}…).`);
+                // Drift check: the stored content_hash must match the recomputed body hash.
+                // Without this, a README body edit that skips the hash refresh leaves both
+                // hashes equally stale and the pair comparison above silently passes.
+                const bodyHash = computeContentHash(enPath);
+                if (enHash !== bodyHash) {
+                    console.error(`\x1b[31m[FAIL]\x1b[0m ${dir}: README.md body has changed since content_hash was recorded — hash is stale.`);
+                    console.error(`        stored content_hash:     ${enHash}`);
+                    console.error(`        recomputed body hash:    ${bodyHash}`);
+                    console.error(`        Fix: bun scripts/verify-readme-sync.ts --update-hashes, then mirror the new hash into README_ko.md translated_from_hash.`);
+                    errors++;
+                } else {
+                    console.log(`\x1b[32m[PASS]\x1b[0m ${dir}: READMEs are synchronized (hash: ${enHash.slice(0, 12)}…).`);
+                }
             }
         } else if (!enExists && !koExists) {
             if (dir !== ".") {
