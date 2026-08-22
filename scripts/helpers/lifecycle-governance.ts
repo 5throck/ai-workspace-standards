@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * lifecycle-governance.ts — Extract mandatory domains from governance JSON
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Usage:
  *   bun scripts/helpers/lifecycle-governance.ts
@@ -14,7 +14,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const governancePath = join(__dirname, '..', '..', 'templates', 'common', 'lifecycle-governance.json');
+const governancePath = join(__dirname, '..', '..', 'docs', 'templates', 'lifecycle-governance.json');
 
 try {
   const content = readFileSync(governancePath, 'utf-8');
