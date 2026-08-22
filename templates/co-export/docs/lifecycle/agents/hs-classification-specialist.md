@@ -3,8 +3,7 @@
 ## Overview
 
 - **Agent Name**: hs-classification-specialist
-- **Role**: HS code classification, customs valuation, tariff rate determination (Korea Customs
-  Act basis)
+- **Role**: HS code classification, customs valuation, tariff rate determination (home-jurisdiction customs act basis, per the active country profile under docs/countries/)
 - **Phase**: beta
 
 ## Phase History

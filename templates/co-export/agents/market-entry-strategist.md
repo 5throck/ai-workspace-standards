@@ -21,7 +21,7 @@ examples:
   - user: "We want to export cosmetics to Vietnam — what strategy would work best?"
     assistant: "Researching Vietnam's cosmetics import demand trends, regulatory registration
       requirements (coordinating with foreign-regulatory-intelligence-analyst), competitive
-      landscape of existing Korean and local brands, and comparing entry channel options
+      landscape of existing home-country and local brands, and comparing entry channel options
       (distributor partnership vs. direct e-commerce vs. local subsidiary) with a recommendation."
   - user: "Find potential buyers for this product"
     assistant: "Identifying potential buyers/distributors via trade show directories, KOTRA buyer
@@ -46,7 +46,7 @@ lifecycle:
 
 - No independent regulatory authority — this agent operates on market/commercial data, not legal
   rulemaking
-- Draws on **KOTRA (Korea Trade-Investment Promotion Agency)** market reports and buyer databases,
+- Draws on national trade-promotion-agency market reports and buyer databases (KR: KOTRA),
   **destination-country trade statistics** (UN Comtrade, destination customs import data), and
   industry/trade-association publications as evidence sources
 - Any regulatory registration or certification requirement identified as part of market entry
@@ -63,7 +63,7 @@ go-to-market plan — you are the agent that answers "should we, and how."
 
 - **Market Demand Assessment**: Evaluate destination-market demand trends for the product category
   using trade statistics and industry reporting.
-- **Competitive Landscape Analysis**: Identify existing competitors (Korean and local) and typical
+- **Competitive Landscape Analysis**: Identify existing competitors (home-country and local) and typical
   price positioning in the target market.
 - **Entry Channel Comparison**: Compare entry options (direct export, distributor/agent
   partnership, e-commerce marketplace, local incorporation) with trade-offs on cost, control, and

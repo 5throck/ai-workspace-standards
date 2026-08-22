@@ -13,9 +13,9 @@
 
 ## Regulatory Scope
 
-- **Primary jurisdiction**: Republic of Korea — Customs Act, Foreign Trade Act, Strategic Items Trade Control Notice, FTA origin rules.
+- **Primary jurisdiction**: the home/exporting jurisdiction per the active country profile under `docs/countries/` (KR profile: Republic of Korea — Customs Act, Foreign Trade Act, Strategic Items Trade Control Notice, FTA origin rules). If no profile is active, confirm the home jurisdiction with the client at Phase 0 intake.
 - **Secondary jurisdictions monitored in parallel**: United States (HTS, EAR, OFAC sanctions lists), China (customs/import regulations), European Union (TARIC, EU sanctions regime).
-- Agents must clearly label findings as **Korea-based** vs **destination-country-based** and flag conflicts between jurisdictions rather than silently reconciling them.
+- Agents must clearly label findings as **home-jurisdiction-based** vs **destination-country-based** and flag conflicts between jurisdictions rather than silently reconciling them.
 
 ---
 
@@ -25,10 +25,10 @@
 
 | Category | Tool / Source |
 |----------|----------------|
-| HS Classification | WCO HS Nomenclature, Korea Customs Service advance rulings, Customs Valuation and Classification Institute |
+| HS Classification | WCO HS Nomenclature, customs-authority advance rulings (KR: Korea Customs Service / Customs Valuation and Classification Institute) |
 | Tariff / Trade Statistics | UN Comtrade, destination-country customs import data |
-| FTA / Origin | Korea FTA texts and Rules of Origin annexes (20+ FTAs in force) |
-| Export Control (Korea) | Integrated Public Notice on Strategic Items, Wassenaar / NSG / MTCR / Australia Group / CWC regimes |
+| FTA / Origin | Home-country FTA texts and Rules of Origin annexes (KR: 20+ FTAs in force) |
+| Export Control (home jurisdiction) | Strategic-items control list per the active country profile (KR: Integrated Public Notice on Strategic Items), Wassenaar / NSG / MTCR / Australia Group / CWC regimes |
 | Export Control / Sanctions (US) | BIS EAR, OFAC SDN List, BIS Entity/Denied Persons Lists |
 | Foreign Regulatory Monitoring | US: Federal Register, USITC AD/CVD orders, CBP HTS updates · China: GACC, MOFCOM · EU: TARIC database, European Commission trade defense investigations |
 | Market Entry | KOTRA buyer databases, trade show directories, industry association listings |
@@ -180,7 +180,7 @@ PM (Phase 0: triage + scope)
 
 ## Domain Rules
 
-1. Agents must clearly label findings as **Korea-based** vs **destination-country-based** per [Regulatory Scope](#regulatory-scope) above; never silently reconcile conflicts between jurisdictions.
+1. Agents must clearly label findings as **home-jurisdiction-based** vs **destination-country-based** per [Regulatory Scope](#regulatory-scope) above; never silently reconcile conflicts between jurisdictions.
 2. Compliance-critical determinations (HS classification, FTA/origin, export control) require **High-tier** agents — never downgrade their tier, even for seemingly simple requests; misclassification carries real financial/legal penalty risk.
 3. **Phase 2 gate is mandatory**: no Phase 3 execution work begins on unapproved compliance findings, even if the client is in a hurry.
 4. Duty drawback claims are a **recurring sub-process** (see [`phase-definitions.md`](phase-definitions.md) § Recurring Sub-Process Pattern): they re-run once per export shipment without re-triggering the Phase 2 gate, unless the output would change a previously approved classification.

@@ -110,7 +110,7 @@ agent writes a given file at a time, coordinated by the PM.
 
 Domain rules to keep in mind:
 
-- Label every finding **Korea-based** vs **destination-country-based**; never silently
+- Label every finding **home-jurisdiction-based** vs **destination-country-based**; never silently
   reconcile conflicts between jurisdictions.
 - Denied-party screening full-name matches are never self-cleared — they always require
   resolution; partial matches are flagged for manual/legal review.

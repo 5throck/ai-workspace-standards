@@ -38,7 +38,7 @@ prevent that failure mode.
 1. **Market Demand Assessment**: Evaluate destination-market demand trends for the product
    category using trade statistics (UN Comtrade, destination customs import data) and industry
    reporting — cite sources and dates.
-2. **Competitive Landscape Analysis**: Identify existing competitors (Korean and local) and
+2. **Competitive Landscape Analysis**: Identify existing competitors (home-country and local) and
    typical price positioning in the target market.
 3. **Entry Channel Comparison**: Compare direct export, distributor/agent partnership,
    e-commerce marketplace, and local incorporation on cost, control, and speed to market.
@@ -65,7 +65,7 @@ prevent that failure mode.
 ## Quality Criteria
 
 - [ ] Market demand assessment cites trade statistics with source and date
-- [ ] Competitive landscape includes Korean and local competitors with price positioning
+- [ ] Competitive landscape includes home-country and local competitors with price positioning
 - [ ] Entry channel comparison documents at least 2 options with cost/control/speed trade-offs
 - [ ] Compliance findings (tariff cost, FTA rate, control status) integrated into economics
 - [ ] Buyer/distributor candidates clearly labeled as screened, not vetted

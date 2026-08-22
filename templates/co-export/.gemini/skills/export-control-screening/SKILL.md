@@ -37,10 +37,10 @@ optional even when the item doesn't obviously look like a "controlled" good.
 3. **License Requirement Determination**: State explicitly whether an export license is required
    and from which authority — do not leave this ambiguous.
 4. **US EAR/OFAC Parallel Check**: If US-origin technology or a high-risk destination is involved,
-   run the parallel US re-export control and sanctions-program check regardless of Korean-side
+   run the parallel US re-export control and sanctions-program check regardless of the home-jurisdiction side
    clearance — extraterritorial exposure applies independently.
 5. **Denied-Party Screening**: Screen counterparties, intermediaries, and ultimate consignees
-   against OFAC SDN List, BIS Entity/Denied Persons Lists, and Korea's own sanctioned-party list.
+   against OFAC SDN List, BIS Entity/Denied Persons Lists, and the home jurisdiction's own sanctioned-party list.
 6. **Match Confidence Triage**: Full-name exact matches → treat as a hit requiring resolution.
    Partial-name or ownership-structure matches → flag for manual/legal review, do NOT self-clear.
 7. **Overall Risk Rating**: Assign clear / requires license / requires legal review / do not

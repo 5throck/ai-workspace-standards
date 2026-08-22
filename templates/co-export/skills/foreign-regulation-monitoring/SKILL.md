@@ -14,7 +14,7 @@ prerequisites: none
 
 ## Context
 
-Use in Phase 1 to establish destination-market regulatory context before or alongside Korea-side
+Use in Phase 1 to establish destination-market regulatory context before or alongside home-jurisdiction
 compliance work. This is intelligence/monitoring, not a compliance determination — findings feed
 `export-control-compliance-specialist` and `market-entry-strategist`, who own the actual
 conclusions in their domains.
