@@ -75,6 +75,11 @@
     ],
     "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
   },
+  "country_scoped_assets": {
+    "description": "Skills and scripts whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
+    "skills": { "k-law": "KR", "k-dart": "KR", "k-kosis": "KR" },
+    "scripts": {}
+  },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",
     "files": [
@@ -167,6 +172,11 @@
         "required_fields": ["variant_agents_dir", "optional", "notes"],
         "optional_fields": ["pipeline_order", "retry_policy"],
         "notes": "pipeline_order: omit or use [] for variants with parallel/free-form agent dispatch. retry_policy: declares on_fail routing and max_retries per agent. optional[]: agents that can be skipped by PM."
+      },
+      "country_config": {
+        "description": "Country/jurisdiction profile configuration. supported[] lists ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN; pattern ^[A-Z]{2,4}$) for profiles shipped under profiles_dir. default MUST be null (region-neutral) — a non-null default region-locks the variant and triggers a validator warning.",
+        "required_fields": ["profiles_dir", "supported"],
+        "notes": "profiles_dir is 'docs/countries' in all current variants. Each supported code must have <profiles_dir>/<CODE>.md with frontmatter code/name/status/last_verified. Profiles are advisory jurisdiction knowledge (loaded at engagement start), never auto-executed. Country != language — language policy remains i18n.locale_codes."
       }
     },
     "co-abap": {

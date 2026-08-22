@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 /**
  * project-to-variant.ts
  *
@@ -96,8 +96,48 @@ const sourceFiles = collectFiles(sourceDir).map(f => ({
   rel: path.relative(sourceDir, f).replace(/\\/g, '/'),
 }));
 
-const SKIP_PATTERNS = [/^\.git\//, /^node_modules\//, /^memory\//];
-function shouldSkip(rel: string): boolean { return SKIP_PATTERNS.some(p => p.test(rel)); }
+// Load country-scoped assets registry for skill exclusion
+const schemaPath = path.join(WORKSPACE_ROOT, 'docs', 'workspace-schema.json');
+let scopedSkills: string[] = [];
+if (fs.existsSync(schemaPath)) {
+  try {
+    const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+    const countryScoped = schema.country_scoped_assets as {
+      skills?: Record<string, string>;
+      scripts?: Record<string, string>;
+    } | undefined;
+    if (countryScoped?.skills) {
+      scopedSkills = Object.keys(countryScoped.skills);
+    }
+  } catch (e) {
+    // Schema read error - skip scoped skill exclusion
+  }
+}
+
+const SKIP_PATTERNS = [
+  /^\.git\//,
+  /^node_modules\//,
+  /^memory\//,
+  /^docs\/countries\/ACTIVE\.md$/  // Project-specific scaffold artifact, not template content
+];
+
+function shouldSkip(rel: string): boolean {
+  // Check standard skip patterns
+  if (SKIP_PATTERNS.some(p => p.test(rel))) return true;
+
+  // Check for scoped skills (e.g., skills/k-law/, .claude/skills/k-dart/, etc.)
+  for (const scopedSkill of scopedSkills) {
+    if (rel === `skills/${scopedSkill}/` ||
+        rel.startsWith(`skills/${scopedSkill}/`) ||
+        rel.startsWith(`.claude/skills/${scopedSkill}/`) ||
+        rel.startsWith(`.gemini/skills/${scopedSkill}/`) ||
+        rel.startsWith(`.agents/skills/${scopedSkill}/`)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 function isCommonInherited(rel: string, sourceAbs: string): boolean {
   if (!commonFiles.has(rel)) return false;
@@ -182,7 +222,48 @@ if (!DRY_RUN) {
       ? fs.readdirSync(skillsDir).filter(f => fs.statSync(path.join(skillsDir, f)).isDirectory())
           .map(f => ({ name: f, file: `skills/${f}/SKILL.md` }))
       : [];
-    const variantJson = { name: targetArg, extends: 'common', version: '0.1.0', agents, skills, description: `TODO: Describe the ${targetArg} variant` };
+
+    // Preserve country_config from source project if present
+    let countryConfig = undefined;
+    const sourceVariantJson = path.join(sourceDir, 'variant.json');
+    if (fs.existsSync(sourceVariantJson)) {
+      try {
+        const sourceVariant = JSON.parse(fs.readFileSync(sourceVariantJson, 'utf-8')) as Record<string, unknown>;
+        if (sourceVariant.country_config) {
+          countryConfig = sourceVariant.country_config;
+        }
+      } catch (e) {
+        // Source variant.json read error - skip country_config preservation
+      }
+    }
+
+    // If source has country profiles (besides ACTIVE.md) but no country_config, create skeleton
+    const countriesDir = path.join(sourceDir, 'docs', 'countries');
+    if (!countryConfig && fs.existsSync(countriesDir)) {
+      const profiles = fs.readdirSync(countriesDir).filter(f => f.endsWith('.md') && f !== 'ACTIVE.md');
+      if (profiles.length > 0) {
+        const supported = profiles.map(f => f.replace('.md', ''));
+        countryConfig = {
+          profiles_dir: 'docs/countries',
+          supported: supported,
+          default: null
+        };
+      }
+    }
+
+    const variantJson: Record<string, unknown> = {
+      name: targetArg,
+      extends: 'common',
+      version: '0.1.0',
+      agents,
+      skills,
+      description: `TODO: Describe the ${targetArg} variant`
+    };
+
+    if (countryConfig) {
+      variantJson.country_config = countryConfig;
+    }
+
     fs.writeFileSync(path.join(targetDir, 'variant.json'), JSON.stringify(variantJson, null, 2) + '\n', 'utf-8');
     console.log(`${GREEN}Generated templates/${targetArg}/variant.json${RESET}`);
   }
@@ -222,6 +303,8 @@ ${CYAN}=== Manual Review Checklist ===${RESET}
   [ ] templates/${targetArg}/agents/pm.md -- verify PM overrides
   [ ] templates/${targetArg}/CLAUDE.md and GEMINI.md -- update variant context${specRegistered ? '' : `
   [ ] Register spec: bun scripts/spec-register.ts --file <design-doc> --source manual (or re-run with --design-doc <path>)`}
+  [ ] templates/${targetArg}/docs/countries/ profiles contain jurisdiction knowledge (not project-specific data); ACTIVE.md excluded
+  [ ] variant.json country_config.supported matches shipped profiles (validate-templates country-config check)
 
 Run bun scripts/audit.ts after completing the checklist.
 `);

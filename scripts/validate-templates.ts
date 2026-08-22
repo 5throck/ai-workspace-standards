@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.10.0
+ * @version 1.11.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -359,6 +359,133 @@ function checkVariantManifests(): Map<string, VariantManifest> {
               fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`, `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`);
             }
           }
+        }
+      }
+
+      // B-05: country_config validation
+      const countryConfig = raw.country_config as {
+        profiles_dir?: string;
+        supported?: string[];
+        default?: string | null;
+      } | undefined;
+
+      if (countryConfig) {
+        // Check required fields
+        if (!countryConfig.profiles_dir || countryConfig.profiles_dir.trim() === '') {
+          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.profiles_dir is missing or empty`);
+        }
+        if (!countryConfig.supported || !Array.isArray(countryConfig.supported) || countryConfig.supported.length === 0) {
+          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported is missing or empty`);
+        } else {
+          // Check each supported code has a profile file
+          for (const code of countryConfig.supported) {
+            if (!/^[A-Z]{2,4}$/.test(code)) {
+              fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported contains invalid code: '${code}'. Pattern: ^[A-Z]{2,4}$`);
+              continue;
+            }
+            const profilePath = join(TEMPLATES_DIR, dir, countryConfig.profiles_dir, `${code}.md`);
+            if (!existsSync(profilePath)) {
+              fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported includes '${code}' but profile file missing: ${countryConfig.profiles_dir}/${code}.md`);
+            } else {
+              // Validate profile frontmatter
+              try {
+                const profileContent = readFileSync(profilePath, 'utf-8');
+                const frontmatter = parseFrontmatter(profileContent);
+                const requiredFields = ['code', 'name', 'status', 'last_verified'];
+                const missing = requiredFields.filter(f => !frontmatter[f]);
+                if (missing.length > 0) {
+                  fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md missing frontmatter fields: ${missing.join(', ')}`);
+                } else {
+                  // Check code matches filename
+                  const codeMatch = profileContent.match(/^code:\s*([A-Z]{2,4})/m);
+                  if (!codeMatch || codeMatch[1] !== code) {
+                    fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md frontmatter code doesn't match filename`);
+                  }
+                  // Check last_verified age (WARN if > 12 months)
+                  const lastVerifiedMatch = profileContent.match(/^last_verified:\s*(\d{4}-\d{2}-\d{2})/m);
+                  if (lastVerifiedMatch) {
+                    const lastVerified = new Date(lastVerifiedMatch[1]);
+                    const monthsSince = (Date.now() - lastVerified.getTime()) / (30 * 24 * 60 * 60 * 1000);
+                    if (monthsSince > 12) {
+                      warn(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md last_verified is older than 12 months (${lastVerifiedMatch[1]}). Consider reviewing.`);
+                    }
+                  }
+                }
+              } catch (e) {
+                fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md has unparseable frontmatter`);
+              }
+            }
+          }
+        }
+        // Check default is null (region-neutral is required)
+        if (countryConfig.default !== null && countryConfig.default !== undefined) {
+          warn(dir, 'country-config', `templates/${dir}/variant.json country_config.default is '${countryConfig.default}'. Policy requires region-neutral (null).`);
+        }
+      }
+
+      // Check if docs/countries/*.md exists but no country_config declared
+      const countriesDir = join(TEMPLATES_DIR, dir, 'docs', 'countries');
+      if (!countryConfig && existsSync(countriesDir)) {
+        const profiles = readdirSync(countriesDir).filter(f => f.endsWith('.md') && f !== 'ACTIVE.md');
+        if (profiles.length > 0) {
+          warn(dir, 'country-config', `templates/${dir}/docs/countries/ contains ${profiles.length} profile(s) but variant.json has no country_config declared.`);
+        }
+      }
+
+      // Advisory: check if description appears jurisdiction-anchored
+      if (countryConfig && raw.description) {
+        const jurisdictionTerms = /korea|korean|한국|대한민국/i;
+        if (jurisdictionTerms.test(raw.description)) {
+          warn(dir, 'country-config', `templates/${dir}/variant.json description appears jurisdiction-anchored (contains Korea/Korean/한국/대한민국). Consider region-neutral description with country-specific details in profiles.`);
+        }
+      }
+
+      // Registry integrity: check country_scoped_assets skills exist in common
+      const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+      if (existsSync(schemaPath)) {
+        try {
+          const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as {
+            skills?: Record<string, string>;
+            scripts?: Record<string, string>;
+          } | undefined;
+
+          if (countryScoped?.skills) {
+            for (const [skillName, scopedCountry] of Object.entries(countryScoped.skills)) {
+              const commonSkillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName);
+              if (!existsSync(commonSkillPath)) {
+                fail('root', 'country-scoped-assets', `Registry lists skill '${skillName}' as ${scopedCountry}-scoped but it's missing from templates/common/skills/`);
+              }
+            }
+          }
+
+          // For variants without KR in country_config.supported, warn if agents reference scoped skills
+          if (countryConfig?.supported && !countryConfig.supported.includes('KR')) {
+            const agentsDir = join(TEMPLATES_DIR, dir, 'agents');
+            if (existsSync(agentsDir)) {
+              for (const agentFile of readdirSync(agentsDir)) {
+                if (agentFile.endsWith('.md')) {
+                  const agentPath = join(agentsDir, agentFile);
+                  const agentContent = readFileSync(agentPath, 'utf-8');
+                  const agentFrontmatter = parseFrontmatter(agentContent);
+                  if (agentFrontmatter.required_skills) {
+                    const requiredSkillsMatch = agentContent.match(/^required_skills:\s*\[(.*?)\]/m);
+                    if (requiredSkillsMatch) {
+                      const requiredSkills = requiredSkillsMatch[1].split(',').map(s => s.trim().replace(/['"]/g, ''));
+                      for (const skill of requiredSkills) {
+                        if (Object.keys(countryScoped?.skills || {}).includes(skill)) {
+                          const scopedCountry = countryScoped?.skills?.[skill] || 'unknown';
+                          warn(dir, 'country-config', `templates/${dir}/agents/${agentFile} required_skills includes scoped skill '${skill}' but variant does not support ` + scopedCountry + `. Reference will be dangling after prune.`);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Schema read error - silently skip registry check
         }
       }
 

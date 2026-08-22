@@ -29,6 +29,8 @@ templates/
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
 
+**Country-scoped skills:** `k-law`, `k-dart`, and `k-kosis` are registered as KR-scoped in the `country_scoped_assets` section of `docs/workspace-schema.json` and are deployed only to projects scaffolded with target country `KR` (`--country KR`); region-neutral projects exclude them. See `common/docs/country-profiles.md` and ADR-0057 (`docs/adr/0057-country-profile-mechanism.md`).
+
 ## Available Variants
 
 | Variant | Status | Description |
@@ -43,7 +45,7 @@ templates/
 | [`co-export`](co-export/) | 🔶 Beta | Import/export trade-compliance workflow with 8 agents (HS classification, export control, FTA origin, duty drawback, logistics, market entry, foreign regulation monitoring, trade documentation) |
 | [`co-news`](co-news/) | 🔶 Beta | Korean business/finance journalism with 7 agents (pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor) and DART/regulatory research integration |
 | [`co-abap`](co-abap/) | ✅ Stable | SAP ABAP development with 20 agents (6 SAP module analysts, 12 technical specialists, pm) and ABAP-specific skills (post-write chain, performance tuning, dump monitoring) |
-| [`co-hr`](co-hr/) | 🔶 Beta | Korean HR & labor-relations consulting with 12 agents (pm + 11 specialists: labor compliance, labor relations, safety & health, talent acquisition, compensation & benefits, performance management, L&D, career & succession, org design, change management, data analyst) and k-law/k-kosis regulatory research integration |
+| [`co-hr`](co-hr/) | 🔶 Beta | Korean HR & labor-relations consulting with 12 agents (pm + 11 specialists: labor compliance, labor relations, safety & health, talent acquisition, compensation & benefits, performance management, L&D, career & succession, org design, change management, data analyst) and k-law/k-kosis regulatory research integration (k-law/k-kosis are KR-scoped skills - KR-target projects only) |
 
 ## Phase 1, 2 & 3 Advancements
 
