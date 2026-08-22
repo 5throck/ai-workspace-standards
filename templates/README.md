@@ -23,7 +23,8 @@ templates/
 ├── co-game/             # Game development variant
 ├── co-export/           # Import/export trade compliance variant (beta)
 ├── co-news/             # Korean business/finance journalism variant (beta)
-└── co-abap/             # SAP ABAP development variant (stable)
+├── co-abap/             # SAP ABAP development variant (stable)
+└── co-hr/               # Korean HR & labor-relations consulting variant (beta)
 ```
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
@@ -42,6 +43,7 @@ templates/
 | [`co-export`](co-export/) | 🔶 Beta | Import/export trade-compliance workflow with 8 agents (HS classification, export control, FTA origin, duty drawback, logistics, market entry, foreign regulation monitoring, trade documentation) |
 | [`co-news`](co-news/) | 🔶 Beta | Korean business/finance journalism with 7 agents (pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor) and DART/regulatory research integration |
 | [`co-abap`](co-abap/) | ✅ Stable | SAP ABAP development with 20 agents (6 SAP module analysts, 12 technical specialists, pm) and ABAP-specific skills (post-write chain, performance tuning, dump monitoring) |
+| [`co-hr`](co-hr/) | 🔶 Beta | Korean HR & labor-relations consulting with 12 agents (pm + 11 specialists: labor compliance, labor relations, safety & health, talent acquisition, compensation & benefits, performance management, L&D, career & succession, org design, change management, data analyst) and k-law/k-kosis regulatory research integration |
 
 ## Phase 1, 2 & 3 Advancements
 
@@ -102,4 +104,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-08-22*
