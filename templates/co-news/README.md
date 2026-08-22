@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 447ffc6f0eda28772ffdeceae70a66f02111e1f964d08933fad6a8949f4a1d3e
+content_hash: e0b5b9ede505da17fdc38000d1630a7476fdcfb25baf549cdbaa991a44eee456
 ---
 
 # co-news
