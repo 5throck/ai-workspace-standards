@@ -2,7 +2,7 @@
 
 | Phase | Name | Owning Agent(s) | Description |
 |-------|------|-----------------|--------------|
-| 0 | Assignment Scoping | pm | Establish story angle, target company/companies, target register (Sedaily-style general-economic tone vs TheBell-style IB/PE specialist tone), and target output language (default: Korean) |
+| 0 | Assignment Scoping | pm | Establish story angle, target company/companies, target register (Sedaily-style general-economic tone vs TheBell-style IB/PE specialist tone), and target output language (per active country profile; KR default: Korean) |
 | 1 | Data & Legal Research | financial-analyst, legal-researcher | Parallel: financial-analyst pulls k-dart data into a narrative brief; legal-researcher pulls k-law context if the story touches corporate law |
 | 2 | Fact Verification | fact-checker | Build the citation ledger; require 2+ independent sources per material claim; block on any UNVERIFIED claim |
 | 3 | Drafting | reporter | Write headline/lead/body strictly from the verified ledger and briefs |

@@ -38,7 +38,7 @@ variant_overrides:
     | Infographics / visuals | `visual-editor` |
 
     ### Article Output Language
-    Default output language is **Korean**. All git artifacts (commit messages, PR titles, branch names) remain in English.
+    Default output language follows the active country profile (KR profile: **Korean**); confirm at Phase 0. All git artifacts (commit messages, PR titles, branch names) remain in English.
     <!-- END VARIANT-SECTION -->
   agent_roster: |
     <!-- VARIANT-SECTION: agent-roster -->
@@ -49,8 +49,8 @@ variant_overrides:
     | Agent | File | Role | Phase(s) | Tier |
     |-------|------|------|----------|------|
     | **pm** (Editor-in-Chief) | `agents/pm.md` | Orchestrates newsroom workflow; enforces editorial gates | 0, 6 | High |
-    | **financial-analyst** | `agents/financial-analyst.md` | Queries DART disclosures; produces financial-narrative-brief | 1 | Medium |
-    | **legal-researcher** | `agents/legal-researcher.md` | Researches Korean law and precedents via k-law | 1 | Medium |
+    | **financial-analyst** | `agents/financial-analyst.md` | Queries DART disclosures (KR profile); produces financial-narrative-brief | 1 | Medium |
+    | **legal-researcher** | `agents/legal-researcher.md` | Researches the target jurisdiction's law and precedents via k-law (KR profile) | 1 | Medium |
     | **fact-checker** | `agents/fact-checker.md` | Builds source-verification-ledger; enforces 2+ sources per claim | 2 | Medium |
     | **reporter** | `agents/reporter.md` | Drafts article from verified briefs | 3 | Low |
     | **style-editor** | `agents/style-editor.md` | AI-tell reduction and house-style conformance | 4 | Low |
@@ -73,7 +73,7 @@ variant_overrides:
     | 6 | Final QA / publish gate | pm | — |
 
     ### Dispatch Rules
-    1. **Phase 0**: Scope — story angle, target company (DART corp_code), target register, output language (default: Korean).
+    1. **Phase 0**: Scope — story angle, target company (disclosure-system identifier; KR: DART corp_code), target register, output language (per active country profile; KR default: Korean).
     2. **Phase 1**: Dispatch `financial-analyst` and `legal-researcher` in parallel.
     3. **Phase 2 (gate)**: Dispatch `fact-checker` after both Phase 1 briefs complete. Gate: 0 UNVERIFIED claims.
     4. **Phase 3**: Dispatch `reporter` after Phase 2 gate.
@@ -96,7 +96,7 @@ variant_overrides:
 
 You act as **Editor-in-Chief** for this newsroom team. Key responsibilities beyond standard PM duties:
 
-- **Assignment scoping (Phase 0)**: establish story angle, target company (with DART corp_code), target register (Sedaily general-economic vs TheBell IB/PE-dense), and **output language** (default: Korean).
+- **Assignment scoping (Phase 0)**: establish story angle, target company (with DART corp_code), target register (Sedaily general-economic vs TheBell IB/PE-dense), and **output language** (per active country profile; KR default: Korean).
 - **Publish gate (Phase 6)**: article is publish-ready only when BOTH conditions hold:
   1. `fact-checker` reports citation ledger complete with **0 `UNVERIFIED` claims**
   2. `style-editor` reports AI-tell reduction and house-style conformance both complete

@@ -21,7 +21,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 <!-- VARIANT-AGENTS-START -->
 | **fact-checker** | [`agents/fact-checker.md`](agents/fact-checker.md) | Medium | Fact-checker - the newsroom's citation gatekeeper. Extracts every material claim from briefs and drafts, requires 2+ ind |
-| **financial-analyst** | [`agents/financial-analyst.md`](agents/financial-analyst.md) | Medium | Financial analyst - runs the k-dart skill against DART filings to produce article-ready narrative briefs (headline numbe |
+| **financial-analyst** | [`agents/financial-analyst.md`](agents/financial-analyst.md) | Medium | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce article-ready narrative briefs (headline numbe |
 | **legal-researcher** | [`agents/legal-researcher.md`](agents/legal-researcher.md) | Medium | Legal researcher - runs the k-law skill against the National Law Information Center (Commercial Act / precedents / admin |
 | **reporter** | [`agents/reporter.md`](agents/reporter.md) | Medium | Reporter - drafts the article headline, lead, and body strictly from the fact-checker's verified citation ledger and the |
 | **style-editor** | [`agents/style-editor.md`](agents/style-editor.md) | Medium | Style editor - runs the AI-tell reduction pass and house-style conformance pass on the reporter's draft, then re-verifie |
@@ -50,7 +50,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/financial-analyst.md`](agents/financial-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Financial analyst - runs the k-dart skill against DART filings to produce article-ready narrative briefs (headline number, YoY/QoQ delta, context, disclosure citation) — not valuation models. Use when: a story needs headline financial numbers, deltas, or disclosure-sourced context for a listed company. |
+| **Role** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce article-ready narrative briefs (headline number, YoY/QoQ delta, context, disclosure citation) — not valuation models. Use when: a story needs headline financial numbers, deltas, or disclosure-sourced context for a listed company. |
 
 ### legal-researcher
 
@@ -86,7 +86,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/visual-editor.md`](agents/visual-editor.md) |
 | **Tier** | medium |
 | **Phases** | 5 |
-| **Role** | Visual editor - turns the financial-analyst's narrative brief into inline SVG figures (waterfall, timeline, bar/line) with correct Korean unit formatting. Use when: a styled draft is ready and the assignment calls for supporting visuals. |
+| **Role** | Visual editor - turns the financial-analyst's narrative brief into inline SVG figures (waterfall, timeline, bar/line) with correct locale unit formatting (KR: Korean numeral groupings). Use when: a styled draft is ready and the assignment calls for supporting visuals. |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -193,7 +193,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 <!-- VARIANT-PHASE-GATE-START -->
 | Fact-checker - the newsroom's citation gatekeeper | Phase 2 | `fact-checker` | medium | |
-| Financial analyst - runs the k-dart skill against DART filings to produce articl | Phase 1 | `financial-analyst` | medium | |
+| Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | Phase 1 | `financial-analyst` | medium | |
 | Legal researcher - runs the k-law skill against the National Law Information Cen | Phase 1 | `legal-researcher` | medium | |
 | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | Phase 3 | `reporter` | medium | |
 | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | Phase 4 | `style-editor` | medium | |
@@ -396,7 +396,7 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
 | Fact-checker - the newsroom's citation gatekeeper | `fact-checker` | `pm` |
-| Financial analyst - runs the k-dart skill against DART filings to produce articl | `financial-analyst` | `pm` |
+| Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | `financial-analyst` | `pm` |
 | Legal researcher - runs the k-law skill against the National Law Information Cen | `legal-researcher` | `pm` |
 | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | `reporter` | `pm` |
 | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | `style-editor` | `pm` |

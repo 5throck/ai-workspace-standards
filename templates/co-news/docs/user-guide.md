@@ -110,13 +110,13 @@ Domain rules to keep in mind:
 
 - One article = one `<article>` directory; never mix two assignments' files.
 - No claim ships without 2+ independent sources in the ledger; financial figures trace
-  to a specific DART filing (receipt number logged), never estimated.
-- Mandatory disclaimers: DART-sourced figures carry "Based on FSS DART (Financial
+  to a specific regulator filing (KR: DART, receipt number logged), never estimated.
+- Mandatory disclaimers: DART-sourced figures (KR profile) carry "Based on FSS DART (Financial
   Supervisory Service electronic disclosure system) filing data"; k-law-sourced legal
   context carries "Based on National Law Information Center shared data / not legal
   advice".
-- Language split: article content defaults to Korean (or the assignment's target
-  language); ALL git artifacts (commits, PR titles, branches) are English-only.
+- Language split: article content follows the assignment's target language (KR profile
+  default: Korean); ALL git artifacts (commits, PR titles, branches) are English-only.
 - Korean numeral-grouping units (jo/eok/man) appear only in Korean-language articles;
   never mix grouping conventions within a single figure.
 - Figure SVGs are never inlined into markdown until `final.md` — drafts reference them

@@ -1,6 +1,6 @@
 {
   "name": "co-news",
-  "description": "Korean business/finance journalism variant for economics reporters covering listed companies — synthesizes DART financial disclosures (via k-dart) and Korean commercial-law research (via k-law) into fact-checked, naturally human-written articles (Korean default, other languages supported) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.",
+  "description": "Business/finance journalism variant for economics reporters covering listed companies — synthesizes regulator financial disclosures (DART via the k-dart skill under the KR country profile in docs/countries/) and commercial-law research (k-law under KR) into fact-checked, naturally human-written articles (output language follows project i18n settings; the KR profile defaults to ko) with financial infographics for readers including listed-company IR staff, CFOs/executives, and PE/VC/bank finance professionals.",
   "variant_type": "collaboration",
   "status": "beta",
   "version": "0.1.0",
@@ -77,6 +77,11 @@
         "dispatch-protocol"
       ]
     }
+  },
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": ["KR"],
+    "default": null
   },
   "skill_manifest": {
     "variant_specific": [
