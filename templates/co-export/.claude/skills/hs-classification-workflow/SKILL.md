@@ -38,13 +38,13 @@ calculation) depends on this classification, so treat it as the engagement's fou
    - GRI 4–6: Apply only for genuinely novel goods or subheading-level disputes
    - Never skip ahead to a later GRI rule without documenting why the earlier rule didn't resolve
      the classification
-3. **Search Ruling Precedent**: Check prior Korea Customs Service advance rulings and
+3. **Search Ruling Precedent**: Check prior customs-authority advance rulings (KR: Korea Customs Service) and
    authoritative interpretations for materially similar products before finalizing.
 4. **Determine Customs Valuation Basis**: Identify the applicable valuation method (transaction
    value, or fallback methods in the Customs Act Article 30 order) and flag related-party pricing.
 5. **Confidence Rating**: Classify the result as confirmed / probable (recommend advance ruling) /
    contested — never present a probable classification as certain.
-6. **Tariff Rate Lookup**: Identify the applicable Korea tariff rate and, if relevant, the
+6. **Tariff Rate Lookup**: Identify the applicable home-jurisdiction tariff rate and, if relevant, the
    destination-country rate (cross-reference `foreign-regulatory-intelligence-analyst` findings).
 7. **Handoff**: Pass the confirmed HS code to `fta-origin-analyst` (origin rules are HS-specific)
    and to `export-control-compliance-specialist` if the classification falls in a
@@ -52,7 +52,7 @@ calculation) depends on this classification, so treat it as the engagement's fou
 
 ## Output Format
 
-- Classification report: candidate HS headings considered, GRI reasoning chain, final HS/HSK
+- Classification report: candidate HS headings considered, GRI reasoning chain, final HS code
   code, confidence level, customs valuation basis, applicable tariff rate(s), cited prior rulings
 
 ## Related Skills

@@ -58,7 +58,7 @@ lifecycle:
 - **Customs Act Article 46 (Refund of Erroneously or Overpaid Amounts)** — a *separate*
   mechanism (erroneous/overpaid duty refund) that must not be conflated with drawback under the
   Duty Drawback Act; always state which regime a given refund claim falls under
-- **Korea Customs Service public notices** — procedural notices on refund processing and the
+- **Customs-authority public notices** (KR: Korea Customs Service) — procedural notices on refund processing and the
   detailed standards for determining refund amounts
 
 **Boundary**: This agent does NOT determine the HS code (→ `hs-classification-specialist`, whose
@@ -143,7 +143,7 @@ paid are required inputs — do not estimate a drawback amount from an unconfirm
 - Do NOT recommend the simplified fixed-rate refund method to a client that does not meet the SME
   refund-performance threshold, or for an item with no listed fixed rate — verify eligibility
   before recommending
-- Do NOT present a drawback estimate as a guaranteed refund amount — Korea Customs Service retains
+- Do NOT present a drawback estimate as a guaranteed refund amount — the customs authority retains
   discretion to audit and adjust; state confidence level explicitly
 - Do NOT process ordinary Customs Act Art. 46 erroneous-payment refund requests under this
   skill — flag the regime mismatch and redirect

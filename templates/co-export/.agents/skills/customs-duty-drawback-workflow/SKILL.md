@@ -32,7 +32,7 @@ eligibility and method selection with the same rigor as classification.
 
 ## Prerequisites
 
-- Confirmed HS/HSK code and tariff rate paid (from hs-classification-specialist)
+- Confirmed HS code (national tariff line) and tariff rate paid (from hs-classification-specialist)
 - Import declaration records for the raw materials in question
 - Bill of materials linking raw materials to exported finished goods
 - Export declaration records for the finished goods

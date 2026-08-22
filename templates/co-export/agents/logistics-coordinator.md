@@ -48,7 +48,7 @@ lifecycle:
   still cited in legacy contracts (2000 included DAF/DES/DEQ/DDU, all removed in 2010; 2010's DAT
   was renamed DPU in 2020) — recognize these when reviewing existing paperwork rather than
   assuming a 1:1 mapping to 2020
-- **Bonded Warehouse Operation Notice** — Korean customs bonded-area
+- **Home-jurisdiction bonded-area rules** (KR: Bonded Warehouse Operation Notice) — customs bonded-area
   regulation relevant to transshipment/storage planning
 - No independent authority over classification, origin, or export control — logistics planning
   consumes those findings (e.g. license requirements affect which forwarder/carrier can legally

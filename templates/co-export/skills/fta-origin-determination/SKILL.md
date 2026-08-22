@@ -27,7 +27,7 @@ analysis without a confirmed HS code is not reliable.
 
 ## Prerequisites
 
-- Confirmed HS/HSK code (from hs-classification-specialist)
+- Confirmed HS code (from hs-classification-specialist)
 - Bill of materials and sourcing breakdown (originating vs. non-originating inputs)
 - Target FTA text with Rules of Origin annex
 - Cost data for RVC calculation (if applicable)
@@ -37,7 +37,7 @@ analysis without a confirmed HS code is not reliable.
 1. **Confirm HS Code**: Verify the HS code with `hs-classification-specialist` — do not proceed
    without it.
 2. **Screen Applicable FTA(s)**: Identify which FTA(s) apply given the origin/destination country
-   pair — Korea has 20+ FTAs in force; do not default to the most well-known one.
+   pair — use the home country's FTA network from the active country profile (KR: 20+ in force); do not default to the most well-known one.
 3. **Look Up Product-Specific Rule (PSR)**: Retrieve the origin criterion for the confirmed HS
    heading from the specific FTA's Rules of Origin annex — Wholly Obtained, Change in Tariff
    Classification (CC/CTH/CTSH), Regional Value Content (RVC), or a specific process requirement.

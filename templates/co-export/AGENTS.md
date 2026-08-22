@@ -53,7 +53,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/export-control-compliance-specialist.md`](agents/export-control-compliance-specialist.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods, technology, or destinations trigger Korean export control licensing requirements, and screens counterparties against US OFAC / EAR and equivalent restricted-party lists for parallel exposure when the transaction touches US-origin technology or a sanctioned destination. Use when: strategic items classification, export license requirement determination, or sanctions/denied-party screening is required. |
+| **Role** | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods, technology, or destinations trigger the home jurisdiction's export control licensing requirements, and screens counterparties against US OFAC / EAR and equivalent restricted-party lists for parallel exposure when the transaction touches US-origin technology or a sanctioned destination. Use when: strategic items classification, export license requirement determination, or sanctions/denied-party screening is required. |
 
 ### foreign-regulatory-intelligence-analyst
 
@@ -62,7 +62,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/foreign-regulatory-intelligence-analyst.md`](agents/foreign-regulatory-intelligence-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) changes affecting client shipments for co-export. Provides destination-market regulatory context that Korea-based compliance agents (HS classification, FTA/origin, export control) use as an input, but does not itself issue compliance determinations. Use when: destination-country import regulation research, tariff-change monitoring, or trade-defense measure screening is required. |
+| **Role** | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) changes affecting client shipments for co-export. Provides destination-market regulatory context that home-jurisdiction compliance agents (HS classification, FTA/origin, export control) use as an input, but does not itself issue compliance determinations. Use when: destination-country import regulation research, tariff-change monitoring, or trade-defense measure screening is required. |
 
 ### fta-origin-analyst
 
@@ -89,7 +89,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/hs-classification-specialist.md`](agents/hs-classification-specialist.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods under the Harmonized System per the Korea Customs Act and the WCO HS nomenclature, determines applicable tariff rates, and flags classification ambiguity requiring a formal customs ruling from the Customs Valuation and Classification Institute. Use when: HS code classification, tariff rate lookup, customs valuation, or classification dispute/ambiguity is required. |
+| **Role** | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods under the Harmonized System per the home jurisdiction's customs legislation (see the active country profile under docs/countries/) and the WCO HS nomenclature, determines applicable tariff rates, and flags classification ambiguity requiring a formal customs ruling from the jurisdiction's customs authority (KR: Customs Valuation and Classification Institute). Use when: HS code classification, tariff rate lookup, customs valuation, or classification dispute/ambiguity is required. |
 
 ### logistics-coordinator
 
