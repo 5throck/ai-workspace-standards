@@ -23,6 +23,8 @@ Required file will fail validation and cannot be promoted to `beta` or `stable` 
      Lifecycle Manager is an L0-only specialist agent per CONSTITUTION.md §L0 Agent
      Non-Propagation. In variant projects (L2), PM handles lifecycle duties directly. -->
 | `docs/{variant}.context.md` | Project-specific context file (name is variant-dependent) |
+| `docs/user-guide.md` | End-user guide (EN) — how to hand work to the agent team; per-variant content, NOT satisfiable from `templates/common/` (see User-Guide Standard, WS-11) |
+| `docs/user-guide_ko.md` | Korean 1:1 mirror of the user guide |
 | `.claude/settings.json` | Shared Claude Code settings (MCP servers, hooks) |
 | `.gemini/settings.json` | Shared Antigravity settings (mirrors `.claude/settings.json`) |
 
@@ -123,6 +125,28 @@ lifecycle:
 WS-10 also asserts that `lifecycle.governance` **resolves to an existing file** — stricter than `validate-agents.ts` itself, which only checks the key is non-empty. That extra strictness earned its keep on the first run: `co-security`'s 5 agents all set `governance: lifecycle-manager`, an agent *name* rather than a path, which passed every project-layer check while resolving to nothing. The sub-assertion was introduced WARN-only pending that fix and promoted to a policy-aware failure once `co-security` was corrected, so an unresolvable pointer can no longer land.
 
 > **Known gap** — `scripts/validators/schema-validator.ts` defines `VALID_LIFECYCLE_PHASES = ['production', 'development', 'retired']`, and [CONSTITUTION.md](../../CONSTITUTION.md) states it is enforced by `audit.ts`. Nothing imports `scripts/validators/`, so that enum is currently unenforced — which is why `phase: beta` (15 agents) and the now-corrected `phase: active` (5) went unnoticed. Wiring it up requires first deciding whether `beta` belongs in the enum.
+
+### User-Guide Standard (WS-11)
+
+Every variant MUST carry a bilingual end-user guide pair: `docs/user-guide.md` (English) and `docs/user-guide_ko.md` (Korean, a 1:1 mirror). `validate-templates.ts` Check **WS-11** enforces presence as a hard **FAIL**. Unlike Variant Contract required files, a copy in `templates/common/` does NOT satisfy this check — the guide's content is variant-specific by design (scenario table, workflow diagram, phase owners, and output locations all describe one domain).
+
+Each guide follows the 5-section skeleton (reference implementation: `templates/co-work/docs/user-guide.md`):
+
+1. **Quick Start** — PM as single entry point, execution-plan table example, rule-of-thumb note
+2. **What Kind of Task Do You Have?** — scenario → likely agent(s) → skill(s) table
+3. **The Standard Multi-Stage Workflow** — ASCII pipeline diagram + key commands + never-bypass-git warning
+4. **Phase Structure** — phase / owner / what-happens table + serial-writes/parallel-reads note
+5. **Where Your Output Goes** — output locations table + domain-rules bullets
+
+Both files open with a language cross-link line and an intro blockquote pointing at `../README.md` (KO: `../README_ko.md`) and `../AGENTS.md`.
+
+This check exists because the standard previously lived only as convention: 7 of 11 variants carried the pair while `co-abap`, `co-export`, `co-news`, and `co-hr` shipped without one — discovered only in a manual 2026-08-23 audit. The missing 8 files were backfilled the same day, so the check was introduced directly as a hard FAIL with no `warningOnly` rollout period to bridge (it does not read `variantValidationPolicy`, unlike WS-08/WS-09/WS-10).
+
+### Variant Index Coverage (WS-12)
+
+Every non-draft `co-*` variant MUST be mentioned in all six index READMEs: root `README.md`, `README_ko.md`, `README_es.md`, `README_ja.md`, plus `templates/README.md` and `templates/README_ko.md`. `validate-templates.ts` Check **WS-12** makes the four EN/KO primary indexes a hard **FAIL** and the two translation indexes (`_es`, `_ja`) a non-blocking **WARN** — a primary-language addition may land while translations catch up, but drift cannot persist silently.
+
+Rationale: a 2026-08-23 audit found `co-export`, `co-news`, `co-abap`, and `co-hr` entirely absent from `README_es.md`, `README_ja.md`, and `templates/README_ko.md` — the index files had silently stopped being updated as new variants landed, and nothing gated it. Detection was manual; WS-12 makes it automatic. Guidance: update all six index files in the same change that adds a variant.
 
 ## Optional Files (Domain Extensions)
 

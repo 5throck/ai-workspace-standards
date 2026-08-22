@@ -6,7 +6,7 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.1.0
+version: 1.2.0
 owner: pm
 last_reviewed: 2026-08-23
 metadata:
@@ -198,6 +198,8 @@ bun run agent:verify
 ## Post-Promotion Checklist
 
 - [ ] `templates/co-<name>/` created and passes validate-templates.ts
+- [ ] Bilingual user guide authored: `templates/co-<name>/docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard (enforced by validate-templates WS-11; reference: `templates/co-work/docs/`)
+- [ ] co-<name> added to all 6 index READMEs — root `README.md` / `README_ko.md` / `README_es.md` / `README_ja.md` (tree + variant table) and `templates/README.md` / `templates/README_ko.md` (enforced by WS-12)
 - [ ] `new-project.sh` and `new-project.ps1` correctly list co-<name> in `--help` output (auto-detected from `templates/`)
 - [ ] `templates/co-<name>/variant.json` status is `beta` with correct lifecycle dates
 - [ ] `Projects/<variant-name>/variant.json` has `phaseAComplete: true`

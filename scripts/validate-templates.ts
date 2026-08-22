@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.9.0
+ * @version 1.10.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2256,6 +2256,73 @@ function checkNoVariantLocalContextMd(variant: string): void {
   }
 }
 
+// Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
+// Standard defined in docs/governance/variant-contract.md "User-Guide Standard".
+// Unlike Variant Contract required files, templates/common/ does NOT satisfy this
+// check — the guide's content is variant-specific by design, so each variant carries
+// its own pair. Root cause guard: 2026-08-23 audit found 4 of 11 variants shipped
+// without any user guide because the standard existed only as convention.
+function checkUserGuidePair(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-11: bilingual user-guide pair in ${variant} ===`);
+
+  const guidePath = join(TEMPLATES_DIR, variant, 'docs', 'user-guide.md');
+  const guideKoPath = join(TEMPLATES_DIR, variant, 'docs', 'user-guide_ko.md');
+
+  const guideExists = existsSync(guidePath);
+  const guideKoExists = existsSync(guideKoPath);
+
+  if (!guideExists) {
+    fail(variant, 'WS-11', `templates/${variant}/docs/user-guide.md is missing`, `Author docs/user-guide.md per the User-Guide Standard (docs/governance/variant-contract.md "User-Guide Standard"); reference implementation: templates/co-work/docs/user-guide.md`);
+  }
+  if (!guideKoExists) {
+    fail(variant, 'WS-11', `templates/${variant}/docs/user-guide_ko.md is missing`, `Author docs/user-guide_ko.md as a 1:1 Korean mirror of docs/user-guide.md`);
+  }
+  if (guideExists && guideKoExists) {
+    pass(`WS-11: ${variant} has the bilingual user-guide pair`);
+  }
+}
+
+// Check WS-12: variant index coverage — every non-draft co-* variant must appear in
+// the root and templates/ README index files. Root cause guard: 2026-08-23 audit
+// found co-export/co-news/co-abap/co-hr missing from README_es.md, README_ja.md and
+// templates/README_ko.md (discovered manually — nothing gated it).
+// EN/KO primary indexes FAIL; translation indexes (es/ja) WARN so a primary-language
+// addition can land while translations catch up, without letting drift persist silently.
+function checkVariantIndexCoverage(manifests: Map<string, VariantManifest>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-12: variant index coverage in README files ===`);
+
+  const indexedVariants = [...manifests.entries()]
+    .filter(([name, manifest]) => name.startsWith('co-') && manifest.status !== 'draft')
+    .map(([name]) => name);
+
+  if (indexedVariants.length === 0) return;
+
+  const indexFiles: Array<{ rel: string; level: 'error' | 'warning' }> = [
+    { rel: 'README.md', level: 'error' },
+    { rel: 'README_ko.md', level: 'error' },
+    { rel: 'templates/README.md', level: 'error' },
+    { rel: 'templates/README_ko.md', level: 'error' },
+    { rel: 'README_es.md', level: 'warning' },
+    { rel: 'README_ja.md', level: 'warning' },
+  ];
+
+  for (const { rel, level } of indexFiles) {
+    const filePath = join(ROOT, rel);
+    if (!existsSync(filePath)) continue; // presence of the index files themselves is governed elsewhere
+
+    const content = readFileSync(filePath, 'utf-8');
+    const missing = indexedVariants.filter(name => !content.includes(name));
+
+    if (missing.length === 0) {
+      pass(`WS-12: all ${indexedVariants.length} variants indexed in ${rel}`);
+    } else if (level === 'error') {
+      fail('root', 'WS-12', `${rel} does not mention variant(s): ${missing.join(', ')}`, `Add the missing variant(s) to ${rel}'s template tree + "Available Variants" table (all 6 index READMEs must list every non-draft variant)`);
+    } else {
+      warn('root', 'WS-12', `${rel} does not mention variant(s): ${missing.join(', ')}`, `Backfill the missing variant(s) in ${rel} (translation index — update in the same change that adds the variant to the primary READMEs)`);
+    }
+  }
+}
+
 // Check WS-08: README standard conformance (README.md + README_ko.md)
 // Enforces the unified README skeleton defined in docs/governance/variant-contract.md
 // "README Standard" and rendered by templates/common/docs/README.template.md (+KO).
@@ -2589,7 +2656,10 @@ function main() {
     checkReadmeStandard(variant);                                // WS-08
     checkContextMdStructure(variant);                            // WS-09
     checkAgentLifecycleFrontmatter(variant);                     // WS-10
+    checkUserGuidePair(variant);                                 // WS-11
   }
+
+  checkVariantIndexCoverage(manifests);                          // WS-12
 
   checkSharedFileSync();
   checkL0L1ScriptParity();

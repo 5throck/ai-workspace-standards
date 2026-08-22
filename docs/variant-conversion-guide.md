@@ -235,6 +235,7 @@ bun scripts/validate-skills.ts  # Verify skills
 | No automated detection of closest variant | User must identify the right variant | Use the mapping table in §3 Step 1 |
 | Conversion is one-way | No automated "un-variant" process | Manual file cleanup |
 | Variant infrastructure adoption (Scenario B) is manual | Requires careful file-by-file adoption | Use upgrade-project.ts for automation where possible |
+| Conversion copies files as-is — it never authors a user guide | `validate-templates` WS-11 fails until the pair exists | Author `docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard ([variant-contract.md](governance/variant-contract.md)); also add the variant to all 6 index READMEs (WS-12) |
 
 ---
 
