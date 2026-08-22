@@ -1,6 +1,5 @@
 ---
 sync_version: 1
-translated_from_hash: PLACEHOLDER
 lang: ko
 lang_reason: source-material
 ---

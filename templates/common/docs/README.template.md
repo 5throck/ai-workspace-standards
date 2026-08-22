@@ -1,6 +1,5 @@
 ---
 sync_version: 1
-content_hash: PLACEHOLDER
 ---
 
 # {{VARIANT_NAME}}
