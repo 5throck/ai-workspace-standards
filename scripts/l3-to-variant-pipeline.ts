@@ -11,7 +11,7 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.10.5
+ * @version 1.11.0
  * @phase: Complete pipeline orchestration
  *
  * Pipeline Phases:
@@ -442,8 +442,12 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
               efs('bun', ['scripts/regenerate-agents-md.ts', '--variant', variantDirName], { stdio: 'inherit' });
               console.log(`   ✅ AGENTS.md regenerated for ${variantDirName}`);
             } else {
-              console.warn(`   ⚠️  L3 source is not under templates/ — auto-regeneration skipped. Run manually:`);
-              console.warn(`      bun scripts/regenerate-agents-md.ts --variant ${variantDirName}`);
+              // L3 source outside templates/ (e.g. Projects/<name>/) — regenerate
+              // in place via --source mode (roster scanned from agents/*.md).
+              // Previously this branch skipped auto-fix with a manual-run hint,
+              // making --auto-fix-agents-md a no-op for every Projects/ source.
+              efs('bun', ['scripts/regenerate-agents-md.ts', '--source', config.l3ProjectPath], { stdio: 'inherit' });
+              console.log(`   ✅ AGENTS.md regenerated in place at ${config.l3ProjectPath}`);
             }
           } catch (fixErr) {
             const fixMsg = fixErr instanceof Error ? fixErr.message : String(fixErr);
@@ -1079,6 +1083,10 @@ async function main() {
   const outputArg = args.find(arg => arg.startsWith('--output='));
   const versionArg = args.find(arg => arg.startsWith('--version='));
   const statusArg = args.find(arg => arg.startsWith('--status='));
+  // Auto-fix toggles — previously PipelineConfig-only fields with no CLI
+  // surface, making phase 3.0/3.5 auto-fix unreachable from a shell run
+  const autoFixAgentsMdArg = args.includes('--auto-fix-agents-md');
+  const autoFixPmMdArg = args.includes('--auto-fix-pm-md');
 
   if (!l3PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/l3-to-variant-pipeline.ts \\');
@@ -1090,7 +1098,9 @@ async function main() {
     console.error('  [--skip-integration=false] (default: ON — Phase 7 is deprecated and skipped) \\');
     console.error('  [--output=<output-path>] \\');
     console.error('  [--version=<semver>] (default: 0.1.0) \\');
-    console.error('  [--status=<beta|stable|deprecated>] (default: beta)');
+    console.error('  [--status=<beta|stable|deprecated>] (default: beta) \\');
+    console.error('  [--auto-fix-agents-md] (phase 3.5: regenerate AGENTS.md on marker misalignment) \\');
+    console.error('  [--auto-fix-pm-md] (phase 3.0: emit pm.md slimming guidance)');
     process.exit(1);
   }
 
@@ -1118,6 +1128,8 @@ async function main() {
     outputPath: outputArg?.split('=')[1],
     version: versionArg?.split('=')[1],
     status: statusArg?.split('=')[1],
+    autoFixAgentsMd: autoFixAgentsMdArg,
+    autoFixPmMd: autoFixPmMdArg,
   };
 
   try {

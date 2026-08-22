@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-22T18:05:59.962Z
+**Generated**: 2026-08-22T18:35:54.909Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -102,7 +102,7 @@
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.10.5 | scripts/l3-to-variant-pipeline.ts | fs, path |
+| l3-to-variant-pipeline.ts | 1.11.0 | scripts/l3-to-variant-pipeline.ts | fs, path |
 | lifecycle-sync-audit.ts | 1.4.6 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
@@ -112,7 +112,7 @@
 | propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
-| regenerate-agents-md.ts | 1.0.1 | scripts/regenerate-agents-md.ts | fs, path |
+| regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
 | render-pdf-deck.ts | 1.0.0 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.1 | scripts/resolve-variants.ts | fs, js-yaml, path |

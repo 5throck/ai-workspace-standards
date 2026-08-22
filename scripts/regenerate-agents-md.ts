@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.0.1
+ * @version 1.1.0
  *
  * Regenerates variant AGENTS.md from the L1 common template with variant-specific
  * VARIANT-*-START/END blocks filled in from agent frontmatter.
@@ -10,10 +10,15 @@
  *   bun scripts/regenerate-agents-md.ts --variant co-consult
  *   bun scripts/regenerate-agents-md.ts --all
  *   bun scripts/regenerate-agents-md.ts --dry-run --variant co-work
+ *   bun scripts/regenerate-agents-md.ts --source Projects/co-hr   # L3 source, in place
  *
  * Problem solved: Variants generated before the §-numbered AGENTS.md structure
  * was introduced lack VARIANT-*-START/END markers, so l3-to-variant-pipeline.ts
  * injection has no anchors to replace. This script regenerates from scratch.
+ * v1.1.0 adds --source <dir>: regenerate an L3 project's AGENTS.md in place
+ * (roster scanned from <dir>/agents/*.md — L3 sources have no variant.json
+ * `agents` array), used by the pipeline's --auto-fix-agents-md for sources
+ * outside templates/.
  */
 
 import * as fs from 'fs';
@@ -299,12 +304,61 @@ function regenerateVariant(variantName: string, dryRun: boolean): void {
   console.log(`  ✅ Written: ${outputPath}`);
 }
 
+/**
+ * Regenerate an L3 source project's AGENTS.md in place.
+ * L3 sources (Projects/<name>/) have no variant.json `agents` array, so the
+ * roster is derived by scanning agents/*.md (pm.md excluded, same rule as
+ * regenerateVariant). Reuses the same L1 template + block pipeline.
+ */
+function regenerateSource(sourceDir: string, dryRun: boolean): void {
+  const agentsDir = path.join(sourceDir, 'agents');
+  if (!fs.existsSync(agentsDir)) {
+    console.error(`  ❌ agents/ directory not found: ${agentsDir}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+    return;
+  }
+
+  const allAgentNames: string[] = fs
+    .readdirSync(agentsDir)
+    // pm.md is excluded by the roster convention; README*.md are agent-dir
+    // docs (L3 scaffolds ship agents/README.md + README_ko.md), not agents
+    .filter((f) => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('README'))
+    .map((f) => f.replace(/\.md$/, ''))
+    .sort();
+
+  console.log(`\n📦 Regenerating AGENTS.md for L3 source ${sourceDir}`);
+  console.log(`   Agents: ${allAgentNames.join(', ')}`);
+
+  const agents: AgentMeta[] = [];
+  for (const name of allAgentNames) {
+    agents.push(readAgentMeta(sourceDir, name));
+  }
+
+  const template = fs.readFileSync(COMMON_AGENTS_TEMPLATE, 'utf-8');
+  const blocks = generateVariantBlocks(agents);
+  const generated = injectBlocks(template, blocks);
+  const outputPath = path.join(sourceDir, 'AGENTS.md');
+
+  if (dryRun) {
+    console.log(`\n--- DRY RUN: Would write to ${outputPath} ---`);
+    console.log(generated.slice(0, 500) + '\n...');
+    return;
+  }
+
+  fs.writeFileSync(outputPath, generated, 'utf-8');
+  console.log(`  ✅ Written: ${outputPath}`);
+}
+
 // CLI entry point
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
 const allFlag = args.includes('--all');
 const variantIdx = args.indexOf('--variant');
 const variantName = variantIdx !== -1 ? args[variantIdx + 1] : null;
+const sourceIdx = args.indexOf('--source');
+const sourceDir = sourceIdx !== -1 ? args[sourceIdx + 1] : null;
 
 const MISALIGNED_VARIANTS = ['co-consult', 'co-work', 'co-security', 'co-design'];
 
@@ -319,12 +373,15 @@ if (allFlag) {
   for (const v of MISALIGNED_VARIANTS) {
     regenerateVariant(v, isDryRun);
   }
+} else if (sourceDir) {
+  regenerateSource(path.resolve(sourceDir), isDryRun);
 } else if (variantName) {
   regenerateVariant(variantName, isDryRun);
 } else {
   console.log(`Usage:
   bun scripts/regenerate-agents-md.ts --variant <name>   # Single variant
   bun scripts/regenerate-agents-md.ts --all              # All misaligned variants
+  bun scripts/regenerate-agents-md.ts --source <dir>     # L3 source, in place
   bun scripts/regenerate-agents-md.ts --dry-run --all    # Preview without writing
 
 Misaligned variants: ${MISALIGNED_VARIANTS.join(', ')}`);
