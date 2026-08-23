@@ -1,16 +1,18 @@
 ---
 name: research
 scope: co-deck
-version: 1.2.0
+version: 1.2.1
 description: >
   Source collection and ideation for lecture materials. After confirming
-  topic/audience/purpose, performs web research (Korean and English) and
-  writes research_notes.md. Responds to "research topic", "collect sources"
+  topic/audience/purpose, performs web research (Korean and English by
+  default, adjusted to the engagement's target market and audience when
+  they differ) and writes research_notes.md. Responds to "research topic",
+  "collect sources"
   . Stage 1 of the
   lecture workflow.
 status: active
 owner: research
-last_reviewed: 2026-06-19
+last_reviewed: 2026-08-23
 prerequisites: none
 ---
 
@@ -50,7 +52,7 @@ Use WebSearch and web_fetch to collect:
 - Expert quotes or reports worth citing
 - Real-world examples the audience can relate to
 
-Search in both Korean and English. Always record source URLs.
+Korean and English by default; adjust to the engagement's target market and audience when they differ. Always record source URLs.
 
 ---
 
