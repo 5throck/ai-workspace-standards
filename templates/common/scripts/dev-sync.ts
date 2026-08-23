@@ -1,4 +1,4 @@
-// @version 1.5.5
+// @version 1.6.0
 // v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
 //           previously `gh pr view <branch>` matched ANY PR regardless of state, so
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
@@ -256,6 +256,26 @@ if (fs.existsSync('package.json')) {
 // Check 2: README_ko pair
 if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
     console.warn('⚠️  README_ko.md missing (non-blocking)');
+}
+
+// 3.97 ADR governance linkage gate (blocking — Stage 2 of ADR-0059).
+//     The validator is L0-only (no docs/adr corpus exists in generated projects),
+//     so this step is guarded by existsSync — scaffolded projects skip it.
+if (fs.existsSync('scripts/verify-adr-governance.ts')) {
+    console.log('📋 Step 3.97: ADR governance linkage check...');
+    const govRes = await $`bun scripts/verify-adr-governance.ts --strict`.nothrow();
+    if (govRes.exitCode !== 0) {
+        console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
+        console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references.${RESET}`);
+        console.error(`${YELLOW}   Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
+        if (import.meta.main) {
+            process.exit(1);
+        }
+    } else {
+        console.log(`${GREEN}✓ ADR governance linkage check passed${RESET}`);
+    }
+} else {
+    console.log('📋 Step 3.97: skipped — ADR governance validator is L0-only (not present in scaffolded projects)');
 }
 
 // 4.5 L0→L1 publish — must run BEFORE audit gate so that CONSTITUTION scrub

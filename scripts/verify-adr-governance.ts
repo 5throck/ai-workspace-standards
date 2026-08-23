@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.1.0
+ * @version 1.2.0
  * @last_updated 2026-08-23
  *
  * Verifies the ADR→governance linkage mechanism (upward reflection gap detection)
@@ -20,16 +20,18 @@
  * - "Linked" means the ADR number or filename appears in any governance doc
  * - Accepted/active ADRs must be referenced from governance docs
  * - Marker hashes must match their source files (WARN on drift)
- * - WARN-only: always exits 0 on findings; exits 1 only on operational failure
+ * - Default mode: WARN-only (always exits 0 on findings; exits 1 only on operational failure)
+ * - Strict mode (--strict): exits 1 on ADR-linkage findings; marker-drift remains WARN-only
  *
- * Usage: bun scripts/verify-adr-governance.ts [--update-marker-hashes]
+ * Usage: bun scripts/verify-adr-governance.ts [--update-marker-hashes] [--strict]
  *
  * Flags:
  * - --update-marker-hashes: Rewrite/insert source+hash fields in all markers (seeding mode)
+ * - --strict: Exit 1 on ADR-linkage findings (blocking gate for dev-sync step 3.97)
  *
  * Exit codes:
- * - 0: Check completed (findings are WARN-only)
- * - 1: Operational failure (e.g., docs/adr missing)
+ * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage findings)
+ * - 1: Operational failure (e.g., docs/adr missing) OR strict mode with ADR-linkage findings
  */
 
 import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
@@ -51,6 +53,7 @@ const TEMPLATES_DIR = join(ROOT, 'templates');
 
 // CLI flags
 const UPDATE_MARKER_HASHES = process.argv.includes('--update-marker-hashes');
+const STRICT = process.argv.includes('--strict');
 
 /**
  * Represents a parsed ADR file
@@ -250,6 +253,11 @@ function checkMarkerDrift(markers: Marker[]): void {
   }
 
   console.log(`\nintentional-duplicate markers: ${okCount}/${totalMarkers} in sync\n`);
+
+  // Strict-mode note: marker-drift findings are always WARN-only
+  if (STRICT && (okCount < totalMarkers)) {
+    console.log('ℹ️  Strict mode: marker-drift findings remain WARN-only (deferred Stage 2b)');
+  }
 }
 
 /**
@@ -502,6 +510,9 @@ function main(): void {
 
   console.log(`✓ Post-cutoff Accepted ADRs to check: ${checked.length}\n`);
 
+  // Hoist linkage findings counter (used for strict-mode exit code)
+  let linkageFindings = 0;
+
   if (checked.length === 0) {
     console.log('ℹ️  All ADRs predate the cutoff date — no linkage check needed.');
     console.log(`   (Cutoff: ${CUTOFF_DATE})\n`);
@@ -514,7 +525,10 @@ function main(): void {
       }
     }
 
-    // Report findings (WARN-only)
+    // Set linkage findings count from array length
+    linkageFindings = findings.length;
+
+    // Report findings (WARN-only in default mode, blocking in strict mode)
     if (findings.length > 0) {
       console.log(`⚠️  [WARN] Found ${findings.length} unlinked Accepted ADR(s):\n`);
       for (const adr of findings) {
@@ -529,9 +543,16 @@ function main(): void {
     console.log(`ADR governance linkage: ${linked}/${checked.length} post-cutoff Accepted ADRs referenced\n`);
 
     if (findings.length > 0) {
-      console.log('✅ Check completed (findings are WARN-only — exit 0)');
+      if (STRICT) {
+        console.log(`⛔ Strict mode: ${findings.length} unlinked-ADR finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+      } else {
+        console.log('✅ Check completed (findings are WARN-only — exit 0)');
+      }
     } else {
       console.log('✅ All post-cutoff Accepted ADRs are referenced from governance docs.');
+      if (STRICT) {
+        console.log('ℹ️  Strict mode: marker-drift findings (if any) remain WARN-only (deferred Stage 2b)');
+      }
     }
   }
 
@@ -544,8 +565,9 @@ function main(): void {
     checkMarkerDrift(markers);
   }
 
-  // WARN-only: always exit 0 on findings
-  process.exit(0);
+  // Default mode: always exit 0 on findings (WARN-only)
+  // Strict mode: exit 1 if linkage findings exist, otherwise 0
+  process.exit(STRICT && linkageFindings > 0 ? 1 : 0);
 }
 
 // Run the check

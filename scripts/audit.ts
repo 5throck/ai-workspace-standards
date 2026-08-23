@@ -1,4 +1,4 @@
-// @version 2.20.0
+// @version 2.20.1
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -2163,9 +2163,9 @@ if (SPEC_CHECK) {
 }
 
 // ── ADR Governance Linkage Checks (--governance-check mode, warn-only) ─────────────
-// NOTE: Stage-1 burn-in per ADR-0059, flag-gated like ADR-0055's --spec-check;
-// ungating into dev-sync is Stage 2 once clean. WARN-only: script exits 0 on findings,
-// audit only FAILs on operational failure (exit 1 from the spawned script).
+// NOTE: dev-sync step 3.97 now invokes `verify-adr-governance.ts --strict` as a
+// blocking gate on ADR-linkage findings (Stage 2 of ADR-0059). This audit flag path
+// remains a non-blocking diagnostic — no flags forwarded to the spawned script here.
 if (GOVERNANCE_CHECK) {
     const { status, stdout, stderr } = spawnSync('bun', ['scripts/verify-adr-governance.ts'], {
         encoding: 'utf-8',
