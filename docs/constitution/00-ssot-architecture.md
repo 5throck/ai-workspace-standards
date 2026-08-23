@@ -77,6 +77,8 @@ templates/co-develop/variant.json
 Projects/<name>/   ←── Disconnected from Workspace Root thereafter (No automatic sync)
 ```
 
+> **Doc-section propagation (ADR-0062)**: beyond whole-file flows, whitelisted marker-based propagation domains (`constitution-context`, `variant-context`) extend the downward Propagation Flow for designated doc sections — marked zones in template docs are rewritten from scrubbed source slices instead of copying whole files.
+
 #### Critical SSOT Violation Patterns (What NOT to do)
 
 | Violation | Reason |

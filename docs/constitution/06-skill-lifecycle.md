@@ -112,6 +112,8 @@ Skills in `skills/` are propagated to `templates/common/skills/` (L1) by `propag
 
 **Prohibited in SKILLS.md**: Columns that control propagation behavior (e.g., `layer`) are explicitly forbidden. Propagation is exclusively controlled via SKILL.md frontmatter (`l2_propagate`/`scope`). Adding a `layer` column to SKILLS.md would create a silent dead column that misleads future developers — `layer-filter.ts` no longer reads it.
 
+**Inter-skill relations are also out of scope**: SKILLS.md does not track skill-to-skill relationships (prerequisites, related skills). Relations live in the generated skill graph (`docs/skill-graph.json` / `docs/skill-graph.md`), derived from SKILL.md frontmatter and agent/variant manifests per ADR-0060 — never as a SKILLS.md column.
+
 #### 6.3 Skill Body Structure
 
 ```markdown

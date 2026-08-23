@@ -115,6 +115,8 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   PM runs /sync "type: description" → PR opened
 ```
 
+> **Gate-moment decision records**: every gate ruling above — Design Gate Row 0 rulings, escalations, and go/no-go decisions — must emit a decision record (`docs/decisions/DEC-YYYYMMDD-NN.md`) before dispatch continues, per ADR-0061.
+
 ##### 5.4.1 Execution Plan Table Format
 
 All PM execution plans MUST use the following table format (enforced in `CLAUDE.md` and `AGENTS.md`):
