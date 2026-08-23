@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.0.0
+ * @version 1.0.1
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -122,10 +122,14 @@ function parseFrontmatter(content: string): Record<string, any> | null {
  */
 function extractBacktickReferences(content: string, knownSkillNames: Set<string>): Set<string> {
   const references = new Set<string>();
+  // Strip fenced code blocks first — their ``` delimiters would otherwise be
+  // consumed as inline backtick pairs, swallowing fenced content and misaligning
+  // pairing for every backtick reference after the first fence.
+  const proseOnly = content.replace(/^```[\s\S]*?^```/gm, '');
   const backtickRegex = /`([^`]+)`/g;
   let match;
 
-  while ((match = backtickRegex.exec(content)) !== null) {
+  while ((match = backtickRegex.exec(proseOnly)) !== null) {
     const name = match[1];
     if (knownSkillNames.has(name)) {
       references.add(name);

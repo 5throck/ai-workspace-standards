@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-23T21:56:23.320Z
+**Generated**: 2026-08-23T22:02:05.199Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
 | docs-writer | agents/docs-writer.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
-| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-08-15 |
+| pm | agents/pm.md | high        # claude-opus-5-0 | inherit | 2026-08-23 |
 | scaffolding-expert | agents/scaffolding-expert.md | low        # claude-haiku-4-5 | inherit | 2026-08-15 |
 | security-expert | agents/security-expert.md | medium        # claude-sonnet-5-0 | inherit | 2026-08-15 |
 
@@ -99,7 +99,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.0.0 | scripts/generate-skill-graph.ts | N/A |
+| generate-skill-graph.ts | 1.0.1 | scripts/generate-skill-graph.ts | N/A |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
