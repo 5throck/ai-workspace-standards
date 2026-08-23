@@ -1,6 +1,6 @@
 # Promotion Checklist Template
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Purpose**: Define 7 criteria for variant promotion from Phase A (Prototype) to Phase C (Template Creation)
 **Usage**: Copy this file to `Projects/[variant-name]/PROMOTION_CHECKLIST.md` and verify each criterion before promotion
 
@@ -25,6 +25,9 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 - [ ] `agents/` directory contains all variant-specific agents
 - [ ] `skills/` directory contains all variant-specific skills
 - [ ] Variant-specific directories (e.g., `regulations/`, `industry-profiles/`) properly structured
+- [ ] Country profiles (if shipped): `country_config` declared in `variant.json` with a `supported` list and `default: null` (region-neutral default), and every `supported` code has a `docs/countries/<CODE>.md` profile whose frontmatter `code` matches
+- [ ] Country-specific assets (skills, env keys) registered in `country_scoped_assets` in both schema copies (`docs/workspace-schema.json` and `templates/common/docs/workspace-schema.json`) - never shipped unregistered; no variant-local forks of registry-governed scoped skills
+- [ ] Docs and agents anchor to a jurisdiction only via the active country profile or explicit `(CC: ...)` markers - no hardcoded target-jurisdiction assumptions in region-neutral default paths
 - [ ] `_ORIGIN.md` lists files copied from workspace root
 - [ ] `_COMMON_VERSION.md` contains workspace common version snapshot
 
@@ -180,4 +183,4 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-06-05*
+*Last Updated: 2026-08-23*

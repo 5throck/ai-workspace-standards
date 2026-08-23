@@ -124,10 +124,6 @@
       "file": "skills/mece-logic-auditor/SKILL.md"
     },
     {
-      "name": "k-law",
-      "file": "skills/k-law/SKILL.md"
-    },
-    {
       "name": "hwp-document-processing",
       "file": "skills/hwp-document-processing/SKILL.md"
     },
@@ -338,18 +334,6 @@
         "phases": [
           1,
           3
-        ],
-        "platform_parity": "required"
-      },
-      {
-        "name": "k-law",
-        "layer": "variant",
-        "used_by_agents": [
-          "strategy-analyst"
-        ],
-        "phases": [
-          1,
-          2
         ],
         "platform_parity": "required"
       },

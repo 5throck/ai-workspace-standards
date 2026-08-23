@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-07-03 | - | production | Backfilled lifecycle record for existing production skill | pm |
 | 2026-08-16 | production | production | Version drift fix: aligned lifecycle doc to v1.2.0 per SKILL.md | lifecycle-manager |
+| 2026-08-24 | production | production | Version sync: aligned lifecycle doc to v1.4.1 per SKILL.md (i18n/country decision line added) | docs-writer |
 
 ## Acceptance Criteria
 
@@ -23,9 +24,9 @@
 ## Dependencies
 
 - pm (owner agent)
-- scripts/create-l2-scaffold.ts (scaffold execution)
+- scripts/create-l3-scaffold.ts (scaffold execution)
 - promote-variant (subsequent Phase B skill)
-- scripts/l2-to-variant-pipeline.ts (Phase B pipeline)
+- scripts/l3-to-variant-pipeline.ts (Phase B pipeline)
 
 ## Usage Statistics
 
@@ -36,7 +37,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.2.0
+- **Version**: 1.4.1
 - **Owner**: pm
-- **Last Updated**: 2026-08-16
-- **Last Reviewer**: lifecycle-manager
+- **Last Updated**: 2026-08-24
+- **Last Reviewer**: docs-writer

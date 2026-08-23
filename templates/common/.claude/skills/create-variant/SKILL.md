@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.4.0
+version: 1.4.1
 owner: pm
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-24
 metadata:
   type: process
   triggers:
@@ -42,6 +42,7 @@ A variant is a domain-specific AI team configuration built on the workspace comm
 - [ ] Variant name format: lowercase, alphanumeric + hyphens only (e.g., `safety-os`, `legal-ai`)
 - [ ] Domain type decided: `security` | `development` | `design` | `consulting` | `collaboration` | `lecture` | `game` | (custom)
 - [ ] Target country decided: a specific jurisdiction (`--country <CODE>`, e.g. `KR`) or region-neutral (default - omit the flag)
+- [ ] i18n locale set decided (which of the schema's `i18n.locale_codes` translation zones the variant supports, e.g. `ko`/`ja` docs): the language axis is independent of the country axis - a variant may be multi-language and region-neutral, single-language with country profiles, or any combination (see the Country vs. Language principle in `docs/country-profiles.md`)
 
 ### Step 1: Run scaffold script
 

@@ -32,6 +32,14 @@
 | 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
 | 10 | **User feedback** | Pending | Positive feedback from beta users; no critical UX/functional complaints. |
 
+## Country-Profile Readiness (KR profile shipped)
+
+| Check | Description | Status |
+|-------|-------------|--------|
+| `country_config` valid | `country_config` declares `supported: ["KR"]` with `default: null` (region-neutral default); `docs/countries/KR.md` exists with frontmatter `code: KR` | ✅ Verified |
+| Scoped assets registered | Country-specific assets (k-law skill, `LAW_API_OC` env key) are registered in `country_scoped_assets` in both schema copies; no variant-local forks of registry-governed scoped skills in `skills/` | ✅ Verified |
+| Region-neutral default intact | Docs and agents anchor to a jurisdiction only via the active country profile or explicit `(KR: ...)`/`(KR profile)` markers; no hardcoded target-jurisdiction assumptions in default paths | ✅ Verified |
+
 ## Domain-Specific Validation
 
 | Check | Description | Status |

@@ -78,6 +78,6 @@ Generated: 2026-08-11T05:17:34.294Z
 
 ## Contract-safety
 
-- [k-law](skills/k-law/SKILL.md) — KR country profile only
+- [k-law](skills/k-law/SKILL.md) — KR-scoped common skill; deploys only to --country KR projects (referenced through the KR country profile)
 - [zod-contract-gate](skills/zod-contract-gate/SKILL.md)
 

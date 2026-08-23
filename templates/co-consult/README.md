@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: a2151e62e8161b32aad5ff7e87b566b6e2011714ef452fd6d87a8e398195957d
+content_hash: cc09362013b1713a5a450fdaf1b5c98c7df1d4fd1c7e684fae1da860202e1340
 ---
 
 # co-consult
@@ -67,7 +67,6 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **company-intelligence**: Comprehensive company/corporate-group intelligence; dispatches 5 parallel research agents into one report.
 - **financial-statement-analysis**: Full financial statement analysis pipeline on the active country profile's disclosure system (KR: DART) — collection → validate → normalize → KPI → ROIC tree → report.
 - **mece-logic-auditor**: MECE issue tree auditing and strategic reasoning evaluation for consulting problem-solving frameworks.
-- **k-law**: Queries the Korean Ministry of Government Legislation's National Law Information Center Open API for statutes, precedents, administrative rules, municipal ordinances, and legal interpretation cases.
 - **hwp-document-processing**: Handles Korean office formats HWP 5.0 (read/validate only) and HWPX (full read/write/generate/validate) — used when a deliverable must be produced in or reference a Korean government/institutional document format.
 - **sample-driven-report-writing**: Analyzes a deliverable sample (HWP/PDF/DOCX) to extract its structure and mandatory table/chart requirements per section, then drafts report content matching the sample's exact format.
 
@@ -104,4 +103,4 @@ This variant focuses on strategy consulting for AI-assisted business consulting 
 
 ---
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-08-23*

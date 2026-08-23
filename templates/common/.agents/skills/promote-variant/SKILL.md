@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.2.0
+version: 1.2.1
 owner: pm
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-24
 metadata:
   type: process
   triggers:
@@ -50,6 +50,16 @@ bun scripts/audit.ts          # Conditions 3, 4
 ```
 
 All conditions must show Done before proceeding.
+
+### Step 1.5: Verify country-profile readiness
+
+Run the country-profile criteria rows from `docs/templates/PROMOTION_CHECKLIST-template.md` (Criteria 1) — these gate promotion for both country-shipping and region-neutral variants:
+
+- [ ] `country_config` valid (if the prototype ships country profiles): `supported` list declared, `default: null` (region-neutral default), and every `supported` code has a `docs/countries/<CODE>.md` profile with matching frontmatter `code`
+- [ ] Country-specific assets (skills, env keys) registered in `country_scoped_assets` in both schema copies - nothing ships unregistered, and there are no variant-local forks of registry-governed scoped skills
+- [ ] Region-neutral default intact: docs and agents reference a jurisdiction only via the active country profile or explicit `(CC: ...)` markers - no hardcoded target-jurisdiction assumptions in default paths
+
+A region-neutral prototype passes by confirming the second and third checks only (no unregistered scoped assets leaked in).
 
 ### Step 2: Update pre-promotion metadata
 

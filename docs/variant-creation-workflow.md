@@ -142,7 +142,7 @@ Create variant template and propagate to workspace root, enabling future project
 - **Location**: `templates/co-[variant-name]/`
 - **Method**:
   - **Option 1 (Manual)**: Manually copy files from `Projects/[variant-name]/` to `templates/co-[variant-name]/`
-  - **Option 2 (Automated)**: Run `bun run scripts/l2-to-variant-pipeline.ts Projects/[variant-name]/`
+  - **Option 2 (Automated)**: Run `bun run scripts/l3-to-variant-pipeline.ts Projects/[variant-name]/`
 - **Structure**:
   ```
   templates/co-[variant-name]/
@@ -195,10 +195,10 @@ Create variant template and propagate to workspace root, enabling future project
 | Direction | Mechanism | Frequency |
 |-----------|-----------|-----------|
 | L0 → L1 | `publish-to-template.ts` (auto via `/sync`) | Continuous |
-| L1 → L2 | `create-l2-scaffold.ts` (scaffold only) | **One-time** |
-| L2 → template | `l2-to-variant-pipeline.ts` (explicit) | On promotion |
+| L1 → L3 | `create-l3-scaffold.ts` (scaffold only) | **One-time** |
+| L3 → template | `l3-to-variant-pipeline.ts` (explicit) | On promotion |
 
-> ⚠️ **No automatic L1→L2 sync after scaffold.** L2 is an independent fork.
+> ⚠️ **No automatic L1→L3 sync after scaffold.** The L3 draft is an independent fork.
 > To check drift: `bun scripts/publish-to-template.ts --check-drift`
 
 ### Rollback Option
@@ -270,7 +270,7 @@ Create variant template and propagate to workspace root, enabling future project
 | Script | Purpose | Status |
 |--------|---------|--------|
 | `new-project.sh/ps1` | Create new project | ✅ Available |
-| `l2-to-variant-pipeline.ts` | Automate Projects/ → templates/ conversion | ✅ Available |
+| `l3-to-variant-pipeline.ts` | Automate Projects/ → templates/ conversion | ✅ Available |
 | `validate-templates.ts` | Template structure validation | ✅ Available |
 | `audit.ts` | Workspace standards compliance | ✅ Available |
 | `verify-platform-lifecycle.ts` | Platform parity verification | ✅ Available |
