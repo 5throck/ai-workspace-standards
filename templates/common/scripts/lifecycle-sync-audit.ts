@@ -11,7 +11,7 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.6
+ * @version 1.4.7
  * @last_updated 2026-08-20
  * @license MIT
  */
@@ -365,6 +365,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
   'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
   'audit:test-platform-parity',                   // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
+  'dev-sync:verify-adr-governance',               // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
 ]);
 
 function runCheckX(): SyncIssue[] {

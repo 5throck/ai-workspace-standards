@@ -1,5 +1,5 @@
 ---
-status: Accepted
+status: Accepted (Amended 2026-08-23)
 date: 2026-08-23
 author: PM + Automation Engineer
 ---
@@ -28,11 +28,11 @@ A new validator script `scripts/verify-adr-governance.ts` enforces the **upward 
 - **WARN-only**: The script exits 0 on findings (prints `[WARN]` lines) and exits 1 only on operational failure (e.g., docs/adr missing).
 - **Grandfathering**: ADRs dated **BEFORE 2026-08-23** are exempt (avoids ~50-file backfill noise). From the cutoff forward, new ADRs require frontmatter `status:` + `date:`.
 
-**Wiring**: The check is flag-gated in `scripts/audit.ts` as `--governance-check`, mirroring the ADR-0055 `--spec-check` pattern. Stage 1 is **burn-in only** — `bun scripts/audit.ts --governance-check` runs the validator, but `dev-sync.ts` does NOT yet call it (that's Stage 2).
+**Wiring**: The check is flag-gated in `scripts/audit.ts` as `--governance-check`, mirroring the ADR-0055 `--spec-check` pattern. Since the Stage 2 amendment below (2026-08-23), `dev-sync.ts` step 3.97 invokes `verify-adr-governance.ts --strict` as a **blocking gate** on ADR-linkage findings; `audit.ts --governance-check` remains the non-blocking diagnostic.
 
 **Exit semantics**:
 
-- `verify-adr-governance.ts`: WARN-only → always exit 0 on findings, exit 1 only on operational failure.
+- `verify-adr-governance.ts`: WARN-only by default (exit 0 on findings, exit 1 only on operational failure); with `--strict` (1.2.0, Stage 2), exit 1 on ADR-linkage findings — see the Amendment below.
 - `audit.ts`: Fails (exit 1) only if the spawned script exits non-zero (operational error) — findings themselves don't block audit.
 
 ### 2. Stage 1b: Intentional-Duplicate Marker Hashes (Follow-up PR)
@@ -90,3 +90,30 @@ Per ADR-0057's L0-leakage check and the L0→L1→L2 propagation rules, this mac
 ## Stage 2 (Future Ungating)
 
 Once the workspace is clean (0 WARN findings), `--governance-check` becomes a hard gate in `dev-sync.ts` — mirroring the ADR-0055 evolution from WARN-only to block-on-finding. The trigger is a separate design doc amendment to this ADR.
+
+> **Update (2026-08-23)**: Stage 2 has shipped — see the Amendment section below.
+
+## Amendment (2026-08-23): Stage 2 Ungating — ADR-Linkage Blocking
+
+Stage 2 shipped the same day as Stage 1: the linkage check's only finding on first run (ADR-0059 itself, before its constitution pointer) was remediated immediately, so the "once the workspace is clean" trigger was met with zero burn-in days.
+
+### Mechanism
+
+- `verify-adr-governance.ts` **1.2.0** adds `--strict`: exit 1 on **ADR-linkage findings only** (plain invocation stays WARN-only; marker-hash drift never blocks under `--strict`).
+- `dev-sync.ts` **1.6.0** adds **step 3.97 — ADR governance linkage gate**, a FATAL step running `bun scripts/verify-adr-governance.ts --strict` between step 3.95 (QA pre-checks) and the step 4 audit gate. A blocked sync aborts **before branch creation and commit**; writes already made by earlier steps (memory log, MEMORY.md index, CHANGELOG) remain on disk — the same exposure the existing step-3 CHANGELOG fatal has. The step is guarded by `existsSync` and **skipped in scaffolded projects** (the validator is L0-only; generated projects have no `docs/adr/` corpus) — registered in `lifecycle-sync-audit.ts` Check X `INTENTIONAL_CROSS_REFS` (1.4.7), same pattern as `pre-commit:validate-templates`.
+
+### Scope decision: linkage-only blocking
+
+Intentional-duplicate marker-hash drift (Stage 1b) deliberately stays WARN. The Stage 1b hashes are whole-file sha256-8 digests of the source constitution file, so **any unrelated edit** to that file flips the hash and flags every duplicate marker of that section — a false-positive profile that has not been proven acceptable under fire. Flipping drift to blocking is an explicit future option ("Stage 2b"), to be decided only after that false-positive rate is understood.
+
+### Honesty note: first actual ungating; ADR-0055 is design lineage, not precedent-in-force
+
+This is the workspace's **first actual ungating** of a WARN-only validator into a blocking dev-sync gate. ADR-0055's Stage 2 (`--spec-check` ungating) never shipped — that ADR is still `Proposed` and its ticket (`tickets/governance/T-20260816-001.yaml`) is still `waiting` — so the "ADR-0055 playbook" references in this ADR describe the pattern's design lineage, not a precedent in force.
+
+### L0-only boundary clarification (glob-copy)
+
+§3's "L0-only" refers to the **check's scope** — the governance corpus and `docs/adr/` exist only at L0. The script file itself sits inside the `scripts` propagation domain's `*.ts` glob, but its registry row's `L0` layer value excludes it from the L0→L1 copy (`layer-filter.ts` `includeScriptInL1` — "Skip L0-only scripts"): no copy exists or is created under `templates/common/scripts/`, no propagation-map exclude was added (the registry layer column is the exclusion mechanism), and no L1 SCRIPTS.md row exists or is required.
+
+### Unchanged
+
+`audit.ts --governance-check` (2.20.1, comment-only bump) remains the **non-blocking diagnostic** — dev-sync step 3.97 calls the validator directly with `--strict` and forwards no flags through the audit path.
