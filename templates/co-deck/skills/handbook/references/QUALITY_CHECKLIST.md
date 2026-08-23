@@ -81,7 +81,7 @@ Scans English handbook HTML for 197 hardcoded common misspellings. Strips `<scri
 | # | Check | Description |
 |---|-------|-------------|
 | 1 | Inline styles | `style="..."` attributes — **allowlisted** intentional patterns pass: CSS custom properties (`var(...)`), SVG presentation attributes (`fill`/`stroke`/`font-*`/`opacity`), flexbox (`display: flex`), `grid-template-columns`, short margin/padding (< 60 chars) |
-| 2 | Inline event handlers | `onclick`/`onerror`/… (XSS risk) — `copyCode(...)` calls are allowlisted |
+| 2 | Inline event handlers | `onclick`/`onerror`/… (XSS risk) — no allowlisted exceptions (copy buttons use event delegation from external JS) |
 | 3 | Deprecated tags | `<font>`, `<center>`, `<marquee>`, … |
 | 4 | Duplicate IDs | Same `id` used more than once in a file |
 | 5 | Empty headings | `<h1>`–`<h6>` with no content |

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-24](2026-08-24.md) | feat(co-deck): port CSP-safe copy buttons with localized labels and hardened link checker from handbook repos |
 | [2026-08-22](2026-08-22.md) | chore: update |
 | [2026-08-23](2026-08-23.md) | feat(skills): promote k-kosis to templates/common |
 | [2026-08-21](2026-08-21.md) | fix(scaffold): repair create-l3-scaffold.ts docs/context.md omission and related drift-prone gaps |

@@ -100,8 +100,6 @@ function checkInlineEvents(html: string, file: string): LintIssue[] {
 
   let m: RegExpExecArray | null;
   while ((m = EVENT_HANDLER_RE.exec(stripped)) !== null) {
-    // Allow copyCode(this) — intentional copy button handler in code blocks
-    if (/onclick\s*=\s*"copyCode\(this\)"/.test(m[0])) continue;
     const line = html.slice(0, m.index!).split("\n").length;
     issues.push({
       file,
