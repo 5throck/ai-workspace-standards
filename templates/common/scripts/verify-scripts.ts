@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.4.0
+ * @version 1.4.1
  *
  * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
  * enforces deprecation removal dates, and blocks on security advisories.
@@ -247,9 +247,10 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
     }
 
     // context.md references are intentionally scrubbed in L1 (templates/common/).
-    // Normalize both sides before comparison to avoid false drift on governance refs.
+    // Normalize BOTH sides: the L1 scrub may or may not have replaced
+    // context.md (scrub misses are the L0-leakage audit check's job, not drift's).
     const l0Normalized = l0Content.replace(/CONSTITUTION\.md/g, 'context.md');
-    const l1Normalized = l1Content;
+    const l1Normalized = l1Content.replace(/CONSTITUTION\.md/g, 'context.md');
 
     if (l0Normalized !== l1Normalized) {
       drifted.push({
