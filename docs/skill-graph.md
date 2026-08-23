@@ -24,9 +24,11 @@
 | `context-commonization-review` | L0 | — | — | — |
 | `create-variant` | L0 | — | — | — |
 | `customs-duty-drawback-workflow` | variant:co-export | customs-duty-drawback-specialist, customs-duty-drawback-specialist | phase3, phase4 | — |
+| `decision-record` | common | — | — | — |
 | `desktop-app-fallback` | variant:co-abap | code-writer, test-runner | phase3, phase4 | — |
 | `documentation-writing` | variant:co-work | content-writer, technical-writer | — | — |
 | `dump-monitor` | variant:co-abap | devops-admin, pm | phase1, phase6 | — |
+| `evidence-ledger` | common | — | — | — |
 | `executive-presentation` | variant:co-consult | communications-lead, communications-lead | phase3 | — |
 | `explain-me` | L0 | — | — | — |
 | `export-control-screening` | variant:co-export | export-control-compliance-specialist, export-control-compliance-specialist | phase1, phase2 | — |

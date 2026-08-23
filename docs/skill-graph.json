@@ -157,6 +157,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "decision-record",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "delivery-manager",
       "type": "agent",
       "layer": "variant:co-consult"
@@ -205,6 +210,11 @@
       "id": "dump-monitor",
       "type": "skill",
       "layer": "variant:co-abap"
+    },
+    {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "common"
     },
     {
       "id": "executive-presentation",
@@ -3009,6 +3019,12 @@
       "from": "source-command-celebrate",
       "to": "pm",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "source-verification-ledger",
+      "to": "evidence-ledger",
+      "source": "prose"
     },
     {
       "type": "used_by",

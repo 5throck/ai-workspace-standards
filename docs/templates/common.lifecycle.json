@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "stable",
-  "lastUpdated": "2026-06-06",
+  "lastUpdated": "2026-08-24",
   "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
   "propagatedTo": [
     "co-develop",
@@ -38,6 +38,11 @@
       "date": "2026-06-06",
       "event": "layer-governance-framework",
       "note": "ADR-0032 Layer Governance Framework adopted; scripts reclassified into L0/L1/L2 layers; layer-filter.ts helper added; publish-to-template.ts v1.5.0, create-l2-scaffold.ts v1.4.0, validate-templates.ts v1.5.0, new-project.sh v1.4.2"
+    },
+    {
+      "date": "2026-08-24",
+      "event": "common-contract-expansion",
+      "note": "common-contract.json updated: 2 skills added (evidence-ledger, decision-record) and pm agent gate-moment rule added per ADR-0061 decision-chain standard"
     }
   ]
 }
