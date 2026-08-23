@@ -1,4 +1,8 @@
-// @version 1.7.1
+// @version 1.7.2
+// v1.7.2: fix(pipeline): forward --spec-exempt via SYNC_SPEC_EXEMPT env instead of shell
+//           interpolation — the interpolated " --spec-exempt=X" (leading space) reached
+//           audit as a single argv word and defeated its startsWith parse, making the
+//           ADR-0055 escape hatch inert on every /sync run (ported from co-abap 1.7.2)
 // v1.7.1: fix(types): coerce Bun Shell stderr to string before .trim() (2 sites) and
 //           widen the five withRetry isSuccess lambdas to the (result: unknown) contract
 //           — typing-only, no behavior change (ported from co-abap docs/upstream-fix-list.md)
@@ -241,7 +245,13 @@ if (fs.existsSync(archiveMemoryTs)) {
 // Output is intentionally visible (no .quiet()); same idiom as step 3.97.
 const specRegPath = path.join('docs', 'specs', 'registry.json');
 if (fs.existsSync(specRegPath)) {
-    const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only${specExempt ? ` --spec-exempt=${specExempt}` : ''}`.nothrow();
+    // Pass the exemption via SYNC_SPEC_EXEMPT (documented env fallback in audit.ts):
+    // interpolating ` --spec-exempt=X` into the Bun $ shell keeps the leading space in
+    // a single argv word, which defeats audit's startsWith('--spec-exempt=') parse.
+    const specEnv = specExempt ? { SYNC_SPEC_EXEMPT: specExempt } : {};
+    const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+        .env({ ...process.env, ...specEnv })
+        .nothrow();
     if (specRes.exitCode !== 0) {
         console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
         console.error('  The diff touches code (scripts/templates/agents) with no relevant spec activity.');

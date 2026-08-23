@@ -1,4 +1,8 @@
-// @version 2.21.0
+// @version 2.21.1
+// v2.21.1: fix(lint+types): stripComment now strips trailing \r before matching — under
+//           core.autocrlf checkouts the $ anchors never matched, so the > nul lint flagged
+//           its own prose comments (ported from co-abap 2.21.2); validators import switched
+//           to a non-literal specifier so variant checkouts type-check (L0-only module)
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -522,7 +526,12 @@ if (hasBun) {
     // which is how `phase: active`/`beta` drift and 6 unparseable SKILL.md frontmatters went
     // unnoticed. Error-severity findings Fail the audit; warnings stay visible as WARN.
     if (fs.existsSync(path.join('scripts', 'validators', 'index.ts')) && fs.existsSync('templates')) {
-        const { runAllValidators } = await import('./validators/index.ts');
+        // Non-literal specifier: scripts/validators/ is L0-only (never propagated), and a
+        // literal specifier is statically resolved by tsc in variant checkouts — TS2307 even
+        // though this existsSync guard makes the import unreachable there. Resolved to a
+        // file URL so runtime ESM resolution is cwd/module-independent.
+        const validatorsUrl = new URL('./validators/index.ts', import.meta.url).href;
+        const { runAllValidators } = await import(validatorsUrl);
         let validatorErrors = 0;
         let validatorWarnings = 0;
         for (const variant of fs.readdirSync('templates').filter(d => d.startsWith('co-'))) {
@@ -1711,9 +1720,14 @@ if (!LIFECYCLE_ONLY) {
     const LINT_SKIP_DIRS = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build', '.next', 'coverage', 'Projects']);
     const LINT_ROOTS = ['scripts', 'templates', '.githooks', 'tests'];
 
-    /** Strip line comments so prose *about* the banned pattern isn't mistaken for a use of it. */
+    /** Strip line comments so prose *about* the banned pattern isn't mistaken for a use of it.
+     * Trailing \r is removed first: under core.autocrlf checkouts lines end CRLF, and the
+     * end-anchors below would otherwise fail to match, leaving comments unstripped. */
     const stripComment = (line: string): string =>
-        line.replace(/^\s*(?:\/\/|#|<#|\*).*$/, '').replace(/\s+(?:\/\/|#)\s.*$/, '');
+        line
+            .replace(/\r$/, '')
+            .replace(/^\s*(?:\/\/|#|<#|\*).*$/, '')
+            .replace(/\s+(?:\/\/|#)\s.*$/, '');
 
     let nulLintHits = 0;
     let nulLintScanned = 0;
