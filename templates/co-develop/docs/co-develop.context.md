@@ -106,7 +106,7 @@ PM —Architect (design + ADR)
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Coding Guidelines
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 8b784484 -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: de37df36 -->
 
 ### Core Rules
 

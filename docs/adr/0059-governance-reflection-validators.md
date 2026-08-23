@@ -32,7 +32,7 @@ A new validator script `scripts/verify-adr-governance.ts` enforces the **upward 
 
 **Exit semantics**:
 
-- `verify-adr-governance.ts`: WARN-only by default (exit 0 on findings, exit 1 only on operational failure); with `--strict` (1.2.0, Stage 2), exit 1 on ADR-linkage findings — see the Amendment below.
+- `verify-adr-governance.ts`: WARN-only by default (exit 0 on findings, exit 1 only on operational failure); with `--strict` (1.2.0, Stage 2), exit 1 on ADR-linkage findings — see the Amendment below. (marker-drift blocking added by Stage 2b — see the second Amendment below)
 - `audit.ts`: Fails (exit 1) only if the spawned script exits non-zero (operational error) — findings themselves don't block audit.
 
 ### 2. Stage 1b: Intentional-Duplicate Marker Hashes (Follow-up PR)
@@ -99,12 +99,12 @@ Stage 2 shipped the same day as Stage 1: the linkage check's only finding on fir
 
 ### Mechanism
 
-- `verify-adr-governance.ts` **1.2.0** adds `--strict`: exit 1 on **ADR-linkage findings only** (plain invocation stays WARN-only; marker-hash drift never blocks under `--strict`).
+- `verify-adr-governance.ts` **1.2.0** adds `--strict`: exit 1 on **ADR-linkage findings only** (plain invocation stays WARN-only; marker-hash drift never blocks under `--strict`) (superseded by Stage 2b below).
 - `dev-sync.ts` **1.6.0** adds **step 3.97 — ADR governance linkage gate**, a FATAL step running `bun scripts/verify-adr-governance.ts --strict` between step 3.95 (QA pre-checks) and the step-4.9 audit gate. A blocked sync aborts **before branch creation and commit**; writes already made by earlier steps (memory log, MEMORY.md index, CHANGELOG) remain on disk — the same exposure the existing step-3 CHANGELOG fatal has. The step is guarded by `existsSync` and **skipped in scaffolded projects** (the validator is L0-only; generated projects have no `docs/adr/` corpus) — registered in `lifecycle-sync-audit.ts` Check X `INTENTIONAL_CROSS_REFS` (1.4.7), same pattern as `pre-commit:validate-templates`.
 
 ### Scope decision: linkage-only blocking
 
-Intentional-duplicate marker-hash drift (Stage 1b) deliberately stays WARN. The Stage 1b hashes are whole-file sha256-8 digests of the source constitution file, so **any unrelated edit** to that file flips the hash and flags every duplicate marker of that section — a false-positive profile that has not been proven acceptable under fire. Flipping drift to blocking is an explicit future option ("Stage 2b"), to be decided only after that false-positive rate is understood.
+Intentional-duplicate marker-hash drift (Stage 1b) deliberately stays WARN. The Stage 1b hashes are whole-file sha256-8 digests of the source constitution file, so **any unrelated edit** to that file flips the hash and flags every duplicate marker of that section — a false-positive profile that has not been proven acceptable under fire (superseded by Stage 2b below — analysis resolved this; see the Stage 2b Amendment). Flipping drift to blocking is an explicit future option ("Stage 2b"), to be decided only after that false-positive rate is understood.
 
 ### Honesty note: first actual ungating; ADR-0055 is design lineage, not precedent-in-force
 
@@ -117,3 +117,31 @@ This is the workspace's **first actual ungating** of a WARN-only validator into 
 ### Unchanged
 
 `audit.ts --governance-check` (2.20.1, comment-only bump) remains the **non-blocking diagnostic** — dev-sync step 3.97 calls the validator directly with `--strict` and forwards no flags through the audit path.
+
+## Amendment (2026-08-23, later): Stage 2b — Marker-Drift Blocking
+
+The Stage 2 scope decision deferred marker-drift blocking until the whole-file false-positive profile was understood. That analysis is complete and resolves the recorded precondition, so Stage 2b ships the deferral's other half: intentional-duplicate marker-hash drift now blocks under `--strict`.
+
+### Precondition resolved: the whole-file false-positive profile
+
+Constitution sources are one-section-per-file (§3 → `03-pr-workflow.md`, §8 → `08-coding-guidelines.md`), so the only unrelated-edit class that could flip a whole-file hash was the 2-line `>` preamble above the section heading — the sources carry no hub plumbing that the duplicates mirror. Template duplicates are transformed summaries, never verbatim copies: the hash is a source-side tripwire by design, so "section changed → review the duplicate" is the correct trip semantic at section granularity. With the digest scoped to the section, an edit that flips it is by definition an edit to the duplicated content, not collateral noise.
+
+### Mechanism
+
+- `verify-adr-governance.ts` **1.3.0** re-scopes `computeSectionHash` to the section slice — from the first level-3 (`###`) heading to EOF, CRLF-normalized sha256-8, with a whole-file fallback when the source has no such heading.
+- The strict exit becomes `linkageFindings + markerFindings > 0`. All four marker WARN classes count: missing source/hash fields, missing source file, hash-compute failure, hash mismatch. The default mode is unchanged (WARN-only).
+- A one-time re-seed of all 9 markers lands in the same PR as this stage — section hashes differ from the previous whole-file hashes, so every marker needed a fresh digest.
+- New guard: `--strict` and `--update-marker-hashes` are mutually exclusive (gating vs. seeding) — combining them exits 1.
+
+### Remedy workflow
+
+A blocked step-3.97 sync points the operator at the remedy:
+
+1. Review the duplicated section in the flagged template file.
+2. Update it if stale.
+3. Run `bun scripts/verify-adr-governance.ts --update-marker-hashes`.
+4. Re-run `/sync`.
+
+### dev-sync guidance
+
+`dev-sync.ts` **1.6.2** extends the step 3.97 guidance string with the marker remedy (string-only change; the gate's placement and mechanics are unchanged from Stage 2).
