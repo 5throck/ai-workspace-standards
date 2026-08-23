@@ -149,6 +149,7 @@ When to create a new skill vs. reuse:
 - [ ] Add skill to `docs/context.md ## Skills` table (for individual projects)
 - [ ] Add skill to `AGENTS.md ## Skills` table (workspace root)
 - [ ] Verify skill file is in correct directory (`skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`)
+- [ ] If the asset is country-scoped: add the `country_scoped_assets` registry entry in **both** schema copies (`docs/workspace-schema.json` + `templates/common/docs/workspace-schema.json`) plus, for env keys, the `.env.sample` marker block — in the same commit (`validate-templates.ts` env-integrity errors enforce this)
 - [ ] Run `bun scripts/skill-lifecycle-audit.ts` to verify registration
 
 #### 6.6 Skill Lifecycle Management
@@ -319,7 +320,7 @@ statistics APIs, disclosure systems) are registered — not frontmatter-marked �
 }
 ```
 
-**Deployment rule**: `new-project.ts` and `create-l2-scaffold.ts` call
+**Deployment rule**: `new-project.ts` and `create-l3-scaffold.ts` call
 `scripts/helpers/prune-country-scoped-assets.ts` after the copy/overlay steps to delete
 every registered skill from all four mirror directories (`skills/`, `.claude/skills/`,
 `.gemini/skills/`, `.agents/skills/`) unless the project's target country (`--country`)
