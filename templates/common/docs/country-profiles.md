@@ -69,7 +69,18 @@ Some skills in the workspace registry are country-scoped: their function require
 - The scope criterion is data-system access, never language
 - The single source of truth is the `country_scoped_assets` registry in `docs/workspace-schema.json`
 
+The registry governs three asset classes - **skills**, **scripts**, and **env**. Env credentials ship inside `# >>> country-scoped:<CC>` / `# <<< country-scoped:<CC>` marker blocks in `.env.sample` and are pruned at scaffold time unless the target country matches, so a region-neutral project never receives another country's API keys. Project-specific env vars stay outside the marker blocks and are never touched by pruning.
+
 If your project needs a country-scoped skill it did not receive, either re-scaffold with the correct target country, or copy the skill from `templates/common/skills/` in the workspace repository per convention (copied skills do not auto-upgrade).
+
+### Deregistration Path
+
+Withdrawing support for a country-scoped asset:
+
+1. Remove the asset from `country_scoped_assets` in **both** schema copies - `docs/workspace-schema.json` and `templates/common/docs/workspace-schema.json` - in the same commit (the two `country_scoped_assets` sections must stay byte-identical)
+2. Remove the shipped asset from `templates/common/` in every mirror directory: the `.env.sample` marker block for env keys, or the skill directories in `skills/`, `.claude/skills/`, `.gemini/skills/`, and `.agents/skills/` for skills
+3. Mark the country profile `status: stale` if its *Tooling & Skill Mapping* section referenced the asset
+4. Run `bun scripts/validate-templates.ts` - the registry integrity checks confirm nothing dangles: a registered key missing from every marker block, or an unregistered key sitting inside one, is an error
 
 ### Personal/Global Skill Bundles
 
@@ -110,6 +121,8 @@ Every profile must open with (or prominently include) a disclaimer in this spiri
 ## Country vs. Language
 
 Country and language are separate axes. Language policy lives in the project's i18n settings (`i18n.locale_codes` in `docs/workspace-schema.json`); profiles reference those settings but never redefine them. One country may have multiple languages (CH, CA) and one language may span many countries (`en`). Note that `zh-CN`/`zh-TW` are language tags, not country codes.
+
+When a region-neutral document must state a jurisdiction-specific fact, tag it with an explicit parenthetical marker - (KR: ...) - instead of restructuring the document around it (the `co-hr` / `co-export` / `co-news` convention). The marker keeps jurisdiction anchors greppable and removable when the document is re-scoped.
 
 ## See Also
 

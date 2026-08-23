@@ -77,7 +77,7 @@ asks for the project's target country at scaffold time (or takes `--country <COD
 (SSOT) from all four mirror directories (`skills/`, `.claude/skills/`, `.gemini/skills/`,
 `.agents/skills/`) unless the selected country matches the registered scope — e.g.
 `k-law` / `k-dart` / `k-kosis` (KR) deploy only to `--country KR` projects and are
-absent from region-neutral ones. The same helper runs in `create-l2-scaffold.ts`
+absent from region-neutral ones. The same helper runs in `create-l3-scaffold.ts`
 (new-variant drafts take the same `--country` flag).
 
 See [ADR-0057](../adr/0057-country-profile-mechanism.md) and the convention doc
@@ -149,7 +149,7 @@ Variant-specific sections are marked with inject markers:
 > `rm docs/<variant>.context.md && bun scripts/new-project.ts <name> <variant>`
 >
 > **Variant naming convention**: All variant names must follow the `co-` prefix convention enforced
-> by `l2-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
+> by `l3-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
 ```
 
 #### 7.4.5 Variant Scaffolding — File Overlay Mechanics
@@ -201,12 +201,12 @@ This table tracks the **variant-authoring** lifecycle specifically (creating a b
 |---|---|---|---|
 | **L0** (workspace root) | — | No L0 changes | `bun run propagate:apply` syncs L0→L1 |
 | **L1** (`templates/common/`) | `propagate:apply` installs scripts | `propagate:docs` injects COMMON markers | — |
-| **L2** (`templates/co-*/`) | — (does not exist yet) | — | `l2-to-variant-pipeline.ts` writes the promoted template here |
-| **L3** (`Projects/<name>/`) | `create-l2-scaffold.ts` creates a new variant **draft** here | Developer refines the draft in place | Draft is consumed by promotion to L2 |
+| **L2** (`templates/co-*/`) | — (does not exist yet) | — | `l3-to-variant-pipeline.ts` writes the promoted template here |
+| **L3** (`Projects/<name>/`) | `create-l3-scaffold.ts` creates a new variant **draft** here | Developer refines the draft in place | Draft is consumed by promotion to L2 |
 
 > **Key script roles**:
-> - `create-l2-scaffold.ts` — creates a new variant **draft** at `Projects/<name>/` (L3), despite the "l2" in its own name and header comment (`"Phase A scaffold creation for new workspace variants (L2 / Projects/)"`) — the name follows ADR-0031's original terminology, which called this draft "L2" before this document's L3 layer existed
-> - `l2-to-variant-pipeline.ts` — promotes that L3 draft into an official L2 variant template at `templates/co-<name>/` (same naming-predates-L3 caveat; its helpers `helpers/scan-l3-project.ts` and `helpers/reconcile-with-l0-l1.ts` now use L3-correct identifiers internally, matching this document's terminology)
+> - `create-l3-scaffold.ts` — creates a new variant **draft** at `Projects/<name>/` (L3)
+> - `l3-to-variant-pipeline.ts` — promotes that L3 draft into an official L2 variant template at `templates/co-<name>/`
 > - `new-project.ts` — separately, creates an ordinary L3 project at `Projects/<name>/` from an *existing* L2 variant template — this is the everyday project-creation path, not variant authoring
 > - `propagate:apply` — syncs L0→L1(common); `propagate:docs` — syncs L1(common)→L2(variants)
 

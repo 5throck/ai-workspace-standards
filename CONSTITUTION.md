@@ -118,7 +118,7 @@ All changes reach `main` via Pull Request—never by direct push. The `/sync` pi
 
 ### 4. Internationalization (i18n) → [Full details](docs/constitution/04-i18n.md)
 
-Apply only to projects with user-facing UI (web app, desktop app, CLI with messages). Pure API servers and libraries are exempt. Standard: 16 languages (`en` default, `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` RTL). Translation files use flat JSON (`locales/<lang-code>.json`). Language detection: `APP_LOCALE` env var → OS locale → `en` fallback. All keys must exist in `en.json` as source of truth.
+Apply only to projects with user-facing UI (web app, desktop app, CLI with messages). Pure API servers and libraries are exempt. Standard: 16 languages (`en` default, `ko`, `ja`, `zh-CN`, `zh-TW`, `de`, `es`, `fr`, `pt`, `vi`, `ms`, `id`, `th`, `ru`, `it`, `ar` RTL). Translation files use flat JSON (`locales/<lang-code>.json`). Language detection: `APP_LOCALE` env var → OS locale → `en` fallback. All keys must exist in `en.json` as source of truth. Country profiles (`country_config`, ADR-0057/0058) are an axis independent from i18n locale codes - they scope jurisdiction-specific assets and never redefine language settings (§4.3 in the full details doc).
 
 ---
 
@@ -639,4 +639,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-16*
+*Last Updated: 2026-08-23*
