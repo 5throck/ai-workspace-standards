@@ -312,7 +312,7 @@ Request received
 
 The PM uses a 3-tier model strategy to optimize cost and quality:
 
-- **High-tier (Design/Plan)**: Used exclusively by the PM/Architect for complex reasoning, architectural design, and writing precise sub-agent prompts.
+- **High-tier (Design/Plan)**: Used by the architect and High-tier design specialists for complex reasoning, architectural design, and writing precise sub-agent prompts.
 - **Medium-tier (Review/QA)**: Used by Auditor or Security agents to review code, run tests, and perform quality gates. Acts as an independent supervisor.
 - **Low-tier (Coding/Execute)**: Used by Automation Engineer agents for fast typing, simple repetitive coding, or strictly scoped tasks.
 

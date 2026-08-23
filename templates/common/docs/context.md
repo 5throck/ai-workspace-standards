@@ -27,14 +27,16 @@ This project follows the workspace-wide 3-Tier model architecture to decouple ag
 The mapping is immutable per generation:
 
 **Gemini Tier Mapping (3.x Generation):**
-- **High**: `gemini-3.1-pro` (Complex reasoning, planning, PM/Architect)
-- **Medium**: `gemini-3.7-flash` (Reviews, testing, QA)
+- **High**: `gemini-3.1-pro` (Complex reasoning, planning, architecture)
+- **Medium**: `gemini-3.7-flash` (Orchestration, coordination, reviews, testing, QA)
 - **Low**: `gemini-3.7-flash` (Fast, repetitive execution)
 
 **Claude Tier Mapping:**
 - **High**: `claude-opus-5-0`
 - **Medium**: `claude-sonnet-5-0`
 - **Low**: `claude-haiku-4-5`
+
+Tier layering: the workspace-root PM stays High (workspace governance and design adjudication); template PMs are Medium (project orchestration). A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 
 Standard directory layout for all projects in this workspace:
 
