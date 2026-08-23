@@ -496,6 +496,15 @@
       "source": "manual",
       "created": "2026-08-23",
       "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-variant-i18n-consolidation-design",
+      "title": "variant i18n consolidation design",
+      "file": "docs/designs/2026-08-24-variant-i18n-consolidation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
     }
   ]
 }

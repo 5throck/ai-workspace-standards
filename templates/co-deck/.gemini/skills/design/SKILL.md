@@ -1,14 +1,14 @@
 ---
 name: design
 scope: co-deck
-version: 1.2.0
+version: 1.2.1
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
   design", "pick colors/fonts", "make design spec" . Stage 4 of the workflow.
 status: active
 owner: design
-last_reviewed: 2026-06-19
+last_reviewed: 2026-08-24
 prerequisites: storyline
 ---
 
@@ -65,9 +65,7 @@ Decide on at least 8 role-based colors:
 #### Fonts
 
 - **One unified Korean+English font** is strongly recommended (mixed fonts cause rendering inconsistency)
-- Recommended fonts:
-  - Serif: MaruBuri — good for dark backgrounds
-  - Sans-serif: NanumSquareNeo, Pretendard
+- Korean font selection guidance (house sans-serif faces, fallback stacks, regional-glyph matching) follows the common `i18n-layout` skill (constitution §4.4 i18n asset suite); font download and TTF wiring remain deck tooling (`prep-pdf` → `download-font.ts`)
 - Record web font URL or local TTF path
 
 #### Font Sizes (baseline)

@@ -1472,6 +1472,12 @@
     {
       "type": "references",
       "from": "design",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design",
       "to": "measure",
       "source": "prose"
     },
@@ -1480,6 +1486,12 @@
       "from": "design",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "design",
+      "to": "prep-pdf",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -1648,6 +1660,12 @@
       "from": "financial-infographic-svg",
       "to": "financial-narrative-brief",
       "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "financial-infographic-svg",
+      "to": "i18n-formatting",
+      "source": "prose"
     },
     {
       "type": "phase",
@@ -2079,6 +2097,12 @@
       "type": "references",
       "from": "hwp-document-processing",
       "to": "consulting-report-writing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "hwp-document-processing",
+      "to": "i18n-layout",
       "source": "prose"
     },
     {

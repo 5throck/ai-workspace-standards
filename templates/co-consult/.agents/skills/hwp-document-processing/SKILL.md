@@ -9,8 +9,8 @@ description: >
   template but must be delivered as .hwpx, or when validating chapter structure, guideline-slot
   completeness, or page count of a drafted deliverable.
 owner: technology-specialist
-version: 2.0.0
-last_reviewed: 2026-08-08
+version: 2.0.1
+last_reviewed: 2026-08-24
 prerequisites:
 metadata:
   type: implementation
@@ -73,3 +73,4 @@ Korean government and public-institution consulting deliverables (e.g. the KOSME
 
 - `structural-innovation-report-writing` — defines the chapter structure, page targets, and Markdown draft this skill converts into the final `.hwpx`
 - `consulting-report-writing` — general consulting report writing standards
+- `i18n-layout` (common skill, constitution §4.4 i18n asset suite) — owns general text encoding, RTL/bidi, and script-font layout rules; this skill owns the HWP/HWPX document procedures themselves
