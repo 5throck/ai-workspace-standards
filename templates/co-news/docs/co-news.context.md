@@ -61,7 +61,7 @@ Phase 1 is the only parallel stage (`financial-analyst` + `legal-researcher` run
 
 | Principle | Description |
 |-----------|-------------|
-| **Fact-Verified** | No claim ships without 2+ independent sources in the citation ledger |
+| **Fact-Verified** | No claim ships without 2+ independent sources in the citation ledger **[NEWS-R1]** |
 | **Disclosure-Grounded** | Financial figures trace to a specific regulator filing (KR: DART, receipt number logged), never estimated |
 | **Naturally Human-Written** | Every draft passes the AI-tell reduction gate before publish |
 | **House-Style Conformant** | Register (Sedaily general-economic vs TheBell IB/PE) matches the assignment's target audience |

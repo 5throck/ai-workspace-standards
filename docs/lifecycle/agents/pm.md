@@ -62,6 +62,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-06-23
+- **Last Updated**: 2026-08-24
 - **Last Reviewer**: lifecycle-manager
 

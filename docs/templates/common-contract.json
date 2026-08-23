@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json.",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -13,7 +13,7 @@
   "common_agents": {
     "pm": {
       "source": "agents/pm.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "overridable": true,
       "override_type_allowed": ["additive", "replacement"],
       "expected_override_all_variants": true,
@@ -94,6 +94,18 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Translation helper for README and documentation files"
+    },
+    "evidence-ledger": {
+      "source": "skills/evidence-ledger/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Fixed-column evidence ledger with variant overlays (ADR-0061)"
+    },
+    "decision-record": {
+      "source": "skills/decision-record/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Decision record format for gate-moment rulings (ADR-0061)"
     }
   },
   "common_commands": {

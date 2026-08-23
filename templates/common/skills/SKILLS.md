@@ -48,6 +48,8 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
 | `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `swe-solve` | 1.0.0 | active | pm | 2026-08-06 | — | Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks |
+| `evidence-ledger` | 1.0.0 | active | pm | 2026-08-24 | — | Fixed-column evidence ledger with variant overlays (scope: common); ADR-0061 decision-chain standard |
+| `decision-record` | 1.0.0 | active | pm | 2026-08-24 | — | Decision record format for gate-moment rulings (scope: common); ADR-0061 decision-chain standard |
 
 
 

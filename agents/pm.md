@@ -13,12 +13,12 @@ description: 'Orchestrates Phases 0, 2, 5, 6. Enforces quality gates. Use when: 
 examples:
   - user: "Start a new feature implementation"
     assistant: "I'll orchestrate Phase 0 (Project Initiation) and Phase 1-2 (Planning & Architecture, including design approval)"
-version: 1.0.0
-last_reviewed: 2026-07-31
+version: 1.1.0
+last_reviewed: 2026-08-24
 lifecycle:
   phase: production
   created: 2026-05-29T00:00:00.000Z
-  last_updated: 2026-06-13T00:00:00.000Z
+  last_updated: 2026-08-24T00:00:00.000Z
   governance: docs/lifecycle/agents/pm.md
 ---
 
@@ -178,6 +178,10 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 - Architect creates/updates design doc — PM dispatches, NOT implements directly
 - Design doc MUST be committed before implementation begins
 - Only E1–E5 exemptions are valid — PM cannot invent ad-hoc exemptions
+
+## Gate-Moment Decision Records (ADR-0061)
+
+Every gate ruling — a Design Gate Row 0 determination, an escalation, or a go/no-go decision — MUST emit a decision record at `docs/decisions/DEC-YYYYMMDD-NN.md` (format defined in the `decision-record` skill, per ADR-0061) **before dispatch continues**. Decision records are superseded, never deleted.
 
 ## Required Tools
 

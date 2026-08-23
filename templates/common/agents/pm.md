@@ -3,8 +3,8 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
-version: "1.0.0"
-last_updated: "2026-08-23"
+version: "1.1.0"
+last_updated: "2026-08-24"
 tier:
   claude: medium
   gemini: medium
@@ -211,6 +211,10 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 - Architect creates/updates design doc — PM dispatches, NOT implements directly
 - Design doc MUST be committed before implementation begins
 - Only E1–E5 exemptions are valid — PM cannot invent ad-hoc exemptions
+
+## Gate-Moment Decision Records (ADR-0061)
+
+Every gate ruling — a Design Gate Row 0 determination, an escalation, or a go/no-go decision — MUST emit a decision record at `docs/decisions/DEC-YYYYMMDD-NN.md` (format defined in the `decision-record` skill, per ADR-0061) **before dispatch continues**. Decision records are superseded, never deleted.
 
 ## Required Tools
 
