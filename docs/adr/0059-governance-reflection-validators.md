@@ -100,7 +100,7 @@ Stage 2 shipped the same day as Stage 1: the linkage check's only finding on fir
 ### Mechanism
 
 - `verify-adr-governance.ts` **1.2.0** adds `--strict`: exit 1 on **ADR-linkage findings only** (plain invocation stays WARN-only; marker-hash drift never blocks under `--strict`).
-- `dev-sync.ts` **1.6.0** adds **step 3.97 — ADR governance linkage gate**, a FATAL step running `bun scripts/verify-adr-governance.ts --strict` between step 3.95 (QA pre-checks) and the step 4 audit gate. A blocked sync aborts **before branch creation and commit**; writes already made by earlier steps (memory log, MEMORY.md index, CHANGELOG) remain on disk — the same exposure the existing step-3 CHANGELOG fatal has. The step is guarded by `existsSync` and **skipped in scaffolded projects** (the validator is L0-only; generated projects have no `docs/adr/` corpus) — registered in `lifecycle-sync-audit.ts` Check X `INTENTIONAL_CROSS_REFS` (1.4.7), same pattern as `pre-commit:validate-templates`.
+- `dev-sync.ts` **1.6.0** adds **step 3.97 — ADR governance linkage gate**, a FATAL step running `bun scripts/verify-adr-governance.ts --strict` between step 3.95 (QA pre-checks) and the step-4.9 audit gate. A blocked sync aborts **before branch creation and commit**; writes already made by earlier steps (memory log, MEMORY.md index, CHANGELOG) remain on disk — the same exposure the existing step-3 CHANGELOG fatal has. The step is guarded by `existsSync` and **skipped in scaffolded projects** (the validator is L0-only; generated projects have no `docs/adr/` corpus) — registered in `lifecycle-sync-audit.ts` Check X `INTENTIONAL_CROSS_REFS` (1.4.7), same pattern as `pre-commit:validate-templates`.
 
 ### Scope decision: linkage-only blocking
 

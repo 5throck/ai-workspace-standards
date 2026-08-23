@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.12.0
+ * @version 1.12.1
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -2734,7 +2734,7 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
     const agentPath = join(agentsDir, file);
     const content = readFileSync(agentPath, 'utf-8');
 
-    const match = content.replace(/^﻿/, '').replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
+    const match = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
     if (!match) {
       report(`templates/${variant}/agents/${file} has no YAML frontmatter`,
         `Add a frontmatter block with at minimum: name, and a lifecycle: block with phase + governance`);

@@ -1,4 +1,4 @@
-// @version 1.6.0
+// @version 1.6.1
 // v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
 //           previously `gh pr view <branch>` matched ANY PR regardless of state, so
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
@@ -318,7 +318,7 @@ if (syncSkillsResult.exitCode !== 0) {
     if (syncSkillsResult.stderr) console.warn(syncSkillsResult.stderr.trim());
 }
 
-// 4. Generate VERSION_MANIFEST.md
+// 4.7 Generate VERSION_MANIFEST.md
 const genManifestTs = path.join('scripts', 'generate-version-manifest.ts');
 if (fs.existsSync(genManifestTs)) {
     const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
