@@ -11,8 +11,18 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.12.0
+ * @version 1.12.1
  * @phase: Complete pipeline orchestration
+ *
+ * v1.12.1: PHASE 2.5 (new) — country-scoped skill exclusion. reconcileWithL0L1()
+ *          only discards files IDENTICAL to L1, so a --country KR draft whose
+ *          k-dart/k-law/k-kosis diverged from templates/common stock (newer version,
+ *          local edits) was classified 'modified' → keepInVariant → forked into
+ *          templates/<variant>/skills/ by generateSkillDirectories() — duplicating
+ *          common stock instead of staying registry-governed. Phase 2.5 now drops
+ *          country_scoped_assets.skills entries (docs/workspace-schema.json SSOT,
+ *          same registry pattern as project-to-variant.ts) from keepInVariant AND
+ *          from the Phase 4 variant.json skill manifest.
  *
  * Pipeline Phases:
  *   PHASE 1   — L3 project scan (scan-l3-project.ts)
@@ -150,6 +160,49 @@ export interface PipelineResult {
   executionTime: number;
   /** Pipeline errors */
   errors: Array<{ phase: string; error: string }>;
+}
+
+// ============================================================================
+// COUNTRY-SCOPED SKILL REGISTRY (ADR-0057/0058)
+// ============================================================================
+
+/**
+ * Load the country-scoped skill names from docs/workspace-schema.json (SSOT).
+ * Same registry pattern as scripts/project-to-variant.ts. Returns an empty set
+ * when the schema is missing or unreadable (pipeline stays runnable; the
+ * exclusion simply becomes a no-op).
+ */
+function loadCountryScopedSkillNames(): Set<string> {
+  const scoped = new Set<string>();
+  try {
+    const schemaPath = join(process.cwd(), 'docs', 'workspace-schema.json');
+    if (!existsSync(schemaPath)) return scoped;
+    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+    const countryScoped = schema.country_scoped_assets as { skills?: Record<string, string> } | undefined;
+    if (countryScoped?.skills) {
+      for (const name of Object.keys(countryScoped.skills)) scoped.add(name);
+    }
+  } catch {
+    // Schema unreadable — proceed without exclusion (registry-governed common stock
+    // still prevents identical-file forks via reconcile's 'identical' discard).
+  }
+  return scoped;
+}
+
+/** Match a manifest targetPath against a country-scoped skill's mirror locations. */
+function matchCountryScopedSkill(targetPath: string, scopedSkills: Set<string>): string | null {
+  const normalized = targetPath.replace(/\\/g, '/');
+  for (const name of scopedSkills) {
+    if (
+      normalized.startsWith(`skills/${name}/`) ||
+      normalized.startsWith(`.claude/skills/${name}/`) ||
+      normalized.startsWith(`.gemini/skills/${name}/`) ||
+      normalized.startsWith(`.agents/skills/${name}/`)
+    ) {
+      return name;
+    }
+  }
+  return null;
 }
 
 // ============================================================================
@@ -344,6 +397,47 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
   if (!phases.reconcile.success) {
     return buildFailureResult(phases, errors, startTime);
+  }
+
+  // ============================================================================
+  // PHASE 2.5: COUNTRY-SCOPED SKILL EXCLUSION (registry-governed)
+  // ============================================================================
+  // A --country KR L3 draft legitimately carries k-dart/k-law/k-kosis (scaffold-time
+  // pruning keeps them when the country matches). reconcileWithL0L1() only discards
+  // files IDENTICAL to L1 — a draft whose scoped skill diverged (newer version, local
+  // edits) is classified 'modified' → keepInVariant → forked into
+  // templates/<variant>/skills/<name>/ by generateSkillDirectories(). Scoped skills
+  // are registry-governed common stock (country_scoped_assets.skills in
+  // docs/workspace-schema.json — same SSOT read as project-to-variant.ts) and must
+  // never be forked into a variant; per-project distribution happens exclusively via
+  // scaffold-time pruning (prune-country-scoped-assets.ts).
+  // ============================================================================
+  const scopedSkillNames = loadCountryScopedSkillNames();
+  if (scopedSkillNames.size > 0) {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 2.5: Country-Scoped Skill Exclusion (${scopedSkillNames.size} registered)`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const excludedSkills = new Set<string>();
+    const keptCountBefore = reconciledManifest!.keepInVariant.length;
+    reconciledManifest!.keepInVariant = reconciledManifest!.keepInVariant.filter((file) => {
+      const scoped = matchCountryScopedSkill(file.targetPath, scopedSkillNames);
+      if (scoped) {
+        excludedSkills.add(scoped);
+        return false;
+      }
+      return true;
+    });
+
+    for (const name of excludedSkills) {
+      console.log(`  country-scoped skill ${name} stays in templates/common (registry-governed) — not forked`);
+    }
+    if (excludedSkills.size === 0) {
+      console.log(`  (no country-scoped skills in the reconciled manifest — nothing to exclude)`);
+    } else {
+      console.log(`  keepInVariant: ${keptCountBefore} → ${reconciledManifest!.keepInVariant.length} file(s)`);
+    }
+    console.log(`✅ PHASE 2.5 COMPLETE`);
   }
 
   // ============================================================================
@@ -675,7 +769,10 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
     // Extract agent roster and skills from L3 scan result
     const agentRoster = extractAgentRoster(scanResult!);
-    const skills = extractSkills(scanResult!);
+    // Scoped skills stay out of the variant.json skill manifest as well — Phase 2.5
+    // keeps their files out of the copy manifest; this keeps the DECLARED manifest
+    // consistent with the generated variant's skills/ tree.
+    const skills = extractSkills(scanResult!).filter(s => !scopedSkillNames.has(s.name));
 
     const metadata: VariantMetadata = {
       name: config.variantName,

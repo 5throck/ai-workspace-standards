@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.10.1
+// v1.10.1: Country-profile awareness (ADR-0057/0058) on the UPGRADE path — previously
+//           only the scaffold path (new-project.ts / create-l3-scaffold.ts) knew about
+//           country-scoped assets, so:
+//           (1) the skills/ SYNC_IF_NEWER pass re-injected k-dart/k-law/k-kosis into
+//               region-neutral projects on every upgrade, undoing scaffold-time pruning
+//               (prune-country-scoped-assets.ts). A registry-driven prune pass now runs
+//               after ALL skill-copy passes, with an isLocallyModified() conflict guard
+//               so a project that intentionally forked a scoped skill keeps its fork.
+//           (2) the post-upgrade template-version.txt rewrite dropped the country= line,
+//               erasing the project's country provenance; it is now preserved (or
+//               country=none written, matching the region-neutral default posture).
 // v1.10.0: Two gaps found while upgrading 7 real projects in one session:
 //   (1) .gitleaks.toml moved out of blind LOCKED overwrite into mergeGitleaksToml() —
 //         co-abap's project-specific allowlist entries (vendored-ABAP false-positive
@@ -39,7 +50,7 @@
 
 import {
   existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync,
-  readdirSync, statSync,
+  readdirSync, statSync, rmSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -106,11 +117,18 @@ const currentVersion = existsSync(versionFile) ? readFileSync(versionFile, 'utf8
 const templateVersionFile = join(projectDir, '.claude', 'template-version.txt');
 let detectedVersion = 'unknown';
 let detectedVariant = '';
+// Country provenance (ADR-0057/0058): scaffold-time country= line is the primary
+// signal; docs/countries/ACTIVE.md (written by new-project.ts when a country was
+// selected) is the fallback for projects whose template-version.txt predates
+// country tracking — including projects upgraded by upgrade-project.ts < v1.10.1,
+// which rewrote the file WITHOUT the country= line.
+let countryFromVersionFile = '';
 
 if (existsSync(templateVersionFile)) {
   const tvContent = readFileSync(templateVersionFile, 'utf8');
   detectedVariant = (tvContent.match(/^variant=(.*)$/m)?.[1] ?? '').trim();
   detectedVersion = (tvContent.match(/^version=(.*)$/m)?.[1] ?? 'unknown').trim();
+  countryFromVersionFile = (tvContent.match(/^country=(.*)$/m)?.[1] ?? '').trim();
 } else {
   console.log('\nWARNING: template-version.txt not found in this project.');
   console.log('    This project may have been created before version tracking was introduced.');
@@ -132,6 +150,28 @@ if (!variant) {
     }
   }
 }
+
+// ── Country detection (ADR-0057/0058) ─────────────────────────────────────────
+// Resolve the project's target country before any skill-copy pass runs, so the
+// post-copy prune (below) can undo country-scoped skill re-injection. Precedence:
+//   1. template-version.txt `country=` line (written by new-project.ts; may be
+//      'none' for region-neutral projects — an explicit value is authoritative)
+//   2. docs/countries/ACTIVE.md "Active jurisdiction: <CODE>" pointer (legacy
+//      projects scaffolded with a country before the country= line existed)
+//   3. 'none' (region-neutral default posture)
+let detectedCountry = 'none';
+if (countryFromVersionFile && (countryFromVersionFile === 'none' || /^[A-Z]{2,4}$/.test(countryFromVersionFile))) {
+  detectedCountry = countryFromVersionFile;
+} else {
+  const activeMdPath = join(projectDir, 'docs', 'countries', 'ACTIVE.md');
+  if (existsSync(activeMdPath)) {
+    const activeContent = readFileSync(activeMdPath, 'utf8');
+    // new-project.ts format: "Active jurisdiction: KR — Republic of Korea. See docs/countries/KR.md. ..."
+    const activeMatch = activeContent.match(/^Active jurisdiction:\s*([A-Z]{2,4})\b/m);
+    if (activeMatch) detectedCountry = activeMatch[1];
+  }
+}
+console.log(`Country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry}`);
 
 // Validate variant
 const validVariants = existsSync(join(workspaceRoot, 'templates'))
@@ -1170,6 +1210,68 @@ if (existsSync(variantSkillsSrc)) {
   console.log('');
 }
 
+// ── COUNTRY-SCOPED SKILL PRUNE (ADR-0057/0058) ────────────────────────────────
+// The skill-copy passes above sync from templates/common/skills/ and, for variant
+// skills, templates/<variant>/skills/ with no country awareness — they re-inject
+// registry-listed country-scoped skills (k-dart/k-law/k-kosis) into projects whose
+// target country doesn't match, silently undoing scaffold-time pruning. Mirror the
+// registry logic of scripts/helpers/prune-country-scoped-assets.ts here instead of
+// spawning it: the upgrade path needs --dry-run parity and a conflict guard the
+// scaffold-time helper lacks. Registry scripts/ (currently empty) and .env.sample
+// env blocks are NOT pruned here — the upgrade path syncs scripts only from the
+// (unscoped) registry and never touches .env.sample.
+// MUST run before the post-upgrade sync-skills.ts invoke so platform mirrors are
+// regenerated from the already-pruned skills/ root.
+console.log('--- COUNTRY-SCOPED SKILL PRUNE ---');
+let countryPrunedSkills = 0;
+{
+  const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
+  let scopedSkills: Record<string, string> = {};
+  if (existsSync(schemaPath)) {
+    try {
+      const schema = JSON.parse(readFileSync(schemaPath, 'utf8')) as Record<string, unknown>;
+      const countryScoped = schema.country_scoped_assets as { skills?: Record<string, string> } | undefined;
+      if (countryScoped?.skills) scopedSkills = countryScoped.skills;
+    } catch (e) {
+      console.log(`  WARN: could not parse docs/workspace-schema.json — country prune skipped (${(e as Error).message})`);
+    }
+  }
+
+  for (const [skillName, scopedCountry] of Object.entries(scopedSkills)) {
+    if (detectedCountry !== 'none' && detectedCountry === scopedCountry) continue; // country matches — keep
+    for (const skillBase of ['skills', '.claude/skills', '.gemini/skills', '.agents/skills']) {
+      const projSkillDir = join(projectDir, skillBase, skillName);
+      if (!existsSync(projSkillDir)) continue;
+      const skillMd = join(projSkillDir, 'SKILL.md');
+      if (existsSync(skillMd)) {
+        // Stock template content (any source the copy passes above would use) is
+        // always safe to prune — this covers freshly re-injected copies, which are
+        // UNTRACKED and therefore look "locally modified" to git status.
+        const isStockCopy = [
+          join(commonDir, 'skills', skillName, 'SKILL.md'),
+          join(templatesDir, 'skills', skillName, 'SKILL.md'),
+        ].some(src => existsSync(src) && fileHash(src) === fileHash(skillMd));
+        // SAFETY: a scoped skill that diverged from the template AND carries local
+        // modifications is a legacy intentional fork (e.g. a project that forked
+        // k-law before the registry existed) — keep it and surface the conflict.
+        if (!isStockCopy && isLocallyModified(skillMd)) {
+          console.log(`  ⚠️  CONFLICT ${skillBase}/${skillName}/  ${scopedCountry}-scoped, project country ${detectedCountry}  (locally modified, kept)`);
+          continue;
+        }
+      }
+      console.log(`  ${dryTag}PRUNE  ${skillBase}/${skillName}/  (${scopedCountry}-scoped, project country: ${detectedCountry})`);
+      if (!dryRun) rmSync(projSkillDir, { recursive: true, force: true });
+      countryPrunedSkills++;
+    }
+  }
+  if (Object.keys(scopedSkills).length === 0) {
+    console.log('  (no country-scoped skills registered — nothing to check)');
+  } else if (countryPrunedSkills === 0) {
+    console.log('  (no country-scoped skills needed pruning)');
+  }
+}
+console.log('');
+
 // ── OVERWRITE: docs/_common/ (allowlist) ──────────────────────────────────────
 console.log('--- OVERWRITE: docs/_common/ (governance files) ---');
 const DOCS_OVERWRITE = ['security.md'];
@@ -1246,16 +1348,19 @@ if (pruneRemoved) {
 }
 
 // ── Post-upgrade: write template-version.txt ───────────────────────────────────
+// country= is preserved from the pre-upgrade detection above — rewriting the file
+// without it (pre-v1.10.1 behavior) erased the project's country provenance and
+// downgraded KR projects to region-neutral on the next upgrade.
 if (!dryRun) {
   mkdirSync(join(projectDir, '.claude'), { recursive: true });
   writeFileSync(
     templateVersionFile,
-    `variant=${variant}\nversion=${currentVersion}\nplatform=${platform}\nupgraded=${new Date().toISOString()}\n`,
+    `variant=${variant}\nversion=${currentVersion}\nplatform=${platform}\ncountry=${detectedCountry}\nupgraded=${new Date().toISOString()}\n`,
     'utf8'
   );
-  console.log(`Written: .claude/template-version.txt (version=${currentVersion})`);
+  console.log(`Written: .claude/template-version.txt (version=${currentVersion}, country=${detectedCountry})`);
 } else {
-  console.log(`[DRY RUN] Would write: .claude/template-version.txt (version=${currentVersion})`);
+  console.log(`[DRY RUN] Would write: .claude/template-version.txt (version=${currentVersion}, country=${detectedCountry})`);
 }
 console.log('');
 
@@ -1311,6 +1416,7 @@ console.log(`  Locked files updated : ${lockedChanged}`);
 console.log(`  Merge files processed: ${mergeChanged}`);
 console.log(`  Sync files updated   : ${syncChanged}`);
 console.log(`  Preserve files listed: ${preserveListed}`);
+console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-run count)' : ''}`);
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');
