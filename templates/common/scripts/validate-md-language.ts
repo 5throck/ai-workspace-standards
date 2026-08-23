@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.6.1
 /**
  * Markdown Language Validation Script with I18N Support
  *
@@ -29,10 +29,12 @@ import { die } from "./lib/error-handling.ts";
 /**
  * Supported locale codes are loaded from docs/workspace-schema.json (i18n.locale_codes).
  * To add a new locale: update docs/workspace-schema.json — do NOT hardcode here.
- * Falls back to a built-in list if the schema file is unavailable.
+ * If the schema file is unavailable, falls back to ['ko'] only (degraded mode,
+ * with a warning) — the language policy names ko/ and locales/ko/ as translation
+ * zones independent of the schema registry.
  */
 // Read locale codes from workspace-schema.json (SSOT for i18n policy)
-// Falls back to a minimal default if schema is unavailable
+// Falls back to ['ko'] (degraded mode) if schema is unavailable
 function loadSupportedLocales(): string[] {
   try {
     const schemaPath = join(dirname(import.meta.path), '..', 'docs', 'workspace-schema.json');
@@ -40,10 +42,12 @@ function loadSupportedLocales(): string[] {
     const codes = schema?.i18n?.locale_codes;
     if (Array.isArray(codes) && codes.length > 0) return codes;
   } catch {
-    // fall through to default
+    // fall through to degraded fallback
   }
-  // Fallback: minimal set if schema unavailable
-  return ['ko', 'ja', 'zh-CN', 'zh-TW', 'de', 'es', 'fr', 'pt', 'vi', 'ms', 'id', 'th', 'ru', 'it', 'ar'];
+  // Degraded mode (schema missing, e.g. project-local runs where the workspace
+  // schema is not shipped): only 'ko' is guaranteed without the registry.
+  console.warn('[validate-md-language] docs/workspace-schema.json unavailable — using degraded locale list (ko only); other translation zones will not be exempted.');
+  return ['ko'];
 }
 
 const SUPPORTED_LOCALES: string[] = loadSupportedLocales();

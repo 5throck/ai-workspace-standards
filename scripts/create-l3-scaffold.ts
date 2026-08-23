@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.12.1
 /**
  * create-l3-scaffold.ts
  *
@@ -1032,6 +1032,19 @@ function main(): void {
   if (args.domain === 'lecture') {
     createLectureScaffold(projectDir);
   }
+
+  // Step 6.6: write .claude/template-version.txt — provenance for upgrade-project.ts
+  // (mirrors new-project.ts §5.6 field order: variant/version/platform/country/created)
+  const claudeDir = path.join(projectDir, ".claude");
+  fs.mkdirSync(claudeDir, { recursive: true });
+  const versionFile = path.join(WORKSPACE_ROOT, "templates", "VERSION");
+  const templateVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf8").trim() : "unknown";
+  const scaffoldCountry = args.country || "none";
+  fs.writeFileSync(
+    path.join(claudeDir, "template-version.txt"),
+    `variant=${toVariantSlug(args.variant)}\nversion=${templateVersion}\nplatform=both\ncountry=${scaffoldCountry}\ncreated=${new Date().toISOString()}\n`
+  );
+  log(`🧾 Wrote .claude/template-version.txt (variant=${toVariantSlug(args.variant)}, version=${templateVersion}, country=${scaffoldCountry})`);
 
   // Step 7: git init
   initGit(projectDir);

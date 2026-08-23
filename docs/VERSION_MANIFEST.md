@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-23T20:24:25.775Z
+**Generated**: 2026-08-23T20:41:12.942Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -89,7 +89,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.0.0 | scripts/compile-tokens.ts | N/A |
-| create-l3-scaffold.ts | 1.12.0 | scripts/create-l3-scaffold.ts | N/A |
+| create-l3-scaffold.ts | 1.12.1 | scripts/create-l3-scaffold.ts | N/A |
 | dev-sync.ts | 1.7.2 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.0.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.0.1 | scripts/dispatch-serial.ts | N/A |
@@ -140,11 +140,11 @@
 | validate-agents.ts | 1.0.5 | scripts/validate-agents.ts | N/A |
 | validate-doc-folder.ts | 1.1.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.0.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.6.0 | scripts/validate-md-language.ts | fs |
+| validate-md-language.ts | 1.6.1 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.12.1 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.13.0 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.3.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
