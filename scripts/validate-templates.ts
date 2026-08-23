@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.12.1
+ * @version 1.13.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -252,6 +252,26 @@ function checkVersion(): void {
   pass(`templates/VERSION: ${version}`);
 }
 
+// B-05: last_verified per profile file, collected across variants for divergence checking
+const countryProfileVerified = new Map<string, Array<{ variant: string; date: string }>>();
+
+// B-05 addendum: cross-variant country-profile freshness — same <CC>.md diverging
+// across variants means one template's profile drifted ahead of the others.
+function checkCountryProfileDivergence(): void {
+  if (!JSON_MODE) console.log('\n=== Check B-05: cross-variant country-profile freshness ===');
+  for (const [code, entries] of countryProfileVerified) {
+    const distinctDates = new Set(entries.map(e => e.date));
+    if (entries.length > 1 && distinctDates.size > 1) {
+      const detail = entries
+        .slice()
+        .sort((a, b) => (a.date === b.date ? a.variant.localeCompare(b.variant) : a.date < b.date ? 1 : -1))
+        .map(e => `${e.variant} ${e.date}`)
+        .join(', ');
+      warn('common', 'country-config', `${code}.md last_verified diverges across ${entries.length} variants: ${detail}. Realign during the next freshness pass.`);
+    }
+  }
+}
+
 // Check 2: variant.json in each variant dir
 function checkVariantManifests(): Map<string, VariantManifest> {
   if (!JSON_MODE) console.log('\n=== Check 2: variant.json manifests ===');
@@ -401,6 +421,11 @@ function checkVariantManifests(): Map<string, VariantManifest> {
                   if (!codeMatch || codeMatch[1] !== code) {
                     fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md frontmatter code doesn't match filename`);
                   }
+                  // Check status value (must be one of: active, draft, stale)
+                  const statusMatch = profileContent.match(/^status:\s*(\S+)/m);
+                  if (!statusMatch || !['active', 'draft', 'stale'].includes(statusMatch[1])) {
+                    fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status must be one of: active, draft, stale (found: '${statusMatch ? statusMatch[1] : 'missing'}')`);
+                  }
                   // Check last_verified age (WARN if > 12 months)
                   const lastVerifiedMatch = profileContent.match(/^last_verified:\s*(\d{4}-\d{2}-\d{2})/m);
                   if (lastVerifiedMatch) {
@@ -408,7 +433,15 @@ function checkVariantManifests(): Map<string, VariantManifest> {
                     const monthsSince = (Date.now() - lastVerified.getTime()) / (30 * 24 * 60 * 60 * 1000);
                     if (monthsSince > 12) {
                       warn(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md last_verified is older than 12 months (${lastVerifiedMatch[1]}). Consider reviewing.`);
+                      // Auto-stale: an 'active' profile past the 12-month line should move to 'stale'
+                      if (statusMatch?.[1] === 'active') {
+                        warn(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status is 'active' but last_verified (${lastVerifiedMatch[1]}) is older than 12 months. Set status: stale until re-verified (stale profiles stay loadable and are flagged at Phase 0 intake).`);
+                      }
                     }
+                    // Collect for the cross-variant divergence check
+                    const seen = countryProfileVerified.get(code) ?? [];
+                    seen.push({ variant: dir, date: lastVerifiedMatch[1] });
+                    countryProfileVerified.set(code, seen);
                   }
                 }
               } catch (e) {
@@ -1367,7 +1400,7 @@ function checkRootCommonCommandsParity(): void {
   }
 }
 
-// Check B-05: Per-variant skill lifecycle (presence-driven)
+// Check B-09: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
   const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
   if (!existsSync(skillsDir)) {
@@ -1375,7 +1408,7 @@ function checkVariantSkills(variant: string): void {
     return;
   }
 
-  if (!JSON_MODE) console.log(`\n=== Check B-05: Skill lifecycle in ${variant} ===`);
+  if (!JSON_MODE) console.log(`\n=== Check B-09: Skill lifecycle in ${variant} ===`);
 
   const dirs = readdirSync(skillsDir).filter(d =>
     d !== '_archive' && d !== 'local' && d !== 'external' && statSync(join(skillsDir, d)).isDirectory()
@@ -2846,7 +2879,7 @@ function main() {
     // Check Variant Contract for all variants (including draft)
     checkVariantContract(variant);
     checkSecurityGateSkills(variant);          // B-03
-    checkVariantSkills(variant);               // B-05: presence-driven skill lifecycle
+    checkVariantSkills(variant);               // B-09: presence-driven skill lifecycle
     checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
 
     if (manifest.status === 'stable') {
@@ -2885,6 +2918,8 @@ function main() {
   }
 
   checkVariantIndexCoverage(manifests);                          // WS-12
+
+  checkCountryProfileDivergence();                               // B-05: cross-variant last_verified divergence
 
   checkSharedFileSync();
   checkL0L1ScriptParity();

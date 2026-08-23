@@ -40,6 +40,9 @@ jobs:
       - name: Verify scripts registry
         run: bun run verify-scripts
 
+      - name: Validate templates (variant manifests + country profiles)
+        run: bun run validate-templates
+
       - name: Secret scanning - gitleaks
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
