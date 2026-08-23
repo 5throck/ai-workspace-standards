@@ -22,9 +22,9 @@ templates/
 ├── co-deck/             # 강의/발표 자료 제작 variant (beta)
 ├── co-game/             # 게임 개발 variant
 ├── co-export/           # 수출입 무역 컴플라이언스 variant (beta)
-├── co-news/             # 한국 경제/금융 저널리즘 variant (beta)
+├── co-news/             # 경제/금융 저널리즘 variant (beta)
 ├── co-abap/             # SAP ABAP 개발 variant (stable)
-└── co-hr/               # 한국 노무/HR 컨설팅 variant (beta)
+└── co-hr/               # 노무/HR 컨설팅 variant (beta)
 ```
 
 **동작 방식:** 새 프로젝트를 스캐폴딩할 때, 스크립트는 먼저 `templates/common/`(공유 인프라)을 복사한 다음 선택된 variant를 덮어씁니다(variant 전용 파일이 공통 파일을 재정의).
@@ -43,9 +43,9 @@ templates/
 | [`co-deck`](co-deck/) | 🔶 Beta | 13개 에이전트 및 다중 테마 HTML-to-PDF 파이프라인을 갖춘 강의/발표 자료 제작 워크플로우 |
 | [`co-game`](co-game/) | ✅ Stable | Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 13개 에이전트 워크플로우 |
 | [`co-export`](co-export/) | 🔶 Beta | 8개 에이전트를 갖춘 수출입 무역 컴플라이언스 워크플로우 (HS 분류, 수출통제·제재 스크리닝, FTA 원산지, 관세 환급, 물류, 시장 진입, 해외 규제 모니터링, 무역 서류) |
-| [`co-news`](co-news/) | 🔶 Beta | 7개 에이전트(pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor)와 DART/규제 리서치 연동을 갖춘 한국 경제/금융 저널리즘 워크플로우 |
+| [`co-news`](co-news/) | 🔶 Beta | 7개 에이전트(pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor)와 DART/규제 리서치 연동을 갖춘 경제/금융 저널리즘 워크플로우 (국가 프로필 경로 연동 — KR 프로필에 DART/k-dart + k-law 포함) |
 | [`co-abap`](co-abap/) | ✅ Stable | 20개 에이전트(6개 SAP 모듈 애널리스트, 12개 기술 전문가, pm)와 ABAP 전용 스킬(post-write chain, 성능 튜닝, 덤프 모니터링)을 갖춘 SAP ABAP 개발 워크플로우 |
-| [`co-hr`](co-hr/) | 🔶 Beta | 12개 에이전트(pm + 노무 컴플라이언스, 노사관계, 안전보건, 채용, 보상·복지, 성과관리, L&D, 경력·계승, 조직설계, 변화관리, 데이터 분석 전문가 11인)와 k-law/k-kosis 규제 리서치 연동을 갖춘 한국 노무/HR 컨설팅 워크플로우 (k-law/k-kosis는 KR 스코프 스킬 - KR 대상 프로젝트에만 배포) |
+| [`co-hr`](co-hr/) | 🔶 Beta | 12개 에이전트(pm + 노무 컴플라이언스, 노사관계, 안전보건, 채용, 보상·복지, 성과관리, L&D, 경력·계승, 조직설계, 변화관리, 데이터 분석 전문가 11인)와 k-law/k-kosis 규제 리서치 연동을 갖춘 노무/HR 컨설팅 워크플로우 (k-law/k-kosis는 KR 스코프 스킬 - KR 대상 프로젝트에만 배포) |
 
 ## Phase 1, 2 & 3 고도화 기능
 
@@ -106,4 +106,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 업데이트
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-08-23*
