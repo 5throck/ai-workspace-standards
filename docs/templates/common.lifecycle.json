@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "stable",
   "lastUpdated": "2026-08-24",
   "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
@@ -43,6 +43,11 @@
       "date": "2026-08-24",
       "event": "common-contract-expansion",
       "note": "common-contract.json updated: 2 skills added (evidence-ledger, decision-record) and pm agent gate-moment rule added per ADR-0061 decision-chain standard"
+    },
+    {
+      "date": "2026-08-24",
+      "event": "common-contract-expansion",
+      "note": "common-contract.json updated: 3 skills added (i18n-locale-config, i18n-formatting, i18n-layout) and i18n-specialist agent added per constitution §4.4 i18n asset suite (5-part design PR5)"
     }
   ]
 }

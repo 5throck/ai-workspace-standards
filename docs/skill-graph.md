@@ -45,6 +45,9 @@
 | `hr-metrics-analysis` | variant:co-hr | data-analyst | phase1, phase3 | — |
 | `hs-classification-workflow` | variant:co-export | hs-classification-specialist, hs-classification-specialist | phase1, phase2 | — |
 | `hwp-document-processing` | variant:co-consult | communications-lead | phase3, phase4 | — |
+| `i18n-formatting` | common | — | — | — |
+| `i18n-layout` | common | — | — | — |
+| `i18n-locale-config` | common | — | — | — |
 | `insight-synthesis` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | — |
 | `k-dart` | common | — | — | — |
 | `k-kosis` | common | — | — | — |
