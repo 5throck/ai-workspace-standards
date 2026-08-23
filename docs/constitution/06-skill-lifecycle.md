@@ -314,7 +314,8 @@ statistics APIs, disclosure systems) are registered — not frontmatter-marked �
 ```json
 "country_scoped_assets": {
   "skills": { "k-law": "KR", "k-dart": "KR", "k-kosis": "KR" },
-  "scripts": {}
+  "scripts": {},
+  "env": { "DART_API_KEY": "KR", "LAW_API_OC": "KR" }
 }
 ```
 
@@ -323,6 +324,10 @@ statistics APIs, disclosure systems) are registered — not frontmatter-marked �
 every registered skill from all four mirror directories (`skills/`, `.claude/skills/`,
 `.gemini/skills/`, `.agents/skills/`) unless the project's target country (`--country`)
 matches the registered scope. Region-neutral projects receive none of them.
+Registered `env` keys are pruned by the same rule: `.env.sample` wraps each
+country-scoped key block in `# >>> country-scoped:<CODE>` / `# <<< country-scoped:<CODE>`
+marker comments, and the helper deletes every marker block whose code differs from the
+target country (ADR-0058).
 
 - **Registry-only by design** — no SKILL.md frontmatter field; one source of truth.
 - **Language is never a country scope** — `translate` and other language skills must not

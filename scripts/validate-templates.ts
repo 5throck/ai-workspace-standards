@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.11.0
+ * @version 1.12.0
  *
  * Validates template variants for structural integrity.
  * Follows the same pattern as agent-lifecycle-audit.ts
@@ -486,6 +486,104 @@ function checkVariantManifests(): Map<string, VariantManifest> {
           }
         } catch (e) {
           // Schema read error - silently skip registry check
+        }
+      }
+
+      // B-06: env registry integrity checks against templates/common/.env.sample
+      const envSamplePath = join(TEMPLATES_DIR, 'common', '.env.sample');
+      if (existsSync(schemaPath) && existsSync(envSamplePath)) {
+        try {
+          const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as {
+            env?: Record<string, string>;
+          } | undefined;
+
+          if (countryScoped?.env) {
+            const envContent = readFileSync(envSamplePath, 'utf-8');
+            const lines = envContent.split('\n');
+
+            // Track state for parsing marker blocks
+            const openMarkers = new Map<number, string>(); // line number -> CODE
+            const closeMarkers = new Map<number, string>(); // line number -> CODE
+            const blocks: Array<{ startLine: number; endLine: number; code: string }> = [];
+            let currentBlock: { startLine: number; code: string } | null = null;
+
+            // First pass: identify all markers and blocks
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
+              const openMatch = line.match(/^# >>>\s*country-scoped:([A-Z]{2,4})/);
+              const closeMatch = line.match(/^# <<<\s*country-scoped:([A-Z]{2,4})/);
+
+              if (openMatch) {
+                const code = openMatch[1];
+                openMarkers.set(i, code);
+                if (currentBlock !== null) {
+                  fail('root', 'env-integrity', `templates/common/.env.sample has nested opening marker at line ${i + 1} without closing previous block at line ${currentBlock.startLine + 1}.`);
+                }
+                currentBlock = { startLine: i, code };
+              } else if (closeMatch) {
+                const code = closeMatch[1];
+                closeMarkers.set(i, code);
+                if (currentBlock === null) {
+                  fail('root', 'env-integrity', `templates/common/.env.sample has closing marker at line ${i + 1} without matching opening marker.`);
+                } else if (currentBlock.code !== code) {
+                  fail('root', 'env-integrity', `templates/common/.env.sample marker mismatch: block opened with '${currentBlock.code}' at line ${currentBlock.startLine + 1} but closed with '${code}' at line ${i + 1}.`);
+                } else {
+                  blocks.push({ startLine: currentBlock.startLine, endLine: i, code: currentBlock.code });
+                  currentBlock = null;
+                }
+              }
+            }
+
+            // Check for unclosed block
+            if (currentBlock !== null) {
+              fail('root', 'env-integrity', `templates/common/.env.sample has unclosed block starting at line ${currentBlock.startLine + 1} with code '${currentBlock.code}'. Missing closing marker.`);
+            }
+
+            // E2: validate balanced markers
+            if (openMarkers.size !== closeMarkers.size) {
+              fail('root', 'env-integrity', `templates/common/.env.sample has ${openMarkers.size} opening markers but ${closeMarkers.size} closing markers. Each opening must have a matching closing marker.`);
+            }
+
+            // E1: check every registered env key appears in a matching block
+            const registeredKeys = new Set(Object.keys(countryScoped.env));
+            const foundKeys = new Set<string>();
+
+            for (const block of blocks) {
+              const blockCode = block.code;
+              const blockLines = lines.slice(block.startLine, block.endLine + 1);
+              const blockText = blockLines.join('\n');
+
+              // Find KEY= patterns in this block
+              const keyMatches = blockText.match(/^([A-Z_]+)=/gm);
+              if (keyMatches) {
+                for (const match of keyMatches) {
+                  const key = match.replace('=', '');
+                  foundKeys.add(key);
+
+                  // E3: check key is registered
+                  if (!registeredKeys.has(key)) {
+                    fail('root', 'env-integrity', `templates/common/.env.sample contains unregistered env key '${key}' in ${blockCode}-scoped block (lines ${block.startLine + 1}-${block.endLine + 1}). Register it in workspace-schema.json country_scoped_assets.env.`);
+                  } else {
+                    // E3: check block code matches registered country
+                    const registeredCountry = countryScoped.env![key];
+                    if (registeredCountry !== blockCode) {
+                      fail('root', 'env-integrity', `templates/common/.env.sample key '${key}' is in ${blockCode}-scoped block but registered as ${registeredCountry}-scoped in workspace-schema.json. Mismatch at lines ${block.startLine + 1}-${block.endLine + 1}.`);
+                    }
+                  }
+                }
+              }
+            }
+
+            // E1: check every registered key was found
+            for (const key of registeredKeys) {
+              if (!foundKeys.has(key)) {
+                fail('root', 'env-integrity', `Registry env key '${key}' (registered as ${countryScoped.env![key]}) does not appear in templates/common/.env.sample. Add ${key}= inside a # >>> country-scoped:${countryScoped.env![key]} marker block.`);
+              }
+            }
+          }
+        } catch (e) {
+          // Schema/env read error - silently skip
         }
       }
 
