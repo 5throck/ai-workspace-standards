@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.2.0
+ * @version 1.3.0
  * @last_updated 2026-08-23
  *
  * Verifies the ADR→governance linkage mechanism (upward reflection gap detection)
@@ -19,19 +19,19 @@
  * - Earlier ADRs are grandfathered silently (avoids ~50-file backfill noise)
  * - "Linked" means the ADR number or filename appears in any governance doc
  * - Accepted/active ADRs must be referenced from governance docs
- * - Marker hashes must match their source files (WARN on drift)
+ * - Marker hashes must match their section source (section-sliced sha256-8; WARN on drift in default mode, blocking in strict)
  * - Default mode: WARN-only (always exits 0 on findings; exits 1 only on operational failure)
- * - Strict mode (--strict): exits 1 on ADR-linkage findings; marker-drift remains WARN-only
+ * - Strict mode (--strict): exits 1 on ADR-linkage OR marker-drift findings
  *
  * Usage: bun scripts/verify-adr-governance.ts [--update-marker-hashes] [--strict]
  *
  * Flags:
  * - --update-marker-hashes: Rewrite/insert source+hash fields in all markers (seeding mode)
- * - --strict: Exit 1 on ADR-linkage findings (blocking gate for dev-sync step 3.97)
+ * - --strict: Exit 1 on ADR-linkage or marker-drift findings (blocking gate for dev-sync step 3.97; Stage 2b)
  *
  * Exit codes:
- * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage findings)
- * - 1: Operational failure (e.g., docs/adr missing) OR strict mode with ADR-linkage findings
+ * - 0: Check completed (default: findings are WARN-only; strict: no ADR-linkage or marker-drift findings)
+ * - 1: Operational failure (e.g., docs/adr missing) OR strict mode with ADR-linkage or marker-drift findings
  */
 
 import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
@@ -124,20 +124,24 @@ function resolveConstitutionSource(section: string): string | null {
 }
 
 /**
- * Compute sha256 hash of a file (first 8 hex chars)
+ * Compute sha256-8 hash of a file's SECTION body: content sliced from the
+ * FIRST line matching /^###\s/ (inclusive) to EOF, CRLF normalized.
+ * Constitution sources are one-section-per-file with a 2-line ">" preamble —
+ * slicing excludes the preamble so hub-plumbing edits don't trip markers
+ * (Stage 2b re-scoping; see ADR-0059 Amendment).
+ * Falls back to whole-file hash if no ### heading exists.
  */
-function computeFileHash(filePath: string): string | null {
-  if (!existsSync(filePath)) {
-    return null;
-  }
-
+function computeSectionHash(filePath: string): string | null {
+  if (!existsSync(filePath)) return null;
   try {
     const content = readFileSync(filePath, 'utf-8');
-    const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
-    return hash.substring(0, 8); // First 8 hex chars
-  } catch {
-    return null;
-  }
+    const normalized = content.replace(/\r\n/g, '\n');
+    const lines = normalized.split('\n');
+    const headingIdx = lines.findIndex(line => /^###\s/.test(line));
+    const slice = headingIdx >= 0 ? lines.slice(headingIdx).join('\n') : normalized;
+    const hash = createHash('sha256').update(slice, 'utf-8').digest('hex');
+    return hash.substring(0, 8);
+  } catch { return null; }
 }
 
 /**
@@ -208,11 +212,12 @@ function scanIntentionalDuplicateMarkers(): Marker[] {
 /**
  * Check marker hash drift
  */
-function checkMarkerDrift(markers: Marker[]): void {
+function checkMarkerDrift(markers: Marker[]): number {
   console.log('🔍 Checking intentional-duplicate marker drift...\n');
 
   let okCount = 0;
   let totalMarkers = markers.length;
+  let findings = 0;
 
   for (const marker of markers) {
     // Check if marker has source/hash fields
@@ -220,6 +225,7 @@ function checkMarkerDrift(markers: Marker[]): void {
       console.log(
         `[WARN] marker at ${marker.file}:${marker.line} lacks source/hash fields (seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes)`
       );
+      findings++;
       continue;
     }
 
@@ -230,14 +236,16 @@ function checkMarkerDrift(markers: Marker[]): void {
 
     if (!existsSync(resolvedSource)) {
       console.log(`[WARN] marker at ${marker.file}:${marker.line} references missing source: ${marker.source}`);
+      findings++;
       continue;
     }
 
     // Compute current hash
-    const currentHash = computeFileHash(resolvedSource);
+    const currentHash = computeSectionHash(resolvedSource);
 
     if (!currentHash) {
       console.log(`[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${marker.source}`);
+      findings++;
       continue;
     }
 
@@ -246,6 +254,7 @@ function checkMarkerDrift(markers: Marker[]): void {
       console.log(
         `[WARN] intentional-duplicate marker at ${marker.file}:${marker.line} is stale: source ${marker.source} changed since hash ${marker.hash} was recorded (expected ${currentHash}) — review the duplicated section and re-seed with --update-marker-hashes after updating it`
       );
+      findings++;
       continue;
     }
 
@@ -254,10 +263,12 @@ function checkMarkerDrift(markers: Marker[]): void {
 
   console.log(`\nintentional-duplicate markers: ${okCount}/${totalMarkers} in sync\n`);
 
-  // Strict-mode note: marker-drift findings are always WARN-only
-  if (STRICT && (okCount < totalMarkers)) {
-    console.log('ℹ️  Strict mode: marker-drift findings remain WARN-only (deferred Stage 2b)');
+  // Strict-mode note: marker-drift findings block in strict mode (Stage 2b)
+  if (STRICT && findings > 0) {
+    console.log(`⛔ Strict mode: ${findings} marker-drift finding(s) — blocking (Stage 2b; see docs/adr/0059)`);
   }
+
+  return findings;
 }
 
 /**
@@ -278,7 +289,7 @@ function updateMarkerHashes(markers: Marker[]): void {
     }
 
     // Compute current hash
-    const currentHash = computeFileHash(resolvedSource);
+    const currentHash = computeSectionHash(resolvedSource);
 
     if (!currentHash) {
       console.log(`[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${resolvedSource}`);
@@ -484,6 +495,13 @@ function scanADRFiles(): ADR[] {
  * Main check function
  */
 function main(): void {
+  // Combined-mode guard: --strict and --update-marker-hashes are mutually exclusive
+  if (UPDATE_MARKER_HASHES && STRICT) {
+    console.error('[ERROR] --strict and --update-marker-hashes are mutually exclusive (gating vs seeding).');
+    console.error('Usage: bun scripts/verify-adr-governance.ts [--strict | --update-marker-hashes]');
+    process.exit(1);
+  }
+
   console.log('🔍 Checking ADR→governance linkage...\n');
 
   // Load governance corpus
@@ -550,24 +568,25 @@ function main(): void {
       }
     } else {
       console.log('✅ All post-cutoff Accepted ADRs are referenced from governance docs.');
-      if (STRICT) {
-        console.log('ℹ️  Strict mode: marker-drift findings (if any) remain WARN-only (deferred Stage 2b)');
-      }
     }
   }
 
   // Phase 2: Check intentional-duplicate markers
   const markers = scanIntentionalDuplicateMarkers();
 
+  const markerFindings = UPDATE_MARKER_HASHES ? 0 : checkMarkerDrift(markers);
+
   if (UPDATE_MARKER_HASHES) {
     updateMarkerHashes(markers);
-  } else {
-    checkMarkerDrift(markers);
+  } else if (STRICT && markerFindings > 0) {
+    console.log(`⛔ Strict mode: ${linkageFindings} unlinked-ADR and/or ${markerFindings} marker-drift finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+  } else if (STRICT && linkageFindings === 0 && markerFindings === 0) {
+    console.log('ℹ️  Strict mode: no linkage or marker-drift findings — exit 0');
   }
 
   // Default mode: always exit 0 on findings (WARN-only)
-  // Strict mode: exit 1 if linkage findings exist, otherwise 0
-  process.exit(STRICT && linkageFindings > 0 ? 1 : 0);
+  // Strict mode: exit 1 if linkage or marker findings exist, otherwise 0
+  process.exit(STRICT && (linkageFindings + markerFindings) > 0 ? 1 : 0);
 }
 
 // Run the check

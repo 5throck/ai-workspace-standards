@@ -100,7 +100,7 @@ Collaboration PM
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Writing Guidelines
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 8b784484 -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: de37df36 -->
 
 ### Core Principles
 

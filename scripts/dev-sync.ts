@@ -1,4 +1,4 @@
-// @version 1.6.1
+// @version 1.6.2
 // v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
 //           previously `gh pr view <branch>` matched ANY PR regardless of state, so
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
@@ -266,8 +266,9 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
     const govRes = await $`bun scripts/verify-adr-governance.ts --strict`.nothrow();
     if (govRes.exitCode !== 0) {
         console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
-        console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references.${RESET}`);
-        console.error(`${YELLOW}   Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
+        console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references, or marker-drift findings exist.${RESET}`);
+        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
+        console.error(`${YELLOW}   For marker-drift: Review the duplicated section, update it if stale, then re-seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes${RESET}`);
         if (import.meta.main) {
             process.exit(1);
         }

@@ -167,7 +167,7 @@ bun scripts/validate-templates.ts
 > **`--governance-check` mode** (added v2.20.0, ADR-0059): Runs `verify-adr-governance.ts` — Accepted ADRs dated
 > on or after 2026-08-23 must be referenced from at least one governance doc (CONSTITUTION.md, `docs/constitution/`,
 > `docs/governance/`) using the canonical `ADR-00NN` form; unlinked ADRs → WARN. Earlier ADRs are grandfathered.
-> Since ADR-0059 Stage 2 (2026-08-23), `dev-sync.ts` step 3.97 runs `verify-adr-governance.ts --strict` as a blocking gate — an unlinked post-cutoff Accepted ADR aborts the sync before branch/commit, while intentional-duplicate marker-hash drift stays WARN. The `audit.ts --governance-check` flag itself remains a non-blocking diagnostic. New ADRs from the cutoff on require frontmatter `status:` + `date:`.
+> Since ADR-0059 Stage 2 (2026-08-23), `dev-sync.ts` step 3.97 runs `verify-adr-governance.ts --strict` as a blocking gate — an unlinked post-cutoff Accepted ADR aborts the sync before branch/commit; since ADR-0059 Stage 2b (2026-08-23), intentional-duplicate marker-hash drift also blocks under the same strict gate. Marker hashes are section-scoped (sha256-8 of the source section slice); the remedy is to review the flagged duplicate section, update it if stale, re-seed via `verify-adr-governance.ts --update-marker-hashes`, and re-run the sync. The `audit.ts --governance-check` flag itself remains a non-blocking diagnostic. New ADRs from the cutoff on require frontmatter `status:` + `date:`.
 
 **Responsibility**:
 - **Agent/Skill changes**: Creator runs sync scripts immediately
