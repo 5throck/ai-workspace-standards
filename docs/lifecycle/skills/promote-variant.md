@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-07-03 | - | production | Backfilled lifecycle record for existing production skill | pm |
+| 2026-08-24 | production | production | Version sync: aligned lifecycle doc to v1.2.1 per SKILL.md (country-profile readiness verification step added) | docs-writer |
 
 ## Acceptance Criteria
 
@@ -23,7 +24,7 @@
 
 - pm (owner agent)
 - create-variant (predecessor Phase A skill)
-- scripts/l2-to-variant-pipeline.ts (promotion pipeline execution)
+- scripts/l3-to-variant-pipeline.ts (promotion pipeline execution)
 - scripts/validate-templates.ts (template validation)
 - scripts/tag-template.ts (git tag publication)
 
@@ -36,7 +37,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.0.1
+- **Version**: 1.2.1
 - **Owner**: pm
-- **Last Updated**: 2026-07-03
-- **Last Reviewer**: pm
+- **Last Updated**: 2026-08-24
+- **Last Reviewer**: docs-writer

@@ -97,7 +97,7 @@ All `<!-- VARIANT-SECTION -->` markers remain functional:
 
 **3. Backward Compatibility Layer**
 
-The scaffold script (`create-l2-scaffold.ts`) supports both approaches:
+The scaffold script (`create-l3-scaffold.ts`) supports both approaches:
 
 ```typescript
 function processVariantContent(content: string): ProcessedContent {
@@ -211,7 +211,7 @@ cp templates/<variant>/agents/pm.md templates/<variant>/agents/pm.md.backup
 # Ensure extends field points to correct parent
 
 # 4. Test variant generation
-bun scripts/create-l2-scaffold.ts <variant>-test --dry-run
+bun scripts/create-l3-scaffold.ts <variant>-test --dry-run
 
 # 5. Commit migration
 git add templates/<variant>/agents/pm.md
@@ -585,7 +585,7 @@ examples:
 ### Impact on Scaffolding Scripts
 
 **Affected Scripts**:
-- `scripts/create-l2-scaffold.ts`
+- `scripts/create-l3-scaffold.ts`
 - `scripts/validate-templates.ts`
 
 **Changes Required**:
@@ -699,12 +699,12 @@ variant: co-design
 ```typescript
 describe('Variant Generation', () => {
   test('generates variant with extends pattern', () => {
-    const result = execSync('bun scripts/create-l2-scaffold.ts test-variant');
+    const result = execSync('bun scripts/create-l3-scaffold.ts test-variant');
     expect(result.toString()).toContain('extends:');
   });
   
   test('maintains backward compatibility', () => {
-    const result = execSync('bun scripts/create-l2-scaffold.ts legacy-variant');
+    const result = execSync('bun scripts/create-l3-scaffold.ts legacy-variant');
     expect(result.toString()).toContain('VARIANT-SECTION'); // Should still work
   });
   
@@ -809,7 +809,7 @@ git revert <phase-1-commit-hash>
 bun scripts/audit.ts
 
 # 3. Test existing workflows
-bun scripts/create-l2-scaffold.ts test-variant --dry-run
+bun scripts/create-l3-scaffold.ts test-variant --dry-run
 
 # 4. Document rollback in memory log
 ```
@@ -920,7 +920,7 @@ git cherry-pick <phase-2-commit-hash>
 - [ADR-0048: Variant PM Architecture — AGENTS.md as Workflow SSOT](../adr/0048-variant-pm-agents-md-workflow-ssot.md)
 - [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md)
 - [Variant PM Specification](../templates/variant-pm-spec.md)
-- [Scaffold Script Documentation](../scripts/create-l2-scaffold.ts)
+- [Scaffold Script Documentation](../scripts/create-l3-scaffold.ts)
 
 ## Support and Questions
 

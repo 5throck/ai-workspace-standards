@@ -105,7 +105,7 @@ cat templates/<variant-name>/variant.json
 For a more thorough conversion with reconciliation and normalization:
 
 ```bash
-# Alternative: Use the full L2-to-variant pipeline
+# Alternative: Use the full L3-to-variant pipeline
 # First, copy project to Projects/ as Phase A prototype
 cp -r <project-path> Projects/<variant-name>/
 cd Projects/<variant-name>/
@@ -113,7 +113,7 @@ git init && git add -A && git commit -m "initial"
 
 # Then run the pipeline
 cd <workspace-root>
-bun scripts/l2-to-variant-pipeline.ts
+bun scripts/l3-to-variant-pipeline.ts
 ```
 
 This runs additional checks:

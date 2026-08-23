@@ -25,8 +25,8 @@ This document assumes familiarity with the L0→L1→L2 hierarchy defined in:
 L0 (Workspace Root)
   ↓ Continuous publish pipeline (dev-sync.ts)
 L1 (Common Template)
-  ↓ One-time scaffold (create-l2-scaffold.ts)
-L2 (Variant Templates: co-design, co-develop, co-security, co-work, co-consult)
+  ↓ One-time scaffold (create-l3-scaffold.ts)
+L3 (Project drafts: Projects/<name>/ — later promoted to L2 variant templates by l3-to-variant-pipeline.ts)
 ```
 
 ## Current State: Post-A-03 Auto-Mode Removal
@@ -140,8 +140,8 @@ description: >
 L0 (agents/pm.md)
   ↓ Continuous publish (dev-sync.ts)
 L1 (templates/common/agents/pm.md) — Simplified template variant
-  ↓ One-time scaffold (create-l2-scaffold.ts)
-L2 (templates/co-*/agents/pm.md) — Full-featured variants
+  ↓ One-time scaffold (create-l3-scaffold.ts)
+L3 (Projects/<name>/agents/pm.md) — project drafts, promoted to L2 (templates/co-*/agents/pm.md) by l3-to-variant-pipeline.ts
 ```
 
 **Key Insight**: L1 is **NOT** a direct copy of L0. It's a **simplified template variant** with structural differences.
@@ -191,8 +191,8 @@ L2 (templates/co-*/agents/pm.md) — Full-featured variants
 
 **Migration Command**:
 ```bash
-# Re-scaffold L2 from latest L1 (WARNING: overwrites local changes)
-bun scripts/create-l2-scaffold.ts --variant co-design --force
+# Re-scaffold a draft from latest L1 (WARNING: overwrites local changes)
+bun scripts/create-l3-scaffold.ts <variant-name> --domain <type>
 ```
 
 ### For New L2 Variants
@@ -202,7 +202,7 @@ bun scripts/create-l2-scaffold.ts --variant co-design --force
 1. Start from latest L1: `templates/common/agents/pm.md`
 2. Add variant-specific customizations (project type, specialist agents)
 3. Run `bun scripts/audit.ts` to verify lifecycle compliance
-4. Test scaffold process: `bun scripts/create-l2-scaffold.ts --variant <your-variant>`
+4. Test scaffold process: `bun scripts/create-l3-scaffold.ts <variant-name> --domain <type>`
 
 ## Maintenance Guidelines
 
@@ -240,7 +240,7 @@ bun scripts/create-l2-scaffold.ts --variant co-design --force
 
 1. Check if change should apply to L0 (reverse propagation)
 2. Update L0 if needed (rare — mostly L0→L1)
-3. Re-publish to all L2 variants: `bun scripts/create-l2-scaffold.ts --all`
+3. Re-publish to all variants: re-run `bun scripts/create-l3-scaffold.ts <variant-name> --domain <type>` for each variant draft
 
 ### Deprecation Notice
 

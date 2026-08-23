@@ -13,10 +13,10 @@ last_verified: 2026-08-23
 
 ## Overview
 
-KR consulting engagements rely on the `k-law` variant skill (a co-consult fork of the common
-KR statutory-research skill), Korean company-disclosure data via DART, and Korean statistics
-via KOSIS. The fork copy exists because co-consult agents reference it directly in
-`variant.json` / AGENTS.md; it stays in sync with the common skill's KR scope.
+KR consulting engagements rely on the KR-scoped `k-law` common skill (registry-governed in
+`country_scoped_assets`; deploys only to projects scaffolded with `--country KR`), Korean
+company-disclosure data via DART, and Korean statistics via KOSIS. Agents reference it
+through this profile rather than through a variant-local copy.
 
 ## Regulatory & Legal Framework
 
@@ -45,9 +45,6 @@ Korean-language deliverables.
 
 | Skill | Scope | Use under KR |
 |-------|-------|--------------|
-| `k-law` (variant fork) | KR | Statutes, precedents, regulatory context (National Law Information Center) |
+| `k-law` (KR-scoped common skill) | KR | Statutes, precedents, regulatory context (National Law Information Center); use in Phase 1 research and route findings to `deliverables/research/` per the Output Destination Mapping in `docs/context.md` |
 
-**Deployment rule**: `k-law` is a KR-scoped asset (fork copy of the common skill; the
-`country_scoped_assets` registry governs the common original). The fork deploys with the
-variant; under a non-KR target country, agents must not cite it and should flag
-jurisdiction verification limits instead.
+**Deployment rule**: `k-law` is a KR-scoped asset in the `country_scoped_assets` registry - it lives in `templates/common/skills/` and deploys only to projects scaffolded with `--country KR`. Under a non-KR active profile, agents must not cite it and should flag jurisdiction verification limits instead. If recurring lookups reveal stable target-specific parameter sets, capture them following the `k-dart` `references/terms-ko.json` pattern.
