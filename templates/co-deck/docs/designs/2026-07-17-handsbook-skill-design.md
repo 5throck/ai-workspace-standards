@@ -199,7 +199,7 @@ Validation is organized as independent check layers aggregated by a single entry
 | ③ Tables | `check-tables.ts` | Table column-sizing policy (no inline colgroup widths, no nowrap on first td) | in-process |
 | a11y | `check-a11y.ts` | Missing `alt`, heading hierarchy (stack-based container reset), empty links, missing `html lang` | in-process |
 | spell | `check-spell.ts` | 197 common English misspellings (strips script/style/pre/code/URLs) | in-process |
-| lint | `check-lint.ts` | Inline styles (allowlist: CSS custom props, SVG, flexbox), inline event handlers (copyCode allowlist), deprecated tags, duplicate IDs, empty headings | in-process |
+| lint | `check-lint.ts` | Inline styles (allowlist: CSS custom props, SVG, flexbox), inline event handlers (no exceptions — copy buttons use delegation), deprecated tags, duplicate IDs, empty headings | in-process |
 | authoring | `check-authoring.ts` | 12 AUTHORING_GUIDELINES compliance checks + `--examples-dir` regression | subprocess |
 | doctor | `handbook-doctor.ts` | 12 static analysis checks (sidebar nav, chapter-nav, broken links, dark palette, language pair, visual element, Course Overview, Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1) | subprocess |
 

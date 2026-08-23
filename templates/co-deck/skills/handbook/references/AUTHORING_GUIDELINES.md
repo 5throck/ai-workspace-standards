@@ -36,28 +36,10 @@
 
 - **Why**: Reviewer feedback — *"For the hands-on exercises too, break the steps down very specifically so that after copying and pasting, they can run right away."*
 - **How to apply**:
-  - Add a **"Copy" button** to each code box, wired to the canonical `copyCode(this)` handler below. Do not invent a separate per-purpose helper (e.g. a `copyPromptBox()`) for multi-line targets — two sibling handbooks built from this same skill independently added their own copy helpers and drifted (one added multi-line support via a second function, the other never did), which is exactly what this canonical version prevents.
-  - Paste this implementation verbatim into each page's inline `<script>` block (these are static-site handbooks with no shared JS bundle, so it is duplicated per page — keep every copy byte-identical):
-    ```js
-    function copyCode(btn) {
-      const codes = btn.parentElement.querySelectorAll(':scope > code');
-      let text;
-      if (codes.length > 1) {
-        text = Array.from(codes).map(c => c.textContent).join('\n');
-      } else {
-        const pre = btn.previousElementSibling || btn.parentElement.querySelector('pre');
-        text = pre.textContent;
-      }
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
-      });
-    }
-    ```
-    - Single-target boxes (a `<pre>` code block, or a `.prompt-box` with exactly one `<code>` child) are handled by the `else` branch via `previousElementSibling`/`pre`.
-    - Multi-line `.prompt-box` boxes (e.g. `cd <dir>` followed by `bun scripts/...`, authored as separate `<code>` siblings joined by `<br>`) are handled by the `codes.length > 1` branch, which joins them with `\n`.
-    - Only localize the `'Copied!'`/`'Copy'` strings for the page's language; the logic must stay identical across every page and every language edition.
+  - Add a **"Copy" button** to each code box using the shared `assets/js/copy-code.js` module. Do not invent separate per-purpose helpers — the canonical implementation handles all cases uniformly.
+  - Button markup is exactly: `<button class="copy-btn" aria-label="Copy code">Copy</button>` placed inside the code container (as in `templates/examples.html`). No attributes beyond the class are required — the shared script wires clicks via document-level `.copy-btn` delegation.
+  - The implementation extracts code from the button's context: single-target boxes (a `<pre>` block, or a `.prompt-box` with exactly one `<code>` child) resolve via `previousElementSibling` or parent `pre`; multi-line `.prompt-box` boxes authored as separate `<code>` siblings joined by `<br>` are joined with `\n` by the `codes.length > 1` branch.
+  - Feedback labels are localized via `COPY_LABELS` keyed on `<html lang>`; the button's initial text stays "Copy" in all languages, only the temporary feedback message localizes. No inline handlers or per-page scripts needed.
   - Do not mix two or more independent actions in a single step (① create file / ② invoke — keep them separate).
   - Terminal commands should be meaningful even on a per-line basis — number them in execution order.
 
