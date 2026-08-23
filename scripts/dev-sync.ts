@@ -1,4 +1,6 @@
-// @version 1.7.2
+// @version 1.7.3
+// v1.7.3: feat(pipeline): add step 4.65 skill graph gate (ADR-0060) — generates and
+//           verifies skill relationship graph before VERSION_MANIFEST generation
 // v1.7.2: fix(pipeline): forward --spec-exempt via SYNC_SPEC_EXEMPT env instead of shell
 //           interpolation — the interpolated " --spec-exempt=X" (leading space) reached
 //           audit as a single argv word and defeated its startsWith parse, making the
@@ -344,6 +346,35 @@ const syncSkillsResult = await $`bun scripts/sync-skills.ts`.nothrow();
 if (syncSkillsResult.exitCode !== 0) {
     console.warn(`⚠️  Skill sync had warnings (exit ${syncSkillsResult.exitCode}), continuing...`);
     if (syncSkillsResult.stderr) console.warn(String(syncSkillsResult.stderr).trim());
+}
+
+// 4.65 Skill Graph Gate — generates and verifies skill relationship graph (ADR-0060).
+//     The generator is L0-only (no skill graph corpus exists in generated projects),
+//     so this step is guarded by existsSync — scaffolded projects skip it.
+//     Must run BEFORE VERSION_MANIFEST generation so graph files are committed.
+if (fs.existsSync('scripts/generate-skill-graph.ts')) {
+    console.log('📋 Step 4.65: Skill relationship graph gate...');
+    const graphGenRes = await $`bun scripts/generate-skill-graph.ts`.nothrow();
+    if (graphGenRes.exitCode !== 0) {
+        console.error(`${RED}❌ Skill graph generation failed.${RESET}`);
+        console.error(`${YELLOW}   Run manually: bun scripts/generate-skill-graph.ts${RESET}`);
+        if (import.meta.main) {
+            process.exit(1);
+        }
+    }
+
+    const graphVerifyRes = await $`bun scripts/verify-skill-graph.ts`.nothrow();
+    if (graphVerifyRes.exitCode !== 0) {
+        console.error(`${RED}❌ Skill graph verification failed.${RESET}`);
+        console.error(`${YELLOW}   The committed skill graph does not match the current workspace state.${RESET}`);
+        console.error(`${YELLOW}   Fix: Review changes to skills/, agents/, or variant.json, then re-run: bun scripts/generate-skill-graph.ts${RESET}`);
+        if (import.meta.main) {
+            process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ Skill graph verification passed${RESET}`);
+} else {
+    console.log('📋 Step 4.65: skipped — skill graph generator is L0-only (not present in scaffolded projects)');
 }
 
 // 4.7 Generate VERSION_MANIFEST.md

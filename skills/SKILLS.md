@@ -4,7 +4,8 @@
 > Propagation control is via SKILL.md frontmatter (`l2_propagate`/`scope`) — not this file.  
 > Platform skills (`.claude/skills/`, `.gemini/skills/`) are tracked by `verify-platform-lifecycle.ts` — not here.  
 > Machine parsing: `layer-filter.ts` reads each skill's `SKILL.md` frontmatter directly.  
-> **L0+L1+L2 skills** are variant-specific overrides living in `templates/co-*/skills/` — NOT published to `templates/common/skills/`.
+> **L0+L1+L2 skills** are variant-specific overrides living in `templates/co-*/skills/` — NOT published to `templates/common/skills/`.  
+> **Inter-skill relations** are NOT tracked here — see `docs/skill-graph.json` / `docs/skill-graph.md` (ADR-0060).
 
 ---
 
