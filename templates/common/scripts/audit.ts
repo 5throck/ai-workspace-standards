@@ -1,4 +1,4 @@
-// @version 2.19.1
+// @version 2.20.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -33,6 +33,7 @@ import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } 
 const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
 const SKIP_MEMORY = process.argv.includes('--skip-memory');
 const SPEC_CHECK = process.argv.includes('--spec-check');
+const GOVERNANCE_CHECK = process.argv.includes('--governance-check');
 
 // Project context path (used in multiple checks)
 const projectCtxPath = path.join('docs', 'context.md');
@@ -2158,6 +2159,23 @@ if (SPEC_CHECK) {
         if (missingSpecFiles === 0 && registry.specs.length > 0) {
             Pass(`Spec check: all ${registry.specs.length} spec file(s) exist`);
         }
+    }
+}
+
+// ── ADR Governance Linkage Checks (--governance-check mode, warn-only) ─────────────
+// NOTE: Stage-1 burn-in per ADR-0059, flag-gated like ADR-0055's --spec-check;
+// ungating into dev-sync is Stage 2 once clean. WARN-only: script exits 0 on findings,
+// audit only FAILs on operational failure (exit 1 from the spawned script).
+if (GOVERNANCE_CHECK) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/verify-adr-governance.ts'], {
+        encoding: 'utf-8',
+    });
+    console.log(stdout);
+    if (stderr) {
+        console.error(stderr);
+    }
+    if (status !== 0) {
+        Fail('ADR governance linkage check failed with operational error — script exited non-zero');
     }
 }
 

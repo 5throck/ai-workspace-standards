@@ -151,6 +151,9 @@ bun scripts/audit.ts
 # Spec-drift check only (warn-only, non-blocking)
 bun scripts/audit.ts --spec-check
 
+# ADR→governance linkage check (warn-only, non-blocking)
+bun scripts/audit.ts --governance-check
+
 # Template validation
 bun scripts/validate-templates.ts
 ```
@@ -160,6 +163,11 @@ bun scripts/validate-templates.ts
 > (2) `approved` specs stale >14 days → WARN,
 > (3) registry entries whose spec file is missing → WARN.
 > This mode is automatically invoked by `dev-sync.ts` (step 3.9) before every `/sync` commit.
+
+> **`--governance-check` mode** (added v2.20.0, ADR-0059): Runs `verify-adr-governance.ts` — Accepted ADRs dated
+> on or after 2026-08-23 must be referenced from at least one governance doc (CONSTITUTION.md, `docs/constitution/`,
+> `docs/governance/`) using the canonical `ADR-00NN` form; unlinked ADRs → WARN. Earlier ADRs are grandfathered.
+> Stage-1 burn-in only (not yet invoked by `dev-sync.ts`); new ADRs from the cutoff on require frontmatter `status:` + `date:`.
 
 **Responsibility**:
 - **Agent/Skill changes**: Creator runs sync scripts immediately
