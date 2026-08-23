@@ -277,7 +277,7 @@ Use an external computation tool when the task involves ANY of the following:
 
 ## Git / PR Workflow
 
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 3d3cd560 -->
 
 ```
 /sync "feat: description"

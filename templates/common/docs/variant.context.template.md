@@ -125,7 +125,7 @@ Edit code
      co-security → ## Security Guidelines
      co-design  → ## Design Guidelines
      co-work    → ## Writing Guidelines -->
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 8b784484 -->
 
 > Replace this placeholder with variant-specific guidelines.
 > This section is REQUIRED — audit.ts will flag its absence.
@@ -135,7 +135,7 @@ Edit code
 ---
 
 ## Git / PR Workflow
-<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; update when source changes -->
+<!-- intentional-duplicate: workspace standards §3 — maintained locally for AI context proximity; source: docs/constitution/03-pr-workflow.md; hash: 3d3cd560 -->
 
 ```
 /sync "feat: description"
