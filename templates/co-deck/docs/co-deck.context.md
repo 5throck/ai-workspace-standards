@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-20
+# Last Updated: 2026-08-23
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -445,7 +445,7 @@ mechanics; each production run still ends the same way once its gates pass.
 ## Presentation Production Guidelines
 
 ### Content Rules
-1. Research must cover both Korean and English sources
+1. Research covers Korean and English sources by default; adjust to the engagement's target market and audience when they differ
 2. Slide count and bullet density: governed by `theme.json content_rules` (read from `docs/html-themes/themes/<theme>/theme.json` at Stage 2). Default: pitch-enhanced → max 4 bullets, 28 char title
 3. Each slide: ≤ bullets per `content_rules`; `image_role: none` max 3 consecutive slides
 4. Speaker intro (slide 2) and contact (last slide) are mandatory

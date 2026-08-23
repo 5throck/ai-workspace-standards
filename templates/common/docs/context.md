@@ -140,7 +140,7 @@ assuming one. Convention: [`docs/country-profiles.md`](country-profiles.md).
 
 | Content | Language |
 |---------|----------|
-| Conversational replies to user | Korean (default) |
+| Conversational replies to user | Match the user's language; when an active country profile defines a communication default (KR: Korean), follow it |
 | Code, config, commit messages | English only |
 | PR titles, bodies, branch names | English only |
 | CHANGELOG.md entries | English only |

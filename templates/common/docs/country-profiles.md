@@ -58,6 +58,8 @@ Rules:
 
 When a project is scaffolded with a target country, `docs/countries/ACTIVE.md` records which profile the project operates under (or that it is region-neutral). It is project state, not template knowledge: promotion of a project into a variant template always excludes `ACTIVE.md` while carrying the profiles themselves.
 
+`ACTIVE.md` records the **primary** jurisdiction. An engagement that spans additional jurisdictions may load extra profiles from `docs/countries/` and list them as secondaries in the `ACTIVE.md` body — the project still operates under one primary profile at a time.
+
 ## Country-Scoped Skill Deployment
 
 Some skills in the workspace registry are country-scoped: their function requires access to a country-specific data system. Currently `k-law`, `k-dart`, and `k-kosis` are scoped to `KR` (Korean statute lookup, DART disclosure data, KOSIS statistics).
@@ -68,6 +70,19 @@ Some skills in the workspace registry are country-scoped: their function require
 - The single source of truth is the `country_scoped_assets` registry in `docs/workspace-schema.json`
 
 If your project needs a country-scoped skill it did not receive, either re-scaffold with the correct target country, or copy the skill from `templates/common/skills/` in the workspace repository per convention (copied skills do not auto-upgrade).
+
+### Personal/Global Skill Bundles
+
+Skills installed in a user's global skill directories (e.g. `~/.claude/skills/`) are personal machine assets, outside workspace governance. They may overlap with workspace skills but can drift from them, they are invisible to scaffold-time pruning and workspace validators, and they may fire in sessions regardless of the project's target country. Never assume a global bundle is present or current: projects rely on their project-local skills only.
+
+## Profile Freshness & Ownership
+
+Every profile has an owner and a freshness contract:
+
+- **Owner** — the variant that ships the profile owns its accuracy. Re-verification is scheduled by that variant's maintainers (via the workspace PM), not by a central scheduler.
+- **Cadence** — re-verify each profile every 6 months, or before any release that leans on its content. The workspace validator's 12-month `last_verified` warning is a backstop, not the process.
+- **Transitions** — `draft` becomes `active` on its first full verification; `active` becomes `stale` when the 12-month warning fires or a known regulatory change invalidates content.
+- **Stale handling** — a `stale` profile stays loadable: agents must flag its staleness to the client at Phase 0 intake and verify affected statements against current sources. Profiles are never auto-deleted.
 
 ## Adding a Country Profile
 
