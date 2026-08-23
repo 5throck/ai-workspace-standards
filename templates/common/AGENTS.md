@@ -18,6 +18,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
+| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Internationalization and localization guidance: locale configuration (BCP 47), locale-specific formatting (dates, numbers, currency, units, numerals, paper sizes), and text layout (encoding, RTL/bidi, fonts) via the three common i18n skills. **Never owns jurisdictional advice** — trade, labor-law, and industry questions route to the domain experts. See constitution §4.4 "I18N Asset Suite". |
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
@@ -275,6 +276,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
 | PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
+| I18N Specialist | `agents/i18n-specialist.md` | Medium | read-only analysis | locale/formatting files when dispatched |
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 <!-- Add project-specific specialist agents here. Format:

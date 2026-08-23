@@ -382,6 +382,21 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "i18n-formatting",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-layout",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-locale-config",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "image-curator",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -2077,6 +2092,78 @@
       "from": "hwp-document-processing",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-formatting",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "hwp-document-processing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "theme-authoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-locale-config",
+      "to": "translate",
+      "source": "prose"
     },
     {
       "type": "references",

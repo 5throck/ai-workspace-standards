@@ -50,6 +50,9 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `swe-solve` | 1.0.0 | active | pm | 2026-08-06 | — | Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks |
 | `evidence-ledger` | 1.0.0 | active | pm | 2026-08-24 | — | Fixed-column evidence ledger with variant overlays (scope: common); ADR-0061 decision-chain standard |
 | `decision-record` | 1.0.0 | active | pm | 2026-08-24 | — | Decision record format for gate-moment rulings (scope: common); ADR-0061 decision-chain standard |
+| `i18n-locale-config` | 1.0.0 | active | pm | 2026-08-24 | — | BCP 47 locale IDs, collation, timezone, region/language matrix (scope: common); i18n asset suite per constitution §4.4 — never country-scoped (§4.3) |
+| `i18n-formatting` | 1.0.0 | active | pm | 2026-08-24 | — | Per-locale date/number/currency/unit formatting, Korean-scale numerals, paper sizes (scope: common); i18n asset suite per constitution §4.4 — never country-scoped (§4.3) |
+| `i18n-layout` | 1.0.0 | active | pm | 2026-08-24 | — | Character encoding, RTL/bidi, script fonts, hwp pointers (scope: common); i18n asset suite per constitution §4.4 — never country-scoped (§4.3) |
 
 
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json.",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -32,6 +32,13 @@
         "Governance Workflow",
         "Dispatch Protocol"
       ]
+    },
+    "i18n-specialist": {
+      "source": "agents/i18n-specialist.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": ["additive", "replacement"],
+      "description": "I18N Specialist — locale configuration, locale-specific formatting, and text layout routing (constitution §4.4 i18n asset suite); jurisdictional workflows stay with domain experts"
     }
   },
   "common_skills": {
@@ -106,6 +113,24 @@
       "version": "1.0.0",
       "overridable": false,
       "description": "Decision record format for gate-moment rulings (ADR-0061)"
+    },
+    "i18n-locale-config": {
+      "source": "skills/i18n-locale-config/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "BCP 47 locale IDs, language-vs-country doctrine, per-language collation, timezone handling, region/language matrix (constitution §4.4)"
+    },
+    "i18n-formatting": {
+      "source": "skills/i18n-formatting/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Per-locale date/time, number, currency, unit formatting; Korean-scale numerals; print paper sizes (constitution §4.4)"
+    },
+    "i18n-layout": {
+      "source": "skills/i18n-layout/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts, hwp pointers (constitution §4.4)"
     }
   },
   "common_commands": {
