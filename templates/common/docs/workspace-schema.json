@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
   "workflow": {
     "phases": {
@@ -68,7 +68,7 @@
   },
   "i18n": {
     "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories are exempt from the English-only documentation rule.",
-    "locale_codes": ["ko", "ja", "zh-CN", "zh-TW", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar"],
+    "locale_codes": ["ko", "ja", "zh-CN", "zh-TW", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar", "en"],
     "translation_zone_patterns": [
       "<lang-code>/",
       "locales/<lang-code>/"
