@@ -274,9 +274,11 @@ dispatch_protocol:
 | `communication_style` | `string` | Yes | Communication mode (`sync` or `async`) |
 
 **Tier Values**:
-- `high`: High-complexity orchestration (claude-opus-5-0, gemini-3.1-pro)
+- `high`: High-complexity reasoning and design adjudication (claude-opus-5-0, gemini-3.1-pro)
 - `medium`: Standard orchestration (claude-sonnet-5-0, gemini-3.7-flash)
 - `low`: Simple coordination (claude-haiku-4-5)
+
+> Template PMs default to `medium` (project orchestration); the workspace-root PM is `high`. A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 
 **Communication Style Values**:
 - `sync`: Synchronous - requires user confirmation at each gate
@@ -296,7 +298,7 @@ dispatch_protocol:
   can_lead_phases: [0, 2, 6]
   can_support_in: []
   auto_dispatch_to: [red-team-lead, pentester, threat-modeler, patch-engineer, report-writer]
-  tier: high
+  tier: medium
   communication_style: sync
 ```
 
@@ -305,7 +307,7 @@ dispatch_protocol:
   can_lead_phases: [0, 2, 3, 6]
   can_support_in: [4]
   auto_dispatch_to: [ux-researcher, design-lead, visual-designer, prototype-engineer]
-  tier: high
+  tier: medium
   communication_style: sync
 ```
 
@@ -441,7 +443,7 @@ variant_overrides:
     can_lead_phases: [0, 2, 6]
     can_support_in: []
     auto_dispatch_to: [ux-researcher, design-lead, visual-designer, prototype-engineer, service-designer, typography-expert, storyteller]
-    tier: high
+    tier: medium
     communication_style: sync
   constraints:
     phase_determination:
@@ -494,7 +496,7 @@ variant_overrides:
     can_lead_phases: [0, 2, 6]
     can_support_in: []
     auto_dispatch_to: [red-team-lead, pentester, threat-modeler, patch-engineer, report-writer]
-    tier: high
+    tier: medium
     communication_style: sync
   constraints:
     phase_determination:

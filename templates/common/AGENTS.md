@@ -17,7 +17,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | High | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
+| **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly (Phase 0), design validation (Phase 2), and lifecycle finalization (Phase 6). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
 
 <!-- VARIANT-AGENTS-START -->
 <!-- Define project-specific specialist agents here.
@@ -274,7 +274,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 | Agent | File | Tier | Parallelizable | Write Allowed? |
 |-------|------|------|:--------------:|:--------------:|
-| PM Orchestrator | `agents/pm.md` | High | - | orchestrates only |
+| PM Orchestrator | `agents/pm.md` | Medium | - | orchestrates only |
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
 <!-- Add project-specific specialist agents here. Format:

@@ -4,12 +4,12 @@ name: pm
 formal_name: Project Manager (PM) Agent
 status: active
 version: "1.0.0"
-last_updated: "2026-07-31"
+last_updated: "2026-08-23"
 tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+  claude: medium
+  gemini: medium
+  antigravity: medium
+  gemini-cli: medium
 model: inherit
 color: yellow
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
