@@ -1,26 +1,32 @@
 ---
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
-version: 1.0.0
+version: 1.0.1
 owner: pm
 status: active
-last_reviewed: 2026-06-13
-last_updated: 2026-05-30
+last_reviewed: 2026-08-24
+last_updated: 2026-08-24
 scope: common
 metadata:
   type: process
   triggers:
     - translate
     - translation
-    - localize
     - Korean translation
 ---
 
 ## Purpose
 
-Provides translation helpers for README and documentation files with diff preview, synchronization checking, and translation guidance. 
+Provides translation helpers for README and documentation files with diff preview, synchronization checking, and translation guidance.
 
 **This is NOT an automatic translation tool** - it's a **helper tool** that assists translators in identifying changes and managing translation work systematically.
+
+**Scope boundary**: this skill is a file-translation process helper (hash sync, diff preview).
+Questions about locale configuration (BCP 47 IDs, collation), locale-specific formatting
+(dates, numbers, currency, units), or text layout/encoding (RTL, scripts, fonts) belong to
+the i18n asset suite — see the workspace constitution §4.4 "I18N Asset Suite" (governance
+corpus) and the i18n skills of the same suite. The `localize` trigger was removed from
+this skill for that reason (2026-08-24).
 
 ## Implementation
 
