@@ -409,6 +409,7 @@ When a task falls into an exempt category, Row 0 is replaced with an exemption m
 - Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
 - Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
 - Abuse of exemptions is a governance violation
+- These codes are machine-consumed by `audit.ts --spec-exempt=E1..E5` / `SYNC_SPEC_EXEMPT` (ADR-0055 Stage 2 gating; invalid codes hard-Fail)
 
 ### §5.2 Platform Parity Considerations
 

@@ -1,7 +1,7 @@
 # Design: Spec Registry Enforcement + project-to-variant.ts Hardening
 
 **Date**: 2026-08-16
-**Status**: Approved — Part A Stage 1 and Part B implemented; Stage 2 remains as a follow-up PR (see Delivery Scope)
+**Status**: Approved — Part A Stage 1, Part B, and Stage 2 (2026-08-23) implemented (see Delivery Scope)
 **Source**: brainstorming
 **Spec ID**: 2026-08-16-spec-registry-enforcement-design
 **Related**: [workflow-integrated-methodology-design.md](workflow-integrated-methodology-design.md), [execution-plan-design-gate-design.md](execution-plan-design-gate-design.md), [ADR-0054](../adr/0054-error-handling-standardization.md)
@@ -31,6 +31,7 @@ Per this workspace's own Sequential Branch Dependency Rule (`dev-sync.ts` touche
 - **Part A Stage 1** (PR #538, merged) — spec-check gating/relevance fix, `spec-backfill.ts`, ADR-0055 (Proposed).
 - **Part B** (`project-to-variant.ts` hardening) — implemented in the next PR after Part A merged, per the Sequential Branch Dependency Rule.
 - **Stage 2** (Warn → Fail, actually blocking commits) remains deferred — it needs a soak period to observe Stage 1's output on real commits first (≥1 week / one Weekly Health Check cycle with no false-positive reports).
+- **Stage 2** (2026-08-23, shipped) — relevance Fail + blocking dev-sync step 3.9; ADR-0055 Accepted.
 
 ---
 

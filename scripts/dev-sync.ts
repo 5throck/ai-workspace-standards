@@ -1,4 +1,4 @@
-// @version 1.6.2
+// @version 1.7.0
 // v1.5.4: fix(pr-check): "PR already exists for branch" step now checks PR state —
 //           previously `gh pr view <branch>` matched ANY PR regardless of state, so
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
@@ -38,6 +38,7 @@ if (path.resolve(actualCwd) !== expectedRoot) {
 // chain below still applies.
 const rawArgs = process.argv.slice(2);
 let bodyFilePath = '';
+let specExempt = '';
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
@@ -45,6 +46,8 @@ for (let i = 0; i < rawArgs.length; i++) {
     bodyFilePath = rawArgs[++i] ?? '';
   } else if (arg.startsWith('--body-file=')) {
     bodyFilePath = arg.slice('--body-file='.length);
+  } else if (arg.startsWith('--spec-exempt=')) {
+    specExempt = arg.slice('--spec-exempt='.length);
   } else {
     msgArgs.push(arg);
   }
@@ -230,12 +233,23 @@ if (fs.existsSync(archiveMemoryTs)) {
     }
 }
 
-// 3.9 Spec registry check (non-blocking — warns if approved specs are stale or code has no spec)
-// Output is intentionally visible (no .quiet()) — Stage 1 of the spec-registry-enforcement
-// rollout; see docs/designs/2026-08-16-spec-registry-enforcement-design.md.
+// 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check
+// Fails when a code diff has no spec activity; stale/missing-spec stay WARN).
+// Output is intentionally visible (no .quiet()); same idiom as step 3.97.
 const specRegPath = path.join('docs', 'specs', 'registry.json');
 if (fs.existsSync(specRegPath)) {
-    await $`bun scripts/audit.ts --spec-check --lifecycle-only`.nothrow();
+    const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only${specExempt ? ` --spec-exempt=${specExempt}` : ''}`.nothrow();
+    if (specRes.exitCode !== 0) {
+        console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
+        console.error('  The diff touches code (scripts/templates/agents) with no relevant spec activity.');
+        console.error('  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the');
+        console.error('  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).');
+        if (import.meta.main) process.exit(1);
+    } else {
+        console.log(`${GREEN}✓ Spec registry check passed${RESET}`);
+    }
+} else {
+    console.log('📋 Step 3.9: skipped — no docs/specs/registry.json');
 }
 
 // 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)
