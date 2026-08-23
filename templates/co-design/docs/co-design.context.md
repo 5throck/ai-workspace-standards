@@ -100,7 +100,7 @@ Design PM
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Design Guidelines
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 8b784484 -->
 
 ### Core Principles
 

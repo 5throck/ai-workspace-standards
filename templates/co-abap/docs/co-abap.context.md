@@ -468,7 +468,7 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
 ## Coding Guidelines (ABAP Supplement)
 
-<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; update when source changes -->
+<!-- intentional-duplicate: workspace standards §8 — maintained locally for AI context proximity; source: docs/constitution/08-coding-guidelines.md; hash: 8b784484 -->
 
 ### 1. Think Before Coding
 - State assumptions explicitly before implementing. If uncertain, ask — don't guess silently.

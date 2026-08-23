@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-23T01:44:45.341Z
+**Generated**: 2026-08-23T01:52:25.394Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.12.0 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
-| verify-adr-governance.ts | 1.0.0 | scripts/verify-adr-governance.ts | N/A |
+| verify-adr-governance.ts | 1.1.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.1.0 | scripts/verify-memory.ts | fs, path |
