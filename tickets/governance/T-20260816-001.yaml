@@ -4,7 +4,7 @@ kind: manual
 title: 'spec-check Stage 2: promote relevance Warn to Fail (ADR-0055)'
 priority: normal
 not_before: '2026-08-23'
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-08-16T09:53:18.587Z'
 history:
@@ -14,5 +14,11 @@ history:
   - at: '2026-08-16T09:53:37.477Z'
     from: backlog
     to: waiting
+  - at: '2026-08-23T07:31:41.802Z'
+    from: waiting
+    to: review
+  - at: '2026-08-23T07:31:41.915Z'
+    from: review
+    to: done
 result: null
 error: null

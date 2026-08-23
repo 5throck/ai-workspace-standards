@@ -148,7 +148,7 @@ bun scripts/sync-skill-status.ts
 # Full workspace audit
 bun scripts/audit.ts
 
-# Spec-drift check only (warn-only, non-blocking)
+# Spec-drift check only (relevance check Fails — see note below)
 bun scripts/audit.ts --spec-check
 
 # ADR→governance linkage check (warn-only, non-blocking)
@@ -158,11 +158,11 @@ bun scripts/audit.ts --governance-check
 bun scripts/validate-templates.ts
 ```
 
-> **`--spec-check` mode** (added v2.10.0): Runs three warn-only checks against `docs/specs/registry.json` —
-> (1) code files changed with no linked spec → WARN,
+> **`--spec-check` mode** (added v2.10.0): Runs three checks against `docs/specs/registry.json` —
+> (1) code files changed with no linked spec → FAIL (since ADR-0055 Stage 2, 2026-08-23 — was WARN),
 > (2) `approved` specs stale >14 days → WARN,
 > (3) registry entries whose spec file is missing → WARN.
-> This mode is automatically invoked by `dev-sync.ts` (step 3.9) before every `/sync` commit.
+> This mode is automatically invoked by `dev-sync.ts` (step 3.9) before every `/sync` commit — as a **blocking gate** since ADR-0055 Stage 2: a relevance Fail aborts the sync before branch/commit (a manual `--spec-check` run exits 1). Escape hatch: `--spec-exempt=E1..E5` (or `SYNC_SPEC_EXEMPT` env), validated against the AGENTS.md §5.1.1 Design Gate exemption categories — invalid codes hard-Fail.
 
 > **`--governance-check` mode** (added v2.20.0, ADR-0059): Runs `verify-adr-governance.ts` — Accepted ADRs dated
 > on or after 2026-08-23 must be referenced from at least one governance doc (CONSTITUTION.md, `docs/constitution/`,

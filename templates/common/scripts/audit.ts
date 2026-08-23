@@ -1,4 +1,4 @@
-// @version 2.20.1
+// @version 2.21.0
 // v2.15.0: New checkStalePromotedContent() — WARN-only check flagging docs/<variant>.context.md
 //   sections that duplicate a same-heading section already present in the common
 //   templates/common/docs/context.md. checkVariantContextCommonization() only ever compared
@@ -34,6 +34,19 @@ const LIFECYCLE_ONLY = process.argv.includes('--lifecycle-only');
 const SKIP_MEMORY = process.argv.includes('--skip-memory');
 const SPEC_CHECK = process.argv.includes('--spec-check');
 const GOVERNANCE_CHECK = process.argv.includes('--governance-check');
+
+// ADR-0055 Stage 2: spec-relevance exemption escape hatch (--spec-exempt=E3[,E5] or SYNC_SPEC_EXEMPT env).
+// Valid codes map 1:1 to the AGENTS.md §5.1.1 Design Gate exemption categories.
+const SPEC_EXEMPT_CATEGORIES: Record<string, string> = {
+  E1: 'memory-log',
+  E2: 'changelog',
+  E3: 'hotfix-typo',
+  E4: 'pure-readme',
+  E5: 'sync-only',
+};
+const specExemptArg = process.argv.find(a => a.startsWith('--spec-exempt='));
+const SPEC_EXEMPT_RAW = specExemptArg ? specExemptArg.slice('--spec-exempt='.length) : (process.env.SYNC_SPEC_EXEMPT ?? '');
+const SPEC_EXEMPT_CODES = SPEC_EXEMPT_RAW.split(/[,\s]+/).map(c => c.trim()).filter(Boolean);
 
 // Project context path (used in multiple checks)
 const projectCtxPath = path.join('docs', 'context.md');
@@ -2088,15 +2101,31 @@ if (fs.existsSync(variantAuditPath)) {
     }
 }
 
-// ── Spec Registry Checks (--spec-check mode, warn-only) ─────────────────────
+// ── Spec Registry Checks (--spec-check mode) ─────────────────────
+// ADR-0055 Stage 2 (2026-08-23): relevance check is FAIL; stale/missing-spec stay WARN.
 // NOTE: guarded by SPEC_CHECK alone (not !LIFECYCLE_ONLY) because dev-sync.ts's
 // only call site passes --spec-check --lifecycle-only together; gating on
 // !LIFECYCLE_ONLY here made this block permanently unreachable.
 if (SPEC_CHECK) {
-    const SPEC_REGISTRY = path.join('docs', 'specs', 'registry.json');
-    if (!fs.existsSync(SPEC_REGISTRY)) {
-        Warn('Spec registry not found at docs/specs/registry.json — run: bun scripts/spec-register.ts to initialize');
-    } else {
+    // Validate exemption codes (runs whenever SPEC_CHECK is active OR if codes were provided without --spec-check)
+    if (SPEC_EXEMPT_CODES.length > 0) {
+        const invalidCodes = SPEC_EXEMPT_CODES.filter(c => !SPEC_EXEMPT_CATEGORIES[c]);
+        if (invalidCodes.length > 0) {
+            Fail(`Invalid --spec-exempt code(s): ${invalidCodes.join(', ')} — valid codes: E1 (memory-log), E2 (changelog), E3 (hotfix-typo), E4 (pure-readme), E5 (sync-only) (AGENTS.md §5.1.1)`);
+            // Skip the rest of spec-check on invalid codes (the Fail alone produces exit 1)
+            // Note: we must exit the SPEC_CHECK block early here
+        } else {
+            console.log('── spec relevance EXEMPT: ' + SPEC_EXEMPT_CODES.map(c => `${c} (${SPEC_EXEMPT_CATEGORIES[c]})`).join(', ') + ' ──');
+        }
+    }
+
+    // Only proceed if exemption codes were valid (or none provided)
+    const invalidCodes = SPEC_EXEMPT_CODES.filter(c => !SPEC_EXEMPT_CATEGORIES[c]);
+    if (invalidCodes.length === 0) {
+        const SPEC_REGISTRY = path.join('docs', 'specs', 'registry.json');
+        if (!fs.existsSync(SPEC_REGISTRY)) {
+            Warn('Spec registry not found at docs/specs/registry.json — run: bun scripts/spec-register.ts to initialize');
+        } else {
         interface SpecEntry { id: string; file: string; status: string; created: string; last_updated: string; }
         interface Registry { specs: SpecEntry[]; }
 	        const registry: Registry = JSON.parse(readUTF8File(SPEC_REGISTRY));
@@ -2126,7 +2155,11 @@ if (SPEC_CHECK) {
             // (out of scope for this pass — see docs/designs/2026-08-16-spec-registry-enforcement-design.md).
             const relevant = changedSpecArea || recentActiveSpec;
             if (!relevant) {
-                Warn(`Spec check: ${changedCode.length} code file(s) changed but no recent/relevant spec activity (diff doesn't touch docs/specs|docs/designs, and no approved/implemented spec updated within ${RECENT_DAYS}d) — consider running the brainstorming skill or spec-register.ts`);
+                if (SPEC_EXEMPT_CODES.length > 0 && SPEC_EXEMPT_CODES.every(c => SPEC_EXEMPT_CATEGORIES[c])) {
+                    console.log('ℹ️  spec relevance check skipped (exempt)');
+                } else {
+                    Fail(`Spec check: ${changedCode.length} code file(s) changed but no recent/relevant spec activity (diff doesn't touch docs/specs|docs/designs, and no approved/implemented spec updated within ${RECENT_DAYS}d) — consider running the brainstorming skill or spec-register.ts`);
+                }
             } else {
                 Pass('Spec check: code changes covered by spec registry activity');
             }
@@ -2158,6 +2191,7 @@ if (SPEC_CHECK) {
         }
         if (missingSpecFiles === 0 && registry.specs.length > 0) {
             Pass(`Spec check: all ${registry.specs.length} spec file(s) exist`);
+        }
         }
     }
 }

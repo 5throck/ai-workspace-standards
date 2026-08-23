@@ -108,7 +108,7 @@ Intentional-duplicate marker-hash drift (Stage 1b) deliberately stays WARN. The 
 
 ### Honesty note: first actual ungating; ADR-0055 is design lineage, not precedent-in-force
 
-This is the workspace's **first actual ungating** of a WARN-only validator into a blocking dev-sync gate. ADR-0055's Stage 2 (`--spec-check` ungating) never shipped — that ADR is still `Proposed` and its ticket (`tickets/governance/T-20260816-001.yaml`) is still `waiting` — so the "ADR-0055 playbook" references in this ADR describe the pattern's design lineage, not a precedent in force.
+This is the workspace's **first actual ungating** of a WARN-only validator into a blocking dev-sync gate. ADR-0055's Stage 2 (`--spec-check` ungating) never shipped — that ADR is still `Proposed` and its ticket (`tickets/governance/T-20260816-001.yaml`) is still `waiting` — so the "ADR-0055 playbook" references in this ADR describe the pattern's design lineage, not a precedent in force. (superseded 2026-08-23: ADR-0055 Stage 2 has now shipped — this workspace's second ungating)
 
 ### L0-only boundary clarification (glob-copy)
 

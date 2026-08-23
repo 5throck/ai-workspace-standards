@@ -1,6 +1,6 @@
 # ADR-0055: Spec Registry Enforcement
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-08-16
 **Deciders**: pm, architect, automation-engineer
 
@@ -34,7 +34,7 @@ Gated on Stage 1 having run visibly in real `/sync` output for at least one Week
 - Promote the "no relevant spec" `Warn(...)` to `Fail(...)` in `audit.ts` (the stale-spec and missing-file checks stay `Warn`).
 - Add an exemption escape hatch — `--spec-exempt=<E1-E5>` / `SYNC_SPEC_EXEMPT` env var — validated against the exemption categories already defined in `AGENTS.md` §5.1.1 (`memory-log`, `changelog`, `hotfix-typo`, `pure-readme`, `sync-only`).
 - Switch `dev-sync.ts` step 3.9 to the same blocking idiom already used for the main audit gate (visible output, check `exitCode`, `process.exit(1)` on failure).
-- This ADR's Status flips to Accepted when Stage 2 ships.
+- This ADR's Status flips to Accepted when Stage 2 ships (done — see the Stage 2 Amendment below).
 
 ## Consequences
 
@@ -74,3 +74,19 @@ Gated on Stage 1 having run visibly in real `/sync` output for at least one Week
 - `docs/designs/workflow-integrated-methodology-design.md` — original (non-functional) mechanism
 - `AGENTS.md` §3.7.5 — Governance Backlog Dispatch convention; §5.1.1 — Design Gate exemption categories (E1-E5)
 - ADR-0054 — Error Handling Standardization (structural precedent for incremental, opportunistic rollout of a workspace-wide script-behavior change)
+
+## Amendment (2026-08-23): Stage 2 Shipped — Relevance Fail + Blocking dev-sync Step 3.9
+
+### Readiness
+
+Stage 1 shipped 2026-08-16 via PR #538 and ran visibly in real `/sync` output for the full soak period. The readiness gate — Governance Backlog ticket `T-20260816-001` (`not_before: 2026-08-23`) — has now been reached with no false-positive reports; the Stage 2 PR closes the ticket.
+
+### Mechanism
+
+- `scripts/audit.ts` **2.20.1 → 2.21.0**: the spec-relevance check ("code files changed with no linked spec") is promoted from `Warn` to `Fail`; the stale-spec and missing-file checks stay `Warn`, per the original Stage 2 scope. A manual `bun scripts/audit.ts --spec-check` run now exits 1 on a relevance Fail.
+- Exemption escape hatch: `--spec-exempt=E1..E5` (argv) or `SYNC_SPEC_EXEMPT` (env var), validated against the E1–E5 exemption categories defined in `AGENTS.md` §5.1.1 (`memory-log`, `changelog`, `hotfix-typo`, `pure-readme`, `sync-only`) — an invalid code is itself a hard Fail, so the vocabulary cannot be invented ad hoc.
+- `scripts/dev-sync.ts` **1.6.2 → 1.7.0**: step 3.9 becomes a blocking gate using the same idiom as step 3.97 (visible output, `exitCode` check, `process.exit(1)` on failure). A forwarded `--spec-exempt` is consumed by the gate and stripped from the commit message.
+
+### Becomes precedent
+
+ADR-0059's Stage-2 amendment recorded this ADR's Stage 2 as "design lineage, not a precedent in force" because it had never shipped. That statement is now superseded: this PR is the workspace's **second ungating** of a WARN-only validator into a blocking `dev-sync` gate, and the soak-then-block rollout this ADR specified — Stage 1 visible burn-in, readiness tracked as a dated Governance Backlog ticket, then Stage 2 Fail promotion — has now run end-to-end once as written.
