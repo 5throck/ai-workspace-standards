@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-22T23:50:31.869Z
+**Generated**: 2026-08-23T00:27:17.833Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 8
 - **Skills**: 37
-- **Scripts**: 76
+- **Scripts**: 77
 - **Commands**: 8
 
 ---
@@ -144,9 +144,10 @@
 | validate-model-registry.ts | N/A | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
-| validate-templates.ts | 1.11.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.12.0 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
+| verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.1.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.1.2 | scripts/verify-platform-lifecycle.ts | N/A |

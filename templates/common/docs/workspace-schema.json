@@ -76,9 +76,10 @@
     "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
   },
   "country_scoped_assets": {
-    "description": "Skills and scripts whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
+    "description": "Skills, scripts, and env keys whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
     "skills": { "k-law": "KR", "k-dart": "KR", "k-kosis": "KR" },
-    "scripts": {}
+    "scripts": {},
+    "env": { "DART_API_KEY": "KR", "LAW_API_OC": "KR" }
   },
   "rootAllowlist": {
     "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",

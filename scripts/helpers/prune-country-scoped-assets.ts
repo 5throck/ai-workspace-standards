@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
-// @version 0.1.0
+// @version 0.2.0
 /**
  * prune-country-scoped-assets.ts
  *
- * Prunes country-specific skills and scripts from generated projects/L3 drafts
- * based on the target country. Reads the country_scoped_assets registry from
- * workspace schema (SSOT) and removes assets whose registered country != target.
+ * Prunes country-specific skills, scripts, and env key blocks from generated
+ * projects/L3 drafts based on the target country. Reads the country_scoped_assets
+ * registry from workspace schema (SSOT) and removes assets whose registered country != target.
  *
  * Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none>
  *
@@ -15,11 +15,14 @@
  * Pruning rules:
  * - Skills: removes <target>/{skills,.claude/skills,.gemini/skills,.agents/skills}/<name>/
  * - Scripts: removes <target>/scripts/<name>*
- * - Idempotent: missing paths are silent
+ * - Env keys: parses <target>/.env.sample for # >>> country-scoped:<CODE> marker blocks
+ *             and deletes blocks whose CODE != target country. For "none", deletes ALL blocks.
+ *             Marker format: # >>> country-scoped:<CODE> opens, # <<< country-scoped:<CODE> closes.
+ * - Idempotent: missing paths are silent; unbalanced marker blocks leave file unchanged
  * - Exit 0 on success, exit 1 on bad args
  */
 
-import { readFileSync, existsSync, rmSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, rmSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -50,9 +53,10 @@ if (!existsSync(targetDir)) {
 const workspaceRoot = resolve(__dirname, '../..');
 const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
 
-let registry: { skills: Record<string, string>; scripts: Record<string, string> } = {
+let registry: { skills: Record<string, string>; scripts: Record<string, string>; env: Record<string, string> } = {
   skills: {},
-  scripts: {}
+  scripts: {},
+  env: {}
 };
 
 if (existsSync(schemaPath)) {
@@ -64,6 +68,7 @@ if (existsSync(schemaPath)) {
     if (countryScoped) {
       registry.skills = (countryScoped.skills as Record<string, string>) || {};
       registry.scripts = (countryScoped.scripts as Record<string, string>) || {};
+      registry.env = (countryScoped.env as Record<string, string>) || {};
     }
   } catch (error) {
     console.warn(`⚠️  Warning: Could not read workspace schema at ${schemaPath}. Proceeding with empty registry.`);
@@ -158,6 +163,86 @@ function pruneScript(scriptName: string, scopedCountry: string): void {
   }
 }
 
+/**
+ * Prune env key marker blocks from .env.sample
+ */
+function pruneEnvBlocks(): void {
+  const envSamplePath = join(targetDir, '.env.sample');
+  if (!existsSync(envSamplePath)) return;
+
+  try {
+    const content = readFileSync(envSamplePath, 'utf-8');
+    const lines = content.split('\n');
+    const output: string[] = [];
+    let inBlock = false;
+    let currentBlockCode: string | null = null;
+    let blockStartLine = -1;
+    let blockLines: string[] = [];
+    let blocksDeleted = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const openMatch = line.match(/^# >>>\s*country-scoped:([A-Z]{2,4})/);
+      const closeMatch = line.match(/^# <<<\s*country-scoped:([A-Z]{2,4})/);
+
+      if (openMatch) {
+        if (inBlock) {
+          // Nested/unbalanced opening marker - warn and skip
+          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: nested opening marker without closing previous block. File left unchanged.`);
+          return;
+        }
+        inBlock = true;
+        currentBlockCode = openMatch[1];
+        blockStartLine = i;
+        blockLines = [line];
+      } else if (closeMatch) {
+        if (!inBlock) {
+          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: closing marker without opening. File left unchanged.`);
+          return;
+        }
+        if (closeMatch[1] !== currentBlockCode) {
+          console.warn(`  ⚠️  Unbalanced marker at line ${i + 1}: closing code '${closeMatch[1]}' doesn't match opening code '${currentBlockCode}'. File left unchanged.`);
+          return;
+        }
+
+        // Complete block - decide whether to keep or delete
+        blockLines.push(line);
+
+        if (countryArg !== 'none' && countryArg !== '' && countryArg === currentBlockCode) {
+          // Keep the block - country matches
+          output.push(...blockLines);
+        } else {
+          // Delete the block - country doesn't match
+          blocksDeleted++;
+          console.log(`Pruned ${currentBlockCode}-scoped env block from .env.sample`);
+        }
+
+        inBlock = false;
+        currentBlockCode = null;
+        blockLines = [];
+      } else if (inBlock) {
+        blockLines.push(line);
+      } else {
+        output.push(line);
+      }
+    }
+
+    // Check for unclosed block
+    if (inBlock) {
+      console.warn(`  ⚠️  Unbalanced marker: block starting at line ${blockStartLine + 1} has no closing marker. File left unchanged.`);
+      return;
+    }
+
+    // Only rewrite if something was deleted
+    if (blocksDeleted > 0) {
+      writeFileSync(envSamplePath, output.join('\n'), 'utf-8');
+      prunedCount += blocksDeleted;
+    }
+  } catch (error) {
+    console.warn(`  ⚠️  Could not process .env.sample: ${error}`);
+  }
+}
+
 // ── Execute pruning ───────────────────────────────────────────────────────────
 
 console.log(`Pruning country-scoped assets for: ${countryArg === 'none' || countryArg === '' ? 'region-neutral' : countryArg}`);
@@ -171,6 +256,9 @@ for (const [skillName, scopedCountry] of Object.entries(registry.skills)) {
 for (const [scriptName, scopedCountry] of Object.entries(registry.scripts)) {
   pruneScript(scriptName, scopedCountry);
 }
+
+// Prune env marker blocks
+pruneEnvBlocks();
 
 if (prunedCount === 0) {
   console.log('No country-scoped assets needed pruning.');
