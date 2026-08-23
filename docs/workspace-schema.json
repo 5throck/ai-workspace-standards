@@ -277,7 +277,7 @@
     },
     "co-news": {
       "agent_manifest": {
-        "description": "Korean business/finance newsroom agent roster with flat dispatch and fact-checker sign-off gate",
+        "description": "Business/finance newsroom agent roster with flat dispatch and fact-checker sign-off gate",
         "required_fields": ["variant_agents_dir", "optional", "notes"],
         "optional_fields": ["pipeline_order"],
         "notes": "Agents dispatched by PM based on newsroom workflow phase. Fact-checker sign-off gate before publish."

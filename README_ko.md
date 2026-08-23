@@ -187,9 +187,9 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-deck/             # 🔶 Beta — 강연 자료 및 프레젠테이션 제작 에이전트 팀
     ├── co-game/             # ✅ Stable — HTML5 Canvas 게임 개발 에이전트 팀
     ├── co-export/           # 🔶 Beta — 수출입 무역 컴플라이언스 에이전트 팀
-    ├── co-news/             # 🔶 Beta — 한국 경제/금융 저널리즘 에이전트 팀
+    ├── co-news/             # 🔶 Beta — 경제/금융 저널리즘 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-abap/             # ✅ Stable — SAP ABAP 개발 에이전트 팀
-    └── co-hr/                # 🔶 Beta — 한국 노무/HR 컨설팅 에이전트 팀
+    └── co-hr/                # 🔶 Beta — 노무/HR 컨설팅 에이전트 팀 (KR 국가 프로필 포함)
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -230,9 +230,9 @@ C:\git\
 - **co-consult**: 리서치, 분석, 산출물 작성, 고객 납품을 아우르는 7단계 전략 컨설팅 워크플로
 - **co-deck**: 리서치부터 인쇄 가능한 PDF까지의 11단계 강연 자료 제작 워크플로, 5개의 승인 게이트 포함
 - **co-game**: Vanilla TypeScript 기반 HTML5 Canvas 게임 개발 워크플로, 게임 설계, 아케이드/퍼즐 장르, 비주얼 아트, 사운드, 엔진 구현, 디버깅, 테스트 전문 에이전트 포함
-- **co-news**: 상장사 보도를 담당하는 경제 기자를 위한 한국 경제/금융 저널리즘 워크플로 — DART 금융 공시(k-dart), 한국 상법 리서치(k-law), 인용 레저 기반 팩트체크, AI투 느낌 감소, 금융 인포그래픽 생성
+- **co-news**: 상장사 보도를 담당하는 경제 기자를 위한 경제/금융 저널리즘 워크플로 — 금융 공시 리서치(DART, KR 국가 프로필의 k-dart), 상법 리서치(k-law, KR 프로필), 인용 레저 기반 팩트체크, AI투 느낌 감소, 금융 인포그래픽 생성. 국가별 데이터 소스·법령은 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 기본 포함, 다른 국가는 프로필 추가)
 - **co-abap**: PM 주도 오케스트레이션, 6개 SAP 모듈 애널리스트(SD, MM, FI, CO, PP, LE), 기술 실행 에이전트, 자동화된 QA 체인(SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)을 갖춘 6단계 SAP ABAP 개발 워크플로
-- **co-hr**: 인게이지먼트 인테이크, 한국 노동법 컴플라이언스 점검, HRM/HRD 설계, 조직 재설계/변화관리를 아우르는 4단계 노무/HR 컨설팅 워크플로 — k-law/k-kosis 규제 리서치 연동, 12개 에이전트 로스터(PM + 전문가 11인)
+- **co-hr**: 인게이지먼트 인테이크, 대상 관할권의 노동법 컴플라이언스 점검(docs/countries/ 하위 국가 프로필 — KR 프로필 기본 포함), HRM/HRD 설계, 조직 재설계/변화관리를 아우르는 4단계 노무/HR 컨설팅 워크플로 — k-law/k-kosis 규제 리서치 연동(KR 스코프 스킬, KR 국가 프로젝트에만 배포), 12개 에이전트 로스터(PM + 전문가 11인)
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -255,9 +255,9 @@ C:\git\
 | `co-deck` | 🔶 Beta | 강연 자료 제작 워크플로 — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | ✅ Stable | HTML5 Canvas 게임 개발 워크플로 — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | 수출입 무역 컴플라이언스 워크플로 — PM, HS 분류, 수출 통제, FTA 원산지, 환급, 물류, 시장 진출, 해외 규제 모니터링, 무역 서류 |
-| `co-news` | 🔶 Beta | 한국 경제/금융 저널리즘 워크플로 — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
+| `co-news` | 🔶 Beta | 경제/금융 저널리즘 워크플로 — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. 국가별 데이터는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-abap` | ✅ Stable | SAP ABAP 개발 워크플로 — PM, Architect, Code Writer, Test Runner, DBA, DevOps Admin, SAP Investigators, 모듈 애널리스트(SD, MM, FI, CO, PP, LE), Interface/Fiori/Form 전문가, Security Monitor |
-| `co-hr` | 🔶 Beta | 노무/HR 컨설팅 워크플로 — PM, 노동 컴플라이언스 애널리스트, 노사관계 전문가, 안전보건 담당관, 채용 전문가, 보상·복지 애널리스트, 성과관리 컨설턴트, L&D 전문가, 경력·계승 컨설턴트, 조직설계 컨설턴트, 변화관리 파트너, 데이터 애널리스트 |
+| `co-hr` | 🔶 Beta | 노무/HR 컨설팅 워크플로 — PM, 노동 컴플라이언스 애널리스트, 노사관계 전문가, 안전보건 담당관, 채용 전문가, 보상·복지 애널리스트, 성과관리 컨설턴트, L&D 전문가, 경력·계승 컨설턴트, 조직설계 컨설턴트, 변화관리 파트너, 데이터 애널리스트. 노동법 적용 범위는 국가 프로필로 연결 (KR 프로필 포함) |
 
 ### 버전 및 Variant 선택
 
@@ -337,4 +337,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-22*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-23*

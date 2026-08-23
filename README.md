@@ -189,9 +189,9 @@ C:\git\ (workspace root - this repo)
     ├── co-deck/             # 🔶 Beta — lecture and presentation material production agent team
     ├── co-game/             # ✅ Stable — HTML5 Canvas game development agent team
     ├── co-export/           # 🔶 Beta — import/export trade compliance agent team
-    ├── co-news/             # 🔶 Beta — Korean business/finance journalism agent team
+    ├── co-news/             # 🔶 Beta — business/finance journalism agent team (KR country profile included)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
-    └── co-hr/                # 🔶 Beta — Korean HR & labor-relations consulting agent team
+    └── co-hr/                # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -233,9 +233,9 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-deck**: An 11-stage lecture material production workflow from research to print-ready PDF, with 5 approval gates
 - **co-game**: A game development workflow for HTML5 Canvas games using Vanilla TypeScript, with specialized agents for game design, arcade/puzzle genres, visual art, sound, engine implementation, debugging, and testing
 - **co-export**: A trade/export-compliance workflow covering HS classification, export control and sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, and trade documentation
-- **co-news**: A Korean business/finance journalism workflow for economics reporters covering listed companies — DART financial disclosures (via k-dart), Korean commercial-law research (via k-law), fact-checking with citation ledger, AI-tell reduction, and financial infographic generation
+- **co-news**: A business/finance journalism workflow for economics reporters covering listed companies — financial-disclosure research (DART via k-dart under the KR country profile), commercial-law research (k-law, KR profile), fact-checking with citation ledger, AI-tell reduction, and financial infographic generation. Jurisdiction-specific data sources and law attach via country profiles under docs/countries/
 - **co-abap**: A 6-phase SAP ABAP development workflow with PM-led orchestration, six SAP module analysts (SD, MM, FI, CO, PP, LE), technical execution agents, and automated QA chains (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
-- **co-hr**: A 4-phase HR & labor-relations consulting workflow covering engagement intake, Korean labor-law compliance audit, HRM/HRD system design, and org restructuring/change management, with k-law/k-kosis regulatory research integration across a 12-agent roster
+- **co-hr**: A 4-phase HR & labor-relations consulting workflow covering engagement intake, labor-law compliance audit for the target jurisdiction (country profiles under docs/countries/ — KR profile included), HRM/HRD system design, and org restructuring/change management, with k-law/k-kosis regulatory research integration (KR-scoped skills, attached only to KR-country projects) across a 12-agent roster
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -258,9 +258,9 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-deck` | 🔶 Beta | Lecture material production workflow — PM, Version, Research, Storyline, Design, Build, Measure, Export |
 | `co-game` | ✅ Stable | HTML5 Canvas game development workflow — PM, Game Designer, Arcade/Puzzle Designers, Visual Artist, Sound Designer, Game Developer, Game Debugger, Test Runner, Security Monitor |
 | `co-export` | 🔶 Beta | Import/export trade-compliance AI agent team — HS classification, export control & sanctions screening, FTA origin determination, customs duty drawback, logistics coordination, market entry strategy, foreign regulation monitoring, trade documentation |
-| `co-news` | 🔶 Beta | Korean business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor |
+| `co-news` | 🔶 Beta | Business/finance journalism — PM, Reporter, Fact-Checker, Financial Analyst, Legal Researcher, Style Editor, Visual Editor. Jurisdiction data via country profiles (KR profile included) |
 | `co-abap` | ✅ Stable | SAP ABAP development workflow — PM, Architect, Code Writer, Test Runner, DBA, DevOps Admin, SAP Investigators, Module Analysts (SD, MM, FI, CO, PP, LE), Interface/Fiori/Form Experts, Security Monitor |
-| `co-hr` | 🔶 Beta | HR & labor-relations consulting workflow — PM, Labor Compliance Analyst, Labor Relations Specialist, Safety & Health Officer, Talent Acquisition Specialist, Compensation & Benefits Analyst, Performance Management Consultant, L&D Specialist, Career & Succession Consultant, Org Design Consultant, Change Management Partner, Data Analyst |
+| `co-hr` | 🔶 Beta | HR & labor-relations consulting workflow — PM, Labor Compliance Analyst, Labor Relations Specialist, Safety & Health Officer, Talent Acquisition Specialist, Compensation & Benefits Analyst, Performance Management Consultant, L&D Specialist, Career & Succession Consultant, Org Design Consultant, Change Management Partner, Data Analyst. Labor-law scope via country profiles (KR profile included) |
 
 ### Selecting a version and variant
 
@@ -340,4 +340,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-22*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-08-23*

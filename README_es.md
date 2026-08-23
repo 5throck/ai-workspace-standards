@@ -187,9 +187,9 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-deck/             # 🔶 Beta — equipo de agentes para producción de material de lectura y presentaciones
     ├── co-game/             # ✅ Estable — equipo de agentes para desarrollo de juegos en HTML5 Canvas
     ├── co-export/           # 🔶 Beta — equipo de agentes para cumplimiento de comercio exterior
-    ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero coreano
+    ├── co-news/             # 🔶 Beta — equipo de agentes para periodismo empresarial/financiero (perfil de país KR incluido)
     ├── co-abap/             # ✅ Estable — equipo de agentes para desarrollo SAP ABAP
-    └── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (Corea)
+    └── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
 ```
 
 Cada subproyecto vive en su propio directorio y repositorio git:
@@ -231,9 +231,9 @@ Cada variante de plantilla en este workspace proporciona un **flujo de trabajo m
 - **co-deck**: Un flujo de trabajo de producción de material de lectura de 11 etapas, desde la investigación hasta el PDF listo para imprimir, con 5 puertas de aprobación.
 - **co-game**: Un flujo de trabajo de desarrollo de juegos para juegos de HTML5 Canvas usando Vanilla TypeScript, con agentes especializados en diseño de juegos, géneros arcade/puzzle, arte visual, sonido, implementación del motor, depuración y pruebas.
 - **co-export**: Un flujo de trabajo de cumplimiento de comercio exterior que cubre clasificación arancelaria (SA), control de exportaciones y cribado de sanciones, determinación de origen TLC, devolución de aranceles, coordinación logística, estrategia de entrada en mercados, seguimiento de regulaciones extranjeras y documentación comercial
-- **co-news**: Un flujo de trabajo de periodismo empresarial/financiero coreano para reporteros de economía que cubren empresas cotizadas — disclosures financieros de DART (vía k-dart), investigación de derecho mercantil coreano (vía k-law), verificación de hechos con libro de citas, reducción de marcas de IA y generación de infografías financieras
+- **co-news**: Un flujo de trabajo de periodismo empresarial/financiero para reporteros de economía que cubren empresas cotizadas — investigación de disclosures financieros (DART vía k-dart bajo el perfil de país KR), investigación de derecho mercantil (k-law, perfil KR), verificación de hechos con libro de citas, reducción de marcas de IA y generación de infografías financieras. Las fuentes de datos y el derecho específicos de cada jurisdicción se incorporan mediante perfiles de país bajo docs/countries/
 - **co-abap**: Un flujo de desarrollo SAP ABAP de 6 fases con orquestación dirigida por PM, seis analistas de módulos SAP (SD, MM, FI, CO, PP, LE), agentes de ejecución técnica y cadenas de QA automatizadas (SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck)
-- **co-hr**: Un flujo de consultoría de RR. HH. y relaciones laborales de 4 fases que cubre admisión del encargo, auditoría de cumplimiento de la legislación laboral coreana, diseño de HRM/HRD y reestructuración organizativa/gestión del cambio, con integración de investigación regulatoria k-law/k-kosis (equipo de 12 agentes)
+- **co-hr**: Un flujo de consultoría de RR. HH. y relaciones laborales de 4 fases que cubre admisión del encargo, auditoría de cumplimiento de la legislación laboral de la jurisdicción objetivo (perfiles de país bajo docs/countries/ — perfil KR incluido), diseño de HRM/HRD y reestructuración organizativa/gestión del cambio, con integración de investigación regulatoria k-law/k-kosis (habilidades de alcance KR, adjuntas solo a proyectos con país KR) en un equipo de 12 agentes
 
 **💡 Cómo revisar los detalles del flujo de trabajo**
 Las plantillas de agentes específicas y las fases de gobernanza se gestionan dentro de los documentos de cada proyecto generado. Después de crear un proyecto, revise:
@@ -256,9 +256,9 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-deck` | 🔶 Beta | Flujo de producción de material de lectura — PM, Versión, Investigación, Guion, Diseño, Construcción, Medición, Exportación |
 | `co-game` | ✅ Estable | Flujo de desarrollo de juegos HTML5 Canvas — PM, Diseñador de Juegos, Diseñadores Arcade/Puzzle, Artista Visual, Diseñador de Sonido, Desarrollador de Juegos, Depurador de Juegos, Ejecutor de Pruebas, Monitor de Seguridad |
 | `co-export` | 🔶 Beta | Cumplimiento de comercio exterior — clasificación arancelaria, control de exportaciones y sanciones, origen TLC, devolución de aranceles, logística, entrada en mercados, seguimiento regulatorio, documentación comercial |
-| `co-news` | 🔶 Beta | Periodismo empresarial/financiero coreano — PM, Reportero, Verificador de Hechos, Analista Financiero, Investigador Legal, Editor de Estilo, Editor Visual |
+| `co-news` | 🔶 Beta | Periodismo empresarial/financiero — PM, Reportero, Verificador de Hechos, Analista Financiero, Investigador Legal, Editor de Estilo, Editor Visual. Datos de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-abap` | ✅ Estable | Flujo de desarrollo SAP ABAP — PM, Arquitecto, Programador, Ejecutor de Pruebas, DBA, Admin DevOps, Investigadores SAP, Analistas de Módulos (SD, MM, FI, CO, PP, LE), Expertos Interface/Fiori/Form, Monitor de Seguridad |
-| `co-hr` | 🔶 Beta | Consultoría de RR. HH. y relaciones laborales — PM, Analista de Cumplimiento Laboral, Especialista en Relaciones Laborales, Oficial de Seguridad y Salud, Especialista en Adquisición de Talento, Analista de Compensación y Beneficios, Consultor de Gestión del Desempeño, Especialista en L&D, Consultor de Carrera y Sucesión, Consultor de Diseño Organizacional, Socio de Gestión del Cambio, Analista de Datos |
+| `co-hr` | 🔶 Beta | Consultoría de RR. HH. y relaciones laborales — PM, Analista de Cumplimiento Laboral, Especialista en Relaciones Laborales, Oficial de Seguridad y Salud, Especialista en Adquisición de Talento, Analista de Compensación y Beneficios, Consultor de Gestión del Desempeño, Especialista en L&D, Consultor de Carrera y Sucesión, Consultor de Diseño Organizacional, Socio de Gestión del Cambio, Analista de Datos. Alcance del derecho laboral mediante perfiles de país (perfil KR incluido) |
 
 ### Selección de versión y variante
 
@@ -338,4 +338,4 @@ AGPL-3.0 - ver [LICENSE](LICENSE)
 
 ---
 
-*Mantenido por [@5throck](https://github.com/5throck) · Última Actualización: 08-07-2026*
+*Mantenido por [@5throck](https://github.com/5throck) · Última Actualización: 24-08-2026*
