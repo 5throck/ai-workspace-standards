@@ -1,0 +1,3 @@
+Compiled token outputs (tokens.css / tokens.ts) are generated into this
+directory by `bun run tokens` — they are gitignored to prevent drift from
+the tokens.json SSOT. This .gitkeep preserves the directory.
