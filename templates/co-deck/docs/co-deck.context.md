@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-08-23
+# Last Updated: 2026-08-24
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -656,6 +656,18 @@ Agents and skills use generic language for tool references:
 - "file read/write" not `Read`/`Write`/`Edit` (Claude-specific tool names)
 
 This ensures the same `agents/*.md` files work under Claude, Gemini, and any future AI. The only AI-specific content lives in `CLAUDE.md` and `GEMINI.md`.
+
+---
+
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
 
 ---
 
