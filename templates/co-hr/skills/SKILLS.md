@@ -9,6 +9,7 @@ This directory contains variant-specific skills for the `co-hr` template.
 | career-path-succession-planning | `career-path-succession-planning/` | career-path-succession-planning skill |
 | compensation-benchmarking | `compensation-benchmarking/` | compensation-benchmarking skill |
 | consulting-report-writing | `consulting-report-writing/` | consulting-report-writing skill |
+| competency-modeling | `competency-modeling/` | competency-modeling skill |
 | hr-metrics-analysis | `hr-metrics-analysis/` | hr-metrics-analysis skill |
 | learning-curriculum-design | `learning-curriculum-design/` | learning-curriculum-design skill |
 | org-design-framework | `org-design-framework/` | org-design-framework skill |
