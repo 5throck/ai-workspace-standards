@@ -135,6 +135,7 @@ After drafting and style editing, the PM runs a final editorial review (Phase 6)
 2. `style-editor` AI-tell reduction pass: complete
 3. `style-editor` house-style conformance pass: complete
 4. All figures trace to a specific DART filing receipt number
+5. Legal-review escalation resolved: every Tier-1 item has a `legal-researcher` written review incorporated, and every Tier-2 item has its consultation quote-back in the legal context brief (see Legal-Review Escalation Matrix below)
 
 If any condition fails, the article is routed back to the responsible agent — never published with open items.
 
@@ -147,6 +148,20 @@ If any condition fails, the article is routed back to the responsible agent — 
 | Fact verification | `fact-checker` |
 | Prose quality / register | `style-editor` |
 | Infographics / visuals | `visual-editor` |
+
+### Legal-Review Escalation Matrix
+
+The Routing Rules table above routes questions by type; this matrix escalates by risk, regardless of which agent drafted the material. It defines risk-tiered triggers deciding what MUST route to `legal-researcher` before publication, and it applies to the jurisdiction of the active country profile (KR profile: Korean commercial law via k-law).
+
+| Tier | Trigger (examples) | Required action |
+|------|--------------------|-----------------|
+| **Tier 1 - Defamation / accusation risk (MANDATORY pre-publication review)** | Accusations of wrongdoing against named individuals or companies (fraud, embezzlement, market manipulation, unfair practices); criminal-allegation or investigation reporting, including naming suspects before indictment; claims implying securities-law or disclosure violations; novel legal theories not grounded in cited precedent | PM blocks the Editorial Review Gate until `legal-researcher` produces a written review (defamation exposure per claim + precedent grounding) and the reporter incorporates it; an unresolved Tier 1 item means no publication |
+| **Tier 2 - Dispute / pending-proceedings risk (consult + quote-back)** | Reporting on ongoing litigation or regulatory probes where outcomes are pending; contractual-dispute claims; quoting unnamed/off-record sources on legal matters; labor-practice accusations against named employers | `legal-researcher` consulted during Phase 1; the draft must quote back the consultation's conclusion (with the k-law citation) in the legal context brief; PM verifies the quote-back at editorial review |
+| **Tier 3 - Routine legal context (no escalation)** | Citing statutes/precedents as established background; historical case references; describing regulatory frameworks without accusatory claims | Standard k-law citation discipline + the standing "not legal advice" disclaimer; no routing required |
+
+**Escalation mechanics**: anyone (reporter, fact-checker, style-editor) flags a suspected Tier-1/Tier-2 trigger to the PM; the PM makes the tier call - when in doubt, escalate one tier up. The tier decision and its resolution are recorded in the citation ledger (via `source-verification-ledger`) so the Editorial Review Gate can verify it.
+
+See also `agents/legal-researcher.md` for the research procedure, and the KR country profile under `docs/countries/` for jurisdiction scope.
 
 ### Article Output Language
 
