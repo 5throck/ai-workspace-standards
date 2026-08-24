@@ -48,6 +48,7 @@
   "skills": [
     { "name": "accessibility-audit", "file": "skills/accessibility-audit/SKILL.md" },
     { "name": "service-design", "file": "skills/service-design/SKILL.md" },
+    { "name": "token-usage-lint", "file": "skills/token-usage-lint/SKILL.md" },
     { "name": "ui-ux-design-intelligence", "file": "skills/ui-ux-design-intelligence/SKILL.md" }
   ],
   "agent_manifest": {
@@ -67,6 +68,11 @@
         "name": "service-design",
         "used_by_agents": ["service-designer", "design-lead"],
         "phases": [1, 2, 3]
+      },
+      {
+        "name": "token-usage-lint",
+        "used_by_agents": ["prototype-engineer"],
+        "phases": [4]
       },
       {
         "name": "ui-ux-design-intelligence",

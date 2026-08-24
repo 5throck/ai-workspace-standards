@@ -957,6 +957,11 @@
       "layer": "L0"
     },
     {
+      "id": "token-usage-lint",
+      "type": "skill",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "trade-documentation-checklist",
       "type": "skill",
       "layer": "variant:co-export"
@@ -4234,6 +4239,24 @@
       "from": "threat-modeler",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "token-usage-lint",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "token-usage-lint",
+      "to": "prototype-engineer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "token-usage-lint",
+      "to": "prototype-engineer",
+      "source": "skill_manifest"
     },
     {
       "type": "phase",
