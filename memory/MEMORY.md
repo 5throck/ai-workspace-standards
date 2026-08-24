@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-08-25](2026-08-25.md) | feat(co-game): single-file HTML game bundler script + tests + script_manifest registration (PR19 of backlog execution series) |
 | [2026-08-24](2026-08-24.md) | feat(co-deck): port CSP-safe copy buttons with localized labels and hardened link checker from handbook repos |
 | [2026-08-22](2026-08-22.md) | chore: update |
 | [2026-08-23](2026-08-23.md) | feat(skills): promote k-kosis to templates/common |

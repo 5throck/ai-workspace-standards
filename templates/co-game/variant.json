@@ -117,6 +117,16 @@
       }
     ]
   },
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/co-game",
+    "local": [
+      {
+        "name": "bundle-html",
+        "path": "scripts/co-game/bundle-html.ts"
+      }
+    ],
+    "external": []
+  },
   "stablePromotionSummary": {
     "promotedOn": "2026-08-12",
     "previousStatus": "beta",
