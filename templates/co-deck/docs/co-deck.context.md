@@ -430,6 +430,14 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | 11 | Export | **Gate 5 (required)** | sample_5slides.pdf → full .pdf |
 <!-- END VARIANT-INJECT -->
 
+### PPTX Export Boundary
+
+HTML theme decks terminate at PDF by design (pdf-export skill + render-pdf-deck.ts pipeline). Fidelity loss in an HTML→OOXML conversion is the accepted trade-off for the layout-first theme system.
+
+For PowerPoint handoff of markdown-sourced material, use the workspace-root compiler: `bun scripts/md-to-ooxml.ts --input <deck-outline.md> --type pptx` (v1.2.0, Flat OPC single-file OOXML package; H1-per-slide mapping). This is the supported pptx path, kept at the workspace layer rather than forked into co-deck.
+
+This boundary is deliberate; revisit only if a theme-deck pptx fidelity requirement lands (see `docs/variant-benchmark-backlog.md` §5 row 5 for the tracking entry).
+
 ---
 
 ## Git / PR Workflow
