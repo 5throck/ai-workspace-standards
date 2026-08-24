@@ -112,6 +112,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "competency-modeling",
+      "type": "skill",
+      "layer": "variant:co-hr"
+    },
+    {
       "id": "competitive-intelligence",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -1325,6 +1330,60 @@
       "from": "compensation-benchmarking",
       "to": "talent-acquisition-strategy",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "career-path-succession-planning",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "career-succession-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "hr-metrics-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "learning-curriculum-design",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "learning-development-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "org-design-framework",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "performance-management-consultant",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "competency-modeling",
+      "to": "performance-system-design",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "competency-modeling",
+      "to": "phase2",
+      "source": "skill_manifest"
     },
     {
       "type": "used_by",

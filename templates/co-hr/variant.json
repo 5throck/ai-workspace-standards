@@ -68,6 +68,10 @@
       "file": "skills/compensation-benchmarking/SKILL.md"
     },
     {
+      "name": "competency-modeling",
+      "file": "skills/competency-modeling/SKILL.md"
+    },
+    {
       "name": "consulting-report-writing",
       "file": "skills/consulting-report-writing/SKILL.md"
     },
@@ -130,6 +134,17 @@
         "name": "compensation-benchmarking",
         "used_by_agents": [
           "compensation-benefits-analyst"
+        ],
+        "phases": [
+          2
+        ]
+      },
+      {
+        "name": "competency-modeling",
+        "used_by_agents": [
+          "learning-development-specialist",
+          "performance-management-consultant",
+          "career-succession-consultant"
         ],
         "phases": [
           2
