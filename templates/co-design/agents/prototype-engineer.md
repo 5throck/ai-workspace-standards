@@ -20,13 +20,13 @@ examples:
 phases: [4]
 handoff_to: [pm]
 handoff_from: [service-designer, visual-designer, typography-expert]
-required_skills: []
+required_skills: [token-usage-lint]
 version: "1.0.0"
-last_updated: "2026-05-28"
+last_updated: "2026-08-25"
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-05-28"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/prototype-engineer.md
 ---
 
