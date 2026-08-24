@@ -6,8 +6,8 @@ description: >
   classification, customs valuation basis determination, and tariff rate lookup.
   Ensures classification reasoning is reproducible and defensible under a customs
   post-clearance audit.
-version: 1.0.0
-last_reviewed: 2026-08-08
+version: 1.0.1
+last_reviewed: 2026-08-25
 status: active
 owner: hs-classification-specialist
 prerequisites: none
@@ -25,6 +25,13 @@ calculation) depends on this classification, so treat it as the engagement's fou
 - Existing classification needs re-verification after a product spec change
 - Client disputes a prior classification or a customs authority raises a query
 - Customs valuation basis needs to be established alongside classification
+
+## Prerequisites
+
+- Confirmed product description and technical specifications from the client
+- Access to the home jurisdiction's HS nomenclature at tariff-line depth (KR: Korea Customs Service HSK)
+- Prior customs ruling database access (if available for precedent research)
+- A tariff-dataset snapshot conforming to `docs/tariff-dataset-schema.json` for the home jurisdiction (or portal access as fallback; see the schema doc's Consumption section)
 
 ## Execution Steps
 
@@ -46,6 +53,7 @@ calculation) depends on this classification, so treat it as the engagement's fou
    contested — never present a probable classification as certain.
 6. **Tariff Rate Lookup**: Identify the applicable home-jurisdiction tariff rate and, if relevant, the
    destination-country rate (cross-reference `foreign-regulatory-intelligence-analyst` findings).
+   Consult the home jurisdiction's tariff-dataset snapshot (schema: [`docs/tariff-dataset-schema.json`](../../docs/tariff-dataset-schema.json)) before portal lookup; record `captured_at` and `source_ref` of the rate used in the output for audit reproducibility.
 7. **Handoff**: Pass the confirmed HS code to `fta-origin-analyst` (origin rules are HS-specific)
    and to `export-control-compliance-specialist` if the classification falls in a
    strategic-items-adjacent chapter.
@@ -54,6 +62,14 @@ calculation) depends on this classification, so treat it as the engagement's fou
 
 - Classification report: candidate HS headings considered, GRI reasoning chain, final HS code
   code, confidence level, customs valuation basis, applicable tariff rate(s), cited prior rulings
+
+## Quality Criteria
+
+- [ ] HS heading and subheading cited with exact text from the nomenclature
+- [ ] GRI reasoning chain documented in order (GRI 1 → 2 → 3 → ... as applicable)
+- [ ] Confidence level stated explicitly (confirmed / probable / contested)
+- [ ] Prior ruling precedent checked and referenced (or noted as unavailable)
+- [ ] Ambiguity escalation recommended when multiple plausible headings exist
 
 ## Related Skills
 
