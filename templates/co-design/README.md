@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 72120794adb8629fd735691808587284fa6554af04e7a75e5123bb4ce28061dc
+content_hash: 690f6389e85f79832c6473bf249a4f32c8fd5426ed757c2a6dcf84b961e1d810
 ---
 
 # co-design
@@ -54,6 +54,11 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 See [docs/user-guide.md](docs/user-guide.md) for a practical, task-oriented walkthrough of when to use each agent and skill, the workflow phases, and where deliverables are saved.
 
+### Design Tokens & Playground
+
+- **`tokens.json`** — the design-token SSOT (color, typography, spacing, borderRadius, shadow), compiled by `scripts/compile-tokens.ts` into CSS custom properties and typed TS constants.
+- **`playground/`** — a minimal Vite dev server wired to the compiled tokens for live preview during design phases. See [playground/README.md](playground/README.md) for quickstart and the token wiring diagram; runs inside a scaffolded co-design project.
+
 ## How to Collaborate
 
 Working with us is structured to maximize quality and prevent collisions. Here is our standard workflow:
@@ -87,4 +92,4 @@ This variant focuses on UI/UX design, design systems, prototyping, and design ha
 
 ---
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-08-24*

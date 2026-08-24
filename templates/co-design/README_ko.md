@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 72120794adb8629fd735691808587284fa6554af04e7a75e5123bb4ce28061dc
+translated_from_hash: 690f6389e85f79832c6473bf249a4f32c8fd5426ed757c2a6dcf84b961e1d810
 lang: ko
 lang_reason: source-material
 ---
@@ -55,6 +55,11 @@ lang_reason: source-material
 - **ui-ux-design-intelligence**: 디자인 시스템 생성, 컴포넌트 디자인, 시각적 계층 구조, 사용자 중심 디자인 원칙을 포함한 종합적인 UI/UX 디자인 역량을 제공합니다. 사용 시점: 디자인 시스템 구축, 시각 디자인 생성, UI 컴포넌트 디자인, 디자인 명세 수립.
 
 각 에이전트와 스킬을 언제 사용해야 하는지, 워크플로 단계, 산출물 저장 위치에 대한 실용적인 작업 중심 안내는 [docs/user-guide_ko.md](docs/user-guide_ko.md)를 참고하세요.
+
+### 디자인 토큰 & 플레이그라운드
+
+- **`tokens.json`** — 디자인 토큰 SSOT(color, typography, spacing, borderRadius, shadow). `scripts/compile-tokens.ts`가 CSS 커스텀 프로퍼티와 타입 지정 TS 상수로 컴파일합니다.
+- **`playground/`** — 컴파일된 토큰에 연결된 최소 구성의 Vite 개발 서버로, 디자인 단계에서 라이브 미리보기를 제공합니다. 퀵스타트와 토큰 연결 구조는 [playground/README.md](playground/README.md)(영문)를 참고하세요. 스캐폴딩된 co-design 프로젝트 내부에서 실행됩니다.
 
 ## 협업 방법
 

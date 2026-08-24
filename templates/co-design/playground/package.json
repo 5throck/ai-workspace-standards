@@ -1,0 +1,17 @@
+{
+  "name": "co-design-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Live component playground for the co-design variant — Vite dev server wired to compiled design tokens.",
+  "scripts": {
+    "tokens": "bun ../../scripts/compile-tokens.ts --input ../tokens.json --output-css src/generated/tokens.css --output-ts src/generated/tokens.ts",
+    "predev": "bun run tokens",
+    "dev": "vite",
+    "prebuild": "bun run tokens",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
