@@ -677,6 +677,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "samm-maturity",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "sample-driven-report-writing",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -2919,6 +2924,24 @@
       "from": "research-analysis",
       "to": "analyst",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "samm-maturity",
+      "to": "stride-threat-matrix",
+      "source": "prose"
     },
     {
       "type": "used_by",

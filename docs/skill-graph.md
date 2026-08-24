@@ -71,6 +71,7 @@
 | `promote-variant` | L0 | — | — | — |
 | `refactoring` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | — |
 | `research-analysis` | variant:co-work | analyst | — | — |
+| `samm-maturity` | variant:co-security | — | — | — |
 | `sample-driven-report-writing` | variant:co-consult | communications-lead | phase3, phase4 | — |
 | `sap-co` | variant:co-abap | architect, co-analyst, dba | phase1, phase2 | — |
 | `sap-fi` | variant:co-abap | architect, dba, fi-analyst | phase1, phase2 | — |
