@@ -1,8 +1,8 @@
 ---
 name: swe-solve
-description: Autonomous 4-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation and pull-request synthesis.
-version: 1.0.0
-last_reviewed: 2026-08-06
+description: Autonomous 5-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation, pull-request synthesis, and resolution-trajectory logging.
+version: 1.1.0
+last_reviewed: 2026-08-24
 status: active
 scope: co-develop
 owner: pm
@@ -19,12 +19,13 @@ metadata:
 # 🛠️ Skill: swe-solve
 
 ## Context
-Provides a structured 4-stage autonomous software engineering workflow for resolving repository issues, fixing bugs, and implementing features using test-driven development (TDD) and multi-agent coordination.
+Provides a structured 5-stage autonomous software engineering workflow for resolving repository issues, fixing bugs, and implementing features using test-driven development (TDD) and multi-agent coordination. Every run produces a scoreable trajectory record for measuring resolve-rate over time.
 
 ## When to Use
 - Resolving GitHub issues autonomously in `co-develop` variant templates.
 - Executing multi-step code refactoring or bug fixes requiring systematic verification.
 - Running autonomous coding pipelines with automated PR output.
+- Any issue resolution where you need a durable, machine-greppable record of the resolution attempt for later analysis.
 
 ## Execution Steps
 
@@ -48,6 +49,28 @@ Provides a structured 4-stage autonomous software engineering workflow for resol
 - Generate structured PR body detailing issue root cause, code modifications, and test evidence.
 - Submit PR via `/sync` pipeline.
 
+### Stage 5: Trajectory Record
+- Append a trajectory record file to capture the complete resolution attempt for scoring and retrospective analysis.
+- **File path**: `memory/trajectories/swe-solve/<YYYY-MM-DD>-<issue-or-slug>.md` (one file per run; the directory is created on first use).
+- **YAML frontmatter** (machine-greppable for resolve-rate computation):
+  ```yaml
+  ---
+  run: <YYYY-MM-DD>-<slug>
+  issue: <issue URL or local spec ref>
+  resolved: true|false  # true only if PR merged or all stages passed with tests green
+  tests_failed_before: <n>
+  tests_passed_after: <n>
+  files_touched: <n>
+  pr: <PR URL or "none">
+  stages_completed: 1-5
+  ---
+  ```
+- **Body**: Brief per-stage notes (hypothesis, key edits, test evidence). Reuse and extend the Output Format summary structure rather than duplicating it verbatim. The Execution Summary belongs in the PR body; the trajectory file is the durable scoreable record.
+- **Resolve-rate calculation**: `resolved: true` count ÷ total trajectory files for a given period. Compute with:
+  ```bash
+  grep -c '^resolved: true' memory/trajectories/swe-solve/*.md
+  ```
+
 ## Output Format
 
 ```markdown
@@ -69,8 +92,12 @@ Provides a structured 4-stage autonomous software engineering workflow for resol
 - `scripts/helpers/schema-validator.ts`: Updated schema mapping
 
 ### 🚀 PR Synthesis
-- **Branch**: `pr/20260806-swe-solve-fix`
+- **Branch**: `pr/20260824-swe-solve-fix`
 - **Sync Status**: Opened PR #451
+
+### 📊 Trajectory Record
+- **Path**: `memory/trajectories/swe-solve/2026-08-24-target-fix.md`
+- **Resolved**: true
 ```
 
 ## Related Skills
