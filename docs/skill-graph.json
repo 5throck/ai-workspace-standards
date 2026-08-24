@@ -672,6 +672,11 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "roo-qualification-worksheet",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
       "id": "safety-health-officer",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -2929,6 +2934,48 @@
       "from": "research-analysis",
       "to": "analyst",
       "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-analyst",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-determination",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-determination",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "hs-classification-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "phase",
+      "from": "roo-qualification-worksheet",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "roo-qualification-worksheet",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "roo-qualification-worksheet",
+      "to": "trade-documentation-checklist",
+      "source": "prose"
     },
     {
       "type": "phase",

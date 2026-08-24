@@ -14,6 +14,7 @@ This directory contains variant-specific skills for the `co-export` template.
 | hs-classification-workflow | `hs-classification-workflow/` | hs-classification-workflow skill |
 | logistics-coordination | `logistics-coordination/` | logistics-coordination skill |
 | market-entry-strategy | `market-entry-strategy/` | market-entry-strategy skill |
+| roo-qualification-worksheet | `roo-qualification-worksheet/` | roo-qualification-worksheet skill |
 | trade-documentation-checklist | `trade-documentation-checklist/` | trade-documentation-checklist skill |
 
 ## Usage
