@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "co-hr/metric-dictionary-schema.json",
+  "title": "HR Metric Definition Dictionary",
+  "description": "Structured contract for HR metric definitions - calculation formulas, data sources, refresh cadence, and ownership per metric - consumed by the hr-metrics-analysis skill (Execution Steps 1 and 3) and the data-analyst agent. Closes docs/variant-benchmark-backlog.md section 12 'No metric-definition dictionary' (gap closed 2026-08-25).",
+  "type": "object",
+  "required": ["schema_version", "metrics"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "scope": { "type": "string", "description": "Engagement or project scope the dictionary covers, e.g. 'FY2026 workforce baseline diagnosis'" },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "definition", "formula", "data_sources", "refresh_cadence", "owner"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Stable kebab-case identifier, e.g. 'turnover-rate-voluntary'" },
+          "name": { "type": "string", "minLength": 1 },
+          "definition": { "type": "string", "description": "Plain-language definition of what the metric measures" },
+          "formula": { "type": "string", "description": "Explicit calculation formula, e.g. 'separations in period / average headcount in period (voluntary split)'" },
+          "unit": { "type": "string", "description": "Result unit, e.g. 'percent', 'days', 'ratio'" },
+          "data_sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" },
+            "description": "Systems of record, e.g. 'HRIS payroll export', 'ATS requisition report'"
+          },
+          "refresh_cadence": { "type": "string", "enum": ["real-time", "daily", "weekly", "monthly", "quarterly", "annual"] },
+          "owner": { "type": "string", "description": "Role accountable for data quality and refresh" },
+          "iso_30414_area": { "type": "string", "description": "ISO 30414 reporting area link when the metric maps to one - see docs/iso-30414-metrics-mapping.md, areas 1-11" },
+          "benchmark_guardrail": { "type": "string", "description": "External-benchmark citation requirement note; benchmarks must cite source name and recency per skill Step 4" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

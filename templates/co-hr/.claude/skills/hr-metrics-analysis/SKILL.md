@@ -7,8 +7,8 @@ description: >
   benchmarking guardrails. Use when: workforce statistics analysis,
   turnover/conversion analysis, labor-cost analysis, or HR dashboard/people-analytics
   work is required.
-version: 1.0.0
-last_reviewed: 2026-08-23
+version: 1.0.1
+last_reviewed: 2026-08-25
 status: active
 owner: data-analyst
 prerequisites: none
@@ -46,6 +46,8 @@ Use in Phase 1 (baseline diagnosis) and Phase 3 (impact measurement) whenever an
    - Span of control (formula: average direct reports per manager, by level)
    - Engagement/eNPS (only if survey data is available — state the survey instrument and response rate)
 
+   Record each in-scope metric as an entry in the engagement's metric dictionary (schema: [`docs/metric-dictionary-schema.json`](../../docs/metric-dictionary-schema.json)) - the dictionary is the durable form of this step's definitions.
+
 2. **Driver Hypothesis Labeling**: Any causal claim about *why* a metric moved must be explicitly labeled "Hypothesis" (not stated as fact) unless it has been statistically validated (e.g., via cohort comparison or regression with disclosed method). Never present an unvalidated causal narrative as a finding.
 
 3. **Dashboard Specification Design**: For each metric intended for a recurring dashboard, define:
@@ -53,6 +55,8 @@ Use in Phase 1 (baseline diagnosis) and Phase 3 (impact measurement) whenever an
    - Data source (system of record)
    - Refresh cadence (real-time / daily / weekly / monthly)
    - Owner (who is accountable for data quality and refresh)
+
+   Pull formula, data source, refresh cadence, and owner from the metric dictionary (Step 1) rather than restating them.
 
 4. **Benchmarking Guardrail**: When comparing any internal metric to an external/industry benchmark:
    - Cite the benchmark source by name
