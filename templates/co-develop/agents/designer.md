@@ -3,7 +3,7 @@ name: designer
 role: UI/UX specs, wireframes, and component definition producer
 status: active
 version: "1.0.0"
-last_updated: "2026-05-28"
+last_updated: "2026-08-25"
 tier:
   claude: medium
   gemini: medium
@@ -25,7 +25,7 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-05-28"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/designer.md
 ---
 
@@ -143,3 +143,19 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **Auto-Dispatch To**: N/A
 **Tier**: medium
 **Communication Style**: sync  # Design requires synchronous feedback
+
+## Skill Bindings
+
+### Prompt-Only by Design
+
+`required_skills` is intentionally empty - the designer runs prompt-only, with no inbound skill edges in the variant's skill graph.
+
+**Why no skill binding exists in co-develop:**
+
+- The design method is embodied in this role definition itself: the Output Format section defines the wireframe description, component list, interaction/state spec, and design-token table the designer produces as Phase 3 artifacts. co-develop is a software-delivery variant whose design needs are specification-shaped, not tool-shaped.
+- The workspace's reusable design intelligence (design-token linting, accessibility audit, UI/UX heuristics) is hosted in the co-design variant (`templates/co-design/skills/ui-ux-design-intelligence`). Skills are variant-local and are not portable across variants, so no binding target exists in co-develop - creating one would duplicate co-design assets with no consumer in this variant's workflow.
+- co-develop's skill set (`code-review`, `refactoring`, `swe-solve`, `test-driven-development`) contains no UI/design skill by design.
+
+**Escalation path:** if a future co-develop project needs design-skill depth beyond this role definition, consult the co-design variant directly - a cross-variant reference, not a skill import.
+
+**Decision record:** benchmarked against SWE-agent & MetaGPT (see `docs/variant-benchmark-backlog.md` §2); gap closed 2026-08-25.
