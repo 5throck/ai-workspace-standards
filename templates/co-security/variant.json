@@ -38,12 +38,20 @@
     }
   ],
   "skills": [
+    { "name": "samm-maturity", "file": "skills/samm-maturity/SKILL.md" },
     { "name": "sarif-exporter", "file": "skills/sarif-exporter/SKILL.md" },
     { "name": "stride-threat-matrix", "file": "skills/stride-threat-matrix/SKILL.md" },
     { "name": "verify-authorization", "file": "skills/verify-authorization/SKILL.md" }
   ],
   "skill_manifest": {
     "variant_specific": [
+      {
+        "name": "samm-maturity",
+        "layer": "workspace",
+        "used_by_agents": ["threat-modeler"],
+        "phases": [1, 2],
+        "platform_parity": "required"
+      },
       {
         "name": "stride-threat-matrix",
         "layer": "workspace",
