@@ -40,6 +40,7 @@
   "skills": [
     { "name": "samm-maturity", "file": "skills/samm-maturity/SKILL.md" },
     { "name": "sarif-exporter", "file": "skills/sarif-exporter/SKILL.md" },
+    { "name": "spdx-sbom", "file": "skills/spdx-sbom/SKILL.md" },
     { "name": "stride-threat-matrix", "file": "skills/stride-threat-matrix/SKILL.md" },
     { "name": "verify-authorization", "file": "skills/verify-authorization/SKILL.md" }
   ],
@@ -63,6 +64,13 @@
         "name": "sarif-exporter",
         "layer": "workspace",
         "used_by_agents": ["pentester", "report-writer"],
+        "phases": [3, 5],
+        "platform_parity": "required"
+      },
+      {
+        "name": "spdx-sbom",
+        "layer": "workspace",
+        "used_by_agents": ["patch-engineer", "report-writer"],
         "phases": [3, 5],
         "platform_parity": "required"
       },

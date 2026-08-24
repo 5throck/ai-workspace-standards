@@ -827,6 +827,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "spdx-sbom",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "stack-setup",
       "type": "agent",
       "layer": "variant:co-develop"
@@ -3638,6 +3643,48 @@
       "from": "source-verification-ledger",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "patch-engineer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "spdx-sbom",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "spdx-sbom",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "report-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "samm-maturity",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "spdx-sbom",
+      "to": "security-scan",
+      "source": "prose"
     },
     {
       "type": "used_by",
