@@ -381,6 +381,10 @@
         "path": "scripts/co-deck/handbook/check-authoring.ts"
       },
       {
+        "name": "check-i18n-parity",
+        "path": "scripts/co-deck/handbook/check-i18n-parity.ts"
+      },
+      {
         "name": "check-labels",
         "path": "scripts/co-deck/handbook/check-labels.ts"
       },

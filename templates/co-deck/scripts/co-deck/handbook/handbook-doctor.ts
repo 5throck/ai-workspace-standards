@@ -1,11 +1,14 @@
 #!/usr/bin/env bun
 // scripts/co-deck/handbook/handbook-doctor.ts
 // Enhanced static analyzer for handbook HTML files.
-// 12 checks: nav, broken links, dark palette, lang pair, visual, Course Overview,
-// Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1.
+// 13 checks: nav, broken links, dark palette, lang pair, visual, Course Overview,
+// Instructor Guide, unused assets, duplicate IDs, hardcoded colors, empty title/h1,
+// cross-language content parity.
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, relative, resolve, dirname } from "node:path";
+import { configureDocsDir } from "./nav-utils.ts";
+import { checkI18nParity } from "./check-i18n-parity.ts";
 
 const args = process.argv.slice(2);
 function getArg(name: string, fallback: string): string {
@@ -252,6 +255,21 @@ for (const file of htmlFiles) {
   if (h1Match && h1Match[1].trim() === "") {
     allIssues.push({ file: rel, check: "empty-h1", detail: "Empty <h1> tag", severity: "error" });
   }
+}
+
+// --- Check 13: Cross-language content parity ---
+// Delegates to the shared i18n parity checker: FAIL conditions (missing
+// language variants, h1/h2/h3/pre count mismatches, wrong-language links)
+// become errors; drift warnings (>15% li/tr, numeric-token divergence)
+// become warns. Workflow rules: skills/handbook/references/I18N_PARITY_PLAYBOOK.md
+configureDocsDir(docsDir);
+for (const issue of checkI18nParity()) {
+  allIssues.push({
+    file: issue.fileA,
+    check: "i18n-parity",
+    detail: `[${issue.type}] ${issue.detail}`,
+    severity: issue.severity === "fail" ? "error" : "warn",
+  });
 }
 
 // --- Helpers ---
