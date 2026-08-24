@@ -1,7 +1,7 @@
 ---
 name: pdf-export
 scope: co-deck
-version: 2.1.0
+version: 2.1.1
 description: >
   Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sample
   (5-slide) then full PDF generation scripts, reviews results. Reads the 4-layer
@@ -10,7 +10,7 @@ description: >
   the lecture workflow.
 status: active
 owner: pdf-export
-last_reviewed: 2026-06-23
+last_reviewed: 2026-08-25
 prerequisites: prep-pdf
 ---
 
@@ -123,6 +123,7 @@ When `lecture-profile.md` has `background_image.enabled: true`, the PDF renderer
 
 - `presentations/<project>/[project]_v[version].pdf` — full presentation PDF
 - `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review
+- `presentations/<project>/speaker-notes_<lang>.txt` — speaker-notes handoff file, produced alongside the full PDF per the convention in [`docs/speaker-notes-export.md`](../../docs/speaker-notes-export.md)
 
 ## Related Skills
 
