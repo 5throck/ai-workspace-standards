@@ -139,6 +139,7 @@ Also fixed during verification: the new common-agent graph scan counted `templat
 - D9 (CHANGELOG) requires a manual `CHANGELOG.md` edit — completed in this PR.
 - User-guide drift gate (`translated_from_hash`) — PR8 of the design series (WARN phase).
 - Pilot `COMMON-CONTEXT` zones are inserted and in sync in all four pilot variants (co-news, co-hr, co-export, co-consult); conversion of the remaining 7 variants stays gated on stabilization per ADR-0062.
+- **dev-sync step 4.5 wiring — RESOLVED 2026-08-25 (WARN stage)**: the pilot held 0 would-overwrite across both domains (constitution-context, variant-context) through ~10 subsequent PRs after this design landed, satisfying the stabilization bar. `dev-sync.ts` 1.7.4 wires a dry-run drift check after the L0→L1 publish (L0-only): per-domain `would-overwrite > 0` prints a non-fatal WARN with the manual refresh command. Auto-apply inside the pipeline and promotion to a hard gate remain unwired, per the ADR-0055 WARN-first → soak → promote playbook; conversion of the remaining 7 variants stays gated on the same soak.
 
 ## References
 
