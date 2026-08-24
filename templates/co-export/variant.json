@@ -63,6 +63,7 @@
     { "name": "hs-classification-workflow", "file": "skills/hs-classification-workflow/SKILL.md" },
     { "name": "logistics-coordination", "file": "skills/logistics-coordination/SKILL.md" },
     { "name": "market-entry-strategy", "file": "skills/market-entry-strategy/SKILL.md" },
+    { "name": "roo-qualification-worksheet", "file": "skills/roo-qualification-worksheet/SKILL.md" },
     { "name": "trade-documentation-checklist", "file": "skills/trade-documentation-checklist/SKILL.md" }
   ],
   "displayName": "Co Export",
@@ -98,6 +99,16 @@
       },
       {
         "name": "fta-origin-determination",
+        "used_by_agents": [
+          "fta-origin-analyst"
+        ],
+        "phases": [
+          1,
+          2
+        ]
+      },
+      {
+        "name": "roo-qualification-worksheet",
         "used_by_agents": [
           "fta-origin-analyst"
         ],
