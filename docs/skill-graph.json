@@ -1590,6 +1590,30 @@
       "source": "prerequisites"
     },
     {
+      "type": "references",
+      "from": "designer",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "swe-solve",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "test-driven-development",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",
