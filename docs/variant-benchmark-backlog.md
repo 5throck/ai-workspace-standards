@@ -236,29 +236,33 @@ Each variant is assessed with a five-step gap worksheet against one external ind
 
 Merged highest-priority items across all 11 variants, ordered by impact. Phase labels follow the roadmap framing (near/mid/long term).
 
-| # | Variant | Improvement | Classification | Size | Phase | Priority |
-|---|---|---|---|---|---|---|
-| 1 | co-develop | `swe-solve` trajectory logging + measurable resolve-rate | skill | S | near-term | High |
-| 2 | co-security | OWASP SAMM maturity self-assessment skill | skill | M | near-term | High |
-| 3 | co-security | SPDX SBOM generation (and roadmap roster correction) | skill | M | near-term | High |
-| 4 | co-work | `.pptx` extension for `md-to-ooxml.ts` | config | L | long-term | High |
-| 5 | co-deck | PPTX export path (or documented PDF-only boundary) | config | M | near-term | High |
-| 6 | co-design | Component-primitive catalog bound to `tokens.json` | doc | M | mid-term | High |
-| 7 | co-consult | Provider-agnostic disclosure-ingestion contract | skill | M | mid-term | High |
-| 8 | co-game | Single-file HTML game bundler script | config | M | mid-term | High |
-| 9 | co-abap | Clean ABAP conformance checklist | doc | M | mid-term | High |
-| 10 | co-hr | ISO 30414 taxonomy mapping for `hr-metrics-analysis` | doc | M | long-term | High |
-| 11 | co-news | Corrections / transparent-error workflow | doc | S | mid-term | High |
-| 12 | co-export | Rules-of-origin qualification worksheet | skill | M | long-term | High |
-| 13 | co-news | Style-guide rules as a lint checklist skill | skill | M | mid-term | Medium |
-| 14 | co-export | Second-jurisdiction country-profile skeleton | doc | S | long-term | Medium |
-| 15 | co-game | Scene-management convention over the ECS core | doc | S | mid-term | Medium |
-| 16 | co-design | Vite component playground scaffold | config | M | mid-term | Medium |
-| 17 | co-hr | Competency-modeling skill (SHRM BoK core) | skill | M | long-term | Medium |
-| 18 | co-consult | Engagement kickoff artifact pack (issue tree + hypothesis log) | doc | S | mid-term | Medium |
+The **Status** column tracks execution (marked 2026-08-25): `Done — #PR` references the merged pull request; `Open` rows are pending execution.
+
+| # | Variant | Improvement | Classification | Size | Phase | Priority | Status |
+|---|---|---|---|---|---|---|---|
+| 1 | co-develop | `swe-solve` trajectory logging + measurable resolve-rate | skill | S | near-term | High | Done — #650 |
+| 2 | co-security | OWASP SAMM maturity self-assessment skill | skill | M | near-term | High | Done — #651 + #652 |
+| 3 | co-security | SPDX SBOM generation (and roadmap roster correction) | skill | M | near-term | High | Done — #653 |
+| 4 | co-work | `.pptx` extension for `md-to-ooxml.ts` | config | L | long-term | High | Done — #654 |
+| 5 | co-deck | PPTX export path (or documented PDF-only boundary) | config | M | near-term | High | Done — #655 |
+| 6 | co-design | Component-primitive catalog bound to `tokens.json` | doc | M | mid-term | High | Done — #656 |
+| 7 | co-consult | Provider-agnostic disclosure-ingestion contract | skill | M | mid-term | High | Done — #657 |
+| 8 | co-game | Single-file HTML game bundler script | config | M | mid-term | High | Done — #658 |
+| 9 | co-abap | Clean ABAP conformance checklist | doc | M | mid-term | High | Done — #659 |
+| 10 | co-hr | ISO 30414 taxonomy mapping for `hr-metrics-analysis` | doc | M | long-term | High | Done — #660 |
+| 11 | co-news | Corrections / transparent-error workflow | doc | S | mid-term | High | Done — #661 |
+| 12 | co-export | Rules-of-origin qualification worksheet | skill | M | long-term | High | Done — #662 |
+| 13 | co-news | Style-guide rules as a lint checklist skill | skill | M | mid-term | Medium | Open |
+| 14 | co-export | Second-jurisdiction country-profile skeleton | doc | S | long-term | Medium | Open |
+| 15 | co-game | Scene-management convention over the ECS core | doc | S | mid-term | Medium | Open |
+| 16 | co-design | Vite component playground scaffold | config | M | mid-term | Medium | Open |
+| 17 | co-hr | Competency-modeling skill (SHRM BoK core) | skill | M | long-term | Medium | Open |
+| 18 | co-consult | Engagement kickoff artifact pack (issue tree + hypothesis log) | doc | S | mid-term | Medium | Open |
 
 Ordering rationale: items 1–3 harden already-shipped flagship capabilities (measurement, posture, supply-chain) that every scaffolded project inherits; items 4–8 close named benchmark-parity holes flagged by the roadmap itself; items 9–12 establish the benchmark anchors for the four variants outside the roadmap matrix; items 13–18 are the strongest Medium-priority items held back only by breadth of benefit.
 
+Execution note: the High-priority rows 1–12 were executed sequentially as the backlog execution series (2026-08-24 → 2026-08-25), one PR per row, PM-verified before each merge. Row 2 landed in two PRs (#651 delivered the SKILL.md via a parallel session's sync after the original dispatch died on an API usage limit; #652 completed registration and mirrors). Row 5 resolved via the documented-boundary option (PDF-only by design, markdown→pptx path documented) rather than a co-deck-local pptx pipeline.
+
 ---
 
-*Last reviewed: 2026-08-24. Re-run the §1 worksheet when any variant's skill manifest changes (see the maintenance note).*
+*Last reviewed: 2026-08-25. Re-run the §1 worksheet when any variant's skill manifest changes (see the maintenance note).*
