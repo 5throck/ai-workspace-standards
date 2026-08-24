@@ -2,10 +2,10 @@
  * User-guide translated_from_hash gate tests
  * @version 1.0.0
  *
- * Tests for PR8 WARN-stage user-guide hash synchronization:
+ * Tests for FAIL-stage user-guide hash synchronization:
  * - Audit runs correctly against real workspace variants
  * - --update-hashes is idempotent
- * - WARN does not affect exit code
+ * - FAIL affects exit code
  * - L0 ↔ L1 script pair stays in sync
  */
 
@@ -35,19 +35,19 @@ function runScript(args: string[] = []): { stdout: string; stderr: string; exitC
   };
 }
 
-describe('user-guide hash synchronization (WARN stage)', () => {
+describe('user-guide hash synchronization (FAIL stage)', () => {
   test('static audit runs and shows user-guide section', () => {
     const { stdout, exitCode } = runScript();
 
-    // Should complete successfully (exit 0 even with WARNs)
+    // Should complete successfully when all hashes are synchronized
     expect(exitCode).toBe(0);
 
     // Should show the new audit section header
     expect(stdout).toContain('User-guide translated_from_hash');
-    expect(stdout).toContain('WARN stage');
+    expect(stdout).toContain('FAIL stage');
 
-    // Should show per-variant results (PASS or WARN)
-    expect(stdout).toMatch(/PASS|WARN/);
+    // Should show per-variant results (PASS or FAIL)
+    expect(stdout).toMatch(/PASS|FAIL/);
   });
 
   test('counts all 11 user-guide pairs', () => {
@@ -55,7 +55,7 @@ describe('user-guide hash synchronization (WARN stage)', () => {
 
     // Should show audit results for all 11 variants with user-guide pairs
     const userGuideLines = stdout.split('\n').filter(line =>
-      line.includes('templates/co-') && (line.includes('[PASS]') || line.includes('[WARN]'))
+      line.includes('templates/co-') && (line.includes('[PASS]') || line.includes('[FAIL]'))
     );
 
     // Should have exactly 11 user-guide results (co-abap through co-work)
@@ -97,11 +97,11 @@ describe('user-guide hash synchronization (WARN stage)', () => {
     }
   });
 
-  test('WARN does not affect exit code', () => {
-    // Run static audit - should pass regardless of WARNs
+  test('FAIL affects exit code when hashes are missing or stale', () => {
+    // Run static audit - should pass when all hashes are synchronized
     const { stdout, exitCode } = runScript();
 
-    // Even if there are WARNs, exit code must be 0
+    // When all user-guide pairs have synchronized hashes, exit code must be 0
     expect(exitCode).toBe(0);
 
     // Should complete with success message

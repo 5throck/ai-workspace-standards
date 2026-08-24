@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.4.0
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
@@ -281,11 +281,11 @@ function updateUserGuideHash(variantDir: string): void {
 
 /**
  * Audits user-guide.md ↔ user-guide_ko.md pairs for translated_from_hash synchronization.
- * Reports WARN only (never fails the build).
+ * Reports FAIL and affects exit code (FAIL stage per ADR-0055 playbook after WARN soak).
  */
-async function runUserGuideHashAudit(): Promise<void> {
-    console.log("\n=== User-guide translated_from_hash (WARN stage) ===");
-    let warnings = 0;
+async function runUserGuideHashAudit(): Promise<number> {
+    console.log("\n=== User-guide translated_from_hash (FAIL stage) ===");
+    let failures = 0;
     let passed = 0;
 
     for (const variantDir of variantDirs) {
@@ -303,29 +303,31 @@ async function runUserGuideHashAudit(): Promise<void> {
         const koHash = getFrontmatterField(koPath, "translated_from_hash");
 
         if (koHash === null) {
-            console.warn(`\x1b[33m[WARN]\x1b[0m ${variantDir}: user-guide pair missing translated_from_hash (run with --update-hashes to seed)`);
-            warnings++;
+            console.error(`\x1b[31m[FAIL]\x1b[0m ${variantDir}: user-guide pair missing translated_from_hash (run with --update-hashes to seed)`);
+            failures++;
             continue;
         }
 
         const enHash = computeContentHash(enPath);
 
         if (enHash !== koHash) {
-            console.warn(`\x1b[33m[WARN]\x1b[0m ${variantDir}: user-guide_ko.md translated_from_hash is stale — EN guide changed since translation`);
-            console.warn(`        user-guide.md current hash:          ${enHash}`);
-            console.warn(`        user-guide_ko.md translated_from_hash: ${koHash}`);
-            warnings++;
+            console.error(`\x1b[31m[FAIL]\x1b[0m ${variantDir}: user-guide_ko.md translated_from_hash is stale — EN guide changed since translation`);
+            console.error(`        user-guide.md current hash:          ${enHash}`);
+            console.error(`        user-guide_ko.md translated_from_hash: ${koHash}`);
+            failures++;
         } else {
             console.log(`\x1b[32m[PASS]\x1b[0m ${variantDir}: user-guide hashes synchronized (${enHash.slice(0, 12)}…)`);
             passed++;
         }
     }
 
-    if (warnings === 0 && passed === 0) {
+    if (failures === 0 && passed === 0) {
         console.log(`\x1b[33m[SKIP]\x1b[0m No user-guide pairs found.`);
     } else {
-        console.log(`\nUser-guide hash audit: ${passed} passed, ${warnings} warnings (WARN stage — does not affect exit code)`);
+        console.log(`\nUser-guide hash audit: ${passed} passed, ${failures} failure(s) (FAIL stage per ADR-0055)`);
     }
+
+    return failures;
 }
 
 async function main() {
@@ -347,8 +349,8 @@ async function main() {
 
     totalErrors += await runStaticAudit();
 
-    // User-guide audit runs at WARN stage — never affects exit code (PR8, WARN-first per ADR-0055 playbook)
-    await runUserGuideHashAudit();
+    // User-guide audit runs at FAIL stage — promoted 2026-08-24 after WARN soak completed through #647 with zero warnings
+    totalErrors += await runUserGuideHashAudit();
 
     if (isPreCommit) {
         totalErrors += await runDynamicAudit();

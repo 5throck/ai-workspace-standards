@@ -1,10 +1,11 @@
 # User-Guide translated_from_hash Gate Design
 
 **Design ID**: 2026-08-24-user-guide-hash-gate-design
-**Status**: Implemented (PR8, WARN stage)
-**PR**: #8 of 10-PR owner-approved series
+**Status**: Implemented (PR8 WARN stage → PR10 FAIL stage)
+**PR**: #8 of 10-PR owner-approved series (promotion in the PR10 follow-up)
 **Author**: automation-engineer (per PM-approved plan)
 **Created**: 2026-08-24
+**Promoted**: 2026-08-24 — `verify-readme-sync.ts` v1.4.0 (PR10): WARN → FAIL per ADR-0055 playbook. Soak evidence: zero warnings observed from PR #646 seeding through #647.
 
 ---
 
@@ -115,25 +116,23 @@ translated_from_hash: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
 
 ## Follow-Ups
 
-### 1. Error Promotion (Future PR)
+### 1. Error Promotion (Completed — PR10, 2026-08-24)
 
-**Timeline**: After 2 PRs of WARN soak (per ADR-0055 playbook)
+**Timeline**: Completed after WARN soak through PR #647 (zero warnings observed)
 
-**Change**: Convert WARN to FAIL in `runUserGuideHashAudit()`:
-- Increment `totalErrors` for missing/stale hashes
-- Update console.error instead of console.warn
-- Failing exit code will block commits
+**Implementation**: Promoted WARN to FAIL in `runUserGuideHashAudit()` (v1.4.0):
+- Function now returns `Promise<number>` with failure count
+- Console output changed from `[WARN]` to `[FAIL]` (red `\x1b[31m`)
+- Failures increment `totalErrors` and affect exit code
+- Summary line updated to reflect FAIL stage per ADR-0055
 
-**Implementation**:
-```typescript
-// WARN stage (current, v1.3.0)
-console.warn(`[WARN] ${variantDir}: ...`);
-// No exit code impact
+**Evidence**: Since the gate seeded all 11 variant pairs in PR #646, the audit reported "11 passed, 0 warnings" through PR #647, meeting the ADR-0055 WARN-first soak condition.
 
-// Error stage (future PR)
-console.error(`[FAIL] ${variantDir}: ...`);
-errors++; // Affects exit code
-```
+**Changes made**:
+1. `scripts/verify-readme-sync.ts` v1.3.0 → v1.4.0: Promoted to FAIL stage
+2. `tests/user-guide-hash.test.ts`: Updated tests to expect FAIL behavior (exit code 1 on failures)
+3. `scripts/SCRIPTS.md`: Updated version and documentation for FAIL stage
+4. `.gitignore`: Added `.claude/plans/` for session-local plan artifacts
 
 ### 2. Guide Body Generation (Out of Scope)
 
@@ -152,5 +151,5 @@ errors++; // Affects exit code
 
 - **ADR-0055**: Governance Validators (WARN-first playbook)
 - **verify-readme-sync.ts**: README.md hash synchronization infrastructure (reused)
-- **scripts/SCRIPTS.md**: Version registry (1.3.0)
+- **scripts/SCRIPTS.md**: Version registry (1.3.0 WARN stage → 1.4.0 FAIL stage)
 - **docs/specs/registry.json**: Design spec entry (2026-08-24-user-guide-hash-gate-design)
