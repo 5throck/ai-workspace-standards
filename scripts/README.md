@@ -156,6 +156,12 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 **Idempotency**: files already marked `# @resolved-from:` are skipped unless `--force` is passed.
 **Note**: L0 script (workspace infrastructure only). Not copied to `templates/common/scripts/`.
 
+#### `verify-readme-sync.ts`
+**Purpose**: Validates README.md / README_ko.md hash synchronization for workspace root and templates.
+Audits user-guide.md / user-guide_ko.md translated_from_hash synchronization (WARN stage per ADR-0055 playbook).
+**Usage**: `bun scripts/verify-readme-sync.ts [--pre-commit] [--update-hashes]`
+**v1.3.0**: Added user-guide translated_from_hash WARN-stage audit — detects missing/stale hashes in KO guides; --update-hashes now also seeds translated_from_hash in user-guide_ko.md frontmatter.
+
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
 (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects

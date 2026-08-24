@@ -1,3 +1,6 @@
+---
+translated_from_hash: d7c7f22c706d47f0b070f6f2e8203a0cb0e63af53ed2062d32f3ffd7cac46334
+---
 # Co-Consult — 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**

@@ -1,3 +1,6 @@
+---
+translated_from_hash: af214ac64b02edf3eabb1f223d0815806549563fdd1a2379c3968716771d7638
+---
 # co-deck 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**

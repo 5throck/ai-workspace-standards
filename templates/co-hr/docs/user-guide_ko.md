@@ -1,3 +1,6 @@
+---
+translated_from_hash: e4d898417c9d02cd2b743611515d62fb79d026e648cff134135b31ed2d59142e
+---
 # Co-HR 사용자 가이드
 
 **언어**: [English](user-guide.md) · **한국어**

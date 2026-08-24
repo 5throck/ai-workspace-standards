@@ -1,3 +1,6 @@
+---
+translated_from_hash: c900c2ecbdf27a3b4105e28984ed81bfa47d696b5e610e7fc178f245c3ededbf
+---
 # Co-ABAP 사용자 가이드
 
 **언어**: [English](user-guide.md) · **한국어**

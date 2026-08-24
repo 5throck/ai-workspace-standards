@@ -1,3 +1,6 @@
+---
+translated_from_hash: e3cd2937d9f34d39e3baa2e59ee1bb001dd1c7459fadd4a26ca0be03744c531d
+---
 # Co-News 사용자 가이드
 
 **언어**: [English](user-guide.md) · **한국어**

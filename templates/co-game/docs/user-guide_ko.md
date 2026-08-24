@@ -1,3 +1,6 @@
+---
+translated_from_hash: 6eebfc36b4c42d211aa9a7020296d5d60efa714c46a8000835b6b6e5252831c8
+---
 # co-game 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**

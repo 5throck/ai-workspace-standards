@@ -1,3 +1,6 @@
+---
+translated_from_hash: 6cdfd685645a36981691450db11c3b2684b152fbc62878aca579ea984555df60
+---
 # Co-Work 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**
