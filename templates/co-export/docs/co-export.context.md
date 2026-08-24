@@ -188,6 +188,16 @@ PM (Phase 0: triage + scope)
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
 7. Regulatory monitoring findings must carry source attribution and a staleness check (flag any source not verified within 30 days of report delivery) per the `foreign-regulation-monitoring` skill.
 
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 *Created 2026-08-08 as part of Phase A scaffold. See `_ORIGIN.md` for provenance.*

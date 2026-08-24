@@ -5,7 +5,7 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.4.0
+ * @version 2.5.1
  *
  * Usage:
  *   bun scripts/propagate-to-templates.ts [--dry-run|--apply] [--domain <name>] [flags]
@@ -37,6 +37,16 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
 import * as yaml from 'js-yaml';
+import {
+  findMarkerZones,
+  extractMarkerZones,
+  scanIntentionalDuplicateMarkers,
+  computeSectionHash,
+  extractSectionContent,
+  resolveConstitutionSource,
+  type MarkerZone,
+  type IntentionalDuplicateMarker
+} from './helpers/markers.ts';
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
 const C = {
@@ -58,6 +68,7 @@ const GOVERNANCE_L1    = args.includes('--governance-l1');
 const DOCS             = args.includes('--docs');
 const CHECK_DRIFT      = args.includes('--check-drift');
 const PRUNE            = args.includes('--prune');
+const MARKER_REWRITE   = args.includes('--marker-rewrite');
 const domainIdx        = args.indexOf('--domain');
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
 const INCLUDE_DISABLED = args.includes('--include-disabled');
@@ -103,6 +114,9 @@ interface Domain {
   /** Controls whether this domain participates in L1→L2 drift detection (--check-drift).
    *  Set false for domains managed through Fork Model scaffolding (ADR-0031). */
   l2_drift_eligible?: boolean;
+  /** Marker-rewrite only: apply scrubConstitutionRefs to source zone content before
+   *  propagating, so L0→L1 marker zones never leak docs/constitution/ links. */
+  scrub_constitution_refs?: boolean;
 }
 
 interface PropagationMap {
@@ -644,6 +658,14 @@ export function scrubConstitutionRefs(content: string, filePath?: string): strin
   content = content.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
   // A-4. Plain-text mentions.
   content = content.replace(/CONSTITUTION\.md/g, 'context.md');
+  // A-5. Part-file links into docs/constitution/ (e.g. 06-skill-lifecycle.md) whose
+  // link text does NOT mention CONSTITUTION.md (those are already covered by A-2).
+  // L1/L2 trees have no docs/constitution/ directory — the projected home is
+  // docs/context.md, so pointing the link there keeps it resolvable.
+  content = content.replace(
+    /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
+    '[docs/context.md](docs/context.md)'
+  );
   return content;
 }
 
@@ -1196,6 +1218,253 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
   }
 }
 
+// ── --marker-rewrite: Marker-based doc propagation engine ─────────────────────
+/**
+ * Detect line ending style of a file (CRLF vs LF)
+ * Returns 'crlf' if file contains CRLF, 'lf' otherwise
+ */
+function detectLineEnding(filePath: string): 'crlf' | 'lf' {
+  const content = readFileSync(filePath, 'utf-8');
+  // Check first 100 lines for CRLF
+  const lines = content.split('\n').slice(0, 100);
+  const crlfCount = lines.filter(line => line.endsWith('\r')).length;
+  return crlfCount > 0 ? 'crlf' : 'lf';
+}
+
+/**
+ * Rewrite marker zones and intentional-duplicate markers with current source content
+ * For every existing marker zone: replace zone content with current source slice
+ * For every intentional-duplicate marker: replace section content AND refresh hash
+ */
+function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
+  console.log(`\n${C.cyan}=== --marker-rewrite: Marker-based doc propagation ===${C.reset}`);
+  if (isDryRun) console.log(`${C.dim}(dry-run mode — no files will be written)${C.reset}`);
+
+  const map: PropagationMap = JSON.parse(readFileSync(mapPath, 'utf-8'));
+
+  // --domain validation: restrict the marker-inject loop to one domain, or fail
+  // loudly on an unknown name (silently falling through to "all domains" hid typos).
+  if (DOMAIN_FILTER !== null && !(DOMAIN_FILTER in map.domains)) {
+    console.error(`${C.red}❌ Domain '${DOMAIN_FILTER}' not found in propagation-map.json.${C.reset}`);
+    console.error(`${C.yellow}   Available domains: ${Object.keys(map.domains).join(', ')}${C.reset}`);
+    process.exit(1);
+  }
+
+  let totalOverwritten = 0;
+  let totalInSync = 0;
+  let totalSkipped = 0;
+
+  // Process marker-inject domains (COMMON-<DOMAIN>:START/END zones)
+  const markerInjectDomains = Object.entries(map.domains)
+    .filter(([name, d]: [string, Domain]) =>
+      d.mode === 'marker-inject' && d.source_file && d.marker &&
+      (DOMAIN_FILTER === null || name === DOMAIN_FILTER))
+    .map(([_, d]: [string, Domain]) => ({
+      sourceFile: d.source_file as string,
+      targetFile: (d as any).target_file as string | undefined,
+      marker: d.marker as string,
+      variants: d.target_variants as string[],
+      scrub: d.scrub_constitution_refs === true,
+    }));
+
+  for (const { sourceFile, targetFile, marker, variants, scrub } of markerInjectDomains) {
+    const sourcePath = join(workspaceRoot, sourceFile);
+    if (!existsSync(sourcePath)) {
+      console.log(`  ${C.yellow}⚠️  ${sourceFile} not found, skipping${C.reset}`);
+      continue;
+    }
+
+    const sourceContent = readFileSync(sourcePath, 'utf-8');
+    let sourceSections = extractMarkerZones(sourceContent, marker);
+    // Domain opt-in scrub: propagated zones must not leak docs/constitution/
+    // links into L1 — same transform the non-marker copy path applies
+    // (L0-leakage is audited by audit.ts)
+    if (scrub) {
+      sourceSections = sourceSections.map(s =>
+        ({ ...s, fullBlock: scrubConstitutionRefs(s.fullBlock, sourceFile) }));
+    }
+
+    if (sourceSections.length === 0) {
+      console.log(`  ${C.yellow}⚠️  No <!-- ${marker}:START/END --> markers found in ${sourceFile}, skipping${C.reset}`);
+      continue;
+    }
+
+    console.log(`\n  ${C.cyan}${sourceFile}${C.reset} — ${sourceSections.length} marker zone(s)`);
+
+    for (const variant of variants) {
+      // Use target_file if specified, otherwise basename of source_file
+      const targetFilename = targetFile
+        ? targetFile.replace('{variant}', variant)
+        : basename(sourceFile);
+      const variantPath = join(workspaceRoot, 'templates', variant, targetFilename);
+      if (!existsSync(variantPath)) {
+        console.log(`    ${C.yellow}⚠️  templates/${variant}/${basename(sourceFile)} not found, skipping${C.reset}`);
+        totalSkipped++;
+        continue;
+      }
+
+      const lineEnding = detectLineEnding(variantPath);
+      const variantLabel = `templates/${variant}/${targetFilename}`;
+      let variantContent = readFileSync(variantPath, 'utf-8');
+      let fileOverwritten = false;
+
+      // Only zones carrying THIS domain's marker belong to this pass — a target
+      // file can host zones from several domains (templates/common/docs/context.md
+      // carries both COMMON-CONSTITUTION and COMMON-CONTEXT), and cross-domain
+      // zones would always report "no matching source section".
+      const existingZones = findMarkerZones(variantPath).filter(z => z.marker === marker);
+
+      if (existingZones.length === 0) {
+        console.log(`    ${C.dim}—  ${variantLabel}: no ${marker} zones present (will inject on --apply)${C.reset}`);
+        totalSkipped++;
+        continue;
+      }
+
+      if (existingZones.length > sourceSections.length) {
+        console.log(`    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} ${marker} zone(s) but only ${sourceSections.length} in source — extra zone(s) skipped${C.reset}`);
+      }
+
+      // Rewrite each existing zone, bottom-up so a splice cannot shift the
+      // recorded line numbers of zones still to be processed.
+      for (let zi = existingZones.length - 1; zi >= 0; zi--) {
+        const zone = existingZones[zi];
+        // Pair by document order: k-th zone of this marker ↔ k-th source zone
+        const matchingSection = sourceSections[zi] ?? null;
+
+        if (!matchingSection) {
+          totalSkipped++;
+          continue;
+        }
+
+        // Compare CRLF-normalized blocks — source and target may use different
+        // line-ending styles without that counting as drift.
+        const norm = (s: string) => s.replace(/\r\n/g, '\n');
+        if (sha256(norm(matchingSection.fullBlock)) === sha256(norm(zone.fullBlock))) {
+          console.log(`    ${C.dim}✓  ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): in sync${C.reset}`);
+          totalInSync++;
+          continue;
+        }
+
+        // Zone has drifted - replace it
+        const lines = variantContent.split('\n');
+        const zoneLineCount = zone.endLine - zone.startLine + 1;
+
+        // Replace the zone lines
+        const newZoneLines = norm(matchingSection.fullBlock).split('\n');
+        lines.splice(zone.startLine - 1, zoneLineCount, ...newZoneLines);
+
+        variantContent = lines.join('\n');
+        console.log(`    ${C.green}✓  Overwrote ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): ${newZoneLines.length - zoneLineCount > 0 ? '+' : ''}${newZoneLines.length - zoneLineCount} lines${C.reset}`);
+        fileOverwritten = true;
+        totalOverwritten++;
+      }
+
+      // Write file if changed — normalize to LF first, then re-apply the
+      // detected ending so CRLF files never end up with \r\r\n.
+      if (fileOverwritten && !isDryRun) {
+        const normalizedContent = variantContent
+          .replace(/\r\n/g, '\n')
+          .replace(/\n/g, lineEnding === 'crlf' ? '\r\n' : '\n');
+
+        writeFileSync(variantPath, normalizedContent, 'utf-8');
+        console.log(`    ${C.green}✅ ${variantLabel} updated${C.reset}`);
+      } else if (fileOverwritten && isDryRun) {
+        console.log(`    ${C.cyan}[dry-run] ${variantLabel} would be updated${C.reset}`);
+      }
+    }
+  }
+
+  // Process intentional-duplicate markers
+  const markers = scanIntentionalDuplicateMarkers();
+  console.log(`\n  ${C.cyan}Scanning ${markers.length} intentional-duplicate marker(s)...${C.reset}`);
+
+  for (const marker of markers) {
+    if (!marker.source || !marker.hash) {
+      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line} lacks source/hash, skipping${C.reset}`);
+      totalSkipped++;
+      continue;
+    }
+
+    // Resolve source file
+    const resolvedSource = marker.source.startsWith('docs/')
+      ? join(workspaceRoot, marker.source)
+      : marker.source;
+
+    if (!existsSync(resolvedSource)) {
+      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: source missing: ${marker.source}${C.reset}`);
+      totalSkipped++;
+      continue;
+    }
+
+    // Compute current hash
+    const currentHash = computeSectionHash(resolvedSource);
+    if (!currentHash) {
+      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to compute hash for ${marker.source}${C.reset}`);
+      totalSkipped++;
+      continue;
+    }
+
+    // Check if marker is stale
+    if (currentHash === marker.hash) {
+      console.log(`    ${C.dim}✓  Marker at ${marker.file}:${marker.line} (§${marker.section}): in sync${C.reset}`);
+      totalInSync++;
+      continue;
+    }
+
+    // Extract current section content
+    const sectionContent = extractSectionContent(resolvedSource);
+    if (!sectionContent) {
+      console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to extract section from ${marker.source}${C.reset}`);
+      totalSkipped++;
+      continue;
+    }
+
+    // Rewrite file with new content and updated hash
+    if (!isDryRun) {
+      let content = readFileSync(marker.file, 'utf-8');
+      const lines = content.split('\n');
+      const lineIndex = marker.line - 1; // 0-indexed
+
+      // Find the start of the duplicated section (line after marker)
+      let sectionStart = lineIndex + 1;
+      let sectionEnd = sectionStart;
+
+      // Find the end of the section (next marker or EOF)
+      for (let i = sectionStart; i < lines.length; i++) {
+        if (lines[i].match(/<!--\s*intentional-duplicate:/)) {
+          break;
+        }
+        sectionEnd = i;
+      }
+
+      // Replace section content
+      const newSectionLines = sectionContent.split('\n');
+      lines.splice(sectionStart, sectionEnd - sectionStart + 1, ...newSectionLines);
+
+      // Update marker hash
+      const line = lines[lineIndex];
+      const newMarker = line.replace(/hash:\s*[0-9a-f]{8}/, `hash: ${currentHash}`);
+      lines[lineIndex] = newMarker;
+
+      // Write back — normalize to LF first, then re-apply the detected ending
+      // so CRLF files never end up with \r\r\n
+      content = lines.join('\n');
+      const lineEnding = detectLineEnding(marker.file);
+      const normalizedContent = lineEnding === 'crlf'
+        ? content.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
+        : content.replace(/\r\n/g, '\n');
+
+      writeFileSync(marker.file, normalizedContent, 'utf-8');
+      console.log(`    ${C.green}✓  Overwrote marker at ${marker.file}:${marker.line} (§${marker.section}): ${newSectionLines.length - (sectionEnd - sectionStart + 1) > 0 ? '+' : ''}${newSectionLines.length - (sectionEnd - sectionStart + 1)} lines, hash ${marker.hash} → ${currentHash}${C.reset}`);
+      totalOverwritten++;
+    } else {
+      console.log(`    ${C.cyan}[dry-run] Would overwrite marker at ${marker.file}:${marker.line} (§${marker.section}): hash ${marker.hash} → ${currentHash}${C.reset}`);
+      totalOverwritten++;
+    }
+  }
+
+  console.log(`\n${C.green}Marker rewrite complete.${C.reset} ${isDryRun ? 'Would overwrite' : 'Overwritten'}: ${totalOverwritten}, In sync: ${totalInSync}, Skipped: ${totalSkipped}`);
+}
 
 // ── Main dispatch ──────────────────────────────────────────────────────────────
 if (import.meta.main) {
@@ -1232,6 +1501,8 @@ if (APPLY && !SKIP_ENCODING && !GOVERNANCE_L1 && !DOCS && !CHECK_DRIFT) {
 
 if (CHECK_DRIFT) {
   runCheckDrift(MAP_PATH);
+} else if (MARKER_REWRITE) {
+  runMarkerRewrite(MAP_PATH, DRY_RUN);
 } else {
   runL0L1Sync(MAP_PATH);
   // Side-commands: can combine with --apply or --dry-run

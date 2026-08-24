@@ -21,7 +21,8 @@ See `common-contract.json` for:
 
 ## L0 Agent Non-Propagation
 
-Only `pm.md` exists in this directory. L0 specialist agents (architect, auditor,
+Only `pm.md` and `i18n-specialist.md` (constitution §4.4 i18n asset suite) exist
+in this directory. L0 specialist agents (architect, auditor,
 automation-engineer, docs-writer, lifecycle-manager, scaffolding-expert,
 security-expert) are intentionally **not** propagated here. Variant projects
 define their own specialist agents. See docs/context.md §7.5 and ADR-0043.

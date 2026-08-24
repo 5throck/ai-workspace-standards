@@ -119,6 +119,16 @@ Ten variant-specific domain skills are registered for co-hr in `skill_manifest.v
 Applicable statute families are defined by the active country profile (`docs/countries/<CODE>.md`; see `docs/countries/KR.md` for the KR profile's statute families — labor standards, trade union & labor relations adjustment, worker participation & cooperation, occupational safety and health, and serious-accident liability). Identify the active profile at Phase 0 intake; when no profile is active, confirm the applicable jurisdiction with the client before any statutory work.
 <!-- END VARIANT-INJECT -->
 
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 *co-hr.context.md version: 1.1 — restructured to the WS-09 standard slot order (Tech Stack / Agents / Skills / Environment Setup / Development Workflow / Guidelines / File Organization Policy / Domain Rules); v1.0 content preserved*

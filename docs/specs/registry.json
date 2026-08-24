@@ -505,6 +505,15 @@
       "source": "manual",
       "created": "2026-08-24",
       "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-marker-propagation-engine-design",
+      "title": "marker propagation engine design",
+      "file": "docs/designs/2026-08-24-marker-propagation-engine-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
     }
   ]
 }

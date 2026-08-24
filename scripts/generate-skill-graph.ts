@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
- * @version 1.0.1
+ * @version 1.1.0
  *
  * Generates a skill relationship graph from multiple sources:
  * - SKILL.md files (prerequisites, relates_to frontmatter fields)
@@ -254,6 +254,23 @@ function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, 
       if (entry.endsWith('.md') && entry !== 'handoff-spec.md') {
         const name = entry.replace('.md', '');
         agents.set(name, { id: name, type: 'agent', layer: 'L0' });
+      }
+    }
+  }
+
+  // Common agents (templates/common/agents/) - DEDUP: skip if already in L0
+  const commonAgentsDir = join(ROOT, 'templates', 'common', 'agents');
+  if (existsSync(commonAgentsDir)) {
+    const entries = readdirSync(commonAgentsDir);
+    for (const entry of entries) {
+      // Exclude non-agent files: handoff-spec.md and underscore-prefixed
+      // directory docs (e.g. _COMMON.md is the folder README, not an agent)
+      if (entry.endsWith('.md') && entry !== 'handoff-spec.md' && !entry.startsWith('_')) {
+        const name = entry.replace('.md', '');
+        // Dedup rule: keep L0 node, skip common-layer duplicate
+        if (!agents.has(name)) {
+          agents.set(name, { id: name, type: 'agent', layer: 'common' });
+        }
       }
     }
   }

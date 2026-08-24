@@ -103,6 +103,16 @@ The five Core Principles under Newsroom Guidelines above are the binding rules (
 1. **Language split** — article content follows the assignment's target language (KR profile default: Korean); ALL git artifacts (commits, PR titles, branches) are English-only, always.
 2. **Figure formatting locale** — Korean numeral-grouping units (jo/eok/man) appear only in Korean-language articles; never mix grouping conventions within a single figure.
 
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 ## Variant-Specific PM Configuration

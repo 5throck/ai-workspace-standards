@@ -350,7 +350,7 @@ lang_reason: legal   # legal | source-material | proper-noun
 ### Pluggable Variant Audit Hooks and Integrity Protection
 - **Core Script Standardization**: The core synchronization and validation scripts (`scripts/dev-sync.ts` and `scripts/audit.ts`) must remain standardized and identical across all templates and variants. Direct modification of these core scripts in L2 projects is strictly forbidden.
 - **Variant-Specific Audit Hook**: Variant projects requiring custom verification checks must implement them in a pluggable hook script located at `scripts/audit-variant.ts`.
-- **Integrity Enforcement**: During template reconciliation (`l2-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
+- **Integrity Enforcement**: During template reconciliation (`l3-to-variant-pipeline.ts`), any modified core scripts will be automatically detected and will fail the reconciliation.
 <!-- COMMON-AGENTS:END -->
 
 ---

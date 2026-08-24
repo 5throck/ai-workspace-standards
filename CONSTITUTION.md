@@ -541,6 +541,7 @@ This annotation:
 
 Valid reasons include: AI context proximity (faster access without full CONSTITUTION.md load), variant-specific contextualization, platform-specific adaptation.
 
+<!-- COMMON-CONSTITUTION:START -->
 #### Language Policy Exception — Korean Legal/Regulatory Content
 
 The English-only policy admits a narrow exception for files where Korean is legally
@@ -576,6 +577,7 @@ See [docs/constitution/06-skill-lifecycle.md](docs/constitution/06-skill-lifecyc
 #### Pluggable Variant Audit Hook
 
 A mechanism that allows variant-specific validation checks to be executed during the synchronization and validation pipeline without modifying core script files (e.g., `dev-sync.ts`, `audit.ts`). Variant-specific audits are placed in `scripts/audit-variant.ts`. If this script is present, the core validation runner (`audit.ts`) dynamically detects and executes it. Any non-zero exit code from `audit-variant.ts` will fail the audit gate.
+<!-- COMMON-CONSTITUTION:END -->
 
 ### 11. Governance Enforcement Layers → [Full details](docs/designs/ecc-phase1-governance-design.md)
 
@@ -639,4 +641,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-08-23*
+*Last Updated: 2026-08-24*

@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
  * verify-adr-governance.ts
- * @version 1.3.0
- * @last_updated 2026-08-23
+ * @version 1.4.0
+ * @last_updated 2026-08-24
  *
  * Verifies the ADR→governance linkage mechanism (upward reflection gap detection)
  * and intentional-duplicate marker hash drift detection.
@@ -38,6 +38,14 @@ import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import {
+  parseSectionNumber,
+  parseMarkerFields,
+  resolveConstitutionSource,
+  computeSectionHash,
+  scanIntentionalDuplicateMarkers,
+  type IntentionalDuplicateMarker
+} from './helpers/markers.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -76,143 +84,9 @@ enum ADRStatus {
 }
 
 /**
- * Represents an intentional-duplicate marker
- */
-interface Marker {
-  file: string;
-  line: number;
-  section: string; // §3, §8, etc.
-  text: string; // Full marker text
-  source: string | null; // Resolved source path
-  hash: string | null; // Stored hash
-}
-
-/**
- * Parse section number from marker text (e.g., "workspace standards §8" -> "8")
- */
-function parseSectionNumber(markerText: string): string | null {
-  const match = markerText.match(/workspace standards §(\d+)/);
-  return match ? match[1] : null;
-}
-
-/**
- * Resolve constitution source file for a section number
- * Maps §3 -> docs/constitution/03-pr-workflow.md, §8 -> docs/constitution/08-coding-guidelines.md
- */
-function resolveConstitutionSource(section: string): string | null {
-  if (!existsSync(CONSTITUTION_DIR)) {
-    return null;
-  }
-
-  // Zero-pad the section number (e.g., "3" -> "03", "8" -> "08")
-  const paddedSection = section.padStart(2, '0');
-
-  // Scan for files matching the pattern 0{section}-*.md
-  const entries = readdirSync(CONSTITUTION_DIR);
-  const matching = entries.filter(entry =>
-    entry.startsWith(`${paddedSection}-`) && entry.endsWith('.md')
-  );
-
-  if (matching.length === 0) {
-    return null; // Cannot resolve source
-  }
-  if (matching.length > 1) {
-    return null; // Ambiguous - multiple matches
-  }
-
-  return join(CONSTITUTION_DIR, matching[0]);
-}
-
-/**
- * Compute sha256-8 hash of a file's SECTION body: content sliced from the
- * FIRST line matching /^###\s/ (inclusive) to EOF, CRLF normalized.
- * Constitution sources are one-section-per-file with a 2-line ">" preamble —
- * slicing excludes the preamble so hub-plumbing edits don't trip markers
- * (Stage 2b re-scoping; see ADR-0059 Amendment).
- * Falls back to whole-file hash if no ### heading exists.
- */
-function computeSectionHash(filePath: string): string | null {
-  if (!existsSync(filePath)) return null;
-  try {
-    const content = readFileSync(filePath, 'utf-8');
-    const normalized = content.replace(/\r\n/g, '\n');
-    const lines = normalized.split('\n');
-    const headingIdx = lines.findIndex(line => /^###\s/.test(line));
-    const slice = headingIdx >= 0 ? lines.slice(headingIdx).join('\n') : normalized;
-    const hash = createHash('sha256').update(slice, 'utf-8').digest('hex');
-    return hash.substring(0, 8);
-  } catch { return null; }
-}
-
-/**
- * Parse marker fields from comment text
- * Extracts section, source, and hash if present
- */
-function parseMarkerFields(markerText: string): { section: string | null; source: string | null; hash: string | null } {
-  const sectionMatch = markerText.match(/workspace standards §(\d+)/);
-  const section = sectionMatch ? sectionMatch[1] : null;
-
-  const sourceMatch = markerText.match(/source:\s*([^\s;]+)/);
-  const source = sourceMatch ? sourceMatch[1] : null;
-
-  const hashMatch = markerText.match(/hash:\s*([0-9a-f]{8})/);
-  const hash = hashMatch ? hashMatch[1] : null;
-
-  return { section, source, hash };
-}
-
-/**
- * Scan templates/ for intentional-duplicate markers
- */
-function scanIntentionalDuplicateMarkers(): Marker[] {
-  const markers: Marker[] = [];
-
-  if (!existsSync(TEMPLATES_DIR)) {
-    return markers;
-  }
-
-  // Recursively scan all .md files under templates/
-  const entries = readdirSync(TEMPLATES_DIR, { recursive: true, withFileTypes: true });
-
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.md')) {
-      continue;
-    }
-
-    const filePath = join(entry.path, entry.name);
-    const content = readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n');
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const markerMatch = line.match(/<!--\s*intentional-duplicate:\s*([^>]+)-->/);
-
-      if (markerMatch) {
-        const markerText = markerMatch[1];
-        const section = parseSectionNumber(markerText);
-
-        if (section) {
-          const { source, hash } = parseMarkerFields(markerText);
-          markers.push({
-            file: filePath,
-            line: i + 1, // 1-indexed
-            section,
-            text: markerText,
-            source,
-            hash,
-          });
-        }
-      }
-    }
-  }
-
-  return markers;
-}
-
-/**
  * Check marker hash drift
  */
-function checkMarkerDrift(markers: Marker[]): number {
+function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
   console.log('🔍 Checking intentional-duplicate marker drift...\n');
 
   let okCount = 0;
@@ -274,7 +148,7 @@ function checkMarkerDrift(markers: Marker[]): number {
 /**
  * Update marker hashes (seeding mode)
  */
-function updateMarkerHashes(markers: Marker[]): void {
+function updateMarkerHashes(markers: IntentionalDuplicateMarker[]): void {
   console.log('🔄 Updating intentional-duplicate marker hashes...\n');
 
   let touchedCount = 0;
