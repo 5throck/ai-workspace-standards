@@ -158,8 +158,9 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 
 #### `verify-readme-sync.ts`
 **Purpose**: Validates README.md / README_ko.md hash synchronization for workspace root and templates.
-Audits user-guide.md / user-guide_ko.md translated_from_hash synchronization (WARN stage per ADR-0055 playbook).
+Audits user-guide.md / user-guide_ko.md translated_from_hash synchronization (FAIL stage per ADR-0055 playbook after WARN soak).
 **Usage**: `bun scripts/verify-readme-sync.ts [--pre-commit] [--update-hashes]`
+**v1.4.0**: Promoted user-guide translated_from_hash gate from WARN to FAIL (promoted 2026-08-24 after WARN soak through PR #647 with zero warnings observed); now returns failure count and affects exit code.
 **v1.3.0**: Added user-guide translated_from_hash WARN-stage audit — detects missing/stale hashes in KO guides; --update-hashes now also seeds translated_from_hash in user-guide_ko.md frontmatter.
 
 #### `verify-memory.ts`

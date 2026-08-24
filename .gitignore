@@ -144,3 +144,6 @@ memory/archive/
 
 # Ignore test temp directories
 tests/.temp/
+
+# --- Claude Code plan-mode artifacts (session-local, must not be committed) ---
+.claude/plans/
