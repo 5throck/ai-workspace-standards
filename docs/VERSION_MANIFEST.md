@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-24T14:13:12.111Z
+**Generated**: 2026-08-24T14:33:39.933Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -106,7 +106,7 @@
 | l3-to-variant-pipeline.ts | 1.12.1 | scripts/l3-to-variant-pipeline.ts | fs, path |
 | lifecycle-sync-audit.ts | 1.4.8 | scripts/lifecycle-sync-audit.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
-| md-to-ooxml.ts | 1.1.0 | scripts/md-to-ooxml.ts | fs, path |
+| md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | new-project.ts | 1.8.0 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.2.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
