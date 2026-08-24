@@ -91,7 +91,8 @@ Dispatch `handbook-reviewer` agent to run:
 1. `bun run validate-handbook --checks all` — unified entry point: ① structure, ② nav (4 checks), ③ tables, a11y, spell, lint, authoring, doctor
 2. `bun run check-authoring` — 12 authoring compliance checks (incl. §21-6 footer structure) — already included in `--checks all`, run standalone for `--examples-dir` regression
 3. `bun run validate-nav` — 4 navigation integrity checks — already included in `--checks all`
-4. Apply fixes for any issues found
+4. `bun run check-i18n` — cross-language content parity (heading/code-block counts, wrong-language links); for multilingual handbooks follow I18N_PARITY_PLAYBOOK.md (canonical-first regeneration workflow)
+5. Apply fixes for any issues found
 
 ### H-6: Apply Theme
 
