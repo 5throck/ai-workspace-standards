@@ -1,0 +1,57 @@
+{
+  "registry": "co-work-document-style-registry",
+  "version": "1.0.0",
+  "description": "Corporate style-template registry keyed by document type, consumed by OOXML compilation (md-to-ooxml.ts docx/pptx emitters and future xlsx emitter). Style ids match the <w:pStyle w:val> references the compiler emits. Closes docs/variant-benchmark-backlog.md section 8 'No document template registry' (gap closed 2026-08-25).",
+  "consumers": ["scripts/md-to-ooxml.ts (docx emitter)", "scripts/md-to-ooxml.ts (pptx emitter)"],
+  "units": {
+    "size_half_pt": "OOXML w:sz value (half-points; 24 = 12pt)",
+    "color": "6-digit hex, no # prefix (OOXML w:color val)",
+    "spacing_pt": "points"
+  },
+  "document_types": {
+    "memo": {
+      "output_format": "docx",
+      "description": "Internal memo - compact, single-purpose, minimal chrome",
+      "styles": {
+        "Normal": { "font_ascii": "Calibri", "font_eastasia": "Malgun Gothic", "size_half_pt": 20, "color": "1F1F1F", "line_spacing": 1.15 },
+        "Heading1": { "size_half_pt": 28, "color": "1F3864", "bold": true, "space_before_pt": 10, "space_after_pt": 4 },
+        "Heading2": { "size_half_pt": 24, "color": "2E5496", "bold": true, "space_before_pt": 8, "space_after_pt": 4 },
+        "Heading3": { "size_half_pt": 21, "color": "2E5496", "bold": true, "space_before_pt": 6, "space_after_pt": 2 },
+        "ListBullet": { "size_half_pt": 20, "color": "1F1F1F", "indent_pt": 18 }
+      },
+      "page": { "size": "A4", "margins_mm": { "top": 20, "bottom": 20, "left": 18, "right": 18 } },
+      "header_footer": "none"
+    },
+    "report": {
+      "output_format": "docx",
+      "description": "Stakeholder report - formal structure with generous spacing",
+      "styles": {
+        "Normal": { "font_ascii": "Calibri", "font_eastasia": "Malgun Gothic", "size_half_pt": 22, "color": "202020", "line_spacing": 1.3 },
+        "Heading1": { "size_half_pt": 36, "color": "1F3864", "bold": true, "space_before_pt": 18, "space_after_pt": 8 },
+        "Heading2": { "size_half_pt": 28, "color": "2E5496", "bold": true, "space_before_pt": 14, "space_after_pt": 6 },
+        "Heading3": { "size_half_pt": 24, "color": "2E5496", "bold": true, "space_before_pt": 10, "space_after_pt": 4 },
+        "ListBullet": { "size_half_pt": 22, "color": "202020", "indent_pt": 22 }
+      },
+      "page": { "size": "A4", "margins_mm": { "top": 25, "bottom": 25, "left": 20, "right": 20 } },
+      "header_footer": "title-and-page-number"
+    },
+    "deck": {
+      "output_format": "pptx",
+      "description": "Presentation deck - maps to the pptx emitter's title/body placeholders",
+      "styles": {
+        "Title": { "font_ascii": "Calibri", "size_half_pt": 40, "color": "1F3864", "bold": true },
+        "Body": { "font_ascii": "Calibri", "size_half_pt": 24, "color": "202020" }
+      },
+      "slide": { "size": "16x9" }
+    },
+    "spreadsheet": {
+      "output_format": "xlsx",
+      "status": "reserved",
+      "description": "Reserved: corporate spreadsheet styles (header-row fill/font, number formats). No xlsx emitter exists yet; consumption begins when one lands.",
+      "styles": {
+        "HeaderRow": { "font_ascii": "Calibri", "size_half_pt": 20, "color": "FFFFFF", "bold": true, "fill": "1F3864" },
+        "Data": { "font_ascii": "Calibri", "size_half_pt": 20, "color": "1F1F1F" }
+      }
+    }
+  }
+}

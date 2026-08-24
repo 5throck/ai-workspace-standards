@@ -140,6 +140,7 @@ All scripts are TypeScript (`.ts`) executed via Bun — no `.sh`/`.ps1` counterp
 1. All research findings must be logged to memory/ with source citations.
 2. Stakeholder review comments must be tracked in the project coordination log.
 3. Publication artifacts must be version-controlled before distribution.
+4. Corporate document styles are SSOT'd at `docs/document-style-registry.json` - style bundles keyed by document type (memo, report, deck, reserved spreadsheet) for OOXML compilation. Agents producing OOXML deliverables MUST read the registry for the target document type rather than inventing styles; see `docs/document-style-registry.md` for the schema and consumption contract.
 
 ---
 
@@ -155,4 +156,4 @@ Key rules:
 
 ---
 
-*co-work.context.md version: 1.1 — normalized to canonical template structure*
+*co-work.context.md version: 1.2 — document-style-registry referenced (Domain Rule 4)*
