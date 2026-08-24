@@ -511,5 +511,16 @@ For a full comparison of tool capabilities (Claude Code CLI vs Desktop App vs An
 - **No cross-platform pairing needed**: Since all scripts are TypeScript, there is no need for separate `.sh`/`.ps1` pairs.
 
 ---
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
+
+---
 *co-abap.context.md version: 1.0 — co-abap variant template, migrated 2026-08-15*
 *Source project: co-abap*
