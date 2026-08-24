@@ -66,6 +66,7 @@
     }
   ],
   "skills": [
+    { "name": "arcade-physics", "file": "skills/arcade-physics/SKILL.md" },
     { "name": "code-review", "file": "skills/code-review/SKILL.md" },
     { "name": "refactoring", "file": "skills/refactoring/SKILL.md" },
     { "name": "test-driven-development", "file": "skills/test-driven-development/SKILL.md" },
@@ -95,6 +96,11 @@
   },
   "skill_manifest": {
     "variant_specific": [
+      {
+        "name": "arcade-physics",
+        "used_by_agents": ["game-developer", "game-debugger"],
+        "phases": [4]
+      },
       {
         "name": "sound-synth",
         "used_by_agents": ["sound-designer"],

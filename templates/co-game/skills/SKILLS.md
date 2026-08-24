@@ -6,6 +6,7 @@ This directory contains variant-specific skills for the `co-game` template.
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
+| `arcade-physics` | 1.0.0 | active | pm | 2026-08-25 | — | Minimal Arcade-class physics on the ECS core: MovementSystem integration, gravity/damping, AABB collision response (backlog Low row) |
 | `code-review` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `refactoring` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `test-driven-development` | 1.0.0 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |

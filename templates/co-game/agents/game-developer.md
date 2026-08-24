@@ -3,7 +3,7 @@ name: game-developer
 role: Canvas rendering engine, game loop, collision detection, and entity implementation specialist
 status: active
 version: "1.0.1"
-last_updated: "2026-06-27"
+last_updated: "2026-08-25"
 capabilities:
   - game-loop
   - engine-implementation
@@ -25,11 +25,11 @@ examples:
 phases: [4]
 handoff_to: [test-runner]
 handoff_from: [architect, game-designer, visual-artist]
-required_skills: []
+required_skills: [arcade-physics]
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-06-27"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/game-developer.md
 ---
 
