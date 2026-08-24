@@ -252,16 +252,16 @@ The **Status** column tracks execution (marked 2026-08-25): `Done — #PR` refer
 | 10 | co-hr | ISO 30414 taxonomy mapping for `hr-metrics-analysis` | doc | M | long-term | High | Done — #660 |
 | 11 | co-news | Corrections / transparent-error workflow | doc | S | mid-term | High | Done — #661 |
 | 12 | co-export | Rules-of-origin qualification worksheet | skill | M | long-term | High | Done — #662 |
-| 13 | co-news | Style-guide rules as a lint checklist skill | skill | M | mid-term | Medium | Open |
-| 14 | co-export | Second-jurisdiction country-profile skeleton | doc | S | long-term | Medium | Open |
-| 15 | co-game | Scene-management convention over the ECS core | doc | S | mid-term | Medium | Open |
-| 16 | co-design | Vite component playground scaffold | config | M | mid-term | Medium | Open |
-| 17 | co-hr | Competency-modeling skill (SHRM BoK core) | skill | M | long-term | Medium | Open |
-| 18 | co-consult | Engagement kickoff artifact pack (issue tree + hypothesis log) | doc | S | mid-term | Medium | Open |
+| 13 | co-news | Style-guide rules as a lint checklist skill | skill | M | mid-term | Medium | Done — #664 |
+| 14 | co-export | Second-jurisdiction country-profile skeleton | doc | S | long-term | Medium | Done — #665 |
+| 15 | co-game | Scene-management convention over the ECS core | doc | S | mid-term | Medium | Done — #666 |
+| 16 | co-design | Vite component playground scaffold | config | M | mid-term | Medium | Done — #669 |
+| 17 | co-hr | Competency-modeling skill (SHRM BoK core) | skill | M | long-term | Medium | Done — #667 |
+| 18 | co-consult | Engagement kickoff artifact pack (issue tree + hypothesis log) | doc | S | mid-term | Medium | Done — #668 |
 
 Ordering rationale: items 1–3 harden already-shipped flagship capabilities (measurement, posture, supply-chain) that every scaffolded project inherits; items 4–8 close named benchmark-parity holes flagged by the roadmap itself; items 9–12 establish the benchmark anchors for the four variants outside the roadmap matrix; items 13–18 are the strongest Medium-priority items held back only by breadth of benefit.
 
-Execution note: the High-priority rows 1–12 were executed sequentially as the backlog execution series (2026-08-24 → 2026-08-25), one PR per row, PM-verified before each merge. Row 2 landed in two PRs (#651 delivered the SKILL.md via a parallel session's sync after the original dispatch died on an API usage limit; #652 completed registration and mirrors). Row 5 resolved via the documented-boundary option (PDF-only by design, markdown→pptx path documented) rather than a co-deck-local pptx pipeline.
+Execution note: the High-priority rows 1–12 were executed sequentially as the backlog execution series (2026-08-24 → 2026-08-25), one PR per row, PM-verified before each merge. Row 2 landed in two PRs (#651 delivered the SKILL.md via a parallel session's sync after the original dispatch died on an API usage limit; #652 completed registration and mirrors). Row 5 resolved via the documented-boundary option (PDF-only by design, markdown→pptx path documented) rather than a co-deck-local pptx pipeline. The Medium rows 13–18 followed in the same series (2026-08-25) as PRs #664–#669, PM-authored inline during an API usage-limit window (the same battery gates ran before every merge); row 16 (Vite playground) additionally passed a live compiler smoke test into the scaffold's generated dir. All 18 consolidated rows are now Done; the remaining Low-priority items in the per-variant sections stay unsequenced.
 
 ---
 
