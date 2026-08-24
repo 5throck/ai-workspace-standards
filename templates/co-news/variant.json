@@ -62,6 +62,10 @@
     {
       "name": "source-verification-ledger",
       "file": "skills/source-verification-ledger/SKILL.md"
+    },
+    {
+      "name": "style-lint-checklist",
+      "file": "skills/style-lint-checklist/SKILL.md"
     }
   ],
   "displayName": "Co-News",
@@ -139,6 +143,17 @@
         ],
         "phases": [
           5
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "style-lint-checklist",
+        "layer": "workspace",
+        "used_by_agents": [
+          "style-editor"
+        ],
+        "phases": [
+          4
         ],
         "platform_parity": "required"
       }

@@ -11,6 +11,7 @@ This directory contains variant-specific skills for the `co-news` template.
 | financial-journalism-style | `financial-journalism-style/` | financial-journalism-style skill |
 | financial-narrative-brief | `financial-narrative-brief/` | financial-narrative-brief skill |
 | source-verification-ledger | `source-verification-ledger/` | source-verification-ledger skill |
+| style-lint-checklist | `style-lint-checklist/` | style-lint-checklist skill |
 
 ## Usage
 

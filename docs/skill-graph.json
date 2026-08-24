@@ -882,6 +882,11 @@
       "layer": "variant:co-news"
     },
     {
+      "id": "style-lint-checklist",
+      "type": "skill",
+      "layer": "variant:co-news"
+    },
+    {
       "id": "swe-solve",
       "type": "skill",
       "layer": "L0"
@@ -3912,6 +3917,42 @@
       "from": "style-editor",
       "to": "financial-journalism-style",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "ai-tell-reduction",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "style-lint-checklist",
+      "to": "financial-journalism-style",
+      "source": "prerequisites"
+    },
+    {
+      "type": "phase",
+      "from": "style-lint-checklist",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "style-lint-checklist",
+      "to": "source-verification-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "style-lint-checklist",
+      "to": "style-editor",
+      "source": "skill_manifest"
     },
     {
       "type": "phase",
