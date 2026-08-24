@@ -1,4 +1,4 @@
-// @version 1.7.3
+// @version 1.7.4
 // v1.7.3: feat(pipeline): add step 4.65 skill graph gate (ADR-0060) — generates and
 //           verifies skill relationship graph before VERSION_MANIFEST generation
 // v1.7.2: fix(pipeline): forward --spec-exempt via SYNC_SPEC_EXEMPT env instead of shell
@@ -335,6 +335,38 @@ if (isWorkspaceRoot) {
             }
         } else {
             console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+        }
+    }
+}
+
+// ── Step 4.55: COMMON-CONTEXT marker-rewrite drift check (WARN stage, L0-only) ──
+// Per ADR-0062 + the ADR-0055 WARN-first playbook: the pilot propagation domains
+// (constitution-context, variant-context) are checked for zone drift at sync time.
+// Dry-run only — drift is reported as a WARN (non-fatal); the operator runs
+// `bun scripts/propagate-to-templates.ts --marker-rewrite --domain <name> --apply`
+// manually to refresh zones. Promotion to a hard gate waits for pilot soak.
+// Wired 2026-08-25 after the 4-variant pilot held 0 would-overwrite across ~10 PRs
+// (design doc: docs/designs/2026-08-24-marker-propagation-engine-design.md).
+if (isWorkspaceRoot && isL0Context) {
+    console.log('\n🔍 COMMON-CONTEXT marker-rewrite drift check (WARN stage)...');
+    for (const domain of ['constitution-context', 'variant-context']) {
+        try {
+            const res = await $`bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain}`.nothrow();
+            const out = res.stdout.toString();
+            const m = out.match(/Would overwrite: (\d+)/);
+            const wouldOverwrite = m ? parseInt(m[1], 10) : null;
+            if (res.exitCode !== 0) {
+                console.log(`${YELLOW}⚠️  marker-rewrite check failed for domain '${domain}' (exit ${res.exitCode}) — investigate manually${RESET}`);
+            } else if (wouldOverwrite === null) {
+                console.log(`${YELLOW}⚠️  marker-rewrite output for domain '${domain}' had no drift counter — investigate manually${RESET}`);
+            } else if (wouldOverwrite > 0) {
+                console.log(`${YELLOW}⚠️  COMMON-CONTEXT drift in domain '${domain}': ${wouldOverwrite} zone(s) would be overwritten${RESET}`);
+                console.log(`${YELLOW}   Refresh manually: bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain} --apply${RESET}`);
+            } else {
+                console.log(`${GREEN}✓ COMMON-CONTEXT domain '${domain}' in sync (0 would-overwrite)${RESET}`);
+            }
+        } catch {
+            console.log(`${YELLOW}⚠️  marker-rewrite check could not run for domain '${domain}' — investigate manually${RESET}`);
         }
     }
 }
