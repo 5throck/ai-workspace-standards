@@ -397,6 +397,11 @@
       "layer": "common"
     },
     {
+      "id": "i18n-specialist",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
       "id": "image-curator",
       "type": "agent",
       "layer": "variant:co-deck"
@@ -2186,6 +2191,30 @@
     {
       "type": "references",
       "from": "i18n-locale-config",
+      "to": "translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-specialist",
       "to": "translate",
       "source": "prose"
     },

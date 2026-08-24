@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-08-23T22:55:28.797Z
+**Generated**: 2026-08-24T04:12:17.839Z
 **Manifest Version**: 1.0
 **Location**: docs\VERSION_MANIFEST.md
 
@@ -99,7 +99,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-scripts-readme.ts | 1.0.3 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.0.1 | scripts/generate-skill-graph.ts | N/A |
+| generate-skill-graph.ts | 1.1.0 | scripts/generate-skill-graph.ts | N/A |
 | generate-version-manifest.ts | 1.2.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
@@ -110,7 +110,7 @@
 | new-project.ts | 1.8.0 | scripts/new-project.ts | js-yaml |
 | project-to-variant.ts | 1.2.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.0.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.4.0 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.5.1 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | N/A | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.1.0 | scripts/regenerate-agents-md.ts | fs, path |
@@ -147,7 +147,7 @@
 | validate-skills.ts | 1.0.3 | scripts/validate-skills.ts | N/A |
 | validate-templates.ts | 1.13.0 | scripts/validate-templates.ts | js-yaml |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
-| verify-adr-governance.ts | 1.3.0 | scripts/verify-adr-governance.ts | N/A |
+| verify-adr-governance.ts | 1.4.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.0.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.1.0 | scripts/verify-memory.ts | fs, path |

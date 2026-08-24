@@ -247,6 +247,16 @@ Each agent must save its deliverables to the designated folder with the specifie
 9. Phase 1 research deliverables MUST pass cross-validation before entering `insight-synthesis`. PM dispatches validator agents per the Cross-Validation Matrix in [`engagement-orchestration.md`](engagement-orchestration.md). See Phase 1.5 Cross-Validation section for checklist and re-execution triggers.
 10. **Korean-terminology reference assets are SSOT'd at `docs/terms-ko.json`** (workspace root — not per-skill). Any skill that needs a Korean-original ↔ English glossary (business/financial/corporate-research terms not covered by the workspace English-only doc policy) MUST read/link `docs/terms-ko.json` rather than maintaining a local `references/terms-ko.json` copy. Rationale: a skill-local copy is duplicated 4× across platform mirrors (`skills/`, `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) and, when two or more skills need overlapping terms (e.g. `company-intelligence` and `financial-statement-analysis` both need financial-statement account names), those per-skill copies drift out of sync with no audit check catching it. Extending an entry: add it directly to `docs/terms-ko.json` under the relevant category (create a new category if none fits); do not add category duplicates. Currently consumed by: `company-intelligence`, `financial-statement-analysis`.
 
+<!-- COMMON-CONTEXT:START -->
+This project follows the workspace coding standards defined in the project's Coding Guidelines section.
+
+Key rules:
+- All operational scripts must be TypeScript (`.ts`) — run via `bun scripts/<name>.ts` (ADR-0036; no `.sh`/`.ps1` pairs)
+- Git hook scripts in `.githooks/` remain Unix shell (`.sh`) for git compatibility
+- All text files saved as **UTF-8 (without BOM)**
+- Commit messages and PR artifacts in **English only**
+<!-- COMMON-CONTEXT:END -->
+
 ---
 
 *co-consult.context.md version: 2.5 — deliverable language now country-profile-driven (KR default: Korean)*

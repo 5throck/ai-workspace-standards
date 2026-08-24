@@ -5,7 +5,7 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.12.0
+ * @version 1.13.0
  * @phase 3: Variant Generation
  *
  * Dependencies:
@@ -1677,9 +1677,56 @@ async function main() {
   const manifestArg = args.find(arg => arg.startsWith('--manifest='))?.split('=')[1];
   const metadataArg = args.find(arg => arg.startsWith('--metadata='))?.split('=')[1];
   const outputArg = args.find(arg => arg.startsWith('--output='))?.split('=')[1];
+  const regenerateArg = args.find(arg => arg.startsWith('--regenerate='))?.split('=')[1];
 
+  // --regenerate mode: re-render README.md for an existing variant
+  if (regenerateArg) {
+    if (!manifestArg || !metadataArg) {
+      console.error('Usage: bun scripts/helpers/generate-variant.ts --regenerate=<variant> --manifest=<path> --metadata=<json-string>');
+      process.exit(1);
+    }
+
+    try {
+      // Load manifest
+      const manifestJson = readFileSync(manifestArg, 'utf-8');
+      const manifest = JSON.parse(manifestJson) as ReconciledManifest;
+
+      // Parse metadata
+      const metadata = JSON.parse(metadataArg) as VariantMetadata;
+
+      // Locate variant directory
+      const variantPath = resolve(process.cwd(), 'templates', regenerateArg);
+      if (!existsSync(variantPath)) {
+        console.error(`❌ Variant not found: templates/${regenerateArg}`);
+        process.exit(1);
+      }
+
+      const readmePath = join(variantPath, 'README.md');
+      const readmeTemplatePath = resolve(process.cwd(), 'templates', regenerateArg, 'README.template.md');
+
+      if (!existsSync(readmeTemplatePath)) {
+        console.error(`❌ README.template.md not found for variant ${regenerateArg}`);
+        process.exit(1);
+      }
+
+      // Re-render README
+      const readmeContent = await renderREADME(metadata, readmeTemplatePath);
+      writeFileSync(readmePath, readmeContent, 'utf-8');
+
+      console.log(`\n✅ README regenerated for templates/${regenerateArg}`);
+      process.exit(0);
+    } catch (error) {
+      console.error('\n❌ README regeneration failed:');
+      console.error(error);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Normal generation mode
   if (!manifestArg || !metadataArg) {
     console.error('Usage: bun scripts/helpers/generate-variant.ts --manifest=<path> --metadata=<json-string> [--output=<path>]');
+    console.error('   OR:  bun scripts/helpers/generate-variant.ts --regenerate=<variant> --manifest=<path> --metadata=<json-string>');
     process.exit(1);
   }
 

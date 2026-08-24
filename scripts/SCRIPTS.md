@@ -77,7 +77,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
-| `generate-skill-graph.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
+| `generate-skill-graph.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
@@ -89,7 +89,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/generate-variant.ts` | L0 | 1.12.0 | active | —| —| L0 | —|
+| `helpers/generate-variant.ts` | L0 | 1.13.0 | active | —| —| L0 | —|
 | `helpers/agent-promote.ts` | L0 | 0.1.1 | experimental | —| —| L0 | —|
 | `helpers/agent-similarity-analyzer.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/golden-reference-loader.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -102,6 +102,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/merge-frontmatter.ts` | L0 | 1.8.6 | active | —| —| L0+L1 | —|
 | `helpers/security-validator.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/context-sections.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
+| `helpers/markers.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/pm-md-parser.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
@@ -170,7 +171,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `resolve-variants.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `project-to-variant.ts` | L0 | 1.2.0 | active | `--source`, `--target`, `--dry-run`, `--force`, `--design-doc`, `--threshold-files`, `--threshold-dirs` | —| L0 | —|
 | `promote-context-section.ts` | L0 | 1.0.0 | active | `--heading`, `--variants`, `--source`, `--after-heading`, `--dry-run` | —| L0 | —|
-| `propagate-to-templates.ts` | L0 | 2.4.0 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled` | —| L0 | —|
+| `propagate-to-templates.ts` | L0 | 2.5.1 | active | `--apply`, `--prune`, `--dry-run`, `--check-drift`, `--governance-l1`, `--docs`, `--include-disabled`, `--marker-rewrite` | —| L0 | —|
 | `qa-gate.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -204,7 +205,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `validate-skills.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `validate-templates.ts` | L0 | 1.13.0 | active | —| —| L0 | —|
 | `verify-country-prune.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
-| `verify-adr-governance.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `verify-adr-governance.ts` | L0 | 1.4.0 | active | —| —| L0 | —|
 | `verify-agent-deliverables.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-skill-graph.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `verify-memory.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
