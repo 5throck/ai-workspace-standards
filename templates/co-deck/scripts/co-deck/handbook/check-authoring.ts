@@ -334,7 +334,7 @@ function checkFooterStructure(htmlFiles: string[], baseDir: string): AuthoringIs
       continue;
     }
 
-    const footerText = footerMatch[1].trim();
+    const footerText = footerMatch[1].replace(/\r\n?/g, "\n").trim(); // EOL-insensitive: group CRLF and LF footers together
     if (!/creativecommons\.org\/licenses\/by-nc-sa/.test(footerText)) {
       issues.push({
         file: rel, rule: "footer-license", section: "§21-6",

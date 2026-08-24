@@ -1,3 +1,6 @@
+---
+translated_from_hash: bdac2f01715102024cbf0b6614b4001928904b90077846c950efea7686e52a7d
+---
 # co-security 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**

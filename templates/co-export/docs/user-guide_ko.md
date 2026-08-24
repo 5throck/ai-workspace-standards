@@ -1,3 +1,6 @@
+---
+translated_from_hash: e2d594ac8f83b8625c23b77ba813d66fa8b0da97efec75866ecdee08ff4543dd
+---
 # Co-Export 사용자 가이드
 
 **언어**: [English](user-guide.md) · **한국어**

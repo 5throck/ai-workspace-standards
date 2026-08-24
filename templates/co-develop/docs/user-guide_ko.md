@@ -1,3 +1,6 @@
+---
+translated_from_hash: 08780f074f99e9f05df795e2117ef856ae13fc508903bef2907ecc8774f23b14
+---
 # co-develop 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**
