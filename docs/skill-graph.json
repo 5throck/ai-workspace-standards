@@ -2926,6 +2926,18 @@
       "source": "required_skills"
     },
     {
+      "type": "phase",
+      "from": "samm-maturity",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "samm-maturity",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
       "type": "references",
       "from": "samm-maturity",
       "to": "sarif-exporter",
@@ -2942,6 +2954,12 @@
       "from": "samm-maturity",
       "to": "stride-threat-matrix",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "samm-maturity",
+      "to": "threat-modeler",
+      "source": "skill_manifest"
     },
     {
       "type": "used_by",
