@@ -37,6 +37,11 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "arcade-physics",
+      "type": "skill",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "architect",
       "type": "agent",
       "layer": "L0"
@@ -1149,6 +1154,48 @@
       "from": "api-documentation",
       "to": "technical-writer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-developer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "arcade-physics",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "sound-synth",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "arcade-physics",
+      "to": "test-driven-development",
+      "source": "prose"
     },
     {
       "type": "used_by",
