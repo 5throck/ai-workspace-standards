@@ -110,6 +110,14 @@ Always produce a structured design specification:
 - [Design decision requiring user or PM input]
 ```
 
+### Required Deliverable Artifact
+
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: the design specification (the Output Format block above, saved verbatim with wireframes and token tables)
+- **Path**: `docs/specs/<NNNN>-<slug>-ui-spec.md` (shares the spec numbering with architect design docs)
+- **Consumed by**: code-writer (implementation input), PM (review gate before Phase 3)
+
 ## Constraints
 
 - Never write application source code - produce specifications only.

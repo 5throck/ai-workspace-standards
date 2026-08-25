@@ -155,7 +155,23 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 | `docs/adr/` | Architecture Decision Records |
 | `docs/specs/` | Technical specifications |
 | `docs/api/` | API documentation |
-| `memory/` | Session logs, meeting transcripts |
+| `memory/` | Session logs, meeting transcripts, QA reports, stack-setup records |
+
+---
+
+## Per-Role Deliverable Artifacts
+
+Every specialist dispatch leaves one durable artifact on disk - never chat output only (MetaGPT-style PRD/design/task hand-off chain). The same contract is stated in each agent file's `## Output Format → Required Deliverable Artifact` section.
+
+| Role | Required artifact | Path convention | Consumed by |
+|------|-------------------|-----------------|-------------|
+| PM | Execution plan table + session log | `memory/YYYY-MM-DD.md` (workspace-governed, see AGENTS.md §5) | All specialists |
+| architect | Implementation plan doc (+ ADR for architectural decisions) | `docs/specs/<NNNN>-<slug>-design.md`, `docs/adr/NNNN-slug.md` | designer, code-writer |
+| designer | Design specification (wireframes, components, tokens) | `docs/specs/<NNNN>-<slug>-ui-spec.md` | code-writer |
+| code-writer | Source change + colocated tests (+ `docs/api/` when interfaces change) | project source tree | test-runner |
+| test-runner | QA Report (audit + tests + acceptance verdict) | `memory/qa/<YYYY-MM-DD>-<slug>.md` | PM |
+| security-monitor | Structured finding files + scan summary | `security/YYYY-MM-DD-{slug}.md` | PM |
+| stack-setup | Approved setup record (commands, sources, risks, results) | `memory/<YYYY-MM-DD>-stack-setup-<slug>.md` | PM, future sessions |
 
 ---
 
@@ -165,6 +181,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 1. All implementation must have a corresponding test.
 2. Architecture changes require Architect agent ADR before implementation.
 3. Security Monitor must review before any PR targeting auth, secrets, or infra. **[DEVELOP-R1]**
+4. Every specialist dispatch must leave its Required Deliverable Artifact on disk - chat output alone does not complete a hand-off (see Per-Role Deliverable Artifacts). **[DEVELOP-R2]**
 
 ---
 
@@ -180,4 +197,4 @@ Key rules:
 
 ---
 
-*co-develop.context.md version: 1.1 — normalized to canonical template structure*
+*co-develop.context.md version: 1.2 — Per-Role Deliverable Artifacts chain + [DEVELOP-R2] added (2026-08-25); previous: 1.1 normalized to canonical template structure*

@@ -3,7 +3,7 @@ name: test-runner
 role: Test execution and acceptance criteria verification specialist
 status: active
 version: "1.0.0"
-last_updated: "2026-05-28"
+last_updated: "2026-08-25"
 tier:
   claude: medium
   gemini: medium
@@ -24,7 +24,7 @@ required_skills: [test-driven-development]
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-05-28"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/test-runner.md
 ---
 
@@ -83,6 +83,14 @@ This ensures verification happens at the proper point in the workflow, after imp
 ### Verdict
 [READY FOR PR ✅ | BLOCKED ❌ - reason]
 ```
+
+### Required Deliverable Artifact
+
+Every dispatch must leave one durable artifact on disk, not chat output only:
+
+- **Artifact**: the QA Report (the Output Format block above, saved verbatim - the verdict must be reproducible from the recorded commands)
+- **Path**: `memory/qa/<YYYY-MM-DD>-<slug>.md` (one file per run; directory created on first use)
+- **Consumed by**: PM (READY FOR PR / BLOCKED decision)
 
 ## Constraints
 
