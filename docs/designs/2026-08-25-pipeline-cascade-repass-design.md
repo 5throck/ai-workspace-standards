@@ -58,15 +58,15 @@ bun scripts/propagate-to-templates.ts --apply
 
 ## Verification
 
-Placeholder for PM to fill after running the battery:
+Results recorded 2026-08-25 (PR #697 landing):
 
-1. **Unit tests**: `tests/unit/dev-sync-pipeline-order.test.ts` (3 tests: ≥2 `--apply` invocations, last after sync-skills, first before sync-skills).
-2. **Integration test**: `tests/propagate-to-templates.test.ts` cascade re-publish convergence test (consecutive `--apply` passes, pass2 has zero `copied` lines).
-3. **Verify-scripts**: `bun scripts/verify-scripts.ts` expects 0 hard warnings; 161 registered (dev-sync 1.7.6 bump counted).
-4. **Lifecycle-sync-audit**: `bun scripts/lifecycle-sync-audit.ts` all-pass (second `propagate-to-templates.ts` reference covered by existing whitelist).
+1. **Unit tests**: `tests/unit/dev-sync-pipeline-order.test.ts` 3/3 + `tests/propagate-to-templates.test.ts` 5/5 — 8/8 pass (32 expect calls).
+2. **Integration test**: convergence test passed — consecutive `--apply` passes, pass 2 exit 0 with zero per-file `copied` lines.
+3. **Verify-scripts**: 161 registered, 0 hard warnings (dev-sync 1.7.6 counted on both SCRIPTS.md tiers).
+4. **Lifecycle-sync-audit**: all-pass, no new Check X findings (the second `propagate-to-templates.ts` reference in the dev-sync L1 mirror is covered by the existing presence-based whitelist entry; 8 warnings all pre-existing).
 5. **Audit**: `bun scripts/audit.ts` all-pass.
-6. **Landing sync console output**: GREEN line `✓ Step 4.62: cascade re-publish complete — N file(s) copied` or `✓ Step 4.62: template mirrors already converged (nothing to apply)`.
-7. **PR diff**: 8 SKILL.md copies updated (1 source + 3 platform via step 4.6 + 4 template via step 4.62).
+6. **Landing sync (dogfood)**: the PR #697 landing `/sync` executed the new code from the working tree — the three template platform copies that entered the sync at 1.2.1 (`templates/common/.claude|.gemini|.agents/skills/sync/SKILL.md`) were healed to 1.2.2 **in the same commit**, proving the cascade closed in one sync.
+7. **PR diff**: 8/8 sync SKILL.md copies present in PR #697 (1 source + 3 root platform via step 4.6 + 4 template: `templates/common/skills` via 4.5, 3 platform copies via 4.62); post-merge `propagate --dry-run` reports 0 drift.
 
 ## References
 
