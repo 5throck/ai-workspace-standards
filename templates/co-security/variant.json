@@ -38,6 +38,7 @@
     }
   ],
   "skills": [
+    { "name": "finding-reconciliation", "file": "skills/finding-reconciliation/SKILL.md" },
     { "name": "samm-maturity", "file": "skills/samm-maturity/SKILL.md" },
     { "name": "sarif-exporter", "file": "skills/sarif-exporter/SKILL.md" },
     { "name": "spdx-sbom", "file": "skills/spdx-sbom/SKILL.md" },
@@ -72,6 +73,13 @@
         "layer": "workspace",
         "used_by_agents": ["patch-engineer", "report-writer"],
         "phases": [3, 5],
+        "platform_parity": "required"
+      },
+      {
+        "name": "finding-reconciliation",
+        "layer": "workspace",
+        "used_by_agents": ["pentester", "report-writer"],
+        "phases": [3, 5, 6],
         "platform_parity": "required"
       },
       {

@@ -522,6 +522,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "finding-reconciliation",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "fiori-developer",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -2355,6 +2360,72 @@
       "from": "financial-statement-analysis",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "pentester",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "pentester",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "finding-reconciliation",
+      "to": "phase6",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "report-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "finding-reconciliation",
+      "to": "report-writer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "sarif-exporter",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "stride-threat-matrix",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "finding-reconciliation",
+      "to": "verify-authorization",
+      "source": "prose"
     },
     {
       "type": "used_by",
