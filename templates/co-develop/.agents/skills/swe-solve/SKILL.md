@@ -1,8 +1,8 @@
 ---
 name: swe-solve
 description: Autonomous 5-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation, pull-request synthesis, and resolution-trajectory logging.
-version: 1.1.0
-last_reviewed: 2026-08-24
+version: 1.1.1
+last_reviewed: 2026-08-25
 status: active
 scope: co-develop
 owner: pm
@@ -70,6 +70,7 @@ Provides a structured 5-stage autonomous software engineering workflow for resol
   ```bash
   grep -c '^resolved: true' memory/trajectories/swe-solve/*.md
   ```
+- **Pipeline regression check**: the benchmark fixture set at `docs/benchmark-fixtures/` freezes three issues (pure-function bug, error-handling bug, micro-feature) with known-good resolutions for SWE-bench-style accepted/resolved scoring - run the pipeline against those when you need to attribute a resolve-rate change to the pipeline rather than the target. See the set's [README](../../docs/benchmark-fixtures/README.md) for the scoring rubric.
 
 ## Output Format
 
