@@ -11,8 +11,8 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.4.8
- * @last_updated 2026-08-20
+ * @version 1.4.9
+ * @last_updated 2026-08-25
  * @license MIT
  */
 
@@ -368,6 +368,8 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'dev-sync:verify-adr-governance',               // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
   'dev-sync:generate-skill-graph',                // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
   'dev-sync:verify-skill-graph',                  // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 verifier absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
+  'dev-sync:sync-template-deps',                  // dev-sync.ts step 4.52: called only inside isWorkspaceRoot guard (same shape as dev-sync:propagate-to-templates; template dep mirror is L0-only tooling)
+  'audit:sync-template-deps',                     // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
 ]);
 
 function runCheckX(): SyncIssue[] {

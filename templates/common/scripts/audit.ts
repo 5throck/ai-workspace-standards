@@ -1,4 +1,4 @@
-// @version 2.22.0
+// @version 2.23.0
 // v2.21.1: fix(lint+types): stripComment now strips trailing \r before matching — under
 //           core.autocrlf checkouts the $ anchors never matched, so the > nul lint flagged
 //           its own prose comments (ported from co-abap 2.21.2); validators import switched
@@ -1126,6 +1126,63 @@ function checkVariantJsonSchema() {
   }
 }
 
+// Template dependency mirror check
+function checkTemplateDependencyMirror() {
+  const rootPkgPath = path.join('package.json');
+  const templatePkgPath = path.join('templates', 'common', 'package.json');
+
+  // Skip if template package.json doesn't exist (L1/L3 context)
+  if (!fs.existsSync(templatePkgPath)) {
+    return;
+  }
+
+  // Parse both package.json files
+  let rootPkg: any;
+  let templatePkg: any;
+  try {
+    rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf-8'));
+    templatePkg = JSON.parse(fs.readFileSync(templatePkgPath, 'utf-8'));
+  } catch (e: any) {
+    Fail(`Template dependency mirror: failed to parse package.json files — ${e.message}`);
+    return;
+  }
+
+  const sections: Array<'dependencies' | 'devDependencies'> = ['dependencies', 'devDependencies'];
+  let driftFound = false;
+
+  for (const section of sections) {
+    const rootSection = rootPkg[section] || {};
+    const templateSection = templatePkg[section] || {};
+
+    // Check shared keys for drift
+    for (const key of Object.keys(templateSection)) {
+      if (key in rootSection) {
+        const rootVersion = rootSection[key];
+        const templateVersion = templateSection[key];
+
+        if (rootVersion !== templateVersion) {
+          Fail(`Template dep drift: templates/common/package.json ${section}.${key} "${templateVersion}" != root "${rootVersion}" — fix: bun scripts/sync-template-deps.ts --apply`);
+          driftFound = true;
+        }
+      }
+    }
+  }
+
+  // Check engines drift
+  if (rootPkg.engines && templatePkg.engines) {
+    for (const field of Object.keys(rootPkg.engines)) {
+      if (field in templatePkg.engines && templatePkg.engines[field] !== rootPkg.engines[field]) {
+        Fail(`Template dep drift: templates/common/package.json engines.${field} "${templatePkg.engines[field]}" != root "${rootPkg.engines[field]}" — fix: bun scripts/sync-template-deps.ts --apply`);
+        driftFound = true;
+      }
+    }
+  }
+
+  if (!driftFound) {
+    Pass('template dependency mirror: shared dep versions match root package.json');
+  }
+}
+
 // Stale shell/script reference check
 if (!LIFECYCLE_ONLY) {
 function checkStaleShellReferences() {
@@ -1530,6 +1587,7 @@ checkVariantContextGuidelinesSection();
 checkVariantAgentSections();
 checkVariantSkillSections();
 checkVariantJsonSchema();
+checkTemplateDependencyMirror();
 }
 
 // Workspace root detection: presence of context.md (and absence of variant.json)

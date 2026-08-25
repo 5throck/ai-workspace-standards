@@ -146,6 +146,16 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 - `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
 **v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
 
+#### `sync-template-deps.ts`
+**Purpose**: Automatic dependency version sync from root package.json to templates/common/package.json + bun.lock regeneration. Root package.json is the SSOT for shared dependency versions.
+**Usage**: `bun scripts/sync-template-deps.ts [--check|--apply]`
+**Runs automatically**: dev-sync step 4.52 (after propagate step 4.5, before audit step 4.9)
+**Sync policy**:
+- Shared deps (present in both root and template): aligned to root version
+- Root-only deps: NOT auto-added to template (e.g., semver, @types/js-yaml)
+- Template-only deps: NOT auto-removed (manual decision required)
+- engines: aligned if shared fields differ
+
 #### `sync-skills-to-l2.ts`
 **Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
 **Usage**: `bun scripts/sync-skills-to-l2.ts`

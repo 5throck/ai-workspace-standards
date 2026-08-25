@@ -63,12 +63,12 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `agent-verify.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `analyze-git-history.ts` | L0 | 1.0.2 | active | —| —| L0+L1 | —|
 | `archive-memory.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
-| `audit.ts` | L0 | 2.22.0 | active | —| —| L0+L1 | —|
+| `audit.ts` | L0 | 2.23.0 | active | —| —| L0+L1 | —|
 | `cleanup-completed-md.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `clear-pm-approval.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `compile-tokens.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `create-l3-scaffold.ts` | L0 | 1.12.1 | active | —| —| L0 | —|
-| `dev-sync.ts` | L0 | 1.7.4 | active | —| —| L0+L1 | —|
+| `dev-sync.ts` | L0 | 1.7.5 | active | —| —| L0+L1 | —|
 | `dispatch-parallel.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
@@ -151,7 +151,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `lib/platform-context.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `lib/propagation-map-schema.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `lib/ssrf.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `lifecycle-sync-audit.ts` | L0 | 1.4.8 | active | —| —| L0+L1 | —|
+| `lifecycle-sync-audit.ts` | L0 | 1.4.9 | active | —| —| L0+L1 | —|
 | `list-template-versions.ts` | L0 | 1.1.0 | active | —| —| L0 | —|
 | `md-to-ooxml.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `new-project.ts` | L0 | 1.5.3 | active | —| —| L0 | —|
@@ -171,6 +171,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-md.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `sync-skill-status.ts` | L0 | 1.0.1 | active | — | — | L0+L1 | — |
 | `sync-skills-to-l2.ts` | L0 | 1.0.1 | active | — | — | L0 | — |
+| `sync-template-deps.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `sync-skills.ts` | L0 | 1.4.1 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `tag-template.ts` | L0 | 1.0.1 | active | —| —| L0 | —|
 | `team-builder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
@@ -391,6 +392,16 @@ to ensure Claude Code, Antigravity, and Antigravity CLI pick up the update.
 - `bun scripts/sync-skills.ts --dir templates/co-consult` — a single project root (variant or `templates/common`)
 - `bun scripts/sync-skills.ts --all-variants` — every `templates/co-*/` variant plus `templates/common/`
 **v1.4.0**: added `--dir`/`--all-variants` — the workspace-root-only default was silently leaving `.agents/skills/` (Antigravity CLI) far behind `.claude/skills/`/`.gemini/skills/` in every variant (discovered during a full skill-lifecycle audit, 2026-07-19). Run `--all-variants` after any variant-level skill change.
+
+#### `sync-template-deps.ts`
+**Purpose**: Automatic dependency version sync from root package.json to templates/common/package.json + bun.lock regeneration. Root package.json is the SSOT for shared dependency versions.
+**Usage**: `bun scripts/sync-template-deps.ts [--check|--apply]`
+**Runs automatically**: dev-sync step 4.52 (after propagate step 4.5, before audit step 4.9)
+**Sync policy**:
+- Shared deps (present in both root and template): aligned to root version
+- Root-only deps: NOT auto-added to template (e.g., semver, @types/js-yaml)
+- Template-only deps: NOT auto-added or auto-removed (manual decision required)
+- engines: aligned if shared fields differ
 
 #### `sync-skills-to-l2.ts`
 **Purpose**: Synchronizes explicitly requested skills or scripts from L1 (templates/common) to L2 variants.
