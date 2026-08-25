@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 690f6389e85f79832c6473bf249a4f32c8fd5426ed757c2a6dcf84b961e1d810
+translated_from_hash: 9a4a25829fe39c45c4a87b70c7a842322d70aba1747b3daa33cec7b5b6b5eef2
 lang: ko
 lang_reason: source-material
 ---
@@ -58,7 +58,7 @@ lang_reason: source-material
 
 ### 디자인 토큰 & 플레이그라운드
 
-- **`tokens.json`** — 디자인 토큰 SSOT(color, typography, spacing, borderRadius, shadow). `scripts/compile-tokens.ts`가 CSS 커스텀 프로퍼티와 타입 지정 TS 상수로 컴파일합니다.
+- **`tokens.json`** — 디자인 토큰 SSOT(color, typography, spacing, borderRadius, shadow). `scripts/compile-tokens.ts`가 CSS 커스텀 프로퍼티와 타입 지정 TS 상수로 컴파일합니다. 테마 프리셋(`dark`, `high-contrast`)은 예약된 `themes` 키 아래에 두면 `[data-theme="<name>"]` CSS 블록으로 컴파일됩니다 — 사용자는 `data-theme` 속성으로 테마를 전환하며, 레이아웃 토큰은 테마 불변입니다([DESIGN-R2]).
 - **`playground/`** — 컴파일된 토큰에 연결된 최소 구성의 Vite 개발 서버로, 디자인 단계에서 라이브 미리보기를 제공합니다. 퀵스타트와 토큰 연결 구조는 [playground/README.md](playground/README.md)(영문)를 참고하세요. 스캐폴딩된 co-design 프로젝트 내부에서 실행됩니다.
 
 ## 협업 방법
