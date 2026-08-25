@@ -30,14 +30,14 @@ examples:
 phases: [3, 4]
 handoff_to: [pm]
 handoff_from: [pm, market-entry-strategist, trade-documentation-specialist]
-required_skills: [logistics-coordination]
+required_skills: [logistics-coordination, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, reporting]
 version: "1.1.0"
-last_updated: "2026-08-16"
+last_updated: "2026-08-25"
 lifecycle:
   phase: beta
   created: "2026-08-08"
-  last_updated: "2026-08-16"
+  last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/logistics-coordinator.md
 ---
 

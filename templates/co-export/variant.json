@@ -61,6 +61,7 @@
     { "name": "fta-origin-determination", "file": "skills/fta-origin-determination/SKILL.md" },
     { "name": "halal-certification-workflow", "file": "skills/halal-certification-workflow/SKILL.md" },
     { "name": "hs-classification-workflow", "file": "skills/hs-classification-workflow/SKILL.md" },
+    { "name": "landed-cost-calculation", "file": "skills/landed-cost-calculation/SKILL.md" },
     { "name": "logistics-coordination", "file": "skills/logistics-coordination/SKILL.md" },
     { "name": "market-entry-strategy", "file": "skills/market-entry-strategy/SKILL.md" },
     { "name": "roo-qualification-worksheet", "file": "skills/roo-qualification-worksheet/SKILL.md" },
@@ -184,6 +185,17 @@
         "phases": [
           3,
           4
+        ]
+      },
+      {
+        "name": "landed-cost-calculation",
+        "used_by_agents": [
+          "hs-classification-specialist",
+          "logistics-coordinator"
+        ],
+        "phases": [
+          1,
+          2
         ]
       }
     ]

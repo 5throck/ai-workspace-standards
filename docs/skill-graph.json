@@ -707,6 +707,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "landed-cost-calculation",
+      "type": "skill",
+      "layer": "variant:co-export"
+    },
+    {
       "id": "le-analyst",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -2981,6 +2986,78 @@
       "type": "references",
       "from": "labor-compliance-audit",
       "to": "stakeholder-alignment",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "customs-duty-drawback-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "fta-origin-determination",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-specialist",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "landed-cost-calculation",
+      "to": "hs-classification-workflow",
+      "source": "prerequisites"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordination",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordinator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "landed-cost-calculation",
+      "to": "logistics-coordinator",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "landed-cost-calculation",
+      "to": "phase1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "landed-cost-calculation",
+      "to": "phase2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "landed-cost-calculation",
+      "to": "roo-qualification-worksheet",
       "source": "prose"
     },
     {
