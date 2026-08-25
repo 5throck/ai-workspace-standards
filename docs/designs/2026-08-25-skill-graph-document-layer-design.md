@@ -19,3 +19,8 @@ The root projection modeled only skills and agents. The co-newbiz pilot proved a
 ## Non-goals
 
 Runtime semantics for doc edges; retro-linking historical ADR prose beyond exact backtick/label matches; country-mark relaxation (invariant untouched).
+
+## Follow-up (2026-08-25, same day) — L0+L1 promotion
+
+Both graph scripts promoted from L0-only to **L0+L1** (`templates/common/scripts/` byte-copies; drift report 69 pairs in sync; SCRIPTS.md scope columns updated both tiers). Rationale: the generator was already project-safe by construction — every source is existence-guarded (`docs/decisions`, `docs/adr`, `templates/` variant scan, overrides seed auto-create), and dev-sync step 4.65's `existsSync` guard auto-runs it inside any scaffolded project's pipeline. L1-context smoke test verified (emits a common-skills graph; smoke outputs removed — the overrides seed self-recreates on first run). This is what "apply the document layer to templates" means operationally: not copying L0 outputs, but shipping the capability in the Tier-2 snapshot so every scaffolded project gains project-local document-layer graphs.
+

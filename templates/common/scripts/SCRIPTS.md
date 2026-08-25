@@ -76,6 +76,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `generate-l3-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
+| `generate-skill-graph.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-scripts-readme.ts` | L0 | 1.0.3 | active | —| —| L0 | —|
 | `generate-version-manifest.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
 | `helpers/beta-lifecycle.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
@@ -195,6 +196,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `verify-readme-sync.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
 | `verify-scripts.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
 | `verify-skills.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `verify-skill-graph.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `verify-template-integrity.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `validate-pm-extends.ts` | L0 | 0.3.1 | active | —| —| L0+L1 | —|
 
